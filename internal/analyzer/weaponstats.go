@@ -104,7 +104,13 @@ func (a *WeaponStatsAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error 
 		stats.activeWeapon = e.Value
 
 	case mvd.StatShells:
-		if stats.shells > 0 && e.Value < stats.shells && e.Value >= 0 {
+		// Sanity check: shells should be in reasonable range (0-200)
+		// Values outside this range are likely parsing errors
+		if e.Value < 0 || e.Value > 200 {
+			// Skip this update - corrupted data
+			break
+		}
+		if stats.shells > 0 && stats.shells <= 200 && e.Value < stats.shells {
 			decrease := stats.shells - e.Value
 			// Skip if within respawn grace period (0.5 seconds)
 			isRespawnWindow := e.Time-stats.lastRespawn < 0.5
@@ -129,7 +135,11 @@ func (a *WeaponStatsAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error 
 		stats.shells = e.Value
 
 	case mvd.StatNails:
-		if stats.nails > 0 && e.Value < stats.nails && e.Value >= 0 {
+		// Sanity check: nails should be in reasonable range (0-200)
+		if e.Value < 0 || e.Value > 200 {
+			break
+		}
+		if stats.nails > 0 && stats.nails <= 200 && e.Value < stats.nails {
 			decrease := stats.nails - e.Value
 			// Skip if within respawn grace period (0.5 seconds)
 			isRespawnWindow := e.Time-stats.lastRespawn < 0.5
@@ -154,7 +164,11 @@ func (a *WeaponStatsAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error 
 		stats.nails = e.Value
 
 	case mvd.StatRockets:
-		if stats.rockets > 0 && e.Value < stats.rockets && e.Value >= 0 {
+		// Sanity check: rockets should be in reasonable range (0-100)
+		if e.Value < 0 || e.Value > 100 {
+			break
+		}
+		if stats.rockets > 0 && stats.rockets <= 100 && e.Value < stats.rockets {
 			decrease := stats.rockets - e.Value
 			// Skip if within respawn grace period (0.5 seconds)
 			isRespawnWindow := e.Time-stats.lastRespawn < 0.5
@@ -172,7 +186,11 @@ func (a *WeaponStatsAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error 
 		stats.rockets = e.Value
 
 	case mvd.StatCells:
-		if stats.cells > 0 && e.Value < stats.cells && e.Value >= 0 {
+		// Sanity check: cells should be in reasonable range (0-200)
+		if e.Value < 0 || e.Value > 200 {
+			break
+		}
+		if stats.cells > 0 && stats.cells <= 200 && e.Value < stats.cells {
 			decrease := stats.cells - e.Value
 			// Skip if within respawn grace period (0.5 seconds)
 			isRespawnWindow := e.Time-stats.lastRespawn < 0.5
