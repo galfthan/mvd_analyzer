@@ -317,7 +317,7 @@ const (
 	DtUnknown    = 28
 )
 
-// DeathTypeToWeapon converts a death type to weapon name
+// DeathTypeToWeapon converts a death type to weapon/damage source name
 func DeathTypeToWeapon(dt int) string {
 	switch dt {
 	case DtAxe:
@@ -336,8 +336,48 @@ func DeathTypeToWeapon(dt int) string {
 		return "rl"
 	case DtLGBeam, DtLGDischarge, DtLGDischargeSelf:
 		return "lg"
+	case DtStomp:
+		return "stomp"
+	case DtTele1, DtTele2, DtTele3, DtTele4:
+		return "tele"
+	case DtSquish:
+		return "squish"
+	case DtExploBox:
+		return "explobox"
 	default:
 		return "unknown"
+	}
+}
+
+// IsEnvironmentalDamage returns true if the death type is environmental/self-inflicted
+func IsEnvironmentalDamage(dt int) bool {
+	switch dt {
+	case DtLava, DtSlime, DtWater, DtFall, DtTriggerHurt, DtSuicide:
+		return true
+	default:
+		return false
+	}
+}
+
+// EnvironmentalDamageType returns the environmental damage category
+func EnvironmentalDamageType(dt int) string {
+	switch dt {
+	case DtLava:
+		return "lava"
+	case DtSlime:
+		return "slime"
+	case DtWater:
+		return "drown"
+	case DtFall:
+		return "fall"
+	case DtTriggerHurt:
+		return "trigger"
+	case DtSuicide:
+		return "suicide"
+	case DtSquish:
+		return "squish"
+	default:
+		return ""
 	}
 }
 

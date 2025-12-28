@@ -26,6 +26,14 @@ type playerWeaponStats struct {
 
 	// Accumulated stats per weapon
 	weapons map[string]*weaponData
+
+	// Environmental damage received
+	lavaDamage    int
+	slimeDamage   int
+	drownDamage   int
+	fallDamage    int
+	squishDamage  int // World-attributed squish only
+	triggerDamage int
 }
 
 type weaponData struct {
@@ -152,6 +160,37 @@ func (a *WeaponStatsAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error 
 
 func (a *WeaponStatsAnalyzer) handleDamage(e *parser.DamageEvent) error {
 	weapon := mvd.DeathTypeToWeapon(e.DeathType)
+
+	// Handle environmental damage (victim tracking only)
+	if mvd.IsEnvironmentalDamage(e.DeathType) {
+		if e.Victim >= 0 && e.Victim < mvd.MaxClients {
+			victim := a.getOrCreate(e.Victim)
+			effectiveDmg, _ := a.calculateEffectiveDamage(e.Damage, victim)
+
+			envType := mvd.EnvironmentalDamageType(e.DeathType)
+			switch envType {
+			case "lava":
+				victim.lavaDamage += effectiveDmg
+			case "slime":
+				victim.slimeDamage += effectiveDmg
+			case "drown":
+				victim.drownDamage += effectiveDmg
+			case "fall":
+				victim.fallDamage += effectiveDmg
+			case "trigger":
+				victim.triggerDamage += effectiveDmg
+			case "squish":
+				// World-attributed squish - track as environmental
+				victim.squishDamage += effectiveDmg
+			}
+
+			// Update victim state
+			a.applyDamageToVictim(e.Damage, victim)
+		}
+		return nil
+	}
+
+	// For player-attributed damage, we need a valid weapon
 	if weapon == "unknown" {
 		return nil
 	}
@@ -166,6 +205,9 @@ func (a *WeaponStatsAnalyzer) handleDamage(e *parser.DamageEvent) error {
 			victim := a.getOrCreate(e.Victim)
 			effectiveDmg, _ := a.calculateEffectiveDamage(e.Damage, victim)
 			wd.SelfDamage += effectiveDmg
+
+			// Update victim state
+			a.applyDamageToVictim(e.Damage, victim)
 		} else {
 			// Get victim's state for damage calculation
 			victim := a.getOrCreate(e.Victim)
@@ -356,7 +398,7 @@ func (a *WeaponStatsAnalyzer) Finalize() (interface{}, error) {
 	for playerNum, stats := range a.playerStats {
 		if a.ctx.Players[playerNum] != nil {
 			name := a.ctx.Players[playerNum].Name
-			if name != "" && len(stats.weapons) > 0 {
+			if name != "" && (len(stats.weapons) > 0 || stats.hasEnvironmentalDamage()) {
 				entry := &PlayerWeaponStatsEntry{
 					Weapons: make(map[string]*WeaponStatEntry),
 				}
@@ -371,12 +413,31 @@ func (a *WeaponStatsAnalyzer) Finalize() (interface{}, error) {
 						Accuracy:   calculateAccuracy(wd.Shots, wd.Hits),
 					}
 				}
+
+				// Add environmental damage if any
+				if stats.hasEnvironmentalDamage() {
+					entry.Environment = &EnvironmentalDamage{
+						Lava:    stats.lavaDamage,
+						Slime:   stats.slimeDamage,
+						Drown:   stats.drownDamage,
+						Fall:    stats.fallDamage,
+						Squish:  stats.squishDamage,
+						Trigger: stats.triggerDamage,
+					}
+				}
+
 				result.PlayerStats[name] = entry
 			}
 		}
 	}
 
 	return result, nil
+}
+
+// hasEnvironmentalDamage returns true if the player has any environmental damage
+func (s *playerWeaponStats) hasEnvironmentalDamage() bool {
+	return s.lavaDamage > 0 || s.slimeDamage > 0 || s.drownDamage > 0 ||
+		s.fallDamage > 0 || s.squishDamage > 0 || s.triggerDamage > 0
 }
 
 func calculateAccuracy(shots, hits int) float64 {

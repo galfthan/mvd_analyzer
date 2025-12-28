@@ -819,25 +819,56 @@ The `deathtype` field in damage events and obituaries identifies the weapon or c
 | 7 | `DT_RL` | Rocket Launcher | "rocket", "gibbed" |
 | 8 | `DT_LG_BEAM` | Lightning Gun (beam) | "shaft", "accepts shaft" |
 | 9 | `DT_LG_DIS` | Lightning Gun (discharge) | "discharge" |
-| 10 | `DT_DROWN` | Drowning | "sleeps with the fishes" |
-| 11 | `DT_LAVA` | Lava | "burst into flames" |
-| 12 | `DT_SLIME` | Slime | "sucks it down" |
-| 13 | `DT_DISCHARGE` | Discharge (self) | "discharges" |
-| 14 | `DT_FALL` | Fall damage | "cratered" |
-| 15 | `DT_SQUISH` | Crushed | "squished" |
-| 16 | `DT_SUICIDE` | Suicide (/kill) | "suicides" |
-| 17 | `DT_TELEFRAG` | Telefrag | "telefragged" |
-| 18 | `DT_STOMP` | Stomp (player landing) | - |
-| 19 | `DT_BLEEDING` | Bleeding out | "bleeds to death" |
-| 20 | `DT_TRAP` | Trap | - |
-| 21 | `DT_TEAM` | Team damage | "teammate" |
-| 22 | `DT_WORLD` | World/environment | - |
-| 23 | `DT_UNKNOWN` | Unknown | - |
-| 24 | `DT_WORLDSPAWN` | Worldspawn | - |
-| 25 | `DT_TRIGGER_HURT` | Trigger hurt | - |
-| 26 | `DT_COIL` | Coil gun (mod) | - |
-| 27 | `DT_SG_COIL` | Shotgun coil (mod) | - |
-| 28 | `DT_GRAVITY` | Gravity damage | - |
+| 10 | `DT_LG_DIS_SELF` | LG discharge (self) | "discharges" |
+| 11 | `DT_HOOK` | Grappling hook | - |
+| 12 | `DT_CHANGELEVEL` | Level change | - |
+| 13 | `DT_LAVA` | Lava damage | "burst into flames" |
+| 14 | `DT_SLIME` | Slime damage | "sucks it down" |
+| 15 | `DT_WATER` | Drowning | "sleeps with the fishes" |
+| 16 | `DT_FALL` | Fall damage | "cratered" |
+| 17 | `DT_STOMP` | Stomp (land on enemy) | - |
+| 18-21 | `DT_TELE1-4` | Telefrag | "telefragged" |
+| 22 | `DT_EXPLOBOX` | Exploding box | - |
+| 23 | `DT_LASER` | Laser (mod) | - |
+| 24 | `DT_FIREBALL` | Fireball (mod) | - |
+| 25 | `DT_SQUISH` | Crushed by door/platform | "squished" |
+| 26 | `DT_TRIGGER_HURT` | trigger_hurt brush | - |
+| 27 | `DT_SUICIDE` | Suicide (/kill) | "suicides" |
+| 28 | `DT_UNKNOWN` | Unknown | - |
+
+### Damage Attribution Classification
+
+Death types are classified by who receives credit for the damage:
+
+#### Player-Attributed Damage (counts in attacker's dmg_given)
+
+These death types credit the attacking player:
+
+| Death Type | Values | Track As | Description |
+|------------|--------|----------|-------------|
+| Weapons | 1-11 | `axe`, `sg`, `ssg`, `ng`, `sng`, `gl`, `rl`, `lg` | Standard weapon damage |
+| Stomp | 17 | `stomp` | Landing on enemy's head |
+| Telefrag | 18-21 | `tele` | Telefragging enemy during teleport |
+| Squish | 25 | `squish` | When attacker != victim (triggered by player) |
+| Exploding Box | 22 | `explobox` | Exploding box triggered by player |
+
+**Note**: For squish damage (DT_SQUISH=25), the attribution depends on the attacker:
+- If `attacker == victim` or `attacker == world` → Environmental (self-damage)
+- If `attacker != victim` → Player-attributed (e.g., trapping enemy in door)
+
+#### Environmental Damage (counts in victim's damage received)
+
+These death types are world/self-attributed and NOT counted in dmg_given:
+
+| Death Type | Value | Track As | Description |
+|------------|-------|----------|-------------|
+| Lava | 13 | `lava` | Walking in lava |
+| Slime | 14 | `slime` | Walking in slime |
+| Drowning | 15 | `drown` | Underwater too long |
+| Fall | 16 | `fall` | Fall damage from height |
+| Squish | 25 | `squish` | World-attributed crush damage |
+| Trigger Hurt | 26 | `trigger` | Damage from trigger_hurt brushes |
+| Suicide | 27 | `suicide` | Using /kill command |
 
 ### Mapping Death Types to Weapon Names
 
@@ -851,13 +882,53 @@ func DeathTypeToWeapon(dt int) string {
     case 5:  return "sng"
     case 6:  return "gl"
     case 7:  return "rl"
-    case 8:  return "lg"      // beam
-    case 9:  return "lg"      // discharge
-    case 17: return "tele"
+    case 8, 9, 10: return "lg"  // beam, discharge, self-discharge
+    case 17: return "stomp"     // landing on enemy
+    case 18, 19, 20, 21: return "tele"  // telefrag variants
+    case 22: return "explobox"  // exploding box
+    case 25: return "squish"    // crush damage (when player-attributed)
     default: return "unknown"
     }
 }
+
+func IsEnvironmentalDamage(dt int) bool {
+    switch dt {
+    case 13, 14, 15, 16, 26, 27:  // lava, slime, water, fall, trigger_hurt, suicide
+        return true
+    default:
+        return false
+    }
+}
+
+func EnvironmentalDamageType(dt int) string {
+    switch dt {
+    case 13: return "lava"
+    case 14: return "slime"
+    case 15: return "drown"
+    case 16: return "fall"
+    case 25: return "squish"   // when world-attributed
+    case 26: return "trigger"
+    case 27: return "suicide"
+    default: return ""
+    }
+}
 ```
+
+### Example: Telefrag Damage
+
+When a player telefrags an enemy:
+1. The dmgdone hidden message contains `deathtype=18` (DT_TELE1)
+2. Damage is typically 100 (instant kill)
+3. This damage is credited to the telefragging player's `dmg_given`
+4. It appears in weapon stats as `tele` damage
+
+### Example: Environmental Damage
+
+When a player walks in lava:
+1. The dmgdone hidden message contains `deathtype=13` (DT_LAVA)
+2. The attacker entity is typically `world` (entity 0) or self
+3. This damage is NOT counted in any player's `dmg_given`
+4. It's tracked separately as environmental damage received
 
 ---
 

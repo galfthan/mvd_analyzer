@@ -107,7 +107,18 @@ type WeaponStatsResult struct {
 
 // PlayerWeaponStatsEntry holds weapon stats for a player
 type PlayerWeaponStatsEntry struct {
-	Weapons map[string]*WeaponStatEntry `json:"weapons"`
+	Weapons     map[string]*WeaponStatEntry `json:"weapons"`
+	Environment *EnvironmentalDamage        `json:"environment,omitempty"`
+}
+
+// EnvironmentalDamage tracks damage received from environmental sources
+type EnvironmentalDamage struct {
+	Lava    int `json:"lava,omitempty"`    // Damage from lava
+	Slime   int `json:"slime,omitempty"`   // Damage from slime
+	Drown   int `json:"drown,omitempty"`   // Damage from drowning
+	Fall    int `json:"fall,omitempty"`    // Fall damage
+	Squish  int `json:"squish,omitempty"`  // Crush damage (world-attributed)
+	Trigger int `json:"trigger,omitempty"` // trigger_hurt damage
 }
 
 // WeaponStatEntry holds statistics for a single weapon
