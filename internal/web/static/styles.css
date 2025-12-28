@@ -98,6 +98,46 @@ header p {
     color: #ff5252;
 }
 
+/* Tab Navigation */
+.tab-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #2a3f5f;
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 5px 5px 0 0;
+    transition: all 0.3s;
+}
+
+.tab-btn:hover {
+    color: #00d9ff;
+    background: rgba(0, 217, 255, 0.1);
+}
+
+.tab-btn.active {
+    color: #00d9ff;
+    background: #1a1a2e;
+    border-bottom: 2px solid #00d9ff;
+    margin-bottom: -12px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 .panel {
     background: #1a1a2e;
     border-radius: 8px;
@@ -218,33 +258,195 @@ table tbody tr:hover {
     color: #00d9ff;
 }
 
-.frags-list {
-    max-height: 400px;
+/* Timeline Styles */
+.timeline-container {
+    max-height: 600px;
     overflow-y: auto;
 }
 
-.frag-item {
-    padding: 8px 12px;
-    border-bottom: 1px solid #2a3f5f;
-    font-family: monospace;
+.timeline-header {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    gap: 10px;
+    padding: 10px;
+    background: #16213e;
+    border-radius: 8px 8px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.team-header {
+    font-weight: bold;
+    color: #00d9ff;
+    text-align: center;
+}
+
+.timeline-center {
+    text-align: center;
+    color: #888;
     font-size: 0.9rem;
 }
 
-.frag-item:hover {
-    background: rgba(0, 217, 255, 0.1);
+.timeline-body {
+    display: flex;
+    flex-direction: column;
 }
 
-.frag-item.teamkill {
-    background: rgba(255, 165, 0, 0.1);
+.timeline-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    gap: 10px;
+    padding: 4px 10px;
+    border-bottom: 1px solid #2a3f5f;
 }
 
-.frag-item.suicide {
+.timeline-row:hover {
+    background: rgba(0, 217, 255, 0.05);
+}
+
+.timeline-left {
+    text-align: right;
+    font-size: 0.85rem;
+}
+
+.timeline-time {
+    text-align: center;
     color: #888;
+    font-size: 0.8rem;
+    font-family: monospace;
 }
 
-.frag-time {
+.timeline-right {
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+.timeline-event {
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.timeline-event.frag {
+    color: #ff6b6b;
+}
+
+.timeline-event.chat {
+    color: #4ecdc4;
+}
+
+.timeline-event.teamsay {
+    color: #45b7d1;
+}
+
+/* Accuracy Table */
+#accuracy-table td.accuracy-high {
+    color: #00c853;
+}
+
+#accuracy-table td.accuracy-medium {
+    color: #ffc107;
+}
+
+#accuracy-table td.accuracy-low {
+    color: #ff5252;
+}
+
+.acc-detail {
     color: #888;
-    margin-right: 10px;
+    font-size: 0.8rem;
+    margin-left: 4px;
+}
+
+/* Weapon cells in stats table */
+.weapon-kills {
+    color: #ff6b6b;
+    margin-left: 4px;
+}
+
+.weapon-dmg {
+    color: #888;
+    font-size: 0.85rem;
+    margin-left: 4px;
+}
+
+/* Stats tables */
+.stats-table {
+    font-size: 0.9rem;
+}
+
+.stats-table th {
+    white-space: nowrap;
+}
+
+.stats-table td {
+    white-space: nowrap;
+}
+
+/* Accuracy Graphs */
+.accuracy-graphs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.player-graph {
+    background: #16213e;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.player-graph h4 {
+    color: #00d9ff;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+
+.graph-container {
+    height: 150px;
+    position: relative;
+    background: #1a1a2e;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.graph-bars {
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+    gap: 2px;
+}
+
+.graph-bar {
+    flex: 1;
+    background: linear-gradient(to top, #00d9ff, #00b8d9);
+    border-radius: 2px 2px 0 0;
+    min-width: 8px;
+    position: relative;
+}
+
+.graph-bar:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #16213e;
+    color: #eee;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.graph-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 0.75rem;
+    color: #888;
 }
 
 /* Scrollbar styling */

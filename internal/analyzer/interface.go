@@ -35,6 +35,7 @@ type Result struct {
 	Duration    float64            `json:"duration"`
 	Match       *MatchResult       `json:"match,omitempty"`
 	Frags       *FragResult        `json:"frags,omitempty"`
+	Messages    *MessagesResult    `json:"messages,omitempty"`
 	Stats       *StatsResult       `json:"stats,omitempty"`
 	WeaponStats *WeaponStatsResult `json:"weaponStats,omitempty"`
 	DemoInfo    *DemoInfoResult    `json:"demoInfo,omitempty"`
@@ -92,6 +93,22 @@ type PlayerFrags struct {
 	ByWeapon map[string]int `json:"byWeapon"`
 }
 
+// MessagesResult contains match messages (frags and chat) for timeline display
+type MessagesResult struct {
+	Events []MatchEvent `json:"events"`
+}
+
+// MatchEvent represents a frag or chat message in the match
+type MatchEvent struct {
+	Time    float64 `json:"time"`
+	Type    string  `json:"type"`    // "frag", "chat", "teamsay"
+	Player  string  `json:"player"`  // Who sent/killed
+	Team    string  `json:"team"`    // Player's team
+	Message string  `json:"message"` // Chat text or frag description
+	Victim  string  `json:"victim,omitempty"` // For frags
+	Weapon  string  `json:"weapon,omitempty"` // For frags
+}
+
 // StatsResult contains stats tracking results
 type StatsResult struct {
 	PlayerStats map[string]*PlayerStatsEntry `json:"playerStats"`
@@ -105,7 +122,8 @@ type PlayerStatsEntry struct {
 
 // WeaponStatsResult contains weapon usage statistics
 type WeaponStatsResult struct {
-	PlayerStats map[string]*PlayerWeaponStatsEntry `json:"playerStats"`
+	PlayerStats     map[string]*PlayerWeaponStatsEntry `json:"playerStats"`
+	TimelineStats   map[string]*TimelineStatsEntry     `json:"timelineStats,omitempty"` // Per-player accuracy over time
 }
 
 // PlayerWeaponStatsEntry holds weapon stats for a player
@@ -133,6 +151,25 @@ type WeaponStatEntry struct {
 	TeamDamage int     `json:"teamDamage,omitempty"`
 	SelfDamage int     `json:"selfDamage,omitempty"`
 	Accuracy   float64 `json:"accuracy"`
+}
+
+// TimelineStatsEntry holds time-windowed accuracy stats for a player
+type TimelineStatsEntry struct {
+	Windows []AccuracyWindow `json:"windows"`
+}
+
+// AccuracyWindow represents accuracy stats for a 1-minute window
+type AccuracyWindow struct {
+	StartTime float64 `json:"startTime"` // Window start in seconds
+	SG        *WindowAccuracy `json:"sg,omitempty"`
+	LG        *WindowAccuracy `json:"lg,omitempty"`
+}
+
+// WindowAccuracy represents accuracy within a time window
+type WindowAccuracy struct {
+	Shots    int     `json:"shots"`
+	Hits     int     `json:"hits"`
+	Accuracy float64 `json:"accuracy"`
 }
 
 // DemoInfoResult contains parsed KTX embedded JSON stats (authoritative)

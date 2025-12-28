@@ -114,6 +114,10 @@ func (r *Registry) Analyze(filePath string) (*Result, error) {
 			if di, ok := output.(*DemoInfoResult); ok {
 				result.DemoInfo = di
 			}
+		case "messages":
+			if m, ok := output.(*MessagesResult); ok {
+				result.Messages = m
+			}
 		}
 	}
 
@@ -127,6 +131,7 @@ func NewDefaultRegistry() *Registry {
 	r.Register(NewDemoInfoAnalyzer())
 	r.Register(NewMatchAnalyzer())
 	r.Register(NewFragAnalyzer())
+	r.Register(NewMessagesAnalyzer())
 	r.Register(NewStatsAnalyzer())
 	r.Register(NewWeaponStatsAnalyzer())
 	return r

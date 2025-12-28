@@ -25,53 +25,164 @@
         <section id="results-section" class="card" style="display: none;">
             <h2>Analysis Results</h2>
 
-            <div id="match-summary" class="panel">
-                <h3>Match Summary</h3>
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <label>Map</label>
-                        <span id="map-name">-</span>
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="summary">Summary</button>
+                <button class="tab-btn" data-tab="messages">Messages</button>
+                <button class="tab-btn" data-tab="accuracy">Accuracy</button>
+            </div>
+
+            <!-- Summary Tab -->
+            <div id="tab-summary" class="tab-content active">
+                <div id="match-summary" class="panel">
+                    <h3>Match Info</h3>
+                    <div class="summary-grid" id="match-info-grid">
+                        <div class="summary-item">
+                            <label>Map</label>
+                            <span id="map-name">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Duration</label>
+                            <span id="duration">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Mode</label>
+                            <span id="mode">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Server</label>
+                            <span id="hostname">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Date</label>
+                            <span id="match-date">-</span>
+                        </div>
                     </div>
-                    <div class="summary-item">
-                        <label>Duration</label>
-                        <span id="duration">-</span>
-                    </div>
-                    <div class="summary-item">
-                        <label>Total Frags</label>
-                        <span id="total-frags">-</span>
+                </div>
+
+                <div id="teams-panel" class="panel">
+                    <h3>Teams</h3>
+                    <div id="teams-list" class="teams-list"></div>
+                </div>
+
+                <div id="players-panel" class="panel">
+                    <h3>Player Stats</h3>
+                    <table id="scoreboard" class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>Frags</th>
+                                <th>Deaths</th>
+                                <th>TK</th>
+                                <th>Dmg Given</th>
+                                <th>Dmg Taken</th>
+                                <th>Ping</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreboard-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="weapons-summary-panel" class="panel">
+                    <h3>Weapon Stats</h3>
+                    <table id="weapon-stats-table" class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>SG</th>
+                                <th>SSG</th>
+                                <th>NG</th>
+                                <th>SNG</th>
+                                <th>GL</th>
+                                <th>RL</th>
+                                <th>LG</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weapon-stats-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="items-panel" class="panel">
+                    <h3>Item Pickups</h3>
+                    <table id="items-table" class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>RA</th>
+                                <th>YA</th>
+                                <th>GA</th>
+                                <th>MH</th>
+                                <th>Quad</th>
+                                <th>Pent</th>
+                                <th>Ring</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="performance-panel" class="panel">
+                    <h3>Performance</h3>
+                    <table id="performance-table" class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Max Spree</th>
+                                <th>Quad Kills</th>
+                                <th>Speed Avg</th>
+                                <th>Speed Max</th>
+                                <th>Spawn Frags</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performance-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="weapons-panel" class="panel">
+                    <h3>Kills by Weapon</h3>
+                    <div id="weapons-chart" class="chart"></div>
+                </div>
+            </div>
+
+            <!-- Messages Tab -->
+            <div id="tab-messages" class="tab-content">
+                <div class="panel">
+                    <h3>Match Timeline</h3>
+                    <div class="timeline-container">
+                        <div class="timeline-header">
+                            <div class="team-header" id="team1-header">Team 1</div>
+                            <div class="timeline-center">Time</div>
+                            <div class="team-header" id="team2-header">Team 2</div>
+                        </div>
+                        <div class="timeline-body" id="timeline-body"></div>
                     </div>
                 </div>
             </div>
 
-            <div id="teams-panel" class="panel">
-                <h3>Teams</h3>
-                <div id="teams-list" class="teams-list"></div>
-            </div>
+            <!-- Accuracy Tab -->
+            <div id="tab-accuracy" class="tab-content">
+                <div class="panel">
+                    <h3>Weapon Accuracy Table</h3>
+                    <table id="accuracy-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>SG Acc</th>
+                                <th>LG Acc</th>
+                                <th>RL Dmg</th>
+                                <th>Total Dmg</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accuracy-body"></tbody>
+                    </table>
+                </div>
 
-            <div id="players-panel" class="panel">
-                <h3>Scoreboard</h3>
-                <table id="scoreboard">
-                    <thead>
-                        <tr>
-                            <th>Player</th>
-                            <th>Team</th>
-                            <th>Kills</th>
-                            <th>Deaths</th>
-                            <th>Frags</th>
-                        </tr>
-                    </thead>
-                    <tbody id="scoreboard-body"></tbody>
-                </table>
-            </div>
-
-            <div id="weapons-panel" class="panel">
-                <h3>Kills by Weapon</h3>
-                <div id="weapons-chart" class="chart"></div>
-            </div>
-
-            <div id="frags-panel" class="panel">
-                <h3>Recent Frags</h3>
-                <div id="frags-list" class="frags-list"></div>
+                <div class="panel">
+                    <h3>Shotgun Accuracy Over Time</h3>
+                    <div id="sg-graphs" class="accuracy-graphs"></div>
+                </div>
             </div>
         </section>
     </div>

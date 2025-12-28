@@ -7,6 +7,50 @@ import (
 	"github.com/mvd-analyzer/internal/parser"
 )
 
+// cleanQuakeName removes Quake color codes and control characters from names
+// The JSON contains \uXXXX escapes for non-ASCII bytes, which Go decodes as Unicode codepoints
+func cleanQuakeName(s string) string {
+	var result []rune
+	for _, r := range s {
+		// Get the codepoint as a byte value (0-255)
+		// JSON escapes like \u009C become rune 0x9C, \u00D3 becomes rune 0xD3
+		c := int(r)
+
+		// Handle characters in the 128-255 range (Quake colored/bronze text)
+		// These are colored versions of the lower 128 chars
+		if c >= 128 && c <= 255 {
+			c -= 128
+		}
+
+		// Skip characters outside byte range (shouldn't happen in Quake names)
+		if c > 255 {
+			continue
+		}
+
+		// Map Quake charset special chars to ASCII equivalents
+		// Quake uses chars 0x00-0x1F for special graphical characters
+		if c < 32 {
+			// Skip most control characters
+			switch c {
+			case 0x10: // right arrow
+				result = append(result, '>')
+			case 0x11: // left arrow
+				result = append(result, '<')
+			case 0x12: // dot
+				result = append(result, '.')
+			case 0x1C, 0x1D, 0x1E, 0x1F: // dots/bullets
+				result = append(result, '.')
+			default:
+				// Skip other control characters (0x19, 0x1C for separators, etc.)
+			}
+		} else if c < 127 {
+			result = append(result, rune(c))
+		}
+		// Skip DEL (127)
+	}
+	return string(result)
+}
+
 // DemoInfoAnalyzer collects and parses embedded demoinfo JSON from hidden messages
 type DemoInfoAnalyzer struct {
 	ctx    *Context
@@ -97,8 +141,8 @@ func (a *DemoInfoAnalyzer) parseBlocks() *DemoInfoResult {
 
 	for _, p := range raw.Players {
 		player := DemoInfoPlayer{
-			Name:        p.Name,
-			Team:        p.Team,
+			Name:        cleanQuakeName(p.Name),
+			Team:        cleanQuakeName(p.Team),
 			TopColor:    p.TopColor,
 			BottomColor: p.BottomColor,
 			Ping:        p.Ping,
