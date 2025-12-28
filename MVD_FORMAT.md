@@ -20,6 +20,17 @@ MVD (Multi-View Demo) is a demo recording format for QuakeWorld that captures th
 | `.mvd.gz` | Gzip-compressed MVD |
 | `.mvd.bz2` | Bzip2-compressed MVD |
 
+### Real-World Example
+
+A typical 20-minute 4on4 competitive match:
+- **File size**: ~13 MB (uncompressed)
+- **Messages**: ~213,000 demo messages
+- **Message types breakdown**:
+  - `dem_all`: Most common (~80%)
+  - `dem_stats`: Per-player stat updates
+  - `dem_single`: Player-specific messages
+  - `dem_multiple`: Multi-player messages (including hidden messages)
+
 ---
 
 ## Binary Format Conventions
@@ -51,6 +62,15 @@ real_value = encoded_value / 8.0
 
 With `FTE_PEXT_FLOATCOORDS` or `MVD_PEXT1_FLOATCOORDS`, coordinates are 32-bit floats.
 
+### Character Encoding
+
+QuakeWorld uses a custom character encoding:
+- Characters 0-127: Standard ASCII
+- Characters 128-255: "Gold" (alternate color) versions of 0-127
+- To convert gold text: `char = char - 128` if `char >= 128`
+
+Player names and messages may contain these high-bit characters for colored text.
+
 ---
 
 ## File Structure
@@ -58,12 +78,18 @@ With `FTE_PEXT_FLOATCOORDS` or `MVD_PEXT1_FLOATCOORDS`, coordinates are 32-bit f
 An MVD file is a sequential stream of **demo messages**. There is no file header - parsing begins immediately with the first message.
 
 ```
-[Message 1]
-[Message 2]
+[Message 1]  <- Usually dem_set (sequence initialization)
+[Message 2]  <- Usually dem_all with svc_serverdata
 [Message 3]
 ...
-[End Message]
+[End Message] <- dem_all with svc_disconnect "EndOfDemo"
 ```
+
+### First Message Sequence
+
+A typical MVD file begins with:
+1. `dem_set` - Sequence numbers (first 10 bytes)
+2. `dem_all` - Contains `svc_serverdata` with protocol extensions and server info
 
 ---
 
@@ -86,6 +112,8 @@ The `message_type` byte encodes both the type and sometimes additional data:
 Bits 0-2: Message type (0-7)
 Bits 3-7: Additional data (for dem_single and dem_stats: player number)
 ```
+
+**Important**: The first message typically has `time_delta = 0`. Subsequent messages accumulate time deltas to track demo time.
 
 ### Message Types
 
@@ -117,6 +145,8 @@ Offset  Size  Field
 ```
 
 **Total size**: 10 bytes
+
+**Note**: This is the only message type that does NOT have a payload_size field - the payload is always exactly 8 bytes (two longs).
 
 ### dem_all (type 6)
 
@@ -219,16 +249,26 @@ The payload in dem_read, dem_all, dem_multiple, dem_single, and dem_stats messag
 | 12 | `svc_lightstyle` | Set light style |
 | 14 | `svc_updatefrags` | Update player frags |
 | 20 | `svc_spawnstatic` | Spawn static entity |
+| 21 | `svc_fte_spawnstatic2` | FTE extended static entity |
 | 22 | `svc_spawnbaseline` | Entity baseline |
 | 23 | `svc_temp_entity` | Temporary entity (explosion, etc.) |
 | 24 | `svc_setpause` | Pause game |
 | 26 | `svc_centerprint` | Center screen message |
+| 27 | `svc_killedmonster` | Monster killed (no payload) |
+| 28 | `svc_foundsecret` | Secret found (no payload) |
+| 29 | `svc_spawnstaticsound` | Static sound |
 | 30 | `svc_intermission` | Intermission screen |
+| 31 | `svc_finale` | Finale text |
 | 32 | `svc_cdtrack` | CD track number |
+| 33 | `svc_sellscreen` | Sell screen |
+| 34 | `svc_smallkick` | Small view kick (no payload) |
+| 35 | `svc_bigkick` | Big view kick (no payload) |
 | 36 | `svc_updateping` | Update player ping |
 | 37 | `svc_updateentertime` | Update player enter time |
 | 38 | `svc_updatestatlong` | Update player stat (long value) |
+| 39 | `svc_muzzleflash` | Muzzle flash effect |
 | 40 | `svc_updateuserinfo` | Update player userinfo |
+| 41 | `svc_download` | File download chunk |
 | 42 | `svc_playerinfo` | Player state update |
 | 43 | `svc_nails` | Nail projectiles |
 | 44 | `svc_chokecount` | Choked packet count |
@@ -236,10 +276,35 @@ The payload in dem_read, dem_all, dem_multiple, dem_single, and dem_stats messag
 | 46 | `svc_soundlist` | Sound precache list |
 | 47 | `svc_packetentities` | Entity updates |
 | 48 | `svc_deltapacketentities` | Delta entity updates |
+| 49 | `svc_maxspeed` | Max speed setting |
+| 50 | `svc_entgravity` | Entity gravity setting |
 | 51 | `svc_setinfo` | Set player info key |
 | 52 | `svc_serverinfo` | Set server info key |
 | 53 | `svc_updatepl` | Update packet loss |
 | 54 | `svc_nails2` | Nail projectiles (MVD extended) |
+| 60 | `svc_fte_modellistshort` | FTE short model list |
+| 66 | `svc_fte_spawnbaseline2` | FTE extended baseline |
+
+### Parsing Payloads
+
+Each payload may contain multiple svc_* commands. Parse commands sequentially until the payload is exhausted:
+
+```go
+for !reader.EOF() {
+    cmd := reader.ReadByte()
+    switch cmd {
+    case SVC_SERVERDATA:
+        parseServerData(reader)
+    case SVC_PRINT:
+        parsePrint(reader)
+    // ... handle other commands
+    default:
+        // Unknown command - must skip appropriately
+    }
+}
+```
+
+**Important**: If you encounter an unknown command and cannot determine its size, you must skip the rest of the current payload and continue with the next demo message.
 
 ---
 
@@ -256,34 +321,55 @@ Offset  Size  Field
 1       4     extension_id (e.g., PROTOCOL_VERSION_FTE, PROTOCOL_VERSION_MVD1)
 5       4     extension_flags
 
-// Standard header
+// Standard header (after extensions)
 N       4     PROTOCOL_VERSION (28)
 N+4     4     server_count (spawn count)
-N+8     var   game_directory (string)
+N+8     var   game_directory (string, e.g., "qw")
 N+?     4     server_time (float)
-N+?     var   level_name (string)
+N+?     var   level_name (string, e.g., "Schloss Adler")
 
-// Movement variables
-        4     gravity (float)
+// Movement variables (10 floats)
+        4     gravity (float, typically 800.0)
         4     stopspeed (float)
-        4     maxspeed (float)
+        4     maxspeed (float, typically 320.0)
         4     spectator_maxspeed (float)
         4     accelerate (float)
         4     airaccelerate (float)
         4     wateraccelerate (float)
         4     friction (float)
         4     waterfriction (float)
-        4     entgravity (float)
+        4     entgravity (float, typically 1.0)
 ```
 
 ### Protocol Extension IDs
 
-| ID | Name | Value |
-|----|------|-------|
-| `PROTOCOL_VERSION_FTE` | FTE extensions | `'F' + ('T'<<8) + ('E'<<16) + ('X'<<24)` = 0x58455446 |
-| `PROTOCOL_VERSION_FTE2` | FTE extensions 2 | `'F' + ('T'<<8) + ('E'<<16) + ('2'<<24)` = 0x32455446 |
-| `PROTOCOL_VERSION_MVD1` | MVD extensions | `'M' + ('V'<<8) + ('D'<<16) + ('1'<<24)` = 0x3144564D |
-| `PROTOCOL_VERSION` | Standard QW | 28 |
+| ID | Name | Value | ASCII |
+|----|------|-------|-------|
+| `PROTOCOL_VERSION_FTE` | FTE extensions | 0x58455446 | "FTEX" |
+| `PROTOCOL_VERSION_FTE2` | FTE extensions 2 | 0x32455446 | "FTE2" |
+| `PROTOCOL_VERSION_MVD1` | MVD extensions | 0x3144564D | "MVD1" |
+| `PROTOCOL_VERSION` | Standard QW | 28 | - |
+
+### Parsing Protocol Extensions
+
+```go
+for {
+    version := reader.ReadUint32()
+    if version == PROTOCOL_VERSION {
+        // Standard protocol - done with extensions
+        break
+    }
+    flags := reader.ReadUint32()
+    switch version {
+    case PROTOCOL_VERSION_FTE:
+        fteFlags = flags
+    case PROTOCOL_VERSION_FTE2:
+        fte2Flags = flags
+    case PROTOCOL_VERSION_MVD1:
+        mvd1Flags = flags
+    }
+}
+```
 
 ### FTE Protocol Extension Flags
 
@@ -305,7 +391,7 @@ N+?     var   level_name (string)
 ```c
 #define MVD_PEXT1_FLOATCOORDS       (1 << 0)  // Float coords for entities
 #define MVD_PEXT1_HIGHLAGTELEPORT   (1 << 1)  // Teleport direction fix
-#define MVD_PEXT1_HIDDEN_MESSAGES   (1 << 5)  // Hidden message support
+#define MVD_PEXT1_HIDDEN_MESSAGES   (1 << 5)  // Hidden message support (0x20)
 ```
 
 ---
@@ -325,9 +411,9 @@ Offset  Size  Field
 4       1     frame (animation frame)
 
 // Conditional fields based on flags:
-if (flags & DF_ORIGIN)      2  origin_x (coord)
-if (flags & DF_ORIGIN<<1)   2  origin_y (coord)
-if (flags & DF_ORIGIN<<2)   2  origin_z (coord)
+if (flags & DF_ORIGIN)      2  origin_x (coord or float if FLOATCOORDS)
+if (flags & DF_ORIGIN<<1)   2  origin_y (coord or float if FLOATCOORDS)
+if (flags & DF_ORIGIN<<2)   2  origin_z (coord or float if FLOATCOORDS)
 
 if (flags & DF_ANGLES)      2  angle_pitch (angle16)
 if (flags & DF_ANGLES<<1)   2  angle_yaw (angle16)
@@ -399,22 +485,22 @@ Offset  Size  Field
 
 | Index | Name | Description |
 |-------|------|-------------|
-| 0 | `STAT_HEALTH` | Health points |
+| 0 | `STAT_HEALTH` | Health points (0-250+) |
 | 1 | `STAT_FRAGS` | Frag count |
 | 2 | `STAT_WEAPON` | Current weapon model index |
-| 3 | `STAT_AMMO` | Current ammo |
-| 4 | `STAT_ARMOR` | Armor points |
+| 3 | `STAT_AMMO` | Current ammo for active weapon |
+| 4 | `STAT_ARMOR` | Armor points (0-200) |
 | 5 | `STAT_WEAPONFRAME` | Weapon animation frame |
-| 6 | `STAT_SHELLS` | Shell ammo count |
-| 7 | `STAT_NAILS` | Nail ammo count |
-| 8 | `STAT_ROCKETS` | Rocket ammo count |
-| 9 | `STAT_CELLS` | Cell ammo count |
+| 6 | `STAT_SHELLS` | Shell ammo count (max 100) |
+| 7 | `STAT_NAILS` | Nail ammo count (max 200) |
+| 8 | `STAT_ROCKETS` | Rocket ammo count (max 100) |
+| 9 | `STAT_CELLS` | Cell ammo count (max 100) |
 | 10 | `STAT_ACTIVEWEAPON` | Active weapon flags |
 | 11 | `STAT_TOTALSECRETS` | Total secrets in level |
 | 12 | `STAT_TOTALMONSTERS` | Total monsters in level |
 | 13 | `STAT_SECRETS` | Secrets found |
 | 14 | `STAT_MONSTERS` | Monsters killed |
-| 15 | `STAT_ITEMS` | Item flags |
+| 15 | `STAT_ITEMS` | Item flags (weapons, armor, powerups) |
 | 16 | `STAT_VIEWHEIGHT` | View height offset |
 | 17 | `STAT_TIME` | Server time |
 
@@ -428,25 +514,41 @@ Offset  Size  Field
 #define IT_GRENADE_LAUNCHER     (1 << 4)
 #define IT_ROCKET_LAUNCHER      (1 << 5)
 #define IT_LIGHTNING            (1 << 6)
-#define IT_SUPER_LIGHTNING      (1 << 7)
+#define IT_SUPER_LIGHTNING      (1 << 7)   // Unused in standard QW
 #define IT_SHELLS               (1 << 8)
 #define IT_NAILS                (1 << 9)
 #define IT_ROCKETS              (1 << 10)
 #define IT_CELLS                (1 << 11)
 #define IT_AXE                  (1 << 12)
-#define IT_ARMOR1               (1 << 13)  // Green armor
-#define IT_ARMOR2               (1 << 14)  // Yellow armor
-#define IT_ARMOR3               (1 << 15)  // Red armor
-#define IT_SUPERHEALTH          (1 << 16)
+#define IT_ARMOR1               (1 << 13)  // Green armor (100)
+#define IT_ARMOR2               (1 << 14)  // Yellow armor (150)
+#define IT_ARMOR3               (1 << 15)  // Red armor (200)
+#define IT_SUPERHEALTH          (1 << 16)  // Megahealth
 #define IT_KEY1                 (1 << 17)
 #define IT_KEY2                 (1 << 18)
-#define IT_INVISIBILITY         (1 << 19)
-#define IT_INVULNERABILITY      (1 << 20)
-#define IT_SUIT                 (1 << 21)
-#define IT_QUAD                 (1 << 22)
+#define IT_INVISIBILITY         (1 << 19)  // Ring of Shadows
+#define IT_INVULNERABILITY      (1 << 20)  // Pentagram
+#define IT_SUIT                 (1 << 21)  // Biosuit
+#define IT_QUAD                 (1 << 22)  // Quad Damage
 // Bits 23-27 reserved
 // Bits 28-31: Server flags (sigils)
 ```
+
+---
+
+## svc_updatefrags (14)
+
+Updates a player's frag count.
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_updatefrags (14)
+1       1     player_number (0-31)
+2       2     frags (signed short, little-endian)
+```
+
+**Note**: Frags can be negative (from suicides or team kills).
 
 ---
 
@@ -458,30 +560,51 @@ Player information update.
 Offset  Size  Field
 ------  ----  -----
 0       1     svc_updateuserinfo (40)
-1       1     player_slot
+1       1     player_slot (0-31)
 2       4     user_id (little-endian long)
 6       var   userinfo_string (null-terminated)
 ```
 
-### Userinfo Keys
+### Userinfo String Format
 
-Common keys in the userinfo string:
+The userinfo string is backslash-delimited key-value pairs:
+```
+\name\PlayerName\team\blue\topcolor\4\bottomcolor\4\skin\base
+```
 
-| Key | Description |
-|-----|-------------|
-| `name` | Player name |
-| `team` | Team name |
-| `topcolor` | Top color (0-13) |
-| `bottomcolor` | Bottom color (0-13) |
-| `skin` | Skin name |
-| `spectator` | "1" if spectator |
-| `*client` | Client software name |
+### Common Userinfo Keys
+
+| Key | Description | Example |
+|-----|-------------|---------|
+| `name` | Player name | `"splif"` |
+| `team` | Team name | `"blue"`, `"red"` |
+| `topcolor` | Top color (0-13) | `"4"` |
+| `bottomcolor` | Bottom color (0-13) | `"4"` |
+| `skin` | Skin name | `"base"` |
+| `spectator` | "1" if spectator | `"1"` |
+| `*client` | Client software | `"ezQuake 3.6"` |
+
+### Parsing Userinfo
+
+```go
+func parseUserinfo(s string) map[string]string {
+    if s == "" || s[0] != '\\' {
+        return nil
+    }
+    parts := strings.Split(s[1:], "\\")
+    result := make(map[string]string)
+    for i := 0; i+1 < len(parts); i += 2 {
+        result[parts[i]] = parts[i+1]
+    }
+    return result
+}
+```
 
 ---
 
 ## svc_print (8)
 
-Print message to console.
+Print message to console. **Critical for frag detection**.
 
 ```
 Offset  Size  Field
@@ -493,27 +616,75 @@ Offset  Size  Field
 
 ### Print Levels
 
-| Value | Name | Description |
-|-------|------|-------------|
-| 0 | `PRINT_LOW` | Low priority |
-| 1 | `PRINT_MEDIUM` | Medium priority |
-| 2 | `PRINT_HIGH` | High priority |
-| 3 | `PRINT_CHAT` | Chat message |
+| Value | Name | Description | Use Case |
+|-------|------|-------------|----------|
+| 0 | `PRINT_LOW` | Low priority | Debug/info messages |
+| 1 | `PRINT_MEDIUM` | Medium priority | **Obituaries (kill messages)** |
+| 2 | `PRINT_HIGH` | High priority | Match events, server messages |
+| 3 | `PRINT_CHAT` | Chat message | Player chat |
+
+### Obituary Messages (Frag Detection)
+
+Kill messages appear at `PRINT_MEDIUM` (level 1). Common patterns:
+
+**Weapon Kills** (victim ... killer pattern):
+| Pattern | Weapon |
+|---------|--------|
+| `"X was gibbed by Y's rocket"` | Rocket Launcher |
+| `"X was smeared by Y's quad rocket"` | Rocket Launcher (with Quad) |
+| `"X ate N loads of Y's buckshot"` | Super Shotgun |
+| `"X was lead poisoned by Y"` | Super Shotgun |
+| `"X accepts Y's shaft"` | Lightning Gun |
+| `"X was perforated by Y"` | Nailgun |
+| `"X was punctured by Y"` | Nailgun |
+| `"X was ventilated by Y"` | Nailgun |
+| `"X was straw-cuttered by Y"` | Super Nailgun |
+| `"X was telefragged by Y"` | Telefrag |
+| `"X was ax-murdered by Y"` | Axe |
+
+**Suicides** (single player pattern):
+| Pattern | Cause |
+|---------|-------|
+| `"X suicides"` | /kill command |
+| `"X tries to leave"` | Disconnect during combat |
+| `"X blew himself up"` | Self-rocket |
+| `"X becomes bored with life"` | Various |
+| `"X cratered"` | Fall damage |
+| `"X sleeps with the fishes"` | Drowning |
+| `"X sucks it down"` | Slime |
+| `"X burst into flames"` | Lava |
+
+**Team Kills**:
+| Pattern | Description |
+|---------|-------------|
+| `"X mows down a teammate"` | Team kill |
+| `"X gets a frag for the other team"` | Self-damage hurting team |
+
+### Example Obituary Messages from Real Demo
+
+```
+[12.8s] "nexus was gibbed by splif's rocket"
+[14.3s] "ToT_fix was lead poisoned by paniagua"
+[59.9s] "nexus ate 2 loads of rusti FU's buckshot"
+[77.1s] "paniagua was straw-cuttered by rghst"
+[128.9s] "rusti FU gets a frag for the other team"
+[195.6s] "paniagua mows down a teammate"
+```
 
 ---
 
 ## Hidden Messages
 
-When `MVD_PEXT1_HIDDEN_MESSAGES` is enabled, `dem_multiple` messages with `player_mask == 0` contain structured hidden data.
+When `MVD_PEXT1_HIDDEN_MESSAGES` (0x20) is enabled, `dem_multiple` messages with `player_mask == 0` contain structured hidden data.
 
 ### Hidden Message Format
 
 ```
 Offset  Size  Field
 ------  ----  -----
-0       4     block_length (little-endian long)
+0       4     block_length (little-endian long, includes type_id)
 4       2     type_id (little-endian short)
-6       N     block_data (block_length bytes)
+6       N     block_data (block_length - 2 bytes)
 ```
 
 If `type_id == 0xFFFF`, read another short for extended type range.
@@ -573,6 +744,8 @@ Offset  Size  Field
 
 ### mvdhidden_demoinfo (0x0003)
 
+Contains embedded JSON metadata about the demo.
+
 ```
 Offset  Size  Field
 ------  ----  -----
@@ -582,13 +755,105 @@ Offset  Size  Field
 
 ### mvdhidden_dmgdone (0x0007)
 
+Tracks damage dealt between players. Useful for detailed statistics.
+
 ```
 Offset  Size  Field
 ------  ----  -----
-0       1     type_flags (bit 15 = splash damage)
+0       1     type_flags (bit 7 = splash damage)
 1       2     attacker_entity (short)
 3       2     victim_entity (short)
 5       2     damage_amount (short)
+```
+
+---
+
+## Additional svc_* Command Structures
+
+### svc_sound (6)
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_sound (6)
+1       2     channel (short) - bits encode volume/attenuation presence
+if (channel & 0x8000):
+          1     volume
+if (channel & 0x4000):
+          1     attenuation
+          1     sound_num
+          6/12  origin (3 coords, size depends on FLOATCOORDS)
+```
+
+### svc_stufftext (9)
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_stufftext (9)
+1       var   command (null-terminated string)
+```
+
+### svc_setangle (10)
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_setangle (10)
+1       1     pitch (angle)
+2       1     yaw (angle)
+3       1     roll (angle)
+```
+
+### svc_lightstyle (12)
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_lightstyle (12)
+1       1     style_index
+2       var   pattern (null-terminated string, e.g., "mmmaaaggg")
+```
+
+### svc_updateping (36)
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_updateping (36)
+1       1     player_number
+2       2     ping (short, milliseconds)
+```
+
+### svc_updatepl (53)
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_updatepl (53)
+1       1     player_number
+2       1     packet_loss (percentage, 0-100)
+```
+
+### svc_setinfo (51)
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_setinfo (51)
+1       1     player_number
+2       var   key (null-terminated string)
+?       var   value (null-terminated string)
+```
+
+### svc_serverinfo (52)
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_serverinfo (52)
+1       var   key (null-terminated string)
+?       var   value (null-terminated string)
 ```
 
 ---
@@ -615,15 +880,22 @@ Offset  Size  Field
 
 ```python
 def parse_mvd(file):
+    cumulative_time = 0.0
+
     while not eof(file):
         # Read message header
         time_delta = read_byte(file)
         type_byte = read_byte(file)
+
+        # Accumulate time (delta is in milliseconds)
+        cumulative_time += time_delta / 1000.0
+
         message_type = type_byte & 0x07
 
         if message_type == DEM_SET:  # 2
             incoming_seq = read_long(file)
             outgoing_seq = read_long(file)
+            # No payload
 
         elif message_type == DEM_MULTIPLE:  # 3
             player_mask = read_long(file)
@@ -639,7 +911,7 @@ def parse_mvd(file):
             player_num = type_byte >> 3
             size = read_long(file)
             payload = read_bytes(file, size)
-            parse_network_message(payload)
+            parse_network_message(payload, target_player=player_num)
 
         elif message_type == DEM_STATS:  # 5
             player_num = type_byte >> 3
@@ -676,67 +948,107 @@ def parse_network_message(data):
             stat = read_byte(data)
             value = read_byte(data)
 
+        elif cmd == SVC_PRINT:
+            level = read_byte(data)
+            message = read_string(data)
+            if level == PRINT_MEDIUM:
+                detect_frag(message)
+
         # ... handle other svc_* commands
+        else:
+            # Unknown command - skip rest of this payload
+            break
 ```
+
+---
+
+## Practical Implementation Notes
+
+### Robustness Tips
+
+1. **Validate player numbers**: Always check `player_num < MAX_CLIENTS (32)` before array access.
+
+2. **Handle unknown commands gracefully**: When encountering an unknown svc_* command, skip the rest of the current payload rather than aborting.
+
+3. **Time tracking**: Accumulate time_delta values to track demo time. A typical 20-minute demo will have cumulative time around 1200 seconds.
+
+4. **Character encoding**: Player names may contain high-bit characters (128-255) for gold/colored text. Subtract 128 to get ASCII equivalent.
+
+5. **Protocol extensions**: Always check for extensions before parsing fields that may have different sizes (e.g., coordinates may be 16-bit or 32-bit float).
+
+### Common Parsing Issues
+
+| Issue | Solution |
+|-------|----------|
+| Demo stops parsing early | Check for unknown svc_* commands causing early exit |
+| Invalid player numbers (>31) | Skip messages with out-of-range player numbers |
+| Garbled player names | Handle high-bit character encoding |
+| Missing frags | Check PRINT_MEDIUM (level 1) for obituaries, not PRINT_HIGH |
+| Zero duration | Ensure time_delta accumulation is correct (milliseconds) |
+
+### Performance Considerations
+
+- Stream parsing is recommended for large files (10MB+)
+- Most messages are `dem_all` - optimize for this case
+- Payload sizes are typically 4-800 bytes
+- A 20-minute demo may contain 200,000+ messages
 
 ---
 
 ## Example: Reading Player Positions
 
-```python
-def parse_playerinfo_mvd(data):
-    player_num = read_byte(data)
-    flags = read_short(data)
-    frame = read_byte(data)
+```go
+func parsePlayerInfoMVD(r *BufferReader, floatCoords bool) *PlayerState {
+    playerNum := r.ReadByte()
+    flags := r.ReadUint16()
+    frame := r.ReadByte()
 
-    origin = [None, None, None]
-    angles = [None, None, None]
+    state := &PlayerState{
+        PlayerNum: int(playerNum),
+        Frame:     frame,
+        IsDead:    flags&DF_DEAD != 0,
+        IsGib:     flags&DF_GIB != 0,
+    }
 
-    # Read origin components
-    for i in range(3):
-        if flags & (DF_ORIGIN << i):
-            origin[i] = read_coord(data)
+    // Read origin components
+    for i := 0; i < 3; i++ {
+        if flags&(DF_ORIGIN<<i) != 0 {
+            if floatCoords {
+                state.Origin[i] = r.ReadFloat32()
+            } else {
+                state.Origin[i] = r.ReadCoord()
+            }
+        }
+    }
 
-    # Read angle components
-    for i in range(3):
-        if flags & (DF_ANGLES << i):
-            angles[i] = read_angle16(data)
+    // Read angle components
+    for i := 0; i < 3; i++ {
+        if flags&(DF_ANGLES<<i) != 0 {
+            state.Angles[i] = r.ReadAngle16()
+        }
+    }
 
-    model = None
-    if flags & DF_MODEL:
-        model = read_byte(data)
-
-    skin = None
-    if flags & DF_SKINNUM:
-        skin = read_byte(data)
-        # Handle extended model index
-        if skin & 0x80 and model is not None:
-            model += 256
+    if flags&DF_MODEL != 0 {
+        state.ModelIndex = int(r.ReadByte())
+    }
+    if flags&DF_SKINNUM != 0 {
+        skin := r.ReadByte()
+        // Handle extended model index
+        if skin&0x80 != 0 && flags&DF_MODEL != 0 {
+            state.ModelIndex += 256
             skin &= 0x7F
+        }
+        state.SkinNum = int(skin)
+    }
+    if flags&DF_EFFECTS != 0 {
+        state.Effects = r.ReadByte()
+    }
+    if flags&DF_WEAPONFRAME != 0 {
+        state.WeaponFrame = r.ReadByte()
+    }
 
-    effects = None
-    if flags & DF_EFFECTS:
-        effects = read_byte(data)
-
-    weaponframe = None
-    if flags & DF_WEAPONFRAME:
-        weaponframe = read_byte(data)
-
-    is_dead = bool(flags & DF_DEAD)
-    is_gib = bool(flags & DF_GIB)
-
-    return PlayerState(
-        player_num=player_num,
-        origin=origin,
-        angles=angles,
-        frame=frame,
-        model=model,
-        skin=skin,
-        effects=effects,
-        weaponframe=weaponframe,
-        is_dead=is_dead,
-        is_gib=is_gib
-    )
+    return state
+}
 ```
 
 ---
@@ -780,6 +1092,7 @@ For implementation details, refer to these files in the ezQuake source:
 | `src/qwprot/src/protocol.h` | Protocol definitions |
 | `src/server.h` | Server data structures |
 | `src/client.h` | Client data structures |
+| `src/fragstats.c` | Frag detection patterns |
 
 ---
 
@@ -789,7 +1102,7 @@ For implementation details, refer to these files in the ezQuake source:
 |---------|---------|
 | Original | Basic MVD format (MVDSV) |
 | FTE Extensions | Model/entity doubling, float coords |
-| MVD_PEXT1 | Hidden messages, antilag data |
+| MVD_PEXT1 | Hidden messages, antilag data, damage tracking |
 
 ---
 
