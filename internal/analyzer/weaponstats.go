@@ -1,6 +1,8 @@
 package analyzer
 
 import (
+	"math"
+
 	"github.com/mvd-analyzer/internal/mvd"
 	"github.com/mvd-analyzer/internal/parser"
 )
@@ -18,7 +20,9 @@ type playerWeaponStats struct {
 	nails        int
 	rockets      int
 	cells        int
-	health       int // Current health for damage capping
+	health       int     // Current health for damage capping
+	armor        int     // Current armor value
+	armorType    float64 // Armor absorption rate (0.3=green, 0.6=yellow, 0.8=red)
 
 	// Accumulated stats per weapon
 	weapons map[string]*weaponData
@@ -63,6 +67,24 @@ func (a *WeaponStatsAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error 
 	switch e.StatIndex {
 	case mvd.StatHealth:
 		stats.health = e.Value
+
+	case mvd.StatArmor:
+		stats.armor = e.Value
+
+	case mvd.StatItems:
+		// Determine armor type from item flags
+		// IT_ARMOR3 (red) = 80% absorption
+		// IT_ARMOR2 (yellow) = 60% absorption
+		// IT_ARMOR1 (green) = 30% absorption
+		if e.Value&mvd.ITArmor3 != 0 {
+			stats.armorType = 0.8
+		} else if e.Value&mvd.ITArmor2 != 0 {
+			stats.armorType = 0.6
+		} else if e.Value&mvd.ITArmor1 != 0 {
+			stats.armorType = 0.3
+		} else {
+			stats.armorType = 0 // No armor
+		}
 
 	case mvd.StatActiveWeapon:
 		stats.activeWeapon = e.Value
@@ -140,24 +162,17 @@ func (a *WeaponStatsAnalyzer) handleDamage(e *parser.DamageEvent) error {
 		wd := attacker.getWeapon(weapon)
 
 		if e.Attacker == e.Victim {
-			// Self-damage (cap at own health)
+			// Self-damage - use the same armor+health calculation
 			victim := a.getOrCreate(e.Victim)
-			effectiveDmg := e.Damage
-			if victim.health > 0 && effectiveDmg > victim.health {
-				effectiveDmg = victim.health
-			}
+			effectiveDmg, _ := a.calculateEffectiveDamage(e.Damage, victim)
 			wd.SelfDamage += effectiveDmg
 		} else {
-			// Get victim's health for damage capping
+			// Get victim's state for damage calculation
 			victim := a.getOrCreate(e.Victim)
-			rawDamage := e.Damage
-			effectiveDamage := rawDamage
 
-			// Cap damage at victim's current health (like KTX does)
-			if victim.health > 0 && effectiveDamage > victim.health {
-				effectiveDamage = victim.health
-			}
-			overkill := rawDamage - effectiveDamage
+			// Calculate damage exactly like KTX does:
+			// dmg_dealt = armor_absorbed + min(health_damage, victim_health)
+			effectiveDamage, overkill := a.calculateEffectiveDamage(e.Damage, victim)
 
 			// Check if team damage
 			isTeamDamage := a.isTeamDamage(e.Attacker, e.Victim)
@@ -172,17 +187,75 @@ func (a *WeaponStatsAnalyzer) handleDamage(e *parser.DamageEvent) error {
 				}
 			}
 
-			// Update victim's health (approximate - may go negative on death)
-			if victim.health > 0 {
-				victim.health -= effectiveDamage
-				if victim.health < 0 {
-					victim.health = 0
-				}
-			}
+			// Update victim's armor and health after damage
+			a.applyDamageToVictim(e.Damage, victim)
 		}
 	}
 
 	return nil
+}
+
+// calculateEffectiveDamage computes damage exactly like KTX:
+// MVD damage = raw_damage (before armor split, after quad/handicap)
+// armor_absorbed = ceil(armorType * raw_damage), capped at armor_value
+// health_damage = ceil(raw_damage - armor_absorbed)
+// effective_damage = armor_absorbed + min(health_damage, victim_health)
+func (a *WeaponStatsAnalyzer) calculateEffectiveDamage(rawDamage int, victim *playerWeaponStats) (effective, overkill int) {
+	// Calculate armor absorption using ceiling (like KTX's newceil)
+	var armorAbsorbed int
+	if victim.armor > 0 && victim.armorType > 0 {
+		// Armor absorbs ceil(armorType * damage), capped at current armor value
+		absorbed := int(math.Ceil(float64(rawDamage) * victim.armorType))
+		if absorbed > victim.armor {
+			absorbed = victim.armor
+		}
+		armorAbsorbed = absorbed
+	}
+
+	// Health damage is what's left after armor (using ceiling like KTX)
+	healthDamage := int(math.Ceil(float64(rawDamage) - float64(armorAbsorbed)))
+	if healthDamage < 0 {
+		healthDamage = 0
+	}
+
+	// Cap health damage at victim's current health
+	effectiveHealthDamage := healthDamage
+	if victim.health > 0 && effectiveHealthDamage > victim.health {
+		effectiveHealthDamage = victim.health
+	} else if victim.health <= 0 {
+		effectiveHealthDamage = 0
+	}
+
+	// Overkill is the health damage beyond what was needed
+	overkill = healthDamage - effectiveHealthDamage
+
+	// Total effective damage = armor absorbed + capped health damage
+	effective = armorAbsorbed + effectiveHealthDamage
+
+	return effective, overkill
+}
+
+// applyDamageToVictim updates victim's armor and health after taking damage
+func (a *WeaponStatsAnalyzer) applyDamageToVictim(rawDamage int, victim *playerWeaponStats) {
+	// Calculate armor absorption using ceiling (like KTX)
+	var armorAbsorbed int
+	if victim.armor > 0 && victim.armorType > 0 {
+		absorbed := int(math.Ceil(float64(rawDamage) * victim.armorType))
+		if absorbed > victim.armor {
+			absorbed = victim.armor
+		}
+		armorAbsorbed = absorbed
+		victim.armor -= armorAbsorbed
+	}
+
+	// Apply health damage using ceiling (like KTX)
+	healthDamage := int(math.Ceil(float64(rawDamage) - float64(armorAbsorbed)))
+	if victim.health > 0 {
+		victim.health -= healthDamage
+		if victim.health < 0 {
+			victim.health = 0
+		}
+	}
 }
 
 // isTeamDamage checks if attacker and victim are on the same team

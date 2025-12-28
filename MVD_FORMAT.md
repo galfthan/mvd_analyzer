@@ -882,31 +882,70 @@ cl->ps.unbound_dmg_dealt += iDamage;   // Raw damage (written to MVD)
 
 ### Damage Capping Algorithm
 
-To match KTX stats, cap damage at victim's current health:
+To match KTX stats exactly, you must account for **both armor absorption AND health capping**:
 
 ```go
-func calculateEffectiveDamage(rawDamage, victimHealth int) (effective, overkill int) {
-    if victimHealth <= 0 {
-        return 0, rawDamage
+func calculateEffectiveDamage(rawDamage int, armorValue int, armorType float64, health int) (effective, overkill int) {
+    // Step 1: Calculate armor absorption (using ceiling like KTX)
+    armorAbsorbed := 0
+    if armorValue > 0 && armorType > 0 {
+        absorbed := int(math.Ceil(float64(rawDamage) * armorType))
+        if absorbed > armorValue {
+            absorbed = armorValue
+        }
+        armorAbsorbed = absorbed
     }
-    if rawDamage > victimHealth {
-        return victimHealth, rawDamage - victimHealth
+
+    // Step 2: Calculate health damage (what's left after armor)
+    healthDamage := int(math.Ceil(float64(rawDamage) - float64(armorAbsorbed)))
+
+    // Step 3: Cap health damage at victim's current health
+    effectiveHealthDamage := healthDamage
+    if health > 0 && effectiveHealthDamage > health {
+        effectiveHealthDamage = health
+    } else if health <= 0 {
+        effectiveHealthDamage = 0
     }
-    return rawDamage, 0
+
+    // Step 4: Total effective = armor absorbed + capped health damage
+    effective = armorAbsorbed + effectiveHealthDamage
+    overkill = healthDamage - effectiveHealthDamage
+
+    return effective, overkill
 }
 ```
 
-### Health Tracking for Damage Capping
+**Key insight**: The MVD damage value is the "raw damage" before armor split. KTX's `dmg_dealt` includes full armor absorption but caps only the health portion. Simply capping total damage at health is WRONG and will undercount by the armor absorption amount.
 
-To accurately cap damage, track health from `STAT_HEALTH` updates:
+### State Tracking for Accurate Damage Calculation
 
-1. Initialize player health from spawn (typically 100)
-2. Update health on `svc_updatestat` with `STAT_HEALTH`
-3. When processing damage events:
-   - Get victim's current health
-   - Cap damage at health value
-   - Subtract effective damage from tracked health
-   - Store overkill separately for analysis
+To accurately calculate damage, track these stats for each player:
+
+**From `svc_updatestat`/`svc_updatestatlong`:**
+- `STAT_HEALTH` (index 0): Current health points
+- `STAT_ARMOR` (index 4): Current armor points
+- `STAT_ITEMS` (index 15): Item flags (includes armor type)
+
+**Armor type from STAT_ITEMS:**
+```go
+if items & IT_ARMOR3 != 0 {
+    armorType = 0.8  // Red armor - 80% absorption
+} else if items & IT_ARMOR2 != 0 {
+    armorType = 0.6  // Yellow armor - 60% absorption
+} else if items & IT_ARMOR1 != 0 {
+    armorType = 0.3  // Green armor - 30% absorption
+} else {
+    armorType = 0    // No armor
+}
+```
+
+**When processing damage events:**
+1. Get victim's current armor, armorType, and health
+2. Calculate armor_absorbed = min(ceil(armorType * rawDamage), armorValue)
+3. Calculate health_damage = ceil(rawDamage - armor_absorbed)
+4. Cap health_damage at victim's current health
+5. effective_damage = armor_absorbed + capped_health_damage
+6. Update victim's armor and health after damage
 
 ### Overkill as a Playstyle Metric
 
