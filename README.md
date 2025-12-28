@@ -22,7 +22,21 @@ go build -o mvd-analyzer ./cmd/mvd-analyzer
 
 ## Usage
 
-### Basic Analysis
+### Web Dashboard
+
+```bash
+# Start the web server
+./mvd-analyzer serve
+
+# With custom port
+./mvd-analyzer serve -p 3000
+```
+
+Then open http://localhost:8080 in your browser and drag-and-drop MVD files to analyze.
+
+**Note:** You must run the server - opening the HTML file directly won't work.
+
+### Command Line Analysis
 
 ```bash
 # Analyze a demo file

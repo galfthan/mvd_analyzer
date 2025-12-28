@@ -3,6 +3,7 @@ package api
 
 import (
 	"embed"
+	"encoding/json"
 	"io/fs"
 	"net/http"
 )
@@ -25,10 +26,10 @@ func NewServer(staticFS embed.FS) *Server {
 
 // setupRoutes configures all HTTP routes
 func (s *Server) setupRoutes() {
-	// API routes
-	s.mux.HandleFunc("POST /api/analyze", s.handleAnalyze)
-	s.mux.HandleFunc("GET /api/analyses", s.handleListAnalyses)
-	s.mux.HandleFunc("GET /api/analyses/{id}", s.handleGetAnalysis)
+	// API routes - use standard pattern without method prefix for compatibility
+	s.mux.HandleFunc("/api/analyze", s.handleAnalyze)
+	s.mux.HandleFunc("/api/analyses", s.handleListAnalyses)
+	s.mux.HandleFunc("/api/analyses/", s.handleGetAnalysisWrapper)
 
 	// Serve static files for dashboard
 	staticContent, err := fs.Sub(s.staticFS, "static")
@@ -44,6 +45,28 @@ func (s *Server) setupRoutes() {
 	// Serve static files
 	fileServer := http.FileServer(http.FS(staticContent))
 	s.mux.Handle("/", fileServer)
+}
+
+// handleGetAnalysisWrapper extracts ID from path and calls handleGetAnalysis
+func (s *Server) handleGetAnalysisWrapper(w http.ResponseWriter, r *http.Request) {
+	// Extract ID from path: /api/analyses/{id}
+	id := r.URL.Path[len("/api/analyses/"):]
+	if id == "" {
+		http.Error(w, "Missing analysis ID", http.StatusBadRequest)
+		return
+	}
+
+	analysesMu.RLock()
+	result, ok := analyses[id]
+	analysesMu.RUnlock()
+
+	if !ok {
+		http.Error(w, "Analysis not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
 }
 
 // ServeHTTP implements http.Handler
