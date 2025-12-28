@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MVD Demo Analyzer</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MVD Demo Analyzer</h1>
+            <p>Analyze QuakeWorld MVD demo files</p>
+        </header>
+
+        <section id="upload-section" class="card">
+            <h2>Upload Demo</h2>
+            <div class="upload-area" id="drop-zone">
+                <input type="file" id="file-input" accept=".mvd,.mvd.gz" hidden>
+                <p>Drop .mvd file here or <button onclick="document.getElementById('file-input').click()">browse</button></p>
+            </div>
+            <div id="upload-status" class="status"></div>
+        </section>
+
+        <section id="results-section" class="card" style="display: none;">
+            <h2>Analysis Results</h2>
+
+            <div id="match-summary" class="panel">
+                <h3>Match Summary</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <label>Map</label>
+                        <span id="map-name">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <label>Duration</label>
+                        <span id="duration">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <label>Total Frags</label>
+                        <span id="total-frags">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="teams-panel" class="panel">
+                <h3>Teams</h3>
+                <div id="teams-list" class="teams-list"></div>
+            </div>
+
+            <div id="players-panel" class="panel">
+                <h3>Scoreboard</h3>
+                <table id="scoreboard">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Team</th>
+                            <th>Kills</th>
+                            <th>Deaths</th>
+                            <th>Frags</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreboard-body"></tbody>
+                </table>
+            </div>
+
+            <div id="weapons-panel" class="panel">
+                <h3>Kills by Weapon</h3>
+                <div id="weapons-chart" class="chart"></div>
+            </div>
+
+            <div id="frags-panel" class="panel">
+                <h3>Recent Frags</h3>
+                <div id="frags-list" class="frags-list"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: #00d9ff;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+header p {
+    color: #888;
+}
+
+.card {
+    background: #16213e;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.card h2 {
+    color: #00d9ff;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #2a3f5f;
+    padding-bottom: 10px;
+}
+
+.upload-area {
+    border: 2px dashed #2a3f5f;
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.upload-area:hover,
+.upload-area.dragover {
+    border-color: #00d9ff;
+    background: rgba(0, 217, 255, 0.1);
+}
+
+.upload-area button {
+    background: #00d9ff;
+    color: #1a1a2e;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.upload-area button:hover {
+    background: #00b8d9;
+}
+
+.status {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.status.loading {
+    background: #2a3f5f;
+    color: #00d9ff;
+}
+
+.status.success {
+    background: rgba(0, 200, 83, 0.2);
+    color: #00c853;
+}
+
+.status.error {
+    background: rgba(255, 82, 82, 0.2);
+    color: #ff5252;
+}
+
+.panel {
+    background: #1a1a2e;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.panel h3 {
+    color: #00d9ff;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-item label {
+    display: block;
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.summary-item span {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #00d9ff;
+}
+
+.teams-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.team-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #16213e;
+    border-radius: 8px;
+}
+
+.team-name {
+    font-weight: bold;
+}
+
+.team-frags {
+    color: #00d9ff;
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th,
+table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #2a3f5f;
+}
+
+table th {
+    background: #16213e;
+    color: #00d9ff;
+    font-weight: 600;
+}
+
+table tbody tr:hover {
+    background: rgba(0, 217, 255, 0.1);
+}
+
+.chart {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.weapon-bar {
+    display: grid;
+    grid-template-columns: 120px 1fr 60px;
+    align-items: center;
+    gap: 10px;
+}
+
+.weapon-name {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.bar-container {
+    background: #2a3f5f;
+    border-radius: 4px;
+    height: 20px;
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00d9ff, #00b8d9);
+    border-radius: 4px;
+    transition: width 0.3s;
+}
+
+.weapon-count {
+    text-align: right;
+    font-weight: bold;
+    color: #00d9ff;
+}
+
+.frags-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.frag-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #2a3f5f;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.frag-item:hover {
+    background: rgba(0, 217, 255, 0.1);
+}
+
+.frag-item.teamkill {
+    background: rgba(255, 165, 0, 0.1);
+}
+
+.frag-item.suicide {
+    color: #888;
+}
+
+.frag-time {
+    color: #888;
+    margin-right: 10px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2a3f5f;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3a4f6f;
+}
