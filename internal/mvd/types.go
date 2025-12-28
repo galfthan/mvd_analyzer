@@ -276,11 +276,69 @@ type FragEvent struct {
 
 // DamageEvent represents damage dealt (from hidden messages)
 type DamageEvent struct {
-	Attacker int
-	Victim   int
-	Damage   int
-	IsSplash bool
-	Time     float64
+	Attacker  int
+	Victim    int
+	Damage    int
+	DeathType int  // Weapon/death type that caused the damage
+	IsSplash  bool
+	Time      float64
+}
+
+// Death types (from KTX deathtype.h)
+const (
+	DtNone       = 0
+	DtAxe        = 1
+	DtSG         = 2
+	DtSSG        = 3
+	DtNG         = 4
+	DtSNG        = 5
+	DtGL         = 6
+	DtRL         = 7
+	DtLGBeam     = 8
+	DtLGDischarge = 9
+	DtLGDischargeSelf = 10
+	DtHook       = 11
+	DtChangeLevel = 12
+	DtLava       = 13
+	DtSlime      = 14
+	DtWater      = 15
+	DtFall       = 16
+	DtStomp      = 17
+	DtTele1      = 18
+	DtTele2      = 19
+	DtTele3      = 20
+	DtTele4      = 21
+	DtExploBox   = 22
+	DtLaser      = 23
+	DtFireball   = 24
+	DtSquish     = 25
+	DtTriggerHurt = 26
+	DtSuicide    = 27
+	DtUnknown    = 28
+)
+
+// DeathTypeToWeapon converts a death type to weapon name
+func DeathTypeToWeapon(dt int) string {
+	switch dt {
+	case DtAxe:
+		return "axe"
+	case DtSG:
+		return "sg"
+	case DtSSG:
+		return "ssg"
+	case DtNG:
+		return "ng"
+	case DtSNG:
+		return "sng"
+	case DtGL:
+		return "gl"
+	case DtRL:
+		return "rl"
+	case DtLGBeam, DtLGDischarge, DtLGDischargeSelf:
+		return "lg"
+	default:
+		return "unknown"
+	}
 }
 
 // Stats represents player statistics

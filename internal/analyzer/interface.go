@@ -29,12 +29,13 @@ type Analyzer interface {
 
 // Result holds results from all analyzers
 type Result struct {
-	FilePath string           `json:"filePath"`
-	Duration float64          `json:"duration"`
-	Match    *MatchResult     `json:"match,omitempty"`
-	Frags    *FragResult      `json:"frags,omitempty"`
-	Stats    *StatsResult     `json:"stats,omitempty"`
-	Errors   []string         `json:"errors,omitempty"`
+	FilePath    string             `json:"filePath"`
+	Duration    float64            `json:"duration"`
+	Match       *MatchResult       `json:"match,omitempty"`
+	Frags       *FragResult        `json:"frags,omitempty"`
+	Stats       *StatsResult       `json:"stats,omitempty"`
+	WeaponStats *WeaponStatsResult `json:"weaponStats,omitempty"`
+	Errors      []string           `json:"errors,omitempty"`
 }
 
 // MatchResult contains match summary information
@@ -97,4 +98,25 @@ type StatsResult struct {
 type PlayerStatsEntry struct {
 	MaxHealth int `json:"maxHealth"`
 	MaxArmor  int `json:"maxArmor"`
+}
+
+// WeaponStatsResult contains weapon usage statistics
+type WeaponStatsResult struct {
+	PlayerStats map[string]*PlayerWeaponStatsEntry `json:"playerStats"`
+}
+
+// PlayerWeaponStatsEntry holds weapon stats for a player
+type PlayerWeaponStatsEntry struct {
+	Weapons map[string]*WeaponStatEntry `json:"weapons"`
+}
+
+// WeaponStatEntry holds statistics for a single weapon
+type WeaponStatEntry struct {
+	Shots      int     `json:"shots"`
+	Hits       int     `json:"hits"`
+	Damage     int     `json:"damage"`
+	Overkill   int     `json:"overkill,omitempty"`
+	TeamDamage int     `json:"teamDamage,omitempty"`
+	SelfDamage int     `json:"selfDamage,omitempty"`
+	Accuracy   float64 `json:"accuracy"`
 }

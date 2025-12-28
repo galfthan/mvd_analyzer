@@ -145,6 +145,11 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 			stat.Frags = frags
 		}
 
+		// Skip players with 0 frags (likely joined briefly but didn't play)
+		if stat.Frags == 0 {
+			continue
+		}
+
 		result.Players = append(result.Players, stat)
 
 		// Aggregate team frags

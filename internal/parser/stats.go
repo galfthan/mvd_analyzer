@@ -25,6 +25,19 @@ type FragUpdateEvent struct {
 func (e *FragUpdateEvent) EventType() EventType { return EventFragUpdate }
 func (e *FragUpdateEvent) EventTime() float64   { return e.Time }
 
+// DamageEvent is emitted when damage is dealt (from hidden messages)
+type DamageEvent struct {
+	Attacker  int     // Attacker player number (entity - 1)
+	Victim    int     // Victim player number (entity - 1)
+	Damage    int     // Amount of damage dealt
+	DeathType int     // Weapon/death type (DtRL, DtSG, etc.)
+	IsSplash  bool    // True if splash damage
+	Time      float64
+}
+
+func (e *DamageEvent) EventType() EventType { return EventDamage }
+func (e *DamageEvent) EventTime() float64   { return e.Time }
+
 // parseUpdateStat parses svc_updatestat message (byte value)
 func (p *Parser) parseUpdateStat(r *mvd.BufferReader, time float64, playerNum int) error {
 	statIndex, err := r.ReadByte()

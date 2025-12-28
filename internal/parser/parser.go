@@ -23,6 +23,7 @@ const (
 	EventStatUpdate
 	EventFragUpdate
 	EventPlayerInfo
+	EventDamage
 )
 
 // Handler is called for each parsed event
@@ -179,7 +180,109 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 // parseHiddenMessage parses hidden messages (dem_multiple with player_mask=0)
 func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 	// Hidden messages contain structured metadata
-	// For now, we'll skip them - they can be added later for damage tracking
+	r := mvd.NewBufferReader(msg.Payload)
+	time := msg.Time
+
+	for r.Remaining() > 0 {
+		// Read block length (4 bytes)
+		blockLen, err := r.ReadUint32()
+		if err != nil {
+			return nil // End of data
+		}
+		if blockLen < 2 || blockLen > 10000 {
+			return nil // Invalid block (sanity check)
+		}
+
+		// Read type ID (2 bytes)
+		typeID, err := r.ReadUint16()
+		if err != nil {
+			return nil
+		}
+
+		// blockLen is the length of the data AFTER the typeID (not including it)
+		dataLen := int(blockLen)
+
+		// Parse based on type
+		switch typeID {
+		case mvd.MVDHiddenDmgDone:
+			// parseHiddenDamage handles the damage record and skips extra bytes
+			if err := p.parseHiddenDamage(r, time, dataLen); err != nil {
+				return nil // Stop on error
+			}
+		default:
+			// Skip unknown hidden message types
+			if dataLen > 0 {
+				if err := r.Skip(dataLen); err != nil {
+					return nil
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+// parseHiddenDamage parses mvdhidden_dmgdone (0x0007)
+// Format: single 8-byte record: <short: flags|deathtype> <short: attacker> <short: victim> <short: damage>
+// Note: Each block contains exactly one damage record (8 bytes)
+func (p *Parser) parseHiddenDamage(r *mvd.BufferReader, time float64, dataLen int) error {
+	// Read exactly one damage record (8 bytes)
+	if dataLen < 8 {
+		return r.Skip(dataLen)
+	}
+
+	// Read flags and death type
+	flagsAndType, err := r.ReadUint16()
+	if err != nil {
+		return err
+	}
+
+	// Read attacker entity number
+	attackerEnt, err := r.ReadUint16()
+	if err != nil {
+		return err
+	}
+
+	// Read victim entity number
+	victimEnt, err := r.ReadUint16()
+	if err != nil {
+		return err
+	}
+
+	// Read damage amount
+	damage, err := r.ReadInt16()
+	if err != nil {
+		return err
+	}
+
+	// Skip any extra bytes in this block
+	if dataLen > 8 {
+		r.Skip(dataLen - 8)
+	}
+
+	// Extract splash damage flag (bit 15)
+	const splashDamageFlag = 1 << 15
+	isSplash := (flagsAndType & splashDamageFlag) != 0
+	deathType := int(flagsAndType &^ splashDamageFlag)
+
+	// Convert entity numbers to player numbers (entities are 1-indexed, players are 0-indexed)
+	attackerPlayer := int(attackerEnt) - 1
+	victimPlayer := int(victimEnt) - 1
+
+	// Only emit if valid player numbers
+	if attackerPlayer >= 0 && attackerPlayer < mvd.MaxClients &&
+		victimPlayer >= 0 && victimPlayer < mvd.MaxClients &&
+		damage > 0 {
+		return p.emit(&DamageEvent{
+			Attacker:  attackerPlayer,
+			Victim:    victimPlayer,
+			Damage:    int(damage),
+			DeathType: deathType,
+			IsSplash:  isSplash,
+			Time:      time,
+		})
+	}
+
 	return nil
 }
 

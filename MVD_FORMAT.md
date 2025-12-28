@@ -679,13 +679,17 @@ When `MVD_PEXT1_HIDDEN_MESSAGES` (0x20) is enabled, `dem_multiple` messages with
 
 ### Hidden Message Format
 
+Hidden messages consist of sequential blocks within the payload:
+
 ```
 Offset  Size  Field
 ------  ----  -----
-0       4     block_length (little-endian long, includes type_id)
+0       4     block_length (little-endian long, data length AFTER type_id)
 4       2     type_id (little-endian short)
-6       N     block_data (block_length - 2 bytes)
+6       N     block_data (block_length bytes)
 ```
+
+**Important**: The `block_length` field specifies the length of the data that follows the `type_id`, NOT including the type_id itself. This is a common source of parsing errors.
 
 If `type_id == 0xFFFF`, read another short for extended type range.
 
@@ -755,16 +759,319 @@ Offset  Size  Field
 
 ### mvdhidden_dmgdone (0x0007)
 
-Tracks damage dealt between players. Useful for detailed statistics.
+Tracks damage dealt between players. **Critical for weapon statistics**.
+
+Each hidden message block can contain one damage record. The format is:
 
 ```
+Hidden Message Block:
 Offset  Size  Field
 ------  ----  -----
-0       1     type_flags (bit 7 = splash damage)
-1       2     attacker_entity (short)
-3       2     victim_entity (short)
-5       2     damage_amount (short)
+0       4     block_length (8 for dmgdone - length of data AFTER type_id)
+4       2     type_id (0x0007)
+
+Damage Record (8 bytes):
+Offset  Size  Field
+------  ----  -----
+0       2     flags_and_deathtype (short)
+              - Bits 0-14: death type (weapon identifier)
+              - Bit 15: splash damage flag (0x8000)
+2       2     attacker_entity (short, 1-indexed entity number)
+4       2     victim_entity (short, 1-indexed entity number)
+6       2     damage_amount (signed short)
 ```
+
+**Important Notes**:
+- Entity numbers are 1-indexed (entity 0 is world). Convert to player number: `player_num = entity - 1`
+- The `damage_amount` is **raw/unbound damage** including overkill (see [Damage Tracking](#damage-tracking-details))
+- Splash damage flag indicates indirect damage (e.g., rocket splash, not direct hit)
+
+**Example parsing**:
+```go
+flagsAndType := r.ReadUint16()  // e.g., 0x8007 = splash + RL
+attackerEnt := r.ReadUint16()   // e.g., 3 = player slot 2
+victimEnt := r.ReadUint16()     // e.g., 8 = player slot 7
+damage := r.ReadInt16()         // e.g., 89
+
+isSplash := (flagsAndType & 0x8000) != 0
+deathType := flagsAndType & 0x7FFF  // 7 = DT_RL
+attackerPlayer := int(attackerEnt) - 1
+victimPlayer := int(victimEnt) - 1
+```
+
+---
+
+## Death Types
+
+The `deathtype` field in damage events and obituaries identifies the weapon or cause of death. These values come from KTX mod's `deathtype.h`.
+
+### Death Type Constants
+
+| Value | Name | Weapon/Cause | Obituary Keyword |
+|-------|------|--------------|------------------|
+| 0 | `DT_NONE` | Unknown | - |
+| 1 | `DT_AXE` | Axe | "axed", "ax-murdered" |
+| 2 | `DT_SG` | Shotgun | "shot" |
+| 3 | `DT_SSG` | Super Shotgun | "buckshot", "lead poisoned" |
+| 4 | `DT_NG` | Nailgun | "nailed", "perforated" |
+| 5 | `DT_SNG` | Super Nailgun | "straw-cuttered" |
+| 6 | `DT_GL` | Grenade Launcher | "grenade", "eats pineapple" |
+| 7 | `DT_RL` | Rocket Launcher | "rocket", "gibbed" |
+| 8 | `DT_LG_BEAM` | Lightning Gun (beam) | "shaft", "accepts shaft" |
+| 9 | `DT_LG_DIS` | Lightning Gun (discharge) | "discharge" |
+| 10 | `DT_DROWN` | Drowning | "sleeps with the fishes" |
+| 11 | `DT_LAVA` | Lava | "burst into flames" |
+| 12 | `DT_SLIME` | Slime | "sucks it down" |
+| 13 | `DT_DISCHARGE` | Discharge (self) | "discharges" |
+| 14 | `DT_FALL` | Fall damage | "cratered" |
+| 15 | `DT_SQUISH` | Crushed | "squished" |
+| 16 | `DT_SUICIDE` | Suicide (/kill) | "suicides" |
+| 17 | `DT_TELEFRAG` | Telefrag | "telefragged" |
+| 18 | `DT_STOMP` | Stomp (player landing) | - |
+| 19 | `DT_BLEEDING` | Bleeding out | "bleeds to death" |
+| 20 | `DT_TRAP` | Trap | - |
+| 21 | `DT_TEAM` | Team damage | "teammate" |
+| 22 | `DT_WORLD` | World/environment | - |
+| 23 | `DT_UNKNOWN` | Unknown | - |
+| 24 | `DT_WORLDSPAWN` | Worldspawn | - |
+| 25 | `DT_TRIGGER_HURT` | Trigger hurt | - |
+| 26 | `DT_COIL` | Coil gun (mod) | - |
+| 27 | `DT_SG_COIL` | Shotgun coil (mod) | - |
+| 28 | `DT_GRAVITY` | Gravity damage | - |
+
+### Mapping Death Types to Weapon Names
+
+```go
+func DeathTypeToWeapon(dt int) string {
+    switch dt {
+    case 1:  return "axe"
+    case 2:  return "sg"
+    case 3:  return "ssg"
+    case 4:  return "ng"
+    case 5:  return "sng"
+    case 6:  return "gl"
+    case 7:  return "rl"
+    case 8:  return "lg"      // beam
+    case 9:  return "lg"      // discharge
+    case 17: return "tele"
+    default: return "unknown"
+    }
+}
+```
+
+---
+
+## Damage Tracking Details
+
+### MVD vs KTX Damage Values
+
+MVD files contain **raw/unbound damage** values, which includes overkill damage. KTX mod's stats track **effective damage** capped at the victim's health.
+
+| Type | Description | Example |
+|------|-------------|---------|
+| **Raw Damage** (MVD) | Actual damage dealt regardless of victim health | Rocket deals 120 damage |
+| **Effective Damage** (KTX) | Damage capped at victim's current health | Victim has 50 HP → 50 counted |
+| **Overkill** | Difference: raw - effective | 120 - 50 = 70 overkill |
+
+**KTX Source Reference** (`client.c`):
+```c
+// KTX tracks both but reports only effective damage in stats
+cl->ps.dmg_dealt += iDamage;           // Capped at victim health
+cl->ps.unbound_dmg_dealt += iDamage;   // Raw damage (written to MVD)
+```
+
+### Damage Capping Algorithm
+
+To match KTX stats, cap damage at victim's current health:
+
+```go
+func calculateEffectiveDamage(rawDamage, victimHealth int) (effective, overkill int) {
+    if victimHealth <= 0 {
+        return 0, rawDamage
+    }
+    if rawDamage > victimHealth {
+        return victimHealth, rawDamage - victimHealth
+    }
+    return rawDamage, 0
+}
+```
+
+### Health Tracking for Damage Capping
+
+To accurately cap damage, track health from `STAT_HEALTH` updates:
+
+1. Initialize player health from spawn (typically 100)
+2. Update health on `svc_updatestat` with `STAT_HEALTH`
+3. When processing damage events:
+   - Get victim's current health
+   - Cap damage at health value
+   - Subtract effective damage from tracked health
+   - Store overkill separately for analysis
+
+### Overkill as a Playstyle Metric
+
+High overkill percentages can indicate:
+- Aggressive finishing shots (ensuring kills)
+- Quad Damage usage
+- Multiple players focusing same target
+- Wasteful ammunition usage
+
+**Example analysis from real demo**:
+```
+Player     RL Damage   RL Overkill   Overkill%
+splif      1806        658           36%
+rghst      1723        557           32%
+ToT_fix    875         182           21%
+```
+
+---
+
+## Weapon Statistics Tracking
+
+### Shot Detection via Ammo Changes
+
+Shots are detected by monitoring ammo decreases via `svc_updatestat`:
+
+| Weapon | Ammo Stat | Per-Shot Cost | Notes |
+|--------|-----------|---------------|-------|
+| Shotgun | `STAT_SHELLS` | 1 | 6 pellets per shot |
+| Super Shotgun | `STAT_SHELLS` | 2 | 14 pellets per shot |
+| Nailgun | `STAT_NAILS` | 1 | |
+| Super Nailgun | `STAT_NAILS` | 2 | |
+| Grenade Launcher | `STAT_ROCKETS` | 1 | |
+| Rocket Launcher | `STAT_ROCKETS` | 1 | |
+| Lightning Gun | `STAT_CELLS` | 1 | Per tick (~10 ticks/sec) |
+
+### Active Weapon Tracking
+
+The `STAT_ACTIVEWEAPON` stat contains weapon flags indicating the current weapon:
+
+```c
+// Active weapon flags (from IT_* constants)
+#define IT_SHOTGUN          (1 << 0)   // 1
+#define IT_SUPER_SHOTGUN    (1 << 1)   // 2
+#define IT_NAILGUN          (1 << 2)   // 4
+#define IT_SUPER_NAILGUN    (1 << 3)   // 8
+#define IT_GRENADE_LAUNCHER (1 << 4)   // 16
+#define IT_ROCKET_LAUNCHER  (1 << 5)   // 32
+#define IT_LIGHTNING        (1 << 6)   // 64
+```
+
+### Shot Tracking Algorithm
+
+```go
+func handleAmmoChange(player *PlayerStats, statIndex, newValue int) {
+    oldValue := player.ammo[statIndex]
+
+    // Only count decreases (not pickups)
+    if newValue >= oldValue || oldValue <= 0 {
+        player.ammo[statIndex] = newValue
+        return
+    }
+
+    decrease := oldValue - newValue
+    weapon := getWeaponForStat(statIndex, player.activeWeapon)
+    ammoPerShot := getAmmoPerShot(weapon)
+
+    shots := decrease / ammoPerShot
+    if shots > 0 {
+        player.weaponStats[weapon].Shots += shots
+    }
+
+    player.ammo[statIndex] = newValue
+}
+```
+
+### Hit Detection
+
+Hits are counted from damage events (non-splash):
+
+| Weapon | Hit Criteria |
+|--------|--------------|
+| Hitscan (LG, SG, SSG, NG, SNG) | Any damage event, not splash |
+| Projectile (RL, GL) | Direct hit only (splash flag = false) |
+
+**Important**: Shotgun weapons fire multiple pellets, each generating a separate damage event. This means:
+- SSG accuracy can exceed 100% (14 pellets per shot)
+- SG accuracy can exceed 100% (6 pellets per shot)
+
+### Accuracy Calculation
+
+```go
+func calculateAccuracy(shots, hits int) float64 {
+    if shots == 0 {
+        return 0
+    }
+    return float64(hits) / float64(shots) * 100
+}
+```
+
+**Note**: For shotguns, this calculates pellet accuracy, not shot accuracy.
+
+---
+
+## Obituary Message Patterns (KTX)
+
+These patterns are from KTX mod's `client.c`. Used to parse frag messages from `svc_print` at `PRINT_MEDIUM` level.
+
+### Suicide Patterns
+
+| Pattern | Death Type | Cause |
+|---------|-----------|-------|
+| `"X suicides"` | `DT_SUICIDE` | /kill command |
+| `"X tries to leave"` | `DT_SUICIDE` | Disconnect/quit |
+| `"X becomes bored with life"` | `DT_SUICIDE` | Various |
+| `"X blew himself up"` | `DT_RL` | Self-rocket |
+| `"X discovers blast radius"` | `DT_RL` | Self-rocket |
+| `"X cratered"` | `DT_FALL` | Fall damage |
+| `"X fell to his death"` | `DT_FALL` | Fall damage |
+| `"X sleeps with the fishes"` | `DT_DROWN` | Drowning |
+| `"X sucks it down"` | `DT_SLIME` | Slime |
+| `"X gulped a load of slime"` | `DT_SLIME` | Slime |
+| `"X burst into flames"` | `DT_LAVA` | Lava |
+| `"X turned into hot slag"` | `DT_LAVA` | Lava |
+| `"X was squished"` | `DT_SQUISH` | Crushed |
+| `"X discharges into the water"` | `DT_DISCHARGE` | LG in water |
+| `"X electrocutes himself"` | `DT_DISCHARGE` | LG in water |
+| `"X ate his own pineapple"` | `DT_GL` | Self-grenade |
+| `"X tried to catch it"` | `DT_GL` | Self-grenade |
+
+### Weapon Kill Patterns (victim ... killer)
+
+| Pattern | Death Type | Weapon |
+|---------|-----------|--------|
+| `"X was ax-murdered by Y"` | `DT_AXE` | Axe |
+| `"X was axed by Y"` | `DT_AXE` | Axe |
+| `"X chewed on Y's boomstick"` | `DT_SG` | Shotgun |
+| `"X ate N loads of Y's buckshot"` | `DT_SSG` | Super Shotgun |
+| `"X was lead poisoned by Y"` | `DT_SSG` | Super Shotgun |
+| `"X was perforated by Y"` | `DT_NG` | Nailgun |
+| `"X was punctured by Y"` | `DT_NG` | Nailgun |
+| `"X was nailed by Y"` | `DT_NG` | Nailgun |
+| `"X was straw-cuttered by Y"` | `DT_SNG` | Super Nailgun |
+| `"X was ventilated by Y"` | `DT_SNG` | Super Nailgun |
+| `"X was railed by Y"` | `DT_RL` | Rocket Launcher |
+| `"X was gibbed by Y's rocket"` | `DT_RL` | Rocket Launcher (gib) |
+| `"X was smeared by Y's quad rocket"` | `DT_RL` | RL + Quad (gib) |
+| `"X eats Y's pineapple"` | `DT_GL` | Grenade Launcher |
+| `"X was gibbed by Y's grenade"` | `DT_GL` | GL (gib) |
+| `"X accepts Y's shaft"` | `DT_LG_BEAM` | Lightning Gun |
+| `"X gets a natural disaster from Y"` | `DT_LG_BEAM` | Lightning Gun |
+| `"X was telefragged by Y"` | `DT_TELEFRAG` | Telefrag |
+
+### Team Kill Patterns
+
+| Pattern | Description |
+|---------|-------------|
+| `"X mows down a teammate"` | Killed teammate |
+| `"X gets a frag for the other team"` | Team damage |
+| `"X almost got away with murder"` | Close teamkill |
+
+### Quad Damage Modifiers
+
+When Quad Damage is active, obituaries change:
+- `"X was railed by Y"` → `"X was smeared by Y's quad rocket"`
+- Higher chance of gib messages (rocket does 400+ damage)
 
 ---
 
@@ -985,6 +1292,33 @@ def parse_network_message(data):
 | Garbled player names | Handle high-bit character encoding |
 | Missing frags | Check PRINT_MEDIUM (level 1) for obituaries, not PRINT_HIGH |
 | Zero duration | Ensure time_delta accumulation is correct (milliseconds) |
+| Player name mismatches | Normalize spaces and color codes (see below) |
+| Damage values too high | Cap damage at victim's health (MVD has unbound damage) |
+
+### Player Name Normalization
+
+Player names in MVD demos may require normalization:
+
+1. **Color codes**: Characters 128-255 are "gold" versions. Strip high bit: `char & 0x7F`
+2. **Multiple spaces**: Some names contain multiple consecutive spaces (e.g., `"rusti  FU"`). Normalize to single space if comparing names across sources.
+3. **Trailing/leading spaces**: Trim whitespace when comparing.
+4. **Case sensitivity**: QuakeWorld names are case-sensitive.
+
+```go
+func normalizeName(name string) string {
+    // Strip color codes (high-bit characters)
+    var result strings.Builder
+    for _, c := range name {
+        if c >= 128 {
+            result.WriteRune(c - 128)
+        } else {
+            result.WriteRune(c)
+        }
+    }
+    // Collapse multiple spaces
+    return strings.Join(strings.Fields(result.String()), " ")
+}
+```
 
 ### Performance Considerations
 
@@ -1081,7 +1415,9 @@ func parsePlayerInfoMVD(r *BufferReader, floatCoords bool) *PlayerState {
 
 ## Source Code References
 
-For implementation details, refer to these files in the ezQuake source:
+### ezQuake Source Files
+
+For client/demo playback implementation details:
 
 | File | Description |
 |------|-------------|
@@ -1094,15 +1430,64 @@ For implementation details, refer to these files in the ezQuake source:
 | `src/client.h` | Client data structures |
 | `src/fragstats.c` | Frag detection patterns |
 
+### KTX Source Files
+
+For server-side implementation and stats tracking:
+
+| File | Description |
+|------|-------------|
+| `src/client.c` | Obituary patterns, damage tracking, player stats |
+| `src/deathtype.h` | Death type constants (DT_*) |
+| `src/world.c` | Damage application logic |
+| `src/weapons.c` | Weapon damage values and mechanics |
+| `src/bot/bot_misc.c` | Additional weapon definitions |
+
+### Key KTX Code Locations
+
+**Obituary generation** (`client.c`):
+- Function: `ClientObituary()` - generates death messages
+- Pattern matching reveals all obituary text strings
+
+**Damage tracking** (`client.c`):
+- Variable: `cl->ps.dmg_dealt` - effective damage (health-capped)
+- Variable: `cl->ps.unbound_dmg_dealt` - raw damage (written to MVD)
+
+**Hidden message writing** (`client.c`):
+- Function: `MVD_Write_Dmgdone()` - writes dmgdone blocks to MVD
+
 ---
 
 ## Version History
 
 | Version | Changes |
 |---------|---------|
-| Original | Basic MVD format (MVDSV) |
-| FTE Extensions | Model/entity doubling, float coords |
-| MVD_PEXT1 | Hidden messages, antilag data, damage tracking |
+| Original (MVDSV) | Basic MVD format - dem_* message types, svc_* commands |
+| FTE Extensions | Model index > 255, entity count > 512, float coordinates |
+| MVD_PEXT1 (KTX) | Hidden messages (damage tracking, antilag, demoinfo, commentary) |
+
+### MVD_PEXT1 Hidden Message History
+
+The hidden message system (`MVD_PEXT1_HIDDEN_MESSAGES`, bit 5 = 0x20) was added by the KTX mod to embed metadata not visible to players during playback:
+
+- **0x0000 - antilag_position**: Antilag position data for hit detection replay
+- **0x0001 - usercmd**: Player input commands
+- **0x0003 - demoinfo**: Embedded JSON metadata (match info, player stats)
+- **0x0007 - dmgdone**: Damage events with attacker, victim, weapon, and amount
+
+### Damage Tracking Evolution
+
+Early MVD analysis relied on parsing obituary messages (`svc_print` at `PRINT_MEDIUM`). This provided:
+- Kill/death counts
+- Weapon used (from obituary text patterns)
+- Team kills and suicides
+
+The `mvdhidden_dmgdone` (0x0007) message added by KTX provides:
+- Precise damage amounts per hit
+- Splash vs direct hit distinction
+- Continuous damage tracking (not just kills)
+- Foundation for accuracy calculation
+
+**Important caveat**: MVD damage values are **unbound** (raw damage before health capping). To match KTX match report stats, damage must be capped at victim's current health.
 
 ---
 
