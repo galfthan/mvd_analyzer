@@ -39,6 +39,18 @@ func (a *DemoInfoAnalyzer) Finalize() (interface{}, error) {
 		return nil, nil
 	}
 
+	result := a.parseBlocks()
+
+	// Store in context for other analyzers (e.g., WeaponStatsAnalyzer)
+	if result != nil {
+		a.ctx.DemoInfo = result
+	}
+
+	return result, nil
+}
+
+func (a *DemoInfoAnalyzer) parseBlocks() *DemoInfoResult {
+
 	// Concatenate blocks in correct order
 	// Block numbering: 1, 2, 3, ..., 0 (where 0 is the LAST block)
 	var blockNums []int
@@ -63,7 +75,7 @@ func (a *DemoInfoAnalyzer) Finalize() (interface{}, error) {
 		// Return raw JSON as string for debugging if parsing fails
 		return &DemoInfoResult{
 			RawJSON: string(fullJSON),
-		}, nil
+		}
 	}
 
 	// Convert to our result structure
@@ -120,7 +132,7 @@ func (a *DemoInfoAnalyzer) Finalize() (interface{}, error) {
 		result.Players = append(result.Players, player)
 	}
 
-	return result, nil
+	return result
 }
 
 // Raw JSON structures for parsing KTX demoinfo

@@ -35,7 +35,9 @@ func (r *Registry) Analyze(filePath string) (*Result, error) {
 	p := parser.NewParser(decoder)
 
 	// Create context
-	ctx := &Context{}
+	ctx := &Context{
+		FragsBySlot: make(map[int]int),
+	}
 
 	// Initialize all analyzers
 	for _, a := range r.analyzers {
@@ -53,6 +55,10 @@ func (r *Registry) Analyze(filePath string) (*Result, error) {
 		// Update context on user info
 		if e, ok := event.(*parser.UserInfoEvent); ok {
 			ctx.Players[e.Player.Slot] = e.Player
+		}
+		// Track frags by slot for player name resolution
+		if e, ok := event.(*parser.FragUpdateEvent); ok {
+			ctx.FragsBySlot[e.PlayerNum] = e.Frags
 		}
 
 		// Dispatch to all analyzers
@@ -117,10 +123,11 @@ func (r *Registry) Analyze(filePath string) (*Result, error) {
 // NewDefaultRegistry creates a registry with all default analyzers
 func NewDefaultRegistry() *Registry {
 	r := NewRegistry()
+	// DemoInfo first so it's available in Context for other analyzers
+	r.Register(NewDemoInfoAnalyzer())
 	r.Register(NewMatchAnalyzer())
 	r.Register(NewFragAnalyzer())
 	r.Register(NewStatsAnalyzer())
 	r.Register(NewWeaponStatsAnalyzer())
-	r.Register(NewDemoInfoAnalyzer())
 	return r
 }

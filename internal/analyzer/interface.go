@@ -8,8 +8,10 @@ import (
 
 // Context provides shared state for analyzers
 type Context struct {
-	ServerData *mvd.ServerData
-	Players    [mvd.MaxClients]*mvd.PlayerInfo
+	ServerData  *mvd.ServerData
+	Players     [mvd.MaxClients]*mvd.PlayerInfo
+	FragsBySlot map[int]int      // Final frag count per slot
+	DemoInfo    *DemoInfoResult  // Parsed demoinfo (set during finalization)
 }
 
 // Analyzer is the interface for analysis modules

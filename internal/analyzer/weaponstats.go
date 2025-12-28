@@ -425,47 +425,98 @@ func (a *WeaponStatsAnalyzer) getRocketWeapon(activeWeapon int) string {
 }
 
 func (a *WeaponStatsAnalyzer) Finalize() (interface{}, error) {
+	// Build demoinfo lookup by frag count for resolving missing player names
+	demoInfoByFrags := a.buildDemoInfoLookup()
+
 	result := &WeaponStatsResult{
 		PlayerStats: make(map[string]*PlayerWeaponStatsEntry),
 	}
 
 	for playerNum, stats := range a.playerStats {
-		if a.ctx.Players[playerNum] != nil {
-			name := a.ctx.Players[playerNum].Name
-			if name != "" && (len(stats.weapons) > 0 || stats.hasEnvironmentalDamage()) {
-				entry := &PlayerWeaponStatsEntry{
-					Weapons: make(map[string]*WeaponStatEntry),
-				}
-				for weapon, wd := range stats.weapons {
-					entry.Weapons[weapon] = &WeaponStatEntry{
-						Shots:      wd.Shots,
-						Hits:       wd.Hits,
-						Damage:     wd.Damage,
-						Overkill:   wd.Overkill,
-						TeamDamage: wd.TeamDamage,
-						SelfDamage: wd.SelfDamage,
-						Accuracy:   calculateAccuracy(wd.Shots, wd.Hits),
-					}
-				}
+		name := a.getPlayerName(playerNum, demoInfoByFrags)
+		if name == "" || name == "[ServeMe]" {
+			// Skip spectators and unknown players
+			continue
+		}
 
-				// Add environmental damage if any
-				if stats.hasEnvironmentalDamage() {
-					entry.Environment = &EnvironmentalDamage{
-						Lava:    stats.lavaDamage,
-						Slime:   stats.slimeDamage,
-						Drown:   stats.drownDamage,
-						Fall:    stats.fallDamage,
-						Squish:  stats.squishDamage,
-						Trigger: stats.triggerDamage,
-					}
-				}
-
-				result.PlayerStats[name] = entry
+		if len(stats.weapons) > 0 || stats.hasEnvironmentalDamage() {
+			entry := &PlayerWeaponStatsEntry{
+				Weapons: make(map[string]*WeaponStatEntry),
 			}
+			for weapon, wd := range stats.weapons {
+				entry.Weapons[weapon] = &WeaponStatEntry{
+					Shots:      wd.Shots,
+					Hits:       wd.Hits,
+					Damage:     wd.Damage,
+					Overkill:   wd.Overkill,
+					TeamDamage: wd.TeamDamage,
+					SelfDamage: wd.SelfDamage,
+					Accuracy:   calculateAccuracy(wd.Shots, wd.Hits),
+				}
+			}
+
+			// Add environmental damage if any
+			if stats.hasEnvironmentalDamage() {
+				entry.Environment = &EnvironmentalDamage{
+					Lava:    stats.lavaDamage,
+					Slime:   stats.slimeDamage,
+					Drown:   stats.drownDamage,
+					Fall:    stats.fallDamage,
+					Squish:  stats.squishDamage,
+					Trigger: stats.triggerDamage,
+				}
+			}
+
+			result.PlayerStats[name] = entry
 		}
 	}
 
 	return result, nil
+}
+
+// buildDemoInfoLookup creates a map from frag count to demoinfo player
+func (a *WeaponStatsAnalyzer) buildDemoInfoLookup() map[int]DemoInfoPlayer {
+	result := make(map[int]DemoInfoPlayer)
+	if a.ctx.DemoInfo == nil {
+		return result
+	}
+
+	// Count how many players have each frag count
+	fragCounts := make(map[int]int)
+	for _, p := range a.ctx.DemoInfo.Players {
+		if p.Stats != nil {
+			fragCounts[p.Stats.Frags]++
+		}
+	}
+
+	// Only include players with unique frag counts
+	for _, p := range a.ctx.DemoInfo.Players {
+		if p.Stats != nil && fragCounts[p.Stats.Frags] == 1 {
+			result[p.Stats.Frags] = p
+		}
+	}
+
+	return result
+}
+
+// getPlayerName returns the player name for a slot, using demoinfo if UserInfo is missing
+func (a *WeaponStatsAnalyzer) getPlayerName(playerNum int, demoInfoByFrags map[int]DemoInfoPlayer) string {
+	// First try UserInfo
+	if a.ctx.Players[playerNum] != nil && a.ctx.Players[playerNum].Name != "" {
+		return a.ctx.Players[playerNum].Name
+	}
+
+	// Try matching by frag count
+	if a.ctx.FragsBySlot != nil && a.ctx.DemoInfo != nil {
+		frags, ok := a.ctx.FragsBySlot[playerNum]
+		if ok {
+			if di, found := demoInfoByFrags[frags]; found {
+				return di.Name
+			}
+		}
+	}
+
+	return ""
 }
 
 // hasEnvironmentalDamage returns true if the player has any environmental damage
