@@ -340,6 +340,242 @@ table tbody tr:hover {
     color: #45b7d1;
 }
 
+/* Timeline Analysis Tab */
+.timeline-overview-panel {
+    margin-bottom: 20px;
+}
+
+.timeline-overview-container {
+    position: relative;
+    height: 120px;
+    background: #16213e;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.timeline-overview-graph {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    height: 80px;
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+}
+
+.timeline-brush {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    height: 80px;
+    pointer-events: none;
+}
+
+.brush-selection {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: rgba(0, 217, 255, 0.15);
+    border-left: 2px solid #00d9ff;
+    border-right: 2px solid #00d9ff;
+    pointer-events: all;
+    cursor: grab;
+}
+
+.brush-selection:active {
+    cursor: grabbing;
+}
+
+.brush-handle {
+    position: absolute;
+    top: 0;
+    width: 10px;
+    height: 100%;
+    background: #00d9ff;
+    cursor: ew-resize;
+    pointer-events: all;
+    border-radius: 2px;
+    opacity: 0.8;
+}
+
+.brush-handle:hover {
+    opacity: 1;
+}
+
+.brush-handle-left {
+    left: 0;
+    transform: translateX(-50%);
+}
+
+.brush-handle-right {
+    right: 0;
+    transform: translateX(50%);
+}
+
+.timeline-axis {
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    right: 10px;
+    height: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #888;
+    font-size: 0.75rem;
+    font-family: monospace;
+}
+
+.timeline-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.legend-color.team-a-weapons { background: rgba(255, 107, 107, 0.8); }
+.legend-color.team-b-weapons { background: rgba(78, 205, 196, 0.8); }
+.legend-color.team-a-powerup { background: rgba(255, 193, 7, 0.9); }
+.legend-color.team-b-powerup { background: rgba(156, 39, 176, 0.9); }
+
+/* Stacked bar segments */
+.stacked-bar {
+    flex: 1;
+    display: flex;
+    flex-direction: column-reverse;
+    height: 100%;
+    min-width: 2px;
+}
+
+.bar-segment {
+    transition: height 0.1s;
+}
+
+.bar-segment.team-a-weapons { background: rgba(255, 107, 107, 0.8); }
+.bar-segment.team-b-weapons { background: rgba(78, 205, 196, 0.8); }
+.bar-segment.team-a-powerup { background: rgba(255, 193, 7, 0.9); }
+.bar-segment.team-b-powerup { background: rgba(156, 39, 176, 0.9); }
+
+/* Detail Row Layout */
+.timeline-detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+    .timeline-detail-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Messages Panel */
+.timeline-messages-panel {
+    min-height: 250px;
+}
+
+.timeline-messages-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.timeline-message-item {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 10px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #2a3f5f;
+}
+
+.timeline-message-item:hover {
+    background: rgba(0, 217, 255, 0.05);
+}
+
+.timeline-message-time {
+    color: #888;
+    font-family: monospace;
+    font-size: 0.8rem;
+}
+
+.timeline-message-content {
+    font-size: 0.85rem;
+    word-break: break-word;
+}
+
+.timeline-message-content.frag { color: #ff6b6b; }
+.timeline-message-content.powerup { color: #ffc107; }
+.timeline-message-content.chat { color: #4ecdc4; }
+.timeline-message-content.teamsay { color: #45b7d1; }
+
+/* Detail Graph Panel */
+.timeline-detail-graph-panel {
+    min-height: 250px;
+}
+
+.detail-graph-container {
+    height: 200px;
+    background: #16213e;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+}
+
+/* Health/Armor Graphs */
+.timeline-health-panel {
+    min-height: 200px;
+}
+
+.health-armor-graph {
+    height: 150px;
+    background: #16213e;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+}
+
+.health-bar {
+    flex: 1;
+    display: flex;
+    flex-direction: column-reverse;
+    min-width: 2px;
+}
+
+.health-segment {
+    background: rgba(0, 200, 83, 0.7);
+}
+
+.armor-segment {
+    background: rgba(255, 193, 7, 0.7);
+}
+
+#time-range-label {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: normal;
+}
+
 /* Accuracy Table */
 #accuracy-table td.accuracy-high {
     color: #00c853;

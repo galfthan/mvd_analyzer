@@ -31,15 +31,16 @@ type Analyzer interface {
 
 // Result holds results from all analyzers
 type Result struct {
-	FilePath    string             `json:"filePath"`
-	Duration    float64            `json:"duration"`
-	Match       *MatchResult       `json:"match,omitempty"`
-	Frags       *FragResult        `json:"frags,omitempty"`
-	Messages    *MessagesResult    `json:"messages,omitempty"`
-	Stats       *StatsResult       `json:"stats,omitempty"`
-	WeaponStats *WeaponStatsResult `json:"weaponStats,omitempty"`
-	DemoInfo    *DemoInfoResult    `json:"demoInfo,omitempty"`
-	Errors      []string           `json:"errors,omitempty"`
+	FilePath         string                   `json:"filePath"`
+	Duration         float64                  `json:"duration"`
+	Match            *MatchResult             `json:"match,omitempty"`
+	Frags            *FragResult              `json:"frags,omitempty"`
+	Messages         *MessagesResult          `json:"messages,omitempty"`
+	Stats            *StatsResult             `json:"stats,omitempty"`
+	WeaponStats      *WeaponStatsResult       `json:"weaponStats,omitempty"`
+	DemoInfo         *DemoInfoResult          `json:"demoInfo,omitempty"`
+	TimelineAnalysis *TimelineAnalysisResult  `json:"timelineAnalysis,omitempty"`
+	Errors           []string                 `json:"errors,omitempty"`
 }
 
 // MatchResult contains match summary information
@@ -284,4 +285,30 @@ type DemoInfoDamage struct {
 type DemoInfoItem struct {
 	Took int `json:"took,omitempty"`
 	Time int `json:"time,omitempty"`
+}
+
+// TimelineAnalysisResult contains time-bucketed data for timeline visualization
+type TimelineAnalysisResult struct {
+	BucketDuration float64          `json:"bucketDuration"` // Seconds per bucket
+	Buckets        []TimelineBucket `json:"buckets"`
+}
+
+// TimelineBucket represents aggregated data for a time slice
+type TimelineBucket struct {
+	StartTime float64                    `json:"startTime"`
+	EndTime   float64                    `json:"endTime"`
+	TeamData  map[string]*TeamBucketData `json:"teamData"` // Keyed by team name
+}
+
+// TeamBucketData holds per-team aggregated stats for a time bucket
+type TeamBucketData struct {
+	PlayersWithWeapons  int            `json:"playersWithWeapons"`  // Count with RL or LG
+	PlayersWithPowerups int            `json:"playersWithPowerups"` // Count with Quad/Pent/Ring
+	AvgHealth           float64        `json:"avgHealth"`
+	AvgArmor            float64        `json:"avgArmor"`
+	ArmorByType         map[string]int `json:"armorByType,omitempty"`  // "ga"/"ya"/"ra" -> count
+	TotalShells         int            `json:"totalShells,omitempty"`
+	TotalNails          int            `json:"totalNails,omitempty"`
+	TotalRockets        int            `json:"totalRockets,omitempty"`
+	TotalCells          int            `json:"totalCells,omitempty"`
 }

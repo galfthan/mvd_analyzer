@@ -118,6 +118,10 @@ func (r *Registry) Analyze(filePath string) (*Result, error) {
 			if m, ok := output.(*MessagesResult); ok {
 				result.Messages = m
 			}
+		case "timelineAnalysis":
+			if ta, ok := output.(*TimelineAnalysisResult); ok {
+				result.TimelineAnalysis = ta
+			}
 		}
 	}
 
@@ -134,5 +138,6 @@ func NewDefaultRegistry() *Registry {
 	r.Register(NewMessagesAnalyzer())
 	r.Register(NewStatsAnalyzer())
 	r.Register(NewWeaponStatsAnalyzer())
+	r.Register(NewTimelineAnalyzer())
 	return r
 }

@@ -117,10 +117,9 @@ function displayResults(result) {
         displayWeaponsChart(result.frags.byWeapon);
     }
 
-    // Messages timeline
-    if (result.messages && result.messages.events) {
-        const teams = demoInfo?.teams || (result.match?.teams?.map(t => t.name)) || [];
-        displayTimeline(result.messages.events, teams);
+    // Timeline Analysis (new graphical view)
+    if (result.timelineAnalysis || result.messages?.events) {
+        displayTimelineAnalysis(result);
     }
 
     // Accuracy tab
@@ -559,4 +558,400 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Timeline Analysis State
+let timelineState = {
+    buckets: [],
+    duration: 0,
+    teams: [],
+    selection: { start: 0, end: 60 },
+    brushing: false,
+    brushMode: null,
+    dragStartX: 0,
+    dragStartSelection: null
+};
+
+function displayTimelineAnalysis(result) {
+    const timeline = result.timelineAnalysis;
+    const events = result.messages?.events || [];
+    const demoInfo = result.demoInfo;
+
+    // Get teams
+    let teams = [];
+    if (demoInfo?.teams) {
+        teams = demoInfo.teams;
+    } else if (result.match?.teams) {
+        teams = result.match.teams.map(t => t.name);
+    }
+
+    timelineState.buckets = timeline?.buckets || [];
+    timelineState.duration = result.duration || 600;
+    timelineState.teams = teams;
+    timelineState.selection = { start: 0, end: Math.min(60, timelineState.duration) };
+
+    // Update legend team names
+    if (teams.length >= 2) {
+        document.getElementById('legend-team-a').textContent = teams[0];
+        document.getElementById('legend-team-a2').textContent = teams[0];
+        document.getElementById('legend-team-b').textContent = teams[1];
+        document.getElementById('legend-team-b2').textContent = teams[1];
+        document.getElementById('team-a-health-title').textContent = `${teams[0]} Health/Armor`;
+        document.getElementById('team-b-health-title').textContent = `${teams[1]} Health/Armor`;
+    }
+
+    renderOverviewGraph();
+    renderOverviewAxis();
+    setupBrush();
+    updateDetailView();
+}
+
+function renderOverviewGraph() {
+    const container = document.getElementById('overview-graph');
+    container.innerHTML = '';
+
+    const buckets = timelineState.buckets;
+    const teams = timelineState.teams;
+
+    if (!buckets || buckets.length === 0 || teams.length < 2) return;
+
+    // Find max value for scaling
+    let maxValue = 1;
+    for (const bucket of buckets) {
+        const td = bucket.teamData || {};
+        const teamA = td[teams[0]] || {};
+        const teamB = td[teams[1]] || {};
+        const total = (teamA.playersWithWeapons || 0) + (teamB.playersWithWeapons || 0) +
+                      (teamA.playersWithPowerups || 0) + (teamB.playersWithPowerups || 0);
+        if (total > maxValue) maxValue = total;
+    }
+
+    // Create bars
+    for (const bucket of buckets) {
+        const bar = document.createElement('div');
+        bar.className = 'stacked-bar';
+
+        const td = bucket.teamData || {};
+        const teamA = td[teams[0]] || {};
+        const teamB = td[teams[1]] || {};
+
+        // Stack order (bottom to top): Team A weapons, Team B weapons, Team A powerups, Team B powerups
+        const layers = [
+            { value: teamA.playersWithWeapons || 0, className: 'team-a-weapons' },
+            { value: teamB.playersWithWeapons || 0, className: 'team-b-weapons' },
+            { value: teamA.playersWithPowerups || 0, className: 'team-a-powerup' },
+            { value: teamB.playersWithPowerups || 0, className: 'team-b-powerup' }
+        ];
+
+        for (const layer of layers) {
+            if (layer.value > 0) {
+                const segment = document.createElement('div');
+                segment.className = `bar-segment ${layer.className}`;
+                segment.style.height = `${(layer.value / maxValue) * 100}%`;
+                bar.appendChild(segment);
+            }
+        }
+
+        container.appendChild(bar);
+    }
+}
+
+function renderOverviewAxis() {
+    const container = document.getElementById('overview-axis');
+    container.innerHTML = '';
+
+    const duration = timelineState.duration;
+    const tickCount = 5;
+
+    for (let i = 0; i <= tickCount; i++) {
+        const time = (duration / tickCount) * i;
+        const span = document.createElement('span');
+        span.textContent = formatTime(time);
+        container.appendChild(span);
+    }
+}
+
+function setupBrush() {
+    const container = document.getElementById('timeline-overview-container');
+    const selection = document.getElementById('brush-selection');
+    const leftHandle = document.getElementById('brush-handle-left');
+    const rightHandle = document.getElementById('brush-handle-right');
+
+    updateBrushPosition();
+
+    // Mouse event handlers
+    function startDrag(e, mode) {
+        e.preventDefault();
+        timelineState.brushing = true;
+        timelineState.brushMode = mode;
+        timelineState.dragStartX = e.clientX;
+        timelineState.dragStartSelection = { ...timelineState.selection };
+
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', endDrag);
+    }
+
+    function onDrag(e) {
+        if (!timelineState.brushing) return;
+
+        const containerRect = container.getBoundingClientRect();
+        const containerWidth = containerRect.width - 20; // Account for padding
+        const currentX = e.clientX - containerRect.left - 10;
+        const currentTime = (currentX / containerWidth) * timelineState.duration;
+
+        const minWindow = 10; // Minimum 10 second window
+
+        switch (timelineState.brushMode) {
+            case 'move':
+                const deltaX = e.clientX - timelineState.dragStartX;
+                const deltaTime = (deltaX / containerWidth) * timelineState.duration;
+                let newStart = timelineState.dragStartSelection.start + deltaTime;
+                let newEnd = timelineState.dragStartSelection.end + deltaTime;
+
+                // Clamp to bounds
+                if (newStart < 0) {
+                    newEnd -= newStart;
+                    newStart = 0;
+                }
+                if (newEnd > timelineState.duration) {
+                    newStart -= (newEnd - timelineState.duration);
+                    newEnd = timelineState.duration;
+                }
+
+                timelineState.selection.start = Math.max(0, newStart);
+                timelineState.selection.end = Math.min(timelineState.duration, newEnd);
+                break;
+
+            case 'resize-left':
+                timelineState.selection.start = Math.max(0,
+                    Math.min(currentTime, timelineState.selection.end - minWindow));
+                break;
+
+            case 'resize-right':
+                timelineState.selection.end = Math.min(timelineState.duration,
+                    Math.max(currentTime, timelineState.selection.start + minWindow));
+                break;
+        }
+
+        updateBrushPosition();
+        updateDetailView();
+    }
+
+    function endDrag() {
+        timelineState.brushing = false;
+        timelineState.brushMode = null;
+        document.removeEventListener('mousemove', onDrag);
+        document.removeEventListener('mouseup', endDrag);
+    }
+
+    // Attach event listeners
+    selection.addEventListener('mousedown', (e) => startDrag(e, 'move'));
+    leftHandle.addEventListener('mousedown', (e) => startDrag(e, 'resize-left'));
+    rightHandle.addEventListener('mousedown', (e) => startDrag(e, 'resize-right'));
+
+    // Click on container to jump selection
+    container.addEventListener('click', (e) => {
+        if (timelineState.brushing) return;
+        if (e.target.closest('.brush-selection, .brush-handle')) return;
+
+        const containerRect = container.getBoundingClientRect();
+        const containerWidth = containerRect.width - 20;
+        const clickX = e.clientX - containerRect.left - 10;
+        const clickTime = (clickX / containerWidth) * timelineState.duration;
+
+        const windowSize = timelineState.selection.end - timelineState.selection.start;
+        const halfWindow = windowSize / 2;
+
+        timelineState.selection.start = Math.max(0, clickTime - halfWindow);
+        timelineState.selection.end = Math.min(timelineState.duration, clickTime + halfWindow);
+
+        // Adjust if we hit boundaries
+        if (timelineState.selection.start === 0) {
+            timelineState.selection.end = Math.min(timelineState.duration, windowSize);
+        }
+        if (timelineState.selection.end === timelineState.duration) {
+            timelineState.selection.start = Math.max(0, timelineState.duration - windowSize);
+        }
+
+        updateBrushPosition();
+        updateDetailView();
+    });
+}
+
+function updateBrushPosition() {
+    const selection = document.getElementById('brush-selection');
+    const leftHandle = document.getElementById('brush-handle-left');
+    const rightHandle = document.getElementById('brush-handle-right');
+
+    const startPct = (timelineState.selection.start / timelineState.duration) * 100;
+    const endPct = (timelineState.selection.end / timelineState.duration) * 100;
+    const widthPct = endPct - startPct;
+
+    selection.style.left = `${startPct}%`;
+    selection.style.width = `${widthPct}%`;
+
+    leftHandle.style.left = `${startPct}%`;
+    rightHandle.style.left = `${endPct}%`;
+}
+
+function updateDetailView() {
+    const { start, end } = timelineState.selection;
+
+    // Update time range label
+    document.getElementById('time-range-label').textContent =
+        `(${formatTime(start)} - ${formatTime(end)})`;
+
+    // Update all detail panels
+    updateDetailMessages(start, end);
+    updateDetailGraph(start, end);
+    updateHealthArmorGraphs(start, end);
+}
+
+function updateDetailMessages(startTime, endTime) {
+    const container = document.getElementById('detail-messages');
+    container.innerHTML = '';
+
+    if (!currentResult?.messages?.events) return;
+
+    // Filter events in time range
+    const events = currentResult.messages.events.filter(e =>
+        e.time >= startTime && e.time <= endTime
+    );
+
+    // Deduplicate (same message within 1 second)
+    const seen = new Map();
+    const deduped = events.filter(e => {
+        const key = `${Math.floor(e.time)}:${e.message}`;
+        if (seen.has(key)) return false;
+        seen.set(key, true);
+        return true;
+    });
+
+    // Render messages (limit to 200)
+    deduped.slice(0, 200).forEach(event => {
+        const item = document.createElement('div');
+        item.className = 'timeline-message-item';
+        item.innerHTML = `
+            <span class="timeline-message-time">${formatTime(event.time)}</span>
+            <span class="timeline-message-content ${event.type}">${escapeHtml(event.message)}</span>
+        `;
+        container.appendChild(item);
+    });
+
+    if (deduped.length === 0) {
+        container.innerHTML = '<div style="color: #888; padding: 20px; text-align: center;">No events in selected time range</div>';
+    }
+}
+
+function updateDetailGraph(startTime, endTime) {
+    const container = document.getElementById('detail-graph');
+    container.innerHTML = '';
+
+    const buckets = timelineState.buckets;
+    const teams = timelineState.teams;
+
+    if (!buckets || buckets.length === 0 || teams.length < 2) return;
+
+    // Filter buckets within range
+    const filteredBuckets = buckets.filter(b =>
+        b.startTime >= startTime && b.endTime <= endTime
+    );
+
+    if (filteredBuckets.length === 0) return;
+
+    // Find max value for scaling
+    let maxValue = 1;
+    for (const bucket of filteredBuckets) {
+        const td = bucket.teamData || {};
+        const teamA = td[teams[0]] || {};
+        const teamB = td[teams[1]] || {};
+        const total = (teamA.playersWithWeapons || 0) + (teamB.playersWithWeapons || 0) +
+                      (teamA.playersWithPowerups || 0) + (teamB.playersWithPowerups || 0);
+        if (total > maxValue) maxValue = total;
+    }
+
+    // Create bars
+    for (const bucket of filteredBuckets) {
+        const bar = document.createElement('div');
+        bar.className = 'stacked-bar';
+
+        const td = bucket.teamData || {};
+        const teamA = td[teams[0]] || {};
+        const teamB = td[teams[1]] || {};
+
+        const layers = [
+            { value: teamA.playersWithWeapons || 0, className: 'team-a-weapons' },
+            { value: teamB.playersWithWeapons || 0, className: 'team-b-weapons' },
+            { value: teamA.playersWithPowerups || 0, className: 'team-a-powerup' },
+            { value: teamB.playersWithPowerups || 0, className: 'team-b-powerup' }
+        ];
+
+        for (const layer of layers) {
+            if (layer.value > 0) {
+                const segment = document.createElement('div');
+                segment.className = `bar-segment ${layer.className}`;
+                segment.style.height = `${(layer.value / maxValue) * 100}%`;
+                bar.appendChild(segment);
+            }
+        }
+
+        container.appendChild(bar);
+    }
+}
+
+function updateHealthArmorGraphs(startTime, endTime) {
+    const teams = timelineState.teams;
+    if (teams.length < 2) return;
+
+    renderHealthArmorGraph('team-a-health-graph', teams[0], startTime, endTime);
+    renderHealthArmorGraph('team-b-health-graph', teams[1], startTime, endTime);
+}
+
+function renderHealthArmorGraph(containerId, teamName, startTime, endTime) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    const buckets = timelineState.buckets;
+
+    // Filter buckets within range
+    const filteredBuckets = buckets.filter(b =>
+        b.startTime >= startTime && b.endTime <= endTime
+    );
+
+    if (filteredBuckets.length === 0) return;
+
+    // Max values for scaling
+    const maxHealth = 250; // Max health with mega
+    const maxArmor = 200;  // Max armor (RA)
+    const maxTotal = maxHealth + maxArmor;
+
+    // Create bars
+    for (const bucket of filteredBuckets) {
+        const teamData = bucket.teamData?.[teamName] || {};
+        const avgHealth = teamData.avgHealth || 0;
+        const avgArmor = teamData.avgArmor || 0;
+
+        const bar = document.createElement('div');
+        bar.className = 'health-bar';
+
+        // Health segment (green)
+        if (avgHealth > 0) {
+            const healthSeg = document.createElement('div');
+            healthSeg.className = 'health-segment';
+            healthSeg.style.height = `${(avgHealth / maxTotal) * 100}%`;
+            healthSeg.title = `Health: ${Math.round(avgHealth)}`;
+            bar.appendChild(healthSeg);
+        }
+
+        // Armor segment (yellow) - stacked on top
+        if (avgArmor > 0) {
+            const armorSeg = document.createElement('div');
+            armorSeg.className = 'armor-segment';
+            armorSeg.style.height = `${(avgArmor / maxTotal) * 100}%`;
+            armorSeg.title = `Armor: ${Math.round(avgArmor)}`;
+            bar.appendChild(armorSeg);
+        }
+
+        container.appendChild(bar);
+    }
 }

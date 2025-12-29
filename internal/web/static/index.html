@@ -145,17 +145,49 @@
                 </div>
             </div>
 
-            <!-- Messages Tab -->
+            <!-- Timeline Analysis Tab -->
             <div id="tab-messages" class="tab-content">
-                <div class="panel">
-                    <h3>Match Timeline</h3>
-                    <div class="timeline-container">
-                        <div class="timeline-header">
-                            <div class="team-header" id="team1-header">Team 1</div>
-                            <div class="timeline-center">Time</div>
-                            <div class="team-header" id="team2-header">Team 2</div>
+                <!-- Overview Panel with Time Selector -->
+                <div class="panel timeline-overview-panel">
+                    <h3>Match Overview</h3>
+                    <div class="timeline-overview-container" id="timeline-overview-container">
+                        <div class="timeline-overview-graph" id="overview-graph"></div>
+                        <div class="timeline-brush" id="timeline-brush">
+                            <div class="brush-handle brush-handle-left" id="brush-handle-left"></div>
+                            <div class="brush-selection" id="brush-selection"></div>
+                            <div class="brush-handle brush-handle-right" id="brush-handle-right"></div>
                         </div>
-                        <div class="timeline-body" id="timeline-body"></div>
+                        <div class="timeline-axis" id="overview-axis"></div>
+                    </div>
+                    <div class="timeline-legend">
+                        <span class="legend-item"><span class="legend-color team-a-weapons"></span><span id="legend-team-a">Team A</span> Weapons</span>
+                        <span class="legend-item"><span class="legend-color team-b-weapons"></span><span id="legend-team-b">Team B</span> Weapons</span>
+                        <span class="legend-item"><span class="legend-color team-a-powerup"></span><span id="legend-team-a2">Team A</span> Powerups</span>
+                        <span class="legend-item"><span class="legend-color team-b-powerup"></span><span id="legend-team-b2">Team B</span> Powerups</span>
+                    </div>
+                </div>
+
+                <!-- Detail View Row 1: Messages + Detail Graph -->
+                <div class="timeline-detail-row">
+                    <div class="panel timeline-messages-panel">
+                        <h3>Events <span id="time-range-label"></span></h3>
+                        <div class="timeline-messages-scroll" id="detail-messages"></div>
+                    </div>
+                    <div class="panel timeline-detail-graph-panel">
+                        <h3>Activity Detail</h3>
+                        <div class="detail-graph-container" id="detail-graph"></div>
+                    </div>
+                </div>
+
+                <!-- Detail View Row 2: Health/Armor per Team -->
+                <div class="timeline-detail-row">
+                    <div class="panel timeline-health-panel">
+                        <h3 id="team-a-health-title">Team A Health/Armor</h3>
+                        <div class="health-armor-graph" id="team-a-health-graph"></div>
+                    </div>
+                    <div class="panel timeline-health-panel">
+                        <h3 id="team-b-health-title">Team B Health/Armor</h3>
+                        <div class="health-armor-graph" id="team-b-health-graph"></div>
                     </div>
                 </div>
             </div>
