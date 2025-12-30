@@ -289,26 +289,76 @@ type DemoInfoItem struct {
 
 // TimelineAnalysisResult contains time-bucketed data for timeline visualization
 type TimelineAnalysisResult struct {
-	BucketDuration float64          `json:"bucketDuration"` // Seconds per bucket
-	Buckets        []TimelineBucket `json:"buckets"`
+	BucketDuration float64             `json:"bucketDuration"` // Seconds per bucket
+	MatchStartTime float64             `json:"matchStartTime"` // When match actually started (after warmup)
+	Buckets        []TimelineBucket    `json:"buckets"`
+	FragEvents     []TimelineFragEvent `json:"fragEvents,omitempty"` // Frag events for score timeline
+}
+
+// TimelineFragEvent represents a single frag with time, player and team info
+type TimelineFragEvent struct {
+	Time   float64 `json:"time"`
+	Player string  `json:"player"` // Player name who got the frag
+	Team   string  `json:"team"`
 }
 
 // TimelineBucket represents aggregated data for a time slice
 type TimelineBucket struct {
-	StartTime float64                    `json:"startTime"`
-	EndTime   float64                    `json:"endTime"`
-	TeamData  map[string]*TeamBucketData `json:"teamData"` // Keyed by team name
+	StartTime  float64                      `json:"startTime"`
+	EndTime    float64                      `json:"endTime"`
+	PlayerData map[string]*PlayerBucketData `json:"playerData"` // Keyed by player name (primary)
+	TeamData   map[string]*TeamBucketData   `json:"teamData"`   // Keyed by team name (aggregated from players)
+}
+
+// PlayerBucketData holds per-player stats for a time bucket
+type PlayerBucketData struct {
+	Team string `json:"team"`
+
+	// Weapons (boolean flags in source, but stored as count for consistency)
+	HasRL bool `json:"hasRL,omitempty"`
+	HasLG bool `json:"hasLG,omitempty"`
+
+	// Powerups
+	HasQuad bool `json:"hasQuad,omitempty"`
+	HasPent bool `json:"hasPent,omitempty"`
+	HasRing bool `json:"hasRing,omitempty"`
+
+	// Health/Armor
+	Health    int    `json:"health"`
+	Armor     int    `json:"armor"`
+	ArmorType string `json:"armorType,omitempty"` // "ga"/"ya"/"ra"
+
+	// Ammo
+	Shells  int `json:"shells,omitempty"`
+	Nails   int `json:"nails,omitempty"`
+	Rockets int `json:"rockets,omitempty"`
+	Cells   int `json:"cells,omitempty"`
 }
 
 // TeamBucketData holds per-team aggregated stats for a time bucket
 type TeamBucketData struct {
-	PlayersWithWeapons  int            `json:"playersWithWeapons"`  // Count with RL or LG
-	PlayersWithPowerups int            `json:"playersWithPowerups"` // Count with Quad/Pent/Ring
-	AvgHealth           float64        `json:"avgHealth"`
-	AvgArmor            float64        `json:"avgArmor"`
-	ArmorByType         map[string]int `json:"armorByType,omitempty"`  // "ga"/"ya"/"ra" -> count
-	TotalShells         int            `json:"totalShells,omitempty"`
-	TotalNails          int            `json:"totalNails,omitempty"`
-	TotalRockets        int            `json:"totalRockets,omitempty"`
-	TotalCells          int            `json:"totalCells,omitempty"`
+	// Weapon control (granular)
+	PlayersWithRL      int `json:"playersWithRL"`      // RL only (no LG)
+	PlayersWithLG      int `json:"playersWithLG"`      // LG only (no RL)
+	PlayersWithRLLG    int `json:"playersWithRLLG"`    // Both RL and LG
+	PlayersWithWeapons int `json:"playersWithWeapons"` // Total with RL or LG
+
+	// Powerups (granular)
+	PlayersWithQuad    int `json:"playersWithQuad"`
+	PlayersWithPent    int `json:"playersWithPent"`
+	PlayersWithRing    int `json:"playersWithRing"`
+	PlayersWithPowerups int `json:"playersWithPowerups"` // Total with any powerup
+
+	// Health/Armor
+	AvgHealth   float64 `json:"avgHealth"`
+	AvgArmor    float64 `json:"avgArmor"`
+	TotalHealth int     `json:"totalHealth,omitempty"` // Sum of all players' health
+	TotalArmor  int     `json:"totalArmor,omitempty"`  // Sum of all players' armor
+
+	// Detailed tracking
+	ArmorByType  map[string]int `json:"armorByType,omitempty"` // "ga"/"ya"/"ra" -> count
+	TotalShells  int            `json:"totalShells,omitempty"`
+	TotalNails   int            `json:"totalNails,omitempty"`
+	TotalRockets int            `json:"totalRockets,omitempty"`
+	TotalCells   int            `json:"totalCells,omitempty"`
 }

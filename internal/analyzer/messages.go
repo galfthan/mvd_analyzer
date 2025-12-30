@@ -71,16 +71,43 @@ func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEven
 		return nil
 	}
 
-	// Look for "(team)" prefix for teamsay
-	isTeamSay := false
+	// QW teamsay format: "(playername): message" or "(playername) message"
 	if strings.HasPrefix(msg, "(") {
+		// Try "(name): " format first (most common)
+		if idx := strings.Index(msg, "): "); idx > 0 {
+			playerName := msg[1:idx]
+			chatText := msg[idx+3:]
+
+			// Find player's team by looking up the player
+			team := a.getPlayerTeam(playerName)
+
+			return &MatchEvent{
+				Time:    time,
+				Type:    "teamsay",
+				Player:  playerName,
+				Team:    team,
+				Message: chatText,
+			}
+		}
+		// Try "(name) " format (space after paren)
 		if idx := strings.Index(msg, ") "); idx > 0 {
-			isTeamSay = true
-			msg = msg[idx+2:]
+			playerName := msg[1:idx]
+			chatText := msg[idx+2:]
+
+			// Find player's team by looking up the player
+			team := a.getPlayerTeam(playerName)
+
+			return &MatchEvent{
+				Time:    time,
+				Type:    "teamsay",
+				Player:  playerName,
+				Team:    team,
+				Message: chatText,
+			}
 		}
 	}
 
-	// Find the colon that separates name from message
+	// Regular chat format: "name: message"
 	colonIdx := strings.Index(msg, ": ")
 	if colonIdx <= 0 {
 		return nil
@@ -92,14 +119,9 @@ func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEven
 	// Find player's team
 	team := a.getPlayerTeam(playerName)
 
-	eventType := "chat"
-	if isTeamSay {
-		eventType = "teamsay"
-	}
-
 	return &MatchEvent{
 		Time:    time,
-		Type:    eventType,
+		Type:    "chat",
 		Player:  playerName,
 		Team:    team,
 		Message: chatText,
@@ -197,13 +219,46 @@ func (a *MessagesAnalyzer) extractKillerName(rest string) string {
 
 // getPlayerTeam returns the team name for a player
 func (a *MessagesAnalyzer) getPlayerTeam(name string) string {
+	// First try exact match
 	for i := 0; i < len(a.ctx.Players); i++ {
 		p := a.ctx.Players[i]
 		if p != nil && p.Name == name {
 			return p.Team
 		}
 	}
+
+	// Try normalized match (remove dots, special chars, lowercase)
+	normalizedName := normalizeName(name)
+	for i := 0; i < len(a.ctx.Players); i++ {
+		p := a.ctx.Players[i]
+		if p != nil && normalizeName(p.Name) == normalizedName {
+			return p.Team
+		}
+	}
+
+	// Try substring match (player name contains the lookup name or vice versa)
+	for i := 0; i < len(a.ctx.Players); i++ {
+		p := a.ctx.Players[i]
+		if p != nil {
+			pNorm := normalizeName(p.Name)
+			if strings.Contains(pNorm, normalizedName) || strings.Contains(normalizedName, pNorm) {
+				return p.Team
+			}
+		}
+	}
+
 	return ""
+}
+
+// normalizeName removes dots, special chars and lowercases for matching
+func normalizeName(name string) string {
+	var result strings.Builder
+	for _, r := range strings.ToLower(name) {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			result.WriteRune(r)
+		}
+	}
+	return result.String()
 }
 
 func (a *MessagesAnalyzer) Finalize() (interface{}, error) {

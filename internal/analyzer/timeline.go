@@ -10,11 +10,20 @@ type TimelineAnalyzer struct {
 	ctx            *Context
 	bucketDuration float64
 	playerState    map[int]*timelinePlayerState
+	playerNames    map[int]string // Slot -> player name (from UserInfoEvent)
 	buckets        []*timelineBucketData
+	fragEventsRaw  []fragEventRaw // Raw frag events (player num, time)
 	lastSampleTime float64
 	matchStartTime float64
 	matchStarted   bool
 }
+
+// fragEventRaw tracks a frag before team assignment
+type fragEventRaw struct {
+	Time      float64
+	PlayerNum int
+}
+
 
 // timelinePlayerState tracks current state for a single player
 type timelinePlayerState struct {
@@ -25,41 +34,32 @@ type timelinePlayerState struct {
 	nails   int
 	rockets int
 	cells   int
+	frags   int // Current frag count
 }
 
 // timelineBucketData holds raw aggregated data during analysis
 type timelineBucketData struct {
-	startTime float64
-	endTime   float64
-	teamData  map[string]*teamBucketRawData
+	startTime  float64
+	endTime    float64
+	playerData map[int]*playerBucketRawData // Keyed by slot
 }
 
-// teamBucketRawData holds per-team aggregated data
-type teamBucketRawData struct {
-	// Granular weapon tracking
-	playersWithRL   int // RL only
-	playersWithLG   int // LG only
-	playersWithRLLG int // Both RL and LG
-
-	// Granular powerup tracking
-	playersWithQuad int
-	playersWithPent int
-	playersWithRing int
-
-	// Legacy totals (for backward compat)
-	playersWithWeapons  int
-	playersWithPowerups int
-
-	// Health/armor
-	healthSamples []int
-	armorSamples  []int
-	armorByType   map[string]int // ga/ya/ra -> count
-
-	// Ammo
-	totalShells  int
-	totalNails   int
-	totalRockets int
-	totalCells   int
+// playerBucketRawData holds per-player data for a bucket
+type playerBucketRawData struct {
+	name      string
+	team      string
+	hasRL     bool
+	hasLG     bool
+	hasQuad   bool
+	hasPent   bool
+	hasRing   bool
+	health    int
+	armor     int
+	armorType string // "ga"/"ya"/"ra"
+	shells    int
+	nails     int
+	rockets   int
+	cells     int
 }
 
 // NewTimelineAnalyzer creates a new timeline analyzer
@@ -67,6 +67,7 @@ func NewTimelineAnalyzer() *TimelineAnalyzer {
 	return &TimelineAnalyzer{
 		bucketDuration: 1.0, // 1 second buckets for detail resolution
 		playerState:    make(map[int]*timelinePlayerState),
+		playerNames:    make(map[int]string),
 		buckets:        make([]*timelineBucketData, 0),
 	}
 }
@@ -85,6 +86,14 @@ func (a *TimelineAnalyzer) OnEvent(event parser.Event) error {
 	case *parser.PrintEvent:
 		// Detect match start from countdown message
 		a.detectMatchStart(e)
+	case *parser.FragUpdateEvent:
+		// Track frag events from frag updates (more reliable than stat updates)
+		a.handleFragUpdate(e)
+	case *parser.UserInfoEvent:
+		// Track player names for team resolution later
+		if e.Player != nil && e.Player.Name != "" {
+			a.playerNames[e.Player.Slot] = e.Player.Name
+		}
 	}
 	return nil
 }
@@ -111,6 +120,20 @@ func contains(s, substr string) bool {
 		}
 	}
 	return false
+}
+
+func (a *TimelineAnalyzer) handleFragUpdate(e *parser.FragUpdateEvent) {
+	state := a.getOrCreatePlayerState(e.PlayerNum)
+
+	// Only track if match has started and frag count increased
+	if a.matchStarted && e.Frags > state.frags {
+		// Store raw event - team will be assigned in Finalize
+		a.fragEventsRaw = append(a.fragEventsRaw, fragEventRaw{
+			Time:      e.Time,
+			PlayerNum: e.PlayerNum,
+		})
+	}
+	state.frags = e.Frags
 }
 
 func (a *TimelineAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error {
@@ -152,10 +175,10 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error {
 func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 	bucket := a.getOrCreateBucket(time)
 
-	// Aggregate stats by team
+	// Sample stats per player
 	for slot := 0; slot < mvd.MaxClients; slot++ {
 		player := a.ctx.Players[slot]
-		if player == nil || player.Team == "" || player.Spectator {
+		if player == nil || player.Spectator {
 			continue
 		}
 
@@ -169,59 +192,37 @@ func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 			continue
 		}
 
-		teamData := a.getOrCreateTeamData(bucket, player.Team)
-
-		// Track weapons granularly
-		hasRL := (state.items & mvd.ITRocketLauncher) != 0
-		hasLG := (state.items & mvd.ITLightning) != 0
-
-		if hasRL && hasLG {
-			teamData.playersWithRLLG++
-			teamData.playersWithWeapons++
-		} else if hasRL {
-			teamData.playersWithRL++
-			teamData.playersWithWeapons++
-		} else if hasLG {
-			teamData.playersWithLG++
-			teamData.playersWithWeapons++
+		// Create player data for this bucket
+		pData := &playerBucketRawData{
+			name:    player.Name,
+			team:    player.Team,
+			health:  state.health,
+			armor:   state.armor,
+			shells:  state.shells,
+			nails:   state.nails,
+			rockets: state.rockets,
+			cells:   state.cells,
 		}
 
-		// Track powerups granularly
-		hasQuad := (state.items & mvd.ITQuad) != 0
-		hasPent := (state.items & mvd.ITInvulnerability) != 0
-		hasRing := (state.items & mvd.ITInvisibility) != 0
+		// Track weapons
+		pData.hasRL = (state.items & mvd.ITRocketLauncher) != 0
+		pData.hasLG = (state.items & mvd.ITLightning) != 0
 
-		if hasQuad {
-			teamData.playersWithQuad++
-			teamData.playersWithPowerups++
-		}
-		if hasPent {
-			teamData.playersWithPent++
-			teamData.playersWithPowerups++
-		}
-		if hasRing {
-			teamData.playersWithRing++
-			teamData.playersWithPowerups++
-		}
-
-		// Track health and armor
-		teamData.healthSamples = append(teamData.healthSamples, state.health)
-		teamData.armorSamples = append(teamData.armorSamples, state.armor)
+		// Track powerups
+		pData.hasQuad = (state.items & mvd.ITQuad) != 0
+		pData.hasPent = (state.items & mvd.ITInvulnerability) != 0
+		pData.hasRing = (state.items & mvd.ITInvisibility) != 0
 
 		// Track armor type
 		if state.items&mvd.ITArmor3 != 0 {
-			teamData.armorByType["ra"]++
+			pData.armorType = "ra"
 		} else if state.items&mvd.ITArmor2 != 0 {
-			teamData.armorByType["ya"]++
+			pData.armorType = "ya"
 		} else if state.items&mvd.ITArmor1 != 0 {
-			teamData.armorByType["ga"]++
+			pData.armorType = "ga"
 		}
 
-		// Track ammo totals
-		teamData.totalShells += state.shells
-		teamData.totalNails += state.nails
-		teamData.totalRockets += state.rockets
-		teamData.totalCells += state.cells
+		bucket.playerData[slot] = pData
 	}
 }
 
@@ -231,23 +232,14 @@ func (a *TimelineAnalyzer) getOrCreateBucket(time float64) *timelineBucketData {
 	// Extend buckets array if needed
 	for len(a.buckets) <= bucketIndex {
 		newBucket := &timelineBucketData{
-			startTime: float64(len(a.buckets)) * a.bucketDuration,
-			endTime:   float64(len(a.buckets)+1) * a.bucketDuration,
-			teamData:  make(map[string]*teamBucketRawData),
+			startTime:  float64(len(a.buckets)) * a.bucketDuration,
+			endTime:    float64(len(a.buckets)+1) * a.bucketDuration,
+			playerData: make(map[int]*playerBucketRawData),
 		}
 		a.buckets = append(a.buckets, newBucket)
 	}
 
 	return a.buckets[bucketIndex]
-}
-
-func (a *TimelineAnalyzer) getOrCreateTeamData(bucket *timelineBucketData, team string) *teamBucketRawData {
-	if bucket.teamData[team] == nil {
-		bucket.teamData[team] = &teamBucketRawData{
-			armorByType: make(map[string]int),
-		}
-	}
-	return bucket.teamData[team]
 }
 
 func (a *TimelineAnalyzer) getOrCreatePlayerState(playerNum int) *timelinePlayerState {
@@ -268,47 +260,209 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		}
 	}
 
+	// Build a name->team lookup from DemoInfo (authoritative source)
+	// Use both exact name and normalized name for matching
+	nameToTeam := make(map[string]string)
+	normNameToTeam := make(map[string]string) // Normalized names (lowercase, alphanumeric only)
+	fragsToTeam := make(map[int]string)        // Frag count -> team (for slot matching)
+	fragsToPlayer := make(map[int]string)      // Frag count -> player name (for slot matching)
+	if a.ctx.DemoInfo != nil {
+		for _, p := range a.ctx.DemoInfo.Players {
+			if p.Name != "" && p.Team != "" {
+				nameToTeam[p.Name] = p.Team
+				normNameToTeam[normalizePlayerName(p.Name)] = p.Team
+				// Map frag count to team and player for slot resolution
+				if p.Stats != nil && p.Stats.Frags != 0 {
+					fragsToTeam[p.Stats.Frags] = p.Team
+					fragsToPlayer[p.Stats.Frags] = p.Name
+				}
+			}
+		}
+	}
+
+	// Build slot->team and slot->player mappings from final frag counts
+	slotToTeam := make(map[int]string)
+	slotToPlayer := make(map[int]string)
+	for slot, frags := range a.ctx.FragsBySlot {
+		if team, ok := fragsToTeam[frags]; ok {
+			slotToTeam[slot] = team
+		}
+		if player, ok := fragsToPlayer[frags]; ok {
+			slotToPlayer[slot] = player
+		}
+	}
+
+	// Convert raw frag events to final events with player and team info
+	fragEvents := make([]TimelineFragEvent, 0, len(a.fragEventsRaw))
+	for _, raw := range a.fragEventsRaw {
+		playerName := ""
+		team := ""
+
+		// First try ctx.Players
+		player := a.ctx.Players[raw.PlayerNum]
+		if player != nil {
+			if player.Name != "" {
+				playerName = player.Name
+			}
+			if player.Team != "" {
+				team = player.Team
+			}
+		}
+
+		// If no player name, try our local tracking
+		if playerName == "" {
+			if name, ok := a.playerNames[raw.PlayerNum]; ok {
+				playerName = name
+			}
+		}
+
+		// If we have a name but no team, look it up in DemoInfo
+		if playerName != "" && team == "" {
+			team = nameToTeam[playerName]
+			if team == "" {
+				team = normNameToTeam[normalizePlayerName(playerName)]
+			}
+		}
+
+		// If still no player/team, try slot mapping from frag counts
+		if playerName == "" {
+			playerName = slotToPlayer[raw.PlayerNum]
+		}
+		if team == "" {
+			team = slotToTeam[raw.PlayerNum]
+		}
+
+		if team != "" {
+			fragEvents = append(fragEvents, TimelineFragEvent{
+				Time:   raw.Time,
+				Player: playerName,
+				Team:   team,
+			})
+		}
+	}
+
 	result := &TimelineAnalysisResult{
 		BucketDuration: a.bucketDuration,
 		MatchStartTime: a.matchStartTime,
 		Buckets:        make([]TimelineBucket, len(a.buckets)),
+		FragEvents:     fragEvents,
 	}
 
 	for i, b := range a.buckets {
 		bucket := TimelineBucket{
-			StartTime: b.startTime,
-			EndTime:   b.endTime,
-			TeamData:  make(map[string]*TeamBucketData),
+			StartTime:  b.startTime,
+			EndTime:    b.endTime,
+			PlayerData: make(map[string]*PlayerBucketData),
+			TeamData:   make(map[string]*TeamBucketData),
 		}
 
-		for team, data := range b.teamData {
-			bucket.TeamData[team] = &TeamBucketData{
-				// Granular weapons
-				PlayersWithRL:   data.playersWithRL,
-				PlayersWithLG:   data.playersWithLG,
-				PlayersWithRLLG: data.playersWithRLLG,
+		// First, build PlayerData from raw player data
+		// Also resolve names from slot mappings if needed
+		teamAggregates := make(map[string]*teamAggregator)
 
-				// Granular powerups
-				PlayersWithQuad: data.playersWithQuad,
-				PlayersWithPent: data.playersWithPent,
-				PlayersWithRing: data.playersWithRing,
+		for slot, pRaw := range b.playerData {
+			// Get player name, falling back to slot mapping
+			playerName := pRaw.name
+			if playerName == "" {
+				playerName = slotToPlayer[slot]
+			}
+			if playerName == "" {
+				continue // Skip if we can't identify the player
+			}
 
-				// Legacy totals
-				PlayersWithWeapons:  data.playersWithWeapons,
-				PlayersWithPowerups: data.playersWithPowerups,
+			// Get team, falling back to slot mapping
+			team := pRaw.team
+			if team == "" {
+				team = slotToTeam[slot]
+			}
+
+			// Build player bucket data
+			bucket.PlayerData[playerName] = &PlayerBucketData{
+				Team:      team,
+				HasRL:     pRaw.hasRL,
+				HasLG:     pRaw.hasLG,
+				HasQuad:   pRaw.hasQuad,
+				HasPent:   pRaw.hasPent,
+				HasRing:   pRaw.hasRing,
+				Health:    pRaw.health,
+				Armor:     pRaw.armor,
+				ArmorType: pRaw.armorType,
+				Shells:    pRaw.shells,
+				Nails:     pRaw.nails,
+				Rockets:   pRaw.rockets,
+				Cells:     pRaw.cells,
+			}
+
+			// Aggregate for team stats
+			if team != "" {
+				if teamAggregates[team] == nil {
+					teamAggregates[team] = &teamAggregator{
+						armorByType: make(map[string]int),
+					}
+				}
+				agg := teamAggregates[team]
+
+				// Weapons
+				if pRaw.hasRL && pRaw.hasLG {
+					agg.playersWithRLLG++
+					agg.playersWithWeapons++
+				} else if pRaw.hasRL {
+					agg.playersWithRL++
+					agg.playersWithWeapons++
+				} else if pRaw.hasLG {
+					agg.playersWithLG++
+					agg.playersWithWeapons++
+				}
+
+				// Powerups
+				if pRaw.hasQuad {
+					agg.playersWithQuad++
+					agg.playersWithPowerups++
+				}
+				if pRaw.hasPent {
+					agg.playersWithPent++
+					agg.playersWithPowerups++
+				}
+				if pRaw.hasRing {
+					agg.playersWithRing++
+					agg.playersWithPowerups++
+				}
 
 				// Health/Armor
-				AvgHealth:   average(data.healthSamples),
-				AvgArmor:    average(data.armorSamples),
-				TotalHealth: sum(data.healthSamples),
-				TotalArmor:  sum(data.armorSamples),
+				agg.healthSamples = append(agg.healthSamples, pRaw.health)
+				agg.armorSamples = append(agg.armorSamples, pRaw.armor)
+				if pRaw.armorType != "" {
+					agg.armorByType[pRaw.armorType]++
+				}
 
-				// Details
-				ArmorByType:  data.armorByType,
-				TotalShells:  data.totalShells,
-				TotalNails:   data.totalNails,
-				TotalRockets: data.totalRockets,
-				TotalCells:   data.totalCells,
+				// Ammo
+				agg.totalShells += pRaw.shells
+				agg.totalNails += pRaw.nails
+				agg.totalRockets += pRaw.rockets
+				agg.totalCells += pRaw.cells
+			}
+		}
+
+		// Build TeamData from aggregates
+		for team, agg := range teamAggregates {
+			bucket.TeamData[team] = &TeamBucketData{
+				PlayersWithRL:       agg.playersWithRL,
+				PlayersWithLG:       agg.playersWithLG,
+				PlayersWithRLLG:     agg.playersWithRLLG,
+				PlayersWithWeapons:  agg.playersWithWeapons,
+				PlayersWithQuad:     agg.playersWithQuad,
+				PlayersWithPent:     agg.playersWithPent,
+				PlayersWithRing:     agg.playersWithRing,
+				PlayersWithPowerups: agg.playersWithPowerups,
+				AvgHealth:           average(agg.healthSamples),
+				AvgArmor:            average(agg.armorSamples),
+				TotalHealth:         sum(agg.healthSamples),
+				TotalArmor:          sum(agg.armorSamples),
+				ArmorByType:         agg.armorByType,
+				TotalShells:         agg.totalShells,
+				TotalNails:          agg.totalNails,
+				TotalRockets:        agg.totalRockets,
+				TotalCells:          agg.totalCells,
 			}
 		}
 
@@ -316,6 +470,25 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	}
 
 	return result, nil
+}
+
+// teamAggregator is used during finalization to aggregate player data into team data
+type teamAggregator struct {
+	playersWithRL       int
+	playersWithLG       int
+	playersWithRLLG     int
+	playersWithWeapons  int
+	playersWithQuad     int
+	playersWithPent     int
+	playersWithRing     int
+	playersWithPowerups int
+	healthSamples       []int
+	armorSamples        []int
+	armorByType         map[string]int
+	totalShells         int
+	totalNails          int
+	totalRockets        int
+	totalCells          int
 }
 
 // average calculates the average of a slice of ints
@@ -337,4 +510,22 @@ func sum(values []int) int {
 		s += v
 	}
 	return s
+}
+
+// normalizePlayerName removes non-alphanumeric chars and lowercases for fuzzy matching
+// "bad.rotker" and "badrotker" will both become "badrotker"
+func normalizePlayerName(name string) string {
+	var result []byte
+	for i := 0; i < len(name); i++ {
+		c := name[i]
+		// Convert uppercase to lowercase
+		if c >= 'A' && c <= 'Z' {
+			c += 32
+		}
+		// Keep only alphanumeric
+		if (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') {
+			result = append(result, c)
+		}
+	}
+	return string(result)
 }

@@ -150,44 +150,127 @@
                 <!-- Overview Panel with Time Selector -->
                 <div class="panel timeline-overview-panel">
                     <h3>Match Overview</h3>
-                    <div class="timeline-overview-container" id="timeline-overview-container">
-                        <div class="timeline-overview-graph" id="overview-graph"></div>
-                        <div class="timeline-brush" id="timeline-brush">
-                            <div class="brush-handle brush-handle-left" id="brush-handle-left"></div>
-                            <div class="brush-selection" id="brush-selection"></div>
-                            <div class="brush-handle brush-handle-right" id="brush-handle-right"></div>
+                    <div class="timeline-overview-wrapper">
+                        <div class="timeline-y-axis" id="overview-y-axis">
+                            <span class="y-label y-top">4</span>
+                            <span class="y-label y-mid">0</span>
+                            <span class="y-label y-bottom">4</span>
                         </div>
-                        <div class="timeline-axis" id="overview-axis"></div>
+                        <div class="timeline-overview-container" id="timeline-overview-container">
+                            <div class="timeline-overview-graph" id="overview-graph"></div>
+                            <div class="timeline-brush" id="timeline-brush">
+                                <div class="brush-handle brush-handle-left" id="brush-handle-left"></div>
+                                <div class="brush-selection" id="brush-selection"></div>
+                                <div class="brush-handle brush-handle-right" id="brush-handle-right"></div>
+                            </div>
+                            <div class="timeline-axis" id="overview-axis"></div>
+                        </div>
                     </div>
                     <div class="timeline-legend">
                         <span class="legend-item"><span id="legend-team-a">Team A ↑</span></span>
                         <span class="legend-item"><span id="legend-team-b">Team B ↓</span></span>
-                        <span class="legend-item"><span class="legend-color weapons"></span> Weapons (RL/LG)</span>
-                        <span class="legend-item"><span class="legend-color powerups"></span> Powerups</span>
+                        <span class="legend-item"><span class="legend-color rl"></span> RL</span>
+                        <span class="legend-item"><span class="legend-color lg"></span> LG</span>
+                        <span class="legend-item"><span class="legend-color rllg"></span> RL+LG</span>
+                        <span class="legend-item"><span class="legend-color quad"></span> Quad</span>
+                        <span class="legend-item"><span class="legend-color pent"></span> Pent</span>
+                        <span class="legend-item"><span class="legend-color ring"></span> Ring</span>
                     </div>
                 </div>
 
-                <!-- Detail View Row 1: Messages + Detail Graph -->
-                <div class="timeline-detail-row">
+                <!-- Activity Detail (full width) -->
+                <div class="panel timeline-detail-graph-panel-full">
+                    <h3>Activity Detail <span id="time-range-label"></span></h3>
+                    <div class="detail-graph-wrapper">
+                        <div class="timeline-y-axis" id="detail-y-axis">
+                            <span class="y-label y-top">4</span>
+                            <span class="y-label y-mid">0</span>
+                            <span class="y-label y-bottom">4</span>
+                        </div>
+                        <div class="detail-graph-outer">
+                            <div class="detail-graph-container" id="detail-graph"></div>
+                            <div class="detail-graph-axis" id="detail-axis"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health/Armor (diverging style) -->
+                <div class="panel timeline-health-panel-full">
+                    <h3>Team Health/Armor</h3>
+                    <div class="health-graph-wrapper">
+                        <div class="timeline-y-axis" id="health-y-axis">
+                            <span class="y-label y-top" id="health-y-top">800</span>
+                            <span class="y-label y-mid">0</span>
+                            <span class="y-label y-bottom" id="health-y-bottom">800</span>
+                        </div>
+                        <div class="health-graph-outer">
+                            <div class="health-armor-graph-diverging" id="health-armor-graph"></div>
+                            <div class="health-graph-axis" id="health-axis"></div>
+                        </div>
+                    </div>
+                    <div class="timeline-legend">
+                        <span class="legend-item"><span id="legend-health-team-a">Team A ↑</span></span>
+                        <span class="legend-item"><span id="legend-health-team-b">Team B ↓</span></span>
+                        <span class="legend-item"><span class="legend-color health"></span> Health</span>
+                        <span class="legend-item"><span class="legend-color ra"></span> RA</span>
+                        <span class="legend-item"><span class="legend-color ya"></span> YA</span>
+                        <span class="legend-item"><span class="legend-color ga"></span> GA</span>
+                    </div>
+                </div>
+
+                <!-- Frags per 15s (diverging style) -->
+                <div class="panel timeline-health-panel-full">
+                    <h3>Frags per 15s</h3>
+                    <div class="health-graph-wrapper">
+                        <div class="timeline-y-axis" id="frags-y-axis">
+                            <span class="y-label y-top" id="frags-y-top">10</span>
+                            <span class="y-label y-mid">0</span>
+                            <span class="y-label y-bottom" id="frags-y-bottom">10</span>
+                        </div>
+                        <div class="health-graph-outer">
+                            <div class="health-armor-graph-diverging" id="frags-graph"></div>
+                            <div class="health-graph-axis" id="frags-axis"></div>
+                        </div>
+                    </div>
+                    <div class="timeline-legend">
+                        <span class="legend-item"><span id="legend-frags-team-a">Team A ↑</span></span>
+                        <span class="legend-item"><span id="legend-frags-team-b">Team B ↓</span></span>
+                    </div>
+                </div>
+
+                <!-- Cumulative Frags Timeline -->
+                <div class="panel timeline-health-panel-full">
+                    <h3>Score Timeline</h3>
+                    <div class="health-graph-wrapper">
+                        <div class="timeline-y-axis" id="score-y-axis">
+                            <span class="y-label y-top" id="score-y-top">+20</span>
+                            <span class="y-label y-mid">0</span>
+                            <span class="y-label y-bottom" id="score-y-bottom">-20</span>
+                        </div>
+                        <div class="health-graph-outer">
+                            <div class="score-timeline-graph" id="score-graph"></div>
+                            <div class="health-graph-axis" id="score-axis"></div>
+                        </div>
+                    </div>
+                    <div class="timeline-legend">
+                        <span class="legend-item"><span id="legend-score-team-a">Team A leading ↑</span></span>
+                        <span class="legend-item"><span id="legend-score-team-b">Team B leading ↓</span></span>
+                    </div>
+                </div>
+
+                <!-- Three Message Panes -->
+                <div class="timeline-messages-row">
                     <div class="panel timeline-messages-panel">
-                        <h3>Events <span id="time-range-label"></span></h3>
-                        <div class="timeline-messages-scroll" id="detail-messages"></div>
+                        <h3>Kills</h3>
+                        <div class="timeline-messages-scroll" id="kill-messages"></div>
                     </div>
-                    <div class="panel timeline-detail-graph-panel">
-                        <h3>Activity Detail</h3>
-                        <div class="detail-graph-container" id="detail-graph"></div>
+                    <div class="panel timeline-messages-panel">
+                        <h3 id="team-a-chat-title">Team A Chat</h3>
+                        <div class="timeline-messages-scroll" id="team-a-messages"></div>
                     </div>
-                </div>
-
-                <!-- Detail View Row 2: Health/Armor per Team -->
-                <div class="timeline-detail-row">
-                    <div class="panel timeline-health-panel">
-                        <h3 id="team-a-health-title">Team A Health/Armor</h3>
-                        <div class="health-armor-graph" id="team-a-health-graph"></div>
-                    </div>
-                    <div class="panel timeline-health-panel">
-                        <h3 id="team-b-health-title">Team B Health/Armor</h3>
-                        <div class="health-armor-graph" id="team-b-health-graph"></div>
+                    <div class="panel timeline-messages-panel">
+                        <h3 id="team-b-chat-title">Team B Chat</h3>
+                        <div class="timeline-messages-scroll" id="team-b-messages"></div>
                     </div>
                 </div>
             </div>

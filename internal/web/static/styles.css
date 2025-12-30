@@ -450,8 +450,85 @@ table tbody tr:hover {
     border-radius: 2px;
 }
 
+/* Granular weapon/powerup colors */
 .legend-color.weapons { background: rgba(0, 217, 255, 0.9); }
 .legend-color.powerups { background: rgba(255, 193, 7, 0.9); }
+.legend-color.rl { background: rgba(255, 107, 107, 0.9); }
+.legend-color.lg { background: rgba(0, 217, 255, 0.9); }
+.legend-color.rllg { background: rgba(156, 39, 176, 0.9); }
+.legend-color.quad { background: rgba(0, 150, 255, 0.9); }
+.legend-color.pent { background: rgba(255, 0, 0, 0.9); }
+.legend-color.ring { background: rgba(255, 235, 59, 0.9); }
+.legend-color.health { background: rgba(0, 200, 83, 0.9); }
+.legend-color.armor { background: rgba(255, 193, 7, 0.9); }
+.legend-color.ra { background: rgba(255, 50, 50, 0.9); }
+.legend-color.ya { background: rgba(255, 200, 0, 0.9); }
+.legend-color.ga { background: rgba(0, 180, 0, 0.9); }
+
+/* Y-Axis styling */
+.timeline-overview-wrapper,
+.detail-graph-wrapper,
+.health-graph-wrapper {
+    display: flex;
+    gap: 5px;
+}
+
+.timeline-y-axis {
+    width: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 10px 5px 20px 0;
+    font-size: 0.7rem;
+    color: #888;
+    font-family: monospace;
+}
+
+.y-label {
+    line-height: 1;
+}
+
+.timeline-overview-container {
+    flex: 1;
+}
+
+/* Full-width panels */
+.timeline-detail-graph-panel-full,
+.timeline-health-panel-full {
+    margin-bottom: 20px;
+}
+
+.detail-graph-outer,
+.health-graph-outer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-graph-axis,
+.health-graph-axis {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 10px 0 10px;
+    font-size: 0.75rem;
+    color: #888;
+    font-family: monospace;
+}
+
+/* Three-column message row */
+.timeline-messages-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 1000px) {
+    .timeline-messages-row {
+        grid-template-columns: 1fr;
+    }
+}
 
 /* Diverging bar chart - Team A up, Team B down */
 .diverging-bar {
@@ -488,8 +565,27 @@ table tbody tr:hover {
     width: 100%;
 }
 
+/* Legacy colors */
 .bar-segment.weapons { background: rgba(0, 217, 255, 0.9); }
 .bar-segment.powerups { background: rgba(255, 193, 7, 0.9); }
+
+/* Granular weapon colors */
+.bar-segment.rl { background: rgba(255, 107, 107, 0.9); }
+.bar-segment.lg { background: rgba(0, 217, 255, 0.9); }
+.bar-segment.rllg { background: rgba(156, 39, 176, 0.9); }
+
+/* Granular powerup colors */
+.bar-segment.quad { background: rgba(0, 150, 255, 0.9); }
+.bar-segment.pent { background: rgba(255, 0, 0, 0.9); }
+.bar-segment.ring { background: rgba(255, 235, 59, 0.9); }
+
+/* Health/Armor segments */
+.bar-segment.health { background: rgba(0, 200, 83, 0.9); }
+.bar-segment.armor { background: rgba(255, 193, 7, 0.9); }
+.bar-segment.ra { background: rgba(255, 50, 50, 0.9); }
+.bar-segment.ya { background: rgba(255, 200, 0, 0.9); }
+.bar-segment.ga { background: rgba(0, 180, 0, 0.6); }
+.bar-segment.frags { background: rgba(255, 100, 100, 0.9); }
 
 /* Center axis line for diverging chart */
 .timeline-overview-graph::after {
@@ -498,8 +594,8 @@ table tbody tr:hover {
     left: 0;
     right: 0;
     top: 50%;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.2);
+    height: 2px;
+    background: rgba(0, 0, 0, 0.8);
     pointer-events: none;
 }
 
@@ -577,8 +673,8 @@ table tbody tr:hover {
     left: 10px;
     right: 10px;
     top: 50%;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.2);
+    height: 2px;
+    background: rgba(0, 0, 0, 0.8);
     pointer-events: none;
 }
 
@@ -610,6 +706,78 @@ table tbody tr:hover {
 
 .armor-segment {
     background: rgba(255, 193, 7, 0.7);
+}
+
+/* Diverging Health/Armor Graph */
+.health-armor-graph-diverging {
+    height: 200px;
+    background: #16213e;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    position: relative;
+}
+
+.health-armor-graph-diverging::after {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 50%;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+}
+
+/* Score Timeline Graph */
+.score-timeline-graph {
+    height: 200px;
+    background: #16213e;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+}
+
+.score-timeline-graph::after {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 50%;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+}
+
+.score-bar {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.score-bar-fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background: rgba(255, 100, 100, 0.8);
+}
+
+.score-bar-fill.positive {
+    bottom: 50%;
+    background: rgba(100, 200, 255, 0.8);
+}
+
+.score-bar-fill.negative {
+    top: 50%;
+    background: rgba(255, 100, 100, 0.8);
 }
 
 #time-range-label {
