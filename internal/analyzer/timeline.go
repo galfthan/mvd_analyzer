@@ -137,6 +137,13 @@ func (a *TimelineAnalyzer) handleFragUpdate(e *parser.FragUpdateEvent) {
 }
 
 func (a *TimelineAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error {
+	// Ignore all state during countdown/warmup - players have all weapons,
+	// infinite ammo, etc. which is meaningless. Match starts fresh with
+	// 100 health and base shotgun.
+	if !a.matchStarted {
+		return nil
+	}
+
 	state := a.getOrCreatePlayerState(e.PlayerNum)
 
 	switch e.StatIndex {

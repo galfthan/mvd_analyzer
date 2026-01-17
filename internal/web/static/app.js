@@ -560,6 +560,98 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Escape a single character for HTML
+function escapeHtmlChar(char) {
+    switch (char) {
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '&': return '&amp;';
+        case '"': return '&quot;';
+        case "'": return '&#39;';
+        default: return char;
+    }
+}
+
+// Format Quake chat messages with colors
+// Based on ezQuake source code character rendering:
+// - Characters 0-127: Normal white text
+// - Characters 128-255: "Gold/Brown" alternate text (same glyphs as 0-127)
+// - &cRGB: Set color to RGB (hex digits 0-F, each multiplied by 16)
+// - &r: Reset color to white
+function formatQuakeMessage(text) {
+    if (!text) return '';
+
+    // Remove sound triggers at end of messages (!K, !H, !G, !C, etc.)
+    let result = text.replace(/![A-Z]$/g, '');
+
+    let output = '';
+    let currentColor = null;
+    let i = 0;
+
+    while (i < result.length) {
+        const charCode = result.charCodeAt(i);
+
+        // Check for &cRGB color code
+        if (result.slice(i, i + 2) === '&c') {
+            // Check for &cfff (white/reset)
+            if (result.slice(i, i + 5).toLowerCase() === '&cfff') {
+                if (currentColor) output += '</span>';
+                currentColor = null;
+                i += 5;
+                continue;
+            }
+            // Check for 3-digit hex color
+            const colorMatch = result.slice(i + 2, i + 5).match(/^[0-9a-fA-F]{3}/);
+            if (colorMatch) {
+                if (currentColor) output += '</span>';
+                // ezQuake uses r * 16 for each hex digit (0-240 range)
+                const r = parseInt(colorMatch[0][0], 16) * 16;
+                const g = parseInt(colorMatch[0][1], 16) * 16;
+                const b = parseInt(colorMatch[0][2], 16) * 16;
+                currentColor = `rgb(${r},${g},${b})`;
+                output += `<span style="color:${currentColor}">`;
+                i += 5;
+                continue;
+            }
+        }
+
+        // Check for &r reset
+        if (result.slice(i, i + 2) === '&r') {
+            if (currentColor) output += '</span>';
+            currentColor = null;
+            i += 2;
+            continue;
+        }
+
+        // High-bit gold characters (128-255)
+        if (charCode >= 128 && charCode <= 255) {
+            const baseChar = String.fromCharCode(charCode - 128);
+            if (currentColor === null) {
+                output += `<span class="quake-gold">${escapeHtmlChar(baseChar)}</span>`;
+            } else {
+                output += escapeHtmlChar(baseChar);
+            }
+            i++;
+            continue;
+        }
+
+        // Skip macro delimiters (curly braces and square brackets)
+        // These are Quake client markup, not displayed text
+        if (result[i] === '{' || result[i] === '}' ||
+            result[i] === '[' || result[i] === ']') {
+            i++;
+            continue;
+        }
+
+        // Regular character
+        output += escapeHtmlChar(result[i]);
+        i++;
+    }
+
+    if (currentColor) output += '</span>';
+    return output;
+}
+
 // Timeline Analysis State
 let timelineState = {
     buckets: [],
@@ -995,7 +1087,7 @@ function updateDetailMessages(startTime, endTime) {
         item.className = 'timeline-message-item';
         item.innerHTML = `
             <span class="timeline-message-time">${formatTime(Math.max(0, relTime))}</span>
-            <span class="timeline-message-content ${event.type}">${escapeHtml(event.message)}</span>
+            <span class="timeline-message-content ${event.type}">${formatQuakeMessage(event.message)}</span>
         `;
 
         if (event.type === 'frag') {

@@ -71,6 +71,117 @@ QuakeWorld uses a custom character encoding:
 
 Player names and messages may contain these high-bit characters for colored text.
 
+### Text Rendering and Color Codes
+
+*Source: ezQuake `r_draw_charset.c`, `fonts.c`, `console.c`*
+
+#### High-Bit "Gold/Brown" Characters
+
+Characters with values 128-255 are rendered using the same glyphs as characters 0-127, but displayed in a "gold" or "brown" color instead of white. This is commonly used for:
+- Highlighted text in the console
+- Alternate styling in player names
+- Special markers in messages
+
+**ezQuake Gradient Colors** (from `fonts.c`):
+| Type | Top Color | Bottom Color |
+|------|-----------|--------------|
+| Normal (white) | rgb(255, 255, 255) | rgb(107, 98, 86) |
+| Alternate (gold/brown) | rgb(175, 120, 52) | rgb(75, 52, 22) |
+| Numbers | rgb(255, 255, 150) | rgb(218, 132, 7) |
+
+**Conversion**:
+```go
+func convertQuakeChar(c byte) (displayChar byte, isGold bool) {
+    if c >= 128 {
+        return c - 128, true  // Gold/brown character
+    }
+    return c, false  // Normal white character
+}
+```
+
+#### Inline Color Codes
+
+Modern QuakeWorld clients support inline color codes in text strings:
+
+| Code | Format | Description |
+|------|--------|-------------|
+| `&cRGB` | 3 hex digits | Set text color to RGB |
+| `&cfff` | Special case | Reset to white (equivalent to `&r`) |
+| `&r` | Reset | Reset color to default (white) |
+
+**Color Calculation**:
+```c
+// ezQuake r_draw_charset.c
+rgba[0] = (r * 16);  // R hex digit (0-F) -> 0-240
+rgba[1] = (g * 16);  // G hex digit (0-F) -> 0-240
+rgba[2] = (b * 16);  // B hex digit (0-F) -> 0-240
+```
+
+**Examples**:
+- `&cf00` = Red (rgb(240, 0, 0))
+- `&c0f0` = Green (rgb(0, 240, 0))
+- `&c00f` = Blue (rgb(0, 0, 240))
+- `&cff0` = Yellow (rgb(240, 240, 0))
+- `&c888` = Gray (rgb(128, 128, 128))
+
+**Parsing Algorithm**:
+```javascript
+function parseQuakeText(text) {
+    let output = '';
+    let currentColor = null;
+    let i = 0;
+
+    while (i < text.length) {
+        const charCode = text.charCodeAt(i);
+
+        // Check for &c color code
+        if (text.slice(i, i + 2) === '&c') {
+            const colorMatch = text.slice(i + 2, i + 5).match(/^[0-9a-fA-F]{3}/);
+            if (colorMatch) {
+                const [r, g, b] = colorMatch[0].split('').map(h => parseInt(h, 16) * 16);
+                currentColor = `rgb(${r},${g},${b})`;
+                i += 5;
+                continue;
+            }
+        }
+
+        // Check for &r reset code
+        if (text.slice(i, i + 2) === '&r') {
+            currentColor = null;
+            i += 2;
+            continue;
+        }
+
+        // Handle high-bit gold characters
+        if (charCode >= 128 && charCode <= 255) {
+            const baseChar = String.fromCharCode(charCode - 128);
+            output += formatWithColor(baseChar, currentColor || 'gold');
+            i++;
+            continue;
+        }
+
+        // Regular character
+        output += formatWithColor(text[i], currentColor || 'white');
+        i++;
+    }
+
+    return output;
+}
+```
+
+#### Sound Triggers
+
+Chat messages may end with sound trigger codes that cause the client to play sounds:
+
+| Code | Sound | Description |
+|------|-------|-------------|
+| `!K` | Kill sound | Played on frag events |
+| `!H` | Hit sound | Played on damage |
+| `!G` | Generic sound | Various notifications |
+| `!C` | Chat sound | Chat notification |
+
+These should be stripped when displaying text, as they are only meaningful for audio playback.
+
 ---
 
 ## File Structure

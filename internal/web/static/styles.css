@@ -912,3 +912,11 @@ table tbody tr:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: #3a4f6f;
 }
+
+/* Quake high-bit "gold/brown" characters (128-255)
+   Based on ezQuake font_gradient_alternate colors:
+   Top: rgb(175, 120, 52) -> Bottom: rgb(75, 52, 22)
+   Using the top/brighter color for better visibility */
+.quake-gold {
+    color: #af7834;
+}
