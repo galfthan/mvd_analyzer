@@ -126,6 +126,9 @@ async function uploadFile(file) {
 }
 
 function displayResults(result) {
+    // Reset timeline state before loading new demo
+    resetTimelineState();
+
     document.getElementById('results-section').style.display = 'block';
 
     const demoInfo = result.demoInfo;
@@ -711,8 +714,35 @@ let timelineState = {
     brushMode: null,
     dragStartX: 0,
     dragStartSelection: null,
-    overviewBucketSize: 5 // Aggregate to 5-second buckets for overview
+    overviewBucketSize: 5, // Aggregate to 5-second buckets for overview
+    brushInitialized: false // Track if brush handlers are set up
 };
+
+// Reset all timeline state for loading a new demo
+function resetTimelineState() {
+    timelineState.buckets = [];
+    timelineState.events = [];
+    timelineState.fragEvents = [];
+    timelineState.duration = 0;
+    timelineState.matchStartTime = 0;
+    timelineState.teams = [];
+    timelineState.selection = { start: 0, end: 60 };
+    timelineState.brushing = false;
+    timelineState.brushMode = null;
+    timelineState.dragStartX = 0;
+    timelineState.dragStartSelection = null;
+
+    // Clear all timeline graph containers
+    const containers = [
+        'overview-graph', 'overview-axis', 'detail-graph', 'detail-axis',
+        'health-armor-graph', 'health-axis', 'frags-graph', 'frags-axis',
+        'score-graph', 'score-axis', 'kill-messages', 'team-a-messages', 'team-b-messages'
+    ];
+    containers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+    });
+}
 
 function displayTimelineAnalysis(result) {
     const timeline = result.timelineAnalysis;
@@ -964,6 +994,12 @@ function renderOverviewAxis() {
 }
 
 function setupBrush() {
+    // Only set up event handlers once - they reference timelineState which updates
+    if (timelineState.brushInitialized) {
+        updateBrushPosition();
+        return;
+    }
+
     const container = document.getElementById('timeline-overview-container');
     const selection = document.getElementById('brush-selection');
     const leftHandle = document.getElementById('brush-handle-left');
@@ -971,7 +1007,7 @@ function setupBrush() {
 
     updateBrushPosition();
 
-    // Mouse event handlers
+    // Mouse event handlers - these reference timelineState dynamically
     function startDrag(e, mode) {
         e.preventDefault();
         timelineState.brushing = true;
@@ -1068,6 +1104,8 @@ function setupBrush() {
         updateBrushPosition();
         updateDetailView();
     });
+
+    timelineState.brushInitialized = true;
 }
 
 function updateBrushPosition() {

@@ -78,7 +78,7 @@ func parseUserInfoString(s string, player *mvd.PlayerInfo) {
 		case "name":
 			player.Name = cleanString(value)
 		case "team":
-			player.Team = value
+			player.Team = cleanString(value)
 		case "topcolor":
 			if c, err := strconv.Atoi(value); err == nil {
 				player.TopColor = c

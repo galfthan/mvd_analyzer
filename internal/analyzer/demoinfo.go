@@ -123,20 +123,26 @@ func (a *DemoInfoAnalyzer) parseBlocks() *DemoInfoResult {
 	}
 
 	// Convert to our result structure
+	// Clean team names (remove Quake high-bit color codes)
+	cleanedTeams := make([]string, len(raw.Teams))
+	for i, t := range raw.Teams {
+		cleanedTeams[i] = cleanQuakeName(t)
+	}
+
 	result := &DemoInfoResult{
-		Version:  raw.Version,
-		Date:     raw.Date,
-		Map:      raw.Map,
-		Hostname: raw.Hostname,
-		IP:       raw.IP,
-		Port:     raw.Port,
-		Mode:     raw.Mode,
+		Version:   raw.Version,
+		Date:      raw.Date,
+		Map:       raw.Map,
+		Hostname:  raw.Hostname,
+		IP:        raw.IP,
+		Port:      raw.Port,
+		Mode:      raw.Mode,
 		Timelimit: raw.Timelimit,
 		Fraglimit: raw.Fraglimit,
-		Duration: raw.Duration,
-		Demo:     raw.Demo,
-		Teams:    raw.Teams,
-		Players:  make([]DemoInfoPlayer, 0, len(raw.Players)),
+		Duration:  raw.Duration,
+		Demo:      raw.Demo,
+		Teams:     cleanedTeams,
+		Players:   make([]DemoInfoPlayer, 0, len(raw.Players)),
 	}
 
 	for _, p := range raw.Players {
