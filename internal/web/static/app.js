@@ -839,6 +839,18 @@ function aggregateDetailBuckets(buckets, binSize, teams) {
 
         for (const team of teams) {
             const teamBuckets = binBuckets.map(b => (b.teamData || {})[team] || {});
+
+            // Aggregate armorByType - use max for each armor type count
+            const armorByType = {};
+            for (const tb of teamBuckets) {
+                const abt = tb.armorByType || {};
+                for (const armorType of ['ra', 'ya', 'ga']) {
+                    if (abt[armorType]) {
+                        armorByType[armorType] = Math.max(armorByType[armorType] || 0, abt[armorType]);
+                    }
+                }
+            }
+
             aggregated.teamData[team] = {
                 // Use max within bin for player counts (shows peak control)
                 playersWithRL: Math.max(...teamBuckets.map(tb => tb.playersWithRL || 0)),
@@ -849,7 +861,9 @@ function aggregateDetailBuckets(buckets, binSize, teams) {
                 playersWithRing: Math.max(...teamBuckets.map(tb => tb.playersWithRing || 0)),
                 // Use average for health/armor totals
                 totalHealth: Math.round(teamBuckets.reduce((sum, tb) => sum + (tb.totalHealth || 0), 0) / teamBuckets.length),
-                totalArmor: Math.round(teamBuckets.reduce((sum, tb) => sum + (tb.totalArmor || 0), 0) / teamBuckets.length)
+                totalArmor: Math.round(teamBuckets.reduce((sum, tb) => sum + (tb.totalArmor || 0), 0) / teamBuckets.length),
+                // Preserve armor type breakdown
+                armorByType: armorByType
             };
         }
 
