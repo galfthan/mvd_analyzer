@@ -606,6 +606,7 @@ function resetTimelineState() {
     // Clear all timeline graph containers
     const containers = [
         'overview-graph', 'overview-axis', 'detail-graph', 'detail-axis',
+        'powerup-lines-top', 'powerup-lines-bottom',
         'health-armor-graph', 'health-axis', 'frags-graph', 'frags-axis',
         'score-graph', 'score-axis', 'kill-messages', 'team-a-messages', 'team-b-messages'
     ];
@@ -1112,16 +1113,15 @@ function updateDetailGraph(startTime, endTime) {
     const binSize = getOptimalBinSize(selectionDuration);
     const displayBuckets = aggregateDetailBuckets(filteredBuckets, binSize, teams);
 
-    // Find max value for scaling (use 4 as typical max for 4v4)
+    // Find max value for scaling (weapons only, use 4 as typical max for 4v4)
     let maxTeamValue = 4;
     for (const bucket of displayBuckets) {
         const td = bucket.teamData || {};
         const teamA = td[teams[0]] || {};
         const teamB = td[teams[1]] || {};
-        const teamATotal = (teamA.playersWithRL || 0) + (teamA.playersWithLG || 0) + (teamA.playersWithRLLG || 0) +
-                          (teamA.playersWithQuad || 0) + (teamA.playersWithPent || 0) + (teamA.playersWithRing || 0);
-        const teamBTotal = (teamB.playersWithRL || 0) + (teamB.playersWithLG || 0) + (teamB.playersWithRLLG || 0) +
-                          (teamB.playersWithQuad || 0) + (teamB.playersWithPent || 0) + (teamB.playersWithRing || 0);
+        // Only count weapons, not powerups
+        const teamATotal = (teamA.playersWithRL || 0) + (teamA.playersWithLG || 0) + (teamA.playersWithRLLG || 0);
+        const teamBTotal = (teamB.playersWithRL || 0) + (teamB.playersWithLG || 0) + (teamB.playersWithRLLG || 0);
         maxTeamValue = Math.max(maxTeamValue, teamATotal, teamBTotal);
     }
 
@@ -1131,7 +1131,7 @@ function updateDetailGraph(startTime, endTime) {
 
     const barHeight = 90; // pixels for max value
 
-    // Create diverging bars (Team A up, Team B down)
+    // Create diverging bars (Team A up, Team B down) - weapons only
     for (const bucket of displayBuckets) {
         const bar = document.createElement('div');
         bar.className = 'diverging-bar';
@@ -1140,37 +1140,109 @@ function updateDetailGraph(startTime, endTime) {
         const teamAData = td[teams[0]] || {};
         const teamBData = td[teams[1]] || {};
 
-        // Build team data objects
+        // Build team data objects (weapons only)
         const teamA = {
             rl: teamAData.playersWithRL || 0,
             lg: teamAData.playersWithLG || 0,
-            rllg: teamAData.playersWithRLLG || 0,
-            quad: teamAData.playersWithQuad || 0,
-            pent: teamAData.playersWithPent || 0,
-            ring: teamAData.playersWithRing || 0
+            rllg: teamAData.playersWithRLLG || 0
         };
         const teamB = {
             rl: teamBData.playersWithRL || 0,
             lg: teamBData.playersWithLG || 0,
-            rllg: teamBData.playersWithRLLG || 0,
-            quad: teamBData.playersWithQuad || 0,
-            pent: teamBData.playersWithPent || 0,
-            ring: teamBData.playersWithRing || 0
+            rllg: teamBData.playersWithRLLG || 0
         };
 
         // Team A goes up (above center axis)
         const topContainer = document.createElement('div');
         topContainer.className = 'diverging-bar-top';
-        addGranularSegments(topContainer, teamA, maxTeamValue, barHeight);
+        addWeaponSegments(topContainer, teamA, maxTeamValue, barHeight);
 
         // Team B goes down (below center axis)
         const bottomContainer = document.createElement('div');
         bottomContainer.className = 'diverging-bar-bottom';
-        addGranularSegments(bottomContainer, teamB, maxTeamValue, barHeight);
+        addWeaponSegments(bottomContainer, teamB, maxTeamValue, barHeight);
 
         bar.appendChild(topContainer);
         bar.appendChild(bottomContainer);
         container.appendChild(bar);
+    }
+
+    // Render powerup lines separately
+    updatePowerupLines(filteredBuckets, startTime, endTime, teams);
+}
+
+// Add weapon segments only (no powerups)
+function addWeaponSegments(container, data, maxValue, maxHeight) {
+    const segments = [
+        { value: data.rl, className: 'rl' },
+        { value: data.lg, className: 'lg' },
+        { value: data.rllg, className: 'rllg' }
+    ];
+
+    for (const seg of segments) {
+        if (seg.value > 0) {
+            const el = document.createElement('div');
+            el.className = `bar-segment ${seg.className}`;
+            el.style.height = `${(seg.value / maxValue) * maxHeight}px`;
+            container.appendChild(el);
+        }
+    }
+}
+
+// Render powerup lines as horizontal spans showing duration
+function updatePowerupLines(buckets, startTime, endTime, teams) {
+    const topContainer = document.getElementById('powerup-lines-top');
+    const bottomContainer = document.getElementById('powerup-lines-bottom');
+    topContainer.innerHTML = '';
+    bottomContainer.innerHTML = '';
+
+    if (buckets.length === 0 || teams.length < 2) return;
+
+    const duration = endTime - startTime;
+    const powerupTypes = ['quad', 'pent', 'ring'];
+
+    // For each team, find contiguous spans where powerup is active
+    for (let teamIdx = 0; teamIdx < 2; teamIdx++) {
+        const team = teams[teamIdx];
+        const container = teamIdx === 0 ? topContainer : bottomContainer;
+
+        for (const powerup of powerupTypes) {
+            const field = `playersWith${powerup.charAt(0).toUpperCase() + powerup.slice(1)}`;
+
+            // Find spans where this powerup is active
+            let spanStart = null;
+            for (let i = 0; i < buckets.length; i++) {
+                const bucket = buckets[i];
+                const td = bucket.teamData || {};
+                const teamData = td[team] || {};
+                const hasIt = (teamData[field] || 0) > 0;
+
+                if (hasIt && spanStart === null) {
+                    spanStart = bucket.startTime;
+                } else if (!hasIt && spanStart !== null) {
+                    // End of span
+                    addPowerupLine(container, spanStart, bucket.startTime, startTime, duration, powerup);
+                    spanStart = null;
+                }
+            }
+            // Handle span that extends to end
+            if (spanStart !== null) {
+                addPowerupLine(container, spanStart, endTime, startTime, duration, powerup);
+            }
+        }
+    }
+}
+
+function addPowerupLine(container, spanStart, spanEnd, viewStart, viewDuration, powerupType) {
+    const leftPct = ((spanStart - viewStart) / viewDuration) * 100;
+    const widthPct = ((spanEnd - spanStart) / viewDuration) * 100;
+
+    if (widthPct > 0) {
+        const line = document.createElement('div');
+        line.className = `powerup-line ${powerupType}`;
+        line.style.left = `${leftPct}%`;
+        line.style.width = `${widthPct}%`;
+        container.appendChild(line);
     }
 }
 

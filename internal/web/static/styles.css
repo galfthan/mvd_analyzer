@@ -733,6 +733,30 @@ table tbody tr:hover {
     pointer-events: none;
 }
 
+/* Powerup Lines Container */
+.powerup-lines-container {
+    position: relative;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    margin: 0 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+
+.powerup-line {
+    position: absolute;
+    height: 6px;
+    border-radius: 2px;
+    opacity: 0.9;
+}
+
+.powerup-line.quad { background: rgba(0, 150, 255, 0.9); top: 2px; }
+.powerup-line.pent { background: rgba(255, 0, 0, 0.9); top: 9px; }
+.powerup-line.ring { background: rgba(255, 235, 59, 0.9); top: 16px; }
+
 /* Health/Armor Graphs */
 .timeline-health-panel {
     min-height: 200px;
