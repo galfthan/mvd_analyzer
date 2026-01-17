@@ -5,10 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/mvd-analyzer/internal/analyzer"
 	"github.com/mvd-analyzer/internal/api"
+	"github.com/mvd-analyzer/internal/hub"
 	"github.com/mvd-analyzer/internal/web"
 )
 
@@ -23,6 +25,8 @@ func main() {
 		analyzeCmd(os.Args[2:])
 	case "serve":
 		serveCmd(os.Args[2:])
+	case "hub":
+		hubCmd(os.Args[2:])
 	case "help", "-h", "--help":
 		printUsage()
 	default:
@@ -37,6 +41,7 @@ func printUsage() {
 	fmt.Println("Usage:")
 	fmt.Println("  mvd-analyzer analyze <file.mvd> [options]  Analyze an MVD demo")
 	fmt.Println("  mvd-analyzer serve [options]               Start web dashboard server")
+	fmt.Println("  mvd-analyzer hub <gameId|url> [options]    Download and analyze from QuakeWorld Hub")
 	fmt.Println("  mvd-analyzer help                          Show this help")
 	fmt.Println()
 	fmt.Println("Analyze Options:")
@@ -45,10 +50,16 @@ func printUsage() {
 	fmt.Println("Serve Options:")
 	fmt.Println("  -p, --port <port>       Port to listen on (default: 8080)")
 	fmt.Println()
+	fmt.Println("Hub Options:")
+	fmt.Println("  -p, --port <port>       Port for web server (default: 8080)")
+	fmt.Println("  -d, --dir <directory>   Directory to save demo (default: current)")
+	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println("  mvd-analyzer analyze demo.mvd")
 	fmt.Println("  mvd-analyzer analyze demo.mvd -o json")
 	fmt.Println("  mvd-analyzer serve -p 3000")
+	fmt.Println("  mvd-analyzer hub 188692")
+	fmt.Println("  mvd-analyzer hub \"https://hub.quakeworld.nu/games/?gameId=188692\"")
 }
 
 func analyzeCmd(args []string) {
@@ -213,4 +224,85 @@ func containsAny(s string, substrs ...string) bool {
 		}
 	}
 	return false
+}
+
+func hubCmd(args []string) {
+	fs := flag.NewFlagSet("hub", flag.ExitOnError)
+	port := fs.Int("p", 8080, "Port for web server")
+	fs.IntVar(port, "port", 8080, "Port for web server")
+	dir := fs.String("d", ".", "Directory to save demo")
+	fs.StringVar(dir, "dir", ".", "Directory to save demo")
+
+	if err := fs.Parse(args); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+
+	if fs.NArg() < 1 {
+		fmt.Fprintf(os.Stderr, "Error: no game ID or URL specified\n")
+		fmt.Fprintf(os.Stderr, "Usage: mvd-analyzer hub <gameId|url>\n")
+		os.Exit(1)
+	}
+
+	input := fs.Arg(0)
+
+	// Parse game ID from input
+	gameID, err := hub.ParseGameID(input)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Fetching game info for ID %d...\n", gameID)
+
+	// Create hub client and fetch game info
+	client := hub.NewClient()
+	game, err := client.GetGame(gameID)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error fetching game: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Game: %s %s on %s\n", game.Mode, game.Matchtag, game.Map)
+	if len(game.Teams) >= 2 {
+		fmt.Printf("Teams: %s (%d) vs %s (%d)\n",
+			game.Teams[0].Name, game.Teams[0].Frags,
+			game.Teams[1].Name, game.Teams[1].Frags)
+	}
+
+	// Generate filename and download path
+	filename := game.GenerateDemoFilename()
+	destPath := filepath.Join(*dir, filename)
+
+	fmt.Printf("Downloading demo to %s...\n", destPath)
+
+	// Download demo
+	if err := client.DownloadDemo(game, destPath); err != nil {
+		fmt.Fprintf(os.Stderr, "Error downloading demo: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Download complete. Analyzing...")
+
+	// Analyze the downloaded demo
+	registry := analyzer.NewDefaultRegistry()
+	result, err := registry.Analyze(destPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error analyzing demo: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Start web server with results
+	addr := fmt.Sprintf(":%d", *port)
+	fmt.Printf("\nStarting web server on port %d...\n", *port)
+	fmt.Printf("Web dashboard: http://localhost%s\n", addr)
+	fmt.Printf("QuakeWorld Hub: https://hub.quakeworld.nu/games/?gameId=%d\n", gameID)
+	fmt.Println("Press Ctrl+C to stop")
+
+	server := api.NewServer(web.StaticFiles)
+	server.SetInitialResult(result)
+	if err := server.ListenAndServe(addr); err != nil {
+		fmt.Fprintf(os.Stderr, "Server error: %v\n", err)
+		os.Exit(1)
+	}
 }

@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"io/fs"
 	"net/http"
+
+	"github.com/mvd-analyzer/internal/analyzer"
 )
 
 // Server handles HTTP requests for the MVD analyzer
@@ -30,6 +32,7 @@ func (s *Server) setupRoutes() {
 	s.mux.HandleFunc("/api/analyze", s.handleAnalyze)
 	s.mux.HandleFunc("/api/analyses", s.handleListAnalyses)
 	s.mux.HandleFunc("/api/analyses/", s.handleGetAnalysisWrapper)
+	s.mux.HandleFunc("/api/hub/load", s.handleHubLoad)
 
 	// Serve static files for dashboard
 	staticContent, err := fs.Sub(s.staticFS, "static")
@@ -77,4 +80,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // ListenAndServe starts the HTTP server
 func (s *Server) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, s)
+}
+
+// SetInitialResult stores an analysis result that was generated before server start
+// (e.g., from CLI hub command). Returns the generated ID.
+func (s *Server) SetInitialResult(result *analyzer.Result) string {
+	id := generateID()
+	analysesMu.Lock()
+	analyses[id] = result
+	analysesMu.Unlock()
+	return id
 }

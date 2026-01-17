@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/mvd-analyzer/internal/analyzer"
+	"github.com/mvd-analyzer/internal/hub"
 )
 
 var (
@@ -137,4 +138,81 @@ func generateID() string {
 	bytes := make([]byte, 8)
 	rand.Read(bytes)
 	return hex.EncodeToString(bytes)
+}
+
+// handleHubLoad handles POST /api/hub/load
+// Downloads and analyzes a demo from QuakeWorld Hub
+func (s *Server) handleHubLoad(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse request body
+	var req struct {
+		Input string `json:"input"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if req.Input == "" {
+		http.Error(w, "Missing input (game ID or URL)", http.StatusBadRequest)
+		return
+	}
+
+	// Parse game ID
+	gameID, err := hub.ParseGameID(req.Input)
+	if err != nil {
+		http.Error(w, "Invalid game ID: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Fetch game info
+	client := hub.NewClient()
+	game, err := client.GetGame(gameID)
+	if err != nil {
+		http.Error(w, "Failed to fetch game: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Download demo to temp file
+	tempDir := os.TempDir()
+	filename := game.GenerateDemoFilename()
+	tempPath := filepath.Join(tempDir, filename)
+
+	if err := client.DownloadDemo(game, tempPath); err != nil {
+		http.Error(w, "Failed to download demo: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer os.Remove(tempPath)
+
+	// Analyze the demo
+	registry := analyzer.NewDefaultRegistry()
+	result, err := registry.Analyze(tempPath)
+	if err != nil {
+		http.Error(w, "Analysis failed: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Use descriptive filename
+	result.FilePath = filename
+
+	// Store result
+	id := generateID()
+	analysesMu.Lock()
+	analyses[id] = result
+	analysesMu.Unlock()
+
+	// Return result with ID and hub info
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"id":     id,
+		"result": result,
+		"hub": map[string]interface{}{
+			"gameId":    gameID,
+			"viewerUrl": game.GetViewerURLWithTime(0, 0),
+		},
+	})
 }

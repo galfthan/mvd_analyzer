@@ -14,10 +14,15 @@
         </header>
 
         <section id="upload-section" class="card">
-            <h2>Upload Demo</h2>
+            <h2>Load Demo</h2>
             <div class="upload-area" id="drop-zone">
                 <input type="file" id="file-input" accept=".mvd,.mvd.gz" hidden>
                 <p>Drop .mvd file here or <button onclick="document.getElementById('file-input').click()">browse</button></p>
+            </div>
+            <div class="hub-load">
+                <span class="hub-label">or load from</span>
+                <input type="text" id="hub-input" placeholder="Game ID or hub.quakeworld.nu URL">
+                <button id="hub-load-btn" onclick="loadFromHub()">Load from Hub</button>
             </div>
             <div id="upload-status" class="status"></div>
         </section>

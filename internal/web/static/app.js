@@ -48,6 +48,53 @@ function setupTabs() {
     });
 }
 
+// Load demo from QuakeWorld Hub by game ID or URL
+async function loadFromHub() {
+    const input = document.getElementById('hub-input').value.trim();
+    if (!input) {
+        alert('Please enter a game ID or URL');
+        return;
+    }
+
+    const status = document.getElementById('upload-status');
+    const btn = document.getElementById('hub-load-btn');
+
+    status.textContent = 'Fetching from QuakeWorld Hub...';
+    status.className = 'status loading';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/api/hub/load', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ input })
+        });
+
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        const data = await response.json();
+        status.textContent = 'Analysis complete!';
+        status.className = 'status success';
+
+        currentResult = data.result;
+        displayResults(data.result);
+
+        // Store hub info for viewer links
+        if (data.hub) {
+            currentResult.hubInfo = data.hub;
+        }
+    } catch (error) {
+        status.textContent = 'Error: ' + error.message;
+        status.className = 'status error';
+    } finally {
+        btn.disabled = false;
+    }
+}
+
 async function uploadFile(file) {
     const status = document.getElementById('upload-status');
     status.textContent = 'Analyzing...';

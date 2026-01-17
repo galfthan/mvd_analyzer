@@ -76,6 +76,61 @@ header p {
     background: #00b8d9;
 }
 
+.hub-load {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #2a3f5f;
+}
+
+.hub-label {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.hub-load input {
+    background: #1a1a2e;
+    border: 1px solid #2a3f5f;
+    border-radius: 5px;
+    padding: 10px 15px;
+    color: #eee;
+    font-size: 0.95rem;
+    width: 320px;
+}
+
+.hub-load input:focus {
+    outline: none;
+    border-color: #00d9ff;
+}
+
+.hub-load input::placeholder {
+    color: #666;
+}
+
+.hub-load button {
+    background: #0f3460;
+    color: #00d9ff;
+    border: 1px solid #00d9ff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.hub-load button:hover {
+    background: #00d9ff;
+    color: #1a1a2e;
+}
+
+.hub-load button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .status {
     margin-top: 15px;
     padding: 10px;
