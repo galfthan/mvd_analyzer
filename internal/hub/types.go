@@ -48,6 +48,7 @@ func (t *Team) UnmarshalJSON(data []byte) error {
 
 // Player represents a player in a game
 type Player struct {
+	ID    int    `json:"id"`
 	Name  string `json:"name"`
 	Team  string `json:"team"`
 	Frags int    `json:"frags"`
@@ -59,6 +60,7 @@ type Player struct {
 // UnmarshalJSON handles the nested JSON structure for players
 func (p *Player) UnmarshalJSON(data []byte) error {
 	var raw struct {
+		ID    int    `json:"id"`
 		Name  string `json:"name"`
 		Team  string `json:"team"`
 		Frags int    `json:"frags"`
@@ -69,6 +71,7 @@ func (p *Player) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
+	p.ID = raw.ID
 	p.Name = raw.Name
 	p.Team = raw.Team
 	p.Frags = raw.Frags

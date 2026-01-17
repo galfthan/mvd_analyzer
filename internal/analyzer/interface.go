@@ -272,7 +272,8 @@ type TimelineAnalysisResult struct {
 	BucketDuration float64             `json:"bucketDuration"` // Seconds per bucket
 	MatchStartTime float64             `json:"matchStartTime"` // When match actually started (after warmup)
 	Buckets        []TimelineBucket    `json:"buckets"`
-	FragEvents     []TimelineFragEvent `json:"fragEvents,omitempty"` // Frag events for score timeline
+	FragEvents     []TimelineFragEvent `json:"fragEvents,omitempty"`   // Frag events for score timeline
+	PowerupEvents  []PowerupEvent      `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
 }
 
 // TimelineFragEvent represents a single frag with time, player and team info
@@ -280,6 +281,18 @@ type TimelineFragEvent struct {
 	Time   float64 `json:"time"`
 	Player string  `json:"player"` // Player name who got the frag
 	Team   string  `json:"team"`
+}
+
+// PowerupEvent represents a powerup pickup event for Key Moments
+type PowerupEvent struct {
+	Time         float64 `json:"time"`         // Demo time when picked up
+	EndTime      float64 `json:"endTime"`      // Demo time when lost/expired
+	PlayerName   string  `json:"playerName"`   // Player name
+	PlayerSlot   int     `json:"playerSlot"`   // Player slot in demo
+	PlayerUserID int     `json:"playerUserID"` // Player UserID for Hub viewer track param
+	Team         string  `json:"team"`         // Player's team
+	PowerupType  string  `json:"powerupType"`  // "quad", "pent", or "ring"
+	Duration     float64 `json:"duration"`     // Seconds held
 }
 
 // TimelineBucket represents aggregated data for a time slice

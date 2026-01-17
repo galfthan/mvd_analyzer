@@ -683,9 +683,26 @@ Offset  Size  Field
 ------  ----  -----
 0       1     svc_updateuserinfo (40)
 1       1     player_slot (0-31)
-2       4     user_id (little-endian long)
+2       4     user_id (little-endian uint32)
 6       var   userinfo_string (null-terminated)
 ```
+
+### Player Slot vs User ID
+
+These two identifiers serve different purposes:
+
+| Field | Range | Description |
+|-------|-------|-------------|
+| `player_slot` | 0-31 | Client slot on the server. Fixed position in the server's client array, assigned when a player connects based on which slot is available. Used throughout the demo to identify which player entity is being updated. |
+| `user_id` | arbitrary | Unique session identifier assigned by the server. Typically increments with each new connection. Used by external tools (e.g., QuakeWorld Hub viewer's `track` parameter) to identify specific players across demos. |
+
+**Key differences:**
+- **Slot** is positional (limited to 32 clients) and may be reused if a player disconnects
+- **UserID** is unique per session and persists for that player's connection
+- Different demos from the same server may assign different slots to the same player
+- The same player on different servers will have different UserIDs
+
+**Implementation note:** The `svc_updateuserinfo` message is sent multiple times during a demo (e.g., when player info changes). Some server mods (like KTPro) resend userinfo with `user_id=0` or corrupted values in subsequent updates. When parsing, keep the **first valid UserID** (non-zero) for each slot and ignore later updates that have invalid values.
 
 ### Userinfo String Format
 

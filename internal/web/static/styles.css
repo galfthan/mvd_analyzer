@@ -999,3 +999,50 @@ table tbody tr:hover {
 .quake-gold {
     color: #af7834;
 }
+
+/* Key Moments Tab */
+.empty-message {
+    color: #888;
+    text-align: center;
+    padding: 40px;
+    font-style: italic;
+}
+
+.time-cell {
+    font-family: monospace;
+    color: #888;
+}
+
+.powerup-cell {
+    font-weight: bold;
+}
+
+.powerup-cell.quad { color: #0096ff; }
+.powerup-cell.pent { color: #ff5050; }
+.powerup-cell.ring { color: #ffeb3b; }
+
+.viewer-link {
+    color: #00d9ff;
+    text-decoration: none;
+    padding: 4px 12px;
+    border: 1px solid #00d9ff;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.viewer-link:hover {
+    background: #00d9ff;
+    color: #1a1a2e;
+}
+
+#keymoments-table th:first-child,
+#keymoments-table td:first-child {
+    width: 80px;
+}
+
+#keymoments-table th:last-child,
+#keymoments-table td:last-child {
+    width: 100px;
+    text-align: center;
+}

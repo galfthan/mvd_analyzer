@@ -1,6 +1,8 @@
 package analyzer
 
 import (
+	"sort"
+
 	"github.com/mvd-analyzer/internal/mvd"
 	"github.com/mvd-analyzer/internal/parser"
 )
@@ -11,6 +13,7 @@ type TimelineAnalyzer struct {
 	bucketDuration float64
 	playerState    map[int]*timelinePlayerState
 	playerNames    map[int]string // Slot -> player name (from UserInfoEvent)
+	playerUserIDs  map[int]int    // Slot -> UserID (for Hub viewer track param)
 	buckets        []*timelineBucketData
 	fragEventsRaw  []fragEventRaw // Raw frag events (player num, time)
 	lastSampleTime float64
@@ -67,6 +70,7 @@ func NewTimelineAnalyzer() *TimelineAnalyzer {
 		bucketDuration: 1.0, // 1 second buckets for detail resolution
 		playerState:    make(map[int]*timelinePlayerState),
 		playerNames:    make(map[int]string),
+		playerUserIDs:  make(map[int]int),
 		buckets:        make([]*timelineBucketData, 0),
 	}
 }
@@ -89,9 +93,19 @@ func (a *TimelineAnalyzer) OnEvent(event parser.Event) error {
 		// Track frag events from frag updates (more reliable than stat updates)
 		a.handleFragUpdate(e)
 	case *parser.UserInfoEvent:
-		// Track player names for team resolution later
+		// Track player names and UserIDs for team resolution and Hub viewer links
 		if e.Player != nil && e.Player.Name != "" {
 			a.playerNames[e.Player.Slot] = e.Player.Name
+			// Only update UserID if we don't have one yet, or if the new one is valid
+			// Some servers resend userinfo with UserID=0 or corrupted values
+			// Keep the first valid UserID we see for each slot
+			newUserID := e.Player.UserID
+			existingUserID := a.playerUserIDs[e.Player.Slot]
+			if existingUserID == 0 && newUserID > 0 {
+				// No existing ID, use whatever we got (first valid value)
+				a.playerUserIDs[e.Player.Slot] = newUserID
+			}
+			// Otherwise keep existing UserID - first valid value wins
 		}
 	}
 	return nil
@@ -348,11 +362,15 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		}
 	}
 
+	// Detect powerup pickup events for Key Moments
+	powerupEvents := a.detectPowerupEvents(nameToTeam, slotToTeam, slotToPlayer)
+
 	result := &TimelineAnalysisResult{
 		BucketDuration: a.bucketDuration,
 		MatchStartTime: a.matchStartTime,
 		Buckets:        make([]TimelineBucket, len(a.buckets)),
 		FragEvents:     fragEvents,
+		PowerupEvents:  powerupEvents,
 	}
 
 	for i, b := range a.buckets {
@@ -535,4 +553,126 @@ func normalizePlayerName(name string) string {
 		}
 	}
 	return string(result)
+}
+
+// detectPowerupEvents scans buckets for powerup pickup/loss transitions
+func (a *TimelineAnalyzer) detectPowerupEvents(nameToTeam map[string]string, slotToTeam map[int]string, slotToPlayer map[int]string) []PowerupEvent {
+	if len(a.buckets) == 0 {
+		return nil
+	}
+
+	events := []PowerupEvent{}
+
+	type powerupInfo struct {
+		field string
+		name  string
+	}
+	powerupTypes := []powerupInfo{
+		{"hasQuad", "quad"},
+		{"hasPent", "pent"},
+		{"hasRing", "ring"},
+	}
+
+	// Track active powerups per player slot per type
+	// Map: slot -> powerupType -> startTime (0 if not active)
+	activeRuns := make(map[int]map[string]float64)
+
+	for _, bucket := range a.buckets {
+		for slot, pData := range bucket.playerData {
+			if activeRuns[slot] == nil {
+				activeRuns[slot] = make(map[string]float64)
+			}
+
+			// Check each powerup type
+			for _, pt := range powerupTypes {
+				var hasIt bool
+				switch pt.field {
+				case "hasQuad":
+					hasIt = pData.hasQuad
+				case "hasPent":
+					hasIt = pData.hasPent
+				case "hasRing":
+					hasIt = pData.hasRing
+				}
+
+				startTime := activeRuns[slot][pt.name]
+
+				if hasIt && startTime == 0 {
+					// Powerup just picked up
+					activeRuns[slot][pt.name] = bucket.startTime
+				} else if !hasIt && startTime > 0 {
+					// Powerup just lost
+					event := a.createPowerupEvent(slot, pt.name, startTime, bucket.startTime, nameToTeam, slotToTeam, slotToPlayer)
+					events = append(events, event)
+					activeRuns[slot][pt.name] = 0
+				}
+			}
+		}
+	}
+
+	// Handle powerups still active at end of demo
+	lastBucket := a.buckets[len(a.buckets)-1]
+	for slot, runs := range activeRuns {
+		for pType, startTime := range runs {
+			if startTime > 0 {
+				event := a.createPowerupEvent(slot, pType, startTime, lastBucket.endTime, nameToTeam, slotToTeam, slotToPlayer)
+				events = append(events, event)
+			}
+		}
+	}
+
+	// Sort by time
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].Time < events[j].Time
+	})
+
+	return events
+}
+
+// createPowerupEvent creates a PowerupEvent with resolved player info
+func (a *TimelineAnalyzer) createPowerupEvent(slot int, powerupType string, startTime, endTime float64, nameToTeam map[string]string, slotToTeam map[int]string, slotToPlayer map[int]string) PowerupEvent {
+	event := PowerupEvent{
+		Time:        startTime,
+		EndTime:     endTime,
+		PlayerSlot:  slot,
+		PowerupType: powerupType,
+		Duration:    endTime - startTime,
+	}
+
+	// Set UserID from our tracking map (used for Hub viewer track param)
+	if userID, ok := a.playerUserIDs[slot]; ok {
+		event.PlayerUserID = userID
+	}
+
+	// Resolve player name - try ctx.Players first
+	if player := a.ctx.Players[slot]; player != nil {
+		event.PlayerName = player.Name
+		event.Team = player.Team
+		// Also get UserID from player info if not already set
+		if event.PlayerUserID == 0 && player.UserID != 0 {
+			event.PlayerUserID = player.UserID
+		}
+	}
+
+	// Fallback to local tracking
+	if event.PlayerName == "" {
+		if name, ok := a.playerNames[slot]; ok {
+			event.PlayerName = name
+		}
+	}
+
+	// Fallback to slot mapping
+	if event.PlayerName == "" {
+		event.PlayerName = slotToPlayer[slot]
+	}
+
+	// Resolve team if not set
+	if event.Team == "" && event.PlayerName != "" {
+		event.Team = nameToTeam[event.PlayerName]
+	}
+	if event.Team == "" {
+		event.Team = slotToTeam[slot]
+	}
+
+	return event
 }

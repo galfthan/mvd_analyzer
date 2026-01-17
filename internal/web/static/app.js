@@ -81,12 +81,13 @@ async function loadFromHub() {
         status.className = 'status success';
 
         currentResult = data.result;
-        displayResults(data.result);
 
-        // Store hub info for viewer links
+        // Store hub info for viewer links (before displayResults so Key Moments can use it)
         if (data.hub) {
             currentResult.hubInfo = data.hub;
         }
+
+        displayResults(data.result);
     } catch (error) {
         status.textContent = 'Error: ' + error.message;
         status.className = 'status error';
@@ -170,6 +171,11 @@ function displayResults(result) {
     // Timeline Analysis (new graphical view)
     if (result.timelineAnalysis || result.messages?.events) {
         displayTimelineAnalysis(result);
+    }
+
+    // Key Moments (powerup runs)
+    if (result.timelineAnalysis?.powerupEvents) {
+        displayKeyMoments(result);
     }
 }
 
@@ -441,6 +447,75 @@ function getAccuracyClass(acc) {
     if (acc >= 40) return 'accuracy-high';
     if (acc >= 25) return 'accuracy-medium';
     return 'accuracy-low';
+}
+
+function displayKeyMoments(result) {
+    const tbody = document.getElementById('keymoments-body');
+    const emptyMsg = document.getElementById('keymoments-empty');
+    tbody.innerHTML = '';
+
+    const powerupEvents = result.timelineAnalysis?.powerupEvents || [];
+    const matchStartTime = result.timelineAnalysis?.matchStartTime || 0;
+
+    if (powerupEvents.length === 0) {
+        emptyMsg.style.display = 'block';
+        return;
+    }
+    emptyMsg.style.display = 'none';
+
+    // Get hub info for viewer links (from currentResult which may have hubInfo set)
+    const hubInfo = currentResult?.hubInfo;
+
+    powerupEvents.forEach(event => {
+        const tr = document.createElement('tr');
+
+        // Calculate match-relative time for display
+        const relTime = Math.max(0, event.time - matchStartTime);
+
+        // Build viewer URL if hub info available
+        let watchCell = '-';
+        if (hubInfo && hubInfo.gameId) {
+            // Use raw demo time for Hub viewer (includes countdown period)
+            // Demo time = event.time (already in demo time, not match-relative)
+            const fromTime = Math.max(0, Math.floor(event.time) - 10);
+            const toTime = Math.floor(event.endTime) + 5;
+
+            // Use playerUserID from MVD demo data - this is what Hub viewer expects for track param
+            // Falls back to playerSlot if UserID is 0 (shouldn't happen in well-formed demos)
+            const trackId = event.playerUserID || event.playerSlot;
+
+            const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
+            watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Watch</a>`;
+        }
+
+        // Powerup display with color
+        const powerupDisplay = getPowerupDisplay(event.powerupType);
+
+        tr.innerHTML = `
+            <td class="time-cell">${formatTime(relTime)}</td>
+            <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
+            <td>${escapeHtml(event.playerName || 'Unknown')}</td>
+            <td>${escapeHtml(event.team || '-')}</td>
+            <td>${Math.round(event.duration)}s</td>
+            <td>${watchCell}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function getPowerupDisplay(type) {
+    switch(type) {
+        case 'quad': return 'Quad';
+        case 'pent': return 'Pent';
+        case 'ring': return 'Ring';
+        default: return type;
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function formatDuration(seconds) {

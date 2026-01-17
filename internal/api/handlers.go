@@ -205,7 +205,7 @@ func (s *Server) handleHubLoad(w http.ResponseWriter, r *http.Request) {
 	analyses[id] = result
 	analysesMu.Unlock()
 
-	// Return result with ID and hub info
+	// Return result with ID and hub info (including players for viewer track IDs)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"id":     id,
@@ -213,6 +213,7 @@ func (s *Server) handleHubLoad(w http.ResponseWriter, r *http.Request) {
 		"hub": map[string]interface{}{
 			"gameId":    gameID,
 			"viewerUrl": game.GetViewerURLWithTime(0, 0),
+			"players":   game.Players,
 		},
 	})
 }

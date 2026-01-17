@@ -34,6 +34,7 @@
             <div class="tab-nav">
                 <button class="tab-btn active" data-tab="summary">Summary</button>
                 <button class="tab-btn" data-tab="timeline">Timeline</button>
+                <button class="tab-btn" data-tab="keymoments">Key Moments</button>
             </div>
 
             <!-- Summary Tab -->
@@ -277,6 +278,29 @@
                     <div class="panel timeline-messages-panel">
                         <h3 id="team-b-chat-title">Team B Chat</h3>
                         <div class="timeline-messages-scroll" id="team-b-messages"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Moments Tab -->
+            <div id="tab-keymoments" class="tab-content">
+                <div class="panel">
+                    <h3>Powerup Runs</h3>
+                    <table class="stats-table" id="keymoments-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Powerup</th>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>Duration</th>
+                                <th>Watch</th>
+                            </tr>
+                        </thead>
+                        <tbody id="keymoments-body"></tbody>
+                    </table>
+                    <div id="keymoments-empty" class="empty-message" style="display: none;">
+                        No powerup pickups detected in this demo.
                     </div>
                 </div>
             </div>
