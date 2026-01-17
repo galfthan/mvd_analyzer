@@ -171,11 +171,6 @@ function displayResults(result) {
     if (result.timelineAnalysis || result.messages?.events) {
         displayTimelineAnalysis(result);
     }
-
-    // Accuracy tab
-    if (result.weaponStats) {
-        displayAccuracyTable(result.weaponStats.playerStats, result.match ? result.match.players : [], demoInfo);
-    }
 }
 
 function displayTeamsFromDemoInfo(demoInfo) {
@@ -439,81 +434,6 @@ function displayTimeline(events, teams) {
         `;
 
         container.appendChild(row);
-    });
-}
-
-function displayAccuracyTable(playerStats, players, demoInfo) {
-    const tbody = document.getElementById('accuracy-body');
-    tbody.innerHTML = '';
-
-    const data = [];
-
-    if (demoInfo && demoInfo.players) {
-        for (const player of demoInfo.players) {
-            const weapons = player.weapons || {};
-            const sg = weapons.sg || {};
-            const lg = weapons.lg || {};
-            const rl = weapons.rl || {};
-
-            const sgAcc = sg.acc && sg.acc.attacks > 0 ? (sg.acc.hits / sg.acc.attacks) * 100 : 0;
-            const lgAcc = lg.acc && lg.acc.attacks > 0 ? (lg.acc.hits / lg.acc.attacks) * 100 : 0;
-
-            const rlDmg = rl.damage?.enemy || 0;
-            const totalDmg = player.dmg?.given || 0;
-
-            data.push({
-                name: player.name,
-                team: player.team || '',
-                sgAcc: sgAcc,
-                lgAcc: lgAcc,
-                sgShots: sg.acc?.attacks || 0,
-                sgHits: sg.acc?.hits || 0,
-                lgShots: lg.acc?.attacks || 0,
-                lgHits: lg.acc?.hits || 0,
-                rlDmg: rlDmg,
-                totalDmg: totalDmg
-            });
-        }
-    } else {
-        for (const [name, stats] of Object.entries(playerStats)) {
-            const playerInfo = players.find(p => p.name === name);
-            const sg = stats.weapons?.sg || {};
-            const lg = stats.weapons?.lg || {};
-            const rl = stats.weapons?.rl || {};
-
-            let totalDmg = 0;
-            for (const w of Object.values(stats.weapons || {})) {
-                totalDmg += w.damage || 0;
-            }
-
-            data.push({
-                name: name,
-                team: playerInfo ? playerInfo.team : '',
-                sgAcc: sg.accuracy || 0,
-                lgAcc: lg.accuracy || 0,
-                sgShots: sg.shots || 0,
-                sgHits: sg.hits || 0,
-                lgShots: lg.shots || 0,
-                lgHits: lg.hits || 0,
-                rlDmg: rl.damage || 0,
-                totalDmg: totalDmg
-            });
-        }
-    }
-
-    data.sort((a, b) => b.totalDmg - a.totalDmg);
-
-    data.forEach(player => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${escapeHtml(player.name)}</td>
-            <td>${escapeHtml(player.team)}</td>
-            <td class="${getAccuracyClass(player.sgAcc)}">${player.sgAcc.toFixed(1)}% <span class="acc-detail">(${player.sgHits}/${player.sgShots})</span></td>
-            <td class="${getAccuracyClass(player.lgAcc)}">${player.lgAcc.toFixed(1)}% <span class="acc-detail">(${player.lgHits}/${player.lgShots})</span></td>
-            <td>${player.rlDmg}</td>
-            <td>${player.totalDmg}</td>
-        `;
-        tbody.appendChild(tr);
     });
 }
 
