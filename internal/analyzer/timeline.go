@@ -3,6 +3,7 @@ package analyzer
 import (
 	"sort"
 
+	"github.com/mvd-analyzer/internal/loc"
 	"github.com/mvd-analyzer/internal/mvd"
 	"github.com/mvd-analyzer/internal/parser"
 )
@@ -19,6 +20,7 @@ type TimelineAnalyzer struct {
 	lastSampleTime float64
 	matchStartTime float64
 	matchStarted   bool
+	locFinder      *loc.Finder // Location finder for map (nil if no .loc file)
 }
 
 // fragEventRaw tracks a frag before team assignment
@@ -37,6 +39,7 @@ type timelinePlayerState struct {
 	rockets int
 	cells   int
 	frags   int // Current frag count
+	x, y, z float32 // Last known position
 }
 
 // timelineBucketData holds raw aggregated data during analysis
@@ -62,6 +65,8 @@ type playerBucketRawData struct {
 	nails     int
 	rockets   int
 	cells     int
+	x, y, z   float32 // Position
+	location  string  // Named location from .loc file
 }
 
 // NewTimelineAnalyzer creates a new timeline analyzer
@@ -80,6 +85,11 @@ func (a *TimelineAnalyzer) Name() string { return "timelineAnalysis" }
 func (a *TimelineAnalyzer) Init(ctx *Context) error {
 	a.ctx = ctx
 	return nil
+}
+
+// SetLocFinder sets the location finder for map position lookups
+func (a *TimelineAnalyzer) SetLocFinder(finder *loc.Finder) {
+	a.locFinder = finder
 }
 
 func (a *TimelineAnalyzer) OnEvent(event parser.Event) error {
@@ -107,8 +117,19 @@ func (a *TimelineAnalyzer) OnEvent(event parser.Event) error {
 			}
 			// Otherwise keep existing UserID - first valid value wins
 		}
+	case *parser.PlayerPositionEvent:
+		// Track player positions
+		a.handlePositionUpdate(e)
 	}
 	return nil
+}
+
+func (a *TimelineAnalyzer) handlePositionUpdate(e *parser.PlayerPositionEvent) {
+	// Always track position, even during warmup (for continuity)
+	state := a.getOrCreatePlayerState(e.PlayerNum)
+	state.x = e.Origin[0]
+	state.y = e.Origin[1]
+	state.z = e.Origin[2]
 }
 
 func (a *TimelineAnalyzer) detectMatchStart(e *parser.PrintEvent) {
@@ -243,6 +264,11 @@ func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 			pData.armorType = "ga"
 		}
 
+		// Track position (location name resolved in Finalize)
+		pData.x = state.x
+		pData.y = state.y
+		pData.z = state.z
+
 		bucket.playerData[slot] = pData
 	}
 }
@@ -278,6 +304,24 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		lastBucket := a.buckets[len(a.buckets)-1]
 		if lastBucket.endTime > a.lastSampleTime {
 			a.sampleCurrentState(lastBucket.endTime)
+		}
+	}
+
+	// Try to load loc file from DemoInfo.Map if not already loaded
+	if a.locFinder == nil && a.ctx.DemoInfo != nil && a.ctx.DemoInfo.Map != "" {
+		if finder, err := loc.LoadForMap(a.ctx.DemoInfo.Map); err == nil {
+			a.locFinder = finder
+		}
+	}
+
+	// Resolve location names now that we have the loc finder
+	if a.locFinder != nil {
+		for _, bucket := range a.buckets {
+			for _, pData := range bucket.playerData {
+				if pData.x != 0 || pData.y != 0 || pData.z != 0 {
+					pData.location = a.locFinder.FindNearest(pData.x, pData.y, pData.z)
+				}
+			}
 		}
 	}
 
@@ -416,6 +460,10 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 				Nails:     pRaw.nails,
 				Rockets:   pRaw.rockets,
 				Cells:     pRaw.cells,
+				X:         pRaw.x,
+				Y:         pRaw.y,
+				Z:         pRaw.z,
+				Location:  pRaw.location,
 			}
 
 			// Aggregate for team stats

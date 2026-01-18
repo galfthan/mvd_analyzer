@@ -326,6 +326,12 @@ type PlayerBucketData struct {
 	Nails   int `json:"nails,omitempty"`
 	Rockets int `json:"rockets,omitempty"`
 	Cells   int `json:"cells,omitempty"`
+
+	// Position (from svc_playerinfo)
+	X        float32 `json:"x,omitempty"`        // World X coordinate
+	Y        float32 `json:"y,omitempty"`        // World Y coordinate
+	Z        float32 `json:"z,omitempty"`        // World Z coordinate
+	Location string  `json:"location,omitempty"` // Named location from .loc file
 }
 
 // TeamBucketData holds per-team aggregated stats for a time bucket

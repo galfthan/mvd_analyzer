@@ -245,6 +245,7 @@ type ServerData struct {
 	GameDir           string
 	ServerTime        float32
 	LevelName         string
+	MapFile           string // BSP filename from model list (e.g., "maps/dm2.bsp")
 	Gravity           float32
 	StopSpeed         float32
 	MaxSpeed          float32

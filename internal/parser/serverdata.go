@@ -118,3 +118,33 @@ func (p *Parser) parseServerData(r *mvd.BufferReader, time float64) error {
 	// Emit event
 	return p.emit(&ServerDataEvent{Data: sd, Time: time})
 }
+
+// parseModelList parses svc_modellist to extract the map file (first model)
+func (p *Parser) parseModelList(r *mvd.BufferReader) error {
+	// Skip start index
+	if _, err := r.ReadByte(); err != nil {
+		return err
+	}
+
+	// First model is always the map BSP file
+	firstModel := true
+	for {
+		s, err := r.ReadString()
+		if err != nil {
+			return err
+		}
+		if s == "" {
+			break
+		}
+
+		// First model is the map file (e.g., "maps/dm2.bsp")
+		if firstModel && p.serverData != nil {
+			p.serverData.MapFile = s
+			firstModel = false
+		}
+	}
+
+	// Skip next index byte
+	r.Skip(1)
+	return nil
+}

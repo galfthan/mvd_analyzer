@@ -32,12 +32,13 @@ type Handler func(event Event) error
 
 // Parser parses network message payloads
 type Parser struct {
-	decoder     *mvd.Decoder
-	serverData  *mvd.ServerData
-	players     [mvd.MaxClients]*mvd.PlayerInfo
-	playerStats [mvd.MaxClients]*mvd.Stats
-	handlers    []Handler
-	floatCoords bool
+	decoder         *mvd.Decoder
+	serverData      *mvd.ServerData
+	players         [mvd.MaxClients]*mvd.PlayerInfo
+	playerStats     [mvd.MaxClients]*mvd.Stats
+	playerPositions [mvd.MaxClients][3]float32 // Last known position per player (for delta updates)
+	handlers        []Handler
+	floatCoords     bool
 }
 
 // NewParser creates a new parser
@@ -156,6 +157,16 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 
 		case mvd.SvcUpdateFrags:
 			if err := p.parseUpdateFrags(r, msg.Time); err != nil {
+				return nil
+			}
+
+		case mvd.SvcPlayerInfo:
+			if err := p.parsePlayerInfo(r, msg.Time, p.floatCoords); err != nil {
+				return nil
+			}
+
+		case mvd.SvcModelList:
+			if err := p.parseModelList(r); err != nil {
 				return nil
 			}
 
