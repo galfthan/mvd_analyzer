@@ -507,6 +507,57 @@ for {
 
 ---
 
+## svc_modellist (45) - Model Precache List
+
+Contains the list of models used by the map. The **first model** is always the map BSP file, which provides the authoritative map filename.
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_modellist (45)
+1       1     start_index (usually 0)
+
+// Model list (null-terminated strings until empty string)
+?       var   model_1 (string, e.g., "maps/dm2.bsp")  <- Map BSP file
+?       var   model_2 (string, e.g., "progs/player.mdl")
+...
+?       var   model_N (string)
+?       1     empty string (0x00 terminator)
+?       1     next_index (for continuation, usually 0)
+```
+
+### Map Name Sources
+
+There are two places to get the map name, serving different purposes:
+
+| Source | Field | Example | Use Case |
+|--------|-------|---------|----------|
+| `svc_serverdata` | `level_name` | `"Claustrophobopolis"` | Display name shown to players |
+| `svc_modellist` | First model | `"maps/dm2.bsp"` | BSP filename for loading .loc files, etc. |
+
+**Example parsing**:
+```go
+func parseModelList(r *BufferReader) string {
+    r.ReadByte() // skip start_index
+
+    for {
+        model := r.ReadString()
+        if model == "" {
+            break
+        }
+        // First model is always the map BSP
+        if strings.HasPrefix(model, "maps/") {
+            // Extract "dm2" from "maps/dm2.bsp"
+            return strings.TrimSuffix(strings.TrimPrefix(model, "maps/"), ".bsp")
+        }
+    }
+    r.ReadByte() // skip next_index
+    return ""
+}
+```
+
+---
+
 ## svc_playerinfo (42) - Player State Update
 
 This is the core message type for player positions in MVD. The format differs between MVD and standard QWD.
@@ -995,6 +1046,124 @@ Offset  Size  Field
 **Block numbering**: JSON may be split across multiple blocks. Blocks are numbered 1, 2, 3, ..., 0 where **block 0 is the LAST block**. Concatenate blocks in order: 1, 2, ..., n, then 0.
 
 *Source: ezQuake `sv_demo_misc.c:851-873`*
+
+#### KTX Demoinfo JSON Schema
+
+The JSON structure is **KTX mod specific**. Other server mods may use different schemas or omit demoinfo entirely.
+
+**Example JSON** (abbreviated):
+```json
+{
+  "version": 1,
+  "date": "2024-01-15 20:30:00 UTC",
+  "map": "dm2",
+  "hostname": "QW Server",
+  "ip": "192.168.1.1",
+  "port": 27500,
+  "mode": "4on4",
+  "tl": 20,
+  "fl": 0,
+  "duration": 1200,
+  "demo": "4on4_red_vs_blue[dm2]20240115-2030.mvd",
+  "teams": ["red", "blue"],
+  "players": [
+    {
+      "name": "PlayerName",
+      "team": "red",
+      "top-color": 4,
+      "bottom-color": 4,
+      "ping": 25,
+      "login": "player_login",
+      "stats": {
+        "frags": 15,
+        "deaths": 10,
+        "tk": 0,
+        "spawn-frags": 2,
+        "kills": 15,
+        "suicides": 0
+      },
+      "dmg": {
+        "taken": 1500,
+        "given": 2200,
+        "team": 150,
+        "self": 80,
+        "team-weapons": 50,
+        "enemy-weapons": 1800
+      },
+      "spree": {
+        "max": 5,
+        "quad": 3
+      },
+      "control": 45.5,
+      "speed": {
+        "avg": 320.5,
+        "max": 580.0
+      },
+      "weapons": {
+        "rl": {
+          "acc": { "virtual": 45.2, "real": 38.5 },
+          "kills": { "total": 8, "team": 0 },
+          "deaths": 3,
+          "pickups": { "taken": 5, "total-taken": 8, "spawn-taken": 2, "spawn-total-taken": 3 },
+          "damage": { "enemy": 1200, "team": 0 }
+        },
+        "lg": {
+          "acc": { "virtual": 32.1, "real": 28.4 },
+          "kills": { "total": 4, "team": 0 },
+          "deaths": 2,
+          "damage": { "enemy": 650, "team": 0 }
+        }
+      },
+      "items": {
+        "ra": { "took": 3, "time": 45 },
+        "ya": { "took": 5, "time": 30 },
+        "mh": { "took": 2, "time": 15 },
+        "quad": { "took": 1, "time": 30 }
+      }
+    }
+  ]
+}
+```
+
+**Top-level fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `version` | int | Demoinfo schema version |
+| `date` | string | Match date/time (UTC) |
+| `map` | string | Map BSP name (e.g., "dm2") - **authoritative map name** |
+| `hostname` | string | Server hostname |
+| `ip` | string | Server IP address |
+| `port` | int | Server port |
+| `mode` | string | Game mode ("4on4", "2on2", "duel", etc.) |
+| `tl` | int | Timelimit in minutes |
+| `fl` | int | Fraglimit |
+| `duration` | int | Match duration in seconds |
+| `demo` | string | Demo filename |
+| `teams` | string[] | Team names |
+| `players` | object[] | Player data array |
+
+**Player fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Player name (may contain Quake color codes) |
+| `team` | string | Team name |
+| `top-color` | int | Top color (0-13) |
+| `bottom-color` | int | Bottom color (0-13) |
+| `ping` | int | Player ping in ms |
+| `login` | string | Login name (if authenticated) |
+| `stats` | object | Frag/death statistics |
+| `dmg` | object | Damage statistics |
+| `spree` | object | Kill streak info |
+| `control` | float | Control percentage |
+| `speed` | object | Movement speed stats |
+| `weapons` | object | Per-weapon statistics (keyed by weapon name) |
+| `items` | object | Item pickup statistics (keyed by item name) |
+
+**Weapon names**: `"axe"`, `"sg"`, `"ssg"`, `"ng"`, `"sng"`, `"gl"`, `"rl"`, `"lg"`
+
+**Item names**: `"ga"`, `"ya"`, `"ra"`, `"mh"`, `"quad"`, `"pent"`, `"ring"`
 
 ### mvdhidden_dmgdone (0x0007)
 
