@@ -1737,11 +1737,191 @@ function updateScoreAxis(startTime, endTime) {
 // Map Visualization
 // =============================================================================
 
+// Item keywords that should remain uppercase in location names
+const ITEM_KEYWORDS = ['RA', 'YA', 'GA', 'MH', 'RL', 'LG', 'GL', 'NG', 'SNG', 'QUAD', 'PENT', 'RING'];
+
+// Normalize location name: "RA MH" → "RA-MH", "Quad low" → "QUAD-low", "big stairs" → "big-stairs"
+function normalizeLocationName(name) {
+    return name
+        .trim()
+        .replace(/\s+/g, '-')
+        .split('-')
+        .map(part => {
+            const upper = part.toUpperCase();
+            return ITEM_KEYWORDS.includes(upper) ? upper : part.toLowerCase();
+        })
+        .join('-');
+}
+
+// Get color for location based on item type in name
+function getLocationColor(name) {
+    const nameLower = name.toLowerCase();
+
+    // Powerups - bright colors
+    if (nameLower.includes('quad'))  return { fill: 'rgba(80, 120, 255, 0.15)', stroke: '#5078ff', text: '#7090ff' };
+    if (nameLower.includes('pent'))  return { fill: 'rgba(255, 0, 255, 0.15)', stroke: '#ff00ff', text: '#ff66ff' };
+    if (nameLower.includes('ring'))  return { fill: 'rgba(255, 255, 0, 0.15)', stroke: '#ffff00', text: '#ffff66' };
+
+    // Armors
+    if (nameLower.includes('ra'))    return { fill: 'rgba(255, 80, 80, 0.15)', stroke: '#ff5050', text: '#ff8080' };
+    if (nameLower.includes('ya'))    return { fill: 'rgba(255, 200, 50, 0.15)', stroke: '#ffc832', text: '#ffd866' };
+    if (nameLower.includes('ga'))    return { fill: 'rgba(80, 200, 80, 0.15)', stroke: '#50c850', text: '#80d880' };
+
+    // Health
+    if (nameLower.includes('mh'))    return { fill: 'rgba(80, 200, 255, 0.15)', stroke: '#50c8ff', text: '#80d8ff' };
+
+    // Weapons
+    if (nameLower.includes('rl'))    return { fill: 'rgba(200, 100, 50, 0.12)', stroke: '#c86432', text: '#d88050' };
+    if (nameLower.includes('lg'))    return { fill: 'rgba(150, 150, 255, 0.12)', stroke: '#9696ff', text: '#b0b0ff' };
+    if (nameLower.includes('gl'))    return { fill: 'rgba(100, 180, 100, 0.12)', stroke: '#64b464', text: '#80c880' };
+    if (nameLower.includes('sng') || nameLower.includes('ng'))
+                                     return { fill: 'rgba(180, 140, 80, 0.12)', stroke: '#b48c50', text: '#c8a060' };
+
+    // Default - subtle gray
+    return { fill: 'rgba(100, 100, 120, 0.08)', stroke: '#444', text: '#666' };
+}
+
+// Group locations by normalized name and calculate centroid
+function processLocationGroups(locations) {
+    const groups = {};
+
+    for (const loc of locations) {
+        const normalizedName = normalizeLocationName(loc.name);
+        if (!groups[normalizedName]) {
+            groups[normalizedName] = {
+                name: normalizedName,
+                points: [],
+                centroid: { x: 0, y: 0 },
+                color: getLocationColor(normalizedName)
+            };
+        }
+        groups[normalizedName].points.push({ x: loc.x, y: loc.y, z: loc.z });
+    }
+
+    // Calculate centroid for each group
+    for (const group of Object.values(groups)) {
+        let sumX = 0, sumY = 0;
+        for (const p of group.points) {
+            sumX += p.x;
+            sumY += p.y;
+        }
+        group.centroid = {
+            x: sumX / group.points.length,
+            y: sumY / group.points.length
+        };
+    }
+
+    return Object.values(groups);
+}
+
+// Compute convex hull using Graham scan algorithm
+function computeConvexHull(points) {
+    if (points.length < 3) return points;
+
+    // Find lowest point (highest Y in canvas coords)
+    let start = 0;
+    for (let i = 1; i < points.length; i++) {
+        if (points[i].y > points[start].y ||
+            (points[i].y === points[start].y && points[i].x < points[start].x)) {
+            start = i;
+        }
+    }
+
+    // Sort by polar angle from start point
+    const startPoint = points[start];
+    const sorted = points.slice().sort((a, b) => {
+        const angleA = Math.atan2(a.y - startPoint.y, a.x - startPoint.x);
+        const angleB = Math.atan2(b.y - startPoint.y, b.x - startPoint.x);
+        return angleA - angleB;
+    });
+
+    // Build hull with cross-product check
+    const hull = [];
+    for (const p of sorted) {
+        while (hull.length >= 2 && crossProduct(hull[hull.length-2], hull[hull.length-1], p) <= 0) {
+            hull.pop();
+        }
+        hull.push(p);
+    }
+    return hull;
+}
+
+function crossProduct(o, a, b) {
+    return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+}
+
+function expandPolygon(points, distance) {
+    if (points.length === 0) return points;
+
+    let cx = 0, cy = 0;
+    for (const p of points) { cx += p.x; cy += p.y; }
+    cx /= points.length;
+    cy /= points.length;
+
+    return points.map(p => {
+        const dx = p.x - cx;
+        const dy = p.y - cy;
+        const len = Math.sqrt(dx*dx + dy*dy) || 1;
+        return { x: p.x + (dx / len) * distance, y: p.y + (dy / len) * distance };
+    });
+}
+
+// Draw a location region (convex hull or circle for single point)
+function drawLocationRegion(ctx, group, worldToCanvasFunc) {
+    if (group.points.length === 1) {
+        // Single point - draw small circle
+        const pos = worldToCanvasFunc(group.points[0].x, group.points[0].y);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
+        ctx.fillStyle = group.color.fill;
+        ctx.fill();
+        ctx.strokeStyle = group.color.stroke;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    } else {
+        // Multiple points - compute and draw convex hull
+        const canvasPoints = group.points.map(p => worldToCanvasFunc(p.x, p.y));
+        const hull = computeConvexHull(canvasPoints);
+
+        if (hull.length < 3) {
+            // Degenerate case - draw bounding rect with padding
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            for (const p of canvasPoints) {
+                minX = Math.min(minX, p.x);
+                maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y);
+                maxY = Math.max(maxY, p.y);
+            }
+            const pad = 15;
+            ctx.fillStyle = group.color.fill;
+            ctx.fillRect(minX - pad, minY - pad, maxX - minX + pad*2, maxY - minY + pad*2);
+            ctx.strokeStyle = group.color.stroke;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(minX - pad, minY - pad, maxX - minX + pad*2, maxY - minY + pad*2);
+        } else {
+            // Expand hull outward and draw
+            const expanded = expandPolygon(hull, 15);
+            ctx.beginPath();
+            ctx.moveTo(expanded[0].x, expanded[0].y);
+            for (let i = 1; i < expanded.length; i++) {
+                ctx.lineTo(expanded[i].x, expanded[i].y);
+            }
+            ctx.closePath();
+            ctx.fillStyle = group.color.fill;
+            ctx.fill();
+            ctx.strokeStyle = group.color.stroke;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+    }
+}
+
 // Map View State
 let mapState = {
     canvas: null,
     ctx: null,
     locations: [],
+    locationGroups: null, // Cached processed location groups
     bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
     currentTime: 0,
     isPlaying: false,
@@ -1766,6 +1946,7 @@ function initMapView(result) {
     // Get location data from timeline analysis
     const timeline = result.timelineAnalysis;
     mapState.locations = timeline.locationData || [];
+    mapState.locationGroups = null; // Clear cached groups for new demo
 
     // Show/hide no-data message
     const noDataMsg = document.getElementById('map-no-data');
@@ -1969,21 +2150,27 @@ function renderMap(time) {
     ctx.fillStyle = '#0a0a15';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw location labels
-    ctx.font = '11px monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    // Process location groups once (cache in mapState)
+    if (!mapState.locationGroups && mapState.locations.length > 0) {
+        mapState.locationGroups = processLocationGroups(mapState.locations);
+    }
 
-    for (const loc of mapState.locations) {
-        const pos = worldToCanvas(loc.x, loc.y);
-        // Draw subtle dot for location
-        ctx.fillStyle = '#333';
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
-        ctx.fill();
-        // Draw label
-        ctx.fillStyle = '#555';
-        ctx.fillText(loc.name, pos.x, pos.y - 10);
+    // Draw location regions first (background layer)
+    if (mapState.locationGroups) {
+        for (const group of mapState.locationGroups) {
+            drawLocationRegion(ctx, group, worldToCanvas);
+        }
+
+        // Draw single label at centroid for each location
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        for (const group of mapState.locationGroups) {
+            const pos = worldToCanvas(group.centroid.x, group.centroid.y);
+            ctx.fillStyle = group.color.text;
+            ctx.fillText(group.name, pos.x, pos.y);
+        }
     }
 
     // Get player positions at this time
