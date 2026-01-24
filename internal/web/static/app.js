@@ -177,6 +177,11 @@ function displayResults(result) {
     if (result.timelineAnalysis?.powerupEvents) {
         displayKeyMoments(result);
     }
+
+    // Map View
+    if (result.timelineAnalysis) {
+        initMapView(result);
+    }
 }
 
 function displayTeamsFromDemoInfo(demoInfo) {
@@ -1719,5 +1724,451 @@ function updateScoreAxis(startTime, endTime) {
         const span = document.createElement('span');
         span.textContent = formatTime(time);
         container.appendChild(span);
+    }
+}
+
+// =============================================================================
+// Map Visualization
+// =============================================================================
+
+// Map View State
+let mapState = {
+    canvas: null,
+    ctx: null,
+    locations: [],
+    bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
+    currentTime: 0,
+    isPlaying: false,
+    playInterval: null,
+    showTracks: false,
+    tracks: {}, // playerName -> [{x, y}]
+    teams: [],
+    playerSymbols: {}, // playerName -> { symbol, team, teamIdx }
+    initialized: false
+};
+
+const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
+
+function initMapView(result) {
+    if (!result.timelineAnalysis) return;
+
+    mapState.canvas = document.getElementById('map-canvas');
+    if (!mapState.canvas) return;
+    mapState.ctx = mapState.canvas.getContext('2d');
+
+    // Get location data from timeline analysis
+    const timeline = result.timelineAnalysis;
+    mapState.locations = timeline.locationData || [];
+
+    // Show/hide no-data message
+    const noDataMsg = document.getElementById('map-no-data');
+    if (noDataMsg) {
+        noDataMsg.style.display = mapState.locations.length === 0 ? 'block' : 'none';
+    }
+
+    // Calculate bounds from locations and player positions
+    calculateMapBounds(result);
+
+    // Get teams from demoInfo or match
+    if (result.demoInfo?.teams) {
+        mapState.teams = result.demoInfo.teams;
+    } else if (result.match?.teams) {
+        mapState.teams = result.match.teams.map(t => t.name);
+    } else {
+        mapState.teams = [];
+    }
+
+    // Assign symbols to players
+    assignPlayerSymbols(result);
+
+    // Set up time controls (only once)
+    if (!mapState.initialized) {
+        setupMapTimeControls(result);
+        mapState.initialized = true;
+    } else {
+        // Update slider for new demo
+        updateMapSliderRange(result);
+    }
+
+    // Build powerup event list
+    buildMapPowerupList(result);
+
+    // Reset tracks
+    mapState.tracks = {};
+    const showTracksCheckbox = document.getElementById('map-show-tracks');
+    if (showTracksCheckbox) {
+        showTracksCheckbox.checked = false;
+        mapState.showTracks = false;
+    }
+
+    // Initial render at match start
+    mapState.currentTime = timeline.matchStartTime || 0;
+    const slider = document.getElementById('map-timeline-slider');
+    if (slider) slider.value = mapState.currentTime;
+
+    renderMap(mapState.currentTime);
+}
+
+function calculateMapBounds(result) {
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+
+    // From locations
+    for (const loc of mapState.locations) {
+        minX = Math.min(minX, loc.x);
+        maxX = Math.max(maxX, loc.x);
+        minY = Math.min(minY, loc.y);
+        maxY = Math.max(maxY, loc.y);
+    }
+
+    // From player positions in timeline
+    const buckets = result.timelineAnalysis?.buckets || [];
+    for (const bucket of buckets) {
+        for (const [name, data] of Object.entries(bucket.playerData || {})) {
+            if (data.x !== 0 || data.y !== 0) {
+                minX = Math.min(minX, data.x);
+                maxX = Math.max(maxX, data.x);
+                minY = Math.min(minY, data.y);
+                maxY = Math.max(maxY, data.y);
+            }
+        }
+    }
+
+    // Handle case where no data found
+    if (minX === Infinity) {
+        minX = -1000; maxX = 1000;
+        minY = -1000; maxY = 1000;
+    }
+
+    // Add padding (10%)
+    const padX = (maxX - minX) * 0.1;
+    const padY = (maxY - minY) * 0.1;
+
+    mapState.bounds = {
+        minX: minX - padX,
+        maxX: maxX + padX,
+        minY: minY - padY,
+        maxY: maxY + padY
+    };
+}
+
+function worldToCanvas(x, y) {
+    const { minX, maxX, minY, maxY } = mapState.bounds;
+    const canvas = mapState.canvas;
+
+    const worldWidth = maxX - minX;
+    const worldHeight = maxY - minY;
+
+    const scaleX = canvas.width / worldWidth;
+    const scaleY = canvas.height / worldHeight;
+    const scale = Math.min(scaleX, scaleY);
+
+    const offsetX = (canvas.width - worldWidth * scale) / 2;
+    const offsetY = (canvas.height - worldHeight * scale) / 2;
+
+    return {
+        x: offsetX + (x - minX) * scale,
+        y: canvas.height - (offsetY + (y - minY) * scale) // Flip Y
+    };
+}
+
+function assignPlayerSymbols(result) {
+    const demoInfo = result.demoInfo;
+    const players = demoInfo?.players || [];
+
+    mapState.playerSymbols = {};
+
+    // Group players by team
+    const teamPlayers = {};
+    for (const team of mapState.teams) {
+        teamPlayers[team] = [];
+    }
+
+    for (const player of players) {
+        if (player.team && teamPlayers[player.team]) {
+            teamPlayers[player.team].push(player.name);
+        }
+    }
+
+    // Assign symbols
+    for (let teamIdx = 0; teamIdx < mapState.teams.length; teamIdx++) {
+        const team = mapState.teams[teamIdx];
+        const playerList = teamPlayers[team] || [];
+        playerList.forEach((name, i) => {
+            mapState.playerSymbols[name] = {
+                symbol: PLAYER_SYMBOLS[i % PLAYER_SYMBOLS.length],
+                team: team,
+                teamIdx: teamIdx
+            };
+        });
+    }
+
+    // Build legend
+    buildMapLegend();
+}
+
+function buildMapLegend() {
+    const legend = document.getElementById('map-legend');
+    if (!legend) return;
+
+    legend.innerHTML = '<h4>Players</h4>';
+
+    for (let teamIdx = 0; teamIdx < mapState.teams.length; teamIdx++) {
+        const team = mapState.teams[teamIdx];
+        const teamDiv = document.createElement('div');
+        teamDiv.className = 'map-legend-team';
+
+        const teamColor = teamIdx === 0 ? 'player-red' : 'player-blue';
+        teamDiv.innerHTML = `<div class="map-legend-team-name ${teamColor}">${escapeHtml(team)}</div>`;
+
+        for (const [name, info] of Object.entries(mapState.playerSymbols)) {
+            if (info.team === team) {
+                const item = document.createElement('div');
+                item.className = 'map-legend-item';
+                item.innerHTML = `
+                    <span class="map-legend-symbol ${teamColor}">${info.symbol}</span>
+                    <span>${escapeHtml(name)}</span>
+                `;
+                teamDiv.appendChild(item);
+            }
+        }
+
+        legend.appendChild(teamDiv);
+    }
+}
+
+function renderMap(time) {
+    const ctx = mapState.ctx;
+    const canvas = mapState.canvas;
+
+    if (!ctx || !canvas) return;
+
+    // Clear
+    ctx.fillStyle = '#0a0a15';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw location labels
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (const loc of mapState.locations) {
+        const pos = worldToCanvas(loc.x, loc.y);
+        // Draw subtle dot for location
+        ctx.fillStyle = '#333';
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+        // Draw label
+        ctx.fillStyle = '#555';
+        ctx.fillText(loc.name, pos.x, pos.y - 10);
+    }
+
+    // Get player positions at this time
+    const bucket = findBucketAtTime(time);
+
+    // Draw tracks if enabled
+    if (mapState.showTracks) {
+        drawTracks(ctx);
+    }
+
+    // Draw players
+    if (bucket) {
+        ctx.font = 'bold 18px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        for (const [name, data] of Object.entries(bucket.playerData || {})) {
+            if (data.x === 0 && data.y === 0) continue;
+
+            const pos = worldToCanvas(data.x, data.y);
+            const symbolInfo = mapState.playerSymbols[name];
+
+            if (symbolInfo) {
+                // Team color
+                ctx.fillStyle = symbolInfo.teamIdx === 0 ? '#ff5050' : '#50a0ff';
+                ctx.fillText(symbolInfo.symbol, pos.x, pos.y);
+
+                // Add to track if showing tracks
+                if (mapState.showTracks) {
+                    if (!mapState.tracks[name]) mapState.tracks[name] = [];
+                    const lastPos = mapState.tracks[name][mapState.tracks[name].length - 1];
+                    // Only add if moved significantly
+                    if (!lastPos || Math.abs(lastPos.x - pos.x) > 2 || Math.abs(lastPos.y - pos.y) > 2) {
+                        mapState.tracks[name].push({
+                            x: pos.x,
+                            y: pos.y,
+                            teamIdx: symbolInfo.teamIdx
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    // Update time display
+    const matchStart = currentResult?.timelineAnalysis?.matchStartTime || 0;
+    const relTime = time - matchStart;
+    const timeDisplay = document.getElementById('map-current-time');
+    if (timeDisplay) {
+        timeDisplay.textContent = formatTime(Math.max(0, relTime));
+    }
+}
+
+function drawTracks(ctx) {
+    for (const [name, points] of Object.entries(mapState.tracks)) {
+        if (points.length < 2) continue;
+
+        ctx.beginPath();
+        ctx.strokeStyle = points[0].teamIdx === 0
+            ? 'rgba(255, 80, 80, 0.4)'
+            : 'rgba(80, 160, 255, 0.4)';
+        ctx.lineWidth = 2;
+
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+            ctx.lineTo(points[i].x, points[i].y);
+        }
+        ctx.stroke();
+    }
+}
+
+function findBucketAtTime(time) {
+    const buckets = currentResult?.timelineAnalysis?.buckets || [];
+    for (const bucket of buckets) {
+        if (time >= bucket.startTime && time < bucket.endTime) {
+            return bucket;
+        }
+    }
+    // Return last bucket if past end
+    return buckets.length > 0 ? buckets[buckets.length - 1] : null;
+}
+
+function setupMapTimeControls(result) {
+    updateMapSliderRange(result);
+
+    const slider = document.getElementById('map-timeline-slider');
+    if (slider) {
+        slider.addEventListener('input', (e) => {
+            mapState.currentTime = parseFloat(e.target.value);
+            renderMap(mapState.currentTime);
+        });
+    }
+
+    const playPauseBtn = document.getElementById('map-play-pause');
+    if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', toggleMapPlayback);
+    }
+
+    const jumpBackBtn = document.getElementById('map-jump-back');
+    if (jumpBackBtn) {
+        jumpBackBtn.addEventListener('click', () => jumpMapTime(-10));
+    }
+
+    const jumpForwardBtn = document.getElementById('map-jump-forward');
+    if (jumpForwardBtn) {
+        jumpForwardBtn.addEventListener('click', () => jumpMapTime(10));
+    }
+
+    const showTracksCheckbox = document.getElementById('map-show-tracks');
+    if (showTracksCheckbox) {
+        showTracksCheckbox.addEventListener('change', (e) => {
+            mapState.showTracks = e.target.checked;
+            if (!mapState.showTracks) {
+                mapState.tracks = {};
+            }
+            renderMap(mapState.currentTime);
+        });
+    }
+
+    const resetTracksBtn = document.getElementById('map-reset-tracks');
+    if (resetTracksBtn) {
+        resetTracksBtn.addEventListener('click', () => {
+            mapState.tracks = {};
+            renderMap(mapState.currentTime);
+        });
+    }
+}
+
+function updateMapSliderRange(result) {
+    const slider = document.getElementById('map-timeline-slider');
+    if (!slider) return;
+
+    const duration = result.duration || 600;
+    const matchStart = result.timelineAnalysis?.matchStartTime || 0;
+
+    slider.min = matchStart;
+    slider.max = duration;
+    slider.value = matchStart;
+    mapState.currentTime = matchStart;
+}
+
+function toggleMapPlayback() {
+    const btn = document.getElementById('map-play-pause');
+    if (!btn) return;
+
+    if (mapState.isPlaying) {
+        clearInterval(mapState.playInterval);
+        mapState.isPlaying = false;
+        btn.textContent = '▶';
+    } else {
+        mapState.isPlaying = true;
+        btn.textContent = '⏸';
+        mapState.playInterval = setInterval(() => {
+            mapState.currentTime += 1;
+            const slider = document.getElementById('map-timeline-slider');
+            if (slider) {
+                if (mapState.currentTime > parseFloat(slider.max)) {
+                    mapState.currentTime = parseFloat(slider.min);
+                    mapState.tracks = {}; // Reset tracks on loop
+                }
+                slider.value = mapState.currentTime;
+            }
+            renderMap(mapState.currentTime);
+        }, 1000); // 1 second per second (real-time)
+    }
+}
+
+function jumpMapTime(delta) {
+    const slider = document.getElementById('map-timeline-slider');
+    if (!slider) return;
+
+    mapState.currentTime = Math.max(
+        parseFloat(slider.min),
+        Math.min(parseFloat(slider.max), mapState.currentTime + delta)
+    );
+    slider.value = mapState.currentTime;
+    renderMap(mapState.currentTime);
+}
+
+function buildMapPowerupList(result) {
+    const list = document.getElementById('map-powerup-events');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    const events = result.timelineAnalysis?.powerupEvents || [];
+    const matchStart = result.timelineAnalysis?.matchStartTime || 0;
+
+    if (events.length === 0) {
+        list.innerHTML = '<li style="color: #666; font-style: italic;">No powerup events</li>';
+        return;
+    }
+
+    for (const event of events) {
+        const li = document.createElement('li');
+        const relTime = Math.max(0, event.time - matchStart);
+        li.innerHTML = `
+            <span class="time-cell">${formatTime(relTime)}</span>
+            <span class="powerup-cell ${event.powerupType}">${getPowerupDisplay(event.powerupType)}</span>
+            <span>${escapeHtml(event.playerName || 'Unknown')}</span>
+        `;
+        li.addEventListener('click', () => {
+            mapState.currentTime = event.time;
+            const slider = document.getElementById('map-timeline-slider');
+            if (slider) slider.value = event.time;
+            renderMap(event.time);
+        });
+        list.appendChild(li);
     }
 }

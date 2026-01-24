@@ -272,8 +272,17 @@ type TimelineAnalysisResult struct {
 	BucketDuration float64             `json:"bucketDuration"` // Seconds per bucket
 	MatchStartTime float64             `json:"matchStartTime"` // When match actually started (after warmup)
 	Buckets        []TimelineBucket    `json:"buckets"`
-	FragEvents     []TimelineFragEvent `json:"fragEvents,omitempty"`   // Frag events for score timeline
+	FragEvents     []TimelineFragEvent `json:"fragEvents,omitempty"`    // Frag events for score timeline
 	PowerupEvents  []PowerupEvent      `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
+	LocationData   []MapLocation       `json:"locationData,omitempty"`  // Location points from .loc file for map view
+}
+
+// MapLocation represents a named point in a map for visualization
+type MapLocation struct {
+	X    float32 `json:"x"`
+	Y    float32 `json:"y"`
+	Z    float32 `json:"z"`
+	Name string  `json:"name"`
 }
 
 // TimelineFragEvent represents a single frag with time, player and team info

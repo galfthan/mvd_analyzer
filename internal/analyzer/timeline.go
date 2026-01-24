@@ -409,12 +409,28 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	// Detect powerup pickup events for Key Moments
 	powerupEvents := a.detectPowerupEvents(nameToTeam, slotToTeam, slotToPlayer)
 
+	// Export location data for map visualization
+	var locationData []MapLocation
+	if a.locFinder != nil {
+		locs := a.locFinder.Locations()
+		locationData = make([]MapLocation, len(locs))
+		for i, l := range locs {
+			locationData[i] = MapLocation{
+				X:    l.X,
+				Y:    l.Y,
+				Z:    l.Z,
+				Name: l.Name,
+			}
+		}
+	}
+
 	result := &TimelineAnalysisResult{
 		BucketDuration: a.bucketDuration,
 		MatchStartTime: a.matchStartTime,
 		Buckets:        make([]TimelineBucket, len(a.buckets)),
 		FragEvents:     fragEvents,
 		PowerupEvents:  powerupEvents,
+		LocationData:   locationData,
 	}
 
 	for i, b := range a.buckets {

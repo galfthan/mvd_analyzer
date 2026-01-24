@@ -52,6 +52,11 @@ func (f *Finder) FindNearestWithDistance(x, y, z float32) (string, float32) {
 	return nearest, float32(math.Sqrt(float64(minDistSq)))
 }
 
+// Locations returns all locations in the finder
+func (f *Finder) Locations() []Location {
+	return f.locations
+}
+
 // FindLocationsInRadius returns all locations within the given radius of the point
 func (f *Finder) FindLocationsInRadius(x, y, z, radius float32) []Location {
 	if len(f.locations) == 0 {

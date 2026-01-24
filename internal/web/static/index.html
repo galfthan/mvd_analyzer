@@ -34,6 +34,7 @@
             <div class="tab-nav">
                 <button class="tab-btn active" data-tab="summary">Summary</button>
                 <button class="tab-btn" data-tab="timeline">Timeline</button>
+                <button class="tab-btn" data-tab="map">Map</button>
                 <button class="tab-btn" data-tab="keymoments">Key Moments</button>
             </div>
 
@@ -278,6 +279,43 @@
                     <div class="panel timeline-messages-panel">
                         <h3 id="team-b-chat-title">Team B Chat</h3>
                         <div class="timeline-messages-scroll" id="team-b-messages"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Tab -->
+            <div id="tab-map" class="tab-content">
+                <div class="panel map-panel">
+                    <div class="map-controls">
+                        <div class="map-time-controls">
+                            <button id="map-jump-back" title="Jump back 10s">⏮</button>
+                            <button id="map-play-pause" title="Play/Pause">▶</button>
+                            <button id="map-jump-forward" title="Jump forward 10s">⏭</button>
+                            <span id="map-current-time" class="map-time-display">0:00</span>
+                        </div>
+                        <input type="range" id="map-timeline-slider" min="0" max="100" value="0">
+                        <div class="map-track-controls">
+                            <label class="map-checkbox"><input type="checkbox" id="map-show-tracks"> Show trails</label>
+                            <button id="map-reset-tracks">Clear trails</button>
+                        </div>
+                    </div>
+                    <div class="map-main-content">
+                        <div class="map-canvas-container">
+                            <canvas id="map-canvas" width="700" height="700"></canvas>
+                            <div id="map-no-data" class="map-no-data" style="display: none;">
+                                <p>No location data available for this map.</p>
+                                <p>Player positions will still be shown.</p>
+                            </div>
+                        </div>
+                        <div class="map-sidebar">
+                            <div class="map-legend" id="map-legend">
+                                <h4>Players</h4>
+                            </div>
+                            <div class="map-powerup-list">
+                                <h4>Powerup Events</h4>
+                                <ul id="map-powerup-events"></ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
