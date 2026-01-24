@@ -269,12 +269,37 @@ type DemoInfoItem struct {
 
 // TimelineAnalysisResult contains time-bucketed data for timeline visualization
 type TimelineAnalysisResult struct {
-	BucketDuration float64             `json:"bucketDuration"` // Seconds per bucket
-	MatchStartTime float64             `json:"matchStartTime"` // When match actually started (after warmup)
-	Buckets        []TimelineBucket    `json:"buckets"`
-	FragEvents     []TimelineFragEvent `json:"fragEvents,omitempty"`    // Frag events for score timeline
-	PowerupEvents  []PowerupEvent      `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
-	LocationData   []MapLocation       `json:"locationData,omitempty"`  // Location points from .loc file for map view
+	BucketDuration  float64             `json:"bucketDuration"`            // Seconds per graph bucket (1.0s)
+	HighResDuration float64             `json:"highResDuration,omitempty"` // Seconds per high-res bucket (0.05s)
+	MatchStartTime  float64             `json:"matchStartTime"`            // When match actually started (after warmup)
+	Buckets         []TimelineBucket    `json:"buckets"`                   // 1s aggregated buckets for graphs
+	HighResBuckets  []HighResBucket     `json:"highResBuckets,omitempty"`  // High-res buckets for map visualization
+	FragEvents      []TimelineFragEvent `json:"fragEvents,omitempty"`      // Frag events for score timeline
+	PowerupEvents   []PowerupEvent      `json:"powerupEvents,omitempty"`   // Powerup pickups for Key Moments
+	LocationData    []MapLocation       `json:"locationData,omitempty"`    // Location points from .loc file for map view
+}
+
+// HighResBucket - compact bucket for high-resolution map data
+// Uses short JSON keys to reduce payload size
+type HighResBucket struct {
+	T float64                       `json:"t"`           // Start time
+	P map[string]*HighResPlayerData `json:"p,omitempty"` // Player data by name
+}
+
+// HighResPlayerData - full player state snapshot (compact keys)
+type HighResPlayerData struct {
+	X       float32 `json:"x"`
+	Y       float32 `json:"y"`
+	H       int     `json:"h"`             // Health
+	A       int     `json:"a"`             // Armor
+	AT      string  `json:"at,omitempty"`  // Armor type: "ga"/"ya"/"ra"
+	RL      bool    `json:"rl,omitempty"`  // Has rocket launcher
+	LG      bool    `json:"lg,omitempty"`  // Has lightning gun
+	Q       bool    `json:"q,omitempty"`   // Has quad
+	Pent    bool    `json:"pe,omitempty"`  // Has pent
+	R       bool    `json:"r,omitempty"`   // Has ring
+	Rockets int     `json:"rk,omitempty"`  // Rocket ammo
+	Cells   int     `json:"cl,omitempty"`  // Cell ammo
 }
 
 // MapLocation represents a named point in a map for visualization

@@ -8,19 +8,26 @@ import (
 	"github.com/mvd-analyzer/internal/parser"
 )
 
+// Default bucket durations
+const (
+	DefaultHighResBucketDuration = 0.05 // 50ms for high-res map visualization
+	DefaultGraphBucketDuration   = 1.0  // 1 second for graph aggregation
+)
+
 // TimelineAnalyzer tracks time-bucketed player state for timeline visualization
 type TimelineAnalyzer struct {
-	ctx            *Context
-	bucketDuration float64
-	playerState    map[int]*timelinePlayerState
-	playerNames    map[int]string // Slot -> player name (from UserInfoEvent)
-	playerUserIDs  map[int]int    // Slot -> UserID (for Hub viewer track param)
-	buckets        []*timelineBucketData
-	fragEventsRaw  []fragEventRaw // Raw frag events (player num, time)
-	lastSampleTime float64
-	matchStartTime float64
-	matchStarted   bool
-	locFinder      *loc.Finder // Location finder for map (nil if no .loc file)
+	ctx                 *Context
+	bucketDuration      float64 // High-res sampling interval (default 50ms)
+	graphBucketDuration float64 // Graph aggregation interval (always 1s)
+	playerState         map[int]*timelinePlayerState
+	playerNames         map[int]string // Slot -> player name (from UserInfoEvent)
+	playerUserIDs       map[int]int    // Slot -> UserID (for Hub viewer track param)
+	buckets             []*timelineBucketData
+	fragEventsRaw       []fragEventRaw // Raw frag events (player num, time)
+	lastSampleTime      float64
+	matchStartTime      float64
+	matchStarted        bool
+	locFinder           *loc.Finder // Location finder for map (nil if no .loc file)
 }
 
 // fragEventRaw tracks a frag before team assignment
@@ -72,12 +79,19 @@ type playerBucketRawData struct {
 // NewTimelineAnalyzer creates a new timeline analyzer
 func NewTimelineAnalyzer() *TimelineAnalyzer {
 	return &TimelineAnalyzer{
-		bucketDuration: 1.0, // 1 second buckets for detail resolution
-		playerState:    make(map[int]*timelinePlayerState),
-		playerNames:    make(map[int]string),
-		playerUserIDs:  make(map[int]int),
-		buckets:        make([]*timelineBucketData, 0),
+		bucketDuration:      DefaultHighResBucketDuration, // 50ms for high-res map data
+		graphBucketDuration: DefaultGraphBucketDuration,   // 1s for graphs
+		playerState:         make(map[int]*timelinePlayerState),
+		playerNames:         make(map[int]string),
+		playerUserIDs:       make(map[int]int),
+		buckets:             make([]*timelineBucketData, 0, 24000), // Pre-alloc for 20min @ 50ms
 	}
+}
+
+// SetBucketDuration allows configuring the high-res sampling interval.
+// Must be called before Init(). Common values: 0.01 (10ms), 0.05 (50ms), 0.1 (100ms)
+func (a *TimelineAnalyzer) SetBucketDuration(duration float64) {
+	a.bucketDuration = duration
 }
 
 func (a *TimelineAnalyzer) Name() string { return "timelineAnalysis" }
@@ -424,141 +438,298 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		}
 	}
 
-	result := &TimelineAnalysisResult{
-		BucketDuration: a.bucketDuration,
-		MatchStartTime: a.matchStartTime,
-		Buckets:        make([]TimelineBucket, len(a.buckets)),
-		FragEvents:     fragEvents,
-		PowerupEvents:  powerupEvents,
-		LocationData:   locationData,
+	// Build slot->name mapping for exports
+	slotToName := make(map[int]string)
+	for slot := 0; slot < mvd.MaxClients; slot++ {
+		if player := a.ctx.Players[slot]; player != nil && player.Name != "" {
+			slotToName[slot] = player.Name
+		} else if name := slotToPlayer[slot]; name != "" {
+			slotToName[slot] = name
+		} else if name := a.playerNames[slot]; name != "" {
+			slotToName[slot] = name
+		}
 	}
 
-	for i, b := range a.buckets {
-		bucket := TimelineBucket{
-			StartTime:  b.startTime,
-			EndTime:    b.endTime,
-			PlayerData: make(map[string]*PlayerBucketData),
-			TeamData:   make(map[string]*TeamBucketData),
-		}
+	// Export high-res buckets (50ms) for map visualization
+	highResBuckets := a.exportHighResBuckets(slotToName)
 
-		// First, build PlayerData from raw player data
-		// Also resolve names from slot mappings if needed
-		teamAggregates := make(map[string]*teamAggregator)
+	// Aggregate to 1s buckets for graphs
+	graphBuckets := a.aggregateToGraphBuckets(slotToName, slotToTeam)
 
-		for slot, pRaw := range b.playerData {
-			// Get player name, falling back to slot mapping
-			playerName := pRaw.name
-			if playerName == "" {
-				playerName = slotToPlayer[slot]
-			}
-			if playerName == "" {
-				continue // Skip if we can't identify the player
-			}
-
-			// Get team, falling back to slot mapping
-			team := pRaw.team
-			if team == "" {
-				team = slotToTeam[slot]
-			}
-
-			// Build player bucket data
-			bucket.PlayerData[playerName] = &PlayerBucketData{
-				Team:      team,
-				HasRL:     pRaw.hasRL,
-				HasLG:     pRaw.hasLG,
-				HasQuad:   pRaw.hasQuad,
-				HasPent:   pRaw.hasPent,
-				HasRing:   pRaw.hasRing,
-				Health:    pRaw.health,
-				Armor:     pRaw.armor,
-				ArmorType: pRaw.armorType,
-				Shells:    pRaw.shells,
-				Nails:     pRaw.nails,
-				Rockets:   pRaw.rockets,
-				Cells:     pRaw.cells,
-				X:         pRaw.x,
-				Y:         pRaw.y,
-				Z:         pRaw.z,
-				Location:  pRaw.location,
-			}
-
-			// Aggregate for team stats
-			if team != "" {
-				if teamAggregates[team] == nil {
-					teamAggregates[team] = &teamAggregator{
-						armorByType: make(map[string]int),
-					}
-				}
-				agg := teamAggregates[team]
-
-				// Weapons
-				if pRaw.hasRL && pRaw.hasLG {
-					agg.playersWithRLLG++
-					agg.playersWithWeapons++
-				} else if pRaw.hasRL {
-					agg.playersWithRL++
-					agg.playersWithWeapons++
-				} else if pRaw.hasLG {
-					agg.playersWithLG++
-					agg.playersWithWeapons++
-				}
-
-				// Powerups
-				if pRaw.hasQuad {
-					agg.playersWithQuad++
-					agg.playersWithPowerups++
-				}
-				if pRaw.hasPent {
-					agg.playersWithPent++
-					agg.playersWithPowerups++
-				}
-				if pRaw.hasRing {
-					agg.playersWithRing++
-					agg.playersWithPowerups++
-				}
-
-				// Health/Armor
-				agg.healthSamples = append(agg.healthSamples, pRaw.health)
-				agg.armorSamples = append(agg.armorSamples, pRaw.armor)
-				if pRaw.armorType != "" {
-					agg.armorByType[pRaw.armorType]++
-				}
-
-				// Ammo
-				agg.totalShells += pRaw.shells
-				agg.totalNails += pRaw.nails
-				agg.totalRockets += pRaw.rockets
-				agg.totalCells += pRaw.cells
-			}
-		}
-
-		// Build TeamData from aggregates
-		for team, agg := range teamAggregates {
-			bucket.TeamData[team] = &TeamBucketData{
-				PlayersWithRL:       agg.playersWithRL,
-				PlayersWithLG:       agg.playersWithLG,
-				PlayersWithRLLG:     agg.playersWithRLLG,
-				PlayersWithWeapons:  agg.playersWithWeapons,
-				PlayersWithQuad:     agg.playersWithQuad,
-				PlayersWithPent:     agg.playersWithPent,
-				PlayersWithRing:     agg.playersWithRing,
-				PlayersWithPowerups: agg.playersWithPowerups,
-				AvgHealth:           average(agg.healthSamples),
-				AvgArmor:            average(agg.armorSamples),
-				TotalHealth:         sum(agg.healthSamples),
-				TotalArmor:          sum(agg.armorSamples),
-				ArmorByType:         agg.armorByType,
-				TotalShells:         agg.totalShells,
-				TotalNails:          agg.totalNails,
-				TotalRockets:        agg.totalRockets,
-				TotalCells:          agg.totalCells,
-			}
-		}
-
-		result.Buckets[i] = bucket
+	result := &TimelineAnalysisResult{
+		BucketDuration:  a.graphBucketDuration, // 1.0 for graphs
+		HighResDuration: a.bucketDuration,      // 0.05 for map
+		MatchStartTime:  a.matchStartTime,
+		Buckets:         graphBuckets,    // 1s aggregated for graphs
+		HighResBuckets:  highResBuckets,  // 50ms for map visualization
+		FragEvents:      fragEvents,
+		PowerupEvents:   powerupEvents,
+		LocationData:    locationData,
 	}
 
 	return result, nil
+}
+
+// exportHighResBuckets converts internal buckets to compact export format for map
+func (a *TimelineAnalyzer) exportHighResBuckets(slotToName map[int]string) []HighResBucket {
+	result := make([]HighResBucket, 0, len(a.buckets))
+
+	for _, b := range a.buckets {
+		if len(b.playerData) == 0 {
+			continue // Skip empty buckets
+		}
+
+		hb := HighResBucket{
+			T: b.startTime,
+			P: make(map[string]*HighResPlayerData),
+		}
+
+		for slot, pd := range b.playerData {
+			name := slotToName[slot]
+			if name == "" {
+				name = pd.name // Fallback to stored name
+			}
+			if name == "" {
+				continue
+			}
+
+			hb.P[name] = &HighResPlayerData{
+				X:       pd.x,
+				Y:       pd.y,
+				H:       pd.health,
+				A:       pd.armor,
+				AT:      pd.armorType,
+				RL:      pd.hasRL,
+				LG:      pd.hasLG,
+				Q:       pd.hasQuad,
+				Pent:    pd.hasPent,
+				R:       pd.hasRing,
+				Rockets: pd.rockets,
+				Cells:   pd.cells,
+			}
+		}
+
+		if len(hb.P) > 0 {
+			result = append(result, hb)
+		}
+	}
+
+	return result
+}
+
+// aggregateToGraphBuckets groups high-res buckets into 1s buckets for graphs
+func (a *TimelineAnalyzer) aggregateToGraphBuckets(slotToName map[int]string, slotToTeam map[int]string) []TimelineBucket {
+	if len(a.buckets) == 0 {
+		return nil
+	}
+
+	// Calculate how many high-res buckets per graph bucket
+	bucketsPerSecond := int(a.graphBucketDuration / a.bucketDuration)
+	if bucketsPerSecond < 1 {
+		bucketsPerSecond = 1
+	}
+
+	// Calculate number of graph buckets needed
+	numGraphBuckets := (len(a.buckets) + bucketsPerSecond - 1) / bucketsPerSecond
+	graphBuckets := make([]TimelineBucket, 0, numGraphBuckets)
+
+	for i := 0; i < len(a.buckets); i += bucketsPerSecond {
+		end := i + bucketsPerSecond
+		if end > len(a.buckets) {
+			end = len(a.buckets)
+		}
+
+		// Aggregate this window
+		graphBucket := a.aggregateWindow(a.buckets[i:end], slotToName, slotToTeam)
+		graphBuckets = append(graphBuckets, graphBucket)
+	}
+
+	return graphBuckets
+}
+
+// aggregateWindow aggregates a slice of high-res buckets into a single graph bucket
+func (a *TimelineAnalyzer) aggregateWindow(buckets []*timelineBucketData, slotToName map[int]string, slotToTeam map[int]string) TimelineBucket {
+	if len(buckets) == 0 {
+		return TimelineBucket{
+			PlayerData: make(map[string]*PlayerBucketData),
+			TeamData:   make(map[string]*TeamBucketData),
+		}
+	}
+
+	result := TimelineBucket{
+		StartTime:  buckets[0].startTime,
+		EndTime:    buckets[len(buckets)-1].endTime,
+		PlayerData: make(map[string]*PlayerBucketData),
+		TeamData:   make(map[string]*TeamBucketData),
+	}
+
+	// Track per-player aggregates across the window
+	// For weapons/powerups: take MAX (peak control)
+	// For health/armor: take LAST value (current state)
+	playerAggregates := make(map[string]*playerWindowAggregate)
+
+	for _, b := range buckets {
+		for slot, pRaw := range b.playerData {
+			name := slotToName[slot]
+			if name == "" {
+				name = pRaw.name
+			}
+			if name == "" {
+				continue
+			}
+
+			team := slotToTeam[slot]
+			if team == "" {
+				team = pRaw.team
+			}
+
+			if playerAggregates[name] == nil {
+				playerAggregates[name] = &playerWindowAggregate{team: team}
+			}
+			agg := playerAggregates[name]
+
+			// Weapons/powerups: OR (if they had it at any point in window)
+			agg.hasRL = agg.hasRL || pRaw.hasRL
+			agg.hasLG = agg.hasLG || pRaw.hasLG
+			agg.hasQuad = agg.hasQuad || pRaw.hasQuad
+			agg.hasPent = agg.hasPent || pRaw.hasPent
+			agg.hasRing = agg.hasRing || pRaw.hasRing
+
+			// Health/armor/ammo: take last value (overwrite)
+			agg.health = pRaw.health
+			agg.armor = pRaw.armor
+			agg.armorType = pRaw.armorType
+			agg.shells = pRaw.shells
+			agg.nails = pRaw.nails
+			agg.rockets = pRaw.rockets
+			agg.cells = pRaw.cells
+
+			// Position: take last value
+			agg.x = pRaw.x
+			agg.y = pRaw.y
+			agg.z = pRaw.z
+			agg.location = pRaw.location
+		}
+	}
+
+	// Build PlayerData from aggregates
+	teamAggregates := make(map[string]*teamAggregator)
+
+	for name, agg := range playerAggregates {
+		result.PlayerData[name] = &PlayerBucketData{
+			Team:      agg.team,
+			HasRL:     agg.hasRL,
+			HasLG:     agg.hasLG,
+			HasQuad:   agg.hasQuad,
+			HasPent:   agg.hasPent,
+			HasRing:   agg.hasRing,
+			Health:    agg.health,
+			Armor:     agg.armor,
+			ArmorType: agg.armorType,
+			Shells:    agg.shells,
+			Nails:     agg.nails,
+			Rockets:   agg.rockets,
+			Cells:     agg.cells,
+			X:         agg.x,
+			Y:         agg.y,
+			Z:         agg.z,
+			Location:  agg.location,
+		}
+
+		// Aggregate for team stats
+		team := agg.team
+		if team != "" {
+			if teamAggregates[team] == nil {
+				teamAggregates[team] = &teamAggregator{
+					armorByType: make(map[string]int),
+				}
+			}
+			ta := teamAggregates[team]
+
+			// Weapons
+			if agg.hasRL && agg.hasLG {
+				ta.playersWithRLLG++
+				ta.playersWithWeapons++
+			} else if agg.hasRL {
+				ta.playersWithRL++
+				ta.playersWithWeapons++
+			} else if agg.hasLG {
+				ta.playersWithLG++
+				ta.playersWithWeapons++
+			}
+
+			// Powerups
+			if agg.hasQuad {
+				ta.playersWithQuad++
+				ta.playersWithPowerups++
+			}
+			if agg.hasPent {
+				ta.playersWithPent++
+				ta.playersWithPowerups++
+			}
+			if agg.hasRing {
+				ta.playersWithRing++
+				ta.playersWithPowerups++
+			}
+
+			// Health/Armor
+			ta.healthSamples = append(ta.healthSamples, agg.health)
+			ta.armorSamples = append(ta.armorSamples, agg.armor)
+			if agg.armorType != "" {
+				ta.armorByType[agg.armorType]++
+			}
+
+			// Ammo
+			ta.totalShells += agg.shells
+			ta.totalNails += agg.nails
+			ta.totalRockets += agg.rockets
+			ta.totalCells += agg.cells
+		}
+	}
+
+	// Build TeamData from aggregates
+	for team, ta := range teamAggregates {
+		result.TeamData[team] = &TeamBucketData{
+			PlayersWithRL:       ta.playersWithRL,
+			PlayersWithLG:       ta.playersWithLG,
+			PlayersWithRLLG:     ta.playersWithRLLG,
+			PlayersWithWeapons:  ta.playersWithWeapons,
+			PlayersWithQuad:     ta.playersWithQuad,
+			PlayersWithPent:     ta.playersWithPent,
+			PlayersWithRing:     ta.playersWithRing,
+			PlayersWithPowerups: ta.playersWithPowerups,
+			AvgHealth:           average(ta.healthSamples),
+			AvgArmor:            average(ta.armorSamples),
+			TotalHealth:         sum(ta.healthSamples),
+			TotalArmor:          sum(ta.armorSamples),
+			ArmorByType:         ta.armorByType,
+			TotalShells:         ta.totalShells,
+			TotalNails:          ta.totalNails,
+			TotalRockets:        ta.totalRockets,
+			TotalCells:          ta.totalCells,
+		}
+	}
+
+	return result
+}
+
+// playerWindowAggregate holds per-player data during window aggregation
+type playerWindowAggregate struct {
+	team      string
+	hasRL     bool
+	hasLG     bool
+	hasQuad   bool
+	hasPent   bool
+	hasRing   bool
+	health    int
+	armor     int
+	armorType string
+	shells    int
+	nails     int
+	rockets   int
+	cells     int
+	x, y, z   float32
+	location  string
 }
 
 // teamAggregator is used during finalization to aggregate player data into team data

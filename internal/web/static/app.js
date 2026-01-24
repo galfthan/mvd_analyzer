@@ -656,6 +656,8 @@ function formatQuakeMessage(text) {
 // Timeline Analysis State
 let timelineState = {
     buckets: [],
+    highResBuckets: [],    // High-res buckets for map (50ms)
+    highResDuration: 0.05, // High-res bucket interval
     events: [],
     duration: 0,
     matchStartTime: 0,
@@ -672,6 +674,8 @@ let timelineState = {
 // Reset all timeline state for loading a new demo
 function resetTimelineState() {
     timelineState.buckets = [];
+    timelineState.highResBuckets = [];
+    timelineState.highResDuration = 0.05;
     timelineState.events = [];
     timelineState.fragEvents = [];
     timelineState.duration = 0;
@@ -709,6 +713,8 @@ function displayTimelineAnalysis(result) {
     }
 
     timelineState.buckets = timeline?.buckets || [];
+    timelineState.highResBuckets = timeline?.highResBuckets || [];
+    timelineState.highResDuration = timeline?.highResDuration || 0.05;
     timelineState.matchStartTime = timeline?.matchStartTime || 0;
     timelineState.duration = result.duration || 600;
     timelineState.teams = teams;
@@ -1739,7 +1745,8 @@ let mapState = {
     bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
     currentTime: 0,
     isPlaying: false,
-    playInterval: null,
+    animationFrameId: null,
+    lastRenderTime: 0,
     showTracks: false,
     tracks: {}, // playerName -> [{x, y}]
     teams: [],
@@ -1821,15 +1828,30 @@ function calculateMapBounds(result) {
         maxY = Math.max(maxY, loc.y);
     }
 
-    // From player positions in timeline
-    const buckets = result.timelineAnalysis?.buckets || [];
-    for (const bucket of buckets) {
-        for (const [name, data] of Object.entries(bucket.playerData || {})) {
-            if (data.x !== 0 || data.y !== 0) {
-                minX = Math.min(minX, data.x);
-                maxX = Math.max(maxX, data.x);
-                minY = Math.min(minY, data.y);
-                maxY = Math.max(maxY, data.y);
+    // From high-res buckets (if available) - more accurate bounds
+    const highResBuckets = result.timelineAnalysis?.highResBuckets || [];
+    if (highResBuckets.length > 0) {
+        for (const bucket of highResBuckets) {
+            for (const data of Object.values(bucket.p || {})) {
+                if (data.x !== 0 || data.y !== 0) {
+                    minX = Math.min(minX, data.x);
+                    maxX = Math.max(maxX, data.x);
+                    minY = Math.min(minY, data.y);
+                    maxY = Math.max(maxY, data.y);
+                }
+            }
+        }
+    } else {
+        // Fallback to 1s bucket data if no high-res data
+        const buckets = result.timelineAnalysis?.buckets || [];
+        for (const bucket of buckets) {
+            for (const [name, data] of Object.entries(bucket.playerData || {})) {
+                if (data.x !== 0 || data.y !== 0) {
+                    minX = Math.min(minX, data.x);
+                    maxX = Math.max(maxX, data.x);
+                    minY = Math.min(minY, data.y);
+                    maxY = Math.max(maxY, data.y);
+                }
             }
         }
     }
@@ -2033,7 +2055,60 @@ function drawTracks(ctx) {
     }
 }
 
-function findBucketAtTime(time) {
+// Binary search for high-res bucket at or before time
+function findHighResBucketAtTime(time) {
+    const buckets = timelineState.highResBuckets;
+    if (!buckets || buckets.length === 0) {
+        // Fallback to 1s bucket data
+        return findBucketAtTimeFallback(time);
+    }
+
+    let low = 0, high = buckets.length - 1;
+    while (low < high) {
+        const mid = Math.floor((low + high + 1) / 2);
+        if (buckets[mid].t <= time) {
+            low = mid;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    const bucket = buckets[low];
+    if (!bucket) return null;
+
+    // Convert high-res bucket format to expected format for renderMap
+    return {
+        startTime: bucket.t,
+        endTime: bucket.t + timelineState.highResDuration,
+        playerData: convertHighResPlayerData(bucket.p)
+    };
+}
+
+// Convert compact high-res player data to standard format
+function convertHighResPlayerData(p) {
+    if (!p) return {};
+    const result = {};
+    for (const [name, data] of Object.entries(p)) {
+        result[name] = {
+            x: data.x,
+            y: data.y,
+            health: data.h,
+            armor: data.a,
+            armorType: data.at,
+            hasRL: data.rl,
+            hasLG: data.lg,
+            hasQuad: data.q,
+            hasPent: data.pe,
+            hasRing: data.r,
+            rockets: data.rk,
+            cells: data.cl
+        };
+    }
+    return result;
+}
+
+// Fallback to 1s bucket when no high-res data
+function findBucketAtTimeFallback(time) {
     const buckets = currentResult?.timelineAnalysis?.buckets || [];
     for (const bucket of buckets) {
         if (time >= bucket.startTime && time < bucket.endTime) {
@@ -2042,6 +2117,14 @@ function findBucketAtTime(time) {
     }
     // Return last bucket if past end
     return buckets.length > 0 ? buckets[buckets.length - 1] : null;
+}
+
+function findBucketAtTime(time) {
+    // Use high-res buckets if available (for map), otherwise fall back
+    if (timelineState.highResBuckets && timelineState.highResBuckets.length > 0) {
+        return findHighResBucketAtTime(time);
+    }
+    return findBucketAtTimeFallback(time);
 }
 
 function setupMapTimeControls(result) {
@@ -2108,25 +2191,45 @@ function toggleMapPlayback() {
     if (!btn) return;
 
     if (mapState.isPlaying) {
-        clearInterval(mapState.playInterval);
         mapState.isPlaying = false;
+        if (mapState.animationFrameId) {
+            cancelAnimationFrame(mapState.animationFrameId);
+            mapState.animationFrameId = null;
+        }
         btn.textContent = '▶';
     } else {
         mapState.isPlaying = true;
+        mapState.lastRenderTime = performance.now();
         btn.textContent = '⏸';
-        mapState.playInterval = setInterval(() => {
-            mapState.currentTime += 1;
-            const slider = document.getElementById('map-timeline-slider');
-            if (slider) {
-                if (mapState.currentTime > parseFloat(slider.max)) {
-                    mapState.currentTime = parseFloat(slider.min);
-                    mapState.tracks = {}; // Reset tracks on loop
-                }
-                slider.value = mapState.currentTime;
-            }
-            renderMap(mapState.currentTime);
-        }, 1000); // 1 second per second (real-time)
+        animateMapPlayback();
     }
+}
+
+function animateMapPlayback() {
+    if (!mapState.isPlaying) {
+        mapState.animationFrameId = null;
+        return;
+    }
+
+    const now = performance.now();
+    const elapsed = (now - mapState.lastRenderTime) / 1000; // Convert to seconds
+
+    // Advance game time by elapsed real time (1:1 playback speed)
+    mapState.currentTime += elapsed;
+    mapState.lastRenderTime = now;
+
+    const slider = document.getElementById('map-timeline-slider');
+    if (slider) {
+        if (mapState.currentTime > parseFloat(slider.max)) {
+            mapState.currentTime = parseFloat(slider.min);
+            mapState.tracks = {}; // Reset tracks on loop
+        }
+        slider.value = mapState.currentTime;
+    }
+
+    renderMap(mapState.currentTime);
+
+    mapState.animationFrameId = requestAnimationFrame(animateMapPlayback);
 }
 
 function jumpMapTime(delta) {
