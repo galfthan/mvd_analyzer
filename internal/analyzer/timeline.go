@@ -578,9 +578,9 @@ func (a *TimelineAnalyzer) aggregateWindow(buckets []*timelineBucketData, slotTo
 				continue
 			}
 
-			team := slotToTeam[slot]
+			team := pRaw.team
 			if team == "" {
-				team = pRaw.team
+				team = slotToTeam[slot]
 			}
 
 			if playerAggregates[name] == nil {

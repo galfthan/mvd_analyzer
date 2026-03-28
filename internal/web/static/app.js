@@ -145,6 +145,36 @@ function setupTabs() {
             btn.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            // Stop playback on tab switch
+            if (mapState.isPlaying) {
+                mapState.isPlaying = false;
+                if (mapState.animationFrameId) {
+                    cancelAnimationFrame(mapState.animationFrameId);
+                    mapState.animationFrameId = null;
+                }
+                const tlBtn = document.getElementById('timeline-play-pause');
+                if (tlBtn) tlBtn.textContent = '▶';
+                const mapBtn = document.getElementById('map-play-pause');
+                if (mapBtn) mapBtn.textContent = '▶';
+            }
+
+            // Sync current time between tabs
+            if (tabName === 'map') {
+                const mapSlider = document.getElementById('map-timeline-slider');
+                if (mapSlider) mapSlider.value = mapState.currentTime;
+                renderMap(mapState.currentTime);
+                const mapTimeDisplay = document.getElementById('map-current-time');
+                if (mapTimeDisplay) {
+                    const matchStart = timelineState.matchStartTime;
+                    mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime - matchStart));
+                }
+            } else if (tabName === 'timeline') {
+                const tlSlider = document.getElementById('timeline-slider');
+                if (tlSlider) tlSlider.value = mapState.currentTime;
+                updateTimelineTimeDisplay();
+                updateTimeIndicators();
+            }
         });
     });
 }
@@ -775,13 +805,8 @@ let timelineState = {
     duration: 0,
     matchStartTime: 0,
     teams: [],
-    selection: { start: 0, end: 60 },
-    brushing: false,
-    brushMode: null,
-    dragStartX: 0,
-    dragStartSelection: null,
     overviewBucketSize: 5, // Aggregate to 5-second buckets for overview
-    brushInitialized: false // Track if brush handlers are set up
+    controlsInitialized: false // Track if timeline control handlers are set up
 };
 
 // Reset all timeline state for loading a new demo
@@ -794,11 +819,6 @@ function resetTimelineState() {
     timelineState.duration = 0;
     timelineState.matchStartTime = 0;
     timelineState.teams = [];
-    timelineState.selection = { start: 0, end: 60 };
-    timelineState.brushing = false;
-    timelineState.brushMode = null;
-    timelineState.dragStartX = 0;
-    timelineState.dragStartSelection = null;
 
     // Clear all timeline graph containers
     const containers = [
@@ -834,12 +854,8 @@ function displayTimelineAnalysis(result) {
     timelineState.events = result.messages?.events || [];
     timelineState.fragEvents = timeline?.fragEvents || []; // Frag events from stat tracking
 
-    // Start selection at match start
-    const effectiveStart = timelineState.matchStartTime;
-    timelineState.selection = {
-        start: effectiveStart,
-        end: Math.min(effectiveStart + 60, timelineState.duration)
-    };
+    // Set shared current time to match start (0:00 relative)
+    mapState.currentTime = timelineState.matchStartTime;
 
     // Update legend team names
     if (teams.length >= 2) {
@@ -853,8 +869,9 @@ function displayTimelineAnalysis(result) {
 
     renderOverviewGraph();
     renderOverviewAxis();
-    setupBrush();
+    setupTimelineControls();
     updateDetailView();
+    updateTimeIndicators();
 }
 
 function renderOverviewGraph() {
@@ -1064,154 +1081,196 @@ function renderOverviewAxis() {
     }
 }
 
-function setupBrush() {
-    // Only set up event handlers once - they reference timelineState which updates
-    if (timelineState.brushInitialized) {
-        updateBrushPosition();
+function setupTimelineControls() {
+    if (timelineState.controlsInitialized) {
+        updateTimelineSliderRange();
         return;
     }
 
-    const container = document.getElementById('timeline-overview-container');
-    const selection = document.getElementById('brush-selection');
-    const leftHandle = document.getElementById('brush-handle-left');
-    const rightHandle = document.getElementById('brush-handle-right');
+    const slider = document.getElementById('timeline-slider');
+    const playPauseBtn = document.getElementById('timeline-play-pause');
+    const jumpBackBtn = document.getElementById('timeline-jump-back');
+    const jumpForwardBtn = document.getElementById('timeline-jump-forward');
 
-    updateBrushPosition();
+    updateTimelineSliderRange();
 
-    // Mouse event handlers - these reference timelineState dynamically
-    function startDrag(e, mode) {
-        e.preventDefault();
-        timelineState.brushing = true;
-        timelineState.brushMode = mode;
-        timelineState.dragStartX = e.clientX;
-        timelineState.dragStartSelection = { ...timelineState.selection };
-
-        document.addEventListener('mousemove', onDrag);
-        document.addEventListener('mouseup', endDrag);
-    }
-
-    function onDrag(e) {
-        if (!timelineState.brushing) return;
-
-        const containerRect = container.getBoundingClientRect();
-        const containerWidth = containerRect.width - 20; // Account for padding
-        const currentX = e.clientX - containerRect.left - 10;
-        const currentTime = (currentX / containerWidth) * timelineState.duration;
-
-        const minWindow = 10; // Minimum 10 second window
-
-        switch (timelineState.brushMode) {
-            case 'move':
-                const deltaX = e.clientX - timelineState.dragStartX;
-                const deltaTime = (deltaX / containerWidth) * timelineState.duration;
-                let newStart = timelineState.dragStartSelection.start + deltaTime;
-                let newEnd = timelineState.dragStartSelection.end + deltaTime;
-
-                // Clamp to bounds
-                if (newStart < 0) {
-                    newEnd -= newStart;
-                    newStart = 0;
-                }
-                if (newEnd > timelineState.duration) {
-                    newStart -= (newEnd - timelineState.duration);
-                    newEnd = timelineState.duration;
-                }
-
-                timelineState.selection.start = Math.max(0, newStart);
-                timelineState.selection.end = Math.min(timelineState.duration, newEnd);
-                break;
-
-            case 'resize-left':
-                timelineState.selection.start = Math.max(0,
-                    Math.min(currentTime, timelineState.selection.end - minWindow));
-                break;
-
-            case 'resize-right':
-                timelineState.selection.end = Math.min(timelineState.duration,
-                    Math.max(currentTime, timelineState.selection.start + minWindow));
-                break;
-        }
-
-        updateBrushPosition();
-        updateDetailView();
-    }
-
-    function endDrag() {
-        timelineState.brushing = false;
-        timelineState.brushMode = null;
-        document.removeEventListener('mousemove', onDrag);
-        document.removeEventListener('mouseup', endDrag);
-    }
-
-    // Attach event listeners
-    selection.addEventListener('mousedown', (e) => startDrag(e, 'move'));
-    leftHandle.addEventListener('mousedown', (e) => startDrag(e, 'resize-left'));
-    rightHandle.addEventListener('mousedown', (e) => startDrag(e, 'resize-right'));
-
-    // Click on container to jump selection
-    container.addEventListener('click', (e) => {
-        if (timelineState.brushing) return;
-        if (e.target.closest('.brush-selection, .brush-handle')) return;
-
-        const containerRect = container.getBoundingClientRect();
-        const containerWidth = containerRect.width - 20;
-        const clickX = e.clientX - containerRect.left - 10;
-        const clickTime = (clickX / containerWidth) * timelineState.duration;
-
-        const windowSize = timelineState.selection.end - timelineState.selection.start;
-        const halfWindow = windowSize / 2;
-
-        timelineState.selection.start = Math.max(0, clickTime - halfWindow);
-        timelineState.selection.end = Math.min(timelineState.duration, clickTime + halfWindow);
-
-        // Adjust if we hit boundaries
-        if (timelineState.selection.start === 0) {
-            timelineState.selection.end = Math.min(timelineState.duration, windowSize);
-        }
-        if (timelineState.selection.end === timelineState.duration) {
-            timelineState.selection.start = Math.max(0, timelineState.duration - windowSize);
-        }
-
-        updateBrushPosition();
-        updateDetailView();
+    slider.addEventListener('input', () => {
+        mapState.currentTime = parseFloat(slider.value);
+        updateTimelineTimeDisplay();
+        updateTimeIndicators();
+        // Also sync map slider
+        const mapSlider = document.getElementById('map-timeline-slider');
+        if (mapSlider) mapSlider.value = mapState.currentTime;
     });
 
-    timelineState.brushInitialized = true;
+    playPauseBtn.addEventListener('click', () => {
+        toggleTimelinePlayback();
+    });
+
+    jumpBackBtn.addEventListener('click', () => {
+        jumpTimelineTime(-10);
+    });
+
+    jumpForwardBtn.addEventListener('click', () => {
+        jumpTimelineTime(10);
+    });
+
+    timelineState.controlsInitialized = true;
 }
 
-function updateBrushPosition() {
-    const selection = document.getElementById('brush-selection');
-    const leftHandle = document.getElementById('brush-handle-left');
-    const rightHandle = document.getElementById('brush-handle-right');
+function updateTimelineSliderRange() {
+    const slider = document.getElementById('timeline-slider');
+    if (!slider) return;
 
-    const startPct = (timelineState.selection.start / timelineState.duration) * 100;
-    const endPct = (timelineState.selection.end / timelineState.duration) * 100;
-    const widthPct = endPct - startPct;
+    const matchStart = timelineState.matchStartTime;
+    const duration = timelineState.duration;
 
-    selection.style.left = `${startPct}%`;
-    selection.style.width = `${widthPct}%`;
+    slider.min = matchStart;
+    slider.max = duration;
+    slider.step = 0.1;
+    slider.value = mapState.currentTime;
+    updateTimelineTimeDisplay();
+}
 
-    leftHandle.style.left = `${startPct}%`;
-    rightHandle.style.left = `${endPct}%`;
+function updateTimelineTimeDisplay() {
+    const display = document.getElementById('timeline-current-time');
+    if (!display) return;
+    const matchStart = timelineState.matchStartTime;
+    const relTime = mapState.currentTime - matchStart;
+    display.textContent = formatTime(Math.max(0, relTime));
+}
+
+function toggleTimelinePlayback() {
+    const btn = document.getElementById('timeline-play-pause');
+    if (!btn) return;
+
+    if (mapState.isPlaying) {
+        mapState.isPlaying = false;
+        if (mapState.animationFrameId) {
+            cancelAnimationFrame(mapState.animationFrameId);
+            mapState.animationFrameId = null;
+        }
+        btn.textContent = '▶';
+        // Also sync map button
+        const mapBtn = document.getElementById('map-play-pause');
+        if (mapBtn) mapBtn.textContent = '▶';
+    } else {
+        mapState.isPlaying = true;
+        mapState.lastRenderTime = performance.now();
+        btn.textContent = '⏸';
+        // Also sync map button
+        const mapBtn = document.getElementById('map-play-pause');
+        if (mapBtn) mapBtn.textContent = '⏸';
+        animateSharedPlayback();
+    }
+}
+
+function animateSharedPlayback() {
+    if (!mapState.isPlaying) {
+        mapState.animationFrameId = null;
+        return;
+    }
+
+    const now = performance.now();
+    const elapsed = (now - mapState.lastRenderTime) / 1000;
+    mapState.currentTime += elapsed;
+    mapState.lastRenderTime = now;
+
+    const maxTime = timelineState.duration || parseFloat(document.getElementById('map-timeline-slider')?.max || 600);
+    const minTime = timelineState.matchStartTime || parseFloat(document.getElementById('map-timeline-slider')?.min || 0);
+
+    if (mapState.currentTime > maxTime) {
+        mapState.currentTime = minTime;
+    }
+
+    // Update both sliders
+    const timelineSlider = document.getElementById('timeline-slider');
+    if (timelineSlider) timelineSlider.value = mapState.currentTime;
+    const mapSlider = document.getElementById('map-timeline-slider');
+    if (mapSlider) mapSlider.value = mapState.currentTime;
+
+    updateTimelineTimeDisplay();
+    updateTimeIndicators();
+
+    // If map tab is active, also render map
+    const mapTab = document.getElementById('tab-map');
+    if (mapTab && mapTab.classList.contains('active')) {
+        renderMap(mapState.currentTime);
+    }
+
+    // Update map time display
+    const mapTimeDisplay = document.getElementById('map-current-time');
+    if (mapTimeDisplay) {
+        const matchStart = timelineState.matchStartTime;
+        mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime - matchStart));
+    }
+
+    mapState.animationFrameId = requestAnimationFrame(animateSharedPlayback);
+}
+
+function jumpTimelineTime(delta) {
+    const slider = document.getElementById('timeline-slider');
+    if (!slider) return;
+
+    mapState.currentTime = Math.max(
+        parseFloat(slider.min),
+        Math.min(parseFloat(slider.max), mapState.currentTime + delta)
+    );
+    slider.value = mapState.currentTime;
+    updateTimelineTimeDisplay();
+    updateTimeIndicators();
+
+    // Sync map slider
+    const mapSlider = document.getElementById('map-timeline-slider');
+    if (mapSlider) mapSlider.value = mapState.currentTime;
+}
+
+function updateTimeIndicators() {
+    const matchStart = timelineState.matchStartTime;
+    const duration = timelineState.duration;
+    if (duration <= matchStart) return;
+
+    const pct = ((mapState.currentTime - matchStart) / (duration - matchStart)) * 100;
+    const clampedPct = Math.max(0, Math.min(100, pct));
+
+    // Overview indicator needs to account for container padding (10px each side)
+    const overviewEl = document.getElementById('overview-time-indicator');
+    if (overviewEl) {
+        overviewEl.style.left = `calc(10px + (100% - 20px) * ${clampedPct / 100})`;
+    }
+
+    // Detail graph indicators also need padding offset (graphs have 10px padding)
+    const detailIndicators = [
+        'detail-time-indicator',
+        'health-time-indicator',
+        'frags-time-indicator',
+        'score-time-indicator'
+    ];
+
+    for (const id of detailIndicators) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.left = `calc(10px + (100% - 20px) * ${clampedPct / 100})`;
+        }
+    }
 }
 
 function updateDetailView() {
-    const { start, end } = timelineState.selection;
     const matchStart = timelineState.matchStartTime;
+    const duration = timelineState.duration;
 
-    // Update time range label (relative to match start)
-    const relStart = start - matchStart;
-    const relEnd = end - matchStart;
+    // Show current time in label
+    const relTime = mapState.currentTime - matchStart;
     document.getElementById('time-range-label').textContent =
-        `(${formatTime(Math.max(0, relStart))} - ${formatTime(Math.max(0, relEnd))})`;
+        `(${formatTime(Math.max(0, relTime))})`;
 
-    // Update all detail panels
-    updateDetailMessages(start, end);
-    updateDetailGraph(start, end);
-    updateDetailAxis(start, end);
-    updateHealthArmorGraph(start, end);
-    updateFragsGraph(start, end);
-    updateScoreTimeline(start, end);
+    // Update all detail panels with full match range
+    updateDetailMessages(matchStart, duration);
+    updateDetailGraph(matchStart, duration);
+    updateDetailAxis(matchStart, duration);
+    updateHealthArmorGraph(matchStart, duration);
+    updateFragsGraph(matchStart, duration);
+    updateScoreTimeline(matchStart, duration);
 }
 
 function updateDetailMessages(startTime, endTime) {
@@ -2444,6 +2503,9 @@ function setupMapTimeControls(result) {
         slider.addEventListener('input', (e) => {
             mapState.currentTime = parseFloat(e.target.value);
             renderMap(mapState.currentTime);
+            // Sync timeline slider
+            const tlSlider = document.getElementById('timeline-slider');
+            if (tlSlider) tlSlider.value = mapState.currentTime;
         });
     }
 
@@ -2506,39 +2568,16 @@ function toggleMapPlayback() {
             mapState.animationFrameId = null;
         }
         btn.textContent = '▶';
+        const tlBtn = document.getElementById('timeline-play-pause');
+        if (tlBtn) tlBtn.textContent = '▶';
     } else {
         mapState.isPlaying = true;
         mapState.lastRenderTime = performance.now();
         btn.textContent = '⏸';
-        animateMapPlayback();
+        const tlBtn = document.getElementById('timeline-play-pause');
+        if (tlBtn) tlBtn.textContent = '⏸';
+        animateSharedPlayback();
     }
-}
-
-function animateMapPlayback() {
-    if (!mapState.isPlaying) {
-        mapState.animationFrameId = null;
-        return;
-    }
-
-    const now = performance.now();
-    const elapsed = (now - mapState.lastRenderTime) / 1000; // Convert to seconds
-
-    // Advance game time by elapsed real time (1:1 playback speed)
-    mapState.currentTime += elapsed;
-    mapState.lastRenderTime = now;
-
-    const slider = document.getElementById('map-timeline-slider');
-    if (slider) {
-        if (mapState.currentTime > parseFloat(slider.max)) {
-            mapState.currentTime = parseFloat(slider.min);
-            mapState.tracks = {}; // Reset tracks on loop
-        }
-        slider.value = mapState.currentTime;
-    }
-
-    renderMap(mapState.currentTime);
-
-    mapState.animationFrameId = requestAnimationFrame(animateMapPlayback);
 }
 
 function jumpMapTime(delta) {
@@ -2551,6 +2590,10 @@ function jumpMapTime(delta) {
     );
     slider.value = mapState.currentTime;
     renderMap(mapState.currentTime);
+
+    // Sync timeline slider
+    const tlSlider = document.getElementById('timeline-slider');
+    if (tlSlider) tlSlider.value = mapState.currentTime;
 }
 
 function buildMapPowerupList(result) {

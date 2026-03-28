@@ -539,54 +539,72 @@ table tbody tr:hover {
     gap: 1px;
 }
 
-.timeline-brush {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    height: 80px;
-    pointer-events: none;
+.timeline-time-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
 }
 
-.brush-selection {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    background: rgba(0, 217, 255, 0.15);
-    border-left: 2px solid #00d9ff;
-    border-right: 2px solid #00d9ff;
-    pointer-events: all;
-    cursor: grab;
+.timeline-time-controls button {
+    background: #333;
+    border: 1px solid #555;
+    color: #ddd;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
-.brush-selection:active {
-    cursor: grabbing;
+.timeline-time-controls button:hover {
+    background: #444;
+    border-color: #00d9ff;
 }
 
-.brush-handle {
-    position: absolute;
-    top: 0;
-    width: 10px;
-    height: 100%;
+#timeline-slider {
+    flex: 1;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #333;
+    border-radius: 3px;
+    outline: none;
+    margin: 0 4px;
+}
+
+#timeline-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
     background: #00d9ff;
-    cursor: ew-resize;
-    pointer-events: all;
-    border-radius: 2px;
+    cursor: pointer;
+}
+
+#timeline-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #00d9ff;
+    cursor: pointer;
+    border: none;
+}
+
+.current-time-indicator {
+    position: absolute;
+    top: 0;
+    bottom: 25px;
+    width: 2px;
+    background: #00d9ff;
+    pointer-events: none;
+    z-index: 5;
     opacity: 0.8;
 }
 
-.brush-handle:hover {
-    opacity: 1;
-}
-
-.brush-handle-left {
-    left: 0;
-    transform: translateX(-50%);
-}
-
-.brush-handle-right {
-    right: 0;
-    transform: translateX(50%);
+#overview-time-indicator {
+    top: 10px;
+    bottom: 30px;
 }
 
 .timeline-axis {
@@ -678,6 +696,7 @@ table tbody tr:hover {
     flex: 1;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .detail-graph-axis,
