@@ -118,6 +118,68 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 		}
 	}
 
+	// Normalize all times to be match-relative (0-based from match start)
+	// This eliminates the need for the frontend to subtract matchStartTime everywhere
+	matchStart := 0.0
+	if result.TimelineAnalysis != nil {
+		matchStart = result.TimelineAnalysis.MatchStartTime
+	}
+	if matchStart > 0 {
+		result.Duration -= matchStart
+
+		if ta := result.TimelineAnalysis; ta != nil {
+			for i := range ta.Buckets {
+				ta.Buckets[i].StartTime -= matchStart
+				ta.Buckets[i].EndTime -= matchStart
+			}
+			for i := range ta.HighResBuckets {
+				ta.HighResBuckets[i].T -= matchStart
+			}
+			for i := range ta.FragEvents {
+				ta.FragEvents[i].Time -= matchStart
+			}
+			for i := range ta.PowerupEvents {
+				ta.PowerupEvents[i].Time -= matchStart
+				ta.PowerupEvents[i].EndTime -= matchStart
+			}
+			ta.MatchStartTime = 0
+
+			// Filter out warmup buckets (negative times after normalization)
+			filtered := ta.Buckets[:0]
+			for _, b := range ta.Buckets {
+				if b.EndTime > 0 {
+					filtered = append(filtered, b)
+				}
+			}
+			ta.Buckets = filtered
+
+			filteredHR := ta.HighResBuckets[:0]
+			for _, b := range ta.HighResBuckets {
+				if b.T >= 0 {
+					filteredHR = append(filteredHR, b)
+				}
+			}
+			ta.HighResBuckets = filteredHR
+		}
+
+		if result.Messages != nil {
+			for i := range result.Messages.Events {
+				result.Messages.Events[i].Time -= matchStart
+			}
+		}
+
+		if result.Frags != nil {
+			for i := range result.Frags.Frags {
+				result.Frags.Frags[i].Time -= matchStart
+			}
+		}
+
+		if result.Match != nil {
+			result.Match.StartTime -= matchStart
+			result.Match.EndTime -= matchStart
+		}
+	}
+
 	return result, nil
 }
 

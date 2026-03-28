@@ -106,7 +106,80 @@ function generateDemoFilename(game) {
 document.addEventListener('DOMContentLoaded', () => {
     setupFileUpload();
     setupTabs();
+
+    // Auto-load from hub if URL has ?hub= parameter
+    const params = new URLSearchParams(location.search);
+    const hubId = params.get('hub');
+    if (hubId) {
+        document.getElementById('hub-input').value = hubId;
+        loadFromHub();
+    }
 });
+
+// ─── URL State Sharing ─────────────────────────────────────────────────────
+
+function updateUrlState() {
+    if (!currentResult) return;
+    const params = new URLSearchParams();
+
+    if (currentResult.hubInfo?.gameId) {
+        params.set('hub', currentResult.hubInfo.gameId);
+    }
+
+    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+    if (activeTab && activeTab !== 'summary') params.set('tab', activeTab);
+
+    if (mapState.currentTime > 0) {
+        params.set('t', Math.round(mapState.currentTime));
+    }
+
+    if (timelineState.segment) {
+        params.set('seg', `${Math.round(timelineState.segment.start)}-${Math.round(timelineState.segment.end)}`);
+    }
+
+    const qs = params.toString();
+    history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+}
+
+function applyUrlState() {
+    const params = new URLSearchParams(location.search);
+
+    const seg = params.get('seg');
+    if (seg) {
+        const [start, end] = seg.split('-').map(Number);
+        if (!isNaN(start) && !isNaN(end)) {
+            timelineState.segment = { start, end };
+            updateSelectionOverlay();
+            updateSegmentLabel();
+            updateDetailView();
+        }
+    }
+
+    const t = params.get('t');
+    if (t) {
+        const time = Number(t);
+        if (!isNaN(time)) {
+            mapState.currentTime = time;
+            updateTimelineCursor();
+            updateTimelineTimeDisplay();
+            updateTimeIndicators();
+            updateTeamStatus();
+            renderChatMessages();
+            updateChatCursor();
+            updateChatTimeDisplay();
+            const mapSlider = document.getElementById('map-timeline-slider');
+            if (mapSlider) mapSlider.value = time;
+        }
+    }
+
+    const tab = params.get('tab');
+    if (tab) {
+        const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+        if (btn) btn.click();
+    }
+
+    updateUrlState();
+}
 
 function setupFileUpload() {
     const dropZone = document.getElementById('drop-zone');
@@ -164,8 +237,7 @@ function setupTabs() {
                 renderMap(mapState.currentTime);
                 const mapTimeDisplay = document.getElementById('map-current-time');
                 if (mapTimeDisplay) {
-                    const matchStart = timelineState.matchStartTime;
-                    mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime - matchStart));
+                    mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime));
                 }
             } else if (tabName === 'timeline') {
                 updateTimelineCursor();
@@ -176,6 +248,8 @@ function setupTabs() {
                 updateChatTimeDisplay();
                 renderChatMessages();
             }
+
+            updateUrlState();
         });
     });
 }
@@ -314,6 +388,9 @@ function displayResults(result) {
     if (result.timelineAnalysis) {
         initMapView(result);
     }
+
+    // Apply URL state (tab, time, segment) if present
+    applyUrlState();
 }
 
 function displayTeamsFromDemoInfo(demoInfo) {
@@ -604,7 +681,6 @@ function displayKeyMoments(result) {
     tbody.innerHTML = '';
 
     const powerupEvents = result.timelineAnalysis?.powerupEvents || [];
-    const matchStartTime = result.timelineAnalysis?.matchStartTime || 0;
 
     if (powerupEvents.length === 0) {
         emptyMsg.style.display = 'block';
@@ -617,9 +693,6 @@ function displayKeyMoments(result) {
 
     powerupEvents.forEach(event => {
         const tr = document.createElement('tr');
-
-        // Calculate match-relative time for display
-        const relTime = Math.max(0, event.time - matchStartTime);
 
         // Build viewer URL if hub info available
         let watchCell = '-';
@@ -641,7 +714,7 @@ function displayKeyMoments(result) {
         const powerupDisplay = getPowerupDisplay(event.powerupType);
 
         tr.innerHTML = `
-            <td class="time-cell">${formatTime(relTime)}</td>
+            <td class="time-cell">${formatTime(event.time)}</td>
             <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
             <td>${escapeHtml(event.playerName || 'Unknown')}</td>
             <td>${escapeHtml(event.team || '-')}</td>
@@ -861,8 +934,8 @@ function displayTimelineAnalysis(result) {
     timelineState.events = result.messages?.events || [];
     timelineState.fragEvents = timeline?.fragEvents || []; // Frag events from stat tracking
 
-    // Set shared current time to match start (0:00 relative)
-    mapState.currentTime = timelineState.matchStartTime;
+    // Set shared current time to start (all times are now match-relative, starting at 0)
+    mapState.currentTime = 0;
 
     // Update legend team names
     if (teams.length >= 2) {
@@ -977,7 +1050,7 @@ function setupTimelineControls() {
         if (caretDragging) {
             const time = navBarClickToTime(e);
             if (time === null) return;
-            mapState.currentTime = Math.max(timelineState.matchStartTime, Math.min(time, timelineState.duration));
+            mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration));
             updateTimelineCursor();
             updateTimelineTimeDisplay();
             updateTimeIndicators();
@@ -1006,6 +1079,7 @@ function setupTimelineControls() {
     document.addEventListener('mouseup', (e) => {
         if (caretDragging) {
             caretDragging = false;
+            updateUrlState();
             return;
         }
 
@@ -1020,7 +1094,7 @@ function setupTimelineControls() {
 
         if (end - start <= 2) {
             // Click on bar — set current time, clear segment
-            mapState.currentTime = Math.max(timelineState.matchStartTime, Math.min(time, timelineState.duration));
+            mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration));
             timelineState.segment = null;
             updateTimelineCursor();
             updateTimelineTimeDisplay();
@@ -1039,6 +1113,7 @@ function setupTimelineControls() {
             updateSegmentLabel();
             updateDetailView();
         }
+        updateUrlState();
     });
 
     // Drag on bar to select segment
@@ -1061,6 +1136,7 @@ function setupTimelineControls() {
         updateSelectionOverlay();
         updateSegmentLabel();
         updateDetailView();
+        updateUrlState();
     });
 
     timelineState.controlsInitialized = true;
@@ -1074,7 +1150,7 @@ function navBarClickToTime(e) {
     const width = rect.width;
     if (width <= 0) return null;
     const frac = Math.max(0, Math.min(1, x / width));
-    return timelineState.matchStartTime + frac * (timelineState.duration - timelineState.matchStartTime);
+    return frac * timelineState.duration;
 }
 
 function updateSelectionOverlay() {
@@ -1086,13 +1162,11 @@ function updateSelectionOverlay() {
         return;
     }
 
-    const matchStart = timelineState.matchStartTime;
     const duration = timelineState.duration;
-    const range = duration - matchStart;
-    if (range <= 0) return;
+    if (duration <= 0) return;
 
-    const startPct = ((timelineState.segment.start - matchStart) / range) * 100;
-    const endPct = ((timelineState.segment.end - matchStart) / range) * 100;
+    const startPct = (timelineState.segment.start / duration) * 100;
+    const endPct = (timelineState.segment.end / duration) * 100;
 
     overlay.style.display = 'block';
     overlay.style.left = `${startPct}%`;
@@ -1108,22 +1182,17 @@ function updateSegmentLabel() {
         return;
     }
 
-    const matchStart = timelineState.matchStartTime;
-    const relStart = timelineState.segment.start - matchStart;
-    const relEnd = timelineState.segment.end - matchStart;
-    label.textContent = `${formatTime(Math.max(0, relStart))} – ${formatTime(Math.max(0, relEnd))}`;
+    label.textContent = `${formatTime(timelineState.segment.start)} – ${formatTime(timelineState.segment.end)}`;
 }
 
 function updateTimelineCursor() {
     const cursor = document.getElementById('timeline-nav-cursor');
     const caret = document.getElementById('timeline-nav-caret');
 
-    const matchStart = timelineState.matchStartTime;
     const duration = timelineState.duration;
-    const range = duration - matchStart;
-    if (range <= 0) return;
+    if (duration <= 0) return;
 
-    const pct = Math.max(0, Math.min(100, ((mapState.currentTime - matchStart) / range) * 100));
+    const pct = Math.max(0, Math.min(100, (mapState.currentTime / duration) * 100));
     if (cursor) cursor.style.left = `${pct}%`;
     if (caret) caret.style.left = `${pct}%`;
 }
@@ -1131,9 +1200,7 @@ function updateTimelineCursor() {
 function updateTimelineTimeDisplay() {
     const display = document.getElementById('timeline-current-time');
     if (!display) return;
-    const matchStart = timelineState.matchStartTime;
-    const relTime = mapState.currentTime - matchStart;
-    display.textContent = formatTime(Math.max(0, relTime));
+    display.textContent = formatTime(Math.max(0, mapState.currentTime));
 }
 
 function renderTimelineNavAxis() {
@@ -1141,14 +1208,12 @@ function renderTimelineNavAxis() {
     if (!container) return;
     container.innerHTML = '';
 
-    const matchStart = timelineState.matchStartTime;
     const duration = timelineState.duration;
-    const matchDuration = duration - matchStart;
-    if (matchDuration <= 0) return;
+    if (duration <= 0) return;
 
-    const tickCount = Math.min(10, Math.max(4, Math.floor(matchDuration / 60)));
+    const tickCount = Math.min(10, Math.max(4, Math.floor(duration / 60)));
     for (let i = 0; i <= tickCount; i++) {
-        const time = (matchDuration / tickCount) * i;
+        const time = (duration / tickCount) * i;
         const span = document.createElement('span');
         span.textContent = formatTime(time);
         container.appendChild(span);
@@ -1161,7 +1226,7 @@ function updateTimeIndicators() {
 
     // Detail graphs show either the segment or the full match
     const seg = timelineState.segment;
-    const rangeStart = seg ? seg.start : timelineState.matchStartTime;
+    const rangeStart = seg ? seg.start : 0;
     const rangeEnd = seg ? seg.end : timelineState.duration;
     const range = rangeEnd - rangeStart;
 
@@ -1188,19 +1253,16 @@ function updateTimeIndicators() {
 }
 
 function updateDetailView() {
-    const matchStart = timelineState.matchStartTime;
     const duration = timelineState.duration;
 
     // Use segment if selected, otherwise full match
-    const start = timelineState.segment ? timelineState.segment.start : matchStart;
+    const start = timelineState.segment ? timelineState.segment.start : 0;
     const end = timelineState.segment ? timelineState.segment.end : duration;
 
     // Show range in label
-    const relStart = start - matchStart;
-    const relEnd = end - matchStart;
     if (timelineState.segment) {
         document.getElementById('time-range-label').textContent =
-            `(${formatTime(Math.max(0, relStart))} - ${formatTime(Math.max(0, relEnd))})`;
+            `(${formatTime(start)} - ${formatTime(end)})`;
     } else {
         document.getElementById('time-range-label').textContent = '';
     }
@@ -1243,7 +1305,7 @@ function setupChatControls() {
         if (!caretDragging) return;
         const time = chatBarClickToTime(e);
         if (time === null) return;
-        mapState.currentTime = Math.max(timelineState.matchStartTime, Math.min(time, timelineState.duration));
+        mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration));
         updateChatCursor();
         updateChatTimeDisplay();
         updateTimelineCursor();
@@ -1255,14 +1317,14 @@ function setupChatControls() {
     });
 
     document.addEventListener('mouseup', (e) => {
-        if (caretDragging) { caretDragging = false; return; }
+        if (caretDragging) { caretDragging = false; updateUrlState(); return; }
     });
 
     bar.addEventListener('click', (e) => {
         if (caretDragging) return;
         const time = chatBarClickToTime(e);
         if (time === null) return;
-        mapState.currentTime = Math.max(timelineState.matchStartTime, Math.min(time, timelineState.duration));
+        mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration));
         updateChatCursor();
         updateChatTimeDisplay();
         updateTimelineCursor();
@@ -1271,6 +1333,7 @@ function setupChatControls() {
         renderChatMessages();
         const mapSlider = document.getElementById('map-timeline-slider');
         if (mapSlider) mapSlider.value = mapState.currentTime;
+        updateUrlState();
     });
 
     chatControlsInitialized = true;
@@ -1283,16 +1346,15 @@ function chatBarClickToTime(e) {
     const x = e.clientX - rect.left;
     if (rect.width <= 0) return null;
     const frac = Math.max(0, Math.min(1, x / rect.width));
-    return timelineState.matchStartTime + frac * (timelineState.duration - timelineState.matchStartTime);
+    return frac * timelineState.duration;
 }
 
 function updateChatCursor() {
     const cursor = document.getElementById('chat-nav-cursor');
     const caret = document.getElementById('chat-nav-caret');
-    const matchStart = timelineState.matchStartTime;
-    const range = timelineState.duration - matchStart;
-    if (range <= 0) return;
-    const pct = Math.max(0, Math.min(100, ((mapState.currentTime - matchStart) / range) * 100));
+    const duration = timelineState.duration;
+    if (duration <= 0) return;
+    const pct = Math.max(0, Math.min(100, (mapState.currentTime / duration) * 100));
     if (cursor) cursor.style.left = `${pct}%`;
     if (caret) caret.style.left = `${pct}%`;
 }
@@ -1300,20 +1362,18 @@ function updateChatCursor() {
 function updateChatTimeDisplay() {
     const display = document.getElementById('chat-current-time');
     if (!display) return;
-    const relTime = mapState.currentTime - timelineState.matchStartTime;
-    display.textContent = formatTime(Math.max(0, relTime));
+    display.textContent = formatTime(Math.max(0, mapState.currentTime));
 }
 
 function renderChatNavAxis() {
     const container = document.getElementById('chat-nav-axis');
     if (!container) return;
     container.innerHTML = '';
-    const matchStart = timelineState.matchStartTime;
-    const matchDuration = timelineState.duration - matchStart;
-    if (matchDuration <= 0) return;
-    const tickCount = Math.min(10, Math.max(4, Math.floor(matchDuration / 60)));
+    const duration = timelineState.duration;
+    if (duration <= 0) return;
+    const tickCount = Math.min(10, Math.max(4, Math.floor(duration / 60)));
     for (let i = 0; i <= tickCount; i++) {
-        const time = (matchDuration / tickCount) * i;
+        const time = (duration / tickCount) * i;
         const span = document.createElement('span');
         span.textContent = formatTime(time);
         container.appendChild(span);
@@ -1330,7 +1390,6 @@ function renderChatMessages() {
     const halfWindow = CHAT_WINDOW / 2;
     const windowStart = currentTime - halfWindow;
     const windowEnd = currentTime + halfWindow;
-    const matchStart = timelineState.matchStartTime;
     const teams = timelineState.teams;
 
     // Clear
@@ -1372,9 +1431,9 @@ function renderChatMessages() {
     const ITEM_HEIGHT = 18; // approximate height of a message row
 
     // Render each column with overlap avoidance
-    renderChatColumn(killContainer, killEvents, windowStart, containerHeight, matchStart, ITEM_HEIGHT);
-    renderChatColumn(teamAContainer, teamAEvents, windowStart, containerHeight, matchStart, ITEM_HEIGHT);
-    renderChatColumn(teamBContainer, teamBEvents, windowStart, containerHeight, matchStart, ITEM_HEIGHT);
+    renderChatColumn(killContainer, killEvents, windowStart, containerHeight, ITEM_HEIGHT);
+    renderChatColumn(teamAContainer, teamAEvents, windowStart, containerHeight, ITEM_HEIGHT);
+    renderChatColumn(teamBContainer, teamBEvents, windowStart, containerHeight, ITEM_HEIGHT);
 
     // Add current-time line at center
     for (const container of [killContainer, teamAContainer, teamBContainer]) {
@@ -1385,13 +1444,12 @@ function renderChatMessages() {
     }
 }
 
-function renderChatColumn(container, events, windowStart, containerHeight, matchStart, itemHeight) {
+function renderChatColumn(container, events, windowStart, containerHeight, itemHeight) {
     let lastBottom = -Infinity; // track bottom edge of last placed item
 
     for (const event of events) {
         const frac = (event.time - windowStart) / CHAT_WINDOW;
         let topPx = Math.round(frac * containerHeight);
-        const relTime = event.time - matchStart;
 
         let displaced = false;
         if (topPx < lastBottom) {
@@ -1404,7 +1462,7 @@ function renderChatColumn(container, events, windowStart, containerHeight, match
         marker.style.top = `${topPx}px`;
 
         const prefix = displaced ? '<span class="chat-displaced-dots">...</span>' : '';
-        marker.innerHTML = `${prefix}<span class="chat-time-marker-time">${formatTime(Math.max(0, relTime))}</span><span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
+        marker.innerHTML = `${prefix}<span class="chat-time-marker-time">${formatTime(event.time)}</span><span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
 
         container.appendChild(marker);
         lastBottom = topPx + itemHeight;
@@ -1569,13 +1627,10 @@ function updateDetailAxis(startTime, endTime) {
     const container = document.getElementById('detail-axis');
     container.innerHTML = '';
 
-    const matchStart = timelineState.matchStartTime;
-    const relStart = Math.max(0, startTime - matchStart);
-    const relEnd = Math.max(0, endTime - matchStart);
     const tickCount = 5;
 
     for (let i = 0; i <= tickCount; i++) {
-        const time = relStart + ((relEnd - relStart) / tickCount) * i;
+        const time = startTime + ((endTime - startTime) / tickCount) * i;
         const span = document.createElement('span');
         span.textContent = formatTime(time);
         container.appendChild(span);
@@ -1711,13 +1766,10 @@ function updateHealthAxis(startTime, endTime) {
     const container = document.getElementById('health-axis');
     container.innerHTML = '';
 
-    const matchStart = timelineState.matchStartTime;
-    const relStart = Math.max(0, startTime - matchStart);
-    const relEnd = Math.max(0, endTime - matchStart);
     const tickCount = 5;
 
     for (let i = 0; i <= tickCount; i++) {
-        const time = relStart + ((relEnd - relStart) / tickCount) * i;
+        const time = startTime + ((endTime - startTime) / tickCount) * i;
         const span = document.createElement('span');
         span.textContent = formatTime(time);
         container.appendChild(span);
@@ -1824,13 +1876,10 @@ function updateFragsAxis(startTime, endTime) {
     if (!container) return;
     container.innerHTML = '';
 
-    const matchStart = timelineState.matchStartTime;
-    const relStart = Math.max(0, startTime - matchStart);
-    const relEnd = Math.max(0, endTime - matchStart);
     const tickCount = 5;
 
     for (let i = 0; i <= tickCount; i++) {
-        const time = relStart + ((relEnd - relStart) / tickCount) * i;
+        const time = startTime + ((endTime - startTime) / tickCount) * i;
         const span = document.createElement('span');
         span.textContent = formatTime(time);
         container.appendChild(span);
@@ -1953,13 +2002,10 @@ function updateScoreAxis(startTime, endTime) {
     if (!container) return;
     container.innerHTML = '';
 
-    const matchStart = timelineState.matchStartTime;
-    const relStart = Math.max(0, startTime - matchStart);
-    const relEnd = Math.max(0, endTime - matchStart);
     const tickCount = 5;
 
     for (let i = 0; i <= tickCount; i++) {
-        const time = relStart + ((relEnd - relStart) / tickCount) * i;
+        const time = startTime + ((endTime - startTime) / tickCount) * i;
         const span = document.createElement('span');
         span.textContent = formatTime(time);
         container.appendChild(span);
@@ -2343,9 +2389,9 @@ function initMapView(result) {
     }
 
     // Initial render at match start
-    mapState.currentTime = timeline.matchStartTime || 0;
+    mapState.currentTime = 0;
     const slider = document.getElementById('map-timeline-slider');
-    if (slider) slider.value = mapState.currentTime;
+    if (slider) slider.value = 0;
 
     renderMap(mapState.currentTime);
 }
@@ -2574,11 +2620,9 @@ function renderMap(time) {
     }
 
     // Update time display
-    const matchStart = currentResult?.timelineAnalysis?.matchStartTime || 0;
-    const relTime = time - matchStart;
     const timeDisplay = document.getElementById('map-current-time');
     if (timeDisplay) {
-        timeDisplay.textContent = formatTime(Math.max(0, relTime));
+        timeDisplay.textContent = formatTime(Math.max(0, time));
     }
 }
 
@@ -2687,6 +2731,7 @@ function setupMapTimeControls(result) {
             // Sync timeline cursor
             updateTimelineCursor();
             updateTimelineTimeDisplay();
+            updateUrlState();
         });
     }
 
@@ -2730,12 +2775,11 @@ function updateMapSliderRange(result) {
     if (!slider) return;
 
     const duration = result.duration || 600;
-    const matchStart = result.timelineAnalysis?.matchStartTime || 0;
 
-    slider.min = matchStart;
+    slider.min = 0;
     slider.max = duration;
-    slider.value = matchStart;
-    mapState.currentTime = matchStart;
+    slider.value = 0;
+    mapState.currentTime = 0;
 }
 
 function toggleMapPlayback() {
@@ -2818,7 +2862,6 @@ function buildMapPowerupList(result) {
     list.innerHTML = '';
 
     const events = result.timelineAnalysis?.powerupEvents || [];
-    const matchStart = result.timelineAnalysis?.matchStartTime || 0;
 
     if (events.length === 0) {
         list.innerHTML = '<li style="color: #666; font-style: italic;">No powerup events</li>';
@@ -2827,9 +2870,8 @@ function buildMapPowerupList(result) {
 
     for (const event of events) {
         const li = document.createElement('li');
-        const relTime = Math.max(0, event.time - matchStart);
         li.innerHTML = `
-            <span class="time-cell">${formatTime(relTime)}</span>
+            <span class="time-cell">${formatTime(event.time)}</span>
             <span class="powerup-cell ${event.powerupType}">${getPowerupDisplay(event.powerupType)}</span>
             <span>${escapeHtml(event.playerName || 'Unknown')}</span>
         `;

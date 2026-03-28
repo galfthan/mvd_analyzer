@@ -68,73 +68,51 @@ header p {
     padding-bottom: 10px;
 }
 
-.upload-area {
-    border: 2px dashed #2a3f5f;
-    border-radius: 12px;
-    padding: 48px 40px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
+.load-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-radius: 8px;
+    transition: background 0.2s ease;
 }
 
-.upload-area:hover,
-.upload-area.dragover {
-    border-color: #00d9ff;
+.load-row.dragover {
     background: rgba(0, 217, 255, 0.06);
-    box-shadow: inset 0 0 30px rgba(0, 217, 255, 0.05);
 }
 
-.upload-icon {
-    color: #2a3f5f;
-    margin-bottom: 12px;
-    transition: all 0.3s ease;
-}
-
-.upload-area:hover .upload-icon,
-.upload-area.dragover .upload-icon {
+.load-file-btn,
+.load-row button {
+    background: #0f3460;
     color: #00d9ff;
-    filter: drop-shadow(0 0 6px rgba(0, 217, 255, 0.4));
-    transform: translateY(-2px);
-}
-
-.upload-area p {
-    color: #7a8ba8;
-}
-
-.upload-area button {
-    background: #00d9ff;
-    color: #1a1a2e;
-    border: none;
-    padding: 8px 18px;
+    border: 1px solid rgba(0, 217, 255, 0.4);
+    padding: 10px 20px;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
     font-size: 0.9rem;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
-.upload-area button:hover {
-    background: #00c4e6;
+.load-file-btn:hover,
+.load-row button:hover {
+    background: #00d9ff;
+    color: #1a1a2e;
     box-shadow: 0 0 12px rgba(0, 217, 255, 0.3);
 }
 
-.hub-load {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #2a3f5f;
+.load-row button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
-.hub-label {
-    color: #888;
-    font-size: 0.9rem;
+.load-separator {
+    color: #2a3f5f;
+    font-size: 1.2rem;
 }
 
-.hub-load input {
+.load-row input[type="text"] {
     background: #1a1a2e;
     border: 1px solid #2a3f5f;
     border-radius: 6px;
@@ -145,37 +123,14 @@ header p {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.hub-load input:focus {
+.load-row input[type="text"]:focus {
     outline: none;
     border-color: #00d9ff;
     box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
 }
 
-.hub-load input::placeholder {
+.load-row input[type="text"]::placeholder {
     color: #666;
-}
-
-.hub-load button {
-    background: #0f3460;
-    color: #00d9ff;
-    border: 1px solid rgba(0, 217, 255, 0.4);
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-}
-
-.hub-load button:hover {
-    background: #00d9ff;
-    color: #1a1a2e;
-    box-shadow: 0 0 12px rgba(0, 217, 255, 0.3);
-}
-
-.hub-load button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 .status {

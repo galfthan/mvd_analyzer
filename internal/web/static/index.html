@@ -26,18 +26,10 @@
         </header>
 
         <section id="upload-section" class="card">
-            <h2>Load Demo</h2>
-            <div class="upload-area" id="drop-zone">
+            <div class="load-row" id="drop-zone">
                 <input type="file" id="file-input" accept=".mvd,.mvd.gz" hidden>
-                <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                <p>Drop .mvd file here or <button onclick="document.getElementById('file-input').click()">browse</button></p>
-            </div>
-            <div class="hub-load">
-                <span class="hub-label">or load from</span>
+                <button class="load-file-btn" onclick="document.getElementById('file-input').click()">Load from File</button>
+                <span class="load-separator">|</span>
                 <input type="text" id="hub-input" placeholder="Game ID or hub.quakeworld.nu URL">
                 <button id="hub-load-btn" onclick="loadFromHub()">Load from Hub</button>
             </div>
