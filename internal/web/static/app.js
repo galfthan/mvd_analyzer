@@ -463,10 +463,14 @@ function displayPlayerStats(players) {
             <td>${escapeHtml(player.name)}</td>
             <td>${escapeHtml(player.team || '')}</td>
             <td>${player.stats?.frags || 0}</td>
+            <td>${player.stats?.kills || 0}</td>
             <td>${player.stats?.deaths || 0}</td>
             <td>${player.stats?.tk || 0}</td>
+            <td>${player.stats?.suicides || 0}</td>
             <td>${player.dmg?.given || 0}</td>
             <td>${player.dmg?.taken || 0}</td>
+            <td>${player.dmg?.['enemy-weapons'] ?? 0}</td>
+            <td>${player.dmg?.['taken-to-die'] ?? 0}</td>
             <td>${player.ping || 0}</td>
         `;
         tbody.appendChild(tr);
@@ -604,10 +608,14 @@ function displayScoreboardFallback(byPlayer, players) {
             <td>${escapeHtml(player.name)}</td>
             <td>${escapeHtml(player.team)}</td>
             <td>${player.frags}</td>
+            <td>-</td>
             <td>${player.deaths}</td>
             <td>${player.tk}</td>
+            <td>-</td>
             <td>${player.dmgGiven}</td>
             <td>${player.dmgTaken}</td>
+            <td>-</td>
+            <td>-</td>
             <td>${player.ping}</td>
         `;
         tbody.appendChild(tr);
