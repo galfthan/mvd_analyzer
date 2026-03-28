@@ -825,6 +825,7 @@ function resetTimelineState() {
     timelineState.teams = [];
     timelineState.segment = null;
     timelineState.dragging = false;
+    precomputedFrags = [];
 
     // Clear all timeline graph containers
     const containers = [
@@ -876,12 +877,13 @@ function displayTimelineAnalysis(result) {
         setTextIfExists('legend-weapons-team-b', teams[1] + ' ↓');
     }
 
+    precomputeFragCounts();
     setupTimelineControls();
     setupChatControls();
-    setupGraphHovers();
     updateTimelineCursor();
     updateDetailView();
     updateTimeIndicators();
+    updateTeamStatus();
     renderChatMessages();
 }
 
@@ -1180,6 +1182,9 @@ function updateTimeIndicators() {
             el.style.left = `calc(10px + (100% - 20px) * ${pct / 100})`;
         }
     }
+
+    // Update team status table
+    updateTeamStatus();
 }
 
 function updateDetailView() {
@@ -1961,140 +1966,124 @@ function updateScoreAxis(startTime, endTime) {
     }
 }
 
-// ─── Graph Hover Tooltips ───────────────────────────────────────────────────
+// ─── Team Status Panel ──────────────────────────────────────────────────────
 
-function setupGraphHovers() {
-    const detailOuter = document.querySelector('.detail-graph-outer');
-    const healthOuter = document.querySelector('.health-graph-outer');
-    const tooltip = document.getElementById('graph-tooltip');
-    if (!tooltip) return;
+function updateTeamStatus() {
+    const containerA = document.getElementById('team-status-a');
+    const containerB = document.getElementById('team-status-b');
+    if (!containerA || !containerB) return;
 
-    function handleGraphHover(e, graphEl) {
-        const rect = graphEl.getBoundingClientRect();
-        const x = e.clientX - rect.left - 10; // 10px padding
-        const width = rect.width - 20;
-        if (width <= 0) return null;
-        const frac = Math.max(0, Math.min(1, x / width));
-
-        // Determine time range shown in graphs
-        const seg = timelineState.segment;
-        const rangeStart = seg ? seg.start : timelineState.matchStartTime;
-        const rangeEnd = seg ? seg.end : timelineState.duration;
-        return rangeStart + frac * (rangeEnd - rangeStart);
+    const teams = timelineState.teams;
+    const buckets = timelineState.buckets;
+    if (!buckets || buckets.length === 0 || teams.length < 2) {
+        containerA.innerHTML = '';
+        containerB.innerHTML = '';
+        return;
     }
 
-    function findBucketAtTime(time) {
-        const buckets = timelineState.buckets;
-        if (!buckets || buckets.length === 0) return null;
-        // Binary search for closest bucket
-        let best = null;
-        let bestDist = Infinity;
-        for (const b of buckets) {
-            if (time >= b.startTime && time < b.endTime) return b;
-            const dist = Math.min(Math.abs(b.startTime - time), Math.abs(b.endTime - time));
-            if (dist < bestDist) { bestDist = dist; best = b; }
-        }
-        return best;
+    // Find bucket at current time
+    const time = mapState.currentTime;
+    let bucket = null;
+    for (const b of buckets) {
+        if (time >= b.startTime && time < b.endTime) { bucket = b; break; }
     }
+    if (!bucket) bucket = buckets[buckets.length - 1];
 
-    function armorLabel(type) {
-        if (type === 'ra') return 'RA';
-        if (type === 'ya') return 'YA';
-        if (type === 'ga') return 'GA';
-        return '';
-    }
+    const pd = bucket.playerData || {};
+    const fragCounts = getFragsAtTime(time);
 
-    function weaponLabel(pd) {
-        const w = [];
-        if (pd.hasRL && pd.hasLG) w.push('RL+LG');
-        else if (pd.hasRL) w.push('RL');
-        else if (pd.hasLG) w.push('LG');
-        const p = [];
-        if (pd.hasQuad) p.push('Quad');
-        if (pd.hasPent) p.push('Pent');
-        if (pd.hasRing) p.push('Ring');
-        return [...w, ...p].join(', ') || '-';
-    }
+    for (let ti = 0; ti < 2; ti++) {
+        const team = teams[ti];
+        const container = ti === 0 ? containerA : containerB;
 
-    function getFragsAtTime(time) {
-        const fragEvents = timelineState.fragEvents || [];
-        const counts = {}; // player -> frag count
-        for (const fe of fragEvents) {
-            if (fe.time > time) break;
-            counts[fe.player] = (counts[fe.player] || 0) + 1;
-        }
-        return counts;
-    }
-
-    function buildTooltipHTML(bucket) {
-        const teams = timelineState.teams;
-        if (!bucket || teams.length < 2) return '';
-        const matchStart = timelineState.matchStartTime;
-        const relTime = bucket.startTime - matchStart;
-        const pd = bucket.playerData || {};
-        const fragCounts = getFragsAtTime(bucket.startTime);
-
-        // Group players by team
-        const teamPlayers = { [teams[0]]: [], [teams[1]]: [] };
+        // Collect players for this team
+        const players = [];
         for (const [name, data] of Object.entries(pd)) {
-            if (teamPlayers[data.team]) {
-                teamPlayers[data.team].push({ name, ...data, frags: fragCounts[name] || 0 });
+            if (data.team === team) {
+                players.push({ name, ...data, frags: fragCounts[name] || 0 });
             }
         }
 
-        let html = `<div class="tt-header">${formatTime(Math.max(0, relTime))}</div>`;
+        // Sort by frags desc
+        players.sort((a, b) => b.frags - a.frags);
 
-        for (const team of teams) {
-            const players = teamPlayers[team] || [];
-            const teamFrags = players.reduce((s, p) => s + p.frags, 0);
+        const teamFrags = players.reduce((s, p) => s + p.frags, 0);
+        const teamHealth = players.reduce((s, p) => s + (p.health || 0), 0);
+        const teamArmor = players.reduce((s, p) => s + (p.armor || 0), 0);
 
-            html += `<div class="tt-team">${team} (${teamFrags} frags)</div>`;
-            for (const p of players) {
-                const hp = p.health || 0;
-                const arm = p.armor || 0;
-                const at = armorLabel(p.armorType);
-                const wep = weaponLabel(p);
-                html += `<div class="tt-player">${p.name}: ${hp}hp ${arm}${at} [${wep}] ${p.frags}f</div>`;
-            }
-            if (players.length === 0) {
-                html += `<div class="tt-player" style="color:#666">No players</div>`;
-            }
+        let html = `<h4>${team} — ${teamFrags} frags</h4>`;
+        html += `<table class="team-status-table">`;
+        html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th></tr>`;
+
+        for (const p of players) {
+            const hp = p.health || 0;
+            const arm = p.armor || 0;
+            const at = p.armorType || '';
+            const armorClass = at ? `armor-${at}` : '';
+            const armorStr = arm > 0 ? `<span class="${armorClass}">${arm} ${at.toUpperCase()}</span>` : '0';
+
+            const weps = [];
+            if (p.hasRL && p.hasLG) weps.push('RL+LG');
+            else if (p.hasRL) weps.push('RL');
+            else if (p.hasLG) weps.push('LG');
+            if (p.hasQuad) weps.push('Quad');
+            if (p.hasPent) weps.push('Pent');
+            if (p.hasRing) weps.push('Ring');
+
+            html += `<tr>`;
+            html += `<td>${p.name}</td>`;
+            html += `<td>${p.frags}</td>`;
+            html += `<td>${hp}</td>`;
+            html += `<td>${armorStr}</td>`;
+            html += `<td>${weps.join(', ') || '-'}</td>`;
+            html += `</tr>`;
         }
-        return html;
-    }
 
-    function showTooltip(e, html) {
-        if (!html) { tooltip.style.display = 'none'; return; }
-        tooltip.innerHTML = html;
-        tooltip.style.display = 'block';
-        // Position near cursor
-        const pad = 12;
-        let left = e.clientX + pad;
-        let top = e.clientY + pad;
-        // Keep on screen
-        const tw = tooltip.offsetWidth;
-        const th = tooltip.offsetHeight;
-        if (left + tw > window.innerWidth - pad) left = e.clientX - tw - pad;
-        if (top + th > window.innerHeight - pad) top = e.clientY - th - pad;
-        tooltip.style.left = `${left}px`;
-        tooltip.style.top = `${top}px`;
-    }
+        // Totals row
+        html += `<tr class="totals-row">`;
+        html += `<td>Total</td>`;
+        html += `<td>${teamFrags}</td>`;
+        html += `<td>${teamHealth}</td>`;
+        html += `<td>${teamArmor}</td>`;
+        html += `<td></td>`;
+        html += `</tr>`;
 
-    function onHover(e, graphEl) {
-        const time = handleGraphHover(e, graphEl);
-        if (time === null) { tooltip.style.display = 'none'; return; }
-        const bucket = findBucketAtTime(time);
-        showTooltip(e, buildTooltipHTML(bucket));
+        html += `</table>`;
+        container.innerHTML = html;
     }
+}
 
-    if (detailOuter) {
-        detailOuter.addEventListener('mousemove', (e) => onHover(e, detailOuter));
-        detailOuter.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+// ─── Precomputed Frag Counts ────────────────────────────────────────────────
+
+// Sorted array of { time, cumulative: { player: frags } }
+// Built once per demo load; looked up via binary search.
+let precomputedFrags = []; // [{ time, cumulative }]
+
+function precomputeFragCounts() {
+    const fragEvents = timelineState.fragEvents || [];
+    precomputedFrags = [];
+    if (fragEvents.length === 0) return;
+
+    const sorted = fragEvents.slice().sort((a, b) => a.time - b.time);
+    const running = {}; // player -> cumulative frags
+
+    for (const fe of sorted) {
+        running[fe.player] = (running[fe.player] || 0) + 1;
+        precomputedFrags.push({ time: fe.time, cumulative: { ...running } });
     }
-    if (healthOuter) {
-        healthOuter.addEventListener('mousemove', (e) => onHover(e, healthOuter));
-        healthOuter.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+}
+
+function getFragsAtTime(time) {
+    if (precomputedFrags.length === 0) return {};
+    // Binary search for last entry with time <= target
+    let lo = 0, hi = precomputedFrags.length - 1;
+    if (time < precomputedFrags[0].time) return {};
+    while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (precomputedFrags[mid].time <= time) lo = mid;
+        else hi = mid - 1;
     }
+    return precomputedFrags[lo].cumulative;
 }
 
 // =============================================================================
