@@ -2443,25 +2443,41 @@ function calculateMapBounds(result) {
         minY: minY - padY,
         maxY: maxY + padY
     };
+    updateWorldToCanvasTransform();
 }
 
-function worldToCanvas(x, y) {
+// Precomputed transform parameters — call updateWorldToCanvasTransform() when bounds/canvas change
+let _wtc = { scale: 1, offsetX: 0, offsetY: 0, minX: 0, minY: 0, canvasH: 0 };
+
+function updateWorldToCanvasTransform() {
     const { minX, maxX, minY, maxY } = mapState.bounds;
     const canvas = mapState.canvas;
-
+    if (!canvas) return;
     const worldWidth = maxX - minX;
     const worldHeight = maxY - minY;
+    const scale = Math.min(canvas.width / worldWidth, canvas.height / worldHeight);
+    _wtc.scale = scale;
+    _wtc.offsetX = (canvas.width - worldWidth * scale) / 2;
+    _wtc.offsetY = (canvas.height - worldHeight * scale) / 2;
+    _wtc.minX = minX;
+    _wtc.minY = minY;
+    _wtc.canvasH = canvas.height;
+}
 
-    const scaleX = canvas.width / worldWidth;
-    const scaleY = canvas.height / worldHeight;
-    const scale = Math.min(scaleX, scaleY);
+// Reusable point to avoid GC — only use for immediate consumption, not storage
+const _tmpPt = { x: 0, y: 0 };
 
-    const offsetX = (canvas.width - worldWidth * scale) / 2;
-    const offsetY = (canvas.height - worldHeight * scale) / 2;
+function worldToCanvas(x, y) {
+    _tmpPt.x = _wtc.offsetX + (x - _wtc.minX) * _wtc.scale;
+    _tmpPt.y = _wtc.canvasH - (_wtc.offsetY + (y - _wtc.minY) * _wtc.scale);
+    return _tmpPt;
+}
 
+// Allocating version for cases where result is stored (e.g., tracks, caching)
+function worldToCanvasNew(x, y) {
     return {
-        x: offsetX + (x - minX) * scale,
-        y: canvas.height - (offsetY + (y - minY) * scale) // Flip Y
+        x: _wtc.offsetX + (x - _wtc.minX) * _wtc.scale,
+        y: _wtc.canvasH - (_wtc.offsetY + (y - _wtc.minY) * _wtc.scale)
     };
 }
 
@@ -2558,14 +2574,14 @@ function prerenderLocationBackground() {
     const octx = offscreen.getContext('2d');
 
     for (const group of mapState.locationGroups) {
-        drawLocationRegion(octx, group, worldToCanvas);
+        drawLocationRegion(octx, group, worldToCanvasNew);
     }
 
     octx.font = '10px monospace';
     octx.textAlign = 'center';
     octx.textBaseline = 'middle';
     for (const group of mapState.locationGroups) {
-        const pos = worldToCanvas(group.centroid.x, group.centroid.y);
+        const pos = worldToCanvasNew(group.centroid.x, group.centroid.y);
         octx.fillStyle = group.color.text;
         octx.fillText(group.name, pos.x, pos.y);
     }
@@ -2645,18 +2661,15 @@ function drawTracks(ctx) {
         const isRed = points[0].teamIdx === 0;
         const total = points.length;
 
-        // Draw segments with fading opacity (older = more transparent)
+        // Draw all segments as single path with uniform style (much faster)
+        ctx.beginPath();
+        ctx.strokeStyle = isRed ? 'rgba(255, 80, 80, 0.4)' : 'rgba(80, 160, 255, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(points[0].x, points[0].y);
         for (let i = 1; i < total; i++) {
-            const alpha = 0.08 + 0.5 * (i / total);
-            ctx.beginPath();
-            ctx.strokeStyle = isRed
-                ? `rgba(255, 80, 80, ${alpha})`
-                : `rgba(80, 160, 255, ${alpha})`;
-            ctx.lineWidth = 1.5 + 0.5 * (i / total);
-            ctx.moveTo(points[i - 1].x, points[i - 1].y);
             ctx.lineTo(points[i].x, points[i].y);
-            ctx.stroke();
         }
+        ctx.stroke();
     }
 }
 
@@ -2824,14 +2837,10 @@ function animateMapPlayback() {
         mapState.tracks = {};
     }
 
-    // Lightweight sync: only canvas + cursor positions + time text
+    // Lightweight sync: only canvas + map UI (skip invisible tabs)
     const mapSlider = document.getElementById('map-timeline-slider');
     if (mapSlider) mapSlider.value = mapState.currentTime;
     renderMap(mapState.currentTime);
-    updateTimelineCursor();
-    updateTimelineTimeDisplay();
-    updateChatCursor();
-    updateChatTimeDisplay();
     const mapTimeDisplay = document.getElementById('map-current-time');
     if (mapTimeDisplay) mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime));
 
