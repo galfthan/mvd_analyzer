@@ -13,7 +13,7 @@ build:
 	@mkdir -p $(DIST_DIR)
 	GOOS=js GOARCH=wasm go build $(LDFLAGS) -o $(DIST_DIR)/analyzer.wasm $(WASM_MAIN)
 	@echo "Copying wasm_exec.js..."
-	@cp "$$(go env GOROOT)/misc/wasm/wasm_exec.js" $(DIST_DIR)/
+	@cp "$$(go env GOROOT)/misc/wasm/wasm_exec.js" $(DIST_DIR)/ 2>/dev/null || cp $(STATIC_DIR)/wasm_exec.js $(DIST_DIR)/
 	@echo "Copying static files..."
 	@cp $(STATIC_DIR)/index.html $(DIST_DIR)/
 	@cp $(STATIC_DIR)/styles.css $(DIST_DIR)/
