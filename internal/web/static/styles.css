@@ -1200,6 +1200,15 @@ table tbody tr:hover {
     color: #888;
 }
 
+.time-link {
+    cursor: pointer;
+    color: #00d9ff;
+}
+
+.time-link:hover {
+    text-decoration: underline;
+}
+
 .powerup-cell {
     font-weight: bold;
 }

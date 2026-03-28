@@ -116,6 +116,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// ─── Current Time ──────────────────────────────────────────────────────────
+
+// Single function to set current time and sync all views
+function setCurrentTime(time) {
+    mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration || Infinity));
+    updateTimelineCursor();
+    updateTimelineTimeDisplay();
+    updateTimeIndicators();
+    updateTeamStatus();
+    renderChatMessages();
+    updateChatCursor();
+    updateChatTimeDisplay();
+    const mapSlider = document.getElementById('map-timeline-slider');
+    if (mapSlider) mapSlider.value = mapState.currentTime;
+    updateUrlState();
+}
+
 // ─── URL State Sharing ─────────────────────────────────────────────────────
 
 function updateUrlState() {
@@ -159,16 +176,7 @@ function applyUrlState() {
     if (t) {
         const time = Number(t);
         if (!isNaN(time)) {
-            mapState.currentTime = time;
-            updateTimelineCursor();
-            updateTimelineTimeDisplay();
-            updateTimeIndicators();
-            updateTeamStatus();
-            renderChatMessages();
-            updateChatCursor();
-            updateChatTimeDisplay();
-            const mapSlider = document.getElementById('map-timeline-slider');
-            if (mapSlider) mapSlider.value = time;
+            setCurrentTime(time);
         }
     }
 
@@ -705,30 +713,29 @@ function displayKeyMoments(result) {
         // Build viewer URL if hub info available
         let watchCell = '-';
         if (hubInfo && hubInfo.gameId) {
-            // Use raw demo time for Hub viewer (includes countdown period)
-            // Demo time = event.time (already in demo time, not match-relative)
             const fromTime = Math.max(0, Math.floor(event.time) - 10);
             const toTime = Math.floor(event.endTime) + 5;
-
-            // Use playerUserID from MVD demo data - this is what Hub viewer expects for track param
-            // Falls back to playerSlot if UserID is 0 (shouldn't happen in well-formed demos)
             const trackId = event.playerUserID || event.playerSlot;
-
             const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
             watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Watch</a>`;
         }
 
-        // Powerup display with color
         const powerupDisplay = getPowerupDisplay(event.powerupType);
 
         tr.innerHTML = `
-            <td class="time-cell">${formatTime(event.time)}</td>
+            <td class="time-cell time-link">${formatTime(event.time)}</td>
             <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
             <td>${escapeHtml(event.playerName || 'Unknown')}</td>
             <td>${escapeHtml(event.team || '-')}</td>
             <td>${Math.round(event.duration)}s</td>
             <td>${watchCell}</td>
         `;
+
+        // Click on time to jump there
+        tr.querySelector('.time-link').addEventListener('click', () => {
+            setCurrentTime(event.time);
+        });
+
         tbody.appendChild(tr);
     });
 }
@@ -1058,15 +1065,7 @@ function setupTimelineControls() {
         if (caretDragging) {
             const time = navBarClickToTime(e);
             if (time === null) return;
-            mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration));
-            updateTimelineCursor();
-            updateTimelineTimeDisplay();
-            updateTimeIndicators();
-            renderChatMessages();
-            updateChatCursor();
-            updateChatTimeDisplay();
-            const mapSlider = document.getElementById('map-timeline-slider');
-            if (mapSlider) mapSlider.value = mapState.currentTime;
+            setCurrentTime(time);
             return;
         }
 
@@ -1102,18 +1101,10 @@ function setupTimelineControls() {
 
         if (end - start <= 2) {
             // Click on bar — set current time, clear segment
-            mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration));
             timelineState.segment = null;
-            updateTimelineCursor();
-            updateTimelineTimeDisplay();
-            updateTimeIndicators();
             updateSelectionOverlay();
             updateSegmentLabel();
-            renderChatMessages();
-            updateChatCursor();
-            updateChatTimeDisplay();
-            const mapSlider = document.getElementById('map-timeline-slider');
-            if (mapSlider) mapSlider.value = mapState.currentTime;
+            setCurrentTime(time);
         } else {
             // Drag on bar complete — apply segment to detail views
             timelineState.segment = { start, end };
@@ -1313,15 +1304,7 @@ function setupChatControls() {
         if (!caretDragging) return;
         const time = chatBarClickToTime(e);
         if (time === null) return;
-        mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration));
-        updateChatCursor();
-        updateChatTimeDisplay();
-        updateTimelineCursor();
-        updateTimelineTimeDisplay();
-        updateTimeIndicators();
-        renderChatMessages();
-        const mapSlider = document.getElementById('map-timeline-slider');
-        if (mapSlider) mapSlider.value = mapState.currentTime;
+        setCurrentTime(time);
     });
 
     document.addEventListener('mouseup', (e) => {
@@ -1332,16 +1315,7 @@ function setupChatControls() {
         if (caretDragging) return;
         const time = chatBarClickToTime(e);
         if (time === null) return;
-        mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration));
-        updateChatCursor();
-        updateChatTimeDisplay();
-        updateTimelineCursor();
-        updateTimelineTimeDisplay();
-        updateTimeIndicators();
-        renderChatMessages();
-        const mapSlider = document.getElementById('map-timeline-slider');
-        if (mapSlider) mapSlider.value = mapState.currentTime;
-        updateUrlState();
+        setCurrentTime(time);
     });
 
     chatControlsInitialized = true;
@@ -2734,12 +2708,8 @@ function setupMapTimeControls(result) {
     const slider = document.getElementById('map-timeline-slider');
     if (slider) {
         slider.addEventListener('input', (e) => {
-            mapState.currentTime = parseFloat(e.target.value);
+            setCurrentTime(parseFloat(e.target.value));
             renderMap(mapState.currentTime);
-            // Sync timeline cursor
-            updateTimelineCursor();
-            updateTimelineTimeDisplay();
-            updateUrlState();
         });
     }
 
@@ -2820,25 +2790,22 @@ function animateMapPlayback() {
     mapState.currentTime += elapsed;
     mapState.lastRenderTime = now;
 
-    const slider = document.getElementById('map-timeline-slider');
-    if (slider) {
-        if (mapState.currentTime > parseFloat(slider.max)) {
-            mapState.currentTime = parseFloat(slider.min);
-            mapState.tracks = {};
-        }
-        slider.value = mapState.currentTime;
+    const duration = timelineState.duration || 600;
+    if (mapState.currentTime > duration) {
+        mapState.currentTime = 0;
+        mapState.tracks = {};
     }
 
+    // Sync all views and render map
+    const mapSlider = document.getElementById('map-timeline-slider');
+    if (mapSlider) mapSlider.value = mapState.currentTime;
     renderMap(mapState.currentTime);
-
-    // Sync timeline and chat cursors
     updateTimelineCursor();
     updateTimelineTimeDisplay();
     updateTimeIndicators();
     updateChatCursor();
     updateChatTimeDisplay();
 
-    // Update chat if chat tab is active
     const chatTab = document.getElementById('tab-chat');
     if (chatTab && chatTab.classList.contains('active')) {
         renderChatMessages();
@@ -2848,19 +2815,8 @@ function animateMapPlayback() {
 }
 
 function jumpMapTime(delta) {
-    const slider = document.getElementById('map-timeline-slider');
-    if (!slider) return;
-
-    mapState.currentTime = Math.max(
-        parseFloat(slider.min),
-        Math.min(parseFloat(slider.max), mapState.currentTime + delta)
-    );
-    slider.value = mapState.currentTime;
+    setCurrentTime(mapState.currentTime + delta);
     renderMap(mapState.currentTime);
-
-    // Sync timeline cursor
-    updateTimelineCursor();
-    updateTimelineTimeDisplay();
 }
 
 function buildMapPowerupList(result) {
@@ -2884,10 +2840,8 @@ function buildMapPowerupList(result) {
             <span>${escapeHtml(event.playerName || 'Unknown')}</span>
         `;
         li.addEventListener('click', () => {
-            mapState.currentTime = event.time;
-            const slider = document.getElementById('map-timeline-slider');
-            if (slider) slider.value = event.time;
-            renderMap(event.time);
+            setCurrentTime(event.time);
+            renderMap(mapState.currentTime);
         });
         list.appendChild(li);
     }
