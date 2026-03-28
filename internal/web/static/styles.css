@@ -712,7 +712,8 @@ table tbody tr:hover {
 }
 
 /* Three-column message row */
-.timeline-messages-row {
+/* Chat tab layout */
+.chat-messages-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 15px;
@@ -720,9 +721,68 @@ table tbody tr:hover {
 }
 
 @media (max-width: 1000px) {
-    .timeline-messages-row {
+    .chat-messages-row {
         grid-template-columns: 1fr;
     }
+}
+
+.chat-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-column h3 {
+    margin-bottom: 4px;
+}
+
+.chat-timeline-scroll {
+    position: relative;
+    height: 600px;
+    overflow-y: auto;
+    background: #0d1929;
+    border-radius: 4px;
+}
+
+.chat-time-marker {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 1px 6px;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.chat-time-marker-time {
+    color: #666;
+    font-family: monospace;
+    font-size: 0.72rem;
+    min-width: 36px;
+    flex-shrink: 0;
+}
+
+.chat-time-marker-msg {
+    word-break: break-word;
+    white-space: normal;
+}
+
+.chat-time-marker-msg.frag { color: #ff6b6b; }
+.chat-time-marker-msg.powerup { color: #ffc107; }
+.chat-time-marker-msg.chat { color: #4ecdc4; }
+.chat-time-marker-msg.teamsay { color: #45b7d1; }
+
+.chat-current-time-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #00d9ff;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0.6;
 }
 
 /* Diverging bar chart - Team A up, Team B down */
@@ -813,42 +873,6 @@ table tbody tr:hover {
 }
 
 /* Messages Panel */
-.timeline-messages-panel {
-    min-height: 250px;
-}
-
-.timeline-messages-scroll {
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.timeline-message-item {
-    display: grid;
-    grid-template-columns: 60px 1fr;
-    gap: 10px;
-    padding: 6px 8px;
-    border-bottom: 1px solid #2a3f5f;
-}
-
-.timeline-message-item:hover {
-    background: rgba(0, 217, 255, 0.05);
-}
-
-.timeline-message-time {
-    color: #888;
-    font-family: monospace;
-    font-size: 0.8rem;
-}
-
-.timeline-message-content {
-    font-size: 0.85rem;
-    word-break: break-word;
-}
-
-.timeline-message-content.frag { color: #ff6b6b; }
-.timeline-message-content.powerup { color: #ffc107; }
-.timeline-message-content.chat { color: #4ecdc4; }
-.timeline-message-content.teamsay { color: #45b7d1; }
 
 /* Detail Graph Panel */
 .timeline-detail-graph-panel {

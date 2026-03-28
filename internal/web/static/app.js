@@ -171,7 +171,10 @@ function setupTabs() {
                 updateTimelineCursor();
                 updateTimelineTimeDisplay();
                 updateTimeIndicators();
-                snapMessagesToCurrentTime();
+            } else if (tabName === 'chat') {
+                updateChatCursor();
+                updateChatTimeDisplay();
+                renderChatMessages();
             }
         });
     });
@@ -825,7 +828,7 @@ function resetTimelineState() {
 
     // Clear all timeline graph containers
     const containers = [
-        'timeline-nav-axis', 'detail-graph', 'detail-axis',
+        'timeline-nav-axis', 'chat-nav-axis', 'detail-graph', 'detail-axis',
         'powerup-lines-top', 'powerup-lines-bottom',
         'health-armor-graph', 'health-axis', 'frags-graph', 'frags-axis',
         'score-graph', 'score-axis', 'kill-messages', 'team-a-messages', 'team-b-messages'
@@ -872,9 +875,11 @@ function displayTimelineAnalysis(result) {
     }
 
     setupTimelineControls();
+    setupChatControls();
     updateTimelineCursor();
     updateDetailView();
     updateTimeIndicators();
+    renderChatMessages();
 }
 
 // Calculate optimal bin size based on selection duration
@@ -971,7 +976,9 @@ function setupTimelineControls() {
             updateTimelineCursor();
             updateTimelineTimeDisplay();
             updateTimeIndicators();
-            snapMessagesToCurrentTime();
+            renderChatMessages();
+            updateChatCursor();
+            updateChatTimeDisplay();
             const mapSlider = document.getElementById('map-timeline-slider');
             if (mapSlider) mapSlider.value = mapState.currentTime;
             return;
@@ -1015,7 +1022,9 @@ function setupTimelineControls() {
             updateTimeIndicators();
             updateSelectionOverlay();
             updateSegmentLabel();
-            snapMessagesToCurrentTime();
+            renderChatMessages();
+            updateChatCursor();
+            updateChatTimeDisplay();
             const mapSlider = document.getElementById('map-timeline-slider');
             if (mapSlider) mapSlider.value = mapState.currentTime;
         } else {
@@ -1189,7 +1198,6 @@ function updateDetailView() {
     }
 
     // Update all detail panels
-    updateDetailMessages(start, end);
     updateDetailGraph(start, end);
     updateDetailAxis(start, end);
     updateHealthArmorGraph(start, end);
@@ -1197,116 +1205,174 @@ function updateDetailView() {
     updateScoreTimeline(start, end);
 }
 
-function updateDetailMessages(startTime, endTime) {
+// ─── Chat Tab ──────────────────────────────────────────────────────────────
+
+const CHAT_WINDOW = 60; // Show 1 minute of messages (default)
+let chatControlsInitialized = false;
+
+function setupChatControls() {
+    if (chatControlsInitialized) {
+        updateChatCursor();
+        updateChatTimeDisplay();
+        renderChatNavAxis();
+        return;
+    }
+
+    const bar = document.getElementById('chat-nav-bar');
+    const caret = document.getElementById('chat-nav-caret');
+
+    renderChatNavAxis();
+
+    let caretDragging = false;
+
+    caret.addEventListener('mousedown', (e) => {
+        caretDragging = true;
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!caretDragging) return;
+        const time = chatBarClickToTime(e);
+        if (time === null) return;
+        mapState.currentTime = Math.max(timelineState.matchStartTime, Math.min(time, timelineState.duration));
+        updateChatCursor();
+        updateChatTimeDisplay();
+        updateTimelineCursor();
+        updateTimelineTimeDisplay();
+        updateTimeIndicators();
+        renderChatMessages();
+        const mapSlider = document.getElementById('map-timeline-slider');
+        if (mapSlider) mapSlider.value = mapState.currentTime;
+    });
+
+    document.addEventListener('mouseup', (e) => {
+        if (caretDragging) { caretDragging = false; return; }
+    });
+
+    bar.addEventListener('click', (e) => {
+        if (caretDragging) return;
+        const time = chatBarClickToTime(e);
+        if (time === null) return;
+        mapState.currentTime = Math.max(timelineState.matchStartTime, Math.min(time, timelineState.duration));
+        updateChatCursor();
+        updateChatTimeDisplay();
+        updateTimelineCursor();
+        updateTimelineTimeDisplay();
+        updateTimeIndicators();
+        renderChatMessages();
+        const mapSlider = document.getElementById('map-timeline-slider');
+        if (mapSlider) mapSlider.value = mapState.currentTime;
+    });
+
+    chatControlsInitialized = true;
+}
+
+function chatBarClickToTime(e) {
+    const bar = document.getElementById('chat-nav-bar');
+    if (!bar) return null;
+    const rect = bar.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    if (rect.width <= 0) return null;
+    const frac = Math.max(0, Math.min(1, x / rect.width));
+    return timelineState.matchStartTime + frac * (timelineState.duration - timelineState.matchStartTime);
+}
+
+function updateChatCursor() {
+    const cursor = document.getElementById('chat-nav-cursor');
+    const caret = document.getElementById('chat-nav-caret');
+    const matchStart = timelineState.matchStartTime;
+    const range = timelineState.duration - matchStart;
+    if (range <= 0) return;
+    const pct = Math.max(0, Math.min(100, ((mapState.currentTime - matchStart) / range) * 100));
+    if (cursor) cursor.style.left = `${pct}%`;
+    if (caret) caret.style.left = `${pct}%`;
+}
+
+function updateChatTimeDisplay() {
+    const display = document.getElementById('chat-current-time');
+    if (!display) return;
+    const relTime = mapState.currentTime - timelineState.matchStartTime;
+    display.textContent = formatTime(Math.max(0, relTime));
+}
+
+function renderChatNavAxis() {
+    const container = document.getElementById('chat-nav-axis');
+    if (!container) return;
+    container.innerHTML = '';
+    const matchStart = timelineState.matchStartTime;
+    const matchDuration = timelineState.duration - matchStart;
+    if (matchDuration <= 0) return;
+    const tickCount = Math.min(10, Math.max(4, Math.floor(matchDuration / 60)));
+    for (let i = 0; i <= tickCount; i++) {
+        const time = (matchDuration / tickCount) * i;
+        const span = document.createElement('span');
+        span.textContent = formatTime(time);
+        container.appendChild(span);
+    }
+}
+
+function renderChatMessages() {
     const killContainer = document.getElementById('kill-messages');
     const teamAContainer = document.getElementById('team-a-messages');
     const teamBContainer = document.getElementById('team-b-messages');
+    if (!killContainer || !teamAContainer || !teamBContainer) return;
 
+    const currentTime = mapState.currentTime;
+    const halfWindow = CHAT_WINDOW / 2;
+    const windowStart = currentTime - halfWindow;
+    const windowEnd = currentTime + halfWindow;
+    const matchStart = timelineState.matchStartTime;
+    const teams = timelineState.teams;
+
+    // Clear
     killContainer.innerHTML = '';
     teamAContainer.innerHTML = '';
     teamBContainer.innerHTML = '';
 
-    if (!currentResult?.messages?.events) {
-        const emptyMsg = '<div style="color: #888; padding: 20px; text-align: center;">No events</div>';
-        killContainer.innerHTML = emptyMsg;
-        teamAContainer.innerHTML = emptyMsg;
-        teamBContainer.innerHTML = emptyMsg;
-        return;
-    }
+    if (!currentResult?.messages?.events || teams.length < 2) return;
 
-    const teams = timelineState.teams;
-    const matchStart = timelineState.matchStartTime;
-
-    // Filter events in time range
-    const events = currentResult.messages.events.filter(e =>
-        e.time >= startTime && e.time <= endTime
-    );
-
-    // Deduplicate (same message within 1 second)
+    // Filter and deduplicate events in window
     const seen = new Map();
-    const deduped = events.filter(e => {
+    const events = currentResult.messages.events.filter(e => {
+        if (e.time < windowStart || e.time > windowEnd) return false;
         const key = `${Math.floor(e.time)}:${e.message}`;
         if (seen.has(key)) return false;
         seen.set(key, true);
         return true;
     });
 
-    let killCount = 0, teamACount = 0, teamBCount = 0;
+    // Container height for positioning
+    const containerHeight = killContainer.clientHeight || 600;
 
-    // Sort into three categories
-    deduped.forEach(event => {
+    // Place messages at vertical position proportional to time within window
+    for (const event of events) {
+        const frac = (event.time - windowStart) / CHAT_WINDOW;
+        const topPx = Math.round(frac * containerHeight);
         const relTime = event.time - matchStart;
-        const item = document.createElement('div');
-        item.className = 'timeline-message-item';
-        item.dataset.time = event.time;
-        item.innerHTML = `
-            <span class="timeline-message-time">${formatTime(Math.max(0, relTime))}</span>
-            <span class="timeline-message-content ${event.type}">${formatQuakeMessage(event.message)}</span>
-        `;
+
+        const marker = document.createElement('div');
+        marker.className = 'chat-time-marker';
+        marker.style.top = `${topPx}px`;
+        marker.innerHTML = `<span class="chat-time-marker-time">${formatTime(Math.max(0, relTime))}</span><span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
 
         if (event.type === 'frag') {
-            if (killCount < 100) {
-                killContainer.appendChild(item);
-                killCount++;
-            }
+            killContainer.appendChild(marker);
         } else if (event.type === 'teamsay' || event.type === 'chat') {
-            if (teams.length >= 2 && event.team === teams[0]) {
-                if (teamACount < 50) {
-                    teamAContainer.appendChild(item);
-                    teamACount++;
-                }
-            } else if (teams.length >= 2 && event.team === teams[1]) {
-                if (teamBCount < 50) {
-                    teamBContainer.appendChild(item);
-                    teamBCount++;
-                }
+            if (event.team === teams[0]) {
+                teamAContainer.appendChild(marker);
+            } else if (event.team === teams[1]) {
+                teamBContainer.appendChild(marker);
             }
         }
-    });
-
-    if (killCount === 0) {
-        killContainer.innerHTML = '<div style="color: #888; padding: 10px; text-align: center;">No kills</div>';
-    }
-    if (teamACount === 0) {
-        teamAContainer.innerHTML = '<div style="color: #888; padding: 10px; text-align: center;">No messages</div>';
-    }
-    if (teamBCount === 0) {
-        teamBContainer.innerHTML = '<div style="color: #888; padding: 10px; text-align: center;">No messages</div>';
     }
 
-    // Snap to current time after populating
-    snapMessagesToCurrentTime();
-}
-
-function snapMessagesToCurrentTime() {
-    const currentTime = mapState.currentTime;
-    const containers = ['kill-messages', 'team-a-messages', 'team-b-messages'];
-
-    for (const containerId of containers) {
-        const scrollContainer = document.getElementById(containerId);
-        if (!scrollContainer) continue;
-
-        const items = scrollContainer.querySelectorAll('.timeline-message-item[data-time]');
-        if (items.length === 0) continue;
-
-        // Find the message closest to current time
-        let closestItem = null;
-        let closestDist = Infinity;
-        for (const item of items) {
-            const dist = Math.abs(parseFloat(item.dataset.time) - currentTime);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closestItem = item;
-            }
-        }
-
-        if (closestItem) {
-            // Scroll so the closest item is roughly centered
-            const containerHeight = scrollContainer.clientHeight;
-            const itemTop = closestItem.offsetTop;
-            const itemHeight = closestItem.offsetHeight;
-            scrollContainer.scrollTop = itemTop - (containerHeight / 2) + (itemHeight / 2);
-        }
+    // Add current-time line at center
+    for (const container of [killContainer, teamAContainer, teamBContainer]) {
+        const line = document.createElement('div');
+        line.className = 'chat-current-time-line';
+        line.style.top = `${Math.round(containerHeight / 2)}px`;
+        container.appendChild(line);
     }
 }
 
@@ -2558,10 +2624,18 @@ function animateMapPlayback() {
 
     renderMap(mapState.currentTime);
 
-    // Sync timeline cursor
+    // Sync timeline and chat cursors
     updateTimelineCursor();
     updateTimelineTimeDisplay();
     updateTimeIndicators();
+    updateChatCursor();
+    updateChatTimeDisplay();
+
+    // Update chat if chat tab is active
+    const chatTab = document.getElementById('tab-chat');
+    if (chatTab && chatTab.classList.contains('active')) {
+        renderChatMessages();
+    }
 
     mapState.animationFrameId = requestAnimationFrame(animateMapPlayback);
 }

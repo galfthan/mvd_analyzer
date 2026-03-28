@@ -51,6 +51,7 @@
             <div class="tab-nav">
                 <button class="tab-btn active" data-tab="summary">Summary</button>
                 <button class="tab-btn" data-tab="timeline">Timeline</button>
+                <button class="tab-btn" data-tab="chat">Chat</button>
                 <button class="tab-btn" data-tab="map">Map</button>
                 <button class="tab-btn" data-tab="keymoments">Key Moments</button>
             </div>
@@ -273,19 +274,38 @@
                     </div>
                 </div>
 
-                <!-- Three Message Panes -->
-                <div class="timeline-messages-row">
-                    <div class="panel timeline-messages-panel">
+            </div>
+
+            <!-- Chat Tab -->
+            <div id="tab-chat" class="tab-content">
+                <!-- Time Navigation Bar (same style as timeline) -->
+                <div class="panel timeline-nav-panel">
+                    <div class="timeline-nav-row">
+                        <span id="chat-current-time" class="timeline-nav-time">0:00</span>
+                        <div class="timeline-nav-bar-wrapper" id="chat-nav-bar-wrapper">
+                            <div class="timeline-nav-bar" id="chat-nav-bar">
+                                <div class="timeline-nav-track"></div>
+                                <div class="timeline-nav-cursor" id="chat-nav-cursor"></div>
+                            </div>
+                            <div class="timeline-nav-caret" id="chat-nav-caret" title="Drag to set current time">▲</div>
+                        </div>
+                    </div>
+                    <div class="timeline-nav-axis" id="chat-nav-axis"></div>
+                </div>
+
+                <!-- Three Message Columns -->
+                <div class="chat-messages-row">
+                    <div class="panel chat-column">
                         <h3>Kills</h3>
-                        <div class="timeline-messages-scroll" id="kill-messages"></div>
+                        <div class="chat-timeline-scroll" id="kill-messages"></div>
                     </div>
-                    <div class="panel timeline-messages-panel">
+                    <div class="panel chat-column">
                         <h3 id="team-a-chat-title">Team A Chat</h3>
-                        <div class="timeline-messages-scroll" id="team-a-messages"></div>
+                        <div class="chat-timeline-scroll" id="team-a-messages"></div>
                     </div>
-                    <div class="panel timeline-messages-panel">
+                    <div class="panel chat-column">
                         <h3 id="team-b-chat-title">Team B Chat</h3>
-                        <div class="timeline-messages-scroll" id="team-b-messages"></div>
+                        <div class="chat-timeline-scroll" id="team-b-messages"></div>
                     </div>
                 </div>
             </div>
