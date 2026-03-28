@@ -87,8 +87,8 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 		case "match":
 			if m, ok := output.(*MatchResult); ok {
 				result.Match = m
-				if m.Duration > 0 && m.StartTime > 0 {
-					result.Duration = m.Duration
+				if m.EndTime > 0 {
+					result.Duration = m.EndTime
 				}
 			}
 		case "frag":
