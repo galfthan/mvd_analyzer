@@ -950,24 +950,33 @@ function setupTimelineControls() {
     }
 
     const bar = document.getElementById('timeline-nav-bar');
+    const caret = document.getElementById('timeline-nav-caret');
 
     renderTimelineNavAxis();
 
-    // Click on bar to set current time; drag to select segment
-    bar.addEventListener('mousedown', (e) => {
-        const time = navBarClickToTime(e);
-        if (time === null) return;
+    // --- Caret drag: sets current time ---
+    let caretDragging = false;
 
-        timelineState.dragging = true;
-        timelineState.dragStartTime = time;
-        timelineState.segment = null;
-        updateSelectionOverlay();
-        updateSegmentLabel();
-
+    caret.addEventListener('mousedown', (e) => {
+        caretDragging = true;
         e.preventDefault();
+        e.stopPropagation();
     });
 
     document.addEventListener('mousemove', (e) => {
+        if (caretDragging) {
+            const time = navBarClickToTime(e);
+            if (time === null) return;
+            mapState.currentTime = Math.max(timelineState.matchStartTime, Math.min(time, timelineState.duration));
+            updateTimelineCursor();
+            updateTimelineTimeDisplay();
+            updateTimeIndicators();
+            snapMessagesToCurrentTime();
+            const mapSlider = document.getElementById('map-timeline-slider');
+            if (mapSlider) mapSlider.value = mapState.currentTime;
+            return;
+        }
+
         if (!timelineState.dragging) return;
         const time = navBarClickToTime(e);
         if (time === null) return;
@@ -983,6 +992,11 @@ function setupTimelineControls() {
     });
 
     document.addEventListener('mouseup', (e) => {
+        if (caretDragging) {
+            caretDragging = false;
+            return;
+        }
+
         if (!timelineState.dragging) return;
         timelineState.dragging = false;
 
@@ -993,7 +1007,7 @@ function setupTimelineControls() {
         const end = Math.max(timelineState.dragStartTime, time);
 
         if (end - start <= 2) {
-            // Click — set current time, clear segment
+            // Click on bar — set current time, clear segment
             mapState.currentTime = Math.max(timelineState.matchStartTime, Math.min(time, timelineState.duration));
             timelineState.segment = null;
             updateTimelineCursor();
@@ -1002,11 +1016,10 @@ function setupTimelineControls() {
             updateSelectionOverlay();
             updateSegmentLabel();
             snapMessagesToCurrentTime();
-            // Sync map slider
             const mapSlider = document.getElementById('map-timeline-slider');
             if (mapSlider) mapSlider.value = mapState.currentTime;
         } else {
-            // Drag complete — apply segment to detail views
+            // Drag on bar complete — apply segment to detail views
             timelineState.segment = { start, end };
             updateSelectionOverlay();
             updateSegmentLabel();
@@ -1014,7 +1027,21 @@ function setupTimelineControls() {
         }
     });
 
-    // Double-click to clear segment
+    // Drag on bar to select segment
+    bar.addEventListener('mousedown', (e) => {
+        const time = navBarClickToTime(e);
+        if (time === null) return;
+
+        timelineState.dragging = true;
+        timelineState.dragStartTime = time;
+        timelineState.segment = null;
+        updateSelectionOverlay();
+        updateSegmentLabel();
+
+        e.preventDefault();
+    });
+
+    // Double-click bar to clear segment
     bar.addEventListener('dblclick', () => {
         timelineState.segment = null;
         updateSelectionOverlay();
@@ -1075,15 +1102,16 @@ function updateSegmentLabel() {
 
 function updateTimelineCursor() {
     const cursor = document.getElementById('timeline-nav-cursor');
-    if (!cursor) return;
+    const caret = document.getElementById('timeline-nav-caret');
 
     const matchStart = timelineState.matchStartTime;
     const duration = timelineState.duration;
     const range = duration - matchStart;
     if (range <= 0) return;
 
-    const pct = ((mapState.currentTime - matchStart) / range) * 100;
-    cursor.style.left = `${Math.max(0, Math.min(100, pct))}%`;
+    const pct = Math.max(0, Math.min(100, ((mapState.currentTime - matchStart) / range) * 100));
+    if (cursor) cursor.style.left = `${pct}%`;
+    if (caret) caret.style.left = `${pct}%`;
 }
 
 function updateTimelineTimeDisplay() {

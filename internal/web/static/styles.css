@@ -534,14 +534,19 @@ table tbody tr:hover {
     text-align: center;
 }
 
-.timeline-nav-bar {
+.timeline-nav-bar-wrapper {
     flex: 1;
+    position: relative;
+    user-select: none;
+    padding-bottom: 16px;
+}
+
+.timeline-nav-bar {
     position: relative;
     height: 24px;
     background: #1a2744;
     border-radius: 4px;
-    cursor: pointer;
-    user-select: none;
+    cursor: crosshair;
 }
 
 .timeline-nav-track {
@@ -551,6 +556,23 @@ table tbody tr:hover {
     right: 0;
     bottom: 0;
     border-radius: 4px;
+}
+
+.timeline-nav-caret {
+    position: absolute;
+    top: 24px;
+    font-size: 14px;
+    line-height: 1;
+    color: #00d9ff;
+    cursor: grab;
+    z-index: 10;
+    transform: translateX(-50%);
+    padding: 0 6px;
+    text-shadow: 0 0 4px rgba(0, 217, 255, 0.5);
+}
+
+.timeline-nav-caret:active {
+    cursor: grabbing;
 }
 
 .timeline-selection-overlay {
