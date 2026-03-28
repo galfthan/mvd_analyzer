@@ -5,10 +5,16 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     background: #1a1a2e;
-    color: #eee;
+    color: #e0e0e0;
     line-height: 1.6;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .container {
@@ -23,25 +29,40 @@ header {
 }
 
 header h1 {
+    font-family: 'Rajdhani', sans-serif;
     color: #00d9ff;
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+    text-shadow: 0 0 20px rgba(0, 217, 255, 0.3), 0 0 40px rgba(0, 217, 255, 0.1);
 }
 
 header p {
-    color: #888;
+    color: #7a8ba8;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
 }
 
 .card {
     background: #16213e;
-    border-radius: 10px;
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 217, 255, 0.08);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .card h2 {
+    font-family: 'Rajdhani', sans-serif;
     color: #00d9ff;
+    font-size: 1.4rem;
+    letter-spacing: 0.03em;
     margin-bottom: 20px;
     border-bottom: 1px solid #2a3f5f;
     padding-bottom: 10px;
@@ -49,31 +70,53 @@ header p {
 
 .upload-area {
     border: 2px dashed #2a3f5f;
-    border-radius: 10px;
-    padding: 40px;
+    border-radius: 12px;
+    padding: 48px 40px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
 .upload-area:hover,
 .upload-area.dragover {
     border-color: #00d9ff;
-    background: rgba(0, 217, 255, 0.1);
+    background: rgba(0, 217, 255, 0.06);
+    box-shadow: inset 0 0 30px rgba(0, 217, 255, 0.05);
+}
+
+.upload-icon {
+    color: #2a3f5f;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover .upload-icon,
+.upload-area.dragover .upload-icon {
+    color: #00d9ff;
+    filter: drop-shadow(0 0 6px rgba(0, 217, 255, 0.4));
+    transform: translateY(-2px);
+}
+
+.upload-area p {
+    color: #7a8ba8;
 }
 
 .upload-area button {
     background: #00d9ff;
     color: #1a1a2e;
     border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
+    padding: 8px 18px;
+    border-radius: 6px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
 }
 
 .upload-area button:hover {
-    background: #00b8d9;
+    background: #00c4e6;
+    box-shadow: 0 0 12px rgba(0, 217, 255, 0.3);
 }
 
 .hub-load {
@@ -94,16 +137,18 @@ header p {
 .hub-load input {
     background: #1a1a2e;
     border: 1px solid #2a3f5f;
-    border-radius: 5px;
+    border-radius: 6px;
     padding: 10px 15px;
-    color: #eee;
+    color: #e0e0e0;
     font-size: 0.95rem;
     width: 320px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .hub-load input:focus {
     outline: none;
     border-color: #00d9ff;
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
 }
 
 .hub-load input::placeholder {
@@ -113,17 +158,19 @@ header p {
 .hub-load button {
     background: #0f3460;
     color: #00d9ff;
-    border: 1px solid #00d9ff;
+    border: 1px solid rgba(0, 217, 255, 0.4);
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
 }
 
 .hub-load button:hover {
     background: #00d9ff;
     color: #1a1a2e;
+    box-shadow: 0 0 12px rgba(0, 217, 255, 0.3);
 }
 
 .hub-load button:disabled {
@@ -141,6 +188,23 @@ header p {
 .status.loading {
     background: #2a3f5f;
     color: #00d9ff;
+    position: relative;
+    overflow: hidden;
+}
+
+.status.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.1), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    to { left: 100%; }
 }
 
 .status.success {
@@ -156,33 +220,37 @@ header p {
 /* Tab Navigation */
 .tab-nav {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 4px;
+    margin-bottom: 24px;
     border-bottom: 2px solid #2a3f5f;
-    padding-bottom: 10px;
+    padding-bottom: 0;
 }
 
 .tab-btn {
     background: transparent;
     border: none;
-    color: #888;
-    padding: 10px 20px;
-    font-size: 1rem;
+    color: #7a8ba8;
+    padding: 12px 22px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
     cursor: pointer;
-    border-radius: 5px 5px 0 0;
-    transition: all 0.3s;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.2s ease;
+    position: relative;
 }
 
 .tab-btn:hover {
     color: #00d9ff;
-    background: rgba(0, 217, 255, 0.1);
+    background: rgba(0, 217, 255, 0.06);
 }
 
 .tab-btn.active {
     color: #00d9ff;
-    background: #1a1a2e;
-    border-bottom: 2px solid #00d9ff;
-    margin-bottom: -12px;
+    background: rgba(0, 217, 255, 0.08);
+    box-shadow: inset 0 -2px 0 #00d9ff;
+    margin-bottom: -2px;
 }
 
 .tab-content {
@@ -191,19 +259,29 @@ header p {
 
 .tab-content.active {
     display: block;
+    animation: tabFadeIn 0.3s ease-out;
+}
+
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .panel {
     background: #1a1a2e;
     border-radius: 8px;
     padding: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(42, 63, 95, 0.5);
 }
 
 .panel h3 {
+    font-family: 'Rajdhani', sans-serif;
     color: #00d9ff;
     margin-bottom: 15px;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
 }
 
 .summary-grid {
@@ -218,15 +296,17 @@ header p {
 
 .summary-item label {
     display: block;
-    color: #888;
-    font-size: 0.9rem;
-    margin-bottom: 5px;
+    color: #6b7d99;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
 }
 
 .summary-item span {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #00d9ff;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #e0e0e0;
 }
 
 .teams-list {
@@ -239,40 +319,78 @@ header p {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
+    padding: 16px 20px;
     background: #16213e;
     border-radius: 8px;
+    border-left: 3px solid #2a3f5f;
+    transition: border-color 0.2s;
+}
+
+.team-item:nth-child(1) {
+    border-left-color: #ff5050;
+}
+
+.team-item:nth-child(2) {
+    border-left-color: #50a0ff;
+}
+
+.team-item:nth-child(3) {
+    border-left-color: #4ecdc4;
+}
+
+.team-item:nth-child(4) {
+    border-left-color: #ffc107;
 }
 
 .team-name {
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 1.05rem;
 }
 
 .team-frags {
+    font-family: 'Rajdhani', sans-serif;
     color: #00d9ff;
-    font-weight: bold;
+    font-weight: 700;
+    font-size: 1.2rem;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    font-variant-numeric: tabular-lnum;
 }
 
 table th,
 table td {
-    padding: 12px;
+    padding: 10px 12px;
     text-align: left;
-    border-bottom: 1px solid #2a3f5f;
+    border-bottom: 1px solid rgba(42, 63, 95, 0.6);
 }
 
 table th {
     background: #16213e;
-    color: #00d9ff;
+    color: #7a8ba8;
     font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.015);
 }
 
 table tbody tr:hover {
-    background: rgba(0, 217, 255, 0.1);
+    background: rgba(0, 217, 255, 0.07);
+}
+
+/* Right-align numeric columns (all columns except first) */
+.stats-table td:not(:first-child),
+.stats-table th:not(:first-child) {
+    text-align: right;
 }
 
 .chart {
@@ -304,7 +422,8 @@ table tbody tr:hover {
     height: 100%;
     background: linear-gradient(90deg, #00d9ff, #00b8d9);
     border-radius: 4px;
-    transition: width 0.3s;
+    transition: width 0.5s ease-out;
+    box-shadow: 0 0 6px rgba(0, 217, 255, 0.2);
 }
 
 .weapon-count {
@@ -641,6 +760,28 @@ table tbody tr:hover {
 .bar-segment.ya { background: rgba(255, 200, 0, 0.9); }
 .bar-segment.ga { background: rgba(0, 180, 0, 0.6); }
 .bar-segment.frags { background: rgba(255, 100, 100, 0.9); }
+
+/* Gridlines for diverging charts */
+.timeline-overview-graph::before,
+.detail-graph-container::before,
+.health-armor-graph-diverging::before,
+.score-timeline-graph::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 25%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.04);
+    pointer-events: none;
+    box-shadow: 0 0 0 0 transparent,
+                0 calc(50% - 25%) 0 0 rgba(255, 255, 255, 0.04);
+}
+
+.timeline-overview-graph::before {
+    left: 0;
+    right: 0;
+}
 
 /* Center axis line for diverging chart */
 .timeline-overview-graph::after {
@@ -1024,16 +1165,18 @@ table tbody tr:hover {
 .viewer-link {
     color: #00d9ff;
     text-decoration: none;
-    padding: 4px 12px;
-    border: 1px solid #00d9ff;
-    border-radius: 4px;
+    padding: 5px 14px;
+    border: 1px solid rgba(0, 217, 255, 0.4);
+    border-radius: 5px;
     font-size: 0.85rem;
-    transition: all 0.2s;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
 .viewer-link:hover {
     background: #00d9ff;
     color: #1a1a2e;
+    box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
 }
 
 #keymoments-table th:first-child,
@@ -1072,18 +1215,19 @@ table tbody tr:hover {
 
 .map-time-controls button {
     background: #2a3f5f;
-    border: 1px solid #00d9ff;
+    border: 1px solid rgba(0, 217, 255, 0.4);
     color: #00d9ff;
     padding: 8px 14px;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 1rem;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .map-time-controls button:hover {
     background: #00d9ff;
     color: #1a1a2e;
+    box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
 }
 
 .map-time-display {
@@ -1176,9 +1320,10 @@ table tbody tr:hover {
 
 #map-canvas {
     background: #0a0a15;
-    border: 1px solid #2a3f5f;
-    border-radius: 4px;
+    border: 1px solid rgba(0, 217, 255, 0.15);
+    border-radius: 6px;
     display: block;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(0, 0, 0, 0.3);
 }
 
 .map-no-data {

@@ -236,8 +236,20 @@ function displayPlayerStats(players) {
     // Sort by frags
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
 
+    // Determine team ordering for color assignment
+    const teamOrder = [];
+    sorted.forEach(p => {
+        const t = p.team || '';
+        if (t && !teamOrder.includes(t)) teamOrder.push(t);
+    });
+
     sorted.forEach(player => {
         const tr = document.createElement('tr');
+        const teamIdx = teamOrder.indexOf(player.team || '');
+        const teamColors = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+        if (teamIdx >= 0 && teamIdx < teamColors.length) {
+            tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
+        }
         tr.innerHTML = `
             <td>${escapeHtml(player.name)}</td>
             <td>${escapeHtml(player.team || '')}</td>
@@ -2194,9 +2206,14 @@ function renderMap(time) {
             const symbolInfo = mapState.playerSymbols[name];
 
             if (symbolInfo) {
-                // Team color
-                ctx.fillStyle = symbolInfo.teamIdx === 0 ? '#ff5050' : '#50a0ff';
+                // Team color with glow
+                const teamColor = symbolInfo.teamIdx === 0 ? '#ff5050' : '#50a0ff';
+                ctx.save();
+                ctx.shadowColor = teamColor;
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = teamColor;
                 ctx.fillText(symbolInfo.symbol, pos.x, pos.y);
+                ctx.restore();
 
                 // Add to track if showing tracks
                 if (mapState.showTracks) {
@@ -2228,17 +2245,21 @@ function drawTracks(ctx) {
     for (const [name, points] of Object.entries(mapState.tracks)) {
         if (points.length < 2) continue;
 
-        ctx.beginPath();
-        ctx.strokeStyle = points[0].teamIdx === 0
-            ? 'rgba(255, 80, 80, 0.4)'
-            : 'rgba(80, 160, 255, 0.4)';
-        ctx.lineWidth = 2;
+        const isRed = points[0].teamIdx === 0;
+        const total = points.length;
 
-        ctx.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
+        // Draw segments with fading opacity (older = more transparent)
+        for (let i = 1; i < total; i++) {
+            const alpha = 0.08 + 0.5 * (i / total);
+            ctx.beginPath();
+            ctx.strokeStyle = isRed
+                ? `rgba(255, 80, 80, ${alpha})`
+                : `rgba(80, 160, 255, ${alpha})`;
+            ctx.lineWidth = 1.5 + 0.5 * (i / total);
+            ctx.moveTo(points[i - 1].x, points[i - 1].y);
             ctx.lineTo(points[i].x, points[i].y);
+            ctx.stroke();
         }
-        ctx.stroke();
     }
 }
 
