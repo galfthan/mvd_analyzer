@@ -130,32 +130,39 @@ function setCurrentTime(time) {
     updateChatTimeDisplay();
     const mapSlider = document.getElementById('map-timeline-slider');
     if (mapSlider) mapSlider.value = mapState.currentTime;
+    const mapTimeDisplay = document.getElementById('map-current-time');
+    if (mapTimeDisplay) mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime));
     updateUrlState();
 }
 
 // ─── URL State Sharing ─────────────────────────────────────────────────────
 
+let _urlStateTimer = null;
 function updateUrlState() {
-    if (!currentResult) return;
-    const params = new URLSearchParams();
+    if (_urlStateTimer) return;
+    _urlStateTimer = setTimeout(() => {
+        _urlStateTimer = null;
+        if (!currentResult) return;
+        const params = new URLSearchParams();
 
-    if (currentResult.hubInfo?.gameId) {
-        params.set('hub', currentResult.hubInfo.gameId);
-    }
+        if (currentResult.hubInfo?.gameId) {
+            params.set('hub', currentResult.hubInfo.gameId);
+        }
 
-    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
-    if (activeTab && activeTab !== 'summary') params.set('tab', activeTab);
+        const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+        if (activeTab && activeTab !== 'summary') params.set('tab', activeTab);
 
-    if (mapState.currentTime > 0) {
-        params.set('t', Math.round(mapState.currentTime));
-    }
+        if (mapState.currentTime > 0) {
+            params.set('t', Math.round(mapState.currentTime));
+        }
 
-    if (timelineState.segment) {
-        params.set('seg', `${Math.round(timelineState.segment.start)}-${Math.round(timelineState.segment.end)}`);
-    }
+        if (timelineState.segment) {
+            params.set('seg', `${Math.round(timelineState.segment.start)}-${Math.round(timelineState.segment.end)}`);
+        }
 
-    const qs = params.toString();
-    history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+        const qs = params.toString();
+        history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+    }, 500);
 }
 
 function applyUrlState() {
@@ -2303,6 +2310,7 @@ let mapState = {
     ctx: null,
     locations: [],
     locationGroups: null, // Cached processed location groups
+    locationCanvas: null, // Pre-rendered location background layer
     bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
     currentTime: 0,
     isPlaying: false,
@@ -2328,6 +2336,7 @@ function initMapView(result) {
     const timeline = result.timelineAnalysis;
     mapState.locations = timeline.locationData || [];
     mapState.locationGroups = null; // Clear cached groups for new demo
+    mapState.locationCanvas = null;
 
     // Show/hide no-data message
     const noDataMsg = document.getElementById('map-no-data');
@@ -2474,15 +2483,32 @@ function assignPlayerSymbols(result) {
         }
     }
 
-    // Assign symbols
+    // Assign symbols and pre-render to offscreen canvases
     for (let teamIdx = 0; teamIdx < mapState.teams.length; teamIdx++) {
         const team = mapState.teams[teamIdx];
         const playerList = teamPlayers[team] || [];
+        const teamColor = teamIdx === 0 ? '#ff5050' : '#50a0ff';
         playerList.forEach((name, i) => {
+            const symbol = PLAYER_SYMBOLS[i % PLAYER_SYMBOLS.length];
+            // Pre-render symbol with glow to offscreen canvas
+            const size = 32;
+            const offscreen = document.createElement('canvas');
+            offscreen.width = size;
+            offscreen.height = size;
+            const octx = offscreen.getContext('2d');
+            octx.font = 'bold 18px monospace';
+            octx.textAlign = 'center';
+            octx.textBaseline = 'middle';
+            octx.shadowColor = teamColor;
+            octx.shadowBlur = 12;
+            octx.fillStyle = teamColor;
+            octx.fillText(symbol, size / 2, size / 2);
+
             mapState.playerSymbols[name] = {
-                symbol: PLAYER_SYMBOLS[i % PLAYER_SYMBOLS.length],
+                symbol: symbol,
                 team: team,
-                teamIdx: teamIdx
+                teamIdx: teamIdx,
+                symbolCanvas: offscreen
             };
         });
     }
@@ -2521,6 +2547,32 @@ function buildMapLegend() {
     }
 }
 
+function prerenderLocationBackground() {
+    if (!mapState.locationGroups || !mapState.canvas) return;
+
+    const w = mapState.canvas.width;
+    const h = mapState.canvas.height;
+    const offscreen = document.createElement('canvas');
+    offscreen.width = w;
+    offscreen.height = h;
+    const octx = offscreen.getContext('2d');
+
+    for (const group of mapState.locationGroups) {
+        drawLocationRegion(octx, group, worldToCanvas);
+    }
+
+    octx.font = '10px monospace';
+    octx.textAlign = 'center';
+    octx.textBaseline = 'middle';
+    for (const group of mapState.locationGroups) {
+        const pos = worldToCanvas(group.centroid.x, group.centroid.y);
+        octx.fillStyle = group.color.text;
+        octx.fillText(group.name, pos.x, pos.y);
+    }
+
+    mapState.locationCanvas = offscreen;
+}
+
 function renderMap(time) {
     const ctx = mapState.ctx;
     const canvas = mapState.canvas;
@@ -2536,21 +2588,13 @@ function renderMap(time) {
         mapState.locationGroups = processLocationGroups(mapState.locations);
     }
 
-    // Draw location regions first (background layer)
+    // Draw pre-rendered location background (or render it first time)
     if (mapState.locationGroups) {
-        for (const group of mapState.locationGroups) {
-            drawLocationRegion(ctx, group, worldToCanvas);
+        if (!mapState.locationCanvas) {
+            prerenderLocationBackground();
         }
-
-        // Draw single label at centroid for each location
-        ctx.font = '10px monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        for (const group of mapState.locationGroups) {
-            const pos = worldToCanvas(group.centroid.x, group.centroid.y);
-            ctx.fillStyle = group.color.text;
-            ctx.fillText(group.name, pos.x, pos.y);
+        if (mapState.locationCanvas) {
+            ctx.drawImage(mapState.locationCanvas, 0, 0);
         }
     }
 
@@ -2562,33 +2606,24 @@ function renderMap(time) {
         drawTracks(ctx);
     }
 
-    // Draw players
-    if (bucket) {
-        ctx.font = 'bold 18px monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+    // Draw players (bucket.p = compact high-res format, bucket.playerData = 1s fallback)
+    const playerData = bucket ? (bucket.p || bucket.playerData) : null;
+    if (playerData) {
+        const halfSymbol = 16; // half of pre-rendered symbol canvas size (32)
 
-        for (const [name, data] of Object.entries(bucket.playerData || {})) {
+        for (const [name, data] of Object.entries(playerData)) {
             if (data.x === 0 && data.y === 0) continue;
 
             const pos = worldToCanvas(data.x, data.y);
             const symbolInfo = mapState.playerSymbols[name];
 
-            if (symbolInfo) {
-                // Team color with glow
-                const teamColor = symbolInfo.teamIdx === 0 ? '#ff5050' : '#50a0ff';
-                ctx.save();
-                ctx.shadowColor = teamColor;
-                ctx.shadowBlur = 12;
-                ctx.fillStyle = teamColor;
-                ctx.fillText(symbolInfo.symbol, pos.x, pos.y);
-                ctx.restore();
+            if (symbolInfo && symbolInfo.symbolCanvas) {
+                ctx.drawImage(symbolInfo.symbolCanvas, pos.x - halfSymbol, pos.y - halfSymbol);
 
                 // Add to track if showing tracks
                 if (mapState.showTracks) {
                     if (!mapState.tracks[name]) mapState.tracks[name] = [];
                     const lastPos = mapState.tracks[name][mapState.tracks[name].length - 1];
-                    // Only add if moved significantly
                     if (!lastPos || Math.abs(lastPos.x - pos.x) > 2 || Math.abs(lastPos.y - pos.y) > 2) {
                         mapState.tracks[name].push({
                             x: pos.x,
@@ -2601,11 +2636,6 @@ function renderMap(time) {
         }
     }
 
-    // Update time display
-    const timeDisplay = document.getElementById('map-current-time');
-    if (timeDisplay) {
-        timeDisplay.textContent = formatTime(Math.max(0, time));
-    }
 }
 
 function drawTracks(ctx) {
@@ -2651,12 +2681,8 @@ function findHighResBucketAtTime(time) {
     const bucket = buckets[low];
     if (!bucket) return null;
 
-    // Convert high-res bucket format to expected format for renderMap
-    return {
-        startTime: bucket.t,
-        endTime: bucket.t + timelineState.highResDuration,
-        playerData: convertHighResPlayerData(bucket.p)
-    };
+    // Return high-res bucket directly — renderMap uses compact format (x, y)
+    return bucket;
 }
 
 // Convert compact high-res player data to standard format
@@ -2771,6 +2797,8 @@ function toggleMapPlayback() {
             mapState.animationFrameId = null;
         }
         btn.textContent = '▶';
+        // Full sync on pause (team status, chat, URL)
+        setCurrentTime(mapState.currentTime);
     } else {
         mapState.isPlaying = true;
         mapState.lastRenderTime = performance.now();
@@ -2796,20 +2824,16 @@ function animateMapPlayback() {
         mapState.tracks = {};
     }
 
-    // Sync all views and render map
+    // Lightweight sync: only canvas + cursor positions + time text
     const mapSlider = document.getElementById('map-timeline-slider');
     if (mapSlider) mapSlider.value = mapState.currentTime;
     renderMap(mapState.currentTime);
     updateTimelineCursor();
     updateTimelineTimeDisplay();
-    updateTimeIndicators();
     updateChatCursor();
     updateChatTimeDisplay();
-
-    const chatTab = document.getElementById('tab-chat');
-    if (chatTab && chatTab.classList.contains('active')) {
-        renderChatMessages();
-    }
+    const mapTimeDisplay = document.getElementById('map-current-time');
+    if (mapTimeDisplay) mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime));
 
     mapState.animationFrameId = requestAnimationFrame(animateMapPlayback);
 }
