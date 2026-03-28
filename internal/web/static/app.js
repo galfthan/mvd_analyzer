@@ -153,8 +153,6 @@ function setupTabs() {
                     cancelAnimationFrame(mapState.animationFrameId);
                     mapState.animationFrameId = null;
                 }
-                const tlBtn = document.getElementById('timeline-play-pause');
-                if (tlBtn) tlBtn.textContent = '▶';
                 const mapBtn = document.getElementById('map-play-pause');
                 if (mapBtn) mapBtn.textContent = '▶';
             }
@@ -174,6 +172,7 @@ function setupTabs() {
                 if (tlSlider) tlSlider.value = mapState.currentTime;
                 updateTimelineTimeDisplay();
                 updateTimeIndicators();
+                snapMessagesToCurrentTime();
             }
         });
     });
@@ -806,7 +805,10 @@ let timelineState = {
     matchStartTime: 0,
     teams: [],
     overviewBucketSize: 5, // Aggregate to 5-second buckets for overview
-    controlsInitialized: false // Track if timeline control handlers are set up
+    controlsInitialized: false, // Track if timeline control handlers are set up
+    segment: null, // { start, end } or null for full match - selected time segment
+    dragging: false, // Is user dragging to select a segment on overview?
+    dragStartTime: 0 // Time at drag start
 };
 
 // Reset all timeline state for loading a new demo
@@ -819,6 +821,8 @@ function resetTimelineState() {
     timelineState.duration = 0;
     timelineState.matchStartTime = 0;
     timelineState.teams = [];
+    timelineState.segment = null;
+    timelineState.dragging = false;
 
     // Clear all timeline graph containers
     const containers = [
@@ -1088,34 +1092,141 @@ function setupTimelineControls() {
     }
 
     const slider = document.getElementById('timeline-slider');
-    const playPauseBtn = document.getElementById('timeline-play-pause');
-    const jumpBackBtn = document.getElementById('timeline-jump-back');
-    const jumpForwardBtn = document.getElementById('timeline-jump-forward');
+    const container = document.getElementById('timeline-overview-container');
 
     updateTimelineSliderRange();
 
+    // Slider controls current time
     slider.addEventListener('input', () => {
         mapState.currentTime = parseFloat(slider.value);
         updateTimelineTimeDisplay();
         updateTimeIndicators();
-        // Also sync map slider
+        snapMessagesToCurrentTime();
+        // Sync map slider
         const mapSlider = document.getElementById('map-timeline-slider');
         if (mapSlider) mapSlider.value = mapState.currentTime;
     });
 
-    playPauseBtn.addEventListener('click', () => {
-        toggleTimelinePlayback();
+    // Click on overview graph to set current time
+    // Drag on overview graph to select a time segment
+    container.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.current-time-indicator')) return;
+        const time = overviewClickToTime(e, container);
+        if (time === null) return;
+
+        timelineState.dragging = true;
+        timelineState.dragStartTime = time;
+        // Clear existing segment on new drag
+        timelineState.segment = null;
+        updateSelectionOverlay();
+
+        e.preventDefault();
     });
 
-    jumpBackBtn.addEventListener('click', () => {
-        jumpTimelineTime(-10);
+    document.addEventListener('mousemove', (e) => {
+        if (!timelineState.dragging) return;
+        const time = overviewClickToTime(e, container);
+        if (time === null) return;
+
+        const start = Math.min(timelineState.dragStartTime, time);
+        const end = Math.max(timelineState.dragStartTime, time);
+
+        // Only create segment if dragged more than 2 seconds
+        if (end - start > 2) {
+            timelineState.segment = { start, end };
+            updateSelectionOverlay();
+            updateSegmentLabel();
+        }
     });
 
-    jumpForwardBtn.addEventListener('click', () => {
-        jumpTimelineTime(10);
+    document.addEventListener('mouseup', (e) => {
+        if (!timelineState.dragging) return;
+        timelineState.dragging = false;
+
+        const time = overviewClickToTime(e, container);
+        if (time === null) return;
+
+        const start = Math.min(timelineState.dragStartTime, time);
+        const end = Math.max(timelineState.dragStartTime, time);
+
+        if (end - start <= 2) {
+            // Click (not drag) — set current time, clear segment
+            mapState.currentTime = Math.max(timelineState.matchStartTime, Math.min(time, timelineState.duration));
+            timelineState.segment = null;
+            slider.value = mapState.currentTime;
+            updateTimelineTimeDisplay();
+            updateTimeIndicators();
+            updateSelectionOverlay();
+            updateSegmentLabel();
+            snapMessagesToCurrentTime();
+            // Sync map slider
+            const mapSlider = document.getElementById('map-timeline-slider');
+            if (mapSlider) mapSlider.value = mapState.currentTime;
+        } else {
+            // Drag complete — update detail views for segment
+            timelineState.segment = { start, end };
+            updateSelectionOverlay();
+            updateSegmentLabel();
+            updateDetailView();
+        }
+    });
+
+    // Double-click to clear segment selection
+    container.addEventListener('dblclick', () => {
+        timelineState.segment = null;
+        updateSelectionOverlay();
+        updateSegmentLabel();
+        updateDetailView();
     });
 
     timelineState.controlsInitialized = true;
+}
+
+function overviewClickToTime(e, container) {
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left - 10; // 10px padding
+    const width = rect.width - 20;
+    if (width <= 0) return null;
+    const frac = Math.max(0, Math.min(1, x / width));
+    return timelineState.matchStartTime + frac * (timelineState.duration - timelineState.matchStartTime);
+}
+
+function updateSelectionOverlay() {
+    const overlay = document.getElementById('timeline-selection-overlay');
+    if (!overlay) return;
+
+    if (!timelineState.segment) {
+        overlay.style.display = 'none';
+        return;
+    }
+
+    const matchStart = timelineState.matchStartTime;
+    const duration = timelineState.duration;
+    const range = duration - matchStart;
+    if (range <= 0) return;
+
+    const startPct = ((timelineState.segment.start - matchStart) / range) * 100;
+    const endPct = ((timelineState.segment.end - matchStart) / range) * 100;
+
+    // Account for 10px padding on each side of the container
+    overlay.style.display = 'block';
+    overlay.style.left = `calc(10px + (100% - 20px) * ${startPct / 100})`;
+    overlay.style.width = `calc((100% - 20px) * ${(endPct - startPct) / 100})`;
+}
+
+function updateSegmentLabel() {
+    const label = document.getElementById('timeline-segment-label');
+    if (!label) return;
+
+    if (!timelineState.segment) {
+        label.textContent = '';
+        return;
+    }
+
+    const matchStart = timelineState.matchStartTime;
+    const relStart = timelineState.segment.start - matchStart;
+    const relEnd = timelineState.segment.end - matchStart;
+    label.textContent = `${formatTime(Math.max(0, relStart))} - ${formatTime(Math.max(0, relEnd))}`;
 }
 
 function updateTimelineSliderRange() {
@@ -1138,91 +1249,6 @@ function updateTimelineTimeDisplay() {
     const matchStart = timelineState.matchStartTime;
     const relTime = mapState.currentTime - matchStart;
     display.textContent = formatTime(Math.max(0, relTime));
-}
-
-function toggleTimelinePlayback() {
-    const btn = document.getElementById('timeline-play-pause');
-    if (!btn) return;
-
-    if (mapState.isPlaying) {
-        mapState.isPlaying = false;
-        if (mapState.animationFrameId) {
-            cancelAnimationFrame(mapState.animationFrameId);
-            mapState.animationFrameId = null;
-        }
-        btn.textContent = '▶';
-        // Also sync map button
-        const mapBtn = document.getElementById('map-play-pause');
-        if (mapBtn) mapBtn.textContent = '▶';
-    } else {
-        mapState.isPlaying = true;
-        mapState.lastRenderTime = performance.now();
-        btn.textContent = '⏸';
-        // Also sync map button
-        const mapBtn = document.getElementById('map-play-pause');
-        if (mapBtn) mapBtn.textContent = '⏸';
-        animateSharedPlayback();
-    }
-}
-
-function animateSharedPlayback() {
-    if (!mapState.isPlaying) {
-        mapState.animationFrameId = null;
-        return;
-    }
-
-    const now = performance.now();
-    const elapsed = (now - mapState.lastRenderTime) / 1000;
-    mapState.currentTime += elapsed;
-    mapState.lastRenderTime = now;
-
-    const maxTime = timelineState.duration || parseFloat(document.getElementById('map-timeline-slider')?.max || 600);
-    const minTime = timelineState.matchStartTime || parseFloat(document.getElementById('map-timeline-slider')?.min || 0);
-
-    if (mapState.currentTime > maxTime) {
-        mapState.currentTime = minTime;
-    }
-
-    // Update both sliders
-    const timelineSlider = document.getElementById('timeline-slider');
-    if (timelineSlider) timelineSlider.value = mapState.currentTime;
-    const mapSlider = document.getElementById('map-timeline-slider');
-    if (mapSlider) mapSlider.value = mapState.currentTime;
-
-    updateTimelineTimeDisplay();
-    updateTimeIndicators();
-
-    // If map tab is active, also render map
-    const mapTab = document.getElementById('tab-map');
-    if (mapTab && mapTab.classList.contains('active')) {
-        renderMap(mapState.currentTime);
-    }
-
-    // Update map time display
-    const mapTimeDisplay = document.getElementById('map-current-time');
-    if (mapTimeDisplay) {
-        const matchStart = timelineState.matchStartTime;
-        mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime - matchStart));
-    }
-
-    mapState.animationFrameId = requestAnimationFrame(animateSharedPlayback);
-}
-
-function jumpTimelineTime(delta) {
-    const slider = document.getElementById('timeline-slider');
-    if (!slider) return;
-
-    mapState.currentTime = Math.max(
-        parseFloat(slider.min),
-        Math.min(parseFloat(slider.max), mapState.currentTime + delta)
-    );
-    slider.value = mapState.currentTime;
-    updateTimelineTimeDisplay();
-    updateTimeIndicators();
-
-    // Sync map slider
-    const mapSlider = document.getElementById('map-timeline-slider');
-    if (mapSlider) mapSlider.value = mapState.currentTime;
 }
 
 function updateTimeIndicators() {
@@ -1259,18 +1285,27 @@ function updateDetailView() {
     const matchStart = timelineState.matchStartTime;
     const duration = timelineState.duration;
 
-    // Show current time in label
-    const relTime = mapState.currentTime - matchStart;
-    document.getElementById('time-range-label').textContent =
-        `(${formatTime(Math.max(0, relTime))})`;
+    // Use segment if selected, otherwise full match
+    const start = timelineState.segment ? timelineState.segment.start : matchStart;
+    const end = timelineState.segment ? timelineState.segment.end : duration;
 
-    // Update all detail panels with full match range
-    updateDetailMessages(matchStart, duration);
-    updateDetailGraph(matchStart, duration);
-    updateDetailAxis(matchStart, duration);
-    updateHealthArmorGraph(matchStart, duration);
-    updateFragsGraph(matchStart, duration);
-    updateScoreTimeline(matchStart, duration);
+    // Show range in label
+    const relStart = start - matchStart;
+    const relEnd = end - matchStart;
+    if (timelineState.segment) {
+        document.getElementById('time-range-label').textContent =
+            `(${formatTime(Math.max(0, relStart))} - ${formatTime(Math.max(0, relEnd))})`;
+    } else {
+        document.getElementById('time-range-label').textContent = '';
+    }
+
+    // Update all detail panels
+    updateDetailMessages(start, end);
+    updateDetailGraph(start, end);
+    updateDetailAxis(start, end);
+    updateHealthArmorGraph(start, end);
+    updateFragsGraph(start, end);
+    updateScoreTimeline(start, end);
 }
 
 function updateDetailMessages(startTime, endTime) {
@@ -1314,6 +1349,7 @@ function updateDetailMessages(startTime, endTime) {
         const relTime = event.time - matchStart;
         const item = document.createElement('div');
         item.className = 'timeline-message-item';
+        item.dataset.time = event.time;
         item.innerHTML = `
             <span class="timeline-message-time">${formatTime(Math.max(0, relTime))}</span>
             <span class="timeline-message-content ${event.type}">${formatQuakeMessage(event.message)}</span>
@@ -1347,6 +1383,41 @@ function updateDetailMessages(startTime, endTime) {
     }
     if (teamBCount === 0) {
         teamBContainer.innerHTML = '<div style="color: #888; padding: 10px; text-align: center;">No messages</div>';
+    }
+
+    // Snap to current time after populating
+    snapMessagesToCurrentTime();
+}
+
+function snapMessagesToCurrentTime() {
+    const currentTime = mapState.currentTime;
+    const containers = ['kill-messages', 'team-a-messages', 'team-b-messages'];
+
+    for (const containerId of containers) {
+        const scrollContainer = document.getElementById(containerId);
+        if (!scrollContainer) continue;
+
+        const items = scrollContainer.querySelectorAll('.timeline-message-item[data-time]');
+        if (items.length === 0) continue;
+
+        // Find the message closest to current time
+        let closestItem = null;
+        let closestDist = Infinity;
+        for (const item of items) {
+            const dist = Math.abs(parseFloat(item.dataset.time) - currentTime);
+            if (dist < closestDist) {
+                closestDist = dist;
+                closestItem = item;
+            }
+        }
+
+        if (closestItem) {
+            // Scroll so the closest item is roughly centered
+            const containerHeight = scrollContainer.clientHeight;
+            const itemTop = closestItem.offsetTop;
+            const itemHeight = closestItem.offsetHeight;
+            scrollContainer.scrollTop = itemTop - (containerHeight / 2) + (itemHeight / 2);
+        }
     }
 }
 
@@ -2568,16 +2639,43 @@ function toggleMapPlayback() {
             mapState.animationFrameId = null;
         }
         btn.textContent = '▶';
-        const tlBtn = document.getElementById('timeline-play-pause');
-        if (tlBtn) tlBtn.textContent = '▶';
     } else {
         mapState.isPlaying = true;
         mapState.lastRenderTime = performance.now();
         btn.textContent = '⏸';
-        const tlBtn = document.getElementById('timeline-play-pause');
-        if (tlBtn) tlBtn.textContent = '⏸';
-        animateSharedPlayback();
+        animateMapPlayback();
     }
+}
+
+function animateMapPlayback() {
+    if (!mapState.isPlaying) {
+        mapState.animationFrameId = null;
+        return;
+    }
+
+    const now = performance.now();
+    const elapsed = (now - mapState.lastRenderTime) / 1000;
+    mapState.currentTime += elapsed;
+    mapState.lastRenderTime = now;
+
+    const slider = document.getElementById('map-timeline-slider');
+    if (slider) {
+        if (mapState.currentTime > parseFloat(slider.max)) {
+            mapState.currentTime = parseFloat(slider.min);
+            mapState.tracks = {};
+        }
+        slider.value = mapState.currentTime;
+    }
+
+    renderMap(mapState.currentTime);
+
+    // Sync timeline slider
+    const tlSlider = document.getElementById('timeline-slider');
+    if (tlSlider) tlSlider.value = mapState.currentTime;
+    updateTimelineTimeDisplay();
+    updateTimeIndicators();
+
+    mapState.animationFrameId = requestAnimationFrame(animateMapPlayback);
 }
 
 function jumpMapTime(delta) {

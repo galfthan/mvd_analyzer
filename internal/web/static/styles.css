@@ -542,23 +542,8 @@ table tbody tr:hover {
 .timeline-time-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-}
-
-.timeline-time-controls button {
-    background: #333;
-    border: 1px solid #555;
-    color: #ddd;
+    gap: 8px;
     padding: 4px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.timeline-time-controls button:hover {
-    background: #444;
-    border-color: #00d9ff;
 }
 
 #timeline-slider {
@@ -589,6 +574,25 @@ table tbody tr:hover {
     background: #00d9ff;
     cursor: pointer;
     border: none;
+}
+
+.timeline-segment-label {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #888;
+    white-space: nowrap;
+}
+
+.timeline-selection-overlay {
+    position: absolute;
+    top: 10px;
+    height: 80px;
+    background: rgba(0, 217, 255, 0.12);
+    border-left: 1px solid rgba(0, 217, 255, 0.5);
+    border-right: 1px solid rgba(0, 217, 255, 0.5);
+    pointer-events: none;
+    z-index: 3;
+    display: none;
 }
 
 .current-time-indicator {

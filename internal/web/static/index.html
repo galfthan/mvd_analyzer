@@ -181,15 +181,14 @@
                         </div>
                         <div class="timeline-overview-container" id="timeline-overview-container">
                             <div class="timeline-overview-graph" id="overview-graph"></div>
+                            <div class="timeline-selection-overlay" id="timeline-selection-overlay"></div>
                             <div class="current-time-indicator" id="overview-time-indicator"></div>
                             <div class="timeline-axis" id="overview-axis"></div>
                         </div>
                         <div class="timeline-time-controls">
-                            <button id="timeline-jump-back" title="Jump back 10s">⏮</button>
-                            <button id="timeline-play-pause" title="Play/Pause">▶</button>
-                            <button id="timeline-jump-forward" title="Jump forward 10s">⏭</button>
                             <span id="timeline-current-time" class="map-time-display">0:00</span>
                             <input type="range" id="timeline-slider" min="0" max="100" value="0">
+                            <span id="timeline-segment-label" class="timeline-segment-label"></span>
                         </div>
                     </div>
                     <div class="timeline-legend">
