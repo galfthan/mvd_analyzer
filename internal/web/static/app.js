@@ -1207,7 +1207,7 @@ function updateDetailView() {
 
 // ─── Chat Tab ──────────────────────────────────────────────────────────────
 
-const CHAT_WINDOW = 60; // Show 1 minute of messages (default)
+const CHAT_WINDOW = 40; // Show ±20s of messages
 let chatControlsInitialized = false;
 
 function setupChatControls() {
@@ -1332,40 +1332,41 @@ function renderChatMessages() {
 
     if (!currentResult?.messages?.events || teams.length < 2) return;
 
-    // Filter and deduplicate events in window
+    // Filter and deduplicate events in window (3-second dedup window)
     const seen = new Map();
     const events = currentResult.messages.events.filter(e => {
         if (e.time < windowStart || e.time > windowEnd) return false;
-        const key = `${Math.floor(e.time)}:${e.message}`;
-        if (seen.has(key)) return false;
-        seen.set(key, true);
+        const key = e.message;
+        const prevTime = seen.get(key);
+        if (prevTime !== undefined && Math.abs(e.time - prevTime) < 3) return false;
+        seen.set(key, e.time);
         return true;
     });
 
-    // Container height for positioning
-    const containerHeight = killContainer.clientHeight || 600;
+    // Sort events into categories
+    const killEvents = [];
+    const teamAEvents = [];
+    const teamBEvents = [];
 
-    // Place messages at vertical position proportional to time within window
     for (const event of events) {
-        const frac = (event.time - windowStart) / CHAT_WINDOW;
-        const topPx = Math.round(frac * containerHeight);
-        const relTime = event.time - matchStart;
-
-        const marker = document.createElement('div');
-        marker.className = 'chat-time-marker';
-        marker.style.top = `${topPx}px`;
-        marker.innerHTML = `<span class="chat-time-marker-time">${formatTime(Math.max(0, relTime))}</span><span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
-
         if (event.type === 'frag') {
-            killContainer.appendChild(marker);
+            killEvents.push(event);
         } else if (event.type === 'teamsay' || event.type === 'chat') {
             if (event.team === teams[0]) {
-                teamAContainer.appendChild(marker);
+                teamAEvents.push(event);
             } else if (event.team === teams[1]) {
-                teamBContainer.appendChild(marker);
+                teamBEvents.push(event);
             }
         }
     }
+
+    const containerHeight = killContainer.clientHeight || 700;
+    const ITEM_HEIGHT = 18; // approximate height of a message row
+
+    // Render each column with overlap avoidance
+    renderChatColumn(killContainer, killEvents, windowStart, containerHeight, matchStart, ITEM_HEIGHT);
+    renderChatColumn(teamAContainer, teamAEvents, windowStart, containerHeight, matchStart, ITEM_HEIGHT);
+    renderChatColumn(teamBContainer, teamBEvents, windowStart, containerHeight, matchStart, ITEM_HEIGHT);
 
     // Add current-time line at center
     for (const container of [killContainer, teamAContainer, teamBContainer]) {
@@ -1373,6 +1374,32 @@ function renderChatMessages() {
         line.className = 'chat-current-time-line';
         line.style.top = `${Math.round(containerHeight / 2)}px`;
         container.appendChild(line);
+    }
+}
+
+function renderChatColumn(container, events, windowStart, containerHeight, matchStart, itemHeight) {
+    let lastBottom = -Infinity; // track bottom edge of last placed item
+
+    for (const event of events) {
+        const frac = (event.time - windowStart) / CHAT_WINDOW;
+        let topPx = Math.round(frac * containerHeight);
+        const relTime = event.time - matchStart;
+
+        let displaced = false;
+        if (topPx < lastBottom) {
+            topPx = lastBottom;
+            displaced = true;
+        }
+
+        const marker = document.createElement('div');
+        marker.className = 'chat-time-marker' + (displaced ? ' chat-displaced' : '');
+        marker.style.top = `${topPx}px`;
+
+        const prefix = displaced ? '<span class="chat-displaced-dots">...</span>' : '';
+        marker.innerHTML = `${prefix}<span class="chat-time-marker-time">${formatTime(Math.max(0, relTime))}</span><span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
+
+        container.appendChild(marker);
+        lastBottom = topPx + itemHeight;
     }
 }
 

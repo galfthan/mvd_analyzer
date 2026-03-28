@@ -737,8 +737,8 @@ table tbody tr:hover {
 
 .chat-timeline-scroll {
     position: relative;
-    height: 600px;
-    overflow-y: auto;
+    height: 700px;
+    overflow: hidden;
     background: #0d1929;
     border-radius: 4px;
 }
@@ -773,6 +773,16 @@ table tbody tr:hover {
 .chat-time-marker-msg.powerup { color: #ffc107; }
 .chat-time-marker-msg.chat { color: #4ecdc4; }
 .chat-time-marker-msg.teamsay { color: #45b7d1; }
+
+.chat-displaced {
+    padding-left: 16px;
+}
+
+.chat-displaced-dots {
+    color: #555;
+    font-size: 0.7rem;
+    margin-right: 2px;
+}
 
 .chat-current-time-line {
     position: absolute;
