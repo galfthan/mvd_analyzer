@@ -872,10 +872,13 @@ function displayTimelineAnalysis(result) {
         setTextIfExists('team-b-chat-title', `${teams[1]} Chat`);
         setTextIfExists('legend-health-team-a', teams[0] + ' ↑');
         setTextIfExists('legend-health-team-b', teams[1] + ' ↓');
+        setTextIfExists('legend-weapons-team-a', teams[0] + ' ↑');
+        setTextIfExists('legend-weapons-team-b', teams[1] + ' ↓');
     }
 
     setupTimelineControls();
     setupChatControls();
+    setupGraphHovers();
     updateTimelineCursor();
     updateDetailView();
     updateTimeIndicators();
@@ -1955,6 +1958,142 @@ function updateScoreAxis(startTime, endTime) {
         const span = document.createElement('span');
         span.textContent = formatTime(time);
         container.appendChild(span);
+    }
+}
+
+// ─── Graph Hover Tooltips ───────────────────────────────────────────────────
+
+function setupGraphHovers() {
+    const detailOuter = document.querySelector('.detail-graph-outer');
+    const healthOuter = document.querySelector('.health-graph-outer');
+    const tooltip = document.getElementById('graph-tooltip');
+    if (!tooltip) return;
+
+    function handleGraphHover(e, graphEl) {
+        const rect = graphEl.getBoundingClientRect();
+        const x = e.clientX - rect.left - 10; // 10px padding
+        const width = rect.width - 20;
+        if (width <= 0) return null;
+        const frac = Math.max(0, Math.min(1, x / width));
+
+        // Determine time range shown in graphs
+        const seg = timelineState.segment;
+        const rangeStart = seg ? seg.start : timelineState.matchStartTime;
+        const rangeEnd = seg ? seg.end : timelineState.duration;
+        return rangeStart + frac * (rangeEnd - rangeStart);
+    }
+
+    function findBucketAtTime(time) {
+        const buckets = timelineState.buckets;
+        if (!buckets || buckets.length === 0) return null;
+        // Binary search for closest bucket
+        let best = null;
+        let bestDist = Infinity;
+        for (const b of buckets) {
+            if (time >= b.startTime && time < b.endTime) return b;
+            const dist = Math.min(Math.abs(b.startTime - time), Math.abs(b.endTime - time));
+            if (dist < bestDist) { bestDist = dist; best = b; }
+        }
+        return best;
+    }
+
+    function armorLabel(type) {
+        if (type === 'ra') return 'RA';
+        if (type === 'ya') return 'YA';
+        if (type === 'ga') return 'GA';
+        return '';
+    }
+
+    function weaponLabel(pd) {
+        const w = [];
+        if (pd.hasRL && pd.hasLG) w.push('RL+LG');
+        else if (pd.hasRL) w.push('RL');
+        else if (pd.hasLG) w.push('LG');
+        const p = [];
+        if (pd.hasQuad) p.push('Quad');
+        if (pd.hasPent) p.push('Pent');
+        if (pd.hasRing) p.push('Ring');
+        return [...w, ...p].join(', ') || '-';
+    }
+
+    function getFragsAtTime(time) {
+        const fragEvents = timelineState.fragEvents || [];
+        const counts = {}; // player -> frag count
+        for (const fe of fragEvents) {
+            if (fe.time > time) break;
+            counts[fe.player] = (counts[fe.player] || 0) + 1;
+        }
+        return counts;
+    }
+
+    function buildTooltipHTML(bucket) {
+        const teams = timelineState.teams;
+        if (!bucket || teams.length < 2) return '';
+        const matchStart = timelineState.matchStartTime;
+        const relTime = bucket.startTime - matchStart;
+        const pd = bucket.playerData || {};
+        const fragCounts = getFragsAtTime(bucket.startTime);
+
+        // Group players by team
+        const teamPlayers = { [teams[0]]: [], [teams[1]]: [] };
+        for (const [name, data] of Object.entries(pd)) {
+            if (teamPlayers[data.team]) {
+                teamPlayers[data.team].push({ name, ...data, frags: fragCounts[name] || 0 });
+            }
+        }
+
+        let html = `<div class="tt-header">${formatTime(Math.max(0, relTime))}</div>`;
+
+        for (const team of teams) {
+            const players = teamPlayers[team] || [];
+            const teamFrags = players.reduce((s, p) => s + p.frags, 0);
+
+            html += `<div class="tt-team">${team} (${teamFrags} frags)</div>`;
+            for (const p of players) {
+                const hp = p.health || 0;
+                const arm = p.armor || 0;
+                const at = armorLabel(p.armorType);
+                const wep = weaponLabel(p);
+                html += `<div class="tt-player">${p.name}: ${hp}hp ${arm}${at} [${wep}] ${p.frags}f</div>`;
+            }
+            if (players.length === 0) {
+                html += `<div class="tt-player" style="color:#666">No players</div>`;
+            }
+        }
+        return html;
+    }
+
+    function showTooltip(e, html) {
+        if (!html) { tooltip.style.display = 'none'; return; }
+        tooltip.innerHTML = html;
+        tooltip.style.display = 'block';
+        // Position near cursor
+        const pad = 12;
+        let left = e.clientX + pad;
+        let top = e.clientY + pad;
+        // Keep on screen
+        const tw = tooltip.offsetWidth;
+        const th = tooltip.offsetHeight;
+        if (left + tw > window.innerWidth - pad) left = e.clientX - tw - pad;
+        if (top + th > window.innerHeight - pad) top = e.clientY - th - pad;
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+    }
+
+    function onHover(e, graphEl) {
+        const time = handleGraphHover(e, graphEl);
+        if (time === null) { tooltip.style.display = 'none'; return; }
+        const bucket = findBucketAtTime(time);
+        showTooltip(e, buildTooltipHTML(bucket));
+    }
+
+    if (detailOuter) {
+        detailOuter.addEventListener('mousemove', (e) => onHover(e, detailOuter));
+        detailOuter.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+    }
+    if (healthOuter) {
+        healthOuter.addEventListener('mousemove', (e) => onHover(e, healthOuter));
+        healthOuter.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
     }
 }
 

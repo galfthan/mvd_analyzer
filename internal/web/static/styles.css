@@ -628,6 +628,41 @@ table tbody tr:hover {
     opacity: 0.8;
 }
 
+.graph-tooltip {
+    position: fixed;
+    display: none;
+    background: rgba(10, 18, 32, 0.95);
+    border: 1px solid #2a3f5f;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    color: #ccc;
+    pointer-events: none;
+    z-index: 100;
+    max-width: 320px;
+    font-family: monospace;
+    line-height: 1.5;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.graph-tooltip .tt-header {
+    color: #00d9ff;
+    font-weight: bold;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #2a3f5f;
+    padding-bottom: 3px;
+}
+
+.graph-tooltip .tt-team {
+    margin: 4px 0 2px 0;
+    font-weight: bold;
+}
+
+.graph-tooltip .tt-player {
+    padding-left: 8px;
+    color: #aaa;
+}
+
 .timeline-legend {
     display: flex;
     gap: 20px;
