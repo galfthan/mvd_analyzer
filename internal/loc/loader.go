@@ -50,6 +50,14 @@ func LoadForMap(mapName string) (*Finder, error) {
 	baseName = strings.TrimSuffix(baseName, ".bsp")
 	baseName = strings.ToLower(baseName)
 
+	// Map aliases: some maps share the same layout/locs
+	mapAliases := map[string]string{
+		"phantombase": "phantoma",
+	}
+	if alias, ok := mapAliases[baseName]; ok {
+		baseName = alias
+	}
+
 	filename := fmt.Sprintf("locs/%s.loc", baseName)
 	data, err := locFiles.ReadFile(filename)
 	if err != nil {
