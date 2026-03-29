@@ -2167,9 +2167,8 @@ function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
     if (!hubInfo || !hubInfo.gameId) return '';
     const trackId = playerUserIDs[playerName];
     if (!trackId) return '';
-    const from = Math.max(0, Math.floor(time) - 5);
-    const to = Math.floor(time) + 15;
-    const url = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${from}&to=${to}&track=${trackId}`;
+    const from = Math.floor(time);
+    const url = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${from}&track=${trackId}`;
     return ` <a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">[w]</a>`;
 }
 
