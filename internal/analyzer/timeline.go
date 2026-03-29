@@ -181,15 +181,20 @@ func (a *TimelineAnalyzer) handleFragUpdate(e *parser.FragUpdateEvent) {
 		// Sanity check: filter unreasonable deltas caused by parsing artifacts
 		// (e.g., misaligned reads producing garbage frag values).
 		// No player can gain or lose >5 frags in a single server frame.
+		// When a corrupt value arrives, do NOT update state.frags — keep the
+		// last known good value. The next valid update will naturally produce
+		// the correct cumulative delta (e.g., corrupt reads 9→272, correction
+		// reads 272→10, but by keeping state at 9 the correction gives delta +1).
 		if delta >= -5 && delta <= 5 {
 			a.fragEventsRaw = append(a.fragEventsRaw, fragEventRaw{
 				Time:      e.Time,
 				PlayerNum: e.PlayerNum,
 				Delta:     delta,
 			})
+			state.frags = e.Frags
 		}
+		// else: corrupt value, don't update state.frags
 	}
-	state.frags = e.Frags
 }
 
 func (a *TimelineAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error {
