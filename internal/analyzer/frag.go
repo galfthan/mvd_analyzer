@@ -234,10 +234,10 @@ func (a *FragAnalyzer) checkKill(msg string, time float64) *FragEntry {
 		{" drains ", "lg"},                      // "drains X's batteries" (discharge kill)
 
 		// Rocket Launcher (from KTX client.c dtRL)
-		{" rides ", "rl"},           // "rides X's rocket"
-		{" was gibbed by ", "rl"},   // common gib
+		{" rides ", "rl"},             // "rides X's rocket"
 		{" was brutalized by ", "rl"}, // quad gib variant
 		{" was smeared by ", "rl"},    // quad gib variant
+		// NOTE: " was gibbed by " handled specially below (grenade vs rocket)
 
 		// Grenade Launcher (from KTX client.c dtGL)
 		{" eats ", "gl"}, // "eats X's pineapple"
@@ -264,9 +264,13 @@ func (a *FragAnalyzer) checkKill(msg string, time float64) *FragEntry {
 		// Grappling Hook (from KTX client.c dtHOOK)
 		{" was hooked by ", "hook"},
 
+		// Rail Gun (from KTX sv_mod_frags.h, DMM8/TF)
+		{" was railed by ", "rail"},
+
 		// Stomp kills (from KTX client.c dtSTOMP)
 		{" softens ", "stomp"},     // "X softens Y's fall"
 		{" tried to catch ", "stomp"},
+		{" was literally stomped into particles by ", "stomp"}, // instagib
 		{" was jumped by ", "stomp"},
 		{" was crushed by ", "stomp"},
 
@@ -298,67 +302,63 @@ func (a *FragAnalyzer) checkKill(msg string, time float64) *FragEntry {
 		}
 	}
 
+	// "was gibbed by" needs special handling: weapon depends on suffix
+	// "was gibbed by X's grenade" = gl, "was gibbed by X's rocket" = rl
+	if frag := a.checkGibbedBy(msg, time); frag != nil {
+		return frag
+	}
+
 	return nil
 }
 
 // checkTeamKill checks for team kill patterns
 func (a *FragAnalyzer) checkTeamKill(msg string, time float64) *FragEntry {
-	// Pattern: "X gets a frag for the other team" (suicidal teamkill, from KTX client.c)
-	if idx := strings.Index(msg, " gets a frag for the other team"); idx > 0 {
-		player := strings.TrimSpace(msg[:idx])
-		return &FragEntry{
-			Time:       time,
-			Killer:     player,
-			Victim:     player, // Self-damage resulting in -1 frag
-			Weapon:     "teamkill",
-			IsSuicide:  true,
-			IsTeamKill: true,
+	// These patterns must be checked BEFORE regular kill patterns
+	// because e.g. "was telefragged by his teammate" would otherwise match "was telefragged by"
+
+	// Killer-only teamkill patterns (victim is generic "teammate")
+	tkPatterns := []string{
+		" gets a frag for the other team",
+		" mows down a teammate",
+		" squished a teammate",
+		" checks his glasses",
+		" checks her glasses",
+		" loses another friend",
+	}
+	for _, pattern := range tkPatterns {
+		if idx := strings.Index(msg, pattern); idx > 0 {
+			player := strings.TrimSpace(msg[:idx])
+			isSuicide := pattern == " gets a frag for the other team"
+			return &FragEntry{
+				Time:       time,
+				Killer:     player,
+				Victim:     "teammate",
+				Weapon:     "teamkill",
+				IsSuicide:  isSuicide,
+				IsTeamKill: true,
+			}
 		}
 	}
 
-	// Pattern: "X mows down a teammate" (from KTX client.c)
-	if idx := strings.Index(msg, " mows down a teammate"); idx > 0 {
-		player := strings.TrimSpace(msg[:idx])
-		return &FragEntry{
-			Time:       time,
-			Killer:     player,
-			Victim:     "teammate",
-			Weapon:     "teamkill",
-			IsTeamKill: true,
-		}
+	// Victim-first teammate patterns: "X was <verb> by his/her teammate"
+	tkVictimPatterns := []string{
+		" was telefragged by his teammate",
+		" was telefragged by her teammate",
+		" was crushed by his teammate",
+		" was crushed by her teammate",
+		" was jumped by his teammate",
+		" was jumped by her teammate",
 	}
-
-	// Pattern: "X checks his/her glasses" (teamkill, from KTX client.c)
-	if idx := strings.Index(msg, " checks his glasses"); idx > 0 {
-		killer := strings.TrimSpace(msg[:idx])
-		return &FragEntry{
-			Time:       time,
-			Killer:     killer,
-			Victim:     "teammate",
-			Weapon:     "teamkill",
-			IsTeamKill: true,
-		}
-	}
-	if idx := strings.Index(msg, " checks her glasses"); idx > 0 {
-		killer := strings.TrimSpace(msg[:idx])
-		return &FragEntry{
-			Time:       time,
-			Killer:     killer,
-			Victim:     "teammate",
-			Weapon:     "teamkill",
-			IsTeamKill: true,
-		}
-	}
-
-	// Pattern: "X loses another friend" (teamkill, from KTX client.c)
-	if idx := strings.Index(msg, " loses another friend"); idx > 0 {
-		player := strings.TrimSpace(msg[:idx])
-		return &FragEntry{
-			Time:       time,
-			Killer:     player,
-			Victim:     "teammate",
-			Weapon:     "teamkill",
-			IsTeamKill: true,
+	for _, pattern := range tkVictimPatterns {
+		if idx := strings.Index(msg, pattern); idx > 0 {
+			victim := strings.TrimSpace(msg[:idx])
+			return &FragEntry{
+				Time:       time,
+				Killer:     "teammate",
+				Victim:     victim,
+				Weapon:     "teamkill",
+				IsTeamKill: true,
+			}
 		}
 	}
 
@@ -417,6 +417,35 @@ func (a *FragAnalyzer) checkKillerFirstPatterns(msg string, time float64) *FragE
 	}
 
 	return nil
+}
+
+// checkGibbedBy handles "was gibbed by X's grenade/rocket" with weapon detection
+func (a *FragAnalyzer) checkGibbedBy(msg string, time float64) *FragEntry {
+	idx := strings.Index(msg, " was gibbed by ")
+	if idx <= 0 {
+		return nil
+	}
+	victim := strings.TrimSpace(msg[:idx])
+	rest := msg[idx+15:] // after " was gibbed by "
+
+	// Determine weapon from suffix
+	weapon := "rl" // default
+	if strings.Contains(rest, "'s grenade") || strings.HasSuffix(strings.TrimSpace(rest), "' grenade") {
+		weapon = "gl"
+	}
+
+	killer := extractKillerName(rest)
+	if victim == "" || killer == "" {
+		return nil
+	}
+
+	return &FragEntry{
+		Time:       time,
+		Killer:     killer,
+		Victim:     victim,
+		Weapon:     weapon,
+		IsTeamKill: a.isTeamKill(victim, killer),
+	}
 }
 
 // checkAtePattern handles "ate X loads of Y's buckshot" patterns
