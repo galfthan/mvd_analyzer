@@ -771,8 +771,9 @@ function displayKeyMoments(result) {
         // Build viewer URL if hub info available
         let watchCell = '-';
         if (hubInfo && hubInfo.gameId) {
-            const fromTime = Math.max(0, Math.floor(event.time) - 10);
-            const toTime = Math.floor(event.endTime) + 5;
+            const mst = timelineState.matchStartTime || 0;
+            const fromTime = Math.max(0, Math.floor(event.time + mst) - 10);
+            const toTime = Math.floor(event.endTime + mst) + 5;
             const trackId = event.playerUserID || event.playerSlot;
             const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
             watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Watch</a>`;
@@ -2167,7 +2168,9 @@ function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
     if (!hubInfo || !hubInfo.gameId) return '';
     const trackId = playerUserIDs[playerName];
     if (!trackId) return '';
-    const from = Math.floor(time);
+    // Our times are match-relative (0 = match start). Hub uses demo-relative time
+    // (includes countdown/warmup), so add matchStartTime to convert.
+    const from = Math.floor(time + (timelineState.matchStartTime || 0));
     const url = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${from}&track=${trackId}`;
     return ` <a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">[w]</a>`;
 }
