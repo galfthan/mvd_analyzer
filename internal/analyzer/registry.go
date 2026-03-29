@@ -142,6 +142,7 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 				ta.PowerupEvents[i].Time -= matchStart
 				ta.PowerupEvents[i].EndTime -= matchStart
 			}
+			ta.DemoOffset = matchStart
 			ta.MatchStartTime = 0
 
 			// Filter out warmup buckets (negative times after normalization)

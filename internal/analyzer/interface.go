@@ -272,6 +272,7 @@ type TimelineAnalysisResult struct {
 	BucketDuration  float64             `json:"bucketDuration"`            // Seconds per graph bucket (1.0s)
 	HighResDuration float64             `json:"highResDuration,omitempty"` // Seconds per high-res bucket (0.05s)
 	MatchStartTime  float64             `json:"matchStartTime"`            // When match actually started (after warmup)
+	DemoOffset      float64             `json:"demoOffset,omitempty"`      // Seconds from demo start to match start (for Hub viewer links)
 	Buckets         []TimelineBucket    `json:"buckets"`                   // 1s aggregated buckets for graphs
 	HighResBuckets  []HighResBucket     `json:"highResBuckets,omitempty"`  // High-res buckets for map visualization
 	FragEvents      []TimelineFragEvent `json:"fragEvents,omitempty"`      // Frag events for score timeline
