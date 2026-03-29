@@ -700,7 +700,7 @@ Offset  Size  Field
 
 ## svc_updatefrags (14)
 
-Updates a player's frag count.
+Updates a player's frag count. The value is the **absolute** frag count, not a delta.
 
 ```
 Offset  Size  Field
@@ -710,7 +710,15 @@ Offset  Size  Field
 2       2     frags (signed short, little-endian)
 ```
 
-**Note**: Frags can be negative (from suicides or team kills).
+### Frag Count Behavior
+
+- The server sends this message whenever `ent->v->frags` changes (checked in `SV_SendClientMessages`)
+- The value is **absolute** (total frags), not a delta — the client replaces the stored count entirely
+- Frags **increase** on kills (+1 per kill)
+- Frags **decrease** on suicides and teamkills (-1 per event)
+- Frags can be negative (e.g., multiple suicides before any kills)
+
+*Source: `sv_send.c` — server compares `sv_client->old_frags` to current `ent->v->frags` and broadcasts when changed*
 
 ### Usage Note: Frag Detection Methods
 
@@ -718,10 +726,12 @@ There are two approaches to detect frags in MVD files:
 
 | Method | Source | Use Case |
 |--------|--------|----------|
-| `svc_updatefrags` | Native message | **Recommended for counting frags** - reliable, per-player frag count updates |
-| Obituary parsing | `svc_print` messages | **For frag details** - weapon type, killer/victim names |
+| `svc_updatefrags` | Native message | **Recommended for counting frags** — authoritative absolute count from server |
+| Obituary parsing | `svc_print` messages | **For frag details** — weapon type, killer/victim names |
 
-**Recommendation**: Use `svc_updatefrags` for timeline/score tracking since it provides authoritative frag counts directly from the server. Use obituary parsing only when you need additional details like weapon type.
+To track frags over time, compute deltas between consecutive `svc_updatefrags` values for each player. A delta of +1 indicates a kill, -1 indicates a suicide or teamkill. Multiple frags can occur between updates if the server batches them.
+
+**Recommendation**: Use `svc_updatefrags` for timeline/score tracking. Use obituary parsing only when you need additional details like weapon type.
 
 ---
 
@@ -1579,66 +1589,347 @@ func calculateAccuracy(shots, hits int) float64 {
 
 ## Obituary Message Patterns (KTX)
 
-These patterns are from KTX mod's `client.c`. Used to parse frag messages from `svc_print` at `PRINT_MEDIUM` level.
+*Source: `sv_mod_frags.h` (63 default patterns), `fragfile.dat` (extended patterns)*
 
-### Suicide Patterns
+Obituary messages are sent via `svc_print` at `PRINT_MEDIUM` (level 1). All patterns below use `X` for victim and `Y` for killer. Gender variants exist for some patterns (`himself`/`herself`, `his`/`her`).
 
-| Pattern | Death Type | Cause |
-|---------|-----------|-------|
-| `"X suicides"` | `DT_SUICIDE` | /kill command |
-| `"X tries to leave"` | `DT_SUICIDE` | Disconnect/quit |
-| `"X becomes bored with life"` | `DT_SUICIDE` | Various |
-| `"X blew himself up"` | `DT_RL` | Self-rocket |
-| `"X discovers blast radius"` | `DT_RL` | Self-rocket |
-| `"X cratered"` | `DT_FALL` | Fall damage |
-| `"X fell to his death"` | `DT_FALL` | Fall damage |
-| `"X sleeps with the fishes"` | `DT_DROWN` | Drowning |
-| `"X sucks it down"` | `DT_SLIME` | Slime |
-| `"X gulped a load of slime"` | `DT_SLIME` | Slime |
-| `"X burst into flames"` | `DT_LAVA` | Lava |
-| `"X turned into hot slag"` | `DT_LAVA` | Lava |
-| `"X was squished"` | `DT_SQUISH` | Crushed |
-| `"X discharges into the water"` | `DT_DISCHARGE` | LG in water |
-| `"X electrocutes himself"` | `DT_DISCHARGE` | LG in water |
-| `"X ate his own pineapple"` | `DT_GL` | Self-grenade |
-| `"X tried to catch it"` | `DT_GL` | Self-grenade |
+### Suicide / Environmental Death Patterns (1-player)
 
-### Weapon Kill Patterns (victim ... killer)
+| Pattern | Weapon ID | Category |
+|---------|-----------|----------|
+| `"X suicides"` | 0 (die) | /kill command |
+| `"X died"` | 0 (die) | Generic death |
+| `"X tried to leave"` | 0 (die) | Changelevel |
+| `"X becomes bored with life"` | 7 (rl) | Self-rocket |
+| `"X discovers blast radius"` | 7 (rl) | Self-rocket |
+| `"X tries to put the pin back in"` | 6 (gl) | Self-grenade |
+| `"X electrocutes himself"` | 13 (dschrg) | LG discharge |
+| `"X electrocutes herself"` | 13 (dschrg) | LG discharge |
+| `"X discharges into the water"` | 13 (dschrg) | LG discharge |
+| `"X discharges into the slime"` | 13 (dschrg) | LG discharge |
+| `"X discharges into the lava"` | 13 (dschrg) | LG discharge |
+| `"X heats up the water"` | 13 (dschrg) | LG discharge |
+| `"X sleeps with the fishes"` | 10 (drown) | Drowning |
+| `"X sucks it down"` | 10 (drown) | Drowning |
+| `"X gulped a load of slime"` | 10 (drown) | Slime |
+| `"X can't exist on slime alone"` | 10 (drown) | Slime |
+| `"X burst into flames"` | 10 (drown) | Lava |
+| `"X turned into hot slag"` | 10 (drown) | Lava |
+| `"X visits the Volcano God"` | 10 (drown) | Lava |
+| `"X cratered"` | 15 (fall) | Fall damage |
+| `"X fell to his death"` | 15 (fall) | Fall damage |
+| `"X fell to her death"` | 15 (fall) | Fall damage |
+| `"X blew up"` | 11 (trap) | Explosive box |
+| `"X was spiked"` | 11 (trap) | Spike trap |
+| `"X was zapped"` | 11 (trap) | Laser trap |
+| `"X ate a lavaball"` | 11 (trap) | Fireball |
+| `"X was squished"` | 14 (squish) | Crushed by world |
 
-| Pattern | Death Type | Weapon |
+### Kill Patterns — Victim First (2-player: `"X <pattern> Y"`)
+
+| Pattern | Weapon ID | Weapon |
 |---------|-----------|--------|
-| `"X was ax-murdered by Y"` | `DT_AXE` | Axe |
-| `"X was axed by Y"` | `DT_AXE` | Axe |
-| `"X chewed on Y's boomstick"` | `DT_SG` | Shotgun |
-| `"X ate N loads of Y's buckshot"` | `DT_SSG` | Super Shotgun |
-| `"X was lead poisoned by Y"` | `DT_SSG` | Super Shotgun |
-| `"X was perforated by Y"` | `DT_NG` | Nailgun |
-| `"X was punctured by Y"` | `DT_NG` | Nailgun |
-| `"X was nailed by Y"` | `DT_NG` | Nailgun |
-| `"X was straw-cuttered by Y"` | `DT_SNG` | Super Nailgun |
-| `"X was ventilated by Y"` | `DT_SNG` | Super Nailgun |
-| `"X was railed by Y"` | `DT_RL` | Rocket Launcher |
-| `"X was gibbed by Y's rocket"` | `DT_RL` | Rocket Launcher (gib) |
-| `"X was smeared by Y's quad rocket"` | `DT_RL` | RL + Quad (gib) |
-| `"X eats Y's pineapple"` | `DT_GL` | Grenade Launcher |
-| `"X was gibbed by Y's grenade"` | `DT_GL` | GL (gib) |
-| `"X accepts Y's shaft"` | `DT_LG_BEAM` | Lightning Gun |
-| `"X gets a natural disaster from Y"` | `DT_LG_BEAM` | Lightning Gun |
-| `"X was telefragged by Y"` | `DT_TELEFRAG` | Telefrag |
+| `"X was ax-murdered by Y"` | 1 | Axe |
+| `"X was axed to pieces by Y"` | 1 | Axe (instagib) |
+| `"X chewed on Y's boomstick"` | 2 | Shotgun |
+| `"X was lead poisoned by Y"` | 2 | Shotgun (gib) |
+| `"X was instagibbed by Y"` | 2 | Coil Gun (instagib) |
+| `"X ate 2 loads of Y's buckshot"` | 3 | Super Shotgun |
+| `"X ate 8 loads of Y's buckshot"` | 3 | Super Shotgun (Quad) |
+| `"X was body pierced by Y"` | 4 | Nailgun |
+| `"X was nailed by Y"` | 4 | Nailgun |
+| `"X was perforated by Y"` | 5 | Super Nailgun |
+| `"X was punctured by Y"` | 5 | Super Nailgun |
+| `"X was ventilated by Y"` | 5 | Super Nailgun |
+| `"X was straw-cuttered by Y"` | 5 | Super Nailgun (Quad gib) |
+| `"X eats Y's pineapple"` | 6 | Grenade Launcher |
+| `"X was gibbed by Y's grenade"` | 6 | GL (gib) |
+| `"X rides Y's rocket"` | 7 | Rocket Launcher |
+| `"X was gibbed by Y's rocket"` | 7 | RL (gib) |
+| `"X was smeared by Y's quad rocket"` | 7 | RL + Quad (gib) |
+| `"X was brutalized by Y's quad rocket"` | 7 | RL + Quad (gib) |
+| `"X accepts Y's shaft"` | 8 | Lightning Gun |
+| `"X gets a natural disaster from Y"` | 8 | LG (Quad) |
+| `"X accepts Y's discharge"` | 13 | LG discharge kill |
+| `"X drains Y's batteries"` | 13 | LG discharge kill |
+| `"X was railed by Y"` | 9 | Rail Gun (DMM8/TF) |
+| `"X was telefragged by Y"` | 12 | Telefrag |
+| `"X was literally stomped into particles by Y"` | 17 | Stomp (instagib) |
+| `"X softens Y's fall"` | 17 | Stomp |
+| `"X tried to catch Y"` | 17 | Stomp |
+| `"X was crushed by Y"` | 17 | Stomp |
+| `"X was jumped by Y"` | 17 | Stomp |
+| `"X was hooked by Y"` | — | Grappling Hook |
+| `"X was killed by Y"` | 0 | Generic |
+| `"X was fragged by Y"` | 0 | Generic |
 
-### Team Kill Patterns
+### Kill Patterns — Killer First (2-player: `"Y <pattern> X"`, reverse=true)
 
-| Pattern | Description |
-|---------|-------------|
-| `"X mows down a teammate"` | Killed teammate |
-| `"X gets a frag for the other team"` | Team damage |
-| `"X almost got away with murder"` | Close teamkill |
+| Pattern | Weapon ID | Weapon |
+|---------|-----------|--------|
+| `"Y rips X a new one"` | 7 | RL + Quad (gib) |
+| `"Y stomps X"` | 17 | Stomp |
+| `"Y squishes X"` | 14 | Squish |
 
-### Quad Damage Modifiers
+### Team Kill Patterns (1-player, killer only)
 
-When Quad Damage is active, obituaries change:
-- `"X was railed by Y"` → `"X was smeared by Y's quad rocket"`
-- Higher chance of gib messages (rocket does 400+ damage)
+| Pattern | Weapon ID | Description |
+|---------|-----------|-------------|
+| `"X gets a frag for the other team"` | 16 | Self-frag teamkill |
+| `"X mows down a teammate"` | 16 | Killed teammate |
+| `"X squished a teammate"` | 16 | Squished teammate |
+| `"X checks his glasses"` | 16 | Teamkill (male) |
+| `"X checks her glasses"` | 16 | Teamkill (female) |
+| `"X loses another friend"` | 16 | Teamkill |
+
+### Team Kill Patterns (1-player, victim only)
+
+| Pattern | Weapon ID | Description |
+|---------|-----------|-------------|
+| `"X was telefragged by his teammate"` | 12 | Teammate telefrag |
+| `"X was telefragged by her teammate"` | 12 | Teammate telefrag |
+| `"X was crushed by his teammate"` | 17 | Teammate stomp |
+| `"X was crushed by her teammate"` | 17 | Teammate stomp |
+| `"X was jumped by his teammate"` | 17 | Teammate stomp |
+| `"X was jumped by her teammate"` | 17 | Teammate stomp |
+
+### Weapon Name Suffixes
+
+Kill messages often include possessive weapon names after the killer. These must be stripped to extract the killer name:
+
+| Suffix | Weapon | Notes |
+|--------|--------|-------|
+| `"'s shaft"` | LG | |
+| `"'s rocket"` | RL | |
+| `"'s quad rocket"` | RL + Quad | |
+| `"'s pineapple"` | GL | |
+| `"'s grenade"` | GL | Appears in gib messages |
+| `"'s boomstick"` | SG | |
+| `"'s buckshot"` | SSG | |
+| `"'s axe"` | Axe | |
+| `"'s discharge"` | LG (discharge) | |
+| `"'s batteries"` | LG (discharge) | |
+| `"'s fall"` | Stomp | |
+
+For names ending in 's', KTX uses `"' rocket"` instead of `"'s rocket"` (e.g., `"James' rocket"`).
+
+### Weapon ID Mapping
+
+```c
+char *qw_weapon[] = {
+    "die",     // 0 - generic death
+    "axe",     // 1
+    "sg",      // 2 - shotgun
+    "ssg",     // 3 - super shotgun
+    "ng",      // 4 - nailgun
+    "sng",     // 5 - super nailgun
+    "gl",      // 6 - grenade launcher
+    "rl",      // 7 - rocket launcher
+    "lg",      // 8 - lightning gun
+    "rail",    // 9 - rail gun
+    "drown",   // 10 - environmental (also slime/lava)
+    "trap",    // 11 - spike/laser/fireball/explosive box
+    "tele",    // 12 - telefrag
+    "dschrg",  // 13 - LG discharge
+    "squish",  // 14
+    "fall",    // 15
+    "team",    // 16 - team kill
+    "stomps"   // 17
+};
+```
+
+### Distinguishing `" was gibbed by "` — Grenade vs Rocket
+
+The pattern `"X was gibbed by Y's ..."` appears for both GL and RL gibs. The weapon depends on the suffix:
+- `"X was gibbed by Y's grenade"` → GL (weapon 6)
+- `"X was gibbed by Y's rocket"` → RL (weapon 7)
+- `"X was gibbed by Y's quad rocket"` → RL + Quad (weapon 7)
+
+---
+
+## Entity Update Messages
+
+Entity update messages are the most complex part of the MVD format. They use variable-length encoding based on flag bits, making correct parsing critical — skipping the wrong number of bytes will misalign the reader for all subsequent commands in the same payload.
+
+### svc_spawnbaseline (22) — Entity Baseline
+
+Sets the initial state for an entity. Fixed-size format:
+
+```
+Offset  Size     Field
+------  ----     -----
+0       1        svc_spawnbaseline (22)
+1       1        modelindex
+2       1        frame
+3       1        colormap
+4       1        skinnum
+5       2 or 4   origin[0] (coord or float if FLOATCOORDS)
++       1        angles[0] (angle byte)
++       2 or 4   origin[1]
++       1        angles[1]
++       2 or 4   origin[2]
++       1        angles[2]
+```
+
+**Total size**: 13 bytes (standard coords) or 19 bytes (float coords)
+
+### svc_fte_spawnbaseline2 (66) — FTE Extended Baseline
+
+Uses entity delta format with a 2-byte flag header:
+
+```
+0       1        svc_fte_spawnbaseline2 (66)
+1       2        flag_word (entity delta flags)
++       variable  entity delta fields (see Entity Delta Format below)
+```
+
+### svc_spawnstatic (20) / svc_fte_spawnstatic2 (21)
+
+- `svc_spawnstatic (20)`: Same format as `svc_spawnbaseline` (13 or 19 bytes)
+- `svc_fte_spawnstatic2 (21)`: Same format as `svc_fte_spawnbaseline2` (flag word + entity delta)
+
+### svc_packetentities (47) — Entity State Updates
+
+Contains delta-compressed updates for multiple entities. Each entity is encoded as a 2-byte flag word followed by variable-length field data.
+
+```
+0       1        svc_packetentities (47)
+// Repeating entity entries:
++       2        flag_word (ushort) — 0 = end marker, terminates the list
++       variable  entity delta fields (if flag_word != 0)
+// ... more entries ...
++       2        0x0000 (end marker)
+```
+
+### svc_deltapacketentities (48) — Delta Entity Updates
+
+Same as `svc_packetentities` but with a leading sequence byte:
+
+```
+0       1        svc_deltapacketentities (48)
+1       1        from_sequence (frame number to delta from)
+// Then identical to svc_packetentities format:
++       2        flag_word
++       variable  entity delta fields
+// ...
++       2        0x0000 (end marker)
+```
+
+### Entity Delta Format
+
+*Source: `CL_ParseDelta()` in ezQuake `cl_ents.c`*
+
+Each entity update is encoded as a 2-byte flag word followed by conditional fields. The flag word contains:
+
+**Primary flag word (2 bytes, ushort):**
+
+| Bits | Name | Description |
+|------|------|-------------|
+| 0-8 | Entity number | Entity index (0-511) |
+| 9 | `U_ORIGIN1` | Origin X follows |
+| 10 | `U_ORIGIN2` | Origin Y follows |
+| 11 | `U_ORIGIN3` | Origin Z follows |
+| 12 | `U_ANGLE2` | Yaw angle follows |
+| 13 | `U_FRAME` | Frame byte follows |
+| 14 | `U_REMOVE` | Remove entity (no field data follows) |
+| 15 | `U_MOREBITS` | Additional flag byte follows |
+
+**If `U_MOREBITS` is set, read 1 additional byte:**
+
+| Bit | Name | Description |
+|-----|------|-------------|
+| 0 | `U_ANGLE1` | Pitch angle follows |
+| 1 | `U_ANGLE3` | Roll angle follows |
+| 2 | `U_MODEL` | Model index byte follows |
+| 3 | `U_COLORMAP` | Colormap byte follows |
+| 4 | `U_SKIN` | Skin byte follows |
+| 5 | `U_EFFECTS` | Effects byte follows |
+| 6 | `U_SOLID` | Solid flag (no data read) |
+| 7 | `U_FTE_EVENMORE` | FTE extension byte follows |
+
+**If `U_FTE_EVENMORE` is set (and FTE extensions are active), read 1 byte:**
+
+| Bit | Name | Description |
+|-----|------|-------------|
+| 1 | `U_FTE_TRANS` | Transparency byte follows (if `FTE_PEXT_TRANS`) |
+| 3 | `U_FTE_MODELDBL` | Model index high bit / short model |
+| 5 | `U_FTE_ENTITYDBL` | Entity number += 512 |
+| 6 | `U_FTE_ENTITYDBL2` | Entity number += 1024 |
+| 7 | `U_FTE_YETMORE` | Another extension byte follows |
+
+**If `U_FTE_YETMORE` is set, read 1 more byte:**
+
+| Bit | Name | Description |
+|-----|------|-------------|
+| 2 (bit 10) | `U_FTE_COLOURMOD` | 3 RGB bytes follow (if `FTE_PEXT_COLOURMOD`) |
+
+### Field Reading Order
+
+Fields are read in this exact order when their flag is set:
+
+```
+1. [U_MOREBITS]      → 1 byte (low flag byte)
+2. [U_FTE_EVENMORE]  → 1 byte (FTE flags)
+3. [U_FTE_YETMORE]   → 1 byte (more FTE flags)
+4. U_MODEL           → 1 byte (model index)
+   - Special: if !U_MODEL && U_FTE_MODELDBL → 2 bytes (short model index)
+   - Special: if U_MODEL && U_FTE_MODELDBL → 1 byte (model index + 256)
+5. U_FRAME           → 1 byte
+6. U_COLORMAP        → 1 byte
+7. U_SKIN            → 1 byte
+8. U_EFFECTS         → 1 byte
+9. U_ORIGIN1         → 2 bytes (coord) or 4 bytes (float if FLOATCOORDS)
+10. U_ANGLE1         → 1 byte (angle)
+11. U_ORIGIN2        → 2 bytes or 4 bytes
+12. U_ANGLE2         → 1 byte
+13. U_ORIGIN3        → 2 bytes or 4 bytes
+14. U_ANGLE3         → 1 byte
+15. U_SOLID          → (no data)
+16. U_FTE_TRANS      → 1 byte (if FTE_PEXT_TRANS enabled)
+17. U_FTE_COLOURMOD  → 3 bytes (if FTE_PEXT_COLOURMOD enabled)
+```
+
+### Entity Constants
+
+```c
+// Primary word flags
+#define U_ORIGIN1       (1 << 9)     // 0x0200
+#define U_ORIGIN2       (1 << 10)    // 0x0400
+#define U_ORIGIN3       (1 << 11)    // 0x0800
+#define U_ANGLE2        (1 << 12)    // 0x1000
+#define U_FRAME         (1 << 13)    // 0x2000
+#define U_REMOVE        (1 << 14)    // 0x4000
+#define U_MOREBITS      (1 << 15)    // 0x8000
+
+// Low byte flags (from U_MOREBITS byte)
+#define U_ANGLE1        (1 << 0)
+#define U_ANGLE3        (1 << 1)
+#define U_MODEL         (1 << 2)
+#define U_COLORMAP      (1 << 3)
+#define U_SKIN          (1 << 4)
+#define U_EFFECTS       (1 << 5)
+#define U_SOLID         (1 << 6)
+#define U_FTE_EVENMORE  (1 << 7)
+
+// FTE extension flags (first byte)
+#define U_FTE_TRANS     (1 << 1)
+#define U_FTE_MODELDBL  (1 << 3)
+#define U_FTE_ENTITYDBL (1 << 5)
+#define U_FTE_ENTITYDBL2 (1 << 6)
+#define U_FTE_YETMORE   (1 << 7)
+
+// FTE extension flags (second byte, shifted << 8)
+#define U_FTE_COLOURMOD (1 << 10)
+```
+
+### Parsing Pitfalls
+
+**Critical**: Entity updates are variable-length. If you skip the wrong number of bytes for even one entity, all subsequent commands in the same payload will be misaligned. This causes:
+- Garbage reads of `svc_updatefrags` (bogus frag counts)
+- Lost `svc_print` messages (missing kill attributions)
+- Potential parser crashes
+
+Each payload has its own independent byte buffer, so misalignment does not propagate across demo messages.
 
 ---
 
