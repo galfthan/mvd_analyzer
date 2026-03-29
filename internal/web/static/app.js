@@ -107,12 +107,24 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFileUpload();
     setupTabs();
 
-    // Auto-load from hub if URL has ?hub= parameter
+    // Auto-load from hub if URL has ?hub= parameter (wait for WASM to be ready)
     const params = new URLSearchParams(location.search);
     const hubId = params.get('hub');
     if (hubId) {
         document.getElementById('hub-input').value = hubId;
-        loadFromHub();
+        if (wasmReady) {
+            loadFromHub();
+        } else {
+            // Queue auto-load for when WASM finishes loading
+            const origHandler = worker.onmessage;
+            worker.onmessage = (e) => {
+                origHandler(e);
+                if (e.data.type === 'ready') {
+                    worker.onmessage = origHandler;
+                    loadFromHub();
+                }
+            };
+        }
     }
 });
 
