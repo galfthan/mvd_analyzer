@@ -138,6 +138,7 @@ function setCurrentTime(time) {
     updateTimelineTimeDisplay();
     updateTimeIndicators();
     updateTeamStatus();
+    updateMapLegend();
     renderChatMessages();
     updateChatCursor();
     updateChatTimeDisplay();
@@ -415,8 +416,47 @@ function displayResults(result) {
         initMapView(result);
     }
 
+    // Make all static tables sortable
+    document.querySelectorAll('.stats-table').forEach(makeSortable);
+
     // Apply URL state (tab, time, segment) if present
     applyUrlState();
+}
+
+// ─── Sortable Tables ──────────────────────────────────────────────────────
+
+function makeSortable(table) {
+    const headers = table.querySelectorAll('thead th');
+    headers.forEach((th, colIdx) => {
+        th.classList.add('sortable');
+        th.addEventListener('click', () => {
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            // Toggle direction (default first click = descending for numbers)
+            const wasAsc = th.classList.contains('sort-asc');
+            const dir = wasAsc ? 'desc' : 'asc';
+
+            // Reset all headers in this table
+            headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+            th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
+
+            rows.sort((a, b) => {
+                const aText = a.cells[colIdx]?.textContent.trim() || '';
+                const bText = b.cells[colIdx]?.textContent.trim() || '';
+                // Extract leading number (handles "42", "3.5%", "12 (30s)", etc.)
+                const aNum = parseFloat(aText);
+                const bNum = parseFloat(bText);
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return dir === 'asc' ? aNum - bNum : bNum - aNum;
+                }
+                return dir === 'asc' ? aText.localeCompare(bText) : bText.localeCompare(aText);
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
 }
 
 function displayTeamsFromDemoInfo(demoInfo) {
@@ -1155,6 +1195,20 @@ function setupTimelineControls() {
         updateDetailView();
         updateUrlState();
     });
+
+    // --- Timeline playback controls ---
+    const tlPlayBtn = document.getElementById('timeline-play-pause');
+    if (tlPlayBtn) {
+        tlPlayBtn.addEventListener('click', togglePlayback);
+    }
+    const tlJumpBack = document.getElementById('timeline-jump-back');
+    if (tlJumpBack) {
+        tlJumpBack.addEventListener('click', () => { setCurrentTime(mapState.currentTime - 10); renderMap(mapState.currentTime); });
+    }
+    const tlJumpFwd = document.getElementById('timeline-jump-forward');
+    if (tlJumpFwd) {
+        tlJumpFwd.addEventListener('click', () => { setCurrentTime(mapState.currentTime + 10); renderMap(mapState.currentTime); });
+    }
 
     timelineState.controlsInitialized = true;
 }
@@ -2060,6 +2114,9 @@ function updateTeamStatus() {
         const teamHealth = players.reduce((s, p) => s + (p.health || 0), 0);
         const teamArmor = players.reduce((s, p) => s + (p.armor || 0), 0);
 
+        const hubInfo = currentResult?.hubInfo;
+        const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
+
         let html = `<h4>${team} — ${teamFrags} frags</h4>`;
         html += `<table class="team-status-table">`;
         html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th></tr>`;
@@ -2079,8 +2136,10 @@ function updateTeamStatus() {
             if (p.hasPent) weps.push('Pent');
             if (p.hasRing) weps.push('Ring');
 
+            const watchLink = buildHubWatchLink(p.name, time, hubInfo, playerUserIDs);
+
             html += `<tr>`;
-            html += `<td>${p.name}</td>`;
+            html += `<td>${escapeHtml(p.name)}${watchLink}</td>`;
             html += `<td>${p.frags}</td>`;
             html += `<td>${hp}</td>`;
             html += `<td>${armorStr}</td>`;
@@ -2100,6 +2159,35 @@ function updateTeamStatus() {
         html += `</table>`;
         container.innerHTML = html;
     }
+}
+
+// ─── Hub Watch Link Helper ──────────────────────────────────────────────────
+
+function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
+    if (!hubInfo || !hubInfo.gameId) return '';
+    const trackId = playerUserIDs[playerName];
+    if (!trackId) return '';
+    const from = Math.max(0, Math.floor(time) - 5);
+    const to = Math.floor(time) + 15;
+    const url = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${from}&to=${to}&track=${trackId}`;
+    return ` <a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">[w]</a>`;
+}
+
+// ─── Location Lookup ────────────────────────────────────────────────────────
+
+function findNearestLocation(x, y, locations) {
+    if (!locations || locations.length === 0) return '';
+    let bestDist = Infinity;
+    let bestName = '';
+    for (const loc of locations) {
+        const dx = x - loc.x, dy = y - loc.y;
+        const d = dx * dx + dy * dy;
+        if (d < bestDist) {
+            bestDist = d;
+            bestName = loc.name;
+        }
+    }
+    return bestName;
 }
 
 // ─── Precomputed Frag Counts ────────────────────────────────────────────────
@@ -2583,27 +2671,67 @@ function buildMapLegend() {
 
     legend.innerHTML = '<h4>Players</h4>';
 
+    const table = document.createElement('table');
+    table.className = 'map-legend-table';
+    table.id = 'map-legend-table';
+    table.innerHTML = '<thead><tr><th></th><th>Player</th><th>Area</th></tr></thead>';
+    const tbody = document.createElement('tbody');
+    tbody.id = 'map-legend-tbody';
+
     for (let teamIdx = 0; teamIdx < mapState.teams.length; teamIdx++) {
         const team = mapState.teams[teamIdx];
-        const teamDiv = document.createElement('div');
-        teamDiv.className = 'map-legend-team';
-
         const teamColor = teamIdx === 0 ? 'player-red' : 'player-blue';
-        teamDiv.innerHTML = `<div class="map-legend-team-name ${teamColor}">${escapeHtml(team)}</div>`;
+
+        // Team header row
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = `<td colspan="3" class="map-legend-team-name ${teamColor}" style="padding-top:8px;">${escapeHtml(team)}</td>`;
+        tbody.appendChild(headerRow);
 
         for (const [name, info] of Object.entries(mapState.playerSymbols)) {
             if (info.team === team) {
-                const item = document.createElement('div');
-                item.className = 'map-legend-item';
-                item.innerHTML = `
-                    <span class="map-legend-symbol ${teamColor}">${info.symbol}</span>
-                    <span>${escapeHtml(name)}</span>
+                const tr = document.createElement('tr');
+                tr.dataset.player = name;
+                tr.innerHTML = `
+                    <td><span class="map-legend-symbol ${teamColor}">${info.symbol}</span></td>
+                    <td>${escapeHtml(name)}<span class="map-legend-watch" data-player="${escapeHtml(name)}"></span></td>
+                    <td class="map-legend-area" data-player="${escapeHtml(name)}">-</td>
                 `;
-                teamDiv.appendChild(item);
+                tbody.appendChild(tr);
             }
         }
+    }
 
-        legend.appendChild(teamDiv);
+    table.appendChild(tbody);
+    legend.appendChild(table);
+}
+
+function updateMapLegend() {
+    const tbody = document.getElementById('map-legend-tbody');
+    if (!tbody) return;
+
+    const time = mapState.currentTime;
+    const bucket = findBucketAtTime(time);
+    const playerData = bucket ? (bucket.p || bucket.playerData) : null;
+    const hubInfo = currentResult?.hubInfo;
+    const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
+    const locations = mapState.locations;
+
+    // Update area cells and [w] links
+    const areaCells = tbody.querySelectorAll('.map-legend-area');
+    for (const cell of areaCells) {
+        const name = cell.dataset.player;
+        const data = playerData?.[name];
+        if (data && (data.x !== 0 || data.y !== 0)) {
+            cell.textContent = findNearestLocation(data.x, data.y, locations) || '-';
+        } else {
+            cell.textContent = '-';
+        }
+    }
+
+    const watchSpans = tbody.querySelectorAll('.map-legend-watch');
+    for (const span of watchSpans) {
+        const name = span.dataset.player;
+        span.innerHTML = buildHubWatchLink(name, time, hubInfo, playerUserIDs);
     }
 }
 
@@ -2886,39 +3014,47 @@ function updateMapSliderRange(result) {
     mapState.currentTime = 0;
 }
 
-function toggleMapPlayback() {
-    const btn = document.getElementById('map-play-pause');
-    if (!btn) return;
+function toggleMapPlayback() { togglePlayback(); }
 
+function togglePlayback() {
     if (mapState.isPlaying) {
         mapState.isPlaying = false;
         if (mapState.animationFrameId) {
             cancelAnimationFrame(mapState.animationFrameId);
             mapState.animationFrameId = null;
         }
-        btn.textContent = '▶';
-        // Full sync on pause (team status, chat, URL)
+        // Update both play buttons
+        const mapBtn = document.getElementById('map-play-pause');
+        const tlBtn = document.getElementById('timeline-play-pause');
+        if (mapBtn) mapBtn.textContent = '▶';
+        if (tlBtn) tlBtn.textContent = '▶';
+        // Full sync on pause
         setCurrentTime(mapState.currentTime);
     } else {
         mapState.isPlaying = true;
         mapState.lastRenderTime = performance.now();
-        btn.textContent = '⏸';
-        animateMapPlayback();
+        const mapBtn = document.getElementById('map-play-pause');
+        const tlBtn = document.getElementById('timeline-play-pause');
+        if (mapBtn) mapBtn.textContent = '⏸';
+        if (tlBtn) tlBtn.textContent = '⏸';
+        animatePlayback();
     }
 }
 
-function animateMapPlayback() {
+let _lastFullSyncTime = 0;
+
+function animatePlayback() {
     if (!mapState.isPlaying) {
         mapState.animationFrameId = null;
         return;
     }
 
-    mapState.animationFrameId = requestAnimationFrame(animateMapPlayback);
+    mapState.animationFrameId = requestAnimationFrame(animatePlayback);
 
     const now = performance.now();
     const elapsed = (now - mapState.lastRenderTime) / 1000;
 
-    // Throttle to ~30fps — no need to update UI/canvas faster than that
+    // Throttle to ~30fps
     if (elapsed < 0.033) return;
 
     mapState.currentTime += elapsed;
@@ -2931,10 +3067,24 @@ function animateMapPlayback() {
         mapState.renderDirty = true;
     }
 
-    // Lightweight sync: only canvas + map UI (skip invisible tabs)
+    // Lightweight sync every frame (slider, map, time display)
     if (mapState.sliderEl) mapState.sliderEl.value = mapState.currentTime;
-    renderMap(mapState.currentTime);
     if (mapState.timeDisplayEl) mapState.timeDisplayEl.textContent = formatTime(Math.max(0, mapState.currentTime));
+    renderMap(mapState.currentTime);
+
+    // Full sync (team status, chat, legend, cursors) every 200ms
+    if (now - _lastFullSyncTime > 200) {
+        _lastFullSyncTime = now;
+        mapState.renderDirty = true;
+        updateTimelineCursor();
+        updateTimelineTimeDisplay();
+        updateTimeIndicators();
+        updateTeamStatus();
+        updateMapLegend();
+        renderChatMessages();
+        updateChatCursor();
+        updateChatTimeDisplay();
+    }
 }
 
 function jumpMapTime(delta) {

@@ -277,6 +277,7 @@ type TimelineAnalysisResult struct {
 	FragEvents      []TimelineFragEvent `json:"fragEvents,omitempty"`      // Frag events for score timeline
 	PowerupEvents   []PowerupEvent      `json:"powerupEvents,omitempty"`   // Powerup pickups for Key Moments
 	LocationData    []MapLocation       `json:"locationData,omitempty"`    // Location points from .loc file for map view
+	PlayerUserIDs   map[string]int      `json:"playerUserIDs,omitempty"`   // Player name -> UserID for Hub viewer links
 }
 
 // HighResBucket - compact bucket for high-resolution map data

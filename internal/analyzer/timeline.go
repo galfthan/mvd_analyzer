@@ -465,6 +465,17 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	// Aggregate to 1s buckets for graphs
 	graphBuckets := a.aggregateToGraphBuckets(slotToName, slotToTeam)
 
+	// Build name -> UserID mapping for Hub viewer links
+	playerUserIDsByName := make(map[string]int)
+	for slot, userID := range a.playerUserIDs {
+		if userID > 0 {
+			name := slotToName[slot]
+			if name != "" {
+				playerUserIDsByName[name] = userID
+			}
+		}
+	}
+
 	result := &TimelineAnalysisResult{
 		BucketDuration:  a.graphBucketDuration, // 1.0 for graphs
 		HighResDuration: a.bucketDuration,      // 0.05 for map
@@ -474,6 +485,7 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		FragEvents:      fragEvents,
 		PowerupEvents:   powerupEvents,
 		LocationData:    locationData,
+		PlayerUserIDs:   playerUserIDsByName,
 	}
 
 	return result, nil
