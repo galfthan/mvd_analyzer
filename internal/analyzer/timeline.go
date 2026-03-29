@@ -178,11 +178,16 @@ func (a *TimelineAnalyzer) handleFragUpdate(e *parser.FragUpdateEvent) {
 	// Frags increase on kills, decrease on suicides/teamkills
 	if a.matchStarted && e.Frags != state.frags {
 		delta := e.Frags - state.frags
-		a.fragEventsRaw = append(a.fragEventsRaw, fragEventRaw{
-			Time:      e.Time,
-			PlayerNum: e.PlayerNum,
-			Delta:     delta,
-		})
+		// Sanity check: filter unreasonable deltas caused by parsing artifacts
+		// (e.g., misaligned reads producing garbage frag values).
+		// No player can gain or lose >5 frags in a single server frame.
+		if delta >= -5 && delta <= 5 {
+			a.fragEventsRaw = append(a.fragEventsRaw, fragEventRaw{
+				Time:      e.Time,
+				PlayerNum: e.PlayerNum,
+				Delta:     delta,
+			})
+		}
 	}
 	state.frags = e.Frags
 }
