@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Single function to set current time and sync all views
 function setCurrentTime(time) {
     mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration || Infinity));
+    mapState.renderDirty = true;
     updateTimelineCursor();
     updateTimelineTimeDisplay();
     updateTimeIndicators();
@@ -128,10 +129,8 @@ function setCurrentTime(time) {
     renderChatMessages();
     updateChatCursor();
     updateChatTimeDisplay();
-    const mapSlider = document.getElementById('map-timeline-slider');
-    if (mapSlider) mapSlider.value = mapState.currentTime;
-    const mapTimeDisplay = document.getElementById('map-current-time');
-    if (mapTimeDisplay) mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime));
+    if (mapState.sliderEl) mapState.sliderEl.value = mapState.currentTime;
+    if (mapState.timeDisplayEl) mapState.timeDisplayEl.textContent = formatTime(Math.max(0, mapState.currentTime));
     updateUrlState();
 }
 
@@ -2320,7 +2319,11 @@ let mapState = {
     tracks: {}, // playerName -> [{x, y}]
     teams: [],
     playerSymbols: {}, // playerName -> { symbol, team, teamIdx }
-    initialized: false
+    initialized: false,
+    lastRenderedBucket: null, // Skip redundant redraws
+    renderDirty: false,       // Force redraw on track toggle/reset/etc
+    sliderEl: null,           // Cached DOM refs
+    timeDisplayEl: null
 };
 
 const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
@@ -2595,6 +2598,12 @@ function renderMap(time) {
 
     if (!ctx || !canvas) return;
 
+    // Skip redraw if same data bucket and nothing else changed
+    const bucket = findBucketAtTime(time);
+    if (bucket === mapState.lastRenderedBucket && !mapState.renderDirty) return;
+    mapState.lastRenderedBucket = bucket;
+    mapState.renderDirty = false;
+
     // Clear
     ctx.fillStyle = '#0a0a15';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -2613,9 +2622,6 @@ function renderMap(time) {
             ctx.drawImage(mapState.locationCanvas, 0, 0);
         }
     }
-
-    // Get player positions at this time
-    const bucket = findBucketAtTime(time);
 
     // Draw tracks if enabled
     if (mapState.showTracks) {
@@ -2744,7 +2750,11 @@ function findBucketAtTime(time) {
 function setupMapTimeControls(result) {
     updateMapSliderRange(result);
 
-    const slider = document.getElementById('map-timeline-slider');
+    // Cache DOM refs for the hot animation loop
+    mapState.sliderEl = document.getElementById('map-timeline-slider');
+    mapState.timeDisplayEl = document.getElementById('map-current-time');
+
+    const slider = mapState.sliderEl;
     if (slider) {
         slider.addEventListener('input', (e) => {
             setCurrentTime(parseFloat(e.target.value));
@@ -2774,6 +2784,7 @@ function setupMapTimeControls(result) {
             if (!mapState.showTracks) {
                 mapState.tracks = {};
             }
+            mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
     }
@@ -2782,6 +2793,7 @@ function setupMapTimeControls(result) {
     if (resetTracksBtn) {
         resetTracksBtn.addEventListener('click', () => {
             mapState.tracks = {};
+            mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
     }
@@ -2826,8 +2838,14 @@ function animateMapPlayback() {
         return;
     }
 
+    mapState.animationFrameId = requestAnimationFrame(animateMapPlayback);
+
     const now = performance.now();
     const elapsed = (now - mapState.lastRenderTime) / 1000;
+
+    // Throttle to ~30fps — no need to update UI/canvas faster than that
+    if (elapsed < 0.033) return;
+
     mapState.currentTime += elapsed;
     mapState.lastRenderTime = now;
 
@@ -2835,16 +2853,13 @@ function animateMapPlayback() {
     if (mapState.currentTime > duration) {
         mapState.currentTime = 0;
         mapState.tracks = {};
+        mapState.renderDirty = true;
     }
 
     // Lightweight sync: only canvas + map UI (skip invisible tabs)
-    const mapSlider = document.getElementById('map-timeline-slider');
-    if (mapSlider) mapSlider.value = mapState.currentTime;
+    if (mapState.sliderEl) mapState.sliderEl.value = mapState.currentTime;
     renderMap(mapState.currentTime);
-    const mapTimeDisplay = document.getElementById('map-current-time');
-    if (mapTimeDisplay) mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime));
-
-    mapState.animationFrameId = requestAnimationFrame(animateMapPlayback);
+    if (mapState.timeDisplayEl) mapState.timeDisplayEl.textContent = formatTime(Math.max(0, mapState.currentTime));
 }
 
 function jumpMapTime(delta) {
