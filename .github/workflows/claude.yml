@@ -35,6 +35,8 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --system-prompt "After creating a branch and pushing changes, always include a Netlify preview link in your response. The URL format is: https://{branch-name}--mvdanalyzer.netlify.app/ where {branch-name} is the exact branch name you created (with slashes replaced by hyphens). Note: the preview may take a minute or two to deploy."
           # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
           # Optional: Customize the trigger phrase (default: @claude)
