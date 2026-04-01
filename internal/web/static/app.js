@@ -2570,9 +2570,6 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
     }
 }
 
-// Trail duration constant (seconds) — used for display window and data purging
-const TRAIL_DURATION = 10;
-
 // Map View State
 let mapState = {
     canvas: null,
@@ -2587,7 +2584,10 @@ let mapState = {
     animationFrameId: null,
     lastRenderTime: 0,
     showTracks: false,
-    tracks: {}, // playerName -> [{x, y}]
+    trailDuration: 10,          // Current trail window in seconds
+    fullTrails: {},             // playerName -> [{x, y, t, teamIdx, tp}] — pre-computed from all buckets
+    trailStartTimes: {},        // playerName -> time when trail tracking started (for extending forward)
+    enabledPlayers: {},         // playerName -> boolean — per-player trail toggle
     teams: [],
     playerSymbols: {}, // playerName -> { symbol, team, teamIdx }
     initialized: false,
@@ -2597,9 +2597,8 @@ let mapState = {
 
 const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
 
-// Clear all trail data and force a redraw — call this whenever the user jumps to a new time
+// Force a redraw (trails are pre-computed, no need to clear)
 function resetTrails() {
-    mapState.tracks = {};
     mapState.renderDirty = true;
 }
 
@@ -2643,11 +2642,13 @@ function initMapView(result) {
         mapState.initialized = true;
     }
 
+    // Pre-compute full trails from high-res bucket data
+    precomputeFullTrails();
+
     // Build powerup event list
     buildMapPowerupList(result);
 
-    // Reset tracks
-    mapState.tracks = {};
+    // Reset trail state
     const showTracksCheckbox = document.getElementById('map-show-tracks');
     if (showTracksCheckbox) {
         showTracksCheckbox.checked = false;
@@ -2843,7 +2844,7 @@ function buildMapLegend() {
     const table = document.createElement('table');
     table.className = 'map-legend-table';
     table.id = 'map-legend-table';
-    table.innerHTML = '<thead><tr><th></th><th>Player</th><th>Area</th></tr></thead>';
+    table.innerHTML = '<thead><tr><th></th><th>Player</th><th>Trail</th><th>Area</th></tr></thead>';
     const tbody = document.createElement('tbody');
     tbody.id = 'map-legend-tbody';
 
@@ -2853,17 +2854,19 @@ function buildMapLegend() {
 
         // Team header row
         const headerRow = document.createElement('tr');
-        headerRow.innerHTML = `<td colspan="3" class="map-legend-team-name ${teamColor}" style="padding-top:8px;">${escapeHtml(team)}</td>`;
+        headerRow.innerHTML = `<td colspan="4" class="map-legend-team-name ${teamColor}" style="padding-top:8px;">${escapeHtml(team)}</td>`;
         tbody.appendChild(headerRow);
 
         for (const [name, info] of Object.entries(mapState.playerSymbols)) {
             if (info.team === team) {
                 const tr = document.createElement('tr');
                 tr.dataset.player = name;
+                const escapedName = escapeHtml(name);
                 tr.innerHTML = `
                     <td><span class="map-legend-symbol ${teamColor}">${info.symbol}</span></td>
-                    <td>${escapeHtml(name)}<span class="map-legend-watch" data-player="${escapeHtml(name)}"></span></td>
-                    <td class="map-legend-area" data-player="${escapeHtml(name)}">-</td>
+                    <td>${escapedName}<span class="map-legend-watch" data-player="${escapedName}"></span></td>
+                    <td><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}" checked></td>
+                    <td class="map-legend-area" data-player="${escapedName}">-</td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -2872,6 +2875,16 @@ function buildMapLegend() {
 
     table.appendChild(tbody);
     legend.appendChild(table);
+
+    // Attach per-player trail toggle handlers
+    tbody.querySelectorAll('.map-player-trail-cb').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const playerName = e.target.dataset.player;
+            mapState.enabledPlayers[playerName] = e.target.checked;
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        });
+    });
 }
 
 function updateMapLegend() {
@@ -2930,6 +2943,49 @@ function prerenderLocationBackground() {
     mapState.locationCanvas = offscreen;
 }
 
+// Pre-compute full trails for all players from high-res bucket data.
+// Stores canvas-coordinate points with timestamps and teleport flags.
+function precomputeFullTrails() {
+    mapState.fullTrails = {};
+    const buckets = timelineState.highResBuckets;
+    if (!buckets || buckets.length === 0) return;
+
+    for (const bucket of buckets) {
+        const playerData = bucket.p || bucket.playerData;
+        if (!playerData) continue;
+        const t = bucket.t;
+
+        for (const [name, data] of Object.entries(playerData)) {
+            if (data.x === 0 && data.y === 0) continue;
+
+            const pos = worldToCanvasNew(data.x, data.y);
+            const symbolInfo = mapState.playerSymbols[name];
+            if (!symbolInfo) continue;
+
+            if (!mapState.fullTrails[name]) mapState.fullTrails[name] = [];
+            const track = mapState.fullTrails[name];
+            const last = track[track.length - 1];
+
+            // Only add if moved more than 2 canvas pixels
+            if (last && Math.abs(last.x - pos.x) <= 2 && Math.abs(last.y - pos.y) <= 2) continue;
+
+            const isTeleport = last && (Math.abs(last.x - pos.x) > 150 || Math.abs(last.y - pos.y) > 150);
+            track.push({ x: pos.x, y: pos.y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport });
+        }
+    }
+
+    // Initialize all players as enabled
+    mapState.enabledPlayers = {};
+    for (const name of Object.keys(mapState.fullTrails)) {
+        mapState.enabledPlayers[name] = true;
+    }
+    // Initialize trail start times to 0 (full history available)
+    mapState.trailStartTimes = {};
+    for (const name of Object.keys(mapState.fullTrails)) {
+        mapState.trailStartTimes[name] = 0;
+    }
+}
+
 function renderMap(time) {
     const ctx = mapState.ctx;
     const canvas = mapState.canvas;
@@ -2963,13 +3019,13 @@ function renderMap(time) {
 
     // Draw tracks if enabled
     if (mapState.showTracks) {
-        drawTracks(ctx);
+        drawTracks(ctx, time);
     }
 
     // Draw players (bucket.p = compact high-res format, bucket.playerData = 1s fallback)
     const playerData = bucket ? (bucket.p || bucket.playerData) : null;
     if (playerData) {
-        const halfSymbol = 16; // half of pre-rendered symbol canvas size (32)
+        const halfSymbol = 16;
 
         for (const [name, data] of Object.entries(playerData)) {
             if (data.x === 0 && data.y === 0) continue;
@@ -2979,65 +3035,55 @@ function renderMap(time) {
 
             if (symbolInfo && symbolInfo.symbolCanvas) {
                 ctx.drawImage(symbolInfo.symbolCanvas, pos.x - halfSymbol, pos.y - halfSymbol);
-
-                // Add to track if showing tracks
-                if (mapState.showTracks) {
-                    if (!mapState.tracks[name]) mapState.tracks[name] = [];
-                    const track = mapState.tracks[name];
-                    const lastPos = track[track.length - 1];
-                    if (!lastPos || Math.abs(lastPos.x - pos.x) > 2 || Math.abs(lastPos.y - pos.y) > 2) {
-                        // Detect teleport: large jump in one frame (>150 canvas pixels)
-                        const isTeleport = lastPos && (Math.abs(lastPos.x - pos.x) > 150 || Math.abs(lastPos.y - pos.y) > 150);
-                        track.push({
-                            x: pos.x,
-                            y: pos.y,
-                            t: time,
-                            teamIdx: symbolInfo.teamIdx,
-                            tp: isTeleport
-                        });
-                        // Purge data older than the trail window to avoid memory bloat.
-                        // Keep one anchor point outside the window so the trail has a clean start.
-                        const cutoff = time - TRAIL_DURATION;
-                        while (track.length > 1 && track[0].t < cutoff && track[1].t < cutoff) {
-                            track.shift();
-                        }
-                    }
-                }
             }
         }
     }
-
 }
 
-function drawTracks(ctx) {
-    const now = mapState.currentTime;
-    const trailDuration = TRAIL_DURATION;
+// Binary search: find index of last point with t <= time
+function trailIndexAtTime(points, time) {
+    let low = 0, high = points.length - 1;
+    if (high < 0 || points[0].t > time) return -1;
+    while (low < high) {
+        const mid = (low + high + 1) >> 1;
+        if (points[mid].t <= time) low = mid;
+        else high = mid - 1;
+    }
+    return low;
+}
 
-    for (const [, points] of Object.entries(mapState.tracks)) {
+function drawTracks(ctx, time) {
+    const trailDuration = mapState.trailDuration;
+
+    for (const [name, points] of Object.entries(mapState.fullTrails)) {
+        if (!mapState.enabledPlayers[name]) continue;
         if (points.length < 2) continue;
 
-        // Find start index for 10s window
-        let start = points.length - 1;
-        while (start > 0 && now - points[start].t < trailDuration) start--;
+        // Find the end index: last point at or before current time
+        const endIdx = trailIndexAtTime(points, time);
+        if (endIdx < 1) continue;
 
-        if (points.length - start < 2) continue;
+        // Find start: trail window starts at max(time - trailDuration, trailStartTime)
+        const trailStart = Math.max(time - trailDuration, mapState.trailStartTimes[name] || 0);
+        let startIdx = trailIndexAtTime(points, trailStart);
+        if (startIdx < 0) startIdx = 0;
+
+        if (endIdx - startIdx < 1) continue;
 
         const isRed = points[0].teamIdx === 0;
         const solidColor = isRed ? 'rgba(255, 80, 80, 0.4)' : 'rgba(80, 160, 255, 0.4)';
         const dashColor = isRed ? 'rgba(255, 80, 80, 0.2)' : 'rgba(80, 160, 255, 0.2)';
 
-        // Draw segments, switching style for teleport segments
         let inDash = false;
         ctx.lineWidth = 1.5;
         ctx.strokeStyle = solidColor;
         ctx.setLineDash([]);
         ctx.beginPath();
-        ctx.moveTo(points[start].x, points[start].y);
+        ctx.moveTo(points[startIdx].x, points[startIdx].y);
 
-        for (let i = start + 1; i < points.length; i++) {
+        for (let i = startIdx + 1; i <= endIdx; i++) {
             const needDash = !!points[i].tp;
             if (needDash !== inDash) {
-                // Flush current path
                 ctx.stroke();
                 ctx.beginPath();
                 ctx.moveTo(points[i - 1].x, points[i - 1].y);
@@ -3130,8 +3176,11 @@ function setupMapTrailControls() {
     if (showTracksCheckbox) {
         showTracksCheckbox.addEventListener('change', (e) => {
             mapState.showTracks = e.target.checked;
-            if (!mapState.showTracks) {
-                mapState.tracks = {};
+            // When enabling trails, set trail start times to now so trails grow from current position
+            if (mapState.showTracks) {
+                for (const name of Object.keys(mapState.fullTrails)) {
+                    mapState.trailStartTimes[name] = mapState.currentTime;
+                }
             }
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
@@ -3141,7 +3190,21 @@ function setupMapTrailControls() {
     const resetTracksBtn = document.getElementById('map-reset-tracks');
     if (resetTracksBtn) {
         resetTracksBtn.addEventListener('click', () => {
-            mapState.tracks = {};
+            // Reset trail start times to now
+            for (const name of Object.keys(mapState.fullTrails)) {
+                mapState.trailStartTimes[name] = mapState.currentTime;
+            }
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        });
+    }
+
+    // Trail duration selector
+    const durationSelect = document.getElementById('map-trail-duration');
+    if (durationSelect) {
+        durationSelect.addEventListener('change', (e) => {
+            const newDuration = parseInt(e.target.value, 10);
+            mapState.trailDuration = newDuration;
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
@@ -3149,6 +3212,13 @@ function setupMapTrailControls() {
 }
 
 // ─── Playback Engine ──────────────────────────────────────────────────────
+
+const PLAYBACK_BUTTON_LABELS = {
+    'tl-rev': '-1x',
+    'tl-play-pause': '1x',
+    'tl-5x': '5x',
+    'tl-20x': '20x'
+};
 
 function updatePlaybackButtons() {
     const buttons = {
@@ -3162,10 +3232,10 @@ function updatePlaybackButtons() {
         if (!btn) continue;
         if (mapState.isPlaying && mapState.playbackSpeed === speed) {
             btn.classList.add('active');
-            if (id === 'tl-play-pause') btn.textContent = '⏸';
+            btn.textContent = '⏸';
         } else {
             btn.classList.remove('active');
-            if (id === 'tl-play-pause') btn.textContent = '▶';
+            btn.textContent = PLAYBACK_BUTTON_LABELS[id];
         }
     }
 }
@@ -3220,7 +3290,6 @@ function animatePlayback() {
     // Forward past end: wrap to 0
     if (mapState.currentTime > duration) {
         mapState.currentTime = 0;
-        mapState.tracks = {};
         mapState.renderDirty = true;
     }
 

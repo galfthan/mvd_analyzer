@@ -1475,6 +1475,28 @@ th.sortable.sort-desc::after {
     color: #00d9ff;
 }
 
+.map-trail-select {
+    background: #1a1a2e;
+    border: 1px solid #666;
+    color: #ccc;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.map-trail-select:hover,
+.map-trail-select:focus {
+    border-color: #00d9ff;
+    outline: none;
+}
+
+.map-player-trail-cb {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}
+
 .map-main-content {
     display: flex;
     gap: 20px;
