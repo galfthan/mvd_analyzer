@@ -48,6 +48,29 @@
                 <button class="tab-btn" data-tab="keymoments">Key Moments</button>
             </div>
 
+            <!-- Unified Timeline Widget (visible on Timeline/Chat/Map tabs) -->
+            <div id="unified-timeline" class="panel timeline-nav-panel" style="display: none;">
+                <div class="timeline-nav-row">
+                    <div class="timeline-playback-controls">
+                        <button id="tl-rev" title="Reverse playback (1x)">⏪</button>
+                        <button id="tl-play-pause" title="Play/Pause">▶</button>
+                        <button id="tl-5x" title="Play 5x speed">5x</button>
+                        <button id="tl-20x" title="Play 20x speed">20x</button>
+                    </div>
+                    <span id="tl-current-time" class="timeline-nav-time">0:00</span>
+                    <div class="timeline-nav-bar-wrapper" id="tl-bar-wrapper">
+                        <div class="timeline-nav-bar" id="tl-bar">
+                            <div class="timeline-nav-track" id="tl-track"></div>
+                            <div class="timeline-selection-overlay" id="tl-selection-overlay"></div>
+                            <div class="timeline-nav-cursor" id="tl-cursor"></div>
+                        </div>
+                        <div class="timeline-nav-caret" id="tl-caret" title="Drag to set current time">▲</div>
+                        <div class="timeline-nav-axis" id="tl-axis"></div>
+                    </div>
+                    <span id="tl-segment-label" class="timeline-nav-segment"></span>
+                </div>
+            </div>
+
             <!-- Summary Tab -->
             <div id="tab-summary" class="tab-content active">
                 <div id="match-summary" class="panel">
@@ -238,28 +261,6 @@
 
             <!-- Timeline Tab -->
             <div id="tab-timeline" class="tab-content">
-                <!-- Time Navigation Bar -->
-                <div class="panel timeline-nav-panel">
-                    <div class="timeline-nav-row">
-                        <div class="timeline-playback-controls">
-                            <button id="timeline-jump-back" title="Jump back 10s">⏮</button>
-                            <button id="timeline-play-pause" title="Play/Pause">▶</button>
-                            <button id="timeline-jump-forward" title="Jump forward 10s">⏭</button>
-                        </div>
-                        <span id="timeline-current-time" class="timeline-nav-time">0:00</span>
-                        <div class="timeline-nav-bar-wrapper" id="timeline-nav-bar-wrapper">
-                            <div class="timeline-nav-bar" id="timeline-nav-bar">
-                                <div class="timeline-nav-track" id="timeline-nav-track"></div>
-                                <div class="timeline-selection-overlay" id="timeline-selection-overlay"></div>
-                                <div class="timeline-nav-cursor" id="timeline-nav-cursor"></div>
-                            </div>
-                            <div class="timeline-nav-caret" id="timeline-nav-caret" title="Drag to set current time">▲</div>
-                        </div>
-                        <span id="timeline-segment-label" class="timeline-nav-segment"></span>
-                    </div>
-                    <div class="timeline-nav-axis" id="timeline-nav-axis"></div>
-                </div>
-
                 <!-- Team Status at Current Time -->
                 <div class="panel team-status-panel">
                     <div class="team-status-row">
@@ -368,21 +369,6 @@
 
             <!-- Chat Tab -->
             <div id="tab-chat" class="tab-content">
-                <!-- Time Navigation Bar (same style as timeline) -->
-                <div class="panel timeline-nav-panel">
-                    <div class="timeline-nav-row">
-                        <span id="chat-current-time" class="timeline-nav-time">0:00</span>
-                        <div class="timeline-nav-bar-wrapper" id="chat-nav-bar-wrapper">
-                            <div class="timeline-nav-bar" id="chat-nav-bar">
-                                <div class="timeline-nav-track"></div>
-                                <div class="timeline-nav-cursor" id="chat-nav-cursor"></div>
-                            </div>
-                            <div class="timeline-nav-caret" id="chat-nav-caret" title="Drag to set current time">▲</div>
-                        </div>
-                    </div>
-                    <div class="timeline-nav-axis" id="chat-nav-axis"></div>
-                </div>
-
                 <!-- Three Message Columns in one panel with shared time axis -->
                 <div class="panel chat-panel-outer">
                     <div class="chat-content-row">
@@ -411,18 +397,9 @@
             <!-- Map Tab -->
             <div id="tab-map" class="tab-content">
                 <div class="panel map-panel">
-                    <div class="map-controls">
-                        <div class="map-time-controls">
-                            <button id="map-jump-back" title="Jump back 10s">⏮</button>
-                            <button id="map-play-pause" title="Play/Pause">▶</button>
-                            <button id="map-jump-forward" title="Jump forward 10s">⏭</button>
-                            <span id="map-current-time" class="map-time-display">0:00</span>
-                        </div>
-                        <input type="range" id="map-timeline-slider" min="0" max="100" value="0">
-                        <div class="map-track-controls">
-                            <label class="map-checkbox"><input type="checkbox" id="map-show-tracks"> Show trails</label>
-                            <button id="map-reset-tracks">Clear trails</button>
-                        </div>
+                    <div class="map-track-controls">
+                        <label class="map-checkbox"><input type="checkbox" id="map-show-tracks"> Show trails</label>
+                        <button id="map-reset-tracks">Clear trails</button>
                     </div>
                     <div class="map-main-content">
                         <div class="map-canvas-container">
