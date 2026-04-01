@@ -1708,17 +1708,53 @@ function renderChatMessages() {
     const containerHeight = killContainer.clientHeight || 700;
     const ITEM_HEIGHT = 18; // approximate height of a message row
 
+    // Render shared time axis on the left
+    const axisContainer = document.getElementById('chat-time-axis');
+    if (axisContainer) {
+        renderChatTimeAxis(axisContainer, windowStart, containerHeight);
+    }
+
     // Render each column with overlap avoidance
     renderChatColumn(killContainer, killEvents, windowStart, containerHeight, ITEM_HEIGHT);
     renderChatColumn(teamAContainer, teamAEvents, windowStart, containerHeight, ITEM_HEIGHT);
     renderChatColumn(teamBContainer, teamBEvents, windowStart, containerHeight, ITEM_HEIGHT);
 
-    // Add current-time line at center
+    // Add current-time line at center of each column
     for (const container of [killContainer, teamAContainer, teamBContainer]) {
         const line = document.createElement('div');
         line.className = 'chat-current-time-line';
         line.style.top = `${Math.round(containerHeight / 2)}px`;
         container.appendChild(line);
+    }
+}
+
+function renderChatTimeAxis(container, windowStart, containerHeight) {
+    container.innerHTML = '';
+    const windowEnd = windowStart + CHAT_WINDOW;
+    const tickInterval = 5; // seconds between ticks
+
+    // Add tick for current time at center
+    const currentTop = Math.round(containerHeight / 2);
+    const nowTick = document.createElement('div');
+    nowTick.className = 'chat-tick chat-tick-current';
+    nowTick.style.top = `${currentTop}px`;
+    nowTick.textContent = formatTime(mapState.currentTime);
+    container.appendChild(nowTick);
+
+    // Add ticks at fixed 5s intervals, skip if too close to current-time tick
+    const firstTick = Math.ceil(windowStart / tickInterval) * tickInterval;
+    for (let t = firstTick; t <= windowEnd; t += tickInterval) {
+        const frac = (t - windowStart) / CHAT_WINDOW;
+        const topPx = Math.round(frac * containerHeight);
+        if (topPx < 0 || topPx > containerHeight) continue;
+        // Skip if within 10px of the current-time tick to avoid clutter
+        if (Math.abs(topPx - currentTop) < 10) continue;
+
+        const tick = document.createElement('div');
+        tick.className = 'chat-tick';
+        tick.style.top = `${topPx}px`;
+        tick.textContent = formatTime(t);
+        container.appendChild(tick);
     }
 }
 
@@ -1739,8 +1775,9 @@ function renderChatColumn(container, events, windowStart, containerHeight, itemH
         marker.className = 'chat-time-marker' + (displaced ? ' chat-displaced' : '');
         marker.style.top = `${topPx}px`;
 
+        // No per-message timestamp — time context is provided by the shared left axis
         const prefix = displaced ? '<span class="chat-displaced-dots">...</span>' : '';
-        marker.innerHTML = `${prefix}<span class="chat-time-marker-time">${formatTime(event.time)}</span><span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
+        marker.innerHTML = `${prefix}<span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
 
         container.appendChild(marker);
         lastBottom = topPx + itemHeight;

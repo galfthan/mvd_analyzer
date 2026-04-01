@@ -383,19 +383,27 @@
                     <div class="timeline-nav-axis" id="chat-nav-axis"></div>
                 </div>
 
-                <!-- Three Message Columns -->
-                <div class="chat-messages-row">
-                    <div class="panel chat-column">
-                        <h3>Kills</h3>
-                        <div class="chat-timeline-scroll" id="kill-messages"></div>
-                    </div>
-                    <div class="panel chat-column">
-                        <h3 id="team-a-chat-title">Team A Chat</h3>
-                        <div class="chat-timeline-scroll" id="team-a-messages"></div>
-                    </div>
-                    <div class="panel chat-column">
-                        <h3 id="team-b-chat-title">Team B Chat</h3>
-                        <div class="chat-timeline-scroll" id="team-b-messages"></div>
+                <!-- Three Message Columns in one panel with shared time axis -->
+                <div class="panel chat-panel-outer">
+                    <div class="chat-content-row">
+                        <div class="chat-time-axis-col">
+                            <h3 class="chat-axis-header">&nbsp;</h3>
+                            <div class="chat-time-axis" id="chat-time-axis"></div>
+                        </div>
+                        <div class="chat-columns-wrapper">
+                            <div class="chat-column">
+                                <h3>Kills</h3>
+                                <div class="chat-timeline-scroll" id="kill-messages"></div>
+                            </div>
+                            <div class="chat-column">
+                                <h3 id="team-a-chat-title">Team A Chat</h3>
+                                <div class="chat-timeline-scroll" id="team-a-messages"></div>
+                            </div>
+                            <div class="chat-column">
+                                <h3 id="team-b-chat-title">Team B Chat</h3>
+                                <div class="chat-timeline-scroll" id="team-b-messages"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
