@@ -2523,22 +2523,16 @@ function expandPolygon(points, distance) {
 // Draw a location region (convex hull or circle for single point)
 function drawLocationRegion(ctx, group, worldToCanvasFunc) {
     if (group.points.length === 1) {
-        // Single point - draw small circle
         const pos = worldToCanvasFunc(group.points[0].x, group.points[0].y);
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
         ctx.fillStyle = group.color.fill;
         ctx.fill();
-        ctx.strokeStyle = group.color.stroke;
-        ctx.lineWidth = 1;
-        ctx.stroke();
     } else {
-        // Multiple points - compute and draw convex hull
         const canvasPoints = group.points.map(p => worldToCanvasFunc(p.x, p.y));
         const hull = computeConvexHull(canvasPoints);
 
         if (hull.length < 3) {
-            // Degenerate case - draw bounding rect with padding
             let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             for (const p of canvasPoints) {
                 minX = Math.min(minX, p.x);
@@ -2549,11 +2543,7 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
             const pad = 15;
             ctx.fillStyle = group.color.fill;
             ctx.fillRect(minX - pad, minY - pad, maxX - minX + pad*2, maxY - minY + pad*2);
-            ctx.strokeStyle = group.color.stroke;
-            ctx.lineWidth = 1;
-            ctx.strokeRect(minX - pad, minY - pad, maxX - minX + pad*2, maxY - minY + pad*2);
         } else {
-            // Expand hull outward and draw
             const expanded = expandPolygon(hull, 15);
             ctx.beginPath();
             ctx.moveTo(expanded[0].x, expanded[0].y);
@@ -2563,9 +2553,6 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
             ctx.closePath();
             ctx.fillStyle = group.color.fill;
             ctx.fill();
-            ctx.strokeStyle = group.color.stroke;
-            ctx.lineWidth = 1;
-            ctx.stroke();
         }
     }
 }
@@ -2583,7 +2570,6 @@ let mapState = {
     playbackSpeed: 1,
     animationFrameId: null,
     lastRenderTime: 0,
-    showTracks: false,
     trailDuration: 10,          // Current trail window in seconds
     fullTrails: {},             // playerName -> [{x, y, t, teamIdx, tp}] — pre-computed from all buckets
     trailStartTimes: {},        // playerName -> time when trail tracking started (for extending forward)
@@ -2597,8 +2583,7 @@ let mapState = {
 
 const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
 
-// Force a redraw (trails are pre-computed, no need to clear)
-function resetTrails() {
+function markMapDirty() {
     mapState.renderDirty = true;
 }
 
@@ -2648,12 +2633,8 @@ function initMapView(result) {
     // Build powerup event list
     buildMapPowerupList(result);
 
-    // Reset trail state
-    const showTracksCheckbox = document.getElementById('map-show-tracks');
-    if (showTracksCheckbox) {
-        showTracksCheckbox.checked = false;
-        mapState.showTracks = false;
-    }
+    // Reset trail checkboxes
+    document.querySelectorAll('.map-player-trail-cb').forEach(cb => { cb.checked = false; });
 
     // Initial render at match start
     mapState.currentTime = 0;
@@ -2865,7 +2846,7 @@ function buildMapLegend() {
                 tr.innerHTML = `
                     <td><span class="map-legend-symbol ${teamColor}">${info.symbol}</span></td>
                     <td>${escapedName}<span class="map-legend-watch" data-player="${escapedName}"></span></td>
-                    <td><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}" checked></td>
+                    <td><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}"></td>
                     <td class="map-legend-area" data-player="${escapedName}">-</td>
                 `;
                 tbody.appendChild(tr);
@@ -2881,6 +2862,10 @@ function buildMapLegend() {
         cb.addEventListener('change', (e) => {
             const playerName = e.target.dataset.player;
             mapState.enabledPlayers[playerName] = e.target.checked;
+            // When enabling, start trail from current position
+            if (e.target.checked) {
+                mapState.trailStartTimes[playerName] = mapState.currentTime;
+            }
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
@@ -2974,14 +2959,11 @@ function precomputeFullTrails() {
         }
     }
 
-    // Initialize all players as enabled
+    // Initialize all players as disabled (user enables via All button or per-player checkboxes)
     mapState.enabledPlayers = {};
-    for (const name of Object.keys(mapState.fullTrails)) {
-        mapState.enabledPlayers[name] = true;
-    }
-    // Initialize trail start times to 0 (full history available)
     mapState.trailStartTimes = {};
     for (const name of Object.keys(mapState.fullTrails)) {
+        mapState.enabledPlayers[name] = false;
         mapState.trailStartTimes[name] = 0;
     }
 }
@@ -3017,10 +2999,8 @@ function renderMap(time) {
         }
     }
 
-    // Draw tracks if enabled
-    if (mapState.showTracks) {
-        drawTracks(ctx, time);
-    }
+    // Draw tracks (per-player visibility controlled by enabledPlayers)
+    drawTracks(ctx, time);
 
     // Draw players (bucket.p = compact high-res format, bucket.playerData = 1s fallback)
     const playerData = bucket ? (bucket.p || bucket.playerData) : null;
@@ -3172,16 +3152,30 @@ function findBucketAtTime(time) {
 }
 
 function setupMapTrailControls() {
-    const showTracksCheckbox = document.getElementById('map-show-tracks');
-    if (showTracksCheckbox) {
-        showTracksCheckbox.addEventListener('change', (e) => {
-            mapState.showTracks = e.target.checked;
-            // When enabling trails, set trail start times to now so trails grow from current position
-            if (mapState.showTracks) {
-                for (const name of Object.keys(mapState.fullTrails)) {
+    const allBtn = document.getElementById('map-trails-all');
+    if (allBtn) {
+        allBtn.addEventListener('click', () => {
+            for (const name of Object.keys(mapState.fullTrails)) {
+                // Only reset start time for newly-enabled players
+                if (!mapState.enabledPlayers[name]) {
                     mapState.trailStartTimes[name] = mapState.currentTime;
                 }
+                mapState.enabledPlayers[name] = true;
             }
+            // Sync legend checkboxes
+            document.querySelectorAll('.map-player-trail-cb').forEach(cb => { cb.checked = true; });
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        });
+    }
+
+    const noneBtn = document.getElementById('map-trails-none');
+    if (noneBtn) {
+        noneBtn.addEventListener('click', () => {
+            for (const name of Object.keys(mapState.fullTrails)) {
+                mapState.enabledPlayers[name] = false;
+            }
+            document.querySelectorAll('.map-player-trail-cb').forEach(cb => { cb.checked = false; });
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
@@ -3190,7 +3184,6 @@ function setupMapTrailControls() {
     const resetTracksBtn = document.getElementById('map-reset-tracks');
     if (resetTracksBtn) {
         resetTracksBtn.addEventListener('click', () => {
-            // Reset trail start times to now
             for (const name of Object.keys(mapState.fullTrails)) {
                 mapState.trailStartTimes[name] = mapState.currentTime;
             }
@@ -3199,12 +3192,10 @@ function setupMapTrailControls() {
         });
     }
 
-    // Trail duration selector
     const durationSelect = document.getElementById('map-trail-duration');
     if (durationSelect) {
         durationSelect.addEventListener('change', (e) => {
-            const newDuration = parseInt(e.target.value, 10);
-            mapState.trailDuration = newDuration;
+            mapState.trailDuration = parseInt(e.target.value, 10);
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
@@ -3338,7 +3329,7 @@ function buildMapPowerupList(result) {
         `;
         li.addEventListener('click', () => {
             setCurrentTime(event.time);
-            resetTrails();
+            markMapDirty();
             renderMap(mapState.currentTime);
         });
         list.appendChild(li);

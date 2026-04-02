@@ -398,7 +398,9 @@
             <div id="tab-map" class="tab-content">
                 <div class="panel map-panel">
                     <div class="map-track-controls">
-                        <label class="map-checkbox"><input type="checkbox" id="map-show-tracks"> Show trails</label>
+                        <span class="map-trail-label">Trails:</span>
+                        <button id="map-trails-all">All</button>
+                        <button id="map-trails-none">None</button>
                         <select id="map-trail-duration" class="map-trail-select">
                             <option value="5">5s</option>
                             <option value="10" selected>10s</option>
@@ -407,7 +409,7 @@
                             <option value="300">5min</option>
                             <option value="1200">20min</option>
                         </select>
-                        <button id="map-reset-tracks">Clear trails</button>
+                        <button id="map-reset-tracks">Clear</button>
                     </div>
                     <div class="map-main-content">
                         <div class="map-canvas-container">

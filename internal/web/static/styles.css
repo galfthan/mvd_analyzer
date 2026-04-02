@@ -18,7 +18,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -1444,19 +1444,9 @@ th.sortable.sort-desc::after {
     gap: 12px;
 }
 
-.map-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.map-trail-label {
     color: #888;
-    cursor: pointer;
     font-size: 0.9rem;
-}
-
-.map-checkbox input {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
 }
 
 .map-track-controls button {
