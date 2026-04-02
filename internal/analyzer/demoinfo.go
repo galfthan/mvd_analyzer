@@ -27,22 +27,11 @@ func cleanQuakeName(s string) string {
 			continue
 		}
 
-		// Map Quake charset special chars to ASCII equivalents
-		// Quake uses chars 0x00-0x1F for special graphical characters
+		// Skip control characters (0x00-0x1F) to match parser's cleanString behavior.
+		// Both functions must produce identical names so that demoInfo player names
+		// match the names used in timeline bucket data.
 		if c < 32 {
-			// Skip most control characters
-			switch c {
-			case 0x10: // right arrow
-				result = append(result, '>')
-			case 0x11: // left arrow
-				result = append(result, '<')
-			case 0x12: // dot
-				result = append(result, '.')
-			case 0x1C, 0x1D, 0x1E, 0x1F: // dots/bullets
-				result = append(result, '.')
-			default:
-				// Skip other control characters (0x19, 0x1C for separators, etc.)
-			}
+			continue
 		} else if c < 127 {
 			result = append(result, rune(c))
 		}

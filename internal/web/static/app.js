@@ -2283,26 +2283,45 @@ function updateTeamStatus() {
         return;
     }
 
-    // Find bucket at current time
+    // Find bucket at current time — prefer high-res (50ms) buckets when available
+    // so stats match the map view exactly
     const time = mapState.currentTime;
-    let bucket = null;
-    for (const b of buckets) {
-        if (time >= b.startTime && time < b.endTime) { bucket = b; break; }
+    const hrBucket = findBucketAtTime(time);
+    let pd;
+    if (hrBucket) {
+        pd = hrBucket.p || hrBucket.playerData || {};
+    } else {
+        let bucket = null;
+        for (const b of buckets) {
+            if (time >= b.startTime && time < b.endTime) { bucket = b; break; }
+        }
+        if (!bucket) bucket = buckets[buckets.length - 1];
+        pd = bucket.playerData || {};
     }
-    if (!bucket) bucket = buckets[buckets.length - 1];
-
-    const pd = bucket.playerData || {};
     const fragCounts = getFragsAtTime(time);
 
     for (let ti = 0; ti < 2; ti++) {
         const team = teams[ti];
         const container = ti === 0 ? containerA : containerB;
 
-        // Collect players for this team
+        // Collect players for this team (handle both high-res short and graph long property names)
+        // High-res buckets don't have team info, so look it up from playerSymbols or demoInfo
         const players = [];
         for (const [name, data] of Object.entries(pd)) {
-            if (data.team === team) {
-                players.push({ name, ...data, frags: fragCounts[name] || 0 });
+            const t = data.team || mapState.playerSymbols?.[name]?.team;
+            if (t === team) {
+                players.push({
+                    name,
+                    health: data.h ?? data.health ?? 0,
+                    armor: data.a ?? data.armor ?? 0,
+                    armorType: data.at ?? data.armorType ?? '',
+                    hasRL: data.rl ?? data.hasRL ?? false,
+                    hasLG: data.lg ?? data.hasLG ?? false,
+                    hasQuad: data.q ?? data.hasQuad ?? false,
+                    hasPent: data.pent ?? data.hasPent ?? false,
+                    hasRing: data.r ?? data.hasRing ?? false,
+                    frags: fragCounts[name] || 0,
+                });
             }
         }
 
