@@ -1645,10 +1645,7 @@ function buildFullChat() {
 }
 
 function updateChatTimeLine() {
-    const line = document.getElementById('chat-current-time-line');
-    if (!line) return;
-    const topPx = Math.round(mapState.currentTime * CHAT_PX_PER_SEC);
-    line.style.top = `${topPx}px`;
+    // Line is fixed at 50% of viewport via CSS — nothing to update
 }
 
 function scrollChatToCurrentTime() {
@@ -1656,12 +1653,9 @@ function scrollChatToCurrentTime() {
     const viewport = document.getElementById('chat-scroll-viewport');
     if (!viewport) return;
 
-    const topPx = Math.round(mapState.currentTime * CHAT_PX_PER_SEC);
+    const topPx = mapState.currentTime * CHAT_PX_PER_SEC;
     const targetScroll = Math.max(0, topPx - viewport.clientHeight / 2);
-
-    if (Math.abs(viewport.scrollTop - targetScroll) > 1) {
-        viewport.scrollTop = targetScroll;
-    }
+    viewport.scrollTop = targetScroll;
 }
 
 function renderChatTimeAxisFull(container) {
