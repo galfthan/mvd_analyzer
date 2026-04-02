@@ -2964,18 +2964,24 @@ function precomputeFullTrails() {
             const track = mapState.fullTrails[name];
             const last = track[track.length - 1];
 
-            // Only add if moved more than 2 canvas pixels
-            if (last && Math.abs(last.x - pos.x) <= 2 && Math.abs(last.y - pos.y) <= 2) {
-                lastWorldPos[name] = { x: data.x, y: data.y };
-                continue;
+            const isDeath = !!data.d;
+            const isSpawn = !!data.sp;
+
+            // Always include death/spawn markers regardless of pixel distance
+            if (!isDeath && !isSpawn) {
+                // Only add if moved more than 2 canvas pixels
+                if (last && Math.abs(last.x - pos.x) <= 2 && Math.abs(last.y - pos.y) <= 2) {
+                    lastWorldPos[name] = { x: data.x, y: data.y };
+                    continue;
+                }
             }
 
             // Teleport detection in world units (scale-independent)
             const lw = lastWorldPos[name];
-            const isTeleport = lw && (Math.abs(data.x - lw.x) > MAX_MOVE_PER_BUCKET || Math.abs(data.y - lw.y) > MAX_MOVE_PER_BUCKET);
+            const isTeleport = !isDeath && !isSpawn && lw && (Math.abs(data.x - lw.x) > MAX_MOVE_PER_BUCKET || Math.abs(data.y - lw.y) > MAX_MOVE_PER_BUCKET);
 
             lastWorldPos[name] = { x: data.x, y: data.y };
-            track.push({ x: pos.x, y: pos.y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport });
+            track.push({ x: pos.x, y: pos.y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
         }
     }
 
@@ -3078,16 +3084,54 @@ function drawTracks(ctx, time) {
         const isRed = points[0].teamIdx === 0;
         const solidColor = isRed ? 'rgba(255, 80, 80, 0.4)' : 'rgba(80, 160, 255, 0.4)';
         const dashColor = isRed ? 'rgba(255, 80, 80, 0.2)' : 'rgba(80, 160, 255, 0.2)';
+        const markerColor = isRed ? 'rgba(255, 80, 80, 0.8)' : 'rgba(80, 160, 255, 0.8)';
+
+        // Collect death/spawn markers to draw after lines
+        const markers = [];
 
         let inDash = false;
+        let afterDeath = false; // suppress line from death to next spawn
         ctx.lineWidth = 3;
         ctx.strokeStyle = solidColor;
         ctx.setLineDash([]);
         ctx.beginPath();
         ctx.moveTo(points[startIdx].x, points[startIdx].y);
 
+        if (points[startIdx].spawn) markers.push({ x: points[startIdx].x, y: points[startIdx].y, type: 'spawn' });
+
         for (let i = startIdx + 1; i <= endIdx; i++) {
-            const needDash = !!points[i].tp;
+            const pt = points[i];
+
+            if (pt.spawn) {
+                // Spawn: start a new line segment (gap from death)
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.setLineDash([]);
+                ctx.strokeStyle = solidColor;
+                inDash = false;
+                afterDeath = false;
+                ctx.moveTo(pt.x, pt.y);
+                markers.push({ x: pt.x, y: pt.y, type: 'spawn' });
+                continue;
+            }
+
+            if (pt.death) {
+                // Death: draw line to death point, then mark it
+                ctx.lineTo(pt.x, pt.y);
+                ctx.stroke();
+                ctx.beginPath();
+                afterDeath = true;
+                markers.push({ x: pt.x, y: pt.y, type: 'death' });
+                continue;
+            }
+
+            if (afterDeath) {
+                // Between death and spawn — don't draw
+                ctx.moveTo(pt.x, pt.y);
+                continue;
+            }
+
+            const needDash = !!pt.tp;
             if (needDash !== inDash) {
                 ctx.stroke();
                 ctx.beginPath();
@@ -3101,10 +3145,32 @@ function drawTracks(ctx, time) {
                 }
                 inDash = needDash;
             }
-            ctx.lineTo(points[i].x, points[i].y);
+            ctx.lineTo(pt.x, pt.y);
         }
         ctx.stroke();
         ctx.setLineDash([]);
+
+        // Draw death (✕) and spawn (●) markers on top
+        ctx.fillStyle = markerColor;
+        ctx.strokeStyle = markerColor;
+        ctx.lineWidth = 2;
+        for (const m of markers) {
+            if (m.type === 'death') {
+                // Draw ✕
+                const s = 5;
+                ctx.beginPath();
+                ctx.moveTo(m.x - s, m.y - s);
+                ctx.lineTo(m.x + s, m.y + s);
+                ctx.moveTo(m.x + s, m.y - s);
+                ctx.lineTo(m.x - s, m.y + s);
+                ctx.stroke();
+            } else {
+                // Draw ●
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
     }
 }
 

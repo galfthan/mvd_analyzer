@@ -302,6 +302,8 @@ type HighResPlayerData struct {
 	R       bool    `json:"r,omitempty"`   // Has ring
 	Rockets int     `json:"rk,omitempty"`  // Rocket ammo
 	Cells   int     `json:"cl,omitempty"`  // Cell ammo
+	D       bool    `json:"d,omitempty"`   // Death frame marker
+	Sp      bool    `json:"sp,omitempty"`  // Spawn frame marker
 }
 
 // MapLocation represents a named point in a map for visualization
