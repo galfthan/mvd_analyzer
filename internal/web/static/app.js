@@ -2884,6 +2884,9 @@ function buildMapLegend() {
             renderMap(mapState.currentTime);
         });
     });
+
+    // Make tables sortable
+    legend.querySelectorAll('.team-status-table').forEach(makeSortable);
 }
 
 function updateMapLegend() {
