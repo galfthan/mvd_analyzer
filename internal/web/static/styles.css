@@ -541,7 +541,7 @@ table tbody tr:hover {
 
 .timeline-nav-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
 }
 
@@ -551,6 +551,7 @@ table tbody tr:hover {
     color: #00d9ff;
     min-width: 50px;
     text-align: center;
+    margin-top: 1px;
 }
 
 .timeline-nav-bar-wrapper {
@@ -625,6 +626,7 @@ table tbody tr:hover {
     color: #888;
     white-space: nowrap;
     min-width: 90px;
+    margin-top: 3px;
 }
 
 .timeline-nav-axis {
@@ -1232,6 +1234,7 @@ th.sortable.sort-desc::after {
     align-items: center;
     gap: 4px;
     margin-right: 8px;
+    margin-top: 2px;
 }
 
 .timeline-playback-controls button {
