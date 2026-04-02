@@ -140,6 +140,7 @@ function setCurrentTime(time) {
     updateTeamStatus();
     updateMapLegend();
     renderChatMessages();
+    renderMap(mapState.currentTime);
     updateUrlState();
 }
 
@@ -2609,6 +2610,15 @@ function initMapView(result) {
     // Calculate bounds from locations and player positions
     calculateMapBounds(result);
 
+    // Size canvas to fit map content at full width
+    const worldW = mapState.bounds.maxX - mapState.bounds.minX;
+    const worldH = mapState.bounds.maxY - mapState.bounds.minY;
+    const canvasW = 900;
+    const canvasH = worldW > 0 ? Math.round(Math.max(400, Math.min(900, canvasW * (worldH / worldW)))) : 700;
+    mapState.canvas.width = canvasW;
+    mapState.canvas.height = canvasH;
+    updateWorldToCanvasTransform();
+
     // Get teams from demoInfo or match
     if (result.demoInfo?.teams) {
         mapState.teams = result.demoInfo.teams;
@@ -3038,6 +3048,11 @@ function drawTracks(ctx, time) {
     for (const [name, points] of Object.entries(mapState.fullTrails)) {
         if (!mapState.enabledPlayers[name]) continue;
         if (points.length < 2) continue;
+
+        // If current time is before trail start, pull start back so trail grows from here
+        if (time < (mapState.trailStartTimes[name] || 0)) {
+            mapState.trailStartTimes[name] = time;
+        }
 
         // Find the end index: last point at or before current time
         const endIdx = trailIndexAtTime(points, time);
