@@ -3070,7 +3070,7 @@ function drawTracks(ctx, time) {
         const dashColor = isRed ? 'rgba(255, 80, 80, 0.2)' : 'rgba(80, 160, 255, 0.2)';
 
         let inDash = false;
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 3;
         ctx.strokeStyle = solidColor;
         ctx.setLineDash([]);
         ctx.beginPath();
