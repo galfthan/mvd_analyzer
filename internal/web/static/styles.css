@@ -482,7 +482,7 @@ table tbody tr:hover {
 /* Timeline Analysis Tab */
 .timeline-nav-panel {
     margin-bottom: 12px;
-    padding: 10px 15px 4px 15px;
+    padding: 18px 15px 4px 15px;
 }
 
 .team-status-panel {
@@ -547,7 +547,7 @@ table tbody tr:hover {
 
 .timeline-nav-time {
     font-family: monospace;
-    font-size: 1.2rem;
+    font-size: 0.78rem;
     color: #00d9ff;
     min-width: 50px;
     text-align: center;
@@ -1241,7 +1241,7 @@ th.sortable.sort-desc::after {
     border: 1px solid rgba(0, 217, 255, 0.3);
     color: #7a8ba8;
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 0.78rem;
     padding: 0 9px;
     border-radius: 3px;
     height: 24px;
