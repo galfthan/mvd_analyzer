@@ -233,7 +233,7 @@ function setupFileUpload() {
     });
 }
 
-const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map'];
+const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map', 'keymoments'];
 
 function setupTabs() {
     const tabButtons = document.querySelectorAll('.tab-btn');
