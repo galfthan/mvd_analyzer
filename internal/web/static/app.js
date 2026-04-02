@@ -2283,7 +2283,7 @@ function updateTeamStatus() {
 
         let html = `<h4>${team} — ${teamFrags} frags</h4>`;
         html += `<table class="team-status-table">`;
-        html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th><th></th></tr>`;
+        html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th><th>View</th></tr>`;
 
         for (const p of players) {
             const hp = p.health || 0;
@@ -2832,23 +2832,23 @@ function buildMapLegend() {
     const legend = document.getElementById('map-legend');
     if (!legend) return;
 
-    legend.innerHTML = '<h4>Players</h4>';
-
-    const table = document.createElement('table');
-    table.className = 'map-legend-table';
-    table.id = 'map-legend-table';
-    table.innerHTML = '<thead><tr><th></th><th>Player</th><th></th><th>H</th><th>A</th><th>Wpn</th><th></th></tr></thead>';
-    const tbody = document.createElement('tbody');
-    tbody.id = 'map-legend-tbody';
+    legend.innerHTML = '';
 
     for (let teamIdx = 0; teamIdx < mapState.teams.length; teamIdx++) {
         const team = mapState.teams[teamIdx];
         const teamColor = teamIdx === 0 ? 'player-red' : 'player-blue';
 
-        // Team header row
-        const headerRow = document.createElement('tr');
-        headerRow.innerHTML = `<td colspan="7" class="map-legend-team-name ${teamColor}" style="padding-top:8px;">${escapeHtml(team)}</td>`;
-        tbody.appendChild(headerRow);
+        const title = document.createElement('h4');
+        title.className = teamColor;
+        title.id = `map-legend-team-title-${teamIdx}`;
+        title.textContent = `${team} — 0 frags`;
+        legend.appendChild(title);
+
+        const table = document.createElement('table');
+        table.className = 'team-status-table';
+        table.innerHTML = `<thead><tr><th></th><th>Player</th><th>Trail</th><th>H</th><th>A</th><th>Wpn</th><th>View</th></tr></thead>`;
+        const tbody = document.createElement('tbody');
+        tbody.className = 'map-legend-tbody';
 
         for (const [name, info] of Object.entries(mapState.playerSymbols)) {
             if (info.team === team) {
@@ -2858,7 +2858,7 @@ function buildMapLegend() {
                 tr.innerHTML = `
                     <td><span class="map-legend-symbol ${teamColor}">${info.symbol}</span></td>
                     <td>${escapedName}</td>
-                    <td><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}"></td>
+                    <td class="map-trail-cell"><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}"></td>
                     <td class="map-legend-health" data-player="${escapedName}">-</td>
                     <td class="map-legend-armor" data-player="${escapedName}">-</td>
                     <td class="map-legend-wpn" data-player="${escapedName}">-</td>
@@ -2867,17 +2867,16 @@ function buildMapLegend() {
                 tbody.appendChild(tr);
             }
         }
+
+        table.appendChild(tbody);
+        legend.appendChild(table);
     }
 
-    table.appendChild(tbody);
-    legend.appendChild(table);
-
     // Attach per-player trail toggle handlers
-    tbody.querySelectorAll('.map-player-trail-cb').forEach(cb => {
+    legend.querySelectorAll('.map-player-trail-cb').forEach(cb => {
         cb.addEventListener('change', (e) => {
             const playerName = e.target.dataset.player;
             mapState.enabledPlayers[playerName] = e.target.checked;
-            // When enabling, start trail from current position
             if (e.target.checked) {
                 mapState.trailStartTimes[playerName] = mapState.currentTime;
             }
@@ -2888,39 +2887,52 @@ function buildMapLegend() {
 }
 
 function updateMapLegend() {
-    const tbody = document.getElementById('map-legend-tbody');
-    if (!tbody) return;
+    const legend = document.getElementById('map-legend');
+    if (!legend) return;
 
     const time = mapState.currentTime;
     const bucket = findBucketAtTime(time);
     const playerData = bucket ? (bucket.p || bucket.playerData) : null;
     const hubInfo = currentResult?.hubInfo;
     const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
+    const fragCounts = typeof getFragsAtTime === 'function' ? getFragsAtTime(time) : {};
 
-    // Update health, armor, weapon cells
-    const healthCells = tbody.querySelectorAll('.map-legend-health');
+    // Update team titles with frag counts
+    for (let ti = 0; ti < mapState.teams.length; ti++) {
+        const titleEl = document.getElementById(`map-legend-team-title-${ti}`);
+        if (!titleEl) continue;
+        const team = mapState.teams[ti];
+        let teamFrags = 0;
+        for (const [name, info] of Object.entries(mapState.playerSymbols)) {
+            if (info.team === team) teamFrags += fragCounts[name] || 0;
+        }
+        titleEl.textContent = `${team} — ${teamFrags} frags`;
+    }
+
+    // Update per-player cells
+    const healthCells = legend.querySelectorAll('.map-legend-health');
     for (const cell of healthCells) {
         const name = cell.dataset.player;
         const data = playerData?.[name];
         cell.textContent = data ? (data.h ?? data.health ?? '-') : '-';
     }
 
-    const armorCells = tbody.querySelectorAll('.map-legend-armor');
+    const armorCells = legend.querySelectorAll('.map-legend-armor');
     for (const cell of armorCells) {
         const name = cell.dataset.player;
         const data = playerData?.[name];
         if (data && (data.a ?? data.armor) > 0) {
             const armorVal = data.a ?? data.armor;
             const armorType = data.at ?? data.armorType ?? '';
-            cell.textContent = armorVal;
-            cell.className = 'map-legend-armor' + (armorType ? ' armor-' + armorType : '');
+            cell.innerHTML = armorType
+                ? `<span class="armor-${armorType}">${armorVal} ${armorType.toUpperCase()}</span>`
+                : `${armorVal}`;
         } else {
             cell.textContent = '-';
-            cell.className = 'map-legend-armor';
         }
     }
 
-    const wpnCells = tbody.querySelectorAll('.map-legend-wpn');
+    const wpnCells = legend.querySelectorAll('.map-legend-wpn');
     for (const cell of wpnCells) {
         const name = cell.dataset.player;
         const data = playerData?.[name];
@@ -2934,7 +2946,7 @@ function updateMapLegend() {
         }
     }
 
-    const hubCells = tbody.querySelectorAll('.map-legend-hub');
+    const hubCells = legend.querySelectorAll('.map-legend-hub');
     for (const cell of hubCells) {
         const name = cell.dataset.player;
         cell.innerHTML = buildHubWatchLink(name, time, hubInfo, playerUserIDs);

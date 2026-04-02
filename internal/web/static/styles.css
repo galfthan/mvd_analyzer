@@ -1259,30 +1259,6 @@ th.sortable.sort-desc::after {
 }
 
 /* Map legend table */
-.map-legend-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.78rem;
-    font-family: monospace;
-}
-
-.map-legend-table th {
-    text-align: left;
-    color: #888;
-    font-weight: normal;
-    padding: 2px 6px;
-    border-bottom: 1px solid #1a2744;
-}
-
-.map-legend-table td {
-    padding: 2px 6px;
-    color: #ccc;
-}
-
-.map-legend-table tr:hover {
-    background: rgba(0, 217, 255, 0.04);
-}
-
 .map-legend-health,
 .map-legend-armor,
 .map-legend-wpn {
@@ -1297,8 +1273,8 @@ th.sortable.sort-desc::after {
     padding: 0;
 }
 
-.map-legend-table td:has(.map-player-trail-cb) {
-    padding: 2px 2px;
+.map-trail-cell {
+    padding: 2px 2px !important;
     width: 18px;
     text-align: center;
 }
