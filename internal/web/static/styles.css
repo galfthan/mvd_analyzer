@@ -507,7 +507,7 @@ table tbody tr:hover {
 .team-status-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     font-family: monospace;
 }
 
@@ -547,7 +547,7 @@ table tbody tr:hover {
 
 .timeline-nav-time {
     font-family: monospace;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     color: #00d9ff;
     min-width: 50px;
     text-align: center;
@@ -622,7 +622,7 @@ table tbody tr:hover {
 
 .timeline-nav-segment {
     font-family: monospace;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: #888;
     white-space: nowrap;
     min-width: 90px;
@@ -632,7 +632,7 @@ table tbody tr:hover {
 .timeline-nav-axis {
     position: relative;
     height: 16px;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     color: #666;
     font-family: monospace;
 }
@@ -674,7 +674,7 @@ table tbody tr:hover {
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #888;
 }
 
@@ -713,7 +713,7 @@ table tbody tr:hover {
     justify-content: space-between;
     align-items: flex-end;
     padding: 10px 5px 20px 0;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     color: #888;
     font-family: monospace;
 }
@@ -741,7 +741,7 @@ table tbody tr:hover {
     display: flex;
     justify-content: space-between;
     padding: 5px 10px 0 10px;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     color: #888;
     font-family: monospace;
 }
@@ -1241,7 +1241,7 @@ th.sortable.sort-desc::after {
     border: 1px solid rgba(0, 217, 255, 0.3);
     color: #7a8ba8;
     cursor: pointer;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     padding: 0 9px;
     border-radius: 3px;
     height: 24px;
