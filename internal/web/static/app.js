@@ -1184,6 +1184,8 @@ function resetTimelineState() {
     timelineState.segment = null;
     timelineState.dragging = false;
     precomputedFrags = [];
+    chatRendered = false;
+    chatUserScrolling = false;
 
     // Clear all timeline graph containers
     const containers = [
@@ -1559,31 +1561,46 @@ function updateDetailView() {
 
 // ─── Chat Tab ──────────────────────────────────────────────────────────────
 
-const CHAT_WINDOW = 40; // Show ±20s of messages
+// Chat: pixels per second for the full-match scrollable layout
+const CHAT_PX_PER_SEC = 17.5; // ~same density as original 40s/700px window
+const CHAT_ITEM_HEIGHT = 18;
+
+let chatRendered = false; // true once full chat is built
+let chatUserScrolling = false; // true while user is manually scrolling
+let _chatScrollTimer = null;
+let chatContentHeight = 0; // total inner height in px
 
 function renderChatMessages() {
+    // During playback, just update scroll position (no re-render needed)
+    if (chatRendered) {
+        scrollChatToCurrentTime();
+        return;
+    }
+    buildFullChat();
+}
+
+function buildFullChat() {
     const killContainer = document.getElementById('kill-messages');
     const teamAContainer = document.getElementById('team-a-messages');
     const teamBContainer = document.getElementById('team-b-messages');
     if (!killContainer || !teamAContainer || !teamBContainer) return;
 
-    const currentTime = mapState.currentTime;
-    const halfWindow = CHAT_WINDOW / 2;
-    const windowStart = currentTime - halfWindow;
-    const windowEnd = currentTime + halfWindow;
     const teams = timelineState.teams;
+    const duration = timelineState.duration || 600;
+    chatContentHeight = Math.round(duration * CHAT_PX_PER_SEC);
 
-    // Clear
-    killContainer.innerHTML = '';
-    teamAContainer.innerHTML = '';
-    teamBContainer.innerHTML = '';
+    // Clear and set inner height
+    for (const c of [killContainer, teamAContainer, teamBContainer]) {
+        c.innerHTML = '';
+        c.style.height = '700px';
+    }
 
     if (!currentResult?.messages?.events || teams.length < 2) return;
 
-    // Filter and deduplicate events in window (3-second dedup window)
+    // Deduplicate all events (3-second window)
     const seen = new Map();
     const events = currentResult.messages.events.filter(e => {
-        if (e.time < windowStart || e.time > windowEnd) return false;
+        if (e.time < 0 || e.time > duration) return false;
         const key = e.message;
         const prevTime = seen.get(key);
         if (prevTime !== undefined && Math.abs(e.time - prevTime) < 3) return false;
@@ -1591,7 +1608,7 @@ function renderChatMessages() {
         return true;
     });
 
-    // Sort events into categories
+    // Sort into categories
     const killEvents = [];
     const teamAEvents = [];
     const teamBEvents = [];
@@ -1600,73 +1617,100 @@ function renderChatMessages() {
         if (event.type === 'frag') {
             killEvents.push(event);
         } else if (event.type === 'teamsay' || event.type === 'chat') {
-            if (event.team === teams[0]) {
-                teamAEvents.push(event);
-            } else if (event.team === teams[1]) {
-                teamBEvents.push(event);
-            }
+            if (event.team === teams[0]) teamAEvents.push(event);
+            else if (event.team === teams[1]) teamBEvents.push(event);
         }
     }
 
-    const containerHeight = killContainer.clientHeight || 700;
-    const ITEM_HEIGHT = 18; // approximate height of a message row
+    // Render all messages into inner wrappers
+    renderChatColumnFull(killContainer, killEvents, duration);
+    renderChatColumnFull(teamAContainer, teamAEvents, duration);
+    renderChatColumnFull(teamBContainer, teamBEvents, duration);
 
-    // Render shared time axis on the left
+    // Render time axis for full match
     const axisContainer = document.getElementById('chat-time-axis');
     if (axisContainer) {
-        renderChatTimeAxis(axisContainer, windowStart, containerHeight);
+        renderChatTimeAxisFull(axisContainer, duration);
     }
 
-    // Render each column with overlap avoidance
-    renderChatColumn(killContainer, killEvents, windowStart, containerHeight, ITEM_HEIGHT);
-    renderChatColumn(teamAContainer, teamAEvents, windowStart, containerHeight, ITEM_HEIGHT);
-    renderChatColumn(teamBContainer, teamBEvents, windowStart, containerHeight, ITEM_HEIGHT);
+    // Attach scroll listeners (sync all columns + axis)
+    const allScrollable = [killContainer, teamAContainer, teamBContainer, axisContainer];
+    for (const el of allScrollable) {
+        if (!el) continue;
+        el.addEventListener('scroll', () => {
+            // Sync all containers to this one's scroll position
+            const top = el.scrollTop;
+            for (const other of allScrollable) {
+                if (other && other !== el && other.scrollTop !== top) {
+                    other.scrollTop = top;
+                }
+            }
+            // Mark user as scrolling, reset after 2s of inactivity
+            chatUserScrolling = true;
+            if (_chatScrollTimer) clearTimeout(_chatScrollTimer);
+            _chatScrollTimer = setTimeout(() => { chatUserScrolling = false; }, 2000);
+        }, { passive: true });
+    }
 
-    // Add current-time line at center of each column
-    for (const container of [killContainer, teamAContainer, teamBContainer]) {
-        const line = document.createElement('div');
-        line.className = 'chat-current-time-line';
-        line.style.top = `${Math.round(containerHeight / 2)}px`;
-        container.appendChild(line);
+    chatRendered = true;
+    scrollChatToCurrentTime();
+}
+
+function scrollChatToCurrentTime() {
+    if (chatUserScrolling) return;
+
+    const time = mapState.currentTime;
+    const targetTop = Math.round(time * CHAT_PX_PER_SEC - 350); // center in 700px viewport
+    const clampedTop = Math.max(0, targetTop);
+
+    const containers = [
+        document.getElementById('kill-messages'),
+        document.getElementById('team-a-messages'),
+        document.getElementById('team-b-messages'),
+        document.getElementById('chat-time-axis')
+    ];
+    for (const el of containers) {
+        if (el && Math.abs(el.scrollTop - clampedTop) > 1) {
+            el.scrollTop = clampedTop;
+        }
     }
 }
 
-function renderChatTimeAxis(container, windowStart, containerHeight) {
+function renderChatTimeAxisFull(container, duration) {
     container.innerHTML = '';
-    const windowEnd = windowStart + CHAT_WINDOW;
-    const tickInterval = 5; // seconds between ticks
+    container.style.height = '700px';
+    container.style.overflowY = 'hidden';
 
-    // Add tick for current time at center
-    const currentTop = Math.round(containerHeight / 2);
-    const nowTick = document.createElement('div');
-    nowTick.className = 'chat-tick chat-tick-current';
-    nowTick.style.top = `${currentTop}px`;
-    nowTick.textContent = formatTime(mapState.currentTime);
-    container.appendChild(nowTick);
+    const innerHeight = chatContentHeight;
+    const inner = document.createElement('div');
+    inner.style.position = 'relative';
+    inner.style.height = `${innerHeight}px`;
 
-    // Add ticks at fixed 5s intervals, skip if too close to current-time tick
-    const firstTick = Math.ceil(windowStart / tickInterval) * tickInterval;
-    for (let t = firstTick; t <= windowEnd; t += tickInterval) {
-        const frac = (t - windowStart) / CHAT_WINDOW;
-        const topPx = Math.round(frac * containerHeight);
-        if (topPx < 0 || topPx > containerHeight) continue;
-        // Skip if within 10px of the current-time tick to avoid clutter
-        if (Math.abs(topPx - currentTop) < 10) continue;
-
+    const tickInterval = 5;
+    for (let t = 0; t <= duration; t += tickInterval) {
+        const topPx = Math.round(t * CHAT_PX_PER_SEC);
         const tick = document.createElement('div');
         tick.className = 'chat-tick';
         tick.style.top = `${topPx}px`;
         tick.textContent = formatTime(t);
-        container.appendChild(tick);
+        inner.appendChild(tick);
     }
+
+    container.appendChild(inner);
 }
 
-function renderChatColumn(container, events, windowStart, containerHeight, itemHeight) {
-    let lastBottom = -Infinity; // track bottom edge of last placed item
+function renderChatColumnFull(container, events, duration) {
+    const innerHeight = chatContentHeight;
+
+    // Create inner wrapper for scrollable content
+    const inner = document.createElement('div');
+    inner.style.position = 'relative';
+    inner.style.height = `${innerHeight}px`;
+
+    let lastBottom = -Infinity;
 
     for (const event of events) {
-        const frac = (event.time - windowStart) / CHAT_WINDOW;
-        let topPx = Math.round(frac * containerHeight);
+        let topPx = Math.round(event.time * CHAT_PX_PER_SEC);
 
         let displaced = false;
         if (topPx < lastBottom) {
@@ -1678,13 +1722,14 @@ function renderChatColumn(container, events, windowStart, containerHeight, itemH
         marker.className = 'chat-time-marker' + (displaced ? ' chat-displaced' : '');
         marker.style.top = `${topPx}px`;
 
-        // No per-message timestamp — time context is provided by the shared left axis
         const prefix = displaced ? '<span class="chat-displaced-dots">...</span>' : '';
         marker.innerHTML = `${prefix}<span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
 
-        container.appendChild(marker);
-        lastBottom = topPx + itemHeight;
+        inner.appendChild(marker);
+        lastBottom = topPx + CHAT_ITEM_HEIGHT;
     }
+
+    container.appendChild(inner);
 }
 
 function updateDetailGraph(startTime, endTime) {
@@ -3430,6 +3475,7 @@ function animatePlayback() {
     updateUnifiedCursor();
     updateUnifiedTimeDisplay();
     renderMap(mapState.currentTime);
+    scrollChatToCurrentTime();
 
     // Full sync every 200ms
     if (now - _lastFullSyncTime > 200) {
@@ -3438,7 +3484,6 @@ function animatePlayback() {
         updateTimeIndicators();
         updateTeamStatus();
         updateMapLegend();
-        renderChatMessages();
     }
 }
 

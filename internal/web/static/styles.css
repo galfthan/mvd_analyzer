@@ -775,6 +775,7 @@ table tbody tr:hover {
     position: relative;
     height: 700px;
     flex-shrink: 0;
+    overflow-y: hidden;
 }
 
 .chat-tick {
@@ -839,9 +840,11 @@ table tbody tr:hover {
 .chat-timeline-scroll {
     position: relative;
     height: 700px;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     background: #0d1929;
     border-radius: 4px;
+    scroll-behavior: auto;
 }
 
 .chat-time-marker {
