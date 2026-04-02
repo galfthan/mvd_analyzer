@@ -2926,7 +2926,7 @@ function prerenderLocationBackground() {
         drawLocationRegion(octx, group, worldToCanvasNew);
     }
 
-    octx.font = '10px monospace';
+    octx.font = '15px monospace';
     octx.textAlign = 'center';
     octx.textBaseline = 'middle';
     for (const group of mapState.locationGroups) {

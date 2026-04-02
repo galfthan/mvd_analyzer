@@ -547,11 +547,10 @@ table tbody tr:hover {
 
 .timeline-nav-time {
     font-family: monospace;
-    font-size: 1.1rem;
+    font-size: 1.65rem;
     color: #00d9ff;
-    min-width: 50px;
+    min-width: 60px;
     text-align: center;
-    margin-top: 1px;
 }
 
 .timeline-nav-bar-wrapper {
@@ -626,13 +625,13 @@ table tbody tr:hover {
     color: #888;
     white-space: nowrap;
     min-width: 90px;
-    margin-top: 3px;
+    margin-top: 2px;
 }
 
 .timeline-nav-axis {
     position: relative;
-    height: 16px;
-    font-size: 0.7rem;
+    height: 20px;
+    font-size: 1.05rem;
     color: #666;
     font-family: monospace;
 }
@@ -1234,7 +1233,6 @@ th.sortable.sort-desc::after {
     align-items: center;
     gap: 4px;
     margin-right: 8px;
-    margin-top: 2px;
 }
 
 .timeline-playback-controls button {
@@ -1242,8 +1240,8 @@ th.sortable.sort-desc::after {
     border: 1px solid rgba(0, 217, 255, 0.3);
     color: #7a8ba8;
     cursor: pointer;
-    font-size: 0.8rem;
-    padding: 2px 6px;
+    font-size: 1.2rem;
+    padding: 3px 9px;
     border-radius: 3px;
     line-height: 1;
     transition: all 0.15s;
