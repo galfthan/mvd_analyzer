@@ -2945,7 +2945,7 @@ function precomputeFullTrails() {
     const buckets = timelineState.highResBuckets;
     if (!buckets || buckets.length === 0) return;
 
-    const MAX_MOVE_PER_BUCKET = 125; // 2500 units/s × 0.05s bucket interval
+    const MAX_MOVE_PER_BUCKET = 2500 * (timelineState.highResDuration || 0.05);
     const lastWorldPos = {};
 
     for (const bucket of buckets) {
