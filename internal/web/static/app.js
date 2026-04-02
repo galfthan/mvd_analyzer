@@ -1565,14 +1565,14 @@ function updateDetailView() {
 const CHAT_PX_PER_SEC = 17.5; // ~same density as original 40s/700px window
 const CHAT_ITEM_HEIGHT = 18;
 
-let chatRendered = false; // true once full chat is built
-let chatUserScrolling = false; // true while user is manually scrolling
+let chatRendered = false;
+let chatUserScrolling = false;
 let _chatScrollTimer = null;
-let chatContentHeight = 0; // total inner height in px
+let chatContentHeight = 0;
 
 function renderChatMessages() {
-    // During playback, just update scroll position (no re-render needed)
     if (chatRendered) {
+        updateChatTimeLine();
         scrollChatToCurrentTime();
         return;
     }
@@ -1580,20 +1580,21 @@ function renderChatMessages() {
 }
 
 function buildFullChat() {
+    const viewport = document.getElementById('chat-scroll-viewport');
     const killContainer = document.getElementById('kill-messages');
     const teamAContainer = document.getElementById('team-a-messages');
     const teamBContainer = document.getElementById('team-b-messages');
-    if (!killContainer || !teamAContainer || !teamBContainer) return;
+    const axisContainer = document.getElementById('chat-time-axis');
+    if (!viewport || !killContainer || !teamAContainer || !teamBContainer) return;
 
     const teams = timelineState.teams;
     const duration = timelineState.duration || 600;
     chatContentHeight = Math.round(duration * CHAT_PX_PER_SEC);
 
-    // Clear and set inner height
-    for (const c of [killContainer, teamAContainer, teamBContainer]) {
-        c.innerHTML = '';
-        c.style.height = '700px';
-    }
+    // Clear columns
+    killContainer.innerHTML = '';
+    teamAContainer.innerHTML = '';
+    teamBContainer.innerHTML = '';
 
     if (!currentResult?.messages?.events || teams.length < 2) return;
 
@@ -1608,7 +1609,6 @@ function buildFullChat() {
         return true;
     });
 
-    // Sort into categories
     const killEvents = [];
     const teamAEvents = [];
     const teamBEvents = [];
@@ -1622,69 +1622,55 @@ function buildFullChat() {
         }
     }
 
-    // Render all messages into inner wrappers
-    renderChatColumnFull(killContainer, killEvents, duration);
-    renderChatColumnFull(teamAContainer, teamAEvents, duration);
-    renderChatColumnFull(teamBContainer, teamBEvents, duration);
+    // Render columns with inner wrappers
+    renderChatColumnFull(killContainer, killEvents);
+    renderChatColumnFull(teamAContainer, teamAEvents);
+    renderChatColumnFull(teamBContainer, teamBEvents);
 
-    // Render time axis for full match
-    const axisContainer = document.getElementById('chat-time-axis');
+    // Render time axis
     if (axisContainer) {
-        renderChatTimeAxisFull(axisContainer, duration);
+        renderChatTimeAxisFull(axisContainer);
     }
 
-    // Attach scroll listeners (sync all columns + axis)
-    const allScrollable = [killContainer, teamAContainer, teamBContainer, axisContainer];
-    for (const el of allScrollable) {
-        if (!el) continue;
-        el.addEventListener('scroll', () => {
-            // Sync all containers to this one's scroll position
-            const top = el.scrollTop;
-            for (const other of allScrollable) {
-                if (other && other !== el && other.scrollTop !== top) {
-                    other.scrollTop = top;
-                }
-            }
-            // Mark user as scrolling, reset after 2s of inactivity
-            chatUserScrolling = true;
-            if (_chatScrollTimer) clearTimeout(_chatScrollTimer);
-            _chatScrollTimer = setTimeout(() => { chatUserScrolling = false; }, 2000);
-        }, { passive: true });
-    }
+    // Single scroll listener on viewport
+    viewport.addEventListener('scroll', () => {
+        chatUserScrolling = true;
+        if (_chatScrollTimer) clearTimeout(_chatScrollTimer);
+        _chatScrollTimer = setTimeout(() => { chatUserScrolling = false; }, 2000);
+    }, { passive: true });
 
     chatRendered = true;
+    updateChatTimeLine();
     scrollChatToCurrentTime();
+}
+
+function updateChatTimeLine() {
+    const line = document.getElementById('chat-current-time-line');
+    if (!line) return;
+    const topPx = Math.round(mapState.currentTime * CHAT_PX_PER_SEC);
+    line.style.top = `${topPx}px`;
 }
 
 function scrollChatToCurrentTime() {
     if (chatUserScrolling) return;
+    const viewport = document.getElementById('chat-scroll-viewport');
+    if (!viewport) return;
 
-    const time = mapState.currentTime;
-    const targetTop = Math.round(time * CHAT_PX_PER_SEC - 350); // center in 700px viewport
-    const clampedTop = Math.max(0, targetTop);
+    const topPx = Math.round(mapState.currentTime * CHAT_PX_PER_SEC);
+    const targetScroll = Math.max(0, topPx - viewport.clientHeight / 2);
 
-    const containers = [
-        document.getElementById('kill-messages'),
-        document.getElementById('team-a-messages'),
-        document.getElementById('team-b-messages'),
-        document.getElementById('chat-time-axis')
-    ];
-    for (const el of containers) {
-        if (el && Math.abs(el.scrollTop - clampedTop) > 1) {
-            el.scrollTop = clampedTop;
-        }
+    if (Math.abs(viewport.scrollTop - targetScroll) > 1) {
+        viewport.scrollTop = targetScroll;
     }
 }
 
-function renderChatTimeAxisFull(container, duration) {
+function renderChatTimeAxisFull(container) {
     container.innerHTML = '';
-    container.style.height = '700px';
-    container.style.overflowY = 'hidden';
+    const duration = timelineState.duration || 600;
 
-    const innerHeight = chatContentHeight;
     const inner = document.createElement('div');
     inner.style.position = 'relative';
-    inner.style.height = `${innerHeight}px`;
+    inner.style.height = `${chatContentHeight}px`;
 
     const tickInterval = 5;
     for (let t = 0; t <= duration; t += tickInterval) {
@@ -1699,13 +1685,10 @@ function renderChatTimeAxisFull(container, duration) {
     container.appendChild(inner);
 }
 
-function renderChatColumnFull(container, events, duration) {
-    const innerHeight = chatContentHeight;
-
-    // Create inner wrapper for scrollable content
+function renderChatColumnFull(container, events) {
     const inner = document.createElement('div');
     inner.style.position = 'relative';
-    inner.style.height = `${innerHeight}px`;
+    inner.style.height = `${chatContentHeight}px`;
 
     let lastBottom = -Infinity;
 
@@ -3475,6 +3458,7 @@ function animatePlayback() {
     updateUnifiedCursor();
     updateUnifiedTimeDisplay();
     renderMap(mapState.currentTime);
+    updateChatTimeLine();
     scrollChatToCurrentTime();
 
     // Full sync every 200ms
