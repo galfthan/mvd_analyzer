@@ -2945,6 +2945,9 @@ function precomputeFullTrails() {
     const buckets = timelineState.highResBuckets;
     if (!buckets || buckets.length === 0) return;
 
+    const MAX_MOVE_PER_BUCKET = 125; // 2500 units/s × 0.05s bucket interval
+    const lastWorldPos = {};
+
     for (const bucket of buckets) {
         const playerData = bucket.p || bucket.playerData;
         if (!playerData) continue;
@@ -2962,9 +2965,16 @@ function precomputeFullTrails() {
             const last = track[track.length - 1];
 
             // Only add if moved more than 2 canvas pixels
-            if (last && Math.abs(last.x - pos.x) <= 2 && Math.abs(last.y - pos.y) <= 2) continue;
+            if (last && Math.abs(last.x - pos.x) <= 2 && Math.abs(last.y - pos.y) <= 2) {
+                lastWorldPos[name] = { x: data.x, y: data.y };
+                continue;
+            }
 
-            const isTeleport = last && (Math.abs(last.x - pos.x) > 150 || Math.abs(last.y - pos.y) > 150);
+            // Teleport detection in world units (scale-independent)
+            const lw = lastWorldPos[name];
+            const isTeleport = lw && (Math.abs(data.x - lw.x) > MAX_MOVE_PER_BUCKET || Math.abs(data.y - lw.y) > MAX_MOVE_PER_BUCKET);
+
+            lastWorldPos[name] = { x: data.x, y: data.y };
             track.push({ x: pos.x, y: pos.y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport });
         }
     }
