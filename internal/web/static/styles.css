@@ -1289,6 +1289,20 @@ th.sortable.sort-desc::after {
     text-align: right;
 }
 
+.map-player-trail-cb {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+}
+
+.map-legend-table td:has(.map-player-trail-cb) {
+    padding: 2px 2px;
+    width: 18px;
+    text-align: center;
+}
+
 /* Accuracy Graphs */
 .accuracy-graphs {
     display: grid;

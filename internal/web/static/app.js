@@ -986,7 +986,7 @@ function displayKeyMoments(result) {
             const toTime = Math.floor(event.endTime + demoOff) + 5;
             const trackId = event.playerUserID || event.playerSlot;
             const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
-            watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Watch</a>`;
+            watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
         }
 
         const powerupDisplay = getPowerupDisplay(event.powerupType);
@@ -2283,7 +2283,7 @@ function updateTeamStatus() {
 
         let html = `<h4>${team} — ${teamFrags} frags</h4>`;
         html += `<table class="team-status-table">`;
-        html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th></tr>`;
+        html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th><th></th></tr>`;
 
         for (const p of players) {
             const hp = p.health || 0;
@@ -2300,14 +2300,15 @@ function updateTeamStatus() {
             if (p.hasPent) weps.push('Pent');
             if (p.hasRing) weps.push('Ring');
 
-            const watchLink = buildHubWatchLink(p.name, time, hubInfo, playerUserIDs);
+            const hubLink = buildHubWatchLink(p.name, time, hubInfo, playerUserIDs);
 
             html += `<tr>`;
-            html += `<td>${escapeHtml(p.name)}${watchLink}</td>`;
+            html += `<td>${escapeHtml(p.name)}</td>`;
             html += `<td>${p.frags}</td>`;
             html += `<td>${hp}</td>`;
             html += `<td>${armorStr}</td>`;
             html += `<td>${weps.join(', ') || '-'}</td>`;
+            html += `<td>${hubLink}</td>`;
             html += `</tr>`;
         }
 
@@ -2317,6 +2318,7 @@ function updateTeamStatus() {
         html += `<td>${teamFrags}</td>`;
         html += `<td>${teamHealth}</td>`;
         html += `<td>${teamArmor}</td>`;
+        html += `<td></td>`;
         html += `<td></td>`;
         html += `</tr>`;
 
@@ -2335,7 +2337,7 @@ function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
     // (includes countdown/warmup), so add demoOffset to convert.
     const from = Math.floor(time + (timelineState.demoOffset || 0));
     const url = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${from}&track=${trackId}`;
-    return ` <a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">[w]</a>`;
+    return `<a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">hub</a>`;
 }
 
 // ─── Location Lookup ────────────────────────────────────────────────────────
@@ -2835,7 +2837,7 @@ function buildMapLegend() {
     const table = document.createElement('table');
     table.className = 'map-legend-table';
     table.id = 'map-legend-table';
-    table.innerHTML = '<thead><tr><th></th><th>Player</th><th>Trail</th><th>H</th><th>A</th><th>Wpn</th></tr></thead>';
+    table.innerHTML = '<thead><tr><th></th><th>Player</th><th></th><th>H</th><th>A</th><th>Wpn</th><th></th></tr></thead>';
     const tbody = document.createElement('tbody');
     tbody.id = 'map-legend-tbody';
 
@@ -2845,7 +2847,7 @@ function buildMapLegend() {
 
         // Team header row
         const headerRow = document.createElement('tr');
-        headerRow.innerHTML = `<td colspan="6" class="map-legend-team-name ${teamColor}" style="padding-top:8px;">${escapeHtml(team)}</td>`;
+        headerRow.innerHTML = `<td colspan="7" class="map-legend-team-name ${teamColor}" style="padding-top:8px;">${escapeHtml(team)}</td>`;
         tbody.appendChild(headerRow);
 
         for (const [name, info] of Object.entries(mapState.playerSymbols)) {
@@ -2855,11 +2857,12 @@ function buildMapLegend() {
                 const escapedName = escapeHtml(name);
                 tr.innerHTML = `
                     <td><span class="map-legend-symbol ${teamColor}">${info.symbol}</span></td>
-                    <td>${escapedName}<span class="map-legend-watch" data-player="${escapedName}"></span></td>
+                    <td>${escapedName}</td>
                     <td><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}"></td>
                     <td class="map-legend-health" data-player="${escapedName}">-</td>
                     <td class="map-legend-armor" data-player="${escapedName}">-</td>
                     <td class="map-legend-wpn" data-player="${escapedName}">-</td>
+                    <td class="map-legend-hub" data-player="${escapedName}"></td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -2931,10 +2934,10 @@ function updateMapLegend() {
         }
     }
 
-    const watchSpans = tbody.querySelectorAll('.map-legend-watch');
-    for (const span of watchSpans) {
-        const name = span.dataset.player;
-        span.innerHTML = buildHubWatchLink(name, time, hubInfo, playerUserIDs);
+    const hubCells = tbody.querySelectorAll('.map-legend-hub');
+    for (const cell of hubCells) {
+        const name = cell.dataset.player;
+        cell.innerHTML = buildHubWatchLink(name, time, hubInfo, playerUserIDs);
     }
 }
 
