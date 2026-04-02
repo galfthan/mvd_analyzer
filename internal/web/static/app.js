@@ -2613,8 +2613,8 @@ function initMapView(result) {
     // Size canvas to fit map content at full width
     const worldW = mapState.bounds.maxX - mapState.bounds.minX;
     const worldH = mapState.bounds.maxY - mapState.bounds.minY;
-    const canvasW = 900;
-    const canvasH = worldW > 0 ? Math.round(Math.max(400, Math.min(900, canvasW * (worldH / worldW)))) : 700;
+    const canvasW = 850;
+    const canvasH = worldW > 0 ? Math.round(Math.max(400, Math.min(850, canvasW * (worldH / worldW)))) : 700;
     mapState.canvas.width = canvasW;
     mapState.canvas.height = canvasH;
     updateWorldToCanvasTransform();
@@ -2835,7 +2835,7 @@ function buildMapLegend() {
     const table = document.createElement('table');
     table.className = 'map-legend-table';
     table.id = 'map-legend-table';
-    table.innerHTML = '<thead><tr><th></th><th>Player</th><th>Trail</th><th>Area</th></tr></thead>';
+    table.innerHTML = '<thead><tr><th></th><th>Player</th><th>Trail</th><th>H</th><th>A</th><th>Wpn</th></tr></thead>';
     const tbody = document.createElement('tbody');
     tbody.id = 'map-legend-tbody';
 
@@ -2845,7 +2845,7 @@ function buildMapLegend() {
 
         // Team header row
         const headerRow = document.createElement('tr');
-        headerRow.innerHTML = `<td colspan="4" class="map-legend-team-name ${teamColor}" style="padding-top:8px;">${escapeHtml(team)}</td>`;
+        headerRow.innerHTML = `<td colspan="6" class="map-legend-team-name ${teamColor}" style="padding-top:8px;">${escapeHtml(team)}</td>`;
         tbody.appendChild(headerRow);
 
         for (const [name, info] of Object.entries(mapState.playerSymbols)) {
@@ -2857,7 +2857,9 @@ function buildMapLegend() {
                     <td><span class="map-legend-symbol ${teamColor}">${info.symbol}</span></td>
                     <td>${escapedName}<span class="map-legend-watch" data-player="${escapedName}"></span></td>
                     <td><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}"></td>
-                    <td class="map-legend-area" data-player="${escapedName}">-</td>
+                    <td class="map-legend-health" data-player="${escapedName}">-</td>
+                    <td class="map-legend-armor" data-player="${escapedName}">-</td>
+                    <td class="map-legend-wpn" data-player="${escapedName}">-</td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -2891,15 +2893,39 @@ function updateMapLegend() {
     const playerData = bucket ? (bucket.p || bucket.playerData) : null;
     const hubInfo = currentResult?.hubInfo;
     const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
-    const locations = mapState.locations;
 
-    // Update area cells and [w] links
-    const areaCells = tbody.querySelectorAll('.map-legend-area');
-    for (const cell of areaCells) {
+    // Update health, armor, weapon cells
+    const healthCells = tbody.querySelectorAll('.map-legend-health');
+    for (const cell of healthCells) {
         const name = cell.dataset.player;
         const data = playerData?.[name];
-        if (data && (data.x !== 0 || data.y !== 0)) {
-            cell.textContent = findNearestLocation(data.x, data.y, locations) || '-';
+        cell.textContent = data ? (data.h ?? data.health ?? '-') : '-';
+    }
+
+    const armorCells = tbody.querySelectorAll('.map-legend-armor');
+    for (const cell of armorCells) {
+        const name = cell.dataset.player;
+        const data = playerData?.[name];
+        if (data && (data.a ?? data.armor) > 0) {
+            const armorVal = data.a ?? data.armor;
+            const armorType = data.at ?? data.armorType ?? '';
+            cell.textContent = armorVal;
+            cell.className = 'map-legend-armor' + (armorType ? ' armor-' + armorType : '');
+        } else {
+            cell.textContent = '-';
+            cell.className = 'map-legend-armor';
+        }
+    }
+
+    const wpnCells = tbody.querySelectorAll('.map-legend-wpn');
+    for (const cell of wpnCells) {
+        const name = cell.dataset.player;
+        const data = playerData?.[name];
+        if (data) {
+            const wpns = [];
+            if (data.rl ?? data.hasRL) wpns.push('RL');
+            if (data.lg ?? data.hasLG) wpns.push('LG');
+            cell.textContent = wpns.length > 0 ? wpns.join(' ') : '-';
         } else {
             cell.textContent = '-';
         }
@@ -2926,7 +2952,7 @@ function prerenderLocationBackground() {
         drawLocationRegion(octx, group, worldToCanvasNew);
     }
 
-    octx.font = '15px monospace';
+    octx.font = '12px monospace';
     octx.textAlign = 'center';
     octx.textBaseline = 'middle';
     for (const group of mapState.locationGroups) {

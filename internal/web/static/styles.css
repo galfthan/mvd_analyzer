@@ -630,8 +630,8 @@ table tbody tr:hover {
 
 .timeline-nav-axis {
     position: relative;
-    height: 20px;
-    font-size: 1.05rem;
+    height: 16px;
+    font-size: 0.78rem;
     color: #666;
     font-family: monospace;
 }
@@ -1283,6 +1283,12 @@ th.sortable.sort-desc::after {
     background: rgba(0, 217, 255, 0.04);
 }
 
+.map-legend-health,
+.map-legend-armor,
+.map-legend-wpn {
+    text-align: right;
+}
+
 /* Accuracy Graphs */
 .accuracy-graphs {
     display: grid;
@@ -1526,8 +1532,8 @@ th.sortable.sort-desc::after {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    min-width: 200px;
-    max-width: 300px;
+    min-width: 250px;
+    max-width: 400px;
 }
 
 .map-legend {
