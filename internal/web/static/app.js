@@ -134,16 +134,13 @@ document.addEventListener('DOMContentLoaded', () => {
 function setCurrentTime(time) {
     mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration || Infinity));
     mapState.renderDirty = true;
-    updateTimelineCursor();
-    updateTimelineTimeDisplay();
+    updateUnifiedCursor();
+    updateUnifiedTimeDisplay();
     updateTimeIndicators();
     updateTeamStatus();
     updateMapLegend();
     renderChatMessages();
-    updateChatCursor();
-    updateChatTimeDisplay();
-    if (mapState.sliderEl) mapState.sliderEl.value = mapState.currentTime;
-    if (mapState.timeDisplayEl) mapState.timeDisplayEl.textContent = formatTime(Math.max(0, mapState.currentTime));
+    renderMap(mapState.currentTime);
     updateUrlState();
 }
 
@@ -236,6 +233,8 @@ function setupFileUpload() {
     });
 }
 
+const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map', 'keymoments'];
+
 function setupTabs() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
@@ -246,33 +245,23 @@ function setupTabs() {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
 
-            // Stop playback on tab switch
-            if (mapState.isPlaying) {
-                mapState.isPlaying = false;
-                if (mapState.animationFrameId) {
-                    cancelAnimationFrame(mapState.animationFrameId);
-                    mapState.animationFrameId = null;
-                }
-                const mapBtn = document.getElementById('map-play-pause');
-                if (mapBtn) mapBtn.textContent = '▶';
+            // Show/hide unified timeline
+            const tl = document.getElementById('unified-timeline');
+            if (tl && currentResult) {
+                tl.style.display = TABS_WITH_TIMELINE.includes(tabName) ? '' : 'none';
             }
 
-            // Sync current time between tabs
+            // Stop playback when switching to tabs without timeline
+            if (!TABS_WITH_TIMELINE.includes(tabName) && mapState.isPlaying) {
+                stopPlayback();
+            }
+
+            // Sync views on tab switch
             if (tabName === 'map') {
-                const mapSlider = document.getElementById('map-timeline-slider');
-                if (mapSlider) mapSlider.value = mapState.currentTime;
                 renderMap(mapState.currentTime);
-                const mapTimeDisplay = document.getElementById('map-current-time');
-                if (mapTimeDisplay) {
-                    mapTimeDisplay.textContent = formatTime(Math.max(0, mapState.currentTime));
-                }
             } else if (tabName === 'timeline') {
-                updateTimelineCursor();
-                updateTimelineTimeDisplay();
                 updateTimeIndicators();
             } else if (tabName === 'chat') {
-                updateChatCursor();
-                updateChatTimeDisplay();
                 renderChatMessages();
             }
 
@@ -997,7 +986,7 @@ function displayKeyMoments(result) {
             const toTime = Math.floor(event.endTime + demoOff) + 5;
             const trackId = event.playerUserID || event.playerSlot;
             const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
-            watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Watch</a>`;
+            watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
         }
 
         const powerupDisplay = getPowerupDisplay(event.powerupType);
@@ -1175,7 +1164,6 @@ let timelineState = {
     matchStartTime: 0,
     teams: [],
     overviewBucketSize: 5, // Aggregate to 5-second buckets for overview
-    controlsInitialized: false, // Track if timeline control handlers are set up
     segment: null, // { start, end } or null for full match - selected time segment
     dragging: false, // Is user dragging to select a segment on overview?
     dragStartTime: 0 // Time at drag start
@@ -1183,6 +1171,7 @@ let timelineState = {
 
 // Reset all timeline state for loading a new demo
 function resetTimelineState() {
+    if (mapState.isPlaying) stopPlayback();
     timelineState.buckets = [];
     timelineState.highResBuckets = [];
     timelineState.highResDuration = 0.05;
@@ -1198,7 +1187,7 @@ function resetTimelineState() {
 
     // Clear all timeline graph containers
     const containers = [
-        'timeline-nav-axis', 'chat-nav-axis', 'detail-graph', 'detail-axis',
+        'tl-axis', 'detail-graph', 'detail-axis',
         'powerup-lines-top', 'powerup-lines-bottom',
         'health-armor-graph', 'health-axis', 'frags-graph', 'frags-axis',
         'score-graph', 'score-axis', 'kill-messages', 'team-a-messages', 'team-b-messages'
@@ -1248,9 +1237,14 @@ function displayTimelineAnalysis(result) {
     }
 
     precomputeFragCounts();
-    setupTimelineControls();
-    setupChatControls();
-    updateTimelineCursor();
+    setupUnifiedTimeline();
+
+    // Show the unified timeline on applicable tabs
+    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+    const tl = document.getElementById('unified-timeline');
+    if (tl) tl.style.display = TABS_WITH_TIMELINE.includes(activeTab) ? '' : 'none';
+
+    updateUnifiedCursor();
     updateDetailView();
     updateTimeIndicators();
     updateTeamStatus();
@@ -1321,18 +1315,22 @@ function aggregateDetailBuckets(buckets, binSize, teams) {
     return result;
 }
 
-function setupTimelineControls() {
-    if (timelineState.controlsInitialized) {
-        updateTimelineCursor();
-        updateTimelineTimeDisplay();
-        renderTimelineNavAxis();
+// ─── Unified Timeline Widget ──────────────────────────────────────────────
+
+let unifiedTimelineInitialized = false;
+
+function setupUnifiedTimeline() {
+    if (unifiedTimelineInitialized) {
+        updateUnifiedCursor();
+        updateUnifiedTimeDisplay();
+        renderUnifiedAxis();
         return;
     }
 
-    const bar = document.getElementById('timeline-nav-bar');
-    const caret = document.getElementById('timeline-nav-caret');
+    const bar = document.getElementById('tl-bar');
+    const caret = document.getElementById('tl-caret');
 
-    renderTimelineNavAxis();
+    renderUnifiedAxis();
 
     // --- Caret drag: sets current time ---
     let caretDragging = false;
@@ -1345,14 +1343,14 @@ function setupTimelineControls() {
 
     document.addEventListener('mousemove', (e) => {
         if (caretDragging) {
-            const time = navBarClickToTime(e);
+            const time = tlBarClickToTime(e);
             if (time === null) return;
             setCurrentTime(time);
             return;
         }
 
         if (!timelineState.dragging) return;
-        const time = navBarClickToTime(e);
+        const time = tlBarClickToTime(e);
         if (time === null) return;
 
         const start = Math.min(timelineState.dragStartTime, time);
@@ -1375,20 +1373,18 @@ function setupTimelineControls() {
         if (!timelineState.dragging) return;
         timelineState.dragging = false;
 
-        const time = navBarClickToTime(e);
+        const time = tlBarClickToTime(e);
         if (time === null) return;
 
         const start = Math.min(timelineState.dragStartTime, time);
         const end = Math.max(timelineState.dragStartTime, time);
 
         if (end - start <= 2) {
-            // Click on bar — set current time, clear segment
             timelineState.segment = null;
             updateSelectionOverlay();
             updateSegmentLabel();
             setCurrentTime(time);
         } else {
-            // Drag on bar complete — apply segment to detail views
             timelineState.segment = { start, end };
             updateSelectionOverlay();
             updateSegmentLabel();
@@ -1397,9 +1393,8 @@ function setupTimelineControls() {
         updateUrlState();
     });
 
-    // Drag on bar to select segment
     bar.addEventListener('mousedown', (e) => {
-        const time = navBarClickToTime(e);
+        const time = tlBarClickToTime(e);
         if (time === null) return;
 
         timelineState.dragging = true;
@@ -1411,7 +1406,6 @@ function setupTimelineControls() {
         e.preventDefault();
     });
 
-    // Double-click bar to clear segment
     bar.addEventListener('dblclick', () => {
         timelineState.segment = null;
         updateSelectionOverlay();
@@ -1420,25 +1414,17 @@ function setupTimelineControls() {
         updateUrlState();
     });
 
-    // --- Timeline playback controls ---
-    const tlPlayBtn = document.getElementById('timeline-play-pause');
-    if (tlPlayBtn) {
-        tlPlayBtn.addEventListener('click', togglePlayback);
-    }
-    const tlJumpBack = document.getElementById('timeline-jump-back');
-    if (tlJumpBack) {
-        tlJumpBack.addEventListener('click', () => { setCurrentTime(mapState.currentTime - 10); resetTrails(); renderMap(mapState.currentTime); });
-    }
-    const tlJumpFwd = document.getElementById('timeline-jump-forward');
-    if (tlJumpFwd) {
-        tlJumpFwd.addEventListener('click', () => { setCurrentTime(mapState.currentTime + 10); resetTrails(); renderMap(mapState.currentTime); });
-    }
+    // --- Playback controls ---
+    document.getElementById('tl-rev').addEventListener('click', () => startPlaybackAtSpeed(-1));
+    document.getElementById('tl-play-pause').addEventListener('click', () => startPlaybackAtSpeed(1));
+    document.getElementById('tl-5x').addEventListener('click', () => startPlaybackAtSpeed(5));
+    document.getElementById('tl-20x').addEventListener('click', () => startPlaybackAtSpeed(20));
 
-    timelineState.controlsInitialized = true;
+    unifiedTimelineInitialized = true;
 }
 
-function navBarClickToTime(e) {
-    const bar = document.getElementById('timeline-nav-bar');
+function tlBarClickToTime(e) {
+    const bar = document.getElementById('tl-bar');
     if (!bar) return null;
     const rect = bar.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -1449,7 +1435,7 @@ function navBarClickToTime(e) {
 }
 
 function updateSelectionOverlay() {
-    const overlay = document.getElementById('timeline-selection-overlay');
+    const overlay = document.getElementById('tl-selection-overlay');
     if (!overlay) return;
 
     if (!timelineState.segment) {
@@ -1469,7 +1455,7 @@ function updateSelectionOverlay() {
 }
 
 function updateSegmentLabel() {
-    const label = document.getElementById('timeline-segment-label');
+    const label = document.getElementById('tl-segment-label');
     if (!label) return;
 
     if (!timelineState.segment) {
@@ -1480,9 +1466,9 @@ function updateSegmentLabel() {
     label.textContent = `${formatTime(timelineState.segment.start)} – ${formatTime(timelineState.segment.end)}`;
 }
 
-function updateTimelineCursor() {
-    const cursor = document.getElementById('timeline-nav-cursor');
-    const caret = document.getElementById('timeline-nav-caret');
+function updateUnifiedCursor() {
+    const cursor = document.getElementById('tl-cursor');
+    const caret = document.getElementById('tl-caret');
 
     const duration = timelineState.duration;
     if (duration <= 0) return;
@@ -1492,14 +1478,14 @@ function updateTimelineCursor() {
     if (caret) caret.style.left = `${pct}%`;
 }
 
-function updateTimelineTimeDisplay() {
-    const display = document.getElementById('timeline-current-time');
+function updateUnifiedTimeDisplay() {
+    const display = document.getElementById('tl-current-time');
     if (!display) return;
     display.textContent = formatTime(Math.max(0, mapState.currentTime));
 }
 
-function renderTimelineNavAxis() {
-    const container = document.getElementById('timeline-nav-axis');
+function renderUnifiedAxis() {
+    const container = document.getElementById('tl-axis');
     if (!container) return;
     container.innerHTML = '';
 
@@ -1509,15 +1495,16 @@ function renderTimelineNavAxis() {
     const tickCount = Math.min(10, Math.max(4, Math.floor(duration / 60)));
     for (let i = 0; i <= tickCount; i++) {
         const time = (duration / tickCount) * i;
+        const pct = (i / tickCount) * 100;
         const span = document.createElement('span');
         span.textContent = formatTime(time);
+        span.style.left = `${pct}%`;
         container.appendChild(span);
     }
 }
 
 function updateTimeIndicators() {
-    // Update nav bar cursor (always relative to full match)
-    updateTimelineCursor();
+    updateUnifiedCursor();
 
     // Detail graphs show either the segment or the full match
     const seg = timelineState.segment;
@@ -1573,90 +1560,6 @@ function updateDetailView() {
 // ─── Chat Tab ──────────────────────────────────────────────────────────────
 
 const CHAT_WINDOW = 40; // Show ±20s of messages
-let chatControlsInitialized = false;
-
-function setupChatControls() {
-    if (chatControlsInitialized) {
-        updateChatCursor();
-        updateChatTimeDisplay();
-        renderChatNavAxis();
-        return;
-    }
-
-    const bar = document.getElementById('chat-nav-bar');
-    const caret = document.getElementById('chat-nav-caret');
-
-    renderChatNavAxis();
-
-    let caretDragging = false;
-
-    caret.addEventListener('mousedown', (e) => {
-        caretDragging = true;
-        e.preventDefault();
-        e.stopPropagation();
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (!caretDragging) return;
-        const time = chatBarClickToTime(e);
-        if (time === null) return;
-        setCurrentTime(time);
-    });
-
-    document.addEventListener('mouseup', (e) => {
-        if (caretDragging) { caretDragging = false; updateUrlState(); return; }
-    });
-
-    bar.addEventListener('click', (e) => {
-        if (caretDragging) return;
-        const time = chatBarClickToTime(e);
-        if (time === null) return;
-        setCurrentTime(time);
-    });
-
-    chatControlsInitialized = true;
-}
-
-function chatBarClickToTime(e) {
-    const bar = document.getElementById('chat-nav-bar');
-    if (!bar) return null;
-    const rect = bar.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    if (rect.width <= 0) return null;
-    const frac = Math.max(0, Math.min(1, x / rect.width));
-    return frac * timelineState.duration;
-}
-
-function updateChatCursor() {
-    const cursor = document.getElementById('chat-nav-cursor');
-    const caret = document.getElementById('chat-nav-caret');
-    const duration = timelineState.duration;
-    if (duration <= 0) return;
-    const pct = Math.max(0, Math.min(100, (mapState.currentTime / duration) * 100));
-    if (cursor) cursor.style.left = `${pct}%`;
-    if (caret) caret.style.left = `${pct}%`;
-}
-
-function updateChatTimeDisplay() {
-    const display = document.getElementById('chat-current-time');
-    if (!display) return;
-    display.textContent = formatTime(Math.max(0, mapState.currentTime));
-}
-
-function renderChatNavAxis() {
-    const container = document.getElementById('chat-nav-axis');
-    if (!container) return;
-    container.innerHTML = '';
-    const duration = timelineState.duration;
-    if (duration <= 0) return;
-    const tickCount = Math.min(10, Math.max(4, Math.floor(duration / 60)));
-    for (let i = 0; i <= tickCount; i++) {
-        const time = (duration / tickCount) * i;
-        const span = document.createElement('span');
-        span.textContent = formatTime(time);
-        container.appendChild(span);
-    }
-}
 
 function renderChatMessages() {
     const killContainer = document.getElementById('kill-messages');
@@ -2380,7 +2283,7 @@ function updateTeamStatus() {
 
         let html = `<h4>${team} — ${teamFrags} frags</h4>`;
         html += `<table class="team-status-table">`;
-        html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th></tr>`;
+        html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th><th>View</th></tr>`;
 
         for (const p of players) {
             const hp = p.health || 0;
@@ -2397,14 +2300,15 @@ function updateTeamStatus() {
             if (p.hasPent) weps.push('Pent');
             if (p.hasRing) weps.push('Ring');
 
-            const watchLink = buildHubWatchLink(p.name, time, hubInfo, playerUserIDs);
+            const hubLink = buildHubWatchLink(p.name, time, hubInfo, playerUserIDs);
 
             html += `<tr>`;
-            html += `<td>${escapeHtml(p.name)}${watchLink}</td>`;
+            html += `<td>${escapeHtml(p.name)}</td>`;
             html += `<td>${p.frags}</td>`;
             html += `<td>${hp}</td>`;
             html += `<td>${armorStr}</td>`;
             html += `<td>${weps.join(', ') || '-'}</td>`;
+            html += `<td>${hubLink}</td>`;
             html += `</tr>`;
         }
 
@@ -2414,6 +2318,7 @@ function updateTeamStatus() {
         html += `<td>${teamFrags}</td>`;
         html += `<td>${teamHealth}</td>`;
         html += `<td>${teamArmor}</td>`;
+        html += `<td></td>`;
         html += `<td></td>`;
         html += `</tr>`;
 
@@ -2432,7 +2337,7 @@ function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
     // (includes countdown/warmup), so add demoOffset to convert.
     const from = Math.floor(time + (timelineState.demoOffset || 0));
     const url = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${from}&track=${trackId}`;
-    return ` <a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">[w]</a>`;
+    return `<a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">hub</a>`;
 }
 
 // ─── Location Lookup ────────────────────────────────────────────────────────
@@ -2621,22 +2526,16 @@ function expandPolygon(points, distance) {
 // Draw a location region (convex hull or circle for single point)
 function drawLocationRegion(ctx, group, worldToCanvasFunc) {
     if (group.points.length === 1) {
-        // Single point - draw small circle
         const pos = worldToCanvasFunc(group.points[0].x, group.points[0].y);
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
         ctx.fillStyle = group.color.fill;
         ctx.fill();
-        ctx.strokeStyle = group.color.stroke;
-        ctx.lineWidth = 1;
-        ctx.stroke();
     } else {
-        // Multiple points - compute and draw convex hull
         const canvasPoints = group.points.map(p => worldToCanvasFunc(p.x, p.y));
         const hull = computeConvexHull(canvasPoints);
 
         if (hull.length < 3) {
-            // Degenerate case - draw bounding rect with padding
             let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             for (const p of canvasPoints) {
                 minX = Math.min(minX, p.x);
@@ -2647,11 +2546,7 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
             const pad = 15;
             ctx.fillStyle = group.color.fill;
             ctx.fillRect(minX - pad, minY - pad, maxX - minX + pad*2, maxY - minY + pad*2);
-            ctx.strokeStyle = group.color.stroke;
-            ctx.lineWidth = 1;
-            ctx.strokeRect(minX - pad, minY - pad, maxX - minX + pad*2, maxY - minY + pad*2);
         } else {
-            // Expand hull outward and draw
             const expanded = expandPolygon(hull, 15);
             ctx.beginPath();
             ctx.moveTo(expanded[0].x, expanded[0].y);
@@ -2661,15 +2556,9 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
             ctx.closePath();
             ctx.fillStyle = group.color.fill;
             ctx.fill();
-            ctx.strokeStyle = group.color.stroke;
-            ctx.lineWidth = 1;
-            ctx.stroke();
         }
     }
 }
-
-// Trail duration constant (seconds) — used for display window and data purging
-const TRAIL_DURATION = 10;
 
 // Map View State
 let mapState = {
@@ -2681,24 +2570,23 @@ let mapState = {
     bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
     currentTime: 0,
     isPlaying: false,
+    playbackSpeed: 1,
     animationFrameId: null,
     lastRenderTime: 0,
-    showTracks: false,
-    tracks: {}, // playerName -> [{x, y}]
+    trailDuration: 10,          // Current trail window in seconds
+    fullTrails: {},             // playerName -> [{x, y, t, teamIdx, tp}] — pre-computed from all buckets
+    trailStartTimes: {},        // playerName -> time when trail tracking started (for extending forward)
+    enabledPlayers: {},         // playerName -> boolean — per-player trail toggle
     teams: [],
     playerSymbols: {}, // playerName -> { symbol, team, teamIdx }
     initialized: false,
     lastRenderedBucket: null, // Skip redundant redraws
-    renderDirty: false,       // Force redraw on track toggle/reset/etc
-    sliderEl: null,           // Cached DOM refs
-    timeDisplayEl: null
+    renderDirty: false        // Force redraw on track toggle/reset/etc
 };
 
 const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
 
-// Clear all trail data and force a redraw — call this whenever the user jumps to a new time
-function resetTrails() {
-    mapState.tracks = {};
+function markMapDirty() {
     mapState.renderDirty = true;
 }
 
@@ -2724,6 +2612,15 @@ function initMapView(result) {
     // Calculate bounds from locations and player positions
     calculateMapBounds(result);
 
+    // Size canvas to fit map content at full width
+    const worldW = mapState.bounds.maxX - mapState.bounds.minX;
+    const worldH = mapState.bounds.maxY - mapState.bounds.minY;
+    const canvasW = 850;
+    const canvasH = worldW > 0 ? Math.round(Math.max(400, Math.min(850, canvasW * (worldH / worldW)))) : 700;
+    mapState.canvas.width = canvasW;
+    mapState.canvas.height = canvasH;
+    updateWorldToCanvasTransform();
+
     // Get teams from demoInfo or match
     if (result.demoInfo?.teams) {
         mapState.teams = result.demoInfo.teams;
@@ -2736,25 +2633,20 @@ function initMapView(result) {
     // Assign symbols to players
     assignPlayerSymbols(result);
 
-    // Set up time controls (only once)
+    // Set up trail controls (only once)
     if (!mapState.initialized) {
-        setupMapTimeControls(result);
+        setupMapTrailControls();
         mapState.initialized = true;
-    } else {
-        // Update slider for new demo
-        updateMapSliderRange(result);
     }
+
+    // Pre-compute full trails from high-res bucket data
+    precomputeFullTrails();
 
     // Build powerup event list
     buildMapPowerupList(result);
 
-    // Reset tracks
-    mapState.tracks = {};
-    const showTracksCheckbox = document.getElementById('map-show-tracks');
-    if (showTracksCheckbox) {
-        showTracksCheckbox.checked = false;
-        mapState.showTracks = false;
-    }
+    // Reset trail checkboxes
+    document.querySelectorAll('.map-player-trail-cb').forEach(cb => { cb.checked = false; });
 
     // Initial render at match start
     mapState.currentTime = 0;
@@ -2940,69 +2832,127 @@ function buildMapLegend() {
     const legend = document.getElementById('map-legend');
     if (!legend) return;
 
-    legend.innerHTML = '<h4>Players</h4>';
-
-    const table = document.createElement('table');
-    table.className = 'map-legend-table';
-    table.id = 'map-legend-table';
-    table.innerHTML = '<thead><tr><th></th><th>Player</th><th>Area</th></tr></thead>';
-    const tbody = document.createElement('tbody');
-    tbody.id = 'map-legend-tbody';
+    legend.innerHTML = '';
 
     for (let teamIdx = 0; teamIdx < mapState.teams.length; teamIdx++) {
         const team = mapState.teams[teamIdx];
         const teamColor = teamIdx === 0 ? 'player-red' : 'player-blue';
 
-        // Team header row
-        const headerRow = document.createElement('tr');
-        headerRow.innerHTML = `<td colspan="3" class="map-legend-team-name ${teamColor}" style="padding-top:8px;">${escapeHtml(team)}</td>`;
-        tbody.appendChild(headerRow);
+        const title = document.createElement('h4');
+        title.className = teamColor;
+        title.id = `map-legend-team-title-${teamIdx}`;
+        title.textContent = `${team} — 0 frags`;
+        legend.appendChild(title);
+
+        const table = document.createElement('table');
+        table.className = 'team-status-table';
+        table.innerHTML = `<thead><tr><th></th><th>Player</th><th>Trail</th><th>H</th><th>A</th><th>Wpn</th><th>View</th></tr></thead>`;
+        const tbody = document.createElement('tbody');
+        tbody.className = 'map-legend-tbody';
 
         for (const [name, info] of Object.entries(mapState.playerSymbols)) {
             if (info.team === team) {
                 const tr = document.createElement('tr');
                 tr.dataset.player = name;
+                const escapedName = escapeHtml(name);
                 tr.innerHTML = `
                     <td><span class="map-legend-symbol ${teamColor}">${info.symbol}</span></td>
-                    <td>${escapeHtml(name)}<span class="map-legend-watch" data-player="${escapeHtml(name)}"></span></td>
-                    <td class="map-legend-area" data-player="${escapeHtml(name)}">-</td>
+                    <td>${escapedName}</td>
+                    <td class="map-trail-cell"><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}"></td>
+                    <td class="map-legend-health" data-player="${escapedName}">-</td>
+                    <td class="map-legend-armor" data-player="${escapedName}">-</td>
+                    <td class="map-legend-wpn" data-player="${escapedName}">-</td>
+                    <td class="map-legend-hub" data-player="${escapedName}"></td>
                 `;
                 tbody.appendChild(tr);
             }
         }
+
+        table.appendChild(tbody);
+        legend.appendChild(table);
     }
 
-    table.appendChild(tbody);
-    legend.appendChild(table);
+    // Attach per-player trail toggle handlers
+    legend.querySelectorAll('.map-player-trail-cb').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const playerName = e.target.dataset.player;
+            mapState.enabledPlayers[playerName] = e.target.checked;
+            if (e.target.checked) {
+                mapState.trailStartTimes[playerName] = mapState.currentTime;
+            }
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        });
+    });
+
+    // Make tables sortable
+    legend.querySelectorAll('.team-status-table').forEach(makeSortable);
 }
 
 function updateMapLegend() {
-    const tbody = document.getElementById('map-legend-tbody');
-    if (!tbody) return;
+    const legend = document.getElementById('map-legend');
+    if (!legend) return;
 
     const time = mapState.currentTime;
     const bucket = findBucketAtTime(time);
     const playerData = bucket ? (bucket.p || bucket.playerData) : null;
     const hubInfo = currentResult?.hubInfo;
     const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
-    const locations = mapState.locations;
+    const fragCounts = typeof getFragsAtTime === 'function' ? getFragsAtTime(time) : {};
 
-    // Update area cells and [w] links
-    const areaCells = tbody.querySelectorAll('.map-legend-area');
-    for (const cell of areaCells) {
+    // Update team titles with frag counts
+    for (let ti = 0; ti < mapState.teams.length; ti++) {
+        const titleEl = document.getElementById(`map-legend-team-title-${ti}`);
+        if (!titleEl) continue;
+        const team = mapState.teams[ti];
+        let teamFrags = 0;
+        for (const [name, info] of Object.entries(mapState.playerSymbols)) {
+            if (info.team === team) teamFrags += fragCounts[name] || 0;
+        }
+        titleEl.textContent = `${team} — ${teamFrags} frags`;
+    }
+
+    // Update per-player cells
+    const healthCells = legend.querySelectorAll('.map-legend-health');
+    for (const cell of healthCells) {
         const name = cell.dataset.player;
         const data = playerData?.[name];
-        if (data && (data.x !== 0 || data.y !== 0)) {
-            cell.textContent = findNearestLocation(data.x, data.y, locations) || '-';
+        cell.textContent = data ? (data.h ?? data.health ?? '-') : '-';
+    }
+
+    const armorCells = legend.querySelectorAll('.map-legend-armor');
+    for (const cell of armorCells) {
+        const name = cell.dataset.player;
+        const data = playerData?.[name];
+        if (data && (data.a ?? data.armor) > 0) {
+            const armorVal = data.a ?? data.armor;
+            const armorType = data.at ?? data.armorType ?? '';
+            cell.innerHTML = armorType
+                ? `<span class="armor-${armorType}">${armorVal} ${armorType.toUpperCase()}</span>`
+                : `${armorVal}`;
         } else {
             cell.textContent = '-';
         }
     }
 
-    const watchSpans = tbody.querySelectorAll('.map-legend-watch');
-    for (const span of watchSpans) {
-        const name = span.dataset.player;
-        span.innerHTML = buildHubWatchLink(name, time, hubInfo, playerUserIDs);
+    const wpnCells = legend.querySelectorAll('.map-legend-wpn');
+    for (const cell of wpnCells) {
+        const name = cell.dataset.player;
+        const data = playerData?.[name];
+        if (data) {
+            const wpns = [];
+            if (data.rl ?? data.hasRL) wpns.push('RL');
+            if (data.lg ?? data.hasLG) wpns.push('LG');
+            cell.textContent = wpns.length > 0 ? wpns.join(' ') : '-';
+        } else {
+            cell.textContent = '-';
+        }
+    }
+
+    const hubCells = legend.querySelectorAll('.map-legend-hub');
+    for (const cell of hubCells) {
+        const name = cell.dataset.player;
+        cell.innerHTML = buildHubWatchLink(name, time, hubInfo, playerUserIDs);
     }
 }
 
@@ -3020,7 +2970,7 @@ function prerenderLocationBackground() {
         drawLocationRegion(octx, group, worldToCanvasNew);
     }
 
-    octx.font = '10px monospace';
+    octx.font = '12px monospace';
     octx.textAlign = 'center';
     octx.textBaseline = 'middle';
     for (const group of mapState.locationGroups) {
@@ -3030,6 +2980,62 @@ function prerenderLocationBackground() {
     }
 
     mapState.locationCanvas = offscreen;
+}
+
+// Pre-compute full trails for all players from high-res bucket data.
+// Stores canvas-coordinate points with timestamps and teleport flags.
+function precomputeFullTrails() {
+    mapState.fullTrails = {};
+    const buckets = timelineState.highResBuckets;
+    if (!buckets || buckets.length === 0) return;
+
+    const MAX_MOVE_PER_BUCKET = 2500 * (timelineState.highResDuration || 0.05);
+    const lastWorldPos = {};
+
+    for (const bucket of buckets) {
+        const playerData = bucket.p || bucket.playerData;
+        if (!playerData) continue;
+        const t = bucket.t;
+
+        for (const [name, data] of Object.entries(playerData)) {
+            if (data.x === 0 && data.y === 0) continue;
+
+            const pos = worldToCanvasNew(data.x, data.y);
+            const symbolInfo = mapState.playerSymbols[name];
+            if (!symbolInfo) continue;
+
+            if (!mapState.fullTrails[name]) mapState.fullTrails[name] = [];
+            const track = mapState.fullTrails[name];
+            const last = track[track.length - 1];
+
+            const isDeath = !!data.d;
+            const isSpawn = !!data.sp;
+
+            // Always include death/spawn markers regardless of pixel distance
+            if (!isDeath && !isSpawn) {
+                // Only add if moved more than 2 canvas pixels
+                if (last && Math.abs(last.x - pos.x) <= 2 && Math.abs(last.y - pos.y) <= 2) {
+                    lastWorldPos[name] = { x: data.x, y: data.y };
+                    continue;
+                }
+            }
+
+            // Teleport detection in world units (scale-independent)
+            const lw = lastWorldPos[name];
+            const isTeleport = !isDeath && !isSpawn && lw && (Math.abs(data.x - lw.x) > MAX_MOVE_PER_BUCKET || Math.abs(data.y - lw.y) > MAX_MOVE_PER_BUCKET);
+
+            lastWorldPos[name] = { x: data.x, y: data.y };
+            track.push({ x: pos.x, y: pos.y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
+        }
+    }
+
+    // Initialize all players as disabled (user enables via All button or per-player checkboxes)
+    mapState.enabledPlayers = {};
+    mapState.trailStartTimes = {};
+    for (const name of Object.keys(mapState.fullTrails)) {
+        mapState.enabledPlayers[name] = false;
+        mapState.trailStartTimes[name] = 0;
+    }
 }
 
 function renderMap(time) {
@@ -3063,15 +3069,13 @@ function renderMap(time) {
         }
     }
 
-    // Draw tracks if enabled
-    if (mapState.showTracks) {
-        drawTracks(ctx);
-    }
+    // Draw tracks (per-player visibility controlled by enabledPlayers)
+    drawTracks(ctx, time);
 
     // Draw players (bucket.p = compact high-res format, bucket.playerData = 1s fallback)
     const playerData = bucket ? (bucket.p || bucket.playerData) : null;
     if (playerData) {
-        const halfSymbol = 16; // half of pre-rendered symbol canvas size (32)
+        const halfSymbol = 16;
 
         for (const [name, data] of Object.entries(playerData)) {
             if (data.x === 0 && data.y === 0) continue;
@@ -3081,65 +3085,98 @@ function renderMap(time) {
 
             if (symbolInfo && symbolInfo.symbolCanvas) {
                 ctx.drawImage(symbolInfo.symbolCanvas, pos.x - halfSymbol, pos.y - halfSymbol);
-
-                // Add to track if showing tracks
-                if (mapState.showTracks) {
-                    if (!mapState.tracks[name]) mapState.tracks[name] = [];
-                    const track = mapState.tracks[name];
-                    const lastPos = track[track.length - 1];
-                    if (!lastPos || Math.abs(lastPos.x - pos.x) > 2 || Math.abs(lastPos.y - pos.y) > 2) {
-                        // Detect teleport: large jump in one frame (>150 canvas pixels)
-                        const isTeleport = lastPos && (Math.abs(lastPos.x - pos.x) > 150 || Math.abs(lastPos.y - pos.y) > 150);
-                        track.push({
-                            x: pos.x,
-                            y: pos.y,
-                            t: time,
-                            teamIdx: symbolInfo.teamIdx,
-                            tp: isTeleport
-                        });
-                        // Purge data older than the trail window to avoid memory bloat.
-                        // Keep one anchor point outside the window so the trail has a clean start.
-                        const cutoff = time - TRAIL_DURATION;
-                        while (track.length > 1 && track[0].t < cutoff && track[1].t < cutoff) {
-                            track.shift();
-                        }
-                    }
-                }
             }
         }
     }
-
 }
 
-function drawTracks(ctx) {
-    const now = mapState.currentTime;
-    const trailDuration = TRAIL_DURATION;
+// Binary search: find index of last point with t <= time
+function trailIndexAtTime(points, time) {
+    let low = 0, high = points.length - 1;
+    if (high < 0 || points[0].t > time) return -1;
+    while (low < high) {
+        const mid = (low + high + 1) >> 1;
+        if (points[mid].t <= time) low = mid;
+        else high = mid - 1;
+    }
+    return low;
+}
 
-    for (const [, points] of Object.entries(mapState.tracks)) {
+function drawTracks(ctx, time) {
+    const trailDuration = mapState.trailDuration;
+
+    for (const [name, points] of Object.entries(mapState.fullTrails)) {
+        if (!mapState.enabledPlayers[name]) continue;
         if (points.length < 2) continue;
 
-        // Find start index for 10s window
-        let start = points.length - 1;
-        while (start > 0 && now - points[start].t < trailDuration) start--;
+        // If current time is before trail start, pull start back so trail grows from here
+        if (time < (mapState.trailStartTimes[name] || 0)) {
+            mapState.trailStartTimes[name] = time;
+        }
 
-        if (points.length - start < 2) continue;
+        // Find the end index: last point at or before current time
+        const endIdx = trailIndexAtTime(points, time);
+        if (endIdx < 1) continue;
+
+        // Find start: trail window starts at max(time - trailDuration, trailStartTime)
+        const trailStart = Math.max(time - trailDuration, mapState.trailStartTimes[name] || 0);
+        let startIdx = trailIndexAtTime(points, trailStart);
+        if (startIdx < 0) startIdx = 0;
+
+        if (endIdx - startIdx < 1) continue;
 
         const isRed = points[0].teamIdx === 0;
         const solidColor = isRed ? 'rgba(255, 80, 80, 0.4)' : 'rgba(80, 160, 255, 0.4)';
         const dashColor = isRed ? 'rgba(255, 80, 80, 0.2)' : 'rgba(80, 160, 255, 0.2)';
+        const markerColor = isRed ? 'rgba(255, 80, 80, 0.8)' : 'rgba(80, 160, 255, 0.8)';
 
-        // Draw segments, switching style for teleport segments
+        // Collect death/spawn markers to draw after lines
+        const markers = [];
+
         let inDash = false;
-        ctx.lineWidth = 1.5;
+        let afterDeath = false; // suppress line from death to next spawn
+        ctx.lineWidth = 3;
         ctx.strokeStyle = solidColor;
         ctx.setLineDash([]);
         ctx.beginPath();
-        ctx.moveTo(points[start].x, points[start].y);
+        ctx.moveTo(points[startIdx].x, points[startIdx].y);
 
-        for (let i = start + 1; i < points.length; i++) {
-            const needDash = !!points[i].tp;
+        if (points[startIdx].spawn) markers.push({ x: points[startIdx].x, y: points[startIdx].y, type: 'spawn' });
+
+        for (let i = startIdx + 1; i <= endIdx; i++) {
+            const pt = points[i];
+
+            if (pt.spawn) {
+                // Spawn: start a new line segment (gap from death)
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.setLineDash([]);
+                ctx.strokeStyle = solidColor;
+                inDash = false;
+                afterDeath = false;
+                ctx.moveTo(pt.x, pt.y);
+                markers.push({ x: pt.x, y: pt.y, type: 'spawn' });
+                continue;
+            }
+
+            if (pt.death) {
+                // Death: draw line to death point, then mark it
+                ctx.lineTo(pt.x, pt.y);
+                ctx.stroke();
+                ctx.beginPath();
+                afterDeath = true;
+                markers.push({ x: pt.x, y: pt.y, type: 'death' });
+                continue;
+            }
+
+            if (afterDeath) {
+                // Between death and spawn — don't draw
+                ctx.moveTo(pt.x, pt.y);
+                continue;
+            }
+
+            const needDash = !!pt.tp;
             if (needDash !== inDash) {
-                // Flush current path
                 ctx.stroke();
                 ctx.beginPath();
                 ctx.moveTo(points[i - 1].x, points[i - 1].y);
@@ -3152,10 +3189,32 @@ function drawTracks(ctx) {
                 }
                 inDash = needDash;
             }
-            ctx.lineTo(points[i].x, points[i].y);
+            ctx.lineTo(pt.x, pt.y);
         }
         ctx.stroke();
         ctx.setLineDash([]);
+
+        // Draw death (✕) and spawn (●) markers on top
+        ctx.fillStyle = markerColor;
+        ctx.strokeStyle = markerColor;
+        ctx.lineWidth = 2;
+        for (const m of markers) {
+            if (m.type === 'death') {
+                // Draw ✕
+                const s = 5;
+                ctx.beginPath();
+                ctx.moveTo(m.x - s, m.y - s);
+                ctx.lineTo(m.x + s, m.y + s);
+                ctx.moveTo(m.x + s, m.y - s);
+                ctx.lineTo(m.x - s, m.y + s);
+                ctx.stroke();
+            } else {
+                // Draw ●
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
     }
 }
 
@@ -3227,44 +3286,31 @@ function findBucketAtTime(time) {
     return findBucketAtTimeFallback(time);
 }
 
-function setupMapTimeControls(result) {
-    updateMapSliderRange(result);
-
-    // Cache DOM refs for the hot animation loop
-    mapState.sliderEl = document.getElementById('map-timeline-slider');
-    mapState.timeDisplayEl = document.getElementById('map-current-time');
-
-    const slider = mapState.sliderEl;
-    if (slider) {
-        slider.addEventListener('input', (e) => {
-            setCurrentTime(parseFloat(e.target.value));
-            resetTrails();
+function setupMapTrailControls() {
+    const allBtn = document.getElementById('map-trails-all');
+    if (allBtn) {
+        allBtn.addEventListener('click', () => {
+            for (const name of Object.keys(mapState.fullTrails)) {
+                // Only reset start time for newly-enabled players
+                if (!mapState.enabledPlayers[name]) {
+                    mapState.trailStartTimes[name] = mapState.currentTime;
+                }
+                mapState.enabledPlayers[name] = true;
+            }
+            // Sync legend checkboxes
+            document.querySelectorAll('.map-player-trail-cb').forEach(cb => { cb.checked = true; });
+            mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
     }
 
-    const playPauseBtn = document.getElementById('map-play-pause');
-    if (playPauseBtn) {
-        playPauseBtn.addEventListener('click', toggleMapPlayback);
-    }
-
-    const jumpBackBtn = document.getElementById('map-jump-back');
-    if (jumpBackBtn) {
-        jumpBackBtn.addEventListener('click', () => jumpMapTime(-10));
-    }
-
-    const jumpForwardBtn = document.getElementById('map-jump-forward');
-    if (jumpForwardBtn) {
-        jumpForwardBtn.addEventListener('click', () => jumpMapTime(10));
-    }
-
-    const showTracksCheckbox = document.getElementById('map-show-tracks');
-    if (showTracksCheckbox) {
-        showTracksCheckbox.addEventListener('change', (e) => {
-            mapState.showTracks = e.target.checked;
-            if (!mapState.showTracks) {
-                mapState.tracks = {};
+    const noneBtn = document.getElementById('map-trails-none');
+    if (noneBtn) {
+        noneBtn.addEventListener('click', () => {
+            for (const name of Object.keys(mapState.fullTrails)) {
+                mapState.enabledPlayers[name] = false;
             }
+            document.querySelectorAll('.map-player-trail-cb').forEach(cb => { cb.checked = false; });
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
@@ -3273,50 +3319,77 @@ function setupMapTimeControls(result) {
     const resetTracksBtn = document.getElementById('map-reset-tracks');
     if (resetTracksBtn) {
         resetTracksBtn.addEventListener('click', () => {
-            mapState.tracks = {};
+            for (const name of Object.keys(mapState.fullTrails)) {
+                mapState.trailStartTimes[name] = mapState.currentTime;
+            }
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        });
+    }
+
+    const durationSelect = document.getElementById('map-trail-duration');
+    if (durationSelect) {
+        durationSelect.addEventListener('change', (e) => {
+            mapState.trailDuration = parseInt(e.target.value, 10);
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
     }
 }
 
-function updateMapSliderRange(result) {
-    const slider = document.getElementById('map-timeline-slider');
-    if (!slider) return;
+// ─── Playback Engine ──────────────────────────────────────────────────────
 
-    const duration = result.duration || 600;
+const PLAYBACK_BUTTON_LABELS = {
+    'tl-rev': '-1x',
+    'tl-play-pause': '1x',
+    'tl-5x': '5x',
+    'tl-20x': '20x'
+};
 
-    slider.min = 0;
-    slider.max = duration;
-    slider.value = 0;
-    mapState.currentTime = 0;
+function updatePlaybackButtons() {
+    const buttons = {
+        'tl-rev': -1,
+        'tl-play-pause': 1,
+        'tl-5x': 5,
+        'tl-20x': 20
+    };
+    for (const [id, speed] of Object.entries(buttons)) {
+        const btn = document.getElementById(id);
+        if (!btn) continue;
+        if (mapState.isPlaying && mapState.playbackSpeed === speed) {
+            btn.classList.add('active');
+            btn.textContent = '⏸';
+        } else {
+            btn.classList.remove('active');
+            btn.textContent = PLAYBACK_BUTTON_LABELS[id];
+        }
+    }
 }
 
-function toggleMapPlayback() { togglePlayback(); }
+function startPlaybackAtSpeed(speed) {
+    if (mapState.isPlaying && mapState.playbackSpeed === speed) {
+        // Toggle off — pause
+        stopPlayback();
+        return;
+    }
 
-function togglePlayback() {
-    if (mapState.isPlaying) {
-        mapState.isPlaying = false;
-        if (mapState.animationFrameId) {
-            cancelAnimationFrame(mapState.animationFrameId);
-            mapState.animationFrameId = null;
-        }
-        // Update both play buttons
-        const mapBtn = document.getElementById('map-play-pause');
-        const tlBtn = document.getElementById('timeline-play-pause');
-        if (mapBtn) mapBtn.textContent = '▶';
-        if (tlBtn) tlBtn.textContent = '▶';
-        // Full sync on pause
-        setCurrentTime(mapState.currentTime);
-    } else {
+    mapState.playbackSpeed = speed;
+    if (!mapState.isPlaying) {
         mapState.isPlaying = true;
         mapState.lastRenderTime = performance.now();
-        const mapBtn = document.getElementById('map-play-pause');
-        const tlBtn = document.getElementById('timeline-play-pause');
-        if (mapBtn) mapBtn.textContent = '⏸';
-        if (tlBtn) tlBtn.textContent = '⏸';
         animatePlayback();
     }
+    updatePlaybackButtons();
+}
+
+function stopPlayback() {
+    mapState.isPlaying = false;
+    if (mapState.animationFrameId) {
+        cancelAnimationFrame(mapState.animationFrameId);
+        mapState.animationFrameId = null;
+    }
+    updatePlaybackButtons();
+    setCurrentTime(mapState.currentTime);
 }
 
 let _lastFullSyncTime = 0;
@@ -3335,40 +3408,38 @@ function animatePlayback() {
     // Throttle to ~30fps
     if (elapsed < 0.033) return;
 
-    mapState.currentTime += elapsed;
+    mapState.currentTime += elapsed * mapState.playbackSpeed;
     mapState.lastRenderTime = now;
 
     const duration = timelineState.duration || 600;
+
+    // Forward past end: wrap to 0
     if (mapState.currentTime > duration) {
         mapState.currentTime = 0;
-        mapState.tracks = {};
         mapState.renderDirty = true;
     }
 
-    // Lightweight sync every frame (slider, map, time display)
-    if (mapState.sliderEl) mapState.sliderEl.value = mapState.currentTime;
-    if (mapState.timeDisplayEl) mapState.timeDisplayEl.textContent = formatTime(Math.max(0, mapState.currentTime));
+    // Reverse past start: stop at 0
+    if (mapState.currentTime < 0) {
+        mapState.currentTime = 0;
+        stopPlayback();
+        return;
+    }
+
+    // Lightweight sync every frame
+    updateUnifiedCursor();
+    updateUnifiedTimeDisplay();
     renderMap(mapState.currentTime);
 
-    // Full sync (team status, chat, legend, cursors) every 200ms
+    // Full sync every 200ms
     if (now - _lastFullSyncTime > 200) {
         _lastFullSyncTime = now;
         mapState.renderDirty = true;
-        updateTimelineCursor();
-        updateTimelineTimeDisplay();
         updateTimeIndicators();
         updateTeamStatus();
         updateMapLegend();
         renderChatMessages();
-        updateChatCursor();
-        updateChatTimeDisplay();
     }
-}
-
-function jumpMapTime(delta) {
-    setCurrentTime(mapState.currentTime + delta);
-    resetTrails();
-    renderMap(mapState.currentTime);
 }
 
 function buildMapPowerupList(result) {
@@ -3393,7 +3464,7 @@ function buildMapPowerupList(result) {
         `;
         li.addEventListener('click', () => {
             setCurrentTime(event.time);
-            resetTrails();
+            markMapDirty();
             renderMap(mapState.currentTime);
         });
         list.appendChild(li);

@@ -18,7 +18,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -482,7 +482,7 @@ table tbody tr:hover {
 /* Timeline Analysis Tab */
 .timeline-nav-panel {
     margin-bottom: 12px;
-    padding: 10px 15px 4px 15px;
+    padding: 18px 15px 4px 15px;
 }
 
 .team-status-panel {
@@ -507,7 +507,7 @@ table tbody tr:hover {
 .team-status-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     font-family: monospace;
 }
 
@@ -541,23 +541,24 @@ table tbody tr:hover {
 
 .timeline-nav-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
 }
 
 .timeline-nav-time {
     font-family: monospace;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     color: #00d9ff;
     min-width: 50px;
     text-align: center;
+    line-height: 24px;
 }
 
 .timeline-nav-bar-wrapper {
     flex: 1;
     position: relative;
     user-select: none;
-    padding-bottom: 16px;
+    padding-bottom: 32px;
 }
 
 .timeline-nav-bar {
@@ -621,19 +622,34 @@ table tbody tr:hover {
 
 .timeline-nav-segment {
     font-family: monospace;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: #888;
     white-space: nowrap;
     min-width: 90px;
+    margin-top: 2px;
 }
 
 .timeline-nav-axis {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 60px 0 60px;
-    font-size: 0.7rem;
+    position: relative;
+    height: 16px;
+    font-size: 0.9rem;
     color: #666;
     font-family: monospace;
+}
+
+.timeline-nav-axis span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+.timeline-nav-axis span:first-child {
+    transform: none;
+}
+
+.timeline-nav-axis span:last-child {
+    transform: translateX(-100%);
 }
 
 .current-time-indicator {
@@ -658,7 +674,7 @@ table tbody tr:hover {
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #888;
 }
 
@@ -697,7 +713,7 @@ table tbody tr:hover {
     justify-content: space-between;
     align-items: flex-end;
     padding: 10px 5px 20px 0;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     color: #888;
     font-family: monospace;
 }
@@ -725,7 +741,7 @@ table tbody tr:hover {
     display: flex;
     justify-content: space-between;
     padding: 5px 10px 0 10px;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     color: #888;
     font-family: monospace;
 }
@@ -1225,10 +1241,11 @@ th.sortable.sort-desc::after {
     border: 1px solid rgba(0, 217, 255, 0.3);
     color: #7a8ba8;
     cursor: pointer;
-    font-size: 0.8rem;
-    padding: 2px 6px;
+    font-size: 0.9rem;
+    padding: 0 9px;
     border-radius: 3px;
-    line-height: 1;
+    height: 24px;
+    line-height: 22px;
     transition: all 0.15s;
 }
 
@@ -1237,29 +1254,31 @@ th.sortable.sort-desc::after {
     border-color: #00d9ff;
 }
 
+.timeline-playback-controls button.active {
+    color: #00d9ff;
+    border-color: #00d9ff;
+    background: rgba(0, 217, 255, 0.15);
+}
+
 /* Map legend table */
-.map-legend-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.78rem;
-    font-family: monospace;
+.map-legend-health,
+.map-legend-armor,
+.map-legend-wpn {
+    text-align: right;
 }
 
-.map-legend-table th {
-    text-align: left;
-    color: #888;
-    font-weight: normal;
-    padding: 2px 6px;
-    border-bottom: 1px solid #1a2744;
+.map-player-trail-cb {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
 }
 
-.map-legend-table td {
-    padding: 2px 6px;
-    color: #ccc;
-}
-
-.map-legend-table tr:hover {
-    background: rgba(0, 217, 255, 0.04);
+.map-trail-cell {
+    padding: 2px 2px !important;
+    width: 18px;
+    text-align: center;
 }
 
 /* Accuracy Graphs */
@@ -1418,99 +1437,15 @@ th.sortable.sort-desc::after {
     gap: 15px;
 }
 
-.map-controls {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 12px 15px;
-    background: #16213e;
-    border-radius: 8px;
-    flex-wrap: wrap;
-}
-
-.map-time-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.map-time-controls button {
-    background: #2a3f5f;
-    border: 1px solid rgba(0, 217, 255, 0.4);
-    color: #00d9ff;
-    padding: 8px 14px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.2s ease;
-}
-
-.map-time-controls button:hover {
-    background: #00d9ff;
-    color: #1a1a2e;
-    box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
-}
-
-.map-time-display {
-    font-family: monospace;
-    font-size: 1.1rem;
-    color: #00d9ff;
-    min-width: 60px;
-    text-align: center;
-}
-
-#map-timeline-slider {
-    flex: 1;
-    min-width: 200px;
-    height: 8px;
-    -webkit-appearance: none;
-    background: #2a3f5f;
-    border-radius: 4px;
-    outline: none;
-}
-
-#map-timeline-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    background: #00d9ff;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: transform 0.1s;
-}
-
-#map-timeline-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-}
-
-#map-timeline-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    background: #00d9ff;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-}
-
 .map-track-controls {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.map-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.map-trail-label {
     color: #888;
-    cursor: pointer;
     font-size: 0.9rem;
-}
-
-.map-checkbox input {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
 }
 
 .map-track-controls button {
@@ -1527,6 +1462,28 @@ th.sortable.sort-desc::after {
 .map-track-controls button:hover {
     border-color: #00d9ff;
     color: #00d9ff;
+}
+
+.map-trail-select {
+    background: #1a1a2e;
+    border: 1px solid #666;
+    color: #ccc;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.map-trail-select:hover,
+.map-trail-select:focus {
+    border-color: #00d9ff;
+    outline: none;
+}
+
+.map-player-trail-cb {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
 }
 
 .map-main-content {
@@ -1567,8 +1524,8 @@ th.sortable.sort-desc::after {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    min-width: 200px;
-    max-width: 300px;
+    min-width: 250px;
+    max-width: 400px;
 }
 
 .map-legend {

@@ -39,15 +39,16 @@ type fragEventRaw struct {
 
 // timelinePlayerState tracks current state for a single player
 type timelinePlayerState struct {
-	items   int // Current items (weapons, powerups, armor type)
-	health  int
-	armor   int
-	shells  int
-	nails   int
-	rockets int
-	cells   int
-	frags   int // Current frag count
-	x, y, z float32 // Last known position
+	items      int // Current items (weapons, powerups, armor type)
+	health     int
+	prevHealth int // Previous sample's health, for detecting death/spawn transitions
+	armor      int
+	shells     int
+	nails      int
+	rockets    int
+	cells      int
+	frags      int // Current frag count
+	x, y, z    float32 // Last known position
 }
 
 // timelineBucketData holds raw aggregated data during analysis
@@ -75,6 +76,8 @@ type playerBucketRawData struct {
 	cells     int
 	x, y, z   float32 // Position
 	location  string  // Named location from .loc file
+	dead      bool    // True for death-frame entries (health just went to 0)
+	spawn     bool    // True for spawn-frame entries (health just went from 0 to >0)
 }
 
 // NewTimelineAnalyzer creates a new timeline analyzer
@@ -272,8 +275,15 @@ func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 			continue
 		}
 
-		// Only include alive players (health > 0)
-		if state.health <= 0 {
+		// Detect death/spawn transitions (prevHealth starts at -1 = uninitialized)
+		isDead := state.health <= 0
+		isDeathFrame := isDead && state.prevHealth > 0                           // just died
+		isSpawnFrame := !isDead && (state.prevHealth <= 0) // spawned (first appearance or after death)
+
+		state.prevHealth = state.health
+
+		// Skip players who are dead (unless this is the death frame)
+		if isDead && !isDeathFrame {
 			continue
 		}
 
@@ -287,6 +297,8 @@ func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 			nails:   state.nails,
 			rockets: state.rockets,
 			cells:   state.cells,
+			dead:    isDeathFrame,
+			spawn:   isSpawnFrame,
 		}
 
 		// Track weapons
@@ -336,7 +348,7 @@ func (a *TimelineAnalyzer) getOrCreatePlayerState(playerNum int) *timelinePlayer
 	if s, ok := a.playerState[playerNum]; ok {
 		return s
 	}
-	s := &timelinePlayerState{}
+	s := &timelinePlayerState{prevHealth: -1} // -1 = uninitialized
 	a.playerState[playerNum] = s
 	return s
 }
@@ -548,6 +560,8 @@ func (a *TimelineAnalyzer) exportHighResBuckets(slotToName map[int]string) []Hig
 				R:       pd.hasRing,
 				Rockets: pd.rockets,
 				Cells:   pd.cells,
+				D:       pd.dead,
+				Sp:      pd.spawn,
 			}
 		}
 
