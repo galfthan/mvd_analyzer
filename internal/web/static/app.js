@@ -1569,6 +1569,7 @@ let chatRendered = false;
 let chatUserScrolling = false;
 let _chatScrollTimer = null;
 let chatContentHeight = 0;
+let _chatProgrammaticScroll = false; // flag to distinguish our scrollTop writes from user scrolls
 
 function renderChatMessages() {
     if (chatRendered) {
@@ -1591,14 +1592,12 @@ function buildFullChat() {
     const duration = timelineState.duration || 600;
     chatContentHeight = Math.round(duration * CHAT_PX_PER_SEC);
 
-    // Clear columns
     killContainer.innerHTML = '';
     teamAContainer.innerHTML = '';
     teamBContainer.innerHTML = '';
 
     if (!currentResult?.messages?.events || teams.length < 2) return;
 
-    // Deduplicate all events (3-second window)
     const seen = new Map();
     const events = currentResult.messages.events.filter(e => {
         if (e.time < 0 || e.time > duration) return false;
@@ -1622,18 +1621,26 @@ function buildFullChat() {
         }
     }
 
-    // Render columns with inner wrappers
     renderChatColumnFull(killContainer, killEvents);
     renderChatColumnFull(teamAContainer, teamAEvents);
     renderChatColumnFull(teamBContainer, teamBEvents);
 
-    // Render time axis
     if (axisContainer) {
         renderChatTimeAxisFull(axisContainer);
     }
 
-    // Single scroll listener on viewport
+    // Add current-time line inside the scroll inner (scrolls with content)
+    const scrollInner = viewport.querySelector('.chat-scroll-inner');
+    if (scrollInner) {
+        const line = document.createElement('div');
+        line.className = 'chat-current-time-line';
+        line.id = 'chat-current-time-line';
+        scrollInner.appendChild(line);
+    }
+
+    // Scroll listener: only mark user scrolling if it's not our programmatic scroll
     viewport.addEventListener('scroll', () => {
+        if (_chatProgrammaticScroll) return;
         chatUserScrolling = true;
         if (_chatScrollTimer) clearTimeout(_chatScrollTimer);
         _chatScrollTimer = setTimeout(() => { chatUserScrolling = false; }, 2000);
@@ -1645,7 +1652,9 @@ function buildFullChat() {
 }
 
 function updateChatTimeLine() {
-    // Line is fixed at 50% of viewport via CSS — nothing to update
+    const line = document.getElementById('chat-current-time-line');
+    if (!line) return;
+    line.style.top = `${mapState.currentTime * CHAT_PX_PER_SEC}px`;
 }
 
 function scrollChatToCurrentTime() {
@@ -1655,7 +1664,11 @@ function scrollChatToCurrentTime() {
 
     const topPx = mapState.currentTime * CHAT_PX_PER_SEC;
     const targetScroll = Math.max(0, topPx - viewport.clientHeight / 2);
+
+    _chatProgrammaticScroll = true;
     viewport.scrollTop = targetScroll;
+    // Reset flag after browser processes the scroll event
+    requestAnimationFrame(() => { _chatProgrammaticScroll = false; });
 }
 
 function renderChatTimeAxisFull(container) {

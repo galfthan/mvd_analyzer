@@ -782,6 +782,7 @@ table tbody tr:hover {
 .chat-scroll-inner {
     display: flex;
     gap: 0;
+    position: relative;
 }
 
 .chat-time-axis-col {
@@ -882,7 +883,7 @@ table tbody tr:hover {
     z-index: 10;
     pointer-events: none;
     opacity: 0.6;
-    top: 50%;
+    top: 0;
 }
 
 /* Diverging bar chart - Team A up, Team B down */
