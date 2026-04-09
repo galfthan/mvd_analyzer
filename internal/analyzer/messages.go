@@ -390,9 +390,12 @@ func (a *MessagesAnalyzer) extractKillerName(rest string) string {
 		}
 	}
 
-	// Clean up
+	// Clean up. Trim trailing newline only — we used to also strip a
+	// trailing '.' as punctuation, but Quake names can legitimately end
+	// in '.' (the demo `broken.mvd.gz` has a player named `.N3ophyt3.`
+	// after Q_normalizetext folding) and chopping it splits that player's
+	// frags off into a phantom name that the frontend can't join.
 	rest = strings.TrimSuffix(rest, "\n")
-	rest = strings.TrimSuffix(rest, ".")
 	return strings.TrimSpace(rest)
 }
 

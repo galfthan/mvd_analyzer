@@ -218,18 +218,6 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error {
 
 	state := a.getOrCreatePlayerState(e.PlayerNum)
 
-	// Drop obviously-corrupt stat values. Quake caps every gameplay stat
-	// the timeline cares about well below 1000 (mega + ra = 200 hp / 200
-	// armor at the extreme; ammo counts max ~200). A spurious 32-bit value
-	// from a misread svc_updatestatlong otherwise persists for many seconds
-	// of buckets and blows up the team-average graph autoscale, making the
-	// real curve look like a flat line at zero. We log nothing — the next
-	// real update will replace state.* anyway.
-	const maxStatValue = 1000
-	if e.Value > maxStatValue || e.Value < -1000 {
-		return nil
-	}
-
 	switch e.StatIndex {
 	case mvd.StatHealth:
 		state.health = e.Value
@@ -387,72 +375,100 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	// Use both exact name and normalized name for matching
 	nameToTeam := make(map[string]string)
 	normNameToTeam := make(map[string]string) // Normalized names (lowercase, alphanumeric only)
-	fragsToTeam := make(map[int]string)       // Frag count -> team (for slot matching)
-	fragsToPlayer := make(map[int]string)     // Frag count -> player name (for slot matching)
+
+	// Slot resolution against the demoinfo player list is keyed on
+	// (team, frags) rather than frags alone. KTX may write a "displayed"
+	// netname into the demoinfo JSON that does NOT match the userinfo
+	// "name" key (auth-override case): we can't join by name, so we have
+	// to bridge slot↔demoinfo via secondary signals. The userinfo team is
+	// reliable in this case (only the displayed name diverges), so we use
+	// it as a tie-breaker against the final frag count. We also track how
+	// many demoinfo entries each (team, frags) tuple resolves to so the
+	// caller can require uniqueness before promoting the demoinfo name.
+	type teamFragsKey struct {
+		team  string
+		frags int
+	}
+	demoByKey := make(map[teamFragsKey]*DemoInfoPlayer)
+	demoKeyCount := make(map[teamFragsKey]int)
 	if a.ctx.DemoInfo != nil {
-		for _, p := range a.ctx.DemoInfo.Players {
-			if p.Name != "" && p.Team != "" {
-				nameToTeam[p.Name] = p.Team
-				normNameToTeam[normalizePlayerName(p.Name)] = p.Team
-				// Map frag count to team and player for slot resolution
-				if p.Stats != nil && p.Stats.Frags != 0 {
-					fragsToTeam[p.Stats.Frags] = p.Team
-					fragsToPlayer[p.Stats.Frags] = p.Name
-				}
+		for i := range a.ctx.DemoInfo.Players {
+			p := &a.ctx.DemoInfo.Players[i]
+			if p.Name == "" || p.Team == "" {
+				continue
+			}
+			nameToTeam[p.Name] = p.Team
+			normNameToTeam[normalizePlayerName(p.Name)] = p.Team
+			if p.Stats == nil {
+				continue
+			}
+			k := teamFragsKey{team: p.Team, frags: p.Stats.Frags}
+			demoKeyCount[k]++
+			if demoKeyCount[k] == 1 {
+				demoByKey[k] = p
+			} else {
+				// Ambiguous: drop the entry so callers must fall back.
+				delete(demoByKey, k)
 			}
 		}
 	}
 
-	// Build slot->team and slot->player mappings from final frag counts
+	// Build slot->team and slot->player mappings.
+	//
+	// We only commit a slot→demoinfo mapping when the userinfo team for
+	// that slot agrees with the demoinfo team AND the (team, frags) tuple
+	// resolves to exactly one demoinfo player. Anything ambiguous, missing,
+	// or contradictory is left out — `slotToName` (built later) will then
+	// fall back to ctx.Players[slot].Name. This means the failure mode for
+	// a wrong heuristic is "Team Status panel shows the userinfo name for
+	// one slot", not "stats from slot X get attributed to slot Y".
 	slotToTeam := make(map[int]string)
 	slotToPlayer := make(map[int]string)
 	for slot, frags := range a.ctx.FragsBySlot {
-		if team, ok := fragsToTeam[frags]; ok {
-			slotToTeam[slot] = team
+		live := a.ctx.Players[slot]
+		if live == nil || live.Team == "" {
+			continue
 		}
-		if player, ok := fragsToPlayer[frags]; ok {
-			slotToPlayer[slot] = player
+		k := teamFragsKey{team: live.Team, frags: frags}
+		dp, ok := demoByKey[k]
+		if !ok {
+			continue
 		}
+		slotToTeam[slot] = dp.Team
+		slotToPlayer[slot] = dp.Name
 	}
 
 	// Convert raw frag events to final events with player and team info
 	fragEvents := make([]TimelineFragEvent, 0, len(a.fragEventsRaw))
 	for _, raw := range a.fragEventsRaw {
-		playerName := ""
-		team := ""
+		// Prefer the demoinfo-resolved name (via slotToPlayer) so the
+		// emitted player name matches what the timeline buckets and the
+		// frontend's demoinfo-keyed Team Status panel expect. Fall back to
+		// the userinfo name only when the strict (team, frags) match
+		// failed for this slot.
+		playerName := slotToPlayer[raw.PlayerNum]
+		team := slotToTeam[raw.PlayerNum]
 
-		// First try ctx.Players
-		player := a.ctx.Players[raw.PlayerNum]
-		if player != nil {
-			if player.Name != "" {
+		if playerName == "" {
+			if player := a.ctx.Players[raw.PlayerNum]; player != nil {
 				playerName = player.Name
-			}
-			if player.Team != "" {
-				team = player.Team
+				if team == "" {
+					team = player.Team
+				}
 			}
 		}
-
-		// If no player name, try our local tracking
 		if playerName == "" {
 			if name, ok := a.playerNames[raw.PlayerNum]; ok {
 				playerName = name
 			}
 		}
 
-		// If we have a name but no team, look it up in DemoInfo
+		// If we still have a name but no team, look it up in DemoInfo by name.
 		if playerName != "" && team == "" {
 			team = nameToTeam[playerName]
 			if team == "" {
 				team = normNameToTeam[normalizePlayerName(playerName)]
 			}
-		}
-
-		// If still no player/team, try slot mapping from frag counts
-		if playerName == "" {
-			playerName = slotToPlayer[raw.PlayerNum]
-		}
-		if team == "" {
-			team = slotToTeam[raw.PlayerNum]
 		}
 
 		if team != "" {
@@ -946,34 +962,33 @@ func (a *TimelineAnalyzer) createPowerupEvent(slot int, powerupType string, star
 		event.PlayerUserID = userID
 	}
 
-	// Resolve player name - try ctx.Players first
+	// Prefer the demoinfo-resolved name (via slotToPlayer) so the emitted
+	// name matches what the frontend joins against. Only fall back to the
+	// userinfo name when the strict (team, frags) match failed for this slot.
+	if name := slotToPlayer[slot]; name != "" {
+		event.PlayerName = name
+	}
+	if t := slotToTeam[slot]; t != "" {
+		event.Team = t
+	}
 	if player := a.ctx.Players[slot]; player != nil {
-		event.PlayerName = player.Name
-		event.Team = player.Team
-		// Also get UserID from player info if not already set
+		if event.PlayerName == "" {
+			event.PlayerName = player.Name
+		}
+		if event.Team == "" {
+			event.Team = player.Team
+		}
 		if event.PlayerUserID == 0 && player.UserID != 0 {
 			event.PlayerUserID = player.UserID
 		}
 	}
-
-	// Fallback to local tracking
 	if event.PlayerName == "" {
 		if name, ok := a.playerNames[slot]; ok {
 			event.PlayerName = name
 		}
 	}
-
-	// Fallback to slot mapping
-	if event.PlayerName == "" {
-		event.PlayerName = slotToPlayer[slot]
-	}
-
-	// Resolve team if not set
 	if event.Team == "" && event.PlayerName != "" {
 		event.Team = nameToTeam[event.PlayerName]
-	}
-	if event.Team == "" {
-		event.Team = slotToTeam[slot]
 	}
 
 	return event
