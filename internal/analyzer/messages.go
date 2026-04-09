@@ -390,9 +390,12 @@ func (a *MessagesAnalyzer) extractKillerName(rest string) string {
 		}
 	}
 
-	// Clean up
+	// Clean up. Trim trailing newline only — we used to also strip a
+	// trailing '.' as punctuation, but Quake names can legitimately end
+	// in '.' (the demo `broken.mvd.gz` has a player named `.N3ophyt3.`
+	// after Q_normalizetext folding) and chopping it splits that player's
+	// frags off into a phantom name that the frontend can't join.
 	rest = strings.TrimSuffix(rest, "\n")
-	rest = strings.TrimSuffix(rest, ".")
 	return strings.TrimSpace(rest)
 }
 
@@ -441,6 +444,38 @@ func normalizeName(name string) string {
 }
 
 func (a *MessagesAnalyzer) Finalize() (interface{}, error) {
+	// Backfill missing team attributions using DemoInfo. Some demos have a
+	// userinfo "name" that doesn't match the player's actual displayed
+	// netname (KTX auth-override case): the chat parser pulls the displayed
+	// name out of the print message but ctx.Players[slot].Name is still the
+	// auth name, so the live lookup in handlePrint returns "". DemoInfo is
+	// finalized before this analyzer, so by now we have the canonical
+	// {displayed name -> team} mapping and can repair the gaps.
+	if a.ctx.DemoInfo != nil {
+		nameToTeam := make(map[string]string, len(a.ctx.DemoInfo.Players))
+		normToTeam := make(map[string]string, len(a.ctx.DemoInfo.Players))
+		for _, p := range a.ctx.DemoInfo.Players {
+			if p.Name == "" || p.Team == "" {
+				continue
+			}
+			nameToTeam[p.Name] = p.Team
+			normToTeam[normalizeName(p.Name)] = p.Team
+		}
+		for i := range a.events {
+			ev := &a.events[i]
+			if ev.Team != "" || ev.Player == "" {
+				continue
+			}
+			if t := nameToTeam[ev.Player]; t != "" {
+				ev.Team = t
+				continue
+			}
+			if t := normToTeam[normalizeName(ev.Player)]; t != "" {
+				ev.Team = t
+			}
+		}
+	}
+
 	return &MessagesResult{
 		Events: a.events,
 	}, nil

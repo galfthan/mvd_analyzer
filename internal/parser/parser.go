@@ -141,6 +141,11 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 				return nil
 			}
 
+		case mvd.SvcSetInfo:
+			if err := p.parseSetInfo(r, msg.Time); err != nil {
+				return nil
+			}
+
 		case mvd.SvcPrint:
 			if err := p.parsePrint(r, msg.Time); err != nil {
 				return nil
@@ -415,15 +420,16 @@ func skipCommand(r *mvd.BufferReader, cmd byte, floatCoords bool, fteExt uint32)
 	case mvd.SvcEntGravity:
 		return r.Skip(4) // float
 	case mvd.SvcSetInfo:
-		_, err := r.ReadByte() // player
+		// Handled in parseNetworkMessage main switch; this fallback is unused.
+		_, err := r.ReadByte()
 		if err != nil {
 			return err
 		}
-		_, err = r.ReadString() // key
+		_, err = r.ReadString()
 		if err != nil {
 			return err
 		}
-		_, err = r.ReadString() // value
+		_, err = r.ReadString()
 		return err
 	case mvd.SvcServerInfo:
 		_, err := r.ReadString() // key
@@ -498,25 +504,48 @@ func skipSpawnStatic(r *mvd.BufferReader, floatCoords bool) error {
 	return skipSpawnBaseline(r, floatCoords)
 }
 
+// skipTempEntity skips a svc_temp_entity payload. The byte layout depends on
+// the temp-entity type and whether the protocol negotiated float coordinates.
+//
+// Reference: ezquake `cl_tent.c::CL_ParseTEnt` and mvdsv `cl_parse.c`. The QW
+// wire formats are:
+//
+//	TE_SPIKE/SUPERSPIKE/EXPLOSION/TAREXPLOSION/WIZSPIKE/KNIGHTSPIKE/
+//	  LAVASPLASH/TELEPORT/LIGHTNINGBLOOD: 3 coords             (6 / 12 bytes)
+//	TE_GUNSHOT, TE_BLOOD:                 byte count + 3 coords (7 / 13 bytes)
+//	TE_LIGHTNING1/2/3 (beams):            short ent + 6 coords  (14 / 26 bytes)
+//
+// The previous implementation lumped TE_GUNSHOT into the plain-coord group,
+// dropped TE_BLOOD into the default 6-byte branch, mis-sized beams as 16 bytes,
+// and treated TE_LIGHTNINGBLOOD as a beam. Each of those was a 1-2 byte drift
+// per occurrence; in a busy frame the accumulated drift would walk the parser
+// straight into a byte that happened to look like svc_updatestatlong, at which
+// point downstream code saw armor=172620004 and the team-average graph
+// autoscaled to garbage.
+//
+// Unknown TE types deliberately bail (io.EOF) rather than guessing a length —
+// silent drift is much worse than dropping the rest of the message.
 func skipTempEntity(r *mvd.BufferReader, floatCoords bool) error {
 	teType, err := r.ReadByte()
 	if err != nil {
 		return err
 	}
-	// Size varies by type - simplified handling
+	coordSize := 2
+	if floatCoords {
+		coordSize = 4
+	}
 	switch teType {
-	case 0, 1, 2, 3, 4, 7, 8, 10, 11: // Point-based
-		if floatCoords {
-			return r.Skip(12)
-		}
-		return r.Skip(6)
-	case 5, 6, 9, 13: // Beam-based
-		return r.Skip(16)
+	case 0, 1, 3, 4, 7, 8, 10, 11, 13:
+		// 3 coords
+		return r.Skip(3 * coordSize)
+	case 2, 12:
+		// byte count + 3 coords
+		return r.Skip(1 + 3*coordSize)
+	case 5, 6, 9:
+		// beam: short entity + 3 coords (start) + 3 coords (end)
+		return r.Skip(2 + 6*coordSize)
 	default:
-		if floatCoords {
-			return r.Skip(12)
-		}
-		return r.Skip(6)
+		return io.EOF
 	}
 }
 
