@@ -36,8 +36,6 @@ type Result struct {
 	Match            *MatchResult             `json:"match,omitempty"`
 	Frags            *FragResult              `json:"frags,omitempty"`
 	Messages         *MessagesResult          `json:"messages,omitempty"`
-	Stats            *StatsResult             `json:"stats,omitempty"`
-	WeaponStats      *WeaponStatsResult       `json:"weaponStats,omitempty"`
 	DemoInfo         *DemoInfoResult          `json:"demoInfo,omitempty"`
 	TimelineAnalysis *TimelineAnalysisResult  `json:"timelineAnalysis,omitempty"`
 	Errors           []string                 `json:"errors,omitempty"`
@@ -108,49 +106,6 @@ type MatchEvent struct {
 	Message string  `json:"message"` // Chat text or frag description
 	Victim  string  `json:"victim,omitempty"` // For frags
 	Weapon  string  `json:"weapon,omitempty"` // For frags
-}
-
-// StatsResult contains stats tracking results
-type StatsResult struct {
-	PlayerStats map[string]*PlayerStatsEntry `json:"playerStats"`
-}
-
-// PlayerStatsEntry holds final stats for a player
-type PlayerStatsEntry struct {
-	MaxHealth int `json:"maxHealth"`
-	MaxArmor  int `json:"maxArmor"`
-}
-
-// WeaponStatsResult contains weapon usage statistics
-type WeaponStatsResult struct {
-	PlayerStats map[string]*PlayerWeaponStatsEntry `json:"playerStats"`
-}
-
-// PlayerWeaponStatsEntry holds weapon stats for a player
-type PlayerWeaponStatsEntry struct {
-	Weapons     map[string]*WeaponStatEntry `json:"weapons"`
-	Environment *EnvironmentalDamage        `json:"environment,omitempty"`
-}
-
-// EnvironmentalDamage tracks damage received from environmental sources
-type EnvironmentalDamage struct {
-	Lava    int `json:"lava,omitempty"`    // Damage from lava
-	Slime   int `json:"slime,omitempty"`   // Damage from slime
-	Drown   int `json:"drown,omitempty"`   // Damage from drowning
-	Fall    int `json:"fall,omitempty"`    // Fall damage
-	Squish  int `json:"squish,omitempty"`  // Crush damage (world-attributed)
-	Trigger int `json:"trigger,omitempty"` // trigger_hurt damage
-}
-
-// WeaponStatEntry holds statistics for a single weapon
-type WeaponStatEntry struct {
-	Shots      int     `json:"shots"`
-	Hits       int     `json:"hits"`
-	Damage     int     `json:"damage"`
-	Overkill   int     `json:"overkill,omitempty"`
-	TeamDamage int     `json:"teamDamage,omitempty"`
-	SelfDamage int     `json:"selfDamage,omitempty"`
-	Accuracy   float64 `json:"accuracy"`
 }
 
 // DemoInfoResult contains parsed KTX embedded JSON stats (authoritative)

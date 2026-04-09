@@ -74,7 +74,7 @@ func (a *DemoInfoAnalyzer) Finalize() (interface{}, error) {
 
 	result := a.parseBlocks()
 
-	// Store in context for other analyzers (e.g., WeaponStatsAnalyzer)
+	// Store in context for other analyzers
 	if result != nil {
 		a.ctx.DemoInfo = result
 	}

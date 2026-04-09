@@ -29,10 +29,6 @@ func (a *FragAnalyzer) Init(ctx *Context) error {
 	return nil
 }
 
-// Debug mode for tracking unmatched messages
-var debugUnmatched = false
-var unmatchedMessages []string
-
 func (a *FragAnalyzer) OnEvent(event parser.Event) error {
 	printEvent, ok := event.(*parser.PrintEvent)
 	if !ok {

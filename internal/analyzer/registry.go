@@ -95,14 +95,6 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 			if f, ok := output.(*FragResult); ok {
 				result.Frags = f
 			}
-		case "stats":
-			if s, ok := output.(*StatsResult); ok {
-				result.Stats = s
-			}
-		case "weaponstats":
-			if ws, ok := output.(*WeaponStatsResult); ok {
-				result.WeaponStats = ws
-			}
 		case "demoinfo":
 			if di, ok := output.(*DemoInfoResult); ok {
 				result.DemoInfo = di
@@ -192,8 +184,6 @@ func NewDefaultRegistry() *Registry {
 	r.Register(NewMatchAnalyzer())
 	r.Register(NewFragAnalyzer())
 	r.Register(NewMessagesAnalyzer())
-	r.Register(NewStatsAnalyzer())
-	r.Register(NewWeaponStatsAnalyzer())
 	r.Register(NewTimelineAnalyzer())
 	return r
 }
