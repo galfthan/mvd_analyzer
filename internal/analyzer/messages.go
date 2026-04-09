@@ -441,6 +441,38 @@ func normalizeName(name string) string {
 }
 
 func (a *MessagesAnalyzer) Finalize() (interface{}, error) {
+	// Backfill missing team attributions using DemoInfo. Some demos have a
+	// userinfo "name" that doesn't match the player's actual displayed
+	// netname (KTX auth-override case): the chat parser pulls the displayed
+	// name out of the print message but ctx.Players[slot].Name is still the
+	// auth name, so the live lookup in handlePrint returns "". DemoInfo is
+	// finalized before this analyzer, so by now we have the canonical
+	// {displayed name -> team} mapping and can repair the gaps.
+	if a.ctx.DemoInfo != nil {
+		nameToTeam := make(map[string]string, len(a.ctx.DemoInfo.Players))
+		normToTeam := make(map[string]string, len(a.ctx.DemoInfo.Players))
+		for _, p := range a.ctx.DemoInfo.Players {
+			if p.Name == "" || p.Team == "" {
+				continue
+			}
+			nameToTeam[p.Name] = p.Team
+			normToTeam[normalizeName(p.Name)] = p.Team
+		}
+		for i := range a.events {
+			ev := &a.events[i]
+			if ev.Team != "" || ev.Player == "" {
+				continue
+			}
+			if t := nameToTeam[ev.Player]; t != "" {
+				ev.Team = t
+				continue
+			}
+			if t := normToTeam[normalizeName(ev.Player)]; t != "" {
+				ev.Team = t
+			}
+		}
+	}
+
 	return &MessagesResult{
 		Events: a.events,
 	}, nil

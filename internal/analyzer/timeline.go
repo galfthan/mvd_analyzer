@@ -218,11 +218,22 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error {
 
 	state := a.getOrCreatePlayerState(e.PlayerNum)
 
+	// Drop obviously-corrupt stat values. Quake caps every gameplay stat
+	// the timeline cares about well below 1000 (mega + ra = 200 hp / 200
+	// armor at the extreme; ammo counts max ~200). A spurious 32-bit value
+	// from a misread svc_updatestatlong otherwise persists for many seconds
+	// of buckets and blows up the team-average graph autoscale, making the
+	// real curve look like a flat line at zero. We log nothing — the next
+	// real update will replace state.* anyway.
+	const maxStatValue = 1000
+	if e.Value > maxStatValue || e.Value < -1000 {
+		return nil
+	}
+
 	switch e.StatIndex {
 	case mvd.StatHealth:
 		state.health = e.Value
 	case mvd.StatArmor:
-
 		state.armor = e.Value
 	case mvd.StatItems:
 		state.items = e.Value
@@ -472,13 +483,21 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		}
 	}
 
-	// Build slot->name mapping for exports
+	// Build slot->name mapping for exports.
+	//
+	// Prefer the DemoInfo-derived name (resolved above by matching final
+	// frag counts) over the live userinfo name. The two can differ when
+	// the userinfo "name" field is an auth/login string but the player's
+	// actual displayed netname is a different (often colored) string —
+	// the frontend joins timeline data against DemoInfo player names, so
+	// we must export the same name DemoInfo did or the per-player health/
+	// armor stack disappears for that player.
 	slotToName := make(map[int]string)
 	for slot := 0; slot < mvd.MaxClients; slot++ {
-		if player := a.ctx.Players[slot]; player != nil && player.Name != "" {
-			slotToName[slot] = player.Name
-		} else if name := slotToPlayer[slot]; name != "" {
+		if name := slotToPlayer[slot]; name != "" {
 			slotToName[slot] = name
+		} else if player := a.ctx.Players[slot]; player != nil && player.Name != "" {
+			slotToName[slot] = player.Name
 		} else if name := a.playerNames[slot]; name != "" {
 			slotToName[slot] = name
 		}

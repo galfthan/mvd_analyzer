@@ -141,6 +141,11 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 				return nil
 			}
 
+		case mvd.SvcSetInfo:
+			if err := p.parseSetInfo(r, msg.Time); err != nil {
+				return nil
+			}
+
 		case mvd.SvcPrint:
 			if err := p.parsePrint(r, msg.Time); err != nil {
 				return nil
@@ -415,15 +420,16 @@ func skipCommand(r *mvd.BufferReader, cmd byte, floatCoords bool, fteExt uint32)
 	case mvd.SvcEntGravity:
 		return r.Skip(4) // float
 	case mvd.SvcSetInfo:
-		_, err := r.ReadByte() // player
+		// Handled in parseNetworkMessage main switch; this fallback is unused.
+		_, err := r.ReadByte()
 		if err != nil {
 			return err
 		}
-		_, err = r.ReadString() // key
+		_, err = r.ReadString()
 		if err != nil {
 			return err
 		}
-		_, err = r.ReadString() // value
+		_, err = r.ReadString()
 		return err
 	case mvd.SvcServerInfo:
 		_, err := r.ReadString() // key

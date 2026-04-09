@@ -7,37 +7,26 @@ import (
 	"github.com/mvd-analyzer/internal/parser"
 )
 
-// cleanQuakeName removes Quake color codes and control characters from names
-// The JSON contains \uXXXX escapes for non-ASCII bytes, which Go decodes as Unicode codepoints
+// cleanQuakeName normalizes a Quake-encoded name from KTX's demoinfo JSON.
+// JSON escapes like \u00CE come back as rune 0xCE, so we treat each rune as
+// a Quake font byte (0-255) and run it through the same Q_normalizetext
+// table that the parser uses on userinfo / print messages. Keeping a single
+// mapping function in two places is fragile, but the parser package owns
+// the canonical table; analyzer just delegates.
 func cleanQuakeName(s string) string {
-	var result []rune
-	for _, r := range s {
-		// Get the codepoint as a byte value (0-255)
-		// JSON escapes like \u009C become rune 0x9C, \u00D3 becomes rune 0xD3
-		c := int(r)
-
-		// Handle characters in the 128-255 range (Quake colored/bronze text)
-		// These are colored versions of the lower 128 chars
-		if c >= 128 && c <= 255 {
-			c -= 128
-		}
-
-		// Skip characters outside byte range (shouldn't happen in Quake names)
-		if c > 255 {
-			continue
-		}
-
-		// Skip control characters (0x00-0x1F) to match parser's cleanString behavior.
-		// Both functions must produce identical names so that demoInfo player names
-		// match the names used in timeline bucket data.
-		if c < 32 {
-			continue
-		} else if c < 127 {
-			result = append(result, rune(c))
-		}
-		// Skip DEL (127)
+	if s == "" {
+		return ""
 	}
-	return string(result)
+	buf := make([]byte, 0, len(s))
+	for _, r := range s {
+		if r < 0 || r > 255 {
+			// Non-byte runes shouldn't appear in Quake names; drop them
+			// rather than mangle to something arbitrary.
+			continue
+		}
+		buf = append(buf, byte(r))
+	}
+	return parser.NormalizeQuakeText(buf)
 }
 
 // DemoInfoAnalyzer collects and parses embedded demoinfo JSON from hidden messages
