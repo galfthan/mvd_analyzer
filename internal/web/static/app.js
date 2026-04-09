@@ -1,5 +1,7 @@
 // MVD Analyzer Dashboard — Pure client-side via WASM
 
+const TEAM_COLORS = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+
 let currentResult = null;
 
 // ─── WASM Worker ────────────────────────────────────────────────────────────
@@ -514,7 +516,7 @@ function displayPlayerStats(players) {
     sorted.forEach(player => {
         const tr = document.createElement('tr');
         const teamIdx = teamOrder.indexOf(player.team || '');
-        const teamColors = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+        const teamColors = TEAM_COLORS;
         if (teamIdx >= 0 && teamIdx < teamColors.length) {
             tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
         }
@@ -547,7 +549,7 @@ function displayWeaponStatsTable(players) {
     const sorted = [...players].sort((a, b) => (b.dmg?.given || 0) - (a.dmg?.given || 0));
 
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+    const teamColors = TEAM_COLORS;
 
     sorted.forEach(player => {
         const w = player.weapons || {};
@@ -603,7 +605,7 @@ function displayItemsTable(players) {
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
 
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+    const teamColors = TEAM_COLORS;
 
     sorted.forEach(player => {
         const items = player.items || {};
@@ -641,7 +643,7 @@ function displayPerformanceTable(players) {
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
 
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+    const teamColors = TEAM_COLORS;
 
     sorted.forEach(player => {
         const tr = document.createElement('tr');
@@ -736,7 +738,7 @@ function displayPlayerStatsTeams(players) {
 
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+    const teamColors = TEAM_COLORS;
     const groups = groupByTeam(sorted);
 
     teamOrder.forEach((team, idx) => {
@@ -785,7 +787,7 @@ function displayWeaponStatsTeamsTable(players) {
 
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+    const teamColors = TEAM_COLORS;
     const groups = groupByTeam(sorted);
 
     teamOrder.forEach((team, idx) => {
@@ -826,7 +828,7 @@ function displayItemsTeamsTable(players) {
 
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+    const teamColors = TEAM_COLORS;
     const groups = groupByTeam(sorted);
 
     teamOrder.forEach((team, idx) => {
@@ -868,7 +870,7 @@ function displayPerformanceTeamsTable(players) {
 
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+    const teamColors = TEAM_COLORS;
     const groups = groupByTeam(sorted);
 
     teamOrder.forEach((team, idx) => {
@@ -920,39 +922,6 @@ function displayWeaponsChart(byWeapon) {
     });
 }
 
-function displayTimeline(events, teams) {
-    const container = document.getElementById('timeline-body');
-    container.innerHTML = '';
-
-    const teamNames = Array.isArray(teams) ? teams : teams.map(t => t.name);
-    if (teamNames.length >= 2) {
-        document.getElementById('team1-header').textContent = teamNames[0];
-        document.getElementById('team2-header').textContent = teamNames[1];
-    }
-
-    const relevantEvents = events.filter(e =>
-        e.type === 'frag' || e.type === 'chat' || e.type === 'teamsay'
-    ).slice(0, 500);
-
-    relevantEvents.forEach(event => {
-        const row = document.createElement('div');
-        row.className = 'timeline-row';
-
-        const isTeam1 = teamNames.length >= 1 && event.team === teamNames[0];
-        const isTeam2 = teamNames.length >= 2 && event.team === teamNames[1];
-
-        const eventHtml = `<span class="timeline-event ${event.type}">${escapeHtml(event.message)}</span>`;
-
-        row.innerHTML = `
-            <div class="timeline-left">${isTeam1 ? eventHtml : ''}</div>
-            <div class="timeline-time">${formatTime(event.time)}</div>
-            <div class="timeline-right">${isTeam2 ? eventHtml : ''}</div>
-        `;
-
-        container.appendChild(row);
-    });
-}
-
 function getAccuracyClass(acc) {
     if (acc >= 40) return 'accuracy-high';
     if (acc >= 25) return 'accuracy-medium';
@@ -992,7 +961,7 @@ function displayKeyMoments(result) {
         const powerupDisplay = getPowerupDisplay(event.powerupType);
 
         tr.innerHTML = `
-            <td class="time-cell time-link">${formatTime(event.time)}</td>
+            <td class="time-cell time-link">${formatDuration(event.time)}</td>
             <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
             <td>${escapeHtml(event.playerName || 'Unknown')}</td>
             <td>${escapeHtml(event.team || '-')}</td>
@@ -1018,20 +987,10 @@ function getPowerupDisplay(type) {
     }
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 function formatDuration(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
-function formatTime(seconds) {
-    return formatDuration(seconds);
 }
 
 function getWeaponName(code) {
@@ -1465,7 +1424,7 @@ function updateSegmentLabel() {
         return;
     }
 
-    label.textContent = `${formatTime(timelineState.segment.start)} – ${formatTime(timelineState.segment.end)}`;
+    label.textContent = `${formatDuration(timelineState.segment.start)} – ${formatDuration(timelineState.segment.end)}`;
 }
 
 function updateUnifiedCursor() {
@@ -1483,7 +1442,7 @@ function updateUnifiedCursor() {
 function updateUnifiedTimeDisplay() {
     const display = document.getElementById('tl-current-time');
     if (!display) return;
-    display.textContent = formatTime(Math.max(0, mapState.currentTime));
+    display.textContent = formatDuration(Math.max(0, mapState.currentTime));
 }
 
 function renderUnifiedAxis() {
@@ -1499,7 +1458,7 @@ function renderUnifiedAxis() {
         const time = (duration / tickCount) * i;
         const pct = (i / tickCount) * 100;
         const span = document.createElement('span');
-        span.textContent = formatTime(time);
+        span.textContent = formatDuration(time);
         span.style.left = `${pct}%`;
         container.appendChild(span);
     }
@@ -1546,7 +1505,7 @@ function updateDetailView() {
     // Show range in label
     if (timelineState.segment) {
         document.getElementById('time-range-label').textContent =
-            `(${formatTime(start)} - ${formatTime(end)})`;
+            `(${formatDuration(start)} - ${formatDuration(end)})`;
     } else {
         document.getElementById('time-range-label').textContent = '';
     }
@@ -1685,7 +1644,7 @@ function renderChatTimeAxisFull(container) {
         const tick = document.createElement('div');
         tick.className = 'chat-tick';
         tick.style.top = `${topPx}px`;
-        tick.textContent = formatTime(t);
+        tick.textContent = formatDuration(t);
         inner.appendChild(tick);
     }
 
@@ -1885,7 +1844,7 @@ function updateDetailAxis(startTime, endTime) {
     for (let i = 0; i <= tickCount; i++) {
         const time = startTime + ((endTime - startTime) / tickCount) * i;
         const span = document.createElement('span');
-        span.textContent = formatTime(time);
+        span.textContent = formatDuration(time);
         container.appendChild(span);
     }
 }
@@ -2024,7 +1983,7 @@ function updateHealthAxis(startTime, endTime) {
     for (let i = 0; i <= tickCount; i++) {
         const time = startTime + ((endTime - startTime) / tickCount) * i;
         const span = document.createElement('span');
-        span.textContent = formatTime(time);
+        span.textContent = formatDuration(time);
         container.appendChild(span);
     }
 }
@@ -2135,7 +2094,7 @@ function updateFragsAxis(startTime, endTime) {
     for (let i = 0; i <= tickCount; i++) {
         const time = startTime + ((endTime - startTime) / tickCount) * i;
         const span = document.createElement('span');
-        span.textContent = formatTime(time);
+        span.textContent = formatDuration(time);
         container.appendChild(span);
     }
 }
@@ -2263,7 +2222,7 @@ function updateScoreAxis(startTime, endTime) {
     for (let i = 0; i <= tickCount; i++) {
         const time = startTime + ((endTime - startTime) / tickCount) * i;
         const span = document.createElement('span');
-        span.textContent = formatTime(time);
+        span.textContent = formatDuration(time);
         container.appendChild(span);
     }
 }
@@ -3540,7 +3499,7 @@ function buildMapPowerupList(result) {
     for (const event of events) {
         const li = document.createElement('li');
         li.innerHTML = `
-            <span class="time-cell">${formatTime(event.time)}</span>
+            <span class="time-cell">${formatDuration(event.time)}</span>
             <span class="powerup-cell ${event.powerupType}">${getPowerupDisplay(event.powerupType)}</span>
             <span>${escapeHtml(event.playerName || 'Unknown')}</span>
         `;

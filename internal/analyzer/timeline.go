@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/mvd-analyzer/internal/loc"
 	"github.com/mvd-analyzer/internal/mvd"
@@ -174,20 +175,11 @@ func (a *TimelineAnalyzer) detectMatchStart(e *parser.PrintEvent) {
 	// KTX servers print "The match has begun!" or similar
 	// Also detect "Fight!" or countdown end
 	msg := e.Message
-	if contains(msg, "match has begun") || contains(msg, "Fight!") ||
-		contains(msg, "begins in 1") || contains(msg, "Go!") {
+	if strings.Contains(msg, "match has begun") || strings.Contains(msg, "Fight!") ||
+		strings.Contains(msg, "begins in 1") || strings.Contains(msg, "Go!") {
 		a.matchStartTime = e.Time
 		a.matchStarted = true
 	}
-}
-
-func contains(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
 
 func (a *TimelineAnalyzer) handleFragUpdate(e *parser.FragUpdateEvent) {
