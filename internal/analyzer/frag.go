@@ -73,6 +73,39 @@ func (a *FragAnalyzer) OnEvent(event parser.Event) error {
 }
 
 func (a *FragAnalyzer) Finalize() (interface{}, error) {
+	// Re-evaluate teamkill status using DemoInfo. During OnEvent,
+	// isTeamKill() compared obituary display names against ctx.Players
+	// which may have had auth names, causing misses.
+	if a.ctx.DemoInfo != nil {
+		nameToTeam := make(map[string]string)
+		for _, p := range a.ctx.DemoInfo.Players {
+			if p.Name != "" && p.Team != "" {
+				nameToTeam[p.Name] = p.Team
+			}
+		}
+		for i := range a.frags {
+			f := &a.frags[i]
+			if f.IsSuicide {
+				continue
+			}
+			killerTeam := nameToTeam[f.Killer]
+			victimTeam := nameToTeam[f.Victim]
+			wasTeamKill := f.IsTeamKill
+			f.IsTeamKill = killerTeam != "" && victimTeam != "" && killerTeam == victimTeam
+
+			// Fix kill counts if teamkill status changed
+			if f.IsTeamKill != wasTeamKill && !isGenericPlayer(f.Killer) {
+				if killer, ok := a.byPlayer[f.Killer]; ok {
+					if f.IsTeamKill && !wasTeamKill {
+						killer.Kills--
+					} else if !f.IsTeamKill && wasTeamKill {
+						killer.Kills++
+					}
+				}
+			}
+		}
+	}
+
 	return &FragResult{
 		TotalFrags: len(a.frags),
 		Frags:      a.frags,

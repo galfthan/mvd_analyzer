@@ -98,6 +98,14 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 		case "demoinfo":
 			if di, ok := output.(*DemoInfoResult); ok {
 				result.DemoInfo = di
+				// Patch player names to display names from DemoInfo.
+				// This fixes all downstream Finalize() reads so consumers
+				// see the in-game display name instead of the auth/login name.
+				for slot, info := range ctx.ResolveSlotDemoInfo() {
+					if ctx.Players[slot] != nil {
+						ctx.Players[slot].Name = info.Name
+					}
+				}
 			}
 		case "messages":
 			if m, ok := output.(*MessagesResult); ok {

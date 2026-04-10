@@ -11,8 +11,6 @@ import (
 type MatchAnalyzer struct {
 	ctx            *Context
 	duration       float64
-	fragsByPlayer  map[string]int
-	deathsByPlayer map[string]int
 	matchStartTime float64
 	matchEndTime   float64
 	matchStarted   bool
@@ -20,10 +18,7 @@ type MatchAnalyzer struct {
 
 // NewMatchAnalyzer creates a new match analyzer
 func NewMatchAnalyzer() *MatchAnalyzer {
-	return &MatchAnalyzer{
-		fragsByPlayer:  make(map[string]int),
-		deathsByPlayer: make(map[string]int),
-	}
+	return &MatchAnalyzer{}
 }
 
 func (a *MatchAnalyzer) Name() string { return "match" }
@@ -34,20 +29,8 @@ func (a *MatchAnalyzer) Init(ctx *Context) error {
 }
 
 func (a *MatchAnalyzer) OnEvent(event parser.Event) error {
-	// Track duration
 	a.duration = event.EventTime()
 
-	// Track frag updates
-	if fragEvent, ok := event.(*parser.FragUpdateEvent); ok {
-		if fragEvent.PlayerNum >= 0 && fragEvent.PlayerNum < len(a.ctx.Players) {
-			if a.ctx.Players[fragEvent.PlayerNum] != nil {
-				name := a.ctx.Players[fragEvent.PlayerNum].Name
-				a.fragsByPlayer[name] = fragEvent.Frags
-			}
-		}
-	}
-
-	// Track match start/end from print messages
 	if printEvent, ok := event.(*parser.PrintEvent); ok {
 		a.checkMatchTiming(printEvent)
 	}
@@ -119,14 +102,12 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 		result.GameDir = a.ctx.ServerData.GameDir
 	}
 
-	// Resolve display names from DemoInfo so the match result shows
-	// the in-game display name rather than the auth/login name.
-	resolved := a.ctx.ResolveSlotDemoInfo()
-
 	// Collect team stats
 	teamFrags := make(map[string]int)
 
-	// Collect player stats
+	// Collect player stats.
+	// ctx.Players[slot].Name is already patched to the display name
+	// by registry.go after DemoInfo finalization.
 	for i := 0; i < len(a.ctx.Players); i++ {
 		p := a.ctx.Players[i]
 		if p == nil || p.Name == "" || p.Spectator {
@@ -138,19 +119,14 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 			continue
 		}
 
-		displayName := p.Name
-		if di, ok := resolved[i]; ok {
-			displayName = di.Name
-		}
-
 		stat := PlayerStat{
-			Name:  displayName,
+			Name:  p.Name,
 			Team:  p.Team,
 			Frags: p.Frags,
 		}
 
-		// Use tracked frags if available
-		if frags, ok := a.fragsByPlayer[p.Name]; ok {
+		// Use tracked frags if available (keyed by slot, not name)
+		if frags, ok := a.ctx.FragsBySlot[i]; ok {
 			stat.Frags = frags
 		}
 
