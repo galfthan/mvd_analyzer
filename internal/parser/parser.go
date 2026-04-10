@@ -40,6 +40,8 @@ type Parser struct {
 	handlers        []Handler
 	floatCoords     bool
 	fteExtensions   uint32 // FTE protocol extension flags
+	diagnosticMode  bool
+	warnings        []Warning
 }
 
 // NewParser creates a new parser
@@ -132,61 +134,74 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 		switch cmd {
 		case mvd.SvcServerData:
 			if err := p.parseServerData(r, msg.Time); err != nil {
-				// Non-fatal, continue with next message
+				p.warn(msg.Time, "parse_error", "svc_serverdata: %v", err)
 				return nil
 			}
 
 		case mvd.SvcUpdateUserInfo:
 			if err := p.parseUserInfo(r, msg.Time); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_updateuserinfo: %v", err)
 				return nil
 			}
 
 		case mvd.SvcSetInfo:
 			if err := p.parseSetInfo(r, msg.Time); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_setinfo: %v", err)
 				return nil
 			}
 
 		case mvd.SvcPrint:
 			if err := p.parsePrint(r, msg.Time); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_print: %v", err)
 				return nil
 			}
 
 		case mvd.SvcUpdateStat:
 			if err := p.parseUpdateStat(r, msg.Time, msg.Header.PlayerNum); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_updatestat: %v", err)
 				return nil
 			}
 
 		case mvd.SvcUpdateStatLong:
 			if err := p.parseUpdateStatLong(r, msg.Time, msg.Header.PlayerNum); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_updatestatlong: %v", err)
 				return nil
 			}
 
 		case mvd.SvcUpdateFrags:
 			if err := p.parseUpdateFrags(r, msg.Time); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_updatefrags: %v", err)
 				return nil
 			}
 
 		case mvd.SvcPlayerInfo:
 			if err := p.parsePlayerInfo(r, msg.Time, p.floatCoords); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_playerinfo: %v", err)
 				return nil
 			}
 
 		case mvd.SvcModelList:
 			if err := p.parseModelList(r); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_modellist: %v", err)
 				return nil
 			}
 
 		case mvd.SvcDisconnect:
-			// Read disconnect message
 			message, _ := r.ReadString()
 			if message == "EndOfDemo" {
 				return mvd.ErrEndOfDemo
 			}
 
 		default:
-			// Skip unknown commands - if we can't determine size, skip rest of payload
-			if err := skipCommand(r, cmd, p.floatCoords, p.fteExtensions); err != nil {
-				// Can't skip this command - bail on this payload, but continue parsing
+			if cmd == mvd.SvcTempEntity && p.diagnosticMode {
+				teType, err := skipTempEntityDiag(r, p.floatCoords)
+				if err != nil {
+					p.warn(msg.Time, "unknown_te", "unknown temp entity type %d, %d bytes remaining in payload abandoned", teType, r.Remaining())
+					return nil
+				}
+			} else if err := skipCommand(r, cmd, p.floatCoords, p.fteExtensions); err != nil {
+				p.warn(msg.Time, "unknown_svc", "%s (cmd %d), %d bytes remaining in payload abandoned",
+					SvcName(cmd), cmd, r.Remaining())
 				return nil
 			}
 		}
@@ -208,12 +223,14 @@ func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 			return nil // End of data
 		}
 		if blockLen < 2 || blockLen > 10000 {
-			return nil // Invalid block (sanity check)
+			p.warn(time, "parse_error", "hidden block with invalid length %d", blockLen)
+			return nil
 		}
 
 		// Read type ID (2 bytes)
 		typeID, err := r.ReadUint16()
 		if err != nil {
+			p.warn(time, "parse_error", "hidden block typeID read failed: %v", err)
 			return nil
 		}
 
@@ -223,17 +240,17 @@ func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 		// Parse based on type
 		switch typeID {
 		case mvd.MVDHiddenDmgDone:
-			// parseHiddenDamage handles the damage record and skips extra bytes
 			if err := p.parseHiddenDamage(r, time, dataLen); err != nil {
-				return nil // Stop on error
+				p.warn(time, "parse_error", "hidden dmgdone: %v", err)
+				return nil
 			}
 		case mvd.MVDHiddenDemoInfo:
-			// Parse embedded JSON demoinfo
 			if err := p.parseHiddenDemoInfo(r, time, dataLen); err != nil {
+				p.warn(time, "parse_error", "hidden demoinfo: %v", err)
 				return nil
 			}
 		default:
-			// Skip unknown hidden message types
+			p.warn(time, "unknown_hidden", "unknown hidden message type 0x%04x, %d bytes skipped", typeID, dataLen)
 			if dataLen > 0 {
 				if err := r.Skip(dataLen); err != nil {
 					return nil
@@ -525,6 +542,29 @@ func skipSpawnStatic(r *mvd.BufferReader, floatCoords bool) error {
 //
 // Unknown TE types deliberately bail (io.EOF) rather than guessing a length —
 // silent drift is much worse than dropping the rest of the message.
+// skipTempEntityDiag is like skipTempEntity but returns the TE type on unknown types
+// so the caller can emit a diagnostic warning. Returns (teType, error).
+func skipTempEntityDiag(r *mvd.BufferReader, floatCoords bool) (byte, error) {
+	teType, err := r.ReadByte()
+	if err != nil {
+		return 0, err
+	}
+	coordSize := 2
+	if floatCoords {
+		coordSize = 4
+	}
+	switch teType {
+	case 0, 1, 3, 4, 7, 8, 10, 11, 13:
+		return teType, r.Skip(3 * coordSize)
+	case 2, 12:
+		return teType, r.Skip(1 + 3*coordSize)
+	case 5, 6, 9:
+		return teType, r.Skip(2 + 6*coordSize)
+	default:
+		return teType, io.EOF
+	}
+}
+
 func skipTempEntity(r *mvd.BufferReader, floatCoords bool) error {
 	teType, err := r.ReadByte()
 	if err != nil {
