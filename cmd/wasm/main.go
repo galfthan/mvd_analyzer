@@ -54,8 +54,20 @@ func errorJSON(msg string) string {
 	return string(b)
 }
 
+// Set at build time via -ldflags.
+var (
+	GitHash   = "dev"
+	GitTag    = "dev"
+	BuildDate = "unknown"
+)
+
 func main() {
 	js.Global().Set("analyzeMVD", js.FuncOf(analyze))
+	js.Global().Set("wasmVersion", map[string]interface{}{
+		"hash": GitHash,
+		"tag":  GitTag,
+		"date": BuildDate,
+	})
 	// Block forever to keep WASM instance alive
 	select {}
 }

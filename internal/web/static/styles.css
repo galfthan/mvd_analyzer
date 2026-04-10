@@ -44,6 +44,13 @@ header p {
     letter-spacing: 0.02em;
 }
 
+.version-tag {
+    font-size: 0.75rem !important;
+    color: #4a5a6e !important;
+    margin-top: 4px;
+    font-family: monospace;
+}
+
 .card {
     background: #16213e;
     border-radius: 12px;

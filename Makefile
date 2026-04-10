@@ -3,7 +3,10 @@
 WASM_MAIN := ./cmd/wasm
 DIST_DIR := dist
 STATIC_DIR := internal/web/static
-LDFLAGS := -ldflags "-s -w"
+GIT_HASH := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+GIT_TAG := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
+BUILD_DATE := $(shell date -u +%Y-%m-%d)
+LDFLAGS := -ldflags "-s -w -X main.GitHash=$(GIT_HASH) -X main.GitTag=$(GIT_TAG) -X main.BuildDate=$(BUILD_DATE)"
 
 .PHONY: build serve clean test fmt help
 

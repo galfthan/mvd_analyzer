@@ -12,7 +12,7 @@ async function initWasm() {
     );
     go.run(result.instance);
     wasmReady = true;
-    postMessage({ type: 'ready' });
+    postMessage({ type: 'ready', version: self.wasmVersion || null });
 }
 
 initWasm().catch(err => {

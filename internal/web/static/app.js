@@ -16,6 +16,11 @@ worker.onmessage = (e) => {
         wasmReady = true;
         const overlay = document.getElementById('wasm-loading');
         if (overlay) overlay.style.display = 'none';
+        const v = e.data.version;
+        const tag = document.getElementById('version-tag');
+        if (tag && v) {
+            tag.textContent = `${v.tag} (${v.hash}) — ${v.date}`;
+        }
     } else if (e.data.type === 'result') {
         if (analyzeResolve) {
             analyzeResolve(e.data.json);
