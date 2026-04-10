@@ -424,8 +424,39 @@ function displayResults(result) {
 // ─── Sortable Tables ──────────────────────────────────────────────────────
 
 function makeSortable(table) {
-    const headers = table.querySelectorAll('thead th');
-    headers.forEach((th, colIdx) => {
+    const theadRows = table.querySelectorAll('thead tr');
+    const allHeaders = table.querySelectorAll('thead th');
+
+    // Build a column index map: for each th, compute which td column it maps to.
+    // Handles rowspan and colspan in multi-row headers.
+    const grid = []; // grid[row][col] = th element or null (occupied by span)
+    theadRows.forEach((tr, rowIdx) => {
+        if (!grid[rowIdx]) grid[rowIdx] = [];
+        let colPos = 0;
+        tr.querySelectorAll('th').forEach(th => {
+            // Skip columns already occupied by rowspan from previous rows
+            while (grid[rowIdx][colPos]) colPos++;
+            const colspan = parseInt(th.getAttribute('colspan')) || 1;
+            const rowspan = parseInt(th.getAttribute('rowspan')) || 1;
+            // Store mapping on the element
+            th._sortColIdx = colPos;
+            th._sortColspan = colspan;
+            // Mark grid cells as occupied
+            for (let r = 0; r < rowspan; r++) {
+                if (!grid[rowIdx + r]) grid[rowIdx + r] = [];
+                for (let c = 0; c < colspan; c++) {
+                    grid[rowIdx + r][colPos + c] = true;
+                }
+            }
+            colPos += colspan;
+        });
+    });
+
+    allHeaders.forEach(th => {
+        // Skip colspan > 1 headers (group headers, not sortable)
+        if (th._sortColspan > 1) return;
+
+        const colIdx = th._sortColIdx;
         th.classList.add('sortable');
         th.addEventListener('click', () => {
             const tbody = table.querySelector('tbody');
@@ -437,7 +468,7 @@ function makeSortable(table) {
             const dir = wasAsc ? 'desc' : 'asc';
 
             // Reset all headers in this table
-            headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+            allHeaders.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
             th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
 
             rows.sort((a, b) => {
