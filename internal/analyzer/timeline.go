@@ -376,21 +376,18 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	nameToTeam := make(map[string]string)
 	normNameToTeam := make(map[string]string) // Normalized names (lowercase, alphanumeric only)
 
-	// Slot resolution against the demoinfo player list is keyed on
-	// (team, frags) rather than frags alone. KTX may write a "displayed"
-	// netname into the demoinfo JSON that does NOT match the userinfo
-	// "name" key (auth-override case): we can't join by name, so we have
-	// to bridge slot↔demoinfo via secondary signals. The userinfo team is
-	// reliable in this case (only the displayed name diverges), so we use
-	// it as a tie-breaker against the final frag count. We also track how
-	// many demoinfo entries each (team, frags) tuple resolves to so the
-	// caller can require uniqueness before promoting the demoinfo name.
-	type teamFragsKey struct {
-		team  string
-		frags int
-	}
-	demoByKey := make(map[teamFragsKey]*DemoInfoPlayer)
-	demoKeyCount := make(map[teamFragsKey]int)
+	// Build indexes for slot↔demoinfo bridging.
+	//
+	// Primary: login join — mvdsv broadcasts *auth\<login> in the slot's
+	// userinfo, and KTX writes the same login into demoinfo players[].login.
+	// This is deterministic and unambiguous for authenticated players.
+	//
+	// Fallback: name join — for unauthenticated players the userinfo "name"
+	// and ent->netname are equal by construction (auth is the only mechanism
+	// that makes them diverge), so a direct name match works.
+	demoByLogin := make(map[string]*DemoInfoPlayer) // login → demoinfo player
+	demoByName := make(map[string]*DemoInfoPlayer)  // normalized name → demoinfo player
+	demoNameCount := make(map[string]int)            // detect ambiguous name matches
 	if a.ctx.DemoInfo != nil {
 		for i := range a.ctx.DemoInfo.Players {
 			p := &a.ctx.DemoInfo.Players[i]
@@ -399,43 +396,44 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 			}
 			nameToTeam[p.Name] = p.Team
 			normNameToTeam[normalizePlayerName(p.Name)] = p.Team
-			if p.Stats == nil {
-				continue
+
+			if p.Login != "" {
+				demoByLogin[p.Login] = p
 			}
-			k := teamFragsKey{team: p.Team, frags: p.Stats.Frags}
-			demoKeyCount[k]++
-			if demoKeyCount[k] == 1 {
-				demoByKey[k] = p
+			norm := normalizePlayerName(p.Name)
+			demoNameCount[norm]++
+			if demoNameCount[norm] == 1 {
+				demoByName[norm] = p
 			} else {
-				// Ambiguous: drop the entry so callers must fall back.
-				delete(demoByKey, k)
+				delete(demoByName, norm)
 			}
 		}
 	}
 
 	// Build slot->team and slot->player mappings.
-	//
-	// We only commit a slot→demoinfo mapping when the userinfo team for
-	// that slot agrees with the demoinfo team AND the (team, frags) tuple
-	// resolves to exactly one demoinfo player. Anything ambiguous, missing,
-	// or contradictory is left out — `slotToName` (built later) will then
-	// fall back to ctx.Players[slot].Name. This means the failure mode for
-	// a wrong heuristic is "Team Status panel shows the userinfo name for
-	// one slot", not "stats from slot X get attributed to slot Y".
 	slotToTeam := make(map[int]string)
 	slotToPlayer := make(map[int]string)
-	for slot, frags := range a.ctx.FragsBySlot {
+	for slot := 0; slot < mvd.MaxClients; slot++ {
 		live := a.ctx.Players[slot]
 		if live == nil || live.Team == "" {
 			continue
 		}
-		k := teamFragsKey{team: live.Team, frags: frags}
-		dp, ok := demoByKey[k]
-		if !ok {
-			continue
+
+		// Step 1: login join (authoritative for auth-enabled demos)
+		if live.Auth != "" {
+			if dp, ok := demoByLogin[live.Auth]; ok {
+				slotToTeam[slot] = dp.Team
+				slotToPlayer[slot] = dp.Name
+				continue
+			}
 		}
-		slotToTeam[slot] = dp.Team
-		slotToPlayer[slot] = dp.Name
+
+		// Step 2: direct name join (for unauthenticated players)
+		norm := normalizePlayerName(live.Name)
+		if dp, ok := demoByName[norm]; ok {
+			slotToTeam[slot] = dp.Team
+			slotToPlayer[slot] = dp.Name
+		}
 	}
 
 	// Convert raw frag events to final events with player and team info
@@ -444,8 +442,8 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		// Prefer the demoinfo-resolved name (via slotToPlayer) so the
 		// emitted player name matches what the timeline buckets and the
 		// frontend's demoinfo-keyed Team Status panel expect. Fall back to
-		// the userinfo name only when the strict (team, frags) match
-		// failed for this slot.
+		// the userinfo name only when neither the login join nor the name
+		// join matched this slot to a demoinfo entry.
 		playerName := slotToPlayer[raw.PlayerNum]
 		team := slotToTeam[raw.PlayerNum]
 
@@ -501,8 +499,8 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 
 	// Build slot->name mapping for exports.
 	//
-	// Prefer the DemoInfo-derived name (resolved above by matching final
-	// frag counts) over the live userinfo name. The two can differ when
+	// Prefer the DemoInfo-derived name (resolved above via login join or
+	// name join) over the live userinfo name. The two can differ when
 	// the userinfo "name" field is an auth/login string but the player's
 	// actual displayed netname is a different (often colored) string —
 	// the frontend joins timeline data against DemoInfo player names, so

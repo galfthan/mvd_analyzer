@@ -98,6 +98,8 @@ func (p *Parser) parseSetInfo(r *mvd.BufferReader, time float64) error {
 		if c, err := strconv.Atoi(value); err == nil {
 			player.BottomColor = c
 		}
+	case "*auth":
+		player.Auth = cleanString(value)
 	case "*spectator":
 		player.Spectator = value == "1"
 	default:
@@ -138,6 +140,8 @@ func parseUserInfoString(s string, player *mvd.PlayerInfo) {
 			if c, err := strconv.Atoi(value); err == nil {
 				player.BottomColor = c
 			}
+		case "*auth":
+			player.Auth = cleanString(value)
 		case "spectator":
 			player.Spectator = value == "1"
 		}
