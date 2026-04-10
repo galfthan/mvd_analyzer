@@ -229,6 +229,7 @@ type PlayerInfo struct {
 	Team        string
 	TopColor    int
 	BottomColor int
+	Auth        string // *auth login from userinfo (set by mvdsv for authenticated players)
 	Spectator   bool
 	Frags       int
 	Ping        int
