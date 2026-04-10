@@ -12,6 +12,7 @@ type Context struct {
 	Players     [mvd.MaxClients]*mvd.PlayerInfo
 	FragsBySlot map[int]int      // Final frag count per slot
 	DemoInfo    *DemoInfoResult  // Parsed demoinfo (set during finalization)
+	FragEntries []FragEntry      // Frag entries from frag analyzer (set during finalization)
 }
 
 // SlotDemoInfo holds the resolved demoinfo player for a slot.
@@ -344,14 +345,16 @@ type PowerupEvent struct {
 	Duration     float64 `json:"duration"`     // Seconds held
 }
 
-// FragStreakEvent represents a frag streak (consecutive kills without dying) for Key Moments
+// FragStreakEvent represents a frag streak (spawn-to-death run) for Key Moments
 type FragStreakEvent struct {
-	Time         float64 `json:"time"`         // Demo time when streak started
-	EndTime      float64 `json:"endTime"`      // Demo time when streak ended (death or end of match)
+	Time         float64 `json:"time"`         // Demo time when player spawned
+	EndTime      float64 `json:"endTime"`      // Demo time when player died (or match ended)
 	PlayerName   string  `json:"playerName"`   // Player name
 	PlayerUserID int     `json:"playerUserID"` // Player UserID for Hub viewer track param
 	Team         string  `json:"team"`         // Player's team
-	Frags        int     `json:"frags"`        // Number of consecutive kills
+	Frags        int     `json:"frags"`        // Number of kills during run
+	Duration     float64 `json:"duration"`     // Seconds alive
+	Ewep         string  `json:"ewep"`         // Effective weapon (most kills with)
 }
 
 // TimelineBucket represents aggregated data for a time slice

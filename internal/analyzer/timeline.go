@@ -26,6 +26,7 @@ type TimelineAnalyzer struct {
 	buckets             []*timelineBucketData
 	fragEventsRaw       []fragEventRaw  // Raw frag events (player num, time)
 	deathEventsRaw      []deathEventRaw // Raw death events (player num, time)
+	spawnEventsRaw      []deathEventRaw // Raw spawn events (reusing deathEventRaw type)
 	lastSampleTime      float64
 	matchStartTime      float64
 	matchStarted        bool
@@ -280,9 +281,15 @@ func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 
 		state.prevHealth = state.health
 
-		// Record death events for frag streak calculation
+		// Record death/spawn events for frag streak calculation
 		if isDeathFrame {
 			a.deathEventsRaw = append(a.deathEventsRaw, deathEventRaw{
+				Time:      time,
+				PlayerNum: slot,
+			})
+		}
+		if isSpawnFrame {
+			a.spawnEventsRaw = append(a.spawnEventsRaw, deathEventRaw{
 				Time:      time,
 				PlayerNum: slot,
 			})
@@ -511,7 +518,7 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	}
 
 	// Detect top 5 longest frag streaks for Key Moments
-	fragStreaks := a.detectFragStreaks(5, fragEvents, nameToTeam, playerUserIDsByName)
+	fragStreaks := a.detectFragStreaks(5, nameToTeam, playerUserIDsByName)
 
 	result := &TimelineAnalysisResult{
 		BucketDuration:  a.graphBucketDuration, // 1.0 for graphs
@@ -972,128 +979,152 @@ func (a *TimelineAnalyzer) createPowerupEvent(slot int, powerupType string, star
 	return event
 }
 
-// detectFragStreaks computes the top N longest frag streaks (consecutive kills without dying)
-func (a *TimelineAnalyzer) detectFragStreaks(topN int, fragEvents []TimelineFragEvent, nameToTeam map[string]string, playerUserIDsByName map[string]int) []FragStreakEvent {
-	// Build a per-player timeline of kills and deaths
-	// First, build a per-player-slot death time list
-	deathsBySlot := make(map[int][]float64)
-	for _, d := range a.deathEventsRaw {
-		deathsBySlot[d.PlayerNum] = append(deathsBySlot[d.PlayerNum], d.Time)
-	}
-
-	// Convert slot-based deaths to name-based using same resolution as fragEvents
+// detectFragStreaks computes the top N longest frag streaks (spawn-to-death runs)
+// ranked by number of frags. Each run starts at spawn and ends at death.
+// Effective weapon (ewep) is the weapon with the most kills during the run.
+func (a *TimelineAnalyzer) detectFragStreaks(topN int, nameToTeam map[string]string, playerUserIDsByName map[string]int) []FragStreakEvent {
 	resolved := a.ctx.ResolveSlotDemoInfo()
-	deathsByName := make(map[string][]float64)
-	for slot, times := range deathsBySlot {
-		name := ""
+
+	// Helper: resolve slot to player name
+	slotName := func(slot int) string {
 		if di, ok := resolved[slot]; ok && di.Name != "" {
-			name = di.Name
-		} else if player := a.ctx.Players[slot]; player != nil {
-			name = player.Name
-		} else if n, ok := a.playerNames[slot]; ok {
-			name = n
+			return di.Name
 		}
-		if name != "" {
-			deathsByName[name] = append(deathsByName[name], times...)
+		if player := a.ctx.Players[slot]; player != nil {
+			return player.Name
 		}
+		if n, ok := a.playerNames[slot]; ok {
+			return n
+		}
+		return ""
 	}
 
-	// Sort death times per player
+	// Build per-player sorted spawn and death time lists
+	type lifeEvent struct {
+		time float64
+	}
+	spawnsByName := make(map[string][]float64)
+	deathsByName := make(map[string][]float64)
+
+	for _, s := range a.spawnEventsRaw {
+		if name := slotName(s.PlayerNum); name != "" {
+			spawnsByName[name] = append(spawnsByName[name], s.Time)
+		}
+	}
+	for _, d := range a.deathEventsRaw {
+		if name := slotName(d.PlayerNum); name != "" {
+			deathsByName[name] = append(deathsByName[name], d.Time)
+		}
+	}
+	for name := range spawnsByName {
+		sort.Float64s(spawnsByName[name])
+	}
 	for name := range deathsByName {
 		sort.Float64s(deathsByName[name])
 	}
 
-	// Track streaks per player: walk through frag events in order
-	type activeStreak struct {
-		startTime float64
-		frags     int
+	// Build runs: pair each spawn with the next death
+	type run struct {
+		playerName string
+		team       string
+		spawnTime  float64
+		deathTime  float64
 	}
-	currentStreak := make(map[string]*activeStreak)
+	var runs []run
 
-	var allStreaks []FragStreakEvent
+	// Collect all player names
+	allPlayers := make(map[string]bool)
+	for name := range spawnsByName {
+		allPlayers[name] = true
+	}
+	for name := range deathsByName {
+		allPlayers[name] = true
+	}
 
-	for _, fe := range fragEvents {
-		if fe.Delta <= 0 {
-			// Suicide/teamkill ends the streak
-			if s := currentStreak[fe.Player]; s != nil && s.frags > 0 {
-				allStreaks = append(allStreaks, FragStreakEvent{
-					Time:       s.startTime,
-					EndTime:    fe.Time,
-					PlayerName: fe.Player,
-					Team:       fe.Team,
-					Frags:      s.frags,
+	for name := range allPlayers {
+		spawns := spawnsByName[name]
+		deaths := deathsByName[name]
+		di := 0
+
+		for _, spawnT := range spawns {
+			// Find next death after this spawn
+			for di < len(deaths) && deaths[di] <= spawnT {
+				di++
+			}
+			deathT := 0.0
+			if di < len(deaths) {
+				deathT = deaths[di]
+				di++
+			} else {
+				// No death found - run extends to end of match
+				if len(a.buckets) > 0 {
+					deathT = a.buckets[len(a.buckets)-1].endTime
+				}
+			}
+			if deathT > spawnT {
+				runs = append(runs, run{
+					playerName: name,
+					team:       nameToTeam[name],
+					spawnTime:  spawnT,
+					deathTime:  deathT,
 				})
 			}
-			delete(currentStreak, fe.Player)
+		}
+	}
+
+	// For each run, count frags and determine effective weapon using FragEntries
+	fragEntries := a.ctx.FragEntries
+	var allStreaks []FragStreakEvent
+
+	for _, r := range runs {
+		frags := 0
+		weaponCounts := make(map[string]int)
+
+		for _, fe := range fragEntries {
+			if fe.Killer != r.playerName {
+				continue
+			}
+			if fe.Time < r.spawnTime || fe.Time > r.deathTime {
+				continue
+			}
+			if fe.IsSuicide || fe.IsTeamKill {
+				continue
+			}
+			frags++
+			weaponCounts[fe.Weapon]++
+		}
+
+		if frags == 0 {
 			continue
 		}
 
-		// Check if the player died between the last frag event and this one
-		s := currentStreak[fe.Player]
-		if s != nil {
-			// Check for deaths between the last event and now
-			deaths := deathsByName[fe.Player]
-			died := false
-			for len(deaths) > 0 && deaths[0] <= fe.Time {
-				if s.startTime > 0 && deaths[0] > s.startTime {
-					died = true
-				}
-				deaths = deaths[1:]
-			}
-			deathsByName[fe.Player] = deaths
-			if died {
-				// End the streak
-				allStreaks = append(allStreaks, FragStreakEvent{
-					Time:       s.startTime,
-					EndTime:    fe.Time,
-					PlayerName: fe.Player,
-					Team:       fe.Team,
-					Frags:      s.frags,
-				})
-				s = nil
-				delete(currentStreak, fe.Player)
+		// Determine effective weapon (most kills)
+		ewep := ""
+		maxWepKills := 0
+		for wep, count := range weaponCounts {
+			if count > maxWepKills {
+				maxWepKills = count
+				ewep = wep
 			}
 		}
 
-		// Start or extend streak
-		if s == nil {
-			currentStreak[fe.Player] = &activeStreak{
-				startTime: fe.Time,
-				frags:     fe.Delta,
-			}
-		} else {
-			s.frags += fe.Delta
-		}
-	}
-
-	// Flush remaining active streaks (check if they died after their last frag)
-	for name, s := range currentStreak {
-		if s.frags > 0 {
-			team := nameToTeam[name]
-			endTime := 0.0
-			if len(a.buckets) > 0 {
-				endTime = a.buckets[len(a.buckets)-1].endTime
-			}
-			// Check for any remaining deaths after the streak started
-			for _, dt := range deathsByName[name] {
-				if dt > s.startTime {
-					endTime = dt
-					break
-				}
-			}
-			allStreaks = append(allStreaks, FragStreakEvent{
-				Time:       s.startTime,
-				EndTime:    endTime,
-				PlayerName: name,
-				Team:       team,
-				Frags:      s.frags,
-			})
-		}
+		allStreaks = append(allStreaks, FragStreakEvent{
+			Time:       r.spawnTime,
+			EndTime:    r.deathTime,
+			PlayerName: r.playerName,
+			Team:       r.team,
+			Frags:      frags,
+			Duration:   r.deathTime - r.spawnTime,
+			Ewep:       ewep,
+		})
 	}
 
 	// Sort by frags descending
 	sort.Slice(allStreaks, func(i, j int) bool {
-		return allStreaks[i].Frags > allStreaks[j].Frags
+		if allStreaks[i].Frags != allStreaks[j].Frags {
+			return allStreaks[i].Frags > allStreaks[j].Frags
+		}
+		return allStreaks[i].Duration < allStreaks[j].Duration // Tie-break: shorter run = more impressive
 	})
 
 	// Set UserIDs
