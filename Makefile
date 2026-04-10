@@ -12,6 +12,7 @@ LDFLAGS := -ldflags "-s -w -X main.GitHash=$(GIT_HASH) -X main.GitTag=$(GIT_TAG)
 
 # Default target
 build:
+	@rm -rf $(DIST_DIR)
 	@echo "Building WASM module..."
 	@mkdir -p $(DIST_DIR)
 	GOOS=js GOARCH=wasm go build $(LDFLAGS) -o $(DIST_DIR)/analyzer.wasm $(WASM_MAIN)
