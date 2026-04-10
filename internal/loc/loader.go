@@ -31,8 +31,8 @@ var locVariables = map[string]string{
 	"$loc_name_ssg":  "SSG",
 	"$loc_name_ng":   "NG",
 	"$loc_name_sng":  "SNG",
-	// Separator + suffix (expands to " suffix")
-	"$loc_name_separator": " ",
+	// Separator (ezQuake default is "-")
+	"$loc_name_separator": "-",
 }
 
 // locSeparatorSuffixes lists the known suffixes that can follow $loc_name_separator.
@@ -177,10 +177,20 @@ func substituteVariables(s string) string {
 	}
 	result := string(cleaned)
 
+	// Replace "$." separator shorthand with "-". Many community loc files
+	// use "$." as a compact separator between tokens (e.g., "rl$.low" → "rl-low").
+	// In ezQuake, $loc_name_separator defaults to "-". We use the same default.
+	result = strings.ReplaceAll(result, "$.", "-")
+
 	// Strip ezQuake team color macros: $RR, $BB, $R, $B, $G, $Y, $W
 	// (longer patterns first to avoid partial matches)
 	for _, macro := range []string{"$RR", "$BB", "$GG", "$YY", "$WW", "$R", "$B", "$G", "$Y", "$W"} {
 		result = strings.ReplaceAll(result, macro, "")
+	}
+
+	// Strip remaining standalone "$" before digits (e.g., "$4" area labels)
+	for i := 0; i < 10; i++ {
+		result = strings.ReplaceAll(result, "$"+string(rune('0'+i)), string(rune('0'+i)))
 	}
 
 	// Fix broken loc files (e.g., an1-beta3.loc) where an authoring tool
@@ -206,7 +216,7 @@ func substituteVariables(s string) string {
 		matched := false
 		for _, suffix := range locSeparatorSuffixes {
 			if strings.HasPrefix(rest, suffix) {
-				replacement := " " + suffix
+				replacement := "-" + suffix
 				result = result[:idx] + replacement + result[idx+len(sepPrefix)+len(suffix):]
 				lower = strings.ToLower(result)
 				matched = true
@@ -219,7 +229,7 @@ func substituteVariables(s string) string {
 			if idx+len(sepPrefix) <= len(result) {
 				// Check for base "$loc_name_separator" without a known suffix
 				// but could be followed by unknown text - just expand the base separator
-				result = result[:idx] + " " + result[idx+len(sepPrefix):]
+				result = result[:idx] + "-" + result[idx+len(sepPrefix):]
 				lower = strings.ToLower(result)
 			}
 		}
@@ -242,5 +252,34 @@ func substituteVariables(s string) string {
 
 	// Clean up multiple spaces and trim
 	result = strings.Join(strings.Fields(result), " ")
+
+	// Capitalize known weapon/armor/item abbreviations when they appear as
+	// standalone tokens (delimited by "-", " ", or string boundaries).
+	result = capitalizeItems(result)
+
 	return result
+}
+
+// itemAbbreviations lists weapon, armor, and item short names that should be
+// uppercased when they appear as standalone tokens in location names.
+var itemAbbreviations = map[string]string{
+	"rl": "RL", "lg": "LG", "gl": "GL", "ssg": "SSG", "ng": "NG", "sng": "SNG",
+	"ra": "RA", "ya": "YA", "ga": "GA", "mh": "MH", "mega": "MEGA",
+	"quad": "Quad", "pent": "Pent", "ring": "Ring", "suit": "Suit",
+}
+
+func capitalizeItems(s string) string {
+	// Split on "-" first, process each segment, rejoin
+	dashes := strings.Split(s, "-")
+	for i, seg := range dashes {
+		// Split each dash-segment on spaces, capitalize tokens
+		words := strings.Split(seg, " ")
+		for j, w := range words {
+			if upper, ok := itemAbbreviations[strings.ToLower(w)]; ok {
+				words[j] = upper
+			}
+		}
+		dashes[i] = strings.Join(words, " ")
+	}
+	return strings.Join(dashes, "-")
 }
