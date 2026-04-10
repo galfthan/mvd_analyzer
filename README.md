@@ -89,6 +89,37 @@ Configured for Netlify via `netlify.toml`. Every push runs `make build` and publ
 | `internal/web/static/` | Frontend (HTML, CSS, JS) |
 | `pkg/mvdfile/` | MVD/gzip file reader |
 
+## Testing
+
+```bash
+make test                  # Run all tests
+go test ./internal/parser/ # Unit tests (userinfo parsing)
+```
+
+### Diagnostic test
+
+The diagnostic test runs demos through the parser in "strict mode", surfacing warnings that are normally silently dropped in production. It also checks data quality on the analysis output.
+
+```bash
+go test -v -run TestDiagnosticParseDemos ./internal/diagnostic/
+```
+
+To test against a larger collection, drop `.mvd` / `.mvd.gz` files into `internal/diagnostic/testdata/`.
+
+**Parse warnings** (issues the production parser silently ignores):
+- Unknown `svc_*` command types (payload abandoned)
+- Unknown temp entity types
+- Unknown hidden message type IDs
+- Parse errors in individual message handlers
+
+**Data quality checks** (coherence of the analysis result):
+- Player names in match result vs demoInfo coverage
+- Frag totals: sum of timeline frag events vs demoInfo stats
+- Players with frags but no team
+- Timeline player names not present in demoInfo
+- Impossible stat values (health > 250, armor > 200)
+- Duplicate player names in demoInfo
+
 ## Documentation
 
 - [MVD_FORMAT.md](MVD_FORMAT.md) — Binary format specification with source code references
