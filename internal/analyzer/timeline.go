@@ -465,6 +465,19 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	// Detect powerup pickup events for Key Moments
 	powerupEvents := a.detectPowerupEvents(nameToTeam, slotToTeam, slotToPlayer)
 
+	// Count frags during each powerup run
+	for i := range powerupEvents {
+		pe := &powerupEvents[i]
+		for _, fe := range a.ctx.FragEntries {
+			if fe.Killer != pe.PlayerName || fe.IsSuicide || fe.IsTeamKill {
+				continue
+			}
+			if fe.Time >= pe.Time && fe.Time <= pe.EndTime {
+				pe.Frags++
+			}
+		}
+	}
+
 	// Export location data for map visualization
 	var locationData []MapLocation
 	if a.locFinder != nil {
@@ -518,7 +531,7 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	}
 
 	// Detect top 5 longest frag streaks for Key Moments
-	fragStreaks := a.detectFragStreaks(5, nameToTeam, playerUserIDsByName)
+	fragStreaks := a.detectFragStreaks(10, nameToTeam, playerUserIDsByName)
 
 	result := &TimelineAnalysisResult{
 		BucketDuration:  a.graphBucketDuration, // 1.0 for graphs

@@ -970,6 +970,7 @@ function displayKeyMoments(result) {
             <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
             <td>${escapeHtml(event.playerName || 'Unknown')}</td>
             <td>${escapeHtml(event.team || '-')}</td>
+            <td>${event.frags || 0}</td>
             <td>${Math.round(event.duration)}s</td>
             <td>${watchCell}</td>
         `;
@@ -1007,7 +1008,7 @@ function displayKeyMoments(result) {
                 watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
             }
 
-            const ewepDisplay = streak.ewep ? streak.ewep.toUpperCase() : '-';
+            const mainWepDisplay = streak.ewep ? streak.ewep.toUpperCase() : '-';
             const durationSecs = Math.round(streak.duration);
 
             tr.innerHTML = `
@@ -1015,7 +1016,7 @@ function displayKeyMoments(result) {
                 <td>${escapeHtml(streak.playerName || 'Unknown')}</td>
                 <td>${escapeHtml(streak.team || '-')}</td>
                 <td>${streak.frags}</td>
-                <td>${escapeHtml(ewepDisplay)}</td>
+                <td>${escapeHtml(mainWepDisplay)}</td>
                 <td>${durationSecs}s</td>
                 <td>${watchCell}</td>
             `;

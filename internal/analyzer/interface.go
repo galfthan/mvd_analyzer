@@ -343,6 +343,7 @@ type PowerupEvent struct {
 	Team         string  `json:"team"`         // Player's team
 	PowerupType  string  `json:"powerupType"`  // "quad", "pent", or "ring"
 	Duration     float64 `json:"duration"`     // Seconds held
+	Frags        int     `json:"frags"`        // Kills during powerup run
 }
 
 // FragStreakEvent represents a frag streak (spawn-to-death run) for Key Moments
