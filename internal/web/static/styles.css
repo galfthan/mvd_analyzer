@@ -1424,6 +1424,18 @@ th.sortable.sort-desc::after {
     box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
 }
 
+.keymoments-grid.active {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+@media (max-width: 1200px) {
+    .keymoments-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 #keymoments-table th:first-child,
 #keymoments-table td:first-child {
     width: 80px;

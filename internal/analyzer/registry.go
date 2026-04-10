@@ -94,6 +94,7 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 		case "frag":
 			if f, ok := output.(*FragResult); ok {
 				result.Frags = f
+				ctx.FragEntries = f.Frags // Share with timeline analyzer
 			}
 		case "demoinfo":
 			if di, ok := output.(*DemoInfoResult); ok {
@@ -141,6 +142,10 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 			for i := range ta.PowerupEvents {
 				ta.PowerupEvents[i].Time -= matchStart
 				ta.PowerupEvents[i].EndTime -= matchStart
+			}
+			for i := range ta.FragStreaks {
+				ta.FragStreaks[i].Time -= matchStart
+				ta.FragStreaks[i].EndTime -= matchStart
 			}
 			ta.DemoOffset = matchStart
 			ta.MatchStartTime = 0

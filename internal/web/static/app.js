@@ -970,6 +970,7 @@ function displayKeyMoments(result) {
             <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
             <td>${escapeHtml(event.playerName || 'Unknown')}</td>
             <td>${escapeHtml(event.team || '-')}</td>
+            <td>${event.frags || 0}</td>
             <td>${Math.round(event.duration)}s</td>
             <td>${watchCell}</td>
         `;
@@ -1000,18 +1001,23 @@ function displayKeyMoments(result) {
             let watchCell = '-';
             if (hubInfo && hubInfo.gameId) {
                 const demoOff = timelineState.demoOffset || 0;
-                const fromTime = Math.max(0, Math.floor(streak.time + demoOff) - 5);
-                const toTime = Math.floor(streak.endTime + demoOff) + 5;
+                const fromTime = Math.max(0, Math.floor(streak.time + demoOff));
+                const toTime = Math.floor(streak.endTime + demoOff) + 3;
                 const trackId = streak.playerUserID || 0;
                 const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
                 watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
             }
+
+            const mainWepDisplay = streak.ewep ? streak.ewep.toUpperCase() : '-';
+            const durationSecs = Math.round(streak.duration);
 
             tr.innerHTML = `
                 <td class="time-cell time-link">${formatDuration(streak.time)}</td>
                 <td>${escapeHtml(streak.playerName || 'Unknown')}</td>
                 <td>${escapeHtml(streak.team || '-')}</td>
                 <td>${streak.frags}</td>
+                <td>${escapeHtml(mainWepDisplay)}</td>
+                <td>${durationSecs}s</td>
                 <td>${watchCell}</td>
             `;
 
