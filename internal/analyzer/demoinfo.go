@@ -136,6 +136,8 @@ func (a *DemoInfoAnalyzer) parseBlocks() *DemoInfoResult {
 			Spree:       p.Spree,
 			Control:     p.Control,
 			Speed:       p.Speed,
+			XferRL:      p.XferRL,
+			XferLG:      p.XferLG,
 			Weapons:     make(map[string]*DemoInfoWeapon),
 			Items:       make(map[string]*DemoInfoItem),
 		}

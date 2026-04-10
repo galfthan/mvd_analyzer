@@ -527,6 +527,8 @@ function displayPlayerStats(players) {
         }
         const kills = player.stats?.kills || 0;
         const deaths = player.stats?.deaths || 0;
+        const rlKills = player.weapons?.rl?.kills?.enemy || 0;
+        const lgKills = player.weapons?.lg?.kills?.enemy || 0;
         const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
         tr.innerHTML = `
             <td>${escapeHtml(player.name)}</td>
@@ -534,6 +536,8 @@ function displayPlayerStats(players) {
             <td>${player.stats?.frags || 0}</td>
             <td>${efficiency}%</td>
             <td>${kills}</td>
+            <td>${rlKills}</td>
+            <td>${lgKills}</td>
             <td>${deaths}</td>
             <td>${player.stats?.tk || 0}</td>
             <td>${player.stats?.suicides || 0}</td>
@@ -614,6 +618,7 @@ function displayItemsTable(players) {
 
     sorted.forEach(player => {
         const items = player.items || {};
+        const weapons = player.weapons || {};
         const tr = document.createElement('tr');
         const teamIdx = teamOrder.indexOf(player.team || '');
         if (teamIdx >= 0 && teamIdx < teamColors.length) {
@@ -628,6 +633,12 @@ function displayItemsTable(players) {
             <td>${formatPowerup(items.q)}</td>
             <td>${formatPowerup(items.p)}</td>
             <td>${formatPowerup(items.r)}</td>
+            <td>${weapons.rl?.pickups?.taken || 0}</td>
+            <td>${weapons.rl?.pickups?.dropped || 0}</td>
+            <td>${player.xferRL || 0}</td>
+            <td>${weapons.lg?.pickups?.taken || 0}</td>
+            <td>${weapons.lg?.pickups?.dropped || 0}</td>
+            <td>${player.xferLG || 0}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -750,6 +761,8 @@ function displayPlayerStatsTeams(players) {
         const members = groups[team] || [];
         const frags = members.reduce((s, p) => s + (p.stats?.frags || 0), 0);
         const kills = members.reduce((s, p) => s + (p.stats?.kills || 0), 0);
+        const rlKills = members.reduce((s, p) => s + (p.weapons?.rl?.kills?.enemy || 0), 0);
+        const lgKills = members.reduce((s, p) => s + (p.weapons?.lg?.kills?.enemy || 0), 0);
         const deaths = members.reduce((s, p) => s + (p.stats?.deaths || 0), 0);
         const tk = members.reduce((s, p) => s + (p.stats?.tk || 0), 0);
         const suicides = members.reduce((s, p) => s + (p.stats?.suicides || 0), 0);
@@ -773,6 +786,8 @@ function displayPlayerStatsTeams(players) {
             <td>${frags}</td>
             <td>${efficiency}%</td>
             <td>${kills}</td>
+            <td>${rlKills}</td>
+            <td>${lgKills}</td>
             <td>${deaths}</td>
             <td>${tk}</td>
             <td>${suicides}</td>
@@ -848,6 +863,12 @@ function displayItemsTeamsTable(players) {
         const pentTime = members.reduce((s, p) => s + (p.items?.p?.time || 0), 0);
         const ring = members.reduce((s, p) => s + (p.items?.r?.took || 0), 0);
         const ringTime = members.reduce((s, p) => s + (p.items?.r?.time || 0), 0);
+        const rlPickup = members.reduce((s, p) => s + (p.weapons?.rl?.pickups?.taken || 0), 0);
+        const rlDrop = members.reduce((s, p) => s + (p.weapons?.rl?.pickups?.dropped || 0), 0);
+        const rlXfer = members.reduce((s, p) => s + (p.xferRL || 0), 0);
+        const lgPickup = members.reduce((s, p) => s + (p.weapons?.lg?.pickups?.taken || 0), 0);
+        const lgDrop = members.reduce((s, p) => s + (p.weapons?.lg?.pickups?.dropped || 0), 0);
+        const lgXfer = members.reduce((s, p) => s + (p.xferLG || 0), 0);
 
         const fmtPu = (took, time) => time > 0 ? `${took} (${time}s)` : `${took}`;
 
@@ -864,6 +885,12 @@ function displayItemsTeamsTable(players) {
             <td>${fmtPu(quad, quadTime)}</td>
             <td>${fmtPu(pent, pentTime)}</td>
             <td>${fmtPu(ring, ringTime)}</td>
+            <td>${rlPickup}</td>
+            <td>${rlDrop}</td>
+            <td>${rlXfer}</td>
+            <td>${lgPickup}</td>
+            <td>${lgDrop}</td>
+            <td>${lgXfer}</td>
         `;
         tbody.appendChild(tr);
     });
