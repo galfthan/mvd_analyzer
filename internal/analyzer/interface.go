@@ -14,6 +14,60 @@ type Context struct {
 	DemoInfo    *DemoInfoResult  // Parsed demoinfo (set during finalization)
 }
 
+// SlotDemoInfo holds the resolved demoinfo player for a slot.
+type SlotDemoInfo struct {
+	Name string // Display name from demoinfo
+	Team string // Team from demoinfo
+}
+
+// ResolveSlotDemoInfo bridges slot↔demoinfo using login join (for authenticated
+// players) then name join (for unauthenticated players). Returns a map from
+// slot number to the matched demoinfo player's display name and team.
+func (ctx *Context) ResolveSlotDemoInfo() map[int]SlotDemoInfo {
+	result := make(map[int]SlotDemoInfo)
+	if ctx.DemoInfo == nil {
+		return result
+	}
+
+	demoByLogin := make(map[string]*DemoInfoPlayer)
+	demoByName := make(map[string]*DemoInfoPlayer)
+	nameCount := make(map[string]int)
+
+	for i := range ctx.DemoInfo.Players {
+		p := &ctx.DemoInfo.Players[i]
+		if p.Name == "" {
+			continue
+		}
+		if p.Login != "" {
+			demoByLogin[p.Login] = p
+		}
+		norm := normalizePlayerName(p.Name)
+		nameCount[norm]++
+		if nameCount[norm] == 1 {
+			demoByName[norm] = p
+		} else {
+			delete(demoByName, norm)
+		}
+	}
+
+	for slot, live := range ctx.Players {
+		if live == nil {
+			continue
+		}
+		if live.Auth != "" {
+			if dp, ok := demoByLogin[live.Auth]; ok {
+				result[slot] = SlotDemoInfo{Name: dp.Name, Team: dp.Team}
+				continue
+			}
+		}
+		if dp, ok := demoByName[normalizePlayerName(live.Name)]; ok {
+			result[slot] = SlotDemoInfo{Name: dp.Name, Team: dp.Team}
+		}
+	}
+
+	return result
+}
+
 // Analyzer is the interface for analysis modules
 type Analyzer interface {
 	// Name returns the unique identifier for this analyzer

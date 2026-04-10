@@ -376,63 +376,24 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	nameToTeam := make(map[string]string)
 	normNameToTeam := make(map[string]string) // Normalized names (lowercase, alphanumeric only)
 
-	// Build indexes for slot↔demoinfo bridging.
-	//
-	// Primary: login join — mvdsv broadcasts *auth\<login> in the slot's
-	// userinfo, and KTX writes the same login into demoinfo players[].login.
-	// This is deterministic and unambiguous for authenticated players.
-	//
-	// Fallback: name join — for unauthenticated players the userinfo "name"
-	// and ent->netname are equal by construction (auth is the only mechanism
-	// that makes them diverge), so a direct name match works.
-	demoByLogin := make(map[string]*DemoInfoPlayer) // login → demoinfo player
-	demoByName := make(map[string]*DemoInfoPlayer)  // normalized name → demoinfo player
-	demoNameCount := make(map[string]int)            // detect ambiguous name matches
 	if a.ctx.DemoInfo != nil {
-		for i := range a.ctx.DemoInfo.Players {
-			p := &a.ctx.DemoInfo.Players[i]
+		for _, p := range a.ctx.DemoInfo.Players {
 			if p.Name == "" || p.Team == "" {
 				continue
 			}
 			nameToTeam[p.Name] = p.Team
 			normNameToTeam[normalizePlayerName(p.Name)] = p.Team
-
-			if p.Login != "" {
-				demoByLogin[p.Login] = p
-			}
-			norm := normalizePlayerName(p.Name)
-			demoNameCount[norm]++
-			if demoNameCount[norm] == 1 {
-				demoByName[norm] = p
-			} else {
-				delete(demoByName, norm)
-			}
 		}
 	}
 
-	// Build slot->team and slot->player mappings.
+	// Bridge slot↔demoinfo via login join / name join.
+	resolved := a.ctx.ResolveSlotDemoInfo()
 	slotToTeam := make(map[int]string)
 	slotToPlayer := make(map[int]string)
-	for slot := 0; slot < mvd.MaxClients; slot++ {
-		live := a.ctx.Players[slot]
-		if live == nil || live.Team == "" {
-			continue
-		}
-
-		// Step 1: login join (authoritative for auth-enabled demos)
-		if live.Auth != "" {
-			if dp, ok := demoByLogin[live.Auth]; ok {
-				slotToTeam[slot] = dp.Team
-				slotToPlayer[slot] = dp.Name
-				continue
-			}
-		}
-
-		// Step 2: direct name join (for unauthenticated players)
-		norm := normalizePlayerName(live.Name)
-		if dp, ok := demoByName[norm]; ok {
-			slotToTeam[slot] = dp.Team
-			slotToPlayer[slot] = dp.Name
+	for slot, di := range resolved {
+		if di.Team != "" {
+			slotToTeam[slot] = di.Team
+			slotToPlayer[slot] = di.Name
 		}
 	}
 
