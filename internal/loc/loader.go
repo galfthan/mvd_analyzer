@@ -14,32 +14,46 @@ var locFiles embed.FS
 
 // Variable substitutions for loc file parsing
 // These match the ezQuake teamplay_locfiles.c definitions
+// Keys are stored lowercase for case-insensitive matching
 var locVariables = map[string]string{
-	"$loc_name_ra":              "RA",
-	"$loc_name_ya":              "YA",
-	"$loc_name_ga":              "GA",
-	"$loc_name_mh":              "MH",
-	"$loc_name_quad":            "Quad",
-	"$loc_name_pent":            "Pent",
-	"$loc_name_ring":            "Ring",
-	"$loc_name_separator":       " ",
-	"$loc_name_separatorlow":    " low",
-	"$loc_name_separatorhigh":   " high",
-	"$loc_name_separatorup":     " up",
-	"$loc_name_separatorstairs": " stairs",
-	"$loc_name_separatorwall":   " wall",
-	"$loc_name_separatorway":    " way",
-	"$loc_name_separatorlift":   " lift",
-	"$loc_name_separatorentry":  " entry",
-	"$loc_name_separatorbutton": " button",
-	"$loc_name_separatorroof":   " roof",
-	"$loc_name_separatortunnel": " tunnel",
-	"$loc_name_separatorbox":    " box",
-	"$loc_name_separatorrox":    " rox",
-	"$loc_name_separatorledge":  " ledge",
-	"$loc_name_separatorlifts":  " lifts",
-	"$loc_name_separatorgl":     " GL",
-	"$loc_name_separatorlg":     " LG",
+	// Items and weapons
+	"$loc_name_ra":   "RA",
+	"$loc_name_ya":   "YA",
+	"$loc_name_ga":   "GA",
+	"$loc_name_mh":   "MH",
+	"$loc_name_quad": "Quad",
+	"$loc_name_pent": "Pent",
+	"$loc_name_ring": "Ring",
+	"$loc_name_suit": "Suit",
+	"$loc_name_gl":   "GL",
+	"$loc_name_rl":   "RL",
+	"$loc_name_lg":   "LG",
+	"$loc_name_ssg":  "SSG",
+	"$loc_name_ng":   "NG",
+	"$loc_name_sng":  "SNG",
+	// Separator + suffix (expands to " suffix")
+	"$loc_name_separator": " ",
+}
+
+// locSeparatorSuffixes lists the known suffixes that can follow $loc_name_separator.
+// We expand "$loc_name_separatorXXX" → " XXX" for any suffix found here.
+// This is built from all suffixes observed in loc files from maps.quakeworld.nu.
+var locSeparatorSuffixes = []string{
+	"above", "air", "ammo", "back", "backside", "balcony", "balks", "bars",
+	"beam", "beams", "behind", "below", "beside", "big", "bio", "block",
+	"blue", "box", "boxes", "bridge", "button", "cellar", "cells", "column",
+	"columns", "corridor", "crates", "cross", "crusher", "deathtrap", "door",
+	"easy", "end", "entry", "exit", "floor", "fountain", "ga", "gate", "gl",
+	"hard", "hatch", "health", "hide", "high", "hole", "jesus", "jetty",
+	"ladder", "lava", "ledge", "lg", "lift", "lifts", "low", "main",
+	"manhole", "mega", "mh", "mid", "middle", "ng", "normal", "outer",
+	"outside", "pad", "path", "pent", "pillar", "pipe", "pipes", "pit",
+	"plat", "plates", "platform", "pool", "portal", "quad", "ra", "ramp",
+	"ring", "rl", "roof", "room", "rox", "secret", "sg", "shells", "slime",
+	"sng", "space", "spikes", "spiral", "square", "ssg", "stairs", "stand",
+	"start", "steps", "suit", "surf", "tele", "teleport", "teles", "tonnel",
+	"top", "tower", "trap", "trick", "tunnel", "up", "vent", "walk", "wall",
+	"water", "way", "well", "window", "ya", "yard",
 }
 
 // LoadForMap loads the loc file for a given map name
@@ -144,12 +158,86 @@ func parseLoc(data []byte) ([]Location, error) {
 }
 
 func substituteVariables(s string) string {
-	result := s
+	// Strip Quake special bytes before variable substitution:
+	// - Control chars (0x00-0x1f except \t): color toggles, text formatting
+	// - 0x80-0xFF: high-byte "gold/colored" characters (strip bit 7)
+	var cleaned []byte
+	for i := 0; i < len(s); i++ {
+		b := s[i]
+		if b < 0x20 && b != '\t' {
+			continue // strip control characters
+		}
+		if b >= 0x80 {
+			b &= 0x7F // convert to ASCII equivalent
+			if b < 0x20 {
+				continue // strip if result is a control char
+			}
+		}
+		cleaned = append(cleaned, b)
+	}
+	result := string(cleaned)
 
-	// Sort by length (longest first) to avoid partial matches
-	// e.g., $loc_name_separatorlow should match before $loc_name_separator
+	// Strip ezQuake team color macros: $RR, $BB, $R, $B, $G, $Y, $W
+	// (longer patterns first to avoid partial matches)
+	for _, macro := range []string{"$RR", "$BB", "$GG", "$YY", "$WW", "$R", "$B", "$G", "$Y", "$W"} {
+		result = strings.ReplaceAll(result, macro, "")
+	}
+
+	// Fix broken loc files (e.g., an1-beta3.loc) where an authoring tool
+	// recursively expanded $loc_name_ra inside $loc_name_separator, producing
+	// fragments like $loc_name_sepa$loc_name_rato$loc_name_rabove instead of
+	// $loc_name_separatorabove. Reassemble these before variable substitution.
+	result = strings.ReplaceAll(result, "$loc_name_rato$loc_name_ra", "$loc_name_ratora")
+	result = strings.ReplaceAll(result, "$loc_name_sepa$loc_name_rator", "$loc_name_separator")
+
+	// Case-insensitive variable substitution.
+	// We work on a lowercase copy to find matches, then splice replacements
+	// into the original-case result.
+	lower := strings.ToLower(result)
+
+	// Handle separator+suffix patterns first (longest match)
+	const sepPrefix = "$loc_name_separator"
+	for {
+		idx := strings.Index(lower, sepPrefix)
+		if idx == -1 {
+			break
+		}
+		rest := lower[idx+len(sepPrefix):]
+		matched := false
+		for _, suffix := range locSeparatorSuffixes {
+			if strings.HasPrefix(rest, suffix) {
+				replacement := " " + suffix
+				result = result[:idx] + replacement + result[idx+len(sepPrefix)+len(suffix):]
+				lower = strings.ToLower(result)
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			// Plain $loc_name_separator (no known suffix) or unknown suffix
+			// Check if it matches the base separator
+			if idx+len(sepPrefix) <= len(result) {
+				// Check for base "$loc_name_separator" without a known suffix
+				// but could be followed by unknown text - just expand the base separator
+				result = result[:idx] + " " + result[idx+len(sepPrefix):]
+				lower = strings.ToLower(result)
+			}
+		}
+	}
+
+	// Handle remaining $loc_name_* variables
 	for varName, replacement := range locVariables {
-		result = strings.ReplaceAll(result, varName, replacement)
+		if varName == "$loc_name_separator" {
+			continue // already handled above
+		}
+		for {
+			idx := strings.Index(lower, varName)
+			if idx == -1 {
+				break
+			}
+			result = result[:idx] + replacement + result[idx+len(varName):]
+			lower = strings.ToLower(result)
+		}
 	}
 
 	// Clean up multiple spaces and trim
