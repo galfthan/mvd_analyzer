@@ -557,6 +557,7 @@ function displayWeaponStatsTable(players) {
 
     const teamOrder = getTeamOrder(sorted);
     const teamColors = TEAM_COLORS;
+    const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
     sorted.forEach(player => {
         const w = player.weapons || {};
@@ -565,44 +566,28 @@ function displayWeaponStatsTable(players) {
         if (teamIdx >= 0 && teamIdx < teamColors.length) {
             tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
         }
-        tr.innerHTML = `
-            <td>${escapeHtml(player.name)}</td>
-            <td>${formatWeaponCell(w.sg)}</td>
-            <td>${formatWeaponCell(w.ssg)}</td>
-            <td>${formatWeaponCell(w.ng)}</td>
-            <td>${formatWeaponCell(w.sng)}</td>
-            <td>${formatWeaponCell(w.gl)}</td>
-            <td>${formatWeaponCell(w.rl)}</td>
-            <td>${formatWeaponCell(w.lg)}</td>
-        `;
+        let cells = `<td>${escapeHtml(player.name)}</td>`;
+        wNames.forEach(wn => {
+            cells += formatWeaponCells(w[wn]);
+        });
+        tr.innerHTML = cells;
         tbody.appendChild(tr);
     });
 }
 
-function formatWeaponCell(weapon) {
-    if (!weapon) return '-';
+function formatWeaponCells(weapon) {
+    if (!weapon) return '<td>-</td><td>-</td><td>-</td>';
 
-    const parts = [];
-
-    // Accuracy
+    let acc = '-';
     if (weapon.acc && weapon.acc.attacks > 0) {
-        const acc = ((weapon.acc.hits / weapon.acc.attacks) * 100).toFixed(1);
-        parts.push(`<span class="${getAccuracyClass(parseFloat(acc))}">${acc}%</span>`);
+        const pct = ((weapon.acc.hits / weapon.acc.attacks) * 100).toFixed(1);
+        acc = `<span class="${getAccuracyClass(parseFloat(pct))}">${pct}%</span>`;
     }
 
-    // Kills
     const kills = weapon.kills?.total || weapon.kills?.enemy || 0;
-    if (kills > 0) {
-        parts.push(`<span class="weapon-kills">${kills}k</span>`);
-    }
-
-    // Damage
     const dmg = weapon.damage?.enemy || 0;
-    if (dmg > 0) {
-        parts.push(`<span class="weapon-dmg">${dmg}d</span>`);
-    }
 
-    return parts.length > 0 ? parts.join(' ') : '-';
+    return `<td>${acc}</td><td>${kills || '-'}</td><td>${dmg || '-'}</td>`;
 }
 
 function displayItemsTable(players) {
@@ -780,11 +765,12 @@ function displayWeaponStatsTeamsTable(players) {
     const teamOrder = getTeamOrder(sorted);
     const teamColors = TEAM_COLORS;
     const groups = groupByTeam(sorted);
+    const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
     teamOrder.forEach((team, idx) => {
         const members = groups[team] || [];
-        const wNames = ['sg', 'ssg', 'ng', 'sng', 'gl', 'rl', 'lg'];
-        const cells = wNames.map(wn => {
+        let cells = `<td>${escapeHtml(team)}</td>`;
+        wNames.forEach(wn => {
             let totalAtk = 0, totalHits = 0, totalKills = 0, totalDmg = 0;
             members.forEach(p => {
                 const w = (p.weapons || {})[wn];
@@ -794,21 +780,19 @@ function displayWeaponStatsTeamsTable(players) {
                 totalKills += w.kills?.total || w.kills?.enemy || 0;
                 totalDmg += w.damage?.enemy || 0;
             });
-            const parts = [];
+            let acc = '-';
             if (totalAtk > 0) {
-                const acc = ((totalHits / totalAtk) * 100).toFixed(1);
-                parts.push(`<span class="${getAccuracyClass(parseFloat(acc))}">${acc}%</span>`);
+                const pct = ((totalHits / totalAtk) * 100).toFixed(1);
+                acc = `<span class="${getAccuracyClass(parseFloat(pct))}">${pct}%</span>`;
             }
-            if (totalKills > 0) parts.push(`<span class="weapon-kills">${totalKills}k</span>`);
-            if (totalDmg > 0) parts.push(`<span class="weapon-dmg">${totalDmg}d</span>`);
-            return parts.length > 0 ? parts.join(' ') : '-';
+            cells += `<td>${acc}</td><td>${totalKills || '-'}</td><td>${totalDmg || '-'}</td>`;
         });
 
         const tr = document.createElement('tr');
         if (idx < teamColors.length) {
             tr.style.borderLeft = `3px solid ${teamColors[idx]}`;
         }
-        tr.innerHTML = `<td>${escapeHtml(team)}</td>` + cells.map(c => `<td>${c}</td>`).join('');
+        tr.innerHTML = cells;
         tbody.appendChild(tr);
     });
 }
