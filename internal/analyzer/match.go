@@ -119,6 +119,44 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 		result.GameDir = a.ctx.ServerData.GameDir
 	}
 
+	// Build slot→display name mapping from DemoInfo using login join / name join,
+	// so the match result shows the in-game display name rather than the auth name.
+	slotDisplayName := make(map[int]string)
+	if a.ctx.DemoInfo != nil {
+		demoByLogin := make(map[string]string)  // login → display name
+		demoByName := make(map[string]string)    // normalized name → display name
+		nameCount := make(map[string]int)
+		for _, dp := range a.ctx.DemoInfo.Players {
+			if dp.Name == "" {
+				continue
+			}
+			if dp.Login != "" {
+				demoByLogin[dp.Login] = dp.Name
+			}
+			norm := normalizePlayerName(dp.Name)
+			nameCount[norm]++
+			if nameCount[norm] == 1 {
+				demoByName[norm] = dp.Name
+			} else {
+				delete(demoByName, norm)
+			}
+		}
+		for i, p := range a.ctx.Players {
+			if p == nil {
+				continue
+			}
+			if p.Auth != "" {
+				if name, ok := demoByLogin[p.Auth]; ok {
+					slotDisplayName[i] = name
+					continue
+				}
+			}
+			if name, ok := demoByName[normalizePlayerName(p.Name)]; ok {
+				slotDisplayName[i] = name
+			}
+		}
+	}
+
 	// Collect team stats
 	teamFrags := make(map[string]int)
 
@@ -134,8 +172,13 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 			continue
 		}
 
+		displayName := p.Name
+		if dn, ok := slotDisplayName[i]; ok {
+			displayName = dn
+		}
+
 		stat := PlayerStat{
-			Name:  p.Name,
+			Name:  displayName,
 			Team:  p.Team,
 			Frags: p.Frags,
 		}
