@@ -2464,19 +2464,19 @@ function getFragsAtTime(time) {
 // =============================================================================
 
 // Item keywords that should remain uppercase in location names
-const ITEM_KEYWORDS = ['RA', 'YA', 'GA', 'MH', 'RL', 'LG', 'GL', 'NG', 'SNG', 'QUAD', 'PENT', 'RING'];
+const ITEM_KEYWORDS = ['RA', 'YA', 'GA', 'MH', 'RL', 'LG', 'GL', 'NG', 'SNG', 'SSG', 'SG', 'MEGA', 'QUAD', 'PENT', 'RING'];
 
-// Normalize location name: "RA MH" → "RA-MH", "Quad low" → "QUAD-low", "big stairs" → "big-stairs"
+// Normalize location name: "RA.below" → "RA.below", "Quad low" → "QUAD.low"
 function normalizeLocationName(name) {
     return name
         .trim()
-        .replace(/\s+/g, '-')
-        .split('-')
+        .replace(/[\s-]+/g, '.')
+        .split('.')
         .map(part => {
             const upper = part.toUpperCase();
             return ITEM_KEYWORDS.includes(upper) ? upper : part.toLowerCase();
         })
-        .join('-');
+        .join('.');
 }
 
 // Get color for location based on item type in name
