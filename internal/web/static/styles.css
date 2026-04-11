@@ -1084,6 +1084,10 @@ table tbody tr:hover {
     height: 100%;
 }
 
+#region-time-indicator {
+    bottom: 0;
+}
+
 /* Health/Armor Graphs */
 .timeline-health-panel {
     min-height: 200px;
