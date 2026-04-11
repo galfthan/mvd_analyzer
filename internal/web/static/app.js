@@ -398,6 +398,13 @@ function displayResults(result) {
         displayTeams(result.match.teams);
     }
 
+    // Set team order early so summary tables use consistent colors with map/timeline
+    if (demoInfo?.teams) {
+        timelineState.teams = demoInfo.teams;
+    } else if (result.match?.teams) {
+        timelineState.teams = result.match.teams.map(t => t.name);
+    }
+
     // Player stats from demoInfo
     if (demoInfo && demoInfo.players) {
         displayPlayerStatsTeams(demoInfo.players);
