@@ -2833,7 +2833,7 @@ function buildRegionConfig(regions) {
     container.innerHTML = '';
 
     for (const region of regions) {
-        const locNames = region.points.map(p => p.name).join(', ');
+        const locNames = [...new Set(region.points.map(p => p.name))].join(', ');
         const row = document.createElement('div');
         row.className = 'region-config-row';
         row.innerHTML = `
