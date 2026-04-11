@@ -1167,7 +1167,7 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, nameToTeam map[string]str
 
 // controlKeywords are the item keywords we track for region control
 var controlKeywords = map[string]bool{
-	"RA": true, "RL": true, "QUAD": true,
+	"RA": true, "RL": true, "LG": true, "QUAD": true,
 }
 
 // locWithKeyword pairs a location with its matched keyword
@@ -1183,19 +1183,20 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 		return nil
 	}
 
-	// Group locations by their first dot-token keyword
+	// Group locations by any matching keyword token in their name
+	// e.g., "cellar.RL" matches RL, "RA.stairs" matches RA
 	groups := make(map[string][]locWithKeyword)
 
 	for _, l := range locs {
-		name := l.Name
-		// Extract first token (split by "." or " ")
-		firstToken := name
-		if idx := strings.IndexAny(name, ". "); idx > 0 {
-			firstToken = name[:idx]
-		}
-		upper := strings.ToUpper(firstToken)
-		if controlKeywords[upper] {
-			groups[upper] = append(groups[upper], locWithKeyword{loc: l, keyword: upper})
+		tokens := strings.FieldsFunc(l.Name, func(r rune) bool {
+			return r == '.' || r == ' '
+		})
+		for _, token := range tokens {
+			upper := strings.ToUpper(token)
+			if controlKeywords[upper] {
+				groups[upper] = append(groups[upper], locWithKeyword{loc: l, keyword: upper})
+				break // Only match first keyword per location
+			}
 		}
 	}
 
