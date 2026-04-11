@@ -1576,6 +1576,60 @@ th.sortable.sort-desc::after {
     padding: 15px;
 }
 
+#region-status-panel {
+    background: #16213e;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+#region-status-panel h4 {
+    color: #00d9ff;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.region-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    border-bottom: 1px solid #1a1a2e;
+    font-size: 0.85rem;
+}
+
+.region-status-name {
+    font-weight: bold;
+    min-width: 60px;
+    color: #ccc;
+}
+
+.region-status-state {
+    min-width: 70px;
+    font-size: 0.8rem;
+}
+
+.region-status-players {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.region-player {
+    display: inline-flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    gap: 1px;
+}
+
+.region-wpn-icon {
+    width: 16px;
+    height: auto;
+    vertical-align: middle;
+    margin-left: 1px;
+}
+
 #region-control-panel {
     background: #16213e;
     border-radius: 8px;

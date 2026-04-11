@@ -146,6 +146,7 @@ function setCurrentTime(time) {
     updateTimeIndicators();
     updateTeamStatus();
     updateMapLegend();
+    updateRegionStatus();
     renderChatMessages();
     renderMap(mapState.currentTime);
     updateUrlState();
@@ -2804,8 +2805,10 @@ function initMapView(result) {
 function initRegionControl(result) {
     const rc = result.timelineAnalysis?.regionControl;
     const panel = document.getElementById('region-control-panel');
+    const statusPanel = document.getElementById('region-status-panel');
     if (!rc || !rc.regions || rc.regions.length === 0) {
         if (panel) panel.style.display = 'none';
+        if (statusPanel) statusPanel.style.display = 'none';
         mapState.controlRegions = null;
         return;
     }
@@ -2825,6 +2828,7 @@ function initRegionControl(result) {
     applyRegionConfig();
 
     if (panel) panel.style.display = '';
+    if (statusPanel) statusPanel.style.display = '';
 }
 
 function buildRegionConfig(regions) {
@@ -3421,6 +3425,104 @@ function updateMapLegend() {
     }
 }
 
+function updateRegionStatus() {
+    const container = document.getElementById('region-status-body');
+    if (!container || !mapState.controlRegions || mapState.controlRegions.length === 0) return;
+
+    const time = mapState.currentTime;
+    const controlStates = getRegionControlAtTime(time);
+    if (!controlStates) return;
+
+    const bucket = findBucketAtTime(time);
+    const playerData = bucket ? (bucket.p || bucket.playerData) : null;
+    const teams = mapState.teams || [];
+    const teamColors = TEAM_COLORS;
+    const locations = mapState.locations;
+
+    // Build per-region player lists
+    const regionPlayers = {};
+    for (const r of mapState.controlRegions) {
+        regionPlayers[r.name] = [];
+    }
+
+    if (playerData) {
+        for (const [name, data] of Object.entries(playerData)) {
+            if (data.d || (data.h !== undefined && data.h <= 0)) continue;
+            if (data.x === 0 && data.y === 0) continue;
+
+            const nearest = findNearestLocation(data.x, data.y, locations);
+            if (!nearest) continue;
+            const regionName = mapState.locToRegion?.[nearest];
+            if (!regionName || !regionPlayers[regionName]) continue;
+
+            const sym = mapState.playerSymbols[name];
+            regionPlayers[regionName].push({
+                name, data, sym,
+                teamIdx: sym ? sym.teamIdx : -1,
+                hasRL: data.rl || false,
+                hasLG: data.lg || false,
+            });
+        }
+    }
+
+    // Build HTML
+    let html = '';
+    for (const region of mapState.controlRegions) {
+        const state = controlStates[region.name] || 'empty';
+        const players = regionPlayers[region.name] || [];
+
+        // Status label and color
+        let statusLabel, statusColor;
+        switch (state) {
+            case 'teamAControl':
+                statusLabel = teams[0] || 'A';
+                statusColor = teamColors[0];
+                break;
+            case 'teamAWeakControl':
+                statusLabel = (teams[0] || 'A') + ' (weak)';
+                statusColor = teamColors[0];
+                break;
+            case 'teamBControl':
+                statusLabel = teams[1] || 'B';
+                statusColor = teamColors[1];
+                break;
+            case 'teamBWeakControl':
+                statusLabel = (teams[1] || 'B') + ' (weak)';
+                statusColor = teamColors[1];
+                break;
+            case 'contested':
+                statusLabel = 'Contested';
+                statusColor = '#b060d8';
+                break;
+            default:
+                statusLabel = 'Empty';
+                statusColor = '#555';
+                break;
+        }
+
+        // Player icons with weapon indicators
+        let playersHtml = '';
+        // Sort: team A first, then team B
+        players.sort((a, b) => a.teamIdx - b.teamIdx);
+        for (const p of players) {
+            const color = p.teamIdx >= 0 && p.teamIdx < teamColors.length ? teamColors[p.teamIdx] : '#888';
+            const letter = p.name.charAt(0).toUpperCase();
+            const wpnIcons =
+                (p.hasRL ? '<img src="icon_rl.png" class="region-wpn-icon" alt="RL">' : '') +
+                (p.hasLG ? '<img src="icon_lg.png" class="region-wpn-icon" alt="LG">' : '');
+            playersHtml += `<span class="region-player" style="color: ${color}" title="${escapeHtml(p.name)}">${letter}${wpnIcons}</span>`;
+        }
+
+        html += `<div class="region-status-row">
+            <span class="region-status-name">${escapeHtml(region.name)}</span>
+            <span class="region-status-state" style="color: ${statusColor}">${statusLabel}</span>
+            <span class="region-status-players">${playersHtml || '-'}</span>
+        </div>`;
+    }
+
+    container.innerHTML = html;
+}
+
 function prerenderLocationBackground() {
     if (!mapState.locationGroups || !mapState.canvas) return;
 
@@ -3913,6 +4015,7 @@ function animatePlayback() {
         updateTimeIndicators();
         updateTeamStatus();
         updateMapLegend();
+        updateRegionStatus();
     }
 }
 
