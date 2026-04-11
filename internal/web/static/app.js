@@ -2,6 +2,21 @@
 
 const TEAM_COLORS = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
 
+// Derive strong/weak color variants from a hex color for region control displays
+function hexToRgb(hex) {
+    return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+}
+function teamStrongColor(hex) {
+    const [r, g, b] = hexToRgb(hex);
+    // Darken by 30% for strong control
+    return `rgb(${Math.round(r * 0.7)}, ${Math.round(g * 0.7)}, ${Math.round(b * 0.7)})`;
+}
+function teamWeakColor(hex) {
+    const [r, g, b] = hexToRgb(hex);
+    // Lighten towards white for weak control
+    return `rgb(${Math.round(r + (255 - r) * 0.5)}, ${Math.round(g + (255 - g) * 0.5)}, ${Math.round(b + (255 - b) * 0.5)})`;
+}
+
 let currentResult = null;
 
 // ─── WASM Worker ────────────────────────────────────────────────────────────
@@ -383,6 +398,24 @@ function displayResults(result) {
         displayTeams(result.match.teams);
     }
 
+    // Set team order early (sorted by total frags, highest first) for consistent colors everywhere
+    {
+        let teams = [];
+        if (demoInfo?.teams) {
+            teams = [...demoInfo.teams];
+        } else if (result.match?.teams) {
+            teams = result.match.teams.map(t => t.name);
+        }
+        if (teams.length >= 2 && demoInfo?.players) {
+            const teamFrags = {};
+            for (const p of demoInfo.players) {
+                const t = p.team || '';
+                teamFrags[t] = (teamFrags[t] || 0) + (p.stats?.frags || 0);
+            }
+            teams.sort((a, b) => (teamFrags[b] || 0) - (teamFrags[a] || 0));
+        }
+        timelineState.teams = teams;
+    }
     // Player stats from demoInfo
     if (demoInfo && demoInfo.players) {
         displayPlayerStatsTeams(demoInfo.players);
@@ -398,6 +431,11 @@ function displayResults(result) {
     // Weapons chart from frags
     if (result.frags && result.frags.byWeapon) {
         displayWeaponsChart(result.frags.byWeapon);
+    }
+
+    // Region control data (needed by both timeline and map)
+    if (result.timelineAnalysis?.regionControl) {
+        initRegionControlData(result);
     }
 
     // Timeline Analysis (new graphical view)
@@ -503,10 +541,19 @@ function displayTeamsFromDemoInfo(demoInfo) {
         teamScores[team] += player.stats?.frags || 0;
     }
 
-    // Sort by score
-    const sorted = Object.entries(teamScores).sort((a, b) => b[1] - a[1]);
+    // Use timelineState.teams order for consistent colors, fall back to score sort
+    let ordered;
+    if (timelineState.teams && timelineState.teams.length >= 2) {
+        ordered = timelineState.teams.map(t => [t, teamScores[t] || 0]);
+        // Add any teams not in timelineState.teams
+        for (const [t, s] of Object.entries(teamScores)) {
+            if (!timelineState.teams.includes(t)) ordered.push([t, s]);
+        }
+    } else {
+        ordered = Object.entries(teamScores).sort((a, b) => b[1] - a[1]);
+    }
 
-    sorted.forEach(([name, frags]) => {
+    ordered.forEach(([name, frags]) => {
         const div = document.createElement('div');
         div.className = 'team-item';
         div.innerHTML = `
@@ -521,7 +568,15 @@ function displayTeams(teams) {
     const container = document.getElementById('teams-list');
     container.innerHTML = '';
 
-    const sorted = [...teams].sort((a, b) => b.frags - a.frags);
+    // Use timelineState.teams order for consistent colors, fall back to score sort
+    let sorted;
+    if (timelineState.teams && timelineState.teams.length >= 2) {
+        const orderMap = {};
+        timelineState.teams.forEach((t, i) => { orderMap[t] = i; });
+        sorted = [...teams].sort((a, b) => (orderMap[a.name] ?? 999) - (orderMap[b.name] ?? 999));
+    } else {
+        sorted = [...teams].sort((a, b) => b.frags - a.frags);
+    }
 
     sorted.forEach(team => {
         const div = document.createElement('div');
@@ -541,19 +596,14 @@ function displayPlayerStats(players) {
     // Sort by frags
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
 
-    // Determine team ordering for color assignment
-    const teamOrder = [];
-    sorted.forEach(p => {
-        const t = p.team || '';
-        if (t && !teamOrder.includes(t)) teamOrder.push(t);
-    });
+    const teamOrder = getTeamOrder(sorted);
 
     sorted.forEach(player => {
         const tr = document.createElement('tr');
         const teamIdx = teamOrder.indexOf(player.team || '');
-        const teamColors = TEAM_COLORS;
-        if (teamIdx >= 0 && teamIdx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
+    
+        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
         }
         const kills = player.stats?.kills || 0;
         const deaths = player.stats?.deaths || 0;
@@ -588,15 +638,15 @@ function displayWeaponStatsTable(players) {
     const sorted = [...players].sort((a, b) => (b.dmg?.given || 0) - (a.dmg?.given || 0));
 
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
+
     const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
     sorted.forEach(player => {
         const w = player.weapons || {};
         const tr = document.createElement('tr');
         const teamIdx = teamOrder.indexOf(player.team || '');
-        if (teamIdx >= 0 && teamIdx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
+        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
         }
         let cells = `<td>${escapeHtml(player.name)}</td>`;
         wNames.forEach(wn => {
@@ -629,15 +679,15 @@ function displayItemsTable(players) {
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
 
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
+
 
     sorted.forEach(player => {
         const items = player.items || {};
         const weapons = player.weapons || {};
         const tr = document.createElement('tr');
         const teamIdx = teamOrder.indexOf(player.team || '');
-        if (teamIdx >= 0 && teamIdx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
+        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
         }
         tr.innerHTML = `
             <td>${escapeHtml(player.name)}</td>
@@ -716,11 +766,17 @@ function displayScoreboardFallback(byPlayer, players) {
 // ─── Team helpers ──────────────────────────────────────────────────────────
 
 function getTeamOrder(sortedPlayers) {
+    // Canonical order set early in displayResults(), sorted by total frags
+    if (timelineState.teams && timelineState.teams.length >= 2) {
+        return [...timelineState.teams];
+    }
+    // Fallback: preserve order from input (already frag-sorted)
+    const seen = new Set();
     const order = [];
-    sortedPlayers.forEach(p => {
+    for (const p of sortedPlayers) {
         const t = p.team || '';
-        if (t && !order.includes(t)) order.push(t);
-    });
+        if (t && !seen.has(t)) { seen.add(t); order.push(t); }
+    }
     return order;
 }
 
@@ -742,7 +798,7 @@ function displayPlayerStatsTeams(players) {
 
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
+
     const groups = groupByTeam(sorted);
 
     teamOrder.forEach((team, idx) => {
@@ -766,8 +822,8 @@ function displayPlayerStatsTeams(players) {
         const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
 
         const tr = document.createElement('tr');
-        if (idx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[idx]}`;
+        if (idx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[idx]}`;
         }
         tr.innerHTML = `
             <td>${escapeHtml(team)}</td>
@@ -795,7 +851,7 @@ function displayWeaponStatsTeamsTable(players) {
 
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
+
     const groups = groupByTeam(sorted);
     const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
@@ -821,8 +877,8 @@ function displayWeaponStatsTeamsTable(players) {
         });
 
         const tr = document.createElement('tr');
-        if (idx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[idx]}`;
+        if (idx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[idx]}`;
         }
         tr.innerHTML = cells;
         tbody.appendChild(tr);
@@ -835,7 +891,7 @@ function displayItemsTeamsTable(players) {
 
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
+
     const groups = groupByTeam(sorted);
 
     teamOrder.forEach((team, idx) => {
@@ -860,8 +916,8 @@ function displayItemsTeamsTable(players) {
         const fmtPu = (took, time) => time > 0 ? `${took} (${time}s)` : `${took}`;
 
         const tr = document.createElement('tr');
-        if (idx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[idx]}`;
+        if (idx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[idx]}`;
         }
         tr.innerHTML = `
             <td>${escapeHtml(team)}</td>
@@ -1193,13 +1249,15 @@ function displayTimelineAnalysis(result) {
     const timeline = result.timelineAnalysis;
     const demoInfo = result.demoInfo;
 
-    // Get teams
-    let teams = [];
-    if (demoInfo?.teams) {
-        teams = demoInfo.teams;
-    } else if (result.match?.teams) {
-        teams = result.match.teams.map(t => t.name);
+    // Teams already set (frag-sorted) in displayResults; only set if missing
+    if (!timelineState.teams || timelineState.teams.length === 0) {
+        if (demoInfo?.teams) {
+            timelineState.teams = demoInfo.teams;
+        } else if (result.match?.teams) {
+            timelineState.teams = result.match.teams.map(t => t.name);
+        }
     }
+    const teams = timelineState.teams;
 
     timelineState.buckets = timeline?.buckets || [];
     timelineState.highResBuckets = timeline?.highResBuckets || [];
@@ -1207,7 +1265,6 @@ function displayTimelineAnalysis(result) {
     timelineState.matchStartTime = timeline?.matchStartTime || 0;
     timelineState.demoOffset = timeline?.demoOffset || 0;
     timelineState.duration = result.duration || 600;
-    timelineState.teams = teams;
     timelineState.events = result.messages?.events || [];
     timelineState.fragEvents = timeline?.fragEvents || []; // Frag events from stat tracking
 
@@ -1505,6 +1562,7 @@ function updateTimeIndicators() {
 
     const detailIndicators = [
         'detail-time-indicator',
+        'region-time-indicator',
         'health-time-indicator',
         'frags-time-indicator',
         'score-time-indicator'
@@ -1543,6 +1601,7 @@ function updateDetailView() {
     // Update all detail panels
     updateDetailGraph(start, end);
     updateDetailAxis(start, end);
+    updateRegionControlTimeline(start, end);
     updateHealthArmorGraph(start, end);
     updateFragsGraph(start, end);
     updateScoreTimeline(start, end);
@@ -1865,14 +1924,160 @@ function addPowerupLine(container, spanStart, spanEnd, viewStart, viewDuration, 
     }
 }
 
+// ─── Region Control Timeline ─────────────────────────────────────────────
+
+function updateRegionControlTimeline(startTime, endTime) {
+    const panel = document.getElementById('region-control-timeline-panel');
+    const labelsContainer = document.getElementById('region-timeline-labels');
+    const stripsContainer = document.getElementById('region-timeline-strips');
+    if (!panel || !labelsContainer || !stripsContainer) return;
+
+    if (!mapState.controlRegions || mapState.controlRegions.length === 0 ||
+        !mapState.locToRegion || !timelineState.teams || timelineState.teams.length < 2) {
+        panel.style.display = 'none';
+        return;
+    }
+    panel.style.display = '';
+
+    // Update legend team names
+    const teamA = timelineState.teams[0], teamB = timelineState.teams[1];
+    const teamALabel = document.getElementById('rc-tl-teamA');
+    const teamBLabel = document.getElementById('rc-tl-teamB');
+    if (teamALabel) teamALabel.textContent = teamA;
+    if (teamBLabel) teamBLabel.textContent = teamB;
+
+    // Update legend color swatches to match strip colors exactly
+    const setLegend = (id, color) => { const el = document.getElementById(id); if (el) el.style.background = color; };
+    setLegend('rc-legend-a-ctrl', teamStrongColor(TEAM_COLORS[0]));
+    setLegend('rc-legend-a-weak', teamWeakColor(TEAM_COLORS[0]));
+    setLegend('rc-legend-b-weak', teamWeakColor(TEAM_COLORS[1]));
+    setLegend('rc-legend-b-ctrl', teamStrongColor(TEAM_COLORS[1]));
+
+    labelsContainer.innerHTML = '';
+    stripsContainer.innerHTML = '';
+
+    const regions = mapState.controlRegions;
+    const buckets = timelineState.buckets;
+    if (!buckets || buckets.length === 0) return;
+
+    const duration = endTime - startTime;
+    if (duration <= 0) return;
+
+    const locations = mapState.locations;
+
+    // Control state colors derived from TEAM_COLORS
+    const stateColors = {
+        teamAControl:     teamStrongColor(TEAM_COLORS[0]),
+        teamAWeakControl: teamWeakColor(TEAM_COLORS[0]),
+        contested:        'rgb(255, 255, 255)',
+        empty:            'transparent',
+        teamBWeakControl: teamWeakColor(TEAM_COLORS[1]),
+        teamBControl:     teamStrongColor(TEAM_COLORS[1]),
+    };
+
+    for (const region of regions) {
+        // Label
+        const label = document.createElement('div');
+        label.className = 'region-timeline-label';
+        label.textContent = region.name;
+        label.title = region.name;
+        labelsContainer.appendChild(label);
+
+        // Strip
+        const strip = document.createElement('div');
+        strip.className = 'region-strip';
+
+        // Compute control state per bucket and find contiguous spans
+        let currentState = null;
+        let spanStart = startTime;
+
+        for (let i = 0; i < buckets.length; i++) {
+            const bucket = buckets[i];
+            if (bucket.endTime <= startTime || bucket.startTime >= endTime) continue;
+
+            // Determine control state for this region at this bucket
+            const playerData = bucket.playerData;
+            let aWpn = 0, aNo = 0, bWpn = 0, bNo = 0;
+
+            if (playerData) {
+                for (const [name, data] of Object.entries(playerData)) {
+                    if (!data || (data.health !== undefined && data.health <= 0)) continue;
+                    const loc = data.location || '';
+                    const rName = mapState.locToRegion[loc];
+                    if (rName !== region.name) continue;
+
+                    const playerTeam = data.team || '';
+                    const hasWpn = data.hasRL || data.hasLG;
+
+                    if (playerTeam === teamA) { if (hasWpn) aWpn++; else aNo++; }
+                    else if (playerTeam === teamB) { if (hasWpn) bWpn++; else bNo++; }
+                }
+            }
+
+            const aT = aWpn + aNo, bT = bWpn + bNo;
+            let state;
+            if (aT === 0 && bT === 0) state = 'empty';
+            else if (aT > 0 && bT === 0) state = aWpn > 0 ? 'teamAControl' : 'teamAWeakControl';
+            else if (bT > 0 && aT === 0) state = bWpn > 0 ? 'teamBControl' : 'teamBWeakControl';
+            else if (aWpn > 0 && bWpn === 0) state = 'teamAControl';
+            else if (bWpn > 0 && aWpn === 0) state = 'teamBControl';
+            else state = 'contested';
+
+            if (state !== currentState) {
+                // Emit previous span
+                if (currentState && currentState !== 'empty') {
+                    addRegionSegment(strip, spanStart, bucket.startTime, startTime, duration, stateColors[currentState]);
+                }
+                currentState = state;
+                spanStart = bucket.startTime;
+            }
+        }
+        // Final span
+        if (currentState && currentState !== 'empty') {
+            addRegionSegment(strip, spanStart, endTime, startTime, duration, stateColors[currentState]);
+        }
+
+        stripsContainer.appendChild(strip);
+    }
+
+    // Render time axis with 2-minute intervals
+    const axisContainer = document.getElementById('region-timeline-axis');
+    if (axisContainer) {
+        axisContainer.innerHTML = '';
+        const interval = 120; // 2 minutes
+        for (let t = 0; t <= duration; t += interval) {
+            const time = startTime + t;
+            if (time > endTime) break;
+            const span = document.createElement('span');
+            span.textContent = formatDuration(time);
+            axisContainer.appendChild(span);
+        }
+    }
+}
+
+function addRegionSegment(strip, segStart, segEnd, viewStart, viewDuration, color) {
+    const leftPct = ((segStart - viewStart) / viewDuration) * 100;
+    const widthPct = ((segEnd - segStart) / viewDuration) * 100;
+    if (widthPct > 0) {
+        const seg = document.createElement('div');
+        seg.className = 'region-strip-seg';
+        seg.style.left = `${leftPct}%`;
+        seg.style.width = `${widthPct}%`;
+        seg.style.background = color;
+        strip.appendChild(seg);
+    }
+}
+
 function updateDetailAxis(startTime, endTime) {
     const container = document.getElementById('detail-axis');
     container.innerHTML = '';
 
-    const tickCount = 5;
+    const duration = endTime - startTime;
+    const interval = 120; // 2 minutes
 
-    for (let i = 0; i <= tickCount; i++) {
-        const time = startTime + ((endTime - startTime) / tickCount) * i;
+    for (let t = 0; t <= duration; t += interval) {
+        const time = startTime + t;
+        if (time > endTime) break;
         const span = document.createElement('span');
         span.textContent = formatDuration(time);
         container.appendChild(span);
@@ -2008,10 +2213,12 @@ function updateHealthAxis(startTime, endTime) {
     const container = document.getElementById('health-axis');
     container.innerHTML = '';
 
-    const tickCount = 5;
+    const duration = endTime - startTime;
+    const interval = 120;
 
-    for (let i = 0; i <= tickCount; i++) {
-        const time = startTime + ((endTime - startTime) / tickCount) * i;
+    for (let t = 0; t <= duration; t += interval) {
+        const time = startTime + t;
+        if (time > endTime) break;
         const span = document.createElement('span');
         span.textContent = formatDuration(time);
         container.appendChild(span);
@@ -2119,10 +2326,12 @@ function updateFragsAxis(startTime, endTime) {
     if (!container) return;
     container.innerHTML = '';
 
-    const tickCount = 5;
+    const duration = endTime - startTime;
+    const interval = 120;
 
-    for (let i = 0; i <= tickCount; i++) {
-        const time = startTime + ((endTime - startTime) / tickCount) * i;
+    for (let t = 0; t <= duration; t += interval) {
+        const time = startTime + t;
+        if (time > endTime) break;
         const span = document.createElement('span');
         span.textContent = formatDuration(time);
         container.appendChild(span);
@@ -2247,10 +2456,12 @@ function updateScoreAxis(startTime, endTime) {
     if (!container) return;
     container.innerHTML = '';
 
-    const tickCount = 5;
+    const duration = endTime - startTime;
+    const interval = 120;
 
-    for (let i = 0; i <= tickCount; i++) {
-        const time = startTime + ((endTime - startTime) / tickCount) * i;
+    for (let t = 0; t <= duration; t += interval) {
+        const time = startTime + t;
+        if (time > endTime) break;
         const span = document.createElement('span');
         span.textContent = formatDuration(time);
         container.appendChild(span);
@@ -2632,7 +2843,7 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
 
 // Draw control overlay for regions based on current control state
 function drawRegionControlOverlay(ctx, controlStates) {
-    const teamColors = TEAM_COLORS;
+
 
     for (const [regionName, state] of Object.entries(controlStates)) {
         const groups = mapState.regionToGroups[regionName];
@@ -2641,19 +2852,19 @@ function drawRegionControlOverlay(ctx, controlStates) {
         let color;
         switch (state) {
             case 'teamAControl':
-                color = hexToRgba(teamColors[0], 0.15);
+                color = hexToRgba(TEAM_COLORS[0], 0.15);
                 break;
             case 'teamAWeakControl':
-                color = hexToRgba(teamColors[0], 0.08);
+                color = hexToRgba(TEAM_COLORS[0], 0.08);
                 break;
             case 'teamBControl':
-                color = hexToRgba(teamColors[1], 0.15);
+                color = hexToRgba(TEAM_COLORS[1], 0.15);
                 break;
             case 'teamBWeakControl':
-                color = hexToRgba(teamColors[1], 0.08);
+                color = hexToRgba(TEAM_COLORS[1], 0.08);
                 break;
             case 'contested':
-                color = 'rgba(180, 100, 220, 0.08)';
+                color = 'rgba(255, 255, 255, 0.08)';
                 break;
             default: // empty
                 continue;
@@ -2697,9 +2908,7 @@ function drawLocationRegionFill(ctx, group, fillColor) {
 }
 
 function hexToRgba(hex, alpha) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
+    const [r, g, b] = hexToRgb(hex);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
@@ -2826,8 +3035,10 @@ function initMapView(result) {
     mapState.canvas.height = canvasH;
     updateWorldToCanvasTransform();
 
-    // Get teams from demoInfo or match
-    if (result.demoInfo?.teams) {
+    // Use the canonical frag-sorted team order set in displayResults
+    if (timelineState.teams && timelineState.teams.length >= 2) {
+        mapState.teams = [...timelineState.teams];
+    } else if (result.demoInfo?.teams) {
         mapState.teams = result.demoInfo.teams;
     } else if (result.match?.teams) {
         mapState.teams = result.match.teams.map(t => t.name);
@@ -2862,6 +3073,27 @@ function initMapView(result) {
     initRegionControl(result);
 
     renderMap(mapState.currentTime);
+}
+
+// Early init of region control data (before timeline renders, before map init)
+function initRegionControlData(result) {
+    const rc = result.timelineAnalysis?.regionControl;
+    if (!rc || !rc.regions || rc.regions.length === 0) return;
+
+    // Ensure locations are available
+    if (!mapState.locations || mapState.locations.length === 0) {
+        mapState.locations = result.timelineAnalysis?.locationData || [];
+    }
+
+    // Set control regions and locToRegion from backend definitions
+    mapState.controlRegions = rc.regions;
+    mapState.rcResult = rc;
+    mapState.locToRegion = {};
+    for (const region of rc.regions) {
+        for (const pt of region.points) {
+            mapState.locToRegion[pt.name] = region.name;
+        }
+    }
 }
 
 function initRegionControl(result) {
@@ -2988,6 +3220,9 @@ function applyRegionConfig() {
     // Force map redraw
     mapState.renderDirty = true;
     renderMap(mapState.currentTime);
+
+    // Re-render timeline region control graph
+    updateDetailView();
 }
 
 function recomputeRegionStats(regions) {
@@ -3087,7 +3322,7 @@ function displayRegionControlTable(regions, stats) {
         document.getElementById('rc-teamB-weak-hdr').textContent = teamB + ' weak';
     }
 
-    const teamColors = TEAM_COLORS;
+
 
     for (const region of regions) {
         const s = stats[region.name];
@@ -3095,12 +3330,12 @@ function displayRegionControlTable(regions, stats) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${escapeHtml(region.name)}</strong></td>
-            <td style="background: ${cellBg(teamColors[0], s.teamAControl)}">${s.teamAControl}%</td>
-            <td style="background: ${cellBg(teamColors[0], s.teamAWeakControl, 0.5)}">${s.teamAWeakControl}%</td>
+            <td style="background: ${cellBg(TEAM_COLORS[0], s.teamAControl)}">${s.teamAControl}%</td>
+            <td style="background: ${cellBg(TEAM_COLORS[0], s.teamAWeakControl, 0.5)}">${s.teamAWeakControl}%</td>
             <td style="background: ${cellBg('#888', s.contested)}">${s.contested}%</td>
             <td>${s.empty}%</td>
-            <td style="background: ${cellBg(teamColors[1], s.teamBWeakControl, 0.5)}">${s.teamBWeakControl}%</td>
-            <td style="background: ${cellBg(teamColors[1], s.teamBControl)}">${s.teamBControl}%</td>
+            <td style="background: ${cellBg(TEAM_COLORS[1], s.teamBWeakControl, 0.5)}">${s.teamBWeakControl}%</td>
+            <td style="background: ${cellBg(TEAM_COLORS[1], s.teamBControl)}">${s.teamBControl}%</td>
         `;
         tbody.appendChild(tr);
     }
@@ -3322,7 +3557,7 @@ function assignPlayerSymbols(result) {
         }
         if (letter === '?') letter = player.name[0]?.toUpperCase() || '?';
 
-        const teamColor = player.teamIdx === 0 ? '#ff5050' : '#50a0ff';
+        const teamColor = TEAM_COLORS[player.teamIdx] || TEAM_COLORS[0];
         // Pre-render letter with circle to offscreen canvas
         const size = 32;
         const offscreen = document.createElement('canvas');
@@ -3334,7 +3569,7 @@ function assignPlayerSymbols(result) {
         // Circle background
         octx.beginPath();
         octx.arc(cx, cy, r, 0, Math.PI * 2);
-        octx.fillStyle = player.teamIdx === 0 ? 'rgba(255, 80, 80, 0.25)' : 'rgba(80, 160, 255, 0.25)';
+        octx.fillStyle = hexToRgba(teamColor, 0.25);
         octx.fill();
         octx.strokeStyle = teamColor;
         octx.lineWidth = 2;
@@ -3367,10 +3602,10 @@ function buildMapLegend() {
 
     for (let teamIdx = 0; teamIdx < mapState.teams.length; teamIdx++) {
         const team = mapState.teams[teamIdx];
-        const teamColor = teamIdx === 0 ? 'player-red' : 'player-blue';
+        const teamHex = TEAM_COLORS[teamIdx] || TEAM_COLORS[0];
 
         const title = document.createElement('h4');
-        title.className = teamColor;
+        title.style.color = teamHex;
         title.id = `map-legend-team-title-${teamIdx}`;
         title.textContent = `${team} — 0 frags`;
         legend.appendChild(title);
@@ -3387,7 +3622,7 @@ function buildMapLegend() {
                 tr.dataset.player = name;
                 const escapedName = escapeHtml(name);
                 tr.innerHTML = `
-                    <td><span class="map-legend-symbol ${teamColor}">${info.symbol}</span></td>
+                    <td><span class="map-legend-symbol" style="color: ${teamHex}">${info.symbol}</span></td>
                     <td>${escapedName}</td>
                     <td class="map-trail-cell"><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}"></td>
                     <td class="map-legend-health" data-player="${escapedName}">-</td>
@@ -3499,7 +3734,7 @@ function updateRegionStatus() {
     const bucket = findBucketAtTime(time);
     const playerData = bucket ? (bucket.p || bucket.playerData) : null;
     const teams = mapState.teams || [];
-    const teamColors = TEAM_COLORS;
+
     const locations = mapState.locations;
 
     // Build per-region player lists
@@ -3539,23 +3774,23 @@ function updateRegionStatus() {
         switch (state) {
             case 'teamAControl':
                 statusLabel = teams[0] || 'A';
-                statusColor = teamColors[0];
+                statusColor = TEAM_COLORS[0];
                 break;
             case 'teamAWeakControl':
                 statusLabel = (teams[0] || 'A') + ' (weak)';
-                statusColor = teamColors[0];
+                statusColor = TEAM_COLORS[0];
                 break;
             case 'teamBControl':
                 statusLabel = teams[1] || 'B';
-                statusColor = teamColors[1];
+                statusColor = TEAM_COLORS[1];
                 break;
             case 'teamBWeakControl':
                 statusLabel = (teams[1] || 'B') + ' (weak)';
-                statusColor = teamColors[1];
+                statusColor = TEAM_COLORS[1];
                 break;
             case 'contested':
                 statusLabel = 'Contested';
-                statusColor = '#b060d8';
+                statusColor = '#ffffff';
                 break;
             default:
                 statusLabel = 'Empty';
@@ -3616,7 +3851,7 @@ function buildPlayerRegionIcon(player) {
         ctx.drawImage(symCanvas, ox, oy);
     } else {
         // Fallback: draw letter
-        const color = player.teamIdx === 0 ? '#ff5050' : '#50a0ff';
+        const color = TEAM_COLORS[player.teamIdx] || TEAM_COLORS[0];
         ctx.font = 'bold 16px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -3816,10 +4051,10 @@ function drawTracks(ctx, time) {
 
         if (endIdx - startIdx < 1) continue;
 
-        const isRed = points[0].teamIdx === 0;
-        const solidColor = isRed ? 'rgba(255, 80, 80, 0.4)' : 'rgba(80, 160, 255, 0.4)';
-        const dashColor = isRed ? 'rgba(255, 80, 80, 0.2)' : 'rgba(80, 160, 255, 0.2)';
-        const markerColor = isRed ? 'rgba(255, 80, 80, 0.8)' : 'rgba(80, 160, 255, 0.8)';
+        const teamHex = TEAM_COLORS[points[0].teamIdx] || TEAM_COLORS[0];
+        const solidColor = hexToRgba(teamHex, 0.4);
+        const dashColor = hexToRgba(teamHex, 0.2);
+        const markerColor = hexToRgba(teamHex, 0.8);
 
         // Collect death/spawn markers to draw after lines
         const markers = [];

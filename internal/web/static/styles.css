@@ -1,3 +1,10 @@
+:root {
+    --team-a: #ff5050;
+    --team-b: #50a0ff;
+    --team-c: #4ecdc4;
+    --team-d: #ffc107;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -299,19 +306,19 @@ header p {
 }
 
 .team-item:nth-child(1) {
-    border-left-color: #ff5050;
+    border-left-color: var(--team-a);
 }
 
 .team-item:nth-child(2) {
-    border-left-color: #50a0ff;
+    border-left-color: var(--team-b);
 }
 
 .team-item:nth-child(3) {
-    border-left-color: #4ecdc4;
+    border-left-color: var(--team-c);
 }
 
 .team-item:nth-child(4) {
-    border-left-color: #ffc107;
+    border-left-color: var(--team-d);
 }
 
 .team-name {
@@ -1032,6 +1039,63 @@ table tbody tr:hover {
 .powerup-line.quad { background: rgba(0, 150, 255, 0.9); top: 2px; }
 .powerup-line.pent { background: rgba(255, 0, 0, 0.9); top: 9px; }
 .powerup-line.ring { background: rgba(255, 235, 59, 0.9); top: 16px; }
+
+/* Region Control Timeline */
+.region-timeline-wrapper {
+    display: flex;
+    gap: 0;
+}
+
+.region-timeline-labels {
+    display: flex;
+    flex-direction: column;
+    min-width: 80px;
+    gap: 2px;
+    padding-top: 4px;
+}
+
+.region-timeline-label {
+    height: 20px;
+    line-height: 20px;
+    font-size: 0.75rem;
+    color: #aaa;
+    text-align: right;
+    padding-right: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.region-timeline-outer {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.region-timeline-strips {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 4px;
+}
+
+.region-strip {
+    height: 20px;
+    position: relative;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.region-strip-seg {
+    position: absolute;
+    height: 100%;
+}
+
+#region-time-indicator {
+    bottom: 0;
+}
 
 /* Health/Armor Graphs */
 .timeline-health-panel {
@@ -1755,11 +1819,11 @@ th.sortable.sort-desc::after {
 
 /* Player team colors for map */
 .player-red {
-    color: #ff5050;
+    color: var(--team-a);
 }
 
 .player-blue {
-    color: #50a0ff;
+    color: var(--team-b);
 }
 
 @media (max-width: 900px) {

@@ -1171,15 +1171,79 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, nameToTeam map[string]str
 	return allStreaks
 }
 
-// controlKeywords are the item keywords we track for region control
+// ============================================================================
+// REGION CONTROL CONFIGURATION
+//
+// Region control tracks which team controls key areas of the map.
+// There are two layers of configuration:
+//
+// 1. AUTO-DETECTION (controlKeywords):
+//    Any loc name containing one of these keywords (as a dot/space-separated
+//    token) becomes a tracked region. If multiple locs share the same keyword
+//    but are far apart (>800 world units), they are split into separate regions
+//    named by their distinguishing prefix (e.g., "high.RL" and "low.RL").
+//
+// 2. MAP-SPECIFIC CUSTOM REGIONS (mapCustomRegions):
+//    For popular maps, you can define named regions from specific loc names.
+//    These locs are excluded from auto-detection so they don't get merged
+//    with keyword-based regions.
+//
+// To find loc names for a map, check internal/loc/locs/<map>.loc.
+// The raw loc file uses variables like $loc_name_ra which become "RA" after
+// substitution, and "$." becomes "." as separator. So "high$loc_name_separatorrl"
+// becomes "high.RL". You can also see the final names in the browser's
+// Region Control panel (the editable text fields show all loc names per region).
+//
+// Users can also edit region definitions in the browser without code changes.
+// ============================================================================
+
+// controlKeywords lists the item types that are auto-detected as regions.
+// Add entries here to track additional item types across all maps.
 var controlKeywords = map[string]bool{
 	"RA": true, "RL": true, "LG": true, "QUAD": true,
 }
 
-// locWithKeyword pairs a location with its matched keyword
 type locWithKeyword struct {
 	loc     loc.Location
 	keyword string
+}
+
+// mapCustomRegions defines custom named regions for specific maps.
+// To add a new map, add a key with the lowercase map name and a list of
+// regions. Each region has a display name and a list of loc names to include.
+//
+// Example — adding custom regions for dm4:
+//
+//	"dm4": {
+//	    {name: "RA Bridge", locNames: []string{"RA", "RA.bridge"}},
+//	    {name: "Biosuit",   locNames: []string{"bio", "bio.water"}},
+//	},
+type customRegion struct {
+	name     string   // Display name for this region
+	locNames []string // Loc names to include (exact match against processed loc names)
+}
+
+var mapCustomRegions = map[string][]customRegion{
+	// Schloss
+	"schloss": {
+		{name: "Tower", locNames: []string{"tower", "tower.entry", "tower.RL"}},
+		{name: "Cathedral", locNames: []string{"cathedral", "cathedral.YA", "cathedral.SSG"}},
+	},
+	// E1M2 — Castle of the Damned
+	"e1m2": {
+		{name: "YA", locNames: []string{"YA", "YA.spikes", "YA.tele", "YA.water"}},
+		{name: "MH", locNames: []string{"MH", "MH.above", "MH.entry", "MH.exit", "MH.low", "MH.rox", "MH.SNG"}},
+	},
+	// DM3 — The Abandoned Base
+	"dm3": {
+		{name: "YA", locNames: []string{"YA", "YA.box", "YA.up"}},
+	},
+	// DM2 — The Claustrophobopolis
+	"dm2": {
+		{name: "Secret", locNames: []string{"secret"}},
+		{name: "Backroom", locNames: []string{"RA.MH", "RA.MH/rox"}},
+		{name: "Tele", locNames: []string{"tele", "tele.entry", "tele.YA", "tele.high"}},
+	},
 }
 
 // buildControlRegions groups locations by item keyword and clusters spatially
@@ -1189,11 +1253,35 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 		return nil
 	}
 
+	// Get map name for map-specific customization
+	mapName := ""
+	if a.ctx.DemoInfo != nil && a.ctx.DemoInfo.Map != "" {
+		mapName = strings.ToLower(a.ctx.DemoInfo.Map)
+		if idx := strings.LastIndex(mapName, "/"); idx >= 0 {
+			mapName = mapName[idx+1:]
+		}
+		mapName = strings.TrimSuffix(mapName, ".bsp")
+	}
+
+	// Build set of locs consumed by custom regions (so they're excluded from auto-detection)
+	customConsumed := make(map[string]bool)
+	customDefs := mapCustomRegions[mapName]
+	for _, cr := range customDefs {
+		for _, ln := range cr.locNames {
+			customConsumed[ln] = true
+		}
+	}
+
 	// Group locations by any matching keyword token in their name
 	// e.g., "cellar.RL" matches RL, "RA.stairs" matches RA
 	groups := make(map[string][]locWithKeyword)
 
 	for _, l := range locs {
+		// Skip locs consumed by custom regions
+		if customConsumed[l.Name] {
+			continue
+		}
+
 		tokens := strings.FieldsFunc(l.Name, func(r rune) bool {
 			return r == '.' || r == ' '
 		})
@@ -1208,8 +1296,37 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 
 	var regions []ControlRegion
 
+	// Build custom regions from map-specific definitions
+	locByName := make(map[string][]loc.Location)
+	for _, l := range locs {
+		locByName[l.Name] = append(locByName[l.Name], l)
+	}
+	for _, cr := range customDefs {
+		region := ControlRegion{Name: cr.name}
+		var sumX, sumY float32
+		var count int
+		for _, ln := range cr.locNames {
+			for _, l := range locByName[ln] {
+				region.Points = append(region.Points, MapLocation{
+					X: l.X, Y: l.Y, Z: l.Z, Name: l.Name,
+				})
+				sumX += l.X
+				sumY += l.Y
+				count++
+			}
+		}
+		if count > 0 {
+			region.CentroidX = sumX / float32(count)
+			region.CentroidY = sumY / float32(count)
+			regions = append(regions, region)
+		}
+	}
+
 	for keyword, locs := range groups {
-		clusters := clusterLocations(locs, 1500)
+		if len(locs) == 0 {
+			continue
+		}
+		clusters := clusterLocations(locs, 800)
 
 		for _, cluster := range clusters {
 			region := ControlRegion{}
@@ -1302,22 +1419,19 @@ func clusterLocations(locs []locWithKeyword, threshold float64) [][]locWithKeywo
 
 // nameCluster names a cluster based on the most common second token
 func nameCluster(keyword string, cluster []locWithKeyword) string {
+	// Find the most common non-keyword token across loc names in this cluster.
+	// E.g., for keyword "RL", locs like "high.RL" → token "high", "low.RL" → token "low"
+	keywordLower := strings.ToLower(keyword)
 	tokenCounts := make(map[string]int)
 	for _, lk := range cluster {
-		name := lk.loc.Name
-		// Extract second token after the keyword
-		rest := name
-		if idx := strings.IndexAny(name, ". "); idx > 0 {
-			rest = name[idx+1:]
-		} else {
-			rest = ""
-		}
-		if rest != "" {
-			// Get just the first sub-token
-			if idx := strings.IndexAny(rest, ". "); idx > 0 {
-				rest = rest[:idx]
+		tokens := strings.FieldsFunc(lk.loc.Name, func(r rune) bool {
+			return r == '.' || r == ' '
+		})
+		for _, t := range tokens {
+			lower := strings.ToLower(t)
+			if lower != keywordLower {
+				tokenCounts[lower]++
 			}
-			tokenCounts[strings.ToLower(rest)]++
 		}
 	}
 
@@ -1331,7 +1445,7 @@ func nameCluster(keyword string, cluster []locWithKeyword) string {
 	}
 
 	if bestToken != "" {
-		return keyword + "." + bestToken
+		return bestToken + "." + keyword
 	}
 	return keyword
 }
