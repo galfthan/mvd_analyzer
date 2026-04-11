@@ -146,6 +146,7 @@ function setCurrentTime(time) {
     updateTimeIndicators();
     updateTeamStatus();
     updateMapLegend();
+    updateRegionStatus();
     renderChatMessages();
     renderMap(mapState.currentTime);
     updateUrlState();
@@ -2464,19 +2465,19 @@ function getFragsAtTime(time) {
 // =============================================================================
 
 // Item keywords that should remain uppercase in location names
-const ITEM_KEYWORDS = ['RA', 'YA', 'GA', 'MH', 'RL', 'LG', 'GL', 'NG', 'SNG', 'QUAD', 'PENT', 'RING'];
+const ITEM_KEYWORDS = ['RA', 'YA', 'GA', 'MH', 'RL', 'LG', 'GL', 'NG', 'SNG', 'SSG', 'SG', 'MEGA', 'QUAD', 'PENT', 'RING'];
 
-// Normalize location name: "RA MH" → "RA-MH", "Quad low" → "QUAD-low", "big stairs" → "big-stairs"
+// Normalize location name: "RA.below" → "RA.below", "Quad low" → "QUAD.low"
 function normalizeLocationName(name) {
     return name
         .trim()
-        .replace(/\s+/g, '-')
-        .split('-')
+        .replace(/[\s-]+/g, '.')
+        .split('.')
         .map(part => {
             const upper = part.toUpperCase();
             return ITEM_KEYWORDS.includes(upper) ? upper : part.toLowerCase();
         })
-        .join('-');
+        .join('.');
 }
 
 // Get color for location based on item type in name
@@ -2629,6 +2630,79 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
     }
 }
 
+// Draw control overlay for regions based on current control state
+function drawRegionControlOverlay(ctx, controlStates) {
+    const teamColors = TEAM_COLORS;
+
+    for (const [regionName, state] of Object.entries(controlStates)) {
+        const groups = mapState.regionToGroups[regionName];
+        if (!groups || groups.length === 0) continue;
+
+        let color;
+        switch (state) {
+            case 'teamAControl':
+                color = hexToRgba(teamColors[0], 0.15);
+                break;
+            case 'teamAWeakControl':
+                color = hexToRgba(teamColors[0], 0.08);
+                break;
+            case 'teamBControl':
+                color = hexToRgba(teamColors[1], 0.15);
+                break;
+            case 'teamBWeakControl':
+                color = hexToRgba(teamColors[1], 0.08);
+                break;
+            case 'contested':
+                color = 'rgba(180, 100, 220, 0.08)';
+                break;
+            default: // empty
+                continue;
+        }
+
+        for (const group of groups) {
+            drawLocationRegionFill(ctx, group, color);
+        }
+    }
+}
+
+function drawLocationRegionFill(ctx, group, fillColor) {
+    if (group.points.length === 1) {
+        const pos = worldToCanvasNew(group.points[0].x, group.points[0].y);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+    } else {
+        const canvasPoints = group.points.map(p => worldToCanvasNew(p.x, p.y));
+        const hull = computeConvexHull(canvasPoints);
+        if (hull.length < 3) {
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            for (const p of canvasPoints) {
+                minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+            }
+            const pad = 17;
+            ctx.fillStyle = fillColor;
+            ctx.fillRect(minX - pad, minY - pad, maxX - minX + pad*2, maxY - minY + pad*2);
+        } else {
+            const expanded = expandPolygon(hull, 17);
+            ctx.beginPath();
+            ctx.moveTo(expanded[0].x, expanded[0].y);
+            for (let i = 1; i < expanded.length; i++) ctx.lineTo(expanded[i].x, expanded[i].y);
+            ctx.closePath();
+            ctx.fillStyle = fillColor;
+            ctx.fill();
+        }
+    }
+}
+
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 // Map View State
 let mapState = {
     canvas: null,
@@ -2654,6 +2728,68 @@ let mapState = {
 };
 
 const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
+
+// Badge definitions: angle (0=up, clockwise), letter, color (from timeline legend)
+const BADGE_DEFS = [
+    { angle:   0, key: 'q',   letter: 'Q', color: 'rgb(0, 150, 255)' },
+    { angle:  45, key: 'rl',  letter: 'R', color: 'rgb(255, 107, 107)' },
+    { angle:  90, key: 'lg',  letter: 'L', color: 'rgb(0, 217, 255)' },
+    { angle: 135, key: 'sng', letter: 'N', color: 'rgb(180, 140, 100)' },
+    { angle: 180, key: 'mh',  letter: 'M', color: 'rgb(0, 200, 83)' },
+    { angle: 225, key: 'arm', letter: 'A', color: null },
+    { angle: 270, key: 'pe',  letter: 'P', color: 'rgb(255, 0, 0)' },
+    { angle: 315, key: 'r',   letter: 'I', color: 'rgb(255, 235, 59)' },
+];
+const ARMOR_COLORS = { ra: 'rgb(255, 50, 50)', ya: 'rgb(255, 200, 0)', ga: 'rgb(0, 180, 0)' };
+
+function getActiveBadges(data) {
+    const badges = [];
+    for (const def of BADGE_DEFS) {
+        let active = false, color = def.color, letter = def.letter;
+        switch (def.key) {
+            case 'q':   active = !!data.q; break;
+            case 'rl':  active = !!data.rl; break;
+            case 'lg':  active = !!data.lg; break;
+            case 'sng':
+                if (data.sng) { active = true; letter = 'N'; }
+                else if (data.ssg) { active = true; letter = 'S'; }
+                break;
+            case 'mh':  active = data.h > 100; break;
+            case 'arm':
+                if (data.at) {
+                    active = true;
+                    color = ARMOR_COLORS[data.at] || 'rgb(180, 180, 180)';
+                    letter = data.at.toUpperCase();
+                }
+                break;
+            case 'pe':  active = !!data.pe; break;
+            case 'r':   active = !!data.r; break;
+        }
+        if (active) badges.push({ angle: def.angle, letter, color });
+    }
+    return badges;
+}
+
+function drawBadge(ctx, letter, color, x, y, radius) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.font = `bold ${Math.round(radius * 1.2)}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#000';
+    ctx.fillText(letter, x, y);
+}
+
+function drawBadgesAroundCenter(ctx, badges, cx, cy, orbitRadius, badgeRadius) {
+    for (const b of badges) {
+        const rad = (b.angle - 90) * Math.PI / 180;
+        const bx = cx + orbitRadius * Math.cos(rad);
+        const by = cy + orbitRadius * Math.sin(rad);
+        drawBadge(ctx, b.letter, b.color, bx, by, badgeRadius);
+    }
+}
 
 function markMapDirty() {
     mapState.renderDirty = true;
@@ -2722,7 +2858,333 @@ function initMapView(result) {
     const slider = document.getElementById('map-timeline-slider');
     if (slider) slider.value = 0;
 
+    // Initialize region control data
+    initRegionControl(result);
+
     renderMap(mapState.currentTime);
+}
+
+function initRegionControl(result) {
+    const rc = result.timelineAnalysis?.regionControl;
+    const panel = document.getElementById('region-control-panel');
+    const statusPanel = document.getElementById('region-status-panel');
+    if (!rc || !rc.regions || rc.regions.length === 0) {
+        if (panel) panel.style.display = 'none';
+        if (statusPanel) statusPanel.style.display = 'none';
+        mapState.controlRegions = null;
+        return;
+    }
+
+    // Store the original backend result and all locations for recomputation
+    mapState.rcResult = rc;
+
+    // Ensure location groups are processed
+    if (!mapState.locationGroups && mapState.locations.length > 0) {
+        mapState.locationGroups = processLocationGroups(mapState.locations);
+    }
+
+    // Build region config UI (editable text fields per region)
+    buildRegionConfig(rc.regions);
+
+    // Apply regions (builds lookups, computes stats, renders table)
+    applyRegionConfig();
+
+    if (panel) panel.style.display = '';
+    if (statusPanel) statusPanel.style.display = '';
+}
+
+function buildRegionConfig(regions) {
+    const container = document.getElementById('region-config');
+    if (!container) return;
+    container.innerHTML = '';
+
+    for (const region of regions) {
+        const locNames = [...new Set(region.points.map(p => p.name))].join(', ');
+        const row = document.createElement('div');
+        row.className = 'region-config-row';
+        row.innerHTML = `
+            <label>${escapeHtml(region.name)}:</label>
+            <input type="text" class="region-locs-input" data-region="${escapeHtml(region.name)}" value="${escapeHtml(locNames)}">
+        `;
+        container.appendChild(row);
+    }
+
+    // On change, recompute
+    container.querySelectorAll('.region-locs-input').forEach(input => {
+        input.addEventListener('change', () => applyRegionConfig());
+    });
+}
+
+function applyRegionConfig() {
+    const rc = mapState.rcResult;
+    if (!rc) return;
+
+    // Read current region definitions from the text inputs
+    const regions = [];
+    document.querySelectorAll('.region-locs-input').forEach(input => {
+        const regionName = input.dataset.region;
+        const locNames = input.value.split(',').map(s => s.trim()).filter(s => s);
+
+        // Find matching locations from the full loc list
+        const locSet = new Set(locNames);
+        const points = [];
+        let sumX = 0, sumY = 0;
+        for (const loc of mapState.locations) {
+            if (locSet.has(loc.name)) {
+                points.push({ x: loc.x, y: loc.y, z: loc.z, name: loc.name });
+                sumX += loc.x;
+                sumY += loc.y;
+            }
+        }
+        if (points.length > 0) {
+            regions.push({
+                name: regionName,
+                points: points,
+                centroidX: sumX / points.length,
+                centroidY: sumY / points.length,
+            });
+        }
+    });
+
+    mapState.controlRegions = regions;
+
+    // Build loc-name-to-region lookup
+    mapState.locToRegion = {};
+    for (const region of regions) {
+        for (const pt of region.points) {
+            mapState.locToRegion[pt.name] = region.name;
+        }
+    }
+
+    // Build region-to-location-group mapping for coloring
+    mapState.regionToGroups = {};
+    if (mapState.locationGroups) {
+        for (const group of mapState.locationGroups) {
+            for (const region of regions) {
+                let matched = false;
+                for (const gpt of group.points) {
+                    for (const rpt of region.points) {
+                        const dx = gpt.x - rpt.x, dy = gpt.y - rpt.y;
+                        if (dx * dx + dy * dy < 1) {
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (matched) break;
+                }
+                if (matched) {
+                    if (!mapState.regionToGroups[region.name]) {
+                        mapState.regionToGroups[region.name] = [];
+                    }
+                    mapState.regionToGroups[region.name].push(group);
+                }
+            }
+        }
+    }
+
+    // Recompute stats from high-res buckets
+    recomputeRegionStats(regions);
+
+    // Force map redraw
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
+}
+
+function recomputeRegionStats(regions) {
+    const buckets = timelineState.highResBuckets;
+    if (!buckets || buckets.length === 0 || regions.length === 0) return;
+
+    const teams = mapState.teams || [];
+    if (teams.length < 2) return;
+    const teamA = teams[0], teamB = teams[1];
+
+    // Initialize counters
+    const counters = {};
+    for (const r of regions) {
+        counters[r.name] = { aC: 0, aW: 0, con: 0, emp: 0, bW: 0, bC: 0 };
+    }
+
+    let total = 0;
+    const locations = mapState.locations;
+
+    for (const bucket of buckets) {
+        const playerData = bucket.p || bucket.playerData;
+        if (!playerData) continue;
+        total++;
+
+        // Per-region presence
+        const presence = {};
+        for (const r of regions) {
+            presence[r.name] = { aWpn: 0, aNo: 0, bWpn: 0, bNo: 0 };
+        }
+
+        for (const [name, data] of Object.entries(playerData)) {
+            if (data.d || (data.h !== undefined && data.h <= 0)) continue;
+            if (data.x === 0 && data.y === 0) continue;
+
+            const nearest = findNearestLocation(data.x, data.y, locations);
+            if (!nearest) continue;
+            const regionName = mapState.locToRegion[nearest];
+            if (!regionName || !presence[regionName]) continue;
+
+            const sym = mapState.playerSymbols[name];
+            const playerTeam = sym ? teams[sym.teamIdx] : null;
+            const hasWeapon = data.rl || data.lg;
+            const p = presence[regionName];
+
+            if (playerTeam === teamA) {
+                if (hasWeapon) p.aWpn++; else p.aNo++;
+            } else if (playerTeam === teamB) {
+                if (hasWeapon) p.bWpn++; else p.bNo++;
+            }
+        }
+
+        for (const r of regions) {
+            const p = presence[r.name];
+            const c = counters[r.name];
+            const aT = p.aWpn + p.aNo, bT = p.bWpn + p.bNo;
+
+            if (aT === 0 && bT === 0) { c.emp++; }
+            else if (aT > 0 && bT === 0) { if (p.aWpn > 0) c.aC++; else c.aW++; }
+            else if (bT > 0 && aT === 0) { if (p.bWpn > 0) c.bC++; else c.bW++; }
+            else if (p.aWpn > 0 && p.bWpn === 0) { c.aC++; }
+            else if (p.bWpn > 0 && p.aWpn === 0) { c.bC++; }
+            else { c.con++; }
+        }
+    }
+
+    if (total === 0) return;
+
+    // Build stats and display
+    const pct = (v) => Math.round(v / total * 1000) / 10;
+    const stats = {};
+    for (const r of regions) {
+        const c = counters[r.name];
+        stats[r.name] = {
+            teamAControl: pct(c.aC), teamAWeakControl: pct(c.aW),
+            contested: pct(c.con), empty: pct(c.emp),
+            teamBWeakControl: pct(c.bW), teamBControl: pct(c.bC),
+            teamA, teamB,
+        };
+    }
+
+    mapState.controlStats = stats;
+    displayRegionControlTable(regions, stats);
+}
+
+function displayRegionControlTable(regions, stats) {
+    const tbody = document.getElementById('region-control-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const firstStats = Object.values(stats)[0];
+    if (firstStats) {
+        const teamA = firstStats.teamA || 'Team A';
+        const teamB = firstStats.teamB || 'Team B';
+        document.getElementById('rc-teamA-hdr').textContent = teamA;
+        document.getElementById('rc-teamA-weak-hdr').textContent = teamA + ' weak';
+        document.getElementById('rc-teamB-hdr').textContent = teamB;
+        document.getElementById('rc-teamB-weak-hdr').textContent = teamB + ' weak';
+    }
+
+    const teamColors = TEAM_COLORS;
+
+    for (const region of regions) {
+        const s = stats[region.name];
+        if (!s) continue;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${escapeHtml(region.name)}</strong></td>
+            <td style="background: ${cellBg(teamColors[0], s.teamAControl)}">${s.teamAControl}%</td>
+            <td style="background: ${cellBg(teamColors[0], s.teamAWeakControl, 0.5)}">${s.teamAWeakControl}%</td>
+            <td style="background: ${cellBg('#888', s.contested)}">${s.contested}%</td>
+            <td>${s.empty}%</td>
+            <td style="background: ${cellBg(teamColors[1], s.teamBWeakControl, 0.5)}">${s.teamBWeakControl}%</td>
+            <td style="background: ${cellBg(teamColors[1], s.teamBControl)}">${s.teamBControl}%</td>
+        `;
+        tbody.appendChild(tr);
+    }
+}
+
+function cellBg(color, pct, intensityScale) {
+    if (!pct || pct <= 0) return 'transparent';
+    // Parse hex color to RGB
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    const alpha = Math.min(0.4, (pct / 100) * 0.6) * (intensityScale || 1);
+    return `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(2)})`;
+}
+
+// Compute real-time region control state at a given time
+function getRegionControlAtTime(time) {
+    if (!mapState.controlRegions || !mapState.locToRegion) return null;
+
+    const bucket = findBucketAtTime(time);
+    if (!bucket) return null;
+
+    const playerData = bucket.p || bucket.playerData;
+    if (!playerData) return null;
+
+    const teams = mapState.teams || [];
+    if (teams.length < 2) return null;
+    const teamA = teams[0], teamB = teams[1];
+
+    // Per-region presence
+    const presence = {};
+    for (const region of mapState.controlRegions) {
+        presence[region.name] = { aWpn: 0, aNo: 0, bWpn: 0, bNo: 0 };
+    }
+
+    // Check each player
+    const locations = mapState.locations;
+    for (const [name, data] of Object.entries(playerData)) {
+        if (data.d || (data.h !== undefined && data.h <= 0)) continue; // dead
+        if (data.x === 0 && data.y === 0) continue;
+
+        // Find nearest location
+        const nearest = findNearestLocation(data.x, data.y, locations);
+        if (!nearest) continue;
+
+        const regionName = mapState.locToRegion[nearest];
+        if (!regionName) continue;
+
+        const p = presence[regionName];
+        if (!p) continue;
+
+        const hasWeapon = data.rl || data.lg;
+        const sym = mapState.playerSymbols[name];
+        const playerTeam = sym ? teams[sym.teamIdx] : null;
+
+        if (playerTeam === teamA) {
+            if (hasWeapon) p.aWpn++; else p.aNo++;
+        } else if (playerTeam === teamB) {
+            if (hasWeapon) p.bWpn++; else p.bNo++;
+        }
+    }
+
+    // Determine state per region
+    const states = {};
+    for (const region of mapState.controlRegions) {
+        const p = presence[region.name];
+        const aTotal = p.aWpn + p.aNo;
+        const bTotal = p.bWpn + p.bNo;
+
+        if (aTotal === 0 && bTotal === 0) {
+            states[region.name] = 'empty';
+        } else if (aTotal > 0 && bTotal === 0) {
+            states[region.name] = p.aWpn > 0 ? 'teamAControl' : 'teamAWeakControl';
+        } else if (bTotal > 0 && aTotal === 0) {
+            states[region.name] = p.bWpn > 0 ? 'teamBControl' : 'teamBWeakControl';
+        } else if (p.aWpn > 0 && p.bWpn === 0) {
+            states[region.name] = 'teamAControl';
+        } else if (p.bWpn > 0 && p.aWpn === 0) {
+            states[region.name] = 'teamBControl';
+        } else {
+            states[region.name] = 'contested';
+        }
+    }
+    return states;
 }
 
 function calculateMapBounds(result) {
@@ -3025,6 +3487,152 @@ function updateMapLegend() {
     }
 }
 
+function updateRegionStatus() {
+    const container = document.getElementById('region-status-body');
+    if (!container || !mapState.controlRegions || mapState.controlRegions.length === 0) return;
+    container.innerHTML = '';
+
+    const time = mapState.currentTime;
+    const controlStates = getRegionControlAtTime(time);
+    if (!controlStates) return;
+
+    const bucket = findBucketAtTime(time);
+    const playerData = bucket ? (bucket.p || bucket.playerData) : null;
+    const teams = mapState.teams || [];
+    const teamColors = TEAM_COLORS;
+    const locations = mapState.locations;
+
+    // Build per-region player lists
+    const regionPlayers = {};
+    for (const r of mapState.controlRegions) {
+        regionPlayers[r.name] = [];
+    }
+
+    if (playerData) {
+        for (const [name, data] of Object.entries(playerData)) {
+            if (data.d || (data.h !== undefined && data.h <= 0)) continue;
+            if (data.x === 0 && data.y === 0) continue;
+
+            const nearest = findNearestLocation(data.x, data.y, locations);
+            if (!nearest) continue;
+            const regionName = mapState.locToRegion?.[nearest];
+            if (!regionName || !regionPlayers[regionName]) continue;
+
+            const sym = mapState.playerSymbols[name];
+            regionPlayers[regionName].push({
+                name, data, sym,
+                teamIdx: sym ? sym.teamIdx : -1,
+                hasRL: data.rl || false,
+                hasLG: data.lg || false,
+            });
+        }
+    }
+
+    // Build HTML
+    let html = '';
+    for (const region of mapState.controlRegions) {
+        const state = controlStates[region.name] || 'empty';
+        const players = regionPlayers[region.name] || [];
+
+        // Status label and color
+        let statusLabel, statusColor;
+        switch (state) {
+            case 'teamAControl':
+                statusLabel = teams[0] || 'A';
+                statusColor = teamColors[0];
+                break;
+            case 'teamAWeakControl':
+                statusLabel = (teams[0] || 'A') + ' (weak)';
+                statusColor = teamColors[0];
+                break;
+            case 'teamBControl':
+                statusLabel = teams[1] || 'B';
+                statusColor = teamColors[1];
+                break;
+            case 'teamBWeakControl':
+                statusLabel = (teams[1] || 'B') + ' (weak)';
+                statusColor = teamColors[1];
+                break;
+            case 'contested':
+                statusLabel = 'Contested';
+                statusColor = '#b060d8';
+                break;
+            default:
+                statusLabel = 'Empty';
+                statusColor = '#555';
+                break;
+        }
+
+        // Build row
+        const row = document.createElement('div');
+        row.className = 'region-status-row';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'region-status-name';
+        nameSpan.textContent = region.name;
+        row.appendChild(nameSpan);
+
+        const stateSpan = document.createElement('span');
+        stateSpan.className = 'region-status-state';
+        stateSpan.style.color = statusColor;
+        stateSpan.textContent = statusLabel;
+        row.appendChild(stateSpan);
+
+        const playersSpan = document.createElement('span');
+        playersSpan.className = 'region-status-players';
+
+        // Sort: team A first, then team B
+        players.sort((a, b) => a.teamIdx - b.teamIdx);
+        if (players.length === 0) {
+            playersSpan.textContent = '-';
+        } else {
+            for (const p of players) {
+                const icon = buildPlayerRegionIcon(p);
+                icon.title = p.name;
+                playersSpan.appendChild(icon);
+            }
+        }
+        row.appendChild(playersSpan);
+        container.appendChild(row);
+    }
+}
+
+// Build a composited canvas icon: player circle+letter with RL/LG weapon icons in corners
+function buildPlayerRegionIcon(player) {
+    const sym = player.sym;
+    const symCanvas = sym ? sym.symbolCanvas : null;
+
+    const size = 40;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    canvas.className = 'region-player-icon';
+    const ctx = canvas.getContext('2d');
+
+    // Draw player symbol centered
+    if (symCanvas) {
+        const ox = (size - symCanvas.width) / 2;
+        const oy = (size - symCanvas.height) / 2;
+        ctx.drawImage(symCanvas, ox, oy);
+    } else {
+        // Fallback: draw letter
+        const color = player.teamIdx === 0 ? '#ff5050' : '#50a0ff';
+        ctx.font = 'bold 16px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = color;
+        ctx.fillText(player.name.charAt(0).toUpperCase(), size / 2, size / 2);
+    }
+
+    // Draw status badges around player symbol
+    const badges = getActiveBadges(player.data);
+    if (badges.length > 0) {
+        drawBadgesAroundCenter(ctx, badges, size / 2, size / 2, 14, 5);
+    }
+
+    return canvas;
+}
+
 function prerenderLocationBackground() {
     if (!mapState.locationGroups || !mapState.canvas) return;
 
@@ -3138,6 +3746,14 @@ function renderMap(time) {
         }
     }
 
+    // Draw region control overlay (colored by controlling team)
+    if (mapState.controlRegions && mapState.regionToGroups) {
+        const controlStates = getRegionControlAtTime(time);
+        if (controlStates) {
+            drawRegionControlOverlay(ctx, controlStates);
+        }
+    }
+
     // Draw tracks (per-player visibility controlled by enabledPlayers)
     drawTracks(ctx, time);
 
@@ -3154,6 +3770,12 @@ function renderMap(time) {
 
             if (symbolInfo && symbolInfo.symbolCanvas) {
                 ctx.drawImage(symbolInfo.symbolCanvas, pos.x - halfSymbol, pos.y - halfSymbol);
+
+                // Draw status badges around player symbol
+                const badges = getActiveBadges(data);
+                if (badges.length > 0) {
+                    drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, 14, 5);
+                }
             }
         }
     }
@@ -3509,6 +4131,7 @@ function animatePlayback() {
         updateTimeIndicators();
         updateTeamStatus();
         updateMapLegend();
+        updateRegionStatus();
     }
 }
 

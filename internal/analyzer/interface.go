@@ -292,6 +292,20 @@ type TimelineAnalysisResult struct {
 	FragStreaks      []FragStreakEvent    `json:"fragStreaks,omitempty"`      // Top longest frag streaks for Key Moments
 	LocationData    []MapLocation       `json:"locationData,omitempty"`    // Location points from .loc file for map view
 	PlayerUserIDs   map[string]int      `json:"playerUserIDs,omitempty"`   // Player name -> UserID for Hub viewer links
+	RegionControl   *RegionControlResult `json:"regionControl,omitempty"`  // Region control stats
+}
+
+// ControlRegion represents a named area on the map for control tracking
+type ControlRegion struct {
+	Name      string        `json:"name"`
+	Points    []MapLocation `json:"points"`
+	CentroidX float32       `json:"centroidX"`
+	CentroidY float32       `json:"centroidY"`
+}
+
+// RegionControlResult contains auto-detected region definitions
+type RegionControlResult struct {
+	Regions []ControlRegion `json:"regions"`
 }
 
 // HighResBucket - compact bucket for high-resolution map data
@@ -310,6 +324,8 @@ type HighResPlayerData struct {
 	AT      string  `json:"at,omitempty"`  // Armor type: "ga"/"ya"/"ra"
 	RL      bool    `json:"rl,omitempty"`  // Has rocket launcher
 	LG      bool    `json:"lg,omitempty"`  // Has lightning gun
+	SSG     bool    `json:"ssg,omitempty"` // Has super shotgun
+	SNG     bool    `json:"sng,omitempty"` // Has super nailgun
 	Q       bool    `json:"q,omitempty"`   // Has quad
 	Pent    bool    `json:"pe,omitempty"`  // Has pent
 	R       bool    `json:"r,omitempty"`   // Has ring

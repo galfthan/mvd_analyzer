@@ -424,7 +424,29 @@
                             <div class="map-legend" id="map-legend">
                                 <h4>Players</h4>
                             </div>
+                            <div id="region-status-panel" style="display: none;">
+                                <h4>Region Status</h4>
+                                <div id="region-status-body"></div>
+                            </div>
                         </div>
+                    </div>
+                    <div id="region-control-panel" style="display: none;">
+                        <h4>Region Control</h4>
+                        <div id="region-config" class="region-config"></div>
+                        <table class="stats-table region-control-table" id="region-control-table">
+                            <thead>
+                                <tr>
+                                    <th>Region</th>
+                                    <th id="rc-teamA-hdr" title="Team has player with RL/LG, opponent doesn't">-</th>
+                                    <th id="rc-teamA-weak-hdr" title="Team has player without RL/LG, opponent absent">- weak</th>
+                                    <th title="Both teams present with similar strength">Contested</th>
+                                    <th title="No players in region">Empty</th>
+                                    <th id="rc-teamB-weak-hdr" title="Team has player without RL/LG, opponent absent">- weak</th>
+                                    <th id="rc-teamB-hdr" title="Team has player with RL/LG, opponent doesn't">-</th>
+                                </tr>
+                            </thead>
+                            <tbody id="region-control-body"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>

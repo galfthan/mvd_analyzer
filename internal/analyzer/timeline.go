@@ -73,6 +73,8 @@ type playerBucketRawData struct {
 	team      string
 	hasRL     bool
 	hasLG     bool
+	hasSSG    bool
+	hasSNG    bool
 	hasQuad   bool
 	hasPent   bool
 	hasRing   bool
@@ -317,6 +319,8 @@ func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 		// Track weapons
 		pData.hasRL = (state.items & mvd.ITRocketLauncher) != 0
 		pData.hasLG = (state.items & mvd.ITLightning) != 0
+		pData.hasSSG = (state.items & mvd.ITSuperShotgun) != 0
+		pData.hasSNG = (state.items & mvd.ITSuperNailgun) != 0
 
 		// Track powerups
 		pData.hasQuad = (state.items & mvd.ITQuad) != 0
@@ -533,6 +537,15 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	// Detect top 5 longest frag streaks for Key Moments
 	fragStreaks := a.detectFragStreaks(10, nameToTeam, playerUserIDsByName)
 
+	// Auto-detect control regions from loc data (stats computed client-side)
+	var regionControl *RegionControlResult
+	if a.locFinder != nil {
+		regions := a.buildControlRegions()
+		if len(regions) > 0 {
+			regionControl = &RegionControlResult{Regions: regions}
+		}
+	}
+
 	result := &TimelineAnalysisResult{
 		BucketDuration:  a.graphBucketDuration, // 1.0 for graphs
 		HighResDuration: a.bucketDuration,      // 0.05 for map
@@ -544,6 +557,7 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		FragStreaks:      fragStreaks,
 		LocationData:    locationData,
 		PlayerUserIDs:   playerUserIDsByName,
+		RegionControl:   regionControl,
 	}
 
 	return result, nil
@@ -580,6 +594,8 @@ func (a *TimelineAnalyzer) exportHighResBuckets(slotToName map[int]string) []Hig
 				AT:      pd.armorType,
 				RL:      pd.hasRL,
 				LG:      pd.hasLG,
+				SSG:     pd.hasSSG,
+				SNG:     pd.hasSNG,
 				Q:       pd.hasQuad,
 				Pent:    pd.hasPent,
 				R:       pd.hasRing,
@@ -1154,3 +1170,170 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, nameToTeam map[string]str
 
 	return allStreaks
 }
+
+// controlKeywords are the item keywords we track for region control
+var controlKeywords = map[string]bool{
+	"RA": true, "RL": true, "LG": true, "QUAD": true,
+}
+
+// locWithKeyword pairs a location with its matched keyword
+type locWithKeyword struct {
+	loc     loc.Location
+	keyword string
+}
+
+// buildControlRegions groups locations by item keyword and clusters spatially
+func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
+	locs := a.locFinder.Locations()
+	if len(locs) == 0 {
+		return nil
+	}
+
+	// Group locations by any matching keyword token in their name
+	// e.g., "cellar.RL" matches RL, "RA.stairs" matches RA
+	groups := make(map[string][]locWithKeyword)
+
+	for _, l := range locs {
+		tokens := strings.FieldsFunc(l.Name, func(r rune) bool {
+			return r == '.' || r == ' '
+		})
+		for _, token := range tokens {
+			upper := strings.ToUpper(token)
+			if controlKeywords[upper] {
+				groups[upper] = append(groups[upper], locWithKeyword{loc: l, keyword: upper})
+				break // Only match first keyword per location
+			}
+		}
+	}
+
+	var regions []ControlRegion
+
+	for keyword, locs := range groups {
+		clusters := clusterLocations(locs, 1500)
+
+		for _, cluster := range clusters {
+			region := ControlRegion{}
+
+			// Name the region
+			if len(clusters) == 1 {
+				region.Name = keyword
+			} else {
+				// Find most common second token for naming
+				region.Name = nameCluster(keyword, cluster)
+			}
+
+			// Build points and centroid
+			var sumX, sumY float32
+			for _, lk := range cluster {
+				region.Points = append(region.Points, MapLocation{
+					X:    lk.loc.X,
+					Y:    lk.loc.Y,
+					Z:    lk.loc.Z,
+					Name: lk.loc.Name,
+				})
+				sumX += lk.loc.X
+				sumY += lk.loc.Y
+			}
+			region.CentroidX = sumX / float32(len(cluster))
+			region.CentroidY = sumY / float32(len(cluster))
+
+			regions = append(regions, region)
+		}
+	}
+
+	// Sort regions by name for stable output
+	sort.Slice(regions, func(i, j int) bool {
+		return regions[i].Name < regions[j].Name
+	})
+
+	return regions
+}
+
+// clusterLocations groups locations by spatial proximity using single-linkage clustering
+func clusterLocations(locs []locWithKeyword, threshold float64) [][]locWithKeyword {
+	n := len(locs)
+	if n == 0 {
+		return nil
+	}
+
+	// Union-Find
+	parent := make([]int, n)
+	for i := range parent {
+		parent[i] = i
+	}
+	var find func(int) int
+	find = func(x int) int {
+		if parent[x] != x {
+			parent[x] = find(parent[x])
+		}
+		return parent[x]
+	}
+	union := func(a, b int) {
+		ra, rb := find(a), find(b)
+		if ra != rb {
+			parent[ra] = rb
+		}
+	}
+
+	threshSq := threshold * threshold
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			dx := float64(locs[i].loc.X - locs[j].loc.X)
+			dy := float64(locs[i].loc.Y - locs[j].loc.Y)
+			if dx*dx+dy*dy < threshSq {
+				union(i, j)
+			}
+		}
+	}
+
+	// Group by root
+	clusterMap := make(map[int][]locWithKeyword)
+	for i, l := range locs {
+		root := find(i)
+		clusterMap[root] = append(clusterMap[root], l)
+	}
+
+	var result [][]locWithKeyword
+	for _, c := range clusterMap {
+		result = append(result, c)
+	}
+	return result
+}
+
+// nameCluster names a cluster based on the most common second token
+func nameCluster(keyword string, cluster []locWithKeyword) string {
+	tokenCounts := make(map[string]int)
+	for _, lk := range cluster {
+		name := lk.loc.Name
+		// Extract second token after the keyword
+		rest := name
+		if idx := strings.IndexAny(name, ". "); idx > 0 {
+			rest = name[idx+1:]
+		} else {
+			rest = ""
+		}
+		if rest != "" {
+			// Get just the first sub-token
+			if idx := strings.IndexAny(rest, ". "); idx > 0 {
+				rest = rest[:idx]
+			}
+			tokenCounts[strings.ToLower(rest)]++
+		}
+	}
+
+	bestToken := ""
+	bestCount := 0
+	for token, count := range tokenCounts {
+		if count > bestCount {
+			bestCount = count
+			bestToken = token
+		}
+	}
+
+	if bestToken != "" {
+		return keyword + "." + bestToken
+	}
+	return keyword
+}
+
+// (Region control stats are computed client-side in JavaScript)

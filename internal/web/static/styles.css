@@ -1576,6 +1576,105 @@ th.sortable.sort-desc::after {
     padding: 15px;
 }
 
+#region-status-panel {
+    background: #16213e;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+#region-status-panel h4 {
+    color: #00d9ff;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.region-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    border-bottom: 1px solid #1a1a2e;
+    font-size: 0.85rem;
+}
+
+.region-status-name {
+    font-weight: bold;
+    min-width: 60px;
+    color: #ccc;
+}
+
+.region-status-state {
+    min-width: 70px;
+    font-size: 0.8rem;
+}
+
+.region-status-players {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.region-player-icon {
+    width: 40px;
+    height: 40px;
+    cursor: default;
+}
+
+#region-control-panel {
+    background: #16213e;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+#region-control-panel h4 {
+    color: #00d9ff;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.region-config {
+    margin-bottom: 12px;
+}
+
+.region-config-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.region-config-row label {
+    min-width: 80px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #ccc;
+}
+
+.region-locs-input {
+    flex: 1;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    color: #ccc;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-family: monospace;
+}
+
+.region-locs-input:focus {
+    border-color: #00d9ff;
+    outline: none;
+}
+
+.region-control-table {
+    font-size: 0.8rem;
+}
+
+.region-control-table td {
+    text-align: center;
+}
+
 .map-legend h4 {
     color: #00d9ff;
     margin-bottom: 12px;
