@@ -1543,6 +1543,7 @@ function updateDetailView() {
     // Update all detail panels
     updateDetailGraph(start, end);
     updateDetailAxis(start, end);
+    updateRegionControlTimeline(start, end);
     updateHealthArmorGraph(start, end);
     updateFragsGraph(start, end);
     updateScoreTimeline(start, end);
@@ -1862,6 +1863,130 @@ function addPowerupLine(container, spanStart, spanEnd, viewStart, viewDuration, 
         line.style.left = `${leftPct}%`;
         line.style.width = `${widthPct}%`;
         container.appendChild(line);
+    }
+}
+
+// ─── Region Control Timeline ─────────────────────────────────────────────
+
+function updateRegionControlTimeline(startTime, endTime) {
+    const panel = document.getElementById('region-control-timeline-panel');
+    const labelsContainer = document.getElementById('region-timeline-labels');
+    const stripsContainer = document.getElementById('region-timeline-strips');
+    if (!panel || !labelsContainer || !stripsContainer) return;
+
+    if (!mapState.controlRegions || mapState.controlRegions.length === 0 ||
+        !mapState.locToRegion || !timelineState.teams || timelineState.teams.length < 2) {
+        panel.style.display = 'none';
+        return;
+    }
+    panel.style.display = '';
+
+    // Update legend team names
+    const teamA = timelineState.teams[0], teamB = timelineState.teams[1];
+    const teamALabel = document.getElementById('rc-tl-teamA');
+    const teamBLabel = document.getElementById('rc-tl-teamB');
+    if (teamALabel) teamALabel.textContent = teamA;
+    if (teamBLabel) teamBLabel.textContent = teamB;
+
+    labelsContainer.innerHTML = '';
+    stripsContainer.innerHTML = '';
+
+    const regions = mapState.controlRegions;
+    const buckets = timelineState.buckets;
+    if (!buckets || buckets.length === 0) return;
+
+    const duration = endTime - startTime;
+    if (duration <= 0) return;
+
+    const locations = mapState.locations;
+
+    // Control state colors
+    const stateColors = {
+        teamAControl:     'rgba(255, 80, 80, 0.9)',
+        teamAWeakControl: 'rgba(255, 80, 80, 0.35)',
+        contested:        'rgba(220, 220, 220, 0.6)',
+        empty:            'transparent',
+        teamBWeakControl: 'rgba(80, 160, 255, 0.35)',
+        teamBControl:     'rgba(80, 160, 255, 0.9)',
+    };
+
+    for (const region of regions) {
+        // Label
+        const label = document.createElement('div');
+        label.className = 'region-timeline-label';
+        label.textContent = region.name;
+        label.title = region.name;
+        labelsContainer.appendChild(label);
+
+        // Strip
+        const strip = document.createElement('div');
+        strip.className = 'region-strip';
+
+        // Compute control state per bucket and find contiguous spans
+        let currentState = null;
+        let spanStart = startTime;
+
+        for (let i = 0; i < buckets.length; i++) {
+            const bucket = buckets[i];
+            if (bucket.endTime <= startTime || bucket.startTime >= endTime) continue;
+
+            // Determine control state for this region at this bucket
+            const playerData = bucket.playerData;
+            let aWpn = 0, aNo = 0, bWpn = 0, bNo = 0;
+
+            if (playerData) {
+                for (const [name, data] of Object.entries(playerData)) {
+                    if (!data || (data.health !== undefined && data.health <= 0)) continue;
+                    const loc = data.location || '';
+                    const rName = mapState.locToRegion[loc];
+                    if (rName !== region.name) continue;
+
+                    const sym = mapState.playerSymbols[name];
+                    const playerTeam = sym ? timelineState.teams[sym.teamIdx] : null;
+                    const hasWpn = data.hasRL || data.hasLG;
+
+                    if (playerTeam === teamA) { if (hasWpn) aWpn++; else aNo++; }
+                    else if (playerTeam === teamB) { if (hasWpn) bWpn++; else bNo++; }
+                }
+            }
+
+            const aT = aWpn + aNo, bT = bWpn + bNo;
+            let state;
+            if (aT === 0 && bT === 0) state = 'empty';
+            else if (aT > 0 && bT === 0) state = aWpn > 0 ? 'teamAControl' : 'teamAWeakControl';
+            else if (bT > 0 && aT === 0) state = bWpn > 0 ? 'teamBControl' : 'teamBWeakControl';
+            else if (aWpn > 0 && bWpn === 0) state = 'teamAControl';
+            else if (bWpn > 0 && aWpn === 0) state = 'teamBControl';
+            else state = 'contested';
+
+            if (state !== currentState) {
+                // Emit previous span
+                if (currentState && currentState !== 'empty') {
+                    addRegionSegment(strip, spanStart, bucket.startTime, startTime, duration, stateColors[currentState]);
+                }
+                currentState = state;
+                spanStart = bucket.startTime;
+            }
+        }
+        // Final span
+        if (currentState && currentState !== 'empty') {
+            addRegionSegment(strip, spanStart, endTime, startTime, duration, stateColors[currentState]);
+        }
+
+        stripsContainer.appendChild(strip);
+    }
+}
+
+function addRegionSegment(strip, segStart, segEnd, viewStart, viewDuration, color) {
+    const leftPct = ((segStart - viewStart) / viewDuration) * 100;
+    const widthPct = ((segEnd - segStart) / viewDuration) * 100;
+    if (widthPct > 0) {
+        const seg = document.createElement('div');
+        seg.className = 'region-strip-seg';
+        seg.style.left = `${leftPct}%`;
+        seg.style.width = `${widthPct}%`;
+        seg.style.background = color;
+        strip.appendChild(seg);
     }
 }
 

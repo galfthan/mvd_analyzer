@@ -1033,6 +1033,52 @@ table tbody tr:hover {
 .powerup-line.pent { background: rgba(255, 0, 0, 0.9); top: 9px; }
 .powerup-line.ring { background: rgba(255, 235, 59, 0.9); top: 16px; }
 
+/* Region Control Timeline */
+.region-timeline-wrapper {
+    display: flex;
+    gap: 0;
+}
+
+.region-timeline-labels {
+    display: flex;
+    flex-direction: column;
+    min-width: 80px;
+    gap: 2px;
+}
+
+.region-timeline-label {
+    height: 16px;
+    line-height: 16px;
+    font-size: 0.75rem;
+    color: #aaa;
+    text-align: right;
+    padding-right: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.region-timeline-strips {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+}
+
+.region-strip {
+    height: 16px;
+    position: relative;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.region-strip-seg {
+    position: absolute;
+    height: 100%;
+}
+
 /* Health/Armor Graphs */
 .timeline-health-panel {
     min-height: 200px;
