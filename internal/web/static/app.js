@@ -400,6 +400,11 @@ function displayResults(result) {
         displayWeaponsChart(result.frags.byWeapon);
     }
 
+    // Region control data (needed by both timeline and map)
+    if (result.timelineAnalysis?.regionControl) {
+        initRegionControlData(result);
+    }
+
     // Timeline Analysis (new graphical view)
     if (result.timelineAnalysis || result.messages?.events) {
         displayTimelineAnalysis(result);
@@ -1941,8 +1946,7 @@ function updateRegionControlTimeline(startTime, endTime) {
                     const rName = mapState.locToRegion[loc];
                     if (rName !== region.name) continue;
 
-                    const sym = mapState.playerSymbols[name];
-                    const playerTeam = sym ? timelineState.teams[sym.teamIdx] : null;
+                    const playerTeam = data.team || '';
                     const hasWpn = data.hasRL || data.hasLG;
 
                     if (playerTeam === teamA) { if (hasWpn) aWpn++; else aNo++; }
@@ -2987,6 +2991,27 @@ function initMapView(result) {
     initRegionControl(result);
 
     renderMap(mapState.currentTime);
+}
+
+// Early init of region control data (before timeline renders, before map init)
+function initRegionControlData(result) {
+    const rc = result.timelineAnalysis?.regionControl;
+    if (!rc || !rc.regions || rc.regions.length === 0) return;
+
+    // Ensure locations are available
+    if (!mapState.locations || mapState.locations.length === 0) {
+        mapState.locations = result.timelineAnalysis?.locationData || [];
+    }
+
+    // Set control regions and locToRegion from backend definitions
+    mapState.controlRegions = rc.regions;
+    mapState.rcResult = rc;
+    mapState.locToRegion = {};
+    for (const region of rc.regions) {
+        for (const pt of region.points) {
+            mapState.locToRegion[pt.name] = region.name;
+        }
+    }
 }
 
 function initRegionControl(result) {
