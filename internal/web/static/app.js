@@ -1980,6 +1980,20 @@ function updateRegionControlTimeline(startTime, endTime) {
 
         stripsContainer.appendChild(strip);
     }
+
+    // Render time axis with 2-minute intervals
+    const axisContainer = document.getElementById('region-timeline-axis');
+    if (axisContainer) {
+        axisContainer.innerHTML = '';
+        const interval = 120; // 2 minutes
+        for (let t = 0; t <= duration; t += interval) {
+            const time = startTime + t;
+            if (time > endTime) break;
+            const span = document.createElement('span');
+            span.textContent = formatDuration(time);
+            axisContainer.appendChild(span);
+        }
+    }
 }
 
 function addRegionSegment(strip, segStart, segEnd, viewStart, viewDuration, color) {
@@ -1999,10 +2013,12 @@ function updateDetailAxis(startTime, endTime) {
     const container = document.getElementById('detail-axis');
     container.innerHTML = '';
 
-    const tickCount = 5;
+    const duration = endTime - startTime;
+    const interval = 120; // 2 minutes
 
-    for (let i = 0; i <= tickCount; i++) {
-        const time = startTime + ((endTime - startTime) / tickCount) * i;
+    for (let t = 0; t <= duration; t += interval) {
+        const time = startTime + t;
+        if (time > endTime) break;
         const span = document.createElement('span');
         span.textContent = formatDuration(time);
         container.appendChild(span);
@@ -2138,10 +2154,12 @@ function updateHealthAxis(startTime, endTime) {
     const container = document.getElementById('health-axis');
     container.innerHTML = '';
 
-    const tickCount = 5;
+    const duration = endTime - startTime;
+    const interval = 120;
 
-    for (let i = 0; i <= tickCount; i++) {
-        const time = startTime + ((endTime - startTime) / tickCount) * i;
+    for (let t = 0; t <= duration; t += interval) {
+        const time = startTime + t;
+        if (time > endTime) break;
         const span = document.createElement('span');
         span.textContent = formatDuration(time);
         container.appendChild(span);
@@ -2249,10 +2267,12 @@ function updateFragsAxis(startTime, endTime) {
     if (!container) return;
     container.innerHTML = '';
 
-    const tickCount = 5;
+    const duration = endTime - startTime;
+    const interval = 120;
 
-    for (let i = 0; i <= tickCount; i++) {
-        const time = startTime + ((endTime - startTime) / tickCount) * i;
+    for (let t = 0; t <= duration; t += interval) {
+        const time = startTime + t;
+        if (time > endTime) break;
         const span = document.createElement('span');
         span.textContent = formatDuration(time);
         container.appendChild(span);
@@ -2377,10 +2397,12 @@ function updateScoreAxis(startTime, endTime) {
     if (!container) return;
     container.innerHTML = '';
 
-    const tickCount = 5;
+    const duration = endTime - startTime;
+    const interval = 120;
 
-    for (let i = 0; i <= tickCount; i++) {
-        const time = startTime + ((endTime - startTime) / tickCount) * i;
+    for (let t = 0; t <= duration; t += interval) {
+        const time = startTime + t;
+        if (time > endTime) break;
         const span = document.createElement('span');
         span.textContent = formatDuration(time);
         container.appendChild(span);

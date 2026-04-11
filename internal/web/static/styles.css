@@ -1058,12 +1058,15 @@ table tbody tr:hover {
     text-overflow: ellipsis;
 }
 
-.region-timeline-strips {
+.region-timeline-outer {
     flex: 1;
+    position: relative;
+}
+
+.region-timeline-strips {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    position: relative;
 }
 
 .region-strip {
