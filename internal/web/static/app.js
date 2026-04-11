@@ -390,8 +390,6 @@ function displayResults(result) {
         displayWeaponStatsTable(demoInfo.players);
         displayItemsTeamsTable(demoInfo.players);
         displayItemsTable(demoInfo.players);
-        displayPerformanceTeamsTable(demoInfo.players);
-        displayPerformanceTable(demoInfo.players);
     } else if (result.frags && result.frags.byPlayer) {
         displayScoreboardFallback(result.frags.byPlayer, result.match ? result.match.players : []);
     }
@@ -426,8 +424,39 @@ function displayResults(result) {
 // ─── Sortable Tables ──────────────────────────────────────────────────────
 
 function makeSortable(table) {
-    const headers = table.querySelectorAll('thead th');
-    headers.forEach((th, colIdx) => {
+    const theadRows = table.querySelectorAll('thead tr');
+    const allHeaders = table.querySelectorAll('thead th');
+
+    // Build a column index map: for each th, compute which td column it maps to.
+    // Handles rowspan and colspan in multi-row headers.
+    const grid = []; // grid[row][col] = th element or null (occupied by span)
+    theadRows.forEach((tr, rowIdx) => {
+        if (!grid[rowIdx]) grid[rowIdx] = [];
+        let colPos = 0;
+        tr.querySelectorAll('th').forEach(th => {
+            // Skip columns already occupied by rowspan from previous rows
+            while (grid[rowIdx][colPos]) colPos++;
+            const colspan = parseInt(th.getAttribute('colspan')) || 1;
+            const rowspan = parseInt(th.getAttribute('rowspan')) || 1;
+            // Store mapping on the element
+            th._sortColIdx = colPos;
+            th._sortColspan = colspan;
+            // Mark grid cells as occupied
+            for (let r = 0; r < rowspan; r++) {
+                if (!grid[rowIdx + r]) grid[rowIdx + r] = [];
+                for (let c = 0; c < colspan; c++) {
+                    grid[rowIdx + r][colPos + c] = true;
+                }
+            }
+            colPos += colspan;
+        });
+    });
+
+    allHeaders.forEach(th => {
+        // Skip colspan > 1 headers (group headers, not sortable)
+        if (th._sortColspan > 1) return;
+
+        const colIdx = th._sortColIdx;
         th.classList.add('sortable');
         th.addEventListener('click', () => {
             const tbody = table.querySelector('tbody');
@@ -439,7 +468,7 @@ function makeSortable(table) {
             const dir = wasAsc ? 'desc' : 'asc';
 
             // Reset all headers in this table
-            headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+            allHeaders.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
             th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
 
             rows.sort((a, b) => {
@@ -527,6 +556,8 @@ function displayPlayerStats(players) {
         }
         const kills = player.stats?.kills || 0;
         const deaths = player.stats?.deaths || 0;
+        const rlKills = player.weapons?.rl?.kills?.enemy || 0;
+        const lgKills = player.weapons?.lg?.kills?.enemy || 0;
         const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
         tr.innerHTML = `
             <td>${escapeHtml(player.name)}</td>
@@ -534,6 +565,8 @@ function displayPlayerStats(players) {
             <td>${player.stats?.frags || 0}</td>
             <td>${efficiency}%</td>
             <td>${kills}</td>
+            <td>${rlKills}</td>
+            <td>${lgKills}</td>
             <td>${deaths}</td>
             <td>${player.stats?.tk || 0}</td>
             <td>${player.stats?.suicides || 0}</td>
@@ -555,6 +588,7 @@ function displayWeaponStatsTable(players) {
 
     const teamOrder = getTeamOrder(sorted);
     const teamColors = TEAM_COLORS;
+    const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
     sorted.forEach(player => {
         const w = player.weapons || {};
@@ -563,44 +597,28 @@ function displayWeaponStatsTable(players) {
         if (teamIdx >= 0 && teamIdx < teamColors.length) {
             tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
         }
-        tr.innerHTML = `
-            <td>${escapeHtml(player.name)}</td>
-            <td>${formatWeaponCell(w.sg)}</td>
-            <td>${formatWeaponCell(w.ssg)}</td>
-            <td>${formatWeaponCell(w.ng)}</td>
-            <td>${formatWeaponCell(w.sng)}</td>
-            <td>${formatWeaponCell(w.gl)}</td>
-            <td>${formatWeaponCell(w.rl)}</td>
-            <td>${formatWeaponCell(w.lg)}</td>
-        `;
+        let cells = `<td>${escapeHtml(player.name)}</td>`;
+        wNames.forEach(wn => {
+            cells += formatWeaponCells(w[wn]);
+        });
+        tr.innerHTML = cells;
         tbody.appendChild(tr);
     });
 }
 
-function formatWeaponCell(weapon) {
-    if (!weapon) return '-';
+function formatWeaponCells(weapon) {
+    if (!weapon) return '<td>-</td><td>-</td><td>-</td>';
 
-    const parts = [];
-
-    // Accuracy
+    let acc = '-';
     if (weapon.acc && weapon.acc.attacks > 0) {
-        const acc = ((weapon.acc.hits / weapon.acc.attacks) * 100).toFixed(1);
-        parts.push(`<span class="${getAccuracyClass(parseFloat(acc))}">${acc}%</span>`);
+        const pct = ((weapon.acc.hits / weapon.acc.attacks) * 100).toFixed(1);
+        acc = `<span class="${getAccuracyClass(parseFloat(pct))}">${pct}%</span>`;
     }
 
-    // Kills
     const kills = weapon.kills?.total || weapon.kills?.enemy || 0;
-    if (kills > 0) {
-        parts.push(`<span class="weapon-kills">${kills}k</span>`);
-    }
-
-    // Damage
     const dmg = weapon.damage?.enemy || 0;
-    if (dmg > 0) {
-        parts.push(`<span class="weapon-dmg">${dmg}d</span>`);
-    }
 
-    return parts.length > 0 ? parts.join(' ') : '-';
+    return `<td>${acc}</td><td>${kills || '-'}</td><td>${dmg || '-'}</td>`;
 }
 
 function displayItemsTable(players) {
@@ -614,6 +632,7 @@ function displayItemsTable(players) {
 
     sorted.forEach(player => {
         const items = player.items || {};
+        const weapons = player.weapons || {};
         const tr = document.createElement('tr');
         const teamIdx = teamOrder.indexOf(player.team || '');
         if (teamIdx >= 0 && teamIdx < teamColors.length) {
@@ -628,6 +647,12 @@ function displayItemsTable(players) {
             <td>${formatPowerup(items.q)}</td>
             <td>${formatPowerup(items.p)}</td>
             <td>${formatPowerup(items.r)}</td>
+            <td>${weapons.rl?.pickups?.taken || 0}</td>
+            <td>${weapons.rl?.pickups?.dropped || 0}</td>
+            <td>${player.xferRL || 0}</td>
+            <td>${weapons.lg?.pickups?.taken || 0}</td>
+            <td>${weapons.lg?.pickups?.dropped || 0}</td>
+            <td>${player.xferLG || 0}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -639,33 +664,6 @@ function formatPowerup(item) {
         return `${item.took} (${item.time}s)`;
     }
     return `${item.took}`;
-}
-
-function displayPerformanceTable(players) {
-    const tbody = document.getElementById('performance-body');
-    tbody.innerHTML = '';
-
-    const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
-
-    const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
-
-    sorted.forEach(player => {
-        const tr = document.createElement('tr');
-        const teamIdx = teamOrder.indexOf(player.team || '');
-        if (teamIdx >= 0 && teamIdx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
-        }
-        tr.innerHTML = `
-            <td>${escapeHtml(player.name)}</td>
-            <td>${player.spree?.max || 0}</td>
-            <td>${player.spree?.quad || 0}</td>
-            <td>${player.speed?.avg ? player.speed.avg.toFixed(0) : '-'}</td>
-            <td>${player.speed?.max ? player.speed.max.toFixed(0) : '-'}</td>
-            <td>${player.stats?.['spawn-frags'] || 0}</td>
-        `;
-        tbody.appendChild(tr);
-    });
 }
 
 function displayScoreboardFallback(byPlayer, players) {
@@ -750,6 +748,8 @@ function displayPlayerStatsTeams(players) {
         const members = groups[team] || [];
         const frags = members.reduce((s, p) => s + (p.stats?.frags || 0), 0);
         const kills = members.reduce((s, p) => s + (p.stats?.kills || 0), 0);
+        const rlKills = members.reduce((s, p) => s + (p.weapons?.rl?.kills?.enemy || 0), 0);
+        const lgKills = members.reduce((s, p) => s + (p.weapons?.lg?.kills?.enemy || 0), 0);
         const deaths = members.reduce((s, p) => s + (p.stats?.deaths || 0), 0);
         const tk = members.reduce((s, p) => s + (p.stats?.tk || 0), 0);
         const suicides = members.reduce((s, p) => s + (p.stats?.suicides || 0), 0);
@@ -773,6 +773,8 @@ function displayPlayerStatsTeams(players) {
             <td>${frags}</td>
             <td>${efficiency}%</td>
             <td>${kills}</td>
+            <td>${rlKills}</td>
+            <td>${lgKills}</td>
             <td>${deaths}</td>
             <td>${tk}</td>
             <td>${suicides}</td>
@@ -794,11 +796,12 @@ function displayWeaponStatsTeamsTable(players) {
     const teamOrder = getTeamOrder(sorted);
     const teamColors = TEAM_COLORS;
     const groups = groupByTeam(sorted);
+    const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
     teamOrder.forEach((team, idx) => {
         const members = groups[team] || [];
-        const wNames = ['sg', 'ssg', 'ng', 'sng', 'gl', 'rl', 'lg'];
-        const cells = wNames.map(wn => {
+        let cells = `<td>${escapeHtml(team)}</td>`;
+        wNames.forEach(wn => {
             let totalAtk = 0, totalHits = 0, totalKills = 0, totalDmg = 0;
             members.forEach(p => {
                 const w = (p.weapons || {})[wn];
@@ -808,21 +811,19 @@ function displayWeaponStatsTeamsTable(players) {
                 totalKills += w.kills?.total || w.kills?.enemy || 0;
                 totalDmg += w.damage?.enemy || 0;
             });
-            const parts = [];
+            let acc = '-';
             if (totalAtk > 0) {
-                const acc = ((totalHits / totalAtk) * 100).toFixed(1);
-                parts.push(`<span class="${getAccuracyClass(parseFloat(acc))}">${acc}%</span>`);
+                const pct = ((totalHits / totalAtk) * 100).toFixed(1);
+                acc = `<span class="${getAccuracyClass(parseFloat(pct))}">${pct}%</span>`;
             }
-            if (totalKills > 0) parts.push(`<span class="weapon-kills">${totalKills}k</span>`);
-            if (totalDmg > 0) parts.push(`<span class="weapon-dmg">${totalDmg}d</span>`);
-            return parts.length > 0 ? parts.join(' ') : '-';
+            cells += `<td>${acc}</td><td>${totalKills || '-'}</td><td>${totalDmg || '-'}</td>`;
         });
 
         const tr = document.createElement('tr');
         if (idx < teamColors.length) {
             tr.style.borderLeft = `3px solid ${teamColors[idx]}`;
         }
-        tr.innerHTML = `<td>${escapeHtml(team)}</td>` + cells.map(c => `<td>${c}</td>`).join('');
+        tr.innerHTML = cells;
         tbody.appendChild(tr);
     });
 }
@@ -848,6 +849,12 @@ function displayItemsTeamsTable(players) {
         const pentTime = members.reduce((s, p) => s + (p.items?.p?.time || 0), 0);
         const ring = members.reduce((s, p) => s + (p.items?.r?.took || 0), 0);
         const ringTime = members.reduce((s, p) => s + (p.items?.r?.time || 0), 0);
+        const rlPickup = members.reduce((s, p) => s + (p.weapons?.rl?.pickups?.taken || 0), 0);
+        const rlDrop = members.reduce((s, p) => s + (p.weapons?.rl?.pickups?.dropped || 0), 0);
+        const rlXfer = members.reduce((s, p) => s + (p.xferRL || 0), 0);
+        const lgPickup = members.reduce((s, p) => s + (p.weapons?.lg?.pickups?.taken || 0), 0);
+        const lgDrop = members.reduce((s, p) => s + (p.weapons?.lg?.pickups?.dropped || 0), 0);
+        const lgXfer = members.reduce((s, p) => s + (p.xferLG || 0), 0);
 
         const fmtPu = (took, time) => time > 0 ? `${took} (${time}s)` : `${took}`;
 
@@ -864,42 +871,12 @@ function displayItemsTeamsTable(players) {
             <td>${fmtPu(quad, quadTime)}</td>
             <td>${fmtPu(pent, pentTime)}</td>
             <td>${fmtPu(ring, ringTime)}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-function displayPerformanceTeamsTable(players) {
-    const tbody = document.getElementById('performance-team-body');
-    tbody.innerHTML = '';
-
-    const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
-    const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
-    const groups = groupByTeam(sorted);
-
-    teamOrder.forEach((team, idx) => {
-        const members = groups[team] || [];
-        const maxSpree = members.reduce((m, p) => Math.max(m, p.spree?.max || 0), 0);
-        const quadKills = members.reduce((s, p) => s + (p.spree?.quad || 0), 0);
-        const speedAvgs = members.map(p => p.speed?.avg || 0).filter(v => v > 0);
-        const speedAvg = speedAvgs.length > 0
-            ? (speedAvgs.reduce((s, v) => s + v, 0) / speedAvgs.length).toFixed(0)
-            : '-';
-        const speedMax = members.reduce((m, p) => Math.max(m, p.speed?.max || 0), 0) || '-';
-        const spawnFrags = members.reduce((s, p) => s + (p.stats?.['spawn-frags'] || 0), 0);
-
-        const tr = document.createElement('tr');
-        if (idx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[idx]}`;
-        }
-        tr.innerHTML = `
-            <td>${escapeHtml(team)}</td>
-            <td>${maxSpree}</td>
-            <td>${quadKills}</td>
-            <td>${speedAvg}</td>
-            <td>${speedMax}</td>
-            <td>${spawnFrags}</td>
+            <td>${rlPickup}</td>
+            <td>${rlDrop}</td>
+            <td>${rlXfer}</td>
+            <td>${lgPickup}</td>
+            <td>${lgDrop}</td>
+            <td>${lgXfer}</td>
         `;
         tbody.appendChild(tr);
     });

@@ -194,6 +194,8 @@ type DemoInfoPlayer struct {
 	Spree       *DemoInfoSpree              `json:"spree,omitempty"`
 	Control     float64                     `json:"control,omitempty"`
 	Speed       *DemoInfoSpeed              `json:"speed,omitempty"`
+	XferRL      int                         `json:"xferRL,omitempty"`
+	XferLG      int                         `json:"xferLG,omitempty"`
 	Weapons     map[string]*DemoInfoWeapon  `json:"weapons,omitempty"`
 	Items       map[string]*DemoInfoItem    `json:"items,omitempty"`
 }
