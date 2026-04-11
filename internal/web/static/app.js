@@ -601,9 +601,9 @@ function displayPlayerStats(players) {
     sorted.forEach(player => {
         const tr = document.createElement('tr');
         const teamIdx = teamOrder.indexOf(player.team || '');
-        const teamColors = TEAM_COLORS;
-        if (teamIdx >= 0 && teamIdx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
+    
+        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
         }
         const kills = player.stats?.kills || 0;
         const deaths = player.stats?.deaths || 0;
@@ -638,15 +638,15 @@ function displayWeaponStatsTable(players) {
     const sorted = [...players].sort((a, b) => (b.dmg?.given || 0) - (a.dmg?.given || 0));
 
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
+
     const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
     sorted.forEach(player => {
         const w = player.weapons || {};
         const tr = document.createElement('tr');
         const teamIdx = teamOrder.indexOf(player.team || '');
-        if (teamIdx >= 0 && teamIdx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
+        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
         }
         let cells = `<td>${escapeHtml(player.name)}</td>`;
         wNames.forEach(wn => {
@@ -679,15 +679,15 @@ function displayItemsTable(players) {
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
 
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
+
 
     sorted.forEach(player => {
         const items = player.items || {};
         const weapons = player.weapons || {};
         const tr = document.createElement('tr');
         const teamIdx = teamOrder.indexOf(player.team || '');
-        if (teamIdx >= 0 && teamIdx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[teamIdx]}`;
+        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
         }
         tr.innerHTML = `
             <td>${escapeHtml(player.name)}</td>
@@ -766,16 +766,17 @@ function displayScoreboardFallback(byPlayer, players) {
 // ─── Team helpers ──────────────────────────────────────────────────────────
 
 function getTeamOrder(sortedPlayers) {
-    // Use the same team order as timeline/map for consistent colors
+    // Canonical order set early in displayResults(), sorted by total frags
     if (timelineState.teams && timelineState.teams.length >= 2) {
         return [...timelineState.teams];
     }
-    // Fallback: order by first appearance in frag-sorted list
+    // Fallback: preserve order from input (already frag-sorted)
+    const seen = new Set();
     const order = [];
-    sortedPlayers.forEach(p => {
+    for (const p of sortedPlayers) {
         const t = p.team || '';
-        if (t && !order.includes(t)) order.push(t);
-    });
+        if (t && !seen.has(t)) { seen.add(t); order.push(t); }
+    }
     return order;
 }
 
@@ -797,7 +798,7 @@ function displayPlayerStatsTeams(players) {
 
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
+
     const groups = groupByTeam(sorted);
 
     teamOrder.forEach((team, idx) => {
@@ -821,8 +822,8 @@ function displayPlayerStatsTeams(players) {
         const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
 
         const tr = document.createElement('tr');
-        if (idx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[idx]}`;
+        if (idx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[idx]}`;
         }
         tr.innerHTML = `
             <td>${escapeHtml(team)}</td>
@@ -850,7 +851,7 @@ function displayWeaponStatsTeamsTable(players) {
 
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
+
     const groups = groupByTeam(sorted);
     const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
@@ -876,8 +877,8 @@ function displayWeaponStatsTeamsTable(players) {
         });
 
         const tr = document.createElement('tr');
-        if (idx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[idx]}`;
+        if (idx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[idx]}`;
         }
         tr.innerHTML = cells;
         tbody.appendChild(tr);
@@ -890,7 +891,7 @@ function displayItemsTeamsTable(players) {
 
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-    const teamColors = TEAM_COLORS;
+
     const groups = groupByTeam(sorted);
 
     teamOrder.forEach((team, idx) => {
@@ -915,8 +916,8 @@ function displayItemsTeamsTable(players) {
         const fmtPu = (took, time) => time > 0 ? `${took} (${time}s)` : `${took}`;
 
         const tr = document.createElement('tr');
-        if (idx < teamColors.length) {
-            tr.style.borderLeft = `3px solid ${teamColors[idx]}`;
+        if (idx < TEAM_COLORS.length) {
+            tr.style.borderLeft = `3px solid ${TEAM_COLORS[idx]}`;
         }
         tr.innerHTML = `
             <td>${escapeHtml(team)}</td>
@@ -1945,8 +1946,8 @@ function updateRegionControlTimeline(startTime, endTime) {
     if (teamALabel) teamALabel.textContent = teamA;
     if (teamBLabel) teamBLabel.textContent = teamB;
 
-    // Update legend color swatches to match strip colors exactly (no opacity)
-    const legendColors = document.querySelectorAll('#region-control-timeline .legend-color');
+    // Update legend color swatches to match strip colors exactly
+    const legendColors = document.querySelectorAll('#region-control-timeline-panel .legend-color');
     if (legendColors.length >= 4) {
         legendColors[0].style.background = teamStrongColor(TEAM_COLORS[0]);
         legendColors[1].style.background = teamWeakColor(TEAM_COLORS[0]);
@@ -2844,7 +2845,7 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
 
 // Draw control overlay for regions based on current control state
 function drawRegionControlOverlay(ctx, controlStates) {
-    const teamColors = TEAM_COLORS;
+
 
     for (const [regionName, state] of Object.entries(controlStates)) {
         const groups = mapState.regionToGroups[regionName];
@@ -2853,16 +2854,16 @@ function drawRegionControlOverlay(ctx, controlStates) {
         let color;
         switch (state) {
             case 'teamAControl':
-                color = hexToRgba(teamColors[0], 0.15);
+                color = hexToRgba(TEAM_COLORS[0], 0.15);
                 break;
             case 'teamAWeakControl':
-                color = hexToRgba(teamColors[0], 0.08);
+                color = hexToRgba(TEAM_COLORS[0], 0.08);
                 break;
             case 'teamBControl':
-                color = hexToRgba(teamColors[1], 0.15);
+                color = hexToRgba(TEAM_COLORS[1], 0.15);
                 break;
             case 'teamBWeakControl':
-                color = hexToRgba(teamColors[1], 0.08);
+                color = hexToRgba(TEAM_COLORS[1], 0.08);
                 break;
             case 'contested':
                 color = 'rgba(255, 255, 255, 0.08)';
@@ -3323,7 +3324,7 @@ function displayRegionControlTable(regions, stats) {
         document.getElementById('rc-teamB-weak-hdr').textContent = teamB + ' weak';
     }
 
-    const teamColors = TEAM_COLORS;
+
 
     for (const region of regions) {
         const s = stats[region.name];
@@ -3331,12 +3332,12 @@ function displayRegionControlTable(regions, stats) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${escapeHtml(region.name)}</strong></td>
-            <td style="background: ${cellBg(teamColors[0], s.teamAControl)}">${s.teamAControl}%</td>
-            <td style="background: ${cellBg(teamColors[0], s.teamAWeakControl, 0.5)}">${s.teamAWeakControl}%</td>
+            <td style="background: ${cellBg(TEAM_COLORS[0], s.teamAControl)}">${s.teamAControl}%</td>
+            <td style="background: ${cellBg(TEAM_COLORS[0], s.teamAWeakControl, 0.5)}">${s.teamAWeakControl}%</td>
             <td style="background: ${cellBg('#888', s.contested)}">${s.contested}%</td>
             <td>${s.empty}%</td>
-            <td style="background: ${cellBg(teamColors[1], s.teamBWeakControl, 0.5)}">${s.teamBWeakControl}%</td>
-            <td style="background: ${cellBg(teamColors[1], s.teamBControl)}">${s.teamBControl}%</td>
+            <td style="background: ${cellBg(TEAM_COLORS[1], s.teamBWeakControl, 0.5)}">${s.teamBWeakControl}%</td>
+            <td style="background: ${cellBg(TEAM_COLORS[1], s.teamBControl)}">${s.teamBControl}%</td>
         `;
         tbody.appendChild(tr);
     }
@@ -3603,10 +3604,10 @@ function buildMapLegend() {
 
     for (let teamIdx = 0; teamIdx < mapState.teams.length; teamIdx++) {
         const team = mapState.teams[teamIdx];
-        const teamColor = teamIdx === 0 ? 'player-red' : 'player-blue';
+        const teamHex = TEAM_COLORS[teamIdx] || TEAM_COLORS[0];
 
         const title = document.createElement('h4');
-        title.className = teamColor;
+        title.style.color = teamHex;
         title.id = `map-legend-team-title-${teamIdx}`;
         title.textContent = `${team} — 0 frags`;
         legend.appendChild(title);
@@ -3623,7 +3624,7 @@ function buildMapLegend() {
                 tr.dataset.player = name;
                 const escapedName = escapeHtml(name);
                 tr.innerHTML = `
-                    <td><span class="map-legend-symbol ${teamColor}">${info.symbol}</span></td>
+                    <td><span class="map-legend-symbol" style="color: ${teamHex}">${info.symbol}</span></td>
                     <td>${escapedName}</td>
                     <td class="map-trail-cell"><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}"></td>
                     <td class="map-legend-health" data-player="${escapedName}">-</td>
@@ -3735,7 +3736,7 @@ function updateRegionStatus() {
     const bucket = findBucketAtTime(time);
     const playerData = bucket ? (bucket.p || bucket.playerData) : null;
     const teams = mapState.teams || [];
-    const teamColors = TEAM_COLORS;
+
     const locations = mapState.locations;
 
     // Build per-region player lists
@@ -3775,19 +3776,19 @@ function updateRegionStatus() {
         switch (state) {
             case 'teamAControl':
                 statusLabel = teams[0] || 'A';
-                statusColor = teamColors[0];
+                statusColor = TEAM_COLORS[0];
                 break;
             case 'teamAWeakControl':
                 statusLabel = (teams[0] || 'A') + ' (weak)';
-                statusColor = teamColors[0];
+                statusColor = TEAM_COLORS[0];
                 break;
             case 'teamBControl':
                 statusLabel = teams[1] || 'B';
-                statusColor = teamColors[1];
+                statusColor = TEAM_COLORS[1];
                 break;
             case 'teamBWeakControl':
                 statusLabel = (teams[1] || 'B') + ' (weak)';
-                statusColor = teamColors[1];
+                statusColor = TEAM_COLORS[1];
                 break;
             case 'contested':
                 statusLabel = 'Contested';
@@ -4052,10 +4053,10 @@ function drawTracks(ctx, time) {
 
         if (endIdx - startIdx < 1) continue;
 
-        const isRed = points[0].teamIdx === 0;
-        const solidColor = isRed ? 'rgba(255, 80, 80, 0.4)' : 'rgba(80, 160, 255, 0.4)';
-        const dashColor = isRed ? 'rgba(255, 80, 80, 0.2)' : 'rgba(80, 160, 255, 0.2)';
-        const markerColor = isRed ? 'rgba(255, 80, 80, 0.8)' : 'rgba(80, 160, 255, 0.8)';
+        const teamHex = TEAM_COLORS[points[0].teamIdx] || TEAM_COLORS[0];
+        const solidColor = hexToRgba(teamHex, 0.4);
+        const dashColor = hexToRgba(teamHex, 0.2);
+        const markerColor = hexToRgba(teamHex, 0.8);
 
         // Collect death/spawn markers to draw after lines
         const markers = [];
