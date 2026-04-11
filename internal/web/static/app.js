@@ -1256,6 +1256,7 @@ function displayTimelineAnalysis(result) {
             timelineState.teams = result.match.teams.map(t => t.name);
         }
     }
+    const teams = timelineState.teams;
 
     timelineState.buckets = timeline?.buckets || [];
     timelineState.highResBuckets = timeline?.highResBuckets || [];
