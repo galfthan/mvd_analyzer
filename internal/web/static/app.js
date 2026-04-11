@@ -1905,14 +1905,14 @@ function updateRegionControlTimeline(startTime, endTime) {
 
     const locations = mapState.locations;
 
-    // Control state colors
+    // Control state colors (dark = strong control, light = weak, white = contested)
     const stateColors = {
-        teamAControl:     'rgba(255, 80, 80, 0.9)',
-        teamAWeakControl: 'rgba(255, 80, 80, 0.35)',
-        contested:        'rgba(220, 220, 220, 0.6)',
+        teamAControl:     'rgb(180, 40, 40)',
+        teamAWeakControl: 'rgb(255, 140, 140)',
+        contested:        'rgb(255, 255, 255)',
         empty:            'transparent',
-        teamBWeakControl: 'rgba(80, 160, 255, 0.35)',
-        teamBControl:     'rgba(80, 160, 255, 0.9)',
+        teamBWeakControl: 'rgb(140, 190, 255)',
+        teamBControl:     'rgb(30, 80, 180)',
     };
 
     for (const region of regions) {
@@ -2782,7 +2782,7 @@ function drawRegionControlOverlay(ctx, controlStates) {
                 color = hexToRgba(teamColors[1], 0.08);
                 break;
             case 'contested':
-                color = 'rgba(180, 100, 220, 0.08)';
+                color = 'rgba(255, 255, 255, 0.08)';
                 break;
             default: // empty
                 continue;
@@ -3138,6 +3138,9 @@ function applyRegionConfig() {
     // Force map redraw
     mapState.renderDirty = true;
     renderMap(mapState.currentTime);
+
+    // Re-render timeline region control graph
+    updateDetailView();
 }
 
 function recomputeRegionStats(regions) {
@@ -3705,7 +3708,7 @@ function updateRegionStatus() {
                 break;
             case 'contested':
                 statusLabel = 'Contested';
-                statusColor = '#b060d8';
+                statusColor = '#ffffff';
                 break;
             default:
                 statusLabel = 'Empty';
