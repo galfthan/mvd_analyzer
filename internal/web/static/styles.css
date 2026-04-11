@@ -1047,8 +1047,8 @@ table tbody tr:hover {
 }
 
 .region-timeline-label {
-    height: 16px;
-    line-height: 16px;
+    height: 20px;
+    line-height: 20px;
     font-size: 0.75rem;
     color: #aaa;
     text-align: right;
@@ -1067,7 +1067,7 @@ table tbody tr:hover {
 }
 
 .region-strip {
-    height: 16px;
+    height: 20px;
     position: relative;
     background: rgba(0, 0, 0, 0.15);
     border-radius: 2px;

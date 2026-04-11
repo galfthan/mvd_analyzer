@@ -1510,6 +1510,7 @@ function updateTimeIndicators() {
 
     const detailIndicators = [
         'detail-time-indicator',
+        'region-time-indicator',
         'health-time-indicator',
         'frags-time-indicator',
         'score-time-indicator'
