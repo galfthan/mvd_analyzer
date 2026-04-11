@@ -292,6 +292,42 @@ type TimelineAnalysisResult struct {
 	FragStreaks      []FragStreakEvent    `json:"fragStreaks,omitempty"`      // Top longest frag streaks for Key Moments
 	LocationData    []MapLocation       `json:"locationData,omitempty"`    // Location points from .loc file for map view
 	PlayerUserIDs   map[string]int      `json:"playerUserIDs,omitempty"`   // Player name -> UserID for Hub viewer links
+	RegionControl   *RegionControlResult `json:"regionControl,omitempty"`  // Region control stats
+}
+
+// ControlRegion represents a named area on the map for control tracking
+type ControlRegion struct {
+	Name      string        `json:"name"`
+	Points    []MapLocation `json:"points"`
+	CentroidX float32       `json:"centroidX"`
+	CentroidY float32       `json:"centroidY"`
+}
+
+// RegionControlResult contains region control analysis
+type RegionControlResult struct {
+	Regions []ControlRegion         `json:"regions"`
+	Stats   map[string]*RegionStats `json:"stats"`
+	Shifts  []ControlShift          `json:"shifts,omitempty"`
+}
+
+// RegionStats contains percentage of time in each control state
+type RegionStats struct {
+	TeamAControl     float64 `json:"teamAControl"`
+	TeamAWeakControl float64 `json:"teamAWeakControl"`
+	Contested        float64 `json:"contested"`
+	Empty            float64 `json:"empty"`
+	TeamBWeakControl float64 `json:"teamBWeakControl"`
+	TeamBControl     float64 `json:"teamBControl"`
+	TeamA            string  `json:"teamA"`
+	TeamB            string  `json:"teamB"`
+}
+
+// ControlShift represents a change in region control
+type ControlShift struct {
+	Time      float64 `json:"time"`
+	Region    string  `json:"region"`
+	FromState string  `json:"fromState"`
+	ToState   string  `json:"toState"`
 }
 
 // HighResBucket - compact bucket for high-resolution map data

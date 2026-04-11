@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"math"
 	"sort"
 	"strings"
 
@@ -533,6 +534,27 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	// Detect top 5 longest frag streaks for Key Moments
 	fragStreaks := a.detectFragStreaks(10, nameToTeam, playerUserIDsByName)
 
+	// Compute region control stats
+	var regionControl *RegionControlResult
+	if a.locFinder != nil {
+		// Collect unique team names
+		teamSet := make(map[string]bool)
+		for _, t := range nameToTeam {
+			teamSet[t] = true
+		}
+		var teams []string
+		for t := range teamSet {
+			teams = append(teams, t)
+		}
+		sort.Strings(teams)
+		if len(teams) == 2 {
+			regions := a.buildControlRegions()
+			if len(regions) > 0 {
+				regionControl = a.computeRegionControl(regions, teams[0], teams[1], nameToTeam)
+			}
+		}
+	}
+
 	result := &TimelineAnalysisResult{
 		BucketDuration:  a.graphBucketDuration, // 1.0 for graphs
 		HighResDuration: a.bucketDuration,      // 0.05 for map
@@ -544,6 +566,7 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		FragStreaks:      fragStreaks,
 		LocationData:    locationData,
 		PlayerUserIDs:   playerUserIDsByName,
+		RegionControl:   regionControl,
 	}
 
 	return result, nil
@@ -1153,4 +1176,391 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, nameToTeam map[string]str
 	}
 
 	return allStreaks
+}
+
+// controlKeywords are the item keywords we track for region control
+var controlKeywords = map[string]bool{
+	"RA": true, "RL": true, "QUAD": true,
+}
+
+// locWithKeyword pairs a location with its matched keyword
+type locWithKeyword struct {
+	loc     loc.Location
+	keyword string
+}
+
+// buildControlRegions groups locations by item keyword and clusters spatially
+func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
+	locs := a.locFinder.Locations()
+	if len(locs) == 0 {
+		return nil
+	}
+
+	// Group locations by their first dot-token keyword
+	groups := make(map[string][]locWithKeyword)
+
+	for _, l := range locs {
+		name := l.Name
+		// Extract first token (split by "." or " ")
+		firstToken := name
+		if idx := strings.IndexAny(name, ". "); idx > 0 {
+			firstToken = name[:idx]
+		}
+		upper := strings.ToUpper(firstToken)
+		if controlKeywords[upper] {
+			groups[upper] = append(groups[upper], locWithKeyword{loc: l, keyword: upper})
+		}
+	}
+
+	var regions []ControlRegion
+
+	for keyword, locs := range groups {
+		clusters := clusterLocations(locs, 1500)
+
+		for _, cluster := range clusters {
+			region := ControlRegion{}
+
+			// Name the region
+			if len(clusters) == 1 {
+				region.Name = keyword
+			} else {
+				// Find most common second token for naming
+				region.Name = nameCluster(keyword, cluster)
+			}
+
+			// Build points and centroid
+			var sumX, sumY float32
+			for _, lk := range cluster {
+				region.Points = append(region.Points, MapLocation{
+					X:    lk.loc.X,
+					Y:    lk.loc.Y,
+					Z:    lk.loc.Z,
+					Name: lk.loc.Name,
+				})
+				sumX += lk.loc.X
+				sumY += lk.loc.Y
+			}
+			region.CentroidX = sumX / float32(len(cluster))
+			region.CentroidY = sumY / float32(len(cluster))
+
+			regions = append(regions, region)
+		}
+	}
+
+	// Sort regions by name for stable output
+	sort.Slice(regions, func(i, j int) bool {
+		return regions[i].Name < regions[j].Name
+	})
+
+	return regions
+}
+
+// clusterLocations groups locations by spatial proximity using single-linkage clustering
+func clusterLocations(locs []locWithKeyword, threshold float64) [][]locWithKeyword {
+	n := len(locs)
+	if n == 0 {
+		return nil
+	}
+
+	// Union-Find
+	parent := make([]int, n)
+	for i := range parent {
+		parent[i] = i
+	}
+	var find func(int) int
+	find = func(x int) int {
+		if parent[x] != x {
+			parent[x] = find(parent[x])
+		}
+		return parent[x]
+	}
+	union := func(a, b int) {
+		ra, rb := find(a), find(b)
+		if ra != rb {
+			parent[ra] = rb
+		}
+	}
+
+	threshSq := threshold * threshold
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			dx := float64(locs[i].loc.X - locs[j].loc.X)
+			dy := float64(locs[i].loc.Y - locs[j].loc.Y)
+			if dx*dx+dy*dy < threshSq {
+				union(i, j)
+			}
+		}
+	}
+
+	// Group by root
+	clusterMap := make(map[int][]locWithKeyword)
+	for i, l := range locs {
+		root := find(i)
+		clusterMap[root] = append(clusterMap[root], l)
+	}
+
+	var result [][]locWithKeyword
+	for _, c := range clusterMap {
+		result = append(result, c)
+	}
+	return result
+}
+
+// nameCluster names a cluster based on the most common second token
+func nameCluster(keyword string, cluster []locWithKeyword) string {
+	tokenCounts := make(map[string]int)
+	for _, lk := range cluster {
+		name := lk.loc.Name
+		// Extract second token after the keyword
+		rest := name
+		if idx := strings.IndexAny(name, ". "); idx > 0 {
+			rest = name[idx+1:]
+		} else {
+			rest = ""
+		}
+		if rest != "" {
+			// Get just the first sub-token
+			if idx := strings.IndexAny(rest, ". "); idx > 0 {
+				rest = rest[:idx]
+			}
+			tokenCounts[strings.ToLower(rest)]++
+		}
+	}
+
+	bestToken := ""
+	bestCount := 0
+	for token, count := range tokenCounts {
+		if count > bestCount {
+			bestCount = count
+			bestToken = token
+		}
+	}
+
+	if bestToken != "" {
+		return keyword + "." + bestToken
+	}
+	return keyword
+}
+
+// Control state constants
+const (
+	ctrlEmpty            = "empty"
+	ctrlTeamAControl     = "teamAControl"
+	ctrlTeamAWeakControl = "teamAWeakControl"
+	ctrlContested        = "contested"
+	ctrlTeamBControl     = "teamBControl"
+	ctrlTeamBWeakControl = "teamBWeakControl"
+)
+
+// computeRegionControl analyzes control of each region over time
+func (a *TimelineAnalyzer) computeRegionControl(regions []ControlRegion, teamA, teamB string, nameToTeam map[string]string) *RegionControlResult {
+	if len(a.buckets) == 0 || len(regions) == 0 {
+		return nil
+	}
+
+	// Build loc-name-to-region lookup
+	locToRegion := make(map[string]string)
+	for _, r := range regions {
+		for _, p := range r.Points {
+			locToRegion[p.Name] = r.Name
+		}
+	}
+
+	// Initialize per-region counters
+	type stateCounter struct {
+		teamAControl     int
+		teamAWeakControl int
+		contested        int
+		empty            int
+		teamBControl     int
+		teamBWeakControl int
+	}
+	counters := make(map[string]*stateCounter)
+	for _, r := range regions {
+		counters[r.Name] = &stateCounter{}
+	}
+
+	// Debounce state for shift detection
+	type debounceState struct {
+		confirmed    string
+		pending      string
+		pendingStart float64
+	}
+	debounce := make(map[string]*debounceState)
+	for _, r := range regions {
+		debounce[r.Name] = &debounceState{confirmed: ctrlEmpty}
+	}
+
+	var shifts []ControlShift
+	totalBuckets := 0
+
+	for _, bucket := range a.buckets {
+		// Skip buckets before match start
+		if bucket.startTime < a.matchStartTime {
+			continue
+		}
+		totalBuckets++
+
+		// Per-region presence tracking for this bucket
+		type regionPresence struct {
+			teamAWeapon    int
+			teamANonWeapon int
+			teamBWeapon    int
+			teamBNonWeapon int
+		}
+		presence := make(map[string]*regionPresence)
+		for _, r := range regions {
+			presence[r.Name] = &regionPresence{}
+		}
+
+		// Check each player in this bucket
+		for _, pData := range bucket.playerData {
+			if pData.health <= 0 {
+				continue // Dead players don't count
+			}
+
+			// Find player's nearest loc
+			nearestLoc := a.locFinder.FindNearest(pData.x, pData.y, pData.z)
+			regionName, inRegion := locToRegion[nearestLoc]
+			if !inRegion {
+				continue
+			}
+
+			// Determine team
+			team := pData.team
+			if team == "" {
+				team = nameToTeam[pData.name]
+			}
+
+			hasWeapon := pData.hasRL || pData.hasLG
+
+			p := presence[regionName]
+			if team == teamA {
+				if hasWeapon {
+					p.teamAWeapon++
+				} else {
+					p.teamANonWeapon++
+				}
+			} else if team == teamB {
+				if hasWeapon {
+					p.teamBWeapon++
+				} else {
+					p.teamBNonWeapon++
+				}
+			}
+		}
+
+		// Determine control state for each region
+		for _, r := range regions {
+			p := presence[r.Name]
+			c := counters[r.Name]
+			state := determineControlState(p.teamAWeapon, p.teamANonWeapon, p.teamBWeapon, p.teamBNonWeapon)
+
+			switch state {
+			case ctrlTeamAControl:
+				c.teamAControl++
+			case ctrlTeamAWeakControl:
+				c.teamAWeakControl++
+			case ctrlContested:
+				c.contested++
+			case ctrlEmpty:
+				c.empty++
+			case ctrlTeamBControl:
+				c.teamBControl++
+			case ctrlTeamBWeakControl:
+				c.teamBWeakControl++
+			}
+
+			// Debounced shift detection
+			d := debounce[r.Name]
+			if state != d.confirmed {
+				if state == d.pending {
+					// Still in pending state, check if debounce period passed (2s)
+					if bucket.startTime-d.pendingStart >= 2.0 {
+						shifts = append(shifts, ControlShift{
+							Time:      d.pendingStart,
+							Region:    r.Name,
+							FromState: d.confirmed,
+							ToState:   state,
+						})
+						d.confirmed = state
+						d.pending = ""
+					}
+				} else {
+					// New pending state
+					d.pending = state
+					d.pendingStart = bucket.startTime
+				}
+			} else {
+				// Reverted to confirmed state, cancel pending
+				d.pending = ""
+			}
+		}
+	}
+
+	if totalBuckets == 0 {
+		return nil
+	}
+
+	// Convert counters to percentages
+	stats := make(map[string]*RegionStats)
+	for _, r := range regions {
+		c := counters[r.Name]
+		total := float64(totalBuckets)
+		stats[r.Name] = &RegionStats{
+			TeamAControl:     math.Round(float64(c.teamAControl)/total*1000) / 10,
+			TeamAWeakControl: math.Round(float64(c.teamAWeakControl)/total*1000) / 10,
+			Contested:        math.Round(float64(c.contested)/total*1000) / 10,
+			Empty:            math.Round(float64(c.empty)/total*1000) / 10,
+			TeamBWeakControl: math.Round(float64(c.teamBWeakControl)/total*1000) / 10,
+			TeamBControl:     math.Round(float64(c.teamBControl)/total*1000) / 10,
+			TeamA:            teamA,
+			TeamB:            teamB,
+		}
+	}
+
+	// Sort shifts by time
+	sort.Slice(shifts, func(i, j int) bool {
+		return shifts[i].Time < shifts[j].Time
+	})
+
+	return &RegionControlResult{
+		Regions: regions,
+		Stats:   stats,
+		Shifts:  shifts,
+	}
+}
+
+// determineControlState returns the control state given team presence counts
+func determineControlState(teamAWeapon, teamANonWeapon, teamBWeapon, teamBNonWeapon int) string {
+	teamAPresent := teamAWeapon + teamANonWeapon
+	teamBPresent := teamBWeapon + teamBNonWeapon
+
+	if teamAPresent == 0 && teamBPresent == 0 {
+		return ctrlEmpty
+	}
+
+	if teamAPresent > 0 && teamBPresent == 0 {
+		if teamAWeapon > 0 {
+			return ctrlTeamAControl
+		}
+		return ctrlTeamAWeakControl
+	}
+
+	if teamBPresent > 0 && teamAPresent == 0 {
+		if teamBWeapon > 0 {
+			return ctrlTeamBControl
+		}
+		return ctrlTeamBWeakControl
+	}
+
+	// Both teams present
+	if teamAWeapon > 0 && teamBWeapon == 0 {
+		return ctrlTeamAControl
+	}
+	if teamBWeapon > 0 && teamAWeapon == 0 {
+		return ctrlTeamBControl
+	}
+
+	return ctrlContested
 }

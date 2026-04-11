@@ -1576,6 +1576,26 @@ th.sortable.sort-desc::after {
     padding: 15px;
 }
 
+#region-control-panel {
+    background: #16213e;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+#region-control-panel h4 {
+    color: #00d9ff;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.region-control-table {
+    font-size: 0.8rem;
+}
+
+.region-control-table td {
+    text-align: center;
+}
+
 .map-legend h4 {
     color: #00d9ff;
     margin-bottom: 12px;

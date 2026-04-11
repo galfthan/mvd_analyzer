@@ -2629,6 +2629,79 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
     }
 }
 
+// Draw control overlay for regions based on current control state
+function drawRegionControlOverlay(ctx, controlStates) {
+    const teamColors = TEAM_COLORS;
+
+    for (const [regionName, state] of Object.entries(controlStates)) {
+        const groups = mapState.regionToGroups[regionName];
+        if (!groups || groups.length === 0) continue;
+
+        let color;
+        switch (state) {
+            case 'teamAControl':
+                color = hexToRgba(teamColors[0], 0.15);
+                break;
+            case 'teamAWeakControl':
+                color = hexToRgba(teamColors[0], 0.08);
+                break;
+            case 'teamBControl':
+                color = hexToRgba(teamColors[1], 0.15);
+                break;
+            case 'teamBWeakControl':
+                color = hexToRgba(teamColors[1], 0.08);
+                break;
+            case 'contested':
+                color = 'rgba(180, 100, 220, 0.08)';
+                break;
+            default: // empty
+                continue;
+        }
+
+        for (const group of groups) {
+            drawLocationRegionFill(ctx, group, color);
+        }
+    }
+}
+
+function drawLocationRegionFill(ctx, group, fillColor) {
+    if (group.points.length === 1) {
+        const pos = worldToCanvasNew(group.points[0].x, group.points[0].y);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+    } else {
+        const canvasPoints = group.points.map(p => worldToCanvasNew(p.x, p.y));
+        const hull = computeConvexHull(canvasPoints);
+        if (hull.length < 3) {
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            for (const p of canvasPoints) {
+                minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+            }
+            const pad = 17;
+            ctx.fillStyle = fillColor;
+            ctx.fillRect(minX - pad, minY - pad, maxX - minX + pad*2, maxY - minY + pad*2);
+        } else {
+            const expanded = expandPolygon(hull, 17);
+            ctx.beginPath();
+            ctx.moveTo(expanded[0].x, expanded[0].y);
+            for (let i = 1; i < expanded.length; i++) ctx.lineTo(expanded[i].x, expanded[i].y);
+            ctx.closePath();
+            ctx.fillStyle = fillColor;
+            ctx.fill();
+        }
+    }
+}
+
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 // Map View State
 let mapState = {
     canvas: null,
@@ -2722,7 +2795,184 @@ function initMapView(result) {
     const slider = document.getElementById('map-timeline-slider');
     if (slider) slider.value = 0;
 
+    // Initialize region control data
+    initRegionControl(result);
+
     renderMap(mapState.currentTime);
+}
+
+function initRegionControl(result) {
+    const rc = result.timelineAnalysis?.regionControl;
+    const panel = document.getElementById('region-control-panel');
+    if (!rc || !rc.regions || rc.regions.length === 0) {
+        if (panel) panel.style.display = 'none';
+        mapState.controlRegions = null;
+        return;
+    }
+
+    mapState.controlRegions = rc.regions;
+    mapState.controlStats = rc.stats;
+
+    // Build loc-name-to-region lookup for real-time coloring
+    mapState.locToRegion = {};
+    for (const region of rc.regions) {
+        for (const pt of region.points) {
+            mapState.locToRegion[pt.name] = region.name;
+        }
+    }
+
+    // Ensure location groups are processed (needed for coloring)
+    if (!mapState.locationGroups && mapState.locations.length > 0) {
+        mapState.locationGroups = processLocationGroups(mapState.locations);
+    }
+
+    // Build region-to-location-group mapping for coloring
+    // Match by spatial proximity: if any point in a location group is close
+    // to any point in a control region, that group belongs to that region
+    mapState.regionToGroups = {};
+    if (mapState.locationGroups) {
+        for (const group of mapState.locationGroups) {
+            for (const region of rc.regions) {
+                let matched = false;
+                for (const gpt of group.points) {
+                    for (const rpt of region.points) {
+                        const dx = gpt.x - rpt.x, dy = gpt.y - rpt.y;
+                        if (dx * dx + dy * dy < 1) { // Within 1 world unit (essentially same point)
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (matched) break;
+                }
+                if (matched) {
+                    if (!mapState.regionToGroups[region.name]) {
+                        mapState.regionToGroups[region.name] = [];
+                    }
+                    mapState.regionToGroups[region.name].push(group);
+                }
+            }
+        }
+    }
+
+    // Display percentage table
+    displayRegionControlTable(rc);
+    if (panel) panel.style.display = '';
+}
+
+function displayRegionControlTable(rc) {
+    const tbody = document.getElementById('region-control-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    // Update headers with team names
+    const firstStats = Object.values(rc.stats)[0];
+    if (firstStats) {
+        const teamA = firstStats.teamA || 'Team A';
+        const teamB = firstStats.teamB || 'Team B';
+        document.getElementById('rc-teamA-hdr').textContent = teamA;
+        document.getElementById('rc-teamA-weak-hdr').textContent = teamA + ' weak';
+        document.getElementById('rc-teamB-hdr').textContent = teamB;
+        document.getElementById('rc-teamB-weak-hdr').textContent = teamB + ' weak';
+    }
+
+    const teamColors = TEAM_COLORS;
+
+    for (const region of rc.regions) {
+        const s = rc.stats[region.name];
+        if (!s) continue;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${escapeHtml(region.name)}</strong></td>
+            <td style="background: ${cellBg(teamColors[0], s.teamAControl)}">${s.teamAControl}%</td>
+            <td style="background: ${cellBg(teamColors[0], s.teamAWeakControl, 0.5)}">${s.teamAWeakControl}%</td>
+            <td style="background: ${cellBg('#888', s.contested)}">${s.contested}%</td>
+            <td>${s.empty}%</td>
+            <td style="background: ${cellBg(teamColors[1], s.teamBWeakControl, 0.5)}">${s.teamBWeakControl}%</td>
+            <td style="background: ${cellBg(teamColors[1], s.teamBControl)}">${s.teamBControl}%</td>
+        `;
+        tbody.appendChild(tr);
+    }
+}
+
+function cellBg(color, pct, intensityScale) {
+    if (!pct || pct <= 0) return 'transparent';
+    // Parse hex color to RGB
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    const alpha = Math.min(0.4, (pct / 100) * 0.6) * (intensityScale || 1);
+    return `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(2)})`;
+}
+
+// Compute real-time region control state at a given time
+function getRegionControlAtTime(time) {
+    if (!mapState.controlRegions || !mapState.locToRegion) return null;
+
+    const bucket = findBucketAtTime(time);
+    if (!bucket) return null;
+
+    const playerData = bucket.p || bucket.playerData;
+    if (!playerData) return null;
+
+    const teams = mapState.teams || [];
+    if (teams.length < 2) return null;
+    const teamA = teams[0], teamB = teams[1];
+
+    // Per-region presence
+    const presence = {};
+    for (const region of mapState.controlRegions) {
+        presence[region.name] = { aWpn: 0, aNo: 0, bWpn: 0, bNo: 0 };
+    }
+
+    // Check each player
+    const locations = mapState.locations;
+    for (const [name, data] of Object.entries(playerData)) {
+        if (data.d || (data.h !== undefined && data.h <= 0)) continue; // dead
+        if (data.x === 0 && data.y === 0) continue;
+
+        // Find nearest location
+        const nearest = findNearestLocation(data.x, data.y, locations);
+        if (!nearest) continue;
+
+        const regionName = mapState.locToRegion[nearest];
+        if (!regionName) continue;
+
+        const p = presence[regionName];
+        if (!p) continue;
+
+        const hasWeapon = data.rl || data.lg;
+        const sym = mapState.playerSymbols[name];
+        const playerTeam = sym ? teams[sym.teamIdx] : null;
+
+        if (playerTeam === teamA) {
+            if (hasWeapon) p.aWpn++; else p.aNo++;
+        } else if (playerTeam === teamB) {
+            if (hasWeapon) p.bWpn++; else p.bNo++;
+        }
+    }
+
+    // Determine state per region
+    const states = {};
+    for (const region of mapState.controlRegions) {
+        const p = presence[region.name];
+        const aTotal = p.aWpn + p.aNo;
+        const bTotal = p.bWpn + p.bNo;
+
+        if (aTotal === 0 && bTotal === 0) {
+            states[region.name] = 'empty';
+        } else if (aTotal > 0 && bTotal === 0) {
+            states[region.name] = p.aWpn > 0 ? 'teamAControl' : 'teamAWeakControl';
+        } else if (bTotal > 0 && aTotal === 0) {
+            states[region.name] = p.bWpn > 0 ? 'teamBControl' : 'teamBWeakControl';
+        } else if (p.aWpn > 0 && p.bWpn === 0) {
+            states[region.name] = 'teamAControl';
+        } else if (p.bWpn > 0 && p.aWpn === 0) {
+            states[region.name] = 'teamBControl';
+        } else {
+            states[region.name] = 'contested';
+        }
+    }
+    return states;
 }
 
 function calculateMapBounds(result) {
@@ -3135,6 +3385,14 @@ function renderMap(time) {
         }
         if (mapState.locationCanvas) {
             ctx.drawImage(mapState.locationCanvas, 0, 0);
+        }
+    }
+
+    // Draw region control overlay (colored by controlling team)
+    if (mapState.controlRegions && mapState.regionToGroups) {
+        const controlStates = getRegionControlAtTime(time);
+        if (controlStates) {
+            drawRegionControlOverlay(ctx, controlStates);
         }
     }
 
