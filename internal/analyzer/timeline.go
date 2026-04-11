@@ -1182,20 +1182,19 @@ type locWithKeyword struct {
 	keyword string
 }
 
-// mapLocAliases maps loc names to a region keyword for specific maps.
-// This allows locs that don't contain a keyword to be included in a region.
-// Key: map name, Value: map of loc name -> keyword
-var mapLocAliases = map[string]map[string]string{
-	"dm2": {
-		"secret": "RA",
-	},
+// mapCustomRegions defines custom named regions for specific maps.
+// Locs matching these names are pulled out of auto-detection into named regions.
+// Key: map name, Value: list of {regionName, locNames}
+type customRegion struct {
+	name     string
+	locNames []string
 }
 
-// mapRegionSplits forces certain loc names into separate region names.
-// Key: map name, Value: map of loc name -> forced region name
-var mapRegionSplits = map[string]map[string]string{
+var mapCustomRegions = map[string][]customRegion{
 	"dm2": {
-		"RA.MH": "RA.MH",
+		{name: "Secret", locNames: []string{"secret"}},
+		{name: "Backroom", locNames: []string{"RA.MH", "RA.MH/rox"}},
+		{name: "Tele", locNames: []string{"tele", "tele.entry", "tele.YA", "tele.high"}},
 	},
 }
 
@@ -1206,30 +1205,33 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 		return nil
 	}
 
-	// Get map-specific aliases and splits
+	// Get map name for map-specific customization
 	mapName := ""
 	if a.ctx.DemoInfo != nil && a.ctx.DemoInfo.Map != "" {
 		mapName = strings.ToLower(a.ctx.DemoInfo.Map)
-		// Strip path prefix (e.g., "maps/dm2" -> "dm2")
 		if idx := strings.LastIndex(mapName, "/"); idx >= 0 {
 			mapName = mapName[idx+1:]
 		}
 		mapName = strings.TrimSuffix(mapName, ".bsp")
 	}
-	aliases := mapLocAliases[mapName]
-	splits := mapRegionSplits[mapName]
+
+	// Build set of locs consumed by custom regions (so they're excluded from auto-detection)
+	customConsumed := make(map[string]bool)
+	customDefs := mapCustomRegions[mapName]
+	for _, cr := range customDefs {
+		for _, ln := range cr.locNames {
+			customConsumed[ln] = true
+		}
+	}
 
 	// Group locations by any matching keyword token in their name
 	// e.g., "cellar.RL" matches RL, "RA.stairs" matches RA
 	groups := make(map[string][]locWithKeyword)
 
 	for _, l := range locs {
-		// Check map-specific aliases first
-		if aliases != nil {
-			if keyword, ok := aliases[l.Name]; ok {
-				groups[keyword] = append(groups[keyword], locWithKeyword{loc: l, keyword: keyword})
-				continue
-			}
+		// Skip locs consumed by custom regions
+		if customConsumed[l.Name] {
+			continue
 		}
 
 		tokens := strings.FieldsFunc(l.Name, func(r rune) bool {
@@ -1246,44 +1248,37 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 
 	var regions []ControlRegion
 
-	// Handle map-specific forced splits: extract locs with forced region names
-	forcedRegions := make(map[string][]locWithKeyword) // forced region name -> locs
-	for keyword, kwLocs := range groups {
-		if splits == nil {
-			continue
-		}
-		var remaining []locWithKeyword
-		for _, lk := range kwLocs {
-			if forcedName, ok := splits[lk.loc.Name]; ok {
-				forcedRegions[forcedName] = append(forcedRegions[forcedName], lk)
-			} else {
-				remaining = append(remaining, lk)
+	// Build custom regions from map-specific definitions
+	locByName := make(map[string][]loc.Location)
+	for _, l := range locs {
+		locByName[l.Name] = append(locByName[l.Name], l)
+	}
+	for _, cr := range customDefs {
+		region := ControlRegion{Name: cr.name}
+		var sumX, sumY float32
+		var count int
+		for _, ln := range cr.locNames {
+			for _, l := range locByName[ln] {
+				region.Points = append(region.Points, MapLocation{
+					X: l.X, Y: l.Y, Z: l.Z, Name: l.Name,
+				})
+				sumX += l.X
+				sumY += l.Y
+				count++
 			}
 		}
-		groups[keyword] = remaining
-	}
-
-	// Build regions from forced splits
-	for name, fLocs := range forcedRegions {
-		region := ControlRegion{Name: name}
-		var sumX, sumY float32
-		for _, lk := range fLocs {
-			region.Points = append(region.Points, MapLocation{
-				X: lk.loc.X, Y: lk.loc.Y, Z: lk.loc.Z, Name: lk.loc.Name,
-			})
-			sumX += lk.loc.X
-			sumY += lk.loc.Y
+		if count > 0 {
+			region.CentroidX = sumX / float32(count)
+			region.CentroidY = sumY / float32(count)
+			regions = append(regions, region)
 		}
-		region.CentroidX = sumX / float32(len(fLocs))
-		region.CentroidY = sumY / float32(len(fLocs))
-		regions = append(regions, region)
 	}
 
 	for keyword, locs := range groups {
 		if len(locs) == 0 {
 			continue
 		}
-		clusters := clusterLocations(locs, 1000)
+		clusters := clusterLocations(locs, 800)
 
 		for _, cluster := range clusters {
 			region := ControlRegion{}
@@ -1376,22 +1371,19 @@ func clusterLocations(locs []locWithKeyword, threshold float64) [][]locWithKeywo
 
 // nameCluster names a cluster based on the most common second token
 func nameCluster(keyword string, cluster []locWithKeyword) string {
+	// Find the most common non-keyword token across loc names in this cluster.
+	// E.g., for keyword "RL", locs like "high.RL" → token "high", "low.RL" → token "low"
+	keywordLower := strings.ToLower(keyword)
 	tokenCounts := make(map[string]int)
 	for _, lk := range cluster {
-		name := lk.loc.Name
-		// Extract second token after the keyword
-		rest := name
-		if idx := strings.IndexAny(name, ". "); idx > 0 {
-			rest = name[idx+1:]
-		} else {
-			rest = ""
-		}
-		if rest != "" {
-			// Get just the first sub-token
-			if idx := strings.IndexAny(rest, ". "); idx > 0 {
-				rest = rest[:idx]
+		tokens := strings.FieldsFunc(lk.loc.Name, func(r rune) bool {
+			return r == '.' || r == ' '
+		})
+		for _, t := range tokens {
+			lower := strings.ToLower(t)
+			if lower != keywordLower {
+				tokenCounts[lower]++
 			}
-			tokenCounts[strings.ToLower(rest)]++
 		}
 	}
 
@@ -1405,7 +1397,7 @@ func nameCluster(keyword string, cluster []locWithKeyword) string {
 	}
 
 	if bestToken != "" {
-		return keyword + "." + bestToken
+		return bestToken + "." + keyword
 	}
 	return keyword
 }
