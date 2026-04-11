@@ -1182,6 +1182,23 @@ type locWithKeyword struct {
 	keyword string
 }
 
+// mapLocAliases maps loc names to a region keyword for specific maps.
+// This allows locs that don't contain a keyword to be included in a region.
+// Key: map name, Value: map of loc name -> keyword
+var mapLocAliases = map[string]map[string]string{
+	"dm2": {
+		"secret": "RA",
+	},
+}
+
+// mapRegionSplits forces certain loc names into separate region names.
+// Key: map name, Value: map of loc name -> forced region name
+var mapRegionSplits = map[string]map[string]string{
+	"dm2": {
+		"RA.MH": "RA.MH",
+	},
+}
+
 // buildControlRegions groups locations by item keyword and clusters spatially
 func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 	locs := a.locFinder.Locations()
@@ -1189,11 +1206,32 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 		return nil
 	}
 
+	// Get map-specific aliases and splits
+	mapName := ""
+	if a.ctx.DemoInfo != nil && a.ctx.DemoInfo.Map != "" {
+		mapName = strings.ToLower(a.ctx.DemoInfo.Map)
+		// Strip path prefix (e.g., "maps/dm2" -> "dm2")
+		if idx := strings.LastIndex(mapName, "/"); idx >= 0 {
+			mapName = mapName[idx+1:]
+		}
+		mapName = strings.TrimSuffix(mapName, ".bsp")
+	}
+	aliases := mapLocAliases[mapName]
+	splits := mapRegionSplits[mapName]
+
 	// Group locations by any matching keyword token in their name
 	// e.g., "cellar.RL" matches RL, "RA.stairs" matches RA
 	groups := make(map[string][]locWithKeyword)
 
 	for _, l := range locs {
+		// Check map-specific aliases first
+		if aliases != nil {
+			if keyword, ok := aliases[l.Name]; ok {
+				groups[keyword] = append(groups[keyword], locWithKeyword{loc: l, keyword: keyword})
+				continue
+			}
+		}
+
 		tokens := strings.FieldsFunc(l.Name, func(r rune) bool {
 			return r == '.' || r == ' '
 		})
@@ -1208,8 +1246,44 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 
 	var regions []ControlRegion
 
+	// Handle map-specific forced splits: extract locs with forced region names
+	forcedRegions := make(map[string][]locWithKeyword) // forced region name -> locs
+	for keyword, kwLocs := range groups {
+		if splits == nil {
+			continue
+		}
+		var remaining []locWithKeyword
+		for _, lk := range kwLocs {
+			if forcedName, ok := splits[lk.loc.Name]; ok {
+				forcedRegions[forcedName] = append(forcedRegions[forcedName], lk)
+			} else {
+				remaining = append(remaining, lk)
+			}
+		}
+		groups[keyword] = remaining
+	}
+
+	// Build regions from forced splits
+	for name, fLocs := range forcedRegions {
+		region := ControlRegion{Name: name}
+		var sumX, sumY float32
+		for _, lk := range fLocs {
+			region.Points = append(region.Points, MapLocation{
+				X: lk.loc.X, Y: lk.loc.Y, Z: lk.loc.Z, Name: lk.loc.Name,
+			})
+			sumX += lk.loc.X
+			sumY += lk.loc.Y
+		}
+		region.CentroidX = sumX / float32(len(fLocs))
+		region.CentroidY = sumY / float32(len(fLocs))
+		regions = append(regions, region)
+	}
+
 	for keyword, locs := range groups {
-		clusters := clusterLocations(locs, 1500)
+		if len(locs) == 0 {
+			continue
+		}
+		clusters := clusterLocations(locs, 1000)
 
 		for _, cluster := range clusters {
 			region := ControlRegion{}
