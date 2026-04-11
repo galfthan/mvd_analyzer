@@ -1,3 +1,10 @@
+:root {
+    --team-a: #ff5050;
+    --team-b: #50a0ff;
+    --team-c: #4ecdc4;
+    --team-d: #ffc107;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -299,19 +306,19 @@ header p {
 }
 
 .team-item:nth-child(1) {
-    border-left-color: #ff5050;
+    border-left-color: var(--team-a);
 }
 
 .team-item:nth-child(2) {
-    border-left-color: #50a0ff;
+    border-left-color: var(--team-b);
 }
 
 .team-item:nth-child(3) {
-    border-left-color: #4ecdc4;
+    border-left-color: var(--team-c);
 }
 
 .team-item:nth-child(4) {
-    border-left-color: #ffc107;
+    border-left-color: var(--team-d);
 }
 
 .team-name {
@@ -1812,11 +1819,11 @@ th.sortable.sort-desc::after {
 
 /* Player team colors for map */
 .player-red {
-    color: #ff5050;
+    color: var(--team-a);
 }
 
 .player-blue {
-    color: #50a0ff;
+    color: var(--team-b);
 }
 
 @media (max-width: 900px) {

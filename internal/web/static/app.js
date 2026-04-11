@@ -2,6 +2,21 @@
 
 const TEAM_COLORS = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
 
+// Derive strong/weak color variants from a hex color for region control displays
+function hexToRgb(hex) {
+    return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+}
+function teamStrongColor(hex) {
+    const [r, g, b] = hexToRgb(hex);
+    // Darken by 30% for strong control
+    return `rgb(${Math.round(r * 0.7)}, ${Math.round(g * 0.7)}, ${Math.round(b * 0.7)})`;
+}
+function teamWeakColor(hex) {
+    const [r, g, b] = hexToRgb(hex);
+    // Lighten towards white for weak control
+    return `rgb(${Math.round(r + (255 - r) * 0.5)}, ${Math.round(g + (255 - g) * 0.5)}, ${Math.round(b + (255 - b) * 0.5)})`;
+}
+
 let currentResult = null;
 
 // ─── WASM Worker ────────────────────────────────────────────────────────────
@@ -1894,6 +1909,15 @@ function updateRegionControlTimeline(startTime, endTime) {
     if (teamALabel) teamALabel.textContent = teamA;
     if (teamBLabel) teamBLabel.textContent = teamB;
 
+    // Update legend color swatches to match TEAM_COLORS
+    const legendColors = document.querySelectorAll('#region-control-timeline .legend-color');
+    if (legendColors.length >= 4) {
+        legendColors[0].style.background = teamStrongColor(TEAM_COLORS[0]);
+        legendColors[1].style.background = teamWeakColor(TEAM_COLORS[0]);
+        legendColors[2].style.background = teamWeakColor(TEAM_COLORS[1]);
+        legendColors[3].style.background = teamStrongColor(TEAM_COLORS[1]);
+    }
+
     labelsContainer.innerHTML = '';
     stripsContainer.innerHTML = '';
 
@@ -1906,14 +1930,14 @@ function updateRegionControlTimeline(startTime, endTime) {
 
     const locations = mapState.locations;
 
-    // Control state colors (dark = strong control, light = weak, white = contested)
+    // Control state colors derived from TEAM_COLORS
     const stateColors = {
-        teamAControl:     'rgb(180, 40, 40)',
-        teamAWeakControl: 'rgb(255, 140, 140)',
+        teamAControl:     teamStrongColor(TEAM_COLORS[0]),
+        teamAWeakControl: teamWeakColor(TEAM_COLORS[0]),
         contested:        'rgb(255, 255, 255)',
         empty:            'transparent',
-        teamBWeakControl: 'rgb(140, 190, 255)',
-        teamBControl:     'rgb(30, 80, 180)',
+        teamBWeakControl: teamWeakColor(TEAM_COLORS[1]),
+        teamBControl:     teamStrongColor(TEAM_COLORS[1]),
     };
 
     for (const region of regions) {
@@ -2849,9 +2873,7 @@ function drawLocationRegionFill(ctx, group, fillColor) {
 }
 
 function hexToRgba(hex, alpha) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
+    const [r, g, b] = hexToRgb(hex);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
@@ -3498,7 +3520,7 @@ function assignPlayerSymbols(result) {
         }
         if (letter === '?') letter = player.name[0]?.toUpperCase() || '?';
 
-        const teamColor = player.teamIdx === 0 ? '#ff5050' : '#50a0ff';
+        const teamColor = TEAM_COLORS[player.teamIdx] || TEAM_COLORS[0];
         // Pre-render letter with circle to offscreen canvas
         const size = 32;
         const offscreen = document.createElement('canvas');
@@ -3510,7 +3532,7 @@ function assignPlayerSymbols(result) {
         // Circle background
         octx.beginPath();
         octx.arc(cx, cy, r, 0, Math.PI * 2);
-        octx.fillStyle = player.teamIdx === 0 ? 'rgba(255, 80, 80, 0.25)' : 'rgba(80, 160, 255, 0.25)';
+        octx.fillStyle = hexToRgba(teamColor, 0.25);
         octx.fill();
         octx.strokeStyle = teamColor;
         octx.lineWidth = 2;
@@ -3792,7 +3814,7 @@ function buildPlayerRegionIcon(player) {
         ctx.drawImage(symCanvas, ox, oy);
     } else {
         // Fallback: draw letter
-        const color = player.teamIdx === 0 ? '#ff5050' : '#50a0ff';
+        const color = TEAM_COLORS[player.teamIdx] || TEAM_COLORS[0];
         ctx.font = 'bold 16px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
