@@ -2810,34 +2810,96 @@ function initRegionControl(result) {
         return;
     }
 
-    mapState.controlRegions = rc.regions;
-    mapState.controlStats = rc.stats;
+    // Store the original backend result and all locations for recomputation
+    mapState.rcResult = rc;
 
-    // Build loc-name-to-region lookup for real-time coloring
+    // Ensure location groups are processed
+    if (!mapState.locationGroups && mapState.locations.length > 0) {
+        mapState.locationGroups = processLocationGroups(mapState.locations);
+    }
+
+    // Build region config UI (editable text fields per region)
+    buildRegionConfig(rc.regions);
+
+    // Apply regions (builds lookups, computes stats, renders table)
+    applyRegionConfig();
+
+    if (panel) panel.style.display = '';
+}
+
+function buildRegionConfig(regions) {
+    const container = document.getElementById('region-config');
+    if (!container) return;
+    container.innerHTML = '';
+
+    for (const region of regions) {
+        const locNames = region.points.map(p => p.name).join(', ');
+        const row = document.createElement('div');
+        row.className = 'region-config-row';
+        row.innerHTML = `
+            <label>${escapeHtml(region.name)}:</label>
+            <input type="text" class="region-locs-input" data-region="${escapeHtml(region.name)}" value="${escapeHtml(locNames)}">
+        `;
+        container.appendChild(row);
+    }
+
+    // On change, recompute
+    container.querySelectorAll('.region-locs-input').forEach(input => {
+        input.addEventListener('change', () => applyRegionConfig());
+    });
+}
+
+function applyRegionConfig() {
+    const rc = mapState.rcResult;
+    if (!rc) return;
+
+    // Read current region definitions from the text inputs
+    const regions = [];
+    document.querySelectorAll('.region-locs-input').forEach(input => {
+        const regionName = input.dataset.region;
+        const locNames = input.value.split(',').map(s => s.trim()).filter(s => s);
+
+        // Find matching locations from the full loc list
+        const locSet = new Set(locNames);
+        const points = [];
+        let sumX = 0, sumY = 0;
+        for (const loc of mapState.locations) {
+            if (locSet.has(loc.name)) {
+                points.push({ x: loc.x, y: loc.y, z: loc.z, name: loc.name });
+                sumX += loc.x;
+                sumY += loc.y;
+            }
+        }
+        if (points.length > 0) {
+            regions.push({
+                name: regionName,
+                points: points,
+                centroidX: sumX / points.length,
+                centroidY: sumY / points.length,
+            });
+        }
+    });
+
+    mapState.controlRegions = regions;
+
+    // Build loc-name-to-region lookup
     mapState.locToRegion = {};
-    for (const region of rc.regions) {
+    for (const region of regions) {
         for (const pt of region.points) {
             mapState.locToRegion[pt.name] = region.name;
         }
     }
 
-    // Ensure location groups are processed (needed for coloring)
-    if (!mapState.locationGroups && mapState.locations.length > 0) {
-        mapState.locationGroups = processLocationGroups(mapState.locations);
-    }
-
     // Build region-to-location-group mapping for coloring
-    // Match by spatial proximity: if any point in a location group is close
-    // to any point in a control region, that group belongs to that region
     mapState.regionToGroups = {};
     if (mapState.locationGroups) {
         for (const group of mapState.locationGroups) {
-            for (const region of rc.regions) {
+            for (const region of regions) {
                 let matched = false;
                 for (const gpt of group.points) {
                     for (const rpt of region.points) {
                         const dx = gpt.x - rpt.x, dy = gpt.y - rpt.y;
-                        if (dx * dx + dy * dy < 1) { // Within 1 world unit (essentially same point)
+                        if (dx * dx + dy * dy < 1) {
                             matched = true;
                             break;
                         }
@@ -2854,18 +2916,102 @@ function initRegionControl(result) {
         }
     }
 
-    // Display percentage table
-    displayRegionControlTable(rc);
-    if (panel) panel.style.display = '';
+    // Recompute stats from high-res buckets
+    recomputeRegionStats(regions);
+
+    // Force map redraw
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
 }
 
-function displayRegionControlTable(rc) {
+function recomputeRegionStats(regions) {
+    const buckets = timelineState.highResBuckets;
+    if (!buckets || buckets.length === 0 || regions.length === 0) return;
+
+    const teams = mapState.teams || [];
+    if (teams.length < 2) return;
+    const teamA = teams[0], teamB = teams[1];
+
+    // Initialize counters
+    const counters = {};
+    for (const r of regions) {
+        counters[r.name] = { aC: 0, aW: 0, con: 0, emp: 0, bW: 0, bC: 0 };
+    }
+
+    let total = 0;
+    const locations = mapState.locations;
+
+    for (const bucket of buckets) {
+        const playerData = bucket.p || bucket.playerData;
+        if (!playerData) continue;
+        total++;
+
+        // Per-region presence
+        const presence = {};
+        for (const r of regions) {
+            presence[r.name] = { aWpn: 0, aNo: 0, bWpn: 0, bNo: 0 };
+        }
+
+        for (const [name, data] of Object.entries(playerData)) {
+            if (data.d || (data.h !== undefined && data.h <= 0)) continue;
+            if (data.x === 0 && data.y === 0) continue;
+
+            const nearest = findNearestLocation(data.x, data.y, locations);
+            if (!nearest) continue;
+            const regionName = mapState.locToRegion[nearest];
+            if (!regionName || !presence[regionName]) continue;
+
+            const sym = mapState.playerSymbols[name];
+            const playerTeam = sym ? teams[sym.teamIdx] : null;
+            const hasWeapon = data.rl || data.lg;
+            const p = presence[regionName];
+
+            if (playerTeam === teamA) {
+                if (hasWeapon) p.aWpn++; else p.aNo++;
+            } else if (playerTeam === teamB) {
+                if (hasWeapon) p.bWpn++; else p.bNo++;
+            }
+        }
+
+        for (const r of regions) {
+            const p = presence[r.name];
+            const c = counters[r.name];
+            const aT = p.aWpn + p.aNo, bT = p.bWpn + p.bNo;
+
+            if (aT === 0 && bT === 0) { c.emp++; }
+            else if (aT > 0 && bT === 0) { if (p.aWpn > 0) c.aC++; else c.aW++; }
+            else if (bT > 0 && aT === 0) { if (p.bWpn > 0) c.bC++; else c.bW++; }
+            else if (p.aWpn > 0 && p.bWpn === 0) { c.aC++; }
+            else if (p.bWpn > 0 && p.aWpn === 0) { c.bC++; }
+            else { c.con++; }
+        }
+    }
+
+    if (total === 0) return;
+
+    // Build stats and display
+    const pct = (v) => Math.round(v / total * 1000) / 10;
+    const stats = {};
+    for (const r of regions) {
+        const c = counters[r.name];
+        stats[r.name] = {
+            teamAControl: pct(c.aC), teamAWeakControl: pct(c.aW),
+            contested: pct(c.con), empty: pct(c.emp),
+            teamBWeakControl: pct(c.bW), teamBControl: pct(c.bC),
+            teamA, teamB,
+        };
+    }
+
+    mapState.controlStats = stats;
+    displayRegionControlTable(regions, stats);
+}
+
+function displayRegionControlTable(regions, stats) {
     const tbody = document.getElementById('region-control-body');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // Update headers with team names
-    const firstStats = Object.values(rc.stats)[0];
+    const firstStats = Object.values(stats)[0];
     if (firstStats) {
         const teamA = firstStats.teamA || 'Team A';
         const teamB = firstStats.teamB || 'Team B';
@@ -2877,8 +3023,8 @@ function displayRegionControlTable(rc) {
 
     const teamColors = TEAM_COLORS;
 
-    for (const region of rc.regions) {
-        const s = rc.stats[region.name];
+    for (const region of regions) {
+        const s = stats[region.name];
         if (!s) continue;
         const tr = document.createElement('tr');
         tr.innerHTML = `

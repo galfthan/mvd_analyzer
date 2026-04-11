@@ -147,11 +147,6 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 				ta.FragStreaks[i].Time -= matchStart
 				ta.FragStreaks[i].EndTime -= matchStart
 			}
-			if ta.RegionControl != nil {
-				for i := range ta.RegionControl.Shifts {
-					ta.RegionControl.Shifts[i].Time -= matchStart
-				}
-			}
 			ta.DemoOffset = matchStart
 			ta.MatchStartTime = 0
 

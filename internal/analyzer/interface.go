@@ -303,31 +303,9 @@ type ControlRegion struct {
 	CentroidY float32       `json:"centroidY"`
 }
 
-// RegionControlResult contains region control analysis
+// RegionControlResult contains auto-detected region definitions
 type RegionControlResult struct {
-	Regions []ControlRegion         `json:"regions"`
-	Stats   map[string]*RegionStats `json:"stats"`
-	Shifts  []ControlShift          `json:"shifts,omitempty"`
-}
-
-// RegionStats contains percentage of time in each control state
-type RegionStats struct {
-	TeamAControl     float64 `json:"teamAControl"`
-	TeamAWeakControl float64 `json:"teamAWeakControl"`
-	Contested        float64 `json:"contested"`
-	Empty            float64 `json:"empty"`
-	TeamBWeakControl float64 `json:"teamBWeakControl"`
-	TeamBControl     float64 `json:"teamBControl"`
-	TeamA            string  `json:"teamA"`
-	TeamB            string  `json:"teamB"`
-}
-
-// ControlShift represents a change in region control
-type ControlShift struct {
-	Time      float64 `json:"time"`
-	Region    string  `json:"region"`
-	FromState string  `json:"fromState"`
-	ToState   string  `json:"toState"`
+	Regions []ControlRegion `json:"regions"`
 }
 
 // HighResBucket - compact bucket for high-resolution map data

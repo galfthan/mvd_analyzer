@@ -1588,6 +1588,40 @@ th.sortable.sort-desc::after {
     font-size: 0.95rem;
 }
 
+.region-config {
+    margin-bottom: 12px;
+}
+
+.region-config-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.region-config-row label {
+    min-width: 80px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #ccc;
+}
+
+.region-locs-input {
+    flex: 1;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    color: #ccc;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-family: monospace;
+}
+
+.region-locs-input:focus {
+    border-color: #00d9ff;
+    outline: none;
+}
+
 .region-control-table {
     font-size: 0.8rem;
 }
