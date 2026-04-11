@@ -1623,11 +1623,19 @@ th.sortable.sort-desc::after {
     gap: 1px;
 }
 
-.region-wpn-icon {
-    width: 16px;
-    height: auto;
-    vertical-align: middle;
-    margin-left: 1px;
+.region-wpn-tag {
+    font-size: 0.6rem;
+    font-weight: bold;
+    vertical-align: super;
+    margin-left: 0px;
+}
+
+.region-wpn-rl {
+    color: #ff9933;
+}
+
+.region-wpn-lg {
+    color: #66ccff;
 }
 
 #region-control-panel {

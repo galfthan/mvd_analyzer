@@ -3506,11 +3506,11 @@ function updateRegionStatus() {
         players.sort((a, b) => a.teamIdx - b.teamIdx);
         for (const p of players) {
             const color = p.teamIdx >= 0 && p.teamIdx < teamColors.length ? teamColors[p.teamIdx] : '#888';
-            const letter = p.name.charAt(0).toUpperCase();
-            const wpnIcons =
-                (p.hasRL ? '<img src="icon_rl.png" class="region-wpn-icon" alt="RL">' : '') +
-                (p.hasLG ? '<img src="icon_lg.png" class="region-wpn-icon" alt="LG">' : '');
-            playersHtml += `<span class="region-player" style="color: ${color}" title="${escapeHtml(p.name)}">${letter}${wpnIcons}</span>`;
+            const letter = p.sym ? p.sym.symbol : p.name.charAt(0).toUpperCase();
+            const wpnTags = [];
+            if (p.hasRL) wpnTags.push('<span class="region-wpn-tag region-wpn-rl">r</span>');
+            if (p.hasLG) wpnTags.push('<span class="region-wpn-tag region-wpn-lg">l</span>');
+            playersHtml += `<span class="region-player" style="color: ${color}" title="${escapeHtml(p.name)}">${letter}${wpnTags.join('')}</span>`;
         }
 
         html += `<div class="region-status-row">
