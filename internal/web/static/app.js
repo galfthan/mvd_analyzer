@@ -2729,6 +2729,17 @@ let mapState = {
 
 const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
 
+// Pre-load weapon icons for region status compositing
+const weaponIcons = { rl: null, lg: null };
+(function preloadWeaponIcons() {
+    const rlImg = new Image();
+    rlImg.src = 'icon_rl.png';
+    rlImg.onload = () => { weaponIcons.rl = rlImg; };
+    const lgImg = new Image();
+    lgImg.src = 'icon_lg.png';
+    lgImg.onload = () => { weaponIcons.lg = lgImg; };
+})();
+
 function markMapDirty() {
     mapState.renderDirty = true;
 }
@@ -3428,6 +3439,7 @@ function updateMapLegend() {
 function updateRegionStatus() {
     const container = document.getElementById('region-status-body');
     if (!container || !mapState.controlRegions || mapState.controlRegions.length === 0) return;
+    container.innerHTML = '';
 
     const time = mapState.currentTime;
     const controlStates = getRegionControlAtTime(time);
@@ -3500,27 +3512,80 @@ function updateRegionStatus() {
                 break;
         }
 
-        // Player icons with weapon indicators
-        let playersHtml = '';
+        // Build row
+        const row = document.createElement('div');
+        row.className = 'region-status-row';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'region-status-name';
+        nameSpan.textContent = region.name;
+        row.appendChild(nameSpan);
+
+        const stateSpan = document.createElement('span');
+        stateSpan.className = 'region-status-state';
+        stateSpan.style.color = statusColor;
+        stateSpan.textContent = statusLabel;
+        row.appendChild(stateSpan);
+
+        const playersSpan = document.createElement('span');
+        playersSpan.className = 'region-status-players';
+
         // Sort: team A first, then team B
         players.sort((a, b) => a.teamIdx - b.teamIdx);
-        for (const p of players) {
-            const color = p.teamIdx >= 0 && p.teamIdx < teamColors.length ? teamColors[p.teamIdx] : '#888';
-            const letter = p.sym ? p.sym.symbol : p.name.charAt(0).toUpperCase();
-            const wpnTags = [];
-            if (p.hasRL) wpnTags.push('<span class="region-wpn-tag region-wpn-rl">r</span>');
-            if (p.hasLG) wpnTags.push('<span class="region-wpn-tag region-wpn-lg">l</span>');
-            playersHtml += `<span class="region-player" style="color: ${color}" title="${escapeHtml(p.name)}">${letter}${wpnTags.join('')}</span>`;
+        if (players.length === 0) {
+            playersSpan.textContent = '-';
+        } else {
+            for (const p of players) {
+                const icon = buildPlayerRegionIcon(p);
+                icon.title = p.name;
+                playersSpan.appendChild(icon);
+            }
         }
+        row.appendChild(playersSpan);
+        container.appendChild(row);
+    }
+}
 
-        html += `<div class="region-status-row">
-            <span class="region-status-name">${escapeHtml(region.name)}</span>
-            <span class="region-status-state" style="color: ${statusColor}">${statusLabel}</span>
-            <span class="region-status-players">${playersHtml || '-'}</span>
-        </div>`;
+// Build a composited canvas icon: player circle+letter with RL/LG weapon icons in corners
+function buildPlayerRegionIcon(player) {
+    const sym = player.sym;
+    const symCanvas = sym ? sym.symbolCanvas : null;
+
+    const size = 36;
+    const iconSize = 14; // weapon icon size
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    canvas.className = 'region-player-icon';
+    const ctx = canvas.getContext('2d');
+
+    // Draw player symbol centered
+    if (symCanvas) {
+        const ox = (size - symCanvas.width) / 2;
+        const oy = (size - symCanvas.height) / 2;
+        ctx.drawImage(symCanvas, ox, oy);
+    } else {
+        // Fallback: draw letter
+        const color = player.teamIdx === 0 ? '#ff5050' : '#50a0ff';
+        ctx.font = 'bold 16px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = color;
+        ctx.fillText(player.name.charAt(0).toUpperCase(), size / 2, size / 2);
     }
 
-    container.innerHTML = html;
+    // Draw RL icon top-right
+    if (player.hasRL && weaponIcons.rl) {
+        ctx.drawImage(weaponIcons.rl, size - iconSize, 0, iconSize, iconSize * (weaponIcons.rl.height / weaponIcons.rl.width));
+    }
+
+    // Draw LG icon bottom-right
+    if (player.hasLG && weaponIcons.lg) {
+        const lgH = iconSize * (weaponIcons.lg.height / weaponIcons.lg.width);
+        ctx.drawImage(weaponIcons.lg, size - iconSize, size - lgH, iconSize, lgH);
+    }
+
+    return canvas;
 }
 
 function prerenderLocationBackground() {

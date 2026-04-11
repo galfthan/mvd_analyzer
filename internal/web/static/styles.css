@@ -1615,27 +1615,10 @@ th.sortable.sort-desc::after {
     flex-wrap: wrap;
 }
 
-.region-player {
-    display: inline-flex;
-    align-items: center;
-    font-weight: bold;
-    font-size: 0.9rem;
-    gap: 1px;
-}
-
-.region-wpn-tag {
-    font-size: 0.6rem;
-    font-weight: bold;
-    vertical-align: super;
-    margin-left: 0px;
-}
-
-.region-wpn-rl {
-    color: #ff9933;
-}
-
-.region-wpn-lg {
-    color: #66ccff;
+.region-player-icon {
+    width: 36px;
+    height: 36px;
+    cursor: default;
 }
 
 #region-control-panel {
