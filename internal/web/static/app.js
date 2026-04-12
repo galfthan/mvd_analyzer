@@ -3000,7 +3000,7 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
     for (const name of occupied) {
         const group = groupsByName[name];
         if (!group || !group.tris || group.tris.length < 6) continue;
-        drawLocationRegionOutline(ctx, group, worldToCanvasNew, 'rgba(255, 255, 255, 0.85)', 1);
+        drawLocationRegionOutline(ctx, group, worldToCanvasNew, 'rgba(220, 220, 220, 0.7)', 1);
     }
 
     // Bold label pass — draw over the dimmer prerendered label so it pops.
