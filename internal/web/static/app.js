@@ -2749,6 +2749,20 @@ function processLocationGroups(locations) {
         };
     }
 
+    // If BSP-derived geometry is loaded, attach per-loc triangle lists so
+    // the renderer can draw real floor shapes instead of convex-hull blobs.
+    // Keys must match NormalizeLocationName (Go) <-> normalizeLocationName (JS).
+    if (mapState.mapGeometry && Array.isArray(mapState.mapGeometry.locs)) {
+        const geomByName = {};
+        for (const l of mapState.mapGeometry.locs) {
+            geomByName[l.name] = l;
+        }
+        for (const group of Object.values(groups)) {
+            const g = geomByName[group.name];
+            group.tris = g && Array.isArray(g.tris) && g.tris.length >= 6 ? g.tris : null;
+        }
+    }
+
     return Object.values(groups);
 }
 
@@ -2802,6 +2816,50 @@ function expandPolygon(points, distance) {
         const len = Math.sqrt(dx*dx + dy*dy) || 1;
         return { x: p.x + (dx / len) * distance, y: p.y + (dy / len) * distance };
     });
+}
+
+// Draw a location region from a pre-generated BSP-derived triangle list.
+// tris is a flat Float array: 6 numbers per triangle (x1,y1,x2,y2,x3,y3).
+// Used when mapState.mapGeometry is loaded; otherwise drawLocationRegion
+// below handles the convex-hull fallback.
+function drawLocationRegionFromGeometry(ctx, group, worldToCanvasFunc) {
+    const tris = group.tris;
+    if (!tris || tris.length < 6) return;
+    ctx.fillStyle = group.color.fill;
+    for (let i = 0; i + 5 < tris.length; i += 6) {
+        const a = worldToCanvasFunc(tris[i],     tris[i + 1]);
+        const b = worldToCanvasFunc(tris[i + 2], tris[i + 3]);
+        const c = worldToCanvasFunc(tris[i + 4], tris[i + 5]);
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.lineTo(c.x, c.y);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
+// Fill a location region with an arbitrary color. Prefers the BSP-derived
+// triangle list if the group carries one; falls back to the legacy convex
+// hull path otherwise. Used by the region-control overlay.
+function fillLocationRegion(ctx, group, fillColor, worldToCanvasFunc) {
+    const tris = group.tris;
+    if (tris && tris.length >= 6) {
+        ctx.fillStyle = fillColor;
+        for (let i = 0; i + 5 < tris.length; i += 6) {
+            const a = worldToCanvasFunc(tris[i],     tris[i + 1]);
+            const b = worldToCanvasFunc(tris[i + 2], tris[i + 3]);
+            const c = worldToCanvasFunc(tris[i + 4], tris[i + 5]);
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.lineTo(c.x, c.y);
+            ctx.closePath();
+            ctx.fill();
+        }
+        return;
+    }
+    drawLocationRegionFill(ctx, group, fillColor);
 }
 
 // Draw a location region (convex hull or circle for single point)
@@ -2871,7 +2929,7 @@ function drawRegionControlOverlay(ctx, controlStates) {
         }
 
         for (const group of groups) {
-            drawLocationRegionFill(ctx, group, color);
+            fillLocationRegion(ctx, group, color, worldToCanvasNew);
         }
     }
 }
@@ -2919,6 +2977,7 @@ let mapState = {
     locations: [],
     locationGroups: null, // Cached processed location groups
     locationCanvas: null, // Pre-rendered location background layer
+    mapGeometry: null,    // BSP-derived per-loc polygons (optional, loaded async)
     bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
     currentTime: 0,
     isPlaying: false,
@@ -3016,6 +3075,26 @@ function initMapView(result) {
     mapState.locations = timeline.locationData || [];
     mapState.locationGroups = null; // Clear cached groups for new demo
     mapState.locationCanvas = null;
+    mapState.mapGeometry = null;    // Reset BSP-derived geometry for new demo
+
+    // Fire-and-forget: try to load pre-generated BSP-derived map geometry.
+    // If present, switch from convex-hull blobs to real floor polygons.
+    // If absent (404 or fetch error), the existing hull path remains as fallback.
+    const rawMapName = result.demoInfo && result.demoInfo.map ? result.demoInfo.map : '';
+    const mapBasename = rawMapName.toLowerCase().replace(/^maps\//, '').replace(/\.bsp$/, '');
+    if (mapBasename) {
+        fetch(`maps/${mapBasename}.json`)
+            .then(r => r.ok ? r.json() : null)
+            .then(geom => {
+                if (!geom || !geom.locs || geom.locs.length === 0) return;
+                mapState.mapGeometry = geom;
+                mapState.locationGroups = null;
+                mapState.locationCanvas = null;
+                markMapDirty();
+                renderMap(mapState.currentTime);
+            })
+            .catch(() => {});
+    }
 
     // Show/hide no-data message
     const noDataMsg = document.getElementById('map-no-data');
@@ -3879,7 +3958,11 @@ function prerenderLocationBackground() {
     const octx = offscreen.getContext('2d');
 
     for (const group of mapState.locationGroups) {
-        drawLocationRegion(octx, group, worldToCanvasNew);
+        if (group.tris && group.tris.length >= 6) {
+            drawLocationRegionFromGeometry(octx, group, worldToCanvasNew);
+        } else {
+            drawLocationRegion(octx, group, worldToCanvasNew);
+        }
     }
 
     octx.font = '12px monospace';
