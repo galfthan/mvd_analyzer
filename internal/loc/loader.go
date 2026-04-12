@@ -2,15 +2,10 @@ package loc
 
 import (
 	"bufio"
-	"embed"
-	"fmt"
 	"path/filepath"
 	"strconv"
 	"strings"
 )
-
-//go:embed locs/*.loc
-var locFiles embed.FS
 
 // Variable substitutions for loc file parsing
 // These match the ezQuake teamplay_locfiles.c definitions
@@ -56,54 +51,33 @@ var locSeparatorSuffixes = []string{
 	"water", "way", "well", "window", "ya", "yard",
 }
 
-// LoadForMap loads the loc file for a given map name
-// The map name can include path (e.g., "maps/dm2") and will be normalized
-func LoadForMap(mapName string) (*Finder, error) {
-	// Normalize map name: extract base name without path or extension
-	baseName := filepath.Base(mapName)
-	baseName = strings.TrimSuffix(baseName, ".bsp")
-	baseName = strings.ToLower(baseName)
-
-	// Map aliases: some maps share the same layout/locs
-	mapAliases := map[string]string{
-		"phantombase": "phantoma",
-	}
-	if alias, ok := mapAliases[baseName]; ok {
-		baseName = alias
-	}
-
-	filename := fmt.Sprintf("locs/%s.loc", baseName)
-	data, err := locFiles.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("no loc file for map %s: %w", baseName, err)
-	}
-
-	locations, err := parseLoc(data)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse loc file for %s: %w", baseName, err)
-	}
-
-	return &Finder{
-		mapName:   baseName,
-		locations: locations,
-	}, nil
+// mapAliases maps variant map basenames onto a canonical loc-file basename.
+// Used by callers that want to resolve a demo's map name to the loc file.
+var mapAliases = map[string]string{
+	"phantombase": "phantoma",
 }
 
-// AvailableMaps returns a list of map names that have loc files
-func AvailableMaps() ([]string, error) {
-	entries, err := locFiles.ReadDir("locs")
+// NormalizeMapName extracts the lowercased base name (no path or extension)
+// from a map identifier and applies known aliases. The resulting string is
+// the basename of the .loc file (without the ".loc" suffix).
+func NormalizeMapName(mapName string) string {
+	base := filepath.Base(mapName)
+	base = strings.TrimSuffix(base, ".bsp")
+	base = strings.ToLower(base)
+	if alias, ok := mapAliases[base]; ok {
+		base = alias
+	}
+	return base
+}
+
+// buildFinder parses raw loc-file bytes into a Finder for the given basename.
+// Shared between the native and WASM LoadForMap implementations.
+func buildFinder(baseName string, data []byte) (*Finder, error) {
+	locations, err := parseLoc(data)
 	if err != nil {
 		return nil, err
 	}
-
-	var maps []string
-	for _, entry := range entries {
-		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".loc") {
-			mapName := strings.TrimSuffix(entry.Name(), ".loc")
-			maps = append(maps, mapName)
-		}
-	}
-	return maps, nil
+	return &Finder{mapName: baseName, locations: locations}, nil
 }
 
 func parseLoc(data []byte) ([]Location, error) {

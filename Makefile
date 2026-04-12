@@ -23,6 +23,8 @@ build:
 	@cp $(STATIC_DIR)/styles.css $(DIST_DIR)/
 	@cp $(STATIC_DIR)/app.js $(DIST_DIR)/
 	@cp $(STATIC_DIR)/worker.js $(DIST_DIR)/
+	@cp -r $(STATIC_DIR)/maps $(DIST_DIR)/
+	@cp -r $(STATIC_DIR)/locs $(DIST_DIR)/
 	@echo "Build complete!"
 	@ls -lh $(DIST_DIR)/
 

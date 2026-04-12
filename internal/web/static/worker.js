@@ -3,6 +3,25 @@
 
 importScripts('wasm_exec.js');
 
+// Synchronous loc fetcher exposed to the WASM module. The Go side calls
+// this from internal/loc/loader_wasm.go during analysis to pull the
+// per-map .loc file on demand instead of bundling all locs into the
+// WASM binary. Sync XHR is deprecated on the main thread but is still
+// allowed inside Web Workers, which is exactly where we run.
+self.fetchLocSync = function(mapName) {
+    if (!mapName) return null;
+    try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'locs/' + mapName + '.loc', false); // false = synchronous
+        xhr.send(null);
+        if (xhr.status === 200) return xhr.responseText;
+    } catch (e) {
+        // Network errors / CORS / 404 — fall through to null so Go reports
+        // "no loc file for map ...".
+    }
+    return null;
+};
+
 let wasmReady = false;
 
 async function initWasm() {
