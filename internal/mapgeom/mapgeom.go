@@ -1,0 +1,301 @@
+// Package mapgeom turns a parsed Quake 1 BSP into per-loc walkable-floor
+// polygon sets suitable for the viewer's mini-map.
+//
+// The extractor only keeps faces whose plane normal points "up enough"
+// to be treated as a floor (Z >= floorNormalZ). Each floor face is then
+// assigned to the nearest loc by a Z-weighted nearest-point test and
+// grouped by the normalized loc name. Faces are fan-triangulated and
+// emitted as flat float32 triangle lists that the frontend can render
+// with a trivial ctx.beginPath/moveTo/lineTo/fill loop.
+package mapgeom
+
+import (
+	"sort"
+
+	"github.com/mvd-analyzer/internal/bsp"
+	"github.com/mvd-analyzer/internal/loc"
+)
+
+const (
+	// floorNormalZ is the minimum Z-component for a plane to count as
+	// walkable floor (~45° from horizontal — matches Q1's floor
+	// heuristic closely enough for visualization).
+	floorNormalZ = 0.7
+
+	// locZWeight penalizes vertical distance when matching faces to
+	// locs: a loc 128u above is effectively 256u away horizontally.
+	// This handles stacked rooms (dm4 RA above water, dm6 bridge).
+	locZWeight = 4.0
+
+	// locZReject discards a face entirely when its nearest loc is
+	// further than this in Z, preventing one floor from claiming the
+	// one directly above/below.
+	locZReject = 96.0
+)
+
+// Bounds is the axis-aligned XY rectangle covering all emitted triangle
+// vertices for a map.
+type Bounds struct {
+	MinX float32 `json:"minX"`
+	MaxX float32 `json:"maxX"`
+	MinY float32 `json:"minY"`
+	MaxY float32 `json:"maxY"`
+}
+
+// LocRegion is the per-loc output record. Tris is a flat list of XY
+// pairs in world units, 6 floats per triangle. Name is the normalized
+// loc key (matching the JS side's processLocationGroups keying).
+type LocRegion struct {
+	Name string    `json:"name"`
+	Z    float32   `json:"z"`
+	Tris []float32 `json:"tris"`
+}
+
+// MapRegions is the JSON output root.
+type MapRegions struct {
+	Map     string      `json:"map"`
+	Version int         `json:"version"`
+	Bounds  Bounds      `json:"bounds"`
+	Locs    []LocRegion `json:"locs"`
+}
+
+// Stats carries per-map counters for CLI verbose logging.
+type Stats struct {
+	FacesTotal   int
+	FacesKept    int
+	FacesDropped int // kept by normal test but rejected by Z threshold
+	Locs         int
+	Triangles    int
+}
+
+// Build extracts floor geometry from bsp, assigns each floor face to the
+// nearest loc in finder, and groups them into per-loc triangle lists.
+func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) {
+	var stats Stats
+
+	result := &MapRegions{
+		Map:     mapName,
+		Version: 1,
+	}
+
+	if b == nil || finder == nil || len(b.Models) == 0 || finder.LocationCount() == 0 {
+		return result, stats
+	}
+
+	locPoints := finder.Locations()
+
+	// Only iterate worldspawn faces (model 0). Skipping other models
+	// avoids claiming door/platform brush faces which move at runtime.
+	world := b.Models[0]
+	firstFace := int(world.FirstFace)
+	endFace := firstFace + int(world.NumFaces)
+	if firstFace < 0 {
+		firstFace = 0
+	}
+	if endFace > len(b.Faces) {
+		endFace = len(b.Faces)
+	}
+
+	type keptFace struct {
+		ring [][2]float32 // XY only (Z kept separately)
+		z    float32
+	}
+
+	// Group keptFaces by normalized loc name.
+	groups := make(map[string][]keptFace)
+
+	for faceIdx := firstFace; faceIdx < endFace; faceIdx++ {
+		stats.FacesTotal++
+		face := b.Faces[faceIdx]
+
+		// Reject faces whose plane is not upward-facing enough.
+		if int(face.PlaneID) >= len(b.Planes) {
+			continue
+		}
+		plane := b.Planes[face.PlaneID]
+		normal := plane.Normal
+		if face.Side == 1 {
+			normal = negate(normal)
+		}
+		if normal.Z < floorNormalZ {
+			continue
+		}
+
+		// Assemble ring by walking surfedges → edges → vertices.
+		ring3D, ok := assembleRing(b, face)
+		if !ok || len(ring3D) < 3 {
+			continue
+		}
+
+		// Per-face centroid (in world units) and average Z.
+		var cx, cy, cz float32
+		for _, p := range ring3D {
+			cx += p.X
+			cy += p.Y
+			cz += p.Z
+		}
+		inv := 1.0 / float32(len(ring3D))
+		cx *= inv
+		cy *= inv
+		cz *= inv
+
+		// Find nearest loc with Z weighting.
+		bestIdx := -1
+		bestScore := float32(1e30)
+		for i, lp := range locPoints {
+			dx := cx - lp.X
+			dy := cy - lp.Y
+			dz := cz - lp.Z
+			score := dx*dx + dy*dy + locZWeight*dz*dz
+			if score < bestScore {
+				bestScore = score
+				bestIdx = i
+			}
+		}
+		if bestIdx < 0 {
+			continue
+		}
+		best := locPoints[bestIdx]
+		if absf(cz-best.Z) > locZReject {
+			stats.FacesDropped++
+			continue
+		}
+		stats.FacesKept++
+
+		key := NormalizeLocationName(best.Name)
+		if key == "" {
+			continue
+		}
+
+		ring2D := make([][2]float32, len(ring3D))
+		for i, p := range ring3D {
+			ring2D[i] = [2]float32{p.X, p.Y}
+		}
+		groups[key] = append(groups[key], keptFace{ring: ring2D, z: cz})
+	}
+
+	// Produce stable output: sort loc names alphabetically.
+	keys := make([]string, 0, len(groups))
+	for k := range groups {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	bounds := Bounds{MinX: 1e30, MaxX: -1e30, MinY: 1e30, MaxY: -1e30}
+	hasBounds := false
+
+	for _, k := range keys {
+		faces := groups[k]
+
+		// Median Z across this group's faces for the "z" hint.
+		zs := make([]float32, len(faces))
+		for i, f := range faces {
+			zs[i] = f.z
+		}
+		sort.Slice(zs, func(i, j int) bool { return zs[i] < zs[j] })
+		medianZ := zs[len(zs)/2]
+
+		// Fan-triangulate every face ring into a flat list.
+		var tris []float32
+		for _, f := range faces {
+			for i := 1; i+1 < len(f.ring); i++ {
+				a := f.ring[0]
+				b := f.ring[i]
+				c := f.ring[i+1]
+				tris = append(tris,
+					a[0], a[1],
+					b[0], b[1],
+					c[0], c[1],
+				)
+				if !hasBounds {
+					bounds.MinX, bounds.MaxX = a[0], a[0]
+					bounds.MinY, bounds.MaxY = a[1], a[1]
+					hasBounds = true
+				}
+				for _, p := range [3][2]float32{a, b, c} {
+					if p[0] < bounds.MinX {
+						bounds.MinX = p[0]
+					}
+					if p[0] > bounds.MaxX {
+						bounds.MaxX = p[0]
+					}
+					if p[1] < bounds.MinY {
+						bounds.MinY = p[1]
+					}
+					if p[1] > bounds.MaxY {
+						bounds.MaxY = p[1]
+					}
+				}
+				stats.Triangles++
+			}
+		}
+
+		if len(tris) == 0 {
+			continue
+		}
+		result.Locs = append(result.Locs, LocRegion{
+			Name: k,
+			Z:    medianZ,
+			Tris: tris,
+		})
+	}
+	stats.Locs = len(result.Locs)
+
+	if hasBounds {
+		result.Bounds = bounds
+	}
+	return result, stats
+}
+
+// assembleRing walks face.NumEdges surfedges starting at face.FirstEdge,
+// resolves each through the edge table, and returns the polygon ring as
+// a list of Vec3 in world units. For each surfedge the ring vertex is
+// edge.V[0] when the surfedge index is positive and edge.V[1] when it
+// is negative (Quake's standard winding convention).
+func assembleRing(b *bsp.BSP, face bsp.Face) ([]bsp.Vec3, bool) {
+	n := int(face.NumEdges)
+	if n < 3 {
+		return nil, false
+	}
+	first := int(face.FirstEdge)
+	if first < 0 || first+n > len(b.Surfedges) {
+		return nil, false
+	}
+	ring := make([]bsp.Vec3, 0, n)
+	for i := 0; i < n; i++ {
+		se := b.Surfedges[first+i]
+		var vi uint16
+		switch {
+		case se > 0:
+			if int(se) >= len(b.Edges) {
+				return nil, false
+			}
+			vi = b.Edges[se].V[0]
+		case se < 0:
+			idx := int(-se)
+			if idx >= len(b.Edges) {
+				return nil, false
+			}
+			vi = b.Edges[idx].V[1]
+		default:
+			// se == 0 references the sentinel edge; treat as forward.
+			vi = b.Edges[0].V[0]
+		}
+		if int(vi) >= len(b.Vertices) {
+			return nil, false
+		}
+		ring = append(ring, b.Vertices[vi])
+	}
+	return ring, true
+}
+
+func negate(v bsp.Vec3) bsp.Vec3 {
+	return bsp.Vec3{X: -v.X, Y: -v.Y, Z: -v.Z}
+}
+
+func absf(x float32) float32 {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
