@@ -1946,11 +1946,11 @@ function updateRegionControlTimeline(startTime, endTime) {
     if (teamALabel) teamALabel.textContent = teamA;
     if (teamBLabel) teamBLabel.textContent = teamB;
 
-    // Update legend color swatches to match strip colors exactly
+    // Update legend color swatches to match strip colors exactly. The strip
+    // only renders strong control + contested, so the weak swatches are gone
+    // from the markup and not set here.
     const setLegend = (id, color) => { const el = document.getElementById(id); if (el) el.style.background = color; };
     setLegend('rc-legend-a-ctrl', teamStrongColor(TEAM_COLORS[0]));
-    setLegend('rc-legend-a-weak', teamWeakColor(TEAM_COLORS[0]));
-    setLegend('rc-legend-b-weak', teamWeakColor(TEAM_COLORS[1]));
     setLegend('rc-legend-b-ctrl', teamStrongColor(TEAM_COLORS[1]));
 
     labelsContainer.innerHTML = '';
@@ -1973,15 +1973,17 @@ function updateRegionControlTimeline(startTime, endTime) {
     const locations = mapState.locations;
     const symbols = mapState.playerSymbols || {};
 
-    // Control state colors derived from TEAM_COLORS
+    // Control state colors derived from TEAM_COLORS. The strip deliberately
+    // only renders the "strong" states — solo control by either team and
+    // armed-vs-armed contested. The weak variants (one-side unarmed,
+    // both-sides unarmed weakContested) are tracked elsewhere on the page
+    // but excluded from the strip to keep its color story readable.
     const stateColors = {
         teamAControl:     teamStrongColor(TEAM_COLORS[0]),
-        teamAWeakControl: teamWeakColor(TEAM_COLORS[0]),
         contested:        'rgb(255, 255, 255)',
-        empty:            'transparent',
-        teamBWeakControl: teamWeakColor(TEAM_COLORS[1]),
         teamBControl:     teamStrongColor(TEAM_COLORS[1]),
     };
+    const stripVisible = new Set(['teamAControl', 'teamBControl', 'contested']);
 
     for (const region of regions) {
         // Label
@@ -2044,18 +2046,13 @@ function updateRegionControlTimeline(startTime, endTime) {
                 }
             }
 
-            const aT = aWpn + aNo, bT = bWpn + bNo;
-            let state;
-            if (aT === 0 && bT === 0) state = 'empty';
-            else if (aT > 0 && bT === 0) state = aWpn > 0 ? 'teamAControl' : 'teamAWeakControl';
-            else if (bT > 0 && aT === 0) state = bWpn > 0 ? 'teamBControl' : 'teamBWeakControl';
-            else if (aWpn > 0 && bWpn === 0) state = 'teamAControl';
-            else if (bWpn > 0 && aWpn === 0) state = 'teamBControl';
-            else state = 'contested';
+            // Single source of truth for the formula — see classifyRegionState.
+            const state = classifyRegionState(aWpn, aNo, bWpn, bNo);
 
             if (state !== currentState) {
-                // Emit previous span
-                if (currentState && currentState !== 'empty') {
+                // Emit previous span — only the visible (strong) states paint
+                // pixels; weak states render as gaps in the strip.
+                if (stripVisible.has(currentState)) {
                     addRegionSegment(strip, spanStart, bStart, startTime, duration, stateColors[currentState]);
                 }
                 currentState = state;
@@ -2063,7 +2060,7 @@ function updateRegionControlTimeline(startTime, endTime) {
             }
         }
         // Final span
-        if (currentState && currentState !== 'empty') {
+        if (stripVisible.has(currentState)) {
             addRegionSegment(strip, spanStart, endTime, startTime, duration, stateColors[currentState]);
         }
 
@@ -2668,6 +2665,33 @@ function findNearestLocation(x, y, locations) {
     return bestName;
 }
 
+// Classify region control state from per-team head counts. Single source of
+// truth for everywhere on the page that derives a state from raw presence:
+// the strip, the per-frame map overlay, the stats table, and the status panel.
+//
+// States:
+//   empty            — no living players in the region
+//   teamAControl     — team A present and team A has at least one RL/LG, AND
+//                      team B has no RL/LG holders here (B may be absent or
+//                      present but unarmed; an unarmed B player is dominated)
+//   teamAWeakControl — team A present without RL/LG and team B fully absent
+//   teamBControl / teamBWeakControl — mirror of the above
+//   contested        — both teams present AND each team has at least one
+//                      RL/LG holder here (real fight)
+//   weakContested    — both teams present, neither team has any RL/LG
+//                      (skirmish without major weapons)
+function classifyRegionState(aWpn, aNo, bWpn, bNo) {
+    const aT = aWpn + aNo, bT = bWpn + bNo;
+    if (aT === 0 && bT === 0) return 'empty';
+    if (aT > 0 && bT === 0)   return aWpn > 0 ? 'teamAControl' : 'teamAWeakControl';
+    if (bT > 0 && aT === 0)   return bWpn > 0 ? 'teamBControl' : 'teamBWeakControl';
+    // Both teams present.
+    if (aWpn > 0 && bWpn === 0) return 'teamAControl';
+    if (bWpn > 0 && aWpn === 0) return 'teamBControl';
+    if (aWpn > 0 && bWpn > 0)   return 'contested';
+    return 'weakContested';
+}
+
 // Prefer the server-resolved loc name (3D nearest, matches ezQuake exactly).
 // High-res buckets carry an integer index `li` into mapState.locTable; older
 // 1s buckets carry the resolved name in `data.location`. Falls back to the
@@ -3087,6 +3111,11 @@ function drawRegionControlOverlay(ctx, controlStates) {
             case 'contested':
                 color = 'rgba(255, 255, 255, 0.14)';
                 break;
+            case 'weakContested':
+                // Both teams present but neither has RL/LG — dimmer than
+                // contested, mirroring the weak team-control variants.
+                color = 'rgba(255, 255, 255, 0.07)';
+                break;
             default: // empty
                 continue;
         }
@@ -3489,7 +3518,7 @@ function recomputeRegionStats(regions) {
     // Initialize counters
     const counters = {};
     for (const r of regions) {
-        counters[r.name] = { aC: 0, aW: 0, con: 0, emp: 0, bW: 0, bC: 0 };
+        counters[r.name] = { aC: 0, aW: 0, con: 0, wcon: 0, emp: 0, bW: 0, bC: 0 };
     }
 
     let total = 0;
@@ -3530,14 +3559,15 @@ function recomputeRegionStats(regions) {
         for (const r of regions) {
             const p = presence[r.name];
             const c = counters[r.name];
-            const aT = p.aWpn + p.aNo, bT = p.bWpn + p.bNo;
-
-            if (aT === 0 && bT === 0) { c.emp++; }
-            else if (aT > 0 && bT === 0) { if (p.aWpn > 0) c.aC++; else c.aW++; }
-            else if (bT > 0 && aT === 0) { if (p.bWpn > 0) c.bC++; else c.bW++; }
-            else if (p.aWpn > 0 && p.bWpn === 0) { c.aC++; }
-            else if (p.bWpn > 0 && p.aWpn === 0) { c.bC++; }
-            else { c.con++; }
+            switch (classifyRegionState(p.aWpn, p.aNo, p.bWpn, p.bNo)) {
+                case 'empty':            c.emp++;  break;
+                case 'teamAControl':     c.aC++;   break;
+                case 'teamAWeakControl': c.aW++;   break;
+                case 'teamBControl':     c.bC++;   break;
+                case 'teamBWeakControl': c.bW++;   break;
+                case 'contested':        c.con++;  break;
+                case 'weakContested':    c.wcon++; break;
+            }
         }
     }
 
@@ -3550,7 +3580,8 @@ function recomputeRegionStats(regions) {
         const c = counters[r.name];
         stats[r.name] = {
             teamAControl: pct(c.aC), teamAWeakControl: pct(c.aW),
-            contested: pct(c.con), empty: pct(c.emp),
+            contested: pct(c.con), weakContested: pct(c.wcon),
+            empty: pct(c.emp),
             teamBWeakControl: pct(c.bW), teamBControl: pct(c.bC),
             teamA, teamB,
         };
@@ -3586,6 +3617,7 @@ function displayRegionControlTable(regions, stats) {
             <td style="background: ${cellBg(TEAM_COLORS[0], s.teamAControl)}">${s.teamAControl}%</td>
             <td style="background: ${cellBg(TEAM_COLORS[0], s.teamAWeakControl, 0.5)}">${s.teamAWeakControl}%</td>
             <td style="background: ${cellBg('#888', s.contested)}">${s.contested}%</td>
+            <td style="background: ${cellBg('#888', s.weakContested, 0.5)}">${s.weakContested}%</td>
             <td>${s.empty}%</td>
             <td style="background: ${cellBg(TEAM_COLORS[1], s.teamBWeakControl, 0.5)}">${s.teamBWeakControl}%</td>
             <td style="background: ${cellBg(TEAM_COLORS[1], s.teamBControl)}">${s.teamBControl}%</td>
@@ -3651,26 +3683,11 @@ function getRegionControlAtTime(time) {
         }
     }
 
-    // Determine state per region
+    // Determine state per region (single source of truth in classifyRegionState).
     const states = {};
     for (const region of mapState.controlRegions) {
         const p = presence[region.name];
-        const aTotal = p.aWpn + p.aNo;
-        const bTotal = p.bWpn + p.bNo;
-
-        if (aTotal === 0 && bTotal === 0) {
-            states[region.name] = 'empty';
-        } else if (aTotal > 0 && bTotal === 0) {
-            states[region.name] = p.aWpn > 0 ? 'teamAControl' : 'teamAWeakControl';
-        } else if (bTotal > 0 && aTotal === 0) {
-            states[region.name] = p.bWpn > 0 ? 'teamBControl' : 'teamBWeakControl';
-        } else if (p.aWpn > 0 && p.bWpn === 0) {
-            states[region.name] = 'teamAControl';
-        } else if (p.bWpn > 0 && p.aWpn === 0) {
-            states[region.name] = 'teamBControl';
-        } else {
-            states[region.name] = 'contested';
-        }
+        states[region.name] = classifyRegionState(p.aWpn, p.aNo, p.bWpn, p.bNo);
     }
     return states;
 }
@@ -4045,6 +4062,10 @@ function updateRegionStatus() {
             case 'contested':
                 statusLabel = 'Contested';
                 statusColor = '#ffffff';
+                break;
+            case 'weakContested':
+                statusLabel = 'Contested (weak)';
+                statusColor = '#bbbbbb';
                 break;
             default:
                 statusLabel = 'Empty';
