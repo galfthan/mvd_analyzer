@@ -7,6 +7,66 @@ import (
 	"math"
 )
 
+// byteSource is the minimal interface that both BinaryReader and BufferReader
+// satisfy. The shared `read*` free functions below use it so the higher-level
+// readers (ReadInt16/ReadCoord/ReadAngle/...) only have to be implemented
+// once instead of twice.
+type byteSource interface {
+	ReadByte() (byte, error)
+	ReadUint16() (uint16, error)
+	ReadUint32() (uint32, error)
+}
+
+func readInt8(s byteSource) (int8, error) {
+	b, err := s.ReadByte()
+	return int8(b), err
+}
+
+func readInt16(s byteSource) (int16, error) {
+	v, err := s.ReadUint16()
+	return int16(v), err
+}
+
+func readInt32(s byteSource) (int32, error) {
+	v, err := s.ReadUint32()
+	return int32(v), err
+}
+
+func readFloat32(s byteSource) (float32, error) {
+	v, err := s.ReadUint32()
+	if err != nil {
+		return 0, err
+	}
+	return math.Float32frombits(v), nil
+}
+
+// readCoord reads a 16-bit fixed-point coordinate (units of 1/8). This is
+// the legacy QuakeWorld coordinate format; servers using the float-coords
+// extension call readFloatCoord instead.
+func readCoord(s byteSource) (float32, error) {
+	v, err := readInt16(s)
+	if err != nil {
+		return 0, err
+	}
+	return float32(v) / 8.0, nil
+}
+
+func readAngle(s byteSource) (float32, error) {
+	b, err := s.ReadByte()
+	if err != nil {
+		return 0, err
+	}
+	return float32(b) * (360.0 / 256.0), nil
+}
+
+func readAngle16(s byteSource) (float32, error) {
+	v, err := s.ReadUint16()
+	if err != nil {
+		return 0, err
+	}
+	return float32(v) * (360.0 / 65536.0), nil
+}
+
 // BinaryReader wraps an io.Reader for reading binary data
 type BinaryReader struct {
 	r      io.Reader
@@ -48,13 +108,7 @@ func (br *BinaryReader) ReadBytes(n int) ([]byte, error) {
 	return buf, nil
 }
 
-// ReadInt8 reads a signed 8-bit integer
-func (br *BinaryReader) ReadInt8() (int8, error) {
-	b, err := br.ReadByte()
-	return int8(b), err
-}
-
-// ReadUint16 reads an unsigned 16-bit little-endian integer
+// ReadUint16 reads an unsigned 16-bit little-endian integer.
 func (br *BinaryReader) ReadUint16() (uint16, error) {
 	_, err := io.ReadFull(br.r, br.buf[:2])
 	if err != nil {
@@ -64,13 +118,7 @@ func (br *BinaryReader) ReadUint16() (uint16, error) {
 	return binary.LittleEndian.Uint16(br.buf[:2]), nil
 }
 
-// ReadInt16 reads a signed 16-bit little-endian integer
-func (br *BinaryReader) ReadInt16() (int16, error) {
-	v, err := br.ReadUint16()
-	return int16(v), err
-}
-
-// ReadUint32 reads an unsigned 32-bit little-endian integer
+// ReadUint32 reads an unsigned 32-bit little-endian integer.
 func (br *BinaryReader) ReadUint32() (uint32, error) {
 	_, err := io.ReadFull(br.r, br.buf[:4])
 	if err != nil {
@@ -80,22 +128,7 @@ func (br *BinaryReader) ReadUint32() (uint32, error) {
 	return binary.LittleEndian.Uint32(br.buf[:4]), nil
 }
 
-// ReadInt32 reads a signed 32-bit little-endian integer
-func (br *BinaryReader) ReadInt32() (int32, error) {
-	v, err := br.ReadUint32()
-	return int32(v), err
-}
-
-// ReadFloat32 reads a 32-bit IEEE 754 float
-func (br *BinaryReader) ReadFloat32() (float32, error) {
-	v, err := br.ReadUint32()
-	if err != nil {
-		return 0, err
-	}
-	return math.Float32frombits(v), nil
-}
-
-// ReadString reads a null-terminated string
+// ReadString reads a null-terminated string.
 func (br *BinaryReader) ReadString() (string, error) {
 	var result []byte
 	for {
@@ -111,37 +144,17 @@ func (br *BinaryReader) ReadString() (string, error) {
 	return string(result), nil
 }
 
-// ReadCoord reads a coordinate value (16-bit, divide by 8)
-func (br *BinaryReader) ReadCoord() (float32, error) {
-	v, err := br.ReadInt16()
-	if err != nil {
-		return 0, err
-	}
-	return float32(v) / 8.0, nil
-}
-
-// ReadFloatCoord reads a float coordinate (32-bit float)
+// The remaining typed readers all delegate to the shared free functions.
+func (br *BinaryReader) ReadInt8() (int8, error)        { return readInt8(br) }
+func (br *BinaryReader) ReadInt16() (int16, error)      { return readInt16(br) }
+func (br *BinaryReader) ReadInt32() (int32, error)      { return readInt32(br) }
+func (br *BinaryReader) ReadFloat32() (float32, error)  { return readFloat32(br) }
+func (br *BinaryReader) ReadCoord() (float32, error)    { return readCoord(br) }
 func (br *BinaryReader) ReadFloatCoord() (float32, error) {
 	return br.ReadFloat32()
 }
-
-// ReadAngle reads an angle value (8-bit, scale to degrees)
-func (br *BinaryReader) ReadAngle() (float32, error) {
-	b, err := br.ReadByte()
-	if err != nil {
-		return 0, err
-	}
-	return float32(b) * (360.0 / 256.0), nil
-}
-
-// ReadAngle16 reads a 16-bit angle value
-func (br *BinaryReader) ReadAngle16() (float32, error) {
-	v, err := br.ReadUint16()
-	if err != nil {
-		return 0, err
-	}
-	return float32(v) * (360.0 / 65536.0), nil
-}
+func (br *BinaryReader) ReadAngle() (float32, error)   { return readAngle(br) }
+func (br *BinaryReader) ReadAngle16() (float32, error) { return readAngle16(br) }
 
 // Skip skips n bytes
 func (br *BinaryReader) Skip(n int) error {
@@ -203,13 +216,7 @@ func (br *BufferReader) PeekByte() (byte, error) {
 	return br.data[br.offset], nil
 }
 
-// ReadInt8 reads a signed 8-bit integer
-func (br *BufferReader) ReadInt8() (int8, error) {
-	b, err := br.ReadByte()
-	return int8(b), err
-}
-
-// ReadUint16 reads an unsigned 16-bit little-endian integer
+// ReadUint16 reads an unsigned 16-bit little-endian integer.
 func (br *BufferReader) ReadUint16() (uint16, error) {
 	if br.offset+2 > len(br.data) {
 		return 0, io.EOF
@@ -219,13 +226,7 @@ func (br *BufferReader) ReadUint16() (uint16, error) {
 	return v, nil
 }
 
-// ReadInt16 reads a signed 16-bit little-endian integer
-func (br *BufferReader) ReadInt16() (int16, error) {
-	v, err := br.ReadUint16()
-	return int16(v), err
-}
-
-// ReadUint32 reads an unsigned 32-bit little-endian integer
+// ReadUint32 reads an unsigned 32-bit little-endian integer.
 func (br *BufferReader) ReadUint32() (uint32, error) {
 	if br.offset+4 > len(br.data) {
 		return 0, io.EOF
@@ -235,22 +236,7 @@ func (br *BufferReader) ReadUint32() (uint32, error) {
 	return v, nil
 }
 
-// ReadInt32 reads a signed 32-bit little-endian integer
-func (br *BufferReader) ReadInt32() (int32, error) {
-	v, err := br.ReadUint32()
-	return int32(v), err
-}
-
-// ReadFloat32 reads a 32-bit IEEE 754 float
-func (br *BufferReader) ReadFloat32() (float32, error) {
-	v, err := br.ReadUint32()
-	if err != nil {
-		return 0, err
-	}
-	return math.Float32frombits(v), nil
-}
-
-// ReadString reads a null-terminated string
+// ReadString reads a null-terminated string.
 func (br *BufferReader) ReadString() (string, error) {
 	start := br.offset
 	for br.offset < len(br.data) {
@@ -264,37 +250,17 @@ func (br *BufferReader) ReadString() (string, error) {
 	return "", fmt.Errorf("unterminated string at offset %d", start)
 }
 
-// ReadCoord reads a coordinate value (16-bit, divide by 8)
-func (br *BufferReader) ReadCoord() (float32, error) {
-	v, err := br.ReadInt16()
-	if err != nil {
-		return 0, err
-	}
-	return float32(v) / 8.0, nil
-}
-
-// ReadFloatCoord reads a float coordinate (32-bit float)
+// The remaining typed readers all delegate to the shared free functions.
+func (br *BufferReader) ReadInt8() (int8, error)         { return readInt8(br) }
+func (br *BufferReader) ReadInt16() (int16, error)       { return readInt16(br) }
+func (br *BufferReader) ReadInt32() (int32, error)       { return readInt32(br) }
+func (br *BufferReader) ReadFloat32() (float32, error)   { return readFloat32(br) }
+func (br *BufferReader) ReadCoord() (float32, error)     { return readCoord(br) }
 func (br *BufferReader) ReadFloatCoord() (float32, error) {
 	return br.ReadFloat32()
 }
-
-// ReadAngle reads an angle value (8-bit, scale to degrees)
-func (br *BufferReader) ReadAngle() (float32, error) {
-	b, err := br.ReadByte()
-	if err != nil {
-		return 0, err
-	}
-	return float32(b) * (360.0 / 256.0), nil
-}
-
-// ReadAngle16 reads a 16-bit angle value
-func (br *BufferReader) ReadAngle16() (float32, error) {
-	v, err := br.ReadUint16()
-	if err != nil {
-		return 0, err
-	}
-	return float32(v) * (360.0 / 65536.0), nil
-}
+func (br *BufferReader) ReadAngle() (float32, error)   { return readAngle(br) }
+func (br *BufferReader) ReadAngle16() (float32, error) { return readAngle16(br) }
 
 // Skip skips n bytes
 func (br *BufferReader) Skip(n int) error {

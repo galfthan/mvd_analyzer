@@ -65,8 +65,8 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	}
 
 	// Convert raw frag events to final events with player and team info
-	fragEvents := make([]TimelineFragEvent, 0, len(a.fragEventsRaw))
-	for _, raw := range a.fragEventsRaw {
+	fragEvents := make([]TimelineFragEvent, 0, len(a.rawFrags))
+	for _, raw := range a.rawFrags {
 		// Prefer the demoinfo-resolved name (via slotToPlayer) so the
 		// emitted player name matches what the timeline buckets and the
 		// frontend's demoinfo-keyed Team Status panel expect. Fall back to

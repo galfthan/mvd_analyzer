@@ -26,12 +26,12 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, nameToTeam map[string]str
 	spawnsByName := make(map[string][]float64)
 	deathsByName := make(map[string][]float64)
 
-	for _, s := range a.spawnEventsRaw {
+	for _, s := range a.rawSpawns {
 		if name := slotName(s.PlayerNum); name != "" {
 			spawnsByName[name] = append(spawnsByName[name], s.Time)
 		}
 	}
-	for _, d := range a.deathEventsRaw {
+	for _, d := range a.rawDeaths {
 		if name := slotName(d.PlayerNum); name != "" {
 			deathsByName[name] = append(deathsByName[name], d.Time)
 		}

@@ -216,17 +216,29 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 	return nil
 }
 
-// parseHiddenMessage parses hidden messages (dem_multiple with player_mask=0)
+// parseHiddenMessage parses hidden messages (dem_multiple with player_mask=0).
+//
+// Hidden messages are a sequence of length-prefixed blocks. The function
+// reports two distinct failure modes through warn() so they're separable in
+// the diagnostic feed:
+//
+//   - "parse_error" → garbage we can't recover from (truncated block header,
+//     out-of-range length, sub-parser failure). We stop parsing this hidden
+//     message and return; subsequent hidden messages still parse normally.
+//   - graceful EOF when r.Remaining() drops to 0 between blocks is the
+//     expected end of the message and is NOT logged.
 func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
-	// Hidden messages contain structured metadata
 	r := mvd.NewBufferReader(msg.Payload)
 	time := msg.Time
 
 	for r.Remaining() > 0 {
-		// Read block length (4 bytes)
+		// Read block length (4 bytes). EOF here mid-stream means the
+		// final block header was truncated — that's a parse error, not a
+		// clean end (the loop condition would have caught a clean end).
 		blockLen, err := r.ReadUint32()
 		if err != nil {
-			return nil // End of data
+			p.warn(time, "parse_error", "hidden block: truncated length header (%v)", err)
+			return nil
 		}
 		if blockLen < 2 || blockLen > maxHiddenBlockSize {
 			p.warn(time, "parse_error", "hidden block with invalid length %d", blockLen)
@@ -259,6 +271,7 @@ func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 			p.warn(time, "unknown_hidden", "unknown hidden message type 0x%04x, %d bytes skipped", typeID, dataLen)
 			if dataLen > 0 {
 				if err := r.Skip(dataLen); err != nil {
+					p.warn(time, "parse_error", "hidden block 0x%04x: skip past end of payload (%v)", typeID, err)
 					return nil
 				}
 			}

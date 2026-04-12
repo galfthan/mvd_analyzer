@@ -26,24 +26,24 @@ type TimelineAnalyzer struct {
 	playerNames         map[int]string // Slot -> player name (from UserInfoEvent)
 	playerUserIDs       map[int]int    // Slot -> UserID (for Hub viewer track param)
 	buckets             []*timelineBucketData
-	fragEventsRaw       []fragEventRaw  // Raw frag events (player num, time)
-	deathEventsRaw      []deathEventRaw // Raw death events (player num, time)
-	spawnEventsRaw      []deathEventRaw // Raw spawn events (reusing deathEventRaw type)
+	rawFrags       []fragEvent  // Raw frag events (player num, time)
+	rawDeaths      []deathEvent // Raw death events (player num, time)
+	rawSpawns      []deathEvent // Raw spawn events (reusing deathEvent type)
 	lastSampleTime      float64
 	matchStartTime      float64
 	matchStarted        bool
 	locFinder           *loc.Finder // Location finder for map (nil if no .loc file)
 }
 
-// fragEventRaw tracks a frag before team assignment
-type fragEventRaw struct {
+// fragEvent tracks a frag before team assignment
+type fragEvent struct {
 	Time      float64
 	PlayerNum int
 	Delta     int // +N for kills, -N for suicides/teamkills
 }
 
-// deathEventRaw tracks a player death (detected via health transition)
-type deathEventRaw struct {
+// deathEvent tracks a player death (detected via health transition)
+type deathEvent struct {
 	Time      float64
 	PlayerNum int
 }
@@ -198,7 +198,7 @@ func (a *TimelineAnalyzer) handleFragUpdate(e *parser.FragUpdateEvent) {
 		// the correct cumulative delta (e.g., corrupt reads 9→272, correction
 		// reads 272→10, but by keeping state at 9 the correction gives delta +1).
 		if delta >= -5 && delta <= 5 {
-			a.fragEventsRaw = append(a.fragEventsRaw, fragEventRaw{
+			a.rawFrags = append(a.rawFrags, fragEvent{
 				Time:      e.Time,
 				PlayerNum: e.PlayerNum,
 				Delta:     delta,
@@ -276,13 +276,13 @@ func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 
 		// Record death/spawn events for frag streak calculation
 		if isDeathFrame {
-			a.deathEventsRaw = append(a.deathEventsRaw, deathEventRaw{
+			a.rawDeaths = append(a.rawDeaths, deathEvent{
 				Time:      time,
 				PlayerNum: slot,
 			})
 		}
 		if isSpawnFrame {
-			a.spawnEventsRaw = append(a.spawnEventsRaw, deathEventRaw{
+			a.rawSpawns = append(a.rawSpawns, deathEvent{
 				Time:      time,
 				PlayerNum: slot,
 			})
