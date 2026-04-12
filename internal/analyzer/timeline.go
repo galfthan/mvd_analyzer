@@ -1270,6 +1270,12 @@ var mapCustomRegions = map[string][]customRegion{
 	// DM3 — The Abandoned Base
 	"dm3": {
 		{name: "YA", locNames: []string{"YA", "YA.box", "YA.up"}},
+		// RA region excludes RA.tunnel — it's the lower passageway beneath
+		// the RA platform and shouldn't count as RA control. RA.tunnel is
+		// consumed by its own one-loc region below so it doesn't collide
+		// with the auto-detected "RA" cluster name.
+		{name: "RA", locNames: []string{"RA", "RA.low", "RA.rox", "RA.entry"}},
+		{name: "RA Tunnel", locNames: []string{"RA.tunnel"}},
 	},
 	// DM2 — The Claustrophobopolis
 	"dm2": {
