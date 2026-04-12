@@ -9,12 +9,6 @@ import (
 	"github.com/mvd-analyzer/internal/parser"
 )
 
-// Default bucket durations
-const (
-	DefaultHighResBucketDuration = 0.05 // 50ms for high-res map visualization
-	DefaultGraphBucketDuration   = 1.0  // 1 second for graph aggregation
-)
-
 // TimelineAnalyzer tracks time-bucketed player state for timeline visualization
 type TimelineAnalyzer struct {
 	ctx                 *Context
@@ -99,7 +93,7 @@ func NewTimelineAnalyzer() *TimelineAnalyzer {
 		playerState:         make(map[int]*timelinePlayerState),
 		playerNames:         make(map[int]string),
 		playerUserIDs:       make(map[int]int),
-		buckets:             make([]*timelineBucketData, 0, 24000), // Pre-alloc for 20min @ 50ms
+		buckets:             make([]*timelineBucketData, 0, timelineBucketPrealloc),
 	}
 }
 
@@ -913,6 +907,18 @@ func sum(values []int) int {
 	return s
 }
 
+// powerupKinds is the table of powerups the timeline analyzer tracks. Adding
+// a new powerup here is enough to surface it in PowerupEvent output — no
+// switch statements to update.
+var powerupKinds = []struct {
+	name string
+	has  func(*playerBucketRawData) bool
+}{
+	{"quad", func(p *playerBucketRawData) bool { return p.hasQuad }},
+	{"pent", func(p *playerBucketRawData) bool { return p.hasPent }},
+	{"ring", func(p *playerBucketRawData) bool { return p.hasRing }},
+}
+
 // detectPowerupEvents scans buckets for powerup pickup/loss transitions
 func (a *TimelineAnalyzer) detectPowerupEvents(nameToTeam map[string]string, slotToTeam map[int]string, slotToPlayer map[int]string) []PowerupEvent {
 	if len(a.buckets) == 0 {
@@ -920,16 +926,6 @@ func (a *TimelineAnalyzer) detectPowerupEvents(nameToTeam map[string]string, slo
 	}
 
 	events := []PowerupEvent{}
-
-	type powerupInfo struct {
-		field string
-		name  string
-	}
-	powerupTypes := []powerupInfo{
-		{"hasQuad", "quad"},
-		{"hasPent", "pent"},
-		{"hasRing", "ring"},
-	}
 
 	// Track active powerups per player slot per type
 	// Map: slot -> powerupType -> startTime (0 if not active)
@@ -941,28 +937,18 @@ func (a *TimelineAnalyzer) detectPowerupEvents(nameToTeam map[string]string, slo
 				activeRuns[slot] = make(map[string]float64)
 			}
 
-			// Check each powerup type
-			for _, pt := range powerupTypes {
-				var hasIt bool
-				switch pt.field {
-				case "hasQuad":
-					hasIt = pData.hasQuad
-				case "hasPent":
-					hasIt = pData.hasPent
-				case "hasRing":
-					hasIt = pData.hasRing
-				}
-
-				startTime := activeRuns[slot][pt.name]
+			for _, pk := range powerupKinds {
+				hasIt := pk.has(pData)
+				startTime := activeRuns[slot][pk.name]
 
 				if hasIt && startTime == 0 {
 					// Powerup just picked up
-					activeRuns[slot][pt.name] = bucket.startTime
+					activeRuns[slot][pk.name] = bucket.startTime
 				} else if !hasIt && startTime > 0 {
 					// Powerup just lost
-					event := a.createPowerupEvent(slot, pt.name, startTime, bucket.startTime, nameToTeam, slotToTeam, slotToPlayer)
+					event := a.createPowerupEvent(slot, pk.name, startTime, bucket.startTime, nameToTeam, slotToTeam, slotToPlayer)
 					events = append(events, event)
-					activeRuns[slot][pt.name] = 0
+					activeRuns[slot][pk.name] = 0
 				}
 			}
 		}

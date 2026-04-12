@@ -2,57 +2,69 @@ package analyzer
 
 import "strings"
 
-// killerSuffixes is the union of weapon-attribution suffixes that can appear
-// after a killer name in a QuakeWorld obituary line. Quad variants must come
-// before their non-quad equivalents so that "X's quad rocket" doesn't match
-// "X's quad" + " rocket" by accident.
+// obituaryWeapon describes one weapon family that can attribute a kill in a
+// QuakeWorld obituary line. Each entry lists the trailing forms that the
+// server prints; extractKillerName walks these in order and matches the
+// first one that lands inside the input.
 //
-// This list is the single source of truth for both the FragAnalyzer
-// (internal/analyzer/frag.go) and the MessagesAnalyzer
-// (internal/analyzer/messages.go); historically each had its own slightly
-// different copy.
-var killerSuffixes = []string{
-	// Quad variants (must come first)
-	"'s quad shaft",
-	"'s quad lightning",
-	"'s quad rocket",
-	"'s quad pineapple",
-	"'s quad boomstick",
-	"'s quad grenade",
-	"'s quad axe",
-	// Regular variants
-	"'s shaft",
-	"'s lightning",
-	"'s rocket",
-	"'s pineapple",
-	"'s boomstick",
-	"'s grenade",
-	"'s axe",
-	// Less common weapon variants used by the messages parser
-	"'s buckshot",
-	"'s discharge",
-	"'s batteries",
-	// Apostrophe-only forms (player names ending in 's', e.g. "Cas")
-	"' fall",
-	"'s fall",
-	"' buckshot",
-	"' rocket",
-	"' grenade",
-	"' discharge",
+// Quad variants must be scanned before their non-quad equivalents at the
+// table level (see killerSuffixes below) so that "X's quad rocket" never
+// matches "X's quad" + " rocket" by accident.
+type obituaryWeapon struct {
+	weapon       string   // canonical short code: "rl", "lg", "ssg", ...
+	suffixes     []string // non-quad tails
+	quadSuffixes []string // quad tails (assigned to the same weapon)
 }
 
-// quadOnlySuffixes are quad-specific tail strings used by stripQuadSuffix to
-// peel quad annotation off names that have already been extracted by some
-// other means (e.g. the "rockets from <name>" path in the frag parser).
-var quadOnlySuffixes = []string{
-	"'s quad rocket",
-	"'s quad shaft",
-	"'s quad lightning",
-	"'s quad pineapple",
-	"'s quad boomstick",
-	"'s quad grenade",
-	"'s quad axe",
-	"'s quad",
+// obituaryWeapons is the single source of truth for which obituary suffix
+// belongs to which weapon. Both the FragAnalyzer and the MessagesAnalyzer
+// use this table; previously each had its own near-duplicate list.
+//
+// (The weapon attribution itself isn't consumed by extractKillerName today —
+// that information lives in the per-pattern killPatterns table in
+// messages.go and frag.go — but keeping the suffix list grouped by weapon
+// makes it obvious where to add a new variant when one shows up in a demo.)
+var obituaryWeapons = []obituaryWeapon{
+	{weapon: "rl", suffixes: []string{"'s rocket", "'s pineapple", "' rocket"}, quadSuffixes: []string{"'s quad rocket", "'s quad pineapple"}},
+	{weapon: "lg", suffixes: []string{"'s shaft", "'s lightning", "'s discharge", "' discharge"}, quadSuffixes: []string{"'s quad shaft", "'s quad lightning"}},
+	{weapon: "gl", suffixes: []string{"'s grenade", "' grenade"}, quadSuffixes: []string{"'s quad grenade"}},
+	{weapon: "ssg", suffixes: []string{"'s boomstick", "'s buckshot", "' buckshot"}, quadSuffixes: []string{"'s quad boomstick"}},
+	{weapon: "axe", suffixes: []string{"'s axe"}, quadSuffixes: []string{"'s quad axe"}},
+	{weapon: "ng", suffixes: []string{"'s batteries"}},
+	{weapon: "fall", suffixes: []string{"'s fall", "' fall"}},
+}
+
+// killerSuffixes is the flat suffix list extracted from obituaryWeapons in
+// the order extractKillerName needs to scan them: every quad variant first
+// (so "X's quad rocket" matches before "X's rocket" can), then every
+// non-quad variant.
+var killerSuffixes = buildKillerSuffixes()
+
+func buildKillerSuffixes() []string {
+	var out []string
+	for _, w := range obituaryWeapons {
+		out = append(out, w.quadSuffixes...)
+	}
+	for _, w := range obituaryWeapons {
+		out = append(out, w.suffixes...)
+	}
+	return out
+}
+
+// quadOnlySuffixes are the quad-specific tail strings used by stripQuadSuffix
+// to peel quad annotation off names that have already been extracted by some
+// other means (e.g. the "rockets from <name>" path in the frag parser). The
+// generic "'s quad" sentinel comes last so it only fires when no longer
+// variant matched.
+var quadOnlySuffixes = buildQuadOnlySuffixes()
+
+func buildQuadOnlySuffixes() []string {
+	var out []string
+	for _, w := range obituaryWeapons {
+		out = append(out, w.quadSuffixes...)
+	}
+	out = append(out, "'s quad")
+	return out
 }
 
 // extractKillerName trims a known weapon suffix off the tail of an obituary

@@ -27,6 +27,12 @@ const (
 	EventDemoInfo
 )
 
+// maxHiddenBlockSize caps the length of a single hidden-message block
+// (dem_multiple with player_mask=0). The largest legitimate block in the
+// wild is the demoinfo JSON dump, which fits comfortably under 10 KB; any
+// larger value is treated as corruption rather than a real block.
+const maxHiddenBlockSize = 10000
+
 // Handler is called for each parsed event
 type Handler func(event Event) error
 
@@ -222,7 +228,7 @@ func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 		if err != nil {
 			return nil // End of data
 		}
-		if blockLen < 2 || blockLen > 10000 {
+		if blockLen < 2 || blockLen > maxHiddenBlockSize {
 			p.warn(time, "parse_error", "hidden block with invalid length %d", blockLen)
 			return nil
 		}
