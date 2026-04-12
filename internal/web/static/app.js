@@ -4277,12 +4277,12 @@ function precomputeFullTrails() {
 // without needing to also draw a label.
 const DEATH_X_DURATION = 2.0;
 function drawDeathX(ctx, x, y, teamIdx, alpha) {
-    const r = 13; // matches the player symbol circle radius (assignPlayerSymbols)
+    const r = 8; // a bit smaller than the player symbol circle (radius 13)
     const hex = TEAM_COLORS[teamIdx] || '#ff5050';
     const [rr, gg, bb] = hexToRgb(hex);
     ctx.save();
     ctx.strokeStyle = `rgba(${rr}, ${gg}, ${bb}, ${alpha.toFixed(2)})`;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(x - r, y - r);
