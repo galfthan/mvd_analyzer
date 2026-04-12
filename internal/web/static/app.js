@@ -2764,6 +2764,9 @@ function processLocationGroups(locations) {
         }
     }
 
+    // Cache normalized-name → group lookup for per-frame occupancy highlighting.
+    mapState.locationGroupByName = groups;
+
     return Object.values(groups);
 }
 
@@ -2962,6 +2965,60 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
     }
 }
 
+// Compute the set of loc-group names currently occupied by at least one
+// living player at this bucket. Tries data.location first (only present on
+// 1s buckets) and falls back to nearest-loc lookup for high-res buckets.
+function computeOccupiedGroupNames(playerData) {
+    const occupied = new Set();
+    if (!playerData) return occupied;
+    const locations = mapState.locations;
+    for (const data of Object.values(playerData)) {
+        if (!data) continue;
+        if (data.d || (data.h !== undefined && data.h <= 0)) continue;
+        if (data.health !== undefined && data.health <= 0) continue;
+        if (data.x === 0 && data.y === 0) continue;
+        let locName = data.location;
+        if (!locName && locations && locations.length) {
+            locName = findNearestLocation(data.x, data.y, locations);
+        }
+        if (!locName) continue;
+        occupied.add(normalizeLocationName(locName));
+    }
+    return occupied;
+}
+
+// Highlight loc regions that contain at least one player. Drawn on top of
+// the prerendered background and the team-control tint, so the player's
+// current region is always identifiable at a glance.
+function drawOccupiedRegionsOverlay(ctx, playerData) {
+    const groupsByName = mapState.locationGroupByName;
+    if (!groupsByName) return;
+    const occupied = computeOccupiedGroupNames(playerData);
+    if (occupied.size === 0) return;
+
+    // Brighter outline pass.
+    for (const name of occupied) {
+        const group = groupsByName[name];
+        if (!group || !group.tris || group.tris.length < 6) continue;
+        drawLocationRegionOutline(ctx, group, worldToCanvasNew, 'rgba(255, 255, 255, 0.85)', 1.5);
+    }
+
+    // Bold label pass — draw over the dimmer prerendered label so it pops.
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (const name of occupied) {
+        const group = groupsByName[name];
+        if (!group) continue;
+        const pos = worldToCanvasNew(group.centroid.x, group.centroid.y);
+        // Soft shadow so the label stays legible against any underlying tint.
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+        ctx.fillText(group.name, pos.x + 1, pos.y + 1);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.fillText(group.name, pos.x, pos.y);
+    }
+}
+
 // Draw control overlay for regions based on current control state
 function drawRegionControlOverlay(ctx, controlStates) {
 
@@ -2973,19 +3030,19 @@ function drawRegionControlOverlay(ctx, controlStates) {
         let color;
         switch (state) {
             case 'teamAControl':
-                color = hexToRgba(TEAM_COLORS[0], 0.15);
+                color = hexToRgba(TEAM_COLORS[0], 0.24);
                 break;
             case 'teamAWeakControl':
-                color = hexToRgba(TEAM_COLORS[0], 0.08);
+                color = hexToRgba(TEAM_COLORS[0], 0.14);
                 break;
             case 'teamBControl':
-                color = hexToRgba(TEAM_COLORS[1], 0.15);
+                color = hexToRgba(TEAM_COLORS[1], 0.24);
                 break;
             case 'teamBWeakControl':
-                color = hexToRgba(TEAM_COLORS[1], 0.08);
+                color = hexToRgba(TEAM_COLORS[1], 0.14);
                 break;
             case 'contested':
-                color = 'rgba(255, 255, 255, 0.08)';
+                color = 'rgba(255, 255, 255, 0.14)';
                 break;
             default: // empty
                 continue;
@@ -4153,6 +4210,13 @@ function renderMap(time) {
         if (controlStates) {
             drawRegionControlOverlay(ctx, controlStates);
         }
+    }
+
+    // Highlight regions that currently contain at least one player so the
+    // viewer can tell which loc each symbol belongs to without squinting.
+    const occupancyData = bucket ? (bucket.p || bucket.playerData) : null;
+    if (occupancyData) {
+        drawOccupiedRegionsOverlay(ctx, occupancyData);
     }
 
     // Draw tracks (per-player visibility controlled by enabledPlayers)
