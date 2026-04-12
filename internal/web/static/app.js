@@ -2425,11 +2425,18 @@ function updateScoreTimeline(startTime, endTime) {
     if (yTop) yTop.textContent = `+${maxDiff}`;
     if (yBottom) yBottom.textContent = `-${maxDiff}`;
 
-    // Update legend team names
+    // Update legend team names + color them in the team identity colors so
+    // the legend agrees with the bars below.
     const legendA = document.getElementById('legend-score-team-a');
     const legendB = document.getElementById('legend-score-team-b');
-    if (legendA) legendA.textContent = `${teams[0]} leading ↑`;
-    if (legendB) legendB.textContent = `${teams[1]} leading ↓`;
+    if (legendA) {
+        legendA.textContent = `${teams[0]} leading ↑`;
+        legendA.style.color = TEAM_COLORS[0];
+    }
+    if (legendB) {
+        legendB.textContent = `${teams[1]} leading ↓`;
+        legendB.style.color = TEAM_COLORS[1];
+    }
 
     // Calculate dynamic bucket duration based on selection
     const selectionDuration = endTime - startTime;
@@ -2438,6 +2445,13 @@ function updateScoreTimeline(startTime, endTime) {
 
     const numBuckets = Math.ceil((endTime - startTime) / bucketDuration);
     const barHeight = 90; // pixels for max value
+
+    // Precompute per-team fill colors once so the per-bucket loop stays cheap
+    // and the bars always match TEAM_COLORS without going through the CSS.
+    const [rA, gA, bA] = hexToRgb(TEAM_COLORS[0]);
+    const [rB, gB, bB] = hexToRgb(TEAM_COLORS[1]);
+    const teamAFill = `rgba(${rA}, ${gA}, ${bA}, 0.8)`;
+    const teamBFill = `rgba(${rB}, ${gB}, ${bB}, 0.8)`;
 
     for (let i = 0; i < numBuckets; i++) {
         const bucketStart = startTime + i * bucketDuration;
@@ -2463,10 +2477,12 @@ function updateScoreTimeline(startTime, endTime) {
         const heightPx = heightPct * barHeight;
 
         if (bucketScore > 0) {
-            fill.classList.add('positive');
+            fill.style.background = teamAFill;
+            fill.classList.add('positive'); // legacy class kept for layout (top/bottom anchoring in CSS)
             fill.style.height = `${heightPx}px`;
         } else if (bucketScore < 0) {
-            fill.classList.add('negative');
+            fill.style.background = teamBFill;
+            fill.classList.add('negative'); // legacy class kept for layout (top/bottom anchoring in CSS)
             fill.style.height = `${heightPx}px`;
         }
 
@@ -2578,7 +2594,11 @@ function updateTeamStatus() {
         const hubInfo = currentResult?.hubInfo;
         const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
 
-        let html = `<h4>${team} — ${teamFrags} frags</h4>`;
+        // Color the team name + frag header in the team's identity color so
+        // the two sides are visually distinct at a glance and match the
+        // colors used everywhere else (map legend, score timeline, etc.).
+        const teamColor = TEAM_COLORS[ti] || '#ccc';
+        let html = `<h4 style="color: ${teamColor}">${escapeHtml(team)} — ${teamFrags} frags</h4>`;
         html += `<table class="team-status-table">`;
         html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th><th>View</th></tr>`;
 
