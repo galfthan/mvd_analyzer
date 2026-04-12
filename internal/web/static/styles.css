@@ -1186,17 +1186,15 @@ table tbody tr:hover {
     position: absolute;
     left: 0;
     right: 0;
-    background: rgba(255, 100, 100, 0.8);
+    /* background-color set inline by updateScoreTimeline from TEAM_COLORS */
 }
 
 .score-bar-fill.positive {
-    bottom: 50%;
-    background: rgba(100, 200, 255, 0.8);
+    bottom: 50%; /* grows up from the zero line */
 }
 
 .score-bar-fill.negative {
-    top: 50%;
-    background: rgba(255, 100, 100, 0.8);
+    top: 50%;    /* grows down from the zero line */
 }
 
 #time-range-label {

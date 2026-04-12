@@ -2425,11 +2425,18 @@ function updateScoreTimeline(startTime, endTime) {
     if (yTop) yTop.textContent = `+${maxDiff}`;
     if (yBottom) yBottom.textContent = `-${maxDiff}`;
 
-    // Update legend team names
+    // Update legend team names + color them in the team identity colors so
+    // the legend agrees with the bars below.
     const legendA = document.getElementById('legend-score-team-a');
     const legendB = document.getElementById('legend-score-team-b');
-    if (legendA) legendA.textContent = `${teams[0]} leading ↑`;
-    if (legendB) legendB.textContent = `${teams[1]} leading ↓`;
+    if (legendA) {
+        legendA.textContent = `${teams[0]} leading ↑`;
+        legendA.style.color = TEAM_COLORS[0];
+    }
+    if (legendB) {
+        legendB.textContent = `${teams[1]} leading ↓`;
+        legendB.style.color = TEAM_COLORS[1];
+    }
 
     // Calculate dynamic bucket duration based on selection
     const selectionDuration = endTime - startTime;
@@ -2438,6 +2445,13 @@ function updateScoreTimeline(startTime, endTime) {
 
     const numBuckets = Math.ceil((endTime - startTime) / bucketDuration);
     const barHeight = 90; // pixels for max value
+
+    // Precompute per-team fill colors once so the per-bucket loop stays cheap
+    // and the bars always match TEAM_COLORS without going through the CSS.
+    const [rA, gA, bA] = hexToRgb(TEAM_COLORS[0]);
+    const [rB, gB, bB] = hexToRgb(TEAM_COLORS[1]);
+    const teamAFill = `rgba(${rA}, ${gA}, ${bA}, 0.8)`;
+    const teamBFill = `rgba(${rB}, ${gB}, ${bB}, 0.8)`;
 
     for (let i = 0; i < numBuckets; i++) {
         const bucketStart = startTime + i * bucketDuration;
@@ -2463,10 +2477,12 @@ function updateScoreTimeline(startTime, endTime) {
         const heightPx = heightPct * barHeight;
 
         if (bucketScore > 0) {
-            fill.classList.add('positive');
+            fill.style.background = teamAFill;
+            fill.classList.add('positive'); // legacy class kept for layout (top/bottom anchoring in CSS)
             fill.style.height = `${heightPx}px`;
         } else if (bucketScore < 0) {
-            fill.classList.add('negative');
+            fill.style.background = teamBFill;
+            fill.classList.add('negative'); // legacy class kept for layout (top/bottom anchoring in CSS)
             fill.style.height = `${heightPx}px`;
         }
 
@@ -2578,7 +2594,11 @@ function updateTeamStatus() {
         const hubInfo = currentResult?.hubInfo;
         const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
 
-        let html = `<h4>${team} — ${teamFrags} frags</h4>`;
+        // Color the team name + frag header in the team's identity color so
+        // the two sides are visually distinct at a glance and match the
+        // colors used everywhere else (map legend, score timeline, etc.).
+        const teamColor = TEAM_COLORS[ti] || '#ccc';
+        let html = `<h4 style="color: ${teamColor}">${escapeHtml(team)} — ${teamFrags} frags</h4>`;
         html += `<table class="team-status-table">`;
         html += `<tr><th>Player</th><th>Frags</th><th>Health</th><th>Armor</th><th>Weapons</th><th>View</th></tr>`;
 
@@ -4189,6 +4209,9 @@ function prerenderLocationBackground() {
 // Stores canvas-coordinate points with timestamps and teleport flags.
 function precomputeFullTrails() {
     mapState.fullTrails = {};
+    // Sorted-by-time list of death frames in canvas space, used by renderMap
+    // to draw a fading red "X" at the death location for a couple of seconds.
+    mapState.deathEvents = [];
     const buckets = timelineState.highResBuckets;
     if (!buckets || buckets.length === 0) return;
 
@@ -4213,6 +4236,14 @@ function precomputeFullTrails() {
 
             const isDeath = !!data.d;
             const isSpawn = !!data.sp;
+
+            // Death frames also get added to the standalone deathEvents list
+            // so renderMap can find them without scanning every player trail.
+            // teamIdx is captured so the X is painted in the dead player's
+            // own team color rather than a generic red.
+            if (isDeath) {
+                mapState.deathEvents.push({ t, x: pos.x, y: pos.y, teamIdx: symbolInfo.teamIdx });
+            }
 
             // Always include death/spawn markers regardless of pixel distance
             if (!isDeath && !isSpawn) {
@@ -4239,6 +4270,27 @@ function precomputeFullTrails() {
         mapState.enabledPlayers[name] = false;
         mapState.trailStartTimes[name] = 0;
     }
+}
+
+// Stroke a fading "X" at a death location, sized to match the player circle.
+// Color is the dead player's team color so kills are immediately attributable
+// without needing to also draw a label.
+const DEATH_X_DURATION = 2.0;
+function drawDeathX(ctx, x, y, teamIdx, alpha) {
+    const r = 8; // a bit smaller than the player symbol circle (radius 13)
+    const hex = TEAM_COLORS[teamIdx] || '#ff5050';
+    const [rr, gg, bb] = hexToRgb(hex);
+    ctx.save();
+    ctx.strokeStyle = `rgba(${rr}, ${gg}, ${bb}, ${alpha.toFixed(2)})`;
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - r, y - r);
+    ctx.lineTo(x + r, y + r);
+    ctx.moveTo(x + r, y - r);
+    ctx.lineTo(x - r, y + r);
+    ctx.stroke();
+    ctx.restore();
 }
 
 function renderMap(time) {
@@ -4310,6 +4362,20 @@ function renderMap(time) {
                     drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, 14, 5);
                 }
             }
+        }
+    }
+
+    // Recent-death markers — drawn last so the X sits on top of everything
+    // else and stays visible for DEATH_X_DURATION seconds, fading linearly.
+    // Linear scan is fine: a long match has on the order of 100-200 deaths
+    // and this loop runs at most once per bucket tick.
+    const deaths = mapState.deathEvents;
+    if (deaths && deaths.length > 0) {
+        for (const e of deaths) {
+            const dt = time - e.t;
+            if (dt < 0 || dt > DEATH_X_DURATION) continue;
+            const alpha = 1 - dt / DEATH_X_DURATION;
+            drawDeathX(ctx, e.x, e.y, e.teamIdx, alpha);
         }
     }
 }
