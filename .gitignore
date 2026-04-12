@@ -1,2 +1,6 @@
 dist/
 *.wasm
+
+# Local working directory for cmd/mapgen — community BSP downloads (~1.5 GB).
+# Only the generated JSON under internal/web/static/maps/ is committed.
+maps/
