@@ -40,18 +40,16 @@ type deathEventRaw struct {
 	PlayerNum int
 }
 
-// timelinePlayerState tracks current state for a single player
+// timelinePlayerState tracks current state for a single player as the
+// parser walks the demo. items is the raw item bitfield from svc_updatestat;
+// it's decoded into weapons/powerups/armor type at sampling time.
 type timelinePlayerState struct {
-	items      int // Current items (weapons, powerups, armor type)
-	health     int
-	prevHealth int // Previous sample's health, for detecting death/spawn transitions
-	armor      int
-	shells     int
-	nails      int
-	rockets    int
-	cells      int
-	frags      int // Current frag count
-	x, y, z    float32 // Last known position
+	items      int // raw item bitfield (weapons, powerups, armor type)
+	vitals     vitals
+	prevHealth int // previous sample's health, for death/spawn edge detection
+	ammo       ammoCounts
+	pos        playerPosition
+	frags      int
 }
 
 // timelineBucketData holds raw aggregated data during analysis
@@ -61,28 +59,21 @@ type timelineBucketData struct {
 	playerData map[int]*playerBucketRawData // Keyed by slot
 }
 
-// playerBucketRawData holds per-player data for a bucket
+// playerBucketRawData holds per-player data for a single high-res bucket.
+// Sub-structs (weapons, powerups, vitals, ammo, pos) are shared with
+// playerWindowAggregate so the aggregation loop can copy whole groups at a
+// time.
 type playerBucketRawData struct {
-	name      string
-	team      string
-	hasRL     bool
-	hasLG     bool
-	hasSSG    bool
-	hasSNG    bool
-	hasQuad   bool
-	hasPent   bool
-	hasRing   bool
-	health    int
-	armor     int
-	armorType string // "ga"/"ya"/"ra"
-	shells    int
-	nails     int
-	rockets   int
-	cells     int
-	x, y, z   float32 // Position
-	location  string  // Named location from .loc file
-	dead      bool    // True for death-frame entries (health just went to 0)
-	spawn     bool    // True for spawn-frame entries (health just went from 0 to >0)
+	name     string
+	team     string
+	weapons  weaponLoadout
+	powerups powerupLoadout
+	vitals   vitals
+	ammo     ammoCounts
+	pos      playerPosition
+	location string // named location from .loc file
+	dead     bool   // true for death-frame entries (health just went to 0)
+	spawn    bool   // true for spawn-frame entries (health just went from 0 to >0)
 }
 
 // NewTimelineAnalyzer creates a new timeline analyzer
@@ -150,9 +141,7 @@ func (a *TimelineAnalyzer) OnEvent(event parser.Event) error {
 func (a *TimelineAnalyzer) handlePositionUpdate(e *parser.PlayerPositionEvent) {
 	// Always track position, even during warmup (for continuity)
 	state := a.getOrCreatePlayerState(e.PlayerNum)
-	state.x = e.Origin[0]
-	state.y = e.Origin[1]
-	state.z = e.Origin[2]
+	state.pos = playerPosition{x: e.Origin[0], y: e.Origin[1], z: e.Origin[2]}
 
 	// Sample at bucket boundaries — position updates arrive at ~73 Hz,
 	// much more frequently than stat updates (~3 Hz). Without this,
@@ -224,19 +213,19 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *parser.StatUpdateEvent) error {
 
 	switch e.StatIndex {
 	case mvd.StatHealth:
-		state.health = e.Value
+		state.vitals.health = e.Value
 	case mvd.StatArmor:
-		state.armor = e.Value
+		state.vitals.armor = e.Value
 	case mvd.StatItems:
 		state.items = e.Value
 	case mvd.StatShells:
-		state.shells = e.Value
+		state.ammo.shells = e.Value
 	case mvd.StatNails:
-		state.nails = e.Value
+		state.ammo.nails = e.Value
 	case mvd.StatRockets:
-		state.rockets = e.Value
+		state.ammo.rockets = e.Value
 	case mvd.StatCells:
-		state.cells = e.Value
+		state.ammo.cells = e.Value
 	}
 
 	// Sample at bucket boundaries - fill ALL buckets since last sample
@@ -271,11 +260,11 @@ func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 		}
 
 		// Detect death/spawn transitions (prevHealth starts at -1 = uninitialized)
-		isDead := state.health <= 0
-		isDeathFrame := isDead && state.prevHealth > 0                           // just died
-		isSpawnFrame := !isDead && (state.prevHealth <= 0) // spawned (first appearance or after death)
+		isDead := state.vitals.health <= 0
+		isDeathFrame := isDead && state.prevHealth > 0    // just died
+		isSpawnFrame := !isDead && state.prevHealth <= 0 // spawned (first appearance or after death)
 
-		state.prevHealth = state.health
+		state.prevHealth = state.vitals.health
 
 		// Record death/spawn events for frag streak calculation
 		if isDeathFrame {
@@ -298,42 +287,36 @@ func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 
 		// Create player data for this bucket
 		pData := &playerBucketRawData{
-			name:    player.Name,
-			team:    player.Team,
-			health:  state.health,
-			armor:   state.armor,
-			shells:  state.shells,
-			nails:   state.nails,
-			rockets: state.rockets,
-			cells:   state.cells,
-			dead:    isDeathFrame,
-			spawn:   isSpawnFrame,
+			name:   player.Name,
+			team:   player.Team,
+			vitals: state.vitals,
+			ammo:   state.ammo,
+			pos:    state.pos,
+			dead:   isDeathFrame,
+			spawn:  isSpawnFrame,
 		}
 
-		// Track weapons
-		pData.hasRL = (state.items & mvd.ITRocketLauncher) != 0
-		pData.hasLG = (state.items & mvd.ITLightning) != 0
-		pData.hasSSG = (state.items & mvd.ITSuperShotgun) != 0
-		pData.hasSNG = (state.items & mvd.ITSuperNailgun) != 0
-
-		// Track powerups
-		pData.hasQuad = (state.items & mvd.ITQuad) != 0
-		pData.hasPent = (state.items & mvd.ITInvulnerability) != 0
-		pData.hasRing = (state.items & mvd.ITInvisibility) != 0
-
-		// Track armor type
-		if state.items&mvd.ITArmor3 != 0 {
-			pData.armorType = "ra"
-		} else if state.items&mvd.ITArmor2 != 0 {
-			pData.armorType = "ya"
-		} else if state.items&mvd.ITArmor1 != 0 {
-			pData.armorType = "ga"
+		pData.weapons = weaponLoadout{
+			rl:  state.items&mvd.ITRocketLauncher != 0,
+			lg:  state.items&mvd.ITLightning != 0,
+			ssg: state.items&mvd.ITSuperShotgun != 0,
+			sng: state.items&mvd.ITSuperNailgun != 0,
+		}
+		pData.powerups = powerupLoadout{
+			quad: state.items&mvd.ITQuad != 0,
+			pent: state.items&mvd.ITInvulnerability != 0,
+			ring: state.items&mvd.ITInvisibility != 0,
 		}
 
-		// Track position (location name resolved in Finalize)
-		pData.x = state.x
-		pData.y = state.y
-		pData.z = state.z
+		// Decode armor type from the item bitfield (RA > YA > GA).
+		switch {
+		case state.items&mvd.ITArmor3 != 0:
+			pData.vitals.armorType = "ra"
+		case state.items&mvd.ITArmor2 != 0:
+			pData.vitals.armorType = "ya"
+		case state.items&mvd.ITArmor1 != 0:
+			pData.vitals.armorType = "ga"
+		}
 
 		bucket.playerData[slot] = pData
 	}
@@ -384,8 +367,8 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	if a.locFinder != nil {
 		for _, bucket := range a.buckets {
 			for _, pData := range bucket.playerData {
-				if pData.x != 0 || pData.y != 0 || pData.z != 0 {
-					pData.location = a.locFinder.FindNearest(pData.x, pData.y, pData.z)
+				if pData.pos.x != 0 || pData.pos.y != 0 || pData.pos.z != 0 {
+					pData.location = a.locFinder.FindNearest(pData.pos.x, pData.pos.y, pData.pos.z)
 				}
 			}
 		}
@@ -624,20 +607,20 @@ func (a *TimelineAnalyzer) exportHighResBuckets(slotToName map[int]string, locIn
 			}
 
 			hb.P[name] = &HighResPlayerData{
-				X:       pd.x,
-				Y:       pd.y,
-				H:       pd.health,
-				A:       pd.armor,
-				AT:      pd.armorType,
-				RL:      pd.hasRL,
-				LG:      pd.hasLG,
-				SSG:     pd.hasSSG,
-				SNG:     pd.hasSNG,
-				Q:       pd.hasQuad,
-				Pent:    pd.hasPent,
-				R:       pd.hasRing,
-				Rockets: pd.rockets,
-				Cells:   pd.cells,
+				X:       pd.pos.x,
+				Y:       pd.pos.y,
+				H:       pd.vitals.health,
+				A:       pd.vitals.armor,
+				AT:      pd.vitals.armorType,
+				RL:      pd.weapons.rl,
+				LG:      pd.weapons.lg,
+				SSG:     pd.weapons.ssg,
+				SNG:     pd.weapons.sng,
+				Q:       pd.powerups.quad,
+				Pent:    pd.powerups.pent,
+				R:       pd.powerups.ring,
+				Rockets: pd.ammo.rockets,
+				Cells:   pd.ammo.cells,
 				D:       pd.dead,
 				Sp:      pd.spawn,
 				Li:      locIndex[pd.location], // 0 (omitted) when no loc
@@ -723,26 +706,14 @@ func (a *TimelineAnalyzer) aggregateWindow(buckets []*timelineBucketData, slotTo
 			}
 			agg := playerAggregates[name]
 
-			// Weapons/powerups: OR (if they had it at any point in window)
-			agg.hasRL = agg.hasRL || pRaw.hasRL
-			agg.hasLG = agg.hasLG || pRaw.hasLG
-			agg.hasQuad = agg.hasQuad || pRaw.hasQuad
-			agg.hasPent = agg.hasPent || pRaw.hasPent
-			agg.hasRing = agg.hasRing || pRaw.hasRing
+			// Weapons/powerups OR-fold across the window — peak control.
+			agg.weapons.orInPlace(pRaw.weapons)
+			agg.powerups.orInPlace(pRaw.powerups)
 
-			// Health/armor/ammo: take last value (overwrite)
-			agg.health = pRaw.health
-			agg.armor = pRaw.armor
-			agg.armorType = pRaw.armorType
-			agg.shells = pRaw.shells
-			agg.nails = pRaw.nails
-			agg.rockets = pRaw.rockets
-			agg.cells = pRaw.cells
-
-			// Position: take last value
-			agg.x = pRaw.x
-			agg.y = pRaw.y
-			agg.z = pRaw.z
+			// Vitals/ammo/position take the last sample in the window.
+			agg.vitals = pRaw.vitals
+			agg.ammo = pRaw.ammo
+			agg.pos = pRaw.pos
 			agg.location = pRaw.location
 		}
 	}
@@ -753,21 +724,21 @@ func (a *TimelineAnalyzer) aggregateWindow(buckets []*timelineBucketData, slotTo
 	for name, agg := range playerAggregates {
 		result.PlayerData[name] = &PlayerBucketData{
 			Team:      agg.team,
-			HasRL:     agg.hasRL,
-			HasLG:     agg.hasLG,
-			HasQuad:   agg.hasQuad,
-			HasPent:   agg.hasPent,
-			HasRing:   agg.hasRing,
-			Health:    agg.health,
-			Armor:     agg.armor,
-			ArmorType: agg.armorType,
-			Shells:    agg.shells,
-			Nails:     agg.nails,
-			Rockets:   agg.rockets,
-			Cells:     agg.cells,
-			X:         agg.x,
-			Y:         agg.y,
-			Z:         agg.z,
+			HasRL:     agg.weapons.rl,
+			HasLG:     agg.weapons.lg,
+			HasQuad:   agg.powerups.quad,
+			HasPent:   agg.powerups.pent,
+			HasRing:   agg.powerups.ring,
+			Health:    agg.vitals.health,
+			Armor:     agg.vitals.armor,
+			ArmorType: agg.vitals.armorType,
+			Shells:    agg.ammo.shells,
+			Nails:     agg.ammo.nails,
+			Rockets:   agg.ammo.rockets,
+			Cells:     agg.ammo.cells,
+			X:         agg.pos.x,
+			Y:         agg.pos.y,
+			Z:         agg.pos.z,
 			Location:  agg.location,
 		}
 
@@ -782,43 +753,44 @@ func (a *TimelineAnalyzer) aggregateWindow(buckets []*timelineBucketData, slotTo
 			ta := teamAggregates[team]
 
 			// Weapons
-			if agg.hasRL && agg.hasLG {
+			switch {
+			case agg.weapons.rl && agg.weapons.lg:
 				ta.playersWithRLLG++
 				ta.playersWithWeapons++
-			} else if agg.hasRL {
+			case agg.weapons.rl:
 				ta.playersWithRL++
 				ta.playersWithWeapons++
-			} else if agg.hasLG {
+			case agg.weapons.lg:
 				ta.playersWithLG++
 				ta.playersWithWeapons++
 			}
 
 			// Powerups
-			if agg.hasQuad {
+			if agg.powerups.quad {
 				ta.playersWithQuad++
 				ta.playersWithPowerups++
 			}
-			if agg.hasPent {
+			if agg.powerups.pent {
 				ta.playersWithPent++
 				ta.playersWithPowerups++
 			}
-			if agg.hasRing {
+			if agg.powerups.ring {
 				ta.playersWithRing++
 				ta.playersWithPowerups++
 			}
 
 			// Health/Armor
-			ta.healthSamples = append(ta.healthSamples, agg.health)
-			ta.armorSamples = append(ta.armorSamples, agg.armor)
-			if agg.armorType != "" {
-				ta.armorByType[agg.armorType]++
+			ta.healthSamples = append(ta.healthSamples, agg.vitals.health)
+			ta.armorSamples = append(ta.armorSamples, agg.vitals.armor)
+			if agg.vitals.armorType != "" {
+				ta.armorByType[agg.vitals.armorType]++
 			}
 
 			// Ammo
-			ta.totalShells += agg.shells
-			ta.totalNails += agg.nails
-			ta.totalRockets += agg.rockets
-			ta.totalCells += agg.cells
+			ta.totalShells += agg.ammo.shells
+			ta.totalNails += agg.ammo.nails
+			ta.totalRockets += agg.ammo.rockets
+			ta.totalCells += agg.ammo.cells
 		}
 	}
 
@@ -848,23 +820,18 @@ func (a *TimelineAnalyzer) aggregateWindow(buckets []*timelineBucketData, slotTo
 	return result
 }
 
-// playerWindowAggregate holds per-player data during window aggregation
+// playerWindowAggregate holds per-player data during window aggregation.
+// Weapons/powerups OR-fold across the window (peak control), the rest take
+// the last sample. The substruct shapes match playerBucketRawData so a
+// whole group can be copied with a single assignment.
 type playerWindowAggregate struct {
-	team      string
-	hasRL     bool
-	hasLG     bool
-	hasQuad   bool
-	hasPent   bool
-	hasRing   bool
-	health    int
-	armor     int
-	armorType string
-	shells    int
-	nails     int
-	rockets   int
-	cells     int
-	x, y, z   float32
-	location  string
+	team     string
+	weapons  weaponLoadout
+	powerups powerupLoadout
+	vitals   vitals
+	ammo     ammoCounts
+	pos      playerPosition
+	location string
 }
 
 // teamAggregator is used during finalization to aggregate player data into team data
@@ -914,9 +881,9 @@ var powerupKinds = []struct {
 	name string
 	has  func(*playerBucketRawData) bool
 }{
-	{"quad", func(p *playerBucketRawData) bool { return p.hasQuad }},
-	{"pent", func(p *playerBucketRawData) bool { return p.hasPent }},
-	{"ring", func(p *playerBucketRawData) bool { return p.hasRing }},
+	{"quad", func(p *playerBucketRawData) bool { return p.powerups.quad }},
+	{"pent", func(p *playerBucketRawData) bool { return p.powerups.pent }},
+	{"ring", func(p *playerBucketRawData) bool { return p.powerups.ring }},
 }
 
 // detectPowerupEvents scans buckets for powerup pickup/loss transitions
