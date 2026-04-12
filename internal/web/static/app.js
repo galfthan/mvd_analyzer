@@ -2859,6 +2859,10 @@ function fillLocationRegion(ctx, group, fillColor, worldToCanvasFunc) {
         }
         return;
     }
+    // When traced map geometry is loaded but this group has no tris, skip it
+    // rather than falling back to a hull blob that would visibly clash with
+    // the real polygons already drawn for neighboring locs.
+    if (mapState.mapGeometry) return;
     drawLocationRegionFill(ctx, group, fillColor);
 }
 
@@ -3088,10 +3092,17 @@ function initMapView(result) {
             .then(geom => {
                 if (!geom || !geom.locs || geom.locs.length === 0) return;
                 mapState.mapGeometry = geom;
-                mapState.locationGroups = null;
+                // Rebuild groups with tris attached, then refresh region->group
+                // references so the control overlay doesn't keep pointing at
+                // the pre-fetch (tris-less) group objects.
+                mapState.locationGroups = processLocationGroups(mapState.locations);
                 mapState.locationCanvas = null;
-                markMapDirty();
-                renderMap(mapState.currentTime);
+                if (mapState.rcResult) {
+                    applyRegionConfig(); // also calls renderMap
+                } else {
+                    markMapDirty();
+                    renderMap(mapState.currentTime);
+                }
             })
             .catch(() => {});
     }
@@ -3957,10 +3968,12 @@ function prerenderLocationBackground() {
     offscreen.height = h;
     const octx = offscreen.getContext('2d');
 
+    const hasGeom = !!mapState.mapGeometry;
     for (const group of mapState.locationGroups) {
         if (group.tris && group.tris.length >= 6) {
             drawLocationRegionFromGeometry(octx, group, worldToCanvasNew);
-        } else {
+        } else if (!hasGeom) {
+            // Only fall back to loc-hull blobs when we have no traced map data.
             drawLocationRegion(octx, group, worldToCanvasNew);
         }
     }
