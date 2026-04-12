@@ -2715,8 +2715,9 @@ function getLocationColor(name) {
     if (nameLower.includes('sng') || nameLower.includes('ng'))
                                      return { fill: 'rgba(180, 140, 80, 0.06)', stroke: 'rgba(180, 140, 80, 0.5)', text: 'rgba(200, 160, 96, 0.5)' };
 
-    // Default - subtle gray
-    return { fill: 'rgba(100, 100, 120, 0.04)', stroke: 'rgba(68, 68, 68, 0.5)', text: 'rgba(102, 102, 102, 0.5)' };
+    // Default - neutral gray (brightened so passageways like cemetary.tele
+    // stay legible against the dark background).
+    return { fill: 'rgba(170, 170, 190, 0.12)', stroke: 'rgba(150, 150, 160, 0.6)', text: 'rgba(180, 180, 190, 0.7)' };
 }
 
 // Group locations by normalized name and calculate centroid
@@ -2837,6 +2838,64 @@ function drawLocationRegionFromGeometry(ctx, group, worldToCanvasFunc) {
         ctx.closePath();
         ctx.fill();
     }
+}
+
+// Compute boundary edges of a triangle soup: edges that belong to exactly one
+// triangle are on the outline; edges shared by two triangles are interior and
+// cancel. Returns a flat Float array of world-space segment endpoints
+// (x1,y1,x2,y2, ...). Cached on the group for reuse.
+function computeRegionOutline(group) {
+    if (group.outline !== undefined) return group.outline;
+    const tris = group.tris;
+    if (!tris || tris.length < 6) {
+        group.outline = null;
+        return null;
+    }
+    const edgeCount = new Map();
+    const keyFor = (x1, y1, x2, y2) => {
+        // Canonical order so (a,b) and (b,a) hash equally.
+        if (x1 < x2 || (x1 === x2 && y1 <= y2)) {
+            return x1 + ',' + y1 + '|' + x2 + ',' + y2;
+        }
+        return x2 + ',' + y2 + '|' + x1 + ',' + y1;
+    };
+    for (let i = 0; i + 5 < tris.length; i += 6) {
+        const ax = tris[i],     ay = tris[i + 1];
+        const bx = tris[i + 2], by = tris[i + 3];
+        const cx = tris[i + 4], cy = tris[i + 5];
+        const e1 = keyFor(ax, ay, bx, by);
+        const e2 = keyFor(bx, by, cx, cy);
+        const e3 = keyFor(cx, cy, ax, ay);
+        edgeCount.set(e1, (edgeCount.get(e1) || 0) + 1);
+        edgeCount.set(e2, (edgeCount.get(e2) || 0) + 1);
+        edgeCount.set(e3, (edgeCount.get(e3) || 0) + 1);
+    }
+    const outline = [];
+    for (const [key, count] of edgeCount) {
+        if (count !== 1) continue;
+        const [p1, p2] = key.split('|');
+        const [x1, y1] = p1.split(',').map(Number);
+        const [x2, y2] = p2.split(',').map(Number);
+        outline.push(x1, y1, x2, y2);
+    }
+    group.outline = outline;
+    return outline;
+}
+
+// Stroke the outline of a location region as a set of boundary line segments.
+function drawLocationRegionOutline(ctx, group, worldToCanvasFunc, strokeStyle, lineWidth) {
+    const outline = computeRegionOutline(group);
+    if (!outline || outline.length < 4) return;
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    for (let i = 0; i + 3 < outline.length; i += 4) {
+        const a = worldToCanvasFunc(outline[i],     outline[i + 1]);
+        const b = worldToCanvasFunc(outline[i + 2], outline[i + 3]);
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+    }
+    ctx.stroke();
 }
 
 // Fill a location region with an arbitrary color. Prefers the BSP-derived
@@ -3975,6 +4034,16 @@ function prerenderLocationBackground() {
         } else if (!hasGeom) {
             // Only fall back to loc-hull blobs when we have no traced map data.
             drawLocationRegion(octx, group, worldToCanvasNew);
+        }
+    }
+
+    // Thin grey outlines around each traced region — drawn after all fills so
+    // they sit on top and stay visible regardless of adjacent region tinting.
+    if (hasGeom) {
+        for (const group of mapState.locationGroups) {
+            if (group.tris && group.tris.length >= 6) {
+                drawLocationRegionOutline(octx, group, worldToCanvasNew, 'rgba(180, 180, 180, 0.5)', 1);
+            }
         }
     }
 
