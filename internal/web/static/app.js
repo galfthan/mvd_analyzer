@@ -3715,10 +3715,11 @@ function assignPlayerSymbols(result) {
         const octx = offscreen.getContext('2d');
         const cx = size / 2, cy = size / 2, r = 13;
 
-        // Circle background
+        // Circle background — opaque so the map underneath doesn't bleed
+        // through and fight the letter for legibility.
         octx.beginPath();
         octx.arc(cx, cy, r, 0, Math.PI * 2);
-        octx.fillStyle = hexToRgba(teamColor, 0.25);
+        octx.fillStyle = '#0a0a15';
         octx.fill();
         octx.strokeStyle = teamColor;
         octx.lineWidth = 2;
