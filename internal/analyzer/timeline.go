@@ -1271,11 +1271,11 @@ var mapCustomRegions = map[string][]customRegion{
 	"dm3": {
 		{name: "YA", locNames: []string{"YA", "YA.box", "YA.up"}},
 		// RA region excludes RA.tunnel — it's the lower passageway beneath
-		// the RA platform and shouldn't count as RA control. RA.tunnel is
-		// consumed by its own one-loc region below so it doesn't collide
-		// with the auto-detected "RA" cluster name.
+		// the RA platform and shouldn't count as RA control. Because the
+		// custom region is named exactly "RA", the auto-detection for the
+		// RA keyword is suppressed entirely (see buildControlRegions), so
+		// RA.tunnel simply isn't tracked as a region.
 		{name: "RA", locNames: []string{"RA", "RA.low", "RA.rox", "RA.entry"}},
-		{name: "RA Tunnel", locNames: []string{"RA.tunnel"}},
 	},
 	// DM2 — The Claustrophobopolis
 	"dm2": {
@@ -1303,11 +1303,20 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 	}
 
 	// Build set of locs consumed by custom regions (so they're excluded from auto-detection)
+	// and the set of auto-detect keywords that a custom region has fully claimed.
+	// A custom region claims a keyword whenever its name (uppercased) matches
+	// an entry in controlKeywords — in that case the auto-detector skips that
+	// keyword entirely so the curated definition is the single source of truth
+	// (no leftover one-loc clusters competing under the same name).
 	customConsumed := make(map[string]bool)
+	customClaimedKeywords := make(map[string]bool)
 	customDefs := mapCustomRegions[mapName]
 	for _, cr := range customDefs {
 		for _, ln := range cr.locNames {
 			customConsumed[ln] = true
+		}
+		if controlKeywords[strings.ToUpper(cr.name)] {
+			customClaimedKeywords[strings.ToUpper(cr.name)] = true
 		}
 	}
 
@@ -1363,6 +1372,12 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 
 	for keyword, locs := range groups {
 		if len(locs) == 0 {
+			continue
+		}
+		// A custom region with this exact name has full ownership of the
+		// keyword — skip auto-detection so the curated list isn't padded
+		// with leftover loc clusters under the same name.
+		if customClaimedKeywords[keyword] {
 			continue
 		}
 		clusters := clusterLocations(locs, 800)
