@@ -34,9 +34,12 @@ import (
 func main() {
 	bspDir := flag.String("bsp-dir", "", "directory containing .bsp files (required)")
 	outDir := flag.String("out-dir", "internal/web/static/maps", "output directory for generated JSON")
+	locDir := flag.String("loc-dir", "internal/web/static/locs", "directory containing .loc files")
 	mapFilter := flag.String("map", "", "process only the BSP whose basename (no extension) matches")
 	verbose := flag.Bool("verbose", false, "print per-map progress and stats")
 	flag.Parse()
+
+	loc.SetLocDir(*locDir)
 
 	if *bspDir == "" {
 		fmt.Fprintln(os.Stderr, "mapgen: -bsp-dir is required")
