@@ -1957,13 +1957,21 @@ function updateRegionControlTimeline(startTime, endTime) {
     stripsContainer.innerHTML = '';
 
     const regions = mapState.controlRegions;
-    const buckets = timelineState.buckets;
+    // Drive the strip from the same high-res buckets the map view uses, so
+    // the strip flips at the same 50ms boundaries as the colored map overlay
+    // and shares a single loc-resolution path (resolvePlayerLoc → 3D nearest).
+    // Fall back to the 1s aggregates only if no high-res data is present.
+    const hrBuckets = timelineState.highResBuckets;
+    const useHighRes = hrBuckets && hrBuckets.length > 0;
+    const buckets = useHighRes ? hrBuckets : timelineState.buckets;
     if (!buckets || buckets.length === 0) return;
+    const hrDuration = timelineState.highResDuration || 0.05;
 
     const duration = endTime - startTime;
     if (duration <= 0) return;
 
     const locations = mapState.locations;
+    const symbols = mapState.playerSymbols || {};
 
     // Control state colors derived from TEAM_COLORS
     const stateColors = {
@@ -1993,21 +2001,43 @@ function updateRegionControlTimeline(startTime, endTime) {
 
         for (let i = 0; i < buckets.length; i++) {
             const bucket = buckets[i];
-            if (bucket.endTime <= startTime || bucket.startTime >= endTime) continue;
+
+            // Normalize bucket time bounds: high-res buckets carry only `t`,
+            // 1s buckets carry startTime/endTime explicitly.
+            const bStart = useHighRes ? bucket.t : bucket.startTime;
+            const bEnd   = useHighRes ? bucket.t + hrDuration : bucket.endTime;
+            if (bEnd <= startTime || bStart >= endTime) continue;
 
             // Determine control state for this region at this bucket
-            const playerData = bucket.playerData;
+            const playerData = useHighRes ? bucket.p : bucket.playerData;
             let aWpn = 0, aNo = 0, bWpn = 0, bNo = 0;
 
             if (playerData) {
                 for (const [name, data] of Object.entries(playerData)) {
-                    if (!data || (data.health !== undefined && data.health <= 0)) continue;
-                    const loc = data.location || '';
-                    const rName = mapState.locToRegion[loc];
+                    if (!data) continue;
+                    // Dead/respawning filter — supports both compact (d/h) and
+                    // verbose (dead/health) field names so the 1s fallback path
+                    // still works.
+                    if (data.d || data.dead) continue;
+                    const hp = data.h !== undefined ? data.h : data.health;
+                    if (hp !== undefined && hp <= 0) continue;
+
+                    const locName = resolvePlayerLoc(data, locations);
+                    if (!locName) continue;
+                    const rName = mapState.locToRegion[locName];
                     if (rName !== region.name) continue;
 
-                    const playerTeam = data.team || '';
-                    const hasWpn = data.hasRL || data.hasLG;
+                    // Team: high-res records have no `team` field — derive from
+                    // playerSymbols the same way every other high-res call site
+                    // does. Falls back to `data.team` for the 1s aggregated path.
+                    let playerTeam = data.team || '';
+                    if (!playerTeam) {
+                        const sym = symbols[name];
+                        if (sym) playerTeam = teams[sym.teamIdx] || '';
+                    }
+
+                    // Weapons: high-res uses rl/lg, 1s aggregate uses hasRL/hasLG.
+                    const hasWpn = (data.rl ?? data.hasRL) || (data.lg ?? data.hasLG);
 
                     if (playerTeam === teamA) { if (hasWpn) aWpn++; else aNo++; }
                     else if (playerTeam === teamB) { if (hasWpn) bWpn++; else bNo++; }
@@ -2026,10 +2056,10 @@ function updateRegionControlTimeline(startTime, endTime) {
             if (state !== currentState) {
                 // Emit previous span
                 if (currentState && currentState !== 'empty') {
-                    addRegionSegment(strip, spanStart, bucket.startTime, startTime, duration, stateColors[currentState]);
+                    addRegionSegment(strip, spanStart, bStart, startTime, duration, stateColors[currentState]);
                 }
                 currentState = state;
-                spanStart = bucket.startTime;
+                spanStart = bStart;
             }
         }
         // Final span
@@ -2638,6 +2668,22 @@ function findNearestLocation(x, y, locations) {
     return bestName;
 }
 
+// Prefer the server-resolved loc name (3D nearest, matches ezQuake exactly).
+// High-res buckets carry an integer index `li` into mapState.locTable; older
+// 1s buckets carry the resolved name in `data.location`. Falls back to the
+// 2D nearest-neighbor only when neither field is present (e.g. demos with
+// no .loc file). The 2D fallback is harmless in that case because there is
+// no stacked-loc disambiguation to do without a loc file in the first place.
+function resolvePlayerLoc(data, locations) {
+    if (data) {
+        if (data.li && mapState.locTable) {
+            return mapState.locTable[data.li] || '';
+        }
+        if (data.location) return data.location;
+    }
+    return findNearestLocation(data ? data.x : 0, data ? data.y : 0, locations);
+}
+
 // ─── Precomputed Frag Counts ────────────────────────────────────────────────
 
 // Sorted array of { time, cumulative: { player: frags } }
@@ -2966,8 +3012,8 @@ function drawLocationRegion(ctx, group, worldToCanvasFunc) {
 }
 
 // Compute the set of loc-group names currently occupied by at least one
-// living player at this bucket. Tries data.location first (only present on
-// 1s buckets) and falls back to nearest-loc lookup for high-res buckets.
+// living player at this bucket. Uses the server-resolved 3D-nearest loc
+// (matches ezQuake) via resolvePlayerLoc.
 function computeOccupiedGroupNames(playerData) {
     const occupied = new Set();
     if (!playerData) return occupied;
@@ -2977,10 +3023,7 @@ function computeOccupiedGroupNames(playerData) {
         if (data.d || (data.h !== undefined && data.h <= 0)) continue;
         if (data.health !== undefined && data.health <= 0) continue;
         if (data.x === 0 && data.y === 0) continue;
-        let locName = data.location;
-        if (!locName && locations && locations.length) {
-            locName = findNearestLocation(data.x, data.y, locations);
-        }
+        const locName = resolvePlayerLoc(data, locations);
         if (!locName) continue;
         occupied.add(normalizeLocationName(locName));
     }
@@ -3193,6 +3236,10 @@ function initMapView(result) {
     // Get location data from timeline analysis
     const timeline = result.timelineAnalysis;
     mapState.locations = timeline.locationData || [];
+    // Interned loc-name table — index 0 is the empty/no-loc sentinel.
+    // High-res player records carry an integer Li indexing into this; the
+    // resolvePlayerLoc helper hides the indirection from call sites.
+    mapState.locTable = (timeline && timeline.locTable) ? timeline.locTable : [''];
     mapState.locationGroups = null; // Clear cached groups for new demo
     mapState.locationCanvas = null;
     mapState.mapGeometry = null;    // Reset BSP-derived geometry for new demo
@@ -3463,7 +3510,7 @@ function recomputeRegionStats(regions) {
             if (data.d || (data.h !== undefined && data.h <= 0)) continue;
             if (data.x === 0 && data.y === 0) continue;
 
-            const nearest = findNearestLocation(data.x, data.y, locations);
+            const nearest = resolvePlayerLoc(data, locations);
             if (!nearest) continue;
             const regionName = mapState.locToRegion[nearest];
             if (!regionName || !presence[regionName]) continue;
@@ -3583,8 +3630,8 @@ function getRegionControlAtTime(time) {
         if (data.d || (data.h !== undefined && data.h <= 0)) continue; // dead
         if (data.x === 0 && data.y === 0) continue;
 
-        // Find nearest location
-        const nearest = findNearestLocation(data.x, data.y, locations);
+        // Find loc via authoritative server-resolved name when available
+        const nearest = resolvePlayerLoc(data, locations);
         if (!nearest) continue;
 
         const regionName = mapState.locToRegion[nearest];
@@ -3955,7 +4002,7 @@ function updateRegionStatus() {
             if (data.d || (data.h !== undefined && data.h <= 0)) continue;
             if (data.x === 0 && data.y === 0) continue;
 
-            const nearest = findNearestLocation(data.x, data.y, locations);
+            const nearest = resolvePlayerLoc(data, locations);
             if (!nearest) continue;
             const regionName = mapState.locToRegion?.[nearest];
             if (!regionName || !regionPlayers[regionName]) continue;
