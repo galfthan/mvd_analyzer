@@ -2033,7 +2033,7 @@ function updateRegionControlTimeline(startTime, endTime) {
                     let playerTeam = data.team || '';
                     if (!playerTeam) {
                         const sym = symbols[name];
-                        if (sym) playerTeam = teams[sym.teamIdx] || '';
+                        if (sym) playerTeam = timelineState.teams[sym.teamIdx] || '';
                     }
 
                     // Weapons: high-res uses rl/lg, 1s aggregate uses hasRL/hasLG.
