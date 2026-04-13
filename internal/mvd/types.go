@@ -179,6 +179,7 @@ const (
 	MVDHiddenUserCmdWeaponsSS         = 0x0008
 	MVDHiddenUserCmdWeaponInstruction = 0x0009
 	MVDHiddenPausedDuration           = 0x000A
+	MVDHiddenDemoStartTimestampMs     = 0x000B
 	MVDHiddenExtended                 = 0xFFFF
 )
 

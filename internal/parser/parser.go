@@ -267,6 +267,16 @@ func (p *Parser) parseHiddenMessage(msg *mvd.DemoMessage) error {
 				p.warn(time, "parse_error", "hidden demoinfo: %v", err)
 				return nil
 			}
+		case mvd.MVDHiddenDemoStartTimestampMs:
+			// uint64 unix timestamp ms at demo start. Not currently consumed
+			// by any analyzer — skip the payload so we don't emit an
+			// unknown_hidden warning. Ref: qwprot protocol.h, commit 500bd4b.
+			if dataLen > 0 {
+				if err := r.Skip(dataLen); err != nil {
+					p.warn(time, "parse_error", "hidden demo_start_timestamp_ms: %v", err)
+					return nil
+				}
+			}
 		default:
 			p.warn(time, "unknown_hidden", "unknown hidden message type 0x%04x, %d bytes skipped", typeID, dataLen)
 			if dataLen > 0 {
