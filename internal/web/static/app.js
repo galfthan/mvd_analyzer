@@ -506,8 +506,10 @@ function displayResults(result) {
         displayTimelineAnalysis(result);
     }
 
-    // Key Moments (powerup runs)
-    if (result.timelineAnalysis?.powerupEvents) {
+    // Key Moments (powerup runs + frag streaks). Call unconditionally so
+    // the function gets a chance to clear stale DOM from a previous demo;
+    // displayKeyMoments handles empty powerupEvents / fragStreaks on its own.
+    if (result.timelineAnalysis) {
         displayKeyMoments(result);
     }
 
