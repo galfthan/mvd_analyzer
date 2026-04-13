@@ -25,6 +25,7 @@ const (
 	SvcServerData            = 11
 	SvcLightStyle            = 12
 	SvcUpdateFrags           = 14
+	SvcDamage                = 19
 	SvcSpawnStatic           = 20
 	SvcSpawnBaseline         = 22
 	SvcTempEntity            = 23
