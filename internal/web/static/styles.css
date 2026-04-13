@@ -6,17 +6,17 @@
     --team-d: #ffc107;
 
     /* Surface palette — body background and panel backgrounds. */
-    --bg-deep: var(--bg-deep);       /* page + panel background */
-    --bg-panel: var(--bg-panel);      /* divider, slot tile, header bar */
+    --bg-deep: #1a1a2e;       /* page + panel background */
+    --bg-panel: #2a3f5f;      /* divider, slot tile, header bar */
     --fg-default: #e0e0e0;    /* default body text colour */
 
     /* Accent palette — the cyan/teal used for headers, focus, key UI chrome. */
-    --accent-cyan: var(--accent-cyan);       /* primary accent */
-    --accent-cyan-dim: var(--accent-cyan-dim);   /* gradient + hover counterpart */
+    --accent-cyan: #00d9ff;       /* primary accent */
+    --accent-cyan-dim: #00b8d9;   /* gradient + hover counterpart */
 
     /* Armor palette — used by both .armor-XX classes and JS canvas drawing. */
     --armor-ra: #ff5050;
-    --armor-ya: var(--armor-ya);          /* = rgb(255, 200, 0) — was duplicated as both forms */
+    --armor-ya: #ffc800;          /* = rgb(255, 200, 0) — was duplicated as both forms */
     --armor-ga: #00b400;
 
 }
