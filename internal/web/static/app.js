@@ -1,6 +1,43 @@
 // MVD Analyzer Dashboard — Pure client-side via WASM
 
+// ─── Theme & Constants ──────────────────────────────────────────────────────
+//
+// Single source of truth for colours, magic numbers and shared layout values.
+// Anything that used to be a literal sprinkled across the file lives here so
+// it can be tweaked in one place — including the values that are duplicated
+// in styles.css as :root custom properties (kept in sync by hand: see the
+// matching --team-a / --armor-* / --accent-cyan declarations in styles.css).
 const TEAM_COLORS = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+const ARMOR_COLORS = {
+    ra: 'rgb(255, 50, 50)',
+    ya: 'rgb(255, 200, 0)',
+    ga: 'rgb(0, 180, 0)',
+};
+
+// Badge layout / colours used by the map view to draw inventory icons around
+// each player marker. Hoisted from the map-rendering section so the palette
+// lives next to the rest of the theme.
+const BADGE_DEFS = [
+    { angle:   0, key: 'q',   letter: 'Q', color: 'rgb(0, 150, 255)' },
+    { angle:  45, key: 'rl',  letter: 'R', color: 'rgb(255, 107, 107)' },
+    { angle:  90, key: 'lg',  letter: 'L', color: 'rgb(0, 217, 255)' },
+    { angle: 135, key: 'sng', letter: 'N', color: 'rgb(180, 140, 100)' },
+    { angle: 180, key: 'mh',  letter: 'M', color: 'rgb(0, 200, 83)' },
+    { angle: 225, key: 'arm', letter: 'A', color: null },
+    { angle: 270, key: 'pe',  letter: 'P', color: 'rgb(255, 0, 0)' },
+    { angle: 315, key: 'r',   letter: 'I', color: 'rgb(255, 235, 59)' },
+];
+
+const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
+
+// Timing / layout constants used by the chat scroller and the map playback.
+// CHAT_PX_PER_SEC is the chat-track density: it has to stay in sync with the
+// 700px chat viewport in styles.css (see #chat-track) — change one, change
+// the other.
+const CHAT_PX_PER_SEC   = 17.5; // ~same density as the original 40s/700px window
+const CHAT_ITEM_HEIGHT  = 18;
+const DEATH_X_DURATION  = 2.0;  // seconds an "X" death marker stays on the map
+const PLAYBACK_FPS_MS   = 33;   // map playback throttle (~30 fps = 33 ms/frame)
 
 // Derive strong/weak color variants from a hex color for region control displays
 function hexToRgb(hex) {
@@ -15,6 +52,32 @@ function teamWeakColor(hex) {
     const [r, g, b] = hexToRgb(hex);
     // Lighten towards white for weak control
     return `rgb(${Math.round(r + (255 - r) * 0.5)}, ${Math.round(g + (255 - g) * 0.5)}, ${Math.round(b + (255 - b) * 0.5)})`;
+}
+
+// ─── Table builder ──────────────────────────────────────────────────────────
+//
+// Six different player/team scoreboard tables used to repeat this exact
+// boilerplate: clear tbody, loop, build a <tr>, paint a 3px team-coloured
+// border-left, set innerHTML, append. Centralise it.
+//
+// `getTeamIdx` is optional — pass it for tables whose rows should get a
+// team colour stripe. The helper looks up the colour from TEAM_COLORS so
+// the palette stays in one place.
+function renderTableRows(tbodyId, items, buildRow, getTeamIdx) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    items.forEach((item, i) => {
+        const tr = document.createElement('tr');
+        if (getTeamIdx) {
+            const teamIdx = getTeamIdx(item, i);
+            if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+                tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
+            }
+        }
+        tr.innerHTML = buildRow(item, i);
+        tbody.appendChild(tr);
+    });
 }
 
 let currentResult = null;
@@ -443,8 +506,10 @@ function displayResults(result) {
         displayTimelineAnalysis(result);
     }
 
-    // Key Moments (powerup runs)
-    if (result.timelineAnalysis?.powerupEvents) {
+    // Key Moments (powerup runs + frag streaks). Call unconditionally so
+    // the function gets a chance to clear stale DOM from a previous demo;
+    // displayKeyMoments handles empty powerupEvents / fragStreaks on its own.
+    if (result.timelineAnalysis) {
         displayKeyMoments(result);
     }
 
@@ -590,27 +655,16 @@ function displayTeams(teams) {
 }
 
 function displayPlayerStats(players) {
-    const tbody = document.getElementById('scoreboard-body');
-    tbody.innerHTML = '';
-
-    // Sort by frags
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
-
     const teamOrder = getTeamOrder(sorted);
 
-    sorted.forEach(player => {
-        const tr = document.createElement('tr');
-        const teamIdx = teamOrder.indexOf(player.team || '');
-    
-        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
-            tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
-        }
+    renderTableRows('scoreboard-body', sorted, player => {
         const kills = player.stats?.kills || 0;
         const deaths = player.stats?.deaths || 0;
         const rlKills = player.weapons?.rl?.kills?.enemy || 0;
         const lgKills = player.weapons?.lg?.kills?.enemy || 0;
         const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
-        tr.innerHTML = `
+        return `
             <td>${escapeHtml(player.name)}</td>
             <td>${escapeHtml(player.team || '')}</td>
             <td>${player.stats?.frags || 0}</td>
@@ -627,34 +681,20 @@ function displayPlayerStats(players) {
             <td>${player.dmg?.['taken-to-die'] ?? 0}</td>
             <td>${player.ping || 0}</td>
         `;
-        tbody.appendChild(tr);
-    });
+    }, player => teamOrder.indexOf(player.team || ''));
 }
 
 function displayWeaponStatsTable(players) {
-    const tbody = document.getElementById('weapon-stats-body');
-    tbody.innerHTML = '';
-
     const sorted = [...players].sort((a, b) => (b.dmg?.given || 0) - (a.dmg?.given || 0));
-
     const teamOrder = getTeamOrder(sorted);
-
     const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
-    sorted.forEach(player => {
+    renderTableRows('weapon-stats-body', sorted, player => {
         const w = player.weapons || {};
-        const tr = document.createElement('tr');
-        const teamIdx = teamOrder.indexOf(player.team || '');
-        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
-            tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
-        }
         let cells = `<td>${escapeHtml(player.name)}</td>`;
-        wNames.forEach(wn => {
-            cells += formatWeaponCells(w[wn]);
-        });
-        tr.innerHTML = cells;
-        tbody.appendChild(tr);
-    });
+        wNames.forEach(wn => { cells += formatWeaponCells(w[wn]); });
+        return cells;
+    }, player => teamOrder.indexOf(player.team || ''));
 }
 
 function formatWeaponCells(weapon) {
@@ -673,23 +713,13 @@ function formatWeaponCells(weapon) {
 }
 
 function displayItemsTable(players) {
-    const tbody = document.getElementById('items-body');
-    tbody.innerHTML = '';
-
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
-
     const teamOrder = getTeamOrder(sorted);
 
-
-    sorted.forEach(player => {
+    renderTableRows('items-body', sorted, player => {
         const items = player.items || {};
         const weapons = player.weapons || {};
-        const tr = document.createElement('tr');
-        const teamIdx = teamOrder.indexOf(player.team || '');
-        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
-            tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
-        }
-        tr.innerHTML = `
+        return `
             <td>${escapeHtml(player.name)}</td>
             <td>${items.ra?.took || 0}</td>
             <td>${items.ya?.took || 0}</td>
@@ -705,8 +735,7 @@ function displayItemsTable(players) {
             <td>${weapons.lg?.pickups?.dropped || 0}</td>
             <td>${player.xferLG || 0}</td>
         `;
-        tbody.appendChild(tr);
-    });
+    }, player => teamOrder.indexOf(player.team || ''));
 }
 
 function formatPowerup(item) {
@@ -793,15 +822,11 @@ function groupByTeam(players) {
 // ─── Per-team aggregate tables ─────────────────────────────────────────────
 
 function displayPlayerStatsTeams(players) {
-    const tbody = document.getElementById('player-stats-team-body');
-    tbody.innerHTML = '';
-
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-
     const groups = groupByTeam(sorted);
 
-    teamOrder.forEach((team, idx) => {
+    renderTableRows('player-stats-team-body', teamOrder, team => {
         const members = groups[team] || [];
         const frags = members.reduce((s, p) => s + (p.stats?.frags || 0), 0);
         const kills = members.reduce((s, p) => s + (p.stats?.kills || 0), 0);
@@ -820,12 +845,7 @@ function displayPlayerStatsTeams(players) {
             ? (members.reduce((s, p) => s + (p.ping || 0), 0) / members.length).toFixed(0)
             : 0;
         const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
-
-        const tr = document.createElement('tr');
-        if (idx < TEAM_COLORS.length) {
-            tr.style.borderLeft = `3px solid ${TEAM_COLORS[idx]}`;
-        }
-        tr.innerHTML = `
+        return `
             <td>${escapeHtml(team)}</td>
             <td>${frags}</td>
             <td>${efficiency}%</td>
@@ -841,21 +861,16 @@ function displayPlayerStatsTeams(players) {
             <td>${toDie}</td>
             <td>${ping}</td>
         `;
-        tbody.appendChild(tr);
-    });
+    }, (_team, idx) => idx);
 }
 
 function displayWeaponStatsTeamsTable(players) {
-    const tbody = document.getElementById('weapon-stats-team-body');
-    tbody.innerHTML = '';
-
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-
     const groups = groupByTeam(sorted);
     const wNames = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 
-    teamOrder.forEach((team, idx) => {
+    renderTableRows('weapon-stats-team-body', teamOrder, team => {
         const members = groups[team] || [];
         let cells = `<td>${escapeHtml(team)}</td>`;
         wNames.forEach(wn => {
@@ -875,26 +890,17 @@ function displayWeaponStatsTeamsTable(players) {
             }
             cells += `<td>${acc}</td><td>${totalKills || '-'}</td><td>${totalDmg || '-'}</td>`;
         });
-
-        const tr = document.createElement('tr');
-        if (idx < TEAM_COLORS.length) {
-            tr.style.borderLeft = `3px solid ${TEAM_COLORS[idx]}`;
-        }
-        tr.innerHTML = cells;
-        tbody.appendChild(tr);
-    });
+        return cells;
+    }, (_team, idx) => idx);
 }
 
 function displayItemsTeamsTable(players) {
-    const tbody = document.getElementById('items-team-body');
-    tbody.innerHTML = '';
-
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
-
     const groups = groupByTeam(sorted);
+    const fmtPu = (took, time) => time > 0 ? `${took} (${time}s)` : `${took}`;
 
-    teamOrder.forEach((team, idx) => {
+    renderTableRows('items-team-body', teamOrder, team => {
         const members = groups[team] || [];
         const ra = members.reduce((s, p) => s + (p.items?.ra?.took || 0), 0);
         const ya = members.reduce((s, p) => s + (p.items?.ya?.took || 0), 0);
@@ -912,14 +918,7 @@ function displayItemsTeamsTable(players) {
         const lgPickup = members.reduce((s, p) => s + (p.weapons?.lg?.pickups?.taken || 0), 0);
         const lgDrop = members.reduce((s, p) => s + (p.weapons?.lg?.pickups?.dropped || 0), 0);
         const lgXfer = members.reduce((s, p) => s + (p.xferLG || 0), 0);
-
-        const fmtPu = (took, time) => time > 0 ? `${took} (${time}s)` : `${took}`;
-
-        const tr = document.createElement('tr');
-        if (idx < TEAM_COLORS.length) {
-            tr.style.borderLeft = `3px solid ${TEAM_COLORS[idx]}`;
-        }
-        tr.innerHTML = `
+        return `
             <td>${escapeHtml(team)}</td>
             <td>${ra}</td>
             <td>${ya}</td>
@@ -935,8 +934,7 @@ function displayItemsTeamsTable(players) {
             <td>${lgDrop}</td>
             <td>${lgXfer}</td>
         `;
-        tbody.appendChild(tr);
-    });
+    }, (_team, idx) => idx);
 }
 
 function displayWeaponsChart(byWeapon) {
@@ -972,50 +970,53 @@ function displayKeyMoments(result) {
     const emptyMsg = document.getElementById('keymoments-empty');
     tbody.innerHTML = '';
 
-    const powerupEvents = result.timelineAnalysis?.powerupEvents || [];
-
-    if (powerupEvents.length === 0) {
-        emptyMsg.style.display = 'block';
-        return;
-    }
-    emptyMsg.style.display = 'none';
-
     // Get hub info for viewer links (from currentResult which may have hubInfo set)
     const hubInfo = currentResult?.hubInfo;
 
-    powerupEvents.forEach(event => {
-        const tr = document.createElement('tr');
+    const powerupEvents = result.timelineAnalysis?.powerupEvents || [];
 
-        // Build viewer URL if hub info available
-        let watchCell = '-';
-        if (hubInfo && hubInfo.gameId) {
-            const demoOff = timelineState.demoOffset || 0;
-            const fromTime = Math.max(0, Math.floor(event.time + demoOff) - 10);
-            const toTime = Math.floor(event.endTime + demoOff) + 5;
-            const trackId = event.playerUserID || event.playerSlot;
-            const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
-            watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
-        }
+    // Powerups don't exist on duel / 2v2 maps, so powerupEvents is routinely
+    // empty. Show the empty-state for the powerup table but DO NOT return —
+    // the frag-streaks section below is independent and must still render.
+    if (powerupEvents.length === 0) {
+        emptyMsg.style.display = 'block';
+    } else {
+        emptyMsg.style.display = 'none';
 
-        const powerupDisplay = getPowerupDisplay(event.powerupType);
+        powerupEvents.forEach(event => {
+            const tr = document.createElement('tr');
 
-        tr.innerHTML = `
-            <td class="time-cell time-link">${formatDuration(event.time)}</td>
-            <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
-            <td>${escapeHtml(event.playerName || 'Unknown')}</td>
-            <td>${escapeHtml(event.team || '-')}</td>
-            <td>${event.frags || 0}</td>
-            <td>${Math.round(event.duration)}s</td>
-            <td>${watchCell}</td>
-        `;
+            // Build viewer URL if hub info available
+            let watchCell = '-';
+            if (hubInfo && hubInfo.gameId) {
+                const demoOff = timelineState.demoOffset || 0;
+                const fromTime = Math.max(0, Math.floor(event.time + demoOff) - 10);
+                const toTime = Math.floor(event.endTime + demoOff) + 5;
+                const trackId = event.playerUserID || event.playerSlot;
+                const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
+                watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
+            }
 
-        // Click on time to jump there
-        tr.querySelector('.time-link').addEventListener('click', () => {
-            setCurrentTime(event.time);
+            const powerupDisplay = getPowerupDisplay(event.powerupType);
+
+            tr.innerHTML = `
+                <td class="time-cell time-link">${formatDuration(event.time)}</td>
+                <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
+                <td>${escapeHtml(event.playerName || 'Unknown')}</td>
+                <td>${escapeHtml(event.team || '-')}</td>
+                <td>${event.frags || 0}</td>
+                <td>${Math.round(event.duration)}s</td>
+                <td>${watchCell}</td>
+            `;
+
+            // Click on time to jump there
+            tr.querySelector('.time-link').addEventListener('click', () => {
+                setCurrentTime(event.time);
+            });
+
+            tbody.appendChild(tr);
         });
-
-        tbody.appendChild(tr);
-    });
+    }
 
     // Display frag streaks
     const streakBody = document.getElementById('fragstreaks-body');
@@ -1610,8 +1611,8 @@ function updateDetailView() {
 // ─── Chat Tab ──────────────────────────────────────────────────────────────
 
 // Chat: pixels per second for the full-match scrollable layout
-const CHAT_PX_PER_SEC = 17.5; // ~same density as original 40s/700px window
-const CHAT_ITEM_HEIGHT = 18;
+// (CHAT_PX_PER_SEC and CHAT_ITEM_HEIGHT now live with the rest of the
+// theme constants at the top of this file.)
 
 let chatRendered = false;
 let chatUserScrolling = false;
@@ -3207,20 +3208,8 @@ let mapState = {
     renderDirty: false        // Force redraw on track toggle/reset/etc
 };
 
-const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
-
-// Badge definitions: angle (0=up, clockwise), letter, color (from timeline legend)
-const BADGE_DEFS = [
-    { angle:   0, key: 'q',   letter: 'Q', color: 'rgb(0, 150, 255)' },
-    { angle:  45, key: 'rl',  letter: 'R', color: 'rgb(255, 107, 107)' },
-    { angle:  90, key: 'lg',  letter: 'L', color: 'rgb(0, 217, 255)' },
-    { angle: 135, key: 'sng', letter: 'N', color: 'rgb(180, 140, 100)' },
-    { angle: 180, key: 'mh',  letter: 'M', color: 'rgb(0, 200, 83)' },
-    { angle: 225, key: 'arm', letter: 'A', color: null },
-    { angle: 270, key: 'pe',  letter: 'P', color: 'rgb(255, 0, 0)' },
-    { angle: 315, key: 'r',   letter: 'I', color: 'rgb(255, 235, 59)' },
-];
-const ARMOR_COLORS = { ra: 'rgb(255, 50, 50)', ya: 'rgb(255, 200, 0)', ga: 'rgb(0, 180, 0)' };
+// (PLAYER_SYMBOLS, BADGE_DEFS and ARMOR_COLORS now live with the rest of
+// the theme constants at the top of this file.)
 
 function getActiveBadges(data) {
     const badges = [];
@@ -4275,7 +4264,7 @@ function precomputeFullTrails() {
 // Stroke a fading "X" at a death location, sized to match the player circle.
 // Color is the dead player's team color so kills are immediately attributable
 // without needing to also draw a label.
-const DEATH_X_DURATION = 2.0;
+// (DEATH_X_DURATION lives with the theme constants at the top of this file.)
 function drawDeathX(ctx, x, y, teamIdx, alpha) {
     const r = 8; // a bit smaller than the player symbol circle (radius 13)
     const hex = TEAM_COLORS[teamIdx] || '#ff5050';
@@ -4695,8 +4684,8 @@ function animatePlayback() {
     const now = performance.now();
     const elapsed = (now - mapState.lastRenderTime) / 1000;
 
-    // Throttle to ~30fps
-    if (elapsed < 0.033) return;
+    // Throttle map redraws to PLAYBACK_FPS_MS (~30 fps).
+    if (elapsed < PLAYBACK_FPS_MS / 1000) return;
 
     mapState.currentTime += elapsed * mapState.playbackSpeed;
     mapState.lastRenderTime = now;
