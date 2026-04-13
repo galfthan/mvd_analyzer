@@ -968,50 +968,53 @@ function displayKeyMoments(result) {
     const emptyMsg = document.getElementById('keymoments-empty');
     tbody.innerHTML = '';
 
-    const powerupEvents = result.timelineAnalysis?.powerupEvents || [];
-
-    if (powerupEvents.length === 0) {
-        emptyMsg.style.display = 'block';
-        return;
-    }
-    emptyMsg.style.display = 'none';
-
     // Get hub info for viewer links (from currentResult which may have hubInfo set)
     const hubInfo = currentResult?.hubInfo;
 
-    powerupEvents.forEach(event => {
-        const tr = document.createElement('tr');
+    const powerupEvents = result.timelineAnalysis?.powerupEvents || [];
 
-        // Build viewer URL if hub info available
-        let watchCell = '-';
-        if (hubInfo && hubInfo.gameId) {
-            const demoOff = timelineState.demoOffset || 0;
-            const fromTime = Math.max(0, Math.floor(event.time + demoOff) - 10);
-            const toTime = Math.floor(event.endTime + demoOff) + 5;
-            const trackId = event.playerUserID || event.playerSlot;
-            const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
-            watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
-        }
+    // Powerups don't exist on duel / 2v2 maps, so powerupEvents is routinely
+    // empty. Show the empty-state for the powerup table but DO NOT return —
+    // the frag-streaks section below is independent and must still render.
+    if (powerupEvents.length === 0) {
+        emptyMsg.style.display = 'block';
+    } else {
+        emptyMsg.style.display = 'none';
 
-        const powerupDisplay = getPowerupDisplay(event.powerupType);
+        powerupEvents.forEach(event => {
+            const tr = document.createElement('tr');
 
-        tr.innerHTML = `
-            <td class="time-cell time-link">${formatDuration(event.time)}</td>
-            <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
-            <td>${escapeHtml(event.playerName || 'Unknown')}</td>
-            <td>${escapeHtml(event.team || '-')}</td>
-            <td>${event.frags || 0}</td>
-            <td>${Math.round(event.duration)}s</td>
-            <td>${watchCell}</td>
-        `;
+            // Build viewer URL if hub info available
+            let watchCell = '-';
+            if (hubInfo && hubInfo.gameId) {
+                const demoOff = timelineState.demoOffset || 0;
+                const fromTime = Math.max(0, Math.floor(event.time + demoOff) - 10);
+                const toTime = Math.floor(event.endTime + demoOff) + 5;
+                const trackId = event.playerUserID || event.playerSlot;
+                const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
+                watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
+            }
 
-        // Click on time to jump there
-        tr.querySelector('.time-link').addEventListener('click', () => {
-            setCurrentTime(event.time);
+            const powerupDisplay = getPowerupDisplay(event.powerupType);
+
+            tr.innerHTML = `
+                <td class="time-cell time-link">${formatDuration(event.time)}</td>
+                <td class="powerup-cell ${event.powerupType}">${powerupDisplay}</td>
+                <td>${escapeHtml(event.playerName || 'Unknown')}</td>
+                <td>${escapeHtml(event.team || '-')}</td>
+                <td>${event.frags || 0}</td>
+                <td>${Math.round(event.duration)}s</td>
+                <td>${watchCell}</td>
+            `;
+
+            // Click on time to jump there
+            tr.querySelector('.time-link').addEventListener('click', () => {
+                setCurrentTime(event.time);
+            });
+
+            tbody.appendChild(tr);
         });
-
-        tbody.appendChild(tr);
-    });
+    }
 
     // Display frag streaks
     const streakBody = document.getElementById('fragstreaks-body');
