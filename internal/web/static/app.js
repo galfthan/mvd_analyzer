@@ -454,6 +454,10 @@ function displayResults(result) {
         document.getElementById('duration').textContent = formatDuration(result.duration);
     }
 
+    // Match settings + server info from the new metadata analyzer.
+    displayMatchSettings(result.metadata?.matchSettings);
+    displayServerInfo(result.metadata?.serverInfo);
+
     // Teams from demoInfo
     if (demoInfo && demoInfo.teams) {
         displayTeamsFromDemoInfo(demoInfo);
@@ -658,15 +662,29 @@ function displayPlayerStats(players) {
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
 
+    // Show the handicap column only when at least one player on this demo
+    // has a non-default handicap. KTX omits the JSON field entirely when the
+    // value is 100 (the default), so any non-zero value here means it was
+    // actually set.
+    const showHandicap = sorted.some(p => (p.handicap || 0) > 0 && p.handicap !== 100);
+    document.querySelectorAll('#scoreboard .handicap-col').forEach(el => {
+        el.style.display = showHandicap ? '' : 'none';
+    });
+
     renderTableRows('scoreboard-body', sorted, player => {
         const kills = player.stats?.kills || 0;
         const deaths = player.stats?.deaths || 0;
         const rlKills = player.weapons?.rl?.kills?.enemy || 0;
         const lgKills = player.weapons?.lg?.kills?.enemy || 0;
         const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
+        const botBadge = player.bot
+            ? ` <span class="bot-badge" title="Frogbot${player.bot.skill !== undefined ? ', skill ' + player.bot.skill : ''}${player.bot.customised ? ' (customised)' : ''}">BOT</span>`
+            : '';
+        const handicapCell = `<td class="handicap-col"${showHandicap ? '' : ' style="display: none;"'}>${player.handicap || '-'}</td>`;
         return `
-            <td>${escapeHtml(player.name)}</td>
+            <td>${escapeHtml(player.name)}${botBadge}</td>
             <td>${escapeHtml(player.team || '')}</td>
+            ${handicapCell}
             <td>${player.stats?.frags || 0}</td>
             <td>${efficiency}%</td>
             <td>${kills}</td>
@@ -682,6 +700,141 @@ function displayPlayerStats(players) {
             <td>${player.ping || 0}</td>
         `;
     }, player => teamOrder.indexOf(player.team || ''));
+}
+
+// Long-form names for KTX spawn algorithms (k_spw values). Mirrors
+// respawn_model_name() in ktx/src/g_utils.c — used as a tooltip on the
+// short-form value rendered in the Match Settings panel.
+const SPAWN_LONG_NAMES = {
+    'QW':  'Normal QW respawns',
+    'KTS': 'KT SpawnSafety',
+    'KT':  'Kombat Teams respawns',
+    'KTX': 'KTX respawns',
+    'KT2': 'KTX2 respawns',
+};
+
+// displayMatchSettings renders result.metadata.matchSettings as a labelled
+// grid of cells in the new Match Settings panel. Cells with empty / zero
+// values are skipped so duels don't show "Teamplay 0" etc. The boolean
+// modifier flags (Dmgfrags, NoItems, Midair, …) plus Noweapon and SOCDv2
+// collapse into a single "Modifiers" row of pill-shaped tags below the
+// grid. Hides the whole panel if no settings are available.
+function displayMatchSettings(settings) {
+    const panel = document.getElementById('match-settings-panel');
+    const grid = document.getElementById('match-settings-grid');
+    const modifiersRow = document.getElementById('match-modifiers-row');
+    const modifiersList = document.getElementById('match-modifiers');
+
+    if (!settings) {
+        panel.style.display = 'none';
+        return;
+    }
+
+    const cells = [];
+    const addCell = (label, value, title) => {
+        if (value === undefined || value === null || value === '' || value === 0) return;
+        const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+        cells.push(`
+            <div class="summary-item"${titleAttr}>
+                <label>${escapeHtml(label)}</label>
+                <span>${escapeHtml(String(value))}</span>
+            </div>
+        `);
+    };
+
+    addCell('Mode', settings.mode);
+    addCell('Deathmatch', settings.deathmatch);
+    addCell('Teamplay', settings.teamplay);
+    if (settings.timelimit) addCell('Timelimit', `${settings.timelimit} min`);
+    if (settings.fraglimit) addCell('Fraglimit', settings.fraglimit);
+    if (settings.spawnmodel) {
+        const long = SPAWN_LONG_NAMES[settings.spawnmodel] || 'Unknown spawn algorithm';
+        const kSuffix = settings.spawnK !== undefined ? ` (k_spw=${settings.spawnK})` : '';
+        addCell('Spawnmodel', settings.spawnmodel, `${long}${kSuffix}`);
+    }
+    if (settings.antilag !== undefined && settings.antilag !== 0) {
+        addCell('Antilag', settings.antilag);
+    }
+    if (settings.overtime) {
+        const ot = settings.overtime === 'sd' ? 'sudden death' : `${settings.overtime} min`;
+        addCell('Overtime', ot);
+    }
+    addCell('Powerups', settings.powerups);
+    addCell('Match tag', settings.matchtag);
+
+    grid.innerHTML = cells.join('');
+
+    // Modifier pills — boolean flags + special string flags.
+    const modifiers = [];
+    const addPill = (label, on, title) => {
+        if (!on) return;
+        const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+        modifiers.push(`<span class="modifier-tag"${titleAttr}>${escapeHtml(label)}</span>`);
+    };
+    addPill('Dmgfrags', settings.dmgfrags, 'Damage counts as frags (LGC scoring)');
+    addPill('NoItems',  settings.noItems,  'k_noitems: items disabled');
+    addPill('Midair',   settings.midair,   'k_midair mode');
+    addPill('Instagib', settings.instagib, 'k_instagib mode');
+    addPill('Yawnmode', settings.yawnmode, 'k_yawnmode');
+    addPill('Airstep',  settings.airstep,  'pm_airstep: stair stepping in air');
+    addPill('VWep',     settings.vwep,     'Visible weapon models');
+    if (settings.noweapon) {
+        modifiers.push(`<span class="modifier-tag" title="Disabled weapons">Noweapon: ${escapeHtml(settings.noweapon)}</span>`);
+    }
+    if (settings.socdv2) {
+        modifiers.push(`<span class="modifier-tag" title="SOCD-cleaning mode">SOCDv2: ${escapeHtml(settings.socdv2)}</span>`);
+    }
+    if (modifiers.length > 0) {
+        modifiersList.innerHTML = modifiers.join('');
+        modifiersRow.style.display = '';
+    } else {
+        modifiersRow.style.display = 'none';
+    }
+
+    // Show the panel only if there's anything in it. With the cell-skipping
+    // logic above, an entirely empty matchSettings (parser failure) would
+    // produce zero cells and zero modifiers — hide the panel in that case.
+    panel.style.display = (cells.length > 0 || modifiers.length > 0) ? '' : 'none';
+}
+
+// displayServerInfo renders result.metadata.serverInfo as a 2-column
+// key/value table inside a collapsed <details> panel. Star keys (server
+// system metadata like *version, *admin) sort below regular gameplay
+// cvars. Special-cases the `epoch` key to show a human-readable date
+// alongside the raw unix timestamp.
+function displayServerInfo(serverInfo) {
+    const panel = document.getElementById('server-info-panel');
+    const tbody = document.getElementById('server-info-body');
+
+    if (!serverInfo || Object.keys(serverInfo).length === 0) {
+        panel.style.display = 'none';
+        return;
+    }
+
+    const keys = Object.keys(serverInfo).filter(k => serverInfo[k] !== '' && serverInfo[k] !== undefined);
+    keys.sort((a, b) => {
+        const aStar = a.startsWith('*');
+        const bStar = b.startsWith('*');
+        if (aStar !== bStar) return aStar ? 1 : -1; // star keys go to the bottom
+        return a.localeCompare(b);
+    });
+
+    tbody.innerHTML = '';
+    for (const k of keys) {
+        const v = serverInfo[k];
+        let displayValue = v;
+        if (k === 'epoch') {
+            const ts = parseInt(v, 10);
+            if (!isNaN(ts)) {
+                const dt = new Date(ts * 1000).toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
+                displayValue = `${v} (${dt})`;
+            }
+        }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><code>${escapeHtml(k)}</code></td><td>${escapeHtml(displayValue)}</td>`;
+        tbody.appendChild(tr);
+    }
+    panel.style.display = '';
 }
 
 function displayWeaponStatsTable(players) {
