@@ -190,6 +190,14 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 		}
 	}
 
+	// 1v1 normalization: for duel demos the "team" concept is either
+	// meaningless (arbitrary colour tags) or actively broken (bots have
+	// no team, get dropped from team-keyed aggregates). Rewrite every
+	// team reference to the player's own name so all downstream
+	// consumers still see a uniform team-keyed model, and the UI can
+	// suppress the now-redundant "Per Team" panels.
+	normalizeDuelTeams(result)
+
 	return result, nil
 }
 

@@ -458,6 +458,14 @@ function displayResults(result) {
     displayMatchSettings(result.metadata?.matchSettings);
     displayServerInfo(result.metadata?.serverInfo);
 
+    // Duel-mode styling: the Go-side `normalizeDuelTeams` pass has
+    // already rewritten every team reference to the player's name for
+    // 1v1 demos. Now collapse the redundant "Per Team" panels and the
+    // Teams summary box in the UI so the viewer only sees the per-player
+    // tables. Detected by checking whether every player's team equals
+    // their own name (a property only true after the Go-side rewrite).
+    applyDuelModeUI(result);
+
     // Teams from demoInfo
     if (demoInfo && demoInfo.teams) {
         displayTeamsFromDemoInfo(demoInfo);
@@ -708,6 +716,28 @@ function displayPlayerStats(players) {
             <td>${player.ping || 0}</td>
         `;
     }, player => teamOrder.indexOf(player.team || ''));
+}
+
+// applyDuelModeUI toggles the "Per Team" aggregation panels and the
+// standalone "Teams" summary off when we're rendering a 1v1 demo.
+// Everything else (the per-player scoreboard, weapon stats, item
+// pickups) still renders normally.
+//
+// Detection: the Go `normalizeDuelTeams` pass rewrites every participant
+// team field to their own name for duels, so we can detect duel mode
+// reliably by checking whether every demoInfo player has `team ===
+// name`. This avoids depending on the metadata mode string, which can
+// be "duel" / "1on1" / "LGC" / "Hoony" / missing entirely depending on
+// the server flavour.
+function applyDuelModeUI(result) {
+    const players = result.demoInfo?.players || [];
+    const isDuel = players.length === 2 && players.every(p => p.team === p.name);
+
+    // Toggle a class on <body> so CSS can drive the hiding. Using a
+    // class (instead of inline style writes) means the UI can re-render
+    // cleanly on demo reload without leaking stale display:none values
+    // onto unrelated elements.
+    document.body.classList.toggle('duel-mode', isDuel);
 }
 
 // Long-form names for KTX spawn algorithms (k_spw values). Mirrors

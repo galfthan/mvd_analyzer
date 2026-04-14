@@ -311,6 +311,24 @@ header p {
     color: var(--fg-default);
 }
 
+/* --- Duel mode: hide redundant "Per Team" aggregates ---
+ *
+ * When the Go-side normalizer detects a 1v1 it rewrites every team
+ * reference to the player's own name, so the "Per Team" tables would
+ * just restate the "Per Player" tables with different headers. These
+ * selectors hide:
+ *   - the standalone Teams summary panel (#teams-panel)
+ *   - the "Per Team" h4 headings above each stats block
+ *   - the "Per Team" aggregate tables themselves
+ *   - the "Per Player" heading (redundant once there's no sibling)
+ */
+body.duel-mode .team-aggregate-panel,
+body.duel-mode .team-aggregate-heading,
+body.duel-mode .team-aggregate-table,
+body.duel-mode .per-player-heading {
+    display: none !important;
+}
+
 /* --- Match Settings: modifier pills (Dmgfrags / Midair / etc.) --- */
 .modifier-label {
     display: block;
