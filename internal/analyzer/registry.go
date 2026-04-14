@@ -116,6 +116,10 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 			if ta, ok := output.(*TimelineAnalysisResult); ok {
 				result.TimelineAnalysis = ta
 			}
+		case "metadata":
+			if m, ok := output.(*MetadataResult); ok {
+				result.Metadata = m
+			}
 		}
 	}
 
@@ -194,6 +198,7 @@ func NewDefaultRegistry() *Registry {
 	r := NewRegistry()
 	// DemoInfo first so it's available in Context for other analyzers
 	r.Register(NewDemoInfoAnalyzer())
+	r.Register(NewMetadataAnalyzer())
 	r.Register(NewMatchAnalyzer())
 	r.Register(NewFragAnalyzer())
 	r.Register(NewMessagesAnalyzer())

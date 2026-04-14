@@ -26,6 +26,9 @@ const (
 	EventDamage
 	EventDemoInfo
 	EventIntermission
+	EventStuffText
+	EventCenterPrint
+	EventServerInfo
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -38,6 +41,45 @@ type IntermissionEvent struct {
 
 func (e *IntermissionEvent) EventType() EventType { return EventIntermission }
 func (e *IntermissionEvent) EventTime() float64   { return e.Time }
+
+// StuffTextEvent is emitted for svc_stufftext (cmd 9). The server pushes
+// console commands into the client this way — at connection time it sends
+// `fullserverinfo "\key\value\..."` (the complete cvar dump), and during
+// gameplay it sends `//ktx ...` style hints, weapon-stat tickers, and
+// downloadable map / sound hints.
+type StuffTextEvent struct {
+	Command string
+	Time    float64
+}
+
+func (e *StuffTextEvent) EventType() EventType { return EventStuffText }
+func (e *StuffTextEvent) EventTime() float64   { return e.Time }
+
+// CenterPrintEvent is emitted for svc_centerprint (cmd 26). KTX uses this
+// during the match countdown to render the full match settings table
+// (Mode / Spawnmodel / Antilag / Timelimit / etc) on every connected
+// client's HUD. The countdown text is the cleanest source of structured
+// match settings in a demo.
+type CenterPrintEvent struct {
+	Message string
+	Time    float64
+}
+
+func (e *CenterPrintEvent) EventType() EventType { return EventCenterPrint }
+func (e *CenterPrintEvent) EventTime() float64   { return e.Time }
+
+// ServerInfoEvent is emitted for svc_serverinfo (cmd 52), which is a
+// single-key/value serverinfo update sent mid-game (status changes,
+// matchtag, fpd flags, mode, etc). The initial bulk serverinfo is sent
+// via `fullserverinfo` stufftext, not via this command.
+type ServerInfoEvent struct {
+	Key   string
+	Value string
+	Time  float64
+}
+
+func (e *ServerInfoEvent) EventType() EventType { return EventServerInfo }
+func (e *ServerInfoEvent) EventTime() float64   { return e.Time }
 
 // maxHiddenBlockSize caps the length of a single hidden-message block
 // (dem_multiple with player_mask=0). The largest legitimate block in the
@@ -219,6 +261,49 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 				return nil
 			}
 			if err := p.emit(&IntermissionEvent{Time: msg.Time}); err != nil {
+				return err
+			}
+
+		case mvd.SvcStuffText:
+			// Stuffed console command — at t=0 includes `fullserverinfo "..."`
+			// (complete cvar dump), and during gameplay carries `//ktx ...`
+			// hints, weapon-stat tickers, and download requests.
+			s, err := r.ReadString()
+			if err != nil {
+				p.warn(msg.Time, "parse_error", "svc_stufftext: %v", err)
+				return nil
+			}
+			if err := p.emit(&StuffTextEvent{Command: s, Time: msg.Time}); err != nil {
+				return err
+			}
+
+		case mvd.SvcCenterPrint:
+			// HUD center text — KTX renders the match settings table here
+			// during the countdown.
+			s, err := r.ReadString()
+			if err != nil {
+				p.warn(msg.Time, "parse_error", "svc_centerprint: %v", err)
+				return nil
+			}
+			if err := p.emit(&CenterPrintEvent{Message: s, Time: msg.Time}); err != nil {
+				return err
+			}
+
+		case mvd.SvcServerInfo:
+			// Single-key serverinfo update (status, matchtag, fpd, ...).
+			// Bulk serverinfo arrives via the `fullserverinfo` stufftext
+			// command at connection time.
+			k, err := r.ReadString()
+			if err != nil {
+				p.warn(msg.Time, "parse_error", "svc_serverinfo key: %v", err)
+				return nil
+			}
+			v, err := r.ReadString()
+			if err != nil {
+				p.warn(msg.Time, "parse_error", "svc_serverinfo value: %v", err)
+				return nil
+			}
+			if err := p.emit(&ServerInfoEvent{Key: k, Value: v, Time: msg.Time}); err != nil {
 				return err
 			}
 
@@ -425,9 +510,6 @@ func skipCommand(r *mvd.BufferReader, cmd byte, floatCoords bool, fteExt uint32)
 		return nil
 	case mvd.SvcSound:
 		return skipSound(r, floatCoords)
-	case mvd.SvcStuffText:
-		_, err := r.ReadString()
-		return err
 	case mvd.SvcSetAngle:
 		return r.Skip(3) // 3 angles (bytes)
 	case mvd.SvcLightStyle:
@@ -445,9 +527,6 @@ func skipCommand(r *mvd.BufferReader, cmd byte, floatCoords bool, fteExt uint32)
 		return r.Skip(5) // player + float
 	case mvd.SvcSetPause:
 		return r.Skip(1)
-	case mvd.SvcCenterPrint:
-		_, err := r.ReadString()
-		return err
 	case mvd.SvcSpawnBaseline:
 		// svc_spawnbaseline has a 2-byte entity number prefix before the baseline body.
 		// Ref: ezquake cl_parse.c case svc_spawnbaseline — MSG_ReadShort() + CL_ParseBaseline().
@@ -514,13 +593,6 @@ func skipCommand(r *mvd.BufferReader, cmd byte, floatCoords bool, fteExt uint32)
 			return err
 		}
 		_, err = r.ReadString()
-		return err
-	case mvd.SvcServerInfo:
-		_, err := r.ReadString() // key
-		if err != nil {
-			return err
-		}
-		_, err = r.ReadString() // value
 		return err
 	case mvd.SvcUpdatePL:
 		return r.Skip(2) // player + pl byte
