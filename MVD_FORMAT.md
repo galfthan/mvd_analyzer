@@ -364,6 +364,8 @@ The payload in dem_read, dem_all, dem_multiple, dem_single, and dem_stats messag
 | 11 | `svc_serverdata` | Server initialization data |
 | 12 | `svc_lightstyle` | Set light style |
 | 14 | `svc_updatefrags` | Update player frags |
+| 16 | `svc_stopsound` | Stop a playing sound (rare in MVD) |
+| 19 | `svc_damage` | Local damage feedback to one player |
 | 20 | `svc_spawnstatic` | Spawn static entity |
 | 21 | `svc_fte_spawnstatic2` | FTE extended static entity |
 | 22 | `svc_spawnbaseline` | Entity baseline |
@@ -1049,7 +1051,10 @@ If `type_id == 0xFFFF`, read another short for extended type range.
 | 0x0008 | `mvdhidden_usercmd_weapons_ss` | Server-side weapon data | **Requires server flag** |
 | 0x0009 | `mvdhidden_usercmd_weapon_instruction` | Weapon instruction | **Requires server flag** |
 | 0x000A | `mvdhidden_paused_duration` | Paused time (QTV only) | QTV only |
+| 0x000B | `mvdhidden_demo_start_timestamp_ms` | Unix timestamp (ms) at demo start (uint64) | Newer mvdsv |
 | 0xFFFF | `mvdhidden_extended` | Extended type (read next short) | - |
+
+**Newer types**: the table above tracks qwprot as of 2026. Older parsers will warn `unknown hidden message type 0x000b` on any demo recorded by an mvdsv that includes the [PR #17 / `500bd4b`](https://github.com/QW-Group/qwprot/commit/500bd4b) addition; the payload is a single `uint64` little-endian Unix-millisecond timestamp captured at the moment the server opened the MVD file (intended for stream/voice synchronisation). It's safe to skip if you don't consume it, but recognising it explicitly cleans up the warning stream.
 
 ### Hidden Message Availability
 
@@ -1820,17 +1825,20 @@ Entity update messages are the most complex part of the MVD format. They use var
 
 ### svc_spawnbaseline (22) — Entity Baseline
 
-Sets the initial state for an entity. Fixed-size format:
+Sets the initial state for an entity. **The 2-byte entity number is a prefix to the baseline body — `svc_spawnstatic` (20) does *not* have this prefix.** Mixing them up costs you 2 bytes of drift per occurrence.
+
+*Source: ezquake `cl_parse.c` — `case svc_spawnbaseline: i = MSG_ReadShort(); CL_ParseBaseline(&cl_entities[i].baseline);`*
 
 ```
 Offset  Size     Field
 ------  ----     -----
 0       1        svc_spawnbaseline (22)
-1       1        modelindex
-2       1        frame
-3       1        colormap
-4       1        skinnum
-5       2 or 4   origin[0] (coord or float if FLOATCOORDS)
+1       2        entity_number (short)        ← unique to svc_spawnbaseline
+3       1        modelindex
+4       1        frame
+5       1        colormap
+6       1        skinnum
+7       2 or 4   origin[0] (coord or float if FLOATCOORDS)
 +       1        angles[0] (angle byte)
 +       2 or 4   origin[1]
 +       1        angles[1]
@@ -1838,7 +1846,7 @@ Offset  Size     Field
 +       1        angles[2]
 ```
 
-**Total size**: 13 bytes (standard coords) or 19 bytes (float coords)
+**Total size**: 15 bytes (standard coords) or 21 bytes (float coords).
 
 ### svc_fte_spawnbaseline2 (66) — FTE Extended Baseline
 
@@ -1852,8 +1860,8 @@ Uses entity delta format with a 2-byte flag header:
 
 ### svc_spawnstatic (20) / svc_fte_spawnstatic2 (21)
 
-- `svc_spawnstatic (20)`: Same format as `svc_spawnbaseline` (13 or 19 bytes)
-- `svc_fte_spawnstatic2 (21)`: Same format as `svc_fte_spawnbaseline2` (flag word + entity delta)
+- `svc_spawnstatic (20)`: A bare baseline body — **no 2-byte entity-number prefix**. Total size **13 bytes** (short coords) or **19 bytes** (float coords). ezquake's `CL_ParseStatic(false)` calls `CL_ParseBaseline` directly with no leading short.
+- `svc_fte_spawnstatic2 (21)`: Same wire format as `svc_fte_spawnbaseline2` (2-byte flag word + entity delta fields). Requires `FTE_PEXT_SPAWNSTATIC2` to have been negotiated in `svc_serverdata`.
 
 ### svc_packetentities (47) — Entity State Updates
 
@@ -2090,6 +2098,25 @@ In `broken.mvd.gz` (a real demo we hit during development) a run of six `TE_BLOO
 
 ---
 
+### svc_damage (19)
+
+Local damage feedback the server originally addressed to a single live player. In a server-recorded MVD it shows up inside `dem_single` blocks and inside `dem_all` blocks during multi-player matches. Carries no useful information for analysis (it's just the screen-tint and sbar pain-frame trigger), but you **must** skip it correctly or every command after it in the same payload is lost.
+
+*Source: qwprot `protocol.h` — `#define svc_damage 19  // [byte] [byte] [vec3]`. Body parser: ezquake `cl_view.c::V_ParseDamage()`.*
+
+```
+Offset  Size      Field
+------  ----      -----
+0       1         svc_damage (19)
+1       1         armor_taken
+2       1         blood_taken
+3       6 or 12   from (3 coords, short or float depending on FLOATCOORDS)
+```
+
+**Total size after the cmd byte**: **8 bytes** (short coords) or **14 bytes** (float coords).
+
+**Easy to miss**: `svc_damage` is not in NetQuake — it was added in QuakeWorld — and a parser written from a NQ-era reference will treat byte `0x13` as unknown. In a busy 4-on-4 KTX demo this happens **thousands** of times per match (every hit on every player), and each occurrence abandons the rest of the payload it landed in, which routinely silently drops `svc_updateuserinfo` for late-joining players, `svc_updatefrags` for the next few seconds, and any other svc that happened to be queued behind it.
+
 ### svc_stufftext (9)
 
 ```
@@ -2120,6 +2147,46 @@ Offset  Size  Field
 2       var   pattern (null-terminated string, e.g., "mmmaaaggg")
 ```
 
+### svc_spawnstaticsound (29)
+
+Looping ambient sound source attached to a fixed position (lava bubbles, water hum, generator drone). Sent once per source during the initial `dem_all` setup burst.
+
+*Source: ezquake `cl_parse.c::CL_ParseStaticSound`.*
+
+```
+Offset  Size      Field
+------  ----      -----
+0       1         svc_spawnstaticsound (29)
+1       6 or 12   origin (3 coords, short or float)
++       1         sound_num
++       1         volume
++       1         attenuation
+```
+
+**Total size after the cmd byte**: **9 bytes** (short coords) or **15 bytes** (float coords). Note: it is *not* `3 + 3 + 3 + 2` — there is no spare byte. Earlier versions of this analyzer skipped 11/17 bytes here and accumulated 2 bytes of drift per static-sound entry, which on a busy map blew out the entity setup packet entirely.
+
+### svc_intermission (30)
+
+The server has entered the post-match scoreboard / camera-orbit screen. After this command the server stops sending stat updates and the recorded view freezes — but `svc_playerinfo` position updates continue for several seconds while the camera glides into place.
+
+This is the **only reliable end-of-match signal** in some demos. KTX historically broadcasts a `bprint` like `"The match is over\n"` at the same instant, but not every server flavour or every game mode does, so a print-based detector will miss demos like the `2c8bb5e3…` one in `demos/` that never emit a matching string. `svc_intermission` is always present.
+
+*Source: qwprot `protocol.h` — `#define svc_intermission 30  // [vec3_t] origin [vec3_t] angle`. Note that "vec3_t angle" here means three angle *bytes*, not three short angles.*
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_intermission (30)
+1       6     camera origin (3 short coords)
+7       3     camera angles (3 angle bytes, 1 byte each)
+```
+
+**Total size after the cmd byte**: **9 bytes** under standard short coords. With `FTE_PEXT_FLOATCOORDS` the origin becomes 12 bytes (3 floats), so total is **15 bytes** — but in practice intermission camera coords are sent at the standard short precision even in FLOATCOORDS demos because the camera doesn't need sub-unit accuracy. Verify against your reference implementation if you support FTE FLOATCOORDS.
+
+**Common bug**: assuming "vec3 + vec3" means 12 bytes (3 + 3 shorts). It's `6 + 3 = 9`. Skipping 12 over-runs the end-of-payload by 3 bytes on the very last `dem_all` block of the demo, causing a parse-error warning right at `EndOfDemo`.
+
+**Suggested handling**: emit an `IntermissionEvent` (or whatever your event abstraction looks like) so downstream stat/timeline analyzers can stop sampling. KTX uses several stat fields as out-of-band HUD signalling channels (see [KTX Stat Sentinels](#ktx-stat-sentinels-out-of-band-huge-stat-values) below), and once the camera enters intermission those sentinels stop being overwritten, freezing into every subsequent sample.
+
 ### svc_updateping (36)
 
 ```
@@ -2129,6 +2196,8 @@ Offset  Size  Field
 1       1     player_number
 2       2     ping (short, milliseconds)
 ```
+
+**Total size after the cmd byte**: 3 bytes. The ping is a `short`, **not** a byte. Treating it as a 2-byte payload (1 byte player + 1 byte ping) drifts by 1 byte per `svc_updateping` — and `svc_updateping` is sent once per player per second, so a ~20-minute 4-on-4 demo accumulates **9600 byte-drifts** that present as completely random "unknown svc command" warnings spread across the demo, with one initial setup-packet drop that loses ~5 of 8 players' `svc_updateuserinfo` (worked example: hub demo 121329 — analyzer rendered only 3 of 8 players in the timeline until this single byte was fixed).
 
 ### svc_updatepl (53)
 
@@ -2307,6 +2376,33 @@ def parse_network_message(data):
 
 8. **`svc_setinfo` is a real command you must handle**: don't fall back to the generic skipper. See the [`svc_setinfo`](#svc_setinfo-51) section. Mid-game name/team/skin changes flow through here, not through `svc_updateuserinfo`.
 
+9. **Use `svc_intermission` (30) — not just bprint strings — to detect end of match**: KTX is supposed to broadcast `"The match is over"` on timelimit/fraglimit hit, but in real demos in the wild this print is missing roughly half the time. `svc_intermission` is always sent, so it's the reliable end-of-match signal. Stop sampling player state once you see it; otherwise the post-intermission camera glide keeps producing buckets full of stale (and often sentinel-poisoned) values.
+
+### KTX stat sentinels (out-of-band huge stat values)
+
+KTX overloads several player stat fields as out-of-band signalling channels. The values arrive via normal `svc_updatestatlong` and look like real stats, but they are HUD signalling encoded so that legitimate values can't collide with them. Filter them in your stat handler — clamping to "real" maximums is the simplest correct fix, and downstream code will not miss anything (the values are display-side annotations, not gameplay state).
+
+| Stat | Sentinel pattern | Meaning | Source |
+|------|------------------|---------|--------|
+| `STAT_HEALTH` (0) | `1000 + damage` | Damage-indicator: attacker dealt this much damage on the last hit | [`ktx/src/combat.c:1001`](https://github.com/QW-Group/ktx/blob/master/src/combat.c#L1001) |
+| `STAT_ACTIVEAMMO` (10) | `1000 + damage` | Damage-indicator: victim took this much damage on the last hit | [`ktx/src/combat.c:996`](https://github.com/QW-Group/ktx/blob/master/src/combat.c#L996) |
+| `STAT_ARMOR` (4) | `velocity + 1000` (when `< 1000`), or `-velocity` (when `≥ 1000`) | Pre-match speed-meter (KF_SPEED keyflag): packs horizontal speed | [`ktx/src/client.c:4329`](https://github.com/QW-Group/ktx/blob/master/src/client.c#L4329) |
+| `STAT_FRAGS` (1) | `velocity / 1000` | Pre-match speed-meter: thousands digit of speed | [`ktx/src/client.c:4330`](https://github.com/QW-Group/ktx/blob/master/src/client.c#L4330) |
+| `STAT_SHELLS`/`NAILS`/`ROCKETS`/`CELLS` | `100 + (vertical_velocity-derived bytes)` | Pre-match speed-meter: vertical velocity packed across ammo counters | [`ktx/src/client.c:4331-4334`](https://github.com/QW-Group/ktx/blob/master/src/client.c#L4331) |
+
+**Why you only see them after match end**: during gameplay the sentinel value is transient — KTX writes it for one server frame and overwrites it with the real value the next frame, so a 1 s aggregation window almost always picks the real value. After match end, KTX stops overwriting (`match_over` is true), and whatever sentinel a player had on their last damage hit gets frozen into every subsequent sample.
+
+**Recommended filter**:
+
+```go
+case mvd.StatHealth:
+    if e.Value <= 250 { state.health = e.Value }   // ignore 1000+dmg sentinel
+case mvd.StatArmor:
+    if e.Value <= 200 { state.armor = e.Value }    // ignore velocity sentinel
+```
+
+Combined with stopping all sampling at `svc_intermission`, this completely eliminates post-match `health=1000 / armor=1000` noise on the timeline.
+
 ### Common Parsing Issues
 
 | Issue | Solution |
@@ -2318,6 +2414,10 @@ def parse_network_message(data):
 | One player's per-player health/armor stack is empty in the timeline view | Slot↔demoinfo bridge failed — usually the userinfo `name` differs from the demoinfo display name and your join is by string equality. Use `(team, frags)` matching, fall back to userinfo name on failure. |
 | One player's frag deltas attributed to another player | Naïve `frags → demoInfoPlayer` mapping collided on a tied frag count. Key by `(team, frags)` and require strict uniqueness; do not commit ambiguous mappings. |
 | Sudden 9-digit health/armor reading on one player for several seconds | Parser drifted inside a `svc_temp_entity` run (almost always TE_BLOOD or TE_GUNSHOT — both carry an extra `byte count`) and misread later bytes as `svc_updatestatlong`. Fix `skipTempEntity`, do **not** clamp the value — clamping just hides the upstream drift. |
+| Only some players show up in the timeline; missing players have full stats in the demoinfo JSON and obituaries but no per-player health/armor/position | Either (a) a `svc_damage` (cmd 19) handler is missing — the QW-only command isn't in NetQuake refs and an unhandled cmd 19 abandons the rest of every payload it lands in, including bursts of `svc_updateuserinfo`; or (b) `svc_updateping` (cmd 36) is being skipped as 2 bytes instead of 3 (1 byte player + 2 byte ping `short`), causing 1-byte drift per ping update. Real-world worked example: hub demo 121329 — only 3 of 8 players appeared until both bugs were fixed. |
+| Hundreds or thousands of `unknown svc_*` warnings scattered across one demo, with no obvious starting point | Almost certainly drift compounding from a small per-occurrence skip-length error somewhere upstream. Don't chase the warnings individually — instead bisect by skipping recent additions and re-running the diagnostic on a known-good demo. The likely culprits are the variable-length offenders (`svc_temp_entity`, `svc_packetentities`, `svc_playerinfo`) or off-by-one fixed lengths (`svc_updateping`, `svc_intermission`, `svc_spawnstaticsound`, `svc_spawnbaseline`'s entity prefix). |
+| Player health stuck at `1000`/`1042`/`1078`/etc. for several seconds at end of match | KTX writes `health = 1000 + damage` and `armorvalue = velocity + 1000` as out-of-band HUD signalling — see [KTX Stat Sentinels](#ktx-stat-sentinels-out-of-band-huge-stat-values). The values get frozen at intermission when KTX stops overwriting them. Filter `health > 250` / `armor > 200` at the stat handler and stop sampling on `svc_intermission`. |
+| `unknown_svc: svc_intermission (cmd 30), 9 bytes remaining` warning at the very end of a demo | `skipCommand` is reading 12 bytes for `svc_intermission` (assuming "vec3 origin + vec3 angles" means 6 + 6). The angles are *3 bytes* (1 byte each), not 3 shorts — total is 6 + 3 = 9. |
 | Zero duration | Ensure time_delta accumulation is correct (milliseconds) |
 | Damage values too high | Cap damage at victim's health (MVD has unbound damage) |
 
@@ -2576,6 +2676,13 @@ Enables `mvdhidden_usercmd` (0x0001) recording per player. Used primarily for ra
 - Added [The userinfo `name` is not always the displayed netname](#the-userinfo-name-is-not-always-the-displayed-netname) covering the KTX auth-override case and the recommended `(team, frags)` slot↔demoinfo bridging strategy with strict-uniqueness check.
 - Documented [`svc_setinfo`](#svc_setinfo-51) as a real command consumers must handle (single-key userinfo updates flow through here, not `svc_updateuserinfo`).
 - Strengthened the parsing-pitfalls and robustness tips with a "bail, don't guess" rule for unknown commands and TE types, and a cross-reference between the four variable-length offenders (`svc_temp_entity`, `svc_sound`, `svc_playerinfo`, `svc_packetentities`).
+- Added [`svc_damage`](#svc_damage-19) (cmd 19, QW-only, 8/14 bytes), missing from earlier drafts. An unhandled `svc_damage` was responsible for thousands of payload aborts per demo and was the largest single cause of dropped `svc_updateuserinfo` / `svc_updatefrags` data in real KTX MVDs. Reference: hub demo 121329 — analyzer rendered only 3 of 8 players in the timeline because the initial userinfo packet kept getting truncated mid-stream.
+- Corrected [`svc_spawnbaseline`](#svc_spawnbaseline-22--entity-baseline) total size: it has a **2-byte entity-number prefix** (15/21 bytes total), unlike `svc_spawnstatic` (13/19) which the doc previously claimed shared the same format. Source: ezquake `cl_parse.c case svc_spawnbaseline: i = MSG_ReadShort(); CL_ParseBaseline(...)`.
+- Corrected [`svc_intermission`](#svc_intermission-30) size: it's **9 bytes** (3 short coords + 3 angle bytes), not 12. Promoted it from a pure skip target to an emitted event because it's the only reliable end-of-match signal in some demos (KTX's `"the match is over"` bprint is missing from a meaningful fraction of real demos).
+- Corrected [`svc_updateping`](#svc_updateping-36): the ping is a **short** (2 bytes), not a byte. Total payload after the cmd byte is 3 bytes, not 2. A 1-byte drift here, multiplied across the per-second ping broadcasts of an 8-player match, was the actual root cause of the 121329 player-loss bug.
+- Added [`svc_spawnstaticsound`](#svc_spawnstaticsound-29) (cmd 29) with the correct 9/15 byte size. Earlier versions of the analyzer were skipping 11/17 bytes here — drift in setup-packet ambient-sound entries silently corrupted the entity baseline burst that follows.
+- Added [KTX stat sentinels](#ktx-stat-sentinels-out-of-band-huge-stat-values) section covering KTX's reuse of `STAT_HEALTH`/`STAT_ARMOR`/`STAT_FRAGS`/ammo as out-of-band HUD signalling channels (`health = 1000 + damage`, `armorvalue = velocity + 1000`). These are invisible during gameplay because they get overwritten next frame, but freeze into post-intermission samples — the canonical fix is filter-at-stat-handler combined with stop-sampling-at-`svc_intermission`.
+- Added `mvdhidden_demo_start_timestamp_ms` (0x000B) to the [Hidden Message Types](#hidden-message-types) table. Newer mvdsv builds emit this 8-byte uint64 unix-millisecond timestamp at demo start for stream/voice synchronisation; older parsers will report it as `unknown_hidden 0x000b`.
 
 ### MVD_PEXT1 Hidden Message History
 
@@ -2585,6 +2692,7 @@ The hidden message system (`MVD_PEXT1_HIDDEN_MESSAGES`, bit 5 = 0x20) was added 
 - **0x0001 - usercmd**: Player input commands
 - **0x0003 - demoinfo**: Embedded JSON metadata (match info, player stats)
 - **0x0007 - dmgdone**: Damage events with attacker, victim, weapon, and amount
+- **0x000B - demo_start_timestamp_ms** *(2026, qwprot PR #17)*: uint64 unix-millisecond timestamp captured at demo start, for synchronising voice recordings / stream overlays with the demo timeline.
 
 ### Damage Tracking Evolution
 
