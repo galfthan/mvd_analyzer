@@ -131,6 +131,8 @@ func (a *DemoInfoAnalyzer) parseBlocks() *DemoInfoResult {
 			BottomColor: p.BottomColor,
 			Ping:        p.Ping,
 			Login:       p.Login,
+			Handicap:    p.Handicap,
+			Bot:         p.Bot,
 			Stats:       p.Stats,
 			Dmg:         p.Dmg,
 			Spree:       p.Spree,
@@ -203,6 +205,7 @@ type DemoInfoPlayerRaw struct {
 	Control     float64                      `json:"control,omitempty"`
 	Speed       *DemoInfoSpeed               `json:"speed,omitempty"`
 	Handicap    int                          `json:"handicap,omitempty"`
+	Bot         *DemoInfoBot                 `json:"bot,omitempty"`
 	Weapons     map[string]*DemoInfoWeaponRaw `json:"weapons,omitempty"`
 	Items       map[string]*DemoInfoItemRaw   `json:"items,omitempty"`
 }

@@ -311,6 +311,102 @@ header p {
     color: var(--fg-default);
 }
 
+/* --- Duel mode: hide redundant "Per Team" aggregates ---
+ *
+ * When the Go-side normalizer detects a 1v1 it rewrites every team
+ * reference to the player's own name, so the "Per Team" tables would
+ * just restate the "Per Player" tables with different headers. These
+ * selectors hide:
+ *   - the standalone Teams summary panel (#teams-panel)
+ *   - the "Per Team" h4 headings above each stats block
+ *   - the "Per Team" aggregate tables themselves
+ *   - the "Per Player" heading (redundant once there's no sibling)
+ */
+body.duel-mode .team-aggregate-panel,
+body.duel-mode .team-aggregate-heading,
+body.duel-mode .team-aggregate-table,
+body.duel-mode .per-player-heading {
+    display: none !important;
+}
+
+/* --- Match Settings: modifier pills (Dmgfrags / Midair / etc.) --- */
+.modifier-label {
+    display: block;
+    color: #6b7d99;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.modifier-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.modifier-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    background: var(--bg-panel);
+    color: var(--accent-cyan);
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border: 1px solid rgba(0, 217, 255, 0.25);
+}
+
+/* --- Server Info: collapsible cvar table --- */
+#server-info-panel details > summary {
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+#server-info-panel details > summary::-webkit-details-marker {
+    display: none;
+}
+#server-info-panel details > summary::before {
+    content: '▶ ';
+    color: var(--accent-cyan);
+    font-size: 0.85rem;
+    margin-right: 6px;
+}
+#server-info-panel details[open] > summary::before {
+    content: '▼ ';
+}
+
+.serverinfo-table {
+    margin-top: 12px;
+    width: auto;
+}
+.serverinfo-table td:first-child code {
+    color: var(--accent-cyan-dim);
+    font-size: 0.85rem;
+}
+.serverinfo-table td:nth-child(2) {
+    color: var(--fg-default);
+    font-size: 0.85rem;
+    word-break: break-all;
+}
+
+/* --- Scoreboard: bot badge next to player name --- */
+.bot-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    margin-left: 6px;
+    background: rgba(255, 165, 0, 0.18);
+    color: #ffb347;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(255, 165, 0, 0.4);
+    vertical-align: middle;
+}
+
 .teams-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

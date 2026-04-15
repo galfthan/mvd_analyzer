@@ -100,15 +100,36 @@
                     </div>
                 </div>
 
-                <div id="teams-panel" class="panel">
+                <div id="match-settings-panel" class="panel" style="display: none;">
+                    <h3>Match Settings</h3>
+                    <div class="summary-grid" id="match-settings-grid"></div>
+                    <div id="match-modifiers-row" style="margin-top: 15px; display: none;">
+                        <label class="modifier-label">Modifiers</label>
+                        <div id="match-modifiers" class="modifier-list"></div>
+                    </div>
+                </div>
+
+                <div id="server-info-panel" class="panel" style="display: none;">
+                    <details>
+                        <summary><h3 style="display: inline-block; margin: 0;">Server Info</h3></summary>
+                        <table id="server-info-table" class="stats-table serverinfo-table">
+                            <thead>
+                                <tr><th>Key</th><th>Value</th></tr>
+                            </thead>
+                            <tbody id="server-info-body"></tbody>
+                        </table>
+                    </details>
+                </div>
+
+                <div id="teams-panel" class="panel team-aggregate-panel">
                     <h3>Teams</h3>
                     <div id="teams-list" class="teams-list"></div>
                 </div>
 
                 <div id="players-panel" class="panel">
                     <h3>Basic Stats</h3>
-                    <h4>Per Team</h4>
-                    <table id="player-stats-team-table" class="stats-table">
+                    <h4 class="team-aggregate-heading">Per Team</h4>
+                    <table id="player-stats-team-table" class="stats-table team-aggregate-table">
                         <thead>
                             <tr>
                                 <th>Team</th>
@@ -129,12 +150,13 @@
                         </thead>
                         <tbody id="player-stats-team-body"></tbody>
                     </table>
-                    <h4>Per Player</h4>
+                    <h4 class="per-player-heading">Per Player</h4>
                     <table id="scoreboard" class="stats-table">
                         <thead>
                             <tr>
                                 <th>Player</th>
                                 <th>Team</th>
+                                <th class="handicap-col" title="Player handicap (only shown when at least one player has a non-default handicap)">HC</th>
                                 <th title="Total frags (kills minus suicides/teamkills)">Frags</th>
                                 <th title="Kill efficiency: kills / (kills + deaths)">Eff</th>
                                 <th title="Enemy kills">Kills</th>
@@ -156,8 +178,8 @@
 
                 <div id="weapons-summary-panel" class="panel">
                     <h3>Weapon Stats</h3>
-                    <h4>Per Team</h4>
-                    <table id="weapon-stats-team-table" class="stats-table weapon-stats-split">
+                    <h4 class="team-aggregate-heading">Per Team</h4>
+                    <table id="weapon-stats-team-table" class="stats-table weapon-stats-split team-aggregate-table">
                         <thead>
                             <tr>
                                 <th rowspan="2">Team</th>
@@ -179,7 +201,7 @@
                         </thead>
                         <tbody id="weapon-stats-team-body"></tbody>
                     </table>
-                    <h4>Per Player</h4>
+                    <h4 class="per-player-heading">Per Player</h4>
                     <table id="weapon-stats-table" class="stats-table weapon-stats-split">
                         <thead>
                             <tr>
@@ -206,8 +228,8 @@
 
                 <div id="items-panel" class="panel">
                     <h3>Item Pickups & Drops</h3>
-                    <h4>Per Team</h4>
-                    <table id="items-team-table" class="stats-table">
+                    <h4 class="team-aggregate-heading">Per Team</h4>
+                    <table id="items-team-table" class="stats-table team-aggregate-table">
                         <thead>
                             <tr>
                                 <th>Team</th>
@@ -228,7 +250,7 @@
                         </thead>
                         <tbody id="items-team-body"></tbody>
                     </table>
-                    <h4>Per Player</h4>
+                    <h4 class="per-player-heading">Per Player</h4>
                     <table id="items-table" class="stats-table">
                         <thead>
                             <tr>
