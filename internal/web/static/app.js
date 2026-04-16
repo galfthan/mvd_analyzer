@@ -1425,15 +1425,20 @@ function resetTimelineState() {
 
     // Clear all timeline graph containers
     const containers = [
-        'tl-axis', 'detail-graph', 'detail-axis',
-        'powerup-lines-top', 'powerup-lines-bottom',
-        'health-armor-graph', 'health-axis', 'frags-graph', 'frags-axis',
-        'score-graph', 'score-axis', 'kill-messages', 'team-a-messages', 'team-b-messages'
+        'tl-axis', 'kill-messages', 'team-a-messages', 'team-b-messages'
     ];
     containers.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '';
     });
+    // Clear canvases
+    for (const cid of ['detail-graph-canvas', 'health-armor-canvas', 'frags-canvas', 'score-canvas']) {
+        const c = document.getElementById(cid);
+        if (c && c.getContext) {
+            const ctx = c.getContext('2d');
+            ctx.clearRect(0, 0, c.width, c.height);
+        }
+    }
 }
 
 function displayTimelineAnalysis(result) {
@@ -1489,15 +1494,6 @@ function displayTimelineAnalysis(result) {
     renderChatMessages();
 }
 
-// Calculate optimal bin size based on selection duration
-function getOptimalBinSize(selectionDuration) {
-    if (selectionDuration <= 300) return 1;   // ≤5min: 1s bins
-    if (selectionDuration <= 600) return 2;   // ≤10min: 2s bins
-    if (selectionDuration <= 900) return 3;   // ≤15min: 3s bins
-    if (selectionDuration <= 1200) return 4;  // ≤20min: 4s bins
-    return 5;                                  // >20min: 5s bins
-}
-
 // Binary search for first high-res bucket with t >= targetTime
 function binarySearchBucketStart(buckets, targetTime) {
     let lo = 0, hi = buckets.length;
@@ -1509,74 +1505,346 @@ function binarySearchBucketStart(buckets, targetTime) {
     return lo;
 }
 
-// Aggregate high-res buckets into display bins for graphs.
-// Reads pre-computed team data (td) from each bucket — single linear pass.
-function aggregateHighResBuckets(startTime, endTime, binSize, teams) {
-    const hrBuckets = timelineState.highResBuckets;
-    if (!hrBuckets || hrBuckets.length === 0) return [];
+// ─── Unified Canvas Graph Renderer ──────────────────────────────────────────
+//
+// All timeline graphs (weapons, health/armor, frags, score) share a single
+// canvas-based diverging-bar renderer. Each graph type provides a data
+// preparation function that returns an array of data points in a common
+// format. The renderer draws them at full resolution on a <canvas>.
 
-    const result = [];
-    let idx = binarySearchBucketStart(hrBuckets, startTime);
+const GRAPH_COLORS = {
+    RL:     'rgba(255, 107, 107, 0.9)',
+    LG:     'rgba(0, 217, 255, 0.9)',
+    RLLG:   'rgba(156, 39, 176, 0.9)',
+    QUAD:   'rgba(0, 150, 255, 0.9)',
+    PENT:   'rgba(255, 0, 0, 0.9)',
+    RING:   'rgba(255, 235, 59, 0.9)',
+    HEALTH: 'rgba(0, 200, 83, 0.9)',
+    RA:     'rgba(255, 50, 50, 0.9)',
+    YA:     'rgba(255, 200, 0, 0.9)',
+    GA:     'rgba(0, 180, 0, 0.6)',
+};
 
-    for (let binStart = startTime; binStart < endTime; binStart += binSize) {
-        const binEnd = binStart + binSize;
-        const acc = {};
-        for (const team of teams) {
-            acc[team] = { rl: 0, lg: 0, rllg: 0, w: 0, q: 0, pe: 0, r: 0, pw: 0,
-                          thSum: 0, taSum: 0, abt: {}, count: 0 };
-        }
+const NICE_TICK_INTERVALS = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1200, 1800, 3600];
 
-        while (idx < hrBuckets.length && hrBuckets[idx].t < binEnd) {
-            const b = hrBuckets[idx];
-            if (b.t >= binStart && b.td) {
-                for (const team of teams) {
-                    const src = b.td[team];
-                    if (!src) continue;
-                    const dst = acc[team];
-                    // Max for player counts (peak control in bin)
-                    dst.rl = Math.max(dst.rl, src.rl || 0);
-                    dst.lg = Math.max(dst.lg, src.lg || 0);
-                    dst.rllg = Math.max(dst.rllg, src.rllg || 0);
-                    dst.w = Math.max(dst.w, src.w || 0);
-                    dst.q = Math.max(dst.q, src.q || 0);
-                    dst.pe = Math.max(dst.pe, src.pe || 0);
-                    dst.r = Math.max(dst.r, src.r || 0);
-                    dst.pw = Math.max(dst.pw, src.pw || 0);
-                    // Accumulate for average health/armor
-                    dst.thSum += (src.th || 0);
-                    dst.taSum += (src.ta || 0);
-                    dst.count++;
-                    // Armor-by-type: take max per type
-                    for (const [at, c] of Object.entries(src.abt || {})) {
-                        dst.abt[at] = Math.max(dst.abt[at] || 0, c);
+function pickTickInterval(duration, maxTicks) {
+    const target = duration / maxTicks;
+    for (const iv of NICE_TICK_INTERVALS) {
+        if (iv >= target) return iv;
+    }
+    return NICE_TICK_INTERVALS[NICE_TICK_INTERVALS.length - 1];
+}
+
+// Render a diverging bar graph on a canvas.
+//   dataPoints: [{t, dt, up: [{h, color}], down: [{h, color}]}]
+//   powerupSpans: [{start, end, color, isTop, lane}] (optional, for weapons)
+function renderDivergingGraph(canvasId, {
+    startTime, endTime,
+    dataPoints,
+    maxValue,
+    yAxisId,
+    yTopLabel, yBottomLabel,
+    powerupSpans,
+}) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !canvas.getContext) return;
+
+    const container = canvas.parentElement;
+    const W = container.clientWidth;
+    const H = 200;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const AXIS_H = 20;
+    const PAD = 4;
+    const graphH = H - AXIS_H;
+    const midY = PAD + (graphH - PAD) / 2;
+    const barH = midY - PAD;
+    const duration = endTime - startTime;
+
+    // Background
+    ctx.fillStyle = '#16213e';
+    ctx.fillRect(0, 0, W, graphH);
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, midY - barH * 0.5); ctx.lineTo(W, midY - barH * 0.5);
+    ctx.moveTo(0, midY + barH * 0.5); ctx.lineTo(W, midY + barH * 0.5);
+    ctx.stroke();
+
+    // Center line
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.beginPath();
+    ctx.moveTo(0, midY); ctx.lineTo(W, midY);
+    ctx.stroke();
+
+    if (duration > 0 && dataPoints && dataPoints.length > 0) {
+        for (const pt of dataPoints) {
+            const x = ((pt.t - startTime) / duration) * W;
+            const bw = Math.max(1, ((pt.dt || 0.05) / duration) * W);
+            if (x + bw < 0 || x > W) continue;
+
+            // Up segments (team A, above center)
+            let y = midY;
+            if (pt.up) {
+                for (const seg of pt.up) {
+                    if (seg.h > 0) {
+                        const h = (seg.h / maxValue) * barH;
+                        ctx.fillStyle = seg.color;
+                        ctx.fillRect(x, y - h, bw, h);
+                        y -= h;
                     }
                 }
             }
-            idx++;
+
+            // Down segments (team B, below center)
+            y = midY;
+            if (pt.down) {
+                for (const seg of pt.down) {
+                    if (seg.h > 0) {
+                        const h = (seg.h / maxValue) * barH;
+                        ctx.fillStyle = seg.color;
+                        ctx.fillRect(x, y, bw, h);
+                        y += h;
+                    }
+                }
+            }
         }
 
-        // Build output bin with field names the graph functions expect
-        const teamData = {};
-        for (const team of teams) {
-            const m = acc[team];
-            teamData[team] = {
-                playersWithRL: m.rl,
-                playersWithLG: m.lg,
-                playersWithRLLG: m.rllg,
-                playersWithWeapons: m.w,
-                playersWithQuad: m.q,
-                playersWithPent: m.pe,
-                playersWithRing: m.r,
-                playersWithPowerups: m.pw,
-                totalHealth: m.count > 0 ? Math.round(m.thSum / m.count) : 0,
-                totalArmor: m.count > 0 ? Math.round(m.taSum / m.count) : 0,
-                armorByType: m.abt
-            };
+        // Powerup overlay spans (thin colored strips at top/bottom of bar area)
+        if (powerupSpans) {
+            for (const sp of powerupSpans) {
+                const x1 = Math.max(0, ((sp.start - startTime) / duration) * W);
+                const x2 = Math.min(W, ((sp.end - startTime) / duration) * W);
+                if (x2 <= x1) continue;
+                const stripH = 3;
+                const stripY = sp.isTop
+                    ? PAD + sp.lane * (stripH + 1)
+                    : graphH - PAD - (sp.lane + 1) * (stripH + 1);
+                ctx.fillStyle = sp.color;
+                ctx.fillRect(x1, stripY, x2 - x1, stripH);
+            }
         }
-        result.push({ startTime: binStart, endTime: binEnd, teamData });
     }
 
-    return result;
+    // X-axis ticks (adaptive)
+    if (duration > 0) {
+        const targetTicks = Math.max(4, Math.min(12, Math.floor(W / 100)));
+        const interval = pickTickInterval(duration, targetTicks);
+        ctx.fillStyle = '#888';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        const firstTick = Math.ceil(startTime / interval) * interval;
+        for (let t = firstTick; t <= endTime; t += interval) {
+            const x = ((t - startTime) / duration) * W;
+            ctx.beginPath(); ctx.moveTo(x, graphH); ctx.lineTo(x, graphH + 4); ctx.stroke();
+            ctx.fillText(formatDuration(t), x, graphH + 5);
+        }
+    }
+
+    // Y-axis labels
+    if (yAxisId) {
+        const el = document.getElementById(yAxisId);
+        if (el) {
+            const top = el.querySelector('.y-top');
+            const bot = el.querySelector('.y-bottom');
+            if (top) top.textContent = yTopLabel !== undefined ? yTopLabel : maxValue;
+            if (bot) bot.textContent = yBottomLabel !== undefined ? yBottomLabel : maxValue;
+        }
+    }
+}
+
+// ─── Data preparation: Weapons ──────────────────────────────────────────────
+
+function prepWeaponsData(startTime, endTime, teams) {
+    const hrBuckets = timelineState.highResBuckets;
+    if (!hrBuckets || !hrBuckets.length) return { points: [], max: 4, powerups: [] };
+    const hrDur = timelineState.highResDuration || 0.05;
+    const points = [];
+    let maxVal = 4;
+    const idx0 = binarySearchBucketStart(hrBuckets, startTime);
+    for (let i = idx0; i < hrBuckets.length; i++) {
+        const b = hrBuckets[i];
+        if (b.t > endTime) break;
+        const tdA = b.td?.[teams[0]] || {};
+        const tdB = b.td?.[teams[1]] || {};
+        const upT = (tdA.rl || 0) + (tdA.lg || 0) + (tdA.rllg || 0);
+        const dnT = (tdB.rl || 0) + (tdB.lg || 0) + (tdB.rllg || 0);
+        maxVal = Math.max(maxVal, upT, dnT);
+        points.push({
+            t: b.t, dt: hrDur,
+            up: [
+                { h: tdA.rllg || 0, color: GRAPH_COLORS.RLLG },
+                { h: tdA.lg || 0, color: GRAPH_COLORS.LG },
+                { h: tdA.rl || 0, color: GRAPH_COLORS.RL },
+            ],
+            down: [
+                { h: tdB.rllg || 0, color: GRAPH_COLORS.RLLG },
+                { h: tdB.lg || 0, color: GRAPH_COLORS.LG },
+                { h: tdB.rl || 0, color: GRAPH_COLORS.RL },
+            ],
+        });
+    }
+    return { points, max: maxVal, powerups: computePowerupSpans(startTime, endTime, teams) };
+}
+
+function computePowerupSpans(startTime, endTime, teams) {
+    const hrBuckets = timelineState.highResBuckets;
+    if (!hrBuckets || !hrBuckets.length) return [];
+    const spans = [];
+    const types = [
+        { key: 'q', color: GRAPH_COLORS.QUAD, lane: 0 },
+        { key: 'pe', color: GRAPH_COLORS.PENT, lane: 1 },
+        { key: 'r', color: GRAPH_COLORS.RING, lane: 2 },
+    ];
+    for (let ti = 0; ti < 2; ti++) {
+        const team = teams[ti];
+        const isTop = ti === 0;
+        for (const pu of types) {
+            let spanStart = null;
+            const idx0 = binarySearchBucketStart(hrBuckets, startTime);
+            for (let i = idx0; i < hrBuckets.length; i++) {
+                const b = hrBuckets[i];
+                if (b.t > endTime) { break; }
+                const has = ((b.td?.[team])?.[pu.key] || 0) > 0;
+                if (has && spanStart === null) spanStart = b.t;
+                else if (!has && spanStart !== null) {
+                    spans.push({ start: spanStart, end: b.t, color: pu.color, isTop, lane: pu.lane });
+                    spanStart = null;
+                }
+            }
+            if (spanStart !== null) spans.push({ start: spanStart, end: endTime, color: pu.color, isTop, lane: pu.lane });
+        }
+    }
+    return spans;
+}
+
+// ─── Data preparation: Health/Armor ─────────────────────────────────────────
+
+function prepHealthArmorData(startTime, endTime, teams) {
+    const hrBuckets = timelineState.highResBuckets;
+    if (!hrBuckets || !hrBuckets.length) return { points: [], max: 400 };
+    const hrDur = timelineState.highResDuration || 0.05;
+    const points = [];
+    let maxVal = 400;
+    const idx0 = binarySearchBucketStart(hrBuckets, startTime);
+    for (let i = idx0; i < hrBuckets.length; i++) {
+        const b = hrBuckets[i];
+        if (b.t > endTime) break;
+        const tdA = b.td?.[teams[0]] || {};
+        const tdB = b.td?.[teams[1]] || {};
+        maxVal = Math.max(maxVal, (tdA.th || 0) + (tdA.ta || 0), (tdB.th || 0) + (tdB.ta || 0));
+        points.push({
+            t: b.t, dt: hrDur,
+            up: buildHASegments(tdA),
+            down: buildHASegments(tdB),
+        });
+    }
+    return { points, max: maxVal };
+}
+
+function buildHASegments(td) {
+    const segs = [];
+    if ((td.th || 0) > 0) segs.push({ h: td.th, color: GRAPH_COLORS.HEALTH });
+    const armor = td.ta || 0;
+    const abt = td.abt || {};
+    const ra = abt.ra || 0, ya = abt.ya || 0, ga = abt.ga || 0;
+    const total = ra + ya + ga;
+    if (total > 0 && armor > 0) {
+        if (ga > 0) segs.push({ h: (ga / total) * armor, color: GRAPH_COLORS.GA });
+        if (ya > 0) segs.push({ h: (ya / total) * armor, color: GRAPH_COLORS.YA });
+        if (ra > 0) segs.push({ h: (ra / total) * armor, color: GRAPH_COLORS.RA });
+    } else if (armor > 0) {
+        segs.push({ h: armor, color: GRAPH_COLORS.YA });
+    }
+    return segs;
+}
+
+// ─── Data preparation: Frags ────────────────────────────────────────────────
+
+function prepFragsData(startTime, endTime, teams) {
+    const fragEvents = timelineState.fragEvents || [];
+    if (teams.length < 2) return { points: [], max: 5 };
+    const duration = endTime - startTime;
+    const binSize = Math.max(1, duration / 200);
+    const numBins = Math.ceil(duration / binSize);
+    const aFrags = new Float32Array(numBins);
+    const bFrags = new Float32Array(numBins);
+    for (const f of fragEvents) {
+        if (f.time < startTime || f.time > endTime) continue;
+        const bin = Math.min(Math.floor((f.time - startTime) / binSize), numBins - 1);
+        if (f.team === teams[0]) aFrags[bin] += (f.delta || 1);
+        else if (f.team === teams[1]) bFrags[bin] += (f.delta || 1);
+    }
+    const [rA, gA, bA2] = hexToRgb(TEAM_COLORS[0]);
+    const [rB, gB, bB2] = hexToRgb(TEAM_COLORS[1]);
+    const cA = `rgba(${rA},${gA},${bA2},0.8)`;
+    const cB = `rgba(${rB},${gB},${bB2},0.8)`;
+    let maxVal = 5;
+    const points = [];
+    for (let i = 0; i < numBins; i++) {
+        maxVal = Math.max(maxVal, aFrags[i], bFrags[i]);
+        points.push({
+            t: startTime + i * binSize, dt: binSize,
+            up: [{ h: aFrags[i], color: cA }],
+            down: [{ h: bFrags[i], color: cB }],
+        });
+    }
+    return { points, max: maxVal };
+}
+
+// ─── Data preparation: Score ────────────────────────────────────────────────
+
+function prepScoreData(startTime, endTime, teams) {
+    const fragEvents = (timelineState.fragEvents || []).slice().sort((a, b) => a.time - b.time);
+    if (teams.length < 2) return { points: [], max: 10 };
+    let score = 0;
+    for (const f of fragEvents) {
+        if (f.time >= startTime) break;
+        if (f.team === teams[0]) score += (f.delta || 1);
+        else if (f.team === teams[1]) score -= (f.delta || 1);
+    }
+    // Build cumulative score change points
+    const scoreAt = [{ time: startTime, score }];
+    let s = score;
+    for (const f of fragEvents) {
+        if (f.time < startTime) continue;
+        if (f.time > endTime) break;
+        if (f.team === teams[0]) s += (f.delta || 1);
+        else if (f.team === teams[1]) s -= (f.delta || 1);
+        scoreAt.push({ time: f.time, score: s });
+    }
+    scoreAt.push({ time: endTime, score: s });
+
+    const duration = endTime - startTime;
+    const sampleRate = Math.max(0.5, duration / 400);
+    const [rA, gA, bA2] = hexToRgb(TEAM_COLORS[0]);
+    const [rB, gB, bB2] = hexToRgb(TEAM_COLORS[1]);
+    const cA = `rgba(${rA},${gA},${bA2},0.8)`;
+    const cB = `rgba(${rB},${gB},${bB2},0.8)`;
+    let maxVal = 10;
+    const points = [];
+    let si = 0;
+    for (let t = startTime; t < endTime; t += sampleRate) {
+        while (si + 1 < scoreAt.length && scoreAt[si + 1].time <= t) si++;
+        const v = scoreAt[si].score;
+        maxVal = Math.max(maxVal, Math.abs(v));
+        points.push({
+            t, dt: sampleRate,
+            up: v > 0 ? [{ h: v, color: cA }] : [],
+            down: v < 0 ? [{ h: -v, color: cB }] : [],
+        });
+    }
+    return { points, max: maxVal };
 }
 
 // ─── Unified Timeline Widget ──────────────────────────────────────────────
@@ -1814,9 +2082,8 @@ function updateDetailView() {
         document.getElementById('time-range-label').textContent = '';
     }
 
-    // Update all detail panels
+    // Update all detail panels (axes are drawn on canvas by the unified renderer)
     updateDetailGraph(start, end);
-    updateDetailAxis(start, end);
     updateRegionControlTimeline(start, end);
     updateHealthArmorGraph(start, end);
     updateFragsGraph(start, end);
@@ -1987,717 +2254,59 @@ function renderChatColumnFull(container, events) {
 }
 
 function updateDetailGraph(startTime, endTime) {
-    const container = document.getElementById('detail-graph');
-    container.innerHTML = '';
-
-    const hrBuckets = timelineState.highResBuckets;
     const teams = timelineState.teams;
-
-    if (!hrBuckets || hrBuckets.length === 0 || teams.length < 2) return;
-
-    // Aggregate high-res buckets into display bins
-    const selectionDuration = endTime - startTime;
-    const binSize = getOptimalBinSize(selectionDuration);
-    const displayBuckets = aggregateHighResBuckets(startTime, endTime, binSize, teams);
-
-    if (displayBuckets.length === 0) return;
-
-    // Find max value for scaling (weapons only, use 4 as typical max for 4v4)
-    let maxTeamValue = 4;
-    for (const bucket of displayBuckets) {
-        const td = bucket.teamData || {};
-        const teamA = td[teams[0]] || {};
-        const teamB = td[teams[1]] || {};
-        // Only count weapons, not powerups
-        const teamATotal = (teamA.playersWithRL || 0) + (teamA.playersWithLG || 0) + (teamA.playersWithRLLG || 0);
-        const teamBTotal = (teamB.playersWithRL || 0) + (teamB.playersWithLG || 0) + (teamB.playersWithRLLG || 0);
-        maxTeamValue = Math.max(maxTeamValue, teamATotal, teamBTotal);
-    }
-
-    // Update Y-axis labels
-    document.querySelector('#detail-y-axis .y-top').textContent = maxTeamValue;
-    document.querySelector('#detail-y-axis .y-bottom').textContent = maxTeamValue;
-
-    const barHeight = 90; // pixels for max value
-
-    // Create diverging bars (Team A up, Team B down) - weapons only
-    for (const bucket of displayBuckets) {
-        const bar = document.createElement('div');
-        bar.className = 'diverging-bar';
-
-        const td = bucket.teamData || {};
-        const teamAData = td[teams[0]] || {};
-        const teamBData = td[teams[1]] || {};
-
-        // Build team data objects (weapons only)
-        const teamA = {
-            rl: teamAData.playersWithRL || 0,
-            lg: teamAData.playersWithLG || 0,
-            rllg: teamAData.playersWithRLLG || 0
-        };
-        const teamB = {
-            rl: teamBData.playersWithRL || 0,
-            lg: teamBData.playersWithLG || 0,
-            rllg: teamBData.playersWithRLLG || 0
-        };
-
-        // Team A goes up (above center axis)
-        const topContainer = document.createElement('div');
-        topContainer.className = 'diverging-bar-top';
-        addWeaponSegments(topContainer, teamA, maxTeamValue, barHeight);
-
-        // Team B goes down (below center axis)
-        const bottomContainer = document.createElement('div');
-        bottomContainer.className = 'diverging-bar-bottom';
-        addWeaponSegments(bottomContainer, teamB, maxTeamValue, barHeight);
-
-        bar.appendChild(topContainer);
-        bar.appendChild(bottomContainer);
-        container.appendChild(bar);
-    }
-
-    // Render powerup lines separately — pass display bins (which have pre-computed team data)
-    updatePowerupLines(displayBuckets, startTime, endTime, teams);
-}
-
-// Add weapon segments only (no powerups)
-function addWeaponSegments(container, data, maxValue, maxHeight) {
-    const segments = [
-        { value: data.rl, className: 'rl' },
-        { value: data.lg, className: 'lg' },
-        { value: data.rllg, className: 'rllg' }
-    ];
-
-    for (const seg of segments) {
-        if (seg.value > 0) {
-            const el = document.createElement('div');
-            el.className = `bar-segment ${seg.className}`;
-            el.style.height = `${(seg.value / maxValue) * maxHeight}px`;
-            container.appendChild(el);
-        }
-    }
-}
-
-// Render powerup lines as horizontal spans showing duration
-function updatePowerupLines(buckets, startTime, endTime, teams) {
-    const topContainer = document.getElementById('powerup-lines-top');
-    const bottomContainer = document.getElementById('powerup-lines-bottom');
-    topContainer.innerHTML = '';
-    bottomContainer.innerHTML = '';
-
-    if (buckets.length === 0 || teams.length < 2) return;
-
-    const duration = endTime - startTime;
-    const powerupTypes = ['quad', 'pent', 'ring'];
-
-    // For each team, find contiguous spans where powerup is active
-    for (let teamIdx = 0; teamIdx < 2; teamIdx++) {
-        const team = teams[teamIdx];
-        const container = teamIdx === 0 ? topContainer : bottomContainer;
-
-        for (const powerup of powerupTypes) {
-            const field = `playersWith${powerup.charAt(0).toUpperCase() + powerup.slice(1)}`;
-
-            // Find spans where this powerup is active
-            let spanStart = null;
-            for (let i = 0; i < buckets.length; i++) {
-                const bucket = buckets[i];
-                const td = bucket.teamData || {};
-                const teamData = td[team] || {};
-                const hasIt = (teamData[field] || 0) > 0;
-
-                if (hasIt && spanStart === null) {
-                    spanStart = bucket.startTime;
-                } else if (!hasIt && spanStart !== null) {
-                    // End of span
-                    addPowerupLine(container, spanStart, bucket.startTime, startTime, duration, powerup);
-                    spanStart = null;
-                }
-            }
-            // Handle span that extends to end
-            if (spanStart !== null) {
-                addPowerupLine(container, spanStart, endTime, startTime, duration, powerup);
-            }
-        }
-    }
-}
-
-function addPowerupLine(container, spanStart, spanEnd, viewStart, viewDuration, powerupType) {
-    const leftPct = ((spanStart - viewStart) / viewDuration) * 100;
-    const widthPct = ((spanEnd - spanStart) / viewDuration) * 100;
-
-    if (widthPct > 0) {
-        const line = document.createElement('div');
-        line.className = `powerup-line ${powerupType}`;
-        line.style.left = `${leftPct}%`;
-        line.style.width = `${widthPct}%`;
-        container.appendChild(line);
-    }
-}
-
-// ─── Region Control Timeline ─────────────────────────────────────────────
-
-function updateRegionControlTimeline(startTime, endTime) {
-    const panel = document.getElementById('region-control-timeline-panel');
-    const labelsContainer = document.getElementById('region-timeline-labels');
-    const stripsContainer = document.getElementById('region-timeline-strips');
-    if (!panel || !labelsContainer || !stripsContainer) return;
-
-    if (!mapState.controlRegions || mapState.controlRegions.length === 0 ||
-        !mapState.locToRegion || !timelineState.teams || timelineState.teams.length < 2) {
-        panel.style.display = 'none';
-        return;
-    }
-    panel.style.display = '';
-
-    // Update legend team names
-    const teamA = timelineState.teams[0], teamB = timelineState.teams[1];
-    const teamALabel = document.getElementById('rc-tl-teamA');
-    const teamBLabel = document.getElementById('rc-tl-teamB');
-    if (teamALabel) teamALabel.textContent = teamA;
-    if (teamBLabel) teamBLabel.textContent = teamB;
-
-    // Update legend color swatches to match strip colors exactly. The strip
-    // only renders strong control + contested, so the weak swatches are gone
-    // from the markup and not set here.
-    const setLegend = (id, color) => { const el = document.getElementById(id); if (el) el.style.background = color; };
-    setLegend('rc-legend-a-ctrl', teamStrongColor(TEAM_COLORS[0]));
-    setLegend('rc-legend-b-ctrl', teamStrongColor(TEAM_COLORS[1]));
-
-    labelsContainer.innerHTML = '';
-    stripsContainer.innerHTML = '';
-
-    const regions = mapState.controlRegions;
-    const buckets = timelineState.highResBuckets;
-    if (!buckets || buckets.length === 0) return;
-    const hrDuration = timelineState.highResDuration || 0.05;
-
-    const duration = endTime - startTime;
-    if (duration <= 0) return;
-
-    const locations = mapState.locations;
-    const symbols = mapState.playerSymbols || {};
-
-    // Control state colors derived from TEAM_COLORS. The strip deliberately
-    // only renders the "strong" states — solo control by either team and
-    // armed-vs-armed contested. The weak variants (one-side unarmed,
-    // both-sides unarmed weakContested) are tracked elsewhere on the page
-    // but excluded from the strip to keep its color story readable.
-    const stateColors = {
-        teamAControl:     teamStrongColor(TEAM_COLORS[0]),
-        contested:        'rgb(255, 255, 255)',
-        teamBControl:     teamStrongColor(TEAM_COLORS[1]),
-    };
-    const stripVisible = new Set(['teamAControl', 'teamBControl', 'contested']);
-
-    for (const region of regions) {
-        // Label
-        const label = document.createElement('div');
-        label.className = 'region-timeline-label';
-        label.textContent = region.name;
-        label.title = region.name;
-        labelsContainer.appendChild(label);
-
-        // Strip
-        const strip = document.createElement('div');
-        strip.className = 'region-strip';
-
-        // Compute control state per bucket and find contiguous spans
-        let currentState = null;
-        let spanStart = startTime;
-
-        for (let i = 0; i < buckets.length; i++) {
-            const bucket = buckets[i];
-
-            const bStart = bucket.t;
-            const bEnd   = bucket.t + hrDuration;
-            if (bEnd <= startTime || bStart >= endTime) continue;
-
-            // Determine control state for this region at this bucket
-            const playerData = bucket.p;
-            let aWpn = 0, aNo = 0, bWpn = 0, bNo = 0;
-
-            if (playerData) {
-                for (const [name, data] of Object.entries(playerData)) {
-                    if (!data) continue;
-                    if (data.d) continue;
-                    if (data.h !== undefined && data.h <= 0) continue;
-
-                    const locName = resolvePlayerLoc(data, locations);
-                    if (!locName) continue;
-                    const rName = mapState.locToRegion[locName];
-                    if (rName !== region.name) continue;
-
-                    // Resolve team from playerSymbols
-                    let playerTeam = '';
-                    const sym = symbols[name];
-                    if (sym) playerTeam = timelineState.teams[sym.teamIdx] || '';
-
-                    const hasWpn = data.rl || data.lg;
-
-                    if (playerTeam === teamA) { if (hasWpn) aWpn++; else aNo++; }
-                    else if (playerTeam === teamB) { if (hasWpn) bWpn++; else bNo++; }
-                }
-            }
-
-            // Single source of truth for the formula — see classifyRegionState.
-            const state = classifyRegionState(aWpn, aNo, bWpn, bNo);
-
-            if (state !== currentState) {
-                // Emit previous span — only the visible (strong) states paint
-                // pixels; weak states render as gaps in the strip.
-                if (stripVisible.has(currentState)) {
-                    addRegionSegment(strip, spanStart, bStart, startTime, duration, stateColors[currentState]);
-                }
-                currentState = state;
-                spanStart = bStart;
-            }
-        }
-        // Final span
-        if (stripVisible.has(currentState)) {
-            addRegionSegment(strip, spanStart, endTime, startTime, duration, stateColors[currentState]);
-        }
-
-        stripsContainer.appendChild(strip);
-    }
-
-    // Render time axis with 2-minute intervals
-    const axisContainer = document.getElementById('region-timeline-axis');
-    if (axisContainer) {
-        axisContainer.innerHTML = '';
-        const interval = 120; // 2 minutes
-        for (let t = 0; t <= duration; t += interval) {
-            const time = startTime + t;
-            if (time > endTime) break;
-            const span = document.createElement('span');
-            span.textContent = formatDuration(time);
-            axisContainer.appendChild(span);
-        }
-    }
-}
-
-function addRegionSegment(strip, segStart, segEnd, viewStart, viewDuration, color) {
-    const leftPct = ((segStart - viewStart) / viewDuration) * 100;
-    const widthPct = ((segEnd - segStart) / viewDuration) * 100;
-    if (widthPct > 0) {
-        const seg = document.createElement('div');
-        seg.className = 'region-strip-seg';
-        seg.style.left = `${leftPct}%`;
-        seg.style.width = `${widthPct}%`;
-        seg.style.background = color;
-        strip.appendChild(seg);
-    }
-}
-
-function updateDetailAxis(startTime, endTime) {
-    const container = document.getElementById('detail-axis');
-    container.innerHTML = '';
-
-    const duration = endTime - startTime;
-    const interval = 120; // 2 minutes
-
-    for (let t = 0; t <= duration; t += interval) {
-        const time = startTime + t;
-        if (time > endTime) break;
-        const span = document.createElement('span');
-        span.textContent = formatDuration(time);
-        container.appendChild(span);
-    }
+    if (teams.length < 2) return;
+    const { points, max, powerups } = prepWeaponsData(startTime, endTime, teams);
+    const legendA = document.getElementById('legend-weapons-team-a');
+    const legendB = document.getElementById('legend-weapons-team-b');
+    if (legendA) legendA.textContent = `${teams[0]} ↑`;
+    if (legendB) legendB.textContent = `${teams[1]} ↓`;
+    renderDivergingGraph('detail-graph-canvas', {
+        startTime, endTime, dataPoints: points, maxValue: max,
+        yAxisId: 'detail-y-axis', powerupSpans: powerups,
+    });
 }
 
 function updateHealthArmorGraph(startTime, endTime) {
-    const container = document.getElementById('health-armor-graph');
-    container.innerHTML = '';
-
-    const hrBuckets = timelineState.highResBuckets;
     const teams = timelineState.teams;
-
-    if (!hrBuckets || hrBuckets.length === 0 || teams.length < 2) return;
-
-    // Aggregate high-res buckets into display bins
-    const selectionDuration = endTime - startTime;
-    const binSize = getOptimalBinSize(selectionDuration);
-    const displayBuckets = aggregateHighResBuckets(startTime, endTime, binSize, teams);
-
-    if (displayBuckets.length === 0) return;
-
-    // Find max value for scaling (team total health + armor)
-    // For 4 players: max health ~400 (4*100), max armor ~800 (4*200)
-    let maxValue = 400; // Use 400 as reasonable default for team total
-
-    for (const bucket of displayBuckets) {
-        const td = bucket.teamData || {};
-        const teamA = td[teams[0]] || {};
-        const teamB = td[teams[1]] || {};
-        const teamATotal = (teamA.totalHealth || 0) + (teamA.totalArmor || 0);
-        const teamBTotal = (teamB.totalHealth || 0) + (teamB.totalArmor || 0);
-        maxValue = Math.max(maxValue, teamATotal, teamBTotal);
-    }
-
-    // Update Y-axis labels
-    document.getElementById('health-y-top').textContent = maxValue;
-    document.getElementById('health-y-bottom').textContent = maxValue;
-
-    const barHeight = 90; // pixels for max value
-
-    // Create diverging bars (Team A up, Team B down)
-    for (const bucket of displayBuckets) {
-        const bar = document.createElement('div');
-        bar.className = 'diverging-bar';
-
-        const td = bucket.teamData || {};
-        const teamA = td[teams[0]] || {};
-        const teamB = td[teams[1]] || {};
-
-        // Helper to add armor segments by type
-        const addArmorSegments = (teamData, container) => {
-            const armorByType = teamData.armorByType || {};
-            const totalArmor = teamData.totalArmor || 0;
-            const raCount = armorByType.ra || 0;
-            const yaCount = armorByType.ya || 0;
-            const gaCount = armorByType.ga || 0;
-            const totalPlayers = raCount + yaCount + gaCount;
-
-            if (totalPlayers > 0 && totalArmor > 0) {
-                // Distribute armor proportionally by type
-                const raArmor = (raCount / totalPlayers) * totalArmor;
-                const yaArmor = (yaCount / totalPlayers) * totalArmor;
-                const gaArmor = (gaCount / totalPlayers) * totalArmor;
-
-                // Add RA first (closest to axis), then YA, then GA
-                if (gaArmor > 0) {
-                    const seg = document.createElement('div');
-                    seg.className = 'bar-segment ga';
-                    seg.style.height = `${(gaArmor / maxValue) * barHeight}px`;
-                    container.appendChild(seg);
-                }
-                if (yaArmor > 0) {
-                    const seg = document.createElement('div');
-                    seg.className = 'bar-segment ya';
-                    seg.style.height = `${(yaArmor / maxValue) * barHeight}px`;
-                    container.appendChild(seg);
-                }
-                if (raArmor > 0) {
-                    const seg = document.createElement('div');
-                    seg.className = 'bar-segment ra';
-                    seg.style.height = `${(raArmor / maxValue) * barHeight}px`;
-                    container.appendChild(seg);
-                }
-            } else if (totalArmor > 0) {
-                // Fallback to generic armor if no type breakdown
-                const seg = document.createElement('div');
-                seg.className = 'bar-segment armor';
-                seg.style.height = `${(totalArmor / maxValue) * barHeight}px`;
-                container.appendChild(seg);
-            }
-        };
-
-        // Team A goes up (above center axis) - health closer to axis, armor on top
-        const topContainer = document.createElement('div');
-        topContainer.className = 'diverging-bar-top';
-
-        if ((teamA.totalHealth || 0) > 0) {
-            const seg = document.createElement('div');
-            seg.className = 'bar-segment health';
-            seg.style.height = `${((teamA.totalHealth || 0) / maxValue) * barHeight}px`;
-            topContainer.appendChild(seg);
-        }
-        addArmorSegments(teamA, topContainer);
-
-        // Team B goes down (below center axis)
-        const bottomContainer = document.createElement('div');
-        bottomContainer.className = 'diverging-bar-bottom';
-
-        if ((teamB.totalHealth || 0) > 0) {
-            const seg = document.createElement('div');
-            seg.className = 'bar-segment health';
-            seg.style.height = `${((teamB.totalHealth || 0) / maxValue) * barHeight}px`;
-            bottomContainer.appendChild(seg);
-        }
-        addArmorSegments(teamB, bottomContainer);
-
-        bar.appendChild(topContainer);
-        bar.appendChild(bottomContainer);
-        container.appendChild(bar);
-    }
-
-    // Update health axis
-    updateHealthAxis(startTime, endTime);
-}
-
-function updateHealthAxis(startTime, endTime) {
-    const container = document.getElementById('health-axis');
-    container.innerHTML = '';
-
-    const duration = endTime - startTime;
-    const interval = 120;
-
-    for (let t = 0; t <= duration; t += interval) {
-        const time = startTime + t;
-        if (time > endTime) break;
-        const span = document.createElement('span');
-        span.textContent = formatDuration(time);
-        container.appendChild(span);
-    }
+    if (teams.length < 2) return;
+    const { points, max } = prepHealthArmorData(startTime, endTime, teams);
+    const legendA = document.getElementById('legend-health-team-a');
+    const legendB = document.getElementById('legend-health-team-b');
+    if (legendA) legendA.textContent = `${teams[0]} ↑`;
+    if (legendB) legendB.textContent = `${teams[1]} ↓`;
+    renderDivergingGraph('health-armor-canvas', {
+        startTime, endTime, dataPoints: points, maxValue: max,
+        yAxisId: 'health-y-axis',
+    });
 }
 
 function updateFragsGraph(startTime, endTime) {
-    const container = document.getElementById('frags-graph');
-    if (!container) return;
-    container.innerHTML = '';
-
     const teams = timelineState.teams;
     if (teams.length < 2) return;
-
-    // Use frag events from timeline analysis (from stat tracking)
-    const fragEvents = timelineState.fragEvents || [];
-
-    // Filter frags to selection window
-    const filteredFrags = fragEvents.filter(f => f.time >= startTime && f.time <= endTime);
-
-    // Calculate dynamic bucket duration based on selection (use 15s bins for frags)
-    // For frag counts, we want larger bins than the activity graph
-    const selectionDuration = endTime - startTime;
-    const baseBinSize = getOptimalBinSize(selectionDuration);
-    const bucketDuration = Math.max(15, baseBinSize * 5); // 15s minimum, scale with selection
-
-    const startBucket = Math.floor(startTime / bucketDuration);
-    const endBucket = Math.ceil(endTime / bucketDuration);
-    const numBuckets = endBucket - startBucket;
-
-    if (numBuckets <= 0) return;
-
-    // Count frags per bucket per team
-    const teamAFrags = new Array(numBuckets).fill(0);
-    const teamBFrags = new Array(numBuckets).fill(0);
-
-    for (const frag of filteredFrags) {
-        const bucketIdx = Math.floor(frag.time / bucketDuration) - startBucket;
-        const delta = frag.delta || 1;
-        if (bucketIdx >= 0 && bucketIdx < numBuckets) {
-            if (frag.team === teams[0]) {
-                teamAFrags[bucketIdx] += delta;
-            } else if (frag.team === teams[1]) {
-                teamBFrags[bucketIdx] += delta;
-            }
-        }
-    }
-
-    // Find max frags for scaling
-    let maxFrags = 5;
-    for (let i = 0; i < numBuckets; i++) {
-        maxFrags = Math.max(maxFrags, teamAFrags[i], teamBFrags[i]);
-    }
-
-    // Update Y-axis labels
-    const yTop = document.getElementById('frags-y-top');
-    const yBottom = document.getElementById('frags-y-bottom');
-    if (yTop) yTop.textContent = maxFrags;
-    if (yBottom) yBottom.textContent = maxFrags;
-
-    // Update legend team names
+    const { points, max } = prepFragsData(startTime, endTime, teams);
     const legendA = document.getElementById('legend-frags-team-a');
     const legendB = document.getElementById('legend-frags-team-b');
     if (legendA) legendA.textContent = `${teams[0]} ↑`;
     if (legendB) legendB.textContent = `${teams[1]} ↓`;
-
-    const barHeight = 90;
-
-    // Create diverging bars
-    for (let i = 0; i < numBuckets; i++) {
-        const bar = document.createElement('div');
-        bar.className = 'diverging-bar';
-
-        // Team A up
-        const topContainer = document.createElement('div');
-        topContainer.className = 'diverging-bar-top';
-        if (teamAFrags[i] > 0) {
-            const seg = document.createElement('div');
-            seg.className = 'bar-segment frags';
-            seg.style.height = `${(teamAFrags[i] / maxFrags) * barHeight}px`;
-            topContainer.appendChild(seg);
-        }
-
-        // Team B down
-        const bottomContainer = document.createElement('div');
-        bottomContainer.className = 'diverging-bar-bottom';
-        if (teamBFrags[i] > 0) {
-            const seg = document.createElement('div');
-            seg.className = 'bar-segment frags';
-            seg.style.height = `${(teamBFrags[i] / maxFrags) * barHeight}px`;
-            bottomContainer.appendChild(seg);
-        }
-
-        bar.appendChild(topContainer);
-        bar.appendChild(bottomContainer);
-        container.appendChild(bar);
-    }
-
-    // Update axis for selection window
-    updateFragsAxis(startTime, endTime);
-}
-
-function updateFragsAxis(startTime, endTime) {
-    const container = document.getElementById('frags-axis');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const duration = endTime - startTime;
-    const interval = 120;
-
-    for (let t = 0; t <= duration; t += interval) {
-        const time = startTime + t;
-        if (time > endTime) break;
-        const span = document.createElement('span');
-        span.textContent = formatDuration(time);
-        container.appendChild(span);
-    }
+    renderDivergingGraph('frags-canvas', {
+        startTime, endTime, dataPoints: points, maxValue: max,
+        yAxisId: 'frags-y-axis',
+    });
 }
 
 function updateScoreTimeline(startTime, endTime) {
-    const container = document.getElementById('score-graph');
-    if (!container) return;
-    container.innerHTML = '';
-
     const teams = timelineState.teams;
     if (teams.length < 2) return;
-
-    // Use frag events from timeline analysis (from stat tracking), sorted by time
-    const fragEvents = (timelineState.fragEvents || []).slice().sort((a, b) => a.time - b.time);
-
-    // Calculate score at the start of selection (based on all frags before startTime)
-    let scoreAtStart = 0;
-    for (const frag of fragEvents) {
-        if (frag.time >= startTime) break;
-        const delta = frag.delta || 1;
-        if (frag.team === teams[0]) {
-            scoreAtStart += delta;
-        } else if (frag.team === teams[1]) {
-            scoreAtStart -= delta;
-        }
-    }
-
-    // Calculate cumulative score within selection window
-    // Positive = Team A leading, Negative = Team B leading
-    let scoreDiff = scoreAtStart;
-    const scorePoints = [];
-
-    // Add initial point at selection start
-    scorePoints.push({ time: startTime, diff: scoreDiff });
-
-    for (const frag of fragEvents) {
-        if (frag.time < startTime) continue;
-        if (frag.time > endTime) break;
-        const delta = frag.delta || 1;
-        if (frag.team === teams[0]) {
-            scoreDiff += delta;
-        } else if (frag.team === teams[1]) {
-            scoreDiff -= delta;
-        }
-        scorePoints.push({ time: frag.time, diff: scoreDiff });
-    }
-
-    // Add final point
-    scorePoints.push({ time: endTime, diff: scoreDiff });
-
-    if (scorePoints.length === 0) return;
-
-    // Find max absolute difference within selection for scaling
-    let maxDiff = 10;
-    for (const pt of scorePoints) {
-        maxDiff = Math.max(maxDiff, Math.abs(pt.diff));
-    }
-
-    // Update Y-axis labels
-    const yTop = document.getElementById('score-y-top');
-    const yBottom = document.getElementById('score-y-bottom');
-    if (yTop) yTop.textContent = `+${maxDiff}`;
-    if (yBottom) yBottom.textContent = `-${maxDiff}`;
-
-    // Update legend team names + color them in the team identity colors so
-    // the legend agrees with the bars below.
+    const { points, max } = prepScoreData(startTime, endTime, teams);
     const legendA = document.getElementById('legend-score-team-a');
     const legendB = document.getElementById('legend-score-team-b');
-    if (legendA) {
-        legendA.textContent = `${teams[0]} leading ↑`;
-        legendA.style.color = TEAM_COLORS[0];
-    }
-    if (legendB) {
-        legendB.textContent = `${teams[1]} leading ↓`;
-        legendB.style.color = TEAM_COLORS[1];
-    }
-
-    // Calculate dynamic bucket duration based on selection
-    const selectionDuration = endTime - startTime;
-    const baseBinSize = getOptimalBinSize(selectionDuration);
-    const bucketDuration = Math.max(5, baseBinSize * 2); // 5s minimum for score, scale with selection
-
-    const numBuckets = Math.ceil((endTime - startTime) / bucketDuration);
-    const barHeight = 90; // pixels for max value
-
-    // Precompute per-team fill colors once so the per-bucket loop stays cheap
-    // and the bars always match TEAM_COLORS without going through the CSS.
-    const [rA, gA, bA] = hexToRgb(TEAM_COLORS[0]);
-    const [rB, gB, bB] = hexToRgb(TEAM_COLORS[1]);
-    const teamAFill = `rgba(${rA}, ${gA}, ${bA}, 0.8)`;
-    const teamBFill = `rgba(${rB}, ${gB}, ${bB}, 0.8)`;
-
-    for (let i = 0; i < numBuckets; i++) {
-        const bucketStart = startTime + i * bucketDuration;
-
-        // Find score at bucket midpoint
-        const bucketMid = bucketStart + bucketDuration / 2;
-        let bucketScore = scoreAtStart;
-        for (const pt of scorePoints) {
-            if (pt.time <= bucketMid) {
-                bucketScore = pt.diff;
-            } else {
-                break;
-            }
-        }
-
-        const bar = document.createElement('div');
-        bar.className = 'score-bar';
-
-        const fill = document.createElement('div');
-        fill.className = 'score-bar-fill';
-
-        const heightPct = Math.abs(bucketScore) / maxDiff;
-        const heightPx = heightPct * barHeight;
-
-        if (bucketScore > 0) {
-            fill.style.background = teamAFill;
-            fill.classList.add('positive'); // legacy class kept for layout (top/bottom anchoring in CSS)
-            fill.style.height = `${heightPx}px`;
-        } else if (bucketScore < 0) {
-            fill.style.background = teamBFill;
-            fill.classList.add('negative'); // legacy class kept for layout (top/bottom anchoring in CSS)
-            fill.style.height = `${heightPx}px`;
-        }
-
-        bar.appendChild(fill);
-        container.appendChild(bar);
-    }
-
-    // Update axis for selection window
-    updateScoreAxis(startTime, endTime);
-}
-
-function updateScoreAxis(startTime, endTime) {
-    const container = document.getElementById('score-axis');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const duration = endTime - startTime;
-    const interval = 120;
-
-    for (let t = 0; t <= duration; t += interval) {
-        const time = startTime + t;
-        if (time > endTime) break;
-        const span = document.createElement('span');
-        span.textContent = formatDuration(time);
-        container.appendChild(span);
-    }
+    if (legendA) { legendA.textContent = `${teams[0]} leading ↑`; legendA.style.color = TEAM_COLORS[0]; }
+    if (legendB) { legendB.textContent = `${teams[1]} leading ↓`; legendB.style.color = TEAM_COLORS[1]; }
+    renderDivergingGraph('score-canvas', {
+        startTime, endTime, dataPoints: points, maxValue: max,
+        yAxisId: 'score-y-axis', yTopLabel: `+${max}`, yBottomLabel: `-${max}`,
+    });
 }
 
 // ─── Team Status Panel ──────────────────────────────────────────────────────
@@ -3144,7 +2753,6 @@ function computeOccupiedGroupNames(playerData) {
     for (const data of Object.values(playerData)) {
         if (!data) continue;
         if (data.d || (data.h !== undefined && data.h <= 0)) continue;
-        if (data.health !== undefined && data.health <= 0) continue;
         if (data.x === 0 && data.y === 0) continue;
         const locName = resolvePlayerLoc(data, locations);
         if (!locName) continue;

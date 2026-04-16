@@ -869,6 +869,13 @@ table tbody tr:hover {
     position: relative;
 }
 
+.timeline-canvas {
+    width: 100%;
+    height: 200px;
+    display: block;
+    border-radius: 4px;
+}
+
 .detail-graph-axis,
 .health-graph-axis {
     display: flex;
