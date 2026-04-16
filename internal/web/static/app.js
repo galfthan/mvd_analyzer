@@ -1586,9 +1586,20 @@ function renderDivergingGraph(canvasId, {
     ctx.stroke();
 
     if (duration > 0 && dataPoints && dataPoints.length > 0) {
-        for (const pt of dataPoints) {
-            const x = ((pt.t - startTime) / duration) * W;
-            const bw = Math.max(1, ((pt.dt || 0.05) / duration) * W);
+        // Tile adjacent bars pixel-perfectly: compute each bar's right edge
+        // from the next bucket's start, and round both edges to integers.
+        // Fractional fillRect widths create anti-aliased edges that don't
+        // cancel between neighbours, so the dark background bleeds through
+        // as moiré banding when zoomed in. Integer-aligned tiling eliminates
+        // that with no gaps.
+        for (let i = 0; i < dataPoints.length; i++) {
+            const pt = dataPoints[i];
+            const xRaw = ((pt.t - startTime) / duration) * W;
+            const xNextRaw = (i + 1 < dataPoints.length)
+                ? ((dataPoints[i + 1].t - startTime) / duration) * W
+                : ((pt.t + (pt.dt || 0.05) - startTime) / duration) * W;
+            const x = Math.round(xRaw);
+            const bw = Math.max(1, Math.round(xNextRaw) - x);
             if (x + bw < 0 || x > W) continue;
 
             // Up segments (team A, above center)
@@ -2424,8 +2435,8 @@ function renderRegionControlTimeline(canvasId, labelsId, { startTime, endTime, r
         for (const span of row.spans) {
             const color = stateColors[span.state];
             if (!color) continue;
-            const x1 = ((span.start - startTime) / duration) * W;
-            const x2 = ((span.end - startTime) / duration) * W;
+            const x1 = Math.round(((span.start - startTime) / duration) * W);
+            const x2 = Math.round(((span.end - startTime) / duration) * W);
             const w = x2 - x1;
             if (w <= 0) continue;
             ctx.fillStyle = color;
