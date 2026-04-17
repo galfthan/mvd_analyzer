@@ -4559,49 +4559,54 @@ function setupMapTrailControls() {
     }
 }
 
-// ─── Loc Graph ────────────────────────────────────────────────────────────
+// ─── Loc Graph (Cytoscape) ────────────────────────────────────────────────
 //
-// Static aggregate view of loc-to-loc movement: nodes sized by time spent,
-// directed edges sized by transition count, teleport edges dashed.
+// Prototype using Cytoscape.js for the loc-graph rendering. Swap-in
+// alternative to the earlier hand-rolled canvas version so we can evaluate
+// layout quality, interactivity and future extensibility (route analysis,
+// player animation on top of nodes).
 //
 // FIXME: when per-time player positions are added later, this tab will need
-// to be added to TABS_WITH_TIMELINE so the unified scrubber appears and the
-// render function can receive a time argument.
+// to be added to TABS_WITH_TIMELINE so the unified scrubber appears.
 
 const locGraphState = {
-    canvas: null,
-    ctx: null,
-    graph: null,          // { locs, edges } from result.locGraph
-    nodeByName: null,     // name -> node ref (for fast edge lookup)
-    bounds: null,         // { minX, maxX, minY, maxY }
-    transform: null,      // { scale, offsetX, offsetY, minX, minY, canvasH }
-    filterOptions: [],    // [{ value, label, kind }]
-    initialized: false
+    cy: null,            // Cytoscape instance
+    graph: null,         // { locs, edges } from result.locGraph
+    result: null,        // Full result — used for filter repopulation on re-init
+    initialized: false,
+    tooltip: null        // Hover tooltip DOM node
 };
+
+// cytoscape-fcose registers itself on the global `cytoscape` object when
+// loaded; guard the registration so re-loading the file during dev doesn't
+// throw.
+function registerCytoscapeExtensions() {
+    if (typeof cytoscape === 'undefined') return;
+    if (typeof cytoscapeFcose !== 'undefined' && !cytoscape.__fcoseRegistered) {
+        cytoscape.use(cytoscapeFcose);
+        cytoscape.__fcoseRegistered = true;
+    }
+}
 
 function initLocGraphView(result) {
     const graph = result && result.locGraph;
-    const canvas = document.getElementById('locgraph-canvas');
-    if (!canvas) return;
+    const container = document.getElementById('locgraph-canvas');
+    if (!container) return;
 
-    locGraphState.canvas = canvas;
-    locGraphState.ctx = canvas.getContext('2d');
     locGraphState.graph = graph || null;
+    locGraphState.result = result;
 
     const noData = document.getElementById('locgraph-no-data');
     if (!graph || !graph.locs || graph.locs.length === 0) {
         if (noData) noData.style.display = 'block';
-        const ctx = locGraphState.ctx;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (locGraphState.cy) {
+            locGraphState.cy.destroy();
+            locGraphState.cy = null;
+        }
         return;
     }
     if (noData) noData.style.display = 'none';
 
-    locGraphState.nodeByName = {};
-    for (const n of graph.locs) locGraphState.nodeByName[n.name] = n;
-
-    computeLocGraphBounds(graph.locs);
-    updateLocGraphTransform();
     populateLocGraphFilter(result);
 
     if (!locGraphState.initialized) {
@@ -4609,79 +4614,27 @@ function initLocGraphView(result) {
         locGraphState.initialized = true;
     }
 
-    renderLocGraph();
-}
-
-function computeLocGraphBounds(locs) {
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    let any = false;
-    for (const n of locs) {
-        if (n.x === 0 && n.y === 0) continue;
-        any = true;
-        if (n.x < minX) minX = n.x;
-        if (n.x > maxX) maxX = n.x;
-        if (n.y < minY) minY = n.y;
-        if (n.y > maxY) maxY = n.y;
-    }
-    if (!any) {
-        // Fall back to an arbitrary unit box so nodes at (0,0) still render.
-        minX = -100; maxX = 100; minY = -100; maxY = 100;
-    }
-    const padX = Math.max((maxX - minX) * 0.1, 50);
-    const padY = Math.max((maxY - minY) * 0.1, 50);
-    locGraphState.bounds = {
-        minX: minX - padX,
-        maxX: maxX + padX,
-        minY: minY - padY,
-        maxY: maxY + padY
-    };
-}
-
-function updateLocGraphTransform() {
-    const canvas = locGraphState.canvas;
-    const { minX, maxX, minY, maxY } = locGraphState.bounds;
-    const worldW = maxX - minX;
-    const worldH = maxY - minY;
-    const scale = Math.min(canvas.width / worldW, canvas.height / worldH);
-    locGraphState.transform = {
-        scale,
-        offsetX: (canvas.width - worldW * scale) / 2,
-        offsetY: (canvas.height - worldH * scale) / 2,
-        minX, minY,
-        canvasH: canvas.height
-    };
-}
-
-function locGraphWorldToCanvas(x, y) {
-    const t = locGraphState.transform;
-    return {
-        x: t.offsetX + (x - t.minX) * t.scale,
-        y: t.canvasH - (t.offsetY + (y - t.minY) * t.scale)
-    };
+    buildOrRefreshCytoscape();
 }
 
 function populateLocGraphFilter(result) {
     const select = document.getElementById('locgraph-filter');
     if (!select) return;
 
-    const opts = [{ value: 'all', label: 'All', kind: 'all' }];
-
+    const opts = [{ value: 'all', label: 'All' }];
     const teams = (result.demoInfo && result.demoInfo.teams) || [];
     const players = (result.demoInfo && result.demoInfo.players) || [];
 
     // Hide team options in duel mode (team name == player name for every player).
     const isDuel = players.length > 0 && players.every(p => p.team === p.name);
     if (!isDuel) {
-        for (const t of teams) {
-            opts.push({ value: 'team:' + t, label: 'Team: ' + t, kind: 'team' });
-        }
+        for (const t of teams) opts.push({ value: 'team:' + t, label: 'Team: ' + t });
     }
     for (const p of players) {
         if (!p.name) continue;
-        opts.push({ value: 'player:' + p.name, label: p.name, kind: 'player' });
+        opts.push({ value: 'player:' + p.name, label: p.name });
     }
 
-    locGraphState.filterOptions = opts;
     const prev = select.value;
     select.innerHTML = '';
     for (const o of opts) {
@@ -4695,12 +4648,16 @@ function populateLocGraphFilter(result) {
 }
 
 function setupLocGraphControls() {
-    const filter = document.getElementById('locgraph-filter');
-    const edgeMode = document.getElementById('locgraph-edge-mode');
-    const labels = document.getElementById('locgraph-show-labels');
-    if (filter) filter.addEventListener('change', renderLocGraph);
-    if (edgeMode) edgeMode.addEventListener('change', renderLocGraph);
-    if (labels) labels.addEventListener('change', renderLocGraph);
+    const on = (id, ev, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener(ev, fn);
+    };
+    on('locgraph-filter', 'change', buildOrRefreshCytoscape);
+    on('locgraph-edge-mode', 'change', buildOrRefreshCytoscape);
+    on('locgraph-layout', 'change', buildOrRefreshCytoscape);
+    on('locgraph-show-labels', 'change', applyLocGraphStyle);
+    on('locgraph-relayout', 'click', () => runLocGraphLayout(true));
+    on('locgraph-fit', 'click', () => { if (locGraphState.cy) locGraphState.cy.fit(undefined, 30); });
 }
 
 function getLocGraphFilter() {
@@ -4711,162 +4668,365 @@ function getLocGraphFilter() {
     return { kind: 'all', key: '' };
 }
 
-function nodeWeight(node, filter) {
+function nodeWeightFor(node, filter) {
     if (filter.kind === 'player') return node.byPlayer?.[filter.key] || 0;
     if (filter.kind === 'team') return node.byTeam?.[filter.key] || 0;
     return node.total || 0;
 }
 
-function edgeWeight(edge, filter) {
+function edgeWeightFor(edge, filter) {
     if (filter.kind === 'player') return edge.byPlayer?.[filter.key] || 0;
     if (filter.kind === 'team') return edge.byTeam?.[filter.key] || 0;
     return edge.total || 0;
 }
 
-function renderLocGraph() {
-    const state = locGraphState;
-    if (!state.canvas || !state.graph) return;
-    const ctx = state.ctx;
-    const canvas = state.canvas;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+// Build Cytoscape elements from the current graph + filter + edge-mode.
+// Nodes/edges carry their filtered weight in data so styles can reference it
+// directly instead of re-computing in the mapper.
+function buildCytoscapeElements() {
+    const { graph } = locGraphState;
+    if (!graph) return [];
     const filter = getLocGraphFilter();
     const edgeModeSel = document.getElementById('locgraph-edge-mode');
     const edgeMode = edgeModeSel ? edgeModeSel.value : 'all';
-    const showLabels = document.getElementById('locgraph-show-labels')?.checked ?? true;
 
-    const { locs, edges } = state.graph;
-
-    // Pre-project node centers and weights.
     let maxNodeWeight = 0;
-    const nodePx = {};
-    for (const n of locs) {
-        const w = nodeWeight(n, filter);
+    for (const n of graph.locs) {
+        const w = nodeWeightFor(n, filter);
         if (w > maxNodeWeight) maxNodeWeight = w;
-        nodePx[n.name] = locGraphWorldToCanvas(n.x, n.y);
     }
-
-    const visibleEdges = edges.filter(e => {
-        if (edgeMode === 'normal' && e.kind !== 'normal') return false;
-        if (edgeMode === 'teleport' && e.kind !== 'teleport') return false;
-        return edgeWeight(e, filter) > 0;
-    });
     let maxEdgeWeight = 0;
-    for (const e of visibleEdges) {
-        const w = edgeWeight(e, filter);
+    for (const e of graph.edges) {
+        if (edgeMode === 'normal' && e.kind !== 'normal') continue;
+        if (edgeMode === 'teleport' && e.kind !== 'teleport') continue;
+        const w = edgeWeightFor(e, filter);
         if (w > maxEdgeWeight) maxEdgeWeight = w;
     }
 
-    // Base node radius in pixels.
-    const radiusFor = (w) => {
-        if (maxNodeWeight <= 0) return 6;
-        return 6 + 22 * Math.sqrt(w / maxNodeWeight);
-    };
-    const nodeRadius = {};
-    for (const n of locs) nodeRadius[n.name] = radiusFor(nodeWeight(n, filter));
+    const elements = [];
 
-    // Draw edges first so nodes sit on top.
-    for (const e of visibleEdges) {
-        const from = nodePx[e.from];
-        const to = nodePx[e.to];
-        if (!from || !to) continue;
-        const w = edgeWeight(e, filter);
-        const width = maxEdgeWeight > 0 ? 1 + 5 * Math.sqrt(w / maxEdgeWeight) : 1;
-        drawLocGraphEdge(ctx, from, to, e.kind, width, nodeRadius[e.from] || 6, nodeRadius[e.to] || 6, filter.kind === 'all' ? 0.85 : 0.9);
+    for (const n of graph.locs) {
+        const w = nodeWeightFor(n, filter);
+        const norm = maxNodeWeight > 0 ? w / maxNodeWeight : 0;
+        elements.push({
+            group: 'nodes',
+            data: {
+                id: 'n:' + n.name,
+                name: n.name,
+                weight: w,
+                weightNorm: norm,
+                total: n.total,
+                byPlayer: n.byPlayer,
+                byTeam: n.byTeam || {},
+                // Per-filter dim state: mostly grey out nodes with zero
+                // contribution in non-"all" filters so the subgraph is
+                // visually clear but context is preserved.
+                dim: filter.kind !== 'all' && w === 0
+            },
+            // Preset/geographic layout reads world coords directly from data.
+            // Invert Y so "up" on screen matches "up" in map (QW Y is up).
+            position: { x: n.x || 0, y: -(n.y || 0) }
+        });
     }
 
-    // Draw nodes.
-    for (const n of locs) {
-        const p = nodePx[n.name];
-        const r = nodeRadius[n.name];
-        const w = nodeWeight(n, filter);
-        const visible = w > 0 || filter.kind === 'all';
-        const alpha = visible ? (w > 0 ? 0.95 : 0.25) : 0.15;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = nodeFillForFilter(filter, alpha);
-        ctx.fill();
-        ctx.lineWidth = 1.5;
-        ctx.strokeStyle = `rgba(0, 217, 255, ${alpha * 0.6})`;
-        ctx.stroke();
-
-        if (showLabels && visible) {
-            ctx.fillStyle = `rgba(220, 230, 245, ${alpha})`;
-            ctx.font = '11px Inter, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.fillText(n.name, p.x, p.y + r + 3);
-        }
+    for (const e of graph.edges) {
+        if (edgeMode === 'normal' && e.kind !== 'normal') continue;
+        if (edgeMode === 'teleport' && e.kind !== 'teleport') continue;
+        const w = edgeWeightFor(e, filter);
+        if (w === 0) continue; // Prune invisible edges for this filter
+        const norm = maxEdgeWeight > 0 ? w / maxEdgeWeight : 0;
+        elements.push({
+            group: 'edges',
+            data: {
+                id: 'e:' + e.from + '->' + e.to,
+                source: 'n:' + e.from,
+                target: 'n:' + e.to,
+                weight: w,
+                weightNorm: norm,
+                kind: e.kind,
+                total: e.total,
+                byPlayer: e.byPlayer,
+                byTeam: e.byTeam || {}
+            }
+        });
     }
+
+    return elements;
 }
 
-function nodeFillForFilter(filter, alpha) {
+function buildLocGraphStyle() {
+    const showLabels = document.getElementById('locgraph-show-labels')?.checked ?? true;
+    const filter = getLocGraphFilter();
+
+    // Pick a node fill based on the filter so "Team: red" nodes are tinted
+    // with the team colour. In the "all" view, fall back to a neutral blue.
+    let nodeFill = '#8fb3ff';
     if (filter.kind === 'team') {
         const teams = timelineState.teams || [];
         const idx = teams.indexOf(filter.key);
-        const hex = (idx >= 0 && idx < TEAM_COLORS.length) ? TEAM_COLORS[idx] : '#8fb3ff';
-        return hexToRgba(hex, alpha);
+        nodeFill = (idx >= 0 && idx < TEAM_COLORS.length) ? TEAM_COLORS[idx] : '#8fb3ff';
+    } else if (filter.kind === 'player') {
+        nodeFill = '#ffc107';
     }
-    if (filter.kind === 'player') {
-        return hexToRgba('#ffc107', alpha);
-    }
-    return `rgba(143, 179, 255, ${alpha})`;
+
+    return [
+        {
+            selector: 'node',
+            style: {
+                'background-color': nodeFill,
+                'border-color': 'rgba(0, 217, 255, 0.6)',
+                'border-width': 1.5,
+                // sqrt so diameter scales with sqrt(time); "eye" area ≈ time.
+                'width':  'mapData(weightNorm, 0, 1, 16, 60)',
+                'height': 'mapData(weightNorm, 0, 1, 16, 60)',
+                'label': showLabels ? 'data(name)' : '',
+                'color': '#dfe6f5',
+                'font-size': 11,
+                'font-family': 'Inter, sans-serif',
+                'text-valign': 'bottom',
+                'text-margin-y': 4,
+                'text-outline-color': '#0a0a15',
+                'text-outline-width': 2
+            }
+        },
+        {
+            selector: 'node[?dim]',
+            style: {
+                'background-opacity': 0.25,
+                'border-opacity': 0.2,
+                'text-opacity': 0.35
+            }
+        },
+        {
+            selector: 'edge',
+            style: {
+                'curve-style': 'bezier',
+                'control-point-step-size': 40,
+                'width': 'mapData(weightNorm, 0, 1, 1, 7)',
+                'line-color': '#8fb3ff',
+                'target-arrow-color': '#8fb3ff',
+                'target-arrow-shape': 'triangle',
+                'arrow-scale': 1.1,
+                'opacity': 0.8
+            }
+        },
+        {
+            selector: 'edge[kind = "teleport"]',
+            style: {
+                'line-color': '#00d9ff',
+                'target-arrow-color': '#00d9ff',
+                'line-style': 'dashed',
+                'line-dash-pattern': [8, 4]
+            }
+        },
+        {
+            selector: ':selected',
+            style: {
+                'border-color': '#ffc107',
+                'border-width': 3,
+                'line-color': '#ffc107',
+                'target-arrow-color': '#ffc107'
+            }
+        },
+        {
+            selector: '.highlight',
+            style: {
+                'opacity': 1,
+                'z-index': 50
+            }
+        },
+        {
+            selector: '.faded',
+            style: {
+                'opacity': 0.15
+            }
+        }
+    ];
 }
 
-// Edge drawer: curves A→B and B→A in opposite perpendicular directions so
-// they don't overlap. Teleport edges are drawn dashed in cyan; normal edges
-// in a muted blue. Arrowhead at destination, offset by target node radius.
-function drawLocGraphEdge(ctx, from, to, kind, width, fromR, toR, alpha) {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const dist = Math.hypot(dx, dy);
-    if (dist < 1) return;
-    const nx = dx / dist;
-    const ny = dy / dist;
-    // Shift endpoints outside the node circles.
-    const sx = from.x + nx * fromR;
-    const sy = from.y + ny * fromR;
-    const ex = to.x - nx * (toR + 4);
-    const ey = to.y - ny * (toR + 4);
+// Build the cytoscape instance on first call, otherwise swap in the new
+// element set + layout. Keeping the instance alive preserves pan/zoom state
+// when the user toggles a filter.
+function buildOrRefreshCytoscape() {
+    if (!locGraphState.graph) return;
+    registerCytoscapeExtensions();
+    const container = document.getElementById('locgraph-canvas');
+    if (!container || typeof cytoscape === 'undefined') return;
 
-    // Perpendicular offset — sign derived from endpoint ordering so A→B and
-    // B→A curve on opposite sides.
-    const side = (from.x + from.y * 1000) < (to.x + to.y * 1000) ? 1 : -1;
-    const bulge = Math.min(30, dist * 0.15);
-    const cx = (sx + ex) / 2 + (-ny) * bulge * side;
-    const cy = (sy + ey) / 2 + (nx) * bulge * side;
+    const elements = buildCytoscapeElements();
 
-    const color = kind === 'teleport' ? `rgba(0, 217, 255, ${alpha})` : `rgba(143, 179, 255, ${alpha})`;
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = width;
-    if (kind === 'teleport') ctx.setLineDash([6, 4]); else ctx.setLineDash([]);
+    if (!locGraphState.cy) {
+        locGraphState.cy = cytoscape({
+            container,
+            elements,
+            style: buildLocGraphStyle(),
+            layout: { name: 'preset' },
+            wheelSensitivity: 0.2,
+            minZoom: 0.1,
+            maxZoom: 4
+        });
+        attachLocGraphInteractions(locGraphState.cy);
+    } else {
+        locGraphState.cy.batch(() => {
+            locGraphState.cy.elements().remove();
+            locGraphState.cy.add(elements);
+            locGraphState.cy.style(buildLocGraphStyle());
+        });
+    }
 
-    ctx.beginPath();
-    ctx.moveTo(sx, sy);
-    ctx.quadraticCurveTo(cx, cy, ex, ey);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    runLocGraphLayout(false);
+}
 
-    // Arrowhead — tangent computed from control point for a curved arrow.
-    const tx = ex - cx;
-    const ty = ey - cy;
-    const tl = Math.hypot(tx, ty) || 1;
-    const ux = tx / tl;
-    const uy = ty / tl;
-    const head = 6 + width * 0.8;
-    const baseX = ex - ux * head;
-    const baseY = ey - uy * head;
-    const perpX = -uy;
-    const perpY = ux;
-    const halfWidth = head * 0.55;
-    ctx.beginPath();
-    ctx.moveTo(ex, ey);
-    ctx.lineTo(baseX + perpX * halfWidth, baseY + perpY * halfWidth);
-    ctx.lineTo(baseX - perpX * halfWidth, baseY - perpY * halfWidth);
-    ctx.closePath();
-    ctx.fill();
+// Run the chosen layout. `animate` is false on filter changes (the common
+// case) so layout runs instantly; the re-layout button passes true to get
+// the animated effect.
+function runLocGraphLayout(animate) {
+    const cy = locGraphState.cy;
+    if (!cy) return;
+    const sel = document.getElementById('locgraph-layout');
+    const name = sel ? sel.value : 'preset';
+
+    let opts;
+    if (name === 'preset') {
+        opts = { name: 'preset', fit: true, padding: 30 };
+    } else if (name === 'fcose') {
+        opts = {
+            name: 'fcose',
+            quality: 'default',
+            randomize: false,       // start from current positions
+            animate: animate,
+            animationDuration: 600,
+            nodeRepulsion: 8000,
+            idealEdgeLength: 80,
+            edgeElasticity: 0.45,
+            gravity: 0.25,
+            fit: true,
+            padding: 30
+        };
+    } else if (name === 'cose') {
+        opts = { name: 'cose', animate: animate, padding: 30, fit: true };
+    } else if (name === 'circle') {
+        opts = { name: 'circle', animate: animate, padding: 30, fit: true };
+    } else if (name === 'concentric') {
+        opts = {
+            name: 'concentric',
+            animate: animate,
+            padding: 30,
+            fit: true,
+            // Higher time spent = more central; Cytoscape expects larger
+            // numbers to be more central.
+            concentric: (node) => node.data('weight'),
+            levelWidth: () => 1
+        };
+    } else {
+        opts = { name: 'preset' };
+    }
+
+    const layout = cy.layout(opts);
+    layout.run();
+}
+
+function applyLocGraphStyle() {
+    if (!locGraphState.cy) return;
+    locGraphState.cy.style(buildLocGraphStyle());
+}
+
+// Click: show a tooltip with top-5 connections. Hover: fade the rest of the
+// graph so the node's neighborhood is clear.
+function attachLocGraphInteractions(cy) {
+    // Tooltip DOM — created lazily, reused across hovers.
+    const container = document.getElementById('locgraph-canvas');
+    if (!locGraphState.tooltip) {
+        const tip = document.createElement('div');
+        tip.className = 'locgraph-tooltip';
+        tip.style.display = 'none';
+        container.parentElement.appendChild(tip);
+        locGraphState.tooltip = tip;
+    }
+    const tip = locGraphState.tooltip;
+
+    const hideTip = () => { tip.style.display = 'none'; };
+    const showTipAt = (evt, html) => {
+        tip.textContent = '';
+        tip.innerHTML = html;
+        tip.style.display = 'block';
+        // Position via renderedPosition so it tracks pan/zoom.
+        const rect = container.getBoundingClientRect();
+        const x = evt.renderedPosition ? evt.renderedPosition.x : 0;
+        const y = evt.renderedPosition ? evt.renderedPosition.y : 0;
+        tip.style.left = (x + 12) + 'px';
+        tip.style.top = (rect.height - y - 12) + 'px'; // bottom-up coords
+        // Simpler: use originalEvent client position if available.
+        if (evt.originalEvent) {
+            tip.style.left = (evt.originalEvent.clientX - rect.left + 12) + 'px';
+            tip.style.top = (evt.originalEvent.clientY - rect.top + 12) + 'px';
+        }
+    };
+
+    cy.on('mouseover', 'node', (evt) => {
+        const node = evt.target;
+        cy.elements().addClass('faded');
+        node.removeClass('faded').addClass('highlight');
+        node.connectedEdges().removeClass('faded').addClass('highlight');
+        node.connectedEdges().connectedNodes().removeClass('faded').addClass('highlight');
+        showTipAt(evt, nodeTooltipHtml(node));
+    });
+    cy.on('mouseover', 'edge', (evt) => {
+        const edge = evt.target;
+        cy.elements().addClass('faded');
+        edge.removeClass('faded').addClass('highlight');
+        edge.source().removeClass('faded').addClass('highlight');
+        edge.target().removeClass('faded').addClass('highlight');
+        showTipAt(evt, edgeTooltipHtml(edge));
+    });
+    cy.on('mouseout', 'node, edge', () => {
+        cy.elements().removeClass('faded').removeClass('highlight');
+        hideTip();
+    });
+    cy.on('tap', (evt) => {
+        if (evt.target === cy) hideTip();
+    });
+}
+
+function nodeTooltipHtml(node) {
+    const name = node.data('name');
+    const total = node.data('total') || 0;
+    const byPlayer = node.data('byPlayer') || {};
+    const top = Object.entries(byPlayer).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const rows = top.map(([p, t]) => `<div>· ${escapeHtml(p)}: ${t.toFixed(1)}s</div>`).join('');
+    return `<div><strong>${escapeHtml(name)}</strong></div>
+<div>Total time: ${total.toFixed(1)}s</div>
+${rows}`;
+}
+
+function edgeTooltipHtml(edge) {
+    const from = edge.data('source').replace(/^n:/, '');
+    const to = edge.data('target').replace(/^n:/, '');
+    const kind = edge.data('kind');
+    const total = edge.data('total') || 0;
+    const byPlayer = edge.data('byPlayer') || {};
+    const top = Object.entries(byPlayer).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const rows = top.map(([p, c]) => `<div>· ${escapeHtml(p)}: ${c}</div>`).join('');
+    return `<div><strong>${escapeHtml(from)} → ${escapeHtml(to)}</strong> (${kind})</div>
+<div>Total transitions: ${total}</div>
+${rows}`;
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+// Kept as a thin compatibility shim: the tab-switch handler and old callers
+// invoke renderLocGraph(); route them to the new refresh path.
+function renderLocGraph() {
+    if (locGraphState.cy) {
+        locGraphState.cy.resize();
+        locGraphState.cy.fit(undefined, 30);
+    } else if (locGraphState.graph) {
+        buildOrRefreshCytoscape();
+    }
 }
 
 // ─── Playback Engine ──────────────────────────────────────────────────────

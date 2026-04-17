@@ -1650,7 +1650,7 @@ th.sortable.sort-desc::after {
 
 .locgraph-canvas-container {
     position: relative;
-    align-self: flex-start;
+    width: 100%;
 }
 
 #locgraph-canvas {
@@ -1659,6 +1659,39 @@ th.sortable.sort-desc::after {
     border-radius: 6px;
     display: block;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    height: 700px;
+}
+
+.locgraph-btn {
+    background: transparent;
+    border: 1px solid #666;
+    color: #888;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.locgraph-btn:hover {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+.locgraph-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(10, 10, 21, 0.95);
+    border: 1px solid rgba(0, 217, 255, 0.3);
+    border-radius: 4px;
+    padding: 8px 10px;
+    color: #e0e0e0;
+    font-size: 0.85rem;
+    white-space: pre;
+    z-index: 100;
+    max-width: 280px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
 }
 
 .map-track-controls {
