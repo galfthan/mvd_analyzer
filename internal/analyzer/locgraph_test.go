@@ -4,14 +4,21 @@ import (
 	"testing"
 )
 
+// Small helper to build HighResPlayerData tersely.
+func pd(x, y float32, li int, d, sp bool) *HighResPlayerData {
+	return &HighResPlayerData{X: x, Y: y, H: 100, Li: li, D: d, Sp: sp}
+}
+
 // Build a synthetic Result with a known bucket timeline and verify
 // BuildLocGraph produces the expected nodes and edges, including
-// teleport classification.
+// teleport classification. Each transition is held for at least
+// locGraphHysteresisBuckets (=2) consecutive buckets so the transitions
+// actually commit.
 func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 	const D = 0.05
 
 	// Locs: "A" at (0,0), "B" at (100,0), "C" at (5000,0) — C is far enough
-	// from A that a direct A→C transition in one bucket qualifies as a
+	// from B that a direct B→C transition in one bucket qualifies as a
 	// teleport.
 	locTable := []string{"", "A", "B", "C"}
 	locationData := []MapLocation{
@@ -20,29 +27,15 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 		{Name: "C", X: 5000, Y: 0},
 	}
 
-	p := func(x, y float32, li int, d, sp bool) *HighResPlayerData {
-		return &HighResPlayerData{X: x, Y: y, H: 100, Li: li, D: d, Sp: sp}
-	}
-
-	// Player "p1" (team "red") walks A → A → B, then is teleported to C.
-	// Player "p2" (team "blue") stays in A the entire time.
+	// p1 (red): walks A,A → B,B → C,C (teleport). p2 (blue) stays in A the
+	// whole time.
 	buckets := []HighResBucket{
-		{T: 0.00, P: map[string]*HighResPlayerData{
-			"p1": p(1, 0, 1, false, false),
-			"p2": p(10, 10, 1, false, false),
-		}},
-		{T: 0.05, P: map[string]*HighResPlayerData{
-			"p1": p(50, 0, 1, false, false),
-			"p2": p(10, 10, 1, false, false),
-		}},
-		{T: 0.10, P: map[string]*HighResPlayerData{
-			"p1": p(100, 0, 2, false, false), // A → B normal
-			"p2": p(10, 10, 1, false, false),
-		}},
-		{T: 0.15, P: map[string]*HighResPlayerData{
-			"p1": p(5000, 0, 3, false, false), // B → C teleport
-			"p2": p(10, 10, 1, false, false),
-		}},
+		{T: 0.00, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false), "p2": pd(10, 10, 1, false, false)}},
+		{T: 0.05, P: map[string]*HighResPlayerData{"p1": pd(50, 0, 1, false, false), "p2": pd(10, 10, 1, false, false)}},
+		{T: 0.10, P: map[string]*HighResPlayerData{"p1": pd(98, 0, 2, false, false), "p2": pd(10, 10, 1, false, false)}},  // first B
+		{T: 0.15, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false), "p2": pd(10, 10, 1, false, false)}}, // second B → commit A→B
+		{T: 0.20, P: map[string]*HighResPlayerData{"p1": pd(5000, 0, 3, false, false), "p2": pd(10, 10, 1, false, false)}}, // first C (teleport jump)
+		{T: 0.25, P: map[string]*HighResPlayerData{"p1": pd(5002, 0, 3, false, false), "p2": pd(10, 10, 1, false, false)}}, // second C → commit B→C (teleport)
 	}
 
 	result := &Result{
@@ -70,32 +63,21 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 		nodes[n.Name] = n
 	}
 
-	// Node A: p1 spent 2 buckets there, p2 spent 4 buckets → 6*D total.
-	if got := nodes["A"].Total; !approxEq(got, 6*D) {
-		t.Errorf("A total = %v, want %v", got, 6*D)
+	// Node-time uses raw per-bucket loc — p1: 2 in A, 2 in B, 2 in C;
+	// p2: 6 in A. So A=8D, B=2D, C=2D.
+	if got := nodes["A"].Total; !approxEq(got, 8*D) {
+		t.Errorf("A total = %v, want %v", got, 8*D)
 	}
-	if got := nodes["A"].ByPlayer["p1"]; !approxEq(got, 2*D) {
-		t.Errorf("A byPlayer[p1] = %v, want %v", got, 2*D)
+	if got := nodes["B"].Total; !approxEq(got, 2*D) {
+		t.Errorf("B total = %v, want %v", got, 2*D)
 	}
-	if got := nodes["A"].ByPlayer["p2"]; !approxEq(got, 4*D) {
-		t.Errorf("A byPlayer[p2] = %v, want %v", got, 4*D)
+	if got := nodes["C"].Total; !approxEq(got, 2*D) {
+		t.Errorf("C total = %v, want %v", got, 2*D)
 	}
-	if got := nodes["A"].ByTeam["red"]; !approxEq(got, 2*D) {
-		t.Errorf("A byTeam[red] = %v, want %v", got, 2*D)
-	}
-	if got := nodes["A"].ByTeam["blue"]; !approxEq(got, 4*D) {
-		t.Errorf("A byTeam[blue] = %v, want %v", got, 4*D)
+	if got := nodes["A"].ByTeam["blue"]; !approxEq(got, 6*D) {
+		t.Errorf("A byTeam[blue] = %v, want %v", got, 6*D)
 	}
 
-	// Node B and C each have exactly one bucket of p1 time.
-	if got := nodes["B"].Total; !approxEq(got, D) {
-		t.Errorf("B total = %v, want %v", got, D)
-	}
-	if got := nodes["C"].Total; !approxEq(got, D) {
-		t.Errorf("C total = %v, want %v", got, D)
-	}
-
-	// Coordinates copied from LocationData.
 	if nodes["C"].X != 5000 {
 		t.Errorf("C.X = %v, want 5000", nodes["C"].X)
 	}
@@ -112,46 +94,132 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 	if ab.ByPlayer["p1"] != 1 || ab.ByTeam["red"] != 1 {
 		t.Errorf("A→B breakdown = %+v", ab)
 	}
-
 	bc := edges["B→C"]
 	if bc.Total != 1 || bc.Kind != "teleport" {
 		t.Errorf("B→C = %+v, want total=1 kind=teleport", bc)
 	}
-
 	if _, exists := edges["A→C"]; exists {
 		t.Errorf("unexpected A→C edge: %+v", edges["A→C"])
 	}
 }
 
+// Classic death path: the p.D / p.Sp markers are set on the death and
+// respawn buckets, so the cursor resets and no A→B edge bridges the death.
 func TestBuildLocGraph_DeathResetsCursor(t *testing.T) {
 	const D = 0.05
 	locTable := []string{"", "A", "B"}
-	p := func(x, y float32, li int, d, sp bool) *HighResPlayerData {
-		return &HighResPlayerData{X: x, Y: y, H: 100, Li: li, D: d, Sp: sp}
-	}
 
-	// p1 in A, dies, respawns in B. Should NOT produce an A→B edge because
-	// the death/spawn buckets reset the cursor.
+	// Two buckets in A before death, dead frame, spawn frame, two buckets
+	// in B post-spawn. Without the reset, the 2 buckets in B would commit
+	// an A→B transition.
 	buckets := []HighResBucket{
-		{T: 0.00, P: map[string]*HighResPlayerData{"p1": p(0, 0, 1, false, false)}},
-		{T: 0.05, P: map[string]*HighResPlayerData{"p1": p(0, 0, 1, true, false)}},
-		{T: 0.10, P: map[string]*HighResPlayerData{"p1": p(100, 0, 2, false, true)}},
-		{T: 0.15, P: map[string]*HighResPlayerData{"p1": p(100, 0, 2, false, false)}},
+		{T: 0.00, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false)}},
+		{T: 0.05, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false)}},
+		{T: 0.10, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, true, false)}},  // death
+		{T: 0.15, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, true)}}, // spawn in B
+		{T: 0.20, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false)}},
+		{T: 0.25, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false)}},
 	}
 
-	result := &Result{
-		TimelineAnalysis: &TimelineAnalysisResult{
-			HighResDuration: D,
-			HighResBuckets:  buckets,
-			LocTable:        locTable,
-		},
-	}
+	result := &Result{TimelineAnalysis: &TimelineAnalysisResult{
+		HighResDuration: D, HighResBuckets: buckets, LocTable: locTable,
+	}}
 	graph := BuildLocGraph(result)
 	if graph == nil {
 		t.Fatal("expected graph, got nil")
 	}
 	if len(graph.Edges) != 0 {
 		t.Errorf("expected no edges across death/spawn, got %+v", graph.Edges)
+	}
+}
+
+// Simulates the instant-gib-respawn scenario where both p.D and p.Sp might
+// be missed because death and respawn happen within the same sampling
+// window. The authoritative FragResult still records the death, and
+// BuildLocGraph must use it to reset the cursor so no A→B edge is created.
+func TestBuildLocGraph_FragEventResetsCursor(t *testing.T) {
+	const D = 0.05
+	locTable := []string{"", "A", "B"}
+
+	// 3 buckets in A (cursor commits A), then 3 buckets in B with NO D or
+	// Sp flag set anywhere — simulating a missed intra-bucket gib+respawn.
+	// Without the frag-based reset, this would commit an A→B edge after
+	// the 2nd B bucket.
+	buckets := []HighResBucket{
+		{T: 0.00, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false)}},
+		{T: 0.05, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false)}},
+		{T: 0.10, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false)}},
+		// Death happens at t=0.12 per FragResult; no marker in the stream.
+		{T: 0.15, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false)}},
+		{T: 0.20, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false)}},
+		{T: 0.25, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false)}},
+	}
+
+	result := &Result{
+		TimelineAnalysis: &TimelineAnalysisResult{
+			HighResDuration: D, HighResBuckets: buckets, LocTable: locTable,
+		},
+		Frags: &FragResult{
+			Frags: []FragEntry{
+				{Time: 0.12, Killer: "other", Victim: "p1", Weapon: "rl"},
+			},
+		},
+	}
+	graph := BuildLocGraph(result)
+	if graph == nil {
+		t.Fatal("expected graph, got nil")
+	}
+	for _, e := range graph.Edges {
+		if e.From == "A" && e.To == "B" {
+			t.Errorf("FragResult should have reset cursor across death; unexpected edge %+v", e)
+		}
+	}
+}
+
+// Verify hysteresis suppresses A↔B boundary jitter — rapid single-bucket
+// flips shouldn't produce edges, but a sustained move to a new loc does.
+func TestBuildLocGraph_HysteresisSuppressesJitter(t *testing.T) {
+	const D = 0.05
+	locTable := []string{"", "A", "B", "C"}
+
+	// p1 sits near the A/B boundary and jitters A,B,A,B,A for 5 buckets,
+	// then commits to C for 3 buckets. The jitter has no 2-consecutive
+	// repeats; no A→B or B→A edge should appear. The final C stay is long
+	// enough that A→C should commit.
+	buckets := []HighResBucket{
+		{T: 0.00, P: map[string]*HighResPlayerData{"p1": pd(50, 0, 1, false, false)}},
+		{T: 0.05, P: map[string]*HighResPlayerData{"p1": pd(52, 0, 2, false, false)}},
+		{T: 0.10, P: map[string]*HighResPlayerData{"p1": pd(49, 0, 1, false, false)}},
+		{T: 0.15, P: map[string]*HighResPlayerData{"p1": pd(51, 0, 2, false, false)}},
+		{T: 0.20, P: map[string]*HighResPlayerData{"p1": pd(50, 0, 1, false, false)}},
+		{T: 0.25, P: map[string]*HighResPlayerData{"p1": pd(200, 0, 3, false, false)}},
+		{T: 0.30, P: map[string]*HighResPlayerData{"p1": pd(202, 0, 3, false, false)}},
+		{T: 0.35, P: map[string]*HighResPlayerData{"p1": pd(204, 0, 3, false, false)}},
+	}
+
+	result := &Result{TimelineAnalysis: &TimelineAnalysisResult{
+		HighResDuration: D, HighResBuckets: buckets, LocTable: locTable,
+	}}
+	graph := BuildLocGraph(result)
+	if graph == nil {
+		t.Fatal("expected graph, got nil")
+	}
+
+	seen := map[string]LocEdge{}
+	for _, e := range graph.Edges {
+		seen[e.From+"→"+e.To] = e
+	}
+	if _, ok := seen["A→B"]; ok {
+		t.Errorf("hysteresis should suppress A→B jitter, got edge %+v", seen["A→B"])
+	}
+	if _, ok := seen["B→A"]; ok {
+		t.Errorf("hysteresis should suppress B→A jitter, got edge %+v", seen["B→A"])
+	}
+	// The sustained move to C should commit — from either A or B,
+	// whichever was last committed when C appeared (the commit point at
+	// bucket 0.0 was A, then jitter never committed, so A→C is expected).
+	if e, ok := seen["A→C"]; !ok || e.Total != 1 {
+		t.Errorf("expected A→C=1, got %+v (all edges: %+v)", e, graph.Edges)
 	}
 }
 

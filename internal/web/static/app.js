@@ -4654,6 +4654,7 @@ function setupLocGraphControls() {
     };
     on('locgraph-filter', 'change', buildOrRefreshCytoscape);
     on('locgraph-edge-mode', 'change', buildOrRefreshCytoscape);
+    on('locgraph-min-edge', 'change', buildOrRefreshCytoscape);
     on('locgraph-layout', 'change', buildOrRefreshCytoscape);
     on('locgraph-show-labels', 'change', applyLocGraphStyle);
     on('locgraph-label-size', 'change', applyLocGraphStyle);
@@ -4690,6 +4691,8 @@ function buildCytoscapeElements() {
     const filter = getLocGraphFilter();
     const edgeModeSel = document.getElementById('locgraph-edge-mode');
     const edgeMode = edgeModeSel ? edgeModeSel.value : 'all';
+    const minEdgeSel = document.getElementById('locgraph-min-edge');
+    const minEdge = minEdgeSel ? (parseInt(minEdgeSel.value, 10) || 1) : 1;
 
     let maxNodeWeight = 0;
     for (const n of graph.locs) {
@@ -4701,6 +4704,7 @@ function buildCytoscapeElements() {
         if (edgeMode === 'normal' && e.kind !== 'normal') continue;
         if (edgeMode === 'teleport' && e.kind !== 'teleport') continue;
         const w = edgeWeightFor(e, filter);
+        if (w < minEdge) continue;
         if (w > maxEdgeWeight) maxEdgeWeight = w;
     }
 
@@ -4735,6 +4739,7 @@ function buildCytoscapeElements() {
         if (edgeMode === 'teleport' && e.kind !== 'teleport') continue;
         const w = edgeWeightFor(e, filter);
         if (w === 0) continue; // Prune invisible edges for this filter
+        if (w < minEdge) continue; // UI minimum-edge-count filter
         const norm = maxEdgeWeight > 0 ? w / maxEdgeWeight : 0;
         elements.push({
             group: 'edges',
