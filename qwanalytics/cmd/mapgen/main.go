@@ -30,13 +30,17 @@ import (
 	"github.com/mvd-analyzer/qwanalytics/mapgen/mapgeom"
 )
 
+var itemsOutDir string
+
 func main() {
 	bspDir := flag.String("bsp-dir", "", "directory containing .bsp files (required)")
-	outDir := flag.String("out-dir", "internal/web/static/maps", "output directory for generated JSON")
+	outDir := flag.String("out-dir", "internal/web/static/maps", "output directory for geometry JSON")
+	itemsDir := flag.String("items-out-dir", "qwanalytics/items/data", "output directory for per-map items JSON (analyzer corpus)")
 	locDir := flag.String("loc-dir", "internal/web/static/locs", "directory containing .loc files")
 	mapFilter := flag.String("map", "", "process only the BSP whose basename (no extension) matches")
 	verbose := flag.Bool("verbose", false, "print per-map progress and stats")
 	flag.Parse()
+	itemsOutDir = *itemsDir
 
 	loc.SetLocDir(*locDir)
 
@@ -59,6 +63,12 @@ func main() {
 	if err := os.MkdirAll(*outDir, 0o755); err != nil {
 		fmt.Fprintf(os.Stderr, "mapgen: create out-dir: %v\n", err)
 		os.Exit(1)
+	}
+	if itemsOutDir != "" {
+		if err := os.MkdirAll(itemsOutDir, 0o755); err != nil {
+			fmt.Fprintf(os.Stderr, "mapgen: create items-out-dir: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	bspPaths, err := findBSPs(*bspDir)
@@ -133,6 +143,18 @@ func processOne(path, name, outDir string, verbose bool) error {
 			stats.FacesTotal, stats.FacesKept, stats.FacesDropped)
 	}
 
+	// Decode the entities lump separately (the geometry path in
+	// mapgeom.Build deliberately doesn't touch it) and emit the
+	// pickup-item subset to a slim per-map items JSON. Kept as a
+	// separate file so the analyzer's embedded corpus doesn't have
+	// to pull in the per-map geometry bytes it never needs.
+	var items []mapgeom.MapItem
+	if ents, entErr := bsp.ReadEntities(path); entErr == nil {
+		items = extractMapItems(ents)
+	} else if verbose {
+		fmt.Fprintf(os.Stderr, "  note %s: entities lump: %v\n", name, entErr)
+	}
+
 	outPath := filepath.Join(outDir, name+".json")
 	data, err := json.Marshal(regions)
 	if err != nil {
@@ -142,10 +164,56 @@ func processOne(path, name, outDir string, verbose bool) error {
 		return fmt.Errorf("write %s: %w", outPath, err)
 	}
 
+	if err := writeItemsFile(name, items, itemsOutDir); err != nil {
+		return fmt.Errorf("write items: %w", err)
+	}
+
 	if verbose {
-		fmt.Fprintf(os.Stderr, "  ok   %s: locs=%d tris=%d faces=%d/%d unnamed=%d ceiling=%d dropped=%d bytes=%d\n",
-			name, stats.Locs, stats.Triangles, stats.FacesKept, stats.FacesTotal,
+		fmt.Fprintf(os.Stderr, "  ok   %s: locs=%d tris=%d items=%d faces=%d/%d unnamed=%d ceiling=%d dropped=%d bytes=%d\n",
+			name, stats.Locs, stats.Triangles, len(items), stats.FacesKept, stats.FacesTotal,
 			stats.FacesUnnamed, stats.FacesCeiling, stats.FacesDropped, len(data))
 	}
 	return nil
+}
+
+// writeItemsFile writes the per-map items JSON into the items corpus
+// directory. Empty item lists still produce a file so the corpus is
+// self-documenting about what maps have been processed.
+func writeItemsFile(name string, items []mapgeom.MapItem, itemsDir string) error {
+	if itemsDir == "" {
+		return nil
+	}
+	if items == nil {
+		items = []mapgeom.MapItem{}
+	}
+	f := mapgeom.MapItemsFile{
+		Map:     name,
+		Version: 1,
+		Items:   items,
+	}
+	data, err := json.Marshal(&f)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(itemsDir, name+".json"), data, 0o644)
+}
+
+// extractMapItems filters a BSP entity list down to recognised pickup
+// items and normalises them to the compact Kind strings downstream
+// analytics expect.
+func extractMapItems(ents []bsp.Entity) []mapgeom.MapItem {
+	out := make([]mapgeom.MapItem, 0, len(ents))
+	for _, e := range ents {
+		kind := mapgeom.EntityToItemKind(e.Classname, e.Spawnflags)
+		if kind == "" {
+			continue
+		}
+		out = append(out, mapgeom.MapItem{
+			Kind: kind,
+			X:    e.Origin[0],
+			Y:    e.Origin[1],
+			Z:    e.Origin[2],
+		})
+	}
+	return out
 }

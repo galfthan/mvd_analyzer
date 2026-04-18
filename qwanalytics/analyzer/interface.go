@@ -142,4 +142,7 @@ type (
 	LocGraphResult         = result.LocGraphResult
 	LocNode                = result.LocNode
 	LocEdge                = result.LocEdge
+	ItemsResult            = result.ItemsResult
+	ItemTimeline           = result.ItemTimeline
+	ItemPhase              = result.ItemPhase
 )

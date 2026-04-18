@@ -13,6 +13,7 @@ WASM_MAIN  := ./qw-web/cmd/wasm
 DIST_DIR   := dist
 STATIC_DIR := qw-web/static
 LOC_DATA   := qwanalytics/loc/data
+ITEMS_DATA := qwanalytics/items/data
 GIT_HASH   := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 GIT_TAG    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
 BUILD_DATE := $(shell date -u +%Y-%m-%d)
@@ -36,6 +37,8 @@ build:
 	@cp -r $(STATIC_DIR)/maps $(DIST_DIR)/
 	@echo "Copying loc corpus from $(LOC_DATA)..."
 	@mkdir -p $(DIST_DIR)/locs && cp $(LOC_DATA)/*.loc $(DIST_DIR)/locs/
+	@echo "Copying items corpus from $(ITEMS_DATA)..."
+	@mkdir -p $(DIST_DIR)/items && cp $(ITEMS_DATA)/*.json $(DIST_DIR)/items/
 	@echo "Build complete!"
 	@ls -lh $(DIST_DIR)/
 
