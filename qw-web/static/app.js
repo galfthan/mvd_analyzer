@@ -2208,7 +2208,12 @@ function updateTimeIndicators() {
     for (const id of detailIndicators) {
         const el = document.getElementById(id);
         if (el) {
-            el.style.left = `calc(10px + (100% - 20px) * ${pct / 100})`;
+            // Indicator shares the canvas's time-to-pixel mapping:
+            // x = (t - start) / (end - start) * W, spanning the full
+            // container width. No inset — the legacy 10 px padding
+            // came from a removed axis-strip sibling and causes the
+            // cursor to drift away from the bars near the edges.
+            el.style.left = `${pct}%`;
         }
     }
 
