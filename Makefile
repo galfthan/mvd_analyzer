@@ -24,7 +24,8 @@ build:
 	@cp $(STATIC_DIR)/app.js $(DIST_DIR)/
 	@cp $(STATIC_DIR)/worker.js $(DIST_DIR)/
 	@cp -r $(STATIC_DIR)/maps $(DIST_DIR)/
-	@cp -r $(STATIC_DIR)/locs $(DIST_DIR)/
+	@echo "Copying loc corpus from qwanalytics/loc/data..."
+	@mkdir -p $(DIST_DIR)/locs && cp qwanalytics/loc/data/*.loc $(DIST_DIR)/locs/
 	@echo "Build complete!"
 	@ls -lh $(DIST_DIR)/
 

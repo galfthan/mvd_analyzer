@@ -20,7 +20,7 @@ package mapgeom
 import (
 	"sort"
 
-	"github.com/mvd-analyzer/internal/bsp"
+	"github.com/mvd-analyzer/qwanalytics/mapgen/bsp"
 	"github.com/mvd-analyzer/qwanalytics/loc"
 )
 
