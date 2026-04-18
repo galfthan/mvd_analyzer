@@ -342,10 +342,17 @@ function setupTabs() {
                 stopPlayback();
             }
 
-            // Sync views on tab switch
+            // Sync views on tab switch.
+            //
+            // Canvases sized from their container's clientWidth render empty
+            // when they were first drawn while the tab was hidden
+            // (clientWidth === 0 under display:none). Every dimension-
+            // sensitive tab therefore re-renders here, after its container
+            // is visible, so the first-paint width is always real.
             if (tabName === 'map') {
                 renderMap(mapState.currentTime);
             } else if (tabName === 'timeline') {
+                if (currentResult) updateDetailView();
                 updateTimeIndicators();
             } else if (tabName === 'chat') {
                 renderChatMessages();
