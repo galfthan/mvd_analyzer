@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/mvd-analyzer/internal/mvd"
+	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 
 // ServerDataEvent is emitted when server data is parsed

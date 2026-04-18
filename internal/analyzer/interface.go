@@ -2,8 +2,8 @@
 package analyzer
 
 import (
-	"github.com/mvd-analyzer/internal/mvd"
-	"github.com/mvd-analyzer/internal/parser"
+	"github.com/mvd-analyzer/qwdemo/mvd"
+	"github.com/mvd-analyzer/qwdemo/parser"
 )
 
 // Context provides shared state for analyzers

@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mvd-analyzer/internal/mvd"
+	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 
 // UserInfoEvent is emitted when player info is updated

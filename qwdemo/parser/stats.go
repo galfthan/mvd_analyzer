@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/mvd-analyzer/internal/mvd"
+	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 
 // StatUpdateEvent is emitted when a player stat is updated

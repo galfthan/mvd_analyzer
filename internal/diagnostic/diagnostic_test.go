@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/internal/analyzer"
-	"github.com/mvd-analyzer/internal/mvd"
-	"github.com/mvd-analyzer/internal/parser"
-	"github.com/mvd-analyzer/pkg/mvdfile"
+	"github.com/mvd-analyzer/qwdemo/mvd"
+	"github.com/mvd-analyzer/qwdemo/parser"
+	"github.com/mvd-analyzer/qwdemo/mvdfile"
 )
 
 // TestDiagnosticParseDemos runs every demo in testdata/ through the parser in

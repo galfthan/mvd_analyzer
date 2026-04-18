@@ -8,7 +8,7 @@ import (
 	"syscall/js"
 
 	"github.com/mvd-analyzer/internal/analyzer"
-	"github.com/mvd-analyzer/pkg/mvdfile"
+	"github.com/mvd-analyzer/qwdemo/mvdfile"
 )
 
 func analyze(this js.Value, args []js.Value) interface{} {

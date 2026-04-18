@@ -3,7 +3,7 @@ package analyzer
 import (
 	"strings"
 
-	"github.com/mvd-analyzer/internal/mvd"
+	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 
 // normalizePlayerName lowercases and strips non-alphanumeric characters from a

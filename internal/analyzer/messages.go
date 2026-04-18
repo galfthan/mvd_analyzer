@@ -3,8 +3,8 @@ package analyzer
 import (
 	"strings"
 
-	"github.com/mvd-analyzer/internal/mvd"
-	"github.com/mvd-analyzer/internal/parser"
+	"github.com/mvd-analyzer/qwdemo/mvd"
+	"github.com/mvd-analyzer/qwdemo/parser"
 )
 
 // MessagesAnalyzer captures frags and chat messages for timeline display

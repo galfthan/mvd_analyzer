@@ -4,7 +4,7 @@ import (
 	"sort"
 
 	"github.com/mvd-analyzer/internal/loc"
-	"github.com/mvd-analyzer/internal/mvd"
+	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 
 // Finalize converts the raw per-bucket player state collected during parsing

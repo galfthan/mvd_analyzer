@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/mvd-analyzer/internal/loc"
-	"github.com/mvd-analyzer/internal/mvd"
-	"github.com/mvd-analyzer/internal/parser"
+	"github.com/mvd-analyzer/qwdemo/mvd"
+	"github.com/mvd-analyzer/qwdemo/parser"
 )
 
 // TimelineAnalyzer tracks time-bucketed player state for the timeline view.

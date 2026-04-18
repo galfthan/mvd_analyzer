@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mvd-analyzer/internal/parser"
+	"github.com/mvd-analyzer/qwdemo/parser"
 )
 
 // MatchAnalyzer extracts match summary information

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"sort"
 
-	"github.com/mvd-analyzer/internal/parser"
+	"github.com/mvd-analyzer/qwdemo/parser"
 )
 
 // cleanQuakeName normalizes a Quake-encoded name from KTX's demoinfo JSON.

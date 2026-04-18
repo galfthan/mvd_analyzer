@@ -3,7 +3,7 @@ package analyzer
 import (
 	"strings"
 
-	"github.com/mvd-analyzer/internal/parser"
+	"github.com/mvd-analyzer/qwdemo/parser"
 )
 
 // FragAnalyzer detects frags from print messages

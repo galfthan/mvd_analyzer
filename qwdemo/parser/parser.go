@@ -4,7 +4,7 @@ package parser
 import (
 	"io"
 
-	"github.com/mvd-analyzer/internal/mvd"
+	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 
 // Event represents a parsed game event
