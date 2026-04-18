@@ -1,5 +1,5 @@
 {
     "locGraph": {
-        "blipThresholdMs": 500
+        "blipThresholdMs": 250
     }
 }
