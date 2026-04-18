@@ -18,11 +18,21 @@ import (
 
 // Source is an events.Source implementation that pulls events from an
 // MVD file or byte stream. Satisfies events.Source.
+//
+// Internally, the push-style parser emits into a small ring of events
+// buffered between ParseOne calls. Most ParseOne invocations emit 0–4
+// events (one demo message may carry multiple svc_* commands), so the
+// buffer lives on the stack-allocated initial backing array in the
+// common case and never grows. `head` tracks the read cursor; when the
+// consumer drains to the end we reset to index 0 and reuse the same
+// backing array for the next batch — crucial to avoid per-event
+// allocations along the hot path.
 type Source struct {
 	closer  io.Closer
 	decoder *mvd.Decoder
 	parser  *parser.Parser
 	queue   []events.Event
+	head    int
 	done    bool
 }
 
@@ -68,7 +78,12 @@ func newSource(r io.Reader, closer io.Closer) *Source {
 // Next pulls the next event from the stream. Returns io.EOF when the
 // underlying decoder reports end-of-demo.
 func (s *Source) Next() (events.Event, error) {
-	for len(s.queue) == 0 && !s.done {
+	for s.head >= len(s.queue) && !s.done {
+		// Buffer drained; reset the read cursor and the slice length so
+		// the next ParseOne's append calls reuse the existing backing
+		// array instead of allocating a fresh one.
+		s.queue = s.queue[:0]
+		s.head = 0
 		if err := s.parser.ParseOne(); err != nil {
 			if err == io.EOF {
 				s.done = true
@@ -77,12 +92,12 @@ func (s *Source) Next() (events.Event, error) {
 			return nil, err
 		}
 	}
-	if len(s.queue) == 0 {
+	if s.head >= len(s.queue) {
 		return nil, io.EOF
 	}
-	e := s.queue[0]
-	s.queue[0] = nil
-	s.queue = s.queue[1:]
+	e := s.queue[s.head]
+	s.queue[s.head] = nil // drop the reference so the event can be GC'd
+	s.head++
 	return e, nil
 }
 
