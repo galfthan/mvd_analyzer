@@ -3,7 +3,7 @@ package analyzer
 import (
 	"sort"
 
-	"github.com/mvd-analyzer/internal/loc"
+	"github.com/mvd-analyzer/qwanalytics/loc"
 	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 

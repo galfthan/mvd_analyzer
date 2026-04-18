@@ -149,18 +149,29 @@ func (p *Parser) emit(event Event) error {
 // Parse processes all messages from the decoder
 func (p *Parser) Parse() error {
 	for {
-		msg, err := p.decoder.NextMessage()
-		if err != nil {
-			if err == mvd.ErrEndOfDemo || err == io.EOF {
+		if err := p.ParseOne(); err != nil {
+			if err == io.EOF {
 				return nil // Normal end
 			}
 			return err
 		}
-
-		if err := p.parseMessage(msg); err != nil {
-			return err
-		}
 	}
+}
+
+// ParseOne reads and processes exactly one demo message, invoking the
+// registered OnEvent handlers for any events emitted by that message.
+// Returns io.EOF at a clean end of stream. This is the primitive a
+// pull-style events.Source iterator builds on; Parse() is just a loop
+// over ParseOne until io.EOF.
+func (p *Parser) ParseOne() error {
+	msg, err := p.decoder.NextMessage()
+	if err != nil {
+		if err == mvd.ErrEndOfDemo {
+			return io.EOF
+		}
+		return err
+	}
+	return p.parseMessage(msg)
 }
 
 // parseMessage handles a single demo message

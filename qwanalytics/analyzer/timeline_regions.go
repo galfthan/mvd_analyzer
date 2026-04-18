@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mvd-analyzer/internal/loc"
+	"github.com/mvd-analyzer/qwanalytics/loc"
 )
 
 // ============================================================================

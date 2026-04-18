@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"syscall/js"
 
-	"github.com/mvd-analyzer/internal/analyzer"
+	"github.com/mvd-analyzer/qwanalytics/analyzer"
 	"github.com/mvd-analyzer/qwdemo/mvdfile"
 )
 

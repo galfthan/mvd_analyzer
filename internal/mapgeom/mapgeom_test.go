@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/internal/bsp"
-	"github.com/mvd-analyzer/internal/loc"
+	"github.com/mvd-analyzer/qwanalytics/loc"
 )
 
 // buildTwoFloorBSP constructs an in-memory BSP containing two quads

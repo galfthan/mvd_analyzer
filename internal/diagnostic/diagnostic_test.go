@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mvd-analyzer/internal/analyzer"
+	"github.com/mvd-analyzer/qwanalytics/analyzer"
 	"github.com/mvd-analyzer/qwdemo/mvd"
 	"github.com/mvd-analyzer/qwdemo/parser"
 	"github.com/mvd-analyzer/qwdemo/mvdfile"

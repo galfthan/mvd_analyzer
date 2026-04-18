@@ -3,9 +3,8 @@ package analyzer
 import (
 	"io"
 
-	"github.com/mvd-analyzer/qwdemo/mvd"
-	"github.com/mvd-analyzer/qwdemo/parser"
-	"github.com/mvd-analyzer/qwdemo/mvdfile"
+	"github.com/mvd-analyzer/qwdemo/events"
+	mvdsource "github.com/mvd-analyzer/qwdemo/source/mvd"
 )
 
 // Registry manages registered analyzers
@@ -23,21 +22,41 @@ func (r *Registry) Register(a Analyzer) {
 	r.analyzers = append(r.analyzers, a)
 }
 
-// Analyze runs all registered analyzers on an MVD file
+// Analyze runs all registered analyzers on an MVD file at the given path.
+// Gzip is auto-detected.
 func (r *Registry) Analyze(filePath string) (*Result, error) {
-	f, err := mvdfile.Open(filePath)
+	src, err := mvdsource.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
-	return r.AnalyzeReader(f, filePath)
+	defer src.Close()
+	return r.analyzeSource(src, filePath, src.CurrentTime)
 }
 
-// AnalyzeReader runs all registered analyzers on an MVD data stream
+// AnalyzeReader runs all registered analyzers on an MVD byte stream.
+// Provided as a convenience for callers that already have bytes in hand
+// (notably the WASM entry, which receives a JS Uint8Array).
 func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, error) {
-	decoder := mvd.NewDecoder(reader)
-	p := parser.NewParser(decoder)
+	src, err := mvdsource.NewFromReader(reader)
+	if err != nil {
+		return nil, err
+	}
+	defer src.Close()
+	return r.analyzeSource(src, filename, src.CurrentTime)
+}
 
+// AnalyzeSource runs all registered analyzers against an events.Source.
+// This is the source-agnostic entry point: any Source implementation
+// (MVD file, QTV live, JSON replay) satisfies the interface.
+// `filename` is a display label that flows into Result.FilePath.
+func (r *Registry) AnalyzeSource(source events.Source, filename string) (*Result, error) {
+	// currentTime is filled in by the MVD source wrapper; an abstract
+	// source may not expose a decoder clock, so default to the last
+	// event timestamp seen.
+	return r.analyzeSource(source, filename, nil)
+}
+
+func (r *Registry) analyzeSource(source events.Source, filename string, currentTime func() float64) (*Result, error) {
 	ctx := &Context{
 		FragsBySlot: make(map[int]int),
 	}
@@ -48,32 +67,43 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 		}
 	}
 
-	p.OnEvent(func(event parser.Event) error {
-		if e, ok := event.(*parser.ServerDataEvent); ok {
+	var lastTime float64
+	for {
+		event, err := source.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			// Log and stop; partial results still usable downstream.
+			break
+		}
+		lastTime = event.EventTime()
+
+		if e, ok := event.(*events.ServerDataEvent); ok {
 			ctx.ServerData = e.Data
 		}
-		if e, ok := event.(*parser.UserInfoEvent); ok {
+		if e, ok := event.(*events.UserInfoEvent); ok {
 			ctx.Players[e.Player.Slot] = e.Player
 		}
-		if e, ok := event.(*parser.FragUpdateEvent); ok {
+		if e, ok := event.(*events.FragUpdateEvent); ok {
 			ctx.FragsBySlot[e.PlayerNum] = e.Frags
 		}
 
 		for _, a := range r.analyzers {
 			if err := a.OnEvent(event); err != nil {
-				return err
+				return nil, err
 			}
 		}
-		return nil
-	})
+	}
 
-	if err := p.Parse(); err != nil && err != mvd.ErrEndOfDemo {
-		// Log error but continue to get partial results
+	duration := lastTime
+	if currentTime != nil {
+		duration = currentTime()
 	}
 
 	result := &Result{
 		FilePath: filename,
-		Duration: decoder.CurrentTime(),
+		Duration: duration,
 	}
 
 	for _, a := range r.analyzers {
