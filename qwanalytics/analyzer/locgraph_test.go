@@ -132,49 +132,6 @@ func TestBuildLocGraph_DeathResetsCursor(t *testing.T) {
 	}
 }
 
-// Simulates the instant-gib-respawn scenario where both p.D and p.Sp might
-// be missed because death and respawn happen within the same sampling
-// window. The authoritative FragResult still records the death, and
-// BuildLocGraph must use it to reset the cursor so no A→B edge is created.
-func TestBuildLocGraph_FragEventResetsCursor(t *testing.T) {
-	const D = 0.05
-	locTable := []string{"", "A", "B"}
-
-	// 3 buckets in A (cursor commits A), then 3 buckets in B with NO D or
-	// Sp flag set anywhere — simulating a missed intra-bucket gib+respawn.
-	// Without the frag-based reset, this would commit an A→B edge after
-	// the 2nd B bucket.
-	buckets := []HighResBucket{
-		{T: 0.00, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false)}},
-		{T: 0.05, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false)}},
-		{T: 0.10, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false)}},
-		// Death happens at t=0.12 per FragResult; no marker in the stream.
-		{T: 0.15, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false)}},
-		{T: 0.20, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false)}},
-		{T: 0.25, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false)}},
-	}
-
-	result := &Result{
-		TimelineAnalysis: &TimelineAnalysisResult{
-			HighResDuration: D, HighResBuckets: buckets, LocTable: locTable,
-		},
-		Frags: &FragResult{
-			Frags: []FragEntry{
-				{Time: 0.12, Killer: "other", Victim: "p1", Weapon: "rl"},
-			},
-		},
-	}
-	graph := BuildLocGraph(result)
-	if graph == nil {
-		t.Fatal("expected graph, got nil")
-	}
-	for _, e := range graph.Edges {
-		if e.From == "A" && e.To == "B" {
-			t.Errorf("FragResult should have reset cursor across death; unexpected edge %+v", e)
-		}
-	}
-}
-
 // Without a blip filter upstream, BuildLocGraph emits an edge on every
 // filtered-loc change — that's exactly its job. Smoothing is a separate
 // concern tested in timeline_blipfilter_test.go. This test pins the

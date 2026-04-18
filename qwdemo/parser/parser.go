@@ -29,6 +29,8 @@ const (
 	EventStuffText
 	EventCenterPrint
 	EventServerInfo
+	EventDeath
+	EventSpawn
 )
 
 // IntermissionEvent is emitted when the server enters intermission

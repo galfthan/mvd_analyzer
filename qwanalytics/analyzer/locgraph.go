@@ -52,29 +52,15 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 	}
 	teleportThreshold := float32(bucketDuration * teleportBaseThreshold)
 
-	// Belt-and-suspenders death reset: the in-bucket p.D / p.Sp
-	// markers already cover standard deaths, but a player gibbed
-	// deeply negative can respawn effectively instantly — possibly in
-	// the same 50ms bucket as the death — which makes both markers
-	// false and would otherwise bridge the death with a spurious
-	// edge. The authoritative frag list records every death, so we
-	// use it as a second independent signal to reset the cursor.
-	deathsByPlayer := map[string][]float64{}
-	if result.Frags != nil {
-		for _, f := range result.Frags.Frags {
-			if f.Victim != "" {
-				deathsByPlayer[f.Victim] = append(deathsByPlayer[f.Victim], f.Time)
-			}
-		}
-	}
-
 	// Per-player cursor: just the last loc and the position at the
 	// start of that residence, used for teleport classification on
-	// the next change.
+	// the next change. Deaths / spawns arrive as authoritative p.D /
+	// p.Sp bucket flags driven by DeathEvent / SpawnEvent at the
+	// parser layer, so instant-respawn cases never need a sideways
+	// fallback onto FragResult here.
 	type playerCursor struct {
 		loc          string
 		lastX, lastY float32
-		deathIdx     int
 		seen         bool
 	}
 	cursors := make(map[string]*playerCursor)
@@ -121,16 +107,6 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 			if cur == nil {
 				cur = &playerCursor{}
 				cursors[name] = cur
-			}
-
-			// Advance the per-player death pointer past any deaths
-			// that occurred at or before this bucket's time; each
-			// crossed death resets the cursor so no edge can bridge
-			// it.
-			deaths := deathsByPlayer[name]
-			for cur.deathIdx < len(deaths) && deaths[cur.deathIdx] <= bucket.T {
-				resetCursor(cur)
-				cur.deathIdx++
 			}
 
 			invalidPos := p.X == 0 && p.Y == 0
