@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MVD Demo Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Cytoscape.js for the Loc Graph tab. Core only; fcose layout is loaded on-demand. -->
+    <script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/layout-base@2.0.1/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base@2.2.0/cose-base.js"></script>
+    <script src="https://unpkg.com/cytoscape-fcose@2.2.0/cytoscape-fcose.js"></script>
+</head>
+<body>
+    <!-- WASM loading overlay -->
+    <div id="wasm-loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a2e;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px;">
+        <div style="color:#00d9ff;font-family:'Rajdhani',sans-serif;font-size:1.8rem;font-weight:700;letter-spacing:0.04em;">MVD Demo Analyzer</div>
+        <div style="color:#7a8ba8;font-size:0.9rem;">Loading analyzer...</div>
+        <div style="width:200px;height:3px;background:#2a3f5f;border-radius:2px;overflow:hidden;">
+            <div style="width:100%;height:100%;background:#00d9ff;animation:shimmer 1.5s infinite;"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>MVD Demo Analyzer</h1>
+            <p>Analyze QuakeWorld MVD demo files</p>
+            <p class="version-tag" id="version-tag"></p>
+        </header>
+
+        <section id="upload-section" class="card">
+            <div class="load-row" id="drop-zone">
+                <input type="file" id="file-input" accept=".mvd,.mvd.gz" hidden>
+                <button class="load-file-btn" onclick="document.getElementById('file-input').click()">Load from File</button>
+                <span class="load-separator">|</span>
+                <input type="text" id="hub-input" placeholder="Game ID or hub.quakeworld.nu URL">
+                <button id="hub-load-btn" onclick="loadFromHub()">Load from Hub</button>
+            </div>
+            <div id="upload-status" class="status"></div>
+        </section>
+
+        <section id="results-section" class="card" style="display: none;">
+            <h2>Analysis Results</h2>
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="summary">Summary</button>
+                <button class="tab-btn" data-tab="timeline">Timeline</button>
+                <button class="tab-btn" data-tab="chat">Chat</button>
+                <button class="tab-btn" data-tab="map">Map</button>
+                <button class="tab-btn" data-tab="loc-graph">Loc Graph</button>
+                <button class="tab-btn" data-tab="keymoments">Key Moments</button>
+            </div>
+
+            <!-- Unified Timeline Widget (visible on Timeline/Chat/Map tabs) -->
+            <div id="unified-timeline" class="panel timeline-nav-panel" style="display: none;">
+                <div class="timeline-nav-row">
+                    <div class="timeline-playback-controls">
+                        <button id="tl-rev" title="Reverse playback (1x)">-1x</button>
+                        <button id="tl-play-pause" title="Play/Pause">1x</button>
+                        <button id="tl-5x" title="Play 5x speed">5x</button>
+                        <button id="tl-20x" title="Play 20x speed">20x</button>
+                    </div>
+                    <span id="tl-current-time" class="timeline-nav-time">0:00</span>
+                    <div class="timeline-nav-bar-wrapper" id="tl-bar-wrapper">
+                        <div class="timeline-nav-bar" id="tl-bar">
+                            <div class="timeline-nav-track" id="tl-track"></div>
+                            <div class="timeline-selection-overlay" id="tl-selection-overlay"></div>
+                            <div class="timeline-nav-cursor" id="tl-cursor"></div>
+                        </div>
+                        <div class="timeline-nav-caret" id="tl-caret" title="Drag to set current time">▲</div>
+                        <div class="timeline-nav-axis" id="tl-axis"></div>
+                    </div>
+                    <span id="tl-segment-label" class="timeline-nav-segment"></span>
+                </div>
+            </div>
+
+            <!-- Summary Tab -->
+            <div id="tab-summary" class="tab-content active">
+                <div id="match-summary" class="panel">
+                    <h3>Match Info</h3>
+                    <div class="summary-grid" id="match-info-grid">
+                        <div class="summary-item">
+                            <label>Map</label>
+                            <span id="map-name">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Duration</label>
+                            <span id="duration">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Mode</label>
+                            <span id="mode">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Server</label>
+                            <span id="hostname">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Date</label>
+                            <span id="match-date">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="match-settings-panel" class="panel" style="display: none;">
+                    <h3>Match Settings</h3>
+                    <div class="summary-grid" id="match-settings-grid"></div>
+                    <div id="match-modifiers-row" style="margin-top: 15px; display: none;">
+                        <label class="modifier-label">Modifiers</label>
+                        <div id="match-modifiers" class="modifier-list"></div>
+                    </div>
+                </div>
+
+                <div id="server-info-panel" class="panel" style="display: none;">
+                    <details>
+                        <summary><h3 style="display: inline-block; margin: 0;">Server Info</h3></summary>
+                        <table id="server-info-table" class="stats-table serverinfo-table">
+                            <thead>
+                                <tr><th>Key</th><th>Value</th></tr>
+                            </thead>
+                            <tbody id="server-info-body"></tbody>
+                        </table>
+                    </details>
+                </div>
+
+                <div id="teams-panel" class="panel team-aggregate-panel">
+                    <h3>Teams</h3>
+                    <div id="teams-list" class="teams-list"></div>
+                </div>
+
+                <div id="players-panel" class="panel">
+                    <h3>Basic Stats</h3>
+                    <h4 class="team-aggregate-heading">Per Team</h4>
+                    <table id="player-stats-team-table" class="stats-table team-aggregate-table">
+                        <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th title="Total frags (kills minus suicides/teamkills)">Frags</th>
+                                <th title="Kill efficiency: kills / (kills + deaths)">Eff</th>
+                                <th title="Enemy kills">Kills</th>
+                                <th title="Rocket launcher kills">RL K</th>
+                                <th title="Lightning gun kills">LG K</th>
+                                <th title="Total deaths">Deaths</th>
+                                <th title="Team kills">TK</th>
+                                <th title="Suicides">Bores</th>
+                                <th title="Damage given to enemies">Dmg</th>
+                                <th title="Damage taken from enemies">Taken</th>
+                                <th title="Damage on enemy weapon (damage dealt while enemy held a weapon)">Ewep</th>
+                                <th title="Average damage taken to die">ToDie</th>
+                                <th title="Average ping">Ping</th>
+                            </tr>
+                        </thead>
+                        <tbody id="player-stats-team-body"></tbody>
+                    </table>
+                    <h4 class="per-player-heading">Per Player</h4>
+                    <table id="scoreboard" class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th class="handicap-col" title="Player handicap (only shown when at least one player has a non-default handicap)">HC</th>
+                                <th title="Total frags (kills minus suicides/teamkills)">Frags</th>
+                                <th title="Kill efficiency: kills / (kills + deaths)">Eff</th>
+                                <th title="Enemy kills">Kills</th>
+                                <th title="Rocket launcher kills">RL K</th>
+                                <th title="Lightning gun kills">LG K</th>
+                                <th title="Total deaths">Deaths</th>
+                                <th title="Team kills">TK</th>
+                                <th title="Suicides">Bores</th>
+                                <th title="Damage given to enemies">Dmg</th>
+                                <th title="Damage taken from enemies">Taken</th>
+                                <th title="Damage on enemy weapon (damage dealt while enemy held a weapon)">Ewep</th>
+                                <th title="Average damage taken to die">ToDie</th>
+                                <th>Ping</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreboard-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="weapons-summary-panel" class="panel">
+                    <h3>Weapon Stats</h3>
+                    <h4 class="team-aggregate-heading">Per Team</h4>
+                    <table id="weapon-stats-team-table" class="stats-table weapon-stats-split team-aggregate-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Team</th>
+                                <th colspan="3" title="Shotgun">SG</th>
+                                <th colspan="3" title="Super Shotgun">SSG</th>
+                                <th colspan="3" title="Super Nailgun">SNG</th>
+                                <th colspan="3" title="Grenade Launcher">GL</th>
+                                <th colspan="3" title="Rocket Launcher">RL</th>
+                                <th colspan="3" title="Lightning Gun">LG</th>
+                            </tr>
+                            <tr>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weapon-stats-team-body"></tbody>
+                    </table>
+                    <h4 class="per-player-heading">Per Player</h4>
+                    <table id="weapon-stats-table" class="stats-table weapon-stats-split">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Player</th>
+                                <th colspan="3" title="Shotgun">SG</th>
+                                <th colspan="3" title="Super Shotgun">SSG</th>
+                                <th colspan="3" title="Super Nailgun">SNG</th>
+                                <th colspan="3" title="Grenade Launcher">GL</th>
+                                <th colspan="3" title="Rocket Launcher">RL</th>
+                                <th colspan="3" title="Lightning Gun">LG</th>
+                            </tr>
+                            <tr>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                                <th title="Accuracy">Acc</th><th title="Kills">K</th><th title="Damage to enemies">Dmg</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weapon-stats-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="items-panel" class="panel">
+                    <h3>Item Pickups & Drops</h3>
+                    <h4 class="team-aggregate-heading">Per Team</h4>
+                    <table id="items-team-table" class="stats-table team-aggregate-table">
+                        <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th title="Red Armor pickups">RA</th>
+                                <th title="Yellow Armor pickups">YA</th>
+                                <th title="Green Armor pickups">GA</th>
+                                <th title="Mega Health pickups">MH</th>
+                                <th title="Quad Damage pickups (total hold time)">Quad</th>
+                                <th title="Pentagram of Protection pickups (total hold time)">Pent</th>
+                                <th title="Ring of Shadows pickups (total hold time)">Ring</th>
+                                <th title="Rocket Launcher pickups">RL</th>
+                                <th title="Rocket Launcher drops">RL drop</th>
+                                <th title="Rocket Launcher transfers to teammates">RL xfer</th>
+                                <th title="Lightning Gun pickups">LG</th>
+                                <th title="Lightning Gun drops">LG drop</th>
+                                <th title="Lightning Gun transfers to teammates">LG xfer</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-team-body"></tbody>
+                    </table>
+                    <h4 class="per-player-heading">Per Player</h4>
+                    <table id="items-table" class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th title="Red Armor pickups">RA</th>
+                                <th title="Yellow Armor pickups">YA</th>
+                                <th title="Green Armor pickups">GA</th>
+                                <th title="Mega Health pickups">MH</th>
+                                <th title="Quad Damage pickups (total hold time)">Quad</th>
+                                <th title="Pentagram of Protection pickups (total hold time)">Pent</th>
+                                <th title="Ring of Shadows pickups (total hold time)">Ring</th>
+                                <th title="Rocket Launcher pickups">RL</th>
+                                <th title="Rocket Launcher drops">RL drop</th>
+                                <th title="Rocket Launcher transfers to teammates">RL xfer</th>
+                                <th title="Lightning Gun pickups">LG</th>
+                                <th title="Lightning Gun drops">LG drop</th>
+                                <th title="Lightning Gun transfers to teammates">LG xfer</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-body"></tbody>
+                    </table>
+                </div>
+
+
+                <div id="weapons-panel" class="panel">
+                    <h3>Kills by Weapon</h3>
+                    <div id="weapons-chart" class="chart"></div>
+                </div>
+            </div>
+
+            <!-- Timeline Tab -->
+            <div id="tab-timeline" class="tab-content">
+                <!-- Team Status at Current Time -->
+                <div class="panel team-status-panel">
+                    <div class="team-status-row">
+                        <div class="team-status-side" id="team-status-a"></div>
+                        <div class="team-status-side" id="team-status-b"></div>
+                    </div>
+                </div>
+
+                <!-- Weapons & Powerups (full width) -->
+                <div class="panel timeline-detail-graph-panel-full">
+                    <h3>Weapons & Powerups <span id="time-range-label"></span></h3>
+                    <div class="detail-graph-wrapper">
+                        <div class="timeline-y-axis" id="detail-y-axis">
+                            <span class="y-label y-top">4</span>
+                            <span class="y-label y-mid">0</span>
+                            <span class="y-label y-bottom">4</span>
+                        </div>
+                        <div class="detail-graph-outer">
+                            <canvas class="timeline-canvas" id="detail-graph-canvas"></canvas>
+                            <div class="current-time-indicator" id="detail-time-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="timeline-legend">
+                        <span class="legend-item"><span id="legend-weapons-team-a">Team A ↑</span></span>
+                        <span class="legend-item"><span id="legend-weapons-team-b">Team B ↓</span></span>
+                        <span class="legend-item"><span class="legend-color rl"></span> RL</span>
+                        <span class="legend-item"><span class="legend-color lg"></span> LG</span>
+                        <span class="legend-item"><span class="legend-color rllg"></span> RL+LG</span>
+                        <span class="legend-item"><span class="legend-color quad"></span> Quad</span>
+                        <span class="legend-item"><span class="legend-color pent"></span> Pent</span>
+                        <span class="legend-item"><span class="legend-color ring"></span> Ring</span>
+                    </div>
+                </div>
+
+                <!-- Region Control -->
+                <div class="panel timeline-region-panel" id="region-control-timeline-panel" style="display: none;">
+                    <h3>Region Control</h3>
+                    <div class="region-timeline-wrapper">
+                        <div class="region-timeline-labels" id="region-timeline-labels"></div>
+                        <div class="region-timeline-outer">
+                            <canvas class="timeline-canvas" id="region-control-canvas"></canvas>
+                            <div class="current-time-indicator" id="region-time-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="timeline-legend">
+                        <span class="legend-item"><span class="legend-color" id="rc-legend-a-ctrl"></span> <span id="rc-tl-teamA">Team A</span> ctrl</span>
+                        <span class="legend-item"><span class="legend-color" style="background: rgb(255, 255, 255);"></span> Contested</span>
+                        <span class="legend-item"><span class="legend-color" id="rc-legend-b-ctrl"></span> <span id="rc-tl-teamB">Team B</span> ctrl</span>
+                    </div>
+                </div>
+
+                <!-- Health/Armor (diverging style) -->
+                <div class="panel timeline-health-panel-full">
+                    <h3>Team Health/Armor</h3>
+                    <div class="health-graph-wrapper">
+                        <div class="timeline-y-axis" id="health-y-axis">
+                            <span class="y-label y-top" id="health-y-top">800</span>
+                            <span class="y-label y-mid">0</span>
+                            <span class="y-label y-bottom" id="health-y-bottom">800</span>
+                        </div>
+                        <div class="health-graph-outer">
+                            <canvas class="timeline-canvas" id="health-armor-canvas"></canvas>
+                            <div class="current-time-indicator" id="health-time-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="timeline-legend">
+                        <span class="legend-item"><span id="legend-health-team-a">Team A ↑</span></span>
+                        <span class="legend-item"><span id="legend-health-team-b">Team B ↓</span></span>
+                        <span class="legend-item"><span class="legend-color health"></span> Health</span>
+                        <span class="legend-item"><span class="legend-color ra"></span> RA</span>
+                        <span class="legend-item"><span class="legend-color ya"></span> YA</span>
+                        <span class="legend-item"><span class="legend-color ga"></span> GA</span>
+                    </div>
+                </div>
+
+                <!-- Frags per 10s (diverging style) -->
+                <div class="panel timeline-health-panel-full">
+                    <h3>Frags per 10s</h3>
+                    <div class="health-graph-wrapper">
+                        <div class="timeline-y-axis" id="frags-y-axis">
+                            <span class="y-label y-top" id="frags-y-top">10</span>
+                            <span class="y-label y-mid">0</span>
+                            <span class="y-label y-bottom" id="frags-y-bottom">10</span>
+                        </div>
+                        <div class="health-graph-outer">
+                            <canvas class="timeline-canvas" id="frags-canvas"></canvas>
+                            <div class="current-time-indicator" id="frags-time-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="timeline-legend">
+                        <span class="legend-item"><span id="legend-frags-team-a">Team A ↑</span></span>
+                        <span class="legend-item"><span id="legend-frags-team-b">Team B ↓</span></span>
+                    </div>
+                </div>
+
+                <!-- Cumulative Frags Timeline -->
+                <div class="panel timeline-health-panel-full">
+                    <h3>Score Timeline</h3>
+                    <div class="health-graph-wrapper">
+                        <div class="timeline-y-axis" id="score-y-axis">
+                            <span class="y-label y-top" id="score-y-top">+20</span>
+                            <span class="y-label y-mid">0</span>
+                            <span class="y-label y-bottom" id="score-y-bottom">-20</span>
+                        </div>
+                        <div class="health-graph-outer">
+                            <canvas class="timeline-canvas" id="score-canvas"></canvas>
+                            <div class="current-time-indicator" id="score-time-indicator"></div>
+                        </div>
+                    </div>
+                    <div class="timeline-legend">
+                        <span class="legend-item"><span id="legend-score-team-a">Team A leading ↑</span></span>
+                        <span class="legend-item"><span id="legend-score-team-b">Team B leading ↓</span></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Chat Tab -->
+            <div id="tab-chat" class="tab-content">
+                <div class="panel chat-panel-outer">
+                    <!-- Column headers (outside scroll) -->
+                    <div class="chat-header-row">
+                        <div class="chat-time-axis-col"><h3>&nbsp;</h3></div>
+                        <div class="chat-columns-wrapper">
+                            <div class="chat-column-header"><h3>Kills</h3></div>
+                            <div class="chat-column-header"><h3 id="team-a-chat-title">Team A Chat</h3></div>
+                            <div class="chat-column-header"><h3 id="team-b-chat-title">Team B Chat</h3></div>
+                        </div>
+                    </div>
+                    <!-- Single scroll viewport for all columns -->
+                    <div class="chat-scroll-viewport" id="chat-scroll-viewport">
+                        <div class="chat-scroll-inner">
+                            <div class="chat-time-axis-col">
+                                <div class="chat-time-axis" id="chat-time-axis"></div>
+                            </div>
+                            <div class="chat-columns-wrapper">
+                                <div class="chat-timeline-scroll" id="kill-messages"></div>
+                                <div class="chat-timeline-scroll" id="team-a-messages"></div>
+                                <div class="chat-timeline-scroll" id="team-b-messages"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Tab -->
+            <div id="tab-map" class="tab-content">
+                <div class="panel map-panel">
+                    <div class="map-track-controls">
+                        <span class="map-trail-label">Trails:</span>
+                        <button id="map-trails-all">All</button>
+                        <button id="map-trails-none">None</button>
+                        <select id="map-trail-duration" class="map-trail-select">
+                            <option value="5">5s</option>
+                            <option value="10" selected>10s</option>
+                            <option value="30">30s</option>
+                            <option value="60">1min</option>
+                            <option value="300">5min</option>
+                            <option value="1200">20min</option>
+                        </select>
+                        <button id="map-reset-tracks">Clear</button>
+                    </div>
+                    <div class="map-main-content">
+                        <div class="map-canvas-container">
+                            <canvas id="map-canvas" width="850" height="850"></canvas>
+                            <div id="map-no-data" class="map-no-data" style="display: none;">
+                                <p>No location data available for this map.</p>
+                                <p>Player positions will still be shown.</p>
+                            </div>
+                        </div>
+                        <div class="map-sidebar">
+                            <div class="map-legend" id="map-legend">
+                                <h4>Players</h4>
+                            </div>
+                            <div id="region-status-panel" style="display: none;">
+                                <h4>Region Status</h4>
+                                <div id="region-status-body"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="region-control-panel" style="display: none;">
+                        <h4>Region Control</h4>
+                        <div id="region-config" class="region-config"></div>
+                        <table class="stats-table region-control-table" id="region-control-table">
+                            <thead>
+                                <tr>
+                                    <th>Region</th>
+                                    <th id="rc-teamA-hdr" title="Team has player with RL/LG, opponent doesn't">-</th>
+                                    <th id="rc-teamA-weak-hdr" title="Team has player without RL/LG, opponent absent">- weak</th>
+                                    <th title="Both teams present, each with at least one RL/LG holder">Contested</th>
+                                    <th title="Both teams present, neither has any RL/LG">Cont. weak</th>
+                                    <th title="No players in region">Empty</th>
+                                    <th id="rc-teamB-weak-hdr" title="Team has player without RL/LG, opponent absent">- weak</th>
+                                    <th id="rc-teamB-hdr" title="Team has player with RL/LG, opponent doesn't">-</th>
+                                </tr>
+                            </thead>
+                            <tbody id="region-control-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loc Graph Tab -->
+            <div id="tab-loc-graph" class="tab-content">
+                <div class="panel locgraph-panel">
+                    <div class="locgraph-controls">
+                        <label>Filter:
+                            <select id="locgraph-filter">
+                                <option value="all" selected>All</option>
+                            </select>
+                        </label>
+                        <label>Edges:
+                            <select id="locgraph-edge-mode">
+                                <option value="all" selected>All</option>
+                                <option value="normal">Normal only</option>
+                                <option value="teleport">Teleports only</option>
+                            </select>
+                        </label>
+                        <label>Min count:
+                            <select id="locgraph-min-edge" title="Hide edges with fewer than N transitions">
+                                <option value="1" selected>1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                            </select>
+                        </label>
+                        <label>Layout:
+                            <select id="locgraph-layout">
+                                <option value="preset" selected>Geographic (loc coords)</option>
+                                <option value="fcose">Force-directed (fcose)</option>
+                                <option value="cose">Force-directed (cose)</option>
+                                <option value="circle">Circle</option>
+                                <option value="concentric">Concentric (by time)</option>
+                            </select>
+                        </label>
+                        <label><input type="checkbox" id="locgraph-show-labels" checked> Labels</label>
+                        <label>Label size:
+                            <select id="locgraph-label-size">
+                                <option value="11">Small</option>
+                                <option value="14" selected>Medium</option>
+                                <option value="18">Large</option>
+                                <option value="22">XL</option>
+                            </select>
+                        </label>
+                        <button id="locgraph-relayout" class="locgraph-btn" title="Re-run the current layout">Re-layout</button>
+                        <button id="locgraph-fit" class="locgraph-btn" title="Fit graph to viewport">Fit</button>
+                    </div>
+                    <div class="locgraph-canvas-container">
+                        <div id="locgraph-canvas"></div>
+                        <div id="locgraph-no-data" class="map-no-data" style="display:none">
+                            <p>No loc graph available for this demo.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-legend">
+                        <span class="legend-item"><span class="legend-color" style="background:#8fb3ff;"></span> Normal edge</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#00d9ff;"></span> Teleport edge</span>
+                        <span class="legend-item">Node size = time spent · Edge width = transition count</span>
+                        <span class="legend-item">Drag nodes · scroll to zoom · click for details</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Moments Tab -->
+            <div id="tab-keymoments" class="tab-content keymoments-grid">
+                <div class="panel">
+                    <h3>Powerup Runs</h3>
+                    <table class="stats-table" id="keymoments-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Powerup</th>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>Frags</th>
+                                <th>Duration</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody id="keymoments-body"></tbody>
+                    </table>
+                    <div id="keymoments-empty" class="empty-message" style="display: none;">
+                        No powerup pickups detected in this demo.
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3>Longest Frag Streaks</h3>
+                    <table class="stats-table" id="fragstreaks-table">
+                        <thead>
+                            <tr>
+                                <th>Start</th>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>Frags</th>
+                                <th>Main Weapon</th>
+                                <th>Duration</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fragstreaks-body"></tbody>
+                    </table>
+                    <div id="fragstreaks-empty" class="empty-message" style="display: none;">
+                        No frag streaks detected in this demo.
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

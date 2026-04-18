@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>QTV Proxy Probe</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { font-family: system-ui, sans-serif; background: #111; color: #ddd; margin: 0; padding: 20px; max-width: 1100px; }
+    h1 { margin-top: 0; }
+    label { display: block; margin: 8px 0 4px; font-size: 0.9em; color: #aaa; }
+    input[type=text] { background: #222; color: #eee; border: 1px solid #333; padding: 6px 8px; font-family: monospace; width: 100%; box-sizing: border-box; }
+    .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { background: #2a4; color: #fff; border: 0; padding: 8px 14px; cursor: pointer; font-family: inherit; }
+    button.secondary { background: #444; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #log { background: #000; border: 1px solid #333; margin-top: 20px; padding: 10px; height: 500px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: pre-wrap; }
+    .log-send { color: #4af; }
+    .log-recv { color: #4a4; }
+    .log-info { color: #bbb; }
+    .log-err { color: #f66; }
+    .log-bytes { color: #c84; }
+    .hint { color: #888; font-size: 0.85em; margin-top: 4px; }
+  </style>
+</head>
+<body>
+<h1>QTV Proxy Probe</h1>
+<p>Reverse-engineer the <code>wss://fteqtv.quake.world</code> handshake. Enter a live QTV source (<code>host:port</code>), pick a candidate, watch the log. Once a candidate yields <code>QTVSV 1</code> followed by binary MVD frames, we've found the right shape.</p>
+
+<label>Proxy URL</label>
+<input type="text" id="proxy" value="wss://fteqtv.quake.world">
+
+<label>QTV source (host:port)</label>
+<input type="text" id="target" placeholder="e.g. qw.foppa.dk:28000">
+<div class="hint">Find an active source: <a style="color:#4af" href="https://hubapi.quakeworld.nu/v2/servers?has_player=true" target="_blank">hubapi.quakeworld.nu/v2/servers</a> — look for `qtv_stream.address`.</div>
+
+<div class="row">
+  <button onclick="tryShape('firstFrameTcp')">A: first frame "tcp:host:port\n"</button>
+  <button onclick="tryShape('firstFrameCONNECT')">B: first frame "CONNECT host:port\n"</button>
+  <button onclick="tryShape('pathBased')">C: path-based (<code>wss://…/tcp/host:port</code>)</button>
+  <button onclick="tryShape('fteFullQtv')">D: FTE-style "tcp:host:port\nQTV\nVERSION: 1.0\n…"</button>
+  <button class="secondary" onclick="disconnect()">Disconnect</button>
+  <button class="secondary" onclick="clearLog()">Clear log</button>
+</div>
+
+<div id="log"></div>
+
+<script>
+let ws = null;
+let bytesReceived = 0;
+
+function log(msg, cls) {
+  const d = document.getElementById('log');
+  const entry = document.createElement('div');
+  entry.className = 'log-' + (cls || 'info');
+  const ts = new Date().toISOString().slice(11, 23);
+  entry.textContent = `[${ts}] ${msg}`;
+  d.appendChild(entry);
+  d.scrollTop = d.scrollHeight;
+}
+function clearLog() { document.getElementById('log').innerHTML = ''; bytesReceived = 0; }
+
+function hex(bytes, max) {
+  max = max || 96;
+  const n = Math.min(bytes.length, max);
+  let s = '';
+  for (let i = 0; i < n; i++) {
+    s += bytes[i].toString(16).padStart(2, '0') + ' ';
+    if ((i + 1) % 16 === 0) s += '\n  ';
+  }
+  if (bytes.length > max) s += `… (+${bytes.length - max} more)`;
+  return s;
+}
+
+function printable(bytes, max) {
+  max = max || 200;
+  let s = '';
+  for (let i = 0; i < Math.min(bytes.length, max); i++) {
+    const b = bytes[i];
+    if (b === 0x0a) s += '\\n';
+    else if (b === 0x0d) s += '\\r';
+    else if (b >= 0x20 && b < 0x7f) s += String.fromCharCode(b);
+    else s += '·';
+  }
+  return s;
+}
+
+function disconnect() {
+  if (ws) {
+    log('closing socket', 'info');
+    try { ws.close(); } catch (e) {}
+    ws = null;
+  }
+}
+
+async function tryShape(shape) {
+  disconnect();
+  bytesReceived = 0;
+
+  const proxyURL = document.getElementById('proxy').value.trim();
+  const target = document.getElementById('target').value.trim();
+  if (!target) { log('target required', 'err'); return; }
+
+  let url = proxyURL;
+  if (shape === 'pathBased') {
+    url = proxyURL.replace(/\/+$/, '') + '/tcp/' + encodeURIComponent(target);
+  }
+
+  log(`shape=${shape} → opening ${url} (subprotocol: faketcp)`, 'info');
+  try {
+    ws = new WebSocket(url, 'faketcp');
+  } catch (e) {
+    log(`WebSocket ctor threw: ${e}`, 'err');
+    return;
+  }
+  ws.binaryType = 'arraybuffer';
+
+  ws.onopen = () => {
+    log('WebSocket open', 'info');
+    sendInitialFrame(shape, target);
+  };
+  ws.onmessage = (ev) => {
+    if (typeof ev.data === 'string') {
+      log(`RECV text (${ev.data.length}): ${JSON.stringify(ev.data)}`, 'recv');
+    } else {
+      const bytes = new Uint8Array(ev.data);
+      bytesReceived += bytes.length;
+      log(`RECV binary (${bytes.length}B, total ${bytesReceived}B)`, 'recv');
+      log(`  printable: ${printable(bytes)}`, 'bytes');
+      log(`  hex: ${hex(bytes)}`, 'bytes');
+    }
+  };
+  ws.onerror = (ev) => {
+    log('WebSocket error (details unavailable — check devtools Network tab for HTTP response)', 'err');
+  };
+  ws.onclose = (ev) => {
+    log(`WebSocket closed code=${ev.code} reason=${JSON.stringify(ev.reason || '')} clean=${ev.wasClean}`, 'info');
+    ws = null;
+  };
+}
+
+function sendInitialFrame(shape, target) {
+  if (!ws || ws.readyState !== 1) { log('socket not open', 'err'); return; }
+  const send = (payload) => {
+    let data;
+    if (typeof payload === 'string') {
+      data = new TextEncoder().encode(payload);
+    } else {
+      data = payload;
+    }
+    log(`SEND (${data.length}B): ${JSON.stringify(new TextDecoder().decode(data))}`, 'send');
+    ws.send(data);
+  };
+
+  const qtvHello =
+    'QTV\n' +
+    'VERSION: 1.0\n' +
+    'QTV_EZQUAKE_EXT: 3\n' +
+    'RECEIVE: 1\n' +
+    'SOURCE: ' + target + '\n' +
+    '\n';
+
+  switch (shape) {
+    case 'firstFrameTcp':
+      send(`tcp:${target}\n`);
+      setTimeout(() => {
+        if (ws && ws.readyState === 1) send(qtvHello);
+      }, 200);
+      break;
+    case 'firstFrameCONNECT':
+      send(`CONNECT ${target}\n`);
+      setTimeout(() => {
+        if (ws && ws.readyState === 1) send(qtvHello);
+      }, 200);
+      break;
+    case 'pathBased':
+      // Proxy already knows the target from the URL; send QTV handshake right away.
+      send(qtvHello);
+      break;
+    case 'fteFullQtv':
+      // Wild guess: maybe FTE sends target + hello bundled.
+      send(`tcp:${target}\n` + qtvHello);
+      break;
+    default:
+      log('unknown shape', 'err');
+  }
+}
+</script>
+</body>
+</html>
