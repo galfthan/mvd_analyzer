@@ -120,15 +120,32 @@ func (p *Parser) parseServerData(r *mvd.BufferReader, time float64) error {
 	return p.emit(&ServerDataEvent{Data: sd, Time: time})
 }
 
-// parseModelList parses svc_modellist to extract the map file (first model)
+// parseModelList decodes svc_modellist / svc_fte_modellistshort. The
+// first model in the first chunk is the map BSP (used for the
+// ServerData.MapFile shortcut); every model gets appended to the
+// parser's model-index table so the entity-state decoder can look up
+// model paths when classifying items.
+//
+// Wire format (ezquake-source/src/cl_parse.c:1722-1815): 1-byte
+// start index, NUL-terminated strings until "" terminator, 1-byte
+// continuation index. Split packets are rare in recorded demos but
+// the protocol allows them, so we respect `start` as the starting
+// offset within p.modelList.
 func (p *Parser) parseModelList(r *mvd.BufferReader) error {
-	// Skip start index
-	if _, err := r.ReadByte(); err != nil {
+	start, err := r.ReadByte()
+	if err != nil {
 		return err
 	}
-
-	// First model is always the map BSP file
-	firstModel := true
+	if p.modelList == nil {
+		// Index 0 is reserved for the null model.
+		p.modelList = []string{""}
+	}
+	firstIdx := int(start) + 1
+	for len(p.modelList) < firstIdx {
+		p.modelList = append(p.modelList, "")
+	}
+	idx := firstIdx
+	firstModel := (idx == 1)
 	for {
 		s, err := r.ReadString()
 		if err != nil {
@@ -137,15 +154,16 @@ func (p *Parser) parseModelList(r *mvd.BufferReader) error {
 		if s == "" {
 			break
 		}
-
-		// First model is the map file (e.g., "maps/dm2.bsp")
+		for len(p.modelList) < idx+1 {
+			p.modelList = append(p.modelList, "")
+		}
+		p.modelList[idx] = s
 		if firstModel && p.serverData != nil {
 			p.serverData.MapFile = s
 			firstModel = false
 		}
+		idx++
 	}
-
-	// Skip next index byte
-	r.Skip(1)
-	return nil
+	_, err = r.ReadByte()
+	return err
 }

@@ -15,6 +15,7 @@ type ItemsResult struct {
 type ItemTimeline struct {
 	Name   string      `json:"name"`
 	Kind   string      `json:"kind"`
+	EntNum int         `json:"entNum"` // server ent number — stable id within a match, handy for debugging
 	X      float32     `json:"x"`
 	Y      float32     `json:"y"`
 	Z      float32     `json:"z"`

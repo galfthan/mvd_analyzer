@@ -41,7 +41,6 @@ dist/
   app.js, worker.js           frontend
   maps/                       pre-generated map geometry
   locs/                       .loc files copied from qwanalytics/loc/data
-  items/                      per-map item corpus copied from qwanalytics/items/data
 ```
 
 ### Netlify deploy
@@ -69,15 +68,6 @@ bundle). Instead, when the analyzer needs a loc file, it calls
 `fetchLocSync(mapName)`, which the worker implements as a synchronous
 XHR against `locs/<name>.loc`. `make build` copies the corpus from
 `qwanalytics/loc/data/` into `dist/locs/`.
-
-## Item corpus at runtime
-
-Same pattern for the per-map pickup-item JSON consumed by the
-`ItemAnalyzer`. `qwanalytics/items/loader_wasm.go` calls
-`fetchItemsSync(mapName)`; `worker.js` does a sync XHR against
-`items/<name>.json`. `make build` copies `qwanalytics/items/data/` →
-`dist/items/`. Native builds skip this path and use the `go:embed`
-corpus.
 
 ## Map-tab item overlay
 

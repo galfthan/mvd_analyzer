@@ -22,22 +22,6 @@ self.fetchLocSync = function(mapName) {
     return null;
 };
 
-// Synchronous items fetcher — mirrors fetchLocSync. Called from
-// qwanalytics/items/loader_wasm.go to pull the per-map items JSON
-// (BSP-derived pickup positions) used by the ItemAnalyzer.
-self.fetchItemsSync = function(mapName) {
-    if (!mapName) return null;
-    try {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', 'items/' + mapName + '.json', false);
-        xhr.send(null);
-        if (xhr.status === 200) return xhr.responseText;
-    } catch (e) {
-        // Swallow — Go falls back to "no items file for map ...".
-    }
-    return null;
-};
-
 let wasmReady = false;
 
 async function initWasm() {

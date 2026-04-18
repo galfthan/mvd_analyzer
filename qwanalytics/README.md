@@ -16,22 +16,19 @@ that downstream consumers render, summarise, or feed to an agent.
   via `//go:embed data/*.loc` (466 maps today); for WASM builds the host
   provides `fetchLocSync` so only the loc for the current demo is
   downloaded.
-- `items/` — per-map pickup-item corpus (armor / weapon / MH / powerup
-  positions and kinds, generated from BSP entities). Same two-path
-  dispatch as `loc/`: `//go:embed data/*.json` for native, host-provided
-  `fetchItemsSync` for WASM. Consumed by `ItemAnalyzer` to bind KTX
-  `//ktx took` entity numbers to concrete map items.
-- `mapgen/` — the Quake 1 BSP reader (`bsp/`, including the new
-  `entities.go` decoder for the entities lump) and floor-face extractor
+- `mapgen/` — the Quake 1 BSP reader (`bsp/`) and floor-face extractor
   (`mapgeom/`) used by the mapgen developer tool. Not part of the
   runtime pipeline — it generates static per-map JSON ahead of time.
+  The BSP entities-lump decoder (`bsp/entities.go`) is available for
+  callers that want static map-item data, though the item analyzer
+  itself derives item state purely from the demo now and requires no
+  map preprocessing.
 - `diagnostic/` — opt-in integration harness that runs a demo corpus
   through the parser in warning-collection mode and runs data-quality
   checks on the analysis result.
-- `cmd/mapgen/` — developer tool: reads BSP + loc files, writes two
-  outputs per map — the per-loc floor-polygon JSON for the web viewer
-  (`qw-web/static/maps/<name>.json`) and a slim pickup-items JSON
-  (`qwanalytics/items/data/<name>.json`) consumed by `ItemAnalyzer`.
+- `cmd/mapgen/` — developer tool: reads BSP + loc files, writes per-loc
+  floor-polygon JSON for the web viewer
+  (`qw-web/static/maps/<name>.json`).
 - `cmd/qw-analyze/` — CLI consumer. `qw-analyze demo.mvd` produces Result
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.
@@ -105,10 +102,11 @@ is the wire contract with every consumer; breaking changes bump
 
 ### Items result
 
-`result.Items` carries one `ItemTimeline` per bound map item (armors,
-weapons, megahealth, powerups). Each timeline has deterministic name
-(`ra`, `mh_1`/`mh_2`, `rl_1`/`rl_2`, `quad`, …), world position,
-nearest loc name, and an ordered `Phases` list:
+`result.Items` carries one `ItemTimeline` per observed item entity
+(every armor, health pack, weapon, ammo box, megahealth, and
+powerup). Each timeline has deterministic name (`ra`,
+`mh_1`/`mh_2`, `rl_1`/`rl_2`, `quad`, …), the server edict number,
+world position, nearest loc name, and an ordered `Phases` list:
 
 ```go
 type ItemPhase struct {
@@ -116,18 +114,29 @@ type ItemPhase struct {
     TakenAt       float64 // someone picked it up
     TakenBy       string
     Team          string
-    RespawnAt     float64 // when it comes back up (0 = MH pending rot)
+    RespawnAt     float64 // when it came back up (observed, not predicted)
 }
 ```
 
-Sources: the `ItemAnalyzer` parses KTX's demo-only stuffcmds
-(`//ktx took | timer | drop` from `ktx/src/items.c`) and binds each
-server-side edict number to a concrete `MapItem` on first pickup via
-position snapping against the BSP-derived corpus in `items/`. MH gets
-special handling — `took` opens a phase with `RespawnAt=0` (pending
-rot), and the matching `timer` event later fills in the 20 s timer
-when the carrier's health drops back to ≤100. Non-KTX sources
-produce no item data; the field is omitted.
+Sources: `ItemAnalyzer` consumes `ItemSpawnEvent` and `ItemStateEvent`
+that the parser synthesises from `svc_spawnbaseline` +
+`svc_packetentities` / `svc_deltapacketentities` — the wire-level
+entity-state stream. Item classification uses standard Quake 1 model
+paths (no KTX-specific data), so *every* item with a visible model
+gets tracked on *any* demo source, including ktpro, CustomTF, or
+non-KTX servers. No map preprocessing is required. `TakenBy`
+attribution uses the nearest-player-origin at the moment of pickup
+(best-effort label since the entity-state stream doesn't carry
+"who touched it"). `RespawnAt` is observed directly, so MH rot
+(which varies with damage taken) falls out naturally — no special
+case.
+
+Known limitation: when an item respawns and is immediately
+regrabbed within the same server tick, the entity is never
+visible on the wire for that cycle, so we don't record a phase
+for it. The resulting phase will span the whole contested window
+(e.g. "RA taken at 31s, respawn observed at 91s" means the RA was
+never practically available in that 60 s window).
 
 ## Writing a new analyzer
 

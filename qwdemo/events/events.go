@@ -51,6 +51,8 @@ const (
 	KindServerInfo   = parser.EventServerInfo
 	KindDeath        = parser.EventDeath
 	KindSpawn        = parser.EventSpawn
+	KindItemSpawn    = parser.EventItemSpawn
+	KindItemState    = parser.EventItemState
 )
 
 // Concrete event types emitted on the Source.
@@ -69,6 +71,9 @@ type (
 	ServerInfoEvent   = parser.ServerInfoEvent
 	DeathEvent        = parser.DeathEvent
 	SpawnEvent        = parser.SpawnEvent
+	ItemSpawnEvent    = parser.ItemSpawnEvent
+	ItemStateEvent    = parser.ItemStateEvent
+	EntityState       = parser.EntityState
 )
 
 // Domain types carried by events — not MVD-specific, shared across all
