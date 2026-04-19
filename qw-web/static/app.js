@@ -5425,6 +5425,7 @@ function animatePlayback() {
         updateTeamStatus();
         updateMapLegend();
         updateRegionStatus();
+        updateItemsPanelStatus(mapState.currentTime);
     }
 }
 
