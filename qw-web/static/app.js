@@ -3103,7 +3103,8 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
     }
 
     // Bold label pass — draw over the dimmer prerendered label so it pops.
-    ctx.font = 'bold 12px monospace';
+    const boldPx = Math.round(12 * mapIconScale());
+    ctx.font = `bold ${boldPx}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const name of occupied) {
@@ -3919,30 +3920,7 @@ function assignPlayerSymbols(result) {
         if (letter === '?') letter = player.name[0]?.toUpperCase() || '?';
 
         const teamColor = TEAM_COLORS[player.teamIdx] || TEAM_COLORS[0];
-        // Pre-render letter with circle to offscreen canvas
-        const size = 32;
-        const offscreen = document.createElement('canvas');
-        offscreen.width = size;
-        offscreen.height = size;
-        const octx = offscreen.getContext('2d');
-        const cx = size / 2, cy = size / 2, r = 13;
-
-        // Circle background — opaque so the map underneath doesn't bleed
-        // through and fight the letter for legibility.
-        octx.beginPath();
-        octx.arc(cx, cy, r, 0, Math.PI * 2);
-        octx.fillStyle = '#0a0a15';
-        octx.fill();
-        octx.strokeStyle = teamColor;
-        octx.lineWidth = 2;
-        octx.stroke();
-
-        // Letter
-        octx.font = 'bold 16px monospace';
-        octx.textAlign = 'center';
-        octx.textBaseline = 'middle';
-        octx.fillStyle = teamColor;
-        octx.fillText(letter, cx, cy);
+        const offscreen = renderPlayerSymbolCanvas(letter, teamColor, PLAYER_SYMBOL_BASE_SIZE);
 
         mapState.playerSymbols[player.name] = {
             symbol: letter,
@@ -3951,11 +3929,59 @@ function assignPlayerSymbols(result) {
             symbolCanvas: offscreen
         };
     }
+    // Player symbols above are baked at 1.0 iconScale; renderMap will
+    // re-rasterize them on demand when the zoom-driven iconScale changes.
+    mapState.symbolCanvasScale = 1;
 
     // Build legend and refresh the trail-players dropdown now that the
     // player roster is known for this demo.
     buildMapLegend();
     buildTrailPlayersPanel();
+}
+
+// Base size (px) of a player symbol at iconScale=1. The letter circle
+// radius / outline width / letter font size all scale proportionally from
+// this when we re-rasterize for a different iconScale.
+const PLAYER_SYMBOL_BASE_SIZE = 32;
+
+// Paint a single player-symbol offscreen canvas at the requested pixel size.
+// Same geometry as the original 32 px baseline (circle radius 13, outline
+// width 2, 16 px bold monospace letter), scaled linearly to pixelSize.
+function renderPlayerSymbolCanvas(letter, teamColor, pixelSize) {
+    const size = Math.max(16, Math.round(pixelSize));
+    const k = size / PLAYER_SYMBOL_BASE_SIZE;
+    const offscreen = document.createElement('canvas');
+    offscreen.width = size;
+    offscreen.height = size;
+    const octx = offscreen.getContext('2d');
+    const cx = size / 2, cy = size / 2, r = 13 * k;
+
+    octx.beginPath();
+    octx.arc(cx, cy, r, 0, Math.PI * 2);
+    octx.fillStyle = '#0a0a15';
+    octx.fill();
+    octx.strokeStyle = teamColor;
+    octx.lineWidth = 2 * k;
+    octx.stroke();
+
+    octx.font = `bold ${Math.round(16 * k)}px monospace`;
+    octx.textAlign = 'center';
+    octx.textBaseline = 'middle';
+    octx.fillStyle = teamColor;
+    octx.fillText(letter, cx, cy);
+    return offscreen;
+}
+
+// Re-rasterize every player's symbol canvas at the given iconScale so the
+// letter, circle outline and fill stay crisp at any zoom. Called lazily by
+// renderMap when the current iconScale differs from what we last baked.
+function rebuildPlayerSymbolsForScale(iconScale) {
+    const targetPx = PLAYER_SYMBOL_BASE_SIZE * iconScale;
+    for (const info of Object.values(mapState.playerSymbols)) {
+        const teamColor = TEAM_COLORS[info.teamIdx] || TEAM_COLORS[0];
+        info.symbolCanvas = renderPlayerSymbolCanvas(info.symbol, teamColor, targetPx);
+    }
+    mapState.symbolCanvasScale = iconScale;
 }
 
 function buildMapLegend() {
@@ -4301,7 +4327,8 @@ function drawLocationLayer(ctx) {
         }
     }
 
-    ctx.font = '12px monospace';
+    const labelPx = Math.round(12 * mapIconScale());
+    ctx.font = `${labelPx}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const group of groups) {
@@ -4311,14 +4338,15 @@ function drawLocationLayer(ctx) {
     }
 }
 
-// mapIconScale: subtle, capped upscale applied to player symbols, item
-// markers, and their text labels when the user has zoomed in. Keeps icons
-// legible at high zoom without dominating the view. 1.0 at zoomK=1, linear
-// ramp, cap at 1.5 (user requested "never more than 50% bigger").
+// mapIconScale: capped upscale applied to player symbols, item markers,
+// loc labels, and any other canvas UI that should stay legible as the user
+// zooms in. Linear ramp from 1.0 at zoomK=1, reaching the 1.5x cap around
+// zoomK≈4.3 so midrange zooms already show a clear size bump. Cap is
+// enforced at 1.5 (user requested "never more than 50% bigger").
 function mapIconScale() {
     const k = _wtc.zoomK || 1;
     if (k <= 1) return 1;
-    return Math.min(1.5, 1 + (k - 1) * 0.1);
+    return Math.min(1.5, 1 + (k - 1) * 0.15);
 }
 
 // Pre-compute full trails for all players from high-res bucket data.
@@ -4470,11 +4498,13 @@ function renderMap(time) {
 
     const playerData = bucket ? bucket.p : null;
     if (playerData) {
-        // Base symbol is a pre-rendered 32x32 canvas. At zoom > 1 the symbol
-        // and the badge orbit radius grow together, capped at 1.5x.
+        // Re-rasterize player symbols on zoom change so the circle outline
+        // and letter stay crisp at any scale. iconScale ramps up to 1.5x at
+        // high zoom — see mapIconScale.
         const iconScale = mapIconScale();
-        const symSize = 32 * iconScale;
-        const halfSymbol = symSize / 2;
+        if (mapState.symbolCanvasScale !== iconScale) {
+            rebuildPlayerSymbolsForScale(iconScale);
+        }
         const orbitRadius = 14 * iconScale;
         const badgeRadius = 5 * iconScale;
 
@@ -4485,9 +4515,8 @@ function renderMap(time) {
             const symbolInfo = mapState.playerSymbols[name];
 
             if (symbolInfo && symbolInfo.symbolCanvas) {
-                ctx.drawImage(symbolInfo.symbolCanvas,
-                              pos.x - halfSymbol, pos.y - halfSymbol,
-                              symSize, symSize);
+                const sc = symbolInfo.symbolCanvas;
+                ctx.drawImage(sc, pos.x - sc.width / 2, pos.y - sc.height / 2);
 
                 // Draw status badges around player symbol
                 const badges = getActiveBadges(data);
@@ -5130,13 +5159,12 @@ function installMapInteraction(canvas) {
         if (newZoom === _wtc.zoomK) return;
         _wtc.zoomK = newZoom;
         // Adjust pan so the world point under the cursor stays anchored.
+        // Follow-mode intentionally survives zoom — renderMap's follow step
+        // will re-center on the tracked player using the new zoom level, so
+        // zoom becomes "zoom in on the player" rather than dropping follow.
         const sx = _wtc.scale * _wtc.zoomK;
         _wtc.panX = p.x - _wtc.offsetX - (worldBefore.x - _wtc.minX) * sx;
         _wtc.panY = p.y - _wtc.canvasH + _wtc.offsetY + (worldBefore.y - _wtc.minY) * sx;
-        if (mapState.followPlayer) {
-            mapState.followPlayer = null;
-            syncFollowSelectUI();
-        }
         mapState.renderDirty = true;
         renderMap(mapState.currentTime);
     }, { passive: false });

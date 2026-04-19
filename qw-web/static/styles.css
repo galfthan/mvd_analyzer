@@ -1915,8 +1915,8 @@ th.sortable.sort-desc::after {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    min-width: 250px;
-    max-width: 400px;
+    min-width: 320px;
+    max-width: 520px;
 }
 
 .map-legend {
