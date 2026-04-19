@@ -4283,50 +4283,87 @@ function prerenderLocationBackground() {
     offscreen.height = h;
     const octx = offscreen.getContext('2d');
 
-    // Draw the unnamed backdrop first (if present) so named loc regions
-    // paint on top. Kept dim and neutral so real region tinting remains
-    // readable when both are present.
-    if (backdropTris && backdropTris.length >= 6) {
-        drawTriangleListFill(octx, backdropTris, 'rgba(70, 80, 110, 0.35)', worldToCanvasNew);
-    }
-
-    for (const group of groups) {
-        if (group.tris && group.tris.length >= 6) {
-            drawLocationRegionFromGeometry(octx, group, worldToCanvasNew);
+    // Bake at the base transform (no user pan / zoom) so the cached image is
+    // authoritative; user pan / zoom is applied via a canvas transform at
+    // drawImage time in renderMap. Without this, zooming before the first
+    // bake would freeze the backdrop at the zoomed coords.
+    const savedPanX = _wtc.panX, savedPanY = _wtc.panY, savedZoomK = _wtc.zoomK;
+    _wtc.panX = 0; _wtc.panY = 0; _wtc.zoomK = 1;
+    try {
+        // Draw the unnamed backdrop first (if present) so named loc regions
+        // paint on top. Kept dim and neutral so real region tinting remains
+        // readable when both are present.
+        if (backdropTris && backdropTris.length >= 6) {
+            drawTriangleListFill(octx, backdropTris, 'rgba(70, 80, 110, 0.35)', worldToCanvasNew);
         }
-    }
 
-    // Thin grey outlines around each traced region — drawn after all fills so
-    // they sit on top and stay visible regardless of adjacent region tinting.
-    for (const group of groups) {
-        if (group.tris && group.tris.length >= 6) {
-            drawLocationRegionOutline(octx, group, worldToCanvasNew, 'rgba(180, 180, 180, 0.5)', 1);
+        for (const group of groups) {
+            if (group.tris && group.tris.length >= 6) {
+                drawLocationRegionFromGeometry(octx, group, worldToCanvasNew);
+            }
         }
-    }
 
-    octx.font = '12px monospace';
-    octx.textAlign = 'center';
-    octx.textBaseline = 'middle';
-    for (const group of groups) {
-        const pos = worldToCanvasNew(group.centroid.x, group.centroid.y);
-        octx.fillStyle = group.color.text;
-        octx.fillText(group.name, pos.x, pos.y);
+        // Thin grey outlines around each traced region — drawn after all fills so
+        // they sit on top and stay visible regardless of adjacent region tinting.
+        for (const group of groups) {
+            if (group.tris && group.tris.length >= 6) {
+                drawLocationRegionOutline(octx, group, worldToCanvasNew, 'rgba(180, 180, 180, 0.5)', 1);
+            }
+        }
+
+        octx.font = '12px monospace';
+        octx.textAlign = 'center';
+        octx.textBaseline = 'middle';
+        for (const group of groups) {
+            const pos = worldToCanvasNew(group.centroid.x, group.centroid.y);
+            octx.fillStyle = group.color.text;
+            octx.fillText(group.name, pos.x, pos.y);
+        }
+    } finally {
+        _wtc.panX = savedPanX; _wtc.panY = savedPanY; _wtc.zoomK = savedZoomK;
     }
 
     mapState.locationCanvas = offscreen;
 }
 
+// drawLocationBackdrop: drawImage the pre-baked backdrop with user pan/zoom
+// applied. The bake is at the base transform, so we only need to shift and
+// scale the baked pixels to match the current user view.
+function drawLocationBackdrop(ctx) {
+    const img = mapState.locationCanvas;
+    if (!img) return;
+    const panX = _wtc.panX, panY = _wtc.panY, zoomK = _wtc.zoomK;
+    if (panX === 0 && panY === 0 && zoomK === 1) {
+        ctx.drawImage(img, 0, 0);
+        return;
+    }
+    // Derived in-line: bakedX = offsetX + (x-minX)*scale; we want
+    //   finalX = offsetX + (x-minX)*scale*zoomK + panX
+    //          = zoomK*bakedX + [offsetX*(1-zoomK) + panX]
+    // Similar for Y: tY = (canvasH - offsetY)*(1 - zoomK) + panY.
+    ctx.save();
+    ctx.translate(_wtc.offsetX * (1 - zoomK) + panX,
+                  (_wtc.canvasH - _wtc.offsetY) * (1 - zoomK) + panY);
+    ctx.scale(zoomK, zoomK);
+    ctx.drawImage(img, 0, 0);
+    ctx.restore();
+}
+
 // Pre-compute full trails for all players from high-res bucket data.
-// Stores canvas-coordinate points with timestamps and teleport flags.
+// Stores world-space (wx, wy) positions — drawTracks converts to canvas via
+// worldToCanvas at draw time so trails follow user pan/zoom.
 function precomputeFullTrails() {
     mapState.fullTrails = {};
-    // Sorted-by-time list of death frames in canvas space, used by renderMap
+    // Sorted-by-time list of death frames in world space, used by renderMap
     // to draw a fading red "X" at the death location for a couple of seconds.
     mapState.deathEvents = [];
     const buckets = timelineState.highResBuckets;
     if (!buckets || buckets.length === 0) return;
 
     const MAX_MOVE_PER_BUCKET = 2500 * (timelineState.highResDuration || 0.05);
+    // "Meaningful movement" threshold — 2 canvas pixels at the base fit-to-canvas
+    // scale, translated to world units so the filter is applied in world space.
+    const MIN_MOVE_WORLD = _wtc.scale > 0 ? (2 / _wtc.scale) : 0;
     const lastWorldPos = {};
 
     for (const bucket of buckets) {
@@ -4337,7 +4374,6 @@ function precomputeFullTrails() {
         for (const [name, data] of Object.entries(playerData)) {
             if (data.x === 0 && data.y === 0) continue;
 
-            const pos = worldToCanvasNew(data.x, data.y);
             const symbolInfo = mapState.playerSymbols[name];
             if (!symbolInfo) continue;
 
@@ -4353,13 +4389,12 @@ function precomputeFullTrails() {
             // teamIdx is captured so the X is painted in the dead player's
             // own team color rather than a generic red.
             if (isDeath) {
-                mapState.deathEvents.push({ t, x: pos.x, y: pos.y, teamIdx: symbolInfo.teamIdx });
+                mapState.deathEvents.push({ t, wx: data.x, wy: data.y, teamIdx: symbolInfo.teamIdx });
             }
 
-            // Always include death/spawn markers regardless of pixel distance
+            // Always include death/spawn markers regardless of distance.
             if (!isDeath && !isSpawn) {
-                // Only add if moved more than 2 canvas pixels
-                if (last && Math.abs(last.x - pos.x) <= 2 && Math.abs(last.y - pos.y) <= 2) {
+                if (last && Math.abs(last.wx - data.x) <= MIN_MOVE_WORLD && Math.abs(last.wy - data.y) <= MIN_MOVE_WORLD) {
                     lastWorldPos[name] = { x: data.x, y: data.y };
                     continue;
                 }
@@ -4370,7 +4405,7 @@ function precomputeFullTrails() {
             const isTeleport = !isDeath && !isSpawn && lw && (Math.abs(data.x - lw.x) > MAX_MOVE_PER_BUCKET || Math.abs(data.y - lw.y) > MAX_MOVE_PER_BUCKET);
 
             lastWorldPos[name] = { x: data.x, y: data.y };
-            track.push({ x: pos.x, y: pos.y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
+            track.push({ wx: data.x, wy: data.y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
         }
     }
 
@@ -4446,9 +4481,7 @@ function renderMap(time) {
         if (!mapState.locationCanvas) {
             prerenderLocationBackground();
         }
-        if (mapState.locationCanvas) {
-            ctx.drawImage(mapState.locationCanvas, 0, 0);
-        }
+        drawLocationBackdrop(ctx);
     }
 
     // Draw region control overlay (colored by controlling team)
@@ -4506,7 +4539,8 @@ function renderMap(time) {
             const dt = time - e.t;
             if (dt < 0 || dt > DEATH_X_DURATION) continue;
             const alpha = 1 - dt / DEATH_X_DURATION;
-            drawDeathX(ctx, e.x, e.y, e.teamIdx, alpha);
+            const pos = worldToCanvasNew(e.wx, e.wy);
+            drawDeathX(ctx, pos.x, pos.y, e.teamIdx, alpha);
         }
     }
 }
@@ -4794,6 +4828,17 @@ function drawTracks(ctx, time) {
 
         if (endIdx - startIdx < 1) continue;
 
+        // Pre-convert the visible window of world-space points into canvas
+        // pixels at the current pan / zoom so the inner draw loop stays
+        // allocation-free and worldToCanvas's shared _tmpPt isn't clobbered
+        // between consecutive reads.
+        const cpts = new Array(endIdx - startIdx + 1);
+        for (let i = startIdx; i <= endIdx; i++) {
+            const pt = points[i];
+            const c = worldToCanvasNew(pt.wx, pt.wy);
+            cpts[i - startIdx] = { x: c.x, y: c.y, spawn: pt.spawn, death: pt.death, tp: pt.tp };
+        }
+
         const teamHex = TEAM_COLORS[points[0].teamIdx] || TEAM_COLORS[0];
         const solidColor = hexToRgba(teamHex, 0.4);
         const dashColor = hexToRgba(teamHex, 0.2);
@@ -4808,12 +4853,12 @@ function drawTracks(ctx, time) {
         ctx.strokeStyle = solidColor;
         ctx.setLineDash([]);
         ctx.beginPath();
-        ctx.moveTo(points[startIdx].x, points[startIdx].y);
+        ctx.moveTo(cpts[0].x, cpts[0].y);
 
-        if (points[startIdx].spawn) markers.push({ x: points[startIdx].x, y: points[startIdx].y, type: 'spawn' });
+        if (cpts[0].spawn) markers.push({ x: cpts[0].x, y: cpts[0].y, type: 'spawn' });
 
-        for (let i = startIdx + 1; i <= endIdx; i++) {
-            const pt = points[i];
+        for (let i = 1; i < cpts.length; i++) {
+            const pt = cpts[i];
 
             if (pt.spawn) {
                 // Spawn: start a new line segment (gap from death)
@@ -4848,7 +4893,8 @@ function drawTracks(ctx, time) {
             if (needDash !== inDash) {
                 ctx.stroke();
                 ctx.beginPath();
-                ctx.moveTo(points[i - 1].x, points[i - 1].y);
+                const prev = cpts[i - 1];
+                ctx.moveTo(prev.x, prev.y);
                 if (needDash) {
                     ctx.setLineDash([4, 6]);
                     ctx.strokeStyle = dashColor;
@@ -5213,6 +5259,10 @@ function toggleMapFullscreen() {
     }
 }
 
+// Remembers the unified-timeline's original parent / sibling slot so we can
+// put it back after leaving fullscreen. Populated the first time we relocate.
+let _fsTimelineHome = null;
+
 function onMapFullscreenChange() {
     const panel = document.querySelector('#tab-map .map-panel');
     if (!panel) return;
@@ -5221,6 +5271,21 @@ function onMapFullscreenChange() {
     mapState.fullscreen = nowFs;
     const btn = document.getElementById('map-fullscreen');
     if (btn) btn.textContent = nowFs ? 'Exit fullscreen' : 'Fullscreen';
+
+    // Relocate the shared timeline (playback buttons + scrubber) into the
+    // fullscreen map panel so it stays usable. On exit, put it back.
+    const tl = document.getElementById('unified-timeline');
+    if (tl) {
+        if (nowFs) {
+            if (!_fsTimelineHome) {
+                _fsTimelineHome = { parent: tl.parentNode, next: tl.nextSibling };
+            }
+            panel.appendChild(tl);
+        } else if (_fsTimelineHome && _fsTimelineHome.parent) {
+            _fsTimelineHome.parent.insertBefore(tl, _fsTimelineHome.next);
+        }
+    }
+
     // Canvas backing store must match the new container size; re-render.
     resizeMapCanvas();
     mapState.locationCanvas = null; // backdrop is sized to the canvas, rebuild

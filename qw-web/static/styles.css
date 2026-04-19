@@ -1652,6 +1652,14 @@ th.sortable.sort-desc::after {
     display: none !important;
 }
 
+/* Relocated unified timeline: pin to the bottom of the fullscreen map panel,
+   shrunk to one row of controls so it never eats canvas space. */
+.map-panel--fullscreen #unified-timeline {
+    margin: 0;
+    padding: 6px 10px;
+    flex: 0 0 auto;
+}
+
 .locgraph-panel {
     display: flex;
     flex-direction: column;
