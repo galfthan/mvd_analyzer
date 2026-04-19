@@ -2793,45 +2793,6 @@ function findNearestLocation(x, y, locations) {
     return bestName;
 }
 
-// Estimate world z at (x, y) as an inverse-distance-weighted blend of the
-// K nearest locs. The hard single-nearest variant produced a discontinuous
-// z field, so a player walking across the Voronoi boundary between two
-// neighbour locs of slightly different authored z would see their symbol
-// "pulse" between two sizes each frame (common on flat ground where the
-// mapper placed adjacent loc points at slightly different heights). An IDW
-// blend gives a smooth z field — crossing the boundary becomes a gradual
-// transition, not a step. eps2 keeps the weight finite when a loc is
-// coincident with the query point and controls how much nearby locs
-// dominate vs far ones.
-function findNearestLocationZ(x, y, locations) {
-    if (!locations || locations.length === 0) return 0;
-    const K = 5;
-    const eps2 = 2500; // (50 world units)²
-    const top = []; // ascending by d2, capped to K
-    for (const loc of locations) {
-        const dx = x - loc.x, dy = y - loc.y;
-        const d2 = dx * dx + dy * dy;
-        if (top.length < K) {
-            top.push({ d2, z: loc.z || 0 });
-        } else if (d2 < top[K - 1].d2) {
-            top[K - 1] = { d2, z: loc.z || 0 };
-        } else {
-            continue;
-        }
-        // Insertion-bubble so top stays sorted ascending by d2.
-        for (let i = top.length - 1; i > 0 && top[i].d2 < top[i - 1].d2; i--) {
-            const t = top[i]; top[i] = top[i - 1]; top[i - 1] = t;
-        }
-    }
-    let num = 0, den = 0;
-    for (const t of top) {
-        const w = 1 / (t.d2 + eps2);
-        num += w * t.z;
-        den += w;
-    }
-    return den > 0 ? num / den : 0;
-}
-
 // Compute the 2nd / 98th percentile of z across all map locations. These
 // endpoints are used to scale player-symbol size by "height on the map": a
 // player at the lo end renders at base size, one at the hi end 25% larger.
@@ -4557,7 +4518,6 @@ function renderMap(time) {
         // geometry is drawn fresh each frame so it's always pixel-native at
         // the current zoom and display DPR — no bitmap cache, no upscale blur.
         const iconScale = mapIconScale();
-        const locations = mapState.locations;
         const zRange = mapState.zRange || { lo: 0, hi: 0 };
         const zSpan = zRange.hi - zRange.lo;
 
@@ -4572,15 +4532,11 @@ function renderMap(time) {
             // map (98th percentile) render 25% larger than those near the
             // bottom (2nd percentile), linearly interpolated. Helps separate
             // overlapping players on multi-deck maps (e.g. aerowalk bridges
-            // above the RA room). Prefer the authoritative player z from
-            // the bucket (schema v3+); fall back to an IDW loc-z blend on
-            // older analyses that predate the z field.
+            // above the RA room). data.z is the authoritative player z
+            // from svc_playerinfo, propagated through the analyzer.
             let zScale = 1;
             if (zSpan > 0) {
-                const pz = data.z !== undefined
-                    ? data.z
-                    : findNearestLocationZ(data.x, data.y, locations);
-                let t = (pz - zRange.lo) / zSpan;
+                let t = ((data.z || 0) - zRange.lo) / zSpan;
                 if (t < 0) t = 0;
                 if (t > 1) t = 1;
                 zScale = 1 + 0.25 * t;
