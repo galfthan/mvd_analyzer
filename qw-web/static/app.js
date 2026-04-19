@@ -2094,9 +2094,9 @@ function setupUnifiedTimeline() {
 
     // --- Playback controls ---
     document.getElementById('tl-rev').addEventListener('click', () => startPlaybackAtSpeed(-1));
+    document.getElementById('tl-slow').addEventListener('click', () => startPlaybackAtSpeed(0.2));
     document.getElementById('tl-play-pause').addEventListener('click', () => startPlaybackAtSpeed(1));
     document.getElementById('tl-5x').addEventListener('click', () => startPlaybackAtSpeed(5));
-    document.getElementById('tl-20x').addEventListener('click', () => startPlaybackAtSpeed(20));
 
     // --- Pan/zoom on every diverging graph + region-control timeline ---
     ['detail-graph-canvas', 'region-control-canvas', 'health-armor-canvas',
@@ -5856,17 +5856,17 @@ function renderLocGraph() {
 
 const PLAYBACK_BUTTON_LABELS = {
     'tl-rev': '-1x',
+    'tl-slow': '0.2x',
     'tl-play-pause': '1x',
-    'tl-5x': '5x',
-    'tl-20x': '20x'
+    'tl-5x': '5x'
 };
 
 function updatePlaybackButtons() {
     const buttons = {
         'tl-rev': -1,
+        'tl-slow': 0.2,
         'tl-play-pause': 1,
-        'tl-5x': 5,
-        'tl-20x': 20
+        'tl-5x': 5
     };
     for (const [id, speed] of Object.entries(buttons)) {
         const btn = document.getElementById(id);
