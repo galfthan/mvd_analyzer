@@ -2793,6 +2793,39 @@ function findNearestLocation(x, y, locations) {
     return bestName;
 }
 
+// World z of the loc nearest (x, y) in XY. Used as a cheap proxy for the
+// player's own z (player positions don't carry z through the wire today).
+function findNearestLocationZ(x, y, locations) {
+    if (!locations || locations.length === 0) return 0;
+    let bestDist = Infinity;
+    let bestZ = 0;
+    for (const loc of locations) {
+        const dx = x - loc.x, dy = y - loc.y;
+        const d = dx * dx + dy * dy;
+        if (d < bestDist) {
+            bestDist = d;
+            bestZ = loc.z || 0;
+        }
+    }
+    return bestZ;
+}
+
+// Compute the 2nd / 98th percentile of z across all map locations. These
+// endpoints are used to scale player-symbol size by "height on the map": a
+// player at the lo end renders at base size, one at the hi end 25% larger.
+// Percentiles (not min / max) so a single out-of-bounds loc doesn't squash
+// the useful range.
+function computeMapZRange(locations) {
+    if (!locations || locations.length === 0) return { lo: 0, hi: 0 };
+    const zs = [];
+    for (const loc of locations) zs.push(loc.z || 0);
+    zs.sort((a, b) => a - b);
+    const n = zs.length;
+    const lo = zs[Math.floor(n * 0.02)];
+    const hi = zs[Math.min(n - 1, Math.floor(n * 0.98))];
+    return { lo, hi };
+}
+
 // Classify region control state from per-team head counts. Single source of
 // truth for everywhere on the page that derives a state from raw presence:
 // the strip, the per-frame map overlay, the stats table, and the status panel.
@@ -3383,6 +3416,11 @@ function initMapView(result) {
 
     // Pre-compute full trails from high-res bucket data
     precomputeFullTrails();
+
+    // Cache the map's z percentile range — drives per-player z-based size
+    // scaling in renderMap (players higher up on the map render up to 25%
+    // larger than those on the lowest level).
+    mapState.zRange = computeMapZRange(mapState.locations);
 
     // Populate the Follow-player dropdown with current players.
     rebuildFollowSelect();
@@ -4497,9 +4535,9 @@ function renderMap(time) {
         // geometry is drawn fresh each frame so it's always pixel-native at
         // the current zoom and display DPR — no bitmap cache, no upscale blur.
         const iconScale = mapIconScale();
-        const symSize = PLAYER_SYMBOL_BASE_SIZE * iconScale;
-        const orbitRadius = 14 * iconScale;
-        const badgeRadius = 5 * iconScale;
+        const locations = mapState.locations;
+        const zRange = mapState.zRange || { lo: 0, hi: 0 };
+        const zSpan = zRange.hi - zRange.lo;
 
         for (const [name, data] of Object.entries(playerData)) {
             if (data.x === 0 && data.y === 0) continue;
@@ -4507,6 +4545,25 @@ function renderMap(time) {
             const pos = worldToCanvas(data.x, data.y);
             const symbolInfo = mapState.playerSymbols[name];
             if (!symbolInfo) continue;
+
+            // Per-player z-based size scale: players near the top of the
+            // map (98th percentile) render 25% larger than those near the
+            // bottom (2nd percentile), linearly interpolated. Helps separate
+            // overlapping players on multi-deck maps (e.g. aerowalk bridges
+            // above the RA room). Player positions don't carry z on the
+            // wire yet, so we look up the z of the nearest loc as a proxy.
+            let zScale = 1;
+            if (zSpan > 0) {
+                const pz = findNearestLocationZ(data.x, data.y, locations);
+                let t = (pz - zRange.lo) / zSpan;
+                if (t < 0) t = 0;
+                if (t > 1) t = 1;
+                zScale = 1 + 0.25 * t;
+            }
+            const totalScale = iconScale * zScale;
+            const symSize = PLAYER_SYMBOL_BASE_SIZE * totalScale;
+            const orbitRadius = 14 * totalScale;
+            const badgeRadius = 5 * totalScale;
 
             const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
             drawPlayerSymbolAt(ctx, symbolInfo.symbol, teamHex, pos.x, pos.y, symSize);
@@ -4570,7 +4627,7 @@ const ITEM_MARKER_STYLES = {
 // still rendered on the map but omitted from the scrolling list.
 const PANEL_ITEM_KINDS = new Set(['ra', 'ya', 'ga', 'mh', 'rl', 'lg', 'quad', 'pent', 'ring']);
 
-const ITEM_MARKER_SIZE = 16;  // half of the 32px player symbol
+const ITEM_MARKER_SIZE = 20;  // 25% larger than the prior 16 px baseline
 const ITEM_DIM_ALPHA = 0.35;  // alpha multiplier when item is taken
 
 // isItemUp returns true if the item is available to be picked up at the
@@ -4643,7 +4700,9 @@ function drawMapItems(ctx, time) {
     const iconScale = mapIconScale();
     const size = ITEM_MARKER_SIZE * iconScale;
     const half = size / 2;
-    const fontPx = Math.round(8 * iconScale);
+    // Font scales with the marker so RA/YA/GA/RL/LG labels stay centered and
+    // legible when the square grows. Base 10 px matches the 20 px marker.
+    const fontPx = Math.round(10 * iconScale);
 
     ctx.save();
     ctx.font = `bold ${fontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
@@ -5174,7 +5233,10 @@ function handleMapCanvasClick(cx, cy) {
 
 // ─── Follow-player ────────────────────────────────────────────────────────
 
-const FOLLOW_HIT_RADIUS_PX = 20;
+// Slightly larger than the base symbol radius so the click-to-follow hit
+// area stays generous even when a high-deck / max-zoom player renders at
+// the 1.5 * 1.25 ≈ 1.88x upper bound.
+const FOLLOW_HIT_RADIUS_PX = 24;
 
 function hitTestPlayerSymbol(cx, cy, time) {
     const bucket = findBucketAtTime(time);
