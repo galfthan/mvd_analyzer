@@ -71,16 +71,17 @@ XHR against `locs/<name>.loc`. `make build` copies the corpus from
 
 ## Map-tab item overlay
 
-When the result contains an `items` field (KTX demos), the map tab
-renders every tracked item as a small square and surfaces a sidebar
-panel listing each item with live status (`up`, countdown to
-respawn, or `held` while an MH rot is in progress) and its loc
-region. Armors render as solid-filled coloured squares (RA/YA/GA);
-weapons, MH and powerups are black squares with a coloured outline
-matching the timeline palette plus a short text label (RL, LG, MH,
-Q, P, …). Items currently taken are dimmed on the map and
-highlighted-dim in the sidebar so verifying the event stream
-against gameplay is visual.
+When the result contains an `items` field (any MVD source — KTX,
+ktpro, CustomTF, etc.), the map tab renders every tracked item as a
+small square and surfaces a sidebar panel listing each item with
+live status (`up` or countdown to respawn) and its loc region.
+Armors render as solid-filled coloured squares (RA/YA/GA); weapons,
+MH and powerups are black squares with a coloured outline matching
+the timeline palette plus a short text label (RL, LG, MH, Q, P, …).
+Items currently taken are dimmed on the map and highlighted-dim in
+the sidebar so verifying the event stream against gameplay is
+visual. The panel updates live during playback via the 200 ms
+full-sync tick in `animatePlayback`.
 
 ## Regenerating map geometry
 

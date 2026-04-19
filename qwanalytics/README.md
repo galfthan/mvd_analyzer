@@ -11,7 +11,8 @@ that downstream consumers render, summarise, or feed to an agent.
   against `result.CurrentSchemaVersion`.
 - `analyzer/` — the Analyzer interface, shared `Context`, and `Registry`
   that drives a run. `NewDefaultRegistry()` wires up the seven
-  production analyzers.
+  production analyzers (demoinfo, metadata, match, frag, messages,
+  timeline, items).
 - `loc/` — `.loc` file parser. For native builds the corpus is embedded
   via `//go:embed data/*.loc` (466 maps today); for WASM builds the host
   provides `fetchLocSync` so only the loc for the current demo is
@@ -91,7 +92,7 @@ type Result struct {
     TimelineAnalysis *TimelineAnalysisResult  // bucketed player state
     Metadata         *MetadataResult          // serverinfo + match settings
     LocGraph         *LocGraphResult          // loc-to-loc movement graph
-    Items            *ItemsResult             // per-item pickup / respawn timeline (KTX demos)
+    Items            *ItemsResult             // per-item pickup / respawn timeline (all MVD sources)
     Errors           []string
 }
 ```
