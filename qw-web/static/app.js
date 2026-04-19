@@ -2793,21 +2793,43 @@ function findNearestLocation(x, y, locations) {
     return bestName;
 }
 
-// World z of the loc nearest (x, y) in XY. Used as a cheap proxy for the
-// player's own z (player positions don't carry z through the wire today).
+// Estimate world z at (x, y) as an inverse-distance-weighted blend of the
+// K nearest locs. The hard single-nearest variant produced a discontinuous
+// z field, so a player walking across the Voronoi boundary between two
+// neighbour locs of slightly different authored z would see their symbol
+// "pulse" between two sizes each frame (common on flat ground where the
+// mapper placed adjacent loc points at slightly different heights). An IDW
+// blend gives a smooth z field — crossing the boundary becomes a gradual
+// transition, not a step. eps2 keeps the weight finite when a loc is
+// coincident with the query point and controls how much nearby locs
+// dominate vs far ones.
 function findNearestLocationZ(x, y, locations) {
     if (!locations || locations.length === 0) return 0;
-    let bestDist = Infinity;
-    let bestZ = 0;
+    const K = 5;
+    const eps2 = 2500; // (50 world units)²
+    const top = []; // ascending by d2, capped to K
     for (const loc of locations) {
         const dx = x - loc.x, dy = y - loc.y;
-        const d = dx * dx + dy * dy;
-        if (d < bestDist) {
-            bestDist = d;
-            bestZ = loc.z || 0;
+        const d2 = dx * dx + dy * dy;
+        if (top.length < K) {
+            top.push({ d2, z: loc.z || 0 });
+        } else if (d2 < top[K - 1].d2) {
+            top[K - 1] = { d2, z: loc.z || 0 };
+        } else {
+            continue;
+        }
+        // Insertion-bubble so top stays sorted ascending by d2.
+        for (let i = top.length - 1; i > 0 && top[i].d2 < top[i - 1].d2; i--) {
+            const t = top[i]; top[i] = top[i - 1]; top[i - 1] = t;
         }
     }
-    return bestZ;
+    let num = 0, den = 0;
+    for (const t of top) {
+        const w = 1 / (t.d2 + eps2);
+        num += w * t.z;
+        den += w;
+    }
+    return den > 0 ? num / den : 0;
 }
 
 // Compute the 2nd / 98th percentile of z across all map locations. These
