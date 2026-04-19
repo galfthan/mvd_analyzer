@@ -441,6 +441,10 @@
                         <span class="map-trail-label">Trails:</span>
                         <button id="map-trails-all">All</button>
                         <button id="map-trails-none">None</button>
+                        <details id="map-trails-dropdown" class="map-trails-dropdown">
+                            <summary>Players</summary>
+                            <div id="map-trails-players" class="map-trails-players-panel"></div>
+                        </details>
                         <select id="map-trail-duration" class="map-trail-select">
                             <option value="5">5s</option>
                             <option value="10" selected>10s</option>
@@ -450,6 +454,11 @@
                             <option value="1200">20min</option>
                         </select>
                         <button id="map-reset-tracks">Clear</button>
+                        <span class="map-track-sep" aria-hidden="true"></span>
+                        <span class="map-trail-label">Follow:</span>
+                        <select id="map-follow" class="map-trail-select"></select>
+                        <button id="map-reset-view" title="Reset pan / zoom">Reset view</button>
+                        <button id="map-fullscreen" title="Toggle fullscreen">Fullscreen</button>
                     </div>
                     <div class="map-main-content">
                         <div class="map-canvas-container">

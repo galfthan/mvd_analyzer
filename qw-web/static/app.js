@@ -3114,39 +3114,89 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
     }
 }
 
+// Stack-aware opacity boost: regions with no overlapping, higher-z region
+// currently occupied are drawn at this multiple of their base alpha, so a
+// lower deck standing alone reads cleanly rather than washing out against an
+// empty upper deck's tint. Clamped final alpha to 0.5 so regions never
+// become opaque.
+const REGION_OPACITY_BOOST = 1.9;
+const REGION_STACK_Z_EPS = 32;      // world units — roughly one step height
+const REGION_STACK_OVERLAP_FRAC = 0.25;
+
+// Precompute per-region bbox, median z, and the list of regions stacked
+// above it (XY-overlapping and higher in z). Called from applyRegionConfig
+// after mapState.controlRegions is refreshed.
+function computeRegionStacking(regions) {
+    for (const r of regions) {
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        const zs = [];
+        for (const pt of r.points) {
+            if (pt.x < minX) minX = pt.x;
+            if (pt.x > maxX) maxX = pt.x;
+            if (pt.y < minY) minY = pt.y;
+            if (pt.y > maxY) maxY = pt.y;
+            zs.push(pt.z ?? 0);
+        }
+        r._bbox = { minX, maxX, minY, maxY };
+        zs.sort((a, b) => a - b);
+        r._z = zs.length > 0 ? zs[zs.length >> 1] : 0;
+        r._bboxArea = Math.max(1, (maxX - minX) * (maxY - minY));
+    }
+    for (const r of regions) {
+        const above = [];
+        for (const r2 of regions) {
+            if (r2 === r) continue;
+            if (r2._z <= r._z + REGION_STACK_Z_EPS) continue;
+            const ox = Math.max(0, Math.min(r._bbox.maxX, r2._bbox.maxX) - Math.max(r._bbox.minX, r2._bbox.minX));
+            const oy = Math.max(0, Math.min(r._bbox.maxY, r2._bbox.maxY) - Math.max(r._bbox.minY, r2._bbox.minY));
+            if ((ox * oy) / r._bboxArea >= REGION_STACK_OVERLAP_FRAC) {
+                above.push(r2);
+            }
+        }
+        r._above = above;
+    }
+}
+
 // Draw control overlay for regions based on current control state
 function drawRegionControlOverlay(ctx, controlStates) {
+    const regions = mapState.controlRegions;
+    if (!regions) return;
 
+    // Build the set of regions that are occupied (any non-empty state).
+    // Used by the stacking rule: a region is boosted when no region above it
+    // in its stack is currently occupied.
+    const occupied = new Set();
+    for (const [name, state] of Object.entries(controlStates)) {
+        if (state !== 'empty') occupied.add(name);
+    }
+
+    // Index regions by name for the boost lookup.
+    const regionByName = {};
+    for (const r of regions) regionByName[r.name] = r;
 
     for (const [regionName, state] of Object.entries(controlStates)) {
         const groups = mapState.regionToGroups[regionName];
         if (!groups || groups.length === 0) continue;
 
-        let color;
+        let baseAlpha, hex;
         switch (state) {
-            case 'teamAControl':
-                color = hexToRgba(TEAM_COLORS[0], 0.24);
-                break;
-            case 'teamAWeakControl':
-                color = hexToRgba(TEAM_COLORS[0], 0.14);
-                break;
-            case 'teamBControl':
-                color = hexToRgba(TEAM_COLORS[1], 0.24);
-                break;
-            case 'teamBWeakControl':
-                color = hexToRgba(TEAM_COLORS[1], 0.14);
-                break;
-            case 'contested':
-                color = 'rgba(255, 255, 255, 0.14)';
-                break;
-            case 'weakContested':
-                // Both teams present but neither has RL/LG — dimmer than
-                // contested, mirroring the weak team-control variants.
-                color = 'rgba(255, 255, 255, 0.07)';
-                break;
-            default: // empty
-                continue;
+            case 'teamAControl':     baseAlpha = 0.24; hex = TEAM_COLORS[0]; break;
+            case 'teamAWeakControl': baseAlpha = 0.14; hex = TEAM_COLORS[0]; break;
+            case 'teamBControl':     baseAlpha = 0.24; hex = TEAM_COLORS[1]; break;
+            case 'teamBWeakControl': baseAlpha = 0.14; hex = TEAM_COLORS[1]; break;
+            case 'contested':        baseAlpha = 0.14; hex = '#ffffff'; break;
+            case 'weakContested':    baseAlpha = 0.07; hex = '#ffffff'; break;
+            default: continue; // empty
         }
+
+        const r = regionByName[regionName];
+        let boost = 1.0;
+        if (r && r._above && r._above.length > 0) {
+            const anyAboveOccupied = r._above.some(ra => occupied.has(ra.name));
+            if (!anyAboveOccupied) boost = REGION_OPACITY_BOOST;
+        }
+        const finalAlpha = Math.min(0.5, baseAlpha * boost);
+        const color = hexToRgba(hex, finalAlpha);
 
         for (const group of groups) {
             fillLocationRegion(ctx, group, color, worldToCanvasNew);
@@ -3181,7 +3231,9 @@ let mapState = {
     playerSymbols: {}, // playerName -> { symbol, team, teamIdx }
     initialized: false,
     lastRenderedBucket: null, // Skip redundant redraws
-    renderDirty: false        // Force redraw on track toggle/reset/etc
+    renderDirty: false,       // Force redraw on track toggle/reset/etc
+    followPlayer: null,       // Name of the player the camera re-centers on each frame, or null
+    fullscreen: false         // True while the map panel is in fullscreen (set by fullscreenchange)
 };
 
 // (PLAYER_SYMBOLS, BADGE_DEFS and ARMOR_COLORS now live with the rest of
@@ -3299,14 +3351,12 @@ function initMapView(result) {
     // Calculate bounds from locations and player positions
     calculateMapBounds(result);
 
-    // Size canvas to fit map content at full width
-    const worldW = mapState.bounds.maxX - mapState.bounds.minX;
-    const worldH = mapState.bounds.maxY - mapState.bounds.minY;
-    const canvasW = 850;
-    const canvasH = worldW > 0 ? Math.round(Math.max(400, Math.min(850, canvasW * (worldH / worldW)))) : 700;
-    mapState.canvas.width = canvasW;
-    mapState.canvas.height = canvasH;
-    updateWorldToCanvasTransform();
+    // Size canvas and recompute transform. A fresh demo load resets user pan/zoom.
+    _wtc.panX = 0;
+    _wtc.panY = 0;
+    _wtc.zoomK = 1;
+    mapState.followPlayer = null;
+    resizeMapCanvas();
 
     // Use the canonical frag-sorted team order set in displayResults
     if (timelineState.teams && timelineState.teams.length >= 2) {
@@ -3322,14 +3372,18 @@ function initMapView(result) {
     // Assign symbols to players
     assignPlayerSymbols(result);
 
-    // Set up trail controls (only once)
+    // Set up trail controls + map pan/zoom interaction (only once)
     if (!mapState.initialized) {
         setupMapTrailControls();
+        installMapInteraction(mapState.canvas);
         mapState.initialized = true;
     }
 
     // Pre-compute full trails from high-res bucket data
     precomputeFullTrails();
+
+    // Populate the Follow-player dropdown with current players.
+    rebuildFollowSelect();
 
     // Build powerup event list
     buildMapPowerupList(result);
@@ -3371,6 +3425,7 @@ function initRegionControlData(result) {
             mapState.locToRegion[pt.name] = region.name;
         }
     }
+    computeRegionStacking(mapState.controlRegions);
 }
 
 function initRegionControl(result) {
@@ -3456,6 +3511,7 @@ function applyRegionConfig() {
     });
 
     mapState.controlRegions = regions;
+    computeRegionStacking(regions);
 
     // Build loc-name-to-region lookup
     mapState.locToRegion = {};
@@ -3731,8 +3787,38 @@ function calculateMapBounds(result) {
     updateWorldToCanvasTransform();
 }
 
-// Precomputed transform parameters — call updateWorldToCanvasTransform() when bounds/canvas change
-let _wtc = { scale: 1, offsetX: 0, offsetY: 0, minX: 0, minY: 0, canvasH: 0 };
+// Precomputed transform parameters — call updateWorldToCanvasTransform() when bounds/canvas change.
+// panX/panY/zoomK carry user-applied pan and zoom on top of the fit-to-canvas base. They persist
+// across transform recomputes (e.g. canvas resize, geometry reload) so the user's view survives.
+let _wtc = { scale: 1, offsetX: 0, offsetY: 0, minX: 0, minY: 0, canvasH: 0,
+             panX: 0, panY: 0, zoomK: 1 };
+
+// Canvas width used for non-fullscreen rendering. Fullscreen reads the container bbox instead.
+const MAP_CANVAS_BASE_WIDTH = 850;
+
+function resizeMapCanvas() {
+    const canvas = mapState.canvas;
+    if (!canvas) return;
+    const worldW = mapState.bounds ? (mapState.bounds.maxX - mapState.bounds.minX) : 0;
+    const worldH = mapState.bounds ? (mapState.bounds.maxY - mapState.bounds.minY) : 0;
+    const fs = !!(document.fullscreenElement &&
+                  document.fullscreenElement.classList &&
+                  document.fullscreenElement.classList.contains('map-panel'));
+    let cw, ch;
+    if (fs && canvas.parentElement) {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        cw = Math.max(300, Math.floor(rect.width));
+        ch = Math.max(200, Math.floor(rect.height));
+    } else {
+        cw = MAP_CANVAS_BASE_WIDTH;
+        ch = worldW > 0
+            ? Math.round(Math.max(400, Math.min(850, cw * (worldH / worldW))))
+            : 700;
+    }
+    canvas.width = cw;
+    canvas.height = ch;
+    updateWorldToCanvasTransform();
+}
 
 function updateWorldToCanvasTransform() {
     const { minX, maxX, minY, maxY } = mapState.bounds;
@@ -3747,22 +3833,46 @@ function updateWorldToCanvasTransform() {
     _wtc.minX = minX;
     _wtc.minY = minY;
     _wtc.canvasH = canvas.height;
+    // panX, panY, zoomK intentionally preserved across recomputes.
+}
+
+function resetMapView() {
+    _wtc.panX = 0;
+    _wtc.panY = 0;
+    _wtc.zoomK = 1;
+    if (mapState.followPlayer) {
+        mapState.followPlayer = null;
+        syncFollowSelectUI();
+    }
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
 }
 
 // Reusable point to avoid GC — only use for immediate consumption, not storage
 const _tmpPt = { x: 0, y: 0 };
 
 function worldToCanvas(x, y) {
-    _tmpPt.x = _wtc.offsetX + (x - _wtc.minX) * _wtc.scale;
-    _tmpPt.y = _wtc.canvasH - (_wtc.offsetY + (y - _wtc.minY) * _wtc.scale);
+    const sx = _wtc.scale * _wtc.zoomK;
+    _tmpPt.x = _wtc.offsetX + (x - _wtc.minX) * sx + _wtc.panX;
+    _tmpPt.y = _wtc.canvasH - _wtc.offsetY - (y - _wtc.minY) * sx + _wtc.panY;
     return _tmpPt;
 }
 
 // Allocating version for cases where result is stored (e.g., tracks, caching)
 function worldToCanvasNew(x, y) {
+    const sx = _wtc.scale * _wtc.zoomK;
     return {
-        x: _wtc.offsetX + (x - _wtc.minX) * _wtc.scale,
-        y: _wtc.canvasH - (_wtc.offsetY + (y - _wtc.minY) * _wtc.scale)
+        x: _wtc.offsetX + (x - _wtc.minX) * sx + _wtc.panX,
+        y: _wtc.canvasH - _wtc.offsetY - (y - _wtc.minY) * sx + _wtc.panY
+    };
+}
+
+// Inverse of worldToCanvas — canvas pixel to world coord. Needed for zoom-about-cursor and hit-testing.
+function canvasToWorld(cx, cy) {
+    const sx = _wtc.scale * _wtc.zoomK;
+    return {
+        x: _wtc.minX + (cx - _wtc.offsetX - _wtc.panX) / sx,
+        y: _wtc.minY + (_wtc.canvasH - _wtc.offsetY + _wtc.panY - cy) / sx
     };
 }
 
@@ -3841,8 +3951,10 @@ function assignPlayerSymbols(result) {
         };
     }
 
-    // Build legend
+    // Build legend and refresh the trail-players dropdown now that the
+    // player roster is known for this demo.
     buildMapLegend();
+    buildTrailPlayersPanel();
 }
 
 function buildMapLegend() {
@@ -3863,7 +3975,7 @@ function buildMapLegend() {
 
         const table = document.createElement('table');
         table.className = 'team-status-table';
-        table.innerHTML = `<thead><tr><th></th><th>Player</th><th>Trail</th><th>H</th><th>A</th><th>Wpn</th><th>View</th></tr></thead>`;
+        table.innerHTML = `<thead><tr><th></th><th>Player</th><th>Loc</th><th>H</th><th>A</th><th>Wpn</th><th>View</th></tr></thead>`;
         const tbody = document.createElement('tbody');
         tbody.className = 'map-legend-tbody';
 
@@ -3875,7 +3987,7 @@ function buildMapLegend() {
                 tr.innerHTML = `
                     <td><span class="map-legend-symbol" style="color: ${teamHex}">${info.symbol}</span></td>
                     <td>${escapedName}</td>
-                    <td class="map-trail-cell"><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}"></td>
+                    <td class="map-legend-loc" data-player="${escapedName}">-</td>
                     <td class="map-legend-health" data-player="${escapedName}">-</td>
                     <td class="map-legend-armor" data-player="${escapedName}">-</td>
                     <td class="map-legend-wpn" data-player="${escapedName}">-</td>
@@ -3889,21 +4001,44 @@ function buildMapLegend() {
         legend.appendChild(table);
     }
 
-    // Attach per-player trail toggle handlers
-    legend.querySelectorAll('.map-player-trail-cb').forEach(cb => {
-        cb.addEventListener('change', (e) => {
-            const playerName = e.target.dataset.player;
-            mapState.enabledPlayers[playerName] = e.target.checked;
-            if (e.target.checked) {
-                mapState.trailStartTimes[playerName] = mapState.currentTime;
+    // Make tables sortable
+    legend.querySelectorAll('.team-status-table').forEach(makeSortable);
+}
+
+// Build / refresh the Trails → Players dropdown in the top bar. One checkbox
+// per player, wired to the same mapState.enabledPlayers / trailStartTimes
+// state the legend previously mutated.
+function buildTrailPlayersPanel() {
+    const panel = document.getElementById('map-trails-players');
+    if (!panel) return;
+    panel.innerHTML = '';
+    const names = Object.keys(mapState.playerSymbols).sort((a, b) => a.localeCompare(b));
+    for (const name of names) {
+        const info = mapState.playerSymbols[name];
+        const teamIdx = info?.teamIdx ?? 0;
+        const teamHex = TEAM_COLORS[teamIdx] || TEAM_COLORS[0];
+        const label = document.createElement('label');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.className = 'map-player-trail-cb';
+        cb.dataset.player = name;
+        cb.checked = !!mapState.enabledPlayers[name];
+        cb.addEventListener('change', () => {
+            mapState.enabledPlayers[name] = cb.checked;
+            if (cb.checked) {
+                mapState.trailStartTimes[name] = mapState.currentTime;
             }
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
-    });
-
-    // Make tables sortable
-    legend.querySelectorAll('.team-status-table').forEach(makeSortable);
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'map-trails-player-name';
+        nameSpan.style.color = teamHex;
+        nameSpan.textContent = name;
+        label.appendChild(cb);
+        label.appendChild(nameSpan);
+        panel.appendChild(label);
+    }
 }
 
 function updateMapLegend() {
@@ -3930,6 +4065,18 @@ function updateMapLegend() {
     }
 
     // Update per-player cells
+    const locations = mapState.locations;
+    const locCells = legend.querySelectorAll('.map-legend-loc');
+    for (const cell of locCells) {
+        const name = cell.dataset.player;
+        const data = playerData?.[name];
+        if (data && !(data.x === 0 && data.y === 0)) {
+            cell.textContent = resolvePlayerLoc(data, locations) || '';
+        } else {
+            cell.textContent = '';
+        }
+    }
+
     const healthCells = legend.querySelectorAll('.map-legend-health');
     for (const cell of healthCells) {
         const name = cell.dataset.player;
@@ -4268,6 +4415,19 @@ function renderMap(time) {
     if (bucket === mapState.lastRenderedBucket && !mapState.renderDirty) return;
     mapState.lastRenderedBucket = bucket;
     mapState.renderDirty = false;
+
+    // Follow-player: pin the camera on the tracked player this frame by
+    // adjusting panX/panY so their symbol lands at canvas center.
+    if (mapState.followPlayer && bucket && bucket.p) {
+        const fp = bucket.p[mapState.followPlayer];
+        if (fp && !(fp.x === 0 && fp.y === 0)) {
+            _wtc.panX = 0;
+            _wtc.panY = 0;
+            const pos = worldToCanvas(fp.x, fp.y);
+            _wtc.panX = canvas.width / 2 - pos.x;
+            _wtc.panY = canvas.height / 2 - pos.y;
+        }
+    }
 
     // Clear
     ctx.fillStyle = '#0a0a15';
@@ -4827,6 +4987,260 @@ function setupMapTrailControls() {
             renderMap(mapState.currentTime);
         });
     }
+
+    const followSel = document.getElementById('map-follow');
+    if (followSel) {
+        followSel.addEventListener('change', (e) => {
+            setFollowPlayer(e.target.value || null);
+        });
+    }
+
+    const resetViewBtn = document.getElementById('map-reset-view');
+    if (resetViewBtn) {
+        resetViewBtn.addEventListener('click', () => { resetMapView(); });
+    }
+
+    const fsBtn = document.getElementById('map-fullscreen');
+    if (fsBtn) {
+        fsBtn.addEventListener('click', () => { toggleMapFullscreen(); });
+    }
+
+    // React to fullscreen changes regardless of who triggered them (button,
+    // Escape key, browser UI). Only one listener is needed for the page.
+    if (!setupMapTrailControls.__fsListenerAttached) {
+        document.addEventListener('fullscreenchange', onMapFullscreenChange);
+        window.addEventListener('resize', onMapWindowResize);
+        setupMapTrailControls.__fsListenerAttached = true;
+    }
+}
+
+// installMapInteraction adds pan / zoom / click handlers to the map canvas.
+// Pan: left-drag. Zoom: mouse wheel (centered on cursor). Click (no drag):
+// dispatched through handleMapCanvasClick — used by follow-player to toggle
+// follow on a player symbol. Double-click resets the view.
+function installMapInteraction(canvas) {
+    if (!canvas || canvas.__mapInteractionInstalled) return;
+    canvas.__mapInteractionInstalled = true;
+
+    const CLICK_MAX_MOTION_PX = 5;
+    const ZOOM_MIN = 0.5;
+    const ZOOM_MAX = 12;
+
+    const drag = {
+        active: false,
+        button: -1,
+        startX: 0, startY: 0,
+        lastX: 0, lastY: 0,
+        moved: false,
+    };
+
+    function canvasPointFromEvent(ev) {
+        const rect = canvas.getBoundingClientRect();
+        // The canvas backing store may differ from the displayed CSS size
+        // (especially in fullscreen). Map client coords back to backing pixels.
+        const sx = canvas.width / rect.width;
+        const sy = canvas.height / rect.height;
+        return {
+            x: (ev.clientX - rect.left) * sx,
+            y: (ev.clientY - rect.top) * sy,
+        };
+    }
+
+    canvas.addEventListener('mousedown', (ev) => {
+        if (ev.button !== 0) return;
+        const p = canvasPointFromEvent(ev);
+        drag.active = true;
+        drag.button = ev.button;
+        drag.startX = drag.lastX = p.x;
+        drag.startY = drag.lastY = p.y;
+        drag.moved = false;
+        ev.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (ev) => {
+        if (!drag.active) return;
+        const p = canvasPointFromEvent(ev);
+        const dx = p.x - drag.lastX;
+        const dy = p.y - drag.lastY;
+        drag.lastX = p.x;
+        drag.lastY = p.y;
+        if (!drag.moved) {
+            const totalDx = p.x - drag.startX;
+            const totalDy = p.y - drag.startY;
+            if (Math.abs(totalDx) > CLICK_MAX_MOTION_PX ||
+                Math.abs(totalDy) > CLICK_MAX_MOTION_PX) {
+                drag.moved = true;
+                // Starting a pan drops follow-mode so the user isn't fighting the camera.
+                if (mapState.followPlayer) {
+                    mapState.followPlayer = null;
+                    syncFollowSelectUI();
+                }
+                canvas.style.cursor = 'grabbing';
+            }
+        }
+        if (drag.moved) {
+            _wtc.panX += dx;
+            _wtc.panY += dy;
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        }
+    });
+
+    window.addEventListener('mouseup', (ev) => {
+        if (!drag.active) return;
+        const wasClick = !drag.moved;
+        drag.active = false;
+        drag.button = -1;
+        canvas.style.cursor = '';
+        if (wasClick) {
+            const p = canvasPointFromEvent(ev);
+            handleMapCanvasClick(p.x, p.y);
+        }
+    });
+
+    canvas.addEventListener('wheel', (ev) => {
+        ev.preventDefault();
+        const p = canvasPointFromEvent(ev);
+        const worldBefore = canvasToWorld(p.x, p.y);
+        let newZoom = _wtc.zoomK * Math.exp(-ev.deltaY * 0.0015);
+        if (newZoom < ZOOM_MIN) newZoom = ZOOM_MIN;
+        if (newZoom > ZOOM_MAX) newZoom = ZOOM_MAX;
+        if (newZoom === _wtc.zoomK) return;
+        _wtc.zoomK = newZoom;
+        // Adjust pan so the world point under the cursor stays anchored.
+        const sx = _wtc.scale * _wtc.zoomK;
+        _wtc.panX = p.x - _wtc.offsetX - (worldBefore.x - _wtc.minX) * sx;
+        _wtc.panY = p.y - _wtc.canvasH + _wtc.offsetY + (worldBefore.y - _wtc.minY) * sx;
+        if (mapState.followPlayer) {
+            mapState.followPlayer = null;
+            syncFollowSelectUI();
+        }
+        mapState.renderDirty = true;
+        renderMap(mapState.currentTime);
+    }, { passive: false });
+
+    canvas.addEventListener('dblclick', (ev) => {
+        ev.preventDefault();
+        resetMapView();
+    });
+
+    canvas.style.cursor = 'grab';
+}
+
+// Dispatched from installMapInteraction on a true click (no drag). Used for
+// player-symbol hit-testing to toggle follow-player mode.
+function handleMapCanvasClick(cx, cy) {
+    const hit = hitTestPlayerSymbol(cx, cy, mapState.currentTime);
+    if (hit) {
+        setFollowPlayer(mapState.followPlayer === hit ? null : hit);
+    }
+}
+
+// ─── Follow-player ────────────────────────────────────────────────────────
+
+const FOLLOW_HIT_RADIUS_PX = 20;
+
+function hitTestPlayerSymbol(cx, cy, time) {
+    const bucket = findBucketAtTime(time);
+    if (!bucket || !bucket.p) return null;
+    let best = null;
+    let bestD2 = FOLLOW_HIT_RADIUS_PX * FOLLOW_HIT_RADIUS_PX;
+    for (const [name, data] of Object.entries(bucket.p)) {
+        if (data.x === 0 && data.y === 0) continue;
+        const pos = worldToCanvas(data.x, data.y);
+        const dx = pos.x - cx;
+        const dy = pos.y - cy;
+        const d2 = dx * dx + dy * dy;
+        if (d2 <= bestD2) {
+            bestD2 = d2;
+            best = name;
+        }
+    }
+    return best;
+}
+
+function setFollowPlayer(name) {
+    mapState.followPlayer = name || null;
+    if (mapState.followPlayer) {
+        // Entering follow mode clears any previous manual pan so the camera
+        // lock is relative to a fit-to-canvas baseline. Zoom is preserved.
+        _wtc.panX = 0;
+        _wtc.panY = 0;
+    }
+    syncFollowSelectUI();
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
+}
+
+function syncFollowSelectUI() {
+    const sel = document.getElementById('map-follow');
+    if (!sel) return;
+    sel.value = mapState.followPlayer || '';
+}
+
+function rebuildFollowSelect() {
+    const sel = document.getElementById('map-follow');
+    if (!sel) return;
+    const prev = mapState.followPlayer || '';
+    sel.innerHTML = '';
+    const off = document.createElement('option');
+    off.value = '';
+    off.textContent = 'Off';
+    sel.appendChild(off);
+    const names = Object.keys(mapState.fullTrails).sort((a, b) => a.localeCompare(b));
+    for (const n of names) {
+        const opt = document.createElement('option');
+        opt.value = n;
+        opt.textContent = n;
+        sel.appendChild(opt);
+    }
+    if (prev && !names.includes(prev)) {
+        mapState.followPlayer = null;
+    }
+    sel.value = mapState.followPlayer || '';
+}
+
+// ─── Fullscreen ───────────────────────────────────────────────────────────
+
+function toggleMapFullscreen() {
+    const panel = document.querySelector('#tab-map .map-panel');
+    if (!panel) return;
+    if (document.fullscreenElement === panel) {
+        document.exitFullscreen().catch(() => {});
+    } else {
+        const req = panel.requestFullscreen?.bind(panel);
+        if (req) req().catch(() => {});
+    }
+}
+
+function onMapFullscreenChange() {
+    const panel = document.querySelector('#tab-map .map-panel');
+    if (!panel) return;
+    const nowFs = document.fullscreenElement === panel;
+    panel.classList.toggle('map-panel--fullscreen', nowFs);
+    mapState.fullscreen = nowFs;
+    const btn = document.getElementById('map-fullscreen');
+    if (btn) btn.textContent = nowFs ? 'Exit fullscreen' : 'Fullscreen';
+    // Canvas backing store must match the new container size; re-render.
+    resizeMapCanvas();
+    mapState.locationCanvas = null; // backdrop is sized to the canvas, rebuild
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
+}
+
+let _mapResizeRafId = null;
+function onMapWindowResize() {
+    // Only active (debounced to next frame) while in fullscreen; the
+    // non-fullscreen canvas is fixed-size so the resize listener is a no-op.
+    if (!mapState.fullscreen) return;
+    if (_mapResizeRafId !== null) return;
+    _mapResizeRafId = requestAnimationFrame(() => {
+        _mapResizeRafId = null;
+        resizeMapCanvas();
+        mapState.locationCanvas = null;
+        mapState.renderDirty = true;
+        renderMap(mapState.currentTime);
+    });
 }
 
 // ─── Loc Graph (Cytoscape) ────────────────────────────────────────────────
