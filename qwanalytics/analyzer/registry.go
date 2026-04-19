@@ -157,6 +157,10 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 			if m, ok := output.(*MetadataResult); ok {
 				result.Metadata = m
 			}
+		case "items":
+			if it, ok := output.(*ItemsResult); ok {
+				result.Items = it
+			}
 		}
 	}
 
@@ -213,6 +217,26 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 			result.Match.StartTime -= matchStart
 			result.Match.EndTime -= matchStart
 		}
+
+		if result.Items != nil {
+			for i := range result.Items.Items {
+				ph := result.Items.Items[i].Phases
+				for j := range ph {
+					// AvailableFrom=0 is the synthetic "match
+					// start" marker for initial phases; leave it
+					// alone. All real timestamps get shifted.
+					if ph[j].AvailableFrom > 0 {
+						ph[j].AvailableFrom -= matchStart
+					}
+					if ph[j].TakenAt > 0 {
+						ph[j].TakenAt -= matchStart
+					}
+					if ph[j].RespawnAt > 0 {
+						ph[j].RespawnAt -= matchStart
+					}
+				}
+			}
+		}
 	}
 
 	// 1v1 normalization: for duel demos the "team" concept is either
@@ -248,5 +272,6 @@ func NewDefaultRegistry() *Registry {
 	ta := NewTimelineAnalyzer()
 	ta.SetBlipThresholdMs(r.Config.LocGraph.BlipThresholdMs)
 	r.Register(ta)
+	r.Register(NewItemAnalyzer())
 	return r
 }

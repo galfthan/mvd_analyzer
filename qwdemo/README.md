@@ -66,6 +66,34 @@ The concrete event list, in stable order:
 | `KindStuffText` | `StuffTextEvent` | Server-pushed console command |
 | `KindCenterPrint` | `CenterPrintEvent` | HUD center text (match settings countdown) |
 | `KindServerInfo` | `ServerInfoEvent` | Mid-game serverinfo key/value update |
+| `KindDeath` | `DeathEvent` | Player died — `StatHealth` crossed from >0 to ≤0 |
+| `KindSpawn` | `SpawnEvent` | Player spawned — `StatHealth` crossed from ≤0 to >0 |
+| `KindItemSpawn` | `ItemSpawnEvent` | Item entity observed — baseline known (kind, position) |
+| `KindItemState` | `ItemStateEvent` | Item became taken or respawned — from entity modelindex transitions |
+
+`DeathEvent` and `SpawnEvent` are derived events synthesised by the
+parser from protocol-level `StatHealth` transitions. They fire at the
+exact event time, so analytics don't have to reconstruct death/spawn
+by comparing health samples across the sampling boundary (including
+the instant-respawn case where a gib and respawn land in the same
+50 ms window). See `parser/stats.go` for the emission logic;
+consumers that want killer / weapon attribution still go to the
+analyzer-layer obituary parser (that's KTX-mod-specific text, not a
+protocol signal).
+
+`ItemSpawnEvent` and `ItemStateEvent` are derived events synthesised
+from the entity-state stream (`svc_spawnbaseline`,
+`svc_packetentities`, `svc_deltapacketentities` — see
+`parser/entities.go`). `ItemSpawnEvent` fires once per item entity
+when the demo first makes it observable, carrying the classified kind
+(`ra`, `mh`, `rl`, ...) and world origin. `ItemStateEvent` fires on
+every visibility transition: `Taken=true` when the entity's
+modelindex drops to 0 (server set `self->model = ""` on pickup),
+`Taken=false` when it reappears (`SUB_regen` restored the model).
+Classification uses standard Quake 1 item model paths (armor.mdl +
+skin for GA/YA/RA; maps/b_bh*.bsp for health; progs/g_*.mdl for
+weapons; progs/{quaddama,invulner,invisibl}.mdl for powerups) —
+protocol-level, not KTX-specific.
 
 ## Writing a new Source
 

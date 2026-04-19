@@ -62,12 +62,25 @@ type deathEvent struct {
 // parser walks the demo. items is the raw item bitfield from svc_updatestat;
 // it's decoded into weapons/powerups/armor type at sampling time.
 type timelinePlayerState struct {
-	items      int // raw item bitfield (weapons, powerups, armor type)
-	vitals     vitals
-	prevHealth int // previous sample's health, for death/spawn edge detection
-	ammo       ammoCounts
-	pos        playerPosition
-	frags      int
+	items  int // raw item bitfield (weapons, powerups, armor type)
+	vitals vitals
+	// isDead flips on DeathEvent and flips back on SpawnEvent. Drives
+	// sampleCurrentState's "skip this player" behaviour between death
+	// and respawn; the D/Sp per-bucket flags are set authoritatively by
+	// the event handlers, not inferred from prevHealth/health sampling.
+	isDead bool
+	// firstMatchBucketSeen remains false until the player has been
+	// sampled or event-flagged at least once during the match. The
+	// first visible bucket for each player is marked spawn=true —
+	// downstream consumers (loc-graph cursor, blip filter boundary)
+	// treat match entry the same as a respawn, so a synthetic marker
+	// for players who were already alive at match start (and therefore
+	// have no StatHealth transition to drive a real SpawnEvent) keeps
+	// those consumers honest.
+	firstMatchBucketSeen bool
+	ammo                 ammoCounts
+	pos                  playerPosition
+	frags                int
 }
 
 // timelineBucketData holds raw aggregated data during analysis
@@ -127,6 +140,10 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
 	case *events.StatUpdateEvent:
 		return a.handleStatUpdate(e)
+	case *events.DeathEvent:
+		a.handleDeath(e)
+	case *events.SpawnEvent:
+		a.handleSpawn(e)
 	case *events.PrintEvent:
 		// Detect match start/end from print messages
 		a.detectMatchStart(e)
@@ -308,7 +325,10 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 	bucket := a.getOrCreateBucket(time)
 
-	// Sample stats per player
+	// Sample stats per player. Death / spawn flags (pd.dead / pd.spawn)
+	// are set by handleDeath / handleSpawn from parser-emitted events,
+	// not by this sampler, so we preserve those flags when a bucket is
+	// revisited.
 	for slot := 0; slot < events.MaxClients; slot++ {
 		player := a.ctx.Players[slot]
 		if player == nil || player.Spectator {
@@ -320,67 +340,121 @@ func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 			continue
 		}
 
-		// Detect death/spawn transitions (prevHealth starts at -1 = uninitialized)
-		isDead := state.vitals.health <= 0
-		isDeathFrame := isDead && state.prevHealth > 0   // just died
-		isSpawnFrame := !isDead && state.prevHealth <= 0 // spawned (first appearance or after death)
-
-		state.prevHealth = state.vitals.health
-
-		// Record death/spawn events for frag streak calculation
-		if isDeathFrame {
-			a.rawDeaths = append(a.rawDeaths, deathEvent{
-				Time:      time,
-				PlayerNum: slot,
-			})
-		}
-		if isSpawnFrame {
-			a.rawSpawns = append(a.rawSpawns, deathEvent{
-				Time:      time,
-				PlayerNum: slot,
-			})
-		}
-
-		// Skip players who are dead (unless this is the death frame)
-		if isDead && !isDeathFrame {
+		// Skip dead players entirely — handleDeath already placed the
+		// death-bucket pData with dead=true; subsequent buckets until
+		// SpawnEvent should not carry a playerData entry. Also skip
+		// when vitals.health is still non-positive: during warmup
+		// handleStatUpdate is guarded and vitals stays at the zero
+		// value, so the first match-time sample-fills that run before
+		// the first StatHealth update should not emit empty pData for
+		// the player — the loc-graph and blip filter treat those as
+		// "present but invalid" and that's a regression vs. the prior
+		// prevHealth-based sampler.
+		if state.isDead || state.vitals.health <= 0 {
 			continue
 		}
 
-		// Create player data for this bucket
-		pData := &playerBucketRawData{
-			name:   player.Name,
-			team:   player.Team,
-			vitals: state.vitals,
-			ammo:   state.ammo,
-			pos:    state.pos,
-			dead:   isDeathFrame,
-			spawn:  isSpawnFrame,
+		pData := bucket.playerData[slot]
+		if pData == nil {
+			pData = &playerBucketRawData{}
+			bucket.playerData[slot] = pData
 		}
-
-		pData.weapons = weaponLoadout{
-			rl:  state.items&events.ITRocketLauncher != 0,
-			lg:  state.items&events.ITLightning != 0,
-			ssg: state.items&events.ITSuperShotgun != 0,
-			sng: state.items&events.ITSuperNailgun != 0,
+		a.snapshotPlayerData(pData, player, state)
+		if !state.firstMatchBucketSeen {
+			pData.spawn = true
+			state.firstMatchBucketSeen = true
 		}
-		pData.powerups = powerupLoadout{
-			quad: state.items&events.ITQuad != 0,
-			pent: state.items&events.ITInvulnerability != 0,
-			ring: state.items&events.ITInvisibility != 0,
-		}
-
-		// Decode armor type from the item bitfield (RA > YA > GA).
-		switch {
-		case state.items&events.ITArmor3 != 0:
-			pData.vitals.armorType = "ra"
-		case state.items&events.ITArmor2 != 0:
-			pData.vitals.armorType = "ya"
-		case state.items&events.ITArmor1 != 0:
-			pData.vitals.armorType = "ga"
-		}
-
-		bucket.playerData[slot] = pData
 	}
+}
+
+// snapshotPlayerData populates the "current state" fields of pData from
+// the live player state. Deliberately does NOT touch pData.dead /
+// pData.spawn — those are owned by handleDeath / handleSpawn so that a
+// SpawnEvent that arrives after an earlier sample-fill can't have its
+// flag erased by a subsequent re-sample of the same bucket.
+func (a *TimelineAnalyzer) snapshotPlayerData(pData *playerBucketRawData, player *events.PlayerInfo, state *timelinePlayerState) {
+	pData.name = player.Name
+	pData.team = player.Team
+	pData.vitals = state.vitals
+	pData.ammo = state.ammo
+	pData.pos = state.pos
+	pData.weapons = weaponLoadout{
+		rl:  state.items&events.ITRocketLauncher != 0,
+		lg:  state.items&events.ITLightning != 0,
+		ssg: state.items&events.ITSuperShotgun != 0,
+		sng: state.items&events.ITSuperNailgun != 0,
+	}
+	pData.powerups = powerupLoadout{
+		quad: state.items&events.ITQuad != 0,
+		pent: state.items&events.ITInvulnerability != 0,
+		ring: state.items&events.ITInvisibility != 0,
+	}
+
+	switch {
+	case state.items&events.ITArmor3 != 0:
+		pData.vitals.armorType = "ra"
+	case state.items&events.ITArmor2 != 0:
+		pData.vitals.armorType = "ya"
+	case state.items&events.ITArmor1 != 0:
+		pData.vitals.armorType = "ga"
+	default:
+		pData.vitals.armorType = ""
+	}
+}
+
+// handleDeath records the authoritative death transition from the parser
+// and marks the death bucket. Same guard as handleStatUpdate: only
+// match-time events are recorded so warmup cycles don't pollute state.
+func (a *TimelineAnalyzer) handleDeath(e *events.DeathEvent) {
+	if !a.matchStarted || a.matchEnded {
+		return
+	}
+	state := a.getOrCreatePlayerState(e.PlayerNum)
+	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: e.Time, PlayerNum: e.PlayerNum})
+
+	player := a.ctx.Players[e.PlayerNum]
+	if player == nil || player.Spectator {
+		state.isDead = true
+		return
+	}
+
+	bucket := a.getOrCreateBucket(e.Time)
+	pData := bucket.playerData[e.PlayerNum]
+	if pData == nil {
+		pData = &playerBucketRawData{}
+		a.snapshotPlayerData(pData, player, state)
+		bucket.playerData[e.PlayerNum] = pData
+	}
+	pData.dead = true
+	state.isDead = true
+	state.firstMatchBucketSeen = true
+}
+
+// handleSpawn is the mirror of handleDeath for the respawn transition —
+// or the first-spawn when a player moves from spectator / pre-connect to
+// active play. Consumers treat both cases identically.
+func (a *TimelineAnalyzer) handleSpawn(e *events.SpawnEvent) {
+	if !a.matchStarted || a.matchEnded {
+		return
+	}
+	state := a.getOrCreatePlayerState(e.PlayerNum)
+	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: e.Time, PlayerNum: e.PlayerNum})
+	state.isDead = false
+
+	player := a.ctx.Players[e.PlayerNum]
+	if player == nil || player.Spectator {
+		return
+	}
+
+	bucket := a.getOrCreateBucket(e.Time)
+	pData := bucket.playerData[e.PlayerNum]
+	if pData == nil {
+		pData = &playerBucketRawData{}
+		a.snapshotPlayerData(pData, player, state)
+		bucket.playerData[e.PlayerNum] = pData
+	}
+	pData.spawn = true
+	state.firstMatchBucketSeen = true
 }
 
 func (a *TimelineAnalyzer) getOrCreateBucket(time float64) *timelineBucketData {
@@ -403,7 +477,7 @@ func (a *TimelineAnalyzer) getOrCreatePlayerState(playerNum int) *timelinePlayer
 	if s, ok := a.playerState[playerNum]; ok {
 		return s
 	}
-	s := &timelinePlayerState{prevHealth: -1} // -1 = uninitialized
+	s := &timelinePlayerState{}
 	a.playerState[playerNum] = s
 	return s
 }

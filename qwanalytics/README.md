@@ -11,19 +11,25 @@ that downstream consumers render, summarise, or feed to an agent.
   against `result.CurrentSchemaVersion`.
 - `analyzer/` — the Analyzer interface, shared `Context`, and `Registry`
   that drives a run. `NewDefaultRegistry()` wires up the seven
-  production analyzers.
+  production analyzers (demoinfo, metadata, match, frag, messages,
+  timeline, items).
 - `loc/` — `.loc` file parser. For native builds the corpus is embedded
   via `//go:embed data/*.loc` (466 maps today); for WASM builds the host
   provides `fetchLocSync` so only the loc for the current demo is
   downloaded.
 - `mapgen/` — the Quake 1 BSP reader (`bsp/`) and floor-face extractor
-  (`mapgeom/`) used by the mapgen developer tool. Not part of the runtime
-  pipeline — it generates static per-map JSON ahead of time.
+  (`mapgeom/`) used by the mapgen developer tool. Not part of the
+  runtime pipeline — it generates static per-map JSON ahead of time.
+  The BSP entities-lump decoder (`bsp/entities.go`) is available for
+  callers that want static map-item data, though the item analyzer
+  itself derives item state purely from the demo now and requires no
+  map preprocessing.
 - `diagnostic/` — opt-in integration harness that runs a demo corpus
   through the parser in warning-collection mode and runs data-quality
   checks on the analysis result.
 - `cmd/mapgen/` — developer tool: reads BSP + loc files, writes per-loc
-  floor-polygon JSON for the web viewer.
+  floor-polygon JSON for the web viewer
+  (`qw-web/static/maps/<name>.json`).
 - `cmd/qw-analyze/` — CLI consumer. `qw-analyze demo.mvd` produces Result
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.
@@ -86,13 +92,52 @@ type Result struct {
     TimelineAnalysis *TimelineAnalysisResult  // bucketed player state
     Metadata         *MetadataResult          // serverinfo + match settings
     LocGraph         *LocGraphResult          // loc-to-loc movement graph
+    Items            *ItemsResult             // per-item pickup / respawn timeline (all MVD sources)
     Errors           []string
 }
 ```
 
 Each sub-type is defined in its own file under `result/`. The JSON shape
 is the wire contract with every consumer; breaking changes bump
-`CurrentSchemaVersion`.
+`CurrentSchemaVersion` (currently `2`).
+
+### Items result
+
+`result.Items` carries one `ItemTimeline` per observed item entity
+(every armor, health pack, weapon, ammo box, megahealth, and
+powerup). Each timeline has deterministic name (`ra`,
+`mh_1`/`mh_2`, `rl_1`/`rl_2`, `quad`, …), the server edict number,
+world position, nearest loc name, and an ordered `Phases` list:
+
+```go
+type ItemPhase struct {
+    AvailableFrom float64 // item became available at this time
+    TakenAt       float64 // someone picked it up
+    TakenBy       string
+    Team          string
+    RespawnAt     float64 // when it came back up (observed, not predicted)
+}
+```
+
+Sources: `ItemAnalyzer` consumes `ItemSpawnEvent` and `ItemStateEvent`
+that the parser synthesises from `svc_spawnbaseline` +
+`svc_packetentities` / `svc_deltapacketentities` — the wire-level
+entity-state stream. Item classification uses standard Quake 1 model
+paths (no KTX-specific data), so *every* item with a visible model
+gets tracked on *any* demo source, including ktpro, CustomTF, or
+non-KTX servers. No map preprocessing is required. `TakenBy`
+attribution uses the nearest-player-origin at the moment of pickup
+(best-effort label since the entity-state stream doesn't carry
+"who touched it"). `RespawnAt` is observed directly, so MH rot
+(which varies with damage taken) falls out naturally — no special
+case.
+
+Known limitation: when an item respawns and is immediately
+regrabbed within the same server tick, the entity is never
+visible on the wire for that cycle, so we don't record a phase
+for it. The resulting phase will span the whole contested window
+(e.g. "RA taken at 31s, respawn observed at 91s" means the RA was
+never practically available in that 60 s window).
 
 ## Writing a new analyzer
 

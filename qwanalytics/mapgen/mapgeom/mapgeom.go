@@ -74,6 +74,7 @@ type MapRegions struct {
 	Locs    []LocRegion `json:"locs"`
 }
 
+
 // Stats carries per-map counters for CLI verbose logging.
 type Stats struct {
 	FacesTotal   int

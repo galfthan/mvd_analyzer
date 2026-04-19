@@ -12,7 +12,7 @@ package result
 // CurrentSchemaVersion identifies the JSON schema shape. Bump on any
 // breaking change to the Result structure or its sub-types. Consumers
 // can pin or switch on this value when reading a stored analysis.
-const CurrentSchemaVersion = 1
+const CurrentSchemaVersion = 2
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -29,5 +29,6 @@ type Result struct {
 	TimelineAnalysis *TimelineAnalysisResult `json:"timelineAnalysis,omitempty"`
 	Metadata         *MetadataResult         `json:"metadata,omitempty"`
 	LocGraph         *LocGraphResult         `json:"locGraph,omitempty"`
+	Items            *ItemsResult            `json:"items,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
 }

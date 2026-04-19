@@ -29,6 +29,10 @@ const (
 	EventStuffText
 	EventCenterPrint
 	EventServerInfo
+	EventDeath
+	EventSpawn
+	EventItemSpawn
+	EventItemState
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -102,6 +106,17 @@ type Parser struct {
 	fteExtensions   uint32 // FTE protocol extension flags
 	diagnosticMode  bool
 	warnings        []Warning
+
+	// Entity state tracking — fills from svc_modellist, svc_spawnbaseline,
+	// and svc_packetentities / svc_deltapacketentities so the parser
+	// itself can emit ItemSpawnEvent / ItemStateEvent for every pickup
+	// and respawn without downstream analyzers having to reconstruct
+	// entity state. See entities.go for the decoder.
+	modelList            []string
+	baselines            map[int]*EntityState
+	currentEntities      map[int]*EntityState
+	spawnedItems         map[int]string // ent -> kind, set once per item
+	lastEntityPacketTime float64        // time of the packet we're currently processing
 }
 
 // NewParser creates a new parser
@@ -316,6 +331,38 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			}
 			if err := p.emit(&ServerInfoEvent{Key: k, Value: v, Time: msg.Time}); err != nil {
 				return err
+			}
+
+		case mvd.SvcSpawnBaseline:
+			if err := p.parseSpawnBaseline(r, msg.Time, p.floatCoords); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_spawnbaseline: %v", err)
+				return nil
+			}
+
+		case mvd.SvcFTESpawnBaseline2:
+			if err := p.parseSpawnBaseline2(r, msg.Time, p.floatCoords); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_fte_spawnbaseline2: %v", err)
+				return nil
+			}
+
+		case mvd.SvcPacketEntities:
+			p.lastEntityPacketTime = msg.Time
+			if err := p.parsePacketEntities(r, false, p.floatCoords, p.fteExtensions); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_packetentities: %v", err)
+				return nil
+			}
+
+		case mvd.SvcDeltaPacketEntities:
+			p.lastEntityPacketTime = msg.Time
+			if err := p.parsePacketEntities(r, true, p.floatCoords, p.fteExtensions); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_deltapacketentities: %v", err)
+				return nil
+			}
+
+		case mvd.SvcFTEModelListShort:
+			if err := p.parseModelList(r); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_fte_modellistshort: %v", err)
+				return nil
 			}
 
 		default:

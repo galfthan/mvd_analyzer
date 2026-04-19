@@ -2009,6 +2009,68 @@ The same warning applies verbatim to [`svc_temp_entity`](#svc_temp_entity-23) (T
 
 Each payload has its own independent byte buffer, so misalignment does not propagate across demo messages — that's why "bail on unknown" is the only safe recovery strategy.
 
+### Item tracking via entity state
+
+The entity-update stream is the **protocol-level ground truth** for pickup-item state — no server-mod protocol (KTX prints) or ahead-of-time BSP preprocessing is needed. Every item has a baseline (from `svc_spawnbaseline`), and every pickup / respawn shows up as a visibility transition in `svc_packetentities` / `svc_deltapacketentities`.
+
+**Pickup / respawn on the wire** (from `ktx/src/items.c` plus the mvdsv entity encoder):
+
+- When a player touches an item, the server-side QuakeC sets `self->model = ""` and `self->s.v.solid = SOLID_NOT`. Empty model string → modelindex 0.
+- `mvdsv/src/sv_ents.c:790` filters out entities with modelindex 0 when building the packet-entities list. The delta compressor (`SV_EmitPacketEntities` at `sv_ents.c:313`) notices the entity is no longer in the "to" set and emits **`U_REMOVE`** for it.
+- When the respawn think (`SUB_regen` at `ktx/src/items.c:59`) restores the model, modelindex becomes non-zero again. The entity re-enters the packet with delta-from-baseline encoding on the next frame.
+
+**MVD-specific invariant**: MVD recording sets `pvs = NULL` (`mvdsv/src/sv_ents.c:851`), so PVS culling does *not* apply. The only filter on whether an entity appears in a packet is `modelindex != 0`. That means "entity absent from packet" is **equivalent** to "item was picked up" — it is NOT a "camera can't see it" artefact the way it would be on a live client.
+
+**Item classification from baselines** — model paths are standard Quake 1 (id Software originals), not KTX-specific. Map from `(modelindex → model_path, skin)` to a compact kind:
+
+| Kind  | Model path                | Skin | Notes |
+|-------|---------------------------|------|-------|
+| ga    | `progs/armor.mdl`         | 0    | Green Armor (100) |
+| ya    | `progs/armor.mdl`         | 1    | Yellow Armor (150) |
+| ra    | `progs/armor.mdl`         | 2    | Red Armor (200) |
+| h15   | `maps/b_bh10.bsp`         | —    | Rotten health, 15 HP |
+| h25   | `maps/b_bh25.bsp`         | —    | Health box, 25 HP |
+| mh    | `maps/b_bh100.bsp`        | —    | Megahealth (+100, rots down) |
+| ssg   | `progs/g_shot.mdl`        | —    | Super Shotgun |
+| ng    | `progs/g_nail.mdl`        | —    | Nailgun |
+| sng   | `progs/g_nail2.mdl`       | —    | Super Nailgun |
+| gl    | `progs/g_rock.mdl`        | —    | Grenade Launcher |
+| rl    | `progs/g_rock2.mdl`       | —    | Rocket Launcher |
+| lg    | `progs/g_light.mdl`       | —    | Lightning Gun |
+| shells  | `maps/b_shell{0,1}.bsp`  | —    | Shell boxes |
+| nails   | `maps/b_nail{0,1}.bsp`   | —    | Nail boxes |
+| rockets | `maps/b_rock{0,1}.bsp`   | —    | Rocket boxes |
+| cells   | `maps/b_batt{0,1}.bsp`   | —    | Cell boxes |
+| quad  | `progs/quaddama.mdl`      | —    | Quad Damage (60s / 30s practice) |
+| pent  | `progs/invulner.mdl`      | —    | Pentagram of Invulnerability (300s / 60s HoonyMode) |
+| ring  | `progs/invisibl.mdl`      | —    | Ring of Shadows |
+| suit  | `progs/suit.mdl`          | —    | Environmental Suit |
+| (drop) | `progs/backpack.mdl`    | —    | Player-dropped weapon/ammo (one-shot, no respawn) |
+
+Resolve `modelindex` → path via the `svc_modellist` table. Index 0 is reserved for the null model (empty string). Paths are case-insensitive in practice.
+
+**Implementation pattern** (see `qwdemo/parser/entities.go`):
+
+1. On `svc_modellist` / `svc_fte_modellistshort`: populate `modelList[modelindex] = path`.
+2. On `svc_spawnbaseline` / `svc_fte_spawnbaseline2`: store `EntityState{modelIndex, origin, skin, frame, ...}` keyed by entity number. Classify against the model path; if recognised, emit `ItemSpawnEvent{EntNum, Kind, Origin, Time}`.
+3. On `svc_packetentities` (full) / `svc_deltapacketentities` (delta): maintain a rolling `currentEntities` map. Full packets replace it; deltas copy from previous and apply per-entity updates. `U_REMOVE` deletes; other flags update fields.
+4. Diff new frame vs previous frame per tracked item — emit `ItemStateEvent{EntNum, Kind, Taken: bool, Time}` on every visibility flip (present + modelindex > 0 → absent, or vice versa).
+
+Baselines seed the "initial" state so items at match start are already "up". Non-item entities (players, projectiles, lights, triggers) pass through the classifier as empty kind and are silently filtered.
+
+**Known limitation — insta-regrab invisibility**: If an item respawns and is immediately touched within the same server tick (player camping the spawn), the end-of-tick state is "modelindex 0, still absent from packet." The delta compressor has no new bits to emit, and the wire never shows the "respawned then retaken" transition. KTX's `//ktx took` print fires on every touch regardless, so it *does* count those pickups; the entity-state stream does not. For "when is the item practically available?" questions this is actually the more useful signal (the RA was never effectively up during a hotly-contested window), but for per-touch pickup *counts* the KTX stream is more complete for the item classes it covers (armors, MH, weapons, powerups — not small health or ammo).
+
+### Derived events — death and spawn
+
+`StatHealth` transitions are the protocol-level ground truth for player alive/dead state. The parser in this project synthesises two derived events from `svc_updatestat(long)` StatHealth payloads (`qwdemo/parser/stats.go:114`):
+
+- **DeathEvent** fires when StatHealth crosses from >0 to ≤0.
+- **SpawnEvent** fires when StatHealth crosses from ≤0 to >0.
+
+Both carry `{PlayerNum, Time}` at the exact stat-update tick. The value of this over "compare prevHealth vs. health at each 50 ms sample" is the **instant-respawn** case: a player gibbed deep-negative (e.g. `health = -60`) can be respawned in the same 50 ms window (KTX forcerespawn on gib), and sample-based detection would see `prevHealth = 100, health = 100` at the next boundary and miss both transitions. The parser, looking at every stat update as it arrives, catches the `100 → -60` and `-60 → 100` pair independently.
+
+Consumers that want **killer / weapon attribution** still go to the obituary parser (see [Obituary Messages (Frag Detection)](#obituary-messages-frag-detection) and [Obituary Message Patterns (KTX)](#obituary-message-patterns-ktx)) — attribution is KTX-mod-specific text parsing, not a protocol signal.
+
 ---
 
 ## Additional svc_* Command Structures
@@ -2129,7 +2191,19 @@ Offset  Size  Field
 The server is pushing a console command into the client. There are three classes of stufftext you'll see in MVDs and they're all worth surfacing as parser events:
 
 1. **`fullserverinfo "\key1\value1\key2\value2\..."`** — the bulk cvar dump sent at connection time. This is the **single richest source of server metadata** in the demo: every CVAR_SERVERINFO cvar that mvdsv exposes plus every key KTX has mirrored via `localcmd "serverinfo …"`. See [Demo Metadata Sources](#demo-metadata-sources) below for the full key list.
-2. **`//ktx …` directives** — KTX-specific client hints prefixed with `//` so older clients silently drop them. Examples: `//ktx matchstart`, `//ktx drop 49 64 3` (item drop), `//wps 0 lg 31 17` (per-player weapon stats ticker). These are *not* server config — they're per-event HUD hooks for clients that understand the KTX HUD protocol.
+2. **`//ktx …` directives** — KTX-specific client hints prefixed with `//` so older clients silently drop them. Emitted via `stuffcmd_flags(..., STUFFCMD_DEMOONLY, ...)` so they only appear in the recorded MVD, not in live gameplay. The common ones:
+
+    | Directive | Source | Meaning |
+    |---|---|---|
+    | `//ktx matchstart` | `ktx/src/match.c` | Fires once when warmup ends and the match begins |
+    | `//ktx took <ent> <respawn_sec> <player_ent>` | `ktx/src/items.c:355, 541, 1048, 2074, 2083` | Item picked up. `respawn_sec` is the nominal timer (0 for MH pending rot, 20 for armors, 30 for weapons, 60/180/240/300 for powerups depending on mode) |
+    | `//ktx timer <ent> <respawn_sec>` | `ktx/src/items.c:406` | MH rot finished — the delayed 20 s respawn timer is now armed |
+    | `//ktx drop <ent> <item_flags> <player_ent>` | `ktx/src/items.c:2740` | Player dropped a weapon (backpack spawned) |
+    | `//wps <slot> <weapon> <hits> <shots>` | `ktx/src/stats.c` | Per-player weapon-stats ticker for the spectator HUD |
+
+    These are *not* server config — they're per-event HUD hooks for clients that understand the KTX HUD protocol. They are also **KTX-specific**: ktpro, CustomTF, and other progs don't emit them. Analytics that want to work on any MVD should prefer the protocol-level [entity-state stream](#item-tracking-via-entity-state) for pickup detection and only use `//ktx took|timer` as a supplementary signal for per-touch counts (since the entity stream can't see same-tick insta-regrabs).
+
+    The `<ent>` number is a stable server edict index for the match. `<player_ent>` is `slot + 1` (edict 0 is world, edicts 1..maxclients are the player slots).
 3. **`play sound/file.wav`** style commands — countdown beeps, intermission music. Safe to ignore.
 
 A single-pass parser should emit all three as a `StuffTextEvent` and let the consuming analyzer decide which prefix to react to.
@@ -2864,6 +2938,9 @@ Enables `mvdhidden_usercmd` (0x0001) recording per player. Used primarily for ra
 - Added `mvdhidden_demo_start_timestamp_ms` (0x000B) to the [Hidden Message Types](#hidden-message-types) table. Newer mvdsv builds emit this 8-byte uint64 unix-millisecond timestamp at demo start for stream/voice synchronisation; older parsers will report it as `unknown_hidden 0x000b`.
 - Added [`svc_centerprint`](#svc_centerprint-26) section documenting KTX's reuse of the centerprint stream as a structured match-settings table during the 10-second countdown. Values are encoded with `redtext()` and `dig3()` so they need [`Q_normalizetext`](#player-name-normalization) before they're readable.
 - Added [Demo Metadata Sources](#demo-metadata-sources) — a top-level reference for *all four* protocol-level metadata sources (`fullserverinfo` stufftext, `svc_serverinfo` updates, the countdown centerprint, and the `mvdhidden_demoinfo` JSON) with the complete set of standard mvdsv `CVAR_SERVERINFO` keys, KTX-added serverinfo keys, the spawn-algorithm short→long-name lookup table, and the merge-and-precedence rules a tournament viewer needs to combine them.
+- Added [Item tracking via entity state](#item-tracking-via-entity-state) — the protocol-level way to observe pickups and respawns by diffing `modelindex` transitions in `svc_packetentities` / `svc_deltapacketentities`. Replaces any reliance on KTX's `//ktx took` prints for item-up/down status. Includes the Quake 1 item model-path table used for entity classification, the MVD-ignores-PVS invariant that lets "entity absent from packet" mean "picked up," and the same-tick insta-regrab invisibility that KTX prints uniquely catch.
+- Expanded the [`//ktx` directives](#svc_stufftext-9) coverage to document `//ktx took`, `//ktx timer`, `//ktx drop`, and `//wps` with KTX source-code line references, and documented when the entity-state stream vs. KTX prints is the right signal to use.
+- Added [Derived events — death and spawn](#derived-events--death-and-spawn) — why every `StatHealth` crossing of zero should be surfaced as its own event at the parser layer rather than inferred by per-sample comparison, and the instant-respawn case that motivates it.
 
 ### MVD_PEXT1 Hidden Message History
 
