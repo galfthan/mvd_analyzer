@@ -4028,8 +4028,11 @@ function buildMapLegend() {
         legend.appendChild(table);
     }
 
-    // Make tables sortable
-    legend.querySelectorAll('.team-status-table').forEach(makeSortable);
+    // Map-legend is a live status table (refreshed every 200 ms); sorting
+    // doesn't help here and the `padding-right: 16px !important` the
+    // sortable helper adds to headers misaligns them with the body cells.
+    // Leave this table unsortable — the same .team-status-table class is
+    // shared with other views but applied here without the sortable hook.
 }
 
 // Build / refresh the Trails → Players dropdown in the top bar. One checkbox

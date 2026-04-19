@@ -48,7 +48,7 @@ body {
 }
 
 .container {
-    max-width: 1680px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -1646,6 +1646,8 @@ th.sortable.sort-desc::after {
 .map-panel--fullscreen .map-sidebar {
     max-height: 100%;
     overflow-y: auto;
+    min-width: 400px;
+    max-width: 780px;
 }
 
 .map-panel--fullscreen #region-control-panel {
@@ -1911,13 +1913,12 @@ th.sortable.sort-desc::after {
 }
 
 .map-sidebar {
-    flex: 1 1 auto;
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 15px;
-    min-width: 400px;
-    max-width: 780px;
-    overflow-x: auto;
+    min-width: 320px;
+    max-width: 520px;
 }
 
 .map-legend {
