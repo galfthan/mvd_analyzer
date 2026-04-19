@@ -2094,9 +2094,9 @@ function setupUnifiedTimeline() {
 
     // --- Playback controls ---
     document.getElementById('tl-rev').addEventListener('click', () => startPlaybackAtSpeed(-1));
+    document.getElementById('tl-slow').addEventListener('click', () => startPlaybackAtSpeed(0.2));
     document.getElementById('tl-play-pause').addEventListener('click', () => startPlaybackAtSpeed(1));
     document.getElementById('tl-5x').addEventListener('click', () => startPlaybackAtSpeed(5));
-    document.getElementById('tl-20x').addEventListener('click', () => startPlaybackAtSpeed(20));
 
     // --- Pan/zoom on every diverging graph + region-control timeline ---
     ['detail-graph-canvas', 'region-control-canvas', 'health-armor-canvas',
@@ -2793,6 +2793,22 @@ function findNearestLocation(x, y, locations) {
     return bestName;
 }
 
+// Compute the 2nd / 98th percentile of z across all map locations. These
+// endpoints are used to scale player-symbol size by "height on the map": a
+// player at the lo end renders at base size, one at the hi end 25% larger.
+// Percentiles (not min / max) so a single out-of-bounds loc doesn't squash
+// the useful range.
+function computeMapZRange(locations) {
+    if (!locations || locations.length === 0) return { lo: 0, hi: 0 };
+    const zs = [];
+    for (const loc of locations) zs.push(loc.z || 0);
+    zs.sort((a, b) => a - b);
+    const n = zs.length;
+    const lo = zs[Math.floor(n * 0.02)];
+    const hi = zs[Math.min(n - 1, Math.floor(n * 0.98))];
+    return { lo, hi };
+}
+
 // Classify region control state from per-team head counts. Single source of
 // truth for everywhere on the page that derives a state from raw presence:
 // the strip, the per-frame map overlay, the stats table, and the status panel.
@@ -2953,7 +2969,7 @@ function processLocationGroups(locations) {
     // Keys must match NormalizeLocationName (Go) <-> normalizeLocationName (JS).
     // Entries with an empty name are the unnamed backdrop bucket (faces
     // that couldn't be matched to a loc); they're handled separately by
-    // prerenderLocationBackground as a neutral underlay.
+    // drawLocationLayer as a neutral underlay.
     if (mapState.mapGeometry && Array.isArray(mapState.mapGeometry.locs)) {
         const geomByName = {};
         for (const l of mapState.mapGeometry.locs) {
@@ -2982,21 +2998,25 @@ function drawLocationRegionFromGeometry(ctx, group, worldToCanvasFunc) {
 }
 
 // Fill a flat triangle list (6 numbers per triangle) with the given style.
-// Shared by loc-group fills and the unnamed backdrop underlay.
+// Shared by loc-group fills and the unnamed backdrop underlay. All triangles
+// are added to a single path and filled once so this stays fast when called
+// every frame with thousands of tris. Uses the non-allocating worldToCanvas
+// variant (shared _tmpPt) — safe because each point's x/y is consumed by
+// ctx.moveTo/lineTo before the next call overwrites the buffer.
 function drawTriangleListFill(ctx, tris, fillStyle, worldToCanvasFunc) {
     if (!tris || tris.length < 6) return;
     ctx.fillStyle = fillStyle;
+    ctx.beginPath();
     for (let i = 0; i + 5 < tris.length; i += 6) {
-        const a = worldToCanvasFunc(tris[i],     tris[i + 1]);
-        const b = worldToCanvasFunc(tris[i + 2], tris[i + 3]);
-        const c = worldToCanvasFunc(tris[i + 4], tris[i + 5]);
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.lineTo(c.x, c.y);
+        let p = worldToCanvasFunc(tris[i],     tris[i + 1]);
+        ctx.moveTo(p.x, p.y);
+        p = worldToCanvasFunc(tris[i + 2], tris[i + 3]);
+        ctx.lineTo(p.x, p.y);
+        p = worldToCanvasFunc(tris[i + 4], tris[i + 5]);
+        ctx.lineTo(p.x, p.y);
         ctx.closePath();
-        ctx.fill();
     }
+    ctx.fill();
 }
 
 // Compute boundary edges of a triangle soup: edges that belong to exactly one
@@ -3099,7 +3119,8 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
     }
 
     // Bold label pass — draw over the dimmer prerendered label so it pops.
-    ctx.font = 'bold 12px monospace';
+    const boldPx = Math.round(12 * mapIconScale());
+    ctx.font = `bold ${boldPx}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const name of occupied) {
@@ -3114,39 +3135,89 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
     }
 }
 
+// Stack-aware opacity boost: regions with no overlapping, higher-z region
+// currently occupied are drawn at this multiple of their base alpha, so a
+// lower deck standing alone reads cleanly rather than washing out against an
+// empty upper deck's tint. Clamped final alpha to 0.5 so regions never
+// become opaque.
+const REGION_OPACITY_BOOST = 1.9;
+const REGION_STACK_Z_EPS = 32;      // world units — roughly one step height
+const REGION_STACK_OVERLAP_FRAC = 0.25;
+
+// Precompute per-region bbox, median z, and the list of regions stacked
+// above it (XY-overlapping and higher in z). Called from applyRegionConfig
+// after mapState.controlRegions is refreshed.
+function computeRegionStacking(regions) {
+    for (const r of regions) {
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        const zs = [];
+        for (const pt of r.points) {
+            if (pt.x < minX) minX = pt.x;
+            if (pt.x > maxX) maxX = pt.x;
+            if (pt.y < minY) minY = pt.y;
+            if (pt.y > maxY) maxY = pt.y;
+            zs.push(pt.z ?? 0);
+        }
+        r._bbox = { minX, maxX, minY, maxY };
+        zs.sort((a, b) => a - b);
+        r._z = zs.length > 0 ? zs[zs.length >> 1] : 0;
+        r._bboxArea = Math.max(1, (maxX - minX) * (maxY - minY));
+    }
+    for (const r of regions) {
+        const above = [];
+        for (const r2 of regions) {
+            if (r2 === r) continue;
+            if (r2._z <= r._z + REGION_STACK_Z_EPS) continue;
+            const ox = Math.max(0, Math.min(r._bbox.maxX, r2._bbox.maxX) - Math.max(r._bbox.minX, r2._bbox.minX));
+            const oy = Math.max(0, Math.min(r._bbox.maxY, r2._bbox.maxY) - Math.max(r._bbox.minY, r2._bbox.minY));
+            if ((ox * oy) / r._bboxArea >= REGION_STACK_OVERLAP_FRAC) {
+                above.push(r2);
+            }
+        }
+        r._above = above;
+    }
+}
+
 // Draw control overlay for regions based on current control state
 function drawRegionControlOverlay(ctx, controlStates) {
+    const regions = mapState.controlRegions;
+    if (!regions) return;
 
+    // Build the set of regions that are occupied (any non-empty state).
+    // Used by the stacking rule: a region is boosted when no region above it
+    // in its stack is currently occupied.
+    const occupied = new Set();
+    for (const [name, state] of Object.entries(controlStates)) {
+        if (state !== 'empty') occupied.add(name);
+    }
+
+    // Index regions by name for the boost lookup.
+    const regionByName = {};
+    for (const r of regions) regionByName[r.name] = r;
 
     for (const [regionName, state] of Object.entries(controlStates)) {
         const groups = mapState.regionToGroups[regionName];
         if (!groups || groups.length === 0) continue;
 
-        let color;
+        let baseAlpha, hex;
         switch (state) {
-            case 'teamAControl':
-                color = hexToRgba(TEAM_COLORS[0], 0.24);
-                break;
-            case 'teamAWeakControl':
-                color = hexToRgba(TEAM_COLORS[0], 0.14);
-                break;
-            case 'teamBControl':
-                color = hexToRgba(TEAM_COLORS[1], 0.24);
-                break;
-            case 'teamBWeakControl':
-                color = hexToRgba(TEAM_COLORS[1], 0.14);
-                break;
-            case 'contested':
-                color = 'rgba(255, 255, 255, 0.14)';
-                break;
-            case 'weakContested':
-                // Both teams present but neither has RL/LG — dimmer than
-                // contested, mirroring the weak team-control variants.
-                color = 'rgba(255, 255, 255, 0.07)';
-                break;
-            default: // empty
-                continue;
+            case 'teamAControl':     baseAlpha = 0.24; hex = TEAM_COLORS[0]; break;
+            case 'teamAWeakControl': baseAlpha = 0.14; hex = TEAM_COLORS[0]; break;
+            case 'teamBControl':     baseAlpha = 0.24; hex = TEAM_COLORS[1]; break;
+            case 'teamBWeakControl': baseAlpha = 0.14; hex = TEAM_COLORS[1]; break;
+            case 'contested':        baseAlpha = 0.14; hex = '#ffffff'; break;
+            case 'weakContested':    baseAlpha = 0.07; hex = '#ffffff'; break;
+            default: continue; // empty
         }
+
+        const r = regionByName[regionName];
+        let boost = 1.0;
+        if (r && r._above && r._above.length > 0) {
+            const anyAboveOccupied = r._above.some(ra => occupied.has(ra.name));
+            if (!anyAboveOccupied) boost = REGION_OPACITY_BOOST;
+        }
+        const finalAlpha = Math.min(0.5, baseAlpha * boost);
+        const color = hexToRgba(hex, finalAlpha);
 
         for (const group of groups) {
             fillLocationRegion(ctx, group, color, worldToCanvasNew);
@@ -3165,7 +3236,6 @@ let mapState = {
     ctx: null,
     locations: [],
     locationGroups: null, // Cached processed location groups
-    locationCanvas: null, // Pre-rendered location background layer
     mapGeometry: null,    // BSP-derived per-loc polygons (optional, loaded async)
     bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
     currentTime: 0,
@@ -3181,7 +3251,9 @@ let mapState = {
     playerSymbols: {}, // playerName -> { symbol, team, teamIdx }
     initialized: false,
     lastRenderedBucket: null, // Skip redundant redraws
-    renderDirty: false        // Force redraw on track toggle/reset/etc
+    renderDirty: false,       // Force redraw on track toggle/reset/etc
+    followPlayer: null,       // Name of the player the camera re-centers on each frame, or null
+    fullscreen: false         // True while the map panel is in fullscreen (set by fullscreenchange)
 };
 
 // (PLAYER_SYMBOLS, BADGE_DEFS and ARMOR_COLORS now live with the rest of
@@ -3255,7 +3327,6 @@ function initMapView(result) {
     // resolvePlayerLoc helper hides the indirection from call sites.
     mapState.locTable = (timeline && timeline.locTable) ? timeline.locTable : [''];
     mapState.locationGroups = null; // Clear cached groups for new demo
-    mapState.locationCanvas = null;
     mapState.mapGeometry = null;    // Reset BSP-derived geometry for new demo
 
     // Fire-and-forget: try to load pre-generated BSP-derived map geometry.
@@ -3269,9 +3340,9 @@ function initMapView(result) {
             .then(geom => {
                 if (!geom || !Array.isArray(geom.locs) || geom.locs.length === 0) return;
                 // The unnamed backdrop bucket (name === "") is drawn as a
-                // neutral underlay by prerenderLocationBackground; cache its
-                // triangle list separately so it isn't confused with loc
-                // groups keyed by name.
+                // neutral underlay by drawLocationLayer; cache its triangle
+                // list separately so it isn't confused with loc groups keyed
+                // by name.
                 const backdrop = geom.locs.find(l => l && l.name === '');
                 geom.backdropTris = backdrop && Array.isArray(backdrop.tris) ? backdrop.tris : null;
                 mapState.mapGeometry = geom;
@@ -3279,7 +3350,6 @@ function initMapView(result) {
                 // references so the control overlay doesn't keep pointing at
                 // the pre-fetch (tris-less) group objects.
                 mapState.locationGroups = processLocationGroups(mapState.locations);
-                mapState.locationCanvas = null;
                 if (mapState.rcResult) {
                     applyRegionConfig(); // also calls renderMap
                 } else {
@@ -3299,14 +3369,12 @@ function initMapView(result) {
     // Calculate bounds from locations and player positions
     calculateMapBounds(result);
 
-    // Size canvas to fit map content at full width
-    const worldW = mapState.bounds.maxX - mapState.bounds.minX;
-    const worldH = mapState.bounds.maxY - mapState.bounds.minY;
-    const canvasW = 850;
-    const canvasH = worldW > 0 ? Math.round(Math.max(400, Math.min(850, canvasW * (worldH / worldW)))) : 700;
-    mapState.canvas.width = canvasW;
-    mapState.canvas.height = canvasH;
-    updateWorldToCanvasTransform();
+    // Size canvas and recompute transform. A fresh demo load resets user pan/zoom.
+    _wtc.panX = 0;
+    _wtc.panY = 0;
+    _wtc.zoomK = 1;
+    mapState.followPlayer = null;
+    resizeMapCanvas();
 
     // Use the canonical frag-sorted team order set in displayResults
     if (timelineState.teams && timelineState.teams.length >= 2) {
@@ -3322,14 +3390,23 @@ function initMapView(result) {
     // Assign symbols to players
     assignPlayerSymbols(result);
 
-    // Set up trail controls (only once)
+    // Set up trail controls + map pan/zoom interaction (only once)
     if (!mapState.initialized) {
         setupMapTrailControls();
+        installMapInteraction(mapState.canvas);
         mapState.initialized = true;
     }
 
     // Pre-compute full trails from high-res bucket data
     precomputeFullTrails();
+
+    // Cache the map's z percentile range — drives per-player z-based size
+    // scaling in renderMap (players higher up on the map render up to 25%
+    // larger than those on the lowest level).
+    mapState.zRange = computeMapZRange(mapState.locations);
+
+    // Populate the Follow-player dropdown with current players.
+    rebuildFollowSelect();
 
     // Build powerup event list
     buildMapPowerupList(result);
@@ -3371,6 +3448,7 @@ function initRegionControlData(result) {
             mapState.locToRegion[pt.name] = region.name;
         }
     }
+    computeRegionStacking(mapState.controlRegions);
 }
 
 function initRegionControl(result) {
@@ -3456,6 +3534,7 @@ function applyRegionConfig() {
     });
 
     mapState.controlRegions = regions;
+    computeRegionStacking(regions);
 
     // Build loc-name-to-region lookup
     mapState.locToRegion = {};
@@ -3731,38 +3810,104 @@ function calculateMapBounds(result) {
     updateWorldToCanvasTransform();
 }
 
-// Precomputed transform parameters — call updateWorldToCanvasTransform() when bounds/canvas change
-let _wtc = { scale: 1, offsetX: 0, offsetY: 0, minX: 0, minY: 0, canvasH: 0 };
+// Precomputed transform parameters — call updateWorldToCanvasTransform() when bounds/canvas change.
+// panX/panY/zoomK carry user-applied pan and zoom on top of the fit-to-canvas base. They persist
+// across transform recomputes (e.g. canvas resize, geometry reload) so the user's view survives.
+let _wtc = { scale: 1, offsetX: 0, offsetY: 0, minX: 0, minY: 0, canvasH: 0,
+             panX: 0, panY: 0, zoomK: 1 };
+
+// Canvas width used for non-fullscreen rendering. Fullscreen reads the container bbox instead.
+const MAP_CANVAS_BASE_WIDTH = 850;
+
+function resizeMapCanvas() {
+    const canvas = mapState.canvas;
+    if (!canvas) return;
+    const worldW = mapState.bounds ? (mapState.bounds.maxX - mapState.bounds.minX) : 0;
+    const worldH = mapState.bounds ? (mapState.bounds.maxY - mapState.bounds.minY) : 0;
+    const fs = !!(document.fullscreenElement &&
+                  document.fullscreenElement.classList &&
+                  document.fullscreenElement.classList.contains('map-panel'));
+    let cssW, cssH;
+    if (fs && canvas.parentElement) {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        cssW = Math.max(300, Math.floor(rect.width));
+        cssH = Math.max(200, Math.floor(rect.height));
+    } else {
+        cssW = MAP_CANVAS_BASE_WIDTH;
+        cssH = worldW > 0
+            ? Math.round(Math.max(400, Math.min(850, cssW * (worldH / worldW))))
+            : 700;
+    }
+    // Back the canvas with a physical-pixel bitmap sized for the display DPR
+    // so lines and text render at device resolution. All draw code works in
+    // CSS pixels; renderMap applies setTransform(dpr, 0, 0, dpr, 0, 0) before
+    // each render so ctx operations map from CSS → physical automatically.
+    const dpr = window.devicePixelRatio || 1;
+    mapState.dpr = dpr;
+    mapState.canvasCssW = cssW;
+    mapState.canvasCssH = cssH;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    updateWorldToCanvasTransform();
+}
 
 function updateWorldToCanvasTransform() {
     const { minX, maxX, minY, maxY } = mapState.bounds;
     const canvas = mapState.canvas;
     if (!canvas) return;
+    const cssW = mapState.canvasCssW || canvas.width;
+    const cssH = mapState.canvasCssH || canvas.height;
     const worldWidth = maxX - minX;
     const worldHeight = maxY - minY;
-    const scale = Math.min(canvas.width / worldWidth, canvas.height / worldHeight);
+    const scale = Math.min(cssW / worldWidth, cssH / worldHeight);
     _wtc.scale = scale;
-    _wtc.offsetX = (canvas.width - worldWidth * scale) / 2;
-    _wtc.offsetY = (canvas.height - worldHeight * scale) / 2;
+    _wtc.offsetX = (cssW - worldWidth * scale) / 2;
+    _wtc.offsetY = (cssH - worldHeight * scale) / 2;
     _wtc.minX = minX;
     _wtc.minY = minY;
-    _wtc.canvasH = canvas.height;
+    _wtc.canvasH = cssH;
+    // panX, panY, zoomK intentionally preserved across recomputes.
+}
+
+function resetMapView() {
+    _wtc.panX = 0;
+    _wtc.panY = 0;
+    _wtc.zoomK = 1;
+    if (mapState.followPlayer) {
+        mapState.followPlayer = null;
+        syncFollowSelectUI();
+    }
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
 }
 
 // Reusable point to avoid GC — only use for immediate consumption, not storage
 const _tmpPt = { x: 0, y: 0 };
 
 function worldToCanvas(x, y) {
-    _tmpPt.x = _wtc.offsetX + (x - _wtc.minX) * _wtc.scale;
-    _tmpPt.y = _wtc.canvasH - (_wtc.offsetY + (y - _wtc.minY) * _wtc.scale);
+    const sx = _wtc.scale * _wtc.zoomK;
+    _tmpPt.x = _wtc.offsetX + (x - _wtc.minX) * sx + _wtc.panX;
+    _tmpPt.y = _wtc.canvasH - _wtc.offsetY - (y - _wtc.minY) * sx + _wtc.panY;
     return _tmpPt;
 }
 
 // Allocating version for cases where result is stored (e.g., tracks, caching)
 function worldToCanvasNew(x, y) {
+    const sx = _wtc.scale * _wtc.zoomK;
     return {
-        x: _wtc.offsetX + (x - _wtc.minX) * _wtc.scale,
-        y: _wtc.canvasH - (_wtc.offsetY + (y - _wtc.minY) * _wtc.scale)
+        x: _wtc.offsetX + (x - _wtc.minX) * sx + _wtc.panX,
+        y: _wtc.canvasH - _wtc.offsetY - (y - _wtc.minY) * sx + _wtc.panY
+    };
+}
+
+// Inverse of worldToCanvas — canvas pixel to world coord. Needed for zoom-about-cursor and hit-testing.
+function canvasToWorld(cx, cy) {
+    const sx = _wtc.scale * _wtc.zoomK;
+    return {
+        x: _wtc.minX + (cx - _wtc.offsetX - _wtc.panX) / sx,
+        y: _wtc.minY + (_wtc.canvasH - _wtc.offsetY + _wtc.panY - cy) / sx
     };
 }
 
@@ -3807,42 +3952,45 @@ function assignPlayerSymbols(result) {
         }
         if (letter === '?') letter = player.name[0]?.toUpperCase() || '?';
 
-        const teamColor = TEAM_COLORS[player.teamIdx] || TEAM_COLORS[0];
-        // Pre-render letter with circle to offscreen canvas
-        const size = 32;
-        const offscreen = document.createElement('canvas');
-        offscreen.width = size;
-        offscreen.height = size;
-        const octx = offscreen.getContext('2d');
-        const cx = size / 2, cy = size / 2, r = 13;
-
-        // Circle background — opaque so the map underneath doesn't bleed
-        // through and fight the letter for legibility.
-        octx.beginPath();
-        octx.arc(cx, cy, r, 0, Math.PI * 2);
-        octx.fillStyle = '#0a0a15';
-        octx.fill();
-        octx.strokeStyle = teamColor;
-        octx.lineWidth = 2;
-        octx.stroke();
-
-        // Letter
-        octx.font = 'bold 16px monospace';
-        octx.textAlign = 'center';
-        octx.textBaseline = 'middle';
-        octx.fillStyle = teamColor;
-        octx.fillText(letter, cx, cy);
-
         mapState.playerSymbols[player.name] = {
             symbol: letter,
             team: player.team,
             teamIdx: player.teamIdx,
-            symbolCanvas: offscreen
         };
     }
 
-    // Build legend
+    // Build legend and refresh the trail-players dropdown now that the
+    // player roster is known for this demo.
     buildMapLegend();
+    buildTrailPlayersPanel();
+}
+
+// Base size (px) of a player symbol at iconScale=1. The letter circle
+// radius / outline width / letter font size all scale proportionally from
+// this when we draw for a different iconScale.
+const PLAYER_SYMBOL_BASE_SIZE = 32;
+
+// Draw a player symbol (team-colour-bordered circle + letter) directly onto
+// the supplied ctx, centered at (cx, cy) in CSS pixels. Fresh-drawn every
+// frame so it's always pixel-native at the current zoom and display DPR —
+// no bitmap cache, no upscale blur.
+function drawPlayerSymbolAt(ctx, letter, teamColor, cx, cy, size) {
+    const k = size / PLAYER_SYMBOL_BASE_SIZE;
+    const r = 13 * k;
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#0a0a15';
+    ctx.fill();
+    ctx.strokeStyle = teamColor;
+    ctx.lineWidth = 2 * k;
+    ctx.stroke();
+
+    ctx.font = `bold ${Math.round(16 * k)}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = teamColor;
+    ctx.fillText(letter, cx, cy);
 }
 
 function buildMapLegend() {
@@ -3863,7 +4011,7 @@ function buildMapLegend() {
 
         const table = document.createElement('table');
         table.className = 'team-status-table';
-        table.innerHTML = `<thead><tr><th></th><th>Player</th><th>Trail</th><th>H</th><th>A</th><th>Wpn</th><th>View</th></tr></thead>`;
+        table.innerHTML = `<thead><tr><th></th><th>Player</th><th>Loc</th><th>H</th><th>A</th><th>Wpn</th><th>View</th></tr></thead>`;
         const tbody = document.createElement('tbody');
         tbody.className = 'map-legend-tbody';
 
@@ -3875,7 +4023,7 @@ function buildMapLegend() {
                 tr.innerHTML = `
                     <td><span class="map-legend-symbol" style="color: ${teamHex}">${info.symbol}</span></td>
                     <td>${escapedName}</td>
-                    <td class="map-trail-cell"><input type="checkbox" class="map-player-trail-cb" data-player="${escapedName}"></td>
+                    <td class="map-legend-loc" data-player="${escapedName}">-</td>
                     <td class="map-legend-health" data-player="${escapedName}">-</td>
                     <td class="map-legend-armor" data-player="${escapedName}">-</td>
                     <td class="map-legend-wpn" data-player="${escapedName}">-</td>
@@ -3889,21 +4037,46 @@ function buildMapLegend() {
         legend.appendChild(table);
     }
 
-    // Attach per-player trail toggle handlers
-    legend.querySelectorAll('.map-player-trail-cb').forEach(cb => {
-        cb.addEventListener('change', (e) => {
-            const playerName = e.target.dataset.player;
-            mapState.enabledPlayers[playerName] = e.target.checked;
-            if (e.target.checked) {
-                mapState.trailStartTimes[playerName] = mapState.currentTime;
+    // Make tables sortable. The sort indicator is now inline text (see
+    // th.sortable in styles.css), so enabling sort here no longer shifts
+    // the column headers out of alignment with the body cells.
+    legend.querySelectorAll('.team-status-table').forEach(makeSortable);
+}
+
+// Build / refresh the Trails → Players dropdown in the top bar. One checkbox
+// per player, wired to the same mapState.enabledPlayers / trailStartTimes
+// state the legend previously mutated.
+function buildTrailPlayersPanel() {
+    const panel = document.getElementById('map-trails-players');
+    if (!panel) return;
+    panel.innerHTML = '';
+    const names = Object.keys(mapState.playerSymbols).sort((a, b) => a.localeCompare(b));
+    for (const name of names) {
+        const info = mapState.playerSymbols[name];
+        const teamIdx = info?.teamIdx ?? 0;
+        const teamHex = TEAM_COLORS[teamIdx] || TEAM_COLORS[0];
+        const label = document.createElement('label');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.className = 'map-player-trail-cb';
+        cb.dataset.player = name;
+        cb.checked = !!mapState.enabledPlayers[name];
+        cb.addEventListener('change', () => {
+            mapState.enabledPlayers[name] = cb.checked;
+            if (cb.checked) {
+                mapState.trailStartTimes[name] = mapState.currentTime;
             }
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
-    });
-
-    // Make tables sortable
-    legend.querySelectorAll('.team-status-table').forEach(makeSortable);
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'map-trails-player-name';
+        nameSpan.style.color = teamHex;
+        nameSpan.textContent = name;
+        label.appendChild(cb);
+        label.appendChild(nameSpan);
+        panel.appendChild(label);
+    }
 }
 
 function updateMapLegend() {
@@ -3930,6 +4103,18 @@ function updateMapLegend() {
     }
 
     // Update per-player cells
+    const locations = mapState.locations;
+    const locCells = legend.querySelectorAll('.map-legend-loc');
+    for (const cell of locCells) {
+        const name = cell.dataset.player;
+        const data = playerData?.[name];
+        if (data && !(data.x === 0 && data.y === 0)) {
+            cell.textContent = resolvePlayerLoc(data, locations) || '';
+        } else {
+            cell.textContent = '';
+        }
+    }
+
     const healthCells = legend.querySelectorAll('.map-legend-health');
     for (const cell of healthCells) {
         const name = cell.dataset.player;
@@ -4090,29 +4275,21 @@ function updateRegionStatus() {
 // Build a composited canvas icon: player circle+letter with RL/LG weapon icons in corners
 function buildPlayerRegionIcon(player) {
     const sym = player.sym;
-    const symCanvas = sym ? sym.symbolCanvas : null;
-
+    const dpr = window.devicePixelRatio || 1;
     const size = 40;
     const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = Math.round(size * dpr);
+    canvas.height = Math.round(size * dpr);
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
     canvas.className = 'region-player-icon';
     const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // Draw player symbol centered
-    if (symCanvas) {
-        const ox = (size - symCanvas.width) / 2;
-        const oy = (size - symCanvas.height) / 2;
-        ctx.drawImage(symCanvas, ox, oy);
-    } else {
-        // Fallback: draw letter
-        const color = TEAM_COLORS[player.teamIdx] || TEAM_COLORS[0];
-        ctx.font = 'bold 16px monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = color;
-        ctx.fillText(player.name.charAt(0).toUpperCase(), size / 2, size / 2);
-    }
+    // Draw player symbol centered — fresh-drawn so it's crisp at DPR.
+    const letter = sym?.symbol || player.name.charAt(0).toUpperCase();
+    const teamColor = TEAM_COLORS[sym?.teamIdx ?? player.teamIdx] || TEAM_COLORS[0];
+    drawPlayerSymbolAt(ctx, letter, teamColor, size / 2, size / 2, PLAYER_SYMBOL_BASE_SIZE);
 
     // Draw status badges around player symbol
     const badges = getActiveBadges(player.data);
@@ -4123,63 +4300,73 @@ function buildPlayerRegionIcon(player) {
     return canvas;
 }
 
-function prerenderLocationBackground() {
-    if (!mapState.canvas) return;
+// drawLocationLayer: render the floor plan underlay (BSP backdrop triangles,
+// per-loc region fills, thin grey outlines, centroid labels) directly through
+// worldToCanvas so everything follows user pan / zoom and stays crisp. No
+// bitmap cache — at typical loc counts (~30 regions) this is a handful of
+// batched path fills / strokes per frame, trivially cheap.
+function drawLocationLayer(ctx) {
     const groups = mapState.locationGroups || [];
     const backdropTris = mapState.mapGeometry && mapState.mapGeometry.backdropTris;
     if (groups.length === 0 && (!backdropTris || backdropTris.length < 6)) return;
 
-    const w = mapState.canvas.width;
-    const h = mapState.canvas.height;
-    const offscreen = document.createElement('canvas');
-    offscreen.width = w;
-    offscreen.height = h;
-    const octx = offscreen.getContext('2d');
-
-    // Draw the unnamed backdrop first (if present) so named loc regions
-    // paint on top. Kept dim and neutral so real region tinting remains
-    // readable when both are present.
     if (backdropTris && backdropTris.length >= 6) {
-        drawTriangleListFill(octx, backdropTris, 'rgba(70, 80, 110, 0.35)', worldToCanvasNew);
+        drawTriangleListFill(ctx, backdropTris, 'rgba(70, 80, 110, 0.35)', worldToCanvas);
     }
 
     for (const group of groups) {
         if (group.tris && group.tris.length >= 6) {
-            drawLocationRegionFromGeometry(octx, group, worldToCanvasNew);
+            drawLocationRegionFromGeometry(ctx, group, worldToCanvas);
         }
     }
 
     // Thin grey outlines around each traced region — drawn after all fills so
     // they sit on top and stay visible regardless of adjacent region tinting.
+    // drawLocationRegionOutline needs the allocating worldToCanvasNew because
+    // it holds both endpoints of an edge simultaneously.
     for (const group of groups) {
         if (group.tris && group.tris.length >= 6) {
-            drawLocationRegionOutline(octx, group, worldToCanvasNew, 'rgba(180, 180, 180, 0.5)', 1);
+            drawLocationRegionOutline(ctx, group, worldToCanvasNew, 'rgba(180, 180, 180, 0.5)', 1);
         }
     }
 
-    octx.font = '12px monospace';
-    octx.textAlign = 'center';
-    octx.textBaseline = 'middle';
+    const labelPx = Math.round(12 * mapIconScale());
+    ctx.font = `${labelPx}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     for (const group of groups) {
         const pos = worldToCanvasNew(group.centroid.x, group.centroid.y);
-        octx.fillStyle = group.color.text;
-        octx.fillText(group.name, pos.x, pos.y);
+        ctx.fillStyle = group.color.text;
+        ctx.fillText(group.name, pos.x, pos.y);
     }
+}
 
-    mapState.locationCanvas = offscreen;
+// mapIconScale: capped upscale applied to player symbols, item markers,
+// loc labels, and any other canvas UI that should stay legible as the user
+// zooms in. Linear ramp from 1.0 at zoomK=1, reaching the 1.5x cap around
+// zoomK≈4.3 so midrange zooms already show a clear size bump. Cap is
+// enforced at 1.5 (user requested "never more than 50% bigger").
+function mapIconScale() {
+    const k = _wtc.zoomK || 1;
+    if (k <= 1) return 1;
+    return Math.min(1.5, 1 + (k - 1) * 0.15);
 }
 
 // Pre-compute full trails for all players from high-res bucket data.
-// Stores canvas-coordinate points with timestamps and teleport flags.
+// Stores world-space (wx, wy) positions — drawTracks converts to canvas via
+// worldToCanvas at draw time so trails follow user pan/zoom.
 function precomputeFullTrails() {
     mapState.fullTrails = {};
-    // Sorted-by-time list of death frames in canvas space, used by renderMap
+    // Sorted-by-time list of death frames in world space, used by renderMap
     // to draw a fading red "X" at the death location for a couple of seconds.
     mapState.deathEvents = [];
     const buckets = timelineState.highResBuckets;
     if (!buckets || buckets.length === 0) return;
 
     const MAX_MOVE_PER_BUCKET = 2500 * (timelineState.highResDuration || 0.05);
+    // "Meaningful movement" threshold — 2 canvas pixels at the base fit-to-canvas
+    // scale, translated to world units so the filter is applied in world space.
+    const MIN_MOVE_WORLD = _wtc.scale > 0 ? (2 / _wtc.scale) : 0;
     const lastWorldPos = {};
 
     for (const bucket of buckets) {
@@ -4190,7 +4377,6 @@ function precomputeFullTrails() {
         for (const [name, data] of Object.entries(playerData)) {
             if (data.x === 0 && data.y === 0) continue;
 
-            const pos = worldToCanvasNew(data.x, data.y);
             const symbolInfo = mapState.playerSymbols[name];
             if (!symbolInfo) continue;
 
@@ -4206,13 +4392,12 @@ function precomputeFullTrails() {
             // teamIdx is captured so the X is painted in the dead player's
             // own team color rather than a generic red.
             if (isDeath) {
-                mapState.deathEvents.push({ t, x: pos.x, y: pos.y, teamIdx: symbolInfo.teamIdx });
+                mapState.deathEvents.push({ t, wx: data.x, wy: data.y, teamIdx: symbolInfo.teamIdx });
             }
 
-            // Always include death/spawn markers regardless of pixel distance
+            // Always include death/spawn markers regardless of distance.
             if (!isDeath && !isSpawn) {
-                // Only add if moved more than 2 canvas pixels
-                if (last && Math.abs(last.x - pos.x) <= 2 && Math.abs(last.y - pos.y) <= 2) {
+                if (last && Math.abs(last.wx - data.x) <= MIN_MOVE_WORLD && Math.abs(last.wy - data.y) <= MIN_MOVE_WORLD) {
                     lastWorldPos[name] = { x: data.x, y: data.y };
                     continue;
                 }
@@ -4223,7 +4408,7 @@ function precomputeFullTrails() {
             const isTeleport = !isDeath && !isSpawn && lw && (Math.abs(data.x - lw.x) > MAX_MOVE_PER_BUCKET || Math.abs(data.y - lw.y) > MAX_MOVE_PER_BUCKET);
 
             lastWorldPos[name] = { x: data.x, y: data.y };
-            track.push({ x: pos.x, y: pos.y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
+            track.push({ wx: data.x, wy: data.y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
         }
     }
 
@@ -4269,27 +4454,41 @@ function renderMap(time) {
     mapState.lastRenderedBucket = bucket;
     mapState.renderDirty = false;
 
+    // Normalize to CSS pixel coordinates. The canvas backing store is sized
+    // to cssDims * devicePixelRatio for sharp rendering on HiDPI displays;
+    // setTransform(dpr,...) makes every subsequent draw interpret its
+    // coordinates in CSS px while rasterising at physical resolution.
+    const dpr = mapState.dpr || 1;
+    const cssW = mapState.canvasCssW || canvas.width;
+    const cssH = mapState.canvasCssH || canvas.height;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Follow-player: pin the camera on the tracked player this frame by
+    // adjusting panX/panY so their symbol lands at canvas center.
+    if (mapState.followPlayer && bucket && bucket.p) {
+        const fp = bucket.p[mapState.followPlayer];
+        if (fp && !(fp.x === 0 && fp.y === 0)) {
+            _wtc.panX = 0;
+            _wtc.panY = 0;
+            const pos = worldToCanvas(fp.x, fp.y);
+            _wtc.panX = cssW / 2 - pos.x;
+            _wtc.panY = cssH / 2 - pos.y;
+        }
+    }
+
     // Clear
     ctx.fillStyle = '#0a0a15';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, cssW, cssH);
 
     // Process location groups once (cache in mapState)
     if (!mapState.locationGroups && mapState.locations.length > 0) {
         mapState.locationGroups = processLocationGroups(mapState.locations);
     }
 
-    // Draw pre-rendered location background (or render it first time).
-    // Also runs when we have only the unnamed backdrop from mapGeometry
-    // (loc-less maps), so the floor plan still shows as a neutral underlay.
-    const hasBackdrop = !!(mapState.mapGeometry && mapState.mapGeometry.backdropTris);
-    if (mapState.locationGroups || hasBackdrop) {
-        if (!mapState.locationCanvas) {
-            prerenderLocationBackground();
-        }
-        if (mapState.locationCanvas) {
-            ctx.drawImage(mapState.locationCanvas, 0, 0);
-        }
-    }
+    // Draw the location underlay (backdrop + per-loc regions + outlines +
+    // labels). Fresh each frame so it follows pan / zoom precisely and stays
+    // crisp at any zoom level.
+    drawLocationLayer(ctx);
 
     // Draw region control overlay (colored by controlling team)
     if (mapState.controlRegions && mapState.regionToGroups) {
@@ -4309,32 +4508,13 @@ function renderMap(time) {
     // Draw tracks (per-player visibility controlled by enabledPlayers)
     drawTracks(ctx, time);
 
+    // Z-depth pass for items + players: overlapping players occlude by z
+    // (higher deck on top), and an item whose z is clearly higher than a
+    // player also draws on top. Items carry a downward sort bias
+    // (ITEM_Z_TOP_THRESHOLD) so they lose the tie when a player stands on
+    // them — the common case — but win when they sit a real floor above.
     const playerData = bucket ? bucket.p : null;
-    if (playerData) {
-        const halfSymbol = 16;
-
-        for (const [name, data] of Object.entries(playerData)) {
-            if (data.x === 0 && data.y === 0) continue;
-
-            const pos = worldToCanvas(data.x, data.y);
-            const symbolInfo = mapState.playerSymbols[name];
-
-            if (symbolInfo && symbolInfo.symbolCanvas) {
-                ctx.drawImage(symbolInfo.symbolCanvas, pos.x - halfSymbol, pos.y - halfSymbol);
-
-                // Draw status badges around player symbol
-                const badges = getActiveBadges(data);
-                if (badges.length > 0) {
-                    drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, 14, 5);
-                }
-            }
-        }
-    }
-
-    // Item pickups — fixed map markers for every known item (RA/YA/GA
-    // armors, weapons, MH, powerups). Drawn before death-X so the X
-    // still floats on top when the two coincide.
-    drawMapItems(ctx, time);
+    drawItemsAndPlayersZSorted(ctx, time, playerData);
 
     // Recent-death markers — drawn last so the X sits on top of everything
     // else and stays visible for DEATH_X_DURATION seconds, fading linearly.
@@ -4346,7 +4526,8 @@ function renderMap(time) {
             const dt = time - e.t;
             if (dt < 0 || dt > DEATH_X_DURATION) continue;
             const alpha = 1 - dt / DEATH_X_DURATION;
-            drawDeathX(ctx, e.x, e.y, e.teamIdx, alpha);
+            const pos = worldToCanvasNew(e.wx, e.wy);
+            drawDeathX(ctx, pos.x, pos.y, e.teamIdx, alpha);
         }
     }
 }
@@ -4386,7 +4567,7 @@ const ITEM_MARKER_STYLES = {
 // still rendered on the map but omitted from the scrolling list.
 const PANEL_ITEM_KINDS = new Set(['ra', 'ya', 'ga', 'mh', 'rl', 'lg', 'quad', 'pent', 'ring']);
 
-const ITEM_MARKER_SIZE = 16;  // half of the 32px player symbol
+const ITEM_MARKER_SIZE = 20;  // 25% larger than the prior 16 px baseline
 const ITEM_DIM_ALPHA = 0.35;  // alpha multiplier when item is taken
 
 // isItemUp returns true if the item is available to be picked up at the
@@ -4452,46 +4633,125 @@ function itemStatus(item, time) {
     return { up: false, secsToRespawn: respawnAt - time, pending: false };
 }
 
-function drawMapItems(ctx, time) {
-    const items = currentResult?.items?.items;
-    if (!items || items.length === 0) return;
+// Items are biased this much below their real z when sorting against
+// players, so a player standing at the same floor as an item (same z)
+// draws on top. An item only occludes a player when its z exceeds the
+// player's by at least this clearance — i.e. the item sits on a real
+// level above the player.
+const ITEM_Z_TOP_THRESHOLD = 48;
 
-    const size = ITEM_MARKER_SIZE;
-    const half = size / 2;
+// Combined z-sorted items-and-players pass. Building a single list lets
+// the draw order mix items and players correctly — two players on
+// different decks occlude in z order, an item clearly above a player
+// draws on top, and the common case of a player standing on a pickup
+// draws the player on top.
+function drawItemsAndPlayersZSorted(ctx, time, playerData) {
+    const iconScale = mapIconScale();
+    const zRange = mapState.zRange || { lo: 0, hi: 0 };
+    const zSpan = zRange.hi - zRange.lo;
+
+    const drawables = [];
+    const items = currentResult?.items?.items;
+    if (items && items.length > 0) {
+        for (const item of items) {
+            const style = ITEM_MARKER_STYLES[item.kind];
+            if (!style) continue;
+            drawables.push({
+                kind: 'i',
+                sortZ: (item.z || 0) - ITEM_Z_TOP_THRESHOLD,
+                item, style
+            });
+        }
+    }
+    if (playerData) {
+        for (const [name, data] of Object.entries(playerData)) {
+            if (data.x === 0 && data.y === 0) continue;
+            const symbolInfo = mapState.playerSymbols[name];
+            if (!symbolInfo) continue;
+            drawables.push({
+                kind: 'p',
+                sortZ: data.z || 0,
+                data, symbolInfo
+            });
+        }
+    }
+    if (drawables.length === 0) return;
+
+    drawables.sort((a, b) => a.sortZ - b.sortZ);
+
+    const itemSize = ITEM_MARKER_SIZE * iconScale;
+    const itemHalf = itemSize / 2;
+    const itemFontPx = Math.round(10 * iconScale);
 
     ctx.save();
-    ctx.font = 'bold 8px -apple-system, BlinkMacSystemFont, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    for (const item of items) {
-        const style = ITEM_MARKER_STYLES[item.kind];
-        if (!style) continue;
-
-        const pos = worldToCanvas(item.x, item.y);
-        const up = isItemUp(item, time);
-        ctx.globalAlpha = up ? 1.0 : ITEM_DIM_ALPHA;
-
-        const x = Math.round(pos.x - half);
-        const y = Math.round(pos.y - half);
-
-        ctx.fillStyle = style.fill;
-        ctx.fillRect(x, y, size, size);
-
-        if (style.outline) {
-            ctx.strokeStyle = style.outline;
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
-        }
-
-        if (style.label) {
-            ctx.fillStyle = style.textColor || style.outline || '#fff';
-            ctx.fillText(style.label, pos.x, pos.y + 1);
+    for (const d of drawables) {
+        if (d.kind === 'i') {
+            drawSingleMapItem(ctx, time, d.item, d.style,
+                              itemSize, itemHalf, itemFontPx);
+        } else {
+            drawSinglePlayer(ctx, d.data, d.symbolInfo,
+                             iconScale, zRange, zSpan);
         }
     }
 
     ctx.globalAlpha = 1.0;
     ctx.restore();
+}
+
+function drawSingleMapItem(ctx, time, item, style, size, half, fontPx) {
+    const pos = worldToCanvas(item.x, item.y);
+    const up = isItemUp(item, time);
+    ctx.globalAlpha = up ? 1.0 : ITEM_DIM_ALPHA;
+
+    const x = Math.round(pos.x - half);
+    const y = Math.round(pos.y - half);
+
+    ctx.fillStyle = style.fill;
+    ctx.fillRect(x, y, size, size);
+
+    if (style.outline) {
+        ctx.strokeStyle = style.outline;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
+    }
+
+    if (style.label) {
+        ctx.font = `bold ${fontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.fillStyle = style.textColor || style.outline || '#fff';
+        ctx.fillText(style.label, pos.x, pos.y + 1);
+    }
+    ctx.globalAlpha = 1.0;
+}
+
+function drawSinglePlayer(ctx, data, symbolInfo, iconScale, zRange, zSpan) {
+    const pos = worldToCanvas(data.x, data.y);
+
+    // Per-player z-based size scale: players near the top of the map
+    // (98th percentile z) render 25% larger than those near the bottom
+    // (2nd percentile), linearly interpolated. Applied on top of the
+    // zoom-driven iconScale.
+    let zScale = 1;
+    if (zSpan > 0) {
+        let t = ((data.z || 0) - zRange.lo) / zSpan;
+        if (t < 0) t = 0;
+        if (t > 1) t = 1;
+        zScale = 1 + 0.25 * t;
+    }
+    const totalScale = iconScale * zScale;
+    const symSize = PLAYER_SYMBOL_BASE_SIZE * totalScale;
+    const orbitRadius = 14 * totalScale;
+    const badgeRadius = 5 * totalScale;
+
+    const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
+    drawPlayerSymbolAt(ctx, symbolInfo.symbol, teamHex, pos.x, pos.y, symSize);
+
+    const badges = getActiveBadges(data);
+    if (badges.length > 0) {
+        drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, orbitRadius, badgeRadius);
+    }
 }
 
 // ─── Map Items Panel (sidebar list) ────────────────────────────────────────
@@ -4634,6 +4894,17 @@ function drawTracks(ctx, time) {
 
         if (endIdx - startIdx < 1) continue;
 
+        // Pre-convert the visible window of world-space points into canvas
+        // pixels at the current pan / zoom so the inner draw loop stays
+        // allocation-free and worldToCanvas's shared _tmpPt isn't clobbered
+        // between consecutive reads.
+        const cpts = new Array(endIdx - startIdx + 1);
+        for (let i = startIdx; i <= endIdx; i++) {
+            const pt = points[i];
+            const c = worldToCanvasNew(pt.wx, pt.wy);
+            cpts[i - startIdx] = { x: c.x, y: c.y, spawn: pt.spawn, death: pt.death, tp: pt.tp };
+        }
+
         const teamHex = TEAM_COLORS[points[0].teamIdx] || TEAM_COLORS[0];
         const solidColor = hexToRgba(teamHex, 0.4);
         const dashColor = hexToRgba(teamHex, 0.2);
@@ -4648,12 +4919,12 @@ function drawTracks(ctx, time) {
         ctx.strokeStyle = solidColor;
         ctx.setLineDash([]);
         ctx.beginPath();
-        ctx.moveTo(points[startIdx].x, points[startIdx].y);
+        ctx.moveTo(cpts[0].x, cpts[0].y);
 
-        if (points[startIdx].spawn) markers.push({ x: points[startIdx].x, y: points[startIdx].y, type: 'spawn' });
+        if (cpts[0].spawn) markers.push({ x: cpts[0].x, y: cpts[0].y, type: 'spawn' });
 
-        for (let i = startIdx + 1; i <= endIdx; i++) {
-            const pt = points[i];
+        for (let i = 1; i < cpts.length; i++) {
+            const pt = cpts[i];
 
             if (pt.spawn) {
                 // Spawn: start a new line segment (gap from death)
@@ -4688,7 +4959,8 @@ function drawTracks(ctx, time) {
             if (needDash !== inDash) {
                 ctx.stroke();
                 ctx.beginPath();
-                ctx.moveTo(points[i - 1].x, points[i - 1].y);
+                const prev = cpts[i - 1];
+                ctx.moveTo(prev.x, prev.y);
                 if (needDash) {
                     ctx.setLineDash([4, 6]);
                     ctx.strokeStyle = dashColor;
@@ -4827,6 +5099,278 @@ function setupMapTrailControls() {
             renderMap(mapState.currentTime);
         });
     }
+
+    const followSel = document.getElementById('map-follow');
+    if (followSel) {
+        followSel.addEventListener('change', (e) => {
+            setFollowPlayer(e.target.value || null);
+        });
+    }
+
+    const resetViewBtn = document.getElementById('map-reset-view');
+    if (resetViewBtn) {
+        resetViewBtn.addEventListener('click', () => { resetMapView(); });
+    }
+
+    const fsBtn = document.getElementById('map-fullscreen');
+    if (fsBtn) {
+        fsBtn.addEventListener('click', () => { toggleMapFullscreen(); });
+    }
+
+    // React to fullscreen changes regardless of who triggered them (button,
+    // Escape key, browser UI). Only one listener is needed for the page.
+    if (!setupMapTrailControls.__fsListenerAttached) {
+        document.addEventListener('fullscreenchange', onMapFullscreenChange);
+        window.addEventListener('resize', onMapWindowResize);
+        setupMapTrailControls.__fsListenerAttached = true;
+    }
+}
+
+// installMapInteraction adds pan / zoom / click handlers to the map canvas.
+// Pan: left-drag. Zoom: mouse wheel (centered on cursor). Click (no drag):
+// dispatched through handleMapCanvasClick — used by follow-player to toggle
+// follow on a player symbol. Double-click resets the view.
+function installMapInteraction(canvas) {
+    if (!canvas || canvas.__mapInteractionInstalled) return;
+    canvas.__mapInteractionInstalled = true;
+
+    const CLICK_MAX_MOTION_PX = 5;
+    const ZOOM_MIN = 0.5;
+    const ZOOM_MAX = 12;
+
+    const drag = {
+        active: false,
+        button: -1,
+        startX: 0, startY: 0,
+        lastX: 0, lastY: 0,
+        moved: false,
+    };
+
+    function canvasPointFromEvent(ev) {
+        // CSS pixel coords relative to the canvas origin — matches what
+        // renderMap / worldToCanvas use now that setTransform(dpr) handles
+        // the CSS → physical scaling for drawing.
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: ev.clientX - rect.left,
+            y: ev.clientY - rect.top,
+        };
+    }
+
+    canvas.addEventListener('mousedown', (ev) => {
+        if (ev.button !== 0) return;
+        const p = canvasPointFromEvent(ev);
+        drag.active = true;
+        drag.button = ev.button;
+        drag.startX = drag.lastX = p.x;
+        drag.startY = drag.lastY = p.y;
+        drag.moved = false;
+        ev.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (ev) => {
+        if (!drag.active) return;
+        const p = canvasPointFromEvent(ev);
+        const dx = p.x - drag.lastX;
+        const dy = p.y - drag.lastY;
+        drag.lastX = p.x;
+        drag.lastY = p.y;
+        if (!drag.moved) {
+            const totalDx = p.x - drag.startX;
+            const totalDy = p.y - drag.startY;
+            if (Math.abs(totalDx) > CLICK_MAX_MOTION_PX ||
+                Math.abs(totalDy) > CLICK_MAX_MOTION_PX) {
+                drag.moved = true;
+                // Starting a pan drops follow-mode so the user isn't fighting the camera.
+                if (mapState.followPlayer) {
+                    mapState.followPlayer = null;
+                    syncFollowSelectUI();
+                }
+                canvas.style.cursor = 'grabbing';
+            }
+        }
+        if (drag.moved) {
+            _wtc.panX += dx;
+            _wtc.panY += dy;
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        }
+    });
+
+    window.addEventListener('mouseup', (ev) => {
+        if (!drag.active) return;
+        const wasClick = !drag.moved;
+        drag.active = false;
+        drag.button = -1;
+        canvas.style.cursor = '';
+        if (wasClick) {
+            const p = canvasPointFromEvent(ev);
+            handleMapCanvasClick(p.x, p.y);
+        }
+    });
+
+    canvas.addEventListener('wheel', (ev) => {
+        ev.preventDefault();
+        const p = canvasPointFromEvent(ev);
+        const worldBefore = canvasToWorld(p.x, p.y);
+        let newZoom = _wtc.zoomK * Math.exp(-ev.deltaY * 0.0015);
+        if (newZoom < ZOOM_MIN) newZoom = ZOOM_MIN;
+        if (newZoom > ZOOM_MAX) newZoom = ZOOM_MAX;
+        if (newZoom === _wtc.zoomK) return;
+        _wtc.zoomK = newZoom;
+        // Adjust pan so the world point under the cursor stays anchored.
+        // Follow-mode intentionally survives zoom — renderMap's follow step
+        // will re-center on the tracked player using the new zoom level, so
+        // zoom becomes "zoom in on the player" rather than dropping follow.
+        const sx = _wtc.scale * _wtc.zoomK;
+        _wtc.panX = p.x - _wtc.offsetX - (worldBefore.x - _wtc.minX) * sx;
+        _wtc.panY = p.y - _wtc.canvasH + _wtc.offsetY + (worldBefore.y - _wtc.minY) * sx;
+        mapState.renderDirty = true;
+        renderMap(mapState.currentTime);
+    }, { passive: false });
+
+    canvas.addEventListener('dblclick', (ev) => {
+        ev.preventDefault();
+        resetMapView();
+    });
+
+    canvas.style.cursor = 'grab';
+}
+
+// Dispatched from installMapInteraction on a true click (no drag). Used for
+// player-symbol hit-testing to toggle follow-player mode.
+function handleMapCanvasClick(cx, cy) {
+    const hit = hitTestPlayerSymbol(cx, cy, mapState.currentTime);
+    if (hit) {
+        setFollowPlayer(mapState.followPlayer === hit ? null : hit);
+    }
+}
+
+// ─── Follow-player ────────────────────────────────────────────────────────
+
+// Slightly larger than the base symbol radius so the click-to-follow hit
+// area stays generous even when a high-deck / max-zoom player renders at
+// the 1.5 * 1.25 ≈ 1.88x upper bound.
+const FOLLOW_HIT_RADIUS_PX = 24;
+
+function hitTestPlayerSymbol(cx, cy, time) {
+    const bucket = findBucketAtTime(time);
+    if (!bucket || !bucket.p) return null;
+    let best = null;
+    let bestD2 = FOLLOW_HIT_RADIUS_PX * FOLLOW_HIT_RADIUS_PX;
+    for (const [name, data] of Object.entries(bucket.p)) {
+        if (data.x === 0 && data.y === 0) continue;
+        const pos = worldToCanvas(data.x, data.y);
+        const dx = pos.x - cx;
+        const dy = pos.y - cy;
+        const d2 = dx * dx + dy * dy;
+        if (d2 <= bestD2) {
+            bestD2 = d2;
+            best = name;
+        }
+    }
+    return best;
+}
+
+function setFollowPlayer(name) {
+    mapState.followPlayer = name || null;
+    if (mapState.followPlayer) {
+        // Entering follow mode clears any previous manual pan so the camera
+        // lock is relative to a fit-to-canvas baseline. Zoom is preserved.
+        _wtc.panX = 0;
+        _wtc.panY = 0;
+    }
+    syncFollowSelectUI();
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
+}
+
+function syncFollowSelectUI() {
+    const sel = document.getElementById('map-follow');
+    if (!sel) return;
+    sel.value = mapState.followPlayer || '';
+}
+
+function rebuildFollowSelect() {
+    const sel = document.getElementById('map-follow');
+    if (!sel) return;
+    const prev = mapState.followPlayer || '';
+    sel.innerHTML = '';
+    const off = document.createElement('option');
+    off.value = '';
+    off.textContent = 'Off';
+    sel.appendChild(off);
+    const names = Object.keys(mapState.fullTrails).sort((a, b) => a.localeCompare(b));
+    for (const n of names) {
+        const opt = document.createElement('option');
+        opt.value = n;
+        opt.textContent = n;
+        sel.appendChild(opt);
+    }
+    if (prev && !names.includes(prev)) {
+        mapState.followPlayer = null;
+    }
+    sel.value = mapState.followPlayer || '';
+}
+
+// ─── Fullscreen ───────────────────────────────────────────────────────────
+
+function toggleMapFullscreen() {
+    const panel = document.querySelector('#tab-map .map-panel');
+    if (!panel) return;
+    if (document.fullscreenElement === panel) {
+        document.exitFullscreen().catch(() => {});
+    } else {
+        const req = panel.requestFullscreen?.bind(panel);
+        if (req) req().catch(() => {});
+    }
+}
+
+// Remembers the unified-timeline's original parent / sibling slot so we can
+// put it back after leaving fullscreen. Populated the first time we relocate.
+let _fsTimelineHome = null;
+
+function onMapFullscreenChange() {
+    const panel = document.querySelector('#tab-map .map-panel');
+    if (!panel) return;
+    const nowFs = document.fullscreenElement === panel;
+    panel.classList.toggle('map-panel--fullscreen', nowFs);
+    mapState.fullscreen = nowFs;
+    const btn = document.getElementById('map-fullscreen');
+    if (btn) btn.textContent = nowFs ? 'Exit fullscreen' : 'Fullscreen';
+
+    // Relocate the shared timeline (playback buttons + scrubber) into the
+    // fullscreen map panel so it stays usable. On exit, put it back.
+    const tl = document.getElementById('unified-timeline');
+    if (tl) {
+        if (nowFs) {
+            if (!_fsTimelineHome) {
+                _fsTimelineHome = { parent: tl.parentNode, next: tl.nextSibling };
+            }
+            panel.appendChild(tl);
+        } else if (_fsTimelineHome && _fsTimelineHome.parent) {
+            _fsTimelineHome.parent.insertBefore(tl, _fsTimelineHome.next);
+        }
+    }
+
+    // Canvas backing store must match the new container size; re-render.
+    resizeMapCanvas();
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
+}
+
+let _mapResizeRafId = null;
+function onMapWindowResize() {
+    // Only active (debounced to next frame) while in fullscreen; the
+    // non-fullscreen canvas is fixed-size so the resize listener is a no-op.
+    if (!mapState.fullscreen) return;
+    if (_mapResizeRafId !== null) return;
+    _mapResizeRafId = requestAnimationFrame(() => {
+        _mapResizeRafId = null;
+        resizeMapCanvas();
+        mapState.renderDirty = true;
+        renderMap(mapState.currentTime);
+    });
 }
 
 // ─── Loc Graph (Cytoscape) ────────────────────────────────────────────────
@@ -5346,17 +5890,17 @@ function renderLocGraph() {
 
 const PLAYBACK_BUTTON_LABELS = {
     'tl-rev': '-1x',
+    'tl-slow': '0.2x',
     'tl-play-pause': '1x',
-    'tl-5x': '5x',
-    'tl-20x': '20x'
+    'tl-5x': '5x'
 };
 
 function updatePlaybackButtons() {
     const buttons = {
         'tl-rev': -1,
+        'tl-slow': 0.2,
         'tl-play-pause': 1,
-        'tl-5x': 5,
-        'tl-20x': 20
+        'tl-5x': 5
     };
     for (const [id, speed] of Object.entries(buttons)) {
         const btn = document.getElementById(id);

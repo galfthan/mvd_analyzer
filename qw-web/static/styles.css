@@ -1342,12 +1342,14 @@ table tbody tr:hover {
     white-space: nowrap;
 }
 
-/* Sortable table headers */
+/* Sortable table headers. The sort indicator is rendered as inline text
+   rather than an absolutely-positioned pseudo-element so it contributes
+   to the header's natural width. Without the asymmetric padding trick the
+   previous version used, header and body cells share the same padding and
+   their columns stay aligned in auto-layout tables. */
 th.sortable {
     cursor: pointer;
     user-select: none;
-    position: relative;
-    padding-right: 16px !important;
 }
 
 th.sortable:hover {
@@ -1355,21 +1357,20 @@ th.sortable:hover {
 }
 
 th.sortable::after {
-    content: '⇅';
-    position: absolute;
-    right: 2px;
+    content: ' ⇅';
     opacity: 0.3;
     font-size: 0.7em;
+    margin-left: 2px;
 }
 
 th.sortable.sort-asc::after {
-    content: '▲';
+    content: ' ▲';
     opacity: 0.8;
     color: var(--accent-cyan);
 }
 
 th.sortable.sort-desc::after {
-    content: '▼';
+    content: ' ▼';
     opacity: 0.8;
     color: var(--accent-cyan);
 }
@@ -1611,6 +1612,57 @@ th.sortable.sort-desc::after {
     gap: 15px;
 }
 
+/* Fullscreen layout: the whole .map-panel becomes the fullscreen element.
+   Top bar stays at top, .map-main-content grows to fill remaining height,
+   canvas grows to fill the available width (minus sidebar), sidebar keeps
+   its max-width. The region-control table below the canvas is hidden in
+   fullscreen to free vertical space. */
+.map-panel--fullscreen {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 10px;
+    background: var(--bg-deep);
+    overflow: hidden;
+}
+
+.map-panel--fullscreen .map-main-content {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.map-panel--fullscreen .map-canvas-container {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    align-items: stretch;
+}
+
+.map-panel--fullscreen #map-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.map-panel--fullscreen .map-sidebar {
+    max-height: 100%;
+    overflow-y: auto;
+    min-width: 400px;
+    max-width: 780px;
+}
+
+.map-panel--fullscreen #region-control-panel {
+    display: none !important;
+}
+
+/* Relocated unified timeline: pin to the bottom of the fullscreen map panel,
+   shrunk to one row of controls so it never eats canvas space. */
+.map-panel--fullscreen #unified-timeline {
+    margin: 0;
+    padding: 6px 10px;
+    flex: 0 0 auto;
+}
+
 .locgraph-panel {
     display: flex;
     flex-direction: column;
@@ -1698,6 +1750,91 @@ th.sortable.sort-desc::after {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
+}
+
+.map-track-sep {
+    display: inline-block;
+    width: 1px;
+    height: 22px;
+    background: #3a3a55;
+    margin: 0 4px;
+}
+
+/* Trails → Players dropdown: uses <details> so it toggles natively, no JS
+   needed to show/hide the panel itself. */
+.map-trails-dropdown {
+    position: relative;
+}
+
+.map-trails-dropdown > summary {
+    list-style: none;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid #666;
+    color: #888;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    user-select: none;
+    transition: all 0.2s;
+}
+
+.map-trails-dropdown > summary::-webkit-details-marker { display: none; }
+
+.map-trails-dropdown > summary:hover {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+.map-trails-dropdown[open] > summary {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+.map-trails-dropdown > summary::after {
+    content: ' ▾';
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+.map-trails-players-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background: #16213e;
+    border: 1px solid rgba(0, 217, 255, 0.3);
+    border-radius: 6px;
+    padding: 8px 10px;
+    min-width: 180px;
+    max-height: 360px;
+    overflow-y: auto;
+    z-index: 30;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.map-trails-players-panel label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #d0d0e0;
+    cursor: pointer;
+    padding: 2px 0;
+}
+
+.map-trails-players-panel input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.map-trails-players-panel .map-trails-player-name {
+    font-weight: 600;
 }
 
 .map-trail-label {
@@ -1781,8 +1918,8 @@ th.sortable.sort-desc::after {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    min-width: 250px;
-    max-width: 400px;
+    min-width: 320px;
+    max-width: 520px;
 }
 
 .map-legend {
@@ -1856,7 +1993,7 @@ th.sortable.sort-desc::after {
 }
 
 .map-items-table .item-loc {
-    color: #8a8aa0;
+    color: #c3c3d6;
     font-size: 0.75rem;
     white-space: nowrap;
 }
