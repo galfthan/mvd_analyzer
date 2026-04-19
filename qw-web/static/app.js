@@ -4508,54 +4508,13 @@ function renderMap(time) {
     // Draw tracks (per-player visibility controlled by enabledPlayers)
     drawTracks(ctx, time);
 
-    // Item pickups — drawn BEFORE player symbols so the players always sit
-    // on top of any item markers they're standing on.
-    drawMapItems(ctx, time);
-
+    // Z-depth pass for items + players: overlapping players occlude by z
+    // (higher deck on top), and an item whose z is clearly higher than a
+    // player also draws on top. Items carry a downward sort bias
+    // (ITEM_Z_TOP_THRESHOLD) so they lose the tie when a player stands on
+    // them — the common case — but win when they sit a real floor above.
     const playerData = bucket ? bucket.p : null;
-    if (playerData) {
-        // iconScale ramps up to 1.5x at high zoom (see mapIconScale). Symbol
-        // geometry is drawn fresh each frame so it's always pixel-native at
-        // the current zoom and display DPR — no bitmap cache, no upscale blur.
-        const iconScale = mapIconScale();
-        const zRange = mapState.zRange || { lo: 0, hi: 0 };
-        const zSpan = zRange.hi - zRange.lo;
-
-        for (const [name, data] of Object.entries(playerData)) {
-            if (data.x === 0 && data.y === 0) continue;
-
-            const pos = worldToCanvas(data.x, data.y);
-            const symbolInfo = mapState.playerSymbols[name];
-            if (!symbolInfo) continue;
-
-            // Per-player z-based size scale: players near the top of the
-            // map (98th percentile) render 25% larger than those near the
-            // bottom (2nd percentile), linearly interpolated. Helps separate
-            // overlapping players on multi-deck maps (e.g. aerowalk bridges
-            // above the RA room). data.z is the authoritative player z
-            // from svc_playerinfo, propagated through the analyzer.
-            let zScale = 1;
-            if (zSpan > 0) {
-                let t = ((data.z || 0) - zRange.lo) / zSpan;
-                if (t < 0) t = 0;
-                if (t > 1) t = 1;
-                zScale = 1 + 0.25 * t;
-            }
-            const totalScale = iconScale * zScale;
-            const symSize = PLAYER_SYMBOL_BASE_SIZE * totalScale;
-            const orbitRadius = 14 * totalScale;
-            const badgeRadius = 5 * totalScale;
-
-            const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
-            drawPlayerSymbolAt(ctx, symbolInfo.symbol, teamHex, pos.x, pos.y, symSize);
-
-            // Draw status badges around player symbol
-            const badges = getActiveBadges(data);
-            if (badges.length > 0) {
-                drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, orbitRadius, badgeRadius);
-            }
-        }
-    }
+    drawItemsAndPlayersZSorted(ctx, time, playerData);
 
     // Recent-death markers — drawn last so the X sits on top of everything
     // else and stays visible for DEATH_X_DURATION seconds, fading linearly.
@@ -4674,50 +4633,125 @@ function itemStatus(item, time) {
     return { up: false, secsToRespawn: respawnAt - time, pending: false };
 }
 
-function drawMapItems(ctx, time) {
-    const items = currentResult?.items?.items;
-    if (!items || items.length === 0) return;
+// Items are biased this much below their real z when sorting against
+// players, so a player standing at the same floor as an item (same z)
+// draws on top. An item only occludes a player when its z exceeds the
+// player's by at least this clearance — i.e. the item sits on a real
+// level above the player.
+const ITEM_Z_TOP_THRESHOLD = 48;
 
+// Combined z-sorted items-and-players pass. Building a single list lets
+// the draw order mix items and players correctly — two players on
+// different decks occlude in z order, an item clearly above a player
+// draws on top, and the common case of a player standing on a pickup
+// draws the player on top.
+function drawItemsAndPlayersZSorted(ctx, time, playerData) {
     const iconScale = mapIconScale();
-    const size = ITEM_MARKER_SIZE * iconScale;
-    const half = size / 2;
-    // Font scales with the marker so RA/YA/GA/RL/LG labels stay centered and
-    // legible when the square grows. Base 10 px matches the 20 px marker.
-    const fontPx = Math.round(10 * iconScale);
+    const zRange = mapState.zRange || { lo: 0, hi: 0 };
+    const zSpan = zRange.hi - zRange.lo;
+
+    const drawables = [];
+    const items = currentResult?.items?.items;
+    if (items && items.length > 0) {
+        for (const item of items) {
+            const style = ITEM_MARKER_STYLES[item.kind];
+            if (!style) continue;
+            drawables.push({
+                kind: 'i',
+                sortZ: (item.z || 0) - ITEM_Z_TOP_THRESHOLD,
+                item, style
+            });
+        }
+    }
+    if (playerData) {
+        for (const [name, data] of Object.entries(playerData)) {
+            if (data.x === 0 && data.y === 0) continue;
+            const symbolInfo = mapState.playerSymbols[name];
+            if (!symbolInfo) continue;
+            drawables.push({
+                kind: 'p',
+                sortZ: data.z || 0,
+                data, symbolInfo
+            });
+        }
+    }
+    if (drawables.length === 0) return;
+
+    drawables.sort((a, b) => a.sortZ - b.sortZ);
+
+    const itemSize = ITEM_MARKER_SIZE * iconScale;
+    const itemHalf = itemSize / 2;
+    const itemFontPx = Math.round(10 * iconScale);
 
     ctx.save();
-    ctx.font = `bold ${fontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    for (const item of items) {
-        const style = ITEM_MARKER_STYLES[item.kind];
-        if (!style) continue;
-
-        const pos = worldToCanvas(item.x, item.y);
-        const up = isItemUp(item, time);
-        ctx.globalAlpha = up ? 1.0 : ITEM_DIM_ALPHA;
-
-        const x = Math.round(pos.x - half);
-        const y = Math.round(pos.y - half);
-
-        ctx.fillStyle = style.fill;
-        ctx.fillRect(x, y, size, size);
-
-        if (style.outline) {
-            ctx.strokeStyle = style.outline;
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
-        }
-
-        if (style.label) {
-            ctx.fillStyle = style.textColor || style.outline || '#fff';
-            ctx.fillText(style.label, pos.x, pos.y + 1);
+    for (const d of drawables) {
+        if (d.kind === 'i') {
+            drawSingleMapItem(ctx, time, d.item, d.style,
+                              itemSize, itemHalf, itemFontPx);
+        } else {
+            drawSinglePlayer(ctx, d.data, d.symbolInfo,
+                             iconScale, zRange, zSpan);
         }
     }
 
     ctx.globalAlpha = 1.0;
     ctx.restore();
+}
+
+function drawSingleMapItem(ctx, time, item, style, size, half, fontPx) {
+    const pos = worldToCanvas(item.x, item.y);
+    const up = isItemUp(item, time);
+    ctx.globalAlpha = up ? 1.0 : ITEM_DIM_ALPHA;
+
+    const x = Math.round(pos.x - half);
+    const y = Math.round(pos.y - half);
+
+    ctx.fillStyle = style.fill;
+    ctx.fillRect(x, y, size, size);
+
+    if (style.outline) {
+        ctx.strokeStyle = style.outline;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
+    }
+
+    if (style.label) {
+        ctx.font = `bold ${fontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.fillStyle = style.textColor || style.outline || '#fff';
+        ctx.fillText(style.label, pos.x, pos.y + 1);
+    }
+    ctx.globalAlpha = 1.0;
+}
+
+function drawSinglePlayer(ctx, data, symbolInfo, iconScale, zRange, zSpan) {
+    const pos = worldToCanvas(data.x, data.y);
+
+    // Per-player z-based size scale: players near the top of the map
+    // (98th percentile z) render 25% larger than those near the bottom
+    // (2nd percentile), linearly interpolated. Applied on top of the
+    // zoom-driven iconScale.
+    let zScale = 1;
+    if (zSpan > 0) {
+        let t = ((data.z || 0) - zRange.lo) / zSpan;
+        if (t < 0) t = 0;
+        if (t > 1) t = 1;
+        zScale = 1 + 0.25 * t;
+    }
+    const totalScale = iconScale * zScale;
+    const symSize = PLAYER_SYMBOL_BASE_SIZE * totalScale;
+    const orbitRadius = 14 * totalScale;
+    const badgeRadius = 5 * totalScale;
+
+    const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
+    drawPlayerSymbolAt(ctx, symbolInfo.symbol, teamHex, pos.x, pos.y, symSize);
+
+    const badges = getActiveBadges(data);
+    if (badges.length > 0) {
+        drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, orbitRadius, badgeRadius);
+    }
 }
 
 // ─── Map Items Panel (sidebar list) ────────────────────────────────────────
