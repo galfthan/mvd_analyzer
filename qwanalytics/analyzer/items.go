@@ -33,6 +33,19 @@ type ItemAnalyzer struct {
 	matchStarted   bool
 	matchEnded     bool
 	matchStartTime float64
+
+	// Megahealth holder tracking. The MH respawn timer only starts 20 s
+	// after the holder's health drops to ≤ 100 (either by rot tick-down
+	// or by death), with a 5 s minimum-hold floor enforced by KTX's
+	// `item_megahealth_rot` (ktx/src/items.c:353 — first rot tick fires
+	// 5 s post-pickup). Until that crossing the UI should show "held /
+	// pending" rather than a countdown; see the frontend's `itemStatus`
+	// in qw-web/static/app.js, which already treats RespawnAt==0 as the
+	// pending state. We leave RespawnAt at 0 through the rot phase and
+	// stamp it at the crossing.
+	mhPickup     map[int]float64 // MH entNum -> pickup time
+	heldMHs      map[int][]int   // slot -> MH entNums they currently hold
+	playerHealth map[int]int     // slot -> last seen StatHealth value
 }
 
 type itemEntity struct {
@@ -43,9 +56,43 @@ type itemEntity struct {
 
 func NewItemAnalyzer() *ItemAnalyzer {
 	return &ItemAnalyzer{
-		items:     make(map[int]*itemEntity),
-		playerPos: make(map[int][3]float32),
+		items:        make(map[int]*itemEntity),
+		playerPos:    make(map[int][3]float32),
+		mhPickup:     make(map[int]float64),
+		heldMHs:      make(map[int][]int),
+		playerHealth: make(map[int]int),
 	}
+}
+
+// Standard Quake 1 / KTX / ktpro respawn times in seconds, keyed by the
+// compact item kind strings emitted by the parser (qwdemo/parser/entities.go).
+// These are the canonical DM/TDM values; practice mode, freshteams, and
+// HoonyMode override some of them, but those modes are out of scope here.
+//
+// MH uses 20 for the final countdown only — the rot phase that precedes
+// it is handled separately via holder health tracking (handleStatUpdate /
+// handleDeath below), so the 20 stamped here is only a fallback when the
+// holder's health transition is missing from the stream.
+var kindRespawnSec = map[string]float64{
+	"rl":      30,
+	"lg":      30,
+	"ssg":     30,
+	"sng":     30,
+	"ng":      30,
+	"gl":      30,
+	"ra":      20,
+	"ya":      20,
+	"ga":      20,
+	"h25":     20,
+	"h15":     20,
+	"shells":  30,
+	"nails":   30,
+	"rockets": 30,
+	"cells":   30,
+	"quad":    60,
+	"suit":    60,
+	"pent":    300,
+	"ring":    300,
 }
 
 func (a *ItemAnalyzer) Name() string { return "items" }
@@ -73,6 +120,10 @@ func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 		a.handleItemSpawn(e)
 	case *events.ItemStateEvent:
 		a.handleItemState(e)
+	case *events.StatUpdateEvent:
+		a.handleStatUpdate(e)
+	case *events.DeathEvent:
+		a.handleDeath(e)
 	}
 	return nil
 }
@@ -149,9 +200,19 @@ func (a *ItemAnalyzer) handleItemSpawn(e *events.ItemSpawnEvent) {
 }
 
 // handleItemState closes or opens a phase for a tracked item.
-// Taken=true → close the current available phase with TakenAt (and
-// player attribution). Taken=false → respawn: stamp RespawnAt on the
-// last closed phase and open a new available phase starting now.
+//
+// Taken=true → close the current available phase with TakenAt, attribute
+// the picker by nearest-player, and stamp RespawnAt from the standard
+// kind→seconds table. MH is the exception: it uses holder-health tracking
+// (handleStatUpdate / handleDeath) to compute the real 20 s countdown
+// that only begins after rot ends, so we leave RespawnAt at 0 here and
+// the UI renders that as "pending".
+//
+// Taken=false → respawn: open a new available phase. We intentionally
+// don't stamp RespawnAt from the wire time any more — the wire respawn
+// can slip by a full cycle on insta-regrabs (see qwdemo/MVD_FORMAT.md's
+// "insta-regrab invisibility" note), which is why quad was showing 120 s
+// and RL 60 s countdowns in the UI.
 func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
 	if !a.matchStarted || a.matchEnded {
 		return
@@ -173,21 +234,113 @@ func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
 		}
 		last.TakenAt = e.Time
 		playerSlot, name, team := a.attributePickup(it.origin, e.Time)
-		_ = playerSlot
 		last.TakenBy = name
 		last.Team = team
+
+		if it.kind == "mh" {
+			// Start holder tracking; RespawnAt stays 0 until the
+			// holder's health drops to ≤ 100.
+			a.mhPickup[e.EntNum] = e.Time
+			if playerSlot >= 0 {
+				a.heldMHs[playerSlot] = append(a.heldMHs[playerSlot], e.EntNum)
+			}
+			return
+		}
+		if sec, ok := kindRespawnSec[it.kind]; ok {
+			last.RespawnAt = e.Time + sec
+		}
 		return
 	}
 
-	// Respawn: stamp RespawnAt and open a new phase. If the last
-	// phase hasn't been closed yet (received a respawn without a
-	// matching take — possible at match start if the initial state
-	// registers as "visible but we never saw the take"), just open
-	// a new phase at e.Time.
-	if last.TakenAt > 0 {
-		last.RespawnAt = e.Time
-	}
+	// Wire respawn: open the next available phase. Don't overwrite
+	// RespawnAt that's already been computed from the kind table (or,
+	// for MH, from the holder-health crossing). The one exception is
+	// an unclosed phase at match start where we never observed the
+	// take — leave RespawnAt at 0 and open a fresh phase.
 	it.phases = append(it.phases, ItemPhase{AvailableFrom: e.Time})
+}
+
+// handleStatUpdate watches StatHealth for every slot that currently
+// holds an MH. When a holder's health crosses from > 100 to ≤ 100 (rot
+// tick-down, direct damage, telefrag, anything), that's the rot-end
+// instant — stamp RespawnAt = max(pickup + 5, crossing) + 20 on every
+// MH that slot is holding and forget them. The 5 s floor is KTX's first
+// rot tick delay (items.c:353).
+//
+// StatItems updates are also tracked so the holder-forgets-they-have-MH
+// edge case (IT_SUPERHEALTH bit clearing while health is still > 100,
+// which shouldn't happen but might if we mis-attributed the pickup) is
+// handled symmetrically.
+func (a *ItemAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) {
+	if !a.matchStarted || a.matchEnded {
+		return
+	}
+	switch e.StatIndex {
+	case events.StatHealth:
+		// Mirror TimelineAnalyzer's sentinel filter (ktx/src/combat.c:1001
+		// sets health = 1000 + damage as a damage-indicator hint; real
+		// player health caps at 250). Treat sentinels as "no update" so
+		// they don't mask the real rot-end transition.
+		if e.Value > 250 {
+			return
+		}
+		prev := a.playerHealth[e.PlayerNum]
+		a.playerHealth[e.PlayerNum] = e.Value
+		if prev > 100 && e.Value <= 100 {
+			a.stampHeldMHs(e.PlayerNum, e.Time)
+		}
+	case events.StatItems:
+		if e.Value&events.ITSuperHealth != 0 {
+			return
+		}
+		// Player's IT_SUPERHEALTH bit just cleared. KTX clears it from
+		// inside item_megahealth_rot at rot-end (items.c:401), so this
+		// is redundant with the health crossing above in the normal
+		// case but catches the path where the health stream is thin.
+		a.stampHeldMHs(e.PlayerNum, e.Time)
+	}
+}
+
+// handleDeath is the backup path for the "holder died" case. DeathEvent
+// is derived from the same StatHealth transition that would already
+// trigger stampHeldMHs via handleStatUpdate, but subscribing to both
+// is cheap insurance against event-ordering quirks between the two
+// streams.
+func (a *ItemAnalyzer) handleDeath(e *events.DeathEvent) {
+	if !a.matchStarted || a.matchEnded {
+		return
+	}
+	a.playerHealth[e.PlayerNum] = 0
+	a.stampHeldMHs(e.PlayerNum, e.Time)
+}
+
+// stampHeldMHs closes out every MH phase currently owned by the given
+// slot by stamping RespawnAt = max(pickup + 5, crossing) + 20. Idempotent
+// — calling it twice for the same slot has no effect the second time
+// because heldMHs[slot] is cleared.
+func (a *ItemAnalyzer) stampHeldMHs(slot int, crossing float64) {
+	ents := a.heldMHs[slot]
+	if len(ents) == 0 {
+		return
+	}
+	for _, ent := range ents {
+		it := a.items[ent]
+		if it == nil || len(it.phases) == 0 {
+			continue
+		}
+		last := &it.phases[len(it.phases)-1]
+		if last.TakenAt == 0 || last.RespawnAt != 0 {
+			continue
+		}
+		pickup := a.mhPickup[ent]
+		rotEnd := crossing
+		if pickup+5 > rotEnd {
+			rotEnd = pickup + 5
+		}
+		last.RespawnAt = rotEnd + 20
+		delete(a.mhPickup, ent)
+	}
+	delete(a.heldMHs, slot)
 }
 
 // attributePickup finds the player whose last-known position is
