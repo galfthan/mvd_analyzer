@@ -12,7 +12,13 @@ package result
 // CurrentSchemaVersion identifies the JSON schema shape. Bump on any
 // breaking change to the Result structure or its sub-types. Consumers
 // can pin or switch on this value when reading a stored analysis.
-const CurrentSchemaVersion = 3
+//
+// v4 adds Backpacks: a list of RL/LG backpack drops sourced from
+// KTX's //ktx drop STUFFCMD_DEMOONLY directive. Pickup tracking is
+// intentionally deferred until the wire-flutter reliability issue
+// is resolved — see qwanalytics/analyzer/backpacks.go for the full
+// reasoning.
+const CurrentSchemaVersion = 4
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -30,5 +36,6 @@ type Result struct {
 	Metadata         *MetadataResult         `json:"metadata,omitempty"`
 	LocGraph         *LocGraphResult         `json:"locGraph,omitempty"`
 	Items            *ItemsResult            `json:"items,omitempty"`
+	Backpacks        []BackpackDrop          `json:"backpacks,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
 }

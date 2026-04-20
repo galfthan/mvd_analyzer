@@ -37,43 +37,45 @@ type Kind = parser.EventType
 
 // Kind values — match 1:1 with the concrete event types below.
 const (
-	KindServerData   = parser.EventServerData
-	KindUserInfo     = parser.EventUserInfo
-	KindPrint        = parser.EventPrint
-	KindStatUpdate   = parser.EventStatUpdate
-	KindFragUpdate   = parser.EventFragUpdate
-	KindPlayerInfo   = parser.EventPlayerInfo
-	KindDamage       = parser.EventDamage
-	KindDemoInfo     = parser.EventDemoInfo
-	KindIntermission = parser.EventIntermission
-	KindStuffText    = parser.EventStuffText
-	KindCenterPrint  = parser.EventCenterPrint
-	KindServerInfo   = parser.EventServerInfo
-	KindDeath        = parser.EventDeath
-	KindSpawn        = parser.EventSpawn
-	KindItemSpawn    = parser.EventItemSpawn
-	KindItemState    = parser.EventItemState
+	KindServerData       = parser.EventServerData
+	KindUserInfo         = parser.EventUserInfo
+	KindPrint            = parser.EventPrint
+	KindStatUpdate       = parser.EventStatUpdate
+	KindFragUpdate       = parser.EventFragUpdate
+	KindPlayerInfo       = parser.EventPlayerInfo
+	KindDamage           = parser.EventDamage
+	KindDemoInfo         = parser.EventDemoInfo
+	KindIntermission     = parser.EventIntermission
+	KindStuffText        = parser.EventStuffText
+	KindCenterPrint      = parser.EventCenterPrint
+	KindServerInfo       = parser.EventServerInfo
+	KindDeath            = parser.EventDeath
+	KindSpawn            = parser.EventSpawn
+	KindItemSpawn        = parser.EventItemSpawn
+	KindItemState        = parser.EventItemState
+	KindBackpackDropHint = parser.EventBackpackDropHint
 )
 
 // Concrete event types emitted on the Source.
 type (
-	ServerDataEvent   = parser.ServerDataEvent
-	UserInfoEvent     = parser.UserInfoEvent
-	PrintEvent        = parser.PrintEvent
-	StatUpdateEvent   = parser.StatUpdateEvent
-	FragUpdateEvent   = parser.FragUpdateEvent
-	PlayerPositionEvent = parser.PlayerPositionEvent
-	DamageEvent       = parser.DamageEvent
-	DemoInfoEvent     = parser.DemoInfoEvent
-	IntermissionEvent = parser.IntermissionEvent
-	StuffTextEvent    = parser.StuffTextEvent
-	CenterPrintEvent  = parser.CenterPrintEvent
-	ServerInfoEvent   = parser.ServerInfoEvent
-	DeathEvent        = parser.DeathEvent
-	SpawnEvent        = parser.SpawnEvent
-	ItemSpawnEvent    = parser.ItemSpawnEvent
-	ItemStateEvent    = parser.ItemStateEvent
-	EntityState       = parser.EntityState
+	ServerDataEvent       = parser.ServerDataEvent
+	UserInfoEvent         = parser.UserInfoEvent
+	PrintEvent            = parser.PrintEvent
+	StatUpdateEvent       = parser.StatUpdateEvent
+	FragUpdateEvent       = parser.FragUpdateEvent
+	PlayerPositionEvent   = parser.PlayerPositionEvent
+	DamageEvent           = parser.DamageEvent
+	DemoInfoEvent         = parser.DemoInfoEvent
+	IntermissionEvent     = parser.IntermissionEvent
+	StuffTextEvent        = parser.StuffTextEvent
+	CenterPrintEvent      = parser.CenterPrintEvent
+	ServerInfoEvent       = parser.ServerInfoEvent
+	DeathEvent            = parser.DeathEvent
+	SpawnEvent            = parser.SpawnEvent
+	ItemSpawnEvent        = parser.ItemSpawnEvent
+	ItemStateEvent        = parser.ItemStateEvent
+	BackpackDropHintEvent = parser.BackpackDropHintEvent
+	EntityState           = parser.EntityState
 )
 
 // Domain types carried by events — not MVD-specific, shared across all

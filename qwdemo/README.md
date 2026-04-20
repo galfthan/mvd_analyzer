@@ -70,6 +70,7 @@ The concrete event list, in stable order:
 | `KindSpawn` | `SpawnEvent` | Player spawned — `StatHealth` crossed from ≤0 to >0 |
 | `KindItemSpawn` | `ItemSpawnEvent` | Item entity observed — baseline known (kind, position) |
 | `KindItemState` | `ItemStateEvent` | Item became taken or respawned — from entity modelindex transitions |
+| `KindBackpackDropHint` | `BackpackDropHintEvent` | KTX `//ktx drop` stuffcmd: `(BackpackEnt, ItemFlags, PlayerEnt)` for RL/LG drops only |
 
 `DeathEvent` and `SpawnEvent` are derived events synthesised by the
 parser from protocol-level `StatHealth` transitions. They fire at the
