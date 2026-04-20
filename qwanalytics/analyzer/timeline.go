@@ -196,8 +196,7 @@ func (a *TimelineAnalyzer) handlePositionUpdate(e *events.PlayerPositionEvent) {
 
 		if currentBucket > lastBucket {
 			for b := lastBucket + 1; b <= currentBucket; b++ {
-				bucketTime := float64(b) * a.bucketDuration
-				a.sampleCurrentState(bucketTime)
+				a.sampleCurrentStateAtIndex(b)
 			}
 			a.lastSampleTime = e.Time
 		}
@@ -313,8 +312,7 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 	if currentBucket > lastBucket {
 		// Fill all buckets from lastBucket+1 to currentBucket
 		for b := lastBucket + 1; b <= currentBucket; b++ {
-			bucketTime := float64(b) * a.bucketDuration
-			a.sampleCurrentState(bucketTime)
+			a.sampleCurrentStateAtIndex(b)
 		}
 		a.lastSampleTime = e.Time
 	}
@@ -322,9 +320,27 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 	return nil
 }
 
+// sampleCurrentStateAtIndex is the index-addressed twin of sampleCurrentState
+// used by the event-driven fill loops. Callers synthesize bucket times as
+// `float64(b) * bucketDuration`, but that product is not guaranteed to
+// round-trip back to `b` through `int(t / bucketDuration)` — float64 cannot
+// represent 0.05 exactly, so for many indices (e.g. 324: 324*0.05 =
+// 16.199999999…) the recomputed index comes back as `b-1`, and the wrong
+// bucket gets populated. That caused one in every ~15 high-res buckets to
+// end up empty and get dropped by the exporter, producing the visible
+// timeline gaps. Passing the known-correct bucket index directly avoids
+// the round-trip entirely.
+func (a *TimelineAnalyzer) sampleCurrentStateAtIndex(bucketIndex int) {
+	bucket := a.getOrCreateBucketByIndex(bucketIndex)
+	a.populateBucket(bucket)
+}
+
 func (a *TimelineAnalyzer) sampleCurrentState(time float64) {
 	bucket := a.getOrCreateBucket(time)
+	a.populateBucket(bucket)
+}
 
+func (a *TimelineAnalyzer) populateBucket(bucket *timelineBucketData) {
 	// Sample stats per player. Death / spawn flags (pd.dead / pd.spawn)
 	// are set by handleDeath / handleSpawn from parser-emitted events,
 	// not by this sampler, so we preserve those flags when a bucket is
@@ -458,8 +474,10 @@ func (a *TimelineAnalyzer) handleSpawn(e *events.SpawnEvent) {
 }
 
 func (a *TimelineAnalyzer) getOrCreateBucket(time float64) *timelineBucketData {
-	bucketIndex := int(time / a.bucketDuration)
+	return a.getOrCreateBucketByIndex(int(time / a.bucketDuration))
+}
 
+func (a *TimelineAnalyzer) getOrCreateBucketByIndex(bucketIndex int) *timelineBucketData {
 	// Extend buckets array if needed
 	for len(a.buckets) <= bucketIndex {
 		newBucket := &timelineBucketData{
