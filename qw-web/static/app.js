@@ -3501,6 +3501,16 @@ function initMapView(result) {
     // Pre-compute full trails from high-res bucket data
     precomputeFullTrails();
 
+    // Backpack drops — mirrors mapState.deathEvents in shape so renderMap
+    // can fade them on the same DEATH_X_DURATION timeline. Only RL/LG drops
+    // exist in result.backpacks today (see qwanalytics/result/backpacks.go).
+    mapState.dropEvents = (result.backpacks || []).map(d => ({
+        t:      d.time,
+        wx:     d.origin?.[0] || 0,
+        wy:     d.origin?.[1] || 0,
+        weapon: d.weapon,
+    }));
+
     // Cache the map's z percentile range — drives per-player z-based size
     // scaling in renderMap (players higher up on the map render up to 25%
     // larger than those on the lowest level).
@@ -4543,6 +4553,31 @@ function drawDeathX(ctx, x, y, teamIdx, alpha) {
     ctx.restore();
 }
 
+// Draw a fading "D" superimposed on the death-X to mark drops where the
+// dying player left an RL or LG backpack. Weapon-coded fill (RL red, LG
+// cyan) lets viewers tell the two apart at a glance; a black outline
+// keeps the letter readable against the team-colored X behind it. Fades
+// in lockstep with the underlying X (same DEATH_X_DURATION). We don't
+// yet track pickup time, so the D can't show a "still on ground" state —
+// it just fades, same as the death X.
+function drawDropD(ctx, x, y, weapon, alpha) {
+    const a = alpha.toFixed(2);
+    let fill;
+    if      (weapon === 'rl') fill = `rgba(255, 107, 107, ${a})`;
+    else if (weapon === 'lg') fill = `rgba(0, 217, 255, ${a})`;
+    else                      fill = `rgba(255, 255, 255, ${a})`;
+    ctx.save();
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = `rgba(0, 0, 0, ${a})`;
+    ctx.strokeText('D', x, y);
+    ctx.fillStyle = fill;
+    ctx.fillText('D', x, y);
+    ctx.restore();
+}
+
 function renderMap(time) {
     const ctx = mapState.ctx;
     const canvas = mapState.canvas;
@@ -4629,6 +4664,20 @@ function renderMap(time) {
             const alpha = 1 - dt / DEATH_X_DURATION;
             const pos = worldToCanvasNew(e.wx, e.wy);
             drawDeathX(ctx, pos.x, pos.y, e.teamIdx, alpha);
+        }
+    }
+
+    // Drop markers — superimposed on the death X at the same world
+    // position (KTX drops the backpack at the dying player's origin).
+    // Fades on the same timeline as the X.
+    const drops = mapState.dropEvents;
+    if (drops && drops.length > 0) {
+        for (const e of drops) {
+            const dt = time - e.t;
+            if (dt < 0 || dt > DEATH_X_DURATION) continue;
+            const alpha = 1 - dt / DEATH_X_DURATION;
+            const pos = worldToCanvasNew(e.wx, e.wy);
+            drawDropD(ctx, pos.x, pos.y, e.weapon, alpha);
         }
     }
 }
