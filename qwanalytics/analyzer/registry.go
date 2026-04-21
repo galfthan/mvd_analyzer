@@ -161,6 +161,10 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 			if it, ok := output.(*ItemsResult); ok {
 				result.Items = it
 			}
+		case "backpacks":
+			if b, ok := output.([]BackpackDrop); ok {
+				result.Backpacks = b
+			}
 		}
 	}
 
@@ -237,6 +241,10 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 				}
 			}
 		}
+
+		for i := range result.Backpacks {
+			result.Backpacks[i].Time -= matchStart
+		}
 	}
 
 	// 1v1 normalization: for duel demos the "team" concept is either
@@ -273,5 +281,6 @@ func NewDefaultRegistry() *Registry {
 	ta.SetBlipThresholdMs(r.Config.LocGraph.BlipThresholdMs)
 	r.Register(ta)
 	r.Register(NewItemAnalyzer())
+	r.Register(NewBackpackAnalyzer())
 	return r
 }

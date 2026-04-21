@@ -145,4 +145,5 @@ type (
 	ItemsResult            = result.ItemsResult
 	ItemTimeline           = result.ItemTimeline
 	ItemPhase              = result.ItemPhase
+	BackpackDrop           = result.BackpackDrop
 )

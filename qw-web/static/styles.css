@@ -817,6 +817,15 @@ table tbody tr:hover {
     border-radius: 2px;
 }
 
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.legend-dot.rl { background: rgba(255, 107, 107, 0.9); }
+.legend-dot.lg { background: rgba(0, 217, 255, 0.9); }
+
 /* Granular weapon/powerup colors */
 .legend-color.weapons { background: rgba(0, 217, 255, 0.9); }
 .legend-color.powerups { background: rgba(255, 193, 7, 0.9); }
@@ -1731,7 +1740,8 @@ th.sortable.sort-desc::after {
     color: var(--accent-cyan);
 }
 
-.locgraph-tooltip {
+.locgraph-tooltip,
+.canvas-tooltip {
     position: absolute;
     pointer-events: none;
     background: rgba(10, 10, 21, 0.95);
@@ -1744,6 +1754,12 @@ th.sortable.sort-desc::after {
     z-index: 100;
     max-width: 280px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Drop-dot tooltip uses normal whitespace so multi-line content stacks
+   instead of forming a single long line. */
+.canvas-tooltip {
+    white-space: normal;
 }
 
 .map-track-controls {

@@ -1,0 +1,188 @@
+package analyzer
+
+import (
+	"sort"
+	"strings"
+
+	"github.com/mvd-analyzer/qwanalytics/loc"
+	"github.com/mvd-analyzer/qwdemo/events"
+)
+
+// BackpackAnalyzer emits one BackpackDrop per RL/LG backpack the
+// dying player leaves behind. It consumes KTX's
+// `//ktx drop <ent> <items> <player_ent>` STUFFCMD_DEMOONLY
+// directive (ktx/src/items.c:2740), which the parser surfaces as
+// BackpackDropHintEvent. The hint is emitted exactly once per
+// real drop and carries the dropper's slot directly, so
+// attribution is authoritative — no closest-player snap.
+//
+// Pickup tracking is intentionally NOT implemented. The wire-level
+// ItemStateEvent stream for backpack edicts produces phantom
+// visibility cycles in the 200 ms class (same edict going
+// taken/untaken repeatedly without real pickups in between) that
+// we cannot currently distinguish from genuine fast pickups. Rather
+// than report unreliable data, pickups are deferred to a later
+// branch that diagnoses the flutter source first.
+//
+// Non-RL/LG drops (SSG/NG/SNG/GL/empty) are not surfaced: KTX only
+// emits the //ktx drop hint for RL and LG, and the QW protocol
+// does not transmit backpack contents as wire-level entity state.
+type BackpackAnalyzer struct {
+	ctx       *Context
+	playerPos map[int][3]float32 // slot -> last-known origin (for drop origin)
+	drops     []BackpackDrop
+	mapName   string
+	locFinder *loc.Finder
+
+	matchStarted   bool
+	matchEnded     bool
+	matchStartTime float64
+}
+
+// IT_* bit values for the //ktx drop ItemFlags argument, mirroring
+// ktx/src/items.c:2738 where the hint is emitted.
+const (
+	itemFlagRL = 1 << 5 // IT_ROCKET_LAUNCHER
+	itemFlagLG = 1 << 6 // IT_LIGHTNING
+)
+
+func NewBackpackAnalyzer() *BackpackAnalyzer {
+	return &BackpackAnalyzer{
+		playerPos: make(map[int][3]float32),
+	}
+}
+
+func (a *BackpackAnalyzer) Name() string { return "backpacks" }
+
+func (a *BackpackAnalyzer) Init(ctx *Context) error {
+	a.ctx = ctx
+	return nil
+}
+
+func (a *BackpackAnalyzer) OnEvent(event events.Event) error {
+	switch e := event.(type) {
+	case *events.PrintEvent:
+		a.detectMatchBoundary(e)
+	case *events.IntermissionEvent:
+		if a.matchStarted {
+			a.matchEnded = true
+		}
+	case *events.StuffTextEvent:
+		if strings.HasPrefix(e.Command, "fullserverinfo ") {
+			a.extractMapName(e.Command)
+		}
+	case *events.PlayerPositionEvent:
+		a.playerPos[e.PlayerNum] = e.Origin
+	case *events.BackpackDropHintEvent:
+		a.handleHint(e)
+	}
+	return nil
+}
+
+// handleHint records one BackpackDrop. The hint's PlayerEnt is the
+// dropper's edict (player_slot + 1); their most recent position is
+// the drop origin (KTX spawns the backpack at the dying player's
+// s.v.origin). Defensive: skip on unrecognised flag combos.
+func (a *BackpackAnalyzer) handleHint(e *events.BackpackDropHintEvent) {
+	if !a.matchStarted || a.matchEnded {
+		return
+	}
+	weapon := weaponFromItemFlags(e.ItemFlags)
+	if weapon == "" {
+		return
+	}
+	slot := e.PlayerEnt - 1
+	if slot < 0 || slot >= len(a.ctx.Players) || a.ctx.Players[slot] == nil {
+		return
+	}
+	pl := a.ctx.Players[slot]
+	a.drops = append(a.drops, BackpackDrop{
+		Time:   e.Time,
+		Player: pl.Name,
+		Team:   pl.Team,
+		Weapon: weapon,
+		Origin: a.playerPos[slot],
+		EntNum: e.BackpackEnt,
+	})
+}
+
+func weaponFromItemFlags(flags int) string {
+	hasRL := flags&itemFlagRL != 0
+	hasLG := flags&itemFlagLG != 0
+	switch {
+	case hasRL && !hasLG:
+		return "rl"
+	case hasLG && !hasRL:
+		return "lg"
+	default:
+		// Both bits set or neither → unrecognised. Real KTX drops
+		// always send exactly one; anything else gets dropped
+		// defensively.
+		return ""
+	}
+}
+
+func (a *BackpackAnalyzer) detectMatchBoundary(e *events.PrintEvent) {
+	msg := e.Message
+	if !a.matchStarted {
+		if strings.Contains(msg, "match has begun") ||
+			strings.Contains(msg, "Fight!") ||
+			strings.Contains(msg, "begins in 1") ||
+			strings.Contains(msg, "Go!") {
+			a.matchStarted = true
+			a.matchStartTime = e.Time
+		}
+		return
+	}
+	if a.matchEnded {
+		return
+	}
+	if strings.Contains(msg, "the match is over") ||
+		strings.Contains(msg, "match ended") ||
+		strings.Contains(msg, "game over") ||
+		strings.Contains(msg, "match complete") ||
+		strings.Contains(msg, "timelimit hit") ||
+		strings.Contains(msg, "fraglimit hit") {
+		a.matchEnded = true
+	}
+}
+
+func (a *BackpackAnalyzer) extractMapName(cmd string) {
+	rest := strings.TrimPrefix(cmd, "fullserverinfo ")
+	rest = strings.TrimSpace(rest)
+	rest = strings.TrimPrefix(rest, "\"")
+	if i := strings.LastIndexByte(rest, '"'); i >= 0 {
+		rest = rest[:i]
+	}
+	parts := strings.Split(rest, "\\")
+	start := 0
+	if len(parts) > 0 && parts[0] == "" {
+		start = 1
+	}
+	for i := start; i+1 < len(parts); i += 2 {
+		if parts[i] == "map" {
+			a.mapName = parts[i+1]
+			return
+		}
+	}
+}
+
+// Finalize returns the collected drops sorted by time, with Loc
+// resolved from the map's .loc corpus when available.
+func (a *BackpackAnalyzer) Finalize() (interface{}, error) {
+	if len(a.drops) == 0 {
+		return nil, nil
+	}
+	if a.locFinder == nil && a.mapName != "" {
+		if f, err := loc.LoadForMap(a.mapName); err == nil {
+			a.locFinder = f
+		}
+	}
+	sort.Slice(a.drops, func(i, j int) bool { return a.drops[i].Time < a.drops[j].Time })
+	if a.locFinder != nil {
+		for i := range a.drops {
+			a.drops[i].Loc = a.locFinder.FindNearest(a.drops[i].Origin[0], a.drops[i].Origin[1], a.drops[i].Origin[2])
+		}
+	}
+	return a.drops, nil
+}

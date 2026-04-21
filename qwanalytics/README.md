@@ -10,9 +10,9 @@ that downstream consumers render, summarise, or feed to an agent.
   Consumers (web UI, CLI, AI agent) should import this package and pin
   against `result.CurrentSchemaVersion`.
 - `analyzer/` — the Analyzer interface, shared `Context`, and `Registry`
-  that drives a run. `NewDefaultRegistry()` wires up the seven
+  that drives a run. `NewDefaultRegistry()` wires up the eight
   production analyzers (demoinfo, metadata, match, frag, messages,
-  timeline, items).
+  timeline, items, backpacks).
 - `loc/` — `.loc` file parser. For native builds the corpus is embedded
   via `//go:embed data/*.loc` (466 maps today); for WASM builds the host
   provides `fetchLocSync` so only the loc for the current demo is
@@ -93,13 +93,14 @@ type Result struct {
     Metadata         *MetadataResult          // serverinfo + match settings
     LocGraph         *LocGraphResult          // loc-to-loc movement graph
     Items            *ItemsResult             // per-item pickup / respawn timeline (all MVD sources)
+    Backpacks        []BackpackDrop           // RL/LG backpack drops (from KTX //ktx drop hint)
     Errors           []string
 }
 ```
 
 Each sub-type is defined in its own file under `result/`. The JSON shape
 is the wire contract with every consumer; breaking changes bump
-`CurrentSchemaVersion` (currently `2`).
+`CurrentSchemaVersion` (currently `4`).
 
 ### Items result
 
@@ -138,6 +139,39 @@ visible on the wire for that cycle, so we don't record a phase
 for it. The resulting phase will span the whole contested window
 (e.g. "RA taken at 31s, respawn observed at 91s" means the RA was
 never practically available in that 60 s window).
+
+### Backpacks
+
+`result.Backpacks` is a flat list of RL and LG backpack drops,
+driven by `BackpackAnalyzer`. Each entry is emitted when KTX fires
+its `//ktx drop <ent> <items> <player_ent>` STUFFCMD_DEMOONLY
+directive (ktx/src/items.c:2740). The hint is the authoritative
+source — it fires exactly once per real drop, with weapon and
+dropper slot already attributed, so the analyzer doesn't guess.
+
+Coverage caveats:
+
+- **RL and LG only.** KTX only emits the hint for heavy weapons;
+  SSG/NG/SNG/GL and empty packs are invisible to this signal. The
+  QW protocol does not carry backpack contents on the wire as
+  entity state, so there is no alternative source.
+- **No pickup tracking.** The wire-level entity-state stream for
+  backpack edicts produces phantom visibility cycles that aren't
+  distinguishable from real fast pickups. Until that's diagnosed,
+  pickup attribution is intentionally left off the schema. Each
+  `BackpackDrop` carries only drop-side fields.
+
+```go
+type BackpackDrop struct {
+    Time   float64    // drop time (match-relative)
+    Player string     // dropper display name
+    Team   string
+    Weapon string     // "rl" or "lg"
+    Origin [3]float32 // dropper's position at hint time
+    Loc    string     // nearest named loc
+    EntNum int        // server edict of the backpack entity
+}
+```
 
 ## Writing a new analyzer
 

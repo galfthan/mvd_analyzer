@@ -177,9 +177,11 @@ func (a *ItemAnalyzer) extractMapName(cmd string) {
 // available phase. Fires once per entity (or again if a baseline is
 // resent mid-match, which is rare).
 func (a *ItemAnalyzer) handleItemSpawn(e *events.ItemSpawnEvent) {
-	// Ignore dropped backpacks for now — they have their own
-	// semantics (one-shot pickup, no respawn). They're classified
-	// as "backpack" at the parser layer; filter out here.
+	// Backpacks are handled by BackpackAnalyzer (backpacks.go), which
+	// emits one entry per RL/LG drop from KTX's //ktx drop hint. Skip
+	// them here so the per-item phase model stays clean — the
+	// entity-state stream for backpack edicts is noisy and not used
+	// for tracking today.
 	if e.Kind == "" || e.Kind == "backpack" {
 		return
 	}

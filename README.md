@@ -93,8 +93,9 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 `PrintEvent`, `StatUpdateEvent`, `FragUpdateEvent`, `PlayerPositionEvent`,
 `DamageEvent`, `DemoInfoEvent`, `IntermissionEvent`, `StuffTextEvent`,
 `CenterPrintEvent`, `ServerInfoEvent`, `DeathEvent`, `SpawnEvent`,
-`ItemSpawnEvent`, `ItemStateEvent`. Domain types carried by events —
-`ServerData`, `PlayerInfo`, `PlayerState`, `Stats` — are source-agnostic.
+`ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`. Domain
+types carried by events — `ServerData`, `PlayerInfo`, `PlayerState`,
+`Stats` — are source-agnostic.
 
 `DeathEvent` / `SpawnEvent` are derived events the parser synthesises
 from `StatHealth` edges so analytics never has to reconstruct
@@ -115,9 +116,11 @@ implementation backed by MVD files.
 Defined in [`qwanalytics/result`](qwanalytics/result/result.go). `Result` is
 a JSON-serializable struct with sub-results from every analyzer that ran:
 match, frags, messages, demoinfo, timeline analysis, metadata, locgraph,
-items (per-item pickup / respawn timeline — works on any MVD source).
+items (per-item pickup / respawn timeline — works on any MVD source),
+and backpacks (RL/LG drops attributed to the dying player via KTX's
+`//ktx drop` hint).
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `2`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `4`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 
 ### Running the pipeline
