@@ -1476,6 +1476,7 @@ function displayTimelineAnalysis(result) {
     timelineState.events = result.messages?.events || [];
     timelineState.fragEvents = timeline?.fragEvents || []; // Frag events from stat tracking
     timelineState.backpacks = result.backpacks || [];      // RL/LG drops from KTX hint
+    timelineState.powerupEvents = timeline?.powerupEvents || []; // per-run records: player, team, frags, duration
 
     // Set shared current time to start (all times are now match-relative, starting at 0)
     mapState.currentTime = 0;
@@ -2115,6 +2116,9 @@ function setupUnifiedTimeline() {
     // --- Hover tooltip on weapon-graph drop dots ---
     attachWeaponGraphTooltip();
 
+    // --- Hover tooltip on powerup-timeline spans ---
+    attachPowerupTimelineTooltip();
+
     unifiedTimelineInitialized = true;
 }
 
@@ -2697,59 +2701,58 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
 // spans by which team currently holds the powerup. Reuses renderSpansTimeline,
 // the same renderer the region-control timeline uses — only the input rows
 // and the state→color map differ.
+//
+// Sourced from result.timelineAnalysis.powerupEvents (one record per run,
+// already containing player/team/frags/duration), not from per-bucket
+// aggregates: that gives us exact span boundaries plus the metadata the
+// hover tooltip needs.
 
 const POWERUP_TYPES = [
-    { key: 'q',  name: 'Quad' },
-    { key: 'pe', name: 'Pent' },
-    { key: 'r',  name: 'Ring' },
+    { key: 'quad', name: 'Quad' },
+    { key: 'pent', name: 'Pent' },
+    { key: 'ring', name: 'Ring' },
 ];
 
 function prepPowerupRowsData(startTime, endTime, teams) {
-    const hrBuckets = timelineState.highResBuckets;
-    if (!hrBuckets || !hrBuckets.length) return null;
+    const events = timelineState.powerupEvents;
+    if (!events || events.length === 0) return null;
     const teamA = teams[0], teamB = teams[1];
     if (!teamA || !teamB) return null;
 
-    const idx0 = binarySearchBucketStart(hrBuckets, startTime);
-    const rows = POWERUP_TYPES.map(pu => ({
-        name: pu.name, spans: [], _cur: 'empty', _start: startTime,
-    }));
+    const rowByKey = new Map();
+    const rows = POWERUP_TYPES.map(pu => {
+        const r = { name: pu.name, spans: [] };
+        rowByKey.set(pu.key, r);
+        return r;
+    });
 
-    for (let i = idx0; i < hrBuckets.length; i++) {
-        const b = hrBuckets[i];
-        if (b.t > endTime) break;
-
-        for (let pi = 0; pi < POWERUP_TYPES.length; pi++) {
-            const key = POWERUP_TYPES[pi].key;
-            const aHas = ((b.td?.[teamA])?.[key] || 0) > 0;
-            const bHas = ((b.td?.[teamB])?.[key] || 0) > 0;
-            // Both teams holding the same powerup at once is impossible
-            // (only one Quad spawn at a time), but if it ever happens we
-            // bias to "contested" rather than picking one team.
-            let state;
-            if (aHas && bHas)      state = 'contested';
-            else if (aHas)         state = 'teamA';
-            else if (bHas)         state = 'teamB';
-            else                   state = 'empty';
-
-            const row = rows[pi];
-            if (state !== row._cur) {
-                if (row._cur && row._cur !== 'empty') {
-                    row.spans.push({ start: row._start, end: b.t, state: row._cur });
-                }
-                row._cur = state;
-                row._start = b.t;
-            }
-        }
-    }
-    for (const row of rows) {
-        if (row._cur && row._cur !== 'empty') {
-            row.spans.push({ start: row._start, end: endTime, state: row._cur });
-        }
-        delete row._cur; delete row._start;
+    for (const ev of events) {
+        const row = rowByKey.get(ev.powerupType);
+        if (!row) continue;
+        // Clip the run to the visible window so the bar doesn't extend
+        // beyond the canvas; record the original endpoints in the meta
+        // so the tooltip still shows the full duration.
+        const start = Math.max(startTime, ev.time);
+        const end   = Math.min(endTime,   ev.endTime);
+        if (end <= start) continue;
+        let state;
+        if      (ev.team === teamA) state = 'teamA';
+        else if (ev.team === teamB) state = 'teamB';
+        else                        state = 'other'; // mid-game team change / spectator
+        row.spans.push({ start, end, state, event: ev });
     }
     return { rows, teamA, teamB };
 }
+
+// Hit-test state for the powerup-timeline span hover tooltip — populated
+// by updatePowerupTimeline after each render so the canvas mousemove
+// handler can identify which row + span sits under the cursor.
+const powerupGraphHitState = {
+    startTime: 0,
+    endTime:   0,
+    W:         0,
+    rows:      [], // [{name, spans}]
+};
 
 function updatePowerupTimeline(startTime, endTime) {
     const panel = document.getElementById('powerup-timeline-panel');
@@ -2780,11 +2783,73 @@ function updatePowerupTimeline(startTime, endTime) {
     renderSpansTimeline('powerup-canvas', 'powerup-timeline-labels', {
         startTime, endTime, rows: data.rows,
         stateColors: {
-            teamA:     teamStrongColor(TEAM_COLORS[0]),
-            teamB:     teamStrongColor(TEAM_COLORS[1]),
-            contested: 'rgb(255, 255, 255)',
+            teamA: teamStrongColor(TEAM_COLORS[0]),
+            teamB: teamStrongColor(TEAM_COLORS[1]),
+            other: 'rgba(180, 180, 180, 0.85)',
         },
     });
+
+    // Refresh hit-test cache for the hover tooltip.
+    const canvas = document.getElementById('powerup-canvas');
+    powerupGraphHitState.startTime = startTime;
+    powerupGraphHitState.endTime   = endTime;
+    powerupGraphHitState.W         = canvas ? canvas.clientWidth : 0;
+    powerupGraphHitState.rows      = data.rows;
+}
+
+// Mousemove tooltip on the powerup-canvas. Hit-tests against the
+// last-rendered row layout (RC_ROW_H per row) and shows the source
+// PowerupEvent metadata (player, team, frags, duration).
+function attachPowerupTimelineTooltip() {
+    const canvas = document.getElementById('powerup-canvas');
+    if (!canvas || canvas._powerupTipAttached) return;
+    canvas._powerupTipAttached = true;
+
+    const wrapper = canvas.parentElement; // .region-timeline-outer (positioned)
+    const tip = document.createElement('div');
+    tip.className = 'canvas-tooltip';
+    tip.style.display = 'none';
+    wrapper.appendChild(tip);
+
+    canvas.addEventListener('mousemove', (e) => {
+        const s = powerupGraphHitState;
+        if (!s.W || !s.rows.length) { tip.style.display = 'none'; return; }
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const duration = s.endTime - s.startTime;
+        if (duration <= 0) { tip.style.display = 'none'; return; }
+
+        // Row index by Y; gracefully ignore the axis strip below the rows.
+        const rowIdx = Math.floor(my / RC_ROW_H);
+        if (rowIdx < 0 || rowIdx >= s.rows.length) { tip.style.display = 'none'; return; }
+        const row = s.rows[rowIdx];
+
+        // Find the span whose [start, end] window contains the cursor x.
+        let hit = null;
+        for (const sp of row.spans) {
+            const x1 = ((sp.start - s.startTime) / duration) * s.W;
+            const x2 = ((sp.end   - s.startTime) / duration) * s.W;
+            if (mx >= x1 && mx <= x2) { hit = sp; break; }
+        }
+        if (!hit || !hit.event) { tip.style.display = 'none'; return; }
+
+        const ev = hit.event;
+        const player = escapeHtml(ev.playerName || 'Unknown');
+        const team   = ev.team ? `<div>Team: ${escapeHtml(ev.team)}</div>` : '';
+        const dur    = (ev.duration != null) ? `${Math.round(ev.duration)}s` : '?';
+        tip.innerHTML = `<div><strong>${escapeHtml(row.name)}</strong> · <strong>${player}</strong></div>
+${team}<div>Frags: ${ev.frags || 0}</div>
+<div>Duration: ${dur}</div>`;
+        tip.style.display = 'block';
+        const tipW = tip.offsetWidth || 200;
+        const wrapW = wrapper.clientWidth;
+        let left = mx + 12;
+        if (left + tipW > wrapW) left = mx - tipW - 12;
+        tip.style.left = left + 'px';
+        tip.style.top  = (my + 12) + 'px';
+    });
+    canvas.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
 }
 
 function updateRegionControlTimeline(startTime, endTime) {
