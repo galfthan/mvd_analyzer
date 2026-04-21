@@ -1740,7 +1740,8 @@ th.sortable.sort-desc::after {
     color: var(--accent-cyan);
 }
 
-.locgraph-tooltip {
+.locgraph-tooltip,
+.canvas-tooltip {
     position: absolute;
     pointer-events: none;
     background: rgba(10, 10, 21, 0.95);
@@ -1753,6 +1754,12 @@ th.sortable.sort-desc::after {
     z-index: 100;
     max-width: 280px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Drop-dot tooltip uses normal whitespace so multi-line content stacks
+   instead of forming a single long line. */
+.canvas-tooltip {
+    white-space: normal;
 }
 
 .map-track-controls {

@@ -1739,7 +1739,8 @@ function prepWeaponsData(startTime, endTime, teams) {
 // every RL or LG backpack dropped within the [startTime, endTime]
 // window, with isTop=true for team-A drops and false for team-B.
 // Reads from timelineState.backpacks (populated from result.backpacks
-// in displayTimelineAnalysis).
+// in displayTimelineAnalysis). Each mark carries the source `drop`
+// entry so hover tooltips can show player, loc, and time.
 function computeBackpackDrops(startTime, endTime, teams) {
     const drops = timelineState.backpacks;
     if (!drops || drops.length === 0) return [];
@@ -1755,10 +1756,20 @@ function computeBackpackDrops(startTime, endTime, teams) {
                     : d.weapon === 'lg' ? GRAPH_COLORS.LG
                     : null;
         if (!color) continue;
-        out.push({ time: d.time, color, isTop });
+        out.push({ time: d.time, color, isTop, drop: d });
     }
     return out;
 }
+
+// Hit-test state for the weapon-graph drop dots — populated by
+// updateDetailGraph after each render so the canvas mousemove handler
+// can find the dot under the cursor without re-running the data prep.
+const weaponGraphHitState = {
+    startTime: 0,
+    endTime:   0,
+    W:         0,
+    dropMarks: [],
+};
 
 // ─── Data preparation: Health/Armor ─────────────────────────────────────────
 
@@ -2101,6 +2112,9 @@ function setupUnifiedTimeline() {
     ['detail-graph-canvas', 'powerup-canvas', 'region-control-canvas',
      'health-armor-canvas', 'frags-canvas', 'score-canvas'].forEach(installGraphPanZoom);
 
+    // --- Hover tooltip on weapon-graph drop dots ---
+    attachWeaponGraphTooltip();
+
     unifiedTimelineInitialized = true;
 }
 
@@ -2422,6 +2436,79 @@ function updateDetailGraph(startTime, endTime) {
         startTime, endTime, dataPoints: points, maxValue: max,
         yAxisId: 'detail-y-axis', dropMarks,
     });
+    // Refresh the hit-test cache so the tooltip can find dots after
+    // pan/zoom and after segment selection.
+    const canvas = document.getElementById('detail-graph-canvas');
+    weaponGraphHitState.startTime = startTime;
+    weaponGraphHitState.endTime   = endTime;
+    weaponGraphHitState.W         = canvas ? canvas.clientWidth : 0;
+    weaponGraphHitState.dropMarks = dropMarks;
+}
+
+// Mousemove tooltip on the weapon-graph canvas: highlights the drop
+// dot under the cursor and shows {player, weapon, loc, time}. Layout
+// constants must match renderDivergingGraph (PAD, AXIS_H, DROP_STRIP_H).
+function attachWeaponGraphTooltip() {
+    const canvas = document.getElementById('detail-graph-canvas');
+    if (!canvas || canvas._weaponTipAttached) return;
+    canvas._weaponTipAttached = true;
+
+    const wrapper = canvas.parentElement; // .detail-graph-outer (positioned)
+    const tip = document.createElement('div');
+    tip.className = 'canvas-tooltip';
+    tip.style.display = 'none';
+    wrapper.appendChild(tip);
+
+    const HIT_R     = 6;   // hit radius (slightly larger than dot radius=3)
+    const HIT_DY    = 8;   // vertical tolerance — generous so users can hover near
+    const PAD       = 4;
+    const AXIS_H    = 20;
+    const H         = 200;
+    const graphH    = H - AXIS_H;
+    const DROP_STRIP_H = 8;
+    const topY    = PAD + DROP_STRIP_H / 2;
+    const bottomY = graphH - PAD - DROP_STRIP_H / 2;
+
+    canvas.addEventListener('mousemove', (e) => {
+        const s = weaponGraphHitState;
+        if (!s.W || !s.dropMarks.length) { tip.style.display = 'none'; return; }
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const duration = s.endTime - s.startTime;
+        if (duration <= 0) { tip.style.display = 'none'; return; }
+
+        let best = null;
+        let bestDx = HIT_R + 1;
+        for (const m of s.dropMarks) {
+            const x = ((m.time - s.startTime) / duration) * s.W;
+            const y = m.isTop ? topY : bottomY;
+            const dx = Math.abs(mx - x);
+            const dy = Math.abs(my - y);
+            if (dy <= HIT_DY && dx <= bestDx) {
+                bestDx = dx;
+                best = m;
+            }
+        }
+
+        if (!best) { tip.style.display = 'none'; return; }
+
+        const d = best.drop;
+        const weapon = (d.weapon || '').toUpperCase();
+        const locLine = d.loc ? `<div>Loc: ${escapeHtml(d.loc)}</div>` : '';
+        tip.innerHTML = `<div><strong>${escapeHtml(d.player || '?')}</strong> dropped <strong>${weapon}</strong></div>
+${locLine}<div>Time: ${formatDuration(d.time)}</div>`;
+        tip.style.display = 'block';
+        // Position offset from cursor; clamp inside the wrapper so the tip
+        // doesn't get cut off near the right edge.
+        const tipW = tip.offsetWidth || 200;
+        const wrapW = wrapper.clientWidth;
+        let left = mx + 12;
+        if (left + tipW > wrapW) left = mx - tipW - 12;
+        tip.style.left = left + 'px';
+        tip.style.top  = (my + 12) + 'px';
+    });
+    canvas.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
 }
 
 function updateHealthArmorGraph(startTime, endTime) {
