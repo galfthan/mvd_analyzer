@@ -71,6 +71,8 @@ The concrete event list, in stable order:
 | `KindItemSpawn` | `ItemSpawnEvent` | Item entity observed — baseline known (kind, position) |
 | `KindItemState` | `ItemStateEvent` | Item became taken or respawned — from entity modelindex transitions |
 | `KindBackpackDropHint` | `BackpackDropHintEvent` | KTX `//ktx drop` stuffcmd: `(BackpackEnt, ItemFlags, PlayerEnt)` for RL/LG drops only |
+| `KindItemPickupHint` | `ItemPickupHintEvent` | KTX `//ktx took` stuffcmd: `(ItemEnt, RespawnSec, PlayerEnt)` — authoritative pickup attribution for every MH / armor / weapon / powerup touch |
+| `KindBackpackPickupHint` | `BackpackPickupHintEvent` | KTX `//ktx bp` stuffcmd: `(BackpackEnt, PlayerEnt)` — symmetric to `//ktx drop`, fires only for RL/LG packs |
 
 `DeathEvent` and `SpawnEvent` are derived events synthesised by the
 parser from protocol-level `StatHealth` transitions. They fire at the
@@ -95,6 +97,18 @@ Classification uses standard Quake 1 item model paths (armor.mdl +
 skin for GA/YA/RA; maps/b_bh*.bsp for health; progs/g_*.mdl for
 weapons; progs/{quaddama,invulner,invisibl}.mdl for powerups) —
 protocol-level, not KTX-specific.
+
+`ItemPickupHintEvent` and `BackpackPickupHintEvent` are the
+authoritative KTX counterparts to `ItemStateEvent`: they pin each
+pickup to a concrete player edict, replacing the nearest-origin
+heuristic that `ItemStateEvent` alone requires for attribution.
+`//ktx took` (`ktx/src/items.c:355, 541, 1048, 2074, 2083`) fires on
+every competitive item touch; `//ktx bp`
+(`ktx/src/items.c:2471`) fires on every RL/LG backpack pickup —
+symmetric to the existing `//ktx drop` hint. Both are
+**KTX-specific**: a non-KTX server (ktpro, CustomTF, or vanilla)
+will not emit them, in which case consumers fall back to
+`ItemStateEvent` + heuristics or to per-player stats deltas.
 
 ## Writing a new Source
 

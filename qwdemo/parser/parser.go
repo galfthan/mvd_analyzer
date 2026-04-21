@@ -34,6 +34,8 @@ const (
 	EventItemSpawn
 	EventItemState
 	EventBackpackDropHint
+	EventItemPickupHint
+	EventBackpackPickupHint
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -304,6 +306,12 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 				return err
 			}
 			if err := p.tryEmitBackpackDropHint(s, msg.Time); err != nil {
+				return err
+			}
+			if err := p.tryEmitItemPickupHint(s, msg.Time); err != nil {
+				return err
+			}
+			if err := p.tryEmitBackpackPickupHint(s, msg.Time); err != nil {
 				return err
 			}
 

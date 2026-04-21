@@ -93,9 +93,10 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 `PrintEvent`, `StatUpdateEvent`, `FragUpdateEvent`, `PlayerPositionEvent`,
 `DamageEvent`, `DemoInfoEvent`, `IntermissionEvent`, `StuffTextEvent`,
 `CenterPrintEvent`, `ServerInfoEvent`, `DeathEvent`, `SpawnEvent`,
-`ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`. Domain
-types carried by events — `ServerData`, `PlayerInfo`, `PlayerState`,
-`Stats` — are source-agnostic.
+`ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`,
+`ItemPickupHintEvent`, `BackpackPickupHintEvent`. Domain types carried
+by events — `ServerData`, `PlayerInfo`, `PlayerState`, `Stats` — are
+source-agnostic.
 
 `DeathEvent` / `SpawnEvent` are derived events the parser synthesises
 from `StatHealth` edges so analytics never has to reconstruct
@@ -104,7 +105,12 @@ death/spawn by comparing samples across the sampling boundary.
 stream (`svc_spawnbaseline` + `svc_packetentities` /
 `svc_deltapacketentities`): every item's identity and
 pickup/respawn transitions come out of the wire directly — no KTX
-prints, no BSP preprocessing.
+prints, no BSP preprocessing. `ItemPickupHintEvent` /
+`BackpackPickupHintEvent` / `BackpackDropHintEvent` carry KTX's
+authoritative `//ktx took`, `//ktx bp`, `//ktx drop` directives — the
+touch-level pickup attribution that entity-state alone can only
+approximate. They only fire on KTX servers; non-KTX sources get
+entity-state and stats deltas.
 
 To write a new source: implement `events.Source`, emit the concrete event
 types as you decode your wire format. That's it. See
@@ -117,8 +123,9 @@ Defined in [`qwanalytics/result`](qwanalytics/result/result.go). `Result` is
 a JSON-serializable struct with sub-results from every analyzer that ran:
 match, frags, messages, demoinfo, timeline analysis, metadata, locgraph,
 items (per-item pickup / respawn timeline — works on any MVD source),
-and backpacks (RL/LG drops attributed to the dying player via KTX's
-`//ktx drop` hint).
+and backpacks (RL/LG drops attributed to the dropping player via KTX's
+`//ktx drop` hint; `//ktx bp` pickup hints are parsed but not yet
+consumed by the analyzer).
 
 Every breaking change bumps `CurrentSchemaVersion` (currently `4`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.

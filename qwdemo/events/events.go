@@ -51,9 +51,11 @@ const (
 	KindServerInfo       = parser.EventServerInfo
 	KindDeath            = parser.EventDeath
 	KindSpawn            = parser.EventSpawn
-	KindItemSpawn        = parser.EventItemSpawn
-	KindItemState        = parser.EventItemState
-	KindBackpackDropHint = parser.EventBackpackDropHint
+	KindItemSpawn          = parser.EventItemSpawn
+	KindItemState          = parser.EventItemState
+	KindBackpackDropHint   = parser.EventBackpackDropHint
+	KindItemPickupHint     = parser.EventItemPickupHint
+	KindBackpackPickupHint = parser.EventBackpackPickupHint
 )
 
 // Concrete event types emitted on the Source.
@@ -72,10 +74,12 @@ type (
 	ServerInfoEvent       = parser.ServerInfoEvent
 	DeathEvent            = parser.DeathEvent
 	SpawnEvent            = parser.SpawnEvent
-	ItemSpawnEvent        = parser.ItemSpawnEvent
-	ItemStateEvent        = parser.ItemStateEvent
-	BackpackDropHintEvent = parser.BackpackDropHintEvent
-	EntityState           = parser.EntityState
+	ItemSpawnEvent          = parser.ItemSpawnEvent
+	ItemStateEvent          = parser.ItemStateEvent
+	BackpackDropHintEvent   = parser.BackpackDropHintEvent
+	ItemPickupHintEvent     = parser.ItemPickupHintEvent
+	BackpackPickupHintEvent = parser.BackpackPickupHintEvent
+	EntityState             = parser.EntityState
 )
 
 // Domain types carried by events — not MVD-specific, shared across all

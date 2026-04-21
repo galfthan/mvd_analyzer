@@ -127,8 +127,8 @@ entity-state stream. Item classification uses standard Quake 1 model
 paths (no KTX-specific data), so *every* item with a visible model
 gets tracked on *any* demo source, including ktpro, CustomTF, or
 non-KTX servers. No map preprocessing is required. `TakenBy`
-attribution uses the nearest-player-origin at the moment of pickup
-(best-effort label since the entity-state stream doesn't carry
+attribution currently uses the nearest-player-origin at the moment of
+pickup (best-effort label since the entity-state stream doesn't carry
 "who touched it"). `RespawnAt` is observed directly, so MH rot
 (which varies with damage taken) falls out naturally — no special
 case.
@@ -139,6 +139,14 @@ visible on the wire for that cycle, so we don't record a phase
 for it. The resulting phase will span the whole contested window
 (e.g. "RA taken at 31s, respawn observed at 91s" means the RA was
 never practically available in that 60 s window).
+
+Authoritative alternative (not yet wired into this analyzer): the
+parser now emits `ItemPickupHintEvent` for every KTX `//ktx took`
+directive, pinning each pickup to a concrete player edict without the
+nearest-origin heuristic. It covers MH / armors / heavy weapons /
+powerups on KTX servers; a future refactor will consume these as the
+primary `TakenBy` source and keep the nearest-origin path as a
+fallback for non-KTX sources.
 
 ### Backpacks
 
@@ -155,11 +163,15 @@ Coverage caveats:
   SSG/NG/SNG/GL and empty packs are invisible to this signal. The
   QW protocol does not carry backpack contents on the wire as
   entity state, so there is no alternative source.
-- **No pickup tracking.** The wire-level entity-state stream for
-  backpack edicts produces phantom visibility cycles that aren't
-  distinguishable from real fast pickups. Until that's diagnosed,
-  pickup attribution is intentionally left off the schema. Each
-  `BackpackDrop` carries only drop-side fields.
+- **No pickup tracking (yet).** The wire-level entity-state stream
+  for backpack edicts produces phantom visibility cycles that aren't
+  distinguishable from real fast pickups, so it cannot be used for
+  attribution. The parser now emits `BackpackPickupHintEvent` for
+  KTX's `//ktx bp <backpack_ent> <player_ent>` directive
+  (`ktx/src/items.c:2471`) — symmetric to `//ktx drop`, same RL/LG
+  domain — which *is* authoritative. Wiring it into `BackpackAnalyzer`
+  to add pickup-side fields to the schema is a follow-up change; this
+  analyzer currently still emits drop-side data only.
 
 ```go
 type BackpackDrop struct {
