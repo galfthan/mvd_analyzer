@@ -4654,14 +4654,22 @@ function drawDropD(ctx, x, y, weapon, alpha) {
     else if (weapon === 'lg') fill = `rgba(0, 217, 255, ${a})`;
     else                      fill = `rgba(255, 255, 255, ${a})`;
     ctx.save();
-    ctx.font = 'bold 14px sans-serif';
+    ctx.font = 'bold 28px sans-serif';
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.lineWidth = 3;
+    // Use the alphabetic baseline + measured glyph metrics to put the
+    // letter's *visual* center at (x, y). textBaseline:'middle' is
+    // close but not exact for sans-serif "D" — it leaves a few pixels
+    // of optical drift between the X center and the D center.
+    ctx.textBaseline = 'alphabetic';
+    const m = ctx.measureText('D');
+    const ascent  = m.actualBoundingBoxAscent  || 20; // sane fallback
+    const descent = m.actualBoundingBoxDescent || 0;
+    const yDraw = y + (ascent - descent) / 2;
+    ctx.lineWidth = 5;
     ctx.strokeStyle = `rgba(0, 0, 0, ${a})`;
-    ctx.strokeText('D', x, y);
+    ctx.strokeText('D', x, yDraw);
     ctx.fillStyle = fill;
-    ctx.fillText('D', x, y);
+    ctx.fillText('D', x, yDraw);
     ctx.restore();
 }
 
