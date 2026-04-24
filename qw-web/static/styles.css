@@ -1597,6 +1597,33 @@ th.sortable.sort-desc::after {
     gap: 15px;
 }
 
+.packdrops-filters {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+}
+.packdrops-filters label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.packdrops-filters select {
+    background: rgba(255, 255, 255, 0.05);
+    color: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 0.9rem;
+}
+.packdrops-count {
+    margin-left: auto;
+    color: #888;
+    font-variant-numeric: tabular-nums;
+}
+
 .pack-status {
     font-weight: bold;
     padding: 2px 8px;

@@ -74,8 +74,16 @@ XHR against `locs/<name>.loc`. `make build` copies the corpus from
 The Pack Drops tab shows every RL / LG backpack drop as one row,
 joined with its pickup outcome. The drop side comes from
 `result.backpacks`; the pickup side from `result.weaponPickups` entries
-with `source == "backpack"`, joined on `backpackEnt == entNum`. A
-drop with no matching pickup is shown as `expired`.
+with `source == "backpack"`, joined on `(backpackEnt, dropTime)` —
+the compound key is needed because QW servers recycle backpack
+edict numbers across drops, so `entNum` alone would collide. A drop
+with no matching pickup is shown as `expired`.
+
+Columns: Time, Dropper, Drop Team, Weapon, Drop (hub link),
+Status, Picker, Pick Team, Kills, Run (hub link). Three filter
+dropdowns above the table narrow rows by Dropper team, Picker team,
+or Status label; selections persist across demo reloads when the
+same value is available in the new data.
 
 Status column derivation:
 

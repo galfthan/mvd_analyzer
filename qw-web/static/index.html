@@ -631,14 +631,23 @@
             <div id="tab-packdrops" class="tab-content">
                 <div class="panel">
                     <h3>RL / LG Backpack Drops</h3>
+                    <div class="packdrops-filters">
+                        <label>Dropper team: <select id="packdrops-filter-dropteam"><option value="">All</option></select></label>
+                        <label>Picker team: <select id="packdrops-filter-pickteam"><option value="">All</option></select></label>
+                        <label>Status: <select id="packdrops-filter-status"><option value="">All</option></select></label>
+                        <span id="packdrops-count" class="packdrops-count"></span>
+                    </div>
                     <table class="stats-table" id="packdrops-table">
                         <thead>
                             <tr>
                                 <th>Time</th>
                                 <th>Dropper</th>
+                                <th>Drop Team</th>
                                 <th>Weapon</th>
                                 <th title="Hub replay starting 10s before the drop">Drop</th>
-                                <th>Pickup</th>
+                                <th>Status</th>
+                                <th>Picker</th>
+                                <th>Pick Team</th>
                                 <th title="Frags the picker scored with the pack's weapon before their next death">Kills</th>
                                 <th title="Hub replay from 3s before pickup to picker's next death">Run</th>
                             </tr>
