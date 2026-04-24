@@ -12,15 +12,14 @@ package result
 //     SSG/NG/SNG/GL-only packs have no wire-level pickup signal and
 //     do not appear here.
 //
-// The Kills field is an effectiveness metric: frags the picker
-// scored using Weapon, between PickupTime and their NextDeathTime
-// (or match end if they never die after). "Already had the weapon
-// before pickup" is exposed as HadBefore — a redundant pickup (picker
-// already owns Weapon) still fires the hint, still records an entry,
-// and credits any subsequent kills with Weapon to the entry. When
-// HadBefore is true the Kills number describes kills the player
-// would have made anyway, but it's useful for measuring denial value
-// (picker had RL, grabbed the pack anyway to deny the enemy).
+// Kills is credited only to the pickup that actually granted the
+// weapon (HadBefore=false). Redundant grabs (HadBefore=true — the
+// picker already held Weapon) stay in the list as zero-kill entries
+// so denial labelling in the frontend still works, but they do not
+// claim kills that would have happened anyway with the weapon the
+// picker already carried. Within a single life the first pickup of
+// a weapon is by construction HadBefore=false, and all subsequent
+// pickups of that same weapon in the same life are HadBefore=true.
 type WeaponPickup struct {
 	Time          float64 `json:"time"`
 	Player        string  `json:"player"`

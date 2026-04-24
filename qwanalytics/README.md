@@ -220,12 +220,18 @@ analyzer shadows STAT_ITEMS live; the server sends the STAT_ITEMS
 update on the packet after the pickup hint, so the cached bitfield
 is the pre-pickup state.
 
-`Kills` counts frags by the picker with `Weapon` in the window
-`(Time, NextDeathTime]`, drawn from `ctx.FragEntries` (so
-`WeaponPickupsAnalyzer` must run after `FragAnalyzer`). Teamkills
-and suicides are excluded. `NextDeathTime` is 0 when the picker
-never dies before match end — kills are then unbounded on the
-right.
+`Kills` is credited only to pickups that actually granted the
+weapon (`HadBefore=false`). Redundant grabs (`HadBefore=true` — the
+picker already held the weapon) always report 0 kills, because
+those kills would have happened anyway with the weapon the player
+already had. Each frag goes to the most-recent granting pickup
+whose window `(Time, NextDeathTime]` contains the frag time, drawn
+from `ctx.FragEntries` (so `WeaponPickupsAnalyzer` must run after
+`FragAnalyzer`). Teamkills and suicides are excluded.
+`NextDeathTime` is 0 when the picker never dies before match end —
+kills are then unbounded on the right. The redundant-grab rows
+stay in the output so frontends can still surface denial semantics
+(the `enemy RL` / `xfer RL` chips), they just carry 0 kills.
 
 ```go
 type WeaponPickup struct {

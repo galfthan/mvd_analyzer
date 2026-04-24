@@ -88,11 +88,12 @@ Status column derivation:
 | enemy team, picker hadBefore            | `enemy RL/LG`|
 
 The `Kills` column is `weaponPickups[i].kills` — frags the picker
-scored with the pack's weapon before their next death. For
-`hadBefore` rows the kills number is dimmed: the weapon was already
-in the picker's hand before the pack, so it's not a "gained
-capability" metric — it's the player's normal RL/LG effectiveness in
-that window.
+scored with the pack's weapon before their next death. Only
+pickups that actually granted the weapon (the picker didn't have
+it yet) are eligible for kill credit; redundant grabs — where
+`hadBefore` is true and the pickup didn't give the picker anything
+new — always show 0 and are dimmed. The denial semantics still
+show through the status chip (`enemy RL`, `xfer RL`).
 
 The `Drop` and `Run` columns are hub.quakeworld.nu replay links.
 `Drop` spans 10 s leading into the drop, tracking the dropper;

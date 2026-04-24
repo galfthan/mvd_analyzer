@@ -241,11 +241,19 @@ func (a *WeaponPickupsAnalyzer) detectMatchBoundary(e *events.PrintEvent) {
 }
 
 // Finalize pairs every recorded pickup with its picker's next death
-// and attributes kills from ctx.FragEntries. Each frag is credited to
-// at most one pickup — the most recent pickup of that weapon by the
-// killer whose window [pickupTime, nextDeath] still contains the frag.
-// Without this rule two pickups of the same weapon in the same life
-// would double-count every intervening kill.
+// and attributes kills from ctx.FragEntries. Attribution rules:
+//
+//  1. Only pickups that actually granted the weapon (HadBefore=false)
+//     are eligible for kill credit. In QW weapons are cleared on
+//     respawn, so within a single life each (player, weapon) pair has
+//     at most one "granting" pickup; redundant grabs (hadBefore=true)
+//     never gave the player anything new and must not claim kills
+//     that would have happened anyway. They still appear in the
+//     result with Kills=0 so the denial semantics stay visible.
+//  2. Each frag is credited to the most-recent eligible pickup whose
+//     window [pickupTime, nextDeath] contains the frag. This prevents
+//     a granting pickup in an earlier life from absorbing kills made
+//     after the player died and acquired the weapon again.
 //
 // FragEntries are name-keyed, so we resolve the picker's display name
 // from ctx.Players[slot].Name (patched by the registry to the
@@ -275,6 +283,9 @@ func (a *WeaponPickupsAnalyzer) Finalize() (interface{}, error) {
 	}
 	windowsByPW := make(map[pwKey][]pickupWindow)
 	for i, p := range a.pickups {
+		if p.hadBefore {
+			continue // redundant grab — not eligible for kill credit (rule 1)
+		}
 		picker := a.ctx.Players[p.pickerSlot]
 		if picker == nil {
 			continue

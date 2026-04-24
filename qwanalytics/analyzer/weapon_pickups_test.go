@@ -51,10 +51,13 @@ func TestWeaponPickups_WorldRLWithKills(t *testing.T) {
 	}
 }
 
-// Pickup where the player already held the weapon (STAT_ITEMS RL bit
-// set before the pickup hint). hadBefore=true; kills are still
-// attributed because the weapon is what scored them.
-func TestWeaponPickups_HadBeforeStillCountsKills(t *testing.T) {
+// Redundant grab: player already held the weapon (STAT_ITEMS RL bit
+// set before the pickup hint). hadBefore=true, so the pickup is
+// tracked — the denial label in the frontend depends on it — but
+// kills are NOT credited to it: the player would have made those
+// kills anyway with the RL they already had. Attribution instead
+// goes to whichever earlier pickup granted the weapon.
+func TestWeaponPickups_HadBeforeDoesNotClaimKills(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[2] = &mvd.PlayerInfo{Slot: 2, Name: "hoarder", Team: "blue"}
 
@@ -71,8 +74,8 @@ func TestWeaponPickups_HadBeforeStillCountsKills(t *testing.T) {
 	if !ps[0].HadBefore {
 		t.Errorf("HadBefore should be true — player had RL bit set before pickup")
 	}
-	if ps[0].Kills != 1 {
-		t.Errorf("Kills = %d, want 1", ps[0].Kills)
+	if ps[0].Kills != 0 {
+		t.Errorf("Kills = %d, want 0 (redundant grab must not claim kills)", ps[0].Kills)
 	}
 }
 
@@ -147,18 +150,18 @@ func TestWeaponPickups_TeamkillsAndSuicidesExcluded(t *testing.T) {
 	}
 }
 
-// Two pickups of the same weapon in the same life must not
-// double-count kills. Each frag is attributed to the most recent
-// pickup of that weapon by the killer — not every pickup whose
-// window contains the frag. Previously both pickups got credit for
-// every intervening kill.
-func TestWeaponPickups_NoDoubleCountAcrossPickups(t *testing.T) {
+// Two pickups of the same weapon in the same life: the first (fresh)
+// grabs all the kill credit; any subsequent redundant grabs
+// (hadBefore=true) get 0. This is the rule that makes
+// "enemy RL" / "xfer RL" chips read as 0 kills unless the picker
+// had never held the weapon this life.
+func TestWeaponPickups_RedundantSecondPickupGetsZero(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
 
-	// Pickup 1 at t=10, pickup 2 at t=20, death at t=30. Player
-	// already had RL when pickup 2 fires (hadBefore=true). Frags
-	// are at t=12, t=15, t=25, t=28 — all RL.
+	// Pickup 1 at t=10 (hadBefore=false), pickup 2 at t=20
+	// (hadBefore=true after StatUpdate at t=11), death at t=30.
+	// Frags at t=12, t=15, t=25, t=28 — all RL.
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "rl", Time: 0})
 	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 10})
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 11})
@@ -177,13 +180,47 @@ func TestWeaponPickups_NoDoubleCountAcrossPickups(t *testing.T) {
 	if len(ps) != 2 {
 		t.Fatalf("want 2 pickups, got %d", len(ps))
 	}
-	// Pickup 1 owns kills between (10, 20] — t=12 and t=15.
-	// Pickup 2 owns kills between (20, 30] — t=25 and t=28.
-	if ps[0].Kills != 2 {
-		t.Errorf("pickup[0].Kills = %d, want 2", ps[0].Kills)
+	// Pickup 1 (hadBefore=false, granted the weapon) owns all 4 kills
+	// in the life. Pickup 2 (redundant) owns 0.
+	if ps[0].Kills != 4 {
+		t.Errorf("pickup[0].Kills = %d, want 4 (granting pickup)", ps[0].Kills)
 	}
-	if ps[1].Kills != 2 {
-		t.Errorf("pickup[1].Kills = %d, want 2 (not 4 — no double-count)", ps[1].Kills)
+	if ps[1].HadBefore != true || ps[1].Kills != 0 {
+		t.Errorf("pickup[1] = %+v, want HadBefore=true Kills=0 (redundant grab)", ps[1])
+	}
+}
+
+// After a death + respawn, the player's inventory resets; the next
+// RL pickup is hadBefore=false even though an earlier life's pickup
+// was also hadBefore=false. Kills after the respawn go to the new
+// granting pickup, not the dead life's.
+func TestWeaponPickups_FreshPickupAfterDeathIsItsOwnGrant(t *testing.T) {
+	a, ctx := newTestWeaponPickupsAnalyzer()
+	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+
+	// Life 1: pickup at t=10 (fresh), death at t=30 — STAT_ITEMS
+	// clears at death, which the server sends as a StatUpdate.
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "rl", Time: 0})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 10})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 11})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 30})
+	// Life 2: pickup at t=40 (fresh again), no further death.
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 40})
+
+	ctx.FragEntries = []FragEntry{
+		{Time: 20, Killer: "p", Weapon: "rl"}, // life 1
+		{Time: 45, Killer: "p", Weapon: "rl"}, // life 2
+		{Time: 50, Killer: "p", Weapon: "rl"}, // life 2
+	}
+
+	out, _ := a.Finalize()
+	ps := out.([]WeaponPickup)
+	if ps[0].Kills != 1 {
+		t.Errorf("life-1 pickup kills = %d, want 1", ps[0].Kills)
+	}
+	if ps[1].HadBefore || ps[1].Kills != 2 {
+		t.Errorf("life-2 pickup = %+v, want hadBefore=false kills=2", ps[1])
 	}
 }
 
