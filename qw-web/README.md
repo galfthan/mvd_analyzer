@@ -69,6 +69,36 @@ bundle). Instead, when the analyzer needs a loc file, it calls
 XHR against `locs/<name>.loc`. `make build` copies the corpus from
 `qwanalytics/loc/data/` into `dist/locs/`.
 
+## Pack Drops tab
+
+The Pack Drops tab shows every RL / LG backpack drop as one row,
+joined with its pickup outcome. The drop side comes from
+`result.backpacks`; the pickup side from `result.weaponPickups` entries
+with `source == "backpack"`, joined on `backpackEnt == entNum`. A
+drop with no matching pickup is shown as `expired`.
+
+Status column derivation:
+
+| condition                               | label        |
+|-----------------------------------------|--------------|
+| no matching pickup                      | `expired`    |
+| same team as dropper, picker !hadBefore | `xfer`       |
+| same team as dropper, picker hadBefore  | `xfer RL/LG` |
+| enemy team, picker !hadBefore           | `enemy`      |
+| enemy team, picker hadBefore            | `enemy RL/LG`|
+
+The `Kills` column is `weaponPickups[i].kills` — frags the picker
+scored with the pack's weapon before their next death. For
+`hadBefore` rows the kills number is dimmed: the weapon was already
+in the picker's hand before the pack, so it's not a "gained
+capability" metric — it's the player's normal RL/LG effectiveness in
+that window.
+
+The `Drop` and `Run` columns are hub.quakeworld.nu replay links.
+`Drop` spans 10 s leading into the drop, tracking the dropper;
+`Run` spans 3 s before pickup to the picker's next death (or +15 s
+if they survived to match end), tracking the picker.
+
 ## Map-tab item overlay
 
 When the result contains an `items` field (any MVD source — KTX,

@@ -535,6 +535,9 @@ function displayResults(result) {
         displayKeyMoments(result);
     }
 
+    // Pack Drops — always call so stale rows are cleared between demos.
+    displayPackDrops(result);
+
     // Map View
     if (result.timelineAnalysis) {
         initMapView(result);
@@ -1276,6 +1279,110 @@ function getPowerupDisplay(type) {
         case 'ring': return 'Ring';
         default: return type;
     }
+}
+
+// Pack Drops table — joins result.backpacks (the drop side from
+// //ktx drop) with the backpack-sourced entries in result.weaponPickups
+// (the pickup side from //ktx bp) by backpackEnt. A drop with no
+// matching pickup is shown as "expired" — the pack despawned or
+// fell into a lava pit before anyone touched it.
+function displayPackDrops(result) {
+    const tbody = document.getElementById('packdrops-body');
+    const emptyMsg = document.getElementById('packdrops-empty');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const drops = result.backpacks || [];
+    if (drops.length === 0) {
+        emptyMsg.style.display = 'block';
+        return;
+    }
+    emptyMsg.style.display = 'none';
+
+    const hubInfo = currentResult?.hubInfo;
+    const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
+    const demoOff = timelineState.demoOffset || 0;
+
+    // Build pickup lookup keyed by backpackEnt.
+    const pickupByEnt = {};
+    for (const p of (result.weaponPickups || [])) {
+        if (p.source === 'backpack' && p.backpackEnt) {
+            pickupByEnt[p.backpackEnt] = p;
+        }
+    }
+
+    const hubAnchor = (from, to, trackName) => {
+        if (!hubInfo || !hubInfo.gameId) return '-';
+        const trackId = playerUserIDs[trackName];
+        if (!trackId) return '-';
+        const f = Math.max(0, Math.floor(from + demoOff));
+        const t = Math.floor(to + demoOff);
+        const url = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${f}&to=${t}&track=${trackId}`;
+        return `<a href="${url}" target="_blank" class="viewer-link">Hub</a>`;
+    };
+
+    // Status derivation. Pack weapon is "rl" or "lg"; the picker's
+    // hadBefore bit tells us if the grab was a denial (picker already
+    // owned the weapon). Same-team vs enemy comes from comparing the
+    // dropper's team against the picker's team.
+    const statusFor = (drop, pickup) => {
+        if (!pickup) return { label: 'expired', cls: 'status-expired' };
+        const sameTeam = pickup.team && drop.team && pickup.team === drop.team;
+        const weaponUpper = drop.weapon.toUpperCase();
+        if (sameTeam) {
+            if (pickup.hadBefore) return { label: `xfer ${weaponUpper}`, cls: 'status-xfer-had' };
+            return { label: 'xfer', cls: 'status-xfer' };
+        }
+        if (pickup.hadBefore) return { label: `enemy ${weaponUpper}`, cls: 'status-enemy-had' };
+        return { label: 'enemy', cls: 'status-enemy' };
+    };
+
+    drops.forEach(drop => {
+        const pickup = pickupByEnt[drop.entNum];
+        const status = statusFor(drop, pickup);
+
+        const tr = document.createElement('tr');
+
+        // Drop-side hub link: 10s leading into the drop, tracking the dropper.
+        const dropHub = hubAnchor(drop.time - 10, drop.time + 2, drop.player);
+
+        // Run-side hub link: 3s before pickup → picker's next death
+        // (or +15s if they never die before match end), tracking the picker.
+        let runHub = '-';
+        let pickupCell = '<span class="pack-status status-expired">expired</span>';
+        let killsCell = '-';
+        if (pickup) {
+            const endTime = pickup.nextDeathTime > 0 ? pickup.nextDeathTime : pickup.time + 15;
+            runHub = hubAnchor(pickup.time - 3, endTime, pickup.player);
+            const pickerLabel = escapeHtml(pickup.player || '?');
+            pickupCell = `<span class="pack-status ${status.cls}">${escapeHtml(status.label)}</span> ${pickerLabel}`;
+            // For hadBefore pickups the weapon was already in hand, so
+            // the kills number is the player's kills with that weapon in
+            // the window — redundant of their normal RL/LG effectiveness,
+            // not a "gained capability" metric. Dim it to signal that.
+            if (pickup.hadBefore) {
+                killsCell = `<span class="kills-redundant">${pickup.kills}</span>`;
+            } else {
+                killsCell = String(pickup.kills);
+            }
+        }
+
+        tr.innerHTML = `
+            <td class="time-cell time-link">${formatDuration(drop.time)}</td>
+            <td>${escapeHtml(drop.player || '?')}</td>
+            <td class="weapon-cell weapon-${drop.weapon}">${drop.weapon.toUpperCase()}</td>
+            <td>${dropHub}</td>
+            <td>${pickupCell}</td>
+            <td class="kills-cell">${killsCell}</td>
+            <td>${runHub}</td>
+        `;
+
+        tr.querySelector('.time-link').addEventListener('click', () => {
+            setCurrentTime(drop.time);
+        });
+
+        tbody.appendChild(tr);
+    });
 }
 
 function formatDuration(seconds) {

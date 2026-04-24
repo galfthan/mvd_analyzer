@@ -131,11 +131,13 @@ Defined in [`qwanalytics/result`](qwanalytics/result/result.go). `Result` is
 a JSON-serializable struct with sub-results from every analyzer that ran:
 match, frags, messages, demoinfo, timeline analysis, metadata, locgraph,
 items (per-item pickup / respawn timeline — works on any MVD source),
-and backpacks (RL/LG drops attributed to the dropping player via KTX's
-`//ktx drop` hint; `//ktx bp` pickup hints are parsed but not yet
-consumed by the analyzer).
+backpacks (RL/LG drops attributed to the dropping player via KTX's
+`//ktx drop` hint), and weaponPickups (every slot-weapon acquisition —
+world spawners and RL/LG backpacks — with a kills-before-next-death
+effectiveness metric; joins to backpacks via `backpackEnt` ==
+`backpacks[].entNum`).
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `4`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `5`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 
 ### Running the pipeline

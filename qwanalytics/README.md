@@ -94,13 +94,14 @@ type Result struct {
     LocGraph         *LocGraphResult          // loc-to-loc movement graph
     Items            *ItemsResult             // per-item pickup / respawn timeline (all MVD sources)
     Backpacks        []BackpackDrop           // RL/LG backpack drops (from KTX //ktx drop hint)
+    WeaponPickups    []WeaponPickup           // slot-weapon pickups + kills-before-next-death metric
     Errors           []string
 }
 ```
 
 Each sub-type is defined in its own file under `result/`. The JSON shape
 is the wire contract with every consumer; breaking changes bump
-`CurrentSchemaVersion` (currently `4`).
+`CurrentSchemaVersion` (currently `5`).
 
 ### Items result
 
@@ -171,19 +172,15 @@ Coverage caveats:
   SSG/NG/SNG/GL and empty packs are invisible to this signal. The
   QW protocol does not carry backpack contents on the wire as
   entity state, so there is no alternative source.
-- **No pickup tracking (yet).** The wire-level entity-state stream
-  for backpack edicts produces phantom visibility cycles that aren't
-  distinguishable from real fast pickups, so it cannot be used for
-  attribution. Two authoritative parser events are now available but
-  not yet consumed: `BackpackPickupHintEvent` from KTX's `//ktx bp`
-  directive (`ktx/src/items.c:2471`) — symmetric to `//ktx drop`,
-  same RL/LG domain — and `BackpackPickupPrintEvent` from the
-  per-client `"You get "` print opener (`ktx/src/items.c:2404`),
-  which covers every backpack class including SSG/NG/GL packs but
-  only when the picking player had `msg 0` set (see the PRINT_LOW
-  filter note above). Wiring these into `BackpackAnalyzer` to add
-  pickup-side fields to the schema is a follow-up change; this
-  analyzer currently still emits drop-side data only.
+- **Pickup side lives in `WeaponPickups`, not `Backpacks`.**
+  `BackpackAnalyzer` only records drops. The pickup side — who
+  grabbed the pack, whether they already owned the weapon, how many
+  frags they scored with it before dying — is emitted by
+  `WeaponPickupsAnalyzer` and exposed as `result.WeaponPickups`.
+  Frontends join the two lists by `BackpackDrop.EntNum` ==
+  `WeaponPickup.BackpackEnt`. `BackpackPickupPrintEvent` (the
+  per-client "You get " opener) is not consumed yet; SSG/NG/SNG/GL
+  packs therefore have no pickup record.
 
 ```go
 type BackpackDrop struct {
@@ -194,6 +191,58 @@ type BackpackDrop struct {
     Origin [3]float32 // dropper's position at hint time
     Loc    string     // nearest named loc
     EntNum int        // server edict of the backpack entity
+}
+```
+
+### Weapon pickups
+
+`result.WeaponPickups` is a flat, time-ordered list of slot-weapon
+acquisition events produced by `WeaponPickupsAnalyzer`. Each entry
+pairs a pickup with its effectiveness outcome: did the picker
+already own the weapon, and how many frags did they score with it
+before their next death.
+
+Signal sources, both KTX STUFFCMD_DEMOONLY hints (authoritative, not
+filtered by the `messagelevel` cvar):
+
+- **World pickups** — `ItemPickupHintEvent` (`//ktx took`,
+  ktx/src/items.c:1048). `ItemSpawnEvent` provides the entNum → Kind
+  map for classification. Only weapon kinds (`rl`, `lg`, `gl`, `ssg`,
+  `sng`, `ng`) are recorded; armor / health / powerup hints are
+  ignored.
+- **Backpack pickups** — `BackpackPickupHintEvent` (`//ktx bp`,
+  ktx/src/items.c:2471), paired with the earlier
+  `BackpackDropHintEvent` to attribute weapon and dropper. Only RL
+  and LG packs emit the hint; other pack classes are absent here.
+
+`HadBefore` reads the picker's STAT_ITEMS bit at pickup time. The
+analyzer shadows STAT_ITEMS live; the server sends the STAT_ITEMS
+update on the packet after the pickup hint, so the cached bitfield
+is the pre-pickup state.
+
+`Kills` counts frags by the picker with `Weapon` in the window
+`(Time, NextDeathTime]`, drawn from `ctx.FragEntries` (so
+`WeaponPickupsAnalyzer` must run after `FragAnalyzer`). Teamkills
+and suicides are excluded. `NextDeathTime` is 0 when the picker
+never dies before match end — kills are then unbounded on the
+right.
+
+```go
+type WeaponPickup struct {
+    Time          float64 // pickup time (match-relative)
+    Player        string  // picker display name
+    Team          string
+    Weapon        string  // "rl","lg","gl","ssg","sng","ng"
+    Source        string  // "world" | "backpack"
+    HadBefore     bool    // picker already owned the weapon
+    Kills         int     // kills with Weapon before NextDeathTime
+    NextDeathTime float64 // 0 if picker never died before match end
+
+    // Backpack-source only:
+    BackpackEnt int     // join key with BackpackDrop.EntNum
+    Dropper     string
+    DropperTeam string
+    DropTime    float64
 }
 ```
 
