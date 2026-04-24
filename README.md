@@ -94,9 +94,10 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 `DamageEvent`, `DemoInfoEvent`, `IntermissionEvent`, `StuffTextEvent`,
 `CenterPrintEvent`, `ServerInfoEvent`, `DeathEvent`, `SpawnEvent`,
 `ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`,
-`ItemPickupHintEvent`, `BackpackPickupHintEvent`. Domain types carried
-by events — `ServerData`, `PlayerInfo`, `PlayerState`, `Stats` — are
-source-agnostic.
+`ItemPickupHintEvent`, `BackpackPickupHintEvent`,
+`ItemPickupPrintEvent`, `BackpackPickupPrintEvent`. Domain types
+carried by events — `ServerData`, `PlayerInfo`, `PlayerState`,
+`Stats` — are source-agnostic.
 
 `DeathEvent` / `SpawnEvent` are derived events the parser synthesises
 from `StatHealth` edges so analytics never has to reconstruct
@@ -110,7 +111,14 @@ prints, no BSP preprocessing. `ItemPickupHintEvent` /
 authoritative `//ktx took`, `//ktx bp`, `//ktx drop` directives — the
 touch-level pickup attribution that entity-state alone can only
 approximate. They only fire on KTX servers; non-KTX sources get
-entity-state and stats deltas.
+entity-state and stats deltas. `ItemPickupPrintEvent` /
+`BackpackPickupPrintEvent` parse the per-client "You got the X"
+prints that target the picking player via `dem_single`; they fill
+the gap where `//ktx took` is silent (ammo boxes, H15/H25, non-RL/LG
+backpacks) but only survive to the MVD for players who set `msg 0`
+in their client config (see `qwdemo/MVD_FORMAT.md` for the
+server-side `messagelevel` filter that strips PRINT_LOW in most
+competitive demos).
 
 To write a new source: implement `events.Source`, emit the concrete event
 types as you decode your wire format. That's it. See

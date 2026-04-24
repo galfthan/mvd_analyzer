@@ -1012,6 +1012,31 @@ Kill messages appear at `PRINT_MEDIUM` (level 1). Common patterns:
 [195.6s] "paniagua mows down a teammate"
 ```
 
+### Per-client pickup prints — and the PRINT_LOW filter
+
+KTX's `G_sprint(other, PRINT_LOW, ...)` calls in `ktx/src/items.c` emit per-client text on every pickup: `"You got the Red Armor\n"` (armors / weapons / ammo boxes / powerups), `"You receive 25 health\n"` (health pickups including MH), and the `"You get "` opener line for backpacks (followed by per-piece continuation prints). In MVDs these land in `dem_single` with the picking player's slot in the header, giving authoritative pickup attribution — they would cover the categories `//ktx took` skips (ammo boxes and H15/H25 — `ammo_touch` at items.c:1171 has no stuffcmd, and only the megahealth branch of `health_touch` emits `//ktx took`).
+
+**The catch** — `SV_ClientPrintf` in `mvdsv/src/sv_send.c:225` applies a per-client filter *before* the MVD write:
+
+```c
+if (level < cl->messagelevel)
+    return;
+```
+
+`cl->messagelevel` tracks the `msg` cvar the client set in their config. Pickup prints are PRINT_LOW (0). Competitive QW players widely use `msg 2` to suppress pickup spam in their console, which **also strips the prints from the MVD entirely** — they never reach `MVDWrite_Begin (dem_single, ...)`. On a typical 4on4 / duel with everyone at `msg 2` you'll see **zero** PRINT_LOW events in the recording.
+
+**Coverage is therefore per-player and per-demo.** A duel where one player set `msg 0` and the other set `msg 2` gives you pickup prints for exactly one side. The `//ktx took` and `//ktx bp` directives bypass this filter (they're STUFFCMD_DEMOONLY, not prints) — they're the correct signal when coverage matters.
+
+To decide if print-based pickup attribution is viable on a given demo, count `PrintEvent.Level == 0` entries: zero means the filter stripped everything; a healthy count means at least some players had `msg 0` set.
+
+```
+SV_ClientPrintf (level=PRINT_LOW, target=cl)
+    │
+    ├── if level < cl->messagelevel: return  ← strips prints before MVD write
+    │
+    └── MVDWrite_Begin(dem_single, cl - svs.clients, ...) → svc_print header → message
+```
+
 ---
 
 ## Hidden Messages
@@ -2946,6 +2971,7 @@ Enables `mvdhidden_usercmd` (0x0001) recording per player. Used primarily for ra
 - Added [Item tracking via entity state](#item-tracking-via-entity-state) — the protocol-level way to observe pickups and respawns by diffing `modelindex` transitions in `svc_packetentities` / `svc_deltapacketentities`. Replaces any reliance on KTX's `//ktx took` prints for item-up/down status. Includes the Quake 1 item model-path table used for entity classification, the MVD-ignores-PVS invariant that lets "entity absent from packet" mean "picked up," and the same-tick insta-regrab invisibility that KTX prints uniquely catch.
 - Expanded the [`//ktx` directives](#svc_stufftext-9) coverage to document `//ktx took`, `//ktx timer`, `//ktx drop`, and `//wps` with KTX source-code line references, and documented when the entity-state stream vs. KTX prints is the right signal to use.
 - Added `//ktx bp <backpack_ent> <player_ent>` (`ktx/src/items.c:2471`) to the [`//ktx` directives](#svc_stufftext-9) table — the symmetric pickup companion of `//ktx drop`, fires only for RL/LG packs. Rewrote the pickup-attribution guidance: on KTX servers `//ktx took` + `//ktx bp` are the authoritative pickup-attribution signals (each pair pins the touch to a concrete player edict), superseding the nearest-origin heuristic required by entity-state alone. Non-KTX servers fall back to entity-state or to per-player `svc_updatestat` deltas. Also added `//ktx expire` and documented the demo-ignored `//ktx di` damage-info hint for completeness.
+- Added [Per-client pickup prints — and the PRINT_LOW filter](#per-client-pickup-prints--and-the-print_low-filter) to the `svc_print` section. KTX's `G_sprint(PRINT_LOW)` pickup messages ("You got the Red Armor", "You receive 25 health", "You get " backpack opener) carry pickup-attribution via the `dem_single` target slot and would cover categories `//ktx took` skips (ammo boxes, H15/H25), **but** `SV_ClientPrintf` filters by the picking client's `messagelevel` cvar before the MVD write — competitive players widely set `msg 2`, which strips PRINT_LOW from the recording entirely. Coverage is per-player and per-demo; `//ktx took` / `//ktx bp` are the only signals that bypass the filter.
 - Added [Derived events — death and spawn](#derived-events--death-and-spawn) — why every `StatHealth` crossing of zero should be surfaced as its own event at the parser layer rather than inferred by per-sample comparison, and the instant-respawn case that motivates it.
 
 ### MVD_PEXT1 Hidden Message History

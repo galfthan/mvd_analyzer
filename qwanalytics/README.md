@@ -148,6 +148,14 @@ powerups on KTX servers; a future refactor will consume these as the
 primary `TakenBy` source and keep the nearest-origin path as a
 fallback for non-KTX sources.
 
+`ItemPickupPrintEvent` (parsed from per-client `svc_print` "You got
+the X" / "You receive N health" strings) fills the remaining gap:
+ammo boxes (no `//ktx took`) and H15/H25. Caveat: mvdsv filters
+PRINT_LOW prints by the picking player's `messagelevel` cvar before
+recording, so competitive demos where players set `msg 2` contain no
+pickup prints at all — coverage is per-player and per-demo. See
+`qwdemo/MVD_FORMAT.md` for the full filter mechanics.
+
 ### Backpacks
 
 `result.Backpacks` is a flat list of RL and LG backpack drops,
@@ -166,11 +174,15 @@ Coverage caveats:
 - **No pickup tracking (yet).** The wire-level entity-state stream
   for backpack edicts produces phantom visibility cycles that aren't
   distinguishable from real fast pickups, so it cannot be used for
-  attribution. The parser now emits `BackpackPickupHintEvent` for
-  KTX's `//ktx bp <backpack_ent> <player_ent>` directive
-  (`ktx/src/items.c:2471`) — symmetric to `//ktx drop`, same RL/LG
-  domain — which *is* authoritative. Wiring it into `BackpackAnalyzer`
-  to add pickup-side fields to the schema is a follow-up change; this
+  attribution. Two authoritative parser events are now available but
+  not yet consumed: `BackpackPickupHintEvent` from KTX's `//ktx bp`
+  directive (`ktx/src/items.c:2471`) — symmetric to `//ktx drop`,
+  same RL/LG domain — and `BackpackPickupPrintEvent` from the
+  per-client `"You get "` print opener (`ktx/src/items.c:2404`),
+  which covers every backpack class including SSG/NG/GL packs but
+  only when the picking player had `msg 0` set (see the PRINT_LOW
+  filter note above). Wiring these into `BackpackAnalyzer` to add
+  pickup-side fields to the schema is a follow-up change; this
   analyzer currently still emits drop-side data only.
 
 ```go

@@ -1,5 +1,19 @@
 # Authoritative Pickup Signals — Investigation
 
+## Update (2026-04-21 — post-implementation)
+
+Signal 1 (per-client `svc_print`) was shipped as a complement to Signals 5/1a (KTX hints), and empirical testing exposed a major caveat that was missed in the original catalog below: `SV_ClientPrintf` in `mvdsv/src/sv_send.c:225` filters prints by the picking client's `messagelevel` cvar *before* writing to the MVD. Pickup prints are PRINT_LOW (0), which competitive QW players commonly suppress with `msg 2` — so the corresponding MVDs contain **zero** PRINT_LOW events. Out of 6 test demos, 4 had no pickup prints at all; the 2 that did gave partial coverage (only the players who had `msg 0` set).
+
+**Signal ranking after this finding:**
+
+1. **KTX `//ktx took` + `//ktx bp`** (Signals 5 / 1a below) — the *only* signals that bypass the `messagelevel` filter, since they're STUFFCMD_DEMOONLY directives rather than prints. **Universal on KTX servers.** Coverage limited to MH / armors / RL-LG-GL-SSG-SNG-NG / powerups + RL/LG backpacks.
+2. **Per-client `svc_print`** (Signal 1) — broader item coverage when present (ammo boxes, H15/H25, all backpack classes), but *only* for players with `msg 0`. Useful as a complement, not a replacement.
+3. **Player stats updates** (Signal 2) — the universal fallback for everything the KTX hints miss, on every MVD regardless of client config. Not yet implemented.
+
+The catalog below is preserved as originally written; read it with the above caveat in mind.
+
+---
+
 ## Summary
 
 This investigation maps wire-level signals in the QuakeWorld MVD protocol that authoritatively identify pickup events (which player took which item at what time). The MVD wire carries three distinct, independently-sufficient attribution signals, ranked by implementation complexity and coverage. The strongest signals are:
