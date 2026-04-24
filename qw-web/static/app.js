@@ -1350,22 +1350,36 @@ function displayPackDrops(result) {
     packDropsState.hubInfo = currentResult?.hubInfo || null;
     packDropsState.playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
 
+    const dropPlayers = new Set();
+    const pickPlayers = new Set();
     const dropTeams = new Set();
     const pickTeams = new Set();
     const statuses = new Set();
     for (const r of rows) {
+        if (r.drop.player) dropPlayers.add(r.drop.player);
         if (r.drop.team) dropTeams.add(r.drop.team);
+        if (r.pickup?.player) pickPlayers.add(r.pickup.player);
         if (r.pickup?.team) pickTeams.add(r.pickup.team);
         statuses.add(r.status.label);
     }
-    populateFilterSelect('packdrops-filter-dropteam', [...dropTeams].sort());
-    populateFilterSelect('packdrops-filter-pickteam', [...pickTeams].sort());
-    populateFilterSelect('packdrops-filter-status', [...statuses].sort());
+    const cmp = (a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' });
+    populateFilterSelect('packdrops-filter-dropplayer', [...dropPlayers].sort(cmp));
+    populateFilterSelect('packdrops-filter-dropteam', [...dropTeams].sort(cmp));
+    populateFilterSelect('packdrops-filter-pickplayer', [...pickPlayers].sort(cmp));
+    populateFilterSelect('packdrops-filter-pickteam', [...pickTeams].sort(cmp));
+    populateFilterSelect('packdrops-filter-status', [...statuses].sort(cmp));
 
     // Install filter-change handlers once. onchange is overwrite-safe
     // — rebinding on each new demo replaces the previous closure rather
     // than stacking listeners.
-    for (const id of ['packdrops-filter-dropteam', 'packdrops-filter-pickteam', 'packdrops-filter-status']) {
+    const filterIds = [
+        'packdrops-filter-dropplayer',
+        'packdrops-filter-dropteam',
+        'packdrops-filter-pickplayer',
+        'packdrops-filter-pickteam',
+        'packdrops-filter-status',
+    ];
+    for (const id of filterIds) {
         const el = document.getElementById(id);
         if (el) el.onchange = renderPackDropRows;
     }
@@ -1378,7 +1392,9 @@ function renderPackDropRows() {
     if (!tbody) return;
     tbody.innerHTML = '';
 
+    const dropPlayer = document.getElementById('packdrops-filter-dropplayer').value;
     const dropTeam = document.getElementById('packdrops-filter-dropteam').value;
+    const pickPlayer = document.getElementById('packdrops-filter-pickplayer').value;
     const pickTeam = document.getElementById('packdrops-filter-pickteam').value;
     const status = document.getElementById('packdrops-filter-status').value;
 
@@ -1397,7 +1413,9 @@ function renderPackDropRows() {
 
     let shown = 0;
     for (const r of rows) {
+        if (dropPlayer && r.drop.player !== dropPlayer) continue;
         if (dropTeam && r.drop.team !== dropTeam) continue;
+        if (pickPlayer && (r.pickup?.player || '') !== pickPlayer) continue;
         if (pickTeam && (r.pickup?.team || '') !== pickTeam) continue;
         if (status && r.status.label !== status) continue;
 

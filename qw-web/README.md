@@ -80,10 +80,12 @@ edict numbers across drops, so `entNum` alone would collide. A drop
 with no matching pickup is shown as `expired`.
 
 Columns: Time, Dropper, Drop Team, Weapon, Drop (hub link),
-Status, Picker, Pick Team, Kills, Run (hub link). Three filter
-dropdowns above the table narrow rows by Dropper team, Picker team,
-or Status label; selections persist across demo reloads when the
-same value is available in the new data.
+Status, Picker, Pick Team, Kills, Run (hub link). Five filter
+dropdowns above the table narrow rows by Dropper, Drop Team,
+Picker, Pick Team, or Status label; each dropdown is populated
+from the distinct values present in the current demo, and
+selections persist across demo reloads when the same value is
+still available in the new data.
 
 Status column derivation:
 

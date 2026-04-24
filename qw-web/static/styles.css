@@ -1611,12 +1611,17 @@ th.sortable.sort-desc::after {
     gap: 6px;
 }
 .packdrops-filters select {
-    background: rgba(255, 255, 255, 0.05);
-    color: inherit;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 3px 6px;
-    border-radius: 3px;
+    background: var(--bg-deep);
+    color: #ccc;
+    border: 1px solid #666;
+    padding: 4px 8px;
+    border-radius: 4px;
     font-size: 0.9rem;
+    cursor: pointer;
+}
+.packdrops-filters select option {
+    background: var(--bg-deep);
+    color: #ccc;
 }
 .packdrops-count {
     margin-left: auto;
