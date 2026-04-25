@@ -33,10 +33,7 @@ type BackpackAnalyzer struct {
 	drops     []BackpackDrop
 	mapName   string
 	locFinder *loc.Finder
-
-	matchStarted   bool
-	matchEnded     bool
-	matchStartTime float64
+	timing    MatchTimingDetector
 }
 
 // IT_* bit values for the //ktx drop ItemFlags argument, mirroring
@@ -62,11 +59,9 @@ func (a *BackpackAnalyzer) Init(ctx *Context) error {
 func (a *BackpackAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
 	case *events.PrintEvent:
-		a.detectMatchBoundary(e)
+		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		if a.matchStarted {
-			a.matchEnded = true
-		}
+		a.timing.OnIntermission(e.Time)
 	case *events.StuffTextEvent:
 		if strings.HasPrefix(e.Command, "fullserverinfo ") {
 			a.extractMapName(e.Command)
@@ -84,7 +79,7 @@ func (a *BackpackAnalyzer) OnEvent(event events.Event) error {
 // the drop origin (KTX spawns the backpack at the dying player's
 // s.v.origin). Defensive: skip on unrecognised flag combos.
 func (a *BackpackAnalyzer) handleHint(e *events.BackpackDropHintEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	weapon := weaponFromItemFlags(e.ItemFlags)
@@ -119,31 +114,6 @@ func weaponFromItemFlags(flags int) string {
 		// always send exactly one; anything else gets dropped
 		// defensively.
 		return ""
-	}
-}
-
-func (a *BackpackAnalyzer) detectMatchBoundary(e *events.PrintEvent) {
-	msg := e.Message
-	if !a.matchStarted {
-		if strings.Contains(msg, "match has begun") ||
-			strings.Contains(msg, "Fight!") ||
-			strings.Contains(msg, "begins in 1") ||
-			strings.Contains(msg, "Go!") {
-			a.matchStarted = true
-			a.matchStartTime = e.Time
-		}
-		return
-	}
-	if a.matchEnded {
-		return
-	}
-	if strings.Contains(msg, "the match is over") ||
-		strings.Contains(msg, "match ended") ||
-		strings.Contains(msg, "game over") ||
-		strings.Contains(msg, "match complete") ||
-		strings.Contains(msg, "timelimit hit") ||
-		strings.Contains(msg, "fraglimit hit") {
-		a.matchEnded = true
 	}
 }
 

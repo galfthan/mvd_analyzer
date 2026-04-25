@@ -10,7 +10,7 @@ func newTestBackpackAnalyzer() (*BackpackAnalyzer, *Context) {
 	a := NewBackpackAnalyzer()
 	ctx := &Context{FragsBySlot: map[int]int{}}
 	_ = a.Init(ctx)
-	a.matchStarted = true
+	a.timing.Started = true
 	return a, ctx
 }
 

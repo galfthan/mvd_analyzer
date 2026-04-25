@@ -13,7 +13,7 @@ func newTestItemAnalyzer() (*ItemAnalyzer, *Context) {
 	a := NewItemAnalyzer()
 	ctx := &Context{FragsBySlot: map[int]int{}}
 	_ = a.Init(ctx)
-	a.matchStarted = true
+	a.timing.Started = true
 	return a, ctx
 }
 

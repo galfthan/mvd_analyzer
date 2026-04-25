@@ -3,7 +3,6 @@ package analyzer
 import (
 	"math"
 	"sort"
-	"strings"
 
 	"github.com/mvd-analyzer/qwdemo/events"
 )
@@ -54,7 +53,7 @@ type WeaponPickupsAnalyzer struct {
 	pickups []wpPickupRecord
 	deaths  []wpDeathRecord
 
-	matchStarted, matchEnded bool
+	timing MatchTimingDetector
 }
 
 type packDrop struct {
@@ -120,11 +119,9 @@ func (a *WeaponPickupsAnalyzer) Init(ctx *Context) error {
 func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
 	case *events.PrintEvent:
-		a.detectMatchBoundary(e)
+		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		if a.matchStarted {
-			a.matchEnded = true
-		}
+		a.timing.OnIntermission(e.Time)
 	case *events.StatUpdateEvent:
 		if e.StatIndex == events.StatItems {
 			a.playerItems[e.PlayerNum] = e.Value
@@ -140,7 +137,7 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	case *events.BackpackPickupHintEvent:
 		a.handlePackPickup(e)
 	case *events.DeathEvent:
-		if a.matchStarted && !a.matchEnded {
+		if a.timing.Started && !a.timing.Ended {
 			a.deaths = append(a.deaths, wpDeathRecord{time: e.Time, slot: e.PlayerNum})
 		}
 	}
@@ -148,7 +145,7 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 }
 
 func (a *WeaponPickupsAnalyzer) handleDropHint(e *events.BackpackDropHintEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	weapon := weaponFromItemFlags(e.ItemFlags)
@@ -164,7 +161,7 @@ func (a *WeaponPickupsAnalyzer) handleDropHint(e *events.BackpackDropHintEvent) 
 }
 
 func (a *WeaponPickupsAnalyzer) handleItemPickup(e *events.ItemPickupHintEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	kind, ok := a.itemKind[e.ItemEnt]
@@ -188,7 +185,7 @@ func (a *WeaponPickupsAnalyzer) handleItemPickup(e *events.ItemPickupHintEvent) 
 }
 
 func (a *WeaponPickupsAnalyzer) handlePackPickup(e *events.BackpackPickupHintEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	drop, ok := a.packInfo[e.BackpackEnt]
@@ -214,30 +211,6 @@ func (a *WeaponPickupsAnalyzer) handlePackPickup(e *events.BackpackPickupHintEve
 	// The backpack is now consumed — clear the entry so a stale
 	// entNum can't attribute a later pickup to the same drop.
 	delete(a.packInfo, e.BackpackEnt)
-}
-
-func (a *WeaponPickupsAnalyzer) detectMatchBoundary(e *events.PrintEvent) {
-	msg := e.Message
-	if !a.matchStarted {
-		if strings.Contains(msg, "match has begun") ||
-			strings.Contains(msg, "Fight!") ||
-			strings.Contains(msg, "begins in 1") ||
-			strings.Contains(msg, "Go!") {
-			a.matchStarted = true
-		}
-		return
-	}
-	if a.matchEnded {
-		return
-	}
-	if strings.Contains(msg, "the match is over") ||
-		strings.Contains(msg, "match ended") ||
-		strings.Contains(msg, "game over") ||
-		strings.Contains(msg, "match complete") ||
-		strings.Contains(msg, "timelimit hit") ||
-		strings.Contains(msg, "fraglimit hit") {
-		a.matchEnded = true
-	}
 }
 
 // Finalize pairs every recorded pickup with its picker's next death

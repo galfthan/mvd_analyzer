@@ -1,8 +1,6 @@
 package analyzer
 
 import (
-	"strings"
-
 	"github.com/mvd-analyzer/qwanalytics/loc"
 	"github.com/mvd-analyzer/qwdemo/events"
 )
@@ -28,10 +26,7 @@ type TimelineAnalyzer struct {
 	rawDeaths      []deathEvent // Raw death events (player num, time)
 	rawSpawns      []deathEvent // Raw spawn events (reusing deathEvent type)
 	lastSampleTime      float64
-	matchStartTime      float64
-	matchStarted        bool
-	matchEndTime        float64
-	matchEnded          bool
+	timing              MatchTimingDetector
 	locFinder           *loc.Finder // Location finder for map (nil if no .loc file)
 	blipThresholdMs     int         // Per-player loc smoothing threshold, 0 disables
 }
@@ -145,18 +140,12 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 	case *events.SpawnEvent:
 		a.handleSpawn(e)
 	case *events.PrintEvent:
-		// Detect match start/end from print messages
-		a.detectMatchStart(e)
-		a.detectMatchEnd(e)
+		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
 		// svc_intermission is the most reliable end-of-match signal: KTX
 		// fires it on timelimit/fraglimit hit even when there's no matching
-		// bprint string. Mark the match as ended so further stat/position
-		// updates stop being sampled.
-		if a.matchStarted && !a.matchEnded {
-			a.matchEndTime = e.Time
-			a.matchEnded = true
-		}
+		// bprint string.
+		a.timing.OnIntermission(e.Time)
 	case *events.FragUpdateEvent:
 		// Track frag events from frag updates (more reliable than stat updates)
 		a.handleFragUpdate(e)
@@ -190,7 +179,7 @@ func (a *TimelineAnalyzer) handlePositionUpdate(e *events.PlayerPositionEvent) {
 	// Sample at bucket boundaries — position updates arrive at ~73 Hz,
 	// much more frequently than stat updates (~3 Hz). Without this,
 	// ~93% of 50ms buckets would miss position data entirely.
-	if a.matchStarted && !a.matchEnded {
+	if a.timing.Started && !a.timing.Ended {
 		currentBucket := int(e.Time / a.bucketDuration)
 		lastBucket := int(a.lastSampleTime / a.bucketDuration)
 
@@ -203,49 +192,12 @@ func (a *TimelineAnalyzer) handlePositionUpdate(e *events.PlayerPositionEvent) {
 	}
 }
 
-func (a *TimelineAnalyzer) detectMatchStart(e *events.PrintEvent) {
-	if a.matchStarted {
-		return
-	}
-
-	// KTX servers print "The match has begun!" or similar
-	// Also detect "Fight!" or countdown end
-	msg := e.Message
-	if strings.Contains(msg, "match has begun") || strings.Contains(msg, "Fight!") ||
-		strings.Contains(msg, "begins in 1") || strings.Contains(msg, "Go!") {
-		a.matchStartTime = e.Time
-		a.matchStarted = true
-	}
-}
-
-// detectMatchEnd watches for the KTX print messages that signal the match has
-// ended (timelimit/fraglimit, or explicit "the match is over"). Once flagged,
-// further stat and position updates are ignored so the post-match intermission
-// camera doesn't keep producing buckets — and so KTX's `health = 1000 + dmg`
-// damage-indicator sentinels (combat.c:1001) don't get frozen into them.
-// Patterns mirror MatchAnalyzer (analyzer/match.go) for consistency.
-func (a *TimelineAnalyzer) detectMatchEnd(e *events.PrintEvent) {
-	if a.matchEnded || !a.matchStarted {
-		return
-	}
-	msg := e.Message
-	if strings.Contains(msg, "the match is over") ||
-		strings.Contains(msg, "match ended") ||
-		strings.Contains(msg, "game over") ||
-		strings.Contains(msg, "match complete") ||
-		strings.Contains(msg, "timelimit hit") ||
-		strings.Contains(msg, "fraglimit hit") {
-		a.matchEndTime = e.Time
-		a.matchEnded = true
-	}
-}
-
 func (a *TimelineAnalyzer) handleFragUpdate(e *events.FragUpdateEvent) {
 	state := a.getOrCreatePlayerState(e.PlayerNum)
 
 	// Track frag changes (both increases and decreases)
 	// Frags increase on kills, decrease on suicides/teamkills
-	if a.matchStarted && e.Frags != state.frags {
+	if a.timing.Started && e.Frags != state.frags {
 		delta := e.Frags - state.frags
 		// Sanity check: filter unreasonable deltas caused by parsing artifacts
 		// (e.g., misaligned reads producing garbage frag values).
@@ -272,7 +224,7 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 	// 100 health and base shotgun. After match end, ignore stat updates too:
 	// the intermission camera otherwise freezes the last seen value (often a
 	// KTX damage-indicator sentinel like health=1000+dmg) into every bucket.
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return nil
 	}
 
@@ -422,7 +374,7 @@ func (a *TimelineAnalyzer) snapshotPlayerData(pData *playerBucketRawData, player
 // and marks the death bucket. Same guard as handleStatUpdate: only
 // match-time events are recorded so warmup cycles don't pollute state.
 func (a *TimelineAnalyzer) handleDeath(e *events.DeathEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	state := a.getOrCreatePlayerState(e.PlayerNum)
@@ -450,7 +402,7 @@ func (a *TimelineAnalyzer) handleDeath(e *events.DeathEvent) {
 // or the first-spawn when a player moves from spectator / pre-connect to
 // active play. Consumers treat both cases identically.
 func (a *TimelineAnalyzer) handleSpawn(e *events.SpawnEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	state := a.getOrCreatePlayerState(e.PlayerNum)

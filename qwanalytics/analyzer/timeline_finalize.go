@@ -230,7 +230,7 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 
 	result := &TimelineAnalysisResult{
 		HighResDuration: a.bucketDuration,
-		MatchStartTime:  a.matchStartTime,
+		MatchStartTime:  a.timing.StartTime,
 		HighResBuckets:  highResBuckets,
 		FragEvents:      fragEvents,
 		PowerupEvents:   powerupEvents,

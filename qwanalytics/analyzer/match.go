@@ -10,11 +10,9 @@ import (
 
 // MatchAnalyzer extracts match summary information
 type MatchAnalyzer struct {
-	ctx            *Context
-	duration       float64
-	matchStartTime float64
-	matchEndTime   float64
-	matchStarted   bool
+	ctx      *Context
+	duration float64
+	timing   MatchTimingDetector
 }
 
 // NewMatchAnalyzer creates a new match analyzer
@@ -32,69 +30,32 @@ func (a *MatchAnalyzer) Init(ctx *Context) error {
 func (a *MatchAnalyzer) OnEvent(event events.Event) error {
 	a.duration = event.EventTime()
 
-	if printEvent, ok := event.(*events.PrintEvent); ok {
-		a.checkMatchTiming(printEvent)
+	switch e := event.(type) {
+	case *events.PrintEvent:
+		a.timing.OnPrint(e)
+	case *events.IntermissionEvent:
+		a.timing.OnIntermission(e.EventTime())
 	}
 
 	return nil
 }
 
-// checkMatchTiming detects match start/end from print messages
-func (a *MatchAnalyzer) checkMatchTiming(event *events.PrintEvent) {
-	msg := strings.ToLower(event.Message)
-
-	// Match start patterns
-	matchStartPatterns := []string{
-		"the match has begun",
-		"match started",
-		"fight!",
-		"game start",
-	}
-
-	for _, pattern := range matchStartPatterns {
-		if strings.Contains(msg, pattern) {
-			if !a.matchStarted {
-				a.matchStartTime = event.Time
-				a.matchStarted = true
-			}
-			return
-		}
-	}
-
-	// Match end patterns
-	matchEndPatterns := []string{
-		"the match is over",
-		"match ended",
-		"game over",
-		"match complete",
-		"timelimit hit",
-		"fraglimit hit",
-	}
-
-	for _, pattern := range matchEndPatterns {
-		if strings.Contains(msg, pattern) {
-			a.matchEndTime = event.Time
-			return
-		}
-	}
-}
-
 func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 	// Calculate actual match duration
 	matchDuration := a.duration
-	if a.matchStarted && a.matchStartTime > 0 {
-		if a.matchEndTime > a.matchStartTime {
-			matchDuration = a.matchEndTime - a.matchStartTime
+	if a.timing.Started && a.timing.StartTime > 0 {
+		if a.timing.EndTime > a.timing.StartTime {
+			matchDuration = a.timing.EndTime - a.timing.StartTime
 		} else {
 			// No end detected, use total - start
-			matchDuration = a.duration - a.matchStartTime
+			matchDuration = a.duration - a.timing.StartTime
 		}
 	}
 
 	result := &MatchResult{
 		Duration:  matchDuration,
-		StartTime: a.matchStartTime,
-		EndTime:   a.matchEndTime,
+		StartTime: a.timing.StartTime,
+		EndTime:   a.timing.EndTime,
 	}
 
 	// Get map name from server data
