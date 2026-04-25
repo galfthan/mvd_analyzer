@@ -846,12 +846,14 @@ func (a *ItemAnalyzer) classifyStatDelta(e *events.StatUpdateEvent) {
 		delta := e.Value - snap.health
 		snap.health = e.Value
 		// MH evidence is emitted on the IT_SUPERHEALTH bit transition
-		// in StatItems; small healths emit on +15 / +25 deltas.
-		switch delta {
-		case 15:
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"h15"})
-		case 25:
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"h25"})
+		// in StatItems. For small healths, KTX's T_Heal caps at
+		// max_health=100 (ktx/src/items.c:184-197), so a player at
+		// 80 HP picking up h25 gets a +20 delta, not +25 — and the
+		// touch is still counted in KTX's `tooks`. Accept any positive
+		// delta in the small-health range and let the entity-kind
+		// filter at synthesis time disambiguate h15 vs h25.
+		if delta > 0 && delta <= 25 {
+			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"h15", "h25"})
 		}
 	case events.StatArmor:
 		if !snap.armorSet {

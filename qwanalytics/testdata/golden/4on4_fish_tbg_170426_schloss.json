@@ -7460,6 +7460,13 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 839.7140000003071,
+            "respawnAt": 859.7140000003071,
+            "takenAt": 839.7140000003071,
+            "takenBy": "biggz",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 859.711000000351,
             "respawnAt": 902.932000000383,
             "takenAt": 882.932000000383,
@@ -7526,8 +7533,8 @@
             "availableFrom": 1143.832000000106,
             "respawnAt": 1166.0480000000985,
             "takenAt": 1146.0480000000985,
-            "takenBy": "gore",
-            "team": "'\u003e\u003c\u003e"
+            "takenBy": "nexus",
+            "team": "'tbg"
           },
           {
             "availableFrom": 1166.046000000043,
@@ -7741,6 +7748,13 @@
             "respawnAt": 1006.1990000004927,
             "takenAt": 986.1990000004927,
             "takenBy": "anni",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 1006.1990000004927,
+            "respawnAt": 1026.1990000004928,
+            "takenAt": 1006.1990000004927,
+            "takenBy": "gore",
             "team": "'\u003e\u003c\u003e"
           },
           {

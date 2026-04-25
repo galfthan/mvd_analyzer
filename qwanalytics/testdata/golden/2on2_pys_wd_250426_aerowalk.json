@@ -5416,6 +5416,13 @@
             "team": "pys"
           },
           {
+            "availableFrom": 544.3549999999782,
+            "respawnAt": 564.3549999999782,
+            "takenAt": 544.3549999999782,
+            "takenBy": "wd.cao",
+            "team": "wd"
+          },
+          {
             "availableFrom": 564.3470000000073,
             "respawnAt": 606.2570000000223,
             "takenAt": 586.2570000000223,

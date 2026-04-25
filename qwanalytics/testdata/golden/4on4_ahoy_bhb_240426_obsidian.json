@@ -6180,6 +6180,13 @@
             "team": "ahoy"
           },
           {
+            "availableFrom": 1006.7119999997991,
+            "respawnAt": 1026.7119999997992,
+            "takenAt": 1006.7119999997991,
+            "takenBy": "sailorman",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 1026.7389999998097,
             "respawnAt": 1049.2609999998156,
             "takenAt": 1029.2609999998156,
