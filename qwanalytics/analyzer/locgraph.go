@@ -1,5 +1,7 @@
 package analyzer
 
+import "sort"
+
 // LocGraphResult / LocNode / LocEdge now live in qwanalytics/result and
 // are re-exported via type aliases in interface.go. BuildLocGraph below
 // constructs and returns them; nothing else in this file declares them.
@@ -218,5 +220,15 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 	for _, e := range edges {
 		out.Edges = append(out.Edges, *e)
 	}
+	// Sort by stable keys so the result is deterministic across runs.
+	// Without this the slices reflect Go map iteration order and the
+	// golden test corpus would flap on every invocation.
+	sort.Slice(out.Locs, func(i, j int) bool { return out.Locs[i].Name < out.Locs[j].Name })
+	sort.Slice(out.Edges, func(i, j int) bool {
+		if out.Edges[i].From != out.Edges[j].From {
+			return out.Edges[i].From < out.Edges[j].From
+		}
+		return out.Edges[i].To < out.Edges[j].To
+	})
 	return out
 }

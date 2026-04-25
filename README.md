@@ -214,24 +214,45 @@ go test -v -run TestDiagnosticParseDemos \
     ./qwanalytics/diagnostic/                           # opt-in demo corpus
 ```
 
-Golden regression:
+### Golden corpus
 
-```bash
-# Before a refactor
-go run ./qwanalytics/cmd/qw-analyze -bulk \
-    -out-dir /tmp/before -format json demos/
+`make test` runs `TestGoldenCorpus` (in `qwanalytics/analyzer/golden_test.go`)
+against a manifest of hub.quakeworld.nu game IDs in
+[`qwanalytics/testdata/corpus.json`](qwanalytics/testdata/corpus.json).
+On first run it downloads each demo into
+`qwanalytics/testdata/cache/<gameId>.mvd.gz` (gitignored); subsequent runs
+hit the cache and stay offline. Each demo's full `Result` JSON is pinned
+against `qwanalytics/testdata/golden/<label>.json`.
 
-# After
-go run ./qwanalytics/cmd/qw-analyze -bulk \
-    -out-dir /tmp/after -format json demos/
+The manifest ships empty — add entries to enable coverage:
 
-# Diff
-diff -r /tmp/before /tmp/after
+```json
+[
+  {"gameId": 212111, "label": "duel_dm6_kreatlink", "mode": "1on1"},
+  {"gameId": 230002, "label": "2on2_aerowalk_xy",   "mode": "2on2"},
+  {"gameId": 215555, "label": "4on4_dm3_bhb_huey",  "mode": "4on4"}
+]
 ```
 
-Note that `locGraph` currently has documented map-iteration non-determinism
-(see [CLEANUP-PLAN.md](CLEANUP-PLAN.md) item 7) — filter it with
-`jq 'del(.locGraph, .schemaVersion)'` for a clean comparison.
+Workflow when an analyzer change shifts output:
+
+```bash
+make test
+# TestGoldenCorpus fails with first-diff-line per demo.
+# Inspect the change, then if it was intended:
+go test ./qwanalytics/... -run TestGoldenCorpus -args -update-golden
+git diff qwanalytics/testdata/golden/   # review
+git add qwanalytics/testdata/golden/    # commit alongside the analyzer change
+```
+
+The pipeline also has a CLI for ad-hoc bulk diffs:
+
+```bash
+go run ./qwanalytics/cmd/qw-analyze -bulk -out-dir /tmp/before -format json demos/
+# ... change ...
+go run ./qwanalytics/cmd/qw-analyze -bulk -out-dir /tmp/after  -format json demos/
+diff -r /tmp/before /tmp/after
+```
 
 ## Known limitations
 

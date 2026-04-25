@@ -316,13 +316,38 @@ native source (used by `cmd/mapgen` when pointing at a working copy).
 go test ./qwanalytics/...
 ```
 
-The diagnostic corpus test is opt-in — drop demos into
-`qwanalytics/diagnostic/testdata/` first:
+Three layers exercise different things:
 
-```bash
-cp ~/quake/demos/*.mvd.gz qwanalytics/diagnostic/testdata/
-go test -v -run TestDiagnosticParseDemos ./qwanalytics/diagnostic/
-```
+1. **Per-analyzer unit tests** (`*_test.go` next to each analyzer) drive
+   each analyzer with synthetic event streams and assert on its
+   `Finalize()` output. No MVD bytes; pure-Go, ~milliseconds total.
+2. **Golden corpus** (`analyzer/golden_test.go`) runs the full pipeline
+   against a manifest of hub.quakeworld.nu game IDs in
+   `testdata/corpus.json`. On first run it downloads each demo into
+   `testdata/cache/<gameId>.mvd.gz` (gitignored) and pins the full
+   serialised `Result` against `testdata/golden/<label>.json`. The
+   manifest ships empty — `t.Skip` keeps `make test` green until
+   entries are added. Regenerate goldens after an intentional change:
+
+   ```bash
+   go test ./qwanalytics/... -run TestGoldenCorpus -args -update-golden
+   ```
+
+   Only `filePath` is stripped from the comparison; everything else —
+   `locGraph`, `schemaVersion`, ammo counts, frag totals — is pinned,
+   so any unintended drift surfaces. (The `locGraph` slices are sorted
+   in `BuildLocGraph` for run-to-run determinism; map-keyed sub-objects
+   already serialise alphabetically.)
+
+3. **Diagnostic corpus** (`diagnostic/diagnostic_test.go`) is opt-in
+   and complementary — it runs data-quality invariants
+   (frag-total parity, impossible stat values, …) rather than pinning
+   output. Drop demos into `qwanalytics/diagnostic/testdata/` to enable:
+
+   ```bash
+   cp ~/quake/demos/*.mvd.gz qwanalytics/diagnostic/testdata/
+   go test -v -run TestDiagnosticParseDemos ./qwanalytics/diagnostic/
+   ```
 
 ## Module boundary
 
