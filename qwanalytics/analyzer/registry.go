@@ -13,7 +13,20 @@ import (
 // parameters individual analyzers read; callers may mutate it before
 // analyzing to override defaults for a single run.
 type Registry struct {
-	analyzers      []Analyzer
+	// core analysers are the producers / state-reconstruction tier.
+	// They populate CoreOutputs (DemoInfo, NameTable, FragEntries, …)
+	// that derived analysers consume during their Finalize. Core
+	// finalises before any derived analyser, so registration into
+	// this slice is the load-bearing "I produce something downstream
+	// reads" signal.
+	core []Analyzer
+
+	// derived analysers consume CoreOutputs (or are independent
+	// peers) and produce their own slice of Result. They never write
+	// to CoreOutputs; their own Finalize results stay local to the
+	// Result they populate.
+	derived []Analyzer
+
 	postProcessors []ResultPostProcessor
 	Config         *config.Config
 }
@@ -33,9 +46,29 @@ func NewRegistry() *Registry {
 	return &Registry{Config: config.Default()}
 }
 
-// Register adds an analyzer to the registry
+// Register is a backwards-compatible alias for RegisterDerived. Most
+// analysers are derived (they consume CoreOutputs or are independent
+// peers); use RegisterCore explicitly when an analyser populates
+// CoreOutputs via the CoreProducer interface.
 func (r *Registry) Register(a Analyzer) {
-	r.analyzers = append(r.analyzers, a)
+	r.RegisterDerived(a)
+}
+
+// RegisterCore adds an analyser whose Finalize populates CoreOutputs
+// (i.e. it implements CoreProducer). Core analysers finalise before
+// any derived analyser so downstream consumers see the produced
+// fields. Within the core slice, registration order is preserved —
+// later core analysers can read fields populated by earlier ones via
+// CoreConsumer.
+func (r *Registry) RegisterCore(a Analyzer) {
+	r.core = append(r.core, a)
+}
+
+// RegisterDerived adds an analyser that consumes CoreOutputs (or is
+// independent of it). Derived analysers finalise after every core
+// analyser has populated CoreOutputs.
+func (r *Registry) RegisterDerived(a Analyzer) {
+	r.derived = append(r.derived, a)
 }
 
 // RegisterPostProcessor adds a Result post-processor. They run in
@@ -83,7 +116,12 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 		FragsBySlot: make(map[int]int),
 	}
 
-	for _, a := range r.analyzers {
+	for _, a := range r.core {
+		if err := a.Init(ctx); err != nil {
+			return nil, err
+		}
+	}
+	for _, a := range r.derived {
 		if err := a.Init(ctx); err != nil {
 			return nil, err
 		}
@@ -111,7 +149,14 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 			ctx.FragsBySlot[e.PlayerNum] = e.Frags
 		}
 
-		for _, a := range r.analyzers {
+		// Core analysers see events first, then derived. Within each
+		// slice, registration order is preserved.
+		for _, a := range r.core {
+			if err := a.OnEvent(event); err != nil {
+				return nil, err
+			}
+		}
+		for _, a := range r.derived {
 			if err := a.OnEvent(event); err != nil {
 				return nil, err
 			}
@@ -131,24 +176,30 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 
 	co := &CoreOutputs{}
 
-	for _, a := range r.analyzers {
-		// Hand the running CoreOutputs to any analyser that wants it
-		// before its Finalize runs. Analysers registered later in the
-		// slice see every field produced by analysers registered earlier.
+	// Phase 1 — core finalises and populates CoreOutputs. Each core
+	// analyser also gets a chance to read the running CoreOutputs
+	// (UseCoreOutputs) so a later core entry can consume an earlier
+	// core entry's fields (e.g. Frag reads co.Names produced by
+	// DemoInfo).
+	finalizeOne := func(a Analyzer) {
 		if cc, ok := a.(CoreConsumer); ok {
 			cc.UseCoreOutputs(co)
 		}
-
 		if err := a.Finalize(result); err != nil {
 			result.Errors = append(result.Errors, err.Error())
-			continue
+			return
 		}
-
-		// Producers populate CoreOutputs after their own Finalize so
-		// downstream analysers see the new fields.
 		if cp, ok := a.(CoreProducer); ok {
 			cp.PopulateCore(co)
 		}
+	}
+	for _, a := range r.core {
+		finalizeOne(a)
+	}
+	// Phase 2 — derived. CoreOutputs is fully populated by the time
+	// any derived Finalize runs.
+	for _, a := range r.derived {
+		finalizeOne(a)
 	}
 
 	// Run registered post-processors in order. Each one operates on the
@@ -174,18 +225,27 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 // so further mutations are applied here via targeted setters.
 func NewDefaultRegistry() *Registry {
 	r := NewRegistry()
-	// DemoInfo first so it's available in Context for other analyzers.
-	r.Register(NewDemoInfoAnalyzer())
-	r.Register(NewMetadataAnalyzer())
-	r.Register(NewMatchAnalyzer())
-	r.Register(NewFragAnalyzer())
-	r.Register(NewMessagesAnalyzer())
+
+	// Core: the producers that downstream analysers read via
+	// CoreOutputs. DemoInfo runs first so co.{DemoInfo,Names,Slots}
+	// are populated before Frag's Finalize re-evaluates teamkills
+	// against co.Names.
+	r.RegisterCore(NewDemoInfoAnalyzer())
+	r.RegisterCore(NewFragAnalyzer())
+
+	// Derived: every other analyser. They consume CoreOutputs (via
+	// UseCoreOutputs) or are independent peers, and they never write
+	// to CoreOutputs themselves. Order within the derived slice is
+	// preserved but no derived analyser depends on another's output.
+	r.RegisterDerived(NewMetadataAnalyzer())
+	r.RegisterDerived(NewMatchAnalyzer())
+	r.RegisterDerived(NewMessagesAnalyzer())
 	ta := NewTimelineAnalyzer()
 	ta.SetBlipThresholdMs(r.Config.LocGraph.BlipThresholdMs)
-	r.Register(ta)
-	r.Register(NewItemAnalyzer())
-	r.Register(NewBackpackAnalyzer())
-	r.Register(NewWeaponPickupsAnalyzer())
+	r.RegisterDerived(ta)
+	r.RegisterDerived(NewItemAnalyzer())
+	r.RegisterDerived(NewBackpackAnalyzer())
+	r.RegisterDerived(NewWeaponPickupsAnalyzer())
 
 	// Post-processors run in registration order on the assembled
 	// Result. Order matters: time normalisation has to land first so
