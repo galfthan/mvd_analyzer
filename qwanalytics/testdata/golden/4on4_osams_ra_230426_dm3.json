@@ -6485,6 +6485,13 @@
             "team": "oSaMs"
           },
           {
+            "availableFrom": 918.0640000003667,
+            "respawnAt": 953.1280000003868,
+            "takenAt": 918.0640000003667,
+            "takenBy": "marksuzu",
+            "team": "oSaMs"
+          },
+          {
             "availableFrom": 954.0640000004144,
             "respawnAt": 990.3110000004284,
             "takenAt": 965.3110000004284,
@@ -6708,6 +6715,13 @@
             "takenAt": 7.315000000000007,
             "takenBy": "marksuzu",
             "team": "oSaMs"
+          },
+          {
+            "availableFrom": 83.30700000000344,
+            "respawnAt": 113.29400000000419,
+            "takenAt": 83.30700000000344,
+            "takenBy": "sCorp",
+            "team": ".ra."
           },
           {
             "availableFrom": 114.29900000000592,

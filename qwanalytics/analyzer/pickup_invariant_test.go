@@ -97,11 +97,15 @@ func TestItemPickupCountsMatchDemoInfo(t *testing.T) {
 				t.Fatalf("analyzer produced no items result")
 			}
 
-			// Aggregate items.go pickup counts per (player, kind).
+			// Aggregate items.go pickup counts per (player, kind). A
+			// closed phase is one where attribution succeeded —
+			// indicated by a non-empty TakenBy. Don't gate on
+			// TakenAt > 0: a pickup at exact match-start (t=0 after
+			// normalization) is legitimate and would be missed.
 			counts := map[playerKind]int{}
 			for _, it := range result.Items.Items {
 				for _, ph := range it.Phases {
-					if ph.TakenAt == 0 || ph.TakenBy == "" {
+					if ph.TakenBy == "" {
 						continue
 					}
 					counts[playerKind{ph.TakenBy, it.Kind}]++

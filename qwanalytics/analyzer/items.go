@@ -706,7 +706,7 @@ func (a *ItemAnalyzer) handleItemPickupHint(e *events.ItemPickupHintEvent) {
 	if a.syntheticEnabled {
 		if it := a.items[e.ItemEnt]; it != nil && len(it.phases) > 0 {
 			last := it.phases[len(it.phases)-1]
-			if last.TakenAt > 0 && it.kind != "mh" {
+			if last.TakenAt > 0 {
 				// Wire is still showing the entity as taken from
 				// the previous phase, but KTX says it just got
 				// touched again — must be an insta-regrab.
@@ -722,6 +722,14 @@ func (a *ItemAnalyzer) handleItemPickupHint(e *events.ItemPickupHintEvent) {
 // the slot from the KTX hint directly (no stat-delta or position
 // inference needed). Source label is "hint" — the attribution is
 // authoritative even though the phase itself is synthesised.
+//
+// MH gets the same hint-driven path with one extra step: ownership
+// of the entity transfers from whoever was being rot-tracked to the
+// new picker. Without that transfer, the previous holder's eventual
+// health crossing would stamp RespawnAt on the new phase (the
+// existing handler stamps "all MH ents in heldMHs[slot]"), which is
+// wrong. Stat-delta chain forwarding stays disabled for MH because
+// its predicted respawn depends on rot.
 func (a *ItemAnalyzer) recordSyntheticTakeFromHint(ent int, t float64, slot int) {
 	it := a.items[ent]
 	if it == nil {
@@ -730,7 +738,27 @@ func (a *ItemAnalyzer) recordSyntheticTakeFromHint(ent int, t float64, slot int)
 	it.phases = append(it.phases, ItemPhase{AvailableFrom: t, TakenAt: t})
 	it.pickups = append(it.pickups, phaseAttribution{slot: slot, source: "hint"})
 	last := &it.phases[len(it.phases)-1]
-	if sec, ok := kindRespawnSec[it.kind]; ok {
+
+	if it.kind == "mh" {
+		// Transfer rot ownership to the new picker.
+		for prevSlot, ents := range a.heldMHs {
+			for i, e := range ents {
+				if e == ent {
+					a.heldMHs[prevSlot] = append(ents[:i], ents[i+1:]...)
+					if len(a.heldMHs[prevSlot]) == 0 {
+						delete(a.heldMHs, prevSlot)
+					}
+					break
+				}
+			}
+		}
+		a.mhPickup[ent] = t
+		if slot >= 0 {
+			a.heldMHs[slot] = append(a.heldMHs[slot], ent)
+		}
+		// MH respawn is rot-driven; no synthetic schedule.
+		delete(a.syntheticChain, ent)
+	} else if sec, ok := kindRespawnSec[it.kind]; ok {
 		last.RespawnAt = t + sec
 		a.scheduleSyntheticRespawn(ent, t+sec, 0)
 	} else {

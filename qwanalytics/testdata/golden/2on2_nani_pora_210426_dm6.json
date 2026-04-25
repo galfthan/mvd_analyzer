@@ -4365,6 +4365,13 @@
             "team": "pora"
           },
           {
+            "availableFrom": 411.49199999990816,
+            "respawnAt": 436.49199999990816,
+            "takenAt": 411.49199999990816,
+            "takenBy": "kippo",
+            "team": "pora"
+          },
+          {
             "availableFrom": 436.4809999998915,
             "respawnAt": 480.4919999998731,
             "takenAt": 439.23399999988953,

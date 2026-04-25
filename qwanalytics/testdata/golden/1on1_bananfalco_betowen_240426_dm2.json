@@ -1492,6 +1492,13 @@
             "team": "red"
           },
           {
+            "availableFrom": 178.9849999999931,
+            "respawnAt": 217.84199999999004,
+            "takenAt": 178.9849999999931,
+            "takenBy": "banan falco",
+            "team": "coop"
+          },
+          {
             "availableFrom": 218.00399999998692,
             "respawnAt": 264.69799999998276,
             "takenAt": 232.60699999998474,
@@ -1504,6 +1511,13 @@
             "takenAt": 271.3739999999823,
             "takenBy": "betowen",
             "team": "red"
+          },
+          {
+            "availableFrom": 304.37299999998237,
+            "respawnAt": 358.26899999998176,
+            "takenAt": 304.37299999998237,
+            "takenBy": "banan falco",
+            "team": "coop"
           },
           {
             "availableFrom": 358.39899999998136,
