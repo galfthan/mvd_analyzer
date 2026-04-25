@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/qwdemo/events"
-	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 
 // newTestItemAnalyzer wires an analyzer for unit tests — skips the
@@ -27,7 +26,7 @@ func newTestItemAnalyzer() (*ItemAnalyzer, *Context) {
 // asserting RespawnAt = 30.
 func TestItemAnalyzer_RAPickupRespawn(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[2] = &mvd.PlayerInfo{Slot: 2, Name: "nexus", Team: "ahoy"}
+	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "nexus", Team: "ahoy"}
 	a.playerPos[2] = [3]float32{100, 0, 0}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 75, Kind: "ra", Origin: [3]float32{100, 0, 0}, Time: 0})
@@ -65,7 +64,7 @@ func TestItemAnalyzer_RAPickupRespawn(t *testing.T) {
 // RespawnAt; this test pins it at TakenAt + 60.
 func TestItemAnalyzer_QuadNominalRespawn(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 	a.playerPos[0] = [3]float32{0, 128, 282}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 43, Kind: "quad", Origin: [3]float32{0, 128, 282}, Time: 0})
@@ -87,8 +86,8 @@ func TestItemAnalyzer_QuadNominalRespawn(t *testing.T) {
 // to ≤ 100 — not from the wire respawn time.
 func TestItemAnalyzer_TwoMHs(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[2] = &mvd.PlayerInfo{Slot: 2, Name: "p1"}
-	ctx.Players[3] = &mvd.PlayerInfo{Slot: 3, Name: "p2"}
+	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "p1"}
+	ctx.Players[3] = &events.PlayerInfo{Slot: 3, Name: "p2"}
 	a.playerPos[2] = [3]float32{1000, 0, 0}
 	a.playerPos[3] = [3]float32{-1000, 0, 0}
 
@@ -132,7 +131,7 @@ func TestItemAnalyzer_TwoMHs(t *testing.T) {
 // health; rot drains it to 100 at t=110; RespawnAt is then 130.
 func TestItemAnalyzer_MHRotTickdown(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 	a.playerPos[0] = [3]float32{0, 0, 0}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "mh", Origin: [3]float32{0, 0, 0}})
@@ -155,7 +154,7 @@ func TestItemAnalyzer_MHRotTickdown(t *testing.T) {
 // comes more than 5 s after pickup).
 func TestItemAnalyzer_MHHolderDiesMidRot(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 	a.playerPos[0] = [3]float32{0, 0, 0}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "mh", Origin: [3]float32{0, 0, 0}})
@@ -176,7 +175,7 @@ func TestItemAnalyzer_MHHolderDiesMidRot(t *testing.T) {
 // respawn timer can't arm before pickup+5, so RespawnAt = pickup + 5 + 20.
 func TestItemAnalyzer_MHInstantDeathFloor(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 	a.playerPos[0] = [3]float32{0, 0, 0}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "mh", Origin: [3]float32{0, 0, 0}})
@@ -199,7 +198,7 @@ func TestItemAnalyzer_MHInstantDeathFloor(t *testing.T) {
 // entities to the same RespawnAt.
 func TestItemAnalyzer_TwoMHsSameHolder(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "hog"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "hog"}
 	a.playerPos[0] = [3]float32{0, 0, 0}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 40, Kind: "mh", Origin: [3]float32{0, 0, 0}})

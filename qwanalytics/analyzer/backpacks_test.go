@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/qwdemo/events"
-	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 
 func newTestBackpackAnalyzer() (*BackpackAnalyzer, *Context) {
@@ -21,7 +20,7 @@ func newTestBackpackAnalyzer() (*BackpackAnalyzer, *Context) {
 // the dropper's last PlayerPositionEvent.
 func TestBackpackAnalyzer_RLHintEmitsDrop(t *testing.T) {
 	a, ctx := newTestBackpackAnalyzer()
-	ctx.Players[4] = &mvd.PlayerInfo{Slot: 4, Name: "ace", Team: "red"}
+	ctx.Players[4] = &events.PlayerInfo{Slot: 4, Name: "ace", Team: "red"}
 
 	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 4, Origin: [3]float32{200, 0, 0}, Time: 29.9})
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 142, ItemFlags: 32, PlayerEnt: 5, Time: 30})
@@ -49,7 +48,7 @@ func TestBackpackAnalyzer_RLHintEmitsDrop(t *testing.T) {
 // LG hint (ItemFlags=64) -> weapon="lg".
 func TestBackpackAnalyzer_LGHintEmitsDrop(t *testing.T) {
 	a, ctx := newTestBackpackAnalyzer()
-	ctx.Players[3] = &mvd.PlayerInfo{Slot: 3, Name: "lgdropper"}
+	ctx.Players[3] = &events.PlayerInfo{Slot: 3, Name: "lgdropper"}
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 64, PlayerEnt: 4, Time: 5})
 
 	out, _ := a.Finalize()
@@ -64,7 +63,7 @@ func TestBackpackAnalyzer_LGHintEmitsDrop(t *testing.T) {
 // ignored.
 func TestBackpackAnalyzer_EntityStateEventsIgnored(t *testing.T) {
 	a, ctx := newTestBackpackAnalyzer()
-	ctx.Players[1] = &mvd.PlayerInfo{Slot: 1, Name: "p"}
+	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "p"}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "backpack", Origin: [3]float32{0, 0, 0}, Time: 10})
 	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 50, Kind: "backpack", Taken: true, Time: 11})
@@ -80,7 +79,7 @@ func TestBackpackAnalyzer_EntityStateEventsIgnored(t *testing.T) {
 // practice, but we don't trust the wire to enforce that).
 func TestBackpackAnalyzer_UnrecognisedFlagsDropped(t *testing.T) {
 	a, ctx := newTestBackpackAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "x"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "x"}
 
 	for _, flags := range []int{0, 32 | 64, 1, 4} {
 		_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: flags, PlayerEnt: 1, Time: 1})
@@ -97,7 +96,7 @@ func TestBackpackAnalyzer_PreMatchIgnored(t *testing.T) {
 	a := NewBackpackAnalyzer()
 	ctx := &Context{FragsBySlot: map[int]int{}}
 	_ = a.Init(ctx)
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 	// matchStarted intentionally false.
 
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: 32, PlayerEnt: 1, Time: 1})
@@ -125,8 +124,8 @@ func TestBackpackAnalyzer_UnknownSlotSkipped(t *testing.T) {
 // sorted by time.
 func TestBackpackAnalyzer_SortedByTime(t *testing.T) {
 	a, ctx := newTestBackpackAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "a"}
-	ctx.Players[1] = &mvd.PlayerInfo{Slot: 1, Name: "b"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "a"}
+	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "b"}
 
 	// Submit out of order: t=20 first, then t=10.
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 10, ItemFlags: 32, PlayerEnt: 1, Time: 20})

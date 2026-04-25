@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/qwdemo/events"
-	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 
 func newTestWeaponPickupsAnalyzer() (*WeaponPickupsAnalyzer, *Context) {
@@ -21,7 +20,7 @@ func newTestWeaponPickupsAnalyzer() (*WeaponPickupsAnalyzer, *Context) {
 // post-death RL frag don't count).
 func TestWeaponPickups_WorldRLWithKills(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
-	ctx.Players[4] = &mvd.PlayerInfo{Slot: 4, Name: "ace", Team: "red"}
+	ctx.Players[4] = &events.PlayerInfo{Slot: 4, Name: "ace", Team: "red"}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Time: 0})
 	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 100, PlayerEnt: 5, Time: 10})
@@ -59,7 +58,7 @@ func TestWeaponPickups_WorldRLWithKills(t *testing.T) {
 // goes to whichever earlier pickup granted the weapon.
 func TestWeaponPickups_HadBeforeDoesNotClaimKills(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
-	ctx.Players[2] = &mvd.PlayerInfo{Slot: 2, Name: "hoarder", Team: "blue"}
+	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "hoarder", Team: "blue"}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 77, Kind: "rl", Time: 0})
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 4})
@@ -83,8 +82,8 @@ func TestWeaponPickups_HadBeforeDoesNotClaimKills(t *testing.T) {
 // dropper's identity via the backpackEnt join.
 func TestWeaponPickups_BackpackPickupAttribution(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
-	ctx.Players[1] = &mvd.PlayerInfo{Slot: 1, Name: "dropper", Team: "red"}
-	ctx.Players[2] = &mvd.PlayerInfo{Slot: 2, Name: "thief", Team: "blue"}
+	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "dropper", Team: "red"}
+	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "thief", Team: "blue"}
 
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 32, PlayerEnt: 2, Time: 10})
 	_ = a.OnEvent(&events.BackpackPickupHintEvent{BackpackEnt: 200, PlayerEnt: 3, Time: 11})
@@ -114,7 +113,7 @@ func TestWeaponPickups_BackpackPickupAttribution(t *testing.T) {
 // armor/health.
 func TestWeaponPickups_NonWeaponHintsIgnored(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "ra", Time: 0})
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 2, Kind: "mh", Time: 0})
@@ -131,7 +130,7 @@ func TestWeaponPickups_NonWeaponHintsIgnored(t *testing.T) {
 // those aren't real effectiveness signals.
 func TestWeaponPickups_TeamkillsAndSuicidesExcluded(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "rl", Time: 0})
 	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 5})
@@ -157,7 +156,7 @@ func TestWeaponPickups_TeamkillsAndSuicidesExcluded(t *testing.T) {
 // had never held the weapon this life.
 func TestWeaponPickups_RedundantSecondPickupGetsZero(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
 	// Pickup 1 at t=10 (hadBefore=false), pickup 2 at t=20
 	// (hadBefore=true after StatUpdate at t=11), death at t=30.
@@ -196,7 +195,7 @@ func TestWeaponPickups_RedundantSecondPickupGetsZero(t *testing.T) {
 // granting pickup, not the dead life's.
 func TestWeaponPickups_FreshPickupAfterDeathIsItsOwnGrant(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
 	// Life 1: pickup at t=10 (fresh), death at t=30 — STAT_ITEMS
 	// clears at death, which the server sends as a StatUpdate.
@@ -228,7 +227,7 @@ func TestWeaponPickups_FreshPickupAfterDeathIsItsOwnGrant(t *testing.T) {
 // qualifying frag after the pickup counts (no upper bound).
 func TestWeaponPickups_NoNextDeathKillsUnbounded(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "survivor"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "survivor"}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "lg", Time: 0})
 	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 5})
