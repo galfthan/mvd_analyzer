@@ -40,6 +40,90 @@ that downstream consumers render, summarise, or feed to an agent.
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.
 
+## Pipeline architecture
+
+A run flows through three concentric loops over a single pass of the
+event stream, then a post-pass on the assembled `Result`:
+
+```
+  events.Source ──▶ Init (core, then derived)
+                    │
+                    ▼
+            ┌─ for each event ─────────────────────────┐
+            │   registry sets ctx.{ServerData,         │
+            │     Players, FragsBySlot} from event     │
+            │   for a in core    : a.OnEvent(event)    │
+            │   for a in derived : a.OnEvent(event)    │
+            └──────────────────────────────────────────┘
+                    │
+                    ▼
+            ┌─ Phase 1: Finalize core ────────────────┐
+            │   demoinfo.Finalize → result.DemoInfo   │
+            │   demoinfo.PopulateCore →               │
+            │     co.{DemoInfo, Names, Slots}         │
+            │   frag.UseCoreOutputs(co) // reads Names│
+            │   frag.Finalize → result.Frags          │
+            │   frag.PopulateCore → co.FragEntries    │
+            └─────────────────────────────────────────┘
+                    │
+                    ▼
+            ┌─ Phase 2: Finalize derived ─────────────┐
+            │   each derived analyser:                │
+            │     a.UseCoreOutputs(co)  // optional   │
+            │     a.Finalize(result)                  │
+            │   (no analyser writes to co here)       │
+            └─────────────────────────────────────────┘
+                    │
+                    ▼
+            ┌─ Result post-processors ─────────────────┐
+            │   normalizeMatchRelativeTimes(result)    │
+            │   normalizeDuelTeams(result)             │
+            │   buildLocGraphPost(result)              │
+            └──────────────────────────────────────────┘
+                    │
+                    ▼
+                 *Result
+```
+
+### What goes where
+
+| Slice | Default analysers | Why |
+|---|---|---|
+| **Core** | `demoinfo`, `frag` | Implement `CoreProducer`. Everything they emit (`DemoInfo`, `Names`, `Slots`, `FragEntries`) is the canonical input some derived analyser consumes during its own Finalize. |
+| **Derived** | `metadata`, `match`, `messages`, `timeline`, `items`, `backpacks`, `weapon_pickups` | Either implement `CoreConsumer` (read `co.*`) or are independent peers. They never write to `CoreOutputs`. |
+| **Post-processors** | `normalizeMatchRelativeTimes`, `duelTeamNormalize`, `locGraphPost` | Operate on the assembled `Result` after every Finalize has run. Order matters within the slice (time normalisation must run before locgraph). |
+
+### Why the split
+
+The two-phase ordering exists so cross-analyser dependencies are
+expressed as types, not registration discipline. Before the cleanup,
+adding a derived analyser that read `ctx.FragEntries` only worked if
+the author knew to register it after `frag` — there was no compile-time
+guard. Now the contract is:
+
+- Anything you write into `CoreOutputs` requires `CoreProducer` and
+  `RegisterCore`. The slice is small by design.
+- Anything you read from `CoreOutputs` requires `CoreConsumer`. The
+  registry guarantees `co` is fully populated before any derived
+  Finalize runs.
+- Anything that operates on the assembled `Result` is a
+  `ResultPostProcessor`, not an analyser.
+
+### CoreOutputs shape
+
+```go
+type CoreOutputs struct {
+    DemoInfo    *DemoInfoResult        // KTX JSON metadata
+    Names       *NameTable             // exact + normalized name → team
+    Slots       map[int]SlotInfo       // per-slot resolved display name + team
+    FragEntries []FragEntry            // canonical frag log
+}
+```
+
+Producers populate fields via `PopulateCore`; consumers read whatever
+they need via the field names directly, or via tiny helpers like
+`co.SlotName(slot)`.
+
 ## Using qwanalytics
 
 ### Run the default pipeline over a demo file
