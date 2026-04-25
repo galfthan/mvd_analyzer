@@ -1725,14 +1725,14 @@
             "availableFrom": 0,
             "respawnAt": 56.35700000000079,
             "takenAt": 36.35700000000079,
-            "takenBy": "mj",
-            "team": "red"
+            "takenBy": "speedball"
           },
           {
             "availableFrom": 56.36400000000089,
             "respawnAt": 134.839000000008,
             "takenAt": 114.83900000000801,
-            "takenBy": "speedball"
+            "takenBy": "mj",
+            "team": "red"
           },
           {
             "availableFrom": 134.82100000001398,
@@ -1752,7 +1752,8 @@
             "availableFrom": 299.42300000001876,
             "respawnAt": 324.8190000000142,
             "takenAt": 304.8190000000142,
-            "takenBy": "speedball"
+            "takenBy": "mj",
+            "team": "red"
           },
           {
             "availableFrom": 324.8069999999975,
@@ -2114,7 +2115,8 @@
             "availableFrom": 538.7879999999633,
             "respawnAt": 575.9059999999915,
             "takenAt": 555.9059999999915,
-            "takenBy": "speedball"
+            "takenBy": "mj",
+            "team": "red"
           },
           {
             "availableFrom": 575.8970000000288

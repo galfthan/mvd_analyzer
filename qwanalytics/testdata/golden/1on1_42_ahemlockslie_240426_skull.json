@@ -2038,30 +2038,22 @@
           {
             "availableFrom": 15.004000000000117,
             "respawnAt": 99.0900000000021,
-            "takenAt": 69.0900000000021,
-            "takenBy": "AHemlocksLie",
-            "team": "'tro"
+            "takenAt": 69.0900000000021
           },
           {
             "availableFrom": 84.09300000000478,
             "respawnAt": 206.7670000000099,
-            "takenAt": 176.7670000000099,
-            "takenBy": "AHemlocksLie",
-            "team": "'tro"
+            "takenAt": 176.7670000000099
           },
           {
             "availableFrom": 191.75100000000916,
             "respawnAt": 402.8549999999591,
-            "takenAt": 372.8549999999591,
-            "takenBy": "42",
-            "team": "red"
+            "takenAt": 372.8549999999591
           },
           {
             "availableFrom": 387.83999999995245,
             "respawnAt": 529.1109999998956,
-            "takenAt": 499.1109999998955,
-            "takenBy": "AHemlocksLie",
-            "team": "'tro"
+            "takenAt": 499.1109999998955
           },
           {
             "availableFrom": 514.1209999999095
@@ -2757,8 +2749,8 @@
             "availableFrom": 294.03599999999284,
             "respawnAt": 327.9089999999887,
             "takenAt": 307.9089999999887,
-            "takenBy": "AHemlocksLie",
-            "team": "'tro"
+            "takenBy": "42",
+            "team": "red"
           },
           {
             "availableFrom": 327.9079999999821,

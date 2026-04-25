@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/mvd-analyzer/qwdemo/mvd"
@@ -534,7 +535,10 @@ func (p *Parser) readDelta(r *mvd.BufferReader, word uint32, from *EntityState, 
 // yet (e.g. baseline arrived before the model list) when we can now
 // resolve the kind.
 func (p *Parser) diffItemTransitions(newFrame, oldFrame map[int]*EntityState, time float64) {
-	// Union of keys from old + new (tracked entities only).
+	// Union of keys from old + new (tracked entities only). Sort the
+	// entity numbers before emitting so that downstream stateful
+	// consumers (e.g. items.go's layered attribution) see same-frame
+	// events in a deterministic order across runs.
 	seen := make(map[int]bool, len(newFrame)+len(oldFrame))
 	for k := range newFrame {
 		seen[k] = true
@@ -542,8 +546,13 @@ func (p *Parser) diffItemTransitions(newFrame, oldFrame map[int]*EntityState, ti
 	for k := range oldFrame {
 		seen[k] = true
 	}
+	ents := make([]int, 0, len(seen))
+	for k := range seen {
+		ents = append(ents, k)
+	}
+	sort.Ints(ents)
 
-	for ent := range seen {
+	for _, ent := range ents {
 		// Resolve current kind. Prefer classifying against whatever
 		// state exists now so baselines that landed before the model
 		// list still get an ItemSpawnEvent once we can name the model.
