@@ -168,19 +168,26 @@ dropper slot already attributed, so the analyzer doesn't guess.
 
 Coverage caveats:
 
-- **RL and LG only.** KTX only emits the hint for heavy weapons;
-  SSG/NG/SNG/GL and empty packs are invisible to this signal. The
-  QW protocol does not carry backpack contents on the wire as
-  entity state, so there is no alternative source.
+- **RL and LG only — drops *and* pickups.** KTX only emits `//ktx
+  drop` and `//ktx bp` for packs containing RL or LG, and on
+  competitive demos there is no other authoritative wire signal
+  for non-RL/LG packs (`BackpackPickupPrintEvent` would help, but
+  `SV_ClientPrintf` strips PRINT_LOW prints before the MVD write
+  whenever the picker has `msg >= 1`, and competitive players
+  overwhelmingly run `msg 2`). See
+  [`qwdemo/MVD_FORMAT.md` → Practical gap — non-RL/LG backpack
+  pickups on competitive demos](../qwdemo/MVD_FORMAT.md#svc_stufftext-9)
+  for the full mechanics. Net effect: SSG/NG/SNG/GL/ammo-only
+  packs do not appear in `result.Backpacks`, and corresponding
+  pickups do not appear in `result.WeaponPickups`.
 - **Pickup side lives in `WeaponPickups`, not `Backpacks`.**
   `BackpackAnalyzer` only records drops. The pickup side — who
   grabbed the pack, whether they already owned the weapon, how many
   frags they scored with it before dying — is emitted by
   `WeaponPickupsAnalyzer` and exposed as `result.WeaponPickups`.
   Frontends join the two lists by `BackpackDrop.EntNum` ==
-  `WeaponPickup.BackpackEnt`. `BackpackPickupPrintEvent` (the
-  per-client "You get " opener) is not consumed yet; SSG/NG/SNG/GL
-  packs therefore have no pickup record.
+  `WeaponPickup.BackpackEnt` (paired with `dropTime` to disambiguate
+  recycled edict numbers).
 
 ```go
 type BackpackDrop struct {

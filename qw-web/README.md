@@ -79,6 +79,14 @@ the compound key is needed because QW servers recycle backpack
 edict numbers across drops, so `entNum` alone would collide. A drop
 with no matching pickup is shown as `expired`.
 
+The "RL / LG only" scope is a wire-protocol limit, not a UI
+decision: KTX's `//ktx drop` and `//ktx bp` directives fire only
+for RL/LG packs, and the print-based fallback for other pack
+classes is stripped from competitive MVDs by mvdsv's `messagelevel`
+filter. See [`qwdemo/MVD_FORMAT.md` → Practical gap — non-RL/LG
+backpack pickups on competitive demos](../qwdemo/MVD_FORMAT.md#svc_stufftext-9)
+for the full mechanics.
+
 Columns: Time, Dropper, Drop Team, Weapon, Drop (hub link),
 Status, Picker, Pick Team, Kills, Run (hub link). Five filter
 dropdowns above the table narrow rows by Dropper, Drop Team,
