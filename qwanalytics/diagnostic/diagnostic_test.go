@@ -212,5 +212,26 @@ func checkDataQuality(r *analyzer.Result) []string {
 		}
 	}
 
+	// Item pickup attribution coverage. Every phase that closed (TakenAt
+	// > 0) should name a picker; an empty TakenBy is the layered-signal
+	// pipeline's "no candidate" outcome (source="none") and indicates
+	// either a degenerate scenario or a gap in our signal coverage.
+	if r.Items != nil {
+		var taken, unattributed int
+		for _, it := range r.Items.Items {
+			for _, ph := range it.Phases {
+				if ph.TakenAt > 0 {
+					taken++
+					if ph.TakenBy == "" {
+						unattributed++
+					}
+				}
+			}
+		}
+		if taken > 0 {
+			warn("items: %d closed phases, %d unattributed (TakenBy=\"\")", taken, unattributed)
+		}
+	}
+
 	return warnings
 }

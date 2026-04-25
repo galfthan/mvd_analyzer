@@ -5629,8 +5629,8 @@
             "availableFrom": 137.06900000000974,
             "respawnAt": 178.12500000001458,
             "takenAt": 158.12500000001458,
-            "takenBy": "nlk",
-            "team": ".ra."
+            "takenBy": "clox",
+            "team": "oSaMs"
           },
           {
             "availableFrom": 178.11900000001916,
@@ -6060,14 +6060,14 @@
             "availableFrom": 908.2580000003547,
             "respawnAt": 937.4530000003662,
             "takenAt": 917.4530000003662,
-            "takenBy": "apa",
-            "team": "oSaMs"
+            "takenBy": "[cmd] witka",
+            "team": ".ra."
           },
           {
             "availableFrom": 937.4540000003924,
             "respawnAt": 974.9090000004155,
             "takenAt": 954.9090000004155,
-            "takenBy": "lakso",
+            "takenBy": "clox",
             "team": "oSaMs"
           },
           {
@@ -7817,8 +7817,8 @@
             "availableFrom": 507.58799999993715,
             "respawnAt": 547.6159999999437,
             "takenAt": 517.6159999999437,
-            "takenBy": "sCorp",
-            "team": ".ra."
+            "takenBy": "marksuzu",
+            "team": "oSaMs"
           },
           {
             "availableFrom": 547.6039999999678,
@@ -7943,8 +7943,8 @@
             "availableFrom": 236.32700000003263,
             "respawnAt": 290.8830000000273,
             "takenAt": 260.8830000000273,
-            "takenBy": "clox",
-            "team": "oSaMs"
+            "takenBy": "doberman",
+            "team": ".ra."
           },
           {
             "availableFrom": 290.8690000000135,
@@ -8799,8 +8799,8 @@
             "availableFrom": 96.43700000000449,
             "respawnAt": 126.74600000000447,
             "takenAt": 96.74600000000449,
-            "takenBy": "doberman",
-            "team": ".ra."
+            "takenBy": "lakso",
+            "team": "oSaMs"
           },
           {
             "availableFrom": 126.73400000000768,
@@ -8911,8 +8911,8 @@
             "availableFrom": 750.1470000001735,
             "respawnAt": 781.4500000001746,
             "takenAt": 751.4500000001746,
-            "takenBy": "[cmd] witka",
-            "team": ".ra."
+            "takenBy": "clox",
+            "team": "oSaMs"
           },
           {
             "availableFrom": 781.4320000002028,
@@ -9304,8 +9304,8 @@
             "availableFrom": 576.568999999997,
             "respawnAt": 611.2260000000015,
             "takenAt": 581.2260000000015,
-            "takenBy": "sCorp",
-            "team": ".ra."
+            "takenBy": "clox",
+            "team": "oSaMs"
           },
           {
             "availableFrom": 611.2150000000323,
@@ -10458,7 +10458,7 @@
             "availableFrom": 198.581000000025,
             "respawnAt": 276.71400000003354,
             "takenAt": 246.71400000003354,
-            "takenBy": "sCorp",
+            "takenBy": "doberman",
             "team": ".ra."
           },
           {

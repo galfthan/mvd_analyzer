@@ -4346,8 +4346,8 @@
             "availableFrom": 199.1170000000214,
             "respawnAt": 237.83100000002267,
             "takenAt": 207.83100000002267,
-            "takenBy": "psy*overon",
-            "team": "pys"
+            "takenBy": "wd.char",
+            "team": "wd"
           },
           {
             "availableFrom": 222.8300000000243,
@@ -4472,7 +4472,7 @@
             "availableFrom": 93.02600000000336,
             "respawnAt": 123.68900000000339,
             "takenAt": 93.68900000000338,
-            "takenBy": "psy*overon",
+            "takenBy": "wd.dilbert",
             "team": "pys"
           },
           {
@@ -4686,8 +4686,8 @@
             "availableFrom": 65.1830000000018,
             "respawnAt": 108.28600000000256,
             "takenAt": 78.28600000000256,
-            "takenBy": "wd.dilbert",
-            "team": "pys"
+            "takenBy": "wd.char",
+            "team": "wd"
           },
           {
             "availableFrom": 93.27900000000336,
@@ -4900,14 +4900,14 @@
             "availableFrom": 85.93300000000315,
             "respawnAt": 115.50400000000344,
             "takenAt": 95.50400000000344,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenBy": "wd.dilbert",
+            "team": "pys"
           },
           {
             "availableFrom": 115.49200000000421,
             "respawnAt": 141.12800000000476,
             "takenAt": 121.12800000000475,
-            "takenBy": "wd.char",
+            "takenBy": "wd.cao",
             "team": "wd"
           },
           {
@@ -4935,21 +4935,21 @@
             "availableFrom": 232.8670000000258,
             "respawnAt": 273.9700000000255,
             "takenAt": 253.97000000002552,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenBy": "psy*overon",
+            "team": "pys"
           },
           {
             "availableFrom": 273.96200000001693,
             "respawnAt": 294.7550000000165,
             "takenAt": 274.7550000000165,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenBy": "psy*overon",
+            "team": "pys"
           },
           {
             "availableFrom": 294.7540000000087,
             "respawnAt": 327.22200000000475,
             "takenAt": 307.22200000000475,
-            "takenBy": "wd.char",
+            "takenBy": "wd.cao",
             "team": "wd"
           },
           {
@@ -4963,15 +4963,15 @@
             "availableFrom": 360.44299999999083,
             "respawnAt": 385.2109999999912,
             "takenAt": 365.2109999999912,
-            "takenBy": "psy*overon",
+            "takenBy": "wd.dilbert",
             "team": "pys"
           },
           {
             "availableFrom": 385.1989999999893,
             "respawnAt": 413.5799999999897,
             "takenAt": 393.5799999999897,
-            "takenBy": "wd.cao",
-            "team": "wd"
+            "takenBy": "wd.dilbert",
+            "team": "pys"
           },
           {
             "availableFrom": 413.5589999999878,
@@ -4991,14 +4991,14 @@
             "availableFrom": 461.97099999997147,
             "respawnAt": 486.87499999997016,
             "takenAt": 466.87499999997016,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenBy": "psy*overon",
+            "team": "pys"
           },
           {
             "availableFrom": 486.86699999996324,
             "respawnAt": 511.186999999962,
             "takenAt": 491.18699999996204,
-            "takenBy": "psy*overon",
+            "takenBy": "wd.dilbert",
             "team": "pys"
           },
           {
@@ -6963,30 +6963,22 @@
           {
             "availableFrom": 15.012000000000118,
             "respawnAt": 59.066000000000614,
-            "takenAt": 29.06600000000061,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenAt": 29.06600000000061
           },
           {
             "availableFrom": 44.06500000000092,
             "respawnAt": 77.29700000000098,
-            "takenAt": 47.29700000000099,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenAt": 47.29700000000099
           },
           {
             "availableFrom": 62.280000000001564,
             "respawnAt": 97.36200000000187,
-            "takenAt": 67.36200000000187,
-            "takenBy": "wd.cao",
-            "team": "wd"
+            "takenAt": 67.36200000000187
           },
           {
             "availableFrom": 82.36400000000285,
             "respawnAt": 159.58200000000605,
-            "takenAt": 129.58200000000605,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenAt": 129.58200000000605
           },
           {
             "availableFrom": 144.56900000000934,
@@ -6998,23 +6990,17 @@
           {
             "availableFrom": 169.3380000000158,
             "respawnAt": 212.68600000001908,
-            "takenAt": 182.68600000001908,
-            "takenBy": "wd.dilbert",
-            "team": "pys"
+            "takenAt": 182.68600000001908
           },
           {
             "availableFrom": 197.66900000002133,
             "respawnAt": 242.7370000000233,
-            "takenAt": 212.7370000000233,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenAt": 212.7370000000233
           },
           {
             "availableFrom": 227.73300000002504,
             "respawnAt": 265.816000000026,
-            "takenAt": 235.816000000026,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenAt": 235.816000000026
           },
           {
             "availableFrom": 250.80200000002597,
@@ -7026,23 +7012,17 @@
           {
             "availableFrom": 293.2850000000096,
             "respawnAt": 328.9300000000076,
-            "takenAt": 298.9300000000076,
-            "takenBy": "psy*overon",
-            "team": "pys"
+            "takenAt": 298.9300000000076
           },
           {
             "availableFrom": 313.91800000000245,
             "respawnAt": 359.29699999999644,
-            "takenAt": 329.29699999999644,
-            "takenBy": "wd.cao",
-            "team": "wd"
+            "takenAt": 329.29699999999644
           },
           {
             "availableFrom": 344.2929999999932,
             "respawnAt": 377.4789999999925,
-            "takenAt": 347.4789999999925,
-            "takenBy": "wd.cao",
-            "team": "wd"
+            "takenAt": 347.4789999999925
           },
           {
             "availableFrom": 362.46599999999114,
@@ -7054,23 +7034,17 @@
           {
             "availableFrom": 398.5709999999895,
             "respawnAt": 432.37699999998944,
-            "takenAt": 402.37699999998944,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenAt": 402.37699999998944
           },
           {
             "availableFrom": 417.3729999999865,
             "respawnAt": 448.0759999999863,
-            "takenAt": 418.0759999999863,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenAt": 418.0759999999863
           },
           {
             "availableFrom": 433.0669999999804,
             "respawnAt": 498.2049999999694,
-            "takenAt": 468.2049999999694,
-            "takenBy": "wd.cao",
-            "team": "wd"
+            "takenAt": 468.2049999999694
           },
           {
             "availableFrom": 483.20499999996485,
@@ -7096,16 +7070,12 @@
           {
             "availableFrom": 544.6839999999941,
             "respawnAt": 583.1019999999999,
-            "takenAt": 553.1019999999999,
-            "takenBy": "wd.dilbert",
-            "team": "pys"
+            "takenAt": 553.1019999999999
           },
           {
             "availableFrom": 568.0880000000097,
             "respawnAt": 618.0110000000234,
-            "takenAt": 588.0110000000234,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenAt": 588.0110000000234
           }
         ],
         "x": 152,
@@ -7188,8 +7158,8 @@
           {
             "availableFrom": 0,
             "respawnAt": 20,
-            "takenBy": "wd.dilbert",
-            "team": "pys"
+            "takenBy": "wd.cao",
+            "team": "wd"
           },
           {
             "availableFrom": 20.001000000000214,
@@ -7209,8 +7179,8 @@
             "availableFrom": 69.29600000000194,
             "respawnAt": 100.39000000000269,
             "takenAt": 80.39000000000269,
-            "takenBy": "wd.cao",
-            "team": "wd"
+            "takenBy": "wd.dilbert",
+            "team": "pys"
           },
           {
             "availableFrom": 100.38900000000363,
@@ -7244,8 +7214,8 @@
             "availableFrom": 196.9070000000212,
             "respawnAt": 220.9860000000217,
             "takenAt": 200.9860000000217,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenBy": "psy*overon",
+            "team": "pys"
           },
           {
             "availableFrom": 220.97400000002412,
@@ -7258,8 +7228,8 @@
             "availableFrom": 250.51300000002593,
             "respawnAt": 276.19400000002446,
             "takenAt": 256.19400000002446,
-            "takenBy": "wd.cao",
-            "team": "wd"
+            "takenBy": "psy*overon",
+            "team": "pys"
           },
           {
             "availableFrom": 276.199000000016,
@@ -7279,7 +7249,7 @@
             "availableFrom": 322.03399999999925,
             "respawnAt": 344.0419999999984,
             "takenAt": 324.0419999999984,
-            "takenBy": "wd.cao",
+            "takenBy": "wd.char",
             "team": "wd"
           },
           {
@@ -7335,15 +7305,15 @@
             "availableFrom": 518.2949999999732,
             "respawnAt": 542.5429999999765,
             "takenAt": 522.5429999999765,
-            "takenBy": "wd.dilbert",
+            "takenBy": "psy*overon",
             "team": "pys"
           },
           {
             "availableFrom": 542.5409999999927,
             "respawnAt": 576.0110000000017,
             "takenAt": 556.0110000000017,
-            "takenBy": "wd.char",
-            "team": "wd"
+            "takenBy": "psy*overon",
+            "team": "pys"
           },
           {
             "availableFrom": 576.0090000000149,

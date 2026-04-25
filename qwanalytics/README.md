@@ -223,12 +223,38 @@ that the parser synthesises from `svc_spawnbaseline` +
 entity-state stream. Item classification uses standard Quake 1 model
 paths (no KTX-specific data), so *every* item with a visible model
 gets tracked on *any* demo source, including ktpro, CustomTF, or
-non-KTX servers. No map preprocessing is required. `TakenBy`
-attribution currently uses the nearest-player-origin at the moment of
-pickup (best-effort label since the entity-state stream doesn't carry
-"who touched it"). `RespawnAt` is observed directly, so MH rot
-(which varies with damage taken) falls out naturally — no special
-case.
+non-KTX servers. No map preprocessing is required. `RespawnAt` is
+observed directly, so MH rot (which varies with damage taken) falls
+out naturally — no special case.
+
+`TakenBy` attribution uses a **layered signal pipeline** rather than
+nearest-player snapping. The four layers, in priority order:
+
+1. **`ItemPickupHintEvent`** (`//ktx took`) — keyed by entNum.
+   Authoritative for KTX demos; covers MH, armors, weapons, powerups.
+2. **`ItemPickupPrintEvent`** — per-client `svc_print` "You got the X"
+   / "You receive N health" strings. Authoritative when present, but
+   `mvdsv` filters PRINT_LOW prints by the picker's `messagelevel`
+   cvar; competitive players widely use `msg 2` so this signal is
+   partial in practice. Covers the same set as L1 plus H15 / H25 /
+   ammo boxes when present.
+3. **Stat-delta evidence** — diffs each `StatUpdateEvent` against a
+   per-slot snapshot. IT_* bit 0→1 transitions identify armor /
+   weapon / powerup pickups; STAT_HEALTH +15 / +25 identify small
+   healths; positive STAT_AMMO_* deltas identify ammo boxes. Universal
+   fallback that works on every demo regardless of client config.
+4. **Distance corroborator** — last resort. Iterates slots whose last
+   `PlayerPositionEvent` is within 250 ms of the pickup time and
+   returns the closest within 256² units squared of the item origin;
+   refuses to attribute when no candidate is in radius.
+
+A pickup with no signal in any layer gets `TakenBy=""` (omitempty in
+JSON). Distance is intentionally last because in QW the `findradius` /
+`touch` resolution order for simultaneous touches is effectively
+random rather than nearest-wins, so a nearest-player heuristic
+mis-attributes contested pickups even when the geometry looks
+unambiguous. See [`PICKUP-SIGNALS-INVESTIGATION.md`](../PICKUP-SIGNALS-INVESTIGATION.md)
+for the underlying protocol analysis.
 
 Known limitation: when an item respawns and is immediately
 regrabbed within the same server tick, the entity is never
@@ -236,22 +262,6 @@ visible on the wire for that cycle, so we don't record a phase
 for it. The resulting phase will span the whole contested window
 (e.g. "RA taken at 31s, respawn observed at 91s" means the RA was
 never practically available in that 60 s window).
-
-Authoritative alternative (not yet wired into this analyzer): the
-parser now emits `ItemPickupHintEvent` for every KTX `//ktx took`
-directive, pinning each pickup to a concrete player edict without the
-nearest-origin heuristic. It covers MH / armors / heavy weapons /
-powerups on KTX servers; a future refactor will consume these as the
-primary `TakenBy` source and keep the nearest-origin path as a
-fallback for non-KTX sources.
-
-`ItemPickupPrintEvent` (parsed from per-client `svc_print` "You got
-the X" / "You receive N health" strings) fills the remaining gap:
-ammo boxes (no `//ktx took`) and H15/H25. Caveat: mvdsv filters
-PRINT_LOW prints by the picking player's `messagelevel` cvar before
-recording, so competitive demos where players set `msg 2` contain no
-pickup prints at all — coverage is per-player and per-demo. See
-`qwdemo/MVD_FORMAT.md` for the full filter mechanics.
 
 ### Backpacks
 
