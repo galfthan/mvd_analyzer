@@ -687,9 +687,14 @@ func (a *ItemAnalyzer) distanceBest(itemPos [3]float32, restrictTo map[int]bool,
 	return bestSlot
 }
 
-// handleItemPickupHint buffers a KTX `//ktx took` directive keyed by
-// the picked item's entNum. Layer 1 of the attribution pipeline reads
-// from this buffer at ItemStateEvent time.
+// handleItemPickupHint dispatches a KTX `//ktx took` directive. KTX
+// emits the hint on every touch including insta-regrabs the wire
+// never shows — so when the entity is already in our "taken" phase
+// (no wire respawn observed since the last close), the hint is
+// authoritative ground truth for an otherwise-invisible pickup and
+// gets synthesised immediately. Otherwise the hint is buffered for
+// the layered attribution pipeline to consume on the next
+// Taken=true event.
 func (a *ItemAnalyzer) handleItemPickupHint(e *events.ItemPickupHintEvent) {
 	if !a.timing.Started || a.timing.Ended {
 		return
@@ -698,7 +703,40 @@ func (a *ItemAnalyzer) handleItemPickupHint(e *events.ItemPickupHintEvent) {
 	if slot < 0 || slot >= len(a.ctx.Players) {
 		return
 	}
+	if a.syntheticEnabled {
+		if it := a.items[e.ItemEnt]; it != nil && len(it.phases) > 0 {
+			last := it.phases[len(it.phases)-1]
+			if last.TakenAt > 0 && it.kind != "mh" {
+				// Wire is still showing the entity as taken from
+				// the previous phase, but KTX says it just got
+				// touched again — must be an insta-regrab.
+				a.recordSyntheticTakeFromHint(e.ItemEnt, e.Time, slot)
+				return
+			}
+		}
+	}
 	a.pendingHints[e.ItemEnt] = pendingHint{playerSlot: slot, time: e.Time}
+}
+
+// recordSyntheticTakeFromHint mirrors recordSyntheticPickup but uses
+// the slot from the KTX hint directly (no stat-delta or position
+// inference needed). Source label is "hint" — the attribution is
+// authoritative even though the phase itself is synthesised.
+func (a *ItemAnalyzer) recordSyntheticTakeFromHint(ent int, t float64, slot int) {
+	it := a.items[ent]
+	if it == nil {
+		return
+	}
+	it.phases = append(it.phases, ItemPhase{AvailableFrom: t, TakenAt: t})
+	it.pickups = append(it.pickups, phaseAttribution{slot: slot, source: "hint"})
+	last := &it.phases[len(it.phases)-1]
+	if sec, ok := kindRespawnSec[it.kind]; ok {
+		last.RespawnAt = t + sec
+		a.scheduleSyntheticRespawn(ent, t+sec, 0)
+	} else {
+		delete(a.syntheticChain, ent)
+	}
+	a.attrCounts["hint"]++
 }
 
 // handleItemPickupPrint buffers a per-client `svc_print` pickup

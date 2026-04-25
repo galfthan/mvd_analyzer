@@ -1861,9 +1861,9 @@
             "team": "'tro"
           },
           {
-            "availableFrom": 115.20900000000674,
-            "respawnAt": 135.20900000000674,
-            "takenAt": 115.20900000000674,
+            "availableFrom": 115.21900000001027,
+            "respawnAt": 135.21900000001025,
+            "takenAt": 115.21900000001027,
             "takenBy": "AHemlocksLie",
             "team": "'tro"
           },
@@ -1938,6 +1938,13 @@
             "team": "'tro"
           },
           {
+            "availableFrom": 363.22899999996486,
+            "respawnAt": 383.22899999996486,
+            "takenAt": 363.22899999996486,
+            "takenBy": "AHemlocksLie",
+            "team": "'tro"
+          },
+          {
             "availableFrom": 383.22899999995445,
             "respawnAt": 404.1639999999541,
             "takenAt": 384.1639999999541,
@@ -1962,6 +1969,13 @@
             "availableFrom": 457.0079999999163,
             "respawnAt": 479.99699999991515,
             "takenAt": 459.99699999991515,
+            "takenBy": "AHemlocksLie",
+            "team": "'tro"
+          },
+          {
+            "availableFrom": 479.9939999999062,
+            "respawnAt": 499.9939999999062,
+            "takenAt": 479.9939999999062,
             "takenBy": "AHemlocksLie",
             "team": "'tro"
           },

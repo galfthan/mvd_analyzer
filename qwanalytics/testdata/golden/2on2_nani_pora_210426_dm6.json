@@ -4670,9 +4670,9 @@
             "team": "pora"
           },
           {
-            "availableFrom": 128.42100000000542,
-            "respawnAt": 148.42100000000542,
-            "takenAt": 128.42100000000542,
+            "availableFrom": 128.42300000000722,
+            "respawnAt": 148.42300000000722,
+            "takenAt": 128.42300000000722,
             "takenBy": "SS",
             "team": "nAnI"
           },
@@ -4708,6 +4708,13 @@
             "availableFrom": 238.90100000002678,
             "respawnAt": 261.0180000000274,
             "takenAt": 241.0180000000274,
+            "takenBy": "kippo",
+            "team": "pora"
+          },
+          {
+            "availableFrom": 261.0100000000134,
+            "respawnAt": 281.0100000000134,
+            "takenAt": 261.0100000000134,
             "takenBy": "kippo",
             "team": "pora"
           },
@@ -4761,9 +4768,9 @@
             "team": "nAnI"
           },
           {
-            "availableFrom": 431.06499999990825,
-            "respawnAt": 451.06499999990825,
-            "takenAt": 431.06499999990825,
+            "availableFrom": 431.0749999998953,
+            "respawnAt": 451.0749999998953,
+            "takenAt": 431.0749999998953,
             "takenBy": "rusti",
             "team": "pora"
           },
@@ -4796,9 +4803,9 @@
             "team": "pora"
           },
           {
-            "availableFrom": 534.7989999998673,
-            "respawnAt": 554.7989999998673,
-            "takenAt": 534.7989999998673,
+            "availableFrom": 534.8079999998956,
+            "respawnAt": 554.8079999998956,
+            "takenAt": 534.8079999998956,
             "takenBy": "rusti",
             "team": "pora"
           },
@@ -4842,9 +4849,9 @@
             "team": "pora"
           },
           {
-            "availableFrom": 309.9610000000002,
-            "respawnAt": 609.9610000000001,
-            "takenAt": 309.9610000000002,
+            "availableFrom": 309.94699999997096,
+            "respawnAt": 609.9469999999709,
+            "takenAt": 309.94699999997096,
             "takenBy": "gLAd",
             "team": "nAnI"
           }

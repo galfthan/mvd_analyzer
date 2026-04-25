@@ -112,29 +112,46 @@ delta showing no transition at all (see *insta-regrab invisibility* in
 trigger never fires, so without recovery items.go would silently miss
 those pickups.
 
-The analyser closes that gap with a chain-forward synthesis pass:
+The analyser closes that gap with two complementary synthesis paths:
+
+**Hint-driven (preferred when available).** Every `//ktx took`
+directive identifies the picker's slot directly. When a hint arrives
+for an entity that's already in our "taken" phase (no wire respawn
+observed since the last close), it can only be an insta-regrab —
+synthesise the pickup immediately, using the slot from the hint as
+authoritative attribution (`attributionSource = "hint"`). Covers
+armors, weapons, and powerups on KTX servers.
+
+**Stat-delta-driven (fallback for non-hinted kinds).** For items KTX
+doesn't hint (small healths, ammo boxes), and as a backup if a hint
+is somehow missing:
 
 1. After every `Taken=true(ent, T)` (real or synthetic), schedule a
    prediction at `T + respawnSec[kind]`.
 2. Once the predicted moment plus a 0.5 s settle window has passed,
    look for a unique slot whose stat-delta evidence (a STAT_ARMOR
    jump for armor, IT_QUAD bit transition for quad, ammo tick-up,
-   etc.) and position support a pickup at the predicted instant.
-3. If found, record a synthetic phase (`AvailableFrom=predicted,
-   TakenAt=predicted`) with the unique slot and `attributionSource =
-   "synthetic"`; schedule the next prediction.
-4. If the wire later shows `Taken=false` for the entity, cancel any
-   pending schedule — the entity genuinely respawned without being
-   re-grabbed.
+   etc.) and historical position support a pickup at the predicted
+   instant.
+3. If found, record a synthetic phase
+   (`AvailableFrom=predicted, TakenAt=predicted`) with the unique
+   slot and `attributionSource = "synthetic"`; schedule the next
+   prediction.
+
+Both paths terminate cleanly: a wire `Taken=false` cancels any pending
+schedule (the entity genuinely respawned without being re-grabbed),
+and the chain has a hard cap of 60 entries per entity.
 
 MH is excluded from synthesis because its predicted respawn depends on
 holder-rot timing, which is already handled by the rot tracker.
 
 The qwanalytics pickup-invariant test (`pickup_invariant_test.go`)
 compares per-player phase counts against KTX's authoritative
-`demoInfo.players[*].items[*].took` numbers — synthesis closes most
-of the under-count gap on the hub corpus (1on1 bravado now matches
-exactly; 4on4 obsidian's quad pickups went from 11 to 18 of 20).
+`demoInfo.players[*].items[*].took` numbers. With both synthesis
+paths enabled, the hub corpus has 3 demos at exact match (dm4, skull,
+bravado) and the rest within 1–3 missing pickups, all of which are
+either MH (excluded) or at-cap stat ticks the wire doesn't expose.
+
 Synthesis can be disabled per analyser via `SetSyntheticPickups(false)`
 when wire-only behaviour is needed for comparison.
 
