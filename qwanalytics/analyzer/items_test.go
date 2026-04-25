@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/qwdemo/events"
-	"github.com/mvd-analyzer/qwdemo/mvd"
 )
 
 // newTestItemAnalyzer wires an analyzer for unit tests — skips the
@@ -14,7 +13,7 @@ func newTestItemAnalyzer() (*ItemAnalyzer, *Context) {
 	a := NewItemAnalyzer()
 	ctx := &Context{FragsBySlot: map[int]int{}}
 	_ = a.Init(ctx)
-	a.matchStarted = true
+	a.timing.Started = true
 	return a, ctx
 }
 
@@ -27,7 +26,7 @@ func newTestItemAnalyzer() (*ItemAnalyzer, *Context) {
 // asserting RespawnAt = 30.
 func TestItemAnalyzer_RAPickupRespawn(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[2] = &mvd.PlayerInfo{Slot: 2, Name: "nexus", Team: "ahoy"}
+	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "nexus", Team: "ahoy"}
 	a.playerPos[2] = [3]float32{100, 0, 0}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 75, Kind: "ra", Origin: [3]float32{100, 0, 0}, Time: 0})
@@ -36,8 +35,10 @@ func TestItemAnalyzer_RAPickupRespawn(t *testing.T) {
 	// Insta-regrab simulation: we still want RespawnAt=30, not 45.
 	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: false, Time: 45})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	if len(res.Items) != 1 {
 		t.Fatalf("want 1 item, got %d", len(res.Items))
 	}
@@ -65,15 +66,17 @@ func TestItemAnalyzer_RAPickupRespawn(t *testing.T) {
 // RespawnAt; this test pins it at TakenAt + 60.
 func TestItemAnalyzer_QuadNominalRespawn(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 	a.playerPos[0] = [3]float32{0, 128, 282}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 43, Kind: "quad", Origin: [3]float32{0, 128, 282}, Time: 0})
 	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 43, Kind: "quad", Taken: true, Time: 16.692})
 	// No wire respawn yet — quad was insta-regrabbed each cycle.
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	p0 := res.Items[0].Phases[0]
 	got := p0.RespawnAt - p0.TakenAt
 	if got < 59.999 || got > 60.001 {
@@ -87,8 +90,8 @@ func TestItemAnalyzer_QuadNominalRespawn(t *testing.T) {
 // to ≤ 100 — not from the wire respawn time.
 func TestItemAnalyzer_TwoMHs(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[2] = &mvd.PlayerInfo{Slot: 2, Name: "p1"}
-	ctx.Players[3] = &mvd.PlayerInfo{Slot: 3, Name: "p2"}
+	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "p1"}
+	ctx.Players[3] = &events.PlayerInfo{Slot: 3, Name: "p2"}
 	a.playerPos[2] = [3]float32{1000, 0, 0}
 	a.playerPos[3] = [3]float32{-1000, 0, 0}
 
@@ -106,8 +109,10 @@ func TestItemAnalyzer_TwoMHs(t *testing.T) {
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 100, Time: 110})
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 100, Time: 90})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	if len(res.Items) != 2 {
 		t.Fatalf("want 2 items, got %d", len(res.Items))
 	}
@@ -132,7 +137,7 @@ func TestItemAnalyzer_TwoMHs(t *testing.T) {
 // health; rot drains it to 100 at t=110; RespawnAt is then 130.
 func TestItemAnalyzer_MHRotTickdown(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 	a.playerPos[0] = [3]float32{0, 0, 0}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "mh", Origin: [3]float32{0, 0, 0}})
@@ -143,8 +148,10 @@ func TestItemAnalyzer_MHRotTickdown(t *testing.T) {
 	// Final crossing.
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, Time: 110})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	p0 := res.Items[0].Phases[0]
 	if p0.RespawnAt != 130 {
 		t.Errorf("MH RespawnAt = %v, want 130 (crossing 110 + 20)", p0.RespawnAt)
@@ -155,7 +162,7 @@ func TestItemAnalyzer_MHRotTickdown(t *testing.T) {
 // comes more than 5 s after pickup).
 func TestItemAnalyzer_MHHolderDiesMidRot(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 	a.playerPos[0] = [3]float32{0, 0, 0}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "mh", Origin: [3]float32{0, 0, 0}})
@@ -164,8 +171,10 @@ func TestItemAnalyzer_MHHolderDiesMidRot(t *testing.T) {
 	// Holder dies at t=30 (way past the 5 s floor).
 	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	p0 := res.Items[0].Phases[0]
 	if p0.RespawnAt != 50 {
 		t.Errorf("MH RespawnAt = %v, want 50 (death 30 + 20)", p0.RespawnAt)
@@ -176,7 +185,7 @@ func TestItemAnalyzer_MHHolderDiesMidRot(t *testing.T) {
 // respawn timer can't arm before pickup+5, so RespawnAt = pickup + 5 + 20.
 func TestItemAnalyzer_MHInstantDeathFloor(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "p"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 	a.playerPos[0] = [3]float32{0, 0, 0}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "mh", Origin: [3]float32{0, 0, 0}})
@@ -185,8 +194,10 @@ func TestItemAnalyzer_MHInstantDeathFloor(t *testing.T) {
 	// Rocket to the face at t=10.1, instant death.
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 0, Time: 10.1})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	p0 := res.Items[0].Phases[0]
 	if p0.RespawnAt != 35 { // pickup 10 + 5 (floor) + 20
 		t.Errorf("MH RespawnAt = %v, want 35 (pickup+5+20 from the 5 s floor)", p0.RespawnAt)
@@ -199,7 +210,7 @@ func TestItemAnalyzer_MHInstantDeathFloor(t *testing.T) {
 // entities to the same RespawnAt.
 func TestItemAnalyzer_TwoMHsSameHolder(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
-	ctx.Players[0] = &mvd.PlayerInfo{Slot: 0, Name: "hog"}
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "hog"}
 	a.playerPos[0] = [3]float32{0, 0, 0}
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 40, Kind: "mh", Origin: [3]float32{0, 0, 0}})
@@ -211,8 +222,10 @@ func TestItemAnalyzer_TwoMHsSameHolder(t *testing.T) {
 	// Rot across both; crossing at t=80.
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, Time: 80})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	if len(res.Items) != 2 {
 		t.Fatalf("want 2 MH items, got %d", len(res.Items))
 	}
@@ -229,8 +242,10 @@ func TestItemAnalyzer_TwoMHsSameHolder(t *testing.T) {
 func TestItemAnalyzer_UntouchedItemListed(t *testing.T) {
 	a, _ := newTestItemAnalyzer()
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "lg", Origin: [3]float32{0, 0, 0}})
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	if len(res.Items) != 1 {
 		t.Fatalf("want 1 item, got %d", len(res.Items))
 	}
@@ -251,8 +266,10 @@ func TestItemAnalyzer_PreMatchEventsIgnored(t *testing.T) {
 	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: true, Time: 2})
 	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: false, Time: 5})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	if len(res.Items) != 1 {
 		t.Fatalf("want 1 item, got %d", len(res.Items))
 	}

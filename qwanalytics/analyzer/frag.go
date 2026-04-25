@@ -9,9 +9,21 @@ import (
 // FragAnalyzer detects frags from print messages
 type FragAnalyzer struct {
 	ctx      *Context
+	core     *CoreOutputs
 	frags    []FragEntry
 	byWeapon map[string]int
 	byPlayer map[string]*PlayerFrags
+}
+
+// UseCoreOutputs is part of the CoreConsumer contract — Frag consumes
+// co.DemoInfo during its Finalize to re-evaluate teamkill status with
+// authoritative team membership.
+func (a *FragAnalyzer) UseCoreOutputs(co *CoreOutputs) { a.core = co }
+
+// PopulateCore exposes the resolved frag log to downstream analysers
+// (timeline, weapon_pickups) via CoreOutputs.FragEntries.
+func (a *FragAnalyzer) PopulateCore(co *CoreOutputs) {
+	co.FragEntries = a.frags
 }
 
 // NewFragAnalyzer creates a new frag analyzer
@@ -72,24 +84,19 @@ func (a *FragAnalyzer) OnEvent(event events.Event) error {
 	return nil
 }
 
-func (a *FragAnalyzer) Finalize() (interface{}, error) {
+func (a *FragAnalyzer) Finalize(result *Result) error {
 	// Re-evaluate teamkill status using DemoInfo. During OnEvent,
 	// isTeamKill() compared obituary display names against ctx.Players
 	// which may have had auth names, causing misses.
-	if a.ctx.DemoInfo != nil {
-		nameToTeam := make(map[string]string)
-		for _, p := range a.ctx.DemoInfo.Players {
-			if p.Name != "" && p.Team != "" {
-				nameToTeam[p.Name] = p.Team
-			}
-		}
+	if a.core != nil && a.core.DemoInfo != nil {
+		names := a.core.Names
 		for i := range a.frags {
 			f := &a.frags[i]
 			if f.IsSuicide {
 				continue
 			}
-			killerTeam := nameToTeam[f.Killer]
-			victimTeam := nameToTeam[f.Victim]
+			killerTeam := names.TeamForName(f.Killer)
+			victimTeam := names.TeamForName(f.Victim)
 			wasTeamKill := f.IsTeamKill
 			f.IsTeamKill = killerTeam != "" && victimTeam != "" && killerTeam == victimTeam
 
@@ -106,12 +113,13 @@ func (a *FragAnalyzer) Finalize() (interface{}, error) {
 		}
 	}
 
-	return &FragResult{
+	result.Frags = &FragResult{
 		TotalFrags: len(a.frags),
 		Frags:      a.frags,
 		ByWeapon:   a.byWeapon,
 		ByPlayer:   a.byPlayer,
-	}, nil
+	}
+	return nil
 }
 
 func (a *FragAnalyzer) getOrCreatePlayer(name string) *PlayerFrags {

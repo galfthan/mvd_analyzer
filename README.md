@@ -181,7 +181,7 @@ mvd-analyzer/
     source/mvd/             Source implementation for MVD files
 
   qwanalytics/              Module: analysis pipeline
-    analyzer/               Analyzer interface + Context + Registry
+    analyzer/               Analyzer interface + Context + CoreOutputs + Registry (core/derived split + post-processors)
     result/                 JSON result schema (stable contract)
     loc/                    .loc parser + embedded corpus (466 maps)
     mapgen/

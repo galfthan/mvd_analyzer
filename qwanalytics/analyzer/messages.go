@@ -9,8 +9,14 @@ import (
 // MessagesAnalyzer captures frags and chat messages for timeline display
 type MessagesAnalyzer struct {
 	ctx    *Context
+	core   *CoreOutputs
 	events []MatchEvent
 }
+
+// UseCoreOutputs is part of the CoreConsumer contract — Messages
+// consumes co.Names during its Finalize to backfill team attribution
+// on chat / obituary events whose live name lookup missed.
+func (a *MessagesAnalyzer) UseCoreOutputs(co *CoreOutputs) { a.core = co }
 
 // NewMessagesAnalyzer creates a new messages analyzer
 func NewMessagesAnalyzer() *MessagesAnalyzer {
@@ -378,7 +384,7 @@ func (a *MessagesAnalyzer) getPlayerTeam(name string) string {
 	return ""
 }
 
-func (a *MessagesAnalyzer) Finalize() (interface{}, error) {
+func (a *MessagesAnalyzer) Finalize(result *Result) error {
 	// Backfill missing team attributions using DemoInfo. Some demos have a
 	// userinfo "name" that doesn't match the player's actual displayed
 	// netname (KTX auth-override case): the chat parser pulls the displayed
@@ -386,32 +392,21 @@ func (a *MessagesAnalyzer) Finalize() (interface{}, error) {
 	// auth name, so the live lookup in handlePrint returns "". DemoInfo is
 	// finalized before this analyzer, so by now we have the canonical
 	// {displayed name -> team} mapping and can repair the gaps.
-	if a.ctx.DemoInfo != nil {
-		nameToTeam := make(map[string]string, len(a.ctx.DemoInfo.Players))
-		normToTeam := make(map[string]string, len(a.ctx.DemoInfo.Players))
-		for _, p := range a.ctx.DemoInfo.Players {
-			if p.Name == "" || p.Team == "" {
-				continue
-			}
-			nameToTeam[p.Name] = p.Team
-			normToTeam[normalizePlayerName(p.Name)] = p.Team
-		}
+	if a.core != nil && a.core.DemoInfo != nil {
+		names := a.core.Names
 		for i := range a.events {
 			ev := &a.events[i]
 			if ev.Team != "" || ev.Player == "" {
 				continue
 			}
-			if t := nameToTeam[ev.Player]; t != "" {
-				ev.Team = t
-				continue
-			}
-			if t := normToTeam[normalizePlayerName(ev.Player)]; t != "" {
+			if t := names.TeamForName(ev.Player); t != "" {
 				ev.Team = t
 			}
 		}
 	}
 
-	return &MessagesResult{
+	result.Messages = &MessagesResult{
 		Events: a.events,
-	}, nil
+	}
+	return nil
 }

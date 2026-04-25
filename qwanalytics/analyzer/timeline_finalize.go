@@ -11,7 +11,7 @@ import (
 // into the TimelineAnalysisResult shipped to the frontend. This is the
 // orchestration step — most of the heavy lifting is delegated to the
 // aggregate / powerup / streak / region helpers.
-func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
+func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// Do a final sample at the end
 	if len(a.buckets) > 0 {
 		lastBucket := a.buckets[len(a.buckets)-1]
@@ -21,8 +21,8 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	}
 
 	// Try to load loc file from DemoInfo.Map if not already loaded
-	if a.locFinder == nil && a.ctx.DemoInfo != nil && a.ctx.DemoInfo.Map != "" {
-		if finder, err := loc.LoadForMap(a.ctx.DemoInfo.Map); err == nil {
+	if a.locFinder == nil && a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
+		if finder, err := loc.LoadForMap(a.core.DemoInfo.Map); err == nil {
 			a.locFinder = finder
 		}
 	}
@@ -43,19 +43,11 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		a.applyBlipFilter(a.blipThresholdMs)
 	}
 
-	// Build a name->team lookup from DemoInfo (authoritative source)
-	// Use both exact name and normalized name for matching
-	nameToTeam := make(map[string]string)
-	normNameToTeam := make(map[string]string) // Normalized names (lowercase, alphanumeric only)
-
-	if a.ctx.DemoInfo != nil {
-		for _, p := range a.ctx.DemoInfo.Players {
-			if p.Name == "" || p.Team == "" {
-				continue
-			}
-			nameToTeam[p.Name] = p.Team
-			normNameToTeam[normalizePlayerName(p.Name)] = p.Team
-		}
+	// Use the shared name->team lookup from CoreOutputs (built once
+	// after the demoinfo analyser finalises).
+	var names *NameTable
+	if a.core != nil {
+		names = a.core.Names
 	}
 
 	// Bridge slot↔demoinfo via login join / name join.
@@ -96,10 +88,7 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 
 		// If we still have a name but no team, look it up in DemoInfo by name.
 		if playerName != "" && team == "" {
-			team = nameToTeam[playerName]
-			if team == "" {
-				team = normNameToTeam[normalizePlayerName(playerName)]
-			}
+			team = names.TeamForName(playerName)
 		}
 
 		if team != "" {
@@ -113,12 +102,12 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	}
 
 	// Detect powerup pickup events for Key Moments
-	powerupEvents := a.detectPowerupEvents(nameToTeam, slotToTeam, slotToPlayer)
+	powerupEvents := a.detectPowerupEvents(names, slotToTeam, slotToPlayer)
 
 	// Count frags during each powerup run
 	for i := range powerupEvents {
 		pe := &powerupEvents[i]
-		for _, fe := range a.ctx.FragEntries {
+		for _, fe := range a.coreFragEntries() {
 			if fe.Killer != pe.PlayerName || fe.IsSuicide || fe.IsTeamKill {
 				continue
 			}
@@ -217,7 +206,7 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 	}
 
 	// Detect top 5 longest frag streaks for Key Moments
-	fragStreaks := a.detectFragStreaks(10, nameToTeam, playerUserIDsByName)
+	fragStreaks := a.detectFragStreaks(10, names, playerUserIDsByName)
 
 	// Auto-detect control regions from loc data (stats computed client-side)
 	var regionControl *RegionControlResult
@@ -228,9 +217,9 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		}
 	}
 
-	result := &TimelineAnalysisResult{
+	result.TimelineAnalysis = &TimelineAnalysisResult{
 		HighResDuration: a.bucketDuration,
-		MatchStartTime:  a.matchStartTime,
+		MatchStartTime:  a.timing.StartTime,
 		HighResBuckets:  highResBuckets,
 		FragEvents:      fragEvents,
 		PowerupEvents:   powerupEvents,
@@ -240,6 +229,5 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		PlayerUserIDs:   playerUserIDsByName,
 		RegionControl:   regionControl,
 	}
-
-	return result, nil
+	return nil
 }

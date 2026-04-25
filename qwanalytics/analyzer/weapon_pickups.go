@@ -3,7 +3,6 @@ package analyzer
 import (
 	"math"
 	"sort"
-	"strings"
 
 	"github.com/mvd-analyzer/qwdemo/events"
 )
@@ -35,7 +34,8 @@ import (
 // during Finalize), so this analyzer MUST be registered after
 // FragAnalyzer in the default registry.
 type WeaponPickupsAnalyzer struct {
-	ctx *Context
+	ctx  *Context
+	core *CoreOutputs
 
 	// Per-slot current STAT_ITEMS bitfield. Indexed by slot, not
 	// edict. Maintained in real time; a lookup at pickup-event time
@@ -54,7 +54,28 @@ type WeaponPickupsAnalyzer struct {
 	pickups []wpPickupRecord
 	deaths  []wpDeathRecord
 
-	matchStarted, matchEnded bool
+	timing MatchTimingDetector
+}
+
+// UseCoreOutputs is part of the CoreConsumer contract — WeaponPickups
+// consumes co.FragEntries during its Finalize to attribute kills to
+// each weapon pickup window.
+func (a *WeaponPickupsAnalyzer) UseCoreOutputs(co *CoreOutputs) { a.core = co }
+
+// playerName returns the best display name for a slot. Prefers the
+// CoreOutputs slot table when populated; falls back to the live
+// userinfo entry in ctx.Players. The fallback path keeps unit tests
+// that wire up only ctx.Players (without seeding co.Slots) working.
+func (a *WeaponPickupsAnalyzer) playerName(slot int) string {
+	if name := a.core.SlotName(slot); name != "" {
+		return name
+	}
+	if slot >= 0 && slot < len(a.ctx.Players) {
+		if p := a.ctx.Players[slot]; p != nil {
+			return p.Name
+		}
+	}
+	return ""
 }
 
 type packDrop struct {
@@ -120,11 +141,9 @@ func (a *WeaponPickupsAnalyzer) Init(ctx *Context) error {
 func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
 	case *events.PrintEvent:
-		a.detectMatchBoundary(e)
+		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		if a.matchStarted {
-			a.matchEnded = true
-		}
+		a.timing.OnIntermission(e.Time)
 	case *events.StatUpdateEvent:
 		if e.StatIndex == events.StatItems {
 			a.playerItems[e.PlayerNum] = e.Value
@@ -140,7 +159,7 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	case *events.BackpackPickupHintEvent:
 		a.handlePackPickup(e)
 	case *events.DeathEvent:
-		if a.matchStarted && !a.matchEnded {
+		if a.timing.Started && !a.timing.Ended {
 			a.deaths = append(a.deaths, wpDeathRecord{time: e.Time, slot: e.PlayerNum})
 		}
 	}
@@ -148,7 +167,7 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 }
 
 func (a *WeaponPickupsAnalyzer) handleDropHint(e *events.BackpackDropHintEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	weapon := weaponFromItemFlags(e.ItemFlags)
@@ -164,7 +183,7 @@ func (a *WeaponPickupsAnalyzer) handleDropHint(e *events.BackpackDropHintEvent) 
 }
 
 func (a *WeaponPickupsAnalyzer) handleItemPickup(e *events.ItemPickupHintEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	kind, ok := a.itemKind[e.ItemEnt]
@@ -188,7 +207,7 @@ func (a *WeaponPickupsAnalyzer) handleItemPickup(e *events.ItemPickupHintEvent) 
 }
 
 func (a *WeaponPickupsAnalyzer) handlePackPickup(e *events.BackpackPickupHintEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	drop, ok := a.packInfo[e.BackpackEnt]
@@ -216,30 +235,6 @@ func (a *WeaponPickupsAnalyzer) handlePackPickup(e *events.BackpackPickupHintEve
 	delete(a.packInfo, e.BackpackEnt)
 }
 
-func (a *WeaponPickupsAnalyzer) detectMatchBoundary(e *events.PrintEvent) {
-	msg := e.Message
-	if !a.matchStarted {
-		if strings.Contains(msg, "match has begun") ||
-			strings.Contains(msg, "Fight!") ||
-			strings.Contains(msg, "begins in 1") ||
-			strings.Contains(msg, "Go!") {
-			a.matchStarted = true
-		}
-		return
-	}
-	if a.matchEnded {
-		return
-	}
-	if strings.Contains(msg, "the match is over") ||
-		strings.Contains(msg, "match ended") ||
-		strings.Contains(msg, "game over") ||
-		strings.Contains(msg, "match complete") ||
-		strings.Contains(msg, "timelimit hit") ||
-		strings.Contains(msg, "fraglimit hit") {
-		a.matchEnded = true
-	}
-}
-
 // Finalize pairs every recorded pickup with its picker's next death
 // and attributes kills from ctx.FragEntries. Attribution rules:
 //
@@ -258,9 +253,9 @@ func (a *WeaponPickupsAnalyzer) detectMatchBoundary(e *events.PrintEvent) {
 // FragEntries are name-keyed, so we resolve the picker's display name
 // from ctx.Players[slot].Name (patched by the registry to the
 // DemoInfo name post-Finalize of DemoInfoAnalyzer).
-func (a *WeaponPickupsAnalyzer) Finalize() (interface{}, error) {
+func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 	if len(a.pickups) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	// Partition deaths by slot, time-ordered, for next-death lookup.
@@ -286,21 +281,24 @@ func (a *WeaponPickupsAnalyzer) Finalize() (interface{}, error) {
 		if p.hadBefore {
 			continue // redundant grab — not eligible for kill credit (rule 1)
 		}
-		picker := a.ctx.Players[p.pickerSlot]
-		if picker == nil {
+		if a.ctx.Players[p.pickerSlot] == nil {
 			continue
 		}
 		end := findNextAfter(deathsBySlot[p.pickerSlot], p.time)
 		if end == 0 {
 			end = math.Inf(1)
 		}
-		k := pwKey{picker.Name, p.weapon}
+		k := pwKey{a.playerName(p.pickerSlot), p.weapon}
 		windowsByPW[k] = append(windowsByPW[k], pickupWindow{i, p.time, end})
 	}
 
 	// Attribute each valid frag to the latest covering window.
 	kills := make([]int, len(a.pickups))
-	for _, f := range a.ctx.FragEntries {
+	var fragEntries []FragEntry
+	if a.core != nil {
+		fragEntries = a.core.FragEntries
+	}
+	for _, f := range fragEntries {
 		if f.IsSuicide || f.IsTeamKill {
 			continue
 		}
@@ -328,7 +326,7 @@ func (a *WeaponPickupsAnalyzer) Finalize() (interface{}, error) {
 
 		entry := WeaponPickup{
 			Time:          p.time,
-			Player:        picker.Name,
+			Player:        a.playerName(p.pickerSlot),
 			Team:          picker.Team,
 			Weapon:        p.weapon,
 			Source:        p.source,
@@ -340,7 +338,7 @@ func (a *WeaponPickupsAnalyzer) Finalize() (interface{}, error) {
 			entry.BackpackEnt = p.backpackEnt
 			entry.DropTime = p.dropTime
 			if dropper := a.ctx.Players[p.dropperSlot]; dropper != nil {
-				entry.Dropper = dropper.Name
+				entry.Dropper = a.playerName(p.dropperSlot)
 				entry.DropperTeam = dropper.Team
 			}
 		}
@@ -348,7 +346,8 @@ func (a *WeaponPickupsAnalyzer) Finalize() (interface{}, error) {
 	}
 
 	sort.Slice(out, func(i, j int) bool { return out[i].Time < out[j].Time })
-	return out, nil
+	result.WeaponPickups = out
+	return nil
 }
 
 // findNextAfter returns the smallest value in the (already-sorted)

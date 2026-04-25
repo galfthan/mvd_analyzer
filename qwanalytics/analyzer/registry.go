@@ -13,19 +13,68 @@ import (
 // parameters individual analyzers read; callers may mutate it before
 // analyzing to override defaults for a single run.
 type Registry struct {
-	analyzers []Analyzer
-	Config    *config.Config
+	// core analysers are the producers / state-reconstruction tier.
+	// They populate CoreOutputs (DemoInfo, NameTable, FragEntries, …)
+	// that derived analysers consume during their Finalize. Core
+	// finalises before any derived analyser, so registration into
+	// this slice is the load-bearing "I produce something downstream
+	// reads" signal.
+	core []Analyzer
+
+	// derived analysers consume CoreOutputs (or are independent
+	// peers) and produce their own slice of Result. They never write
+	// to CoreOutputs; their own Finalize results stay local to the
+	// Result they populate.
+	derived []Analyzer
+
+	postProcessors []ResultPostProcessor
+	Config         *config.Config
 }
 
+// ResultPostProcessor mutates the assembled Result after every
+// analyser has finalised. Examples: time normalisation (rebase to
+// match-relative), duel-mode team rewrites, locgraph synthesis from
+// timeline buckets. The function receives CoreOutputs so it can read
+// demoinfo / name tables / frag log without re-deriving them.
+type ResultPostProcessor func(result *Result, co *CoreOutputs)
+
 // NewRegistry creates an empty analyzer registry seeded with the
-// embedded default config.
+// embedded default config. No analysers or post-processors are
+// registered — callers wire those up explicitly (or use
+// NewDefaultRegistry).
 func NewRegistry() *Registry {
 	return &Registry{Config: config.Default()}
 }
 
-// Register adds an analyzer to the registry
+// Register is a backwards-compatible alias for RegisterDerived. Most
+// analysers are derived (they consume CoreOutputs or are independent
+// peers); use RegisterCore explicitly when an analyser populates
+// CoreOutputs via the CoreProducer interface.
 func (r *Registry) Register(a Analyzer) {
-	r.analyzers = append(r.analyzers, a)
+	r.RegisterDerived(a)
+}
+
+// RegisterCore adds an analyser whose Finalize populates CoreOutputs
+// (i.e. it implements CoreProducer). Core analysers finalise before
+// any derived analyser so downstream consumers see the produced
+// fields. Within the core slice, registration order is preserved —
+// later core analysers can read fields populated by earlier ones via
+// CoreConsumer.
+func (r *Registry) RegisterCore(a Analyzer) {
+	r.core = append(r.core, a)
+}
+
+// RegisterDerived adds an analyser that consumes CoreOutputs (or is
+// independent of it). Derived analysers finalise after every core
+// analyser has populated CoreOutputs.
+func (r *Registry) RegisterDerived(a Analyzer) {
+	r.derived = append(r.derived, a)
+}
+
+// RegisterPostProcessor adds a Result post-processor. They run in
+// registration order after every analyser has finalised.
+func (r *Registry) RegisterPostProcessor(p ResultPostProcessor) {
+	r.postProcessors = append(r.postProcessors, p)
 }
 
 // Analyze runs all registered analyzers on an MVD file at the given path.
@@ -67,7 +116,12 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 		FragsBySlot: make(map[int]int),
 	}
 
-	for _, a := range r.analyzers {
+	for _, a := range r.core {
+		if err := a.Init(ctx); err != nil {
+			return nil, err
+		}
+	}
+	for _, a := range r.derived {
 		if err := a.Init(ctx); err != nil {
 			return nil, err
 		}
@@ -95,7 +149,14 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 			ctx.FragsBySlot[e.PlayerNum] = e.Frags
 		}
 
-		for _, a := range r.analyzers {
+		// Core analysers see events first, then derived. Within each
+		// slice, registration order is preserved.
+		for _, a := range r.core {
+			if err := a.OnEvent(event); err != nil {
+				return nil, err
+			}
+		}
+		for _, a := range r.derived {
 			if err := a.OnEvent(event); err != nil {
 				return nil, err
 			}
@@ -113,166 +174,45 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 		Duration:      duration,
 	}
 
-	for _, a := range r.analyzers {
-		output, err := a.Finalize()
-		if err != nil {
+	co := &CoreOutputs{}
+
+	// Phase 1 — core finalises and populates CoreOutputs. Each core
+	// analyser also gets a chance to read the running CoreOutputs
+	// (UseCoreOutputs) so a later core entry can consume an earlier
+	// core entry's fields (e.g. Frag reads co.Names produced by
+	// DemoInfo).
+	finalizeOne := func(a Analyzer) {
+		if cc, ok := a.(CoreConsumer); ok {
+			cc.UseCoreOutputs(co)
+		}
+		if err := a.Finalize(result); err != nil {
 			result.Errors = append(result.Errors, err.Error())
-			continue
+			return
 		}
-
-		switch a.Name() {
-		case "match":
-			if m, ok := output.(*MatchResult); ok {
-				result.Match = m
-				if m.EndTime > 0 {
-					result.Duration = m.EndTime
-				}
-			}
-		case "frag":
-			if f, ok := output.(*FragResult); ok {
-				result.Frags = f
-				ctx.FragEntries = f.Frags // Share with timeline analyzer
-			}
-		case "demoinfo":
-			if di, ok := output.(*DemoInfoResult); ok {
-				result.DemoInfo = di
-				// Patch player names to display names from DemoInfo.
-				// This fixes all downstream Finalize() reads so consumers
-				// see the in-game display name instead of the auth/login name.
-				for slot, info := range ctx.ResolveSlotDemoInfo() {
-					if ctx.Players[slot] != nil {
-						ctx.Players[slot].Name = info.Name
-					}
-				}
-			}
-		case "messages":
-			if m, ok := output.(*MessagesResult); ok {
-				result.Messages = m
-			}
-		case "timelineAnalysis":
-			if ta, ok := output.(*TimelineAnalysisResult); ok {
-				result.TimelineAnalysis = ta
-			}
-		case "metadata":
-			if m, ok := output.(*MetadataResult); ok {
-				result.Metadata = m
-			}
-		case "items":
-			if it, ok := output.(*ItemsResult); ok {
-				result.Items = it
-			}
-		case "backpacks":
-			if b, ok := output.([]BackpackDrop); ok {
-				result.Backpacks = b
-			}
-		case "weaponPickups":
-			if p, ok := output.([]WeaponPickup); ok {
-				result.WeaponPickups = p
-			}
+		if cp, ok := a.(CoreProducer); ok {
+			cp.PopulateCore(co)
 		}
 	}
-
-	// Normalize all times to be match-relative (0-based from match start)
-	// This eliminates the need for the frontend to subtract matchStartTime everywhere
-	matchStart := 0.0
-	if result.TimelineAnalysis != nil {
-		matchStart = result.TimelineAnalysis.MatchStartTime
+	for _, a := range r.core {
+		finalizeOne(a)
 	}
-	if matchStart > 0 {
-		result.Duration -= matchStart
-
-		if ta := result.TimelineAnalysis; ta != nil {
-			for i := range ta.HighResBuckets {
-				ta.HighResBuckets[i].T -= matchStart
-			}
-			for i := range ta.FragEvents {
-				ta.FragEvents[i].Time -= matchStart
-			}
-			for i := range ta.PowerupEvents {
-				ta.PowerupEvents[i].Time -= matchStart
-				ta.PowerupEvents[i].EndTime -= matchStart
-			}
-			for i := range ta.FragStreaks {
-				ta.FragStreaks[i].Time -= matchStart
-				ta.FragStreaks[i].EndTime -= matchStart
-			}
-			ta.DemoOffset = matchStart
-			ta.MatchStartTime = 0
-
-			// Filter out warmup buckets (negative times after normalization)
-			filteredHR := ta.HighResBuckets[:0]
-			for _, b := range ta.HighResBuckets {
-				if b.T >= 0 {
-					filteredHR = append(filteredHR, b)
-				}
-			}
-			ta.HighResBuckets = filteredHR
-		}
-
-		if result.Messages != nil {
-			for i := range result.Messages.Events {
-				result.Messages.Events[i].Time -= matchStart
-			}
-		}
-
-		if result.Frags != nil {
-			for i := range result.Frags.Frags {
-				result.Frags.Frags[i].Time -= matchStart
-			}
-		}
-
-		if result.Match != nil {
-			result.Match.StartTime -= matchStart
-			result.Match.EndTime -= matchStart
-		}
-
-		if result.Items != nil {
-			for i := range result.Items.Items {
-				ph := result.Items.Items[i].Phases
-				for j := range ph {
-					// AvailableFrom=0 is the synthetic "match
-					// start" marker for initial phases; leave it
-					// alone. All real timestamps get shifted.
-					if ph[j].AvailableFrom > 0 {
-						ph[j].AvailableFrom -= matchStart
-					}
-					if ph[j].TakenAt > 0 {
-						ph[j].TakenAt -= matchStart
-					}
-					if ph[j].RespawnAt > 0 {
-						ph[j].RespawnAt -= matchStart
-					}
-				}
-			}
-		}
-
-		for i := range result.Backpacks {
-			result.Backpacks[i].Time -= matchStart
-		}
-
-		for i := range result.WeaponPickups {
-			result.WeaponPickups[i].Time -= matchStart
-			if result.WeaponPickups[i].NextDeathTime > 0 {
-				result.WeaponPickups[i].NextDeathTime -= matchStart
-			}
-			if result.WeaponPickups[i].DropTime > 0 {
-				result.WeaponPickups[i].DropTime -= matchStart
-			}
-		}
+	// Phase 2 — derived. CoreOutputs is fully populated by the time
+	// any derived Finalize runs.
+	for _, a := range r.derived {
+		finalizeOne(a)
 	}
 
-	// 1v1 normalization: for duel demos the "team" concept is either
-	// meaningless (arbitrary colour tags) or actively broken (bots have
-	// no team, get dropped from team-keyed aggregates). Rewrite every
-	// team reference to the player's own name so all downstream
-	// consumers still see a uniform team-keyed model, and the UI can
-	// suppress the now-redundant "Per Team" panels.
-	normalizeDuelTeams(result)
-
-	// Aggregate loc-to-loc movement into a graph (runs after time
-	// normalization and duel team rewrite so nodes/edges use the same
-	// time base and team labels as the rest of the result).
-	result.LocGraph = BuildLocGraph(result)
+	// Run registered post-processors in order. Each one operates on the
+	// fully-finalized Result; CoreOutputs is passed through for read
+	// access. The default ordering (set in NewDefaultRegistry) is:
+	//   1. normalizeMatchRelativeTimes
+	//   2. normalizeDuelTeams
+	//   3. buildLocGraphPost
+	// — but the slice is otherwise unconstrained. Add a step by
+	// calling r.RegisterPostProcessor(...) before Analyze.
+	for _, p := range r.postProcessors {
+		p(result, co)
+	}
 
 	return result, nil
 }
@@ -285,17 +225,35 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 // so further mutations are applied here via targeted setters.
 func NewDefaultRegistry() *Registry {
 	r := NewRegistry()
-	// DemoInfo first so it's available in Context for other analyzers.
-	r.Register(NewDemoInfoAnalyzer())
-	r.Register(NewMetadataAnalyzer())
-	r.Register(NewMatchAnalyzer())
-	r.Register(NewFragAnalyzer())
-	r.Register(NewMessagesAnalyzer())
+
+	// Core: the producers that downstream analysers read via
+	// CoreOutputs. DemoInfo runs first so co.{DemoInfo,Names,Slots}
+	// are populated before Frag's Finalize re-evaluates teamkills
+	// against co.Names.
+	r.RegisterCore(NewDemoInfoAnalyzer())
+	r.RegisterCore(NewFragAnalyzer())
+
+	// Derived: every other analyser. They consume CoreOutputs (via
+	// UseCoreOutputs) or are independent peers, and they never write
+	// to CoreOutputs themselves. Order within the derived slice is
+	// preserved but no derived analyser depends on another's output.
+	r.RegisterDerived(NewMetadataAnalyzer())
+	r.RegisterDerived(NewMatchAnalyzer())
+	r.RegisterDerived(NewMessagesAnalyzer())
 	ta := NewTimelineAnalyzer()
 	ta.SetBlipThresholdMs(r.Config.LocGraph.BlipThresholdMs)
-	r.Register(ta)
-	r.Register(NewItemAnalyzer())
-	r.Register(NewBackpackAnalyzer())
-	r.Register(NewWeaponPickupsAnalyzer())
+	r.RegisterDerived(ta)
+	r.RegisterDerived(NewItemAnalyzer())
+	r.RegisterDerived(NewBackpackAnalyzer())
+	r.RegisterDerived(NewWeaponPickupsAnalyzer())
+
+	// Post-processors run in registration order on the assembled
+	// Result. Order matters: time normalisation has to land first so
+	// duel team rewrite and loc graph construction see match-relative
+	// timestamps; locgraph runs last because it consumes the
+	// already-rewritten team labels and timeline buckets.
+	r.RegisterPostProcessor(normalizeMatchRelativeTimes)
+	r.RegisterPostProcessor(duelTeamNormalize)
+	r.RegisterPostProcessor(locGraphPost)
 	return r
 }

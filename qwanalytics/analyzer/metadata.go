@@ -37,9 +37,9 @@ import (
 // `//wps 0 lg 31 17`, `//ktx drop 49 64 3`) — those are client HUD hints,
 // not server metadata.
 type MetadataAnalyzer struct {
-	serverInfo    map[string]string
-	countdownRaw  string // last centerprint that contained "Countdown:" (post-Q_normalizetext)
-	matchStarted  bool   // gates which countdown sample is the canonical one
+	serverInfo   map[string]string
+	countdownRaw string // last centerprint that contained "Countdown:" (post-Q_normalizetext)
+	timing       MatchTimingDetector
 }
 
 // NewMetadataAnalyzer creates a metadata analyzer.
@@ -71,7 +71,7 @@ func (a *MetadataAnalyzer) OnEvent(event events.Event) error {
 		// want the last one we saw before the match started, because the
 		// final 1-second-remaining centerprint contains the same fields as
 		// the rest and is the cleanest sample.
-		if a.matchStarted {
+		if a.timing.Started {
 			return nil
 		}
 		text := events.NormalizeQuakeText([]byte(e.Message))
@@ -81,9 +81,7 @@ func (a *MetadataAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		// Latch the match start so we stop overwriting countdownRaw with
 		// any post-match centerprint that happens to mention "Countdown".
-		if !a.matchStarted && strings.Contains(e.Message, "match has begun") {
-			a.matchStarted = true
-		}
+		a.timing.OnPrint(e)
 	}
 	return nil
 }
@@ -115,8 +113,8 @@ func (a *MetadataAnalyzer) parseFullserverinfo(cmd string) {
 
 // Finalize converts the collected serverinfo + countdown text into a
 // structured MetadataResult.
-func (a *MetadataAnalyzer) Finalize() (interface{}, error) {
-	result := &MetadataResult{}
+func (a *MetadataAnalyzer) Finalize(result *Result) error {
+	mr := &MetadataResult{}
 
 	if len(a.serverInfo) > 0 {
 		// Copy so the analyzer's internal map can't be mutated by callers.
@@ -124,18 +122,19 @@ func (a *MetadataAnalyzer) Finalize() (interface{}, error) {
 		for k, v := range a.serverInfo {
 			serverInfo[k] = v
 		}
-		result.ServerInfo = serverInfo
+		mr.ServerInfo = serverInfo
 	}
 
 	if a.countdownRaw != "" {
-		result.CountdownText = a.countdownRaw
-		result.MatchSettings = parseCountdownCenterprint(a.countdownRaw)
+		mr.CountdownText = a.countdownRaw
+		mr.MatchSettings = parseCountdownCenterprint(a.countdownRaw)
 	}
 
-	if result.ServerInfo == nil && result.MatchSettings == nil && result.CountdownText == "" {
-		return nil, nil
+	if mr.ServerInfo == nil && mr.MatchSettings == nil && mr.CountdownText == "" {
+		return nil
 	}
-	return result, nil
+	result.Metadata = mr
+	return nil
 }
 
 // parseCountdownCenterprint walks the post-Q_normalizetext countdown table

@@ -21,7 +21,7 @@ func TestSampleCurrentStateAtIndex_FloatRoundTrip(t *testing.T) {
 	if err := a.Init(ctx); err != nil {
 		t.Fatal(err)
 	}
-	a.matchStarted = true
+	a.timing.Started = true
 	// Pre-seed a live player so populateBucket won't skip us.
 	state := a.getOrCreatePlayerState(0)
 	state.vitals.health = 100
@@ -62,7 +62,7 @@ func TestHandleStatUpdate_NoMissingBucketsAcrossFloatBoundary(t *testing.T) {
 	if err := a.Init(ctx); err != nil {
 		t.Fatal(err)
 	}
-	a.matchStarted = true
+	a.timing.Started = true
 	// Health is required for populateBucket not to skip the player.
 	a.getOrCreatePlayerState(0).vitals.health = 100
 

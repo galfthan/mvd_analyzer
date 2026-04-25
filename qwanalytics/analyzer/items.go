@@ -28,11 +28,8 @@ type ItemAnalyzer struct {
 	mapName   string              // resolved from fullserverinfo, used for loc lookup
 	locFinder *loc.Finder
 	// Match window — events during warmup and intermission shouldn't
-	// create observable phases in the result. Mirrors the same
-	// detection logic TimelineAnalyzer uses.
-	matchStarted   bool
-	matchEnded     bool
-	matchStartTime float64
+	// create observable phases in the result.
+	timing MatchTimingDetector
 
 	// Megahealth holder tracking. The MH respawn timer only starts 20 s
 	// after the holder's health drops to ≤ 100 (either by rot tick-down
@@ -105,11 +102,9 @@ func (a *ItemAnalyzer) Init(ctx *Context) error {
 func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
 	case *events.PrintEvent:
-		a.detectMatchBoundary(e)
+		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		if a.matchStarted {
-			a.matchEnded = true
-		}
+		a.timing.OnIntermission(e.Time)
 	case *events.StuffTextEvent:
 		if strings.HasPrefix(e.Command, "fullserverinfo ") {
 			a.extractMapName(e.Command)
@@ -126,31 +121,6 @@ func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 		a.handleDeath(e)
 	}
 	return nil
-}
-
-func (a *ItemAnalyzer) detectMatchBoundary(e *events.PrintEvent) {
-	msg := e.Message
-	if !a.matchStarted {
-		if strings.Contains(msg, "match has begun") ||
-			strings.Contains(msg, "Fight!") ||
-			strings.Contains(msg, "begins in 1") ||
-			strings.Contains(msg, "Go!") {
-			a.matchStarted = true
-			a.matchStartTime = e.Time
-		}
-		return
-	}
-	if a.matchEnded {
-		return
-	}
-	if strings.Contains(msg, "the match is over") ||
-		strings.Contains(msg, "match ended") ||
-		strings.Contains(msg, "game over") ||
-		strings.Contains(msg, "match complete") ||
-		strings.Contains(msg, "timelimit hit") ||
-		strings.Contains(msg, "fraglimit hit") {
-		a.matchEnded = true
-	}
 }
 
 func (a *ItemAnalyzer) extractMapName(cmd string) {
@@ -216,7 +186,7 @@ func (a *ItemAnalyzer) handleItemSpawn(e *events.ItemSpawnEvent) {
 // "insta-regrab invisibility" note), which is why quad was showing 120 s
 // and RL 60 s countdowns in the UI.
 func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	it := a.items[e.EntNum]
@@ -274,7 +244,7 @@ func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
 // which shouldn't happen but might if we mis-attributed the pickup) is
 // handled symmetrically.
 func (a *ItemAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	switch e.StatIndex {
@@ -309,7 +279,7 @@ func (a *ItemAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) {
 // is cheap insurance against event-ordering quirks between the two
 // streams.
 func (a *ItemAnalyzer) handleDeath(e *events.DeathEvent) {
-	if !a.matchStarted || a.matchEnded {
+	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	a.playerHealth[e.PlayerNum] = 0
@@ -348,10 +318,21 @@ func (a *ItemAnalyzer) stampHeldMHs(slot int, crossing float64) {
 // attributePickup finds the player whose last-known position is
 // closest to the item origin. Used to label TakenBy on phase close.
 // Returns ("","") if no player has a position recorded yet.
+//
+// Slots are iterated in numeric order (not map order) so that ties at
+// the same squared distance resolve deterministically — without this,
+// run-to-run output flips for items where two players land within
+// float-precision of equal range.
 func (a *ItemAnalyzer) attributePickup(itemPos [3]float32, _ float64) (int, string, string) {
 	bestSlot := -1
 	bestDistSq := float32(1e18)
-	for slot, pos := range a.playerPos {
+	slots := make([]int, 0, len(a.playerPos))
+	for slot := range a.playerPos {
+		slots = append(slots, slot)
+	}
+	sort.Ints(slots)
+	for _, slot := range slots {
+		pos := a.playerPos[slot]
 		dx := pos[0] - itemPos[0]
 		dy := pos[1] - itemPos[1]
 		dz := pos[2] - itemPos[2]
@@ -368,6 +349,12 @@ func (a *ItemAnalyzer) attributePickup(itemPos [3]float32, _ float64) (int, stri
 		return bestSlot, "", ""
 	}
 	pl := a.ctx.Players[bestSlot]
+	// Note: pl.Name is read at OnEvent time (when ItemStateEvent fires),
+	// so it always carries the userinfo name. Demoinfo-resolved display
+	// names aren't available yet — the demoinfo analyser hasn't
+	// finalised when an item pickup is recorded. For the test corpus
+	// userinfo == display, so the output is correct in practice; the
+	// auth-override case is captured in NOTES-pickup-attribution-quality.md.
 	return bestSlot, pl.Name, pl.Team
 }
 
@@ -376,9 +363,9 @@ func (a *ItemAnalyzer) attributePickup(itemPos [3]float32, _ float64) (int, stri
 // position. Loc labels are attached best-effort from the .loc
 // corpus — absent loc file yields empty Loc strings; the item list
 // itself is always populated when the demo has any item events.
-func (a *ItemAnalyzer) Finalize() (interface{}, error) {
+func (a *ItemAnalyzer) Finalize(result *Result) error {
 	if len(a.items) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	// Best-effort loc lookup — does NOT affect whether items appear.
@@ -438,5 +425,6 @@ func (a *ItemAnalyzer) Finalize() (interface{}, error) {
 		return out[i].Name < out[j].Name
 	})
 
-	return &ItemsResult{Items: out}, nil
+	result.Items = &ItemsResult{Items: out}
+	return nil
 }

@@ -10,12 +10,15 @@ import (
 
 // MatchAnalyzer extracts match summary information
 type MatchAnalyzer struct {
-	ctx            *Context
-	duration       float64
-	matchStartTime float64
-	matchEndTime   float64
-	matchStarted   bool
+	ctx      *Context
+	core     *CoreOutputs
+	duration float64
+	timing   MatchTimingDetector
 }
+
+// UseCoreOutputs lets Match read demoinfo-resolved display names from
+// co.Slots when building the player-stats table.
+func (a *MatchAnalyzer) UseCoreOutputs(co *CoreOutputs) { a.core = co }
 
 // NewMatchAnalyzer creates a new match analyzer
 func NewMatchAnalyzer() *MatchAnalyzer {
@@ -32,86 +35,57 @@ func (a *MatchAnalyzer) Init(ctx *Context) error {
 func (a *MatchAnalyzer) OnEvent(event events.Event) error {
 	a.duration = event.EventTime()
 
-	if printEvent, ok := event.(*events.PrintEvent); ok {
-		a.checkMatchTiming(printEvent)
+	switch e := event.(type) {
+	case *events.PrintEvent:
+		a.timing.OnPrint(e)
+	case *events.IntermissionEvent:
+		a.timing.OnIntermission(e.EventTime())
 	}
 
 	return nil
 }
 
-// checkMatchTiming detects match start/end from print messages
-func (a *MatchAnalyzer) checkMatchTiming(event *events.PrintEvent) {
-	msg := strings.ToLower(event.Message)
-
-	// Match start patterns
-	matchStartPatterns := []string{
-		"the match has begun",
-		"match started",
-		"fight!",
-		"game start",
-	}
-
-	for _, pattern := range matchStartPatterns {
-		if strings.Contains(msg, pattern) {
-			if !a.matchStarted {
-				a.matchStartTime = event.Time
-				a.matchStarted = true
-			}
-			return
-		}
-	}
-
-	// Match end patterns
-	matchEndPatterns := []string{
-		"the match is over",
-		"match ended",
-		"game over",
-		"match complete",
-		"timelimit hit",
-		"fraglimit hit",
-	}
-
-	for _, pattern := range matchEndPatterns {
-		if strings.Contains(msg, pattern) {
-			a.matchEndTime = event.Time
-			return
-		}
-	}
-}
-
-func (a *MatchAnalyzer) Finalize() (interface{}, error) {
+func (a *MatchAnalyzer) Finalize(result *Result) error {
 	// Calculate actual match duration
 	matchDuration := a.duration
-	if a.matchStarted && a.matchStartTime > 0 {
-		if a.matchEndTime > a.matchStartTime {
-			matchDuration = a.matchEndTime - a.matchStartTime
+	if a.timing.Started && a.timing.StartTime > 0 {
+		if a.timing.EndTime > a.timing.StartTime {
+			matchDuration = a.timing.EndTime - a.timing.StartTime
 		} else {
 			// No end detected, use total - start
-			matchDuration = a.duration - a.matchStartTime
+			matchDuration = a.duration - a.timing.StartTime
 		}
 	}
 
-	result := &MatchResult{
+	mr := &MatchResult{
 		Duration:  matchDuration,
-		StartTime: a.matchStartTime,
-		EndTime:   a.matchEndTime,
+		StartTime: a.timing.StartTime,
+		EndTime:   a.timing.EndTime,
 	}
 
 	// Get map name from server data
 	if a.ctx.ServerData != nil {
-		result.Map = extractMapName(a.ctx.ServerData.LevelName)
-		result.GameDir = a.ctx.ServerData.GameDir
+		mr.Map = extractMapName(a.ctx.ServerData.LevelName)
+		mr.GameDir = a.ctx.ServerData.GameDir
 	}
 
 	// Collect team stats
 	teamFrags := make(map[string]int)
 
-	// Collect player stats.
-	// ctx.Players[slot].Name is already patched to the display name
-	// by registry.go after DemoInfo finalization.
+	// Collect player stats. Display names are taken from
+	// co.Slots[i].Name (demoinfo-resolved when matched, else userinfo)
+	// so this output keys against the same names as the rest of the
+	// pipeline.
 	for i := 0; i < len(a.ctx.Players); i++ {
 		p := a.ctx.Players[i]
-		if p == nil || p.Name == "" || p.Spectator {
+		if p == nil || p.Spectator {
+			continue
+		}
+		name := a.core.SlotName(i)
+		if name == "" {
+			name = p.Name
+		}
+		if name == "" {
 			continue
 		}
 
@@ -121,7 +95,7 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 		}
 
 		stat := PlayerStat{
-			Name:  p.Name,
+			Name:  name,
 			Team:  p.Team,
 			Frags: p.Frags,
 		}
@@ -136,7 +110,7 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 			continue
 		}
 
-		result.Players = append(result.Players, stat)
+		mr.Players = append(mr.Players, stat)
 
 		// Aggregate team frags
 		if p.Team != "" {
@@ -154,13 +128,17 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 	}
 	sort.Strings(teamNames)
 	for _, team := range teamNames {
-		result.Teams = append(result.Teams, TeamStat{
+		mr.Teams = append(mr.Teams, TeamStat{
 			Name:  team,
 			Frags: teamFrags[team],
 		})
 	}
 
-	return result, nil
+	result.Match = mr
+	if mr.EndTime > 0 {
+		result.Duration = mr.EndTime
+	}
+	return nil
 }
 
 // isSpectatorTeam returns true if the team name indicates a spectator
