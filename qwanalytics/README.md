@@ -89,9 +89,15 @@ event stream, then a post-pass on the assembled `Result`:
 
 | Slice | Default analysers | Why |
 |---|---|---|
-| **Core** | `demoinfo`, `frag` | Implement `CoreProducer`. Everything they emit (`DemoInfo`, `Names`, `Slots`, `FragEntries`) is the canonical input some derived analyser consumes during its own Finalize. |
-| **Derived** | `metadata`, `match`, `messages`, `timeline`, `items`, `backpacks`, `weapon_pickups` | Either implement `CoreConsumer` (read `co.*`) or are independent peers. They never write to `CoreOutputs`. |
+| **Core** | [`demoinfo`](analyzer/demoinfo.md), [`frag`](analyzer/frag.md) | Implement `CoreProducer`. Everything they emit (`DemoInfo`, `Names`, `Slots`, `FragEntries`) is the canonical input some derived analyser consumes during its own Finalize. |
+| **Derived** | [`metadata`](analyzer/metadata.md), [`match`](analyzer/match.md), [`messages`](analyzer/messages.md), [`timeline`](analyzer/timeline.md), [`items`](analyzer/items.md), [`backpacks`](analyzer/backpacks.md), [`weapon_pickups`](analyzer/weapon_pickups.md) | Either implement `CoreConsumer` (read `co.*`) or are independent peers. They never write to `CoreOutputs`. |
 | **Post-processors** | `normalizeMatchRelativeTimes`, `duelTeamNormalize`, `locGraphPost` | Operate on the assembled `Result` after every Finalize has run. Order matters within the slice (time normalisation must run before locgraph). |
+| **Shelved** | [`tracks`](analyzer/tracks.md) | Code present, not registered. Awaiting a qw-web consumer. |
+
+Each analyser has a one-page README in `analyzer/` covering what it
+consumes / produces, key algorithm steps, and known limitations. Read
+those before adding a new analyser or chasing a data-quality issue
+specific to one of them.
 
 ### Why the split
 
