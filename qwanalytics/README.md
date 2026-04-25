@@ -9,10 +9,16 @@ that downstream consumers render, summarise, or feed to an agent.
 - `result/` — the **stable JSON schema** every pipeline run produces.
   Consumers (web UI, CLI, AI agent) should import this package and pin
   against `result.CurrentSchemaVersion`.
-- `analyzer/` — the Analyzer interface, shared `Context`, and `Registry`
-  that drives a run. `NewDefaultRegistry()` wires up the eight
-  production analyzers (demoinfo, metadata, match, frag, messages,
-  timeline, items, backpacks).
+- `analyzer/` — the `Analyzer` interface, the read-only event/userinfo
+  `Context`, the typed `CoreOutputs` bundle that producer analysers
+  populate for downstream consumers, and the `Registry` that drives a
+  run. `NewDefaultRegistry()` wires up nine production analysers split
+  into two phases: **core** (`demoinfo`, `frag` — the producers that
+  fill `CoreOutputs`) finalise first; **derived** (`metadata`, `match`,
+  `messages`, `timeline`, `items`, `backpacks`, `weapon_pickups`)
+  finalise after, with `CoreOutputs` already populated. Three default
+  result post-processors run last (time normalisation, duel team
+  rewrite, locgraph synthesis) — see `postprocess.go`.
 - `loc/` — `.loc` file parser. For native builds the corpus is embedded
   via `//go:embed data/*.loc` (466 maps today); for WASM builds the host
   provides `fetchLocSync` so only the loc for the current demo is
@@ -261,12 +267,12 @@ type WeaponPickup struct {
 
 ## Writing a new analyzer
 
-Implement the `analyzer.Analyzer` interface:
+Implement the `analyzer.Analyzer` interface. Each analyzer writes
+its slice of `result.Result` directly from `Finalize`:
 
 ```go
 type MyAnalyzer struct {
     ctx *analyzer.Context
-    // ...
 }
 
 func (a *MyAnalyzer) Name() string { return "my" }
@@ -279,29 +285,63 @@ func (a *MyAnalyzer) Init(ctx *analyzer.Context) error {
 func (a *MyAnalyzer) OnEvent(ev events.Event) error {
     switch e := ev.(type) {
     case *events.PrintEvent:
-        // ...
+        _ = e
     }
     return nil
 }
 
-func (a *MyAnalyzer) Finalize() (interface{}, error) {
-    return &MyResult{ /* ... */ }, nil
+func (a *MyAnalyzer) Finalize(result *analyzer.Result) error {
+    result.My = &MyResult{ /* ... */ }
+    return nil
 }
 ```
 
-Wire it into a Registry:
+If your analyzer needs to read another analyzer's output (frag entries,
+demoinfo player table, …), implement `CoreConsumer`. The registry
+hands you the running `*CoreOutputs` immediately before your `Finalize`
+runs:
+
+```go
+type MyAnalyzer struct {
+    ctx  *analyzer.Context
+    core *analyzer.CoreOutputs
+}
+
+func (a *MyAnalyzer) UseCoreOutputs(co *analyzer.CoreOutputs) {
+    a.core = co
+}
+```
+
+If your analyzer *produces* a field that other analyzers will consume,
+implement `CoreProducer`. The registry calls `PopulateCore` after your
+`Finalize` so analysers registered later in the pipeline see your
+output:
+
+```go
+func (a *MyAnalyzer) PopulateCore(co *analyzer.CoreOutputs) {
+    co.MyOutput = a.computed
+}
+```
+
+Then add the type to `result/` and register the analyzer. Choose
+`RegisterCore` for producers (anything implementing `CoreProducer`) and
+`RegisterDerived` for everything else:
 
 ```go
 reg := analyzer.NewDefaultRegistry()
-reg.Register(&MyAnalyzer{})
+reg.RegisterDerived(&MyAnalyzer{})
 ```
 
-If your analyzer's output needs a home on `result.Result`, add the type
-to `result/` and add a case to the switch in
-`analyzer/registry.go:analyzeSource` that promotes the Finalize output
-into the right top-level field. Order matters: analyzers run in
-registration order, so put an analyzer that reads DemoInfo *after* the
-DemoInfo analyzer.
+Core analysers finalize before any derived analyser. Within each slice
+registration order is preserved, so a later core entry can read a
+field populated by an earlier core entry (e.g. Frag reads `co.Names`
+produced by DemoInfo).
+
+If your analyzer is a post-pass that operates on the assembled Result
+(not on the event stream), register it via
+`reg.RegisterPostProcessor(func(*Result, *CoreOutputs))` instead.
+Built-ins like `normalizeMatchRelativeTimes`, `normalizeDuelTeams`,
+and `BuildLocGraph` are wired this way (see `analyzer/postprocess.go`).
 
 ## Loc files
 
