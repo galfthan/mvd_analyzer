@@ -42,8 +42,10 @@ import (
 )
 
 // ktxItemNameToKind maps the KTX demoinfo `items` map key to the
-// item-Kind vocabulary the parser emits. KTX uses `health_15` /
-// `health_25` / `health_100`; the parser uses `h15` / `h25` / `mh`.
+// item-Kind vocabulary the parser emits. The KTX-side names come from
+// ItName() at ktx/src/stats.c:395 — long names for armors and healths,
+// single letters for powerups. Suit is intentionally absent: KTX
+// doesn't track Biosuit in the per-player items map.
 var ktxItemNameToKind = map[string]string{
 	"ga":         "ga",
 	"ya":         "ya",
@@ -51,10 +53,9 @@ var ktxItemNameToKind = map[string]string{
 	"health_15":  "h15",
 	"health_25":  "h25",
 	"health_100": "mh",
-	"quad":       "quad",
-	"pent":       "pent",
-	"ring":       "ring",
-	"suit":       "suit",
+	"q":          "quad",
+	"p":          "pent",
+	"r":          "ring",
 }
 
 // Per-cell and per-demo thresholds for items pickup counts. Set above
@@ -146,7 +147,7 @@ func TestItemPickupCountsMatchDemoInfo(t *testing.T) {
 
 			// Per-kind aggregate breakdown for visibility — easier to
 			// spot which item kind is drifting.
-			for _, kind := range []string{"ga", "ya", "ra", "h15", "h25", "mh", "quad", "pent", "ring", "suit"} {
+			for _, kind := range []string{"ga", "ya", "ra", "h15", "h25", "mh", "quad", "pent", "ring"} {
 				b, ok := kindBreakdown[kind]
 				if !ok || (b.ana == 0 && b.ktx == 0) {
 					continue
