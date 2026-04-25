@@ -13,12 +13,22 @@ import (
 // parameters individual analyzers read; callers may mutate it before
 // analyzing to override defaults for a single run.
 type Registry struct {
-	analyzers []Analyzer
-	Config    *config.Config
+	analyzers      []Analyzer
+	postProcessors []ResultPostProcessor
+	Config         *config.Config
 }
 
+// ResultPostProcessor mutates the assembled Result after every
+// analyser has finalised. Examples: time normalisation (rebase to
+// match-relative), duel-mode team rewrites, locgraph synthesis from
+// timeline buckets. The function receives CoreOutputs so it can read
+// demoinfo / name tables / frag log without re-deriving them.
+type ResultPostProcessor func(result *Result, co *CoreOutputs)
+
 // NewRegistry creates an empty analyzer registry seeded with the
-// embedded default config.
+// embedded default config. No analysers or post-processors are
+// registered — callers wire those up explicitly (or use
+// NewDefaultRegistry).
 func NewRegistry() *Registry {
 	return &Registry{Config: config.Default()}
 }
@@ -26,6 +36,12 @@ func NewRegistry() *Registry {
 // Register adds an analyzer to the registry
 func (r *Registry) Register(a Analyzer) {
 	r.analyzers = append(r.analyzers, a)
+}
+
+// RegisterPostProcessor adds a Result post-processor. They run in
+// registration order after every analyser has finalised.
+func (r *Registry) RegisterPostProcessor(p ResultPostProcessor) {
+	r.postProcessors = append(r.postProcessors, p)
 }
 
 // Analyze runs all registered analyzers on an MVD file at the given path.
@@ -135,107 +151,17 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 		}
 	}
 
-	// Normalize all times to be match-relative (0-based from match start)
-	// This eliminates the need for the frontend to subtract matchStartTime everywhere
-	matchStart := 0.0
-	if result.TimelineAnalysis != nil {
-		matchStart = result.TimelineAnalysis.MatchStartTime
+	// Run registered post-processors in order. Each one operates on the
+	// fully-finalized Result; CoreOutputs is passed through for read
+	// access. The default ordering (set in NewDefaultRegistry) is:
+	//   1. normalizeMatchRelativeTimes
+	//   2. normalizeDuelTeams
+	//   3. buildLocGraphPost
+	// — but the slice is otherwise unconstrained. Add a step by
+	// calling r.RegisterPostProcessor(...) before Analyze.
+	for _, p := range r.postProcessors {
+		p(result, co)
 	}
-	if matchStart > 0 {
-		result.Duration -= matchStart
-
-		if ta := result.TimelineAnalysis; ta != nil {
-			for i := range ta.HighResBuckets {
-				ta.HighResBuckets[i].T -= matchStart
-			}
-			for i := range ta.FragEvents {
-				ta.FragEvents[i].Time -= matchStart
-			}
-			for i := range ta.PowerupEvents {
-				ta.PowerupEvents[i].Time -= matchStart
-				ta.PowerupEvents[i].EndTime -= matchStart
-			}
-			for i := range ta.FragStreaks {
-				ta.FragStreaks[i].Time -= matchStart
-				ta.FragStreaks[i].EndTime -= matchStart
-			}
-			ta.DemoOffset = matchStart
-			ta.MatchStartTime = 0
-
-			// Filter out warmup buckets (negative times after normalization)
-			filteredHR := ta.HighResBuckets[:0]
-			for _, b := range ta.HighResBuckets {
-				if b.T >= 0 {
-					filteredHR = append(filteredHR, b)
-				}
-			}
-			ta.HighResBuckets = filteredHR
-		}
-
-		if result.Messages != nil {
-			for i := range result.Messages.Events {
-				result.Messages.Events[i].Time -= matchStart
-			}
-		}
-
-		if result.Frags != nil {
-			for i := range result.Frags.Frags {
-				result.Frags.Frags[i].Time -= matchStart
-			}
-		}
-
-		if result.Match != nil {
-			result.Match.StartTime -= matchStart
-			result.Match.EndTime -= matchStart
-		}
-
-		if result.Items != nil {
-			for i := range result.Items.Items {
-				ph := result.Items.Items[i].Phases
-				for j := range ph {
-					// AvailableFrom=0 is the synthetic "match
-					// start" marker for initial phases; leave it
-					// alone. All real timestamps get shifted.
-					if ph[j].AvailableFrom > 0 {
-						ph[j].AvailableFrom -= matchStart
-					}
-					if ph[j].TakenAt > 0 {
-						ph[j].TakenAt -= matchStart
-					}
-					if ph[j].RespawnAt > 0 {
-						ph[j].RespawnAt -= matchStart
-					}
-				}
-			}
-		}
-
-		for i := range result.Backpacks {
-			result.Backpacks[i].Time -= matchStart
-		}
-
-		for i := range result.WeaponPickups {
-			result.WeaponPickups[i].Time -= matchStart
-			if result.WeaponPickups[i].NextDeathTime > 0 {
-				result.WeaponPickups[i].NextDeathTime -= matchStart
-			}
-			if result.WeaponPickups[i].DropTime > 0 {
-				result.WeaponPickups[i].DropTime -= matchStart
-			}
-		}
-	}
-
-	// 1v1 normalization: for duel demos the "team" concept is either
-	// meaningless (arbitrary colour tags) or actively broken (bots have
-	// no team, get dropped from team-keyed aggregates). Rewrite every
-	// team reference to the player's own name so all downstream
-	// consumers still see a uniform team-keyed model, and the UI can
-	// suppress the now-redundant "Per Team" panels.
-	normalizeDuelTeams(result)
-
-	// Aggregate loc-to-loc movement into a graph (runs after time
-	// normalization and duel team rewrite so nodes/edges use the same
-	// time base and team labels as the rest of the result).
-	result.LocGraph = BuildLocGraph(result)
 
 	return result, nil
 }
@@ -260,5 +186,14 @@ func NewDefaultRegistry() *Registry {
 	r.Register(NewItemAnalyzer())
 	r.Register(NewBackpackAnalyzer())
 	r.Register(NewWeaponPickupsAnalyzer())
+
+	// Post-processors run in registration order on the assembled
+	// Result. Order matters: time normalisation has to land first so
+	// duel team rewrite and loc graph construction see match-relative
+	// timestamps; locgraph runs last because it consumes the
+	// already-rewritten team labels and timeline buckets.
+	r.RegisterPostProcessor(normalizeMatchRelativeTimes)
+	r.RegisterPostProcessor(duelTeamNormalize)
+	r.RegisterPostProcessor(locGraphPost)
 	return r
 }
