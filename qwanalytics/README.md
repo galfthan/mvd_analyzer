@@ -240,9 +240,12 @@ nearest-player snapping. The four layers, in priority order:
    ammo boxes when present.
 3. **Stat-delta evidence** — diffs each `StatUpdateEvent` against a
    per-slot snapshot. IT_* bit 0→1 transitions identify armor /
-   weapon / powerup pickups; STAT_HEALTH +15 / +25 identify small
-   healths; positive STAT_AMMO_* deltas identify ammo boxes. Universal
-   fallback that works on every demo regardless of client config.
+   weapon / powerup pickups; positive STAT_HEALTH deltas in [1, 25]
+   identify small healths (KTX caps health at 100, so partial-cap
+   pickups give less than the nominal +15 / +25 — the kind filter at
+   synthesis time disambiguates h15 vs h25); positive STAT_AMMO_*
+   deltas identify ammo boxes. Universal fallback that works on every
+   demo regardless of client config.
 4. **Distance corroborator** — last resort. Iterates slots whose last
    `PlayerPositionEvent` is within 250 ms of the pickup time and
    returns the closest within 256² units squared of the item origin;
@@ -256,10 +259,26 @@ mis-attributes contested pickups even when the geometry looks
 unambiguous. See [`PICKUP-SIGNALS-INVESTIGATION.md`](../PICKUP-SIGNALS-INVESTIGATION.md)
 for the underlying protocol analysis.
 
-Known limitation: when an item respawns and is immediately
-regrabbed within the same server tick, the entity is never
-visible on the wire for that cycle, so we don't record a phase
-for it. The resulting phase will span the whole contested window
+**Insta-regrab synthesis**: when an item respawns and is touched again
+within the same server tick the wire never emits a "visible"
+transition, so the entity-state trigger items.go usually relies on is
+silent. The analyser closes that gap with two complementary synthesis
+paths — hint-driven (immediate, when `//ktx took` arrives for an
+already-taken entity; covers MH, armors, weapons, powerups) and
+stat-delta-driven (predicted respawn time + matching stat evidence +
+proximity check; covers small healths and ammo). Synthetic phases
+carry `attributionSource = "hint"` or `"synthetic"` internally and
+are validated against KTX's `demoInfo.players[*].items[*].took` by
+[`pickup_invariant_test.go`](analyzer/pickup_invariant_test.go) — the
+hub corpus matches exactly on 8 of 9 demos. See
+[`analyzer/items.md`](analyzer/items.md#insta-regrab-synthesis) for
+the full algorithm.
+
+Residual limitation: when an item respawns and is immediately
+regrabbed within the same server tick AND no synthesis signal fits
+(very rare — typically a damage hit in the same frame as a small
+heal, masking the stat delta), we don't record a phase for that
+cycle. The resulting phase will span the whole contested window
 (e.g. "RA taken at 31s, respawn observed at 91s" means the RA was
 never practically available in that 60 s window).
 

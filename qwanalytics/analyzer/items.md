@@ -120,7 +120,10 @@ for an entity that's already in our "taken" phase (no wire respawn
 observed since the last close), it can only be an insta-regrab —
 synthesise the pickup immediately, using the slot from the hint as
 authoritative attribution (`attributionSource = "hint"`). Covers
-armors, weapons, and powerups on KTX servers.
+armors, MH, weapons, and powerups on KTX servers. For MH the
+synthesis additionally transfers heldMHs ownership from the previous
+holder to the new picker so the rot tracker stamps `RespawnAt` on the
+right phase.
 
 **Stat-delta-driven (fallback for non-hinted kinds).** For items KTX
 doesn't hint (small healths, ammo boxes), and as a backup if a hint
@@ -138,19 +141,29 @@ is somehow missing:
    slot and `attributionSource = "synthetic"`; schedule the next
    prediction.
 
+The stat-delta classifier accepts any positive `STAT_HEALTH` delta in
+[1, 25] as h15-or-h25 evidence (resolved by entity kind at synthesis
+time). KTX's `T_Heal` caps health at `max_health` (100), so a pickup
+at 80 HP gives only a `+20` delta even though `tooks` increments —
+exact matching on `+15` / `+25` would miss every partial-cap heal.
+MH is detected via the IT_SUPERHEALTH bit transition, not the `+100`
+delta, so the cap rule doesn't apply.
+
+The chain-forward stat-delta path stays disabled for MH because its
+predicted respawn depends on rot timing, which is already tracked
+separately. Hint-driven synthesis applies to MH unchanged.
+
 Both paths terminate cleanly: a wire `Taken=false` cancels any pending
 schedule (the entity genuinely respawned without being re-grabbed),
 and the chain has a hard cap of 60 entries per entity.
 
-MH is excluded from synthesis because its predicted respawn depends on
-holder-rot timing, which is already handled by the rot tracker.
-
 The qwanalytics pickup-invariant test (`pickup_invariant_test.go`)
 compares per-player phase counts against KTX's authoritative
 `demoInfo.players[*].items[*].took` numbers. With both synthesis
-paths enabled, the hub corpus has 3 demos at exact match (dm4, skull,
-bravado) and the rest within 1–3 missing pickups, all of which are
-either MH (excluded) or at-cap stat ticks the wire doesn't expose.
+paths enabled the hub corpus has 8 of 9 demos at exact match across
+every hinted kind; the 9th has one h15 pickup attributed to the
+wrong player (a slot flip on ambiguous stat-delta evidence, net zero
+in total count).
 
 Synthesis can be disabled per analyser via `SetSyntheticPickups(false)`
 when wire-only behaviour is needed for comparison.
