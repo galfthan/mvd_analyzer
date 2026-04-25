@@ -62,11 +62,16 @@ var ktxItemNameToKind = map[string]string{
 // the current observed worst-case so legitimate small drift doesn't
 // break the test, but regressions of 2× or more do. Update only with
 // an explanatory commit message.
+//
+// With synthesis enabled (the default since the synthetic-pickups
+// branch), the corpus baseline is: 1 over-cell per demo max, ≤2 per
+// cell; 3-4 under-cells per demo max, ≤2 per cell. Thresholds set
+// above that.
 const (
-	maxItemsOverPerCell  = 3  // phantom pickups attributed per (player, kind)
-	maxItemsOverPerDemo  = 10 // aggregate over-counts per demo
-	maxItemsUnderPerCell = 6  // missed pickups per (player, kind) — insta-regrabs
-	maxItemsUnderPerDemo = 30 // aggregate under-counts per demo
+	maxItemsOverPerCell  = 2  // phantom pickups attributed per (player, kind)
+	maxItemsOverPerDemo  = 5  // aggregate over-counts per demo
+	maxItemsUnderPerCell = 3  // missed pickups per (player, kind) — residual insta-regrabs
+	maxItemsUnderPerDemo = 10 // aggregate under-counts per demo
 )
 
 func TestItemPickupCountsMatchDemoInfo(t *testing.T) {
@@ -92,11 +97,15 @@ func TestItemPickupCountsMatchDemoInfo(t *testing.T) {
 				t.Fatalf("analyzer produced no items result")
 			}
 
-			// Aggregate items.go pickup counts per (player, kind).
+			// Aggregate items.go pickup counts per (player, kind). A
+			// closed phase is one where attribution succeeded —
+			// indicated by a non-empty TakenBy. Don't gate on
+			// TakenAt > 0: a pickup at exact match-start (t=0 after
+			// normalization) is legitimate and would be missed.
 			counts := map[playerKind]int{}
 			for _, it := range result.Items.Items {
 				for _, ph := range it.Phases {
-					if ph.TakenAt == 0 || ph.TakenBy == "" {
+					if ph.TakenBy == "" {
 						continue
 					}
 					counts[playerKind{ph.TakenBy, it.Kind}]++

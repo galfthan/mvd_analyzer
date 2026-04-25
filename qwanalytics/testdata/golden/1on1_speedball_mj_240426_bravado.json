@@ -3563,6 +3563,12 @@
             "takenBy": "speedball"
           },
           {
+            "availableFrom": 358.02999999997076,
+            "respawnAt": 378.02999999997076,
+            "takenAt": 358.02999999997076,
+            "takenBy": "speedball"
+          },
+          {
             "availableFrom": 378.02999999995535,
             "respawnAt": 405.4499999999498,
             "takenAt": 385.4499999999498,

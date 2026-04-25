@@ -4365,6 +4365,13 @@
             "team": "pora"
           },
           {
+            "availableFrom": 411.49199999990816,
+            "respawnAt": 436.49199999990816,
+            "takenAt": 411.49199999990816,
+            "takenBy": "kippo",
+            "team": "pora"
+          },
+          {
             "availableFrom": 436.4809999998915,
             "respawnAt": 480.4919999998731,
             "takenAt": 439.23399999988953,
@@ -4670,6 +4677,13 @@
             "team": "pora"
           },
           {
+            "availableFrom": 128.42300000000722,
+            "respawnAt": 148.42300000000722,
+            "takenAt": 128.42300000000722,
+            "takenBy": "SS",
+            "team": "nAnI"
+          },
+          {
             "availableFrom": 148.42900000000938,
             "respawnAt": 169.10900000000942,
             "takenAt": 149.10900000000942,
@@ -4701,6 +4715,13 @@
             "availableFrom": 238.90100000002678,
             "respawnAt": 261.0180000000274,
             "takenAt": 241.0180000000274,
+            "takenBy": "kippo",
+            "team": "pora"
+          },
+          {
+            "availableFrom": 261.0100000000134,
+            "respawnAt": 281.0100000000134,
+            "takenAt": 261.0100000000134,
             "takenBy": "kippo",
             "team": "pora"
           },
@@ -4754,6 +4775,13 @@
             "team": "nAnI"
           },
           {
+            "availableFrom": 431.0749999998953,
+            "respawnAt": 451.0749999998953,
+            "takenAt": 431.0749999998953,
+            "takenBy": "rusti",
+            "team": "pora"
+          },
+          {
             "availableFrom": 451.0629999998799,
             "respawnAt": 472.04999999987916,
             "takenAt": 452.04999999987916,
@@ -4779,6 +4807,13 @@
             "respawnAt": 534.7989999998673,
             "takenAt": 514.7989999998673,
             "takenBy": "kippo",
+            "team": "pora"
+          },
+          {
+            "availableFrom": 534.8079999998956,
+            "respawnAt": 554.8079999998956,
+            "takenAt": 534.8079999998956,
+            "takenBy": "rusti",
             "team": "pora"
           },
           {
@@ -4819,6 +4854,13 @@
             "takenAt": 9.96100000000017,
             "takenBy": "kippo",
             "team": "pora"
+          },
+          {
+            "availableFrom": 309.94699999997096,
+            "respawnAt": 609.9469999999709,
+            "takenAt": 309.94699999997096,
+            "takenBy": "gLAd",
+            "team": "nAnI"
           }
         ],
         "x": 512,

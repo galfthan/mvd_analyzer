@@ -4688,6 +4688,13 @@
             "team": "BhB"
           },
           {
+            "availableFrom": 149.00999999999604,
+            "respawnAt": 169.00999999999604,
+            "takenAt": 149.00999999999604,
+            "takenBy": "[nW].Veggie",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 169.01599999999314,
             "respawnAt": 193.9219999999924,
             "takenAt": 173.9219999999924,
@@ -4727,6 +4734,13 @@
             "respawnAt": 315.27399999998727,
             "takenAt": 295.27399999998727,
             "takenBy": "ocoini",
+            "team": "ahoy"
+          },
+          {
+            "availableFrom": 315.26299999999156,
+            "respawnAt": 335.26299999999156,
+            "takenAt": 315.26299999999156,
+            "takenBy": "sailorman",
             "team": "ahoy"
           },
           {
@@ -5264,6 +5278,13 @@
             "takenAt": 7.125000000000021,
             "takenBy": "[nW].Veggie",
             "team": "ahoy"
+          },
+          {
+            "availableFrom": 27.12500000000002,
+            "respawnAt": 47.12500000000002,
+            "takenAt": 27.12500000000002,
+            "takenBy": "KreatoR",
+            "team": "BhB"
           },
           {
             "availableFrom": 47.12299999999961,
@@ -6155,6 +6176,13 @@
             "availableFrom": 960.7429999998126,
             "respawnAt": 1006.7119999997991,
             "takenAt": 986.7119999997991,
+            "takenBy": "sailorman",
+            "team": "ahoy"
+          },
+          {
+            "availableFrom": 1006.7119999997991,
+            "respawnAt": 1026.7119999997992,
+            "takenAt": 1006.7119999997991,
             "takenBy": "sailorman",
             "team": "ahoy"
           },
@@ -9163,6 +9191,13 @@
             "team": "BhB"
           },
           {
+            "availableFrom": 351.6789999999926,
+            "respawnAt": 381.6789999999926,
+            "takenAt": 351.6789999999926,
+            "takenBy": "rghst",
+            "team": "BhB"
+          },
+          {
             "availableFrom": 381.67399999999503,
             "respawnAt": 429.9969999999946,
             "takenAt": 399.9969999999946,
@@ -9507,6 +9542,13 @@
             "team": "ahoy"
           },
           {
+            "availableFrom": 183.33099999999106,
+            "respawnAt": 243.33099999999106,
+            "takenAt": 183.33099999999106,
+            "takenBy": "rghst",
+            "team": "BhB"
+          },
+          {
             "availableFrom": 243.3259999999809,
             "respawnAt": 303.3589999999809,
             "takenAt": 243.35899999998088,
@@ -9521,10 +9563,38 @@
             "team": "ahoy"
           },
           {
+            "availableFrom": 363.3369999999957,
+            "respawnAt": 423.3369999999957,
+            "takenAt": 363.3369999999957,
+            "takenBy": "nexus",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 423.33399999999375,
             "respawnAt": 489.1349999999938,
             "takenAt": 429.1349999999938,
             "takenBy": "ThundeR",
+            "team": "BhB"
+          },
+          {
+            "availableFrom": 489.1469999999948,
+            "respawnAt": 549.1469999999948,
+            "takenAt": 489.1469999999948,
+            "takenBy": "rghst",
+            "team": "BhB"
+          },
+          {
+            "availableFrom": 549.1399999999753,
+            "respawnAt": 609.1399999999753,
+            "takenAt": 549.1399999999753,
+            "takenBy": "sailorman",
+            "team": "ahoy"
+          },
+          {
+            "availableFrom": 609.1379999999523,
+            "respawnAt": 669.1379999999523,
+            "takenAt": 609.1379999999523,
+            "takenBy": "rghst",
             "team": "BhB"
           },
           {
@@ -9542,6 +9612,13 @@
             "team": "BhB"
           },
           {
+            "availableFrom": 789.1539999998907,
+            "respawnAt": 849.1539999998907,
+            "takenAt": 789.1539999998907,
+            "takenBy": "sailorman",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 849.1219999998636,
             "respawnAt": 909.1579999998636,
             "takenAt": 849.1579999998636,
@@ -9549,11 +9626,32 @@
             "team": "BhB"
           },
           {
+            "availableFrom": 909.1409999998396,
+            "respawnAt": 969.1409999998396,
+            "takenAt": 909.1409999998396,
+            "takenBy": "nexus",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 969.159999999808,
             "respawnAt": 1031.4769999998068,
             "takenAt": 971.4769999998067,
             "takenBy": "[nW].Veggie",
             "team": "ahoy"
+          },
+          {
+            "availableFrom": 1031.4709999998202,
+            "respawnAt": 1091.4709999998202,
+            "takenAt": 1031.4709999998202,
+            "takenBy": "Doomie",
+            "team": "BhB"
+          },
+          {
+            "availableFrom": 1091.4899999999395,
+            "respawnAt": 1151.4899999999395,
+            "takenAt": 1091.4899999999395,
+            "takenBy": "rghst",
+            "team": "BhB"
           },
           {
             "availableFrom": 1151.473000000044,
@@ -9634,6 +9732,13 @@
             "team": "ahoy"
           },
           {
+            "availableFrom": 106.53300000000169,
+            "respawnAt": 136.5330000000017,
+            "takenAt": 106.53300000000169,
+            "takenBy": "ThundeR",
+            "team": "BhB"
+          },
+          {
             "availableFrom": 136.5199999999982,
             "respawnAt": 168.0839999999979,
             "takenAt": 138.0839999999979,
@@ -9646,6 +9751,34 @@
             "takenAt": 168.6339999999932,
             "takenBy": "sailorman",
             "team": "ahoy"
+          },
+          {
+            "availableFrom": 198.641999999989,
+            "respawnAt": 228.641999999989,
+            "takenAt": 198.641999999989,
+            "takenBy": "sailorman",
+            "team": "ahoy"
+          },
+          {
+            "availableFrom": 228.63299999998392,
+            "respawnAt": 258.6329999999839,
+            "takenAt": 228.63299999998392,
+            "takenBy": "rghst",
+            "team": "BhB"
+          },
+          {
+            "availableFrom": 258.6409999999812,
+            "respawnAt": 288.6409999999812,
+            "takenAt": 258.6409999999812,
+            "takenBy": "nexus",
+            "team": "ahoy"
+          },
+          {
+            "availableFrom": 288.62499999998573,
+            "respawnAt": 318.62499999998573,
+            "takenAt": 288.62499999998573,
+            "takenBy": "Doomie",
+            "team": "BhB"
           },
           {
             "availableFrom": 318.6229999999923,
@@ -9669,9 +9802,30 @@
             "team": "BhB"
           },
           {
+            "availableFrom": 414.95699999999397,
+            "respawnAt": 444.95699999999397,
+            "takenAt": 414.95699999999397,
+            "takenBy": "nexus",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 444.97399999999357,
             "respawnAt": 475.47399999999357,
             "takenAt": 445.47399999999357,
+            "takenBy": "rghst",
+            "team": "BhB"
+          },
+          {
+            "availableFrom": 475.4639999999945,
+            "respawnAt": 505.4639999999945,
+            "takenAt": 475.4639999999945,
+            "takenBy": "sailorman",
+            "team": "ahoy"
+          },
+          {
+            "availableFrom": 505.45499999999413,
+            "respawnAt": 535.4549999999941,
+            "takenAt": 505.45499999999413,
             "takenBy": "rghst",
             "team": "BhB"
           },
@@ -9683,11 +9837,60 @@
             "team": "ahoy"
           },
           {
+            "availableFrom": 566.8899999999666,
+            "respawnAt": 596.8899999999666,
+            "takenAt": 566.8899999999666,
+            "takenBy": "ThundeR",
+            "team": "BhB"
+          },
+          {
+            "availableFrom": 596.888999999958,
+            "respawnAt": 626.888999999958,
+            "takenAt": 596.888999999958,
+            "takenBy": "nexus",
+            "team": "ahoy"
+          },
+          {
+            "availableFrom": 626.8989999999424,
+            "respawnAt": 656.8989999999424,
+            "takenAt": 626.8989999999424,
+            "takenBy": "Doomie",
+            "team": "BhB"
+          },
+          {
+            "availableFrom": 656.8819999999313,
+            "respawnAt": 686.8819999999313,
+            "takenAt": 656.8819999999313,
+            "takenBy": "ocoini",
+            "team": "ahoy"
+          },
+          {
+            "availableFrom": 686.8979999999162,
+            "respawnAt": 716.8979999999162,
+            "takenAt": 686.8979999999162,
+            "takenBy": "nexus",
+            "team": "ahoy"
+          },
+          {
+            "availableFrom": 716.8899999999073,
+            "respawnAt": 746.8899999999073,
+            "takenAt": 716.8899999999073,
+            "takenBy": "ocoini",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 746.867999999904,
             "respawnAt": 776.900999999904,
             "takenAt": 746.900999999904,
             "takenBy": "KreatoR",
             "team": "BhB"
+          },
+          {
+            "availableFrom": 776.8799999998959,
+            "respawnAt": 806.8799999998959,
+            "takenAt": 776.8799999998959,
+            "takenBy": "nexus",
+            "team": "ahoy"
           },
           {
             "availableFrom": 806.8749999998818,
@@ -9704,11 +9907,25 @@
             "team": "ahoy"
           },
           {
+            "availableFrom": 867.9149999998563,
+            "respawnAt": 897.9149999998563,
+            "takenAt": 867.9149999998563,
+            "takenBy": "nexus",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 897.9139999998451,
             "respawnAt": 930.9339999998441,
             "takenAt": 900.9339999998441,
             "takenBy": "KreatoR",
             "team": "BhB"
+          },
+          {
+            "availableFrom": 930.9279999998275,
+            "respawnAt": 960.9279999998275,
+            "takenAt": 930.9279999998275,
+            "takenBy": "ocoini",
+            "team": "ahoy"
           },
           {
             "availableFrom": 960.9499999998125,
@@ -9730,6 +9947,13 @@
             "takenAt": 1023.4329999998026,
             "takenBy": "KreatoR",
             "team": "BhB"
+          },
+          {
+            "availableFrom": 1053.4209999998695,
+            "respawnAt": 1083.4209999998695,
+            "takenAt": 1053.4209999998695,
+            "takenBy": "nexus",
+            "team": "ahoy"
           },
           {
             "availableFrom": 1083.390999999924,
@@ -11461,6 +11685,13 @@
             "team": "BhB"
           },
           {
+            "availableFrom": 21.350999999999924,
+            "respawnAt": 41.35099999999992,
+            "takenAt": 21.350999999999924,
+            "takenBy": "sailorman",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 41.343999999999646,
             "respawnAt": 62.77299999999965,
             "takenAt": 42.77299999999965,
@@ -11496,10 +11727,24 @@
             "team": "ahoy"
           },
           {
+            "availableFrom": 145.61099999999664,
+            "respawnAt": 165.61099999999664,
+            "takenAt": 145.61099999999664,
+            "takenBy": "ocoini",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 165.62099999999367,
             "respawnAt": 197.40099999999188,
             "takenAt": 177.40099999999188,
             "takenBy": "KreatoR",
+            "team": "BhB"
+          },
+          {
+            "availableFrom": 197.3859999999892,
+            "respawnAt": 217.3859999999892,
+            "takenAt": 197.3859999999892,
+            "takenBy": "rghst",
             "team": "BhB"
           },
           {
@@ -11508,6 +11753,13 @@
             "takenAt": 217.72999999998603,
             "takenBy": "sailorman",
             "team": "ahoy"
+          },
+          {
+            "availableFrom": 237.7229999999821,
+            "respawnAt": 257.7229999999821,
+            "takenAt": 237.7229999999821,
+            "takenBy": "ThundeR",
+            "team": "BhB"
           },
           {
             "availableFrom": 257.71899999998107,
@@ -11522,6 +11774,13 @@
             "takenAt": 284.74599999998475,
             "takenBy": "ThundeR",
             "team": "BhB"
+          },
+          {
+            "availableFrom": 304.74399999998906,
+            "respawnAt": 324.74399999998906,
+            "takenAt": 304.74399999998906,
+            "takenBy": "[nW].Veggie",
+            "team": "ahoy"
           },
           {
             "availableFrom": 324.75899999999325,
@@ -11559,10 +11818,24 @@
             "team": "BhB"
           },
           {
+            "availableFrom": 433.1849999999938,
+            "respawnAt": 453.1849999999938,
+            "takenAt": 433.1849999999938,
+            "takenBy": "ocoini",
+            "team": "ahoy"
+          },
+          {
             "availableFrom": 453.20199999999386,
             "respawnAt": 474.8379999999941,
             "takenAt": 454.8379999999941,
             "takenBy": "ThundeR",
+            "team": "BhB"
+          },
+          {
+            "availableFrom": 474.8279999999945,
+            "respawnAt": 494.8279999999945,
+            "takenAt": 474.8279999999945,
+            "takenBy": "rghst",
             "team": "BhB"
           },
           {
@@ -11664,6 +11937,13 @@
             "team": "ahoy"
           },
           {
+            "availableFrom": 813.653999999878,
+            "respawnAt": 833.653999999878,
+            "takenAt": 813.653999999878,
+            "takenBy": "rghst",
+            "team": "BhB"
+          },
+          {
             "availableFrom": 833.6309999998688,
             "respawnAt": 854.8439999998681,
             "takenAt": 834.8439999998681,
@@ -11697,6 +11977,13 @@
             "takenAt": 925.4299999998307,
             "takenBy": "nexus",
             "team": "ahoy"
+          },
+          {
+            "availableFrom": 945.4199999998212,
+            "respawnAt": 965.4199999998212,
+            "takenAt": 945.4199999998212,
+            "takenBy": "rghst",
+            "team": "BhB"
           },
           {
             "availableFrom": 965.4219999998097,
@@ -11753,6 +12040,13 @@
             "takenAt": 1138.1090000000174,
             "takenBy": "Doomie",
             "team": "BhB"
+          },
+          {
+            "availableFrom": 1158.1210000000565,
+            "respawnAt": 1178.1210000000565,
+            "takenAt": 1158.1210000000565,
+            "takenBy": "nexus",
+            "team": "ahoy"
           },
           {
             "availableFrom": 1178.1090000000947,

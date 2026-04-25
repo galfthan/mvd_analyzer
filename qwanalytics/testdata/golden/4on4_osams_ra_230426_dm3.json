@@ -6485,6 +6485,13 @@
             "team": "oSaMs"
           },
           {
+            "availableFrom": 918.0640000003667,
+            "respawnAt": 953.1280000003868,
+            "takenAt": 918.0640000003667,
+            "takenBy": "marksuzu",
+            "team": "oSaMs"
+          },
+          {
             "availableFrom": 954.0640000004144,
             "respawnAt": 990.3110000004284,
             "takenAt": 965.3110000004284,
@@ -6708,6 +6715,13 @@
             "takenAt": 7.315000000000007,
             "takenBy": "marksuzu",
             "team": "oSaMs"
+          },
+          {
+            "availableFrom": 83.30700000000344,
+            "respawnAt": 113.29400000000419,
+            "takenAt": 83.30700000000344,
+            "takenBy": "sCorp",
+            "team": ".ra."
           },
           {
             "availableFrom": 114.29900000000592,
@@ -8333,6 +8347,20 @@
             "team": "oSaMs"
           },
           {
+            "availableFrom": 248.15900000003262,
+            "respawnAt": 308.1590000000326,
+            "takenAt": 248.15900000003262,
+            "takenBy": "apa",
+            "team": "oSaMs"
+          },
+          {
+            "availableFrom": 308.1600000000041,
+            "respawnAt": 368.1600000000041,
+            "takenAt": 308.1600000000041,
+            "takenBy": "apa",
+            "team": "oSaMs"
+          },
+          {
             "availableFrom": 368.14999999997997,
             "respawnAt": 429.1129999999798,
             "takenAt": 369.1129999999798,
@@ -8368,11 +8396,25 @@
             "team": "oSaMs"
           },
           {
+            "availableFrom": 669.7620000000973,
+            "respawnAt": 729.7620000000973,
+            "takenAt": 669.7620000000973,
+            "takenBy": "lakso",
+            "team": "oSaMs"
+          },
+          {
             "availableFrom": 729.7480000001572,
             "respawnAt": 789.7630000001571,
             "takenAt": 729.7630000001571,
             "takenBy": "lakso",
             "team": "oSaMs"
+          },
+          {
+            "availableFrom": 789.7490000002124,
+            "respawnAt": 849.7490000002124,
+            "takenAt": 789.7490000002124,
+            "takenBy": "[cmd] witka",
+            "team": ".ra."
           },
           {
             "availableFrom": 849.7450000002852,
@@ -8442,11 +8484,25 @@
             "team": "oSaMs"
           },
           {
+            "availableFrom": 55.35800000000075,
+            "respawnAt": 75.35800000000074,
+            "takenAt": 55.35800000000075,
+            "takenBy": "doberman",
+            "team": ".ra."
+          },
+          {
             "availableFrom": 75.36100000000268,
             "respawnAt": 106.2780000000037,
             "takenAt": 86.2780000000037,
             "takenBy": "marksuzu",
             "team": "oSaMs"
+          },
+          {
+            "availableFrom": 106.27800000000524,
+            "respawnAt": 126.27800000000525,
+            "takenAt": 106.27800000000524,
+            "takenBy": "[cmd] witka",
+            "team": ".ra."
           },
           {
             "availableFrom": 126.26800000000756,
@@ -8624,6 +8680,13 @@
             "team": "oSaMs"
           },
           {
+            "availableFrom": 787.0460000002093,
+            "respawnAt": 807.0460000002093,
+            "takenAt": 787.0460000002093,
+            "takenBy": "apa",
+            "team": "oSaMs"
+          },
+          {
             "availableFrom": 807.0480000002328,
             "respawnAt": 827.0610000002329,
             "takenAt": 807.0610000002329,
@@ -8789,6 +8852,13 @@
             "team": "oSaMs"
           },
           {
+            "availableFrom": 30.148000000000465,
+            "respawnAt": 60.14800000000046,
+            "takenAt": 30.148000000000465,
+            "takenBy": "marksuzu",
+            "team": "oSaMs"
+          },
+          {
             "availableFrom": 60.14800000000134,
             "respawnAt": 96.43600000000198,
             "takenAt": 66.43600000000198,
@@ -8822,6 +8892,20 @@
             "takenAt": 188.53500000002222,
             "takenBy": "[cmd] witka",
             "team": ".ra."
+          },
+          {
+            "availableFrom": 218.54000000002935,
+            "respawnAt": 248.54000000002935,
+            "takenAt": 218.54000000002935,
+            "takenBy": "nlk",
+            "team": ".ra."
+          },
+          {
+            "availableFrom": 248.5440000000325,
+            "respawnAt": 278.5440000000325,
+            "takenAt": 248.5440000000325,
+            "takenBy": "lakso",
+            "team": "oSaMs"
           },
           {
             "availableFrom": 278.53100000001905,
@@ -8873,6 +8957,13 @@
             "team": ".ra."
           },
           {
+            "availableFrom": 501.42799999993304,
+            "respawnAt": 531.4279999999331,
+            "takenAt": 501.42799999993304,
+            "takenBy": "nlk",
+            "team": ".ra."
+          },
+          {
             "availableFrom": 531.4199999999535,
             "respawnAt": 564.3159999999559,
             "takenAt": 534.3159999999559,
@@ -8880,10 +8971,24 @@
             "team": ".ra."
           },
           {
+            "availableFrom": 564.3189999999845,
+            "respawnAt": 594.3189999999845,
+            "takenAt": 564.3189999999845,
+            "takenBy": "lakso",
+            "team": "oSaMs"
+          },
+          {
             "availableFrom": 594.3050000000145,
             "respawnAt": 626.1350000000165,
             "takenAt": 596.1350000000165,
             "takenBy": "apa",
+            "team": "oSaMs"
+          },
+          {
+            "availableFrom": 626.1350000000505,
+            "respawnAt": 656.1350000000505,
+            "takenAt": 626.1350000000505,
+            "takenBy": "lakso",
             "team": "oSaMs"
           },
           {
@@ -8927,6 +9032,13 @@
             "takenAt": 816.4780000002446,
             "takenBy": "[cmd] witka",
             "team": ".ra."
+          },
+          {
+            "availableFrom": 846.4850000002814,
+            "respawnAt": 876.4850000002814,
+            "takenAt": 846.4850000002814,
+            "takenBy": "clox",
+            "team": "oSaMs"
           },
           {
             "availableFrom": 876.4780000003162,
@@ -10627,6 +10739,13 @@
             "team": "oSaMs"
           },
           {
+            "availableFrom": 364.0519999999917,
+            "respawnAt": 394.0519999999917,
+            "takenAt": 364.0519999999917,
+            "takenBy": "[cmd] witka",
+            "team": ".ra."
+          },
+          {
             "availableFrom": 394.04299999997073,
             "respawnAt": 434.611999999967,
             "takenAt": 404.611999999967,
@@ -11433,6 +11552,13 @@
             "team": ".ra."
           },
           {
+            "availableFrom": 239.75200000003312,
+            "respawnAt": 259.7520000000331,
+            "takenAt": 239.75200000003312,
+            "takenBy": "[cmd] witka",
+            "team": ".ra."
+          },
+          {
             "availableFrom": 259.7480000000276,
             "respawnAt": 280.7420000000274,
             "takenAt": 260.7420000000274,
@@ -11587,6 +11713,13 @@
             "team": ".ra."
           },
           {
+            "availableFrom": 802.3990000002273,
+            "respawnAt": 822.3990000002273,
+            "takenAt": 802.3990000002273,
+            "takenBy": "[cmd] witka",
+            "team": ".ra."
+          },
+          {
             "availableFrom": 822.3950000002515,
             "respawnAt": 843.4280000002526,
             "takenAt": 823.4280000002526,
@@ -11697,6 +11830,13 @@
             "takenAt": 1153.5610000000804,
             "takenBy": "clox",
             "team": "oSaMs"
+          },
+          {
+            "availableFrom": 1173.5430000000226,
+            "respawnAt": 1193.5430000000226,
+            "takenAt": 1173.5430000000226,
+            "takenBy": "nlk",
+            "team": ".ra."
           },
           {
             "availableFrom": 1193.5449999999637

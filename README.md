@@ -273,10 +273,14 @@ diff -r /tmp/before /tmp/after
 
 3. **Same-tick item insta-regrab**: If an item respawns and is picked up
    again within a single server tick (camped spawn), the wire never
-   emits a "visible" transition for that cycle, so the phase timeline
-   spans the whole contested window rather than counting each touch.
-   This matches "when is the item practically up?" but undercounts per-
-   touch stats. See [qwdemo/MVD_FORMAT.md#item-tracking-via-entity-state](qwdemo/MVD_FORMAT.md#item-tracking-via-entity-state).
+   emits a "visible" transition for that cycle. The items analyzer
+   recovers these via two synthesis paths (KTX `//ktx took` hint-driven
+   for armors/MH/weapons/powerups; stat-delta + position for small
+   healths and ammo), so per-touch counts now match KTX's authoritative
+   `tooks` on 8 of 9 corpus demos. The remaining residual is bounded
+   to small healths in rare edge cases (damage-in-same-frame). See
+   [qwdemo/MVD_FORMAT.md#item-tracking-via-entity-state](qwdemo/MVD_FORMAT.md#item-tracking-via-entity-state)
+   and [qwanalytics/analyzer/items.md](qwanalytics/analyzer/items.md#insta-regrab-synthesis).
 
 ## Reference sources
 

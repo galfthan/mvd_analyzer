@@ -5505,6 +5505,13 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 543.9199999998912,
+            "respawnAt": 563.9199999998912,
+            "takenAt": 543.9199999998912,
+            "takenBy": "DobeZz",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 563.9039999999454,
             "respawnAt": 604.6079999999749,
             "takenAt": 584.6079999999749,
@@ -7299,6 +7306,13 @@
             "team": "'\u003e\u003c\u003e"
           },
           {
+            "availableFrom": 76.1450000000011,
+            "respawnAt": 96.1450000000011,
+            "takenAt": 76.1450000000011,
+            "takenBy": "paniagua",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 96.13700000000534,
             "respawnAt": 118.8490000000057,
             "takenAt": 98.8490000000057,
@@ -7446,6 +7460,13 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 839.7140000003071,
+            "respawnAt": 859.7140000003071,
+            "takenAt": 839.7140000003071,
+            "takenBy": "biggz",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 859.711000000351,
             "respawnAt": 902.932000000383,
             "takenAt": 882.932000000383,
@@ -7512,8 +7533,8 @@
             "availableFrom": 1143.832000000106,
             "respawnAt": 1166.0480000000985,
             "takenAt": 1146.0480000000985,
-            "takenBy": "gore",
-            "team": "'\u003e\u003c\u003e"
+            "takenBy": "nexus",
+            "team": "'tbg"
           },
           {
             "availableFrom": 1166.046000000043,
@@ -7727,6 +7748,13 @@
             "respawnAt": 1006.1990000004927,
             "takenAt": 986.1990000004927,
             "takenBy": "anni",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 1006.1990000004927,
+            "respawnAt": 1026.1990000004928,
+            "takenAt": 1006.1990000004927,
+            "takenBy": "gore",
             "team": "'\u003e\u003c\u003e"
           },
           {
@@ -9289,6 +9317,13 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 602.9990000000034,
+            "respawnAt": 902.9990000000034,
+            "takenAt": 602.9990000000034,
+            "takenBy": "paniagua",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 902.9890000004092,
             "respawnAt": 1204.3040000004105,
             "takenAt": 904.3040000004103,
@@ -9328,6 +9363,13 @@
             "team": "'\u003e\u003c\u003e"
           },
           {
+            "availableFrom": 183.12500000002348,
+            "respawnAt": 243.12500000002348,
+            "takenAt": 183.12500000002348,
+            "takenBy": "DobeZz",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 243.11700000003748,
             "respawnAt": 303.1310000000375,
             "takenAt": 243.1310000000375,
@@ -9339,6 +9381,13 @@
             "respawnAt": 365.4439999999959,
             "takenAt": 305.4439999999959,
             "takenBy": "ocoini",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 365.4439999999572,
+            "respawnAt": 425.4439999999572,
+            "takenAt": 365.4439999999572,
+            "takenBy": "DobeZz",
             "team": "'\u003e\u003c\u003e"
           },
           {
@@ -9398,9 +9447,30 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 910.1940000004153,
+            "respawnAt": 970.1940000004153,
+            "takenAt": 910.1940000004153,
+            "takenBy": "paniagua",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 970.1920000004786,
             "respawnAt": 1030.361000000479,
             "takenAt": 970.3610000004787,
+            "takenBy": "nexus",
+            "team": "'tbg"
+          },
+          {
+            "availableFrom": 1030.368000000465,
+            "respawnAt": 1090.368000000465,
+            "takenAt": 1030.368000000465,
+            "takenBy": "ocoini",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 1090.3690000002637,
+            "respawnAt": 1150.3690000002637,
+            "takenAt": 1090.3690000002637,
             "takenBy": "nexus",
             "team": "'tbg"
           },
@@ -9430,6 +9500,13 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 25.611000000000473,
+            "respawnAt": 45.61100000000047,
+            "takenAt": 25.611000000000473,
+            "takenBy": "paniagua",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 45.6090000000009,
             "respawnAt": 74.47700000000101,
             "takenAt": 54.477000000001006,
@@ -9437,10 +9514,24 @@
             "team": "'\u003e\u003c\u003e"
           },
           {
+            "availableFrom": 74.46500000000269,
+            "respawnAt": 94.46500000000269,
+            "takenAt": 74.46500000000269,
+            "takenBy": "anni",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 94.4600000000051,
             "respawnAt": 114.4750000000051,
             "takenAt": 94.4750000000051,
             "takenBy": "ocoini",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 114.46000000000778,
+            "respawnAt": 134.4600000000078,
+            "takenAt": 114.46000000000778,
+            "takenBy": "DobeZz",
             "team": "'\u003e\u003c\u003e"
           },
           {
@@ -9528,6 +9619,20 @@
             "team": "'\u003e\u003c\u003e"
           },
           {
+            "availableFrom": 437.50799999990994,
+            "respawnAt": 457.50799999990994,
+            "takenAt": 437.50799999990994,
+            "takenBy": "ocoini",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 457.502999999894,
+            "respawnAt": 477.502999999894,
+            "takenAt": 457.502999999894,
+            "takenBy": "anni",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 477.49999999987836,
             "respawnAt": 520.3599999998613,
             "takenAt": 500.3599999998614,
@@ -9602,6 +9707,20 @@
             "respawnAt": 747.7250000001945,
             "takenAt": 727.7250000001945,
             "takenBy": "paniagua",
+            "team": "'tbg"
+          },
+          {
+            "availableFrom": 747.7260000002192,
+            "respawnAt": 767.7260000002192,
+            "takenAt": 747.7260000002192,
+            "takenBy": "nexus",
+            "team": "'tbg"
+          },
+          {
+            "availableFrom": 767.7340000002447,
+            "respawnAt": 787.7340000002447,
+            "takenAt": 767.7340000002447,
+            "takenBy": "biggz",
             "team": "'tbg"
           },
           {
@@ -9717,6 +9836,13 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 1164.4770000000465,
+            "respawnAt": 1184.4770000000465,
+            "takenAt": 1164.4770000000465,
+            "takenBy": "ocoini",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 1184.4759999999965,
             "respawnAt": 1204.8529999999953,
             "takenAt": 1184.8529999999953,
@@ -9788,11 +9914,25 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 61.44700000000139,
+            "respawnAt": 91.4470000000014,
+            "takenAt": 61.44700000000139,
+            "takenBy": "nexus",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 91.45200000000473,
             "respawnAt": 125.88200000000529,
             "takenAt": 95.88200000000529,
             "takenBy": "DobeZz",
             "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 125.88100000000978,
+            "respawnAt": 155.88100000000978,
+            "takenAt": 125.88100000000978,
+            "takenBy": "biggz",
+            "team": "'tbg"
           },
           {
             "availableFrom": 155.87000000001655,
@@ -9809,6 +9949,13 @@
             "team": "'\u003e\u003c\u003e"
           },
           {
+            "availableFrom": 218.81800000003136,
+            "respawnAt": 248.8180000000314,
+            "takenAt": 218.81800000003136,
+            "takenBy": "ocoini",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 248.8050000000367,
             "respawnAt": 278.82000000003666,
             "takenAt": 248.82000000003669,
@@ -9816,11 +9963,25 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 278.80300000001506,
+            "respawnAt": 308.80300000001506,
+            "takenAt": 278.80300000001506,
+            "takenBy": "DobeZz",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 308.80099999999425,
             "respawnAt": 338.8139999999942,
             "takenAt": 308.8139999999942,
             "takenBy": "DobeZz",
             "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 338.8019999999732,
+            "respawnAt": 368.8019999999732,
+            "takenAt": 338.8019999999732,
+            "takenBy": "biggz",
+            "team": "'tbg"
           },
           {
             "availableFrom": 368.8039999999557,
@@ -9851,6 +10012,13 @@
             "team": "'\u003e\u003c\u003e"
           },
           {
+            "availableFrom": 495.6689999998645,
+            "respawnAt": 525.6689999998645,
+            "takenAt": 495.6689999998645,
+            "takenBy": "ocoini",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 525.6579999998934,
             "respawnAt": 557.3359999998955,
             "takenAt": 527.3359999998955,
@@ -9863,6 +10031,13 @@
             "takenAt": 559.95999999994,
             "takenBy": ".N3ophyt3.",
             "team": "'tbg"
+          },
+          {
+            "availableFrom": 589.9469999999831,
+            "respawnAt": 619.9469999999831,
+            "takenAt": 589.9469999999831,
+            "takenBy": "ocoini",
+            "team": "'\u003e\u003c\u003e"
           },
           {
             "availableFrom": 619.9480000000304,
@@ -9956,6 +10131,20 @@
             "team": "'\u003e\u003c\u003e"
           },
           {
+            "availableFrom": 1026.4860000004778,
+            "respawnAt": 1056.4860000004778,
+            "takenAt": 1026.4860000004778,
+            "takenBy": "biggz",
+            "team": "'tbg"
+          },
+          {
+            "availableFrom": 1056.4780000003784,
+            "respawnAt": 1086.4780000003784,
+            "takenAt": 1056.4780000003784,
+            "takenBy": "gore",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 1086.4720000002778,
             "respawnAt": 1121.3170000002597,
             "takenAt": 1091.3170000002597,
@@ -9968,6 +10157,13 @@
             "takenAt": 1122.3600000001695,
             "takenBy": "paniagua",
             "team": "'tbg"
+          },
+          {
+            "availableFrom": 1152.3650000000785,
+            "respawnAt": 1182.3650000000785,
+            "takenAt": 1152.3650000000785,
+            "takenBy": "anni",
+            "team": "'\u003e\u003c\u003e"
           },
           {
             "availableFrom": 1182.3600000000026,
@@ -9993,6 +10189,13 @@
             "takenAt": 1.8769999999999865,
             "takenBy": ".N3ophyt3.",
             "team": "'tbg"
+          },
+          {
+            "availableFrom": 31.86800000000067,
+            "respawnAt": 61.86800000000067,
+            "takenAt": 31.86800000000067,
+            "takenBy": "ocoini",
+            "team": "'\u003e\u003c\u003e"
           },
           {
             "availableFrom": 61.86300000000141,
@@ -10065,6 +10268,13 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 374.59899999995247,
+            "respawnAt": 404.59899999995247,
+            "takenAt": 374.59899999995247,
+            "takenBy": "paniagua",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 404.5969999999342,
             "respawnAt": 434.6099999999342,
             "takenAt": 404.6099999999342,
@@ -10104,6 +10314,13 @@
             "respawnAt": 598.6099999999519,
             "takenAt": 568.6099999999519,
             "takenBy": "paniagua",
+            "team": "'tbg"
+          },
+          {
+            "availableFrom": 598.5959999999961,
+            "respawnAt": 628.5959999999961,
+            "takenAt": 598.5959999999961,
+            "takenBy": "nexus",
             "team": "'tbg"
           },
           {
@@ -10149,6 +10366,20 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 822.0900000003094,
+            "respawnAt": 852.0900000003094,
+            "takenAt": 822.0900000003094,
+            "takenBy": "paniagua",
+            "team": "'tbg"
+          },
+          {
+            "availableFrom": 852.0940000003405,
+            "respawnAt": 882.0940000003405,
+            "takenAt": 852.0940000003405,
+            "takenBy": ".N3ophyt3.",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 882.0940000003818,
             "respawnAt": 914.1690000003848,
             "takenAt": 884.1690000003848,
@@ -10184,6 +10415,13 @@
             "team": "'\u003e\u003c\u003e"
           },
           {
+            "availableFrom": 1055.7930000003805,
+            "respawnAt": 1085.7930000003805,
+            "takenAt": 1055.7930000003805,
+            "takenBy": "paniagua",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 1085.78500000028,
             "respawnAt": 1115.9270000002796,
             "takenAt": 1085.9270000002796,
@@ -10196,6 +10434,13 @@
             "takenAt": 1116.0680000001878,
             "takenBy": "ocoini",
             "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 1146.0480000000985,
+            "respawnAt": 1176.0480000000985,
+            "takenAt": 1146.0480000000985,
+            "takenBy": "paniagua",
+            "team": "'tbg"
           },
           {
             "availableFrom": 1176.0490000000175,
@@ -10307,6 +10552,13 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 474.8819999999041,
+            "respawnAt": 504.8819999999041,
+            "takenAt": 474.8819999999041,
+            "takenBy": "paniagua",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 504.8679999998642,
             "respawnAt": 547.4139999998821,
             "takenAt": 517.4139999998821,
@@ -10318,6 +10570,13 @@
             "respawnAt": 588.9109999999383,
             "takenAt": 558.9109999999383,
             "takenBy": "nexus",
+            "team": "'tbg"
+          },
+          {
+            "availableFrom": 588.9109999999383,
+            "respawnAt": 618.9109999999383,
+            "takenAt": 588.9109999999383,
+            "takenBy": "paniagua",
             "team": "'tbg"
           },
           {
@@ -12091,6 +12350,20 @@
             "team": "'\u003e\u003c\u003e"
           },
           {
+            "availableFrom": 24.162000000000468,
+            "respawnAt": 44.16200000000047,
+            "takenAt": 24.162000000000468,
+            "takenBy": "anni",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 44.158000000000875,
+            "respawnAt": 64.15800000000088,
+            "takenAt": 44.158000000000875,
+            "takenBy": "gore",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 64.14900000000162,
             "respawnAt": 85.0250000000017,
             "takenAt": 65.0250000000017,
@@ -12270,6 +12543,13 @@
             "respawnAt": 638.6980000000285,
             "takenAt": 618.6980000000285,
             "takenBy": "anni",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 638.6870000000589,
+            "respawnAt": 658.6870000000589,
+            "takenAt": 638.6870000000589,
+            "takenBy": "ocoini",
             "team": "'\u003e\u003c\u003e"
           },
           {
@@ -12550,6 +12830,13 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 332.05599999997867,
+            "respawnAt": 352.05599999997867,
+            "takenAt": 332.05599999997867,
+            "takenBy": ".N3ophyt3.",
+            "team": "'tbg"
+          },
+          {
             "availableFrom": 352.05599999996457,
             "respawnAt": 375.4069999999627,
             "takenAt": 355.4069999999627,
@@ -12562,6 +12849,13 @@
             "takenAt": 379.9339999999502,
             "takenBy": "gore",
             "team": "'\u003e\u003c\u003e"
+          },
+          {
+            "availableFrom": 399.93399999993767,
+            "respawnAt": 419.93399999993767,
+            "takenAt": 399.93399999993767,
+            "takenBy": "nexus",
+            "team": "'tbg"
           },
           {
             "availableFrom": 419.9269999999237,
@@ -12662,6 +12956,13 @@
             "team": "'tbg"
           },
           {
+            "availableFrom": 721.9790000001863,
+            "respawnAt": 741.9790000001863,
+            "takenAt": 721.9790000001863,
+            "takenBy": "anni",
+            "team": "'\u003e\u003c\u003e"
+          },
+          {
             "availableFrom": 741.966000000213,
             "respawnAt": 765.5310000002167,
             "takenAt": 745.5310000002167,
@@ -12702,6 +13003,13 @@
             "takenAt": 888.0130000003898,
             "takenBy": "paniagua",
             "team": "'tbg"
+          },
+          {
+            "availableFrom": 908.0230000004137,
+            "respawnAt": 928.0230000004137,
+            "takenAt": 908.0230000004137,
+            "takenBy": "gore",
+            "team": "'\u003e\u003c\u003e"
           },
           {
             "availableFrom": 928.0260000004359,

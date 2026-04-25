@@ -103,6 +103,71 @@ disagreement.
    via `StatUpdateEvent` until the crossing, then stamps
    `RespawnAt = max(pickup+5, crossing) + 20`.
 
+## Insta-regrab synthesis
+
+When a player camps an item spawn, the engine can run "respawn → touch
+→ remove" in a single server frame, leaving the wire's end-of-frame
+delta showing no transition at all (see *insta-regrab invisibility* in
+[`qwdemo/MVD_FORMAT.md`](../../qwdemo/MVD_FORMAT.md)). The entity-state
+trigger never fires, so without recovery items.go would silently miss
+those pickups.
+
+The analyser closes that gap with two complementary synthesis paths:
+
+**Hint-driven (preferred when available).** Every `//ktx took`
+directive identifies the picker's slot directly. When a hint arrives
+for an entity that's already in our "taken" phase (no wire respawn
+observed since the last close), it can only be an insta-regrab —
+synthesise the pickup immediately, using the slot from the hint as
+authoritative attribution (`attributionSource = "hint"`). Covers
+armors, MH, weapons, and powerups on KTX servers. For MH the
+synthesis additionally transfers heldMHs ownership from the previous
+holder to the new picker so the rot tracker stamps `RespawnAt` on the
+right phase.
+
+**Stat-delta-driven (fallback for non-hinted kinds).** For items KTX
+doesn't hint (small healths, ammo boxes), and as a backup if a hint
+is somehow missing:
+
+1. After every `Taken=true(ent, T)` (real or synthetic), schedule a
+   prediction at `T + respawnSec[kind]`.
+2. Once the predicted moment plus a 0.5 s settle window has passed,
+   look for a unique slot whose stat-delta evidence (a STAT_ARMOR
+   jump for armor, IT_QUAD bit transition for quad, ammo tick-up,
+   etc.) and historical position support a pickup at the predicted
+   instant.
+3. If found, record a synthetic phase
+   (`AvailableFrom=predicted, TakenAt=predicted`) with the unique
+   slot and `attributionSource = "synthetic"`; schedule the next
+   prediction.
+
+The stat-delta classifier accepts any positive `STAT_HEALTH` delta in
+[1, 25] as h15-or-h25 evidence (resolved by entity kind at synthesis
+time). KTX's `T_Heal` caps health at `max_health` (100), so a pickup
+at 80 HP gives only a `+20` delta even though `tooks` increments —
+exact matching on `+15` / `+25` would miss every partial-cap heal.
+MH is detected via the IT_SUPERHEALTH bit transition, not the `+100`
+delta, so the cap rule doesn't apply.
+
+The chain-forward stat-delta path stays disabled for MH because its
+predicted respawn depends on rot timing, which is already tracked
+separately. Hint-driven synthesis applies to MH unchanged.
+
+Both paths terminate cleanly: a wire `Taken=false` cancels any pending
+schedule (the entity genuinely respawned without being re-grabbed),
+and the chain has a hard cap of 60 entries per entity.
+
+The qwanalytics pickup-invariant test (`pickup_invariant_test.go`)
+compares per-player phase counts against KTX's authoritative
+`demoInfo.players[*].items[*].took` numbers. With both synthesis
+paths enabled the hub corpus has 8 of 9 demos at exact match across
+every hinted kind; the 9th has one h15 pickup attributed to the
+wrong player (a slot flip on ambiguous stat-delta evidence, net zero
+in total count).
+
+Synthesis can be disabled per analyser via `SetSyntheticPickups(false)`
+when wire-only behaviour is needed for comparison.
+
 ## Display name resolution
 
 Picker names are resolved during `Finalize` via `co.SlotName(slot)`

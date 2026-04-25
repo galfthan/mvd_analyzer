@@ -5416,6 +5416,13 @@
             "team": "pys"
           },
           {
+            "availableFrom": 544.3549999999782,
+            "respawnAt": 564.3549999999782,
+            "takenAt": 544.3549999999782,
+            "takenBy": "wd.cao",
+            "team": "wd"
+          },
+          {
             "availableFrom": 564.3470000000073,
             "respawnAt": 606.2570000000223,
             "takenAt": 586.2570000000223,
@@ -7131,10 +7138,24 @@
             "team": "wd"
           },
           {
+            "availableFrom": 369.03799999999103,
+            "respawnAt": 429.03799999999103,
+            "takenAt": 369.03799999999103,
+            "takenBy": "wd.char",
+            "team": "wd"
+          },
+          {
             "availableFrom": 429.050999999982,
             "respawnAt": 490.3749999999814,
             "takenAt": 430.3749999999814,
             "takenBy": "wd.char",
+            "team": "wd"
+          },
+          {
+            "availableFrom": 490.35899999996235,
+            "respawnAt": 550.3589999999624,
+            "takenAt": 490.35899999996235,
+            "takenBy": "wd.cao",
             "team": "wd"
           },
           {
