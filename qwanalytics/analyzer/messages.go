@@ -384,7 +384,7 @@ func (a *MessagesAnalyzer) getPlayerTeam(name string) string {
 	return ""
 }
 
-func (a *MessagesAnalyzer) Finalize() (interface{}, error) {
+func (a *MessagesAnalyzer) Finalize(result *Result) error {
 	// Backfill missing team attributions using DemoInfo. Some demos have a
 	// userinfo "name" that doesn't match the player's actual displayed
 	// netname (KTX auth-override case): the chat parser pulls the displayed
@@ -405,7 +405,8 @@ func (a *MessagesAnalyzer) Finalize() (interface{}, error) {
 		}
 	}
 
-	return &MessagesResult{
+	result.Messages = &MessagesResult{
 		Events: a.events,
-	}, nil
+	}
+	return nil
 }

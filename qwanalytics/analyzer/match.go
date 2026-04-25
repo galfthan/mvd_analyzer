@@ -45,7 +45,7 @@ func (a *MatchAnalyzer) OnEvent(event events.Event) error {
 	return nil
 }
 
-func (a *MatchAnalyzer) Finalize() (interface{}, error) {
+func (a *MatchAnalyzer) Finalize(result *Result) error {
 	// Calculate actual match duration
 	matchDuration := a.duration
 	if a.timing.Started && a.timing.StartTime > 0 {
@@ -57,7 +57,7 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 		}
 	}
 
-	result := &MatchResult{
+	mr := &MatchResult{
 		Duration:  matchDuration,
 		StartTime: a.timing.StartTime,
 		EndTime:   a.timing.EndTime,
@@ -65,8 +65,8 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 
 	// Get map name from server data
 	if a.ctx.ServerData != nil {
-		result.Map = extractMapName(a.ctx.ServerData.LevelName)
-		result.GameDir = a.ctx.ServerData.GameDir
+		mr.Map = extractMapName(a.ctx.ServerData.LevelName)
+		mr.GameDir = a.ctx.ServerData.GameDir
 	}
 
 	// Collect team stats
@@ -110,7 +110,7 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 			continue
 		}
 
-		result.Players = append(result.Players, stat)
+		mr.Players = append(mr.Players, stat)
 
 		// Aggregate team frags
 		if p.Team != "" {
@@ -128,13 +128,17 @@ func (a *MatchAnalyzer) Finalize() (interface{}, error) {
 	}
 	sort.Strings(teamNames)
 	for _, team := range teamNames {
-		result.Teams = append(result.Teams, TeamStat{
+		mr.Teams = append(mr.Teams, TeamStat{
 			Name:  team,
 			Frags: teamFrags[team],
 		})
 	}
 
-	return result, nil
+	result.Match = mr
+	if mr.EndTime > 0 {
+		result.Duration = mr.EndTime
+	}
+	return nil
 }
 
 // isSpectatorTeam returns true if the team name indicates a spectator

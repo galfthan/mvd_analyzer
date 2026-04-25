@@ -76,3 +76,12 @@ func (co *CoreOutputs) SlotName(slot int) string {
 type CoreConsumer interface {
 	UseCoreOutputs(co *CoreOutputs)
 }
+
+// CoreProducer is the optional interface for analysers that contribute
+// fields to CoreOutputs after their own Finalize runs. The registry
+// invokes PopulateCore on every implementer immediately after the
+// analyser's Finalize, so any analyser registered later in the slice
+// (Core or Derived) sees the produced fields.
+type CoreProducer interface {
+	PopulateCore(co *CoreOutputs)
+}

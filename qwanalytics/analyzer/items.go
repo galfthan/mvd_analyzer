@@ -363,9 +363,9 @@ func (a *ItemAnalyzer) attributePickup(itemPos [3]float32, _ float64) (int, stri
 // position. Loc labels are attached best-effort from the .loc
 // corpus — absent loc file yields empty Loc strings; the item list
 // itself is always populated when the demo has any item events.
-func (a *ItemAnalyzer) Finalize() (interface{}, error) {
+func (a *ItemAnalyzer) Finalize(result *Result) error {
 	if len(a.items) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	// Best-effort loc lookup — does NOT affect whether items appear.
@@ -425,5 +425,6 @@ func (a *ItemAnalyzer) Finalize() (interface{}, error) {
 		return out[i].Name < out[j].Name
 	})
 
-	return &ItemsResult{Items: out}, nil
+	result.Items = &ItemsResult{Items: out}
+	return nil
 }

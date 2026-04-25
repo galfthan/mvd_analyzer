@@ -123,76 +123,15 @@ func (r *Registry) analyzeSource(source events.Source, filename string, currentT
 			cc.UseCoreOutputs(co)
 		}
 
-		output, err := a.Finalize()
-		if err != nil {
+		if err := a.Finalize(result); err != nil {
 			result.Errors = append(result.Errors, err.Error())
 			continue
 		}
 
-		switch a.Name() {
-		case "match":
-			if m, ok := output.(*MatchResult); ok {
-				result.Match = m
-				if m.EndTime > 0 {
-					result.Duration = m.EndTime
-				}
-			}
-		case "frag":
-			if f, ok := output.(*FragResult); ok {
-				result.Frags = f
-				co.FragEntries = f.Frags
-			}
-		case "demoinfo":
-			if di, ok := output.(*DemoInfoResult); ok {
-				result.DemoInfo = di
-				co.DemoInfo = di
-				co.Names = NewNameTable(di)
-				// Build the canonical per-slot view consumers read in
-				// their Finalize. Names are demoinfo-resolved when the
-				// slot has a match (via login or name join); otherwise
-				// they fall back to the userinfo name from
-				// ctx.Players[slot]. ctx.Players itself is no longer
-				// mutated post-finalize — it always holds the on-the-
-				// wire userinfo values.
-				resolved := ctx.ResolveSlotDemoInfo()
-				slots := make(map[int]SlotInfo, len(ctx.Players))
-				for slot := 0; slot < len(ctx.Players); slot++ {
-					p := ctx.Players[slot]
-					if p == nil {
-						continue
-					}
-					si := SlotInfo{Name: p.Name, Team: p.Team}
-					if r, ok := resolved[slot]; ok && r.Name != "" {
-						si.Name = r.Name
-					}
-					slots[slot] = si
-				}
-				co.Slots = slots
-			}
-		case "messages":
-			if m, ok := output.(*MessagesResult); ok {
-				result.Messages = m
-			}
-		case "timelineAnalysis":
-			if ta, ok := output.(*TimelineAnalysisResult); ok {
-				result.TimelineAnalysis = ta
-			}
-		case "metadata":
-			if m, ok := output.(*MetadataResult); ok {
-				result.Metadata = m
-			}
-		case "items":
-			if it, ok := output.(*ItemsResult); ok {
-				result.Items = it
-			}
-		case "backpacks":
-			if b, ok := output.([]BackpackDrop); ok {
-				result.Backpacks = b
-			}
-		case "weaponPickups":
-			if p, ok := output.([]WeaponPickup); ok {
-				result.WeaponPickups = p
-			}
+		// Producers populate CoreOutputs after their own Finalize so
+		// downstream analysers see the new fields.
+		if cp, ok := a.(CoreProducer); ok {
+			cp.PopulateCore(co)
 		}
 	}
 

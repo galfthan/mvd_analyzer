@@ -11,7 +11,7 @@ import (
 // into the TimelineAnalysisResult shipped to the frontend. This is the
 // orchestration step — most of the heavy lifting is delegated to the
 // aggregate / powerup / streak / region helpers.
-func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
+func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// Do a final sample at the end
 	if len(a.buckets) > 0 {
 		lastBucket := a.buckets[len(a.buckets)-1]
@@ -217,7 +217,7 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		}
 	}
 
-	result := &TimelineAnalysisResult{
+	result.TimelineAnalysis = &TimelineAnalysisResult{
 		HighResDuration: a.bucketDuration,
 		MatchStartTime:  a.timing.StartTime,
 		HighResBuckets:  highResBuckets,
@@ -229,6 +229,5 @@ func (a *TimelineAnalyzer) Finalize() (interface{}, error) {
 		PlayerUserIDs:   playerUserIDsByName,
 		RegionControl:   regionControl,
 	}
-
-	return result, nil
+	return nil
 }

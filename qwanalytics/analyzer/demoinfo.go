@@ -56,19 +56,50 @@ func (a *DemoInfoAnalyzer) OnEvent(event events.Event) error {
 	return nil
 }
 
-func (a *DemoInfoAnalyzer) Finalize() (interface{}, error) {
+func (a *DemoInfoAnalyzer) Finalize(result *Result) error {
 	if len(a.blocks) == 0 {
-		return nil, nil
+		return nil
 	}
 
-	result := a.parseBlocks()
-
-	// Store in context for other analyzers
-	if result != nil {
-		a.ctx.DemoInfo = result
+	parsed := a.parseBlocks()
+	if parsed != nil {
+		// ctx.DemoInfo is still consulted by Context.ResolveSlotDemoInfo
+		// (used inside PopulateCore below), so it stays in sync with
+		// the result field.
+		a.ctx.DemoInfo = parsed
+		result.DemoInfo = parsed
 	}
+	return nil
+}
 
-	return result, nil
+// PopulateCore builds the demoinfo-derived fields of CoreOutputs that
+// downstream analysers consume during their own Finalize:
+//   - DemoInfo and Names are direct projections of the parsed JSON.
+//   - Slots is the per-slot resolved view (display name preferred,
+//     userinfo team) used everywhere ctx.Players[slot].Name was
+//     previously read post-patch.
+func (a *DemoInfoAnalyzer) PopulateCore(co *CoreOutputs) {
+	di := a.ctx.DemoInfo
+	if di == nil {
+		return
+	}
+	co.DemoInfo = di
+	co.Names = NewNameTable(di)
+
+	resolved := a.ctx.ResolveSlotDemoInfo()
+	slots := make(map[int]SlotInfo, len(a.ctx.Players))
+	for slot := 0; slot < len(a.ctx.Players); slot++ {
+		p := a.ctx.Players[slot]
+		if p == nil {
+			continue
+		}
+		si := SlotInfo{Name: p.Name, Team: p.Team}
+		if r, ok := resolved[slot]; ok && r.Name != "" {
+			si.Name = r.Name
+		}
+		slots[slot] = si
+	}
+	co.Slots = slots
 }
 
 func (a *DemoInfoAnalyzer) parseBlocks() *DemoInfoResult {

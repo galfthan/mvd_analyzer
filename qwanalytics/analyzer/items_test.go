@@ -35,8 +35,10 @@ func TestItemAnalyzer_RAPickupRespawn(t *testing.T) {
 	// Insta-regrab simulation: we still want RespawnAt=30, not 45.
 	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: false, Time: 45})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	if len(res.Items) != 1 {
 		t.Fatalf("want 1 item, got %d", len(res.Items))
 	}
@@ -71,8 +73,10 @@ func TestItemAnalyzer_QuadNominalRespawn(t *testing.T) {
 	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 43, Kind: "quad", Taken: true, Time: 16.692})
 	// No wire respawn yet — quad was insta-regrabbed each cycle.
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	p0 := res.Items[0].Phases[0]
 	got := p0.RespawnAt - p0.TakenAt
 	if got < 59.999 || got > 60.001 {
@@ -105,8 +109,10 @@ func TestItemAnalyzer_TwoMHs(t *testing.T) {
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 100, Time: 110})
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 100, Time: 90})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	if len(res.Items) != 2 {
 		t.Fatalf("want 2 items, got %d", len(res.Items))
 	}
@@ -142,8 +148,10 @@ func TestItemAnalyzer_MHRotTickdown(t *testing.T) {
 	// Final crossing.
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, Time: 110})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	p0 := res.Items[0].Phases[0]
 	if p0.RespawnAt != 130 {
 		t.Errorf("MH RespawnAt = %v, want 130 (crossing 110 + 20)", p0.RespawnAt)
@@ -163,8 +171,10 @@ func TestItemAnalyzer_MHHolderDiesMidRot(t *testing.T) {
 	// Holder dies at t=30 (way past the 5 s floor).
 	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	p0 := res.Items[0].Phases[0]
 	if p0.RespawnAt != 50 {
 		t.Errorf("MH RespawnAt = %v, want 50 (death 30 + 20)", p0.RespawnAt)
@@ -184,8 +194,10 @@ func TestItemAnalyzer_MHInstantDeathFloor(t *testing.T) {
 	// Rocket to the face at t=10.1, instant death.
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 0, Time: 10.1})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	p0 := res.Items[0].Phases[0]
 	if p0.RespawnAt != 35 { // pickup 10 + 5 (floor) + 20
 		t.Errorf("MH RespawnAt = %v, want 35 (pickup+5+20 from the 5 s floor)", p0.RespawnAt)
@@ -210,8 +222,10 @@ func TestItemAnalyzer_TwoMHsSameHolder(t *testing.T) {
 	// Rot across both; crossing at t=80.
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, Time: 80})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	if len(res.Items) != 2 {
 		t.Fatalf("want 2 MH items, got %d", len(res.Items))
 	}
@@ -228,8 +242,10 @@ func TestItemAnalyzer_TwoMHsSameHolder(t *testing.T) {
 func TestItemAnalyzer_UntouchedItemListed(t *testing.T) {
 	a, _ := newTestItemAnalyzer()
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "lg", Origin: [3]float32{0, 0, 0}})
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	if len(res.Items) != 1 {
 		t.Fatalf("want 1 item, got %d", len(res.Items))
 	}
@@ -250,8 +266,10 @@ func TestItemAnalyzer_PreMatchEventsIgnored(t *testing.T) {
 	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: true, Time: 2})
 	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: false, Time: 5})
 
-	out, _ := a.Finalize()
-	res := out.(*ItemsResult)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Items
+	res := out
 	if len(res.Items) != 1 {
 		t.Fatalf("want 1 item, got %d", len(res.Items))
 	}

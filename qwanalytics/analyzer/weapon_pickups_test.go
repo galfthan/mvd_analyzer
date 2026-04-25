@@ -33,8 +33,11 @@ func TestWeaponPickups_WorldRLWithKills(t *testing.T) {
 		{Time: 40, Killer: "ace", Victim: "w", Weapon: "rl"}, // post-death
 	}}
 
-	out, _ := a.Finalize()
-	ps, ok := out.([]WeaponPickup)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.WeaponPickups
+	ps := out
+	ok := ps != nil
 	if !ok || len(ps) != 1 {
 		t.Fatalf("out = %v, want 1 pickup", out)
 	}
@@ -68,8 +71,10 @@ func TestWeaponPickups_HadBeforeDoesNotClaimKills(t *testing.T) {
 		{Time: 6, Killer: "hoarder", Weapon: "rl"},
 	}}
 
-	out, _ := a.Finalize()
-	ps := out.([]WeaponPickup)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.WeaponPickups
+	ps := out
 	if !ps[0].HadBefore {
 		t.Errorf("HadBefore should be true — player had RL bit set before pickup")
 	}
@@ -88,8 +93,10 @@ func TestWeaponPickups_BackpackPickupAttribution(t *testing.T) {
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 32, PlayerEnt: 2, Time: 10})
 	_ = a.OnEvent(&events.BackpackPickupHintEvent{BackpackEnt: 200, PlayerEnt: 3, Time: 11})
 
-	out, _ := a.Finalize()
-	ps := out.([]WeaponPickup)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.WeaponPickups
+	ps := out
 	if len(ps) != 1 {
 		t.Fatalf("want 1 pickup, got %d", len(ps))
 	}
@@ -120,7 +127,9 @@ func TestWeaponPickups_NonWeaponHintsIgnored(t *testing.T) {
 	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 5})
 	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 2, PlayerEnt: 1, Time: 6})
 
-	out, _ := a.Finalize()
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.WeaponPickups
 	if out != nil {
 		t.Errorf("out = %v, want nil (no weapon pickups)", out)
 	}
@@ -142,8 +151,10 @@ func TestWeaponPickups_TeamkillsAndSuicidesExcluded(t *testing.T) {
 		{Time: 20, Killer: "p", Weapon: "rl"}, // the only real frag
 	}}
 
-	out, _ := a.Finalize()
-	ps := out.([]WeaponPickup)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.WeaponPickups
+	ps := out
 	if ps[0].Kills != 1 {
 		t.Errorf("Kills = %d, want 1 (suicide and TK excluded)", ps[0].Kills)
 	}
@@ -174,8 +185,10 @@ func TestWeaponPickups_RedundantSecondPickupGetsZero(t *testing.T) {
 		{Time: 28, Killer: "p", Weapon: "rl"},
 	}}
 
-	out, _ := a.Finalize()
-	ps := out.([]WeaponPickup)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.WeaponPickups
+	ps := out
 	if len(ps) != 2 {
 		t.Fatalf("want 2 pickups, got %d", len(ps))
 	}
@@ -213,8 +226,10 @@ func TestWeaponPickups_FreshPickupAfterDeathIsItsOwnGrant(t *testing.T) {
 		{Time: 50, Killer: "p", Weapon: "rl"}, // life 2
 	}}
 
-	out, _ := a.Finalize()
-	ps := out.([]WeaponPickup)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.WeaponPickups
+	ps := out
 	if ps[0].Kills != 1 {
 		t.Errorf("life-1 pickup kills = %d, want 1", ps[0].Kills)
 	}
@@ -238,8 +253,10 @@ func TestWeaponPickups_NoNextDeathKillsUnbounded(t *testing.T) {
 		{Time: 99, Killer: "survivor", Weapon: "lg"},
 	}}
 
-	out, _ := a.Finalize()
-	ps := out.([]WeaponPickup)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.WeaponPickups
+	ps := out
 	if ps[0].NextDeathTime != 0 {
 		t.Errorf("NextDeathTime = %v, want 0", ps[0].NextDeathTime)
 	}

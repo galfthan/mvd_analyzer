@@ -20,6 +20,12 @@ type FragAnalyzer struct {
 // authoritative team membership.
 func (a *FragAnalyzer) UseCoreOutputs(co *CoreOutputs) { a.core = co }
 
+// PopulateCore exposes the resolved frag log to downstream analysers
+// (timeline, weapon_pickups) via CoreOutputs.FragEntries.
+func (a *FragAnalyzer) PopulateCore(co *CoreOutputs) {
+	co.FragEntries = a.frags
+}
+
 // NewFragAnalyzer creates a new frag analyzer
 func NewFragAnalyzer() *FragAnalyzer {
 	return &FragAnalyzer{
@@ -78,7 +84,7 @@ func (a *FragAnalyzer) OnEvent(event events.Event) error {
 	return nil
 }
 
-func (a *FragAnalyzer) Finalize() (interface{}, error) {
+func (a *FragAnalyzer) Finalize(result *Result) error {
 	// Re-evaluate teamkill status using DemoInfo. During OnEvent,
 	// isTeamKill() compared obituary display names against ctx.Players
 	// which may have had auth names, causing misses.
@@ -107,12 +113,13 @@ func (a *FragAnalyzer) Finalize() (interface{}, error) {
 		}
 	}
 
-	return &FragResult{
+	result.Frags = &FragResult{
 		TotalFrags: len(a.frags),
 		Frags:      a.frags,
 		ByWeapon:   a.byWeapon,
 		ByPlayer:   a.byPlayer,
-	}, nil
+	}
+	return nil
 }
 
 func (a *FragAnalyzer) getOrCreatePlayer(name string) *PlayerFrags {

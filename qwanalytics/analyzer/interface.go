@@ -86,7 +86,8 @@ func (ctx *Context) ResolveSlotDemoInfo() map[int]SlotDemoInfo {
 
 // Analyzer is the interface for analysis modules.
 type Analyzer interface {
-	// Name returns the unique identifier for this analyzer.
+	// Name returns the unique identifier for this analyzer. Used for
+	// diagnostics — the registry no longer dispatches on it.
 	Name() string
 
 	// Init is called before parsing begins.
@@ -95,8 +96,10 @@ type Analyzer interface {
 	// OnEvent receives parsed events during parsing.
 	OnEvent(event events.Event) error
 
-	// Finalize is called after parsing completes and returns results.
-	Finalize() (interface{}, error)
+	// Finalize runs after the event stream is exhausted. Each analyser
+	// writes its own slice of the result struct directly — no more
+	// type-erased return + registry-side switch on Name().
+	Finalize(result *Result) error
 }
 
 // --- Result type aliases ---

@@ -113,8 +113,8 @@ func (a *MetadataAnalyzer) parseFullserverinfo(cmd string) {
 
 // Finalize converts the collected serverinfo + countdown text into a
 // structured MetadataResult.
-func (a *MetadataAnalyzer) Finalize() (interface{}, error) {
-	result := &MetadataResult{}
+func (a *MetadataAnalyzer) Finalize(result *Result) error {
+	mr := &MetadataResult{}
 
 	if len(a.serverInfo) > 0 {
 		// Copy so the analyzer's internal map can't be mutated by callers.
@@ -122,18 +122,19 @@ func (a *MetadataAnalyzer) Finalize() (interface{}, error) {
 		for k, v := range a.serverInfo {
 			serverInfo[k] = v
 		}
-		result.ServerInfo = serverInfo
+		mr.ServerInfo = serverInfo
 	}
 
 	if a.countdownRaw != "" {
-		result.CountdownText = a.countdownRaw
-		result.MatchSettings = parseCountdownCenterprint(a.countdownRaw)
+		mr.CountdownText = a.countdownRaw
+		mr.MatchSettings = parseCountdownCenterprint(a.countdownRaw)
 	}
 
-	if result.ServerInfo == nil && result.MatchSettings == nil && result.CountdownText == "" {
-		return nil, nil
+	if mr.ServerInfo == nil && mr.MatchSettings == nil && mr.CountdownText == "" {
+		return nil
 	}
-	return result, nil
+	result.Metadata = mr
+	return nil
 }
 
 // parseCountdownCenterprint walks the post-Q_normalizetext countdown table

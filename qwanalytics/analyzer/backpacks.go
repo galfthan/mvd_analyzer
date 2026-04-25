@@ -139,9 +139,9 @@ func (a *BackpackAnalyzer) extractMapName(cmd string) {
 
 // Finalize returns the collected drops sorted by time, with Loc
 // resolved from the map's .loc corpus when available.
-func (a *BackpackAnalyzer) Finalize() (interface{}, error) {
+func (a *BackpackAnalyzer) Finalize(result *Result) error {
 	if len(a.drops) == 0 {
-		return nil, nil
+		return nil
 	}
 	if a.locFinder == nil && a.mapName != "" {
 		if f, err := loc.LoadForMap(a.mapName); err == nil {
@@ -154,5 +154,6 @@ func (a *BackpackAnalyzer) Finalize() (interface{}, error) {
 			a.drops[i].Loc = a.locFinder.FindNearest(a.drops[i].Origin[0], a.drops[i].Origin[1], a.drops[i].Origin[2])
 		}
 	}
-	return a.drops, nil
+	result.Backpacks = a.drops
+	return nil
 }

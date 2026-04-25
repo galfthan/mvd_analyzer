@@ -25,8 +25,11 @@ func TestBackpackAnalyzer_RLHintEmitsDrop(t *testing.T) {
 	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 4, Origin: [3]float32{200, 0, 0}, Time: 29.9})
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 142, ItemFlags: 32, PlayerEnt: 5, Time: 30})
 
-	out, _ := a.Finalize()
-	drops, ok := out.([]BackpackDrop)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Backpacks
+	drops := out
+	ok := drops != nil
 	if !ok || len(drops) != 1 {
 		t.Fatalf("drops = %v, want 1 entry", out)
 	}
@@ -51,8 +54,10 @@ func TestBackpackAnalyzer_LGHintEmitsDrop(t *testing.T) {
 	ctx.Players[3] = &events.PlayerInfo{Slot: 3, Name: "lgdropper"}
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 64, PlayerEnt: 4, Time: 5})
 
-	out, _ := a.Finalize()
-	drops := out.([]BackpackDrop)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Backpacks
+	drops := out
 	if drops[0].Weapon != "lg" {
 		t.Errorf("Weapon = %q, want lg", drops[0].Weapon)
 	}
@@ -68,7 +73,9 @@ func TestBackpackAnalyzer_EntityStateEventsIgnored(t *testing.T) {
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "backpack", Origin: [3]float32{0, 0, 0}, Time: 10})
 	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 50, Kind: "backpack", Taken: true, Time: 11})
 
-	out, _ := a.Finalize()
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Backpacks
 	if out != nil {
 		t.Errorf("Finalize = %v, want nil (no hint = no drop)", out)
 	}
@@ -84,7 +91,9 @@ func TestBackpackAnalyzer_UnrecognisedFlagsDropped(t *testing.T) {
 	for _, flags := range []int{0, 32 | 64, 1, 4} {
 		_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: flags, PlayerEnt: 1, Time: 1})
 	}
-	out, _ := a.Finalize()
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Backpacks
 	if out != nil {
 		t.Errorf("Finalize = %v, want nil (all flag combos unrecognised)", out)
 	}
@@ -101,7 +110,9 @@ func TestBackpackAnalyzer_PreMatchIgnored(t *testing.T) {
 
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: 32, PlayerEnt: 1, Time: 1})
 
-	out, _ := a.Finalize()
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Backpacks
 	if out != nil {
 		t.Errorf("Finalize = %v, want nil (pre-match)", out)
 	}
@@ -114,7 +125,9 @@ func TestBackpackAnalyzer_UnknownSlotSkipped(t *testing.T) {
 
 	// PlayerEnt=10 -> slot=9, but ctx.Players[9] is nil.
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: 32, PlayerEnt: 10, Time: 1})
-	out, _ := a.Finalize()
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Backpacks
 	if out != nil {
 		t.Errorf("Finalize = %v, want nil (unknown slot)", out)
 	}
@@ -131,8 +144,10 @@ func TestBackpackAnalyzer_SortedByTime(t *testing.T) {
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 10, ItemFlags: 32, PlayerEnt: 1, Time: 20})
 	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 20, ItemFlags: 64, PlayerEnt: 2, Time: 10})
 
-	out, _ := a.Finalize()
-	drops := out.([]BackpackDrop)
+	r := &Result{}
+	_ = a.Finalize(r)
+	out := r.Backpacks
+	drops := out
 	if drops[0].Time != 10 || drops[1].Time != 20 {
 		t.Errorf("times = %v, want [10, 20]", []float64{drops[0].Time, drops[1].Time})
 	}

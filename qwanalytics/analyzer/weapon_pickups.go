@@ -253,9 +253,9 @@ func (a *WeaponPickupsAnalyzer) handlePackPickup(e *events.BackpackPickupHintEve
 // FragEntries are name-keyed, so we resolve the picker's display name
 // from ctx.Players[slot].Name (patched by the registry to the
 // DemoInfo name post-Finalize of DemoInfoAnalyzer).
-func (a *WeaponPickupsAnalyzer) Finalize() (interface{}, error) {
+func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 	if len(a.pickups) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	// Partition deaths by slot, time-ordered, for next-death lookup.
@@ -346,7 +346,8 @@ func (a *WeaponPickupsAnalyzer) Finalize() (interface{}, error) {
 	}
 
 	sort.Slice(out, func(i, j int) bool { return out[i].Time < out[j].Time })
-	return out, nil
+	result.WeaponPickups = out
+	return nil
 }
 
 // findNextAfter returns the smallest value in the (already-sorted)
