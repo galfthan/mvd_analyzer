@@ -68,10 +68,22 @@ belongs in the frontend.
   belongs in the commit history.
 - Match existing code style — no new lint configs, no reformatting
   of untouched files.
-- Tests: unit tests live alongside the code they test
-  (`*_test.go`); opt-in integration tests live in
-  `qwanalytics/diagnostic/`. Run `go test ./qwdemo/...
-  ./qwanalytics/...` before committing non-trivial work.
+- Tests come in three layers: (1) per-analyzer / per-parser unit tests
+  live alongside the code (`*_test.go`); (2) the **golden corpus**
+  (`qwanalytics/analyzer/golden_test.go` + `testdata/corpus.json`)
+  pins the full pipeline output for a curated set of hub.quakeworld.nu
+  demos — fetched on first `make test`, cached locally, so steady-state
+  runs are offline; (3) the diagnostic harness in
+  `qwanalytics/diagnostic/` runs data-quality invariants when demos
+  are present. Run `go test ./qwdemo/... ./qwanalytics/...` before
+  committing non-trivial work. If the golden test fails on an
+  intended change, regenerate with
+  `go test ./qwanalytics/analyzer/... -run TestGoldenCorpus -args -update-golden`
+  (the `-update-golden` flag is registered only in the analyzer package
+  — wider scopes like `./qwanalytics/...` fail in `mapgen` with
+  "flag provided but not defined")
+  and commit the regenerated `testdata/golden/*.json` together with
+  the code change.
 
 ## Ground-truth sources
 

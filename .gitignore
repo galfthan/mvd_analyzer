@@ -4,3 +4,8 @@ dist/
 # Local working directory for cmd/mapgen — community BSP downloads (~1.5 GB).
 # Only the generated JSON under internal/web/static/maps/ is committed.
 /maps/
+
+# MVD demos pulled from hub.quakeworld.nu by the golden test harness.
+# The corpus.json manifest references them by gameId; demos are fetched
+# on first run and cached here. Bytes themselves are never committed.
+qwanalytics/testdata/cache/

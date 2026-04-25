@@ -316,13 +316,49 @@ native source (used by `cmd/mapgen` when pointing at a working copy).
 go test ./qwanalytics/...
 ```
 
-The diagnostic corpus test is opt-in — drop demos into
-`qwanalytics/diagnostic/testdata/` first:
+Three layers exercise different things:
 
-```bash
-cp ~/quake/demos/*.mvd.gz qwanalytics/diagnostic/testdata/
-go test -v -run TestDiagnosticParseDemos ./qwanalytics/diagnostic/
-```
+1. **Per-analyzer unit tests** (`*_test.go` next to each analyzer) drive
+   each analyzer with synthetic event streams and assert on its
+   `Finalize()` output. No MVD bytes; pure-Go, ~milliseconds total.
+2. **Golden corpus** (`analyzer/golden_test.go`) runs the full pipeline
+   against a manifest of hub.quakeworld.nu game IDs in
+   `testdata/corpus.json`. On first run it downloads each demo into
+   `testdata/cache/<gameId>.mvd.gz` (gitignored) and pins the
+   serialised `Result` against `testdata/golden/<label>.json`. The
+   manifest currently ships with nine demos (three each of 1on1, 2on2,
+   4on4); `t.Skip` keeps `make test` green if it is ever emptied.
+   Regenerate goldens after an intentional change:
+
+   ```bash
+   go test ./qwanalytics/analyzer/... -run TestGoldenCorpus -args -update-golden
+   ```
+
+   (Use `./qwanalytics/analyzer/...`, not the wider `./qwanalytics/...`
+   — `-update-golden` is registered only in this test package and
+   wider scopes fail in `mapgen` with "flag provided but not defined".)
+
+   Two transforms are applied before comparison: `filePath` is
+   stripped (per-machine cache path), and `timelineAnalysis.highResBuckets`
+   is sliced to three 15 s windows (`[0, 15]`, `[60, 75]`, last 15 s).
+   The high-res slice is necessary because the full 50 ms position
+   track is ~20 MB per 4on4 demo, and the three windows are enough
+   sampling to catch bucketer / position-extractor drift. Everything
+   else — `locGraph`, `schemaVersion`, ammo counts, frag totals,
+   weapon stats, items, powerup events — is pinned in full, so any
+   unintended drift surfaces. (The `locGraph` slices are sorted in
+   `BuildLocGraph` for run-to-run determinism; map-keyed sub-objects
+   already serialise alphabetically.)
+
+3. **Diagnostic corpus** (`diagnostic/diagnostic_test.go`) is opt-in
+   and complementary — it runs data-quality invariants
+   (frag-total parity, impossible stat values, …) rather than pinning
+   output. Drop demos into `qwanalytics/diagnostic/testdata/` to enable:
+
+   ```bash
+   cp ~/quake/demos/*.mvd.gz qwanalytics/diagnostic/testdata/
+   go test -v -run TestDiagnosticParseDemos ./qwanalytics/diagnostic/
+   ```
 
 ## Module boundary
 
