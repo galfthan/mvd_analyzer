@@ -4,6 +4,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mvd-analyzer/qwanalytics/config"
 	"github.com/mvd-analyzer/qwanalytics/loc"
 )
 
@@ -19,18 +20,20 @@ import (
 //    but are far apart (>800 world units), they are split into separate regions
 //    named by their distinguishing prefix (e.g., "high.RL" and "low.RL").
 //
-// 2. MAP-SPECIFIC CUSTOM REGIONS (mapCustomRegions):
-//    For popular maps, you can define named regions from specific loc names.
-//    These locs are excluded from auto-detection so they don't get merged
-//    with keyword-based regions.
+//    Maps with no RA loc fall back to YA: the auto-detector swaps RA→YA
+//    for that map only, so duel maps like dm6 (no RA) still get a tracked
+//    armor region instead of an empty one.
 //
-// To find loc names for a map, check internal/loc/locs/<map>.loc.
-// The raw loc file uses variables like $loc_name_ra which become "RA" after
-// substitution, and "$." becomes "." as separator. So "high$loc_name_separatorrl"
-// becomes "high.RL". You can also see the final names in the browser's
-// Region Control panel (the editable text fields show all loc names per region).
-//
-// Users can also edit region definitions in the browser without code changes.
+// 2. MAP-SPECIFIC CUSTOM REGIONS (config/regions/<map>.json):
+//    Per-map overrides ship as embedded JSON files. Each entry has a
+//    display name and a list of loc names to include; those locs are
+//    excluded from auto-detection so they don't get merged with
+//    keyword-based regions. To find loc names for a map, check the
+//    embedded .loc corpus (qwanalytics/loc/data/<map>.loc) — variables
+//    like $loc_name_ra resolve to "RA" and $loc_name_separator to ".".
+//    The loc names visible in the browser's Region Control panel are the
+//    canonical post-substitution form, and the panel's Save button emits
+//    JSON in the exact shape regions/<map>.json uses.
 // ============================================================================
 
 // controlKeywords lists the item types that are auto-detected as regions.
@@ -42,50 +45,6 @@ var controlKeywords = map[string]bool{
 type locWithKeyword struct {
 	loc     loc.Location
 	keyword string
-}
-
-// mapCustomRegions defines custom named regions for specific maps.
-// To add a new map, add a key with the lowercase map name and a list of
-// regions. Each region has a display name and a list of loc names to include.
-//
-// Example — adding custom regions for dm4:
-//
-//	"dm4": {
-//	    {name: "RA Bridge", locNames: []string{"RA", "RA.bridge"}},
-//	    {name: "Biosuit",   locNames: []string{"bio", "bio.water"}},
-//	},
-type customRegion struct {
-	name     string   // Display name for this region
-	locNames []string // Loc names to include (exact match against processed loc names)
-}
-
-var mapCustomRegions = map[string][]customRegion{
-	// Schloss
-	"schloss": {
-		{name: "Tower", locNames: []string{"tower", "tower.entry", "tower.RL"}},
-		{name: "Cathedral", locNames: []string{"cathedral", "cathedral.YA", "cathedral.SSG"}},
-	},
-	// E1M2 — Castle of the Damned
-	"e1m2": {
-		{name: "YA", locNames: []string{"YA", "YA.spikes", "YA.tele", "YA.water"}},
-		{name: "MH", locNames: []string{"MH", "MH.above", "MH.entry", "MH.exit", "MH.low", "MH.rox", "MH.SNG"}},
-	},
-	// DM3 — The Abandoned Base
-	"dm3": {
-		{name: "YA", locNames: []string{"YA", "YA.box", "YA.up"}},
-		// RA region excludes RA.tunnel — it's the lower passageway beneath
-		// the RA platform and shouldn't count as RA control. Because the
-		// custom region is named exactly "RA", the auto-detection for the
-		// RA keyword is suppressed entirely (see buildControlRegions), so
-		// RA.tunnel simply isn't tracked as a region.
-		{name: "RA", locNames: []string{"RA", "RA.low", "RA.rox", "RA.entry"}},
-	},
-	// DM2 — The Claustrophobopolis
-	"dm2": {
-		{name: "Secret", locNames: []string{"secret"}},
-		{name: "Backroom", locNames: []string{"RA.MH", "RA.MH/rox"}},
-		{name: "Tele", locNames: []string{"tele", "tele.entry", "tele.YA", "tele.high"}},
-	},
 }
 
 // buildControlRegions groups locations by item keyword and clusters spatially
@@ -105,21 +64,34 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 		mapName = strings.TrimSuffix(mapName, ".bsp")
 	}
 
+	// Build the per-map keyword set. If the map has no RA loc anywhere,
+	// promote YA in RA's place so duel maps like dm6 (YA-only) still get
+	// a tracked armor region. Custom regions are evaluated independently;
+	// this fallback only affects the keyword-based auto-detector.
+	keywordSet := make(map[string]bool, len(controlKeywords))
+	for k, v := range controlKeywords {
+		keywordSet[k] = v
+	}
+	if !mapHasKeyword(locs, "RA") {
+		delete(keywordSet, "RA")
+		keywordSet["YA"] = true
+	}
+
 	// Build set of locs consumed by custom regions (so they're excluded from auto-detection)
 	// and the set of auto-detect keywords that a custom region has fully claimed.
 	// A custom region claims a keyword whenever its name (uppercased) matches
-	// an entry in controlKeywords — in that case the auto-detector skips that
+	// an entry in keywordSet — in that case the auto-detector skips that
 	// keyword entirely so the curated definition is the single source of truth
 	// (no leftover one-loc clusters competing under the same name).
 	customConsumed := make(map[string]bool)
 	customClaimedKeywords := make(map[string]bool)
-	customDefs := mapCustomRegions[mapName]
+	customDefs := config.RegionsForMap(mapName)
 	for _, cr := range customDefs {
-		for _, ln := range cr.locNames {
+		for _, ln := range cr.Locs {
 			customConsumed[ln] = true
 		}
-		if controlKeywords[strings.ToUpper(cr.name)] {
-			customClaimedKeywords[strings.ToUpper(cr.name)] = true
+		if keywordSet[strings.ToUpper(cr.Name)] {
+			customClaimedKeywords[strings.ToUpper(cr.Name)] = true
 		}
 	}
 
@@ -138,7 +110,7 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 		})
 		for _, token := range tokens {
 			upper := strings.ToUpper(token)
-			if controlKeywords[upper] {
+			if keywordSet[upper] {
 				groups[upper] = append(groups[upper], locWithKeyword{loc: l, keyword: upper})
 				break // Only match first keyword per location
 			}
@@ -153,10 +125,10 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 		locByName[l.Name] = append(locByName[l.Name], l)
 	}
 	for _, cr := range customDefs {
-		region := ControlRegion{Name: cr.name}
+		region := ControlRegion{Name: cr.Name}
 		var sumX, sumY float32
 		var count int
-		for _, ln := range cr.locNames {
+		for _, ln := range cr.Locs {
 			for _, l := range locByName[ln] {
 				region.Points = append(region.Points, MapLocation{
 					X: l.X, Y: l.Y, Z: l.Z, Name: l.Name,
@@ -221,6 +193,24 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 	})
 
 	return regions
+}
+
+// mapHasKeyword reports whether any loc name contains `keyword` as a
+// dot/space-separated token (case-insensitive). Used to drive the
+// RA→YA fallback for maps that ship no RA.
+func mapHasKeyword(locs []loc.Location, keyword string) bool {
+	upper := strings.ToUpper(keyword)
+	for _, l := range locs {
+		tokens := strings.FieldsFunc(l.Name, func(r rune) bool {
+			return r == '.' || r == ' '
+		})
+		for _, t := range tokens {
+			if strings.ToUpper(t) == upper {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // clusterLocations groups locations by spatial proximity using single-linkage clustering

@@ -1,0 +1,7 @@
+{
+    "regions": [
+        {"name": "Secret", "locs": ["secret"]},
+        {"name": "Backroom", "locs": ["RA.MH", "RA.MH/rox"]},
+        {"name": "Tele", "locs": ["tele", "tele.entry", "tele.YA", "tele.high"]}
+    ]
+}
