@@ -292,8 +292,11 @@ diff -r /tmp/before /tmp/after
 
 ## License
 
-This project analyzes demo files from QuakeWorld, which uses the
-GPL-licensed Quake engine.
+mvd-analyzer is released under the MIT License — see [LICENSE](LICENSE).
+
+It analyzes demo files from QuakeWorld, whose Quake engine is GPL-
+licensed; this repo only consumes the wire format and does not
+incorporate engine source.
 
 ## Acknowledgments
 
