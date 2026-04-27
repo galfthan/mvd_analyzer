@@ -60,12 +60,14 @@ func buildTwoFloorBSP() *bsp.BSP {
 func TestBuild_AssignsFacesToCorrectLoc(t *testing.T) {
 	b := buildTwoFloorBSP()
 
-	// Two locs centered over the quads, one on each floor. The "RL"
-	// keyword is in ITEM_KEYWORDS so it stays uppercase after
+	// Two locs centered over the quads, one on each floor. ezquake's
+	// addloc records the player origin (cl.simorg), which sits 24 above
+	// the floor for a standing player — so loc.Z = floor.Z + 24. The
+	// "RL" keyword is in ITEM_KEYWORDS so it stays uppercase after
 	// normalization; "start" is generic so it gets lowercased.
 	finder := loc.NewFinder("test", []loc.Location{
-		{X: 32, Y: 32, Z: 0, Name: "start"},
-		{X: 32, Y: 32, Z: 128, Name: "RL"},
+		{X: 32, Y: 32, Z: 24, Name: "start"},
+		{X: 32, Y: 32, Z: 152, Name: "RL"},
 	})
 
 	regions, stats := Build("test", b, finder)
@@ -120,11 +122,13 @@ func TestBuild_AssignsFacesToCorrectLoc(t *testing.T) {
 func TestBuild_SingleLocClaimsAllFloors(t *testing.T) {
 	b := buildTwoFloorBSP()
 
-	// Only one loc, placed on the low floor. Matching ezQuake's
-	// TP_LocationName, every face picks its nearest loc with no
-	// rejection threshold — so the high floor also maps to "start".
+	// Only one loc, placed at standing-player height (24 above) the
+	// low floor. Matching ezQuake's TP_LocationName, every face picks
+	// its nearest loc with no rejection threshold — so the high floor
+	// also maps to "start" (and is within the global ceiling cap
+	// because the gap to the high floor is just at the threshold).
 	finder := loc.NewFinder("test", []loc.Location{
-		{X: 32, Y: 32, Z: 0, Name: "start"},
+		{X: 32, Y: 32, Z: 24, Name: "start"},
 	})
 
 	regions, stats := Build("test", b, finder)
@@ -217,11 +221,14 @@ func buildStackedTrioBSP() *bsp.BSP {
 func TestBuild_DropsCeilingAboveFloor(t *testing.T) {
 	b := buildStackedTrioBSP()
 
-	// Single loc point at z=0. The floor (z=0) and the platform
-	// (z=128, exactly at threshold) are both kept; the ceiling
-	// (z=384, 384u above the loc) is dropped.
+	// Single loc point at standing-player height (24 above) the low
+	// floor. The floor (z=0) and the platform (z=128, exactly at the
+	// global cap) are both kept; the ceiling (z=384, well above the
+	// cap) is dropped. Cap = maxLocZ + ceilingMaxAboveLoc -
+	//                       playerOriginAboveFloor
+	//                     = 24 + 128 - 24 = 128.
 	finder := loc.NewFinder("test", []loc.Location{
-		{X: 32, Y: 32, Z: 0, Name: "room"},
+		{X: 32, Y: 32, Z: 24, Name: "room"},
 	})
 
 	regions, stats := Build("test", b, finder)
@@ -260,8 +267,8 @@ func TestBuild_MultiLevelRegionKeepsAllFloors(t *testing.T) {
 	}
 
 	finder := loc.NewFinder("test", []loc.Location{
-		{X: 32, Y: 32, Z: 0, Name: "lifts"},
-		{X: 32, Y: 32, Z: 384, Name: "lifts"},
+		{X: 32, Y: 32, Z: 24, Name: "lifts"},
+		{X: 32, Y: 32, Z: 408, Name: "lifts"},
 	})
 
 	regions, stats := Build("test", b, finder)

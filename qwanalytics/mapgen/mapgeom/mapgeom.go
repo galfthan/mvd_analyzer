@@ -30,13 +30,24 @@ const (
 	// heuristic closely enough for visualization).
 	floorNormalZ = 0.7
 
+	// playerOriginAboveFloor is the Z offset between the floor a
+	// standing player rests on and that player's origin (mins.z = -24
+	// in standard Quake 1). Loc points are recorded at cl.simorg
+	// (ezquake-source/src/teamplay_locfiles.c:316), so a walkable
+	// floor's loc sits ~24 above the floor's centroid. The ceiling
+	// filter compares like-for-like by adding this offset to face Z
+	// before testing against the loc-derived cap.
+	playerOriginAboveFloor float32 = 24.0
+
 	// ceilingMaxAboveLoc drops a face whose centroid is more than this
-	// far above its nearest loc point. Loc points sit at player-eye
-	// positions the mapper cared about, so a face significantly above
-	// the closest one is almost always unreachable roof/ceiling
-	// detail. Since a region is anchored by many loc points (one per
-	// playable sub-area), stairs and lifts connecting levels stay
-	// covered as long as each level has its own loc point.
+	// far above its 3D-nearest loc point, *after* projecting the face
+	// up by playerOriginAboveFloor so face Z and loc Z share a frame.
+	// Loc points sit at player-origin positions the mapper cared
+	// about, so a face significantly above the closest one is almost
+	// always unreachable roof/ceiling detail. Since a region is
+	// anchored by many loc points (one per playable sub-area), stairs
+	// and lifts connecting levels stay covered as long as each level
+	// has its own loc point.
 	ceilingMaxAboveLoc float32 = 128.0
 )
 
@@ -179,13 +190,12 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 					bestIdx = i
 				}
 			}
-			// Drop faces sitting well above the nearest loc point —
+			// Drop faces sitting well above their 3D-nearest loc —
 			// they're almost certainly unreachable roof/ceiling
-			// detail. Regions with real vertical range (stairs,
-			// lifts) stay covered because each level gets its own
-			// loc point, and the nearest loc of a face on that level
-			// sits close to it in Z.
-			if cz-locPoints[bestIdx].Z > ceilingMaxAboveLoc {
+			// detail. Project the face up by playerOriginAboveFloor
+			// so we compare loc Z to loc Z (loc points record player
+			// origin = floor + 24).
+			if cz+playerOriginAboveFloor-locPoints[bestIdx].Z > ceilingMaxAboveLoc {
 				stats.FacesCeiling++
 				continue
 			}
