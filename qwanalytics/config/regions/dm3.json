@@ -1,0 +1,6 @@
+{
+    "regions": [
+        {"name": "YA", "locs": ["YA", "YA.box", "YA.up"]},
+        {"name": "RA", "locs": ["RA", "RA.low", "RA.rox", "RA.entry"]}
+    ]
+}

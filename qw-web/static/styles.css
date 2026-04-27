@@ -2139,11 +2139,16 @@ th.sortable.sort-desc::after {
     margin-bottom: 4px;
 }
 
-.region-config-row label {
-    min-width: 80px;
-    font-weight: bold;
-    font-size: 0.85rem;
+.region-name-input {
+    width: 110px;
+    background: var(--bg-deep);
+    border: 1px solid #333;
     color: #ccc;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    font-family: inherit;
 }
 
 .region-locs-input {
@@ -2157,9 +2162,50 @@ th.sortable.sort-desc::after {
     font-family: monospace;
 }
 
+.region-name-input:focus,
 .region-locs-input:focus {
     border-color: var(--accent-cyan);
     outline: none;
+}
+
+.region-remove-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: #aaa;
+    width: 24px;
+    height: 24px;
+    line-height: 1;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+}
+
+.region-remove-btn:hover {
+    background: #3a1f1f;
+    border-color: #a44;
+    color: #fff;
+}
+
+.region-config-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.region-config-actions button {
+    background: var(--bg-deep);
+    border: 1px solid #333;
+    color: #ccc;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.region-config-actions button:hover {
+    border-color: var(--accent-cyan);
+    color: #fff;
 }
 
 .region-control-table {

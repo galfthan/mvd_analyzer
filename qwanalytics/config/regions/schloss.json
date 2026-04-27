@@ -1,0 +1,6 @@
+{
+    "regions": [
+        {"name": "Tower", "locs": ["tower", "tower.entry", "tower.RL"]},
+        {"name": "Cathedral", "locs": ["cathedral", "cathedral.YA", "cathedral.SSG"]}
+    ]
+}

@@ -1,0 +1,6 @@
+{
+    "regions": [
+        {"name": "YA", "locs": ["YA", "YA.spikes", "YA.tele", "YA.water"]},
+        {"name": "MH", "locs": ["MH", "MH.above", "MH.entry", "MH.exit", "MH.low", "MH.rox", "MH.SNG"]}
+    ]
+}

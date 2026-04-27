@@ -73,5 +73,9 @@ The analyser is split across several files:
 ## Reference
 
 - 50 ms cadence is the QW server tick (KTX `pmove.c`).
-- Region/loc heuristics: see `qwanalytics/loc/data/*.loc` and
-  the per-map region defs in `qwanalytics/config/`.
+- Region/loc heuristics: see `qwanalytics/loc/data/*.loc`. Auto-detect
+  keywords live in `timeline_regions.go`; per-map region overrides ship
+  as JSON in `qwanalytics/config/regions/<map>.json` (drop a new file
+  in that directory, no Go code change needed). Maps with no RA loc
+  fall back to YA in the auto-detector. The web UI's Region Control
+  panel saves/loads this exact JSON shape.

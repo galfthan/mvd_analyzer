@@ -3939,35 +3939,88 @@ function buildRegionConfig(regions) {
     if (!container) return;
     container.innerHTML = '';
 
+    const rowsWrap = document.createElement('div');
+    rowsWrap.className = 'region-config-rows';
+    container.appendChild(rowsWrap);
+
     for (const region of regions) {
         const locNames = [...new Set(region.points.map(p => p.name))].join(', ');
-        const row = document.createElement('div');
-        row.className = 'region-config-row';
-        row.innerHTML = `
-            <label>${escapeHtml(region.name)}:</label>
-            <input type="text" class="region-locs-input" data-region="${escapeHtml(region.name)}" value="${escapeHtml(locNames)}">
-        `;
-        container.appendChild(row);
+        rowsWrap.appendChild(buildRegionRow(region.name, locNames));
     }
 
-    // On change, recompute
-    container.querySelectorAll('.region-locs-input').forEach(input => {
-        input.addEventListener('change', () => applyRegionConfig());
+    const actions = document.createElement('div');
+    actions.className = 'region-config-actions';
+    actions.innerHTML = `
+        <button type="button" class="region-add-btn">+ Add region</button>
+        <button type="button" class="region-save-btn" title="Download these region definitions as JSON">Save…</button>
+        <button type="button" class="region-load-btn" title="Load region definitions from a JSON file">Load…</button>
+        <input type="file" class="region-load-input" accept="application/json,.json" hidden>
+    `;
+    container.appendChild(actions);
+
+    actions.querySelector('.region-add-btn').addEventListener('click', () => {
+        const row = buildRegionRow('', '');
+        rowsWrap.appendChild(row);
+        const nameInput = row.querySelector('.region-name-input');
+        if (nameInput) nameInput.focus();
     });
+    actions.querySelector('.region-save-btn').addEventListener('click', saveRegionConfig);
+    const loadInput = actions.querySelector('.region-load-input');
+    actions.querySelector('.region-load-btn').addEventListener('click', () => loadInput.click());
+    loadInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) loadRegionConfig(file);
+        loadInput.value = '';
+    });
+}
+
+function buildRegionRow(name, locNames) {
+    const row = document.createElement('div');
+    row.className = 'region-config-row';
+    row.innerHTML = `
+        <input type="text" class="region-name-input" placeholder="region name" value="${escapeHtml(name)}">
+        <input type="text" class="region-locs-input" placeholder="loc1, loc2, …" value="${escapeHtml(locNames)}">
+        <button type="button" class="region-remove-btn" title="Remove region">&times;</button>
+    `;
+    row.querySelector('.region-name-input').addEventListener('change', () => applyRegionConfig());
+    row.querySelector('.region-locs-input').addEventListener('change', () => applyRegionConfig());
+    row.querySelector('.region-remove-btn').addEventListener('click', () => {
+        row.remove();
+        applyRegionConfig();
+    });
+    return row;
+}
+
+function readRegionConfigFromUI() {
+    // Walk the per-row inputs in DOM order so the user's region order
+    // is preserved when serialised. Empty rows (no name or no locs)
+    // are dropped silently — they're transient editing state.
+    const out = [];
+    document.querySelectorAll('#region-config .region-config-row').forEach(row => {
+        const name = (row.querySelector('.region-name-input')?.value || '').trim();
+        const locsRaw = row.querySelector('.region-locs-input')?.value || '';
+        const locs = locsRaw.split(',').map(s => s.trim()).filter(s => s);
+        if (!name || locs.length === 0) return;
+        out.push({ name, locs });
+    });
+    return out;
 }
 
 function applyRegionConfig() {
     const rc = mapState.rcResult;
     if (!rc) return;
 
-    // Read current region definitions from the text inputs
+    // Read current region definitions from the per-row inputs
     const regions = [];
-    document.querySelectorAll('.region-locs-input').forEach(input => {
-        const regionName = input.dataset.region;
-        const locNames = input.value.split(',').map(s => s.trim()).filter(s => s);
+    const seenNames = new Set();
+    for (const def of readRegionConfigFromUI()) {
+        // Drop dupes — first occurrence wins so editing a row above
+        // doesn't get masked by a stale row below sharing the same name.
+        if (seenNames.has(def.name)) continue;
+        seenNames.add(def.name);
 
         // Find matching locations from the full loc list
-        const locSet = new Set(locNames);
+        const locSet = new Set(def.locs);
         const points = [];
         let sumX = 0, sumY = 0;
         for (const loc of mapState.locations) {
@@ -3979,13 +4032,13 @@ function applyRegionConfig() {
         }
         if (points.length > 0) {
             regions.push({
-                name: regionName,
+                name: def.name,
                 points: points,
                 centroidX: sumX / points.length,
                 centroidY: sumY / points.length,
             });
         }
-    });
+    }
 
     mapState.controlRegions = regions;
     computeRegionStacking(regions);
@@ -4152,6 +4205,66 @@ function displayRegionControlTable(regions, stats) {
         `;
         tbody.appendChild(tr);
     }
+}
+
+// Map name → safe filename stem for the Save button. Falls back to
+// "regions" when no map info is available.
+function regionConfigFilename() {
+    const raw = currentResult?.demoInfo?.map || currentResult?.match?.map || '';
+    let base = String(raw).toLowerCase();
+    const slash = base.lastIndexOf('/');
+    if (slash >= 0) base = base.slice(slash + 1);
+    if (base.endsWith('.bsp')) base = base.slice(0, -4);
+    base = base.replace(/[^a-z0-9_-]/g, '');
+    return (base || 'regions') + '.json';
+}
+
+function saveRegionConfig() {
+    const regions = readRegionConfigFromUI();
+    const json = JSON.stringify({ regions }, null, 4) + '\n';
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = regionConfigFilename();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function loadRegionConfig(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+        let parsed;
+        try {
+            parsed = JSON.parse(reader.result);
+        } catch (err) {
+            alert('Failed to parse region JSON: ' + err.message);
+            return;
+        }
+        const regions = Array.isArray(parsed?.regions) ? parsed.regions : null;
+        if (!regions) {
+            alert('Region JSON must have a top-level "regions" array.');
+            return;
+        }
+        // Rebuild the row UI from the loaded definitions, then re-apply
+        // so map render / stats / timeline pick up the change.
+        const container = document.getElementById('region-config');
+        if (!container) return;
+        const rowsWrap = container.querySelector('.region-config-rows');
+        if (!rowsWrap) return;
+        rowsWrap.innerHTML = '';
+        for (const r of regions) {
+            const name = String(r.name || '').trim();
+            const locs = Array.isArray(r.locs) ? r.locs.map(s => String(s)) : [];
+            if (!name) continue;
+            rowsWrap.appendChild(buildRegionRow(name, locs.join(', ')));
+        }
+        applyRegionConfig();
+    };
+    reader.onerror = () => alert('Failed to read file.');
+    reader.readAsText(file);
 }
 
 function cellBg(color, pct, intensityScale) {
