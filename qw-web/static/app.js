@@ -258,10 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (hasSearch) {
         writeSearchFiltersToForm(urlFilters);
-        // Only auto-expand the panel when we're not also loading a demo —
-        // displayResults() collapses it as soon as a demo is ready, so
-        // pre-collapsing now avoids a visible expand→collapse flash.
-        if (!hubId) setSearchPanelExpanded(true);
+        // When no demo is also being loaded, ensure the Search tab is the
+        // visible one (it is by default in the HTML, but the URL may
+        // also carry a ?tab= override that we must respect).
+        if (!hubId && !params.get('tab')) switchTab('search');
         runSearch();
     }
 });
@@ -299,7 +299,7 @@ function updateUrlState() {
                 params.set('gameId', currentResult.hubInfo.gameId);
             }
 
-            const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+            const activeTab = document.querySelector('.sidebar-btn.active')?.dataset.tab;
             if (activeTab && activeTab !== 'summary') params.set('tab', activeTab);
 
             if (mapState.currentTime > 0) {
@@ -347,7 +347,7 @@ function applyUrlState() {
 
     const tab = params.get('tab');
     if (tab) {
-        const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+        const btn = document.querySelector(`.sidebar-btn[data-tab="${tab}"]`);
         if (btn) btn.click();
     }
 
@@ -384,8 +384,13 @@ function setupFileUpload() {
 
 const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map', 'keymoments'];
 
+function switchTab(name) {
+    const btn = document.querySelector(`.sidebar-btn[data-tab="${name}"]`);
+    if (btn) btn.click();
+}
+
 function setupTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabButtons = document.querySelectorAll('.sidebar-btn');
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const tabName = btn.dataset.tab;
@@ -543,32 +548,10 @@ function writeSearchFiltersToForm(filters) {
     if (filters.to     !== undefined) document.getElementById('search-to').value     = filters.to;
 }
 
-function setSearchPanelExpanded(expanded) {
-    const section = document.getElementById('search-section');
-    const body = document.getElementById('search-body');
-    const toggle = document.getElementById('search-toggle');
-    const caret = toggle.querySelector('.search-toggle-caret');
-    if (expanded) {
-        section.classList.remove('collapsed');
-        body.style.display = '';
-        toggle.setAttribute('aria-expanded', 'true');
-        caret.textContent = '▾';
-    } else {
-        section.classList.add('collapsed');
-        body.style.display = 'none';
-        toggle.setAttribute('aria-expanded', 'false');
-        caret.textContent = '▸';
-    }
-}
-
 function setupSearch() {
     document.getElementById('search-form').addEventListener('submit', (e) => {
         e.preventDefault();
         runSearch();
-    });
-    document.getElementById('search-toggle').addEventListener('click', () => {
-        const expanded = document.getElementById('search-toggle').getAttribute('aria-expanded') === 'true';
-        setSearchPanelExpanded(!expanded);
     });
 }
 
@@ -661,7 +644,7 @@ function renderSearchResults(games) {
 async function loadGameFromSearch(game) {
     try {
         await loadGameFromHub(game);
-        // displayResults() collapses the panel as part of finishing a load.
+        // displayResults() switches to the Summary tab as part of finishing a load.
     } catch (error) {
         const status = document.getElementById('upload-status');
         status.textContent = 'Error: ' + error.message;
@@ -673,8 +656,14 @@ function displayResults(result) {
     // Reset timeline state before loading new demo
     resetTimelineState();
 
-    document.getElementById('results-section').style.display = 'block';
-    setSearchPanelExpanded(false);
+    document.body.classList.remove('no-demo');
+
+    // Land the user on the Summary tab after a fresh load, unless the URL
+    // explicitly asks for a different tab (deep links like ?tab=map should
+    // win — applyUrlState() is called later and will switch tabs again).
+    if (!new URLSearchParams(location.search).get('tab')) {
+        switchTab('summary');
+    }
 
     const demoInfo = result.demoInfo;
 
@@ -1915,7 +1904,7 @@ function displayTimelineAnalysis(result) {
     setupUnifiedTimeline();
 
     // Show the unified timeline on applicable tabs
-    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+    const activeTab = document.querySelector('.sidebar-btn.active')?.dataset.tab;
     const tl = document.getElementById('unified-timeline');
     if (tl) tl.style.display = TABS_WITH_TIMELINE.includes(activeTab) ? '' : 'none';
 

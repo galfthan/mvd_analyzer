@@ -47,64 +47,180 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-header {
-    text-align: center;
-    margin-bottom: 30px;
-    position: relative;
-}
-
-.github-link {
-    position: absolute;
+/* Top bar — slim wordmark + version + GitHub link, sticky to top */
+.topbar {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 20px;
+    background: #16213e;
+    border-bottom: 1px solid rgba(0, 217, 255, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    gap: 14px;
+    position: sticky;
     top: 0;
-    right: 0;
+    z-index: 100;
+}
+
+.topbar-brand {
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--accent-cyan);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    text-shadow: 0 0 12px rgba(0, 217, 255, 0.25);
+    transition: color 0.15s ease;
+}
+
+.topbar-brand:hover {
+    color: var(--accent-cyan-dim);
+}
+
+.topbar-spacer { flex: 1; }
+
+.topbar-version {
+    color: #4a5a6e;
+    font-family: monospace;
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.topbar-version:hover {
+    color: var(--accent-cyan);
+}
+
+/* Inner <a> rendered by setVersionTag in app.js for the commit hash */
+.topbar-version a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px dotted currentColor;
+}
+
+.topbar-github {
     color: #7a8ba8;
     display: inline-flex;
     align-items: center;
     transition: color 0.15s ease;
 }
 
-.github-link:hover {
+.topbar-github:hover {
     color: var(--accent-cyan);
 }
 
-header h1 {
-    font-family: 'Rajdhani', sans-serif;
-    color: var(--accent-cyan);
-    font-size: 2.8rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    margin-bottom: 8px;
-    text-shadow: 0 0 20px rgba(0, 217, 255, 0.3), 0 0 40px rgba(0, 217, 255, 0.1);
+/* Layout — sidebar + main pane fill the rest of the viewport */
+.layout {
+    display: flex;
+    min-height: calc(100vh - 44px);
 }
 
-header p {
+.sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: #16213e;
+    border-right: 1px solid rgba(0, 217, 255, 0.08);
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: transparent;
+    border: none;
     color: #7a8ba8;
-    font-size: 0.95rem;
-    letter-spacing: 0.02em;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    text-align: left;
+    transition: all 0.15s ease;
+    position: relative;
 }
 
-.version-tag {
-    font-size: 0.75rem !important;
-    color: #4a5a6e !important;
-    margin-top: 4px;
-    font-family: monospace;
-}
-
-.version-tag a {
-    color: inherit;
-    text-decoration: none;
-    border-bottom: 1px dotted currentColor;
-    transition: color 0.15s ease;
-}
-
-.version-tag a:hover {
+.sidebar-btn:hover {
     color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.06);
+}
+
+.sidebar-btn.active {
+    color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.08);
+}
+
+.sidebar-btn.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    background: var(--accent-cyan);
+    border-radius: 2px;
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+    padding: 20px 28px;
+}
+
+/* Empty state for non-Search tabs when no demo loaded.
+ * Hides every direct child of an inactive-because-no-demo tab and
+ * surfaces only the .empty-state placeholder. The Search tab is
+ * exempt because its load + filter form must always be available. */
+.empty-state {
+    display: none;
+    padding: 80px 40px;
+    text-align: center;
+    color: #7a8ba8;
+    font-style: italic;
+    font-size: 1rem;
+}
+
+body.no-demo .tab-content > .empty-state {
+    display: block;
+}
+
+body.no-demo .tab-content:not(#tab-search) > :not(.empty-state) {
+    display: none;
+}
+
+body.no-demo #unified-timeline {
+    display: none !important;
+}
+
+@media (max-width: 800px) {
+    .layout { flex-direction: column; }
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 6px 8px;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 217, 255, 0.08);
+    }
+    .sidebar-btn {
+        flex-shrink: 0;
+        padding: 6px 12px;
+    }
+    .sidebar-btn.active::before {
+        left: 6px;
+        right: 6px;
+        top: auto;
+        bottom: 0;
+        width: auto;
+        height: 2px;
+        border-radius: 1px;
+    }
+    .main { padding: 16px; }
 }
 
 .card {
@@ -235,45 +351,14 @@ header p {
     color: #ff5252;
 }
 
-/* Demo Search Panel */
-#search-section {
-    padding: 16px 28px;
+/* Demo Search Panel — load row + filter form, both inside the Search tab */
+.search-load-panel,
+.search-filter-panel {
+    padding: 16px 20px;
 }
 
-#search-section.collapsed {
-    padding: 12px 28px;
-}
-
-.search-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: var(--accent-cyan);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    padding: 6px 0;
-    text-align: left;
-    transition: color 0.15s ease;
-}
-
-.search-toggle:hover {
-    color: var(--accent-cyan-dim);
-}
-
-.search-toggle-caret {
-    display: inline-block;
-    width: 1em;
-    color: var(--accent-cyan);
-}
-
-.search-body {
-    margin-top: 14px;
+.search-load-panel {
+    margin-bottom: 16px;
 }
 
 .search-form {
