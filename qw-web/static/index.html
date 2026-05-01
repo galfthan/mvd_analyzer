@@ -47,6 +47,57 @@
             <div id="upload-status" class="status"></div>
         </section>
 
+        <section id="search-section" class="card">
+            <button type="button" class="search-toggle" id="search-toggle" aria-expanded="true">
+                <span class="search-toggle-caret">▾</span>
+                <span class="search-toggle-label">Search demos</span>
+            </button>
+            <div class="search-body" id="search-body">
+                <form class="search-form" id="search-form" autocomplete="off">
+                    <div class="search-row">
+                        <label class="search-field">
+                            <span>Player</span>
+                            <input type="text" id="search-player" placeholder="any">
+                        </label>
+                        <label class="search-field">
+                            <span>Team</span>
+                            <input type="text" id="search-team" placeholder="any">
+                        </label>
+                        <label class="search-field">
+                            <span>Map</span>
+                            <input type="text" id="search-map" placeholder="any">
+                        </label>
+                        <label class="search-field">
+                            <span>Mode</span>
+                            <select id="search-mode">
+                                <option value="">Any</option>
+                                <option value="1on1">1v1</option>
+                                <option value="2on2">2v2</option>
+                                <option value="4on4">4v4</option>
+                                <option value="ffa">FFA</option>
+                                <option value="ctf">CTF</option>
+                            </select>
+                        </label>
+                        <label class="search-field">
+                            <span>Game tag</span>
+                            <input type="text" id="search-tag" placeholder="any">
+                        </label>
+                        <label class="search-field search-field-date">
+                            <span>From</span>
+                            <input type="date" id="search-from">
+                        </label>
+                        <label class="search-field search-field-date">
+                            <span>To</span>
+                            <input type="date" id="search-to">
+                        </label>
+                        <button type="submit" class="search-submit" id="search-submit">Search</button>
+                    </div>
+                </form>
+                <div id="search-status" class="status"></div>
+                <div id="search-results" class="search-results"></div>
+            </div>
+        </section>
+
         <section id="results-section" class="card" style="display: none;">
             <h2>Analysis Results</h2>
 

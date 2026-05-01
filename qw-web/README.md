@@ -50,7 +50,9 @@ Every push to a branch with Netlify connected will rebuild and deploy.
 
 ## How the pieces fit
 
-1. User drops an MVD file on the page (or pastes a hub.quakeworld.nu URL).
+1. User drops an MVD file on the page, pastes a hub.quakeworld.nu URL,
+   or picks a row from the demo-search panel (see "Demo search panel"
+   below).
 2. `app.js` hands the bytes to `worker.js` via `postMessage`.
 3. The worker calls `analyzeMVD(bytes, filename)` on the WASM instance.
 4. WASM code (`cmd/wasm/main.go`) runs the qwanalytics default pipeline,
@@ -60,6 +62,33 @@ Every push to a branch with Netlify connected will rebuild and deploy.
 
 The WASM boundary is the only place that bridges Go and JS. The rest of
 the frontend is dependency-free JS plus a sprinkle of CSS.
+
+## Demo search panel
+
+A collapsible **Search demos** panel sits between the "Load from
+File / Hub" row and the analysis results. It queries the same Supabase
+`v1_games` table the existing hub-loader uses (so no backend of our own)
+and lets the user filter by player, team, map, mode (1v1 / 2v2 / 4v4 /
+FFA / CTF), game tag, and date range. All filters are AND-combined,
+empty fields act as wildcards, and the latest 20 matches sorted by date
+descending are listed. Clicking a row downloads the demo and runs the
+normal analysis pipeline; the panel auto-collapses to a `▸ Search demos`
+header during analysis and can be re-expanded to swap demos.
+
+The panel state is reflected in the URL so links are shareable. Supported
+params: `player`, `team`, `map`, `mode`, `tag`, `from`, `to`. For
+example:
+
+- `?player=nexus` opens the page with the panel expanded, the player
+  field pre-filled, and the search auto-executed.
+- `?player=nexus&mode=1on1&map=aerowalk` pre-fills three fields.
+- `?gameId=212607&player=nexus` loads the demo *and* pre-populates the
+  (collapsed) search panel; expanding it shows the filters and runs the
+  query.
+
+The demo-load URL parameter is `gameId` (matching hub.quakeworld.nu's
+own URL scheme); the legacy `?hub=<id>` form is still accepted on read
+for any links that already exist in the wild.
 
 ## Loc files at runtime
 

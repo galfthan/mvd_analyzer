@@ -166,6 +166,34 @@ async function fetchGameFromHub(gameId) {
     return games[0];
 }
 
+const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 'to'];
+const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url';
+
+async function searchHub(filters) {
+    const parts = [
+        `select=${encodeURIComponent(SEARCH_SELECT)}`,
+        `order=timestamp.desc`,
+        `limit=20`,
+    ];
+    if (filters.player) parts.push(`players_fts=fts.'${encodeURIComponent(filters.player)}'`);
+    if (filters.team)   parts.push(`team_names=cs.{${encodeURIComponent(filters.team)}}`);
+    if (filters.map)    parts.push(`map=eq.${encodeURIComponent(filters.map)}`);
+    if (filters.mode)   parts.push(`mode=eq.${encodeURIComponent(filters.mode)}`);
+    if (filters.tag)    parts.push(`matchtag=ilike.%25${encodeURIComponent(filters.tag)}%25`);
+    if (filters.from)   parts.push(`timestamp=gte.${encodeURIComponent(filters.from)}`);
+    if (filters.to)     parts.push(`timestamp=lte.${encodeURIComponent(filters.to + 'T23:59:59')}`);
+
+    const resp = await fetch(`${SUPABASE_URL}?${parts.join('&')}`, {
+        headers: {
+            'apikey': SUPABASE_API_KEY,
+            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+            'accept-profile': 'public'
+        }
+    });
+    if (!resp.ok) throw new Error(`Hub API error: ${resp.status}`);
+    return await resp.json();
+}
+
 async function downloadDemoFromHub(game) {
     const sha = game.demo_sha256;
     // Try CDN first
@@ -198,10 +226,12 @@ function generateDemoFilename(game) {
 document.addEventListener('DOMContentLoaded', () => {
     setupFileUpload();
     setupTabs();
+    setupSearch();
 
-    // Auto-load from hub if URL has ?hub= parameter (wait for WASM to be ready)
     const params = new URLSearchParams(location.search);
-    const hubId = params.get('hub');
+
+    // Auto-load demo if URL has ?gameId= (canonical) or ?hub= (legacy) param
+    const hubId = params.get('gameId') || params.get('hub');
     if (hubId) {
         document.getElementById('hub-input').value = hubId;
         if (wasmReady) {
@@ -217,6 +247,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
         }
+    }
+
+    // Auto-populate + run search if URL has any ?player=/team=/map=/mode=/tag=/from=/to=
+    const urlFilters = {};
+    let hasSearch = false;
+    for (const f of SEARCH_FIELDS) {
+        const v = params.get(f);
+        if (v) { urlFilters[f] = v; hasSearch = true; }
+    }
+    if (hasSearch) {
+        writeSearchFiltersToForm(urlFilters);
+        // Only auto-expand the panel when we're not also loading a demo —
+        // displayResults() collapses it as soon as a demo is ready, so
+        // pre-collapsing now avoids a visible expand→collapse flash.
+        if (!hubId) setSearchPanelExpanded(true);
+        runSearch();
     }
 });
 
@@ -241,26 +287,35 @@ function setCurrentTime(time) {
 // ─── URL State Sharing ─────────────────────────────────────────────────────
 
 let _urlStateTimer = null;
+let lastExecutedSearch = null;
 function updateUrlState() {
     if (_urlStateTimer) return;
     _urlStateTimer = setTimeout(() => {
         _urlStateTimer = null;
-        if (!currentResult) return;
         const params = new URLSearchParams();
 
-        if (currentResult.hubInfo?.gameId) {
-            params.set('hub', currentResult.hubInfo.gameId);
+        if (currentResult) {
+            if (currentResult.hubInfo?.gameId) {
+                params.set('gameId', currentResult.hubInfo.gameId);
+            }
+
+            const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+            if (activeTab && activeTab !== 'summary') params.set('tab', activeTab);
+
+            if (mapState.currentTime > 0) {
+                params.set('t', Math.round(mapState.currentTime));
+            }
+
+            if (timelineState.segment) {
+                params.set('seg', `${Math.round(timelineState.segment.start)}-${Math.round(timelineState.segment.end)}`);
+            }
         }
 
-        const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
-        if (activeTab && activeTab !== 'summary') params.set('tab', activeTab);
-
-        if (mapState.currentTime > 0) {
-            params.set('t', Math.round(mapState.currentTime));
-        }
-
-        if (timelineState.segment) {
-            params.set('seg', `${Math.round(timelineState.segment.start)}-${Math.round(timelineState.segment.end)}`);
+        if (lastExecutedSearch) {
+            for (const f of SEARCH_FIELDS) {
+                const v = lastExecutedSearch[f];
+                if (v) params.set(f, v);
+            }
         }
 
         const qs = params.toString();
@@ -422,27 +477,7 @@ async function loadFromHub() {
         status.textContent = 'Fetching game info...';
         const game = await fetchGameFromHub(gameId);
 
-        status.textContent = 'Downloading demo...';
-        const demoBytes = await downloadDemoFromHub(game);
-
-        status.textContent = 'Analyzing...';
-        const filename = generateDemoFilename(game);
-        const jsonStr = await analyzeInWorker(demoBytes, filename);
-        const result = JSON.parse(jsonStr);
-        if (result.error) throw new Error(result.error);
-
-        status.textContent = 'Analysis complete!';
-        status.className = 'status success';
-        currentResult = result;
-
-        // Attach hub info for viewer links
-        currentResult.hubInfo = {
-            gameId: gameId,
-            viewerUrl: `https://hub.quakeworld.nu/games/?gameId=${gameId}`,
-            players: game.players
-        };
-
-        displayResults(result);
+        await loadGameFromHub(game);
     } catch (error) {
         status.textContent = 'Error: ' + error.message;
         status.className = 'status error';
@@ -451,11 +486,195 @@ async function loadFromHub() {
     }
 }
 
+// Given a game object already fetched from Supabase, download the demo,
+// analyse it, and render the results. Shared by loadFromHub() (which
+// fetches by ID first) and the search-result click handler (which
+// already has the row in hand).
+async function loadGameFromHub(game) {
+    const status = document.getElementById('upload-status');
+    if (!wasmReady) throw new Error('Analyzer is still loading, please wait...');
+
+    document.getElementById('hub-input').value = game.id;
+
+    status.textContent = 'Downloading demo...';
+    status.className = 'status loading';
+    const demoBytes = await downloadDemoFromHub(game);
+
+    status.textContent = 'Analyzing...';
+    const filename = generateDemoFilename(game);
+    const jsonStr = await analyzeInWorker(demoBytes, filename);
+    const result = JSON.parse(jsonStr);
+    if (result.error) throw new Error(result.error);
+
+    status.textContent = 'Analysis complete!';
+    status.className = 'status success';
+    currentResult = result;
+
+    currentResult.hubInfo = {
+        gameId: game.id,
+        viewerUrl: `https://hub.quakeworld.nu/games/?gameId=${game.id}`,
+        players: game.players
+    };
+
+    displayResults(result);
+}
+
+// ─── Demo Search Panel ──────────────────────────────────────────────────────
+
+function readSearchFilters() {
+    return {
+        player: document.getElementById('search-player').value.trim(),
+        team:   document.getElementById('search-team').value.trim(),
+        map:    document.getElementById('search-map').value.trim(),
+        mode:   document.getElementById('search-mode').value,
+        tag:    document.getElementById('search-tag').value.trim(),
+        from:   document.getElementById('search-from').value,
+        to:     document.getElementById('search-to').value,
+    };
+}
+
+function writeSearchFiltersToForm(filters) {
+    if (filters.player !== undefined) document.getElementById('search-player').value = filters.player;
+    if (filters.team   !== undefined) document.getElementById('search-team').value   = filters.team;
+    if (filters.map    !== undefined) document.getElementById('search-map').value    = filters.map;
+    if (filters.mode   !== undefined) document.getElementById('search-mode').value   = filters.mode;
+    if (filters.tag    !== undefined) document.getElementById('search-tag').value    = filters.tag;
+    if (filters.from   !== undefined) document.getElementById('search-from').value   = filters.from;
+    if (filters.to     !== undefined) document.getElementById('search-to').value     = filters.to;
+}
+
+function setSearchPanelExpanded(expanded) {
+    const section = document.getElementById('search-section');
+    const body = document.getElementById('search-body');
+    const toggle = document.getElementById('search-toggle');
+    const caret = toggle.querySelector('.search-toggle-caret');
+    if (expanded) {
+        section.classList.remove('collapsed');
+        body.style.display = '';
+        toggle.setAttribute('aria-expanded', 'true');
+        caret.textContent = '▾';
+    } else {
+        section.classList.add('collapsed');
+        body.style.display = 'none';
+        toggle.setAttribute('aria-expanded', 'false');
+        caret.textContent = '▸';
+    }
+}
+
+function setupSearch() {
+    document.getElementById('search-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        runSearch();
+    });
+    document.getElementById('search-toggle').addEventListener('click', () => {
+        const expanded = document.getElementById('search-toggle').getAttribute('aria-expanded') === 'true';
+        setSearchPanelExpanded(!expanded);
+    });
+}
+
+async function runSearch() {
+    const filters = readSearchFilters();
+    const status = document.getElementById('search-status');
+    const submit = document.getElementById('search-submit');
+    const resultsEl = document.getElementById('search-results');
+
+    status.textContent = 'Searching…';
+    status.className = 'status loading';
+    submit.disabled = true;
+
+    try {
+        const games = await searchHub(filters);
+        status.textContent = '';
+        status.className = 'status';
+        renderSearchResults(games);
+        lastExecutedSearch = filters;
+        updateUrlState();
+    } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+        status.className = 'status error';
+        resultsEl.innerHTML = '';
+    } finally {
+        submit.disabled = false;
+    }
+}
+
+const SEARCH_MODE_LABELS = {
+    '1on1': '1v1',
+    '2on2': '2v2',
+    '4on4': '4v4',
+    'ffa':  'FFA',
+    'ctf':  'CTF',
+};
+
+function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderSearchResults(games) {
+    const el = document.getElementById('search-results');
+    el.innerHTML = '';
+    if (!games || games.length === 0) {
+        el.innerHTML = '<div class="search-empty">No demos match these filters.</div>';
+        return;
+    }
+    for (const game of games) {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'search-result';
+        row.dataset.gameId = game.id;
+
+        const modeText = SEARCH_MODE_LABELS[game.mode] || game.mode || '-';
+        const mapText  = game.map || '-';
+        const dateText = (game.timestamp || '').slice(0, 10);
+
+        // Pick contestants: top-2 teams for team modes, top-2 players otherwise.
+        const isTeamMode = game.mode && game.mode !== '1on1' && game.mode !== 'ffa';
+        let contestants = '—';
+        if (isTeamMode && Array.isArray(game.teams) && game.teams.length >= 2) {
+            const t = [...game.teams].sort((a, b) => (b.frags || 0) - (a.frags || 0));
+            contestants = `${t[0].name} ${t[0].frags} : ${t[1].frags} ${t[1].name}`;
+        } else if (Array.isArray(game.players) && game.players.length >= 2) {
+            const p = [...game.players].sort((a, b) => (b.frags || 0) - (a.frags || 0));
+            contestants = `${p[0].name} ${p[0].frags} : ${p[1].frags} ${p[1].name}`;
+        } else if (Array.isArray(game.players) && game.players.length === 1) {
+            const p = game.players[0];
+            contestants = `${p.name} ${p.frags || 0}`;
+        }
+
+        const tagHtml = game.matchtag
+            ? `<span class="search-result-tag">${escapeHtml(game.matchtag)}</span>`
+            : '<span class="search-result-tag"></span>';
+
+        row.innerHTML =
+            `<span class="search-result-mode">${escapeHtml(modeText)}</span>` +
+            `<span class="search-result-map">${escapeHtml(mapText)}</span>` +
+            `<span class="search-result-contest">${escapeHtml(contestants)}</span>` +
+            tagHtml +
+            `<span class="search-result-date">${escapeHtml(dateText)}</span>`;
+
+        row.addEventListener('click', () => loadGameFromSearch(game));
+        el.appendChild(row);
+    }
+}
+
+async function loadGameFromSearch(game) {
+    try {
+        await loadGameFromHub(game);
+        // displayResults() collapses the panel as part of finishing a load.
+    } catch (error) {
+        const status = document.getElementById('upload-status');
+        status.textContent = 'Error: ' + error.message;
+        status.className = 'status error';
+    }
+}
+
 function displayResults(result) {
     // Reset timeline state before loading new demo
     resetTimelineState();
 
     document.getElementById('results-section').style.display = 'block';
+    setSearchPanelExpanded(false);
 
     const demoInfo = result.demoInfo;
 
