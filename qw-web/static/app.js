@@ -414,19 +414,29 @@ function setupTabs() {
             //
             // Canvases sized from their container's clientWidth render empty
             // when they were first drawn while the tab was hidden
-            // (clientWidth === 0 under display:none). Every dimension-
-            // sensitive tab therefore re-renders here, after its container
-            // is visible, so the first-paint width is always real.
-            if (tabName === 'map') {
-                renderMap(mapState.currentTime);
-            } else if (tabName === 'timeline') {
-                if (currentResult) updateDetailView();
-                updateTimeIndicators();
-            } else if (tabName === 'chat') {
-                renderChatMessages();
-            } else if (tabName === 'loc-graph') {
-                renderLocGraph();
-            }
+            // (clientWidth === 0 under display:none). Re-render here, after
+            // the .active class has flipped the parent to display:block and
+            // the next frame has let layout settle — a same-frame
+            // clientWidth read after a display:none → block transition can
+            // still come back as 0 in some browsers (Chromium when the
+            // first-paint also has a tabFadeIn animation pending), which
+            // sizes the canvas to 0 px and produces a blank tab until the
+            // user does anything that triggers another render. The map's
+            // canvas is fixed-size so its blank-tab cause is the
+            // bucket-cache short-circuit in renderMap; force-dirty fixes it.
+            requestAnimationFrame(() => {
+                if (tabName === 'map') {
+                    mapState.renderDirty = true;
+                    renderMap(mapState.currentTime);
+                } else if (tabName === 'timeline') {
+                    if (currentResult) updateDetailView();
+                    updateTimeIndicators();
+                } else if (tabName === 'chat') {
+                    renderChatMessages();
+                } else if (tabName === 'loc-graph') {
+                    renderLocGraph();
+                }
+            });
 
             updateUrlState();
         });
@@ -819,8 +829,12 @@ function makeSortable(table) {
             th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
 
             rows.sort((a, b) => {
-                const aText = a.cells[colIdx]?.textContent.trim() || '';
-                const bText = b.cells[colIdx]?.textContent.trim() || '';
+                const aCell = a.cells[colIdx];
+                const bCell = b.cells[colIdx];
+                // Cells can opt-in to a custom sort key via data-sort-value
+                // (e.g. the Stack column shows "70 120 RA" but sorts on H+A).
+                const aText = (aCell?.dataset.sortValue ?? aCell?.textContent.trim() ?? '');
+                const bText = (bCell?.dataset.sortValue ?? bCell?.textContent.trim() ?? '');
                 // Extract leading number (handles "42", "3.5%", "12 (30s)", etc.)
                 const aNum = parseFloat(aText);
                 const bNum = parseFloat(bText);
@@ -4793,7 +4807,7 @@ function buildMapLegend() {
 
         const table = document.createElement('table');
         table.className = 'team-status-table';
-        table.innerHTML = `<thead><tr><th></th><th>Player</th><th>Loc</th><th>H</th><th>A</th><th>Wpn</th><th>View</th></tr></thead>`;
+        table.innerHTML = `<thead><tr><th></th><th>Player</th><th>Loc</th><th title="Health + armor (sorted by H+A)">Stack</th><th>Wpn</th><th>View</th></tr></thead>`;
         const tbody = document.createElement('tbody');
         tbody.className = 'map-legend-tbody';
 
@@ -4806,8 +4820,7 @@ function buildMapLegend() {
                     <td><span class="map-legend-symbol" style="color: ${teamHex}">${info.symbol}</span></td>
                     <td>${escapedName}</td>
                     <td class="map-legend-loc" data-player="${escapedName}">-</td>
-                    <td class="map-legend-health" data-player="${escapedName}">-</td>
-                    <td class="map-legend-armor" data-player="${escapedName}">-</td>
+                    <td class="map-legend-stack" data-player="${escapedName}" data-sort-value="0">-</td>
                     <td class="map-legend-wpn" data-player="${escapedName}">-</td>
                     <td class="map-legend-hub" data-player="${escapedName}"></td>
                 `;
@@ -4897,25 +4910,27 @@ function updateMapLegend() {
         }
     }
 
-    const healthCells = legend.querySelectorAll('.map-legend-health');
-    for (const cell of healthCells) {
+    const stackCells = legend.querySelectorAll('.map-legend-stack');
+    for (const cell of stackCells) {
         const name = cell.dataset.player;
         const data = playerData?.[name];
-        cell.textContent = data ? (data.h ?? data.health ?? '-') : '-';
-    }
-
-    const armorCells = legend.querySelectorAll('.map-legend-armor');
-    for (const cell of armorCells) {
-        const name = cell.dataset.player;
-        const data = playerData?.[name];
-        if (data && (data.a ?? data.armor) > 0) {
-            const armorVal = data.a ?? data.armor;
-            const armorType = data.at ?? data.armorType ?? '';
-            cell.innerHTML = armorType
-                ? `<span class="armor-${armorType}">${armorVal} ${armorType.toUpperCase()}</span>`
-                : `${armorVal}`;
-        } else {
+        if (!data) {
             cell.textContent = '-';
+            cell.dataset.sortValue = '0';
+            continue;
+        }
+        const h = data.h ?? data.health ?? 0;
+        const a = data.a ?? data.armor ?? 0;
+        const at = data.at ?? data.armorType ?? '';
+        cell.dataset.sortValue = String(h + a);
+        if (h <= 0) {
+            cell.textContent = '-';
+        } else if (a > 0 && at) {
+            cell.innerHTML = `<span class="stack-h">${h}</span> <span class="armor-${at}">${a} ${at.toUpperCase()}</span>`;
+        } else if (a > 0) {
+            cell.innerHTML = `<span class="stack-h">${h}</span> <span>${a}</span>`;
+        } else {
+            cell.innerHTML = `<span class="stack-h">${h}</span>`;
         }
     }
 
@@ -5648,17 +5663,14 @@ function renderItemsPanel() {
             const style = ITEM_MARKER_STYLES[item.kind];
             const tr = document.createElement('tr');
             const swatch = document.createElement('td');
+            swatch.className = 'item-swatch-cell';
             swatch.appendChild(buildItemSwatch(style));
-            const name = document.createElement('td');
-            name.className = 'item-name';
-            name.textContent = item.name.toUpperCase().replace(/_/g, ' ');
             const loc = document.createElement('td');
             loc.className = 'item-loc';
             loc.textContent = item.loc || '';
             const status = document.createElement('td');
             status.className = 'item-status';
             tr.appendChild(swatch);
-            tr.appendChild(name);
             tr.appendChild(loc);
             tr.appendChild(status);
             body.appendChild(tr);
@@ -6176,7 +6188,10 @@ function onMapFullscreenChange() {
             if (!_fsTimelineHome) {
                 _fsTimelineHome = { parent: tl.parentNode, next: tl.nextSibling };
             }
-            panel.appendChild(tl);
+            // Pin to the top of the fullscreen panel so the visual order is
+            // timeline → canvas → controls (controls live at the bottom of
+            // .map-panel via the HTML layout).
+            panel.insertBefore(tl, panel.firstChild);
         } else if (_fsTimelineHome && _fsTimelineHome.parent) {
             _fsTimelineHome.parent.insertBefore(tl, _fsTimelineHome.next);
         }
