@@ -466,30 +466,38 @@ function setupTabs() {
             // empty when they were first drawn while the tab was hidden
             // (clientWidth === 0 under display:none). Force a synchronous
             // reflow of the now-active tab content by reading offsetHeight
-            // — this commits the display:none → block transition before
-            // we measure clientWidth or draw. (requestAnimationFrame was
-            // not enough on its own; some Chromium builds defer the
-            // post-display-change layout until after rAF runs when a CSS
-            // animation is also pending, leaving canvases sized to 0.)
+            // so the display:none → block transition is committed before
+            // we measure clientWidth or draw.
             //
             // The map's canvas is fixed-size, so its blank-tab cause is
-            // the bucket-cache short-circuit in renderMap; clear the
-            // cache + mark dirty so the redraw always happens.
+            // the bucket-cache short-circuit in renderMap; clear the cache
+            // + mark dirty so the redraw always happens.
+            //
+            // Some renders (Timeline in particular) don't surface on the
+            // first sync attempt in Firefox — the unified-timeline
+            // becoming visible at the same moment shifts the scroll
+            // container layout, and the canvases written that frame get
+            // composited through a stale layer snapshot. A second render
+            // in the next frame catches this.
             const tabContentEl = document.getElementById(`tab-${tabName}`);
             if (tabContentEl) void tabContentEl.offsetHeight;
 
-            if (tabName === 'map') {
-                mapState.renderDirty = true;
-                mapState.lastRenderedBucket = null;
-                renderMap(mapState.currentTime);
-            } else if (tabName === 'timeline') {
-                if (currentResult) updateDetailView();
-                updateTimeIndicators();
-            } else if (tabName === 'chat') {
-                renderChatMessages();
-            } else if (tabName === 'loc-graph') {
-                renderLocGraph();
-            }
+            const renderForTab = () => {
+                if (tabName === 'map') {
+                    mapState.renderDirty = true;
+                    mapState.lastRenderedBucket = null;
+                    renderMap(mapState.currentTime);
+                } else if (tabName === 'timeline') {
+                    if (currentResult) updateDetailView();
+                    updateTimeIndicators();
+                } else if (tabName === 'chat') {
+                    renderChatMessages();
+                } else if (tabName === 'loc-graph') {
+                    renderLocGraph();
+                }
+            };
+            renderForTab();
+            requestAnimationFrame(renderForTab);
 
             updateUrlState();
         });

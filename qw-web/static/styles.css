@@ -2359,8 +2359,8 @@ th.sortable.sort-desc::after {
     border-radius: 8px;
     padding: 12px;
     flex: 0 0 auto;
-    width: 145px;
-    min-width: 130px;
+    width: 218px;
+    min-width: 195px;
 }
 
 .map-items-panel h4 {
@@ -2411,7 +2411,7 @@ th.sortable.sort-desc::after {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 80px;
+    max-width: 140px;
 }
 
 .map-items-table .item-status {
