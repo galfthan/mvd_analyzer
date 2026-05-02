@@ -2007,10 +2007,10 @@ th.sortable.sort-desc::after {
 }
 
 /* Fullscreen layout: the whole .map-panel becomes the fullscreen element.
-   Layout priority — give the sidebar tables and the region-control table
-   the room they need, then let the map canvas take the rest. The map
-   shrinks gracefully on smaller screens; on bigger screens it grows
-   because both the sidebar and the region-control panel are capped. */
+   Top bar stays at top, .map-main-content grows to fill remaining height,
+   canvas grows to fill the available width (minus sidebar), sidebar keeps
+   its max-width. The region-control table below the canvas is hidden in
+   fullscreen to free vertical space. */
 .map-panel--fullscreen {
     width: 100vw;
     height: 100vh;
@@ -2038,23 +2038,20 @@ th.sortable.sort-desc::after {
     height: 100%;
 }
 
-/* Wider sidebar cap in fullscreen — lets the items + region-status
- * row breathe without forcing the canvas to be cramped on small
- * screens (sidebar shrinks to its 400 px min-width when needed). */
+/* Sidebar needs to fit the items panel (218 px) + region-status side by
+ * side, so its min-width has to be wide enough that region-status gets
+ * a usable column. The map shrinks to give it that room; on larger
+ * screens the sidebar still tops out at max-width and the rest goes to
+ * the canvas. */
 .map-panel--fullscreen .map-sidebar {
     max-height: 100%;
     overflow-y: auto;
-    min-width: 400px;
-    max-width: 920px;
+    min-width: 500px;
+    max-width: 780px;
 }
 
-/* Region-control table stays visible in fullscreen (was hidden), but
- * is capped at ~35 vh so the map keeps the lion's share of the
- * vertical space. Internal scroll handles long region lists. */
 .map-panel--fullscreen #region-control-panel {
-    flex: 0 1 auto;
-    max-height: 35vh;
-    overflow-y: auto;
+    display: none !important;
 }
 
 /* Relocated unified timeline: pin to the bottom of the fullscreen map panel,
