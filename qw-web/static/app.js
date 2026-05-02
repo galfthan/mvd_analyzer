@@ -444,16 +444,24 @@ function setupTabs() {
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const tabName = btn.dataset.tab;
+
+            // Stage 1 — toggle the unified-timeline first and force a
+            // layout commit. The timeline is sticky-positioned inside
+            // .main, so its visibility change shifts the scroll
+            // container's layout, and Firefox would otherwise
+            // composite the canvases that we paint immediately
+            // afterwards through a stale layer snapshot.
+            const tl = document.getElementById('unified-timeline');
+            if (tl && currentResult) {
+                tl.style.display = TABS_WITH_TIMELINE.includes(tabName) ? '' : 'none';
+                void tl.offsetHeight;
+            }
+
+            // Stage 2 — flip the active tab.
             tabButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
-
-            // Show/hide unified timeline
-            const tl = document.getElementById('unified-timeline');
-            if (tl && currentResult) {
-                tl.style.display = TABS_WITH_TIMELINE.includes(tabName) ? '' : 'none';
-            }
 
             // Stop playback when switching to tabs without timeline
             if (!TABS_WITH_TIMELINE.includes(tabName) && mapState.isPlaying) {
@@ -498,6 +506,12 @@ function setupTabs() {
             };
             renderForTab();
             requestAnimationFrame(renderForTab);
+            // Firefox can hold a layer snapshot for longer than one
+            // frame after a sticky-positioned sibling appears (the
+            // unified-timeline becomes visible at the same moment).
+            // A 120 ms backup catches that — manual console runs of
+            // the same code work, so the fix is purely time-based.
+            setTimeout(renderForTab, 120);
 
             updateUrlState();
         });
