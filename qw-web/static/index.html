@@ -65,6 +65,34 @@
 
         <main class="main">
 
+            <!-- Unified Timeline Widget (visible on Timeline/Chat/Map tabs).
+                 Lives at the top of .main outside the scroll container so it
+                 stays put without needing position:sticky — Firefox composited
+                 sticky-promoted siblings through stale snapshots. -->
+            <div id="unified-timeline" class="panel timeline-nav-panel" style="display: none;">
+                <div class="timeline-nav-row">
+                    <div class="timeline-playback-controls">
+                        <button id="tl-rev" title="Reverse playback (1x)">-1x</button>
+                        <button id="tl-slow" title="Play 0.2x (slow motion)">0.2x</button>
+                        <button id="tl-play-pause" title="Play/Pause">1x</button>
+                        <button id="tl-5x" title="Play 5x speed">5x</button>
+                    </div>
+                    <span id="tl-current-time" class="timeline-nav-time">0:00</span>
+                    <div class="timeline-nav-bar-wrapper" id="tl-bar-wrapper">
+                        <div class="timeline-nav-bar" id="tl-bar">
+                            <div class="timeline-nav-track" id="tl-track"></div>
+                            <div class="timeline-selection-overlay" id="tl-selection-overlay"></div>
+                            <div class="timeline-nav-cursor" id="tl-cursor"></div>
+                        </div>
+                        <div class="timeline-nav-caret" id="tl-caret" title="Drag to set current time">▲</div>
+                        <div class="timeline-nav-axis" id="tl-axis"></div>
+                    </div>
+                    <span id="tl-segment-label" class="timeline-nav-segment"></span>
+                </div>
+            </div>
+
+            <div class="main-scroll">
+
             <!-- Search Tab (first; always available even when no demo loaded) -->
             <div id="tab-search" class="tab-content active">
                 <div class="panel search-load-panel">
@@ -120,29 +148,6 @@
                     </form>
                     <div id="search-status" class="status"></div>
                     <div id="search-results" class="search-results"></div>
-                </div>
-            </div>
-
-            <!-- Unified Timeline Widget (visible on Timeline/Chat/Map tabs) -->
-            <div id="unified-timeline" class="panel timeline-nav-panel" style="display: none;">
-                <div class="timeline-nav-row">
-                    <div class="timeline-playback-controls">
-                        <button id="tl-rev" title="Reverse playback (1x)">-1x</button>
-                        <button id="tl-slow" title="Play 0.2x (slow motion)">0.2x</button>
-                        <button id="tl-play-pause" title="Play/Pause">1x</button>
-                        <button id="tl-5x" title="Play 5x speed">5x</button>
-                    </div>
-                    <span id="tl-current-time" class="timeline-nav-time">0:00</span>
-                    <div class="timeline-nav-bar-wrapper" id="tl-bar-wrapper">
-                        <div class="timeline-nav-bar" id="tl-bar">
-                            <div class="timeline-nav-track" id="tl-track"></div>
-                            <div class="timeline-selection-overlay" id="tl-selection-overlay"></div>
-                            <div class="timeline-nav-cursor" id="tl-cursor"></div>
-                        </div>
-                        <div class="timeline-nav-caret" id="tl-caret" title="Drag to set current time">▲</div>
-                        <div class="timeline-nav-axis" id="tl-axis"></div>
-                    </div>
-                    <span id="tl-segment-label" class="timeline-nav-segment"></span>
                 </div>
             </div>
 
@@ -738,6 +743,7 @@
                 </div>
             </div>
 
+            </div><!-- /main-scroll -->
         </main>
     </div>
 

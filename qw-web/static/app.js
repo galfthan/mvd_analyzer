@@ -444,74 +444,49 @@ function setupTabs() {
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const tabName = btn.dataset.tab;
-
-            // Stage 1 — toggle the unified-timeline first and force a
-            // layout commit. The timeline is sticky-positioned inside
-            // .main, so its visibility change shifts the scroll
-            // container's layout, and Firefox would otherwise
-            // composite the canvases that we paint immediately
-            // afterwards through a stale layer snapshot.
-            const tl = document.getElementById('unified-timeline');
-            if (tl && currentResult) {
-                tl.style.display = TABS_WITH_TIMELINE.includes(tabName) ? '' : 'none';
-                void tl.offsetHeight;
-            }
-
-            // Stage 2 — flip the active tab.
             tabButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            // Show/hide the unified-timeline. It now lives outside the
+            // scroll container as a sibling row of .main-scroll, so a
+            // simple display toggle is all that's needed — no sticky,
+            // no compositor games.
+            const tl = document.getElementById('unified-timeline');
+            if (tl && currentResult) {
+                tl.style.display = TABS_WITH_TIMELINE.includes(tabName) ? '' : 'none';
+            }
 
             // Stop playback when switching to tabs without timeline
             if (!TABS_WITH_TIMELINE.includes(tabName) && mapState.isPlaying) {
                 stopPlayback();
             }
 
-            // Sync views on tab switch.
-            //
-            // Canvases sized from their container's clientWidth render
-            // empty when they were first drawn while the tab was hidden
-            // (clientWidth === 0 under display:none). Force a synchronous
-            // reflow of the now-active tab content by reading offsetHeight
-            // so the display:none → block transition is committed before
-            // we measure clientWidth or draw.
-            //
-            // The map's canvas is fixed-size, so its blank-tab cause is
-            // the bucket-cache short-circuit in renderMap; clear the cache
-            // + mark dirty so the redraw always happens.
-            //
-            // Some renders (Timeline in particular) don't surface on the
-            // first sync attempt in Firefox — the unified-timeline
-            // becoming visible at the same moment shifts the scroll
-            // container layout, and the canvases written that frame get
-            // composited through a stale layer snapshot. A second render
-            // in the next frame catches this.
+            // Sync views on tab switch. Canvases sized from their
+            // container's clientWidth render empty when first drawn
+            // while the tab was hidden (clientWidth === 0 under
+            // display:none) — force a synchronous reflow of the
+            // now-active tab content so the display:none → block
+            // transition commits before we measure or draw. The map's
+            // canvas is fixed-size; its blank-tab cause is the
+            // bucket-cache short-circuit in renderMap, which the
+            // dirty-flag reset handles.
             const tabContentEl = document.getElementById(`tab-${tabName}`);
             if (tabContentEl) void tabContentEl.offsetHeight;
 
-            const renderForTab = () => {
-                if (tabName === 'map') {
-                    mapState.renderDirty = true;
-                    mapState.lastRenderedBucket = null;
-                    renderMap(mapState.currentTime);
-                } else if (tabName === 'timeline') {
-                    if (currentResult) updateDetailView();
-                    updateTimeIndicators();
-                } else if (tabName === 'chat') {
-                    renderChatMessages();
-                } else if (tabName === 'loc-graph') {
-                    renderLocGraph();
-                }
-            };
-            renderForTab();
-            requestAnimationFrame(renderForTab);
-            // Firefox can hold a layer snapshot for longer than one
-            // frame after a sticky-positioned sibling appears (the
-            // unified-timeline becomes visible at the same moment).
-            // A 120 ms backup catches that — manual console runs of
-            // the same code work, so the fix is purely time-based.
-            setTimeout(renderForTab, 120);
+            if (tabName === 'map') {
+                mapState.renderDirty = true;
+                mapState.lastRenderedBucket = null;
+                renderMap(mapState.currentTime);
+            } else if (tabName === 'timeline') {
+                if (currentResult) updateDetailView();
+                updateTimeIndicators();
+            } else if (tabName === 'chat') {
+                renderChatMessages();
+            } else if (tabName === 'loc-graph') {
+                renderLocGraph();
+            }
 
             updateUrlState();
         });

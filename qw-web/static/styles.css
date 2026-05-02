@@ -178,23 +178,31 @@ body {
     border-radius: 2px;
 }
 
+/* Two-row main pane: unified-timeline sits in the fixed top row,
+ * .main-scroll fills the rest and scrolls. The timeline is no longer
+ * position:sticky — that triggered a Firefox compositor bug where the
+ * canvases inside the now-active tab were composited through a stale
+ * snapshot for the first frame. */
 .main {
     flex: 1;
     min-width: 0;
-    padding: 20px 28px;
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Pin the unified-timeline (playback bar + scrubber + axis) to the top
- * of the .main scroll container so it stays usable while the user
- * scrolls the active tab's content. JS toggles its display: '' / 'none'
- * based on the active tab — sticky reads from the visible state. */
 #unified-timeline {
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    flex: 0 0 auto;
     background: var(--bg-deep);
-    margin-top: 0;
+    /* Match the horizontal padding of .main-scroll so the timeline
+     * lines up with the tab content below. */
+    margin: 20px 28px 0 28px;
+}
+
+.main-scroll {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 20px 28px;
 }
 
 /* Empty state for non-Search tabs when no demo loaded.
