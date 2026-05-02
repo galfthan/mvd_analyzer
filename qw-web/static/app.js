@@ -358,7 +358,18 @@ function updateUrlState() {
         }
 
         const qs = params.toString();
-        history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+        if (qs) {
+            history.replaceState(null, '', `?${qs}`);
+        } else if (currentResult || lastExecutedSearch) {
+            // We've actually loaded something but happen to have no
+            // params worth keeping (e.g. fresh load on Summary at t=0
+            // with no segment). Clear the URL.
+            history.replaceState(null, '', location.pathname);
+        }
+        // else: nothing yet — leave the URL alone. There may still be
+        // an in-flight ?gameId=… deep-link auto-load whose params we
+        // would otherwise wipe before WASM finishes booting and
+        // applyUrlState() can read them.
     }, 500);
 }
 
@@ -451,31 +462,34 @@ function setupTabs() {
 
             // Sync views on tab switch.
             //
-            // Canvases sized from their container's clientWidth render empty
-            // when they were first drawn while the tab was hidden
-            // (clientWidth === 0 under display:none). Re-render here, after
-            // the .active class has flipped the parent to display:block and
-            // the next frame has let layout settle — a same-frame
-            // clientWidth read after a display:none → block transition can
-            // still come back as 0 in some browsers (Chromium when the
-            // first-paint also has a tabFadeIn animation pending), which
-            // sizes the canvas to 0 px and produces a blank tab until the
-            // user does anything that triggers another render. The map's
-            // canvas is fixed-size so its blank-tab cause is the
-            // bucket-cache short-circuit in renderMap; force-dirty fixes it.
-            requestAnimationFrame(() => {
-                if (tabName === 'map') {
-                    mapState.renderDirty = true;
-                    renderMap(mapState.currentTime);
-                } else if (tabName === 'timeline') {
-                    if (currentResult) updateDetailView();
-                    updateTimeIndicators();
-                } else if (tabName === 'chat') {
-                    renderChatMessages();
-                } else if (tabName === 'loc-graph') {
-                    renderLocGraph();
-                }
-            });
+            // Canvases sized from their container's clientWidth render
+            // empty when they were first drawn while the tab was hidden
+            // (clientWidth === 0 under display:none). Force a synchronous
+            // reflow of the now-active tab content by reading offsetHeight
+            // — this commits the display:none → block transition before
+            // we measure clientWidth or draw. (requestAnimationFrame was
+            // not enough on its own; some Chromium builds defer the
+            // post-display-change layout until after rAF runs when a CSS
+            // animation is also pending, leaving canvases sized to 0.)
+            //
+            // The map's canvas is fixed-size, so its blank-tab cause is
+            // the bucket-cache short-circuit in renderMap; clear the
+            // cache + mark dirty so the redraw always happens.
+            const tabContentEl = document.getElementById(`tab-${tabName}`);
+            if (tabContentEl) void tabContentEl.offsetHeight;
+
+            if (tabName === 'map') {
+                mapState.renderDirty = true;
+                mapState.lastRenderedBucket = null;
+                renderMap(mapState.currentTime);
+            } else if (tabName === 'timeline') {
+                if (currentResult) updateDetailView();
+                updateTimeIndicators();
+            } else if (tabName === 'chat') {
+                renderChatMessages();
+            } else if (tabName === 'loc-graph') {
+                renderLocGraph();
+            }
 
             updateUrlState();
         });
