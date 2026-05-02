@@ -89,11 +89,36 @@ let wasmReady = false;
 let analyzeResolve = null;
 let analyzeReject = null;
 
+// Hide the wasm-loading overlay. When auto-loading a demo from a URL
+// (?gameId=...), keep it up through the demo download/analyse so the
+// user never sees a half-populated Search/Summary tab in the
+// background — displayResults() calls hideLoadingOverlay() once the
+// pipeline has finished.
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('wasm-loading');
+    if (overlay) overlay.style.display = 'none';
+}
+
+function setLoadingOverlayMessage(text) {
+    const overlay = document.getElementById('wasm-loading');
+    if (!overlay) return;
+    // The subtitle is the second flex child (the small status line).
+    const subtitle = overlay.children[1];
+    if (subtitle) subtitle.textContent = text;
+}
+
 worker.onmessage = (e) => {
     if (e.data.type === 'ready') {
         wasmReady = true;
-        const overlay = document.getElementById('wasm-loading');
-        if (overlay) overlay.style.display = 'none';
+        const params = new URLSearchParams(location.search);
+        const willAutoLoadDemo = !!(params.get('gameId') || params.get('hub'));
+        if (willAutoLoadDemo) {
+            // Demo download is about to start; keep the overlay up and
+            // show the next phase.
+            setLoadingOverlayMessage('Loading demo…');
+        } else {
+            hideLoadingOverlay();
+        }
         const v = e.data.version;
         const tag = document.getElementById('version-tag');
         if (tag && v) {
@@ -229,9 +254,20 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSearch();
 
     const params = new URLSearchParams(location.search);
+    const hubId = params.get('gameId') || params.get('hub');
+    const requestedTab = params.get('tab');
+
+    // Pick the initial active tab. When deep-linking to a demo we want
+    // the destination tab to be active even before the demo finishes
+    // loading, so the wasm-loading overlay covers the right pane and
+    // the user never glimpses the Search panel mid-flight.
+    if (hubId) {
+        switchTab(requestedTab || 'summary');
+    } else if (requestedTab) {
+        switchTab(requestedTab);
+    } // else: leave the HTML default (Search) active.
 
     // Auto-load demo if URL has ?gameId= (canonical) or ?hub= (legacy) param
-    const hubId = params.get('gameId') || params.get('hub');
     if (hubId) {
         document.getElementById('hub-input').value = hubId;
         if (wasmReady) {
@@ -249,7 +285,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Auto-populate + run search if URL has any ?player=/team=/map=/mode=/tag=/from=/to=
+    // Auto-populate search filters from the URL. Only auto-RUN the
+    // query when there's no demo also being deep-loaded — when the
+    // user shares e.g. ?gameId=…&player=nexus, the player filter is
+    // incidental URL state from however they originally found the
+    // demo, not a request to browse the search results.
     const urlFilters = {};
     let hasSearch = false;
     for (const f of SEARCH_FIELDS) {
@@ -258,11 +298,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (hasSearch) {
         writeSearchFiltersToForm(urlFilters);
-        // When no demo is also being loaded, ensure the Search tab is the
-        // visible one (it is by default in the HTML, but the URL may
-        // also carry a ?tab= override that we must respect).
-        if (!hubId && !params.get('tab')) switchTab('search');
-        runSearch();
+        if (!hubId) {
+            if (!requestedTab) switchTab('search');
+            runSearch();
+        }
     }
 });
 
@@ -496,6 +535,9 @@ async function loadFromHub() {
     } catch (error) {
         status.textContent = 'Error: ' + error.message;
         status.className = 'status error';
+        // If we were holding the loading overlay up for a deep-link auto-load,
+        // drop it so the user sees the error message instead of a stuck spinner.
+        hideLoadingOverlay();
     } finally {
         btn.disabled = false;
     }
@@ -776,6 +818,10 @@ function displayResults(result) {
 
     // Apply URL state (tab, time, segment) if present
     applyUrlState();
+
+    // Reveal the now-populated UI (overlay may already be hidden if the
+    // demo was loaded interactively rather than via ?gameId=).
+    hideLoadingOverlay();
 }
 
 // ─── Sortable Tables ──────────────────────────────────────────────────────
