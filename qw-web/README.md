@@ -48,18 +48,63 @@ dist/
 `netlify.toml` at the repo root runs `make build` and publishes `dist/`.
 Every push to a branch with Netlify connected will rebuild and deploy.
 
+## Layout
+
+A slim top bar (wordmark + commit-hash version + GitHub link) sits
+above a Grafana-style frame: a fixed left **sidebar** with one button
+per analysis tab, and a **main pane** that fills the rest of the
+viewport (no width cap). Sidebar order is `Search`, `Summary`,
+`Timeline`, `Chat`, `Map`, `Loc Graph`, `Key Moments`, `Pack Drops`.
+
+The Search tab is the first tab and is always available — it holds the
+file picker, the hub-URL load row, and the filter form for browsing
+the hub. The other tabs are always present in the sidebar; until a
+demo is loaded they show a short "Load or search a demo to begin"
+placeholder (CSS-driven via a `body.no-demo` class). After a successful
+load the placeholder is hidden, the Summary tab activates, and the
+real content renders.
+
+On viewports below 800 px the sidebar reflows into a horizontal scroll
+strip above the main pane.
+
 ## How the pieces fit
 
-1. User drops an MVD file on the page (or pastes a hub.quakeworld.nu URL).
+1. User drops an MVD file on the Search tab, pastes a hub.quakeworld.nu
+   URL, or picks a row from the search results.
 2. `app.js` hands the bytes to `worker.js` via `postMessage`.
 3. The worker calls `analyzeMVD(bytes, filename)` on the WASM instance.
 4. WASM code (`cmd/wasm/main.go`) runs the qwanalytics default pipeline,
    marshals the Result to JSON, returns it as a string.
-5. Worker sends the JSON back to `app.js`, which renders it across the
-   tabs.
+5. Worker sends the JSON back to `app.js`, which clears the no-demo
+   class, switches to the Summary tab, and renders across the tabs.
 
 The WASM boundary is the only place that bridges Go and JS. The rest of
 the frontend is dependency-free JS plus a sprinkle of CSS.
+
+## Demo search
+
+The Search tab queries the same Supabase `v1_games` table that the
+hub-loader uses (so no backend of our own) and lets the user filter by
+player, team, map, mode (1v1 / 2v2 / 4v4 / FFA / CTF), game tag, and
+date range. All filters are AND-combined, empty fields act as
+wildcards, and the latest 20 matches sorted by date descending are
+listed. Clicking a row downloads the demo and runs the normal analysis
+pipeline; the user lands on the Summary tab.
+
+Search state is reflected in the URL so links are shareable. Supported
+params: `player`, `team`, `map`, `mode`, `tag`, `from`, `to`. For
+example:
+
+- `?player=nexus` opens the page on the Search tab with the player
+  field pre-filled and the search auto-executed.
+- `?player=nexus&mode=1on1&map=aerowalk` pre-fills three fields.
+- `?gameId=212607&player=nexus` loads the demo (and lands on Summary)
+  *and* pre-populates the Search tab; clicking Search shows the
+  filters and the result list.
+
+The demo-load URL parameter is `gameId` (matching hub.quakeworld.nu's
+own URL scheme); the legacy `?hub=<id>` form is still accepted on read
+for any links that already exist in the wild.
 
 ## Loc files at runtime
 

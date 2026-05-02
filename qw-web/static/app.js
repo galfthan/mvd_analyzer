@@ -89,11 +89,36 @@ let wasmReady = false;
 let analyzeResolve = null;
 let analyzeReject = null;
 
+// Hide the wasm-loading overlay. When auto-loading a demo from a URL
+// (?gameId=...), keep it up through the demo download/analyse so the
+// user never sees a half-populated Search/Summary tab in the
+// background — displayResults() calls hideLoadingOverlay() once the
+// pipeline has finished.
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('wasm-loading');
+    if (overlay) overlay.style.display = 'none';
+}
+
+function setLoadingOverlayMessage(text) {
+    const overlay = document.getElementById('wasm-loading');
+    if (!overlay) return;
+    // The subtitle is the second flex child (the small status line).
+    const subtitle = overlay.children[1];
+    if (subtitle) subtitle.textContent = text;
+}
+
 worker.onmessage = (e) => {
     if (e.data.type === 'ready') {
         wasmReady = true;
-        const overlay = document.getElementById('wasm-loading');
-        if (overlay) overlay.style.display = 'none';
+        const params = new URLSearchParams(location.search);
+        const willAutoLoadDemo = !!(params.get('gameId') || params.get('hub'));
+        if (willAutoLoadDemo) {
+            // Demo download is about to start; keep the overlay up and
+            // show the next phase.
+            setLoadingOverlayMessage('Loading demo…');
+        } else {
+            hideLoadingOverlay();
+        }
         const v = e.data.version;
         const tag = document.getElementById('version-tag');
         if (tag && v) {
@@ -166,6 +191,34 @@ async function fetchGameFromHub(gameId) {
     return games[0];
 }
 
+const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 'to'];
+const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url';
+
+async function searchHub(filters) {
+    const parts = [
+        `select=${encodeURIComponent(SEARCH_SELECT)}`,
+        `order=timestamp.desc`,
+        `limit=20`,
+    ];
+    if (filters.player) parts.push(`players_fts=fts.'${encodeURIComponent(filters.player)}'`);
+    if (filters.team)   parts.push(`team_names=cs.{${encodeURIComponent(filters.team)}}`);
+    if (filters.map)    parts.push(`map=eq.${encodeURIComponent(filters.map)}`);
+    if (filters.mode)   parts.push(`mode=eq.${encodeURIComponent(filters.mode)}`);
+    if (filters.tag)    parts.push(`matchtag=ilike.%25${encodeURIComponent(filters.tag)}%25`);
+    if (filters.from)   parts.push(`timestamp=gte.${encodeURIComponent(filters.from)}`);
+    if (filters.to)     parts.push(`timestamp=lte.${encodeURIComponent(filters.to + 'T23:59:59')}`);
+
+    const resp = await fetch(`${SUPABASE_URL}?${parts.join('&')}`, {
+        headers: {
+            'apikey': SUPABASE_API_KEY,
+            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+            'accept-profile': 'public'
+        }
+    });
+    if (!resp.ok) throw new Error(`Hub API error: ${resp.status}`);
+    return await resp.json();
+}
+
 async function downloadDemoFromHub(game) {
     const sha = game.demo_sha256;
     // Try CDN first
@@ -198,10 +251,23 @@ function generateDemoFilename(game) {
 document.addEventListener('DOMContentLoaded', () => {
     setupFileUpload();
     setupTabs();
+    setupSearch();
 
-    // Auto-load from hub if URL has ?hub= parameter (wait for WASM to be ready)
     const params = new URLSearchParams(location.search);
-    const hubId = params.get('hub');
+    const hubId = params.get('gameId') || params.get('hub');
+    const requestedTab = params.get('tab');
+
+    // Pick the initial active tab. When deep-linking to a demo we want
+    // the destination tab to be active even before the demo finishes
+    // loading, so the wasm-loading overlay covers the right pane and
+    // the user never glimpses the Search panel mid-flight.
+    if (hubId) {
+        switchTab(requestedTab || 'summary');
+    } else if (requestedTab) {
+        switchTab(requestedTab);
+    } // else: leave the HTML default (Search) active.
+
+    // Auto-load demo if URL has ?gameId= (canonical) or ?hub= (legacy) param
     if (hubId) {
         document.getElementById('hub-input').value = hubId;
         if (wasmReady) {
@@ -216,6 +282,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadFromHub();
                 }
             };
+        }
+    }
+
+    // Auto-populate search filters from the URL. Only auto-RUN the
+    // query when there's no demo also being deep-loaded — when the
+    // user shares e.g. ?gameId=…&player=nexus, the player filter is
+    // incidental URL state from however they originally found the
+    // demo, not a request to browse the search results.
+    const urlFilters = {};
+    let hasSearch = false;
+    for (const f of SEARCH_FIELDS) {
+        const v = params.get(f);
+        if (v) { urlFilters[f] = v; hasSearch = true; }
+    }
+    if (hasSearch) {
+        writeSearchFiltersToForm(urlFilters);
+        if (!hubId) {
+            if (!requestedTab) switchTab('search');
+            runSearch();
         }
     }
 });
@@ -241,30 +326,50 @@ function setCurrentTime(time) {
 // ─── URL State Sharing ─────────────────────────────────────────────────────
 
 let _urlStateTimer = null;
+let lastExecutedSearch = null;
 function updateUrlState() {
     if (_urlStateTimer) return;
     _urlStateTimer = setTimeout(() => {
         _urlStateTimer = null;
-        if (!currentResult) return;
         const params = new URLSearchParams();
 
-        if (currentResult.hubInfo?.gameId) {
-            params.set('hub', currentResult.hubInfo.gameId);
+        if (currentResult) {
+            if (currentResult.hubInfo?.gameId) {
+                params.set('gameId', currentResult.hubInfo.gameId);
+            }
+
+            const activeTab = document.querySelector('.sidebar-btn.active')?.dataset.tab;
+            if (activeTab && activeTab !== 'summary') params.set('tab', activeTab);
+
+            if (mapState.currentTime > 0) {
+                params.set('t', Math.round(mapState.currentTime));
+            }
+
+            if (timelineState.segment) {
+                params.set('seg', `${Math.round(timelineState.segment.start)}-${Math.round(timelineState.segment.end)}`);
+            }
         }
 
-        const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
-        if (activeTab && activeTab !== 'summary') params.set('tab', activeTab);
-
-        if (mapState.currentTime > 0) {
-            params.set('t', Math.round(mapState.currentTime));
-        }
-
-        if (timelineState.segment) {
-            params.set('seg', `${Math.round(timelineState.segment.start)}-${Math.round(timelineState.segment.end)}`);
+        if (lastExecutedSearch) {
+            for (const f of SEARCH_FIELDS) {
+                const v = lastExecutedSearch[f];
+                if (v) params.set(f, v);
+            }
         }
 
         const qs = params.toString();
-        history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+        if (qs) {
+            history.replaceState(null, '', `?${qs}`);
+        } else if (currentResult || lastExecutedSearch) {
+            // We've actually loaded something but happen to have no
+            // params worth keeping (e.g. fresh load on Summary at t=0
+            // with no segment). Clear the URL.
+            history.replaceState(null, '', location.pathname);
+        }
+        // else: nothing yet — leave the URL alone. There may still be
+        // an in-flight ?gameId=… deep-link auto-load whose params we
+        // would otherwise wipe before WASM finishes booting and
+        // applyUrlState() can read them.
     }, 500);
 }
 
@@ -292,7 +397,7 @@ function applyUrlState() {
 
     const tab = params.get('tab');
     if (tab) {
-        const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+        const btn = document.querySelector(`.sidebar-btn[data-tab="${tab}"]`);
         if (btn) btn.click();
     }
 
@@ -329,8 +434,13 @@ function setupFileUpload() {
 
 const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map', 'keymoments'];
 
+function switchTab(name) {
+    const btn = document.querySelector(`.sidebar-btn[data-tab="${name}"]`);
+    if (btn) btn.click();
+}
+
 function setupTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabButtons = document.querySelectorAll('.sidebar-btn');
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const tabName = btn.dataset.tab;
@@ -339,7 +449,10 @@ function setupTabs() {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
 
-            // Show/hide unified timeline
+            // Show/hide the unified-timeline. It now lives outside the
+            // scroll container as a sibling row of .main-scroll, so a
+            // simple display toggle is all that's needed — no sticky,
+            // no compositor games.
             const tl = document.getElementById('unified-timeline');
             if (tl && currentResult) {
                 tl.style.display = TABS_WITH_TIMELINE.includes(tabName) ? '' : 'none';
@@ -352,21 +465,42 @@ function setupTabs() {
 
             // Sync views on tab switch.
             //
-            // Canvases sized from their container's clientWidth render empty
-            // when they were first drawn while the tab was hidden
-            // (clientWidth === 0 under display:none). Every dimension-
-            // sensitive tab therefore re-renders here, after its container
-            // is visible, so the first-paint width is always real.
-            if (tabName === 'map') {
-                renderMap(mapState.currentTime);
-            } else if (tabName === 'timeline') {
-                if (currentResult) updateDetailView();
-                updateTimeIndicators();
-            } else if (tabName === 'chat') {
-                renderChatMessages();
-            } else if (tabName === 'loc-graph') {
-                renderLocGraph();
-            }
+            // Canvases sized from container.clientWidth render empty
+            // when first drawn while the tab was hidden (clientWidth
+            // === 0 under display:none). Force a synchronous reflow
+            // of the now-active tab content so the display:none →
+            // block transition commits before we measure or draw.
+            //
+            // Even after that, Firefox specifically composites the
+            // newly-revealed tab subtree through a layer snapshot for
+            // a brief window — canvas writes during that window stay
+            // invisible until the user does anything else. The two
+            // backup re-renders (next frame + 120 ms) catch it
+            // without us having to know exactly when the snapshot
+            // releases. (Restructuring the layout to drop position:
+            // sticky on the unified-timeline did not eliminate this
+            // — the snapshot trigger appears to be the tab-content
+            // display change itself, not the sticky element.)
+            const tabContentEl = document.getElementById(`tab-${tabName}`);
+            if (tabContentEl) void tabContentEl.offsetHeight;
+
+            const renderForTab = () => {
+                if (tabName === 'map') {
+                    mapState.renderDirty = true;
+                    mapState.lastRenderedBucket = null;
+                    renderMap(mapState.currentTime);
+                } else if (tabName === 'timeline') {
+                    if (currentResult) updateDetailView();
+                    updateTimeIndicators();
+                } else if (tabName === 'chat') {
+                    renderChatMessages();
+                } else if (tabName === 'loc-graph') {
+                    renderLocGraph();
+                }
+            };
+            renderForTab();
+            requestAnimationFrame(renderForTab);
+            setTimeout(renderForTab, 120);
 
             updateUrlState();
         });
@@ -422,32 +556,176 @@ async function loadFromHub() {
         status.textContent = 'Fetching game info...';
         const game = await fetchGameFromHub(gameId);
 
-        status.textContent = 'Downloading demo...';
-        const demoBytes = await downloadDemoFromHub(game);
-
-        status.textContent = 'Analyzing...';
-        const filename = generateDemoFilename(game);
-        const jsonStr = await analyzeInWorker(demoBytes, filename);
-        const result = JSON.parse(jsonStr);
-        if (result.error) throw new Error(result.error);
-
-        status.textContent = 'Analysis complete!';
-        status.className = 'status success';
-        currentResult = result;
-
-        // Attach hub info for viewer links
-        currentResult.hubInfo = {
-            gameId: gameId,
-            viewerUrl: `https://hub.quakeworld.nu/games/?gameId=${gameId}`,
-            players: game.players
-        };
-
-        displayResults(result);
+        await loadGameFromHub(game);
     } catch (error) {
         status.textContent = 'Error: ' + error.message;
         status.className = 'status error';
+        // If we were holding the loading overlay up for a deep-link auto-load,
+        // drop it so the user sees the error message instead of a stuck spinner.
+        hideLoadingOverlay();
     } finally {
         btn.disabled = false;
+    }
+}
+
+// Given a game object already fetched from Supabase, download the demo,
+// analyse it, and render the results. Shared by loadFromHub() (which
+// fetches by ID first) and the search-result click handler (which
+// already has the row in hand).
+async function loadGameFromHub(game) {
+    const status = document.getElementById('upload-status');
+    if (!wasmReady) throw new Error('Analyzer is still loading, please wait...');
+
+    document.getElementById('hub-input').value = game.id;
+
+    status.textContent = 'Downloading demo...';
+    status.className = 'status loading';
+    const demoBytes = await downloadDemoFromHub(game);
+
+    status.textContent = 'Analyzing...';
+    const filename = generateDemoFilename(game);
+    const jsonStr = await analyzeInWorker(demoBytes, filename);
+    const result = JSON.parse(jsonStr);
+    if (result.error) throw new Error(result.error);
+
+    status.textContent = 'Analysis complete!';
+    status.className = 'status success';
+    currentResult = result;
+
+    currentResult.hubInfo = {
+        gameId: game.id,
+        viewerUrl: `https://hub.quakeworld.nu/games/?gameId=${game.id}`,
+        players: game.players
+    };
+
+    displayResults(result);
+}
+
+// ─── Demo Search Panel ──────────────────────────────────────────────────────
+
+function readSearchFilters() {
+    return {
+        player: document.getElementById('search-player').value.trim(),
+        team:   document.getElementById('search-team').value.trim(),
+        map:    document.getElementById('search-map').value.trim(),
+        mode:   document.getElementById('search-mode').value,
+        tag:    document.getElementById('search-tag').value.trim(),
+        from:   document.getElementById('search-from').value,
+        to:     document.getElementById('search-to').value,
+    };
+}
+
+function writeSearchFiltersToForm(filters) {
+    if (filters.player !== undefined) document.getElementById('search-player').value = filters.player;
+    if (filters.team   !== undefined) document.getElementById('search-team').value   = filters.team;
+    if (filters.map    !== undefined) document.getElementById('search-map').value    = filters.map;
+    if (filters.mode   !== undefined) document.getElementById('search-mode').value   = filters.mode;
+    if (filters.tag    !== undefined) document.getElementById('search-tag').value    = filters.tag;
+    if (filters.from   !== undefined) document.getElementById('search-from').value   = filters.from;
+    if (filters.to     !== undefined) document.getElementById('search-to').value     = filters.to;
+}
+
+function setupSearch() {
+    document.getElementById('search-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        runSearch();
+    });
+}
+
+async function runSearch() {
+    const filters = readSearchFilters();
+    const status = document.getElementById('search-status');
+    const submit = document.getElementById('search-submit');
+    const resultsEl = document.getElementById('search-results');
+
+    status.textContent = 'Searching…';
+    status.className = 'status loading';
+    submit.disabled = true;
+
+    try {
+        const games = await searchHub(filters);
+        status.textContent = '';
+        status.className = 'status';
+        renderSearchResults(games);
+        lastExecutedSearch = filters;
+        updateUrlState();
+    } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+        status.className = 'status error';
+        resultsEl.innerHTML = '';
+    } finally {
+        submit.disabled = false;
+    }
+}
+
+const SEARCH_MODE_LABELS = {
+    '1on1': '1v1',
+    '2on2': '2v2',
+    '4on4': '4v4',
+    'ffa':  'FFA',
+    'ctf':  'CTF',
+};
+
+function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderSearchResults(games) {
+    const el = document.getElementById('search-results');
+    el.innerHTML = '';
+    if (!games || games.length === 0) {
+        el.innerHTML = '<div class="search-empty">No demos match these filters.</div>';
+        return;
+    }
+    for (const game of games) {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'search-result';
+        row.dataset.gameId = game.id;
+
+        const modeText = SEARCH_MODE_LABELS[game.mode] || game.mode || '-';
+        const mapText  = game.map || '-';
+        const dateText = (game.timestamp || '').slice(0, 10);
+
+        // Pick contestants: top-2 teams for team modes, top-2 players otherwise.
+        const isTeamMode = game.mode && game.mode !== '1on1' && game.mode !== 'ffa';
+        let contestants = '—';
+        if (isTeamMode && Array.isArray(game.teams) && game.teams.length >= 2) {
+            const t = [...game.teams].sort((a, b) => (b.frags || 0) - (a.frags || 0));
+            contestants = `${t[0].name} ${t[0].frags} : ${t[1].frags} ${t[1].name}`;
+        } else if (Array.isArray(game.players) && game.players.length >= 2) {
+            const p = [...game.players].sort((a, b) => (b.frags || 0) - (a.frags || 0));
+            contestants = `${p[0].name} ${p[0].frags} : ${p[1].frags} ${p[1].name}`;
+        } else if (Array.isArray(game.players) && game.players.length === 1) {
+            const p = game.players[0];
+            contestants = `${p.name} ${p.frags || 0}`;
+        }
+
+        const tagHtml = game.matchtag
+            ? `<span class="search-result-tag">${escapeHtml(game.matchtag)}</span>`
+            : '<span class="search-result-tag"></span>';
+
+        row.innerHTML =
+            `<span class="search-result-mode">${escapeHtml(modeText)}</span>` +
+            `<span class="search-result-map">${escapeHtml(mapText)}</span>` +
+            `<span class="search-result-contest">${escapeHtml(contestants)}</span>` +
+            tagHtml +
+            `<span class="search-result-date">${escapeHtml(dateText)}</span>`;
+
+        row.addEventListener('click', () => loadGameFromSearch(game));
+        el.appendChild(row);
+    }
+}
+
+async function loadGameFromSearch(game) {
+    try {
+        await loadGameFromHub(game);
+        // displayResults() switches to the Summary tab as part of finishing a load.
+    } catch (error) {
+        const status = document.getElementById('upload-status');
+        status.textContent = 'Error: ' + error.message;
+        status.className = 'status error';
     }
 }
 
@@ -455,7 +733,14 @@ function displayResults(result) {
     // Reset timeline state before loading new demo
     resetTimelineState();
 
-    document.getElementById('results-section').style.display = 'block';
+    document.body.classList.remove('no-demo');
+
+    // Land the user on the Summary tab after a fresh load, unless the URL
+    // explicitly asks for a different tab (deep links like ?tab=map should
+    // win — applyUrlState() is called later and will switch tabs again).
+    if (!new URLSearchParams(location.search).get('tab')) {
+        switchTab('summary');
+    }
 
     const demoInfo = result.demoInfo;
 
@@ -558,6 +843,10 @@ function displayResults(result) {
 
     // Apply URL state (tab, time, segment) if present
     applyUrlState();
+
+    // Reveal the now-populated UI (overlay may already be hidden if the
+    // demo was loaded interactively rather than via ?gameId=).
+    hideLoadingOverlay();
 }
 
 // ─── Sortable Tables ──────────────────────────────────────────────────────
@@ -611,8 +900,12 @@ function makeSortable(table) {
             th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
 
             rows.sort((a, b) => {
-                const aText = a.cells[colIdx]?.textContent.trim() || '';
-                const bText = b.cells[colIdx]?.textContent.trim() || '';
+                const aCell = a.cells[colIdx];
+                const bCell = b.cells[colIdx];
+                // Cells can opt-in to a custom sort key via data-sort-value
+                // (e.g. the Stack column shows "70 120 RA" but sorts on H+A).
+                const aText = (aCell?.dataset.sortValue ?? aCell?.textContent.trim() ?? '');
+                const bText = (bCell?.dataset.sortValue ?? bCell?.textContent.trim() ?? '');
                 // Extract leading number (handles "42", "3.5%", "12 (30s)", etc.)
                 const aNum = parseFloat(aText);
                 const bNum = parseFloat(bText);
@@ -1696,7 +1989,7 @@ function displayTimelineAnalysis(result) {
     setupUnifiedTimeline();
 
     // Show the unified timeline on applicable tabs
-    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+    const activeTab = document.querySelector('.sidebar-btn.active')?.dataset.tab;
     const tl = document.getElementById('unified-timeline');
     if (tl) tl.style.display = TABS_WITH_TIMELINE.includes(activeTab) ? '' : 'none';
 
@@ -4585,7 +4878,7 @@ function buildMapLegend() {
 
         const table = document.createElement('table');
         table.className = 'team-status-table';
-        table.innerHTML = `<thead><tr><th></th><th>Player</th><th>Loc</th><th>H</th><th>A</th><th>Wpn</th><th>View</th></tr></thead>`;
+        table.innerHTML = `<thead><tr><th></th><th>Player</th><th>Loc</th><th title="Health + armor (sorted by H+A)">Stack</th><th>Wpn</th><th>View</th></tr></thead>`;
         const tbody = document.createElement('tbody');
         tbody.className = 'map-legend-tbody';
 
@@ -4598,8 +4891,7 @@ function buildMapLegend() {
                     <td><span class="map-legend-symbol" style="color: ${teamHex}">${info.symbol}</span></td>
                     <td>${escapedName}</td>
                     <td class="map-legend-loc" data-player="${escapedName}">-</td>
-                    <td class="map-legend-health" data-player="${escapedName}">-</td>
-                    <td class="map-legend-armor" data-player="${escapedName}">-</td>
+                    <td class="map-legend-stack" data-player="${escapedName}" data-sort-value="0">-</td>
                     <td class="map-legend-wpn" data-player="${escapedName}">-</td>
                     <td class="map-legend-hub" data-player="${escapedName}"></td>
                 `;
@@ -4689,25 +4981,27 @@ function updateMapLegend() {
         }
     }
 
-    const healthCells = legend.querySelectorAll('.map-legend-health');
-    for (const cell of healthCells) {
+    const stackCells = legend.querySelectorAll('.map-legend-stack');
+    for (const cell of stackCells) {
         const name = cell.dataset.player;
         const data = playerData?.[name];
-        cell.textContent = data ? (data.h ?? data.health ?? '-') : '-';
-    }
-
-    const armorCells = legend.querySelectorAll('.map-legend-armor');
-    for (const cell of armorCells) {
-        const name = cell.dataset.player;
-        const data = playerData?.[name];
-        if (data && (data.a ?? data.armor) > 0) {
-            const armorVal = data.a ?? data.armor;
-            const armorType = data.at ?? data.armorType ?? '';
-            cell.innerHTML = armorType
-                ? `<span class="armor-${armorType}">${armorVal} ${armorType.toUpperCase()}</span>`
-                : `${armorVal}`;
-        } else {
+        if (!data) {
             cell.textContent = '-';
+            cell.dataset.sortValue = '0';
+            continue;
+        }
+        const h = data.h ?? data.health ?? 0;
+        const a = data.a ?? data.armor ?? 0;
+        const at = data.at ?? data.armorType ?? '';
+        cell.dataset.sortValue = String(h + a);
+        if (h <= 0) {
+            cell.textContent = '-';
+        } else if (a > 0 && at) {
+            cell.innerHTML = `<span class="stack-h">${h}</span> <span class="armor-${at}">${a} ${at.toUpperCase()}</span>`;
+        } else if (a > 0) {
+            cell.innerHTML = `<span class="stack-h">${h}</span> <span>${a}</span>`;
+        } else {
+            cell.innerHTML = `<span class="stack-h">${h}</span>`;
         }
     }
 
@@ -5440,17 +5734,14 @@ function renderItemsPanel() {
             const style = ITEM_MARKER_STYLES[item.kind];
             const tr = document.createElement('tr');
             const swatch = document.createElement('td');
+            swatch.className = 'item-swatch-cell';
             swatch.appendChild(buildItemSwatch(style));
-            const name = document.createElement('td');
-            name.className = 'item-name';
-            name.textContent = item.name.toUpperCase().replace(/_/g, ' ');
             const loc = document.createElement('td');
             loc.className = 'item-loc';
             loc.textContent = item.loc || '';
             const status = document.createElement('td');
             status.className = 'item-status';
             tr.appendChild(swatch);
-            tr.appendChild(name);
             tr.appendChild(loc);
             tr.appendChild(status);
             body.appendChild(tr);
@@ -5968,7 +6259,10 @@ function onMapFullscreenChange() {
             if (!_fsTimelineHome) {
                 _fsTimelineHome = { parent: tl.parentNode, next: tl.nextSibling };
             }
-            panel.appendChild(tl);
+            // Pin to the top of the fullscreen panel so the visual order is
+            // timeline → canvas → controls (controls live at the bottom of
+            // .map-panel via the HTML layout).
+            panel.insertBefore(tl, panel.firstChild);
         } else if (_fsTimelineHome && _fsTimelineHome.parent) {
             _fsTimelineHome.parent.insertBefore(tl, _fsTimelineHome.next);
         }

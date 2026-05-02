@@ -14,7 +14,7 @@
     <script src="https://unpkg.com/cose-base@2.2.0/cose-base.js"></script>
     <script src="https://unpkg.com/cytoscape-fcose@2.2.0/cytoscape-fcose.js"></script>
 </head>
-<body>
+<body class="no-demo">
     <!-- WASM loading overlay -->
     <div id="wasm-loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a2e;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px;">
         <div style="color:#00d9ff;font-family:'Rajdhani',sans-serif;font-size:1.8rem;font-weight:700;letter-spacing:0.04em;">MVD Demo Analyzer</div>
@@ -24,44 +24,51 @@
         </div>
     </div>
 
-    <div class="container">
-        <header>
-            <a class="github-link" href="https://github.com/galfthan/mvd_analyzer" target="_blank" rel="noopener" aria-label="View source on GitHub" title="View source on GitHub">
-                <svg height="22" width="22" viewBox="0 0 16 16" aria-hidden="true">
-                    <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-                </svg>
-            </a>
-            <h1>MVD Demo Analyzer</h1>
-            <p>Analyze QuakeWorld MVD demo files</p>
-            <p class="version-tag" id="version-tag"></p>
-        </header>
+    <header class="topbar">
+        <a class="topbar-brand" href="./" title="Reset and reload">MVD Demo Analyzer</a>
+        <div class="topbar-spacer"></div>
+        <span class="topbar-version" id="version-tag" title="Build version"></span>
+        <a class="topbar-github" href="https://github.com/galfthan/mvd_analyzer" target="_blank" rel="noopener" aria-label="View source on GitHub" title="View source on GitHub">
+            <svg height="20" width="20" viewBox="0 0 16 16" aria-hidden="true">
+                <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+        </a>
+    </header>
 
-        <section id="upload-section" class="card">
-            <div class="load-row" id="drop-zone">
-                <input type="file" id="file-input" accept=".mvd,.mvd.gz" hidden>
-                <button class="load-file-btn" onclick="document.getElementById('file-input').click()">Load from File</button>
-                <span class="load-separator">|</span>
-                <input type="text" id="hub-input" placeholder="Game ID or hub.quakeworld.nu URL">
-                <button id="hub-load-btn" onclick="loadFromHub()">Load from Hub</button>
-            </div>
-            <div id="upload-status" class="status"></div>
-        </section>
+    <div class="layout">
+        <nav class="sidebar" aria-label="Primary">
+            <button class="sidebar-btn active" data-tab="search" title="Search demos">
+                <span class="sidebar-btn-label">Search</span>
+            </button>
+            <button class="sidebar-btn" data-tab="summary" title="Summary">
+                <span class="sidebar-btn-label">Summary</span>
+            </button>
+            <button class="sidebar-btn" data-tab="timeline" title="Timeline">
+                <span class="sidebar-btn-label">Timeline</span>
+            </button>
+            <button class="sidebar-btn" data-tab="chat" title="Chat">
+                <span class="sidebar-btn-label">Chat</span>
+            </button>
+            <button class="sidebar-btn" data-tab="map" title="Map">
+                <span class="sidebar-btn-label">Map</span>
+            </button>
+            <button class="sidebar-btn" data-tab="loc-graph" title="Loc Graph">
+                <span class="sidebar-btn-label">Loc Graph</span>
+            </button>
+            <button class="sidebar-btn" data-tab="keymoments" title="Key Moments">
+                <span class="sidebar-btn-label">Key Moments</span>
+            </button>
+            <button class="sidebar-btn" data-tab="packdrops" title="Pack Drops">
+                <span class="sidebar-btn-label">Pack Drops</span>
+            </button>
+        </nav>
 
-        <section id="results-section" class="card" style="display: none;">
-            <h2>Analysis Results</h2>
+        <main class="main">
 
-            <!-- Tab Navigation -->
-            <div class="tab-nav">
-                <button class="tab-btn active" data-tab="summary">Summary</button>
-                <button class="tab-btn" data-tab="timeline">Timeline</button>
-                <button class="tab-btn" data-tab="chat">Chat</button>
-                <button class="tab-btn" data-tab="map">Map</button>
-                <button class="tab-btn" data-tab="loc-graph">Loc Graph</button>
-                <button class="tab-btn" data-tab="keymoments">Key Moments</button>
-                <button class="tab-btn" data-tab="packdrops">Pack Drops</button>
-            </div>
-
-            <!-- Unified Timeline Widget (visible on Timeline/Chat/Map tabs) -->
+            <!-- Unified Timeline Widget (visible on Timeline/Chat/Map tabs).
+                 Lives at the top of .main outside the scroll container so it
+                 stays put without needing position:sticky — Firefox composited
+                 sticky-promoted siblings through stale snapshots. -->
             <div id="unified-timeline" class="panel timeline-nav-panel" style="display: none;">
                 <div class="timeline-nav-row">
                     <div class="timeline-playback-controls">
@@ -84,8 +91,69 @@
                 </div>
             </div>
 
+            <div class="main-scroll">
+
+            <!-- Search Tab (first; always available even when no demo loaded) -->
+            <div id="tab-search" class="tab-content active">
+                <div class="panel search-load-panel">
+                    <div class="load-row" id="drop-zone">
+                        <input type="file" id="file-input" accept=".mvd,.mvd.gz" hidden>
+                        <button class="load-file-btn" onclick="document.getElementById('file-input').click()">Load from File</button>
+                        <span class="load-separator">|</span>
+                        <input type="text" id="hub-input" placeholder="Game ID or hub.quakeworld.nu URL">
+                        <button id="hub-load-btn" onclick="loadFromHub()">Load from Hub</button>
+                    </div>
+                    <div id="upload-status" class="status"></div>
+                </div>
+                <div class="panel search-filter-panel">
+                    <form class="search-form" id="search-form" autocomplete="off">
+                        <div class="search-row">
+                            <label class="search-field">
+                                <span>Player</span>
+                                <input type="text" id="search-player" placeholder="any">
+                            </label>
+                            <label class="search-field">
+                                <span>Team</span>
+                                <input type="text" id="search-team" placeholder="any">
+                            </label>
+                            <label class="search-field">
+                                <span>Map</span>
+                                <input type="text" id="search-map" placeholder="any">
+                            </label>
+                            <label class="search-field">
+                                <span>Mode</span>
+                                <select id="search-mode">
+                                    <option value="">Any</option>
+                                    <option value="1on1">1v1</option>
+                                    <option value="2on2">2v2</option>
+                                    <option value="4on4">4v4</option>
+                                    <option value="ffa">FFA</option>
+                                    <option value="ctf">CTF</option>
+                                </select>
+                            </label>
+                            <label class="search-field">
+                                <span>Game tag</span>
+                                <input type="text" id="search-tag" placeholder="any">
+                            </label>
+                            <label class="search-field search-field-date">
+                                <span>From</span>
+                                <input type="date" id="search-from">
+                            </label>
+                            <label class="search-field search-field-date">
+                                <span>To</span>
+                                <input type="date" id="search-to">
+                            </label>
+                            <button type="submit" class="search-submit" id="search-submit">Search</button>
+                        </div>
+                    </form>
+                    <div id="search-status" class="status"></div>
+                    <div id="search-results" class="search-results"></div>
+                </div>
+            </div>
+
             <!-- Summary Tab -->
-            <div id="tab-summary" class="tab-content active">
+            <div id="tab-summary" class="tab-content">
+                <div class="empty-state">Load or search a demo to begin.</div>
                 <div id="match-summary" class="panel">
                     <h3>Match Info</h3>
                     <div class="summary-grid" id="match-info-grid">
@@ -295,6 +363,7 @@
 
             <!-- Timeline Tab -->
             <div id="tab-timeline" class="tab-content">
+                <div class="empty-state">Load or search a demo to begin.</div>
                 <!-- Team Status at Current Time -->
                 <div class="panel team-status-panel">
                     <div class="team-status-row">
@@ -429,6 +498,7 @@
 
             <!-- Chat Tab -->
             <div id="tab-chat" class="tab-content">
+                <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel chat-panel-outer">
                     <!-- Column headers (outside scroll) -->
                     <div class="chat-header-row">
@@ -457,7 +527,34 @@
 
             <!-- Map Tab -->
             <div id="tab-map" class="tab-content">
+                <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel map-panel">
+                    <div class="map-main-content">
+                        <div class="map-canvas-container">
+                            <canvas id="map-canvas" width="850" height="850"></canvas>
+                            <div id="map-no-data" class="map-no-data" style="display: none;">
+                                <p>No location data available for this map.</p>
+                                <p>Player positions will still be shown.</p>
+                            </div>
+                        </div>
+                        <div class="map-sidebar">
+                            <div class="map-legend" id="map-legend">
+                                <h4>Players</h4>
+                            </div>
+                            <div class="map-sidebar-row">
+                                <div id="map-items-panel" class="map-items-panel" style="display: none;">
+                                    <h4>Items</h4>
+                                    <table class="map-items-table" id="map-items-table">
+                                        <tbody id="map-items-body"></tbody>
+                                    </table>
+                                </div>
+                                <div id="region-status-panel" style="display: none;">
+                                    <h4>Region Status</h4>
+                                    <div id="region-status-body"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="map-track-controls">
                         <span class="map-trail-label">Trails:</span>
                         <button id="map-trails-all">All</button>
@@ -480,30 +577,6 @@
                         <select id="map-follow" class="map-trail-select"></select>
                         <button id="map-reset-view" title="Reset pan / zoom">Reset view</button>
                         <button id="map-fullscreen" title="Toggle fullscreen">Fullscreen</button>
-                    </div>
-                    <div class="map-main-content">
-                        <div class="map-canvas-container">
-                            <canvas id="map-canvas" width="850" height="850"></canvas>
-                            <div id="map-no-data" class="map-no-data" style="display: none;">
-                                <p>No location data available for this map.</p>
-                                <p>Player positions will still be shown.</p>
-                            </div>
-                        </div>
-                        <div class="map-sidebar">
-                            <div class="map-legend" id="map-legend">
-                                <h4>Players</h4>
-                            </div>
-                            <div id="map-items-panel" class="map-items-panel" style="display: none;">
-                                <h4>Items</h4>
-                                <table class="map-items-table" id="map-items-table">
-                                    <tbody id="map-items-body"></tbody>
-                                </table>
-                            </div>
-                            <div id="region-status-panel" style="display: none;">
-                                <h4>Region Status</h4>
-                                <div id="region-status-body"></div>
-                            </div>
-                        </div>
                     </div>
                     <div id="region-control-panel" style="display: none;">
                         <h4>Region Control</h4>
@@ -529,6 +602,7 @@
 
             <!-- Loc Graph Tab -->
             <div id="tab-loc-graph" class="tab-content">
+                <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel locgraph-panel">
                     <div class="locgraph-controls">
                         <label>Filter:
@@ -590,6 +664,7 @@
 
             <!-- Key Moments Tab -->
             <div id="tab-keymoments" class="tab-content keymoments-grid">
+                <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel">
                     <h3>Powerup Runs</h3>
                     <table class="stats-table" id="keymoments-table">
@@ -634,6 +709,7 @@
 
             <!-- Pack Drops Tab -->
             <div id="tab-packdrops" class="tab-content">
+                <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel">
                     <h3>RL / LG Backpack Drops</h3>
                     <div class="packdrops-filters">
@@ -667,7 +743,8 @@
                 </div>
             </div>
 
-        </section>
+            </div><!-- /main-scroll -->
+        </main>
     </div>
 
     <script src="app.js"></script>

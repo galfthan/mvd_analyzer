@@ -34,12 +34,21 @@
     padding: 0;
 }
 
+html, body {
+    height: 100%;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     background: var(--bg-deep);
     color: var(--fg-default);
     line-height: 1.6;
     animation: fadeIn 0.4s ease-out;
+    /* Pin the topbar + sidebar by making the body itself non-scrolling
+     * and giving the .main pane its own scroll. */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes fadeIn {
@@ -47,64 +56,204 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
+/* Top bar — slim wordmark + version + GitHub link. Body is the
+ * scroll-anchor (overflow: hidden, flex column), so this just needs to
+ * sit at the top and not shrink. */
+.topbar {
+    display: flex;
+    align-items: center;
+    flex: 0 0 44px;
+    padding: 0 20px;
+    background: #16213e;
+    border-bottom: 1px solid rgba(0, 217, 255, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    gap: 14px;
+    z-index: 100;
 }
 
-header {
-    text-align: center;
-    margin-bottom: 30px;
-    position: relative;
+.topbar-brand {
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--accent-cyan);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    text-shadow: 0 0 12px rgba(0, 217, 255, 0.25);
+    transition: color 0.15s ease;
 }
 
-.github-link {
-    position: absolute;
-    top: 0;
-    right: 0;
+.topbar-brand:hover {
+    color: var(--accent-cyan-dim);
+}
+
+.topbar-spacer { flex: 1; }
+
+.topbar-version {
+    color: #4a5a6e;
+    font-family: monospace;
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.topbar-version:hover {
+    color: var(--accent-cyan);
+}
+
+/* Inner <a> rendered by setVersionTag in app.js for the commit hash */
+.topbar-version a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px dotted currentColor;
+}
+
+.topbar-github {
     color: #7a8ba8;
     display: inline-flex;
     align-items: center;
     transition: color 0.15s ease;
 }
 
-.github-link:hover {
+.topbar-github:hover {
     color: var(--accent-cyan);
 }
 
-header h1 {
-    font-family: 'Rajdhani', sans-serif;
-    color: var(--accent-cyan);
-    font-size: 2.8rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    margin-bottom: 8px;
-    text-shadow: 0 0 20px rgba(0, 217, 255, 0.3), 0 0 40px rgba(0, 217, 255, 0.1);
+/* Layout — sidebar + main pane fill the rest of the viewport. The
+ * sidebar stays fixed; .main scrolls. */
+.layout {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
-header p {
+.sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: #16213e;
+    border-right: 1px solid rgba(0, 217, 255, 0.08);
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+}
+
+.sidebar-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: transparent;
+    border: none;
     color: #7a8ba8;
-    font-size: 0.95rem;
-    letter-spacing: 0.02em;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    text-align: left;
+    transition: all 0.15s ease;
+    position: relative;
 }
 
-.version-tag {
-    font-size: 0.75rem !important;
-    color: #4a5a6e !important;
-    margin-top: 4px;
-    font-family: monospace;
-}
-
-.version-tag a {
-    color: inherit;
-    text-decoration: none;
-    border-bottom: 1px dotted currentColor;
-    transition: color 0.15s ease;
-}
-
-.version-tag a:hover {
+.sidebar-btn:hover {
     color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.06);
+}
+
+.sidebar-btn.active {
+    color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.08);
+}
+
+.sidebar-btn.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    background: var(--accent-cyan);
+    border-radius: 2px;
+}
+
+/* Two-row main pane: unified-timeline sits in the fixed top row,
+ * .main-scroll fills the rest and scrolls. The timeline is no longer
+ * position:sticky — that triggered a Firefox compositor bug where the
+ * canvases inside the now-active tab were composited through a stale
+ * snapshot for the first frame. */
+.main {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#unified-timeline {
+    flex: 0 0 auto;
+    background: var(--bg-deep);
+    /* Match the horizontal padding of .main-scroll so the timeline
+     * lines up with the tab content below. */
+    margin: 20px 28px 0 28px;
+}
+
+.main-scroll {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 20px 28px;
+}
+
+/* Empty state for non-Search tabs when no demo loaded.
+ * Hides every direct child of an inactive-because-no-demo tab and
+ * surfaces only the .empty-state placeholder. The Search tab is
+ * exempt because its load + filter form must always be available. */
+.empty-state {
+    display: none;
+    padding: 80px 40px;
+    text-align: center;
+    color: #7a8ba8;
+    font-style: italic;
+    font-size: 1rem;
+}
+
+body.no-demo .tab-content > .empty-state {
+    display: block;
+}
+
+body.no-demo .tab-content:not(#tab-search) > :not(.empty-state) {
+    display: none;
+}
+
+body.no-demo #unified-timeline {
+    display: none !important;
+}
+
+@media (max-width: 800px) {
+    .layout { flex-direction: column; }
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 6px 8px;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 217, 255, 0.08);
+    }
+    .sidebar-btn {
+        flex-shrink: 0;
+        padding: 6px 12px;
+    }
+    .sidebar-btn.active::before {
+        left: 6px;
+        right: 6px;
+        top: auto;
+        bottom: 0;
+        width: auto;
+        height: 2px;
+        border-radius: 1px;
+    }
+    .main { padding: 16px; }
 }
 
 .card {
@@ -235,6 +384,165 @@ header p {
     color: #ff5252;
 }
 
+/* Demo Search Panel — load row + filter form, both inside the Search tab */
+.search-load-panel,
+.search-filter-panel {
+    padding: 16px 20px;
+}
+
+.search-load-panel {
+    margin-bottom: 16px;
+}
+
+.search-form {
+    margin-bottom: 12px;
+}
+
+.search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.search-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 140px;
+    min-width: 120px;
+}
+
+.search-field-date {
+    flex: 0 1 160px;
+}
+
+.search-field > span {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #7a8ba8;
+}
+
+.search-field input,
+.search-field select {
+    background: var(--bg-deep);
+    border: 1px solid var(--bg-panel);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--fg-default);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-field input:focus,
+.search-field select:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+}
+
+.search-field input::placeholder {
+    color: #4a5a6e;
+    font-style: italic;
+}
+
+.search-submit {
+    background: #0f3460;
+    color: var(--accent-cyan);
+    border: 1px solid rgba(0, 217, 255, 0.4);
+    padding: 9px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.search-submit:hover {
+    background: var(--accent-cyan);
+    color: var(--bg-deep);
+    box-shadow: 0 0 12px rgba(0, 217, 255, 0.3);
+}
+
+.search-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.search-result {
+    display: grid;
+    grid-template-columns: 56px 110px 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    background: var(--bg-deep);
+    border: 1px solid rgba(42, 63, 95, 0.5);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: var(--fg-default);
+    font-size: 0.92rem;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.search-result:hover {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.06);
+    box-shadow: 0 0 12px rgba(0, 217, 255, 0.15);
+}
+
+.search-result-mode {
+    color: var(--accent-cyan);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.search-result-map {
+    color: #c8d4e3;
+    font-weight: 500;
+}
+
+.search-result-contest {
+    color: var(--fg-default);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-result-tag {
+    color: #7a8ba8;
+    font-size: 0.82rem;
+    font-style: italic;
+    min-width: 0;
+    text-align: right;
+}
+
+.search-result-date {
+    color: #7a8ba8;
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.search-empty {
+    padding: 20px;
+    text-align: center;
+    color: #7a8ba8;
+    font-style: italic;
+}
+
 /* Tab Navigation */
 .tab-nav {
     display: flex;
@@ -277,13 +585,13 @@ header p {
 
 .tab-content.active {
     display: block;
-    animation: tabFadeIn 0.3s ease-out;
 }
-
-@keyframes tabFadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* (Removed `animation: tabFadeIn 0.3s ease-out`. The opacity +
+ * translateY transition forced Firefox to composite the .tab-content
+ * subtree through its own layer, which used a snapshot of the canvas
+ * for the 300 ms animation window — anything renderMap / updateDetailView
+ * wrote to the canvas backing store during that window stayed invisible
+ * until the user navigated away and back, triggering another repaint.) */
 
 .panel {
     background: var(--bg-deep);
@@ -717,7 +1025,7 @@ table tbody tr:hover {
     flex: 1;
     position: relative;
     user-select: none;
-    padding-bottom: 32px;
+    padding-bottom: 7px;
 }
 
 .timeline-nav-bar {
@@ -1730,10 +2038,15 @@ th.sortable.sort-desc::after {
     height: 100%;
 }
 
+/* Sidebar needs to fit the items panel (218 px) + region-status side by
+ * side, so its min-width has to be wide enough that region-status gets
+ * a usable column. The map shrinks to give it that room; on larger
+ * screens the sidebar still tops out at max-width and the rest goes to
+ * the canvas. */
 .map-panel--fullscreen .map-sidebar {
     max-height: 100%;
     overflow-y: auto;
-    min-width: 400px;
+    min-width: 500px;
     max-width: 780px;
 }
 
@@ -2012,7 +2325,16 @@ th.sortable.sort-desc::after {
     flex-direction: column;
     gap: 15px;
     min-width: 320px;
-    max-width: 520px;
+    max-width: 720px;
+}
+
+/* Players panel sits alone (full sidebar width); below it, Items and
+ * Region Status share a flex row so their combined width matches the
+ * Players panel above. */
+.map-sidebar-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
 }
 
 .map-legend {
@@ -2021,10 +2343,18 @@ th.sortable.sort-desc::after {
     padding: 15px;
 }
 
+/* The Stack column merges health and armor: H rendered white, then armor
+ * "120 RA" using the existing .armor-{ra,ya,ga} colour classes. */
+.team-status-table .stack-h {
+    color: #ffffff;
+}
+
 #region-status-panel {
     background: #16213e;
     border-radius: 8px;
     padding: 15px;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 #region-status-panel h4 {
@@ -2033,13 +2363,17 @@ th.sortable.sort-desc::after {
     font-size: 0.95rem;
 }
 
-/* Items panel — between Players and Region Control in the map sidebar.
-   Shows each known item (armors, weapons, powerups, MH) with a live
-   status column (up / respawn countdown) and the item's loc region. */
+/* Items panel — narrow column to the right of the player table. Three
+ * columns only: swatch, loc, status. The item name is conveyed by the
+ * swatch's colour and inline label (RL/LG/MH/Q/P/...) so we drop the
+ * dedicated name column to keep the panel narrow. */
 .map-items-panel {
     background: #16213e;
     border-radius: 8px;
-    padding: 15px;
+    padding: 12px;
+    flex: 0 0 auto;
+    width: 218px;
+    min-width: 195px;
 }
 
 .map-items-panel h4 {
@@ -2079,16 +2413,18 @@ th.sortable.sort-desc::after {
     line-height: 1;
 }
 
-.map-items-table .item-name {
-    font-weight: 600;
-    color: #e8e8f0;
-    white-space: nowrap;
+.map-items-table .item-swatch-cell {
+    width: 22px;
+    padding-right: 4px;
 }
 
 .map-items-table .item-loc {
     color: #c3c3d6;
     font-size: 0.75rem;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
 }
 
 .map-items-table .item-status {
