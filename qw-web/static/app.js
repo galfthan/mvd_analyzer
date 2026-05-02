@@ -463,30 +463,44 @@ function setupTabs() {
                 stopPlayback();
             }
 
-            // Sync views on tab switch. Canvases sized from their
-            // container's clientWidth render empty when first drawn
-            // while the tab was hidden (clientWidth === 0 under
-            // display:none) — force a synchronous reflow of the
-            // now-active tab content so the display:none → block
-            // transition commits before we measure or draw. The map's
-            // canvas is fixed-size; its blank-tab cause is the
-            // bucket-cache short-circuit in renderMap, which the
-            // dirty-flag reset handles.
+            // Sync views on tab switch.
+            //
+            // Canvases sized from container.clientWidth render empty
+            // when first drawn while the tab was hidden (clientWidth
+            // === 0 under display:none). Force a synchronous reflow
+            // of the now-active tab content so the display:none →
+            // block transition commits before we measure or draw.
+            //
+            // Even after that, Firefox specifically composites the
+            // newly-revealed tab subtree through a layer snapshot for
+            // a brief window — canvas writes during that window stay
+            // invisible until the user does anything else. The two
+            // backup re-renders (next frame + 120 ms) catch it
+            // without us having to know exactly when the snapshot
+            // releases. (Restructuring the layout to drop position:
+            // sticky on the unified-timeline did not eliminate this
+            // — the snapshot trigger appears to be the tab-content
+            // display change itself, not the sticky element.)
             const tabContentEl = document.getElementById(`tab-${tabName}`);
             if (tabContentEl) void tabContentEl.offsetHeight;
 
-            if (tabName === 'map') {
-                mapState.renderDirty = true;
-                mapState.lastRenderedBucket = null;
-                renderMap(mapState.currentTime);
-            } else if (tabName === 'timeline') {
-                if (currentResult) updateDetailView();
-                updateTimeIndicators();
-            } else if (tabName === 'chat') {
-                renderChatMessages();
-            } else if (tabName === 'loc-graph') {
-                renderLocGraph();
-            }
+            const renderForTab = () => {
+                if (tabName === 'map') {
+                    mapState.renderDirty = true;
+                    mapState.lastRenderedBucket = null;
+                    renderMap(mapState.currentTime);
+                } else if (tabName === 'timeline') {
+                    if (currentResult) updateDetailView();
+                    updateTimeIndicators();
+                } else if (tabName === 'chat') {
+                    renderChatMessages();
+                } else if (tabName === 'loc-graph') {
+                    renderLocGraph();
+                }
+            };
+            renderForTab();
+            requestAnimationFrame(renderForTab);
+            setTimeout(renderForTab, 120);
 
             updateUrlState();
         });
