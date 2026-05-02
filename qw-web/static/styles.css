@@ -577,13 +577,13 @@ body.no-demo #unified-timeline {
 
 .tab-content.active {
     display: block;
-    animation: tabFadeIn 0.3s ease-out;
 }
-
-@keyframes tabFadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* (Removed `animation: tabFadeIn 0.3s ease-out`. The opacity +
+ * translateY transition forced Firefox to composite the .tab-content
+ * subtree through its own layer, which used a snapshot of the canvas
+ * for the 300 ms animation window — anything renderMap / updateDetailView
+ * wrote to the canvas backing store during that window stayed invisible
+ * until the user navigated away and back, triggering another repaint.) */
 
 .panel {
     background: var(--bg-deep);
