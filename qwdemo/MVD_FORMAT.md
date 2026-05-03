@@ -1272,6 +1272,38 @@ The JSON structure is **KTX mod specific**. Other server mods may use different 
 
 **Item names**: `"ga"`, `"ya"`, `"ra"`, `"mh"`, `"quad"`, `"pent"`, `"ring"`
 
+##### Weapon `pickups` counters
+
+KTX tracks four distinct counters per `(player, weapon)` and emits whichever are non-zero:
+
+| JSON key | KTX field | Increments when |
+|----------|-----------|-----------------|
+| `taken` | `tooks` | First acquisition this life — any source (world entity *or* backpack), and only if the player did not already hold the weapon. |
+| `total-taken` | `ttooks` | Every touch — any source, every time, even if the player already had the weapon. |
+| `spawn-taken` | `stooks` | First acquisition this life from a **world entity only** (not a backpack drop). Backpack pickups do not count. |
+| `spawn-total-taken` | `sttooks` | Every touch of a **world entity** (not backpack) — every time, regardless of whether the player already had the weapon. |
+
+The four counters fall out of one branchy increment in `TookWeaponHandler` (`ktx/src/client.c:4707`):
+
+```c
+ttooks++;                               // every call
+if (!from_backpack) sttooks++;          // every world touch
+if (!(player_items & new_wp)) {         // first-acquisition: didn't already hold the weapon
+    if (!from_backpack) stooks++;       //   world, first-acq
+    tooks++;                            //   any source, first-acq
+}
+```
+
+Worked example for one player's RL counters across a single life:
+
+1. Spawn → run over RL spawn entity (didn't have RL): `taken+1, total-taken+1, spawn-taken+1, spawn-total-taken+1`.
+2. Same life, run back over the respawned RL: `total-taken+1, spawn-total-taken+1` (already held; not a first-acq).
+3. Die. Respawn. Pick up an RL backpack: `taken+1, total-taken+1` (any-source first-acq, no spawn counters because it's a backpack).
+
+**Comparison semantics for analysers.** Counting world-entity pickup phases off the wire (entity-state `Taken=true` transitions on weapon edicts) corresponds to **`spawn-total-taken`**, not `taken`. `taken` filters out repeat pickups within a life and additionally counts backpack acquisitions, neither of which is observable in entity-state alone. Items / armors / healths / powerups in `items[]` use a single `took` field with simpler semantics — every touch — because those code paths (`ktx/src/items.c:318, 332, 336, 511, 2149, 2164, 2179`) do not split the counter.
+
+*Source: counters incremented in `ktx/src/client.c:4749-4763`; serialized in `ktx/src/stats_json.c:180-202`.*
+
 ### mvdhidden_dmgdone (0x0007)
 
 Tracks damage dealt between players. **Critical for weapon statistics**.

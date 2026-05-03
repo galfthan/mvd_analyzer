@@ -61,6 +61,9 @@
             <button class="sidebar-btn" data-tab="packdrops" title="Pack Drops">
                 <span class="sidebar-btn-label">Pack Drops</span>
             </button>
+            <button class="sidebar-btn" data-tab="pickups" title="Pickups">
+                <span class="sidebar-btn-label">Pickups</span>
+            </button>
         </nav>
 
         <main class="main">
@@ -320,10 +323,10 @@
                                 <th title="Quad Damage pickups (total hold time)">Quad</th>
                                 <th title="Pentagram of Protection pickups (total hold time)">Pent</th>
                                 <th title="Ring of Shadows pickups (total hold time)">Ring</th>
-                                <th title="Rocket Launcher pickups">RL</th>
+                                <th title="Rocket Launcher first pickups per life (item or pack)">RL</th>
                                 <th title="Rocket Launcher drops">RL drop</th>
                                 <th title="Rocket Launcher transfers to teammates">RL xfer</th>
-                                <th title="Lightning Gun pickups">LG</th>
+                                <th title="Lightning Gun first pickups per life (item or pack)">LG</th>
                                 <th title="Lightning Gun drops">LG drop</th>
                                 <th title="Lightning Gun transfers to teammates">LG xfer</th>
                             </tr>
@@ -342,10 +345,10 @@
                                 <th title="Quad Damage pickups (total hold time)">Quad</th>
                                 <th title="Pentagram of Protection pickups (total hold time)">Pent</th>
                                 <th title="Ring of Shadows pickups (total hold time)">Ring</th>
-                                <th title="Rocket Launcher pickups">RL</th>
+                                <th title="Rocket Launcher first pickups per life (item or pack)">RL</th>
                                 <th title="Rocket Launcher drops">RL drop</th>
                                 <th title="Rocket Launcher transfers to teammates">RL xfer</th>
-                                <th title="Lightning Gun pickups">LG</th>
+                                <th title="Lightning Gun first pickups per life (item or pack)">LG</th>
                                 <th title="Lightning Gun drops">LG drop</th>
                                 <th title="Lightning Gun transfers to teammates">LG xfer</th>
                             </tr>
@@ -740,6 +743,60 @@
                     <div id="packdrops-empty" class="empty-message" style="display: none;">
                         No RL / LG backpack drops detected in this demo.
                     </div>
+                </div>
+            </div>
+
+            <!-- Pickups Tab -->
+            <div id="tab-pickups" class="tab-content">
+                <div class="empty-state">Load or search a demo to begin.</div>
+
+                <div class="panel">
+                    <div class="pickups-toolbar">
+                        <label>Mode:
+                            <select id="pickups-mode">
+                                <option value="all">All pickups (every touch)</option>
+                                <option value="first">First pickup per life</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <h3>Weapon Pickups</h3>
+                    <h4 class="team-aggregate-heading">Per Team</h4>
+                    <div class="pickups-table-wrap">
+                        <table id="pickups-weap-team-table" class="stats-table pickups-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <h4 class="per-player-heading">Per Player</h4>
+                    <div class="pickups-table-wrap">
+                        <table id="pickups-weap-player-table" class="stats-table pickups-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel" id="pickups-items-panel">
+                    <h3>Item Pickups</h3>
+                    <h4 class="team-aggregate-heading">Per Team</h4>
+                    <div class="pickups-table-wrap">
+                        <table id="pickups-item-team-table" class="stats-table pickups-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <h4 class="per-player-heading">Per Player</h4>
+                    <div class="pickups-table-wrap">
+                        <table id="pickups-item-player-table" class="stats-table pickups-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="pickups-empty" class="empty-message" style="display: none;">
+                    No tracked pickups in this demo.
                 </div>
             </div>
 

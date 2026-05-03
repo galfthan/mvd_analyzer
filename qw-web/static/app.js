@@ -830,6 +830,9 @@ function displayResults(result) {
     // Pack Drops — always call so stale rows are cleared between demos.
     displayPackDrops(result);
 
+    // Pickups — per-entity item pickups + KTX-tooks verification.
+    displayPickupsTab(result);
+
     // Map View
     if (result.timelineAnalysis) {
         initMapView(result);
@@ -1618,6 +1621,387 @@ function populateFilterSelect(selectId, values) {
     // Preserve selection across demo reload when possible.
     if (values.includes(prev)) sel.value = prev;
     else sel.value = '';
+}
+
+// ─── Pickups tab ──────────────────────────────────────────────────────
+//
+// Two tables — Weapon Pickups (RL/LG/GL/SNG with per-entity columns,
+// pack column for RL/LG, and a Σ that aggregates the kind) and Item
+// Pickups (armors, healths, powerups). Both react to a mode selector:
+//
+//   "All pickups"          → Σ vs KTX total-taken; pack vs ttooks-sttooks
+//   "First pickup per life" → Σ vs KTX taken;       pack vs tooks-stooks
+//
+// Per-entity columns always show every-touch from items.phases. The
+// verify cell renders silently on KTX agreement and red+✗ on diff.
+//
+// Note: GL/SNG packs aren't tracked on the analyser side (KTX only emits
+// `//ktx bp` for RL/LG; ktx/src/items.c:2471), so those weapons compare
+// against KTX's entity-only fields (spawn-taken / spawn-total-taken).
+
+const PICKUPS_WEAPON_KINDS = [
+    { kind: 'rl',  label: 'RL',  ktxName: 'rl',  hasPack: true  },
+    { kind: 'lg',  label: 'LG',  ktxName: 'lg',  hasPack: true  },
+    { kind: 'gl',  label: 'GL',  ktxName: 'gl',  hasPack: false },
+    { kind: 'sng', label: 'SNG', ktxName: 'sng', hasPack: false },
+];
+
+const PICKUPS_ITEM_KINDS = [
+    { kind: 'ra',   label: 'RA',   ktxName: 'ra' },
+    { kind: 'ya',   label: 'YA',   ktxName: 'ya' },
+    { kind: 'ga',   label: 'GA',   ktxName: 'ga' },
+    { kind: 'mh',   label: 'MH',   ktxName: 'health_100' },
+    { kind: 'quad', label: 'Quad', ktxName: 'q' },
+    { kind: 'pent', label: 'Pent', ktxName: 'p' },
+    { kind: 'ring', label: 'Ring', ktxName: 'r' },
+];
+
+let pickupsMode = 'all'; // 'all' | 'first'
+
+function pickupsWeaponDetail(player, ktxName) {
+    const pk = player.weapons?.[ktxName]?.pickups || {};
+    return {
+        'first pickup, any source': pk['taken'] || 0,
+        'every touch, any source':  pk['total-taken'] || 0,
+        'first pickup of items':    pk['spawn-taken'] || 0,
+        'every item touch':         pk['spawn-total-taken'] || 0,
+    };
+}
+function pickupsSumDetail(into, add) {
+    if (!add) return into;
+    if (!into) into = {};
+    for (const [k, v] of Object.entries(add)) into[k] = (into[k] || 0) + v;
+    return into;
+}
+
+function displayPickupsTab(result) {
+    const sel = document.getElementById('pickups-mode');
+    if (sel && !sel.dataset.bound) {
+        sel.value = pickupsMode;
+        sel.addEventListener('change', () => {
+            pickupsMode = sel.value;
+            if (currentResult) renderPickupsTables(currentResult);
+        });
+        sel.dataset.bound = '1';
+    }
+    renderPickupsTables(result);
+}
+
+function renderPickupsTables(result) {
+    const state = computePickupsState(result);
+    const empty = document.getElementById('pickups-empty');
+    const itemsPanel = document.getElementById('pickups-items-panel');
+
+    const hasWeapon = PICKUPS_WEAPON_KINDS.some(k => (state.weaponEntsByKind.get(k.kind) || []).length > 0);
+    const hasItem = PICKUPS_ITEM_KINDS.some(k => (state.itemEntsByKind.get(k.kind) || []).length > 0);
+
+    if (!hasWeapon && !hasItem) {
+        empty.style.display = '';
+        for (const id of ['pickups-weap-team-table', 'pickups-weap-player-table',
+                          'pickups-item-team-table', 'pickups-item-player-table']) {
+            const t = document.getElementById(id);
+            if (t) t.style.display = 'none';
+        }
+        return;
+    }
+    empty.style.display = 'none';
+
+    renderPickupsSection(state, 'weap', PICKUPS_WEAPON_KINDS, buildWeaponCols, weaponCellFor);
+    if (itemsPanel) itemsPanel.style.display = hasItem ? '' : 'none';
+    renderPickupsSection(state, 'item', PICKUPS_ITEM_KINDS, buildItemCols, itemCellFor);
+}
+
+function computePickupsState(result) {
+    const players = result.demoInfo?.players || [];
+    const teamOrder = getTeamOrder([...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0)));
+    const playerByName = new Map(players.map(p => [p.name, p]));
+
+    const items = result.items?.items || [];
+    const weaponEntsByKind = new Map();
+    const itemEntsByKind = new Map();
+    for (const it of items) {
+        if (PICKUPS_WEAPON_KINDS.some(k => k.kind === it.kind)) {
+            if (!weaponEntsByKind.has(it.kind)) weaponEntsByKind.set(it.kind, []);
+            weaponEntsByKind.get(it.kind).push(it);
+        } else if (PICKUPS_ITEM_KINDS.some(k => k.kind === it.kind)) {
+            if (!itemEntsByKind.has(it.kind)) itemEntsByKind.set(it.kind, []);
+            itemEntsByKind.get(it.kind).push(it);
+        }
+    }
+    const sortByLoc = (a, b) => {
+        const la = a.loc || ''; const lb = b.loc || '';
+        if (la !== lb) return la.localeCompare(lb);
+        return a.entNum - b.entNum;
+    };
+    for (const list of weaponEntsByKind.values()) list.sort(sortByLoc);
+    for (const list of itemEntsByKind.values()) list.sort(sortByLoc);
+
+    const entityCountsByPlayer = new Map(); // name -> Map(entNum -> count)
+    const entityCountsByTeam = new Map();   // team -> Map(entNum -> count)
+    for (const it of items) {
+        for (const ph of it.phases || []) {
+            const who = ph.takenBy;
+            if (!who) continue;
+            if (!entityCountsByPlayer.has(who)) entityCountsByPlayer.set(who, new Map());
+            const pm = entityCountsByPlayer.get(who);
+            pm.set(it.entNum, (pm.get(it.entNum) || 0) + 1);
+            const team = ph.team || playerByName.get(who)?.team || '';
+            if (!entityCountsByTeam.has(team)) entityCountsByTeam.set(team, new Map());
+            const tm = entityCountsByTeam.get(team);
+            tm.set(it.entNum, (tm.get(it.entNum) || 0) + 1);
+        }
+    }
+
+    return {
+        result, players, teamOrder, playerByName,
+        weaponEntsByKind, itemEntsByKind,
+        entityCountsByPlayer, entityCountsByTeam,
+        weaponPickups: result.weaponPickups || [],
+    };
+}
+
+function buildWeaponCols(state) {
+    const cols = [];
+    for (const spec of PICKUPS_WEAPON_KINDS) {
+        const list = state.weaponEntsByKind.get(spec.kind) || [];
+        if (list.length === 0) continue;
+        if (list.length === 1 && !spec.hasPack) {
+            // Single combined cell: kind label, mode-aware verify against KTX.
+            cols.push({ type: 'weap-verify', kindSpec: spec, header: spec.label });
+            continue;
+        }
+        if (list.length === 1) {
+            cols.push({
+                type: 'entity-count',
+                kindSpec: spec,
+                entNum: list[0].entNum,
+                header: spec.label,
+            });
+        } else {
+            for (const it of list) {
+                const tag = (it.loc && it.loc.length > 0) ? it.loc : it.name;
+                cols.push({
+                    type: 'entity-count',
+                    kindSpec: spec,
+                    entNum: it.entNum,
+                    header: `${spec.label} <span class="pickups-loc">@ ${escapeHtml(tag)}</span>`,
+                });
+            }
+        }
+        if (spec.hasPack) {
+            cols.push({ type: 'weap-pack', kindSpec: spec, header: `${spec.label} pack` });
+        }
+        cols.push({
+            type: 'weap-verify',
+            kindSpec: spec,
+            header: `${spec.label} <span class="pickups-verify-header">Σ</span>`,
+        });
+    }
+    return cols;
+}
+
+function buildItemCols(state) {
+    const cols = [];
+    for (const spec of PICKUPS_ITEM_KINDS) {
+        const list = state.itemEntsByKind.get(spec.kind) || [];
+        if (list.length === 0) continue;
+        if (list.length === 1) {
+            cols.push({ type: 'item-verify', kindSpec: spec, entNums: [list[0].entNum], header: spec.label });
+            continue;
+        }
+        for (const it of list) {
+            const tag = (it.loc && it.loc.length > 0) ? it.loc : it.name;
+            cols.push({
+                type: 'entity-count',
+                kindSpec: spec,
+                entNum: it.entNum,
+                header: `${spec.label} <span class="pickups-loc">@ ${escapeHtml(tag)}</span>`,
+            });
+        }
+        cols.push({
+            type: 'item-verify',
+            kindSpec: spec,
+            entNums: list.map(it => it.entNum),
+            header: `${spec.label} <span class="pickups-verify-header">Σ</span>`,
+        });
+    }
+    return cols;
+}
+
+function renderPickupsSection(state, idPrefix, kinds, buildCols, cellFor) {
+    const teamTable = document.getElementById(`pickups-${idPrefix}-team-table`);
+    const playerTable = document.getElementById(`pickups-${idPrefix}-player-table`);
+    if (!teamTable || !playerTable) return;
+    const teamHead = teamTable.querySelector('thead');
+    const teamBody = teamTable.querySelector('tbody');
+    const playerHead = playerTable.querySelector('thead');
+    const playerBody = playerTable.querySelector('tbody');
+    teamHead.innerHTML = ''; teamBody.innerHTML = '';
+    playerHead.innerHTML = ''; playerBody.innerHTML = '';
+
+    const cols = buildCols(state);
+    if (cols.length === 0) {
+        teamTable.style.display = 'none';
+        playerTable.style.display = 'none';
+        return;
+    }
+    teamTable.style.display = '';
+    playerTable.style.display = '';
+
+    const buildHeader = (label) => {
+        const tr = document.createElement('tr');
+        tr.appendChild(makeTh(label));
+        for (const c of cols) tr.appendChild(makeTh(c.header));
+        return tr;
+    };
+    teamHead.appendChild(buildHeader('Team'));
+    playerHead.appendChild(buildHeader('Player'));
+
+    const teamsSorted = [...state.teamOrder.filter(t => t !== '')];
+    if (teamsSorted.length === 0 && state.entityCountsByTeam.size > 0) {
+        teamsSorted.push(...[...state.entityCountsByTeam.keys()].filter(t => t !== ''));
+    }
+    for (const team of teamsSorted) {
+        const tr = document.createElement('tr');
+        const teamIdx = state.teamOrder.indexOf(team);
+        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+            tr.style.setProperty('--row-team-color', TEAM_COLORS[teamIdx]);
+        }
+        tr.appendChild(makeTd(escapeHtml(team || '(no team)')));
+        const teamMap = state.entityCountsByTeam.get(team) || new Map();
+        const teamPlayers = state.players.filter(p => p.team === team);
+        for (const c of cols) {
+            tr.appendChild(cellFor(c, true, team, teamMap, teamPlayers, state));
+        }
+        teamBody.appendChild(tr);
+    }
+
+    const playersSorted = [...state.players].sort((a, b) => {
+        const ta = state.teamOrder.indexOf(a.team || '');
+        const tb = state.teamOrder.indexOf(b.team || '');
+        if (ta !== tb) return ta - tb;
+        return (b.stats?.frags || 0) - (a.stats?.frags || 0);
+    });
+    for (const p of playersSorted) {
+        const tr = document.createElement('tr');
+        const teamIdx = state.teamOrder.indexOf(p.team || '');
+        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+            tr.style.setProperty('--row-team-color', TEAM_COLORS[teamIdx]);
+        }
+        tr.appendChild(makeTd(`${escapeHtml(p.name)} <span class="pickups-team-tag">${escapeHtml(p.team || '')}</span>`));
+        const pmap = state.entityCountsByPlayer.get(p.name) || new Map();
+        for (const c of cols) {
+            tr.appendChild(cellFor(c, false, p.name, pmap, [p], state));
+        }
+        playerBody.appendChild(tr);
+    }
+}
+
+function weaponCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
+    const spec = col.kindSpec;
+    if (col.type === 'entity-count') {
+        const n = entMap.get(col.entNum) || 0;
+        return makeTd(n === 0 ? '<span class="muted">0</span>' : String(n));
+    }
+    const matches = isTeam
+        ? (w => (w.team || '') === key)
+        : (w => w.player === key);
+    if (col.type === 'weap-pack') {
+        const ana = state.weaponPickups.filter(w =>
+            w.weapon === spec.kind && matches(w) && w.source === 'backpack'
+            && (pickupsMode !== 'first' || !w.hadBefore)).length;
+        let primary = 0;
+        for (const p of scopedPlayers) {
+            const pk = p.weapons?.[spec.ktxName]?.pickups || {};
+            primary += pickupsMode === 'first'
+                ? ((pk['taken'] || 0) - (pk['spawn-taken'] || 0))
+                : ((pk['total-taken'] || 0) - (pk['spawn-total-taken'] || 0));
+        }
+        return makeVerifyCell(ana, primary, null);
+    }
+    // weap-verify (Σ for hasPack, or single combined cell otherwise).
+    let ana;
+    if (pickupsMode === 'first') {
+        // first-per-life from weaponPickups (any source for hasPack; world-only entries otherwise).
+        ana = state.weaponPickups.filter(w =>
+            w.weapon === spec.kind && matches(w) && !w.hadBefore).length;
+    } else {
+        ana = 0;
+        const list = state.weaponEntsByKind.get(spec.kind) || [];
+        for (const it of list) ana += (entMap.get(it.entNum) || 0);
+        if (spec.hasPack) {
+            ana += state.weaponPickups.filter(w =>
+                w.weapon === spec.kind && matches(w) && w.source === 'backpack').length;
+        }
+    }
+    let primary = 0; let detail = null;
+    for (const p of scopedPlayers) {
+        const pk = p.weapons?.[spec.ktxName]?.pickups || {};
+        if (spec.hasPack) {
+            primary += pickupsMode === 'first' ? (pk['taken'] || 0) : (pk['total-taken'] || 0);
+        } else {
+            primary += pickupsMode === 'first' ? (pk['spawn-taken'] || 0) : (pk['spawn-total-taken'] || 0);
+        }
+        detail = pickupsSumDetail(detail, pickupsWeaponDetail(p, spec.ktxName));
+    }
+    return makeVerifyCell(ana, primary, detail);
+}
+
+function itemCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
+    const spec = col.kindSpec;
+    if (col.type === 'entity-count') {
+        const n = entMap.get(col.entNum) || 0;
+        return makeTd(n === 0 ? '<span class="muted">0</span>' : String(n));
+    }
+    // item-verify: single counter on the KTX side (`took`) — mode has no
+    // effect here (KTX doesn't expose a first-per-life counter for items).
+    let ana = 0;
+    for (const ent of col.entNums) ana += (entMap.get(ent) || 0);
+    let primary = 0;
+    for (const p of scopedPlayers) primary += (p.items?.[spec.ktxName]?.took || 0);
+    return makeVerifyCell(ana, primary, null);
+}
+
+function makeTh(html) {
+    const th = document.createElement('th');
+    th.innerHTML = html;
+    return th;
+}
+
+function makeTd(html) {
+    const td = document.createElement('td');
+    td.innerHTML = html;
+    return td;
+}
+
+// makeVerifyCell renders the analyser count silently when it matches
+// KTX (cell looks like a regular count) and red+✗ when it disagrees.
+// Tooltip is always present so the per-counter breakdown is one hover
+// away even on matched cells.
+function makeVerifyCell(ana, ktxPrimary, detail) {
+    const td = document.createElement('td');
+    if (ana === 0 && ktxPrimary === 0 && (!detail || Object.values(detail).every(v => v === 0))) {
+        td.innerHTML = '<span class="muted">·</span>';
+        return td;
+    }
+    if (ana === ktxPrimary) {
+        td.textContent = String(ana);
+    } else {
+        td.className = 'pickups-verify-bad';
+        const diff = ana - ktxPrimary;
+        const sign = diff > 0 ? `+${diff}` : `${diff}`;
+        td.innerHTML = `${ana}<span class="pickups-verify-mark"> ✗ ktx ${ktxPrimary} (${sign})</span>`;
+    }
+    if (detail) {
+        const lines = [`analyzer: ${ana}`];
+        for (const [field, val] of Object.entries(detail)) {
+            lines.push(`ktx ${field}: ${val}`);
+        }
+        td.title = lines.join('\n');
+    } else {
+        td.title = `analyzer: ${ana}\nktx: ${ktxPrimary}`;
+    }
+    return td;
 }
 
 function displayPackDrops(result) {
