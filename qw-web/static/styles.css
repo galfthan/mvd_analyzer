@@ -1977,12 +1977,30 @@ th.sortable.sort-desc::after {
 .pack-status.status-expired  { color: #888; background: rgba(128, 128, 128, 0.12); }
 
 /* ── Pickups tab ── */
-.pickups-blurb {
-    color: #888;
+.pickups-toolbar {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
     font-size: 0.9rem;
-    line-height: 1.4;
-    max-width: 100ch;
-    margin: 0 0 1.4rem 0;
+}
+.pickups-toolbar label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.pickups-toolbar select {
+    background: var(--bg-deep);
+    color: #ccc;
+    border: 1px solid #666;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+.pickups-toolbar select option {
+    background: var(--bg-deep);
+    color: #ccc;
 }
 .pickups-table-wrap {
     overflow-x: auto;
@@ -2025,13 +2043,6 @@ th.sortable.sort-desc::after {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-left: 4px;
-}
-.pickups-verify-ok {
-    color: #7fcf7f;
-}
-.pickups-verify-ok .pickups-verify-mark {
-    color: #4caf50;
-    margin-left: 2px;
 }
 .pickups-verify-bad {
     color: #ff8080;
