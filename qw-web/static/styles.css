@@ -1976,6 +1976,74 @@ th.sortable.sort-desc::after {
 .pack-status.status-enemy-had { color: #e5bfbf; background: rgba(255, 50, 50, 0.08); }
 .pack-status.status-expired  { color: #888; background: rgba(128, 128, 128, 0.12); }
 
+/* ── Pickups tab ── */
+.pickups-blurb {
+    color: #888;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    max-width: 100ch;
+    margin: 0 0 1.4rem 0;
+}
+.pickups-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+}
+.pickups-table th,
+.pickups-table td {
+    white-space: nowrap;
+    text-align: right;
+    padding: 4px 8px;
+    font-variant-numeric: tabular-nums;
+}
+.pickups-table th:first-child,
+.pickups-table td:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background: #181818;
+    z-index: 1;
+}
+.pickups-table thead th {
+    font-size: 0.85rem;
+    border-bottom: 1px solid #333;
+}
+.pickups-loc {
+    color: #888;
+    font-size: 0.78rem;
+    font-weight: normal;
+}
+.pickups-team-tag {
+    color: #777;
+    font-size: 0.78rem;
+    margin-left: 4px;
+}
+.pickups-verify-header {
+    color: #aaa;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 4px;
+}
+.pickups-verify-ok {
+    color: #7fcf7f;
+}
+.pickups-verify-ok .pickups-verify-mark {
+    color: #4caf50;
+    margin-left: 2px;
+}
+.pickups-verify-bad {
+    color: #ff8080;
+    background: rgba(255, 60, 60, 0.10);
+}
+.pickups-verify-bad .pickups-verify-mark {
+    color: #ff5050;
+    font-size: 0.8rem;
+    margin-left: 4px;
+}
+.pickups-table .muted {
+    color: #555;
+}
+
 .weapon-cell.weapon-rl { color: #ff7040; font-weight: bold; }
 .weapon-cell.weapon-lg { color: #70c0ff; font-weight: bold; }
 

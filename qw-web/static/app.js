@@ -830,6 +830,9 @@ function displayResults(result) {
     // Pack Drops — always call so stale rows are cleared between demos.
     displayPackDrops(result);
 
+    // Pickups — per-entity item pickups + KTX-tooks verification.
+    displayPickupsTab(result);
+
     // Map View
     if (result.timelineAnalysis) {
         initMapView(result);
@@ -1618,6 +1621,234 @@ function populateFilterSelect(selectId, values) {
     // Preserve selection across demo reload when possible.
     if (values.includes(prev)) sel.value = prev;
     else sel.value = '';
+}
+
+// ─── Pickups tab ──────────────────────────────────────────────────────
+//
+// Renders two tables (per-team and per-player) of item pickup counts
+// broken down by entity, so two RAs on the same map appear as separate
+// columns labelled by `loc`. Each kind also gets a "Σ/KTX" verification
+// cell comparing the analyser's per-player total to KTX's authoritative
+// demoInfo.players[*].items[*].took (or weapons[*].pickups.taken). Green
+// on match, red on diff — this is the on-screen counterpart of the
+// pickup-invariant Go test.
+//
+// Items in scope: RL, LG, GL, SNG, RA, YA, GA, MH, Quad, Pent, Ring.
+// (SSG / NG / small healths / ammo deliberately excluded — too noisy
+// or KTX doesn't track them.)
+
+const PICKUPS_KINDS = [
+    { kind: 'rl',   label: 'RL',   ktxSrc: 'weapon', ktxName: 'rl' },
+    { kind: 'lg',   label: 'LG',   ktxSrc: 'weapon', ktxName: 'lg' },
+    { kind: 'gl',   label: 'GL',   ktxSrc: 'weapon', ktxName: 'gl' },
+    { kind: 'sng',  label: 'SNG',  ktxSrc: 'weapon', ktxName: 'sng' },
+    { kind: 'ra',   label: 'RA',   ktxSrc: 'item',   ktxName: 'ra' },
+    { kind: 'ya',   label: 'YA',   ktxSrc: 'item',   ktxName: 'ya' },
+    { kind: 'ga',   label: 'GA',   ktxSrc: 'item',   ktxName: 'ga' },
+    { kind: 'mh',   label: 'MH',   ktxSrc: 'item',   ktxName: 'health_100' },
+    { kind: 'quad', label: 'Quad', ktxSrc: 'item',   ktxName: 'q' },
+    { kind: 'pent', label: 'Pent', ktxSrc: 'item',   ktxName: 'p' },
+    { kind: 'ring', label: 'Ring', ktxSrc: 'item',   ktxName: 'r' },
+];
+
+function ktxTooksFor(player, spec) {
+    if (!player) return 0;
+    if (spec.ktxSrc === 'item') {
+        return player.items?.[spec.ktxName]?.took || 0;
+    }
+    return player.weapons?.[spec.ktxName]?.pickups?.taken || 0;
+}
+
+function displayPickupsTab(result) {
+    const teamTable = document.getElementById('pickups-team-table');
+    const playerTable = document.getElementById('pickups-player-table');
+    const emptyMsg = document.getElementById('pickups-empty');
+    if (!teamTable || !playerTable) return;
+
+    const teamHead = teamTable.querySelector('thead');
+    const teamBody = teamTable.querySelector('tbody');
+    const playerHead = playerTable.querySelector('thead');
+    const playerBody = playerTable.querySelector('tbody');
+    teamHead.innerHTML = '';
+    teamBody.innerHTML = '';
+    playerHead.innerHTML = '';
+    playerBody.innerHTML = '';
+
+    const items = result.items?.items || [];
+    if (items.length === 0) {
+        emptyMsg.style.display = '';
+        teamTable.style.display = 'none';
+        playerTable.style.display = 'none';
+        return;
+    }
+    emptyMsg.style.display = 'none';
+    teamTable.style.display = '';
+    playerTable.style.display = '';
+
+    // Bucket items by kind, keeping only the kinds we care about.
+    const itemsByKind = new Map();
+    for (const it of items) {
+        const spec = PICKUPS_KINDS.find(k => k.kind === it.kind);
+        if (!spec) continue;
+        if (!itemsByKind.has(it.kind)) itemsByKind.set(it.kind, []);
+        itemsByKind.get(it.kind).push(it);
+    }
+    // Sort entities within a kind by loc (then entNum) for stable column order.
+    for (const list of itemsByKind.values()) {
+        list.sort((a, b) => {
+            const la = a.loc || '';
+            const lb = b.loc || '';
+            if (la !== lb) return la.localeCompare(lb);
+            return a.entNum - b.entNum;
+        });
+    }
+
+    // Per-(player, entNum) and per-(team, entNum) counts.
+    const players = result.demoInfo?.players || [];
+    const teamOrder = getTeamOrder([...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0)));
+    const playerByName = new Map(players.map(p => [p.name, p]));
+
+    const countsByPlayer = new Map(); // name -> Map(entNum -> count)
+    const countsByTeam = new Map();   // team -> Map(entNum -> count)
+    for (const it of items) {
+        for (const ph of it.phases || []) {
+            const who = ph.takenBy;
+            if (!who) continue;
+            if (!countsByPlayer.has(who)) countsByPlayer.set(who, new Map());
+            const pm = countsByPlayer.get(who);
+            pm.set(it.entNum, (pm.get(it.entNum) || 0) + 1);
+            const team = ph.team || playerByName.get(who)?.team || '';
+            if (!countsByTeam.has(team)) countsByTeam.set(team, new Map());
+            const tm = countsByTeam.get(team);
+            tm.set(it.entNum, (tm.get(it.entNum) || 0) + 1);
+        }
+    }
+
+    // Build column descriptors. Each kind contributes one column per
+    // entity (skipping the loc suffix when there's only one of that
+    // kind on the map) plus a `Σ/KTX` verify column.
+    const cols = [];
+    for (const spec of PICKUPS_KINDS) {
+        const list = itemsByKind.get(spec.kind);
+        if (!list || list.length === 0) continue;
+        for (const it of list) {
+            let header = spec.label;
+            if (list.length > 1) {
+                const tag = (it.loc && it.loc.length > 0) ? it.loc : it.name;
+                header = `${spec.label} <span class="pickups-loc">@ ${escapeHtml(tag)}</span>`;
+            }
+            cols.push({
+                type: 'count',
+                kindSpec: spec,
+                entNum: it.entNum,
+                header,
+            });
+        }
+        cols.push({
+            type: 'verify',
+            kindSpec: spec,
+            entNums: list.map(it => it.entNum),
+            header: `${spec.label} <span class="pickups-verify-header">Σ/KTX</span>`,
+        });
+    }
+
+    // ── Header row (shared between team and player tables; clone so
+    //    modifications to one don't affect the other) ──
+    function buildHeader(firstColLabel) {
+        const tr = document.createElement('tr');
+        tr.appendChild(makeTh(firstColLabel));
+        for (const c of cols) {
+            tr.appendChild(makeTh(c.header));
+        }
+        return tr;
+    }
+    teamHead.appendChild(buildHeader('Team'));
+    playerHead.appendChild(buildHeader('Player'));
+
+    // ── Per-team rows ──
+    const teamsSorted = [...teamOrder.filter(t => t !== '')];
+    if (teamsSorted.length === 0 && countsByTeam.size > 0) {
+        teamsSorted.push(...[...countsByTeam.keys()].filter(t => t !== ''));
+    }
+    for (const team of teamsSorted) {
+        const tr = document.createElement('tr');
+        tr.appendChild(makeTd(escapeHtml(team || '(no team)')));
+        const teamMap = countsByTeam.get(team) || new Map();
+        const teamPlayers = players.filter(p => p.team === team);
+        for (const c of cols) {
+            if (c.type === 'count') {
+                const n = teamMap.get(c.entNum) || 0;
+                tr.appendChild(makeTd(n === 0 ? '<span class="muted">0</span>' : String(n)));
+            } else {
+                let ana = 0;
+                for (const ent of c.entNums) ana += (teamMap.get(ent) || 0);
+                let ktx = 0;
+                for (const p of teamPlayers) ktx += ktxTooksFor(p, c.kindSpec);
+                tr.appendChild(makeVerifyCell(ana, ktx));
+            }
+        }
+        teamBody.appendChild(tr);
+    }
+
+    // ── Per-player rows ──
+    const playersSorted = [...players].sort((a, b) => {
+        const ta = teamOrder.indexOf(a.team || '');
+        const tb = teamOrder.indexOf(b.team || '');
+        if (ta !== tb) return ta - tb;
+        return (b.stats?.frags || 0) - (a.stats?.frags || 0);
+    });
+    for (const p of playersSorted) {
+        const tr = document.createElement('tr');
+        tr.appendChild(makeTd(`${escapeHtml(p.name)} <span class="pickups-team-tag">${escapeHtml(p.team || '')}</span>`));
+        const pm = countsByPlayer.get(p.name) || new Map();
+        for (const c of cols) {
+            if (c.type === 'count') {
+                const n = pm.get(c.entNum) || 0;
+                tr.appendChild(makeTd(n === 0 ? '<span class="muted">0</span>' : String(n)));
+            } else {
+                let ana = 0;
+                for (const ent of c.entNums) ana += (pm.get(ent) || 0);
+                const ktx = ktxTooksFor(p, c.kindSpec);
+                tr.appendChild(makeVerifyCell(ana, ktx));
+            }
+        }
+        playerBody.appendChild(tr);
+    }
+}
+
+function makeTh(html) {
+    const th = document.createElement('th');
+    th.innerHTML = html;
+    return th;
+}
+
+function makeTd(html) {
+    const td = document.createElement('td');
+    td.innerHTML = html;
+    return td;
+}
+
+// makeVerifyCell renders a "Σ/KTX" cell. Match → green check, mismatch
+// → red diff annotation. The analyser hitting KTX's number exactly is
+// the load-bearing invariant the Go pickup-invariant test enforces;
+// surfacing it on-screen makes a divergence on a fresh demo immediately
+// visible.
+function makeVerifyCell(ana, ktx) {
+    const td = document.createElement('td');
+    if (ana === 0 && ktx === 0) {
+        td.innerHTML = '<span class="muted">·</span>';
+        return td;
+    }
+    if (ana === ktx) {
+        td.className = 'pickups-verify-ok';
+        td.innerHTML = `${ana} <span class="pickups-verify-mark">✓</span>`;
+    } else {
+        td.className = 'pickups-verify-bad';
+        const diff = ana - ktx;
+        const sign = diff > 0 ? `+${diff}` : `${diff}`;
+        td.innerHTML = `${ana}<span class="pickups-verify-mark"> ✗ ktx ${ktx} (${sign})</span>`;
+    }
+    return td;
 }
 
 function displayPackDrops(result) {
