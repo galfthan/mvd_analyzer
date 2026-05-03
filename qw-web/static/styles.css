@@ -1988,24 +1988,26 @@ th.sortable.sort-desc::after {
     overflow-x: auto;
     margin-bottom: 1.5rem;
 }
-.pickups-table th,
-.pickups-table td {
-    white-space: nowrap;
-    text-align: right;
-    padding: 4px 8px;
-    font-variant-numeric: tabular-nums;
-}
+/* Pickups tables inherit .stats-table look from the summary page; the only
+   addition is a sticky-left first column so the player/team label stays in
+   view while the per-entity columns scroll horizontally. */
 .pickups-table th:first-child,
 .pickups-table td:first-child {
-    text-align: left;
     position: sticky;
     left: 0;
-    background: #181818;
     z-index: 1;
 }
-.pickups-table thead th {
-    font-size: 0.85rem;
-    border-bottom: 1px solid #333;
+.pickups-table tbody td:first-child {
+    background: var(--bg-deep);
+    /* Team color strip — same 3px team-coloured edge that the summary
+       scoreboard renders via border-left on <tr>. We put it on the
+       sticky-left cell so it stays in view while the per-entity columns
+       scroll horizontally. The CSS variable is set per-row in JS. */
+    border-left: 3px solid var(--row-team-color, transparent);
+}
+.pickups-table thead th:first-child {
+    /* sit above the sticky-top header siblings and the body sticky-left */
+    z-index: 6;
 }
 .pickups-loc {
     color: #888;

@@ -1799,6 +1799,10 @@ function displayPickupsTab(result) {
     }
     for (const team of teamsSorted) {
         const tr = document.createElement('tr');
+        const teamIdx = teamOrder.indexOf(team);
+        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+            tr.style.setProperty('--row-team-color', TEAM_COLORS[teamIdx]);
+        }
         tr.appendChild(makeTd(escapeHtml(team || '(no team)')));
         const teamMap = countsByTeam.get(team) || new Map();
         const teamPlayers = players.filter(p => p.team === team);
@@ -1837,6 +1841,10 @@ function displayPickupsTab(result) {
     });
     for (const p of playersSorted) {
         const tr = document.createElement('tr');
+        const teamIdx = teamOrder.indexOf(p.team || '');
+        if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
+            tr.style.setProperty('--row-team-color', TEAM_COLORS[teamIdx]);
+        }
         tr.appendChild(makeTd(`${escapeHtml(p.name)} <span class="pickups-team-tag">${escapeHtml(p.team || '')}</span>`));
         const pm = countsByPlayer.get(p.name) || new Map();
         for (const c of cols) {
