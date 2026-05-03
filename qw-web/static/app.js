@@ -1651,12 +1651,39 @@ const PICKUPS_KINDS = [
     { kind: 'ring', label: 'Ring', ktxSrc: 'item',   ktxName: 'r' },
 ];
 
+// ktxTooksFor returns the KTX counter that semantically matches the
+// analyser's per-entity phase count for this kind. It also returns the
+// other relevant KTX counters as `detail` so the UI can surface them
+// inline — KTX bugs and analyser bugs both look like "ana != ktx", and
+// the user has to be able to inspect both sides without re-running
+// anything.
+//
+// Items / healths / armors / powerups have a single `took` field that
+// increments on every successful touch (ktx/src/items.c:318, 332, 336,
+// 511, 2149, 2164, 2179) — straightforward.
+//
+// Weapons split into four: `tooks` only increments on
+// first-acquisition per life (ktx/src/client.c:4756), `ttooks` is
+// every touch (world + backpack), `stooks` is first-acquisition from
+// world only, `sttooks` is every world touch. The analyser's
+// per-entity phase count == `sttooks` if both sides are correct.
 function ktxTooksFor(player, spec) {
-    if (!player) return 0;
+    if (!player) return { primary: 0, detail: null };
     if (spec.ktxSrc === 'item') {
-        return player.items?.[spec.ktxName]?.took || 0;
+        const t = player.items?.[spec.ktxName]?.took || 0;
+        return { primary: t, detail: null };
     }
-    return player.weapons?.[spec.ktxName]?.pickups?.taken || 0;
+    const pk = player.weapons?.[spec.ktxName]?.pickups || {};
+    return {
+        primary: pk['spawn-total-taken'] || 0,
+        detail: {
+            'taken (1st-acq any)': pk['taken'] || 0,
+            'total-taken (every touch)': pk['total-taken'] || 0,
+            'spawn-taken (1st-acq world)': pk['spawn-taken'] || 0,
+            'spawn-total-taken (every world)': pk['spawn-total-taken'] || 0,
+            'dropped': pk['dropped'] || 0,
+        },
+    };
 }
 
 function displayPickupsTab(result) {
@@ -1782,9 +1809,20 @@ function displayPickupsTab(result) {
             } else {
                 let ana = 0;
                 for (const ent of c.entNums) ana += (teamMap.get(ent) || 0);
-                let ktx = 0;
-                for (const p of teamPlayers) ktx += ktxTooksFor(p, c.kindSpec);
-                tr.appendChild(makeVerifyCell(ana, ktx));
+                // Aggregate KTX numbers across team's players.
+                let primary = 0;
+                let detail = null;
+                for (const p of teamPlayers) {
+                    const k = ktxTooksFor(p, c.kindSpec);
+                    primary += k.primary;
+                    if (k.detail) {
+                        if (!detail) detail = {};
+                        for (const [field, val] of Object.entries(k.detail)) {
+                            detail[field] = (detail[field] || 0) + val;
+                        }
+                    }
+                }
+                tr.appendChild(makeVerifyCell(ana, primary, detail));
             }
         }
         teamBody.appendChild(tr);
@@ -1808,8 +1846,8 @@ function displayPickupsTab(result) {
             } else {
                 let ana = 0;
                 for (const ent of c.entNums) ana += (pm.get(ent) || 0);
-                const ktx = ktxTooksFor(p, c.kindSpec);
-                tr.appendChild(makeVerifyCell(ana, ktx));
+                const k = ktxTooksFor(p, c.kindSpec);
+                tr.appendChild(makeVerifyCell(ana, k.primary, k.detail));
             }
         }
         playerBody.appendChild(tr);
@@ -1829,24 +1867,37 @@ function makeTd(html) {
 }
 
 // makeVerifyCell renders a "Σ/KTX" cell. Match → green check, mismatch
-// → red diff annotation. The analyser hitting KTX's number exactly is
-// the load-bearing invariant the Go pickup-invariant test enforces;
-// surfacing it on-screen makes a divergence on a fresh demo immediately
-// visible.
-function makeVerifyCell(ana, ktx) {
+// → red diff annotation. When `detail` is non-null (weapons, which
+// have four distinct KTX counters), the cell hover-tooltip lists every
+// counter so a divergence can be diagnosed without re-running. The
+// analyser-vs-KTX comparison is intentionally NOT load-bearing: a red
+// ✗ might be an analyser bug, but it might equally be a KTX bug — the
+// raw numbers go to the user, not the analyzer's verdict.
+function makeVerifyCell(ana, ktxPrimary, detail) {
     const td = document.createElement('td');
-    if (ana === 0 && ktx === 0) {
+    if (ana === 0 && ktxPrimary === 0 && (!detail || Object.values(detail).every(v => v === 0))) {
         td.innerHTML = '<span class="muted">·</span>';
         return td;
     }
-    if (ana === ktx) {
+    let body;
+    if (ana === ktxPrimary) {
         td.className = 'pickups-verify-ok';
-        td.innerHTML = `${ana} <span class="pickups-verify-mark">✓</span>`;
+        body = `${ana} <span class="pickups-verify-mark">✓</span>`;
     } else {
         td.className = 'pickups-verify-bad';
-        const diff = ana - ktx;
+        const diff = ana - ktxPrimary;
         const sign = diff > 0 ? `+${diff}` : `${diff}`;
-        td.innerHTML = `${ana}<span class="pickups-verify-mark"> ✗ ktx ${ktx} (${sign})</span>`;
+        body = `${ana}<span class="pickups-verify-mark"> ✗ ktx ${ktxPrimary} (${sign})</span>`;
+    }
+    td.innerHTML = body;
+    if (detail) {
+        const lines = [`analyzer: ${ana}`];
+        for (const [field, val] of Object.entries(detail)) {
+            lines.push(`ktx ${field}: ${val}`);
+        }
+        td.title = lines.join('\n');
+    } else {
+        td.title = `analyzer: ${ana}\nktx took: ${ktxPrimary}`;
     }
     return td;
 }

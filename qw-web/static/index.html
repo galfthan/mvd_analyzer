@@ -752,7 +752,10 @@
                 <div class="panel">
                     <h3>Item Pickups — per-entity breakdown vs KTX <code>tooks</code></h3>
                     <p class="pickups-blurb">
-                        Each pickup is attributed to the entity that was touched (so two RAs on the same map appear as separate columns labelled by <code>loc</code>). The trailing <strong>Σ/KTX</strong> cell sums the analyser's per-player counts for that kind and compares with KTX's authoritative <code>demoInfo.players[*].items[*].took</code> — green ✓ on match, red ✗ on mismatch. Items in scope: RL, LG, GL, SNG, RA, YA, GA, MH, Quad, Pent, Ring.
+                        Each pickup is attributed to the entity that was touched (so two RAs on the same map appear as separate columns labelled by <code>loc</code>). The trailing <strong>Σ/KTX</strong> cell sums the analyser's per-player counts for that kind and compares with KTX's own counters from the embedded <code>demoInfo</code>. A red ✗ means the two disagree — that could be an analyser bug <em>or</em> a KTX-stats bug; hover the cell for the raw numbers and decide.
+                    </p>
+                    <p class="pickups-blurb">
+                        For armors, healths, MH, and powerups KTX exposes a single <code>took</code> field that increments on every successful touch — straightforward to compare. <strong>Weapons</strong> are different: KTX writes four counters per (player, weapon) — <code>taken</code> (first-acquisition any source), <code>total-taken</code> (every touch), <code>spawn-taken</code> (first-acquisition world only), and <code>spawn-total-taken</code> (every world touch). The analyser tracks world entity-state phases, so its per-player count semantically corresponds to <code>spawn-total-taken</code>; that's the field used for the green ✓ / red ✗. The cell tooltip shows all four KTX counters so you can see the full picture. Items in scope: RL, LG, GL, SNG, RA, YA, GA, MH, Quad, Pent, Ring.
                     </p>
 
                     <h4 class="team-aggregate-heading">Per Team</h4>
