@@ -1,0 +1,41 @@
+{
+    "regions": [
+        {
+            "name": "LG",
+            "locs": [
+                "LG",
+                "LG.stairs",
+                "LG.up"
+            ]
+        },
+        {
+            "name": "QUAD",
+            "locs": [
+                "Quad.GL",
+                "Quad",
+                "Quad.tower",
+                "Quad.tele",
+                "catwalk"
+            ]
+        },
+        {
+            "name": "RA",
+            "locs": [
+                "RA",
+                "RA.above"
+            ]
+        },
+        {
+            "name": "RL",
+            "locs": [
+                "cellar.RL"
+            ]
+        },
+        {
+            "name": "Pent",
+            "locs": [
+                "Pent"
+            ]
+        }
+    ]
+}
