@@ -1,0 +1,47 @@
+{
+    "regions": [
+        {
+            "name": "QUAD",
+            "locs": [
+                "Quad.RL",
+                "Quad",
+                "Quad.RA",
+                "Quad.rox"
+            ]
+        },
+        {
+            "name": "RA",
+            "locs": [
+                "RA.high",
+                "RA.lava",
+                "RA"
+            ]
+        },
+        {
+            "name": "RL low",
+            "locs": [
+                "RL.low"
+            ]
+        },
+        {
+            "name": "RL high",
+            "locs": [
+                "Quad.RL",
+                "RL.high",
+                "RL.high.cs",
+                "GA.high"
+            ]
+        },
+        {
+            "name": "Tele",
+            "locs": [
+                "ya",
+                "ya.rox",
+                "ya.stairs",
+                "ya.low",
+                "ya.button",
+                "ya.lava"
+            ]
+        }
+    ]
+}

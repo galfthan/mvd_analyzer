@@ -1,0 +1,43 @@
+{
+    "regions": [
+        {
+            "name": "LG",
+            "locs": [
+                "LG",
+                "LG.high"
+            ]
+        },
+        {
+            "name": "QUAD",
+            "locs": [
+                "Quad",
+                "Quad.high",
+                "Quad.low"
+            ]
+        },
+        {
+            "name": "RA",
+            "locs": [
+                "RA",
+                "RA.low",
+                "RA.above"
+            ]
+        },
+        {
+            "name": "RL",
+            "locs": [
+                "RL",
+                "RL.tele"
+            ]
+        },
+        {
+            "name": "Pent",
+            "locs": [
+                "Pent",
+                "Pent.mh",
+                "Pent.ssg",
+                "Pent.water"
+            ]
+        }
+    ]
+}

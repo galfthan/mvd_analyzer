@@ -4703,12 +4703,15 @@ function applyRegionConfig() {
         if (seenNames.has(def.name)) continue;
         seenNames.add(def.name);
 
-        // Find matching locations from the full loc list
-        const locSet = new Set(def.locs);
+        // Find matching locations from the full loc list. Match is
+        // case-insensitive so a hand-edited "ya" still claims the
+        // canonical "YA" loc — saves the user having to memorize the
+        // exact post-substitution casing.
+        const locSet = new Set(def.locs.map(s => s.toLowerCase()));
         const points = [];
         let sumX = 0, sumY = 0;
         for (const loc of mapState.locations) {
-            if (locSet.has(loc.name)) {
+            if (locSet.has(loc.name.toLowerCase())) {
                 points.push({ x: loc.x, y: loc.y, z: loc.z, name: loc.name });
                 sumX += loc.x;
                 sumY += loc.y;

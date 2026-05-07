@@ -1,0 +1,23 @@
+{
+    "regions": [
+        {
+            "name": "QUAD",
+            "locs": [
+                "Quad",
+                "Quad.beside"
+            ]
+        },
+        {
+            "name": "RL",
+            "locs": [
+                "RL"
+            ]
+        },
+        {
+            "name": "YA",
+            "locs": [
+                "YA"
+            ]
+        }
+    ]
+}

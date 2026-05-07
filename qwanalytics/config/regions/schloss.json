@@ -1,6 +1,8 @@
 {
     "regions": [
         {"name": "Tower", "locs": ["tower", "tower.entry", "tower.RL"]},
-        {"name": "Cathedral", "locs": ["cathedral", "cathedral.YA", "cathedral.SSG"]}
+        {"name": "Cathedral", "locs": ["cathedral", "cathedral.YA", "cathedral.SSG"]},
+        {"name": "QUAD", "locs": ["Quad", "Quad.high", "Quad.ledge", "Quad.low"]},
+        {"name": "RA", "locs": ["RA", "RA.cellar", "RA.low", "RA.window"]}
     ]
 }

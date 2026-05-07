@@ -2,6 +2,9 @@
     "regions": [
         {"name": "Secret", "locs": ["secret"]},
         {"name": "Backroom", "locs": ["RA.MH", "RA.MH/rox"]},
-        {"name": "Tele", "locs": ["tele", "tele.entry", "tele.YA", "tele.high"]}
+        {"name": "Tele", "locs": ["tele", "tele.entry", "tele.YA", "tele.high"]},
+        {"name": "QUAD", "locs": ["Quad", "Quad.button", "Quad.high", "Quad.low", "Quad.way"]},
+        {"name": "high.RL", "locs": ["high.RL"]},
+        {"name": "low.RL", "locs": ["low.RL"]}
     ]
 }

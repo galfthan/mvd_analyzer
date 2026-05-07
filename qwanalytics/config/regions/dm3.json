@@ -1,6 +1,9 @@
 {
     "regions": [
         {"name": "YA", "locs": ["YA", "YA.box", "YA.up"]},
-        {"name": "RA", "locs": ["RA", "RA.low", "RA.rox", "RA.entry"]}
+        {"name": "RA", "locs": ["RA", "RA.low", "RA.rox", "RA.entry"]},
+        {"name": "LG", "locs": ["water.LG"]},
+        {"name": "QUAD", "locs": ["Quad", "YA.Quad", "window.Quad"]},
+        {"name": "RL", "locs": ["RL"]}
     ]
 }

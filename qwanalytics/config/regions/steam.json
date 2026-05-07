@@ -1,0 +1,52 @@
+{
+    "regions": [
+        {
+            "name": "LG",
+            "locs": [
+                "LG",
+                "LG.water"
+            ]
+        },
+        {
+            "name": "QUAD",
+            "locs": [
+                "Quad",
+                "Quad.MEGA",
+                "Quad.ledge"
+            ]
+        },
+        {
+            "name": "RA",
+            "locs": [
+                "RA",
+                "RA.high",
+                "RA.low"
+            ]
+        },
+        {
+            "name": "RL high",
+            "locs": [
+                "YA.RL"
+            ]
+        },
+        {
+            "name": "RL red",
+            "locs": [
+                "RA.RL"
+            ]
+        },
+        {
+            "name": "YA",
+            "locs": [
+                "YA"
+            ]
+        },
+        {
+            "name": "LG",
+            "locs": [
+                "LG",
+                "LG.water"
+            ]
+        }
+    ]
+}
