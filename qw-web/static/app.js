@@ -2994,7 +2994,28 @@ function setupUnifiedTimeline() {
     // --- Hover tooltip on powerup-timeline spans ---
     attachPowerupTimelineTooltip();
 
+    // --- Window resize: detail-panel canvases are sized in pixels from
+    // container.clientWidth, so they don't reflow with the viewport on
+    // their own — re-render them when the window resizes. Only the
+    // timeline tab has the detail panels; on other tabs the active-tab
+    // re-render path handles it on switch. Debounced to a single
+    // animation frame per resize burst.
+    window.addEventListener('resize', onTimelineWindowResize);
+
     unifiedTimelineInitialized = true;
+}
+
+let _timelineResizeRafId = null;
+function onTimelineWindowResize() {
+    if (!currentResult) return;
+    const activeTab = document.querySelector('.sidebar-btn.active')?.dataset.tab;
+    if (activeTab !== 'timeline') return;
+    if (_timelineResizeRafId !== null) return;
+    _timelineResizeRafId = requestAnimationFrame(() => {
+        _timelineResizeRafId = null;
+        updateDetailView();
+        updateTimeIndicators();
+    });
 }
 
 function tlBarClickToTime(e) {
