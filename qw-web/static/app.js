@@ -784,8 +784,11 @@ async function loadGameFromSearch(game) {
 }
 
 function displayResults(result) {
-    // Reset timeline state before loading new demo
-    resetTimelineState();
+    // Wipe every panel, table, canvas, and JS-side state object that
+    // could carry data from a previous demo. Critical when swapping
+    // between demos with different shapes (e.g. 4on4 → FFA where
+    // teams/regions/etc. are absent and would otherwise survive).
+    resetUIToCleanState();
 
     document.body.classList.remove('no-demo');
 
@@ -2352,6 +2355,176 @@ let timelineState = {
 };
 
 // Reset all timeline state for loading a new demo
+// resetUIToCleanState wipes every panel, table, canvas, and JS-side
+// state object that could carry data from a previous demo. Called at
+// the top of displayResults() so each load starts from a blank slate.
+// Without this, conditionally-populated panels (teams, scoreboards,
+// timeline graphs, map view, …) survive a swap from e.g. a 4on4 demo
+// to an FFA demo that simply lacks those fields.
+function resetUIToCleanState() {
+    resetTimelineState();
+
+    document.title = 'MVD Analyzer';
+
+    // Match info fields
+    const setText = (id, v) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = v;
+    };
+    const setHTML = (id, v) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = v;
+    };
+    const hide = id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    };
+
+    setText('map-name', '-');
+    setText('duration', '-');
+    setText('mode', '-');
+    setText('hostname', '-');
+    setText('match-date', '-');
+
+    // Topbar demo info
+    setHTML('topbar-demo-info', '');
+
+    // Match settings + server info panels
+    setHTML('match-settings-grid', '');
+    setHTML('match-modifiers', '');
+    hide('match-settings-panel');
+    hide('match-modifiers-row');
+    setHTML('server-info-body', '');
+    hide('server-info-panel');
+
+    // Teams
+    setHTML('teams-list', '');
+
+    // Player / weapon / item tables (per-team + per-player)
+    for (const id of [
+        'player-stats-team-body', 'scoreboard-body',
+        'weapon-stats-team-body', 'weapon-stats-body',
+        'items-team-body', 'items-body',
+    ]) setHTML(id, '');
+
+    // Weapons chart
+    setHTML('weapons-chart', '');
+
+    // Timeline canvases
+    for (const cid of [
+        'detail-graph-canvas', 'health-armor-canvas',
+        'frags-canvas', 'score-canvas',
+        'powerup-canvas', 'region-control-canvas',
+    ]) {
+        const c = document.getElementById(cid);
+        if (c && c.getContext) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    }
+    hide('powerup-timeline-panel');
+    hide('region-control-timeline-panel');
+    hide('unified-timeline');
+    setText('time-range-label', '');
+
+    // Chat
+    for (const id of ['chat-time-axis', 'kill-messages', 'team-a-messages', 'team-b-messages']) {
+        setHTML(id, '');
+    }
+    setText('team-a-chat-title', 'Team A Chat');
+    setText('team-b-chat-title', 'Team B Chat');
+
+    // Map view
+    const mapCanvas = document.getElementById('map-canvas');
+    if (mapCanvas && mapCanvas.getContext) {
+        mapCanvas.getContext('2d').clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+    }
+    setHTML('map-legend', '');
+    setHTML('map-items-body', '');
+    hide('map-items-panel');
+    hide('map-no-data');
+    setHTML('region-control-body', '');
+    hide('region-control-panel');
+    setHTML('region-status-body', '');
+    hide('region-status-panel');
+    setHTML('region-config', '');
+
+    // Loc graph
+    if (locGraphState.cy) {
+        try { locGraphState.cy.destroy(); } catch (_) {}
+        locGraphState.cy = null;
+    }
+    locGraphState.graph = null;
+    locGraphState.result = null;
+    setHTML('locgraph-canvas', '');
+    hide('locgraph-no-data');
+
+    // Key moments
+    setHTML('keymoments-body', '');
+    hide('keymoments-empty');
+    setHTML('fragstreaks-body', '');
+    hide('fragstreaks-empty');
+
+    // Pack drops
+    setHTML('packdrops-body', '');
+    hide('packdrops-empty');
+    setText('packdrops-count', '');
+
+    // Pickups tables (thead + tbody both rebuilt from scratch each load)
+    for (const id of [
+        'pickups-weap-team-table', 'pickups-weap-player-table',
+        'pickups-item-team-table', 'pickups-item-player-table',
+    ]) {
+        const t = document.getElementById(id);
+        if (!t) continue;
+        const head = t.querySelector('thead');
+        const body = t.querySelector('tbody');
+        if (head) head.innerHTML = '';
+        if (body) body.innerHTML = '';
+    }
+    hide('pickups-empty');
+    // pickups-items-panel is shown by displayPickupsTab when item data exists
+
+    // Body class — duel-mode collapses some panels via CSS; clear it so
+    // a non-duel demo loaded after a duel doesn't inherit the layout.
+    document.body.classList.remove('duel-mode');
+
+    // JS-side state objects that hold per-demo data
+    mapState.locations = [];
+    mapState.locationGroups = null;
+    mapState.mapGeometry = null;
+    mapState.bounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+    mapState.currentTime = 0;
+    mapState.isPlaying = false;
+    mapState.playbackSpeed = 1;
+    mapState.animationFrameId = null;
+    mapState.lastRenderTime = 0;
+    mapState.fullTrails = {};
+    mapState.trailStartTimes = {};
+    mapState.enabledPlayers = {};
+    mapState.teams = [];
+    mapState.playerSymbols = {};
+    mapState.lastRenderedBucket = null;
+    mapState.renderDirty = false;
+    mapState.followPlayer = null;
+    if ('controlRegions' in mapState) mapState.controlRegions = null;
+    if ('rcResult' in mapState) mapState.rcResult = null;
+    if ('locToRegion' in mapState) mapState.locToRegion = {};
+    if ('dropEvents' in mapState) mapState.dropEvents = [];
+    if ('zRange' in mapState) mapState.zRange = null;
+    if ('locTable' in mapState) mapState.locTable = [''];
+
+    packDropsState.rows = [];
+    packDropsState.hubInfo = null;
+    packDropsState.playerUserIDs = null;
+
+    if (typeof weaponGraphHitState !== 'undefined') {
+        weaponGraphHitState.W = null;
+        weaponGraphHitState.dropMarks = [];
+    }
+    if (typeof powerupGraphHitState !== 'undefined') {
+        powerupGraphHitState.W = null;
+        powerupGraphHitState.rows = [];
+    }
+}
+
 function resetTimelineState() {
     if (mapState.isPlaying) stopPlayback();
     timelineState.highResBuckets = [];
