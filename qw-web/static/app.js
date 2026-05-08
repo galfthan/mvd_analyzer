@@ -2425,6 +2425,66 @@ function pickTickInterval(duration, maxTicks) {
     return NICE_TICK_INTERVALS[NICE_TICK_INTERVALS.length - 1];
 }
 
+// Plot background — slightly different shade than the panel so the
+// graph area is visually delineated. Same colour for every detail
+// graph so they read as a uniform set.
+const PLOT_BG_COLOR = '#16213e';
+
+// Size a canvas for device-pixel rendering and return the drawing
+// context plus the dimensions in both CSS and device pixels.
+//
+// We render directly in device pixels (no ctx.scale) so every fillRect
+// edge lands on an integer device pixel by construction. CSS-pixel
+// rendering with ctx.scale(dpr, dpr) is fine when dpr is an integer,
+// but at fractional dpr (Linux/KDE/GNOME fractional scaling, browser
+// zoom != 100 %, some Windows configs) every CSS-pixel fillRect edge
+// lands at a non-integer device-pixel offset; the rasteriser then
+// splits that edge across two device pixels at ~50 % coverage each,
+// producing visible darker boundary pixels (and at one fillRect per
+// CSS pixel a regular moiré stripe pattern).
+//
+// Returns null if the canvas element is missing.
+function setupGraphCanvas(canvasId, cssHeight) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !canvas.getContext) return null;
+    const container = canvas.parentElement;
+    const Wcss = container.clientWidth;
+    const Hcss = cssHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const W = Math.round(Wcss * dpr);
+    const H = Math.round(Hcss * dpr);
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.width = Wcss + 'px';
+    canvas.style.height = Hcss + 'px';
+    const ctx = canvas.getContext('2d');
+    return { canvas, ctx, Wcss, Hcss, W, H, dpr };
+}
+
+// Draw the adaptive x-axis tick line and time labels at the bottom of
+// a graph. Tick density keys off Wcss so it doesn't change with dpr.
+// All coords are in device pixels (W, graphH, dpr).
+function drawXAxisTicks(ctx, { W, Wcss, dpr, graphH, startTime, endTime }) {
+    const duration = endTime - startTime;
+    if (duration <= 0) return;
+    const targetTicks = Math.max(4, Math.min(12, Math.floor(Wcss / 100)));
+    const interval = pickTickInterval(duration, targetTicks);
+    ctx.fillStyle = '#888';
+    ctx.font = `${Math.round(10 * dpr)}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    const firstTick = Math.ceil(startTime / interval) * interval;
+    for (let t = firstTick; t <= endTime; t += interval) {
+        const x = ((t - startTime) / duration) * W;
+        ctx.beginPath();
+        ctx.moveTo(x, graphH);
+        ctx.lineTo(x, graphH + 4 * dpr);
+        ctx.stroke();
+        ctx.fillText(formatDuration(t), x, graphH + 5 * dpr);
+    }
+}
+
 // Render a diverging bar graph on a canvas.
 //   dataPoints: [{t, dt, up: [{h, color}], down: [{h, color}]}]
 //   dropMarks:  [{time, color, isTop}] (optional, e.g. RL/LG backpack drops
@@ -2438,32 +2498,9 @@ function renderDivergingGraph(canvasId, {
     yTopLabel, yBottomLabel,
     dropMarks,
 }) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas || !canvas.getContext) return;
-
-    const container = canvas.parentElement;
-    const Wcss = container.clientWidth;
-    const Hcss = 200;
-    const dpr = window.devicePixelRatio || 1;
-    // We render directly in device pixels (no ctx.scale). Drawing in CSS
-    // pixels with ctx.scale(dpr, dpr) is fine when dpr is an integer, but
-    // at fractional dpr (Linux/KDE/GNOME fractional scaling, browser
-    // zoom != 100 %, some Windows configs) every CSS-pixel fillRect edge
-    // lands at a non-integer device-pixel offset. The rasteriser then
-    // splits that edge across two device pixels at ~50 % coverage each;
-    // with alpha-0.9 fills the boundary pixel ends up around 70 %
-    // coverage vs 90 % in the interior, and at one fillRect per CSS
-    // pixel that produces a regular lighter/darker stripe pattern (a
-    // moiré beat between the CSS-px grid and the device-px grid). By
-    // rendering in device pixels directly, every fillRect edge lands on
-    // an integer device pixel by construction.
-    const W = Math.round(Wcss * dpr);
-    const H = Math.round(Hcss * dpr);
-    canvas.width = W;
-    canvas.height = H;
-    canvas.style.width = Wcss + 'px';
-    canvas.style.height = Hcss + 'px';
-    const ctx = canvas.getContext('2d');
+    const setup = setupGraphCanvas(canvasId, 200);
+    if (!setup) return;
+    const { ctx, Wcss, W, H, dpr } = setup;
 
     // Constants below are in device pixels — multiply by dpr so the
     // displayed (CSS-px) size of axes / padding / dots / fonts matches
@@ -2483,13 +2520,12 @@ function renderDivergingGraph(canvasId, {
     const barH = midY - PAD - stripZone;
     const duration = endTime - startTime;
 
-    // Plot background — a slightly different shade than the panel so the
-    // graph area is visually delineated. Safe again now that the
-    // scanline/hold-last renderer below paints every pixel column with
-    // the active data point: empty buckets no longer leave bg-coloured
-    // vertical stripes through the bars. The bg only shows above/below
-    // bars and in the axis strip.
-    ctx.fillStyle = '#16213e';
+    // Plot background — safe again now that the scanline/hold-last
+    // renderer below paints every pixel column with the active data
+    // point: empty buckets no longer leave bg-coloured vertical stripes
+    // through the bars. The bg only shows above/below bars and in the
+    // axis strip.
+    ctx.fillStyle = PLOT_BG_COLOR;
     ctx.fillRect(0, 0, W, graphH);
 
     // Grid lines at ±50% (drawn first so bars overlay them)
@@ -2600,23 +2636,7 @@ function renderDivergingGraph(canvasId, {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.fillRect(0, Math.round(midY), W, Math.max(1, Math.round(dpr)));
 
-    // X-axis ticks (adaptive). targetTicks scales with displayed width
-    // (Wcss) so density doesn't change with dpr.
-    if (duration > 0) {
-        const targetTicks = Math.max(4, Math.min(12, Math.floor(Wcss / 100)));
-        const interval = pickTickInterval(duration, targetTicks);
-        ctx.fillStyle = '#888';
-        ctx.font = `${Math.round(10 * dpr)}px monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-        const firstTick = Math.ceil(startTime / interval) * interval;
-        for (let t = firstTick; t <= endTime; t += interval) {
-            const x = ((t - startTime) / duration) * W;
-            ctx.beginPath(); ctx.moveTo(x, graphH); ctx.lineTo(x, graphH + 4 * dpr); ctx.stroke();
-            ctx.fillText(formatDuration(t), x, graphH + 5 * dpr);
-        }
-    }
+    drawXAxisTicks(ctx, { W, Wcss, dpr, graphH, startTime, endTime });
 
     // Y-axis labels
     if (yAxisId) {
@@ -3594,25 +3614,11 @@ function prepRegionControlData(startTime, endTime, teams) {
 // colors. Used by both the region-control timeline and the powerup
 // timeline so they share one renderer instead of two near-copies.
 function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, stateColors }) {
-    const canvas = document.getElementById(canvasId);
     const labelsEl = document.getElementById(labelsId);
-    if (!canvas || !canvas.getContext || !labelsEl) return;
-
-    const container = canvas.parentElement;
-    const Wcss = container.clientWidth;
-    const Hcss = rows.length * RC_ROW_H + RC_AXIS_H;
-    const dpr = window.devicePixelRatio || 1;
-    // Render in device pixels (no ctx.scale) — same reasoning as
-    // renderDivergingGraph: fillRect edges land on integer device
-    // pixels regardless of dpr, so fractional-dpr setups don't get
-    // anti-aliased boundary pixels that read as darker columns.
-    const W = Math.round(Wcss * dpr);
-    const H = Math.round(Hcss * dpr);
-    canvas.width = W;
-    canvas.height = H;
-    canvas.style.width = Wcss + 'px';
-    canvas.style.height = Hcss + 'px';
-    const ctx = canvas.getContext('2d');
+    if (!labelsEl) return;
+    const setup = setupGraphCanvas(canvasId, rows.length * RC_ROW_H + RC_AXIS_H);
+    if (!setup) return;
+    const { ctx, Wcss, W, dpr } = setup;
 
     const ROW_H = Math.round(RC_ROW_H * dpr);
     const ROW_PAD = Math.max(1, Math.round(dpr));
@@ -3631,10 +3637,7 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
     }
 
     const graphH = rows.length * ROW_H;
-    // Plot background — same as renderDivergingGraph. Spans don't have
-    // the empty-bucket stripe issue (they're explicit ranges, not
-    // sampled points), so the bg can stay solid here too.
-    ctx.fillStyle = '#16213e';
+    ctx.fillStyle = PLOT_BG_COLOR;
     ctx.fillRect(0, 0, W, graphH);
 
     const duration = endTime - startTime;
@@ -3654,20 +3657,7 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
         }
     });
 
-    // X-axis ticks (adaptive, density tied to displayed CSS width).
-    const targetTicks = Math.max(4, Math.min(12, Math.floor(Wcss / 100)));
-    const interval = pickTickInterval(duration, targetTicks);
-    ctx.fillStyle = '#888';
-    ctx.font = `${Math.round(10 * dpr)}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    const firstTick = Math.ceil(startTime / interval) * interval;
-    for (let t = firstTick; t <= endTime; t += interval) {
-        const x = ((t - startTime) / duration) * W;
-        ctx.beginPath(); ctx.moveTo(x, graphH); ctx.lineTo(x, graphH + 4 * dpr); ctx.stroke();
-        ctx.fillText(formatDuration(t), x, graphH + 5 * dpr);
-    }
+    drawXAxisTicks(ctx, { W, Wcss, dpr, graphH, startTime, endTime });
 }
 
 // ─── Powerup Timeline ───────────────────────────────────────────────────────
