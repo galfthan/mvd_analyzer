@@ -2496,28 +2496,46 @@ function renderDivergingGraph(canvasId, {
             const bw = Math.max(1, Math.round(xNextRaw) - x);
             if (x + bw < 0 || x > W) continue;
 
+            // Stack segments with integer-aligned y boundaries. Track the
+            // boundary in floating point but snap each fillRect edge to a
+            // pixel row, using the previous segment's snapped edge as the
+            // next segment's starting edge. Fractional y/h produced anti-
+            // aliased seams between stacked segments that the dark
+            // background leaks through — same moiré story as the bar-x
+            // tiling above, just on the other axis.
+
             // Up segments (team A, above center)
-            let y = midY;
+            let yAcc = midY;
+            let yPrev = Math.round(midY);
             if (pt.up) {
                 for (const seg of pt.up) {
                     if (seg.h > 0) {
-                        const h = (seg.h / maxValue) * barH;
-                        ctx.fillStyle = seg.color;
-                        ctx.fillRect(x, y - h, bw, h);
-                        y -= h;
+                        yAcc -= (seg.h / maxValue) * barH;
+                        const yCur = Math.round(yAcc);
+                        const segH = yPrev - yCur;
+                        if (segH > 0) {
+                            ctx.fillStyle = seg.color;
+                            ctx.fillRect(x, yCur, bw, segH);
+                        }
+                        yPrev = yCur;
                     }
                 }
             }
 
             // Down segments (team B, below center)
-            y = midY;
+            yAcc = midY;
+            yPrev = Math.round(midY);
             if (pt.down) {
                 for (const seg of pt.down) {
                     if (seg.h > 0) {
-                        const h = (seg.h / maxValue) * barH;
-                        ctx.fillStyle = seg.color;
-                        ctx.fillRect(x, y, bw, h);
-                        y += h;
+                        yAcc += (seg.h / maxValue) * barH;
+                        const yCur = Math.round(yAcc);
+                        const segH = yCur - yPrev;
+                        if (segH > 0) {
+                            ctx.fillStyle = seg.color;
+                            ctx.fillRect(x, yPrev, bw, segH);
+                        }
+                        yPrev = yCur;
                     }
                 }
             }
