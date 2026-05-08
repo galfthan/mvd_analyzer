@@ -3005,6 +3005,11 @@ function setupUnifiedTimeline() {
     unifiedTimelineInitialized = true;
 }
 
+const TIMELINE_CANVAS_IDS = [
+    'detail-graph-canvas', 'powerup-canvas', 'region-control-canvas',
+    'health-armor-canvas', 'frags-canvas', 'score-canvas',
+];
+
 let _timelineResizeRafId = null;
 function onTimelineWindowResize() {
     if (!currentResult) return;
@@ -3013,6 +3018,15 @@ function onTimelineWindowResize() {
     if (_timelineResizeRafId !== null) return;
     _timelineResizeRafId = requestAnimationFrame(() => {
         _timelineResizeRafId = null;
+        // The renderers set canvas.style.width in pixels, which (combined
+        // with the default flex `min-width: auto`) wedges the parent open
+        // and prevents shrink-to-fit on window down-size. Clear the inline
+        // width before re-measuring so each container reports its true
+        // available width via clientWidth.
+        for (const id of TIMELINE_CANVAS_IDS) {
+            const c = document.getElementById(id);
+            if (c) c.style.width = '';
+        }
         updateDetailView();
         updateTimeIndicators();
     });
