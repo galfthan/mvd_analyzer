@@ -2484,30 +2484,45 @@ function renderDivergingGraph(canvasId, {
     ctx.stroke();
 
     if (duration > 0 && dataPoints && dataPoints.length > 0) {
-        // Tile adjacent bars pixel-perfectly: compute each bar's right edge
-        // from the next bucket's start, and round both edges to integers.
-        // Fractional fillRect widths create anti-aliased edges that don't
-        // cancel between neighbours, so the dark background bleeds through
-        // as moiré banding when zoomed in. Integer-aligned tiling eliminates
-        // that with no gaps.
-        for (let i = 0; i < dataPoints.length; i++) {
-            const pt = dataPoints[i];
-            const xRaw = ((pt.t - startTime) / duration) * W;
-            const xNextRaw = (i + 1 < dataPoints.length)
-                ? ((dataPoints[i + 1].t - startTime) / duration) * W
-                : ((pt.t + (pt.dt || 0.05) - startTime) / duration) * W;
-            const x = Math.round(xRaw);
-            const bw = Math.max(1, Math.round(xNextRaw) - x);
-            if (x + bw < 0 || x > W) continue;
+        // Output-driven (scanline) rendering: for each pixel column,
+        // sample the data at that pixel's time via a monotonic cursor
+        // (step function / hold-last) and paint a 1-pixel-wide column.
+        // Replaces the older data-driven loop where we rasterised each
+        // bucket as a fillRect of bw px — that was correct when bw ≥ 1
+        // but skipped points whose `up` and `down` were both empty,
+        // leaving the canvas pixel column un-painted; gaps in the data
+        // surfaced as visible vertical stripes. Walking the *output*
+        // makes "every column is drawn" structural and gives a draw
+        // cost that scales with canvas width, not bucket count.
+        let cursor = -1;
+        const sampleAt = (tQuery) => {
+            while (cursor + 1 < dataPoints.length && dataPoints[cursor + 1].t <= tQuery) {
+                cursor++;
+            }
+            if (cursor < 0) return null;
+            const pt = dataPoints[cursor];
+            // Last point: cap at its declared dt so we don't paint past
+            // the end of the data when the view extends slightly beyond it.
+            if (cursor === dataPoints.length - 1) {
+                const endT = pt.t + (pt.dt || 0);
+                if (endT > 0 && tQuery > endT) return null;
+            }
+            return pt;
+        };
 
-            // Stack segments with integer-aligned y boundaries: track the
-            // boundary in floating point but snap each fillRect edge to a
-            // pixel row, using the previous segment's snapped edge as the
-            // next segment's starting edge. Mirrors the integer-x tiling
-            // above so stacked segments meet on exact pixel rows instead
-            // of anti-aliased fractional ones.
+        for (let px = 0; px < W; px++) {
+            const tPx = startTime + (px / W) * duration;
+            const pt = sampleAt(tPx);
+            if (pt == null) continue;
 
-            // Up segments (team A, above center)
+            // Stack segments with integer-aligned y boundaries: track
+            // the boundary in floating point but snap each fillRect
+            // edge to a pixel row, using the previous segment's snapped
+            // edge as the next segment's start. Stacked segments then
+            // meet on exact pixel rows instead of anti-aliased
+            // fractional ones.
+
+            // Up segments (team A, above center).
             let yAcc = midY;
             let yPrev = Math.round(midY);
             if (pt.up) {
@@ -2518,14 +2533,14 @@ function renderDivergingGraph(canvasId, {
                         const segH = yPrev - yCur;
                         if (segH > 0) {
                             ctx.fillStyle = seg.color;
-                            ctx.fillRect(x, yCur, bw, segH);
+                            ctx.fillRect(px, yCur, 1, segH);
                         }
                         yPrev = yCur;
                     }
                 }
             }
 
-            // Down segments (team B, below center)
+            // Down segments (team B, below center).
             yAcc = midY;
             yPrev = Math.round(midY);
             if (pt.down) {
@@ -2536,14 +2551,13 @@ function renderDivergingGraph(canvasId, {
                         const segH = yCur - yPrev;
                         if (segH > 0) {
                             ctx.fillStyle = seg.color;
-                            ctx.fillRect(x, yPrev, bw, segH);
+                            ctx.fillRect(px, yPrev, 1, segH);
                         }
                         yPrev = yCur;
                     }
                 }
             }
         }
-
     }
 
     // Drop-mark dots — small filled circles in the reserved strip zone.
