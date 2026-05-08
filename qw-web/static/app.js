@@ -2483,13 +2483,14 @@ function renderDivergingGraph(canvasId, {
     const barH = midY - PAD - stripZone;
     const duration = endTime - startTime;
 
-    // No explicit plot background — leave the canvas transparent and let
-    // the surrounding .panel (--bg-deep) show through. A separate plot-bg
-    // fill (#16213e) is intentionally a different shade than the panel,
-    // which made any pixel the bars *don't* cover (empty buckets, single-
-    // pixel rounding gaps) pop out as a contrasting vertical stripe and
-    // beat with the bar grid as moiré at certain zooms. With the canvas
-    // transparent, those same pixels match the panel and stay invisible.
+    // Plot background — a slightly different shade than the panel so the
+    // graph area is visually delineated. Safe again now that the
+    // scanline/hold-last renderer below paints every pixel column with
+    // the active data point: empty buckets no longer leave bg-coloured
+    // vertical stripes through the bars. The bg only shows above/below
+    // bars and in the axis strip.
+    ctx.fillStyle = '#16213e';
+    ctx.fillRect(0, 0, W, graphH);
 
     // Grid lines at ±50% (drawn first so bars overlay them)
     ctx.strokeStyle = 'rgba(255,255,255,0.06)';
@@ -3630,7 +3631,11 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
     }
 
     const graphH = rows.length * ROW_H;
-    // Transparent plot background: same reasoning as renderDivergingGraph.
+    // Plot background — same as renderDivergingGraph. Spans don't have
+    // the empty-bucket stripe issue (they're explicit ranges, not
+    // sampled points), so the bg can stay solid here too.
+    ctx.fillStyle = '#16213e';
+    ctx.fillRect(0, 0, W, graphH);
 
     const duration = endTime - startTime;
     if (duration <= 0) return;
