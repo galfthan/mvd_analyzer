@@ -2442,27 +2442,43 @@ function renderDivergingGraph(canvasId, {
     if (!canvas || !canvas.getContext) return;
 
     const container = canvas.parentElement;
-    const W = container.clientWidth;
-    const H = 200;
+    const Wcss = container.clientWidth;
+    const Hcss = 200;
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
+    // We render directly in device pixels (no ctx.scale). Drawing in CSS
+    // pixels with ctx.scale(dpr, dpr) is fine when dpr is an integer, but
+    // at fractional dpr (Linux/KDE/GNOME fractional scaling, browser
+    // zoom != 100 %, some Windows configs) every CSS-pixel fillRect edge
+    // lands at a non-integer device-pixel offset. The rasteriser then
+    // splits that edge across two device pixels at ~50 % coverage each;
+    // with alpha-0.9 fills the boundary pixel ends up around 70 %
+    // coverage vs 90 % in the interior, and at one fillRect per CSS
+    // pixel that produces a regular lighter/darker stripe pattern (a
+    // moiré beat between the CSS-px grid and the device-px grid). By
+    // rendering in device pixels directly, every fillRect edge lands on
+    // an integer device pixel by construction.
+    const W = Math.round(Wcss * dpr);
+    const H = Math.round(Hcss * dpr);
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.width = Wcss + 'px';
+    canvas.style.height = Hcss + 'px';
     const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
 
-    const AXIS_H = 20;
-    const PAD = 4;
+    // Constants below are in device pixels — multiply by dpr so the
+    // displayed (CSS-px) size of axes / padding / dots / fonts matches
+    // what the previous CSS-px-coordinate version drew.
+    const AXIS_H = Math.round(20 * dpr);
+    const PAD = Math.round(4 * dpr);
     const graphH = H - AXIS_H;
-    // Drop-mark strips live in a reserved zone at the top and bottom of the
-    // plot area so weapon bars can never grow into them — the weapons bar
-    // height scales with max players-per-team, so without this reservation
-    // a high-rollout 5v5 snapshot could paint bars straight through the
-    // dots. Sized for one row of ~6 px dots.
-    const DROP_STRIP_H = 8;
+    // Drop-mark strips live in a reserved zone at the top and bottom of
+    // the plot area so weapon bars can never grow into them — the
+    // weapons bar height scales with max players-per-team, so without
+    // this reservation a high-rollout 5v5 snapshot could paint bars
+    // straight through the dots. Sized for one row of ~6 px dots.
+    const DROP_STRIP_H = Math.round(8 * dpr);
     const hasDropMarks = !!(dropMarks && dropMarks.length);
-    const stripZone = hasDropMarks ? DROP_STRIP_H + 2 : 0;
+    const stripZone = hasDropMarks ? DROP_STRIP_H + Math.round(2 * dpr) : 0;
     const midY = PAD + (graphH - PAD) / 2;
     const barH = midY - PAD - stripZone;
     const duration = endTime - startTime;
@@ -2564,7 +2580,7 @@ function renderDivergingGraph(canvasId, {
     // Top strip = team A drops, bottom strip = team B drops; color is
     // weapon-coded by the caller (e.g. RL red, LG cyan).
     if (hasDropMarks && duration > 0) {
-        const dotR = 3;
+        const dotR = 3 * dpr;
         const topY    = PAD + DROP_STRIP_H / 2;
         const bottomY = graphH - PAD - DROP_STRIP_H / 2;
         for (const m of dropMarks) {
@@ -2581,22 +2597,23 @@ function renderDivergingGraph(canvasId, {
     // Zero-y divider — drawn on top of bars so the upper/lower split is
     // always clearly visible. Integer-aligned to avoid anti-aliasing.
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillRect(0, Math.round(midY), W, 1);
+    ctx.fillRect(0, Math.round(midY), W, Math.max(1, Math.round(dpr)));
 
-    // X-axis ticks (adaptive)
+    // X-axis ticks (adaptive). targetTicks scales with displayed width
+    // (Wcss) so density doesn't change with dpr.
     if (duration > 0) {
-        const targetTicks = Math.max(4, Math.min(12, Math.floor(W / 100)));
+        const targetTicks = Math.max(4, Math.min(12, Math.floor(Wcss / 100)));
         const interval = pickTickInterval(duration, targetTicks);
         ctx.fillStyle = '#888';
-        ctx.font = '10px monospace';
+        ctx.font = `${Math.round(10 * dpr)}px monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.strokeStyle = 'rgba(255,255,255,0.08)';
         const firstTick = Math.ceil(startTime / interval) * interval;
         for (let t = firstTick; t <= endTime; t += interval) {
             const x = ((t - startTime) / duration) * W;
-            ctx.beginPath(); ctx.moveTo(x, graphH); ctx.lineTo(x, graphH + 4); ctx.stroke();
-            ctx.fillText(formatDuration(t), x, graphH + 5);
+            ctx.beginPath(); ctx.moveTo(x, graphH); ctx.lineTo(x, graphH + 4 * dpr); ctx.stroke();
+            ctx.fillText(formatDuration(t), x, graphH + 5 * dpr);
         }
     }
 
@@ -3581,17 +3598,26 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
     if (!canvas || !canvas.getContext || !labelsEl) return;
 
     const container = canvas.parentElement;
-    const W = container.clientWidth;
-    const H = rows.length * RC_ROW_H + RC_AXIS_H;
+    const Wcss = container.clientWidth;
+    const Hcss = rows.length * RC_ROW_H + RC_AXIS_H;
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
+    // Render in device pixels (no ctx.scale) — same reasoning as
+    // renderDivergingGraph: fillRect edges land on integer device
+    // pixels regardless of dpr, so fractional-dpr setups don't get
+    // anti-aliased boundary pixels that read as darker columns.
+    const W = Math.round(Wcss * dpr);
+    const H = Math.round(Hcss * dpr);
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.width = Wcss + 'px';
+    canvas.style.height = Hcss + 'px';
     const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
 
-    // Label column, one DOM element per row, sized to match the canvas row.
+    const ROW_H = Math.round(RC_ROW_H * dpr);
+    const ROW_PAD = Math.max(1, Math.round(dpr));
+
+    // Label column, one DOM element per row, sized to match the canvas
+    // row in CSS pixels (the labels live outside the canvas).
     labelsEl.innerHTML = '';
     for (const r of rows) {
         const lab = document.createElement('div');
@@ -3603,16 +3629,14 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
         labelsEl.appendChild(lab);
     }
 
-    const graphH = rows.length * RC_ROW_H;
+    const graphH = rows.length * ROW_H;
     // Transparent plot background: same reasoning as renderDivergingGraph.
-    // Empty cells / sub-pixel rounding gaps blend into the panel instead of
-    // popping out as contrasting stripes.
 
     const duration = endTime - startTime;
     if (duration <= 0) return;
 
     rows.forEach((row, idx) => {
-        const y = idx * RC_ROW_H;
+        const y = idx * ROW_H;
         for (const span of row.spans) {
             const color = stateColors[span.state];
             if (!color) continue;
@@ -3621,23 +3645,23 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
             const w = x2 - x1;
             if (w <= 0) continue;
             ctx.fillStyle = color;
-            ctx.fillRect(x1, y + 1, w, RC_ROW_H - 2);
+            ctx.fillRect(x1, y + ROW_PAD, w, ROW_H - 2 * ROW_PAD);
         }
     });
 
-    // X-axis ticks (adaptive, same helper as renderDivergingGraph)
-    const targetTicks = Math.max(4, Math.min(12, Math.floor(W / 100)));
+    // X-axis ticks (adaptive, density tied to displayed CSS width).
+    const targetTicks = Math.max(4, Math.min(12, Math.floor(Wcss / 100)));
     const interval = pickTickInterval(duration, targetTicks);
     ctx.fillStyle = '#888';
-    ctx.font = '10px monospace';
+    ctx.font = `${Math.round(10 * dpr)}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.strokeStyle = 'rgba(255,255,255,0.08)';
     const firstTick = Math.ceil(startTime / interval) * interval;
     for (let t = firstTick; t <= endTime; t += interval) {
         const x = ((t - startTime) / duration) * W;
-        ctx.beginPath(); ctx.moveTo(x, graphH); ctx.lineTo(x, graphH + 4); ctx.stroke();
-        ctx.fillText(formatDuration(t), x, graphH + 5);
+        ctx.beginPath(); ctx.moveTo(x, graphH); ctx.lineTo(x, graphH + 4 * dpr); ctx.stroke();
+        ctx.fillText(formatDuration(t), x, graphH + 5 * dpr);
     }
 }
 
