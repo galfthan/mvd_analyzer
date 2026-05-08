@@ -2467,9 +2467,13 @@ function renderDivergingGraph(canvasId, {
     const barH = midY - PAD - stripZone;
     const duration = endTime - startTime;
 
-    // Background
-    ctx.fillStyle = '#16213e';
-    ctx.fillRect(0, 0, W, graphH);
+    // No explicit plot background — leave the canvas transparent and let
+    // the surrounding .panel (--bg-deep) show through. A separate plot-bg
+    // fill (#16213e) is intentionally a different shade than the panel,
+    // which made any pixel the bars *don't* cover (empty buckets, single-
+    // pixel rounding gaps) pop out as a contrasting vertical stripe and
+    // beat with the bar grid as moiré at certain zooms. With the canvas
+    // transparent, those same pixels match the panel and stay invisible.
 
     // Grid lines at ±50% (drawn first so bars overlay them)
     ctx.strokeStyle = 'rgba(255,255,255,0.06)';
@@ -2496,13 +2500,12 @@ function renderDivergingGraph(canvasId, {
             const bw = Math.max(1, Math.round(xNextRaw) - x);
             if (x + bw < 0 || x > W) continue;
 
-            // Stack segments with integer-aligned y boundaries. Track the
+            // Stack segments with integer-aligned y boundaries: track the
             // boundary in floating point but snap each fillRect edge to a
             // pixel row, using the previous segment's snapped edge as the
-            // next segment's starting edge. Fractional y/h produced anti-
-            // aliased seams between stacked segments that the dark
-            // background leaks through — same moiré story as the bar-x
-            // tiling above, just on the other axis.
+            // next segment's starting edge. Mirrors the integer-x tiling
+            // above so stacked segments meet on exact pixel rows instead
+            // of anti-aliased fractional ones.
 
             // Up segments (team A, above center)
             let yAcc = midY;
@@ -3587,8 +3590,9 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
     }
 
     const graphH = rows.length * RC_ROW_H;
-    ctx.fillStyle = '#16213e';
-    ctx.fillRect(0, 0, W, graphH);
+    // Transparent plot background: same reasoning as renderDivergingGraph.
+    // Empty cells / sub-pixel rounding gaps blend into the panel instead of
+    // popping out as contrasting stripes.
 
     const duration = endTime - startTime;
     if (duration <= 0) return;
