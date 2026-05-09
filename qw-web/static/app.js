@@ -88,6 +88,8 @@ const worker = new Worker('worker.js');
 let wasmReady = false;
 let analyzeResolve = null;
 let analyzeReject = null;
+let recomputeResolve = null;
+let recomputeReject = null;
 
 // Hide the wasm-loading overlay. When auto-loading a demo from a URL
 // (?gameId=...), keep it up through the demo download/analyse so the
@@ -143,6 +145,18 @@ worker.onmessage = (e) => {
             analyzeResolve = null;
             analyzeReject = null;
         }
+    } else if (e.data.type === 'recompute_result') {
+        if (recomputeResolve) {
+            recomputeResolve(e.data.json);
+            recomputeResolve = null;
+            recomputeReject = null;
+        }
+    } else if (e.data.type === 'recompute_error') {
+        if (recomputeReject) {
+            recomputeReject(new Error(e.data.message));
+            recomputeResolve = null;
+            recomputeReject = null;
+        }
     }
 };
 
@@ -155,6 +169,18 @@ function analyzeInWorker(bytes, filename) {
             { type: 'analyze', bytes: bytes.buffer, filename },
             [bytes.buffer]
         );
+    });
+}
+
+// recomputeInWorker round-trips an edited regions definition through
+// the WASM bridge living on the worker. The Go function is exported on
+// the worker's self (js.Global()), unreachable from the main page —
+// that's why edited region stats stayed stale before this lane existed.
+function recomputeInWorker(overrideJSON) {
+    return new Promise((resolve, reject) => {
+        recomputeResolve = resolve;
+        recomputeReject = reject;
+        worker.postMessage({ type: 'recomputeRegions', overrideJSON });
     });
 }
 
@@ -5004,7 +5030,7 @@ function readRegionConfigFromUI() {
     return out;
 }
 
-function applyRegionConfig() {
+async function applyRegionConfig() {
     const rc = mapState.rcResult;
     if (!rc) return;
 
@@ -5087,9 +5113,14 @@ function applyRegionConfig() {
             locs: r.points.map(p => p.name),
         })),
     });
-    console.log('[applyRegionConfig] override sent to WASM:', overrideJSON);
-    const res = JSON.parse(globalThis.recomputeRegionControl(overrideJSON));
-    console.log('[applyRegionConfig] WASM response stats:', res.stats);
+    let res;
+    try {
+        const jsonStr = await recomputeInWorker(overrideJSON);
+        res = JSON.parse(jsonStr);
+    } catch (err) {
+        console.warn('recomputeRegionControl:', err.message);
+        return;
+    }
     if (res.error) {
         console.warn('recomputeRegionControl:', res.error);
         return;
