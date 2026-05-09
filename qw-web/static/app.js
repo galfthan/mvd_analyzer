@@ -5087,7 +5087,9 @@ function applyRegionConfig() {
             locs: r.points.map(p => p.name),
         })),
     });
+    console.log('[applyRegionConfig] override sent to WASM:', overrideJSON);
     const res = JSON.parse(globalThis.recomputeRegionControl(overrideJSON));
+    console.log('[applyRegionConfig] WASM response stats:', res.stats);
     if (res.error) {
         console.warn('recomputeRegionControl:', res.error);
         return;

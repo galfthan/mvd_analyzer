@@ -236,10 +236,13 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		if len(regions) > 0 {
 			regionControl = &RegionControlResult{Regions: regions}
 
-			// Pick teamA / teamB by alphabetical order of the two
-			// non-empty team names actually present on the field. Skip
-			// the control compute for non-binary team layouts (FFA, 3+
-			// teams) — out of scope per the plan.
+			// Pick teamA / teamB to match the demoinfo-supplied team
+			// order so the frontend's TEAM_COLORS[0]/[1] (bound to
+			// demoinfo.teams[0]/[1] across the rest of the UI) line up
+			// with the regions panel. Falls back to alphabetical when
+			// demoinfo isn't available or doesn't agree with the
+			// on-field set. Skip the control compute for non-binary
+			// team layouts (FFA, 3+ teams) — out of scope per the plan.
 			teamSet := make(map[string]struct{})
 			for _, t := range slotToTeam {
 				if t != "" {
@@ -248,10 +251,21 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 			}
 			if len(teamSet) == 2 {
 				teamNames := make([]string, 0, 2)
-				for t := range teamSet {
-					teamNames = append(teamNames, t)
+				if a.core != nil && a.core.DemoInfo != nil && len(a.core.DemoInfo.Teams) == 2 {
+					di := a.core.DemoInfo.Teams
+					if _, ok0 := teamSet[di[0]]; ok0 {
+						if _, ok1 := teamSet[di[1]]; ok1 {
+							teamNames = append(teamNames, di[0], di[1])
+						}
+					}
 				}
-				sort.Strings(teamNames)
+				if len(teamNames) != 2 {
+					teamNames = teamNames[:0]
+					for t := range teamSet {
+						teamNames = append(teamNames, t)
+					}
+					sort.Strings(teamNames)
+				}
 				teamA, teamB := teamNames[0], teamNames[1]
 
 				// name -> team for ComputeRegionControl. Built from
