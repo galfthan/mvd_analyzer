@@ -517,13 +517,17 @@ Three layers exercise different things:
    `filePath` is stripped before comparison (per-machine cache path).
    At schema v7 the parse-time `highResBuckets` is gone; the canonical
    storage is `streams` (per-player change streams + intervals + native
-   position track). The full streams are pinned in the corpus —
-   regenerate via `-update-golden` after intentional schema or
-   bucketer changes. Everything else — `locGraph`, `schemaVersion`,
-   ammo counts, frag totals, weapon stats, items, powerup events —
-   is also pinned in full, so any unintended drift surfaces. (The
-   `locGraph` slices are sorted in `BuildLocGraph` for run-to-run
-   determinism; map-keyed sub-objects already serialise alphabetically.)
+   position track). Per-player time series in `streams.players[]` are
+   sliced to three 15 s windows (`[0, 15]`, `[60, 75]`, last 15 s)
+   before comparison — `sampleStreams` in `golden_test.go` handles
+   this so a 4on4 demo's ~10 MB native position track doesn't bloat
+   the committed corpus. Three windows are enough sampling to catch
+   stream-emitter / bucketer drift while keeping commits ~4 MB per
+   4on4. Everything else — `locGraph`, `schemaVersion`, ammo counts,
+   frag totals, weapon stats, items, powerup events — is pinned in
+   full, so any unintended drift surfaces. (The `locGraph` slices
+   are sorted in `BuildLocGraph` for run-to-run determinism;
+   map-keyed sub-objects already serialise alphabetically.)
 
 3. **Diagnostic corpus** (`diagnostic/diagnostic_test.go`) is opt-in
    and complementary — it runs data-quality invariants

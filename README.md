@@ -236,10 +236,15 @@ against `qwanalytics/testdata/golden/<label>.json`.
 What is pinned: everything except `filePath`. At schema v7 the
 canonical event-rate storage is `streams` (per-player change streams +
 intervals + native position track) — bucketed views are produced on
-demand by `qwanalytics/view.Buckets` and not stored. The streams are
-pinned in full so any unintended drift surfaces; bucketed-view
-behavior is exercised through the unit tests in
-`qwanalytics/view/equivalence_test.go`.
+demand by `qwanalytics/view.Buckets` and not stored. Per-player time
+series in `streams.players[]` are sliced to three 15 s windows
+(`[0, 15]`, `[60, 75]`, last 15 s) before comparison — the native
+position track alone would otherwise run ~10 MB per 4on4 demo and
+swamp the git history (see [`golden_test.go`](qwanalytics/analyzer/golden_test.go)
+`sampleStreams`). The three windows are enough sampling to catch
+stream-emitter / bucketer drift while keeping the committed corpus
+~4 MB per 4on4. Bucketed-view behavior is exercised through the unit
+tests in `qwanalytics/view/equivalence_test.go`.
 
 The manifest ships with nine demos (three each of 1on1, 2on2, 4on4).
 Add entries by appending to the JSON array; labels follow

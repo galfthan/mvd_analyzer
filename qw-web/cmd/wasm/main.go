@@ -207,8 +207,10 @@ func getLocTrails(this js.Value, args []js.Value) interface{} {
 }
 
 // recomputeRegionControl is the JS-callable region recompute hook.
-// At schema v7 it derives buckets via view.Buckets internally
-// (replacing the old read of ta.HighResBuckets) before classifying.
+// At schema v7 it walks result.Streams natively (via
+// analyzer.ComputeRegionControl, which reads PositionTrack.Li + the
+// RL/LG interval streams per native sample) — no bucket intermediate
+// and no read of the deleted ta.HighResBuckets field.
 //
 // The caller passes a JSON string of {"regions":[{"name":...,"locs":[...]}]}.
 // Returns an error envelope when no demo has been analysed yet, the
