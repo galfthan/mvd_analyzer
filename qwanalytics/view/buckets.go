@@ -367,43 +367,44 @@ func intervalSamples(p result.PlayerStream, field string, bStart, bEnd float64) 
 
 // positionSamples emits the position samples in [bStart, bEnd). When
 // the window contains no native samples (a "gap bucket" — typically
-// only happens during deaths or recording lag) it falls back to a
-// single carry-forward sample.
+// during deaths or recording lag) it falls back to a single
+// carry-forward sample so reducers still produce a value.
 //
-// Order: in-window samples chronologically. Carry-forward is only
-// appended when no in-window sample exists, so:
+// Window membership uses inclusive lower bound: samples with
+// T == bStart are in-window. This matches v6's `int(t/0.05)` integer
+// division — a sample exactly at the bucket boundary is the first
+// event of that bucket, not the last event of the previous one.
 //
-//   - "first" reducer returns the first in-window sample (or the
-//     carry-forward in gap buckets).
-//   - "last" reducer returns the last in-window sample (or the
-//     carry-forward in gap buckets).
-//   - "mean" / "min" / "max" never include the carry-forward unless
-//     the bucket is empty, so aggregations don't get polluted by
-//     out-of-window data.
+// Order: in-window samples chronologically; carry-forward only
+// appended when no in-window sample exists. So "first" returns the
+// first in-window sample (or carry in gap buckets); "last" returns
+// the last in-window sample (or carry); "mean"/"min"/"max" don't
+// include the carry unless the bucket is empty.
 func positionSamples(p result.PlayerStream, bStart, bEnd float64) []Sample {
 	if p.Position == nil {
 		return nil
 	}
 	pt := p.Position
-	out := make([]Sample, 0, 4)
-	carry := positionIndexAtOrBefore(pt, bStart)
-	startIdx := carry + 1
-	if startIdx < 0 {
-		startIdx = 0
+	n := len(pt.T)
+	if n == 0 {
+		return nil
 	}
-	for i := startIdx; i < len(pt.T); i++ {
+	// First sample with T >= bStart (inclusive). Treats samples
+	// landing exactly on the bucket boundary as the bucket's first
+	// event, matching v6's int-division semantics.
+	firstIn := sort.Search(n, func(i int) bool { return float64(pt.T[i]) >= bStart })
+	out := make([]Sample, 0, 4)
+	for i := firstIn; i < n; i++ {
 		t := float64(pt.T[i])
-		if t < bStart {
-			continue
-		}
 		if t >= bEnd {
 			break
 		}
 		out = append(out, Sample{T: t, V: positionTriple(pt, i)})
 	}
-	if len(out) == 0 && carry >= 0 {
+	if len(out) == 0 && firstIn > 0 {
 		// Gap bucket — fall back to the latest sample before bStart.
-		out = append(out, Sample{T: float64(pt.T[carry]), V: positionTriple(pt, carry)})
+		idx := firstIn - 1
+		out = append(out, Sample{T: float64(pt.T[idx]), V: positionTriple(pt, idx)})
 	}
 	return out
 }
@@ -411,22 +412,6 @@ func positionSamples(p result.PlayerStream, bStart, bEnd float64) []Sample {
 // positionTriple returns a [3]int32 array for sample i.
 func positionTriple(pt *result.PositionTrack, i int) [3]int32 {
 	return [3]int32{pt.X[i], pt.Y[i], pt.Z[i]}
-}
-
-// positionIndexAtOrBefore returns the index of the latest position
-// sample with T <= t, or -1 if all samples are after t. Binary search
-// keeps Buckets() per-window cost O(log N) instead of O(N) — material
-// for the position track which can be ~100K samples per player per
-// match. Without this Buckets() over a 24K-bucket grid was O(N²).
-func positionIndexAtOrBefore(pt *result.PositionTrack, t float64) int {
-	n := len(pt.T)
-	if n == 0 {
-		return -1
-	}
-	// sort.Search finds the smallest i for which pt.T[i] > t.
-	// Latest <= t is i-1.
-	i := sort.Search(n, func(i int) bool { return float64(pt.T[i]) > t })
-	return i - 1
 }
 
 func eventListSamples(p result.PlayerStream, field string, bStart, bEnd float64) []Sample {
