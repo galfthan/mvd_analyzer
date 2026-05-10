@@ -149,21 +149,30 @@ field is documented inline.
 
 Defined in `result/timeline.go`.
 
+At schema v7 the parse-time `HighResBuckets` and `HighResDuration`
+fields are gone. Bucketed data is produced on demand by
+`qwanalytics/view.Buckets` (any window size, any reducer set; see
+[Streams](#streams-streams) and [Query API](#query-api)). The wire
+format here only carries the event-shaped derived results.
+
 | Field | JSON key | Type |
 |---|---|---|
-| HighResDuration | `highResDuration` | float64 (seconds per bucket; default 0.05 = 20 Hz) |
 | MatchStartTime | `matchStartTime` | float64 (always 0 after post-process) |
 | DemoOffset | `demoOffset` | float64 (warmup seconds before match start) |
-| HighResBuckets | `highResBuckets` | []HighResBucket |
 | FragEvents | `fragEvents` | []TimelineFragEvent |
 | PowerupEvents | `powerupEvents` | []PowerupEvent |
 | FragStreaks | `fragStreaks` | []FragStreakEvent |
 | LocationData | `locationData` | []MapLocation (loc anchor points) |
-| LocTable | `locTable` | []string (interned loc names; index 0 = ""). `HighResPlayerData.Li` indexes into this. |
+| LocTable | `locTable` | []string (interned loc names; index 0 = ""). `Streams.Players[].Loc[].V` indexes into this. |
 | PlayerUserIDs | `playerUserIDs` | map[string]int (name → Hub viewer UserID) |
 | RegionControl | `regionControl` | *RegionControlResult |
 
-### HighResBucket
+### HighResBucket (legacy shim shape)
+
+`HighResBucket` is no longer on the result wire format. The Go type
+remains as the shape returned by `view.ToLegacyHighResBuckets` (the
+WASM bridge's `getDefaultBuckets` shim). New consumers should target
+`view.BucketsView` directly via `view.Buckets`.
 
 | Field | JSON key | Type |
 |---|---|---|
@@ -171,50 +180,15 @@ Defined in `result/timeline.go`.
 | P | `p` | map[string]*HighResPlayerData |
 | TD | `td` | map[string]*HighResTeamData |
 
-### HighResPlayerData (compact keys)
+### HighResPlayerData / HighResTeamData
 
-| Field | JSON key | Type | Notes |
-|---|---|---|---|
-| X | `x` | float32 | World position from svc_playerinfo origin. |
-| Y | `y` | float32 | |
-| Z | `z` | float32 | |
-| H | `h` | int | Health. |
-| A | `a` | int | Armor. |
-| AT | `at` | string (omitempty) | Armor type: `ga` / `ya` / `ra`. |
-| RL | `rl` | bool (omitempty) | |
-| LG | `lg` | bool (omitempty) | |
-| GL | `gl` | bool (omitempty) | (added in v6) |
-| SSG | `ssg` | bool (omitempty) | |
-| SNG | `sng` | bool (omitempty) | |
-| Q | `q` | bool (omitempty) | Quad. |
-| Pent | `pe` | bool (omitempty) | |
-| R | `r` | bool (omitempty) | Ring. |
-| Shells | `sh` | int (omitempty) | (added in v6) |
-| Nails | `nl` | int (omitempty) | (added in v6) |
-| Rockets | `rk` | int (omitempty) | |
-| Cells | `cl` | int (omitempty) | |
-| D | `d` | bool (omitempty) | Death-frame marker. |
-| Sp | `sp` | bool (omitempty) | Spawn-frame marker. |
-| Li | `li` | int (omitempty) | Loc-table index (0 = no loc). |
-
-Shotgun (baseline) and NG (functionally useless in modern QW) are
-intentionally not tracked. Dead players are absent from `p` between
-`d:true` and the next `sp:true` (consult `D` only on the death-frame).
-
-### HighResTeamData
-
-| Field | JSON key | Type | Notes |
-|---|---|---|---|
-| RL | `rl` | int (omitempty) | Players with RL only. |
-| LG | `lg` | int (omitempty) | Players with LG only. |
-| RLLG | `rllg` | int (omitempty) | Players with both. |
-| W | `w` | int (omitempty) | Total players with RL or LG. |
-| GL | `gl` | int (omitempty) | Independent GL count (added in v6). |
-| Q / Pe / R | `q` / `pe` / `r` | int (omitempty) | Per-powerup counts. |
-| Pw | `pw` | int (omitempty) | Total players with any powerup. |
-| TH | `th` | int (omitempty) | Sum of team health. |
-| TA | `ta` | int (omitempty) | Sum of team armor. |
-| ABT | `abt` | map[string]int (omitempty) | Armor by type → count. |
+Same compact field set as v6 (X/Y/Z, H, A, AT, RL/LG/GL/SSG/SNG,
+Q/Pent/R, Shells/Nails/Rockets/Cells, D, Sp, Li for player; RL/LG/
+RLLG/W/GL/Q/Pe/R/Pw/TH/TA/ABT for team). Returned by
+`view.ToLegacyHighResBuckets`. New consumers should access these
+fields via `view.Buckets` instead, where each player's per-bucket
+data is a `map[string]any` keyed by the field codes from
+[Field vocabulary](#field-vocabulary).
 
 ### TimelineFragEvent
 
@@ -243,12 +217,19 @@ kills during the streak.
 
 ### RegionControlResult (`regionControl`)
 
+At schema v7 the parse-time `bucketStates` field is no longer baked
+into the result. Stats remain (match-aggregate percentages). For
+per-bucket region states at any resolution, call
+`view.RegionControl(opts)` (Go) or `recomputeRegionControl(regionsJSON)`
+(WASM bridge); both derive the bucket states on demand from
+`result.Streams`.
+
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
 | Regions | `regions` | []ControlRegion | Region definitions. |
 | TeamA | `teamA` | string (omitempty) | Team name encoded as `A` in BucketStates. Picked alphabetically. |
 | TeamB | `teamB` | string (omitempty) | Team name encoded as `B`. |
-| BucketStates | `bucketStates` | map[string]string (omitempty) | Region name → string of length `len(highResBuckets)`, one ASCII char per bucket. |
+| BucketStates | `bucketStates` | map[string]string (omitempty) | Populated only by query-time results (`view.RegionControl` / `recomputeRegionControl`). Region name → string of length `n_buckets`, one ASCII char per bucket. |
 | Stats | `stats` | map[string]RegionStats (omitempty) | Region name → match-aggregate share of each control state (percent, one decimal). |
 
 `BucketStates` codes (one byte per bucket):
@@ -290,6 +271,213 @@ analysis time.
 `{ teamAControl, teamAWeakControl, contested, weakContested, empty,
 teamBWeakControl, teamBControl }`. Each value is a percentage 0..100
 with one decimal place; the seven sum to 100 within rounding.
+
+## Streams (`streams`)
+
+Added in v7. Defined in `result/streams.go`. Streams is the canonical
+event-rate storage for every per-player field. Each
+`PlayerStream` records every change to a tracked field at the rate it
+actually changed; aggregated views (50 ms / 1 s buckets, point-in-time
+state, loc trails) are computed on demand from this storage by the
+`qwanalytics/view` package.
+
+### Top-level shape
+
+| Field | JSON key | Type |
+|---|---|---|
+| Players | `players` | []PlayerStream |
+| Global | `global` | GlobalStream |
+
+### GlobalStream
+
+| Field | JSON key | Type | Notes |
+|---|---|---|---|
+| MatchStart | `matchStart` | float64 | Match window start (always 0 after post-process). |
+| MatchEnd | `matchEnd` | float64 | Match window end (seconds). |
+
+### PlayerStream
+
+| Field | JSON key | Type | Notes |
+|---|---|---|---|
+| Name | `name` | string | Canonical player name (D12: collisions in same match get a `#slotIndex` suffix). |
+| Team | `team` | string (omitempty) | Team label (post-duel-normalise: per-player synthetic team). |
+| Position | `pos` | *PositionTrack (omitempty) | Native-rate position track. Omitted from default JSON unless `-include positions` (CLI) or equivalent is set. |
+| Health / Armor | `h` / `a` | []ChangeI16 | Vital change streams. Health caps at 250, Armor at 200; v7 uses int16 since v6's int8 was too narrow. |
+| ArmorType | `at` | []ChangeStr | `"ga"` / `"ya"` / `"ra"` / `""` transitions. |
+| Loc | `li` | []ChangeI16 | Index into `TimelineAnalysisResult.LocTable`. Smoothed by the same blip filter v6 used. |
+| RL / LG / GL / SSG / SNG | `rl` / `lg` / `gl` / `ssg` / `sng` | []Interval | Half-open `[Start, End)` periods the weapon was held. |
+| Quad / Pent / Ring | `q` / `pe` / `r` | []Interval | Same shape as weapons. |
+| Shells / Nails / Rockets / Cells | `sh` / `nl` / `rk` / `cl` | []ChangeI16 | Ammo change streams. |
+| Spawns / Deaths | `sp` / `d` | []float64 | Discrete event timestamps (no associated value). |
+
+### ChangeI16 / ChangeStr / Interval
+
+```
+ChangeI16 = { "t": float64, "v": int16 }
+ChangeStr = { "t": float64, "v": string }
+Interval  = { "s": float64, "e": float64 }   // half-open [s, e)
+```
+
+### PositionTrack
+
+Columnar to compress JSON. Indices align across the four arrays.
+
+```
+PositionTrack = { "t": [float32...], "x": [int32...], "y": [int32...], "z": [int32...] }
+```
+
+`int32` (not `int16`) because Quake maps can exceed ±32 768 in any axis.
+
+### Append rules (the dedup invariant)
+
+- **Change streams** (Health, Armor, ArmorType, Loc, ammo): every entry
+  is a transition. `appendChange(t, v)` appends only if `v` differs
+  from the previous entry's value. Consecutive identical samples are
+  dropped.
+- **Position**: every native sample is appended without dedup.
+  Positions almost always differ; checking is overhead with no payoff.
+- **Intervals** (weapons, powerups): one entry per period the field
+  was true. Anchor opens on `false→true`, closes on `true→false` or at
+  match end.
+- **Spawn / Death timestamps**: discrete events, just appended.
+
+### Identity / disambiguation (D12)
+
+`PlayerStream.Name` is the canonical demoinfo-resolved name. If two
+slots resolve to the same canonical name within one match (rare —
+typical in pickup games where two players both pick "Player"), the
+later slot's stream is suffixed `name#slotIndex`. Mid-match name
+changes are folded into the same stream by the analyser's existing
+canonicalisation.
+
+## Query API
+
+Provided by `qwanalytics/view`. All functions are pure: no I/O, no
+shared mutable state, no mutation of the input `*Result`.
+
+### Field vocabulary
+
+These codes are used identically in JSON wire keys, view-API
+parameters, CLI `-fields` values, and (future) MCP tool inputs.
+
+| Code | Field | Stream form | Default reducer |
+|------|-------|-------------|-----------------|
+| `h` | Health | `[]ChangeI16` | `last` |
+| `a` | Armor | `[]ChangeI16` | `last` |
+| `at` | Armor type | `[]ChangeStr` | `last` |
+| `li` | Loc index | `[]ChangeI16` | `last` |
+| `pos` | Position xyz | `*PositionTrack` | `last` |
+| `rl` | Rocket Launcher held | `[]Interval` | `held-any` |
+| `lg` | Lightning Gun held | `[]Interval` | `held-any` |
+| `gl` | Grenade Launcher held | `[]Interval` | `held-any` |
+| `ssg` | Super Shotgun held | `[]Interval` | `held-any` |
+| `sng` | Super Nailgun held | `[]Interval` | `held-any` |
+| `q` | Quad | `[]Interval` | `held-any` |
+| `pe` | Pentagram | `[]Interval` | `held-any` |
+| `r` | Ring of Shadows | `[]Interval` | `held-any` |
+| `sh` | Shells | `[]ChangeI16` | `last` |
+| `nl` | Nails | `[]ChangeI16` | `last` |
+| `rk` | Rockets | `[]ChangeI16` | `last` |
+| `cl` | Cells | `[]ChangeI16` | `last` |
+| `sp` | Spawn timestamps | `[]float64` | `any` |
+| `d` | Death timestamps | `[]float64` | `any` |
+
+### Reducer registry
+
+| Name | Behavior | Applies to |
+|------|----------|------------|
+| `last` | Value at end of window (carry-forward if no change). | Numeric / categorical. |
+| `first` | Value at start of window. | Numeric / categorical. |
+| `mean` | Arithmetic mean over samples. | Numeric. |
+| `min` / `max` | Extrema over samples. | Numeric. |
+| `dominant` | Mode (most common value); ties broken by `last`. | Categorical. |
+| `held-any` | OR over a bool stream — true if any sample is true. | Bool / interval. |
+| `majority` | True if held ≥ 50 % of window samples. | Bool / interval. |
+| `any` | True if at least one event is in the window. | Event lists (spawn/death). |
+
+Override per call via `BucketsOptions.Reducers`:
+
+```json
+{ "windowMs": 1000, "reducers": { "h": "min", "rl": "majority" } }
+```
+
+Unknown reducer name → explicit error from `view.Buckets`. Unknown
+field codes also error.
+
+### View functions
+
+#### Buckets
+
+```go
+view.Buckets(r, view.BucketsOptions{
+    WindowMs: 1000,
+    Fields:   []string{"h", "a", "rl"},
+    Players:  []string{"bps", "griffin"},
+    Reducers: map[string]string{"h": "mean"},
+    IncludeTeam: true,
+})
+// → *BucketsView { WindowMs, Buckets: []ViewBucket }
+```
+
+Partial last bucket carries `Partial: true` when the window doesn't
+divide evenly into `EndTime - StartTime`.
+
+#### Events
+
+```go
+view.Events(r, view.EventsFilter{
+    StartTime: 60.0, EndTime: 120.0,
+    Types: []string{"frag", "powerup"},
+})
+// → *EventsView { Events: []TaggedEvent }
+```
+
+Default Types omits high-frequency change events (`health`, `armor`,
+`loc`); pass them explicitly to opt back in.
+
+#### StreamSlice
+
+```go
+view.StreamSlice(r, view.StreamSliceOptions{
+    StartTime: 432.0, EndTime: 442.0,
+    Players:   []string{"bps"},
+    Fields:    []string{"h", "a", "rl", "pe"},
+})
+// → *StreamSliceView { Players: []PlayerSlice }
+```
+
+Raw, unreduced change entries falling in `[StartTime, EndTime)`. For
+each requested field, a synthetic carry-forward entry is prepended at
+`StartTime` showing the value at window entry; intervals overlapping
+the window are clamped.
+
+#### StateAt
+
+```go
+view.StateAt(r, view.StateAtOptions{
+    Time:    432.5,
+    Players: []string{"bps"},
+    Fields:  []string{"h", "a", "rl", "pos"},
+})
+// → *StateAtView { Time, Players: map[string]PlayerStateAt }
+```
+
+Resolves each requested field at `Time`. Change streams use latest
+entry with `T <= Time` (carry-forward). Intervals: `true` iff `Time` ∈
+some interval. Position: nearest sample by `T`.
+
+#### LocTrails
+
+Per-player loc residences with dwell durations. `MinDwellMs` folds
+short blips into adjacent stable residences (defaults to 0 = no
+filter; the analyser's pre-existing blip filter has already smoothed
+the underlying loc stream).
+
+#### RegionControl
+
+Re-derives per-bucket region state strings at the requested
+`WindowMs`. Takes a `RegionControlClassifier` callback so the view
+package stays independent of the analyser's classifier.
 
 ## MetadataResult (`metadata`)
 
@@ -351,14 +539,16 @@ stay listed as zero-kill entries so denial labelling still works).
 
 - `weaponPickups[i].backpackEnt` ↔ `backpacks[j].entNum` —
   drop-to-pickup join, `source=="backpack"` only.
-- `highResBuckets[].p[name].li` → `timelineAnalysis.locTable[i]` —
-  resolve player loc name.
+- `streams.players[].li[].v` → `timelineAnalysis.locTable[i]` —
+  resolve player loc name. (Same key joins were on `highResBuckets[].p[name].li`
+  in v6.)
 - `controlRegion.locs[]` ↔ `locTable[]` — region membership.
 - `playerUserIDs[name]` → Hub viewer track parameter.
 - `match.players[].name` ↔ `frags.byPlayer[]` ↔
-  `demoInfo.players[].name` ↔ `highResBuckets[].p` keys — same name
+  `demoInfo.players[].name` ↔ `streams.players[].name` — same name
   resolves through every layer (canonicalised by the demoinfo
-  resolver).
+  resolver). Mid-match name collisions get `#slot` suffix on the
+  streams entry.
 
 ## Layered views (intentional overlap)
 
@@ -384,6 +574,7 @@ duplication exists, the canonical fix lives on the other side.
 
 | Version | Changes |
 |---|---|
+| v7 | `Streams` added as the canonical event-rate storage (per-player change streams + intervals + native-rate position track). `TimelineAnalysisResult.HighResBuckets` and `HighResDuration` removed; bucketed views are now produced on demand by `qwanalytics/view.Buckets`. `RegionControlResult.BucketStates` removed from the parse-time output (still produced by `view.RegionControl` at the requested resolution). Health / Armor change streams use int16 (Quake values reach 250). |
 | v6 | HighResPlayerData adds `gl`, `sh`, `nl`. HighResTeamData adds `gl`. MatchEvent adds `messageClean`. ControlRegion adds `locs`. RegionControlResult adds `teamA`/`teamB`/`bucketStates`/`stats` + new `RegionStats`. Top-level `duration` removed (use `match.duration`). MatchResult.PlayerStat drops dead `kills`/`deaths`. |
 | v5 | WeaponPickups added — slot-weapon acquisitions with kills-before-next-death effectiveness. Backpack pickups carry `backpackEnt` joining to `backpacks[].entNum`. |
 | v4 | Backpacks added — RL/LG backpack drops sourced from KTX `//ktx drop` STUFFCMD_DEMOONLY directive. |

@@ -84,6 +84,11 @@ type deathEvent struct {
 // timelinePlayerState tracks current state for a single player as the
 // parser walks the demo. items is the raw item bitfield from svc_updatestat;
 // it's decoded into weapons/powerups/armor type at sampling time.
+//
+// The accompanying streamBuilder is the append-only historical record
+// that becomes result.PlayerStream at finalize. The cursor (this
+// struct's fields) tells "what is X right now"; the builder holds
+// "every transition we've seen." See state.go for the dedup invariants.
 type timelinePlayerState struct {
 	items  int // raw item bitfield (weapons, powerups, armor type)
 	vitals vitals
@@ -104,6 +109,11 @@ type timelinePlayerState struct {
 	ammo                 ammoCounts
 	pos                  playerPosition
 	frags                int
+
+	// streams accumulates the append-only historical record. Populated
+	// in OnEvent alongside the running cursor; flushed to result.Streams
+	// in Finalize.
+	streams streamBuilder
 }
 
 // timelineBucketData holds raw aggregated data during analysis
@@ -204,6 +214,13 @@ func (a *TimelineAnalyzer) handlePositionUpdate(e *events.PlayerPositionEvent) {
 	state := a.getOrCreatePlayerState(e.PlayerNum)
 	state.pos = playerPosition{x: e.Origin[0], y: e.Origin[1], z: e.Origin[2]}
 
+	// Stream emission: append every native sample (D11 asymmetry —
+	// positions don't dedup). Match-time only; warmup positions would
+	// pollute the stream with garbage.
+	if a.timing.Started && !a.timing.Ended {
+		state.streams.recordPosition(e.Time, e.Origin[0], e.Origin[1], e.Origin[2])
+	}
+
 	// Sample at bucket boundaries — position updates arrive at ~73 Hz,
 	// much more frequently than stat updates (~3 Hz). Without this,
 	// ~93% of 50ms buckets would miss position data entirely.
@@ -265,6 +282,7 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 		// Drop sentinel values so they don't get sampled into buckets.
 		if e.Value <= 250 {
 			state.vitals.health = e.Value
+			state.streams.recordHealth(e.Time, int16(e.Value))
 		}
 	case events.StatArmor:
 		// Same shape: KTX overwrites armorvalue in pre-match speed-meter
@@ -272,17 +290,25 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 		// at 200 (RA). Reject anything larger.
 		if e.Value <= 200 {
 			state.vitals.armor = e.Value
+			state.streams.recordArmor(e.Time, int16(e.Value))
 		}
 	case events.StatItems:
 		state.items = e.Value
+		w, p, at := itemBitsToLoadouts(e.Value)
+		state.streams.recordItemFlags(e.Time, w, p)
+		state.streams.recordArmorType(e.Time, at)
 	case events.StatShells:
 		state.ammo.shells = e.Value
+		state.streams.recordShells(e.Time, int16(e.Value))
 	case events.StatNails:
 		state.ammo.nails = e.Value
+		state.streams.recordNails(e.Time, int16(e.Value))
 	case events.StatRockets:
 		state.ammo.rockets = e.Value
+		state.streams.recordRockets(e.Time, int16(e.Value))
 	case events.StatCells:
 		state.ammo.cells = e.Value
+		state.streams.recordCells(e.Time, int16(e.Value))
 	}
 
 	// Sample at bucket boundaries - fill ALL buckets since last sample
@@ -408,6 +434,7 @@ func (a *TimelineAnalyzer) handleDeath(e *events.DeathEvent) {
 	}
 	state := a.getOrCreatePlayerState(e.PlayerNum)
 	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: e.Time, PlayerNum: e.PlayerNum})
+	state.streams.recordDeath(e.Time)
 
 	player := a.ctx.Players[e.PlayerNum]
 	if player == nil || player.Spectator {
@@ -436,6 +463,7 @@ func (a *TimelineAnalyzer) handleSpawn(e *events.SpawnEvent) {
 	}
 	state := a.getOrCreatePlayerState(e.PlayerNum)
 	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: e.Time, PlayerNum: e.PlayerNum})
+	state.streams.recordSpawn(e.Time)
 	state.isDead = false
 
 	player := a.ctx.Players[e.PlayerNum]

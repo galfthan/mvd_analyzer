@@ -56,14 +56,17 @@ The analyser is split across several files:
    them. Each `ControlRegion` carries an explicit `locs` list that
    names its membership.
 8. **Region control**: `ComputeRegionControl` (in
-   [`region_control.go`](region_control.go)) classifies each high-res
+   [`region_control.go`](region_control.go)) classifies each
    bucket into one of seven states — empty / teamA[Weak]Control /
    teamB[Weak]Control / contested / weakContested — with "armed" =
-   carrying RL or LG. Output is per-region `bucketStates` (one ASCII
-   char per bucket) plus match-aggregate `stats`. The function is
-   pure and re-callable: WASM exposes `recomputeRegionControl` for
-   the web UI's region-edit flow, and a future MCP wrapper will use
-   the same entrypoint.
+   carrying RL or LG. The function takes a `[]HighResBucket` array;
+   at v7 the analyser feeds it derived buckets from
+   `qwanalytics/view.Buckets` (50 ms windows). `view.RegionControl`
+   wraps the classifier as a query function callable from any
+   transport. Output is per-region `bucketStates` (one ASCII char per
+   bucket; query-time only, no longer baked into Result) plus
+   match-aggregate `stats` (still on Result). WASM exposes
+   `recomputeRegionControl` for the web UI's region-edit flow.
 9. **Powerups**: per-slot quad/pent/ring presence transitions are
    converted to `PowerupEvent` records with start/end times.
 

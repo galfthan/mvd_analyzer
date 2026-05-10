@@ -2599,8 +2599,26 @@ function displayTimelineAnalysis(result) {
     }
     const teams = timelineState.teams;
 
-    timelineState.highResBuckets = timeline?.highResBuckets || [];
-    timelineState.highResDuration = timeline?.highResDuration || 0.05;
+    // Schema v7: highResBuckets is no longer a parse-time field on the
+    // result; rebuild it on-demand from result.streams via the WASM
+    // bridge's getDefaultBuckets helper. Returns the same v6-shape
+    // []HighResBucket array the panels iterate.
+    let bucketsArr = [];
+    if (typeof window.getDefaultBuckets === "function") {
+        try {
+            const json = window.getDefaultBuckets();
+            if (json) {
+                const parsed = JSON.parse(json);
+                if (Array.isArray(parsed)) {
+                    bucketsArr = parsed;
+                }
+            }
+        } catch (e) {
+            console.warn("getDefaultBuckets failed:", e);
+        }
+    }
+    timelineState.highResBuckets = bucketsArr;
+    timelineState.highResDuration = 0.05;
     timelineState.matchStartTime = timeline?.matchStartTime || 0;
     timelineState.demoOffset = timeline?.demoOffset || 0;
     timelineState.duration = result.match?.duration || 600;
@@ -4916,11 +4934,12 @@ function initRegionControlData(result) {
     }
     computeRegionStacking(mapState.controlRegions);
 
-    // Pick up the Go-precomputed control data when the result schema
-    // carries it (v6+). Used by getRegionControlAtTime for cheap
-    // lookups and by initRegionControl to skip the JS recompute on
-    // initial load.
-    mapState.bucketStates      = rc.bucketStates || null;
+    // v7: bucketStates is no longer baked at parse time — only Stats,
+    // TeamA, TeamB are on the result. The bridge derives bucketStates
+    // on demand from streams; initRegionControl below calls
+    // recomputeRegionControl to populate mapState.bucketStates from
+    // the same regions definition the analyser used.
+    mapState.bucketStates      = null;
     mapState.regionControlStats = rc.stats || null;
     mapState.teamA              = rc.teamA || null;
     mapState.teamB              = rc.teamB || null;
@@ -4948,7 +4967,7 @@ function initRegionControl(result) {
     // Build region config UI (editable text fields per region)
     buildRegionConfig(rc.regions);
 
-    // Render the table from the Go-supplied bucketStates / stats that
+    // Render the table from the Go-supplied stats that
     // initRegionControlData stashed on mapState. User edits route through
     // applyRegionConfig, which calls the WASM bridge to refresh both.
     renderRegionControlTableFromGo(rc.regions, mapState.regionControlStats, mapState.teamA, mapState.teamB);
@@ -4956,6 +4975,29 @@ function initRegionControl(result) {
 
     if (panel) panel.style.display = '';
     if (statusPanel) statusPanel.style.display = '';
+
+    // v7: pull the per-bucket region states via the bridge so the map
+    // heatmap has data on initial load. Mirrors what applyRegionConfig
+    // does after user edits.
+    if (typeof window.recomputeRegionControl === "function") {
+        try {
+            const overrideJSON = JSON.stringify({
+                regions: rc.regions.map(r => ({
+                    name: r.name,
+                    locs: [...new Set((r.points || []).map(p => p.name))],
+                })),
+            });
+            const json = window.recomputeRegionControl(overrideJSON);
+            const res = JSON.parse(json);
+            if (!res.error && res.bucketStates) {
+                mapState.bucketStates = res.bucketStates;
+                if (res.stats) mapState.regionControlStats = res.stats;
+                mapState.renderDirty = true;
+            }
+        } catch (e) {
+            console.warn("init recomputeRegionControl failed:", e);
+        }
+    }
 }
 
 function buildRegionConfig(regions) {
@@ -5287,8 +5329,10 @@ function calculateMapBounds(result) {
         maxY = Math.max(maxY, loc.y);
     }
 
-    // From high-res buckets - position bounds
-    const highResBuckets = result.timelineAnalysis?.highResBuckets || [];
+    // From high-res buckets - position bounds. v7: read from the
+    // bridge-derived timelineState.highResBuckets instead of the
+    // (deleted) result.timelineAnalysis.highResBuckets field.
+    const highResBuckets = timelineState.highResBuckets || [];
     for (const bucket of highResBuckets) {
         for (const data of Object.values(bucket.p || {})) {
             if (data.x !== 0 || data.y !== 0) {

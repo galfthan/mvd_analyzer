@@ -38,7 +38,23 @@ package result
 //     DemoInfo.Duration).
 //   - MatchResult.PlayerStat drops dead Kills/Deaths fields (always
 //     0; consumers read FragResult.ByPlayer or DemoInfoResult).
-const CurrentSchemaVersion = 6
+//
+// v7:
+//   - Adds Result.Streams: the canonical event-rate storage for every
+//     per-player field (vitals, weapons, powerups, ammo, position,
+//     loc, spawns, deaths). Sparse change streams + half-open
+//     intervals + columnar position track. See qwanalytics/result/streams.go.
+//   - Removes TimelineAnalysisResult.HighResBuckets and
+//     TimelineAnalysisResult.HighResDuration. Bucketed data is now
+//     produced on demand by qwanalytics/view.Buckets at any window
+//     resolution, with per-field reducers selected by the caller.
+//   - Removes RegionControlResult.BucketStates from the parse-time
+//     output. View-time callers (CLI -view region-control, WASM
+//     recomputeRegionControl) get it on demand at the requested
+//     resolution.
+//   - Health/Armor change streams use int16 (Quake values reach 250,
+//     above int8 range).
+const CurrentSchemaVersion = 7
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -60,5 +76,6 @@ type Result struct {
 	Items            *ItemsResult            `json:"items,omitempty"`
 	Backpacks        []BackpackDrop          `json:"backpacks,omitempty"`
 	WeaponPickups    []WeaponPickup          `json:"weaponPickups,omitempty"`
+	Streams          *Streams                `json:"streams,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
 }

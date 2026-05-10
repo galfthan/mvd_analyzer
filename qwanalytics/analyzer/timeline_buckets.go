@@ -1,9 +1,28 @@
 package analyzer
 
-// Bucket export:
+// Bucket export — analyzer-internal scaffolding at v7.
 //
-//   exportHighResBuckets   internal buckets → HighResBucket with per-player
-//                          snapshots and pre-computed team aggregations.
+// At schema v7 the canonical wire-format storage moved to
+// result.Streams; HighResBuckets is no longer a field on
+// TimelineAnalysisResult. This file's exporter is still used
+// internally by the analyzer:
+//
+//   1. Loc resolution + blip filter operate on the parse-time bucket
+//      data (timelineBucketData) at 50 ms resolution — that's the
+//      smoothing granularity the existing logic expects.
+//   2. ComputeRegionControl needs a []HighResBucket to classify region
+//      states; the analyzer feeds it the array produced here.
+//   3. BuildLocGraph (in postprocess) derives its own 50 ms bucket
+//      array from result.Streams via view.Buckets and the legacy
+//      shim; it does not reach into a.buckets directly.
+//   4. The WASM bridge's getDefaultBuckets returns a derived bucket
+//      array via view.Buckets / legacy shim — it does not call this
+//      exporter.
+//
+// Phase 1.5 / 2 may refactor loc resolution + blip filter to operate
+// directly on Streams, removing the need for the parse-time bucket
+// data structure entirely. Until then this exporter stays as the
+// analyzer's local scaffolding.
 
 // exportHighResBuckets converts internal buckets to the compact export format.
 // Each bucket gets per-player data (position, vitals, weapons, powerups) and

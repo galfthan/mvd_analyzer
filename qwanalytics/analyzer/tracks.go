@@ -1,5 +1,7 @@
 package analyzer
 
+import "github.com/mvd-analyzer/qwanalytics/view"
+
 // PlayerTrack contains all movement data for a single player
 type PlayerTrack struct {
 	Team  string      `json:"team"`
@@ -25,13 +27,30 @@ type TracksResult struct {
 	Players map[string]*PlayerTrack `json:"players"`
 }
 
-// ExtractTracks processes timeline data to extract per-player movement tracks segmented by lives
+// ExtractTracks processes timeline data to extract per-player movement tracks segmented by lives.
+//
+// At schema v7 the canonical event-rate storage is result.Streams.
+// ExtractTracks derives a 50 ms bucket array from streams via
+// view.Buckets and the legacy shim — the algorithm wants a uniform
+// "where was each player every 50 ms" view. This is shelved
+// scaffolding for upcoming movement-pattern visualisations.
 func ExtractTracks(result *Result) *TracksResult {
-	if result.TimelineAnalysis == nil {
+	if result == nil || result.TimelineAnalysis == nil || result.Streams == nil {
 		return nil
 	}
 
 	timeline := result.TimelineAnalysis
+
+	bv, err := view.Buckets(result, view.BucketsOptions{
+		WindowMs:    50,
+		Fields:      view.AllStandardFields,
+		Reducers:    view.LegacyReducerSet,
+		IncludeTeam: false,
+	})
+	if err != nil || bv == nil {
+		return nil
+	}
+	highResBuckets := view.ToLegacyHighResBuckets(bv)
 
 	// Get map name from demoInfo if available
 	mapName := ""
@@ -70,8 +89,8 @@ func ExtractTracks(result *Result) *TracksResult {
 		return ""
 	}
 
-	// Process high-res buckets chronologically
-	for _, bucket := range timeline.HighResBuckets {
+	// Process derived buckets chronologically.
+	for _, bucket := range highResBuckets {
 		bucketTime := bucket.T
 
 		// Track which players we see in this bucket

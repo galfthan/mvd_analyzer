@@ -181,51 +181,6 @@ func ComputeRegionControl(
 	return bucketStates, stats
 }
 
-// recomputeRegionStatsFromStrings rebuilds the per-region match-aggregate
-// percentages from already-encoded bucketStates strings. Used by the
-// match-relative postprocess after it slices the warmup prefix off, so
-// the published Stats reflects match-only state.
-func recomputeRegionStatsFromStrings(bucketStates map[string]string) map[string]RegionStats {
-	out := make(map[string]RegionStats, len(bucketStates))
-	for name, s := range bucketStates {
-		var t RegionStats
-		total := float64(len(s))
-		if total == 0 {
-			out[name] = t
-			continue
-		}
-		var emp, aC, aW, con, wcon, bC, bW int
-		for i := 0; i < len(s); i++ {
-			switch s[i] {
-			case RegionStateEmpty:
-				emp++
-			case RegionStateTeamAControl:
-				aC++
-			case RegionStateTeamAWeakControl:
-				aW++
-			case RegionStateContested:
-				con++
-			case RegionStateWeakContested:
-				wcon++
-			case RegionStateTeamBControl:
-				bC++
-			case RegionStateTeamBWeakControl:
-				bW++
-			}
-		}
-		pct := func(n int) float64 { return float64(int(float64(n)/total*1000+0.5)) / 10 }
-		t.Empty = pct(emp)
-		t.TeamAControl = pct(aC)
-		t.TeamAWeakControl = pct(aW)
-		t.Contested = pct(con)
-		t.WeakContested = pct(wcon)
-		t.TeamBControl = pct(bC)
-		t.TeamBWeakControl = pct(bW)
-		out[name] = t
-	}
-	return out
-}
-
 // classifyRegionState is the seven-state decision rule, faithful port
 // of qw-web/static/app.js:4275-4285.
 func classifyRegionState(aWpn, aNo, bWpn, bNo int) byte {

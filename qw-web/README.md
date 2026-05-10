@@ -6,9 +6,15 @@ talks to it through a JS shim.
 
 ## What's in the box
 
-- `cmd/wasm/` — WASM entry point. Exports a single `analyzeMVD(bytes,
-  filename)` function to the JS global scope; everything else in the
-  pipeline is in qwanalytics.
+- `cmd/wasm/` — WASM entry point. Exports `analyzeMVD(bytes, filename)`
+  for the parse-and-pin call, plus the schema-v7 query API as bridge
+  functions: `getDefaultBuckets()` (legacy 50 ms []HighResBucket shape
+  for the existing panels), `getBuckets(optsJSON)`,
+  `getEvents(filterJSON)`, `getStreamSlice(optsJSON)`,
+  `getStateAt(optsJSON)`, `getLocTrails(optsJSON)`, and
+  `recomputeRegionControl(regionsJSON)`. All take a JSON-string argument
+  (or none for `getDefaultBuckets`) and return a JSON string; under the
+  hood they call into `qwanalytics/view` over the cached `lastResult`.
 - `static/` — the browser frontend.
   - `index.html`, `styles.css`, `app.js` — main page and the tabbed
     analyzer UI (scoreboard, timeline, map, chat, loc graph, ...).

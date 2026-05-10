@@ -191,8 +191,16 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		locTable = nil
 	}
 
-	// Export high-res buckets with per-player data and pre-computed team aggregations
+	// Export the analyzer-internal bucket array. At v7 this no longer
+	// ships in Result; it's used here to feed ComputeRegionControl and
+	// (during the postprocess) the loc-graph builder. The wire-format
+	// storage is result.Streams, populated below.
 	highResBuckets := a.exportHighResBuckets(slotToName, slotToTeam, locIndex)
+
+	// Emit per-player loc transitions into each player's stream
+	// builder so result.Streams.Players[].Loc carries the same
+	// blip-filtered loc track every other v6 consumer used.
+	a.emitLocStreams(slotToName, locIndex)
 
 	// Build name -> UserID mapping for Hub viewer links
 	playerUserIDsByName := make(map[string]int)
@@ -291,16 +299,26 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	}
 
 	result.TimelineAnalysis = &TimelineAnalysisResult{
-		HighResDuration: a.bucketDuration,
-		MatchStartTime:  a.timing.StartTime,
-		HighResBuckets:  highResBuckets,
-		FragEvents:      fragEvents,
-		PowerupEvents:   powerupEvents,
-		FragStreaks:      fragStreaks,
-		LocationData:    locationData,
-		LocTable:        locTable,
-		PlayerUserIDs:   playerUserIDsByName,
-		RegionControl:   regionControl,
+		MatchStartTime: a.timing.StartTime,
+		FragEvents:     fragEvents,
+		PowerupEvents:  powerupEvents,
+		FragStreaks:    fragStreaks,
+		LocationData:   locationData,
+		LocTable:       locTable,
+		PlayerUserIDs:  playerUserIDsByName,
+		RegionControl:  regionControl,
+	}
+
+	// Build result.Streams from each player's stream builder. The
+	// match-window anchors come from MatchAnalyzer / DemoInfo via the
+	// post-processor's time normalization; here we set provisional
+	// MatchStart=timing.StartTime, MatchEnd=last bucket's end.
+	matchEnd := 0.0
+	if len(a.buckets) > 0 {
+		matchEnd = a.buckets[len(a.buckets)-1].endTime
+	}
+	if streams := a.buildStreamsResult(slotToName, slotToTeam, a.timing.StartTime, matchEnd); streams != nil {
+		result.Streams = streams
 	}
 	return nil
 }

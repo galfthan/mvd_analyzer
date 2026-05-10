@@ -1,17 +1,22 @@
 package analyzer
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/mvd-analyzer/qwanalytics/view"
+)
 
 // LocGraphResult / LocNode / LocEdge now live in qwanalytics/result and
 // are re-exported via type aliases in interface.go. BuildLocGraph below
 // constructs and returns them; nothing else in this file declares them.
 //
-// Per-bucket loc smoothing happens upstream in TimelineAnalyzer.
-// applyBlipFilter — by the time we see a bucket's Li, any short-lived
-// wall-bleed has already been reassigned to an adjacent stable loc. So
-// the graph just emits an edge whenever a player's filtered loc
-// changes between consecutive buckets, with node time accumulated at
-// the raw per-bucket level.
+// At schema v7 BuildLocGraph derives its 50 ms bucket array from
+// result.Streams via view.Buckets and the legacy shim — the loc graph
+// algorithm wants a uniform-grid view of "where was each player every
+// 50 ms" and that's exactly what view.Buckets provides. The blip-
+// filter smoothing has already happened upstream in
+// TimelineAnalyzer.applyBlipFilter so streams.Loc carries the same
+// smoothed track every v6 consumer used.
 
 // teleportBaseThreshold is the per-axis "max plausible movement per
 // second" limit. A transition whose per-axis displacement exceeds
@@ -20,15 +25,26 @@ import "sort"
 // constant at app.js (MAX_MOVE_PER_BUCKET = 2500 * bucketDuration).
 const teleportBaseThreshold = 2500.0
 
-// BuildLocGraph aggregates HighResBuckets into a loc-to-loc movement
-// graph. Runs after time normalization / warmup filtering so it sees
-// only match-time buckets. Returns nil if there is no timeline data.
+// BuildLocGraph derives a 50 ms bucket array from result.Streams and
+// aggregates it into a loc-to-loc movement graph. Runs after time
+// normalization / warmup filtering so it sees only match-time data.
+// Returns nil if there is no timeline data or no streams.
 func BuildLocGraph(result *Result) *LocGraphResult {
-	if result == nil || result.TimelineAnalysis == nil {
+	if result == nil || result.TimelineAnalysis == nil || result.Streams == nil {
 		return nil
 	}
 	ta := result.TimelineAnalysis
-	if len(ta.HighResBuckets) == 0 {
+	bv, err := view.Buckets(result, view.BucketsOptions{
+		WindowMs:    50,
+		Fields:      view.AllStandardFields,
+		Reducers:    view.LegacyReducerSet,
+		IncludeTeam: false,
+	})
+	if err != nil || bv == nil || len(bv.Buckets) == 0 {
+		return nil
+	}
+	highResBuckets := view.ToLegacyHighResBuckets(bv)
+	if len(highResBuckets) == 0 {
 		return nil
 	}
 
@@ -48,7 +64,7 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 		return ""
 	}
 
-	bucketDuration := ta.HighResDuration
+	bucketDuration := float64(bv.WindowMs) / 1000.0
 	if bucketDuration <= 0 {
 		bucketDuration = 0.05
 	}
@@ -97,7 +113,7 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 		cur.loc = ""
 	}
 
-	for _, bucket := range ta.HighResBuckets {
+	for _, bucket := range highResBuckets {
 		seenThisBucket := make(map[string]bool, len(bucket.P))
 
 		for name, p := range bucket.P {
