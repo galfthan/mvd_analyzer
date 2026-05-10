@@ -78,6 +78,25 @@ fixtures (no spawn/death) break. Worth a cleaner design that
 distinguishes "real demo, no synthetic SpawnEvent" from "test fixture
 with no events."
 
+### Worker runs extra bridge calls per analyze
+
+[`qw-web/static/worker.js`](qw-web/static/worker.js) now calls
+`getDefaultBuckets()` and `recomputeRegionControl(defaults)`
+immediately after `analyzeMVD()` and bundles the JSON results into
+the postMessage envelope. Required because the WASM exports live on
+the worker's global scope, not `window`, and the existing panels
+read `result.timelineAnalysis.highResBuckets` and
+`.regionControl.bucketStates` synchronously. Cost: two extra
+`view.Buckets` walks (~50–200 ms on a 4on4 demo) per load, on top
+of `analyzeMVD` itself.
+
+**Fix path**: fold the legacy-shape bucket build into
+`analyzer.TimelineAnalyzer.Finalize` so it happens during the parse
+pass instead of as a post-step. Or, when Phase 1.5 migrates panels
+to call `getBuckets({windowMs})` per panel via the worker
+postMessage protocol, drop both bridge calls from the analyze hot
+path entirely.
+
 ### `tracks.go` shelved
 
 [`qwanalytics/analyzer/tracks.go`](qwanalytics/analyzer/tracks.go)
