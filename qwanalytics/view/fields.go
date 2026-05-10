@@ -126,36 +126,49 @@ var DefaultReducers = map[string]string{
 	FieldDeaths: "any",
 }
 
-// LegacyReducerSet reproduces v6 sampling-at-bucket-boundary
-// semantics. Used by the WASM bridge's getDefaultBuckets shim so the
-// web frontend renders identically to v6.
+// LegacyReducerSet reproduces v6's "stamp every field at the first
+// event of the bucket" semantics. Used by the WASM bridge's
+// getDefaultBuckets shim and by analyzer-internal calls
+// (BuildLocGraph, ComputeRegionControl, getDefaultBuckets) so the web
+// frontend renders identically to v6.
 //
-// "last" applies to every state field (vitals, ammo, loc, position,
-// armor type). "held-any" applies to interval streams (weapons /
-// powerups) — v6 used the same OR-fold. "any" applies to event-list
-// streams (spawns / deaths) — v6 set the per-bucket flag if the event
-// happened anywhere in the bucket window.
+// "first" semantics — bucket N's data == player state at time
+// N*bucketDur:
+//
+//   - Change streams (h, a, at, li, ammo): carry-forward to bStart
+//     (latest entry with T <= bStart). The stream's value at bStart.
+//   - Position: first native sample with T >= bStart (or the
+//     carry-forward sample if no in-window sample exists, i.e. gap
+//     buckets). See positionSamples in buckets.go.
+//   - Intervals (weapons, powerups): held at exactly bStart. The
+//     intervalSamples helper emits sample 0 at bStart so "first"
+//     returns intervalContains(bStart).
+//   - Spawns / deaths stay on "any" — they need a bool, not a
+//     timestamp.
+//
+// Bucket 0 thus represents the player's state at t=0 (match start),
+// matching v6's first-event-of-bucket stamping.
 var LegacyReducerSet = map[string]string{
-	FieldHealth:    "last",
-	FieldArmor:     "last",
-	FieldArmorType: "last",
-	FieldLoc:       "last",
-	FieldPosition:  "last",
+	FieldHealth:    "first",
+	FieldArmor:     "first",
+	FieldArmorType: "first",
+	FieldLoc:       "first",
+	FieldPosition:  "first",
 
-	FieldRL:  "held-any",
-	FieldLG:  "held-any",
-	FieldGL:  "held-any",
-	FieldSSG: "held-any",
-	FieldSNG: "held-any",
+	FieldRL:  "first",
+	FieldLG:  "first",
+	FieldGL:  "first",
+	FieldSSG: "first",
+	FieldSNG: "first",
 
-	FieldQuad: "held-any",
-	FieldPent: "held-any",
-	FieldRing: "held-any",
+	FieldQuad: "first",
+	FieldPent: "first",
+	FieldRing: "first",
 
-	FieldShells:  "last",
-	FieldNails:   "last",
-	FieldRockets: "last",
-	FieldCells:   "last",
+	FieldShells:  "first",
+	FieldNails:   "first",
+	FieldRockets: "first",
+	FieldCells:   "first",
 
 	FieldSpawns: "any",
 	FieldDeaths: "any",

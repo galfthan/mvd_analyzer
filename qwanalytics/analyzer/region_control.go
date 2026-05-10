@@ -128,17 +128,18 @@ func ComputeRegionControl(
 		if pt == nil || len(pt.T) == 0 || len(pt.Li) != len(pt.T) {
 			continue
 		}
-		// Iterate buckets and walk PositionTrack in order; sIdx
-		// points to the latest sample with T <= bucketEnd.
+		// "First sampling" semantics: bucket bi represents state at
+		// time bucketStart = matchStart + bi*bucketDur. sIdx points
+		// to the latest position sample with T <= bucketStart, so
+		// pt.Li[sIdx] is the loc index at that moment.
 		sIdx := 0
 		for bi := 0; bi < nBuckets; bi++ {
-			bucketEnd := matchStart + float64(bi+1)*bucketDur
-			for sIdx+1 < len(pt.T) && float64(pt.T[sIdx+1]) <= bucketEnd {
+			bucketStart := matchStart + float64(bi)*bucketDur
+			for sIdx+1 < len(pt.T) && float64(pt.T[sIdx+1]) <= bucketStart {
 				sIdx++
 			}
-			// Skip if the latest qualifying sample is actually after bucketEnd
-			// (player hasn't started emitting positions yet).
-			if float64(pt.T[sIdx]) > bucketEnd {
+			// Skip if the player hasn't started emitting positions yet.
+			if float64(pt.T[sIdx]) > bucketStart {
 				continue
 			}
 			li := pt.Li[sIdx]
@@ -149,8 +150,8 @@ func ComputeRegionControl(
 			if !ok {
 				continue
 			}
-			armed := intervalsOverlapAt(p.RL, float64(pt.T[sIdx])) ||
-				intervalsOverlapAt(p.LG, float64(pt.T[sIdx]))
+			armed := intervalsOverlapAt(p.RL, bucketStart) ||
+				intervalsOverlapAt(p.LG, bucketStart)
 			c := presence[bi][regionName]
 			if c == nil {
 				continue

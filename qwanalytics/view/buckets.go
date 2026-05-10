@@ -351,32 +351,42 @@ func intervalSamples(p result.PlayerStream, field string, bStart, bEnd float64) 
 		return nil
 	}
 	// Sample the interval state at a few points across the window so
-	// majority / held-any have something meaningful to count. Using
-	// just bStart would lose mid-window transitions.
+	// majority / held-any have something meaningful to count. samples[0]
+	// is at exactly bStart so the "first" reducer returns intervalContains(bStart),
+	// matching v6's "held at first event of bucket" semantics.
 	const samplesPerWindow = 8
 	out := make([]Sample, samplesPerWindow)
 	span := bEnd - bStart
-	for i := 0; i < samplesPerWindow; i++ {
-		t := bStart + (float64(i)+0.5)*span/float64(samplesPerWindow)
+	out[0] = Sample{T: bStart, V: intervalContains(stream, bStart)}
+	for i := 1; i < samplesPerWindow; i++ {
+		t := bStart + float64(i)*span/float64(samplesPerWindow)
 		out[i] = Sample{T: t, V: intervalContains(stream, t)}
 	}
 	return out
 }
 
+// positionSamples emits the position samples in [bStart, bEnd). When
+// the window contains no native samples (a "gap bucket" — typically
+// only happens during deaths or recording lag) it falls back to a
+// single carry-forward sample.
+//
+// Order: in-window samples chronologically. Carry-forward is only
+// appended when no in-window sample exists, so:
+//
+//   - "first" reducer returns the first in-window sample (or the
+//     carry-forward in gap buckets).
+//   - "last" reducer returns the last in-window sample (or the
+//     carry-forward in gap buckets).
+//   - "mean" / "min" / "max" never include the carry-forward unless
+//     the bucket is empty, so aggregations don't get polluted by
+//     out-of-window data.
 func positionSamples(p result.PlayerStream, bStart, bEnd float64) []Sample {
 	if p.Position == nil {
 		return nil
 	}
 	pt := p.Position
 	out := make([]Sample, 0, 4)
-	// Prepend the latest sample <= bStart so "last" / "first" reducers
-	// see the carrying state.
 	carry := positionIndexAtOrBefore(pt, bStart)
-	if carry >= 0 {
-		out = append(out, Sample{T: float64(pt.T[carry]), V: positionTriple(pt, carry)})
-	}
-	// Walk samples in [bStart, bEnd) starting at carry+1 — everything
-	// before that is by definition <= bStart.
 	startIdx := carry + 1
 	if startIdx < 0 {
 		startIdx = 0
@@ -390,6 +400,10 @@ func positionSamples(p result.PlayerStream, bStart, bEnd float64) []Sample {
 			break
 		}
 		out = append(out, Sample{T: t, V: positionTriple(pt, i)})
+	}
+	if len(out) == 0 && carry >= 0 {
+		// Gap bucket — fall back to the latest sample before bStart.
+		out = append(out, Sample{T: float64(pt.T[carry]), V: positionTriple(pt, carry)})
 	}
 	return out
 }
