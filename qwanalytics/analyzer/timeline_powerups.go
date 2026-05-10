@@ -2,69 +2,45 @@ package analyzer
 
 import "sort"
 
-// powerupKinds is the table of powerups the timeline analyzer tracks. Adding
-// a new powerup here is enough to surface it in PowerupEvent output — no
-// switch statements to update.
-var powerupKinds = []struct {
-	name string
-	has  func(*playerBucketRawData) bool
-}{
-	{"quad", func(p *playerBucketRawData) bool { return p.powerups.quad }},
-	{"pent", func(p *playerBucketRawData) bool { return p.powerups.pent }},
-	{"ring", func(p *playerBucketRawData) bool { return p.powerups.ring }},
-}
-
-// detectPowerupEvents scans buckets for powerup pickup/loss transitions
+// detectPowerupEvents derives PowerupEvent records from each player's
+// streamBuilder interval lists (Quad / Pent / Ring). Each closed
+// interval becomes one PowerupEvent. Replaces v6's per-bucket scan;
+// the streamBuilder already records open / close transitions exactly
+// at the events that flipped them, so this is just a translation.
 func (a *TimelineAnalyzer) detectPowerupEvents(names *NameTable, slotToTeam map[int]string, slotToPlayer map[int]string) []PowerupEvent {
-	if len(a.buckets) == 0 {
+	if len(a.playerState) == 0 {
 		return nil
 	}
 
 	events := []PowerupEvent{}
+	for slot, state := range a.playerState {
+		if state == nil {
+			continue
+		}
+		// Close any still-open intervals at the timing detector's end
+		// time (or the latest position sample) so finalize doesn't
+		// drop ongoing powerup runs.
+		matchEnd := a.timing.EndTime
+		if matchEnd == 0 && len(state.streams.posT) > 0 {
+			matchEnd = float64(state.streams.posT[len(state.streams.posT)-1])
+		}
+		state.streams.quad.closeAtMatchEnd(matchEnd)
+		state.streams.pent.closeAtMatchEnd(matchEnd)
+		state.streams.ring.closeAtMatchEnd(matchEnd)
 
-	// Track active powerups per player slot per type
-	// Map: slot -> powerupType -> startTime (0 if not active)
-	activeRuns := make(map[int]map[string]float64)
-
-	for _, bucket := range a.buckets {
-		for slot, pData := range bucket.playerData {
-			if activeRuns[slot] == nil {
-				activeRuns[slot] = make(map[string]float64)
-			}
-
-			for _, pk := range powerupKinds {
-				hasIt := pk.has(pData)
-				startTime := activeRuns[slot][pk.name]
-
-				if hasIt && startTime == 0 {
-					// Powerup just picked up
-					activeRuns[slot][pk.name] = bucket.startTime
-				} else if !hasIt && startTime > 0 {
-					// Powerup just lost
-					event := a.createPowerupEvent(slot, pk.name, startTime, bucket.startTime, names, slotToTeam, slotToPlayer)
-					events = append(events, event)
-					activeRuns[slot][pk.name] = 0
-				}
+		appendRuns := func(runs []intervalRecord, kind string) {
+			for _, r := range runs {
+				events = append(events, a.createPowerupEvent(slot, kind, r.start, r.end, names, slotToTeam, slotToPlayer))
 			}
 		}
+		appendRuns(state.streams.quad.closed, "quad")
+		appendRuns(state.streams.pent.closed, "pent")
+		appendRuns(state.streams.ring.closed, "ring")
 	}
 
-	// Handle powerups still active at end of demo
-	lastBucket := a.buckets[len(a.buckets)-1]
-	for slot, runs := range activeRuns {
-		for pType, startTime := range runs {
-			if startTime > 0 {
-				event := a.createPowerupEvent(slot, pType, startTime, lastBucket.endTime, names, slotToTeam, slotToPlayer)
-				events = append(events, event)
-			}
-		}
-	}
-
-	// Sort by time
 	sort.Slice(events, func(i, j int) bool {
 		return events[i].Time < events[j].Time
 	})
-
 	return events
 }
 
@@ -78,14 +54,10 @@ func (a *TimelineAnalyzer) createPowerupEvent(slot int, powerupType string, star
 		Duration:    endTime - startTime,
 	}
 
-	// Set UserID from our tracking map (used for Hub viewer track param)
 	if userID, ok := a.playerUserIDs[slot]; ok {
 		event.PlayerUserID = userID
 	}
 
-	// Prefer the demoinfo-resolved name (via slotToPlayer) so the emitted
-	// name matches what the frontend joins against. Only fall back to the
-	// userinfo name when the strict (team, frags) match failed for this slot.
 	if name := slotToPlayer[slot]; name != "" {
 		event.PlayerName = name
 	}

@@ -30,6 +30,7 @@ func makePlayerStreamFromBuckets(name, team string, specs []bucketSpec) result.P
 		pt.X = append(pt.X, s.x)
 		pt.Y = append(pt.Y, s.y)
 		pt.Z = append(pt.Z, 0)
+		pt.Li = append(pt.Li, s.li)
 
 		// Loc: dedup against last value.
 		if len(ps.Loc) == 0 || ps.Loc[len(ps.Loc)-1].V != s.li {
@@ -162,7 +163,7 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 }
 
 func approxEq(a, b float64) bool {
-	const eps = 1e-9
+	const eps = 1e-6 // float32-time roundtrip in PositionTrack accumulates ~1e-7
 	d := a - b
 	if d < 0 {
 		d = -d

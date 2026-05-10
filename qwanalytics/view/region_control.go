@@ -15,22 +15,21 @@ type RegionControlOptions struct {
 // the actual per-bucket classification. Decoupling it here keeps the
 // view package free of analyzer dependencies (avoids a cycle); the
 // caller (analyzer or WASM bridge) plugs in
-// analyzer.ComputeRegionControl.
+// analyzer.ComputeRegionControl. At v7 the classifier walks Streams
+// directly — see analyzer.ComputeRegionControl — so this signature is
+// just a thin pass-through.
 type RegionControlClassifier func(
-	buckets []result.HighResBucket,
-	locTable []string,
+	r *result.Result,
 	regions []result.ControlRegion,
 	teamA, teamB string,
 	teamOf func(playerName string) string,
+	windowMs int,
 ) (map[string]string, map[string]result.RegionStats)
 
-// RegionControl rebuilds a RegionControlResult at the requested
-// windowMs by deriving buckets from r.Streams (via view.Buckets with
-// the legacy reducer set), converting them to v6 HighResBucket
-// shape, and handing them to the supplied classifier.
-//
-// The view package doesn't import analyzer; callers wire
-// analyzer.ComputeRegionControl as the classifier.
+// RegionControl computes a RegionControlResult by delegating to the
+// supplied classifier (which reads result.Streams natively). The view
+// package doesn't import analyzer to avoid an import cycle; callers
+// wire analyzer.ComputeRegionControl as the classifier.
 func RegionControl(
 	r *result.Result,
 	regions []result.ControlRegion,
@@ -46,24 +45,7 @@ func RegionControl(
 	if windowMs <= 0 {
 		windowMs = 50
 	}
-	bv, err := Buckets(r, BucketsOptions{
-		WindowMs:    windowMs,
-		Fields:      AllStandardFields,
-		Reducers:    LegacyReducerSet,
-		IncludeTeam: false,
-	})
-	if err != nil {
-		return nil, err
-	}
-	legacy := ToLegacyHighResBuckets(bv)
-
-	locTable := []string{}
-	if r.TimelineAnalysis != nil {
-		locTable = r.TimelineAnalysis.LocTable
-	}
-
-	bucketStates, stats := classifier(legacy, locTable, regions, teamA, teamB, teamOf)
-
+	bucketStates, stats := classifier(r, regions, teamA, teamB, teamOf, windowMs)
 	return &result.RegionControlResult{
 		Regions:      regions,
 		TeamA:        teamA,

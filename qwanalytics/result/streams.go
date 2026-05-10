@@ -69,13 +69,22 @@ type GlobalStream struct {
 }
 
 // PositionTrack is columnar to compress JSON. Indices align across the
-// four arrays. Coordinates are int32 — Quake maps can exceed ±32 768
+// five arrays. Coordinates are int32 — Quake maps can exceed ±32 768
 // in any axis, so int16 would silently truncate.
+//
+// Li is the resolved loc-name index per native-rate sample (indexes
+// into TimelineAnalysisResult.LocTable, with 0 = "no loc"). Populated
+// during analyzer Finalize (after the loc finder is loaded), then
+// smoothed by the blip filter. Downstream consumers — the loc graph
+// builder, region control, and the FieldLoc bucket reducer in
+// view.Buckets — read this column directly instead of deriving locs
+// from x/y/z separately.
 type PositionTrack struct {
-	T []float32 `json:"t"`
-	X []int32   `json:"x"`
-	Y []int32   `json:"y"`
-	Z []int32   `json:"z"`
+	T  []float32 `json:"t"`
+	X  []int32   `json:"x"`
+	Y  []int32   `json:"y"`
+	Z  []int32   `json:"z"`
+	Li []int16   `json:"li,omitempty"`
 }
 
 // ChangeI8 is a single transition in an int8 stream.

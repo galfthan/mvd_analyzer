@@ -7,6 +7,7 @@ import (
 	"github.com/mvd-analyzer/qwdemo/events"
 )
 
+
 // Streams emission for the timeline analyzer.
 //
 // Every OnEvent dispatch updates the running cursor (timelinePlayerState
@@ -210,12 +211,16 @@ func (b *streamBuilder) toPlayerStream(name, team string) result.PlayerStream {
 		}
 	}
 	if len(b.posT) > 0 {
-		ps.Position = &result.PositionTrack{
+		pos := &result.PositionTrack{
 			T: append([]float32(nil), b.posT...),
 			X: append([]int32(nil), b.posX...),
 			Y: append([]int32(nil), b.posY...),
 			Z: append([]int32(nil), b.posZ...),
 		}
+		if len(b.posLi) == len(b.posT) {
+			pos.Li = append([]int16(nil), b.posLi...)
+		}
+		ps.Position = pos
 	}
 	if len(b.spawns) > 0 {
 		ps.Spawns = append([]float64(nil), b.spawns...)
@@ -319,49 +324,257 @@ func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToT
 	return streams
 }
 
-// emitLocStreams walks the parse-time buckets and appends every
-// (time, loc) transition into the matching player's stream builder.
-// Called from Finalize after the blip filter has smoothed
-// pData.location — so result.Streams.Players[].Loc reflects the same
-// authoritative loc track every v6 consumer saw.
+// resolveLocsAndFilterBlips populates each player's PositionTrack.Li
+// column from the loc finder, runs the blip filter on it (collapsing
+// short-residence wall-bleed onto adjacent stable runs), and emits
+// the resulting sparse Loc change stream into PlayerStream.Loc.
 //
-// Also emits a synthetic spawn timestamp at each player's first
-// match-time bucket, matching v6's firstMatchBucketSeen flag. The
-// loc-graph cursor reset depends on this marker; without it, the
-// player's first observed loc transition gets counted as a real edge.
-func (a *TimelineAnalyzer) emitLocStreams(slotToName map[int]string, locIndex map[string]int) {
-	firstBucketSeen := make(map[int]bool, len(a.playerState))
-	for _, bucket := range a.buckets {
-		for slot, pData := range bucket.playerData {
-			if pData == nil {
-				continue
-			}
-			name := slotToName[slot]
-			if name == "" {
-				continue
-			}
-			state := a.playerState[slot]
-			if state == nil {
-				continue
-			}
-			idx, ok := locIndex[pData.location]
-			if !ok {
-				idx = 0
-			}
-			state.streams.recordLoc(bucket.startTime, int16(idx))
+// Replaces the v6 path of populating per-bucket pData.location and
+// running applyBlipFilter on `a.buckets`. The new approach operates
+// directly on the native-rate position samples so the parse-time
+// bucket data structure is no longer needed.
+//
+// Returns the loc-name → index map for any callers that need to
+// resolve external loc references (e.g. the regions builder).
+func (a *TimelineAnalyzer) resolveLocsAndFilterBlips() (locTable []string, locIndex map[string]int) {
+	locTable = []string{""}
+	locIndex = map[string]int{"": 0}
+	if a.locFinder == nil {
+		return locTable, locIndex
+	}
+	threshold := float64(a.blipThresholdMs) / 1000.0
 
-			if !firstBucketSeen[slot] {
-				firstBucketSeen[slot] = true
-				// If the parser didn't already emit a SpawnEvent at or
-				// before this bucket, synthesise one so loc-graph cursor
-				// reset works the same way it did in v6.
-				existing := state.streams.spawns
-				if len(existing) == 0 || existing[0] > bucket.startTime {
-					prepended := append([]float64{bucket.startTime}, existing...)
-					state.streams.spawns = prepended
+	// First pass: resolve every native sample's nearest loc, populate
+	// PositionTrack.Li. Build the loc-name → index map incrementally
+	// so finalize doesn't need a separate "collect names then assign
+	// indices" pass; the index for a name is stable from first use.
+	indexFor := func(name string) int16 {
+		if name == "" {
+			return 0
+		}
+		idx, ok := locIndex[name]
+		if !ok {
+			idx = len(locTable)
+			locTable = append(locTable, name)
+			locIndex[name] = idx
+		}
+		return int16(idx)
+	}
+
+	// Sort slots so iteration is deterministic — locTable indices are
+	// assigned in order of first appearance, and a Go map iteration
+	// order would shuffle them across runs.
+	slots := make([]int, 0, len(a.playerState))
+	for slot := range a.playerState {
+		slots = append(slots, slot)
+	}
+	sort.Ints(slots)
+
+	for _, slot := range slots {
+		state := a.playerState[slot]
+		b := &state.streams
+		if len(b.posT) == 0 {
+			continue
+		}
+		if cap(b.posLi) < len(b.posT) {
+			b.posLi = make([]int16, len(b.posT))
+		} else {
+			b.posLi = b.posLi[:len(b.posT)]
+		}
+		for i := range b.posT {
+			x, y, z := float32(b.posX[i]), float32(b.posY[i]), float32(b.posZ[i])
+			if x == 0 && y == 0 && z == 0 {
+				b.posLi[i] = 0
+				continue
+			}
+			b.posLi[i] = indexFor(a.locFinder.FindNearest(x, y, z))
+		}
+	}
+
+	// Second pass: run the blip filter on each player's Li column,
+	// using each player's spawn / death timestamps to split runs.
+	if threshold > 0 {
+		for _, slot := range slots {
+			state := a.playerState[slot]
+			b := &state.streams
+			if len(b.posT) == 0 {
+				continue
+			}
+			boundaries := mergeBoundaries(b.spawns, b.deaths)
+			filterPositionLiBlips(b, boundaries, threshold)
+		}
+	}
+
+	// Third pass: emit the sparse PlayerStream.Loc change stream from
+	// the (now-smoothed) Li column.
+	for _, slot := range slots {
+		state := a.playerState[slot]
+		b := &state.streams
+		for i := range b.posT {
+			state.streams.recordLoc(float64(b.posT[i]), b.posLi[i])
+		}
+	}
+	return locTable, locIndex
+}
+
+// mergeBoundaries returns a sorted list of timestamps where the blip
+// filter must split runs: every spawn and every death. Spawns and
+// deaths can interleave; merge sorts both into one ascending slice.
+func mergeBoundaries(spawns, deaths []float64) []float64 {
+	if len(spawns) == 0 && len(deaths) == 0 {
+		return nil
+	}
+	out := make([]float64, 0, len(spawns)+len(deaths))
+	i, j := 0, 0
+	for i < len(spawns) && j < len(deaths) {
+		if spawns[i] <= deaths[j] {
+			out = append(out, spawns[i])
+			i++
+		} else {
+			out = append(out, deaths[j])
+			j++
+		}
+	}
+	out = append(out, spawns[i:]...)
+	out = append(out, deaths[j:]...)
+	return out
+}
+
+// filterPositionLiBlips smooths short-residence Li runs in b.posLi.
+// Mirrors v6's applyBlipFilter / filterBlipsInRun logic but operates
+// on per-position-sample Li values rather than per-50ms buckets.
+//
+// Splits the sample stream into segments at boundary timestamps
+// (spawn / death) and at Li=0 gaps (no resolved loc). Within each
+// segment, groups consecutive same-Li samples; segments whose
+// duration is below threshold become "blips" that get reassigned to
+// the surrounding stable Li values. Mutates b.posLi in place.
+func filterPositionLiBlips(b *streamBuilder, boundaries []float64, threshold float64) {
+	if b == nil || len(b.posT) == 0 || len(b.posLi) != len(b.posT) {
+		return
+	}
+	// Walk samples, break runs at boundary crossings or Li=0.
+	runStart := 0
+	bIdx := 0
+	for runStart < len(b.posT) {
+		// Skip leading Li=0 samples (no loc resolved).
+		for runStart < len(b.posT) && b.posLi[runStart] == 0 {
+			runStart++
+		}
+		if runStart >= len(b.posT) {
+			return
+		}
+		runEnd := runStart + 1
+		for runEnd < len(b.posT) && b.posLi[runEnd] != 0 {
+			t := float64(b.posT[runEnd])
+			for bIdx < len(boundaries) && boundaries[bIdx] <= t {
+				if boundaries[bIdx] > float64(b.posT[runStart]) {
+					goto runComplete
+				}
+				bIdx++
+			}
+			runEnd++
+		}
+	runComplete:
+		filterBlipsInPositionRun(b, runStart, runEnd, threshold)
+		runStart = runEnd
+	}
+}
+
+// filterBlipsInPositionRun applies the blip-collapse rules to one
+// contiguous Li run [runStart, runEnd) of b.posLi. Implementation
+// follows v6's filterBlipsInRun (leading/trailing blips inherit
+// nearest stable; blips between two stables split ceil/floor; blips
+// between same-loc stables collapse).
+func filterBlipsInPositionRun(b *streamBuilder, runStart, runEnd int, threshold float64) {
+	if runEnd-runStart < 2 {
+		return
+	}
+	type segment struct {
+		li         int16
+		start, end int
+		duration   float64
+	}
+	var segs []segment
+	for i := runStart; i < runEnd; {
+		li := b.posLi[i]
+		j := i + 1
+		for j < runEnd && b.posLi[j] == li {
+			j++
+		}
+		var dur float64
+		if j < runEnd {
+			dur = float64(b.posT[j]) - float64(b.posT[i])
+		} else if runEnd < len(b.posT) {
+			dur = float64(b.posT[runEnd]) - float64(b.posT[i])
+		} else if j-1 > i {
+			dur = float64(b.posT[j-1]) - float64(b.posT[i])
+		}
+		segs = append(segs, segment{li: li, start: i, end: j, duration: dur})
+		i = j
+	}
+	if len(segs) == 0 {
+		return
+	}
+	stable := make([]bool, len(segs))
+	firstStable, lastStable := -1, -1
+	for i, s := range segs {
+		if s.duration >= threshold {
+			stable[i] = true
+			if firstStable < 0 {
+				firstStable = i
+			}
+			lastStable = i
+		}
+	}
+	if firstStable < 0 {
+		return
+	}
+	for i := 0; i < firstStable; i++ {
+		setLiInRange(b.posLi, segs[i].start, segs[i].end, segs[firstStable].li)
+	}
+	prev := firstStable
+	for next := firstStable + 1; next <= lastStable; next++ {
+		if !stable[next] {
+			continue
+		}
+		if prev+1 < next {
+			aLi := segs[prev].li
+			dLi := segs[next].li
+			firstBlipSeg := prev + 1
+			if aLi == dLi {
+				for k := firstBlipSeg; k < next; k++ {
+					setLiInRange(b.posLi, segs[k].start, segs[k].end, aLi)
+				}
+			} else {
+				total := 0
+				for k := firstBlipSeg; k < next; k++ {
+					total += segs[k].end - segs[k].start
+				}
+				aCount := (total + 1) / 2
+				assigned := 0
+				for k := firstBlipSeg; k < next; k++ {
+					for s := segs[k].start; s < segs[k].end; s++ {
+						if assigned < aCount {
+							b.posLi[s] = aLi
+						} else {
+							b.posLi[s] = dLi
+						}
+						assigned++
+					}
 				}
 			}
 		}
+		prev = next
+	}
+	for i := lastStable + 1; i < len(segs); i++ {
+		setLiInRange(b.posLi, segs[i].start, segs[i].end, segs[lastStable].li)
+	}
+}
+
+func setLiInRange(li []int16, lo, hi int, v int16) {
+	for i := lo; i < hi; i++ {
+		li[i] = v
 	}
 }
 

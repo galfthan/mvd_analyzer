@@ -74,10 +74,11 @@ type streamBuilder struct {
 
 	shells, nails, rockets, cells []changeI16
 
-	posT []float32
-	posX []int32
-	posY []int32
-	posZ []int32
+	posT  []float32
+	posX  []int32
+	posY  []int32
+	posZ  []int32
+	posLi []int16 // resolved loc index per sample, populated in finalize
 
 	spawns []float64
 	deaths []float64

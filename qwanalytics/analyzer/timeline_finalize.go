@@ -12,14 +12,6 @@ import (
 // orchestration step — most of the heavy lifting is delegated to the
 // aggregate / powerup / streak / region helpers.
 func (a *TimelineAnalyzer) Finalize(result *Result) error {
-	// Do a final sample at the end
-	if len(a.buckets) > 0 {
-		lastBucket := a.buckets[len(a.buckets)-1]
-		if lastBucket.endTime > a.lastSampleTime {
-			a.sampleCurrentState(lastBucket.endTime)
-		}
-	}
-
 	// Try to load loc file from DemoInfo.Map if not already loaded
 	if a.locFinder == nil && a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
 		if finder, err := loc.LoadForMap(a.core.DemoInfo.Map); err == nil {
@@ -27,21 +19,9 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		}
 	}
 
-	// Resolve location names now that we have the loc finder
-	if a.locFinder != nil {
-		for _, bucket := range a.buckets {
-			for _, pData := range bucket.playerData {
-				if pData.pos.x != 0 || pData.pos.y != 0 || pData.pos.z != 0 {
-					pData.location = a.locFinder.FindNearest(pData.pos.x, pData.pos.y, pData.pos.z)
-				}
-			}
-		}
-		// Smooth nearest-loc flicker and wall-bleed by relabeling
-		// short-lived residences onto their neighbors. Runs before
-		// anything that reads pData.location so loc graph, region
-		// control, and map labels all see the same smoothed track.
-		a.applyBlipFilter(a.blipThresholdMs)
-	}
+	// (Loc resolution + blip filter now run on the per-position-sample
+	// PositionTrack.Li column directly; see resolveLocsAndFilterBlips
+	// below.)
 
 	// Use the shared name->team lookup from CoreOutputs (built once
 	// after the demoinfo analyser finalises).
@@ -152,55 +132,17 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		}
 	}
 
-	// Build the interned loc-name table once. Index 0 is reserved for the
-	// empty/no-loc case so HighResPlayerData.Li can lean on json:omitempty.
-	// pData.location was already populated server-side in the loop above
-	// using loc.FindNearest (3D Euclidean, equivalent to ezQuake's
-	// TP_LocationName). Stamping an integer index into each high-res record
-	// is what plumbs that authoritative result through to the JS frontend.
-	//
-	// Names are sorted before indexing so the resulting table is
-	// deterministic across runs (bucket.playerData is a Go map and would
-	// otherwise be visited in random order, shuffling the indices on every
-	// invocation and breaking byte-for-byte regression diffs).
-	locTable := []string{""}
-	locIndex := map[string]int{"": 0}
-	if a.locFinder != nil {
-		seen := make(map[string]struct{})
-		for _, bucket := range a.buckets {
-			for _, pData := range bucket.playerData {
-				if pData.location == "" {
-					continue
-				}
-				seen[pData.location] = struct{}{}
-			}
-		}
-		names := make([]string, 0, len(seen))
-		for name := range seen {
-			names = append(names, name)
-		}
-		sort.Strings(names)
-		for _, name := range names {
-			locIndex[name] = len(locTable)
-			locTable = append(locTable, name)
-		}
-	}
+	// Resolve every native-rate position sample's nearest loc, smooth
+	// short-residence wall-bleed via the blip filter, and emit the
+	// resulting sparse Loc change stream into each player's stream
+	// builder. Returns the ordered locTable we'll ship in Result.
+	locTable, locIndex := a.resolveLocsAndFilterBlips()
 	// Drop the table entirely if only the sentinel slot exists — JSON
 	// omitempty will then skip the field on the wire.
 	if len(locTable) <= 1 {
 		locTable = nil
 	}
-
-	// Export the analyzer-internal bucket array. At v7 this no longer
-	// ships in Result; it's used here to feed ComputeRegionControl and
-	// (during the postprocess) the loc-graph builder. The wire-format
-	// storage is result.Streams, populated below.
-	highResBuckets := a.exportHighResBuckets(slotToName, slotToTeam, locIndex)
-
-	// Emit per-player loc transitions into each player's stream
-	// builder so result.Streams.Players[].Loc carries the same
-	// blip-filtered loc track every other v6 consumer used.
-	a.emitLocStreams(slotToName, locIndex)
+	_ = locIndex // used by the regions builder below if regions are configured
 
 	// Build name -> UserID mapping for Hub viewer links
 	playerUserIDsByName := make(map[string]int)
@@ -216,15 +158,38 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// Detect top 5 longest frag streaks for Key Moments
 	fragStreaks := a.detectFragStreaks(10, names, playerUserIDsByName)
 
-	// Build region definitions from loc data, then compute per-bucket
-	// control state and match-aggregate stats. The pure compute lives in
-	// region_control.go and is re-callable from WASM / future MCP.
-	var regionControl *RegionControlResult
+	// Build result.TimelineAnalysis (sans RegionControl for now) and
+	// then result.Streams — both are needed by ComputeRegionControl
+	// in the new (v7) flow that walks streams directly.
+	result.TimelineAnalysis = &TimelineAnalysisResult{
+		MatchStartTime: a.timing.StartTime,
+		FragEvents:     fragEvents,
+		PowerupEvents:  powerupEvents,
+		FragStreaks:    fragStreaks,
+		LocationData:   locationData,
+		LocTable:       locTable,
+		PlayerUserIDs:  playerUserIDsByName,
+	}
+
+	matchEnd := a.timing.EndTime
+	if matchEnd == 0 {
+		// Fall back to latest position sample if timing didn't observe
+		// an explicit end (e.g. demo cut short before intermission).
+		for _, state := range a.playerState {
+			if n := len(state.streams.posT); n > 0 {
+				if t := float64(state.streams.posT[n-1]); t > matchEnd {
+					matchEnd = t
+				}
+			}
+		}
+	}
+	if streams := a.buildStreamsResult(slotToName, slotToTeam, a.timing.StartTime, matchEnd); streams != nil {
+		result.Streams = streams
+	}
+
+	// Region control: reads result.Streams via ComputeRegionControl.
 	if a.locFinder != nil {
 		regions := a.buildControlRegions()
-		// Fill the explicit Locs[] from the matched Points so the on-wire
-		// shape carries logical membership without consumers reverse-
-		// engineering it from points[].name.
 		for i := range regions {
 			seen := make(map[string]struct{}, len(regions[i].Points))
 			locs := make([]string, 0, len(regions[i].Points))
@@ -242,15 +207,8 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 			regions[i].Locs = locs
 		}
 		if len(regions) > 0 {
-			regionControl = &RegionControlResult{Regions: regions}
+			regionControl := &RegionControlResult{Regions: regions}
 
-			// Pick teamA / teamB to match the demoinfo-supplied team
-			// order so the frontend's TEAM_COLORS[0]/[1] (bound to
-			// demoinfo.teams[0]/[1] across the rest of the UI) line up
-			// with the regions panel. Falls back to alphabetical when
-			// demoinfo isn't available or doesn't agree with the
-			// on-field set. Skip the control compute for non-binary
-			// team layouts (FFA, 3+ teams) — out of scope per the plan.
 			teamSet := make(map[string]struct{})
 			for _, t := range slotToTeam {
 				if t != "" {
@@ -276,9 +234,6 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 				}
 				teamA, teamB := teamNames[0], teamNames[1]
 
-				// name -> team for ComputeRegionControl. Built from
-				// slotToName + slotToTeam, which already reflect the
-				// demoinfo-resolved names that the buckets export with.
 				nameToTeam := make(map[string]string, len(slotToName))
 				for slot, name := range slotToName {
 					if t, ok := slotToTeam[slot]; ok && name != "" {
@@ -288,37 +243,15 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 				teamOf := func(name string) string { return nameToTeam[name] }
 
 				bucketStates, stats := ComputeRegionControl(
-					highResBuckets, locTable, regions, teamA, teamB, teamOf,
+					result, regions, teamA, teamB, teamOf, 50,
 				)
 				regionControl.TeamA = teamA
 				regionControl.TeamB = teamB
 				regionControl.BucketStates = bucketStates
 				regionControl.Stats = stats
 			}
+			result.TimelineAnalysis.RegionControl = regionControl
 		}
-	}
-
-	result.TimelineAnalysis = &TimelineAnalysisResult{
-		MatchStartTime: a.timing.StartTime,
-		FragEvents:     fragEvents,
-		PowerupEvents:  powerupEvents,
-		FragStreaks:    fragStreaks,
-		LocationData:   locationData,
-		LocTable:       locTable,
-		PlayerUserIDs:  playerUserIDsByName,
-		RegionControl:  regionControl,
-	}
-
-	// Build result.Streams from each player's stream builder. The
-	// match-window anchors come from MatchAnalyzer / DemoInfo via the
-	// post-processor's time normalization; here we set provisional
-	// MatchStart=timing.StartTime, MatchEnd=last bucket's end.
-	matchEnd := 0.0
-	if len(a.buckets) > 0 {
-		matchEnd = a.buckets[len(a.buckets)-1].endTime
-	}
-	if streams := a.buildStreamsResult(slotToName, slotToTeam, a.timing.StartTime, matchEnd); streams != nil {
-		result.Streams = streams
 	}
 	return nil
 }

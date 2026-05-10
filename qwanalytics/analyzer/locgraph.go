@@ -2,49 +2,44 @@ package analyzer
 
 import (
 	"sort"
-
-	"github.com/mvd-analyzer/qwanalytics/view"
 )
 
 // LocGraphResult / LocNode / LocEdge now live in qwanalytics/result and
 // are re-exported via type aliases in interface.go. BuildLocGraph below
 // constructs and returns them; nothing else in this file declares them.
 //
-// At schema v7 BuildLocGraph derives its 50 ms bucket array from
-// result.Streams via view.Buckets and the legacy shim — the loc graph
-// algorithm wants a uniform-grid view of "where was each player every
-// 50 ms" and that's exactly what view.Buckets provides. The blip-
-// filter smoothing has already happened upstream in
-// TimelineAnalyzer.applyBlipFilter so streams.Loc carries the same
-// smoothed track every v6 consumer used.
+// At schema v7 BuildLocGraph walks each player's PositionTrack
+// natively: per-sample (X, Y, Li) drives both node-time accumulation
+// (sum of inter-sample dt per loc) and edge classification (loc
+// transitions, with displacement check for teleports). Spawn / death
+// timestamps reset the cursor so a death-then-respawn never produces
+// a spurious edge across the gap.
 
 // teleportBaseThreshold is the per-axis "max plausible movement per
 // second" limit. A transition whose per-axis displacement exceeds
-// bucketDuration * teleportBaseThreshold in the single bucket where
+// bucketDuration * teleportBaseThreshold in the single sample where
 // the loc changed is classified as a teleport. Mirrors the frontend
 // constant at app.js (MAX_MOVE_PER_BUCKET = 2500 * bucketDuration).
 const teleportBaseThreshold = 2500.0
 
-// BuildLocGraph derives a 50 ms bucket array from result.Streams and
-// aggregates it into a loc-to-loc movement graph. Runs after time
-// normalization / warmup filtering so it sees only match-time data.
-// Returns nil if there is no timeline data or no streams.
+// locgraphSampleDt is the assumed per-sample interval used for
+// teleport classification + node-time accumulation when the actual
+// sample-to-sample dt exceeds it. Native position samples arrive at
+// roughly 13 ms apart (~77 Hz) but can have gaps when a player dies;
+// clamping prevents a death-induced 5 s gap from inflating one
+// loc's residence by 5 s.
+const locgraphSampleDt = 0.05
+
+// BuildLocGraph aggregates each player's native-rate PositionTrack
+// into a loc-to-loc movement graph. Runs after time normalization /
+// warmup filtering so it sees only match-time data. Returns nil if
+// streams are absent.
 func BuildLocGraph(result *Result) *LocGraphResult {
 	if result == nil || result.TimelineAnalysis == nil || result.Streams == nil {
 		return nil
 	}
 	ta := result.TimelineAnalysis
-	bv, err := view.Buckets(result, view.BucketsOptions{
-		WindowMs:    50,
-		Fields:      view.AllStandardFields,
-		Reducers:    view.LegacyReducerSet,
-		IncludeTeam: false,
-	})
-	if err != nil || bv == nil || len(bv.Buckets) == 0 {
-		return nil
-	}
-	highResBuckets := view.ToLegacyHighResBuckets(bv)
-	if len(highResBuckets) == 0 {
+	if len(ta.LocTable) == 0 {
 		return nil
 	}
 
@@ -57,39 +52,18 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 		}
 	}
 
-	resolveLoc := func(li int) string {
-		if li > 0 && li < len(ta.LocTable) {
+	resolveLoc := func(li int16) string {
+		if li > 0 && int(li) < len(ta.LocTable) {
 			return ta.LocTable[li]
 		}
 		return ""
 	}
 
-	bucketDuration := float64(bv.WindowMs) / 1000.0
-	if bucketDuration <= 0 {
-		bucketDuration = 0.05
-	}
-	teleportThreshold := float32(bucketDuration * teleportBaseThreshold)
-
-	// Per-player cursor: just the last loc and the position at the
-	// start of that residence, used for teleport classification on
-	// the next change. Deaths / spawns arrive as authoritative p.D /
-	// p.Sp bucket flags driven by DeathEvent / SpawnEvent at the
-	// parser layer, so instant-respawn cases never need a sideways
-	// fallback onto FragResult here.
-	type playerCursor struct {
-		loc          string
-		lastX, lastY float32
-		seen         bool
-	}
-	cursors := make(map[string]*playerCursor)
+	teleportThreshold := float32(locgraphSampleDt * teleportBaseThreshold)
 
 	nodes := make(map[string]*LocNode)
-	// FIXME: edges are keyed only by (from, to); if both a "normal" and a
-	// "teleport" transition occur between the same pair of locs they
-	// collapse into whichever kind was seen first. Future: key edges by
-	// (from, to, kind).
-	edgeKey := func(from, to string) string { return from + "\x00" + to }
 	edges := make(map[string]*LocEdge)
+	edgeKey := func(from, to string) string { return from + "\x00" + to }
 
 	ensureNode := func(name string) *LocNode {
 		n := nodes[name]
@@ -109,67 +83,84 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 		return e
 	}
 
-	resetCursor := func(cur *playerCursor) {
-		cur.loc = ""
-	}
+	for _, p := range result.Streams.Players {
+		pt := p.Position
+		if pt == nil || len(pt.T) == 0 || len(pt.Li) != len(pt.T) {
+			continue
+		}
+		boundaries := mergeBoundaries(p.Spawns, p.Deaths)
+		bIdx := 0
+		// Per-player cursor: tracks the loc + position of the last
+		// sample we counted. Reset at boundary crossings (death/spawn)
+		// and at gaps in the loc track (Li=0).
+		var (
+			curLoc   string
+			curX     float32
+			curY     float32
+			havePrev bool
+		)
+		team := teamByName[p.Name]
 
-	for _, bucket := range highResBuckets {
-		seenThisBucket := make(map[string]bool, len(bucket.P))
+		for i := range pt.T {
+			t := float64(pt.T[i])
+			// Cross any boundaries we've passed; reset cursor.
+			for bIdx < len(boundaries) && boundaries[bIdx] <= t {
+				havePrev = false
+				bIdx++
+			}
 
-		for name, p := range bucket.P {
-			if p == nil {
+			li := pt.Li[i]
+			if li == 0 {
+				havePrev = false
 				continue
 			}
-			seenThisBucket[name] = true
-			cur := cursors[name]
-			if cur == nil {
-				cur = &playerCursor{}
-				cursors[name] = cur
-			}
-
-			invalidPos := p.X == 0 && p.Y == 0
-			if invalidPos || p.Sp || p.D {
-				resetCursor(cur)
-				cur.seen = true
-				continue
-			}
-
-			locName := resolveLoc(p.Li)
-			team := teamByName[name]
-
-			// Node time: every bucket counts toward its (filtered)
-			// loc. The blip filter already redistributed bleed time
-			// to the correct neighbor, so a naive per-bucket
-			// accumulation here is the right accounting.
-			if locName != "" {
-				node := ensureNode(locName)
-				node.Total += bucketDuration
-				node.ByPlayer[name] += bucketDuration
-				if team != "" {
-					if node.ByTeam == nil {
-						node.ByTeam = make(map[string]float64)
-					}
-					node.ByTeam[team] += bucketDuration
-				}
-			}
-
+			locName := resolveLoc(li)
 			if locName == "" {
-				cur.seen = true
+				havePrev = false
 				continue
 			}
 
-			if cur.loc == "" {
-				// First sample after a reset — seed without emitting.
-				cur.loc = locName
-				cur.lastX = p.X
-				cur.lastY = p.Y
-			} else if locName != cur.loc {
-				// Filtered loc just changed — emit one edge.
-				dx := p.X - cur.lastX
+			x := float32(pt.X[i])
+			y := float32(pt.Y[i])
+
+			// Node-time: residence in this loc grows by the gap to the
+			// next sample (clamped by locgraphSampleDt to avoid death
+			// gaps inflating node-time).
+			var dt float64
+			if i+1 < len(pt.T) {
+				dt = float64(pt.T[i+1]) - t
+			} else {
+				dt = locgraphSampleDt
+			}
+			if dt > locgraphSampleDt {
+				dt = locgraphSampleDt
+			}
+			if dt < 0 {
+				dt = 0
+			}
+			node := ensureNode(locName)
+			node.Total += dt
+			node.ByPlayer[p.Name] += dt
+			if team != "" {
+				if node.ByTeam == nil {
+					node.ByTeam = make(map[string]float64)
+				}
+				node.ByTeam[team] += dt
+			}
+
+			if !havePrev {
+				curLoc = locName
+				curX = x
+				curY = y
+				havePrev = true
+				continue
+			}
+			if locName != curLoc {
+				dx := x - curX
 				if dx < 0 {
 					dx = -dx
 				}
-				dy := p.Y - cur.lastY
+				dy := y - curY
 				if dy < 0 {
 					dy = -dy
 				}
@@ -181,37 +172,19 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 				if disp > teleportThreshold {
 					kind = "teleport"
 				}
-				edge := ensureEdge(cur.loc, locName, kind)
+				edge := ensureEdge(curLoc, locName, kind)
 				edge.Total++
-				edge.ByPlayer[name]++
+				edge.ByPlayer[p.Name]++
 				if team != "" {
 					if edge.ByTeam == nil {
 						edge.ByTeam = make(map[string]int)
 					}
 					edge.ByTeam[team]++
 				}
-				cur.loc = locName
-				cur.lastX = p.X
-				cur.lastY = p.Y
-			} else {
-				// Same loc — refresh position so teleport
-				// classification on the next transition uses the
-				// latest in-loc sample, not the entry point.
-				cur.lastX = p.X
-				cur.lastY = p.Y
+				curLoc = locName
 			}
-
-			cur.seen = true
-		}
-
-		// Reset cursor for players who were previously seen but are
-		// absent from this bucket — matches tracks.go dropout
-		// handling.
-		for name, cur := range cursors {
-			if cur.seen && !seenThisBucket[name] {
-				resetCursor(cur)
-				cur.seen = false
-			}
+			curX = x
+			curY = y
 		}
 	}
 
@@ -236,9 +209,6 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 	for _, e := range edges {
 		out.Edges = append(out.Edges, *e)
 	}
-	// Sort by stable keys so the result is deterministic across runs.
-	// Without this the slices reflect Go map iteration order and the
-	// golden test corpus would flap on every invocation.
 	sort.Slice(out.Locs, func(i, j int) bool { return out.Locs[i].Name < out.Locs[j].Name })
 	sort.Slice(out.Edges, func(i, j int) bool {
 		if out.Edges[i].From != out.Edges[j].From {

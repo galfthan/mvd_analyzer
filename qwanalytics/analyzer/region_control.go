@@ -2,6 +2,8 @@ package analyzer
 
 import (
 	"strings"
+
+	"github.com/mvd-analyzer/qwanalytics/result"
 )
 
 // Region-control state codes used by ComputeRegionControl as a compact
@@ -19,106 +21,134 @@ const (
 )
 
 // ComputeRegionControl runs the per-bucket region-control classifier
-// over a finished timeline and returns:
+// over a finished result and returns:
 //
-//   - bucketStates: region name -> string of length len(buckets), one
+//   - bucketStates: region name -> string of length n_buckets, one
 //     state byte per bucket (codes above);
 //   - stats:        region name -> match-aggregate share of each state,
 //     expressed as percentages (0..100, one decimal place; the seven
 //     values sum to 100 within rounding).
 //
-// The function is pure: same inputs always produce the same output. It
-// is called from the analyzer pipeline with the analysis-time regions,
-// and is also re-callable from WASM / future MCP wrappers when a
-// consumer supplies edited regions.
+// At schema v7 the function walks result.Streams directly: per
+// 50 ms (or windowMs) bucket, find each player's last position
+// sample with T <= bucket-end (via PositionTrack.Li), look up the
+// loc → region, check armed (RL/LG interval membership), tally per
+// region, classify.
 //
 // Inputs:
 //
-//   - buckets:   the finalized HighResBuckets array. Must include team
-//                aggregates only as far as P[playerName] entries are
-//                present; this function reads only P, not TD.
-//   - locTable:  TimelineAnalysisResult.LocTable. HighResPlayerData.Li
-//                indexes into this; index 0 is the empty sentinel.
+//   - r:         finalised Result with Streams populated.
 //   - regions:   the regions to evaluate. Each region's Locs field is
 //                authoritative — Points/Centroid are ignored.
 //   - teamA, teamB: the two team names to classify against. Players
 //                whose team is neither are ignored.
 //   - teamOf:    name -> team callback. Returning the empty string
 //                excludes the player from the count.
+//   - windowMs:  bucket resolution. <= 0 falls back to 50 ms.
 //
-// Mirrors qw-web/static/app.js: classifyRegionState (4275-4285),
-// recomputeRegionStats (5098-5180), getRegionControlAtTime (5288-5341).
-// "Armed" means RL or LG. Dead players (D=true or H<=0) are skipped.
+// Mirrors qw-web/static/app.js: classifyRegionState (4275-4285).
+// "Armed" means RL or LG. Pre-spawn / dead samples (Li=0) are skipped.
 func ComputeRegionControl(
-	buckets []HighResBucket,
-	locTable []string,
+	r *Result,
 	regions []ControlRegion,
 	teamA, teamB string,
 	teamOf func(playerName string) string,
+	windowMs int,
 ) (map[string]string, map[string]RegionStats) {
-	if len(regions) == 0 || len(buckets) == 0 {
+	if r == nil || r.Streams == nil || len(regions) == 0 {
 		return nil, nil
+	}
+	if windowMs <= 0 {
+		windowMs = 50
+	}
+	bucketDur := float64(windowMs) / 1000.0
+
+	var locTable []string
+	if r.TimelineAnalysis != nil {
+		locTable = r.TimelineAnalysis.LocTable
 	}
 
 	// regionByLoc maps the canonical loc name (lower-cased) to the
 	// region name. We lower-case for case-insensitive matching, same as
 	// the on-disk regions JSON loader (timeline_regions.go:80-81).
 	regionByLoc := make(map[string]string)
-	for _, r := range regions {
-		for _, ln := range r.Locs {
-			regionByLoc[strings.ToLower(ln)] = r.Name
+	for _, rg := range regions {
+		for _, ln := range rg.Locs {
+			regionByLoc[strings.ToLower(ln)] = rg.Name
 		}
 	}
 	if len(regionByLoc) == 0 {
 		return nil, nil
 	}
 
-	// One counter struct per region, reused per bucket.
-	type counts struct {
-		aWpn, aNo, bWpn, bNo int
-	}
-
-	// Pre-allocate per-region byte buffers and aggregate counters.
-	stateBuf := make(map[string][]byte, len(regions))
-	totals := make(map[string]*RegionStats, len(regions))
-	for _, r := range regions {
-		stateBuf[r.Name] = make([]byte, 0, len(buckets))
-		totals[r.Name] = &RegionStats{}
-	}
-
-	presence := make(map[string]*counts, len(regions))
-	for _, r := range regions {
-		presence[r.Name] = &counts{}
-	}
-
-	for i := range buckets {
-		// Reset per-bucket counts.
-		for _, c := range presence {
-			c.aWpn, c.aNo, c.bWpn, c.bNo = 0, 0, 0, 0
+	// Pre-resolve each region's loc-index set so the inner loop only
+	// does an integer hashtable lookup, not a string-lower per sample.
+	regionByLi := make(map[int16]string, len(regionByLoc))
+	for li, name := range locTable {
+		if rn, ok := regionByLoc[strings.ToLower(name)]; ok {
+			regionByLi[int16(li)] = rn
 		}
+	}
+	if len(regionByLi) == 0 {
+		return nil, nil
+	}
 
-		// Tally living players into their region.
-		for name, pd := range buckets[i].P {
-			if pd == nil {
+	matchEnd := r.Streams.Global.MatchEnd
+	if matchEnd <= 0 {
+		return nil, nil
+	}
+	nBuckets := int((matchEnd / bucketDur) + 0.5)
+	if nBuckets <= 0 {
+		return nil, nil
+	}
+
+	type counts struct{ aWpn, aNo, bWpn, bNo int }
+	presence := make([]map[string]*counts, nBuckets)
+	for i := range presence {
+		presence[i] = make(map[string]*counts, len(regions))
+		for _, rg := range regions {
+			presence[i][rg.Name] = &counts{}
+		}
+	}
+
+	// Per-player walk: for each bucket, find the latest position
+	// sample with T <= bucket-end, classify region presence + armed.
+	for _, p := range r.Streams.Players {
+		team := teamOf(p.Name)
+		if team == "" || (team != teamA && team != teamB) {
+			continue
+		}
+		pt := p.Position
+		if pt == nil || len(pt.T) == 0 || len(pt.Li) != len(pt.T) {
+			continue
+		}
+		// Iterate buckets and walk PositionTrack in order; sIdx
+		// points to the latest sample with T <= bucketEnd.
+		sIdx := 0
+		for bi := 0; bi < nBuckets; bi++ {
+			bucketEnd := float64(bi+1) * bucketDur
+			for sIdx+1 < len(pt.T) && float64(pt.T[sIdx+1]) <= bucketEnd {
+				sIdx++
+			}
+			// Skip if the latest qualifying sample is actually after bucketEnd
+			// (player hasn't started emitting positions yet).
+			if float64(pt.T[sIdx]) > bucketEnd {
 				continue
 			}
-			if pd.D || pd.H <= 0 {
+			li := pt.Li[sIdx]
+			if li == 0 {
 				continue
 			}
-			if pd.Li <= 0 || int(pd.Li) >= len(locTable) {
-				continue
-			}
-			locName := locTable[pd.Li]
-			regionName, ok := regionByLoc[strings.ToLower(locName)]
+			regionName, ok := regionByLi[li]
 			if !ok {
 				continue
 			}
-			team := teamOf(name)
-			if team == "" {
+			armed := intervalsOverlapAt(p.RL, float64(pt.T[sIdx])) ||
+				intervalsOverlapAt(p.LG, float64(pt.T[sIdx]))
+			c := presence[bi][regionName]
+			if c == nil {
 				continue
 			}
-			armed := pd.RL || pd.LG
-			c := presence[regionName]
 			switch team {
 			case teamA:
 				if armed {
@@ -134,13 +164,21 @@ func ComputeRegionControl(
 				}
 			}
 		}
+	}
 
-		// Classify and append one byte per region.
-		for _, r := range regions {
-			c := presence[r.Name]
+	// Classify per bucket per region; tally aggregate state percentages.
+	stateBuf := make(map[string][]byte, len(regions))
+	totals := make(map[string]*RegionStats, len(regions))
+	for _, rg := range regions {
+		stateBuf[rg.Name] = make([]byte, 0, nBuckets)
+		totals[rg.Name] = &RegionStats{}
+	}
+	for bi := 0; bi < nBuckets; bi++ {
+		for _, rg := range regions {
+			c := presence[bi][rg.Name]
 			state := classifyRegionState(c.aWpn, c.aNo, c.bWpn, c.bNo)
-			stateBuf[r.Name] = append(stateBuf[r.Name], state)
-			t := totals[r.Name]
+			stateBuf[rg.Name] = append(stateBuf[rg.Name], state)
+			t := totals[rg.Name]
 			switch state {
 			case RegionStateEmpty:
 				t.Empty++
@@ -160,15 +198,14 @@ func ComputeRegionControl(
 		}
 	}
 
-	// Convert raw counts to percentages (one decimal place).
 	bucketStates := make(map[string]string, len(regions))
 	stats := make(map[string]RegionStats, len(regions))
-	total := float64(len(buckets))
+	total := float64(nBuckets)
 	pct := func(n float64) float64 { return float64(int(n/total*1000+0.5)) / 10 }
-	for _, r := range regions {
-		bucketStates[r.Name] = string(stateBuf[r.Name])
-		t := totals[r.Name]
-		stats[r.Name] = RegionStats{
+	for _, rg := range regions {
+		bucketStates[rg.Name] = string(stateBuf[rg.Name])
+		t := totals[rg.Name]
+		stats[rg.Name] = RegionStats{
 			TeamAControl:     pct(t.TeamAControl),
 			TeamAWeakControl: pct(t.TeamAWeakControl),
 			Contested:        pct(t.Contested),
@@ -179,6 +216,18 @@ func ComputeRegionControl(
 		}
 	}
 	return bucketStates, stats
+}
+
+// intervalsOverlapAt returns true iff t falls inside any half-open
+// interval [Start, End). Used to test "did the player have weapon W
+// at this exact time" without a separate state-at lookup.
+func intervalsOverlapAt(iv []result.Interval, t float64) bool {
+	for _, in := range iv {
+		if t >= in.Start && t < in.End {
+			return true
+		}
+	}
+	return false
 }
 
 // classifyRegionState is the seven-state decision rule, faithful port
