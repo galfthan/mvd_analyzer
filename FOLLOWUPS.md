@@ -50,15 +50,6 @@ synthetic-test fixtures that have no spawn/death/position events.
 Worth a cleaner design that distinguishes "real demo, no synthetic
 SpawnEvent yet" from "test fixture with no events."
 
-### `tracks.go` shelved
-
-[`qwanalytics/analyzer/tracks.go`](qwanalytics/analyzer/tracks.go)
-operates on derived legacy buckets via `view.Buckets` +
-`ToLegacyHighResBuckets`. Per project memory, it's planned future
-work for movement-pattern visualisations (Phase 3 of the original
-roadmap). Refactor to walk `Streams` natively when its analyzer is
-revived.
-
 ### Equivalence test is internal-only
 
 [`qwanalytics/view/equivalence_test.go`](qwanalytics/view/equivalence_test.go)

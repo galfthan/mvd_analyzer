@@ -1,58 +1,49 @@
 package analyzer
 
-import "github.com/mvd-analyzer/qwanalytics/view"
-
-// PlayerTrack contains all movement data for a single player
+// PlayerTrack contains all movement data for a single player.
 type PlayerTrack struct {
 	Team  string      `json:"team"`
 	Lives []LifeTrack `json:"lives"`
 }
 
-// LifeTrack represents one life (spawn to death) for a player
+// LifeTrack represents one life (spawn to death) for a player.
 type LifeTrack struct {
 	SpawnTime float64         `json:"spawnTime"`
 	DeathTime float64         `json:"deathTime,omitempty"` // omit if still alive at match end
 	Positions []TrackPosition `json:"positions"`
 }
 
-// TrackPosition is a single position sample
+// TrackPosition is a single loc transition during a life.
 type TrackPosition struct {
 	Time     float64 `json:"time"`
 	Location string  `json:"location"`
 }
 
-// TracksResult is the top-level structure for track export
+// TracksResult is the top-level structure for track export.
 type TracksResult struct {
 	Map     string                  `json:"map"`
 	Players map[string]*PlayerTrack `json:"players"`
 }
 
-// ExtractTracks processes timeline data to extract per-player movement tracks segmented by lives.
+// ExtractTracks walks each player's PositionTrack and emits per-life
+// movement tracks (spawn→death sequences of loc transitions).
 //
-// At schema v7 the canonical event-rate storage is result.Streams.
-// ExtractTracks derives a 50 ms bucket array from streams via
-// view.Buckets and the legacy shim — the algorithm wants a uniform
-// "where was each player every 50 ms" view. This is shelved
-// scaffolding for upcoming movement-pattern visualisations.
+// At schema v7 it operates on result.Streams natively: PositionTrack
+// (with the Li column populated by the analyzer's loc resolution +
+// blip filter) drives loc transitions; Spawns/Deaths timestamps drive
+// life boundaries. No bucket intermediate.
+//
+// Currently shelved scaffolding for upcoming movement-pattern
+// visualisations — the analyzer that wraps this is not registered
+// in NewDefaultRegistry, so ExtractTracks has no production callers
+// today. When the analyzer is revived, this implementation is the
+// production-ready entry point.
 func ExtractTracks(result *Result) *TracksResult {
 	if result == nil || result.TimelineAnalysis == nil || result.Streams == nil {
 		return nil
 	}
-
 	timeline := result.TimelineAnalysis
 
-	bv, err := view.Buckets(result, view.BucketsOptions{
-		WindowMs:    50,
-		Fields:      view.AllStandardFields,
-		Reducers:    view.LegacyReducerSet,
-		IncludeTeam: false,
-	})
-	if err != nil || bv == nil {
-		return nil
-	}
-	highResBuckets := view.ToLegacyHighResBuckets(bv)
-
-	// Get map name from demoInfo if available
 	mapName := ""
 	if result.DemoInfo != nil {
 		mapName = result.DemoInfo.Map
@@ -63,7 +54,6 @@ func ExtractTracks(result *Result) *TracksResult {
 		Players: make(map[string]*PlayerTrack),
 	}
 
-	// Build team lookup from demoInfo
 	teamByName := make(map[string]string)
 	if result.DemoInfo != nil {
 		for _, p := range result.DemoInfo.Players {
@@ -73,115 +63,103 @@ func ExtractTracks(result *Result) *TracksResult {
 		}
 	}
 
-	// Track state for each player: whether they're alive and current life
-	type playerState struct {
-		alive       bool
-		currentLife *LifeTrack
-		team        string
-	}
-	states := make(map[string]*playerState)
-
-	// Resolve loc name from index
-	resolveLoc := func(li int) string {
-		if li > 0 && li < len(timeline.LocTable) {
+	resolveLoc := func(li int16) string {
+		if li > 0 && int(li) < len(timeline.LocTable) {
 			return timeline.LocTable[li]
 		}
 		return ""
 	}
 
-	// Process derived buckets chronologically.
-	for _, bucket := range highResBuckets {
-		bucketTime := bucket.T
+	matchEnd := result.Streams.Global.MatchEnd
 
-		// Track which players we see in this bucket
-		seenPlayers := make(map[string]bool)
+	for _, p := range result.Streams.Players {
+		pt := p.Position
+		if pt == nil || len(pt.T) == 0 || len(pt.Li) != len(pt.T) {
+			continue
+		}
 
-		for playerName, pData := range bucket.P {
-			seenPlayers[playerName] = true
+		spawns := p.Spawns
+		deaths := p.Deaths
 
-			state, exists := states[playerName]
-			if !exists {
-				team := teamByName[playerName]
-				state = &playerState{alive: false, team: team}
-				states[playerName] = state
-			}
+		var (
+			sIdx, dIdx int
+			alive      bool
+			curLife    *LifeTrack
+			lives      []LifeTrack
+		)
 
-			// Player is alive if they have health > 0
-			isAlive := pData.H > 0
-
-			if isAlive && !state.alive {
-				// Player just spawned - start a new life
-				state.alive = true
-				state.currentLife = &LifeTrack{
-					SpawnTime: bucketTime,
-					Positions: []TrackPosition{},
+		// processBoundaries advances the spawn/death cursors to time
+		// `t` (inclusive), opening / closing lives along the way.
+		// Spawn at exact t opens a life *before* the position sample
+		// at t is evaluated; death at exact t closes it before — so
+		// a sample that lands exactly on a death boundary is treated
+		// as already-dead.
+		processBoundaries := func(t float64) {
+			for sIdx < len(spawns) || dIdx < len(deaths) {
+				var nextT float64
+				isSpawn := false
+				switch {
+				case sIdx < len(spawns) && (dIdx >= len(deaths) || spawns[sIdx] <= deaths[dIdx]):
+					nextT = spawns[sIdx]
+					isSpawn = true
+				default:
+					nextT = deaths[dIdx]
 				}
-			}
-
-			if isAlive && state.currentLife != nil {
-				// Record position only when location changes
-				locName := resolveLoc(pData.Li)
-				if locName != "" {
-					positions := state.currentLife.Positions
-					// Only add if location is different from the last recorded position
-					if len(positions) == 0 || positions[len(positions)-1].Location != locName {
-						state.currentLife.Positions = append(state.currentLife.Positions, TrackPosition{
-							Time:     bucketTime,
-							Location: locName,
-						})
-					}
+				if nextT > t {
+					return
 				}
-			}
-
-			if !isAlive && state.alive {
-				// Player just died - finalize the life
-				state.alive = false
-				if state.currentLife != nil {
-					state.currentLife.DeathTime = bucketTime
-					// Add to player's track
-					if _, ok := tracks.Players[playerName]; !ok {
-						tracks.Players[playerName] = &PlayerTrack{
-							Team:  state.team,
-							Lives: []LifeTrack{},
-						}
+				if isSpawn {
+					if !alive {
+						alive = true
+						curLife = &LifeTrack{SpawnTime: nextT}
 					}
-					tracks.Players[playerName].Lives = append(tracks.Players[playerName].Lives, *state.currentLife)
-					state.currentLife = nil
+					sIdx++
+				} else {
+					if alive && curLife != nil {
+						curLife.DeathTime = nextT
+						lives = append(lives, *curLife)
+						curLife = nil
+					}
+					alive = false
+					dIdx++
 				}
 			}
 		}
 
-		// Check for players who were alive but are no longer in this bucket (died)
-		for playerName, state := range states {
-			if state.alive && !seenPlayers[playerName] {
-				// Player disappeared - they died
-				state.alive = false
-				if state.currentLife != nil {
-					state.currentLife.DeathTime = bucketTime
-					if _, ok := tracks.Players[playerName]; !ok {
-						tracks.Players[playerName] = &PlayerTrack{
-							Team:  state.team,
-							Lives: []LifeTrack{},
-						}
-					}
-					tracks.Players[playerName].Lives = append(tracks.Players[playerName].Lives, *state.currentLife)
-					state.currentLife = nil
-				}
+		for i := range pt.T {
+			t := float64(pt.T[i])
+			processBoundaries(t)
+			if !alive || curLife == nil {
+				continue
+			}
+			locName := resolveLoc(pt.Li[i])
+			if locName == "" {
+				continue
+			}
+			n := len(curLife.Positions)
+			if n == 0 || curLife.Positions[n-1].Location != locName {
+				curLife.Positions = append(curLife.Positions, TrackPosition{
+					Time: t, Location: locName,
+				})
 			}
 		}
-	}
 
-	// Finalize any lives that are still ongoing (player alive at match end)
-	for playerName, state := range states {
-		if state.alive && state.currentLife != nil && len(state.currentLife.Positions) > 0 {
-			// Don't set DeathTime - omitempty will exclude it
-			if _, ok := tracks.Players[playerName]; !ok {
-				tracks.Players[playerName] = &PlayerTrack{
-					Team:  state.team,
-					Lives: []LifeTrack{},
-				}
+		// Drain remaining boundaries past the last position sample
+		// (e.g. a death at match end with no further positions).
+		processBoundaries(matchEnd)
+
+		// Finalize any life still open at match end (player alive
+		// when the demo cut). DeathTime stays zero — JSON omitempty
+		// will drop it.
+		if alive && curLife != nil && len(curLife.Positions) > 0 {
+			lives = append(lives, *curLife)
+		}
+
+		if len(lives) > 0 {
+			tracks.Players[p.Name] = &PlayerTrack{
+				Team:  teamByName[p.Name],
+				Lives: lives,
 			}
-			tracks.Players[playerName].Lives = append(tracks.Players[playerName].Lives, *state.currentLife)
 		}
 	}
 
