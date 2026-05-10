@@ -3629,8 +3629,1079 @@
     ]
   },
   "locGraph": {
-    "edges": [],
-    "locs": []
+    "edges": [
+      {
+        "byPlayer": {
+          "mj": 1,
+          "speedball": 5
+        },
+        "byTeam": {
+          "mj": 1,
+          "speedball": 5
+        },
+        "from": "GA",
+        "kind": "normal",
+        "to": "MH",
+        "total": 6
+      },
+      {
+        "byPlayer": {
+          "mj": 10,
+          "speedball": 8
+        },
+        "byTeam": {
+          "mj": 10,
+          "speedball": 8
+        },
+        "from": "GA",
+        "kind": "normal",
+        "to": "RL",
+        "total": 18
+      },
+      {
+        "byPlayer": {
+          "mj": 4,
+          "speedball": 6
+        },
+        "byTeam": {
+          "mj": 4,
+          "speedball": 6
+        },
+        "from": "GA",
+        "kind": "normal",
+        "to": "SNG",
+        "total": 10
+      },
+      {
+        "byPlayer": {
+          "mj": 1
+        },
+        "byTeam": {
+          "mj": 1
+        },
+        "from": "GA",
+        "kind": "teleport",
+        "to": "YA",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "speedball": 1
+        },
+        "byTeam": {
+          "speedball": 1
+        },
+        "from": "GA",
+        "kind": "normal",
+        "to": "holes",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "mj": 1
+        },
+        "byTeam": {
+          "mj": 1
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "GA",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "mj": 19,
+          "speedball": 25
+        },
+        "byTeam": {
+          "mj": 19,
+          "speedball": 25
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "LG",
+        "total": 44
+      },
+      {
+        "byPlayer": {
+          "mj": 1,
+          "speedball": 13
+        },
+        "byTeam": {
+          "mj": 1,
+          "speedball": 13
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "MH",
+        "total": 14
+      },
+      {
+        "byPlayer": {
+          "mj": 1,
+          "speedball": 1
+        },
+        "byTeam": {
+          "mj": 1,
+          "speedball": 1
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "RA",
+        "total": 2
+      },
+      {
+        "byPlayer": {
+          "mj": 3,
+          "speedball": 10
+        },
+        "byTeam": {
+          "mj": 3,
+          "speedball": 10
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "SNG",
+        "total": 13
+      },
+      {
+        "byPlayer": {
+          "speedball": 2
+        },
+        "byTeam": {
+          "speedball": 2
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "high LG packs",
+        "total": 2
+      },
+      {
+        "byPlayer": {
+          "mj": 14,
+          "speedball": 6
+        },
+        "byTeam": {
+          "mj": 14,
+          "speedball": 6
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "holes",
+        "total": 20
+      },
+      {
+        "byPlayer": {
+          "mj": 1
+        },
+        "byTeam": {
+          "mj": 1
+        },
+        "from": "GL",
+        "kind": "teleport",
+        "to": "lava",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "mj": 6,
+          "speedball": 11
+        },
+        "byTeam": {
+          "mj": 6,
+          "speedball": 11
+        },
+        "from": "LG",
+        "kind": "normal",
+        "to": "GL",
+        "total": 17
+      },
+      {
+        "byPlayer": {
+          "mj": 2,
+          "speedball": 13
+        },
+        "byTeam": {
+          "mj": 2,
+          "speedball": 13
+        },
+        "from": "LG",
+        "kind": "normal",
+        "to": "RA",
+        "total": 15
+      },
+      {
+        "byPlayer": {
+          "mj": 4,
+          "speedball": 5
+        },
+        "byTeam": {
+          "mj": 4,
+          "speedball": 5
+        },
+        "from": "LG",
+        "kind": "normal",
+        "to": "SNG",
+        "total": 9
+      },
+      {
+        "byPlayer": {
+          "mj": 4,
+          "speedball": 3
+        },
+        "byTeam": {
+          "mj": 4,
+          "speedball": 3
+        },
+        "from": "LG",
+        "kind": "normal",
+        "to": "high LG packs",
+        "total": 7
+      },
+      {
+        "byPlayer": {
+          "mj": 11,
+          "speedball": 16
+        },
+        "byTeam": {
+          "mj": 11,
+          "speedball": 16
+        },
+        "from": "LG",
+        "kind": "normal",
+        "to": "low RL",
+        "total": 27
+      },
+      {
+        "byPlayer": {
+          "speedball": 8
+        },
+        "byTeam": {
+          "speedball": 8
+        },
+        "from": "MH",
+        "kind": "normal",
+        "to": "GA",
+        "total": 8
+      },
+      {
+        "byPlayer": {
+          "mj": 2,
+          "speedball": 7
+        },
+        "byTeam": {
+          "mj": 2,
+          "speedball": 7
+        },
+        "from": "MH",
+        "kind": "normal",
+        "to": "GL",
+        "total": 9
+      },
+      {
+        "byPlayer": {
+          "speedball": 1
+        },
+        "byTeam": {
+          "speedball": 1
+        },
+        "from": "MH",
+        "kind": "teleport",
+        "to": "YA",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "speedball": 2
+        },
+        "byTeam": {
+          "speedball": 2
+        },
+        "from": "MH",
+        "kind": "normal",
+        "to": "holes",
+        "total": 2
+      },
+      {
+        "byPlayer": {
+          "mj": 3
+        },
+        "byTeam": {
+          "mj": 3
+        },
+        "from": "Quad",
+        "kind": "normal",
+        "to": "RL",
+        "total": 3
+      },
+      {
+        "byPlayer": {
+          "mj": 3
+        },
+        "byTeam": {
+          "mj": 3
+        },
+        "from": "Quad",
+        "kind": "normal",
+        "to": "YA",
+        "total": 3
+      },
+      {
+        "byPlayer": {
+          "mj": 1,
+          "speedball": 4
+        },
+        "byTeam": {
+          "mj": 1,
+          "speedball": 4
+        },
+        "from": "Quad",
+        "kind": "normal",
+        "to": "lava",
+        "total": 5
+      },
+      {
+        "byPlayer": {
+          "mj": 1,
+          "speedball": 3
+        },
+        "byTeam": {
+          "mj": 1,
+          "speedball": 3
+        },
+        "from": "RA",
+        "kind": "normal",
+        "to": "GL",
+        "total": 4
+      },
+      {
+        "byPlayer": {
+          "mj": 3,
+          "speedball": 10
+        },
+        "byTeam": {
+          "mj": 3,
+          "speedball": 10
+        },
+        "from": "RA",
+        "kind": "normal",
+        "to": "LG",
+        "total": 13
+      },
+      {
+        "byPlayer": {
+          "speedball": 1
+        },
+        "byTeam": {
+          "speedball": 1
+        },
+        "from": "RA",
+        "kind": "teleport",
+        "to": "SNG",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "mj": 1
+        },
+        "byTeam": {
+          "mj": 1
+        },
+        "from": "RA",
+        "kind": "teleport",
+        "to": "lava",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "mj": 4,
+          "speedball": 15
+        },
+        "byTeam": {
+          "mj": 4,
+          "speedball": 15
+        },
+        "from": "RA",
+        "kind": "normal",
+        "to": "low RL",
+        "total": 19
+      },
+      {
+        "byPlayer": {
+          "mj": 1,
+          "speedball": 3
+        },
+        "byTeam": {
+          "mj": 1,
+          "speedball": 3
+        },
+        "from": "RL",
+        "kind": "normal",
+        "to": "GA",
+        "total": 4
+      },
+      {
+        "byPlayer": {
+          "mj": 7,
+          "speedball": 3
+        },
+        "byTeam": {
+          "mj": 7,
+          "speedball": 3
+        },
+        "from": "RL",
+        "kind": "normal",
+        "to": "Quad",
+        "total": 10
+      },
+      {
+        "byPlayer": {
+          "mj": 2,
+          "speedball": 3
+        },
+        "byTeam": {
+          "mj": 2,
+          "speedball": 3
+        },
+        "from": "RL",
+        "kind": "normal",
+        "to": "high LG packs",
+        "total": 5
+      },
+      {
+        "byPlayer": {
+          "mj": 14,
+          "speedball": 7
+        },
+        "byTeam": {
+          "mj": 14,
+          "speedball": 7
+        },
+        "from": "RL",
+        "kind": "normal",
+        "to": "holes",
+        "total": 21
+      },
+      {
+        "byPlayer": {
+          "mj": 9,
+          "speedball": 8
+        },
+        "byTeam": {
+          "mj": 9,
+          "speedball": 8
+        },
+        "from": "RL",
+        "kind": "normal",
+        "to": "lava",
+        "total": 17
+      },
+      {
+        "byPlayer": {
+          "mj": 3,
+          "speedball": 4
+        },
+        "byTeam": {
+          "mj": 3,
+          "speedball": 4
+        },
+        "from": "SNG",
+        "kind": "normal",
+        "to": "GA",
+        "total": 7
+      },
+      {
+        "byPlayer": {
+          "mj": 17,
+          "speedball": 31
+        },
+        "byTeam": {
+          "mj": 17,
+          "speedball": 31
+        },
+        "from": "SNG",
+        "kind": "teleport",
+        "to": "GL",
+        "total": 48
+      },
+      {
+        "byPlayer": {
+          "mj": 6,
+          "speedball": 17
+        },
+        "byTeam": {
+          "mj": 6,
+          "speedball": 17
+        },
+        "from": "SNG",
+        "kind": "normal",
+        "to": "high LG packs",
+        "total": 23
+      },
+      {
+        "byPlayer": {
+          "speedball": 2
+        },
+        "byTeam": {
+          "speedball": 2
+        },
+        "from": "SNG",
+        "kind": "normal",
+        "to": "holes",
+        "total": 2
+      },
+      {
+        "byPlayer": {
+          "mj": 3,
+          "speedball": 6
+        },
+        "byTeam": {
+          "mj": 3,
+          "speedball": 6
+        },
+        "from": "SNG",
+        "kind": "normal",
+        "to": "low RL",
+        "total": 9
+      },
+      {
+        "byPlayer": {
+          "mj": 1
+        },
+        "byTeam": {
+          "mj": 1
+        },
+        "from": "YA",
+        "kind": "teleport",
+        "to": "GL",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "mj": 17,
+          "speedball": 17
+        },
+        "byTeam": {
+          "mj": 17,
+          "speedball": 17
+        },
+        "from": "YA",
+        "kind": "normal",
+        "to": "high LG packs",
+        "total": 34
+      },
+      {
+        "byPlayer": {
+          "mj": 20,
+          "speedball": 9
+        },
+        "byTeam": {
+          "mj": 20,
+          "speedball": 9
+        },
+        "from": "YA",
+        "kind": "normal",
+        "to": "lava",
+        "total": 29
+      },
+      {
+        "byPlayer": {
+          "mj": 2
+        },
+        "byTeam": {
+          "mj": 2
+        },
+        "from": "high LG packs",
+        "kind": "normal",
+        "to": "GL",
+        "total": 2
+      },
+      {
+        "byPlayer": {
+          "mj": 5,
+          "speedball": 6
+        },
+        "byTeam": {
+          "mj": 5,
+          "speedball": 6
+        },
+        "from": "high LG packs",
+        "kind": "normal",
+        "to": "LG",
+        "total": 11
+      },
+      {
+        "byPlayer": {
+          "mj": 2,
+          "speedball": 1
+        },
+        "byTeam": {
+          "mj": 2,
+          "speedball": 1
+        },
+        "from": "high LG packs",
+        "kind": "normal",
+        "to": "RL",
+        "total": 3
+      },
+      {
+        "byPlayer": {
+          "mj": 9,
+          "speedball": 20
+        },
+        "byTeam": {
+          "mj": 9,
+          "speedball": 20
+        },
+        "from": "high LG packs",
+        "kind": "normal",
+        "to": "SNG",
+        "total": 29
+      },
+      {
+        "byPlayer": {
+          "mj": 11,
+          "speedball": 14
+        },
+        "byTeam": {
+          "mj": 11,
+          "speedball": 14
+        },
+        "from": "high LG packs",
+        "kind": "normal",
+        "to": "YA",
+        "total": 25
+      },
+      {
+        "byPlayer": {
+          "mj": 3,
+          "speedball": 4
+        },
+        "byTeam": {
+          "mj": 3,
+          "speedball": 4
+        },
+        "from": "high LG packs",
+        "kind": "normal",
+        "to": "lava",
+        "total": 7
+      },
+      {
+        "byPlayer": {
+          "mj": 7,
+          "speedball": 10
+        },
+        "byTeam": {
+          "mj": 7,
+          "speedball": 10
+        },
+        "from": "high LG packs",
+        "kind": "normal",
+        "to": "low RL",
+        "total": 17
+      },
+      {
+        "byPlayer": {
+          "mj": 5,
+          "speedball": 4
+        },
+        "byTeam": {
+          "mj": 5,
+          "speedball": 4
+        },
+        "from": "holes",
+        "kind": "normal",
+        "to": "GA",
+        "total": 9
+      },
+      {
+        "byPlayer": {
+          "mj": 7,
+          "speedball": 4
+        },
+        "byTeam": {
+          "mj": 7,
+          "speedball": 4
+        },
+        "from": "holes",
+        "kind": "normal",
+        "to": "GL",
+        "total": 11
+      },
+      {
+        "byPlayer": {
+          "mj": 7,
+          "speedball": 5
+        },
+        "byTeam": {
+          "mj": 7,
+          "speedball": 5
+        },
+        "from": "holes",
+        "kind": "normal",
+        "to": "RL",
+        "total": 12
+      },
+      {
+        "byPlayer": {
+          "mj": 3,
+          "speedball": 3
+        },
+        "byTeam": {
+          "mj": 3,
+          "speedball": 3
+        },
+        "from": "holes",
+        "kind": "normal",
+        "to": "SNG",
+        "total": 6
+      },
+      {
+        "byPlayer": {
+          "mj": 4,
+          "speedball": 2
+        },
+        "byTeam": {
+          "mj": 4,
+          "speedball": 2
+        },
+        "from": "holes",
+        "kind": "normal",
+        "to": "high LG packs",
+        "total": 6
+      },
+      {
+        "byPlayer": {
+          "speedball": 1
+        },
+        "byTeam": {
+          "speedball": 1
+        },
+        "from": "lava",
+        "kind": "normal",
+        "to": "Quad",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "mj": 17,
+          "speedball": 10
+        },
+        "byTeam": {
+          "mj": 17,
+          "speedball": 10
+        },
+        "from": "lava",
+        "kind": "normal",
+        "to": "RL",
+        "total": 27
+      },
+      {
+        "byPlayer": {
+          "mj": 16,
+          "speedball": 12
+        },
+        "byTeam": {
+          "mj": 16,
+          "speedball": 12
+        },
+        "from": "lava",
+        "kind": "normal",
+        "to": "YA",
+        "total": 28
+      },
+      {
+        "byPlayer": {
+          "mj": 7,
+          "speedball": 2
+        },
+        "byTeam": {
+          "mj": 7,
+          "speedball": 2
+        },
+        "from": "lava",
+        "kind": "normal",
+        "to": "high LG packs",
+        "total": 9
+      },
+      {
+        "byPlayer": {
+          "mj": 1
+        },
+        "byTeam": {
+          "mj": 1
+        },
+        "from": "low RL",
+        "kind": "teleport",
+        "to": "GA",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "mj": 1
+        },
+        "byTeam": {
+          "mj": 1
+        },
+        "from": "low RL",
+        "kind": "teleport",
+        "to": "GL",
+        "total": 1
+      },
+      {
+        "byPlayer": {
+          "mj": 4,
+          "speedball": 7
+        },
+        "byTeam": {
+          "mj": 4,
+          "speedball": 7
+        },
+        "from": "low RL",
+        "kind": "normal",
+        "to": "LG",
+        "total": 11
+      },
+      {
+        "byPlayer": {
+          "mj": 7,
+          "speedball": 15
+        },
+        "byTeam": {
+          "mj": 7,
+          "speedball": 15
+        },
+        "from": "low RL",
+        "kind": "normal",
+        "to": "RA",
+        "total": 22
+      },
+      {
+        "byPlayer": {
+          "mj": 4,
+          "speedball": 15
+        },
+        "byTeam": {
+          "mj": 4,
+          "speedball": 15
+        },
+        "from": "low RL",
+        "kind": "normal",
+        "to": "SNG",
+        "total": 19
+      },
+      {
+        "byPlayer": {
+          "mj": 7,
+          "speedball": 8
+        },
+        "byTeam": {
+          "mj": 7,
+          "speedball": 8
+        },
+        "from": "low RL",
+        "kind": "normal",
+        "to": "high LG packs",
+        "total": 15
+      }
+    ],
+    "locs": [
+      {
+        "byPlayer": {
+          "mj": 24.676095962524414,
+          "speedball": 21.851032257080078
+        },
+        "byTeam": {
+          "mj": 24.676095962524414,
+          "speedball": 21.851032257080078
+        },
+        "name": "GA",
+        "total": 46.52712821960449,
+        "x": -49.875,
+        "y": -198.125,
+        "z": 24
+      },
+      {
+        "byPlayer": {
+          "mj": 95.20607233047485,
+          "speedball": 104.46211290359497
+        },
+        "byTeam": {
+          "mj": 95.20607233047485,
+          "speedball": 104.46211290359497
+        },
+        "name": "GL",
+        "total": 199.66818523406982,
+        "x": -176.5,
+        "y": 288.125,
+        "z": 296
+      },
+      {
+        "byPlayer": {
+          "mj": 27.966917037963867,
+          "speedball": 34.30585861206055
+        },
+        "byTeam": {
+          "mj": 27.966917037963867,
+          "speedball": 34.30585861206055
+        },
+        "name": "LG",
+        "total": 62.272775650024414,
+        "x": 19.5,
+        "y": 691.375,
+        "z": 296
+      },
+      {
+        "byPlayer": {
+          "mj": 3.3819808959960938,
+          "speedball": 24.206021308898926
+        },
+        "byTeam": {
+          "mj": 3.3819808959960938,
+          "speedball": 24.206021308898926
+        },
+        "name": "MH",
+        "total": 27.58800220489502,
+        "x": -484.5,
+        "y": -105.5,
+        "z": 104
+      },
+      {
+        "byPlayer": {
+          "mj": 6.022972106933594,
+          "speedball": 3.254974365234375
+        },
+        "byTeam": {
+          "mj": 6.022972106933594,
+          "speedball": 3.254974365234375
+        },
+        "name": "Quad",
+        "total": 9.277946472167969,
+        "x": 764.25,
+        "y": -2,
+        "z": 280
+      },
+      {
+        "byPlayer": {
+          "mj": 21.570993423461914,
+          "speedball": 44.78408133983612
+        },
+        "byTeam": {
+          "mj": 21.570993423461914,
+          "speedball": 44.78408133983612
+        },
+        "name": "RA",
+        "total": 66.35507476329803,
+        "x": -302.875,
+        "y": 1201.875,
+        "z": 152
+      },
+      {
+        "byPlayer": {
+          "mj": 81.15403270721436,
+          "speedball": 39.05891227722168
+        },
+        "byTeam": {
+          "mj": 81.15403270721436,
+          "speedball": 39.05891227722168
+        },
+        "name": "RL",
+        "total": 120.21294498443604,
+        "x": 564.25,
+        "y": -55.75,
+        "z": 168
+      },
+      {
+        "byPlayer": {
+          "mj": 28.2869234085083,
+          "speedball": 59.07606506347656
+        },
+        "byTeam": {
+          "mj": 28.2869234085083,
+          "speedball": 59.07606506347656
+        },
+        "name": "SNG",
+        "total": 87.36298847198486,
+        "x": 1.5,
+        "y": 448.5,
+        "z": 24
+      },
+      {
+        "byPlayer": {
+          "mj": 76.06212226487696,
+          "speedball": 57.039039611816406
+        },
+        "byTeam": {
+          "mj": 76.06212226487696,
+          "speedball": 57.039039611816406
+        },
+        "name": "YA",
+        "total": 133.10116187669337,
+        "x": 960.875,
+        "y": 441.125,
+        "z": 104
+      },
+      {
+        "byPlayer": {
+          "mj": 89.0619686126709,
+          "speedball": 93.06895446777344
+        },
+        "byTeam": {
+          "mj": 89.0619686126709,
+          "speedball": 93.06895446777344
+        },
+        "name": "high LG packs",
+        "total": 182.13092308044435,
+        "x": 273.25,
+        "y": 520.5,
+        "z": 168
+      },
+      {
+        "byPlayer": {
+          "mj": 33.41397953033447,
+          "speedball": 12.040018081665039
+        },
+        "byTeam": {
+          "mj": 33.41397953033447,
+          "speedball": 12.040018081665039
+        },
+        "name": "holes",
+        "total": 45.45399761199951,
+        "x": -7.5,
+        "y": -76.5,
+        "z": 296
+      },
+      {
+        "byPlayer": {
+          "mj": 32.585981369018555,
+          "speedball": 16.75499725341797
+        },
+        "byTeam": {
+          "mj": 32.585981369018555,
+          "speedball": 16.75499725341797
+        },
+        "name": "lava",
+        "total": 49.34097862243652,
+        "x": 736.875,
+        "y": 88,
+        "z": 72
+      },
+      {
+        "byPlayer": {
+          "mj": 80.62993621826172,
+          "speedball": 90.11790832616389
+        },
+        "byTeam": {
+          "mj": 80.62993621826172,
+          "speedball": 90.11790832616389
+        },
+        "name": "low RL",
+        "total": 170.74784454442562,
+        "x": -45.875,
+        "y": 1000.125,
+        "z": 24
+      }
+    ]
   },
   "match": {
     "duration": 600.0010000000715,
@@ -4852,7 +5923,6 @@
         ],
         "pos": {
           "li": [
-            1,
             1,
             1,
             1,
@@ -52407,7 +53477,6 @@
         ],
         "pos": {
           "li": [
-            10,
             10,
             10,
             10,

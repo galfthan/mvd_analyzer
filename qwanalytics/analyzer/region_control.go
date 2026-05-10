@@ -93,11 +93,17 @@ func ComputeRegionControl(
 		return nil, nil
 	}
 
+	// Bucket grid is anchored at MatchStart. At finalize time
+	// MatchStart is the wall-clock match-start timestamp; after
+	// postprocess.normalizeMatchRelativeTimes shifts streams,
+	// MatchStart=0 and MatchEnd is the duration. Either way the
+	// per-bucket window is [MatchStart + bi*dur, MatchStart + (bi+1)*dur).
+	matchStart := r.Streams.Global.MatchStart
 	matchEnd := r.Streams.Global.MatchEnd
-	if matchEnd <= 0 {
+	if matchEnd <= matchStart {
 		return nil, nil
 	}
-	nBuckets := int((matchEnd / bucketDur) + 0.5)
+	nBuckets := int(((matchEnd - matchStart) / bucketDur) + 0.5)
 	if nBuckets <= 0 {
 		return nil, nil
 	}
@@ -126,7 +132,7 @@ func ComputeRegionControl(
 		// points to the latest sample with T <= bucketEnd.
 		sIdx := 0
 		for bi := 0; bi < nBuckets; bi++ {
-			bucketEnd := float64(bi+1) * bucketDur
+			bucketEnd := matchStart + float64(bi+1)*bucketDur
 			for sIdx+1 < len(pt.T) && float64(pt.T[sIdx+1]) <= bucketEnd {
 				sIdx++
 			}

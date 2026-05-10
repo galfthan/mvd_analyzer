@@ -232,13 +232,17 @@ func shiftAndFilterFloats(stream []float64, matchStart float64) []float64 {
 }
 
 // shiftAndFilterPosition trims pre-match position samples and shifts
-// the survivors. Mutates pt in place.
+// the survivors. Mutates pt in place. Must keep all five columns
+// (T/X/Y/Z/Li) aligned — BuildLocGraph and ComputeRegionControl
+// both guard on `len(pt.Li) == len(pt.T)` and will silently skip the
+// player if the lengths drift.
 func shiftAndFilterPosition(pt *result.PositionTrack, matchStart float64) {
 	if pt == nil || len(pt.T) == 0 {
 		return
 	}
+	oldLen := len(pt.T)
 	keepFrom := 0
-	for keepFrom < len(pt.T) && float64(pt.T[keepFrom]) < matchStart {
+	for keepFrom < oldLen && float64(pt.T[keepFrom]) < matchStart {
 		keepFrom++
 	}
 	if keepFrom > 0 {
@@ -246,6 +250,9 @@ func shiftAndFilterPosition(pt *result.PositionTrack, matchStart float64) {
 		pt.X = pt.X[keepFrom:]
 		pt.Y = pt.Y[keepFrom:]
 		pt.Z = pt.Z[keepFrom:]
+		if len(pt.Li) == oldLen {
+			pt.Li = pt.Li[keepFrom:]
+		}
 	}
 	for i := range pt.T {
 		pt.T[i] = float32(float64(pt.T[i]) - matchStart)
