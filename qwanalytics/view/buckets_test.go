@@ -41,22 +41,24 @@ func TestBucketsBasicHealth(t *testing.T) {
 	if len(bv.Buckets) != 10 {
 		t.Fatalf("len(Buckets) = %d, want 10", len(bv.Buckets))
 	}
-	// Bucket 0 (0-1s): last health is 60 (carry through bucket end at 1.0).
+	// Default reducer is "first" — bucket N's value is the player's
+	// health at t = N seconds (carry-forward from latest change <= N).
+	// Bucket 0 (t=0): first health entry is 100 at t=0.
 	got := bv.Buckets[0].Players["p1"][FieldHealth]
-	if got != int16(60) {
-		t.Fatalf("bucket 0 health = %v, want 60", got)
+	if got != int16(100) {
+		t.Fatalf("bucket 0 health = %v, want 100", got)
 	}
-	// Bucket 1 (1-2s): last entry inside is 30 at t=1.2; carries.
+	// Bucket 1 (t=1): latest change <= 1.0 is t=0.3 v=60.
 	got = bv.Buckets[1].Players["p1"][FieldHealth]
-	if got != int16(30) {
-		t.Fatalf("bucket 1 health = %v, want 30", got)
+	if got != int16(60) {
+		t.Fatalf("bucket 1 health = %v, want 60", got)
 	}
-	// Bucket 2 (2-3s): change to 100 at t=2.0.
+	// Bucket 2 (t=2): latest change <= 2.0 is t=2.0 v=100.
 	got = bv.Buckets[2].Players["p1"][FieldHealth]
 	if got != int16(100) {
 		t.Fatalf("bucket 2 health = %v, want 100", got)
 	}
-	// Bucket 3 (3-4s): no change in window; carry-forward to 100.
+	// Bucket 3 (t=3): no change in [2,3]; carry-forward to 100.
 	got = bv.Buckets[3].Players["p1"][FieldHealth]
 	if got != int16(100) {
 		t.Fatalf("bucket 3 health = %v, want 100 (carry-forward)", got)

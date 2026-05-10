@@ -96,59 +96,28 @@ var AllStandardFields = []string{
 	FieldSpawns, FieldDeaths,
 }
 
-// DefaultReducers maps each field to its default reducer name (D1
-// from the plan: every field defaults to "last" except event-lists
-// which default to "any" since "value at end of window" is undefined
-// for spawn / death timestamps).
+// DefaultReducers maps each field to its default reducer name. Bucket
+// N's data represents player state at time t = N*bucketDur — i.e.,
+// "first sample of bucket" / "value at start of window" semantics.
+// Bucket 0 == match-start state, consistent with the timeline
+// playback model where each bucket is a snapshot at its own T.
+//
+// Per-field rationale:
+//
+//   - Change streams (h, a, at, li, sh, nl, rk, cl) → "first":
+//     carry-forward to bStart returns the value at start of window.
+//   - Position → "first": first native sample with T >= bStart, or
+//     carry-forward in gap buckets. See positionSamples in buckets.go.
+//   - Intervals (rl, lg, ...) → "first": intervalContains(bStart),
+//     i.e. "is the player carrying it at the start of the bucket".
+//   - Spawns / deaths → "any": discrete events; bool true if the
+//     event happened anywhere in [bStart, bEnd). "first" would return
+//     a timestamp instead of a bool.
+//
+// Consumers can override per-field via BucketsOptions.Reducers (e.g.
+// `{"h": "min"}` for stress-moment graphs, `{"li": "dominant"}` for
+// "what loc did the player spend the most time in this window").
 var DefaultReducers = map[string]string{
-	FieldHealth:    "last",
-	FieldArmor:     "last",
-	FieldArmorType: "last",
-	FieldLoc:       "last",
-	FieldPosition:  "last",
-
-	FieldRL:  "held-any",
-	FieldLG:  "held-any",
-	FieldGL:  "held-any",
-	FieldSSG: "held-any",
-	FieldSNG: "held-any",
-
-	FieldQuad: "held-any",
-	FieldPent: "held-any",
-	FieldRing: "held-any",
-
-	FieldShells:  "last",
-	FieldNails:   "last",
-	FieldRockets: "last",
-	FieldCells:   "last",
-
-	FieldSpawns: "any",
-	FieldDeaths: "any",
-}
-
-// LegacyReducerSet reproduces v6's "stamp every field at the first
-// event of the bucket" semantics. Used by the WASM bridge's
-// getDefaultBuckets shim and by analyzer-internal calls
-// (BuildLocGraph, ComputeRegionControl, getDefaultBuckets) so the web
-// frontend renders identically to v6.
-//
-// "first" semantics — bucket N's data == player state at time
-// N*bucketDur:
-//
-//   - Change streams (h, a, at, li, ammo): carry-forward to bStart
-//     (latest entry with T <= bStart). The stream's value at bStart.
-//   - Position: first native sample with T >= bStart (or the
-//     carry-forward sample if no in-window sample exists, i.e. gap
-//     buckets). See positionSamples in buckets.go.
-//   - Intervals (weapons, powerups): held at exactly bStart. The
-//     intervalSamples helper emits sample 0 at bStart so "first"
-//     returns intervalContains(bStart).
-//   - Spawns / deaths stay on "any" — they need a bool, not a
-//     timestamp.
-//
-// Bucket 0 thus represents the player's state at t=0 (match start),
-// matching v6's first-event-of-bucket stamping.
-var LegacyReducerSet = map[string]string{
 	FieldHealth:    "first",
 	FieldArmor:     "first",
 	FieldArmorType: "first",
@@ -173,6 +142,14 @@ var LegacyReducerSet = map[string]string{
 	FieldSpawns: "any",
 	FieldDeaths: "any",
 }
+
+// LegacyReducerSet is kept as a named alias for DefaultReducers for
+// callers that want to explicitly opt in to v6-equivalent
+// "first-sample-of-bucket" semantics. After the v7 default-policy
+// alignment the two are identical, but the alias preserves the
+// option to diverge later (if e.g. a future analytics-flavoured
+// default flips back to "last" / "mean" for some fields).
+var LegacyReducerSet = DefaultReducers
 
 // resolveReducerName picks the reducer for a field, allowing per-call
 // overrides. Returns the registered Reducer or an error if the chosen

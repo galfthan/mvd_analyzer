@@ -24,8 +24,9 @@ type LegacyHighResTeamData = result.HighResTeamData
 // player data → empty bucket (matching v6 behaviour).
 //
 // The transformation expects bv to have been produced via Buckets()
-// with IncludeTeam=true and the LegacyReducerSet (every field → last)
-// — anything else risks silent visual drift in the frontend.
+// with IncludeTeam=true and the LegacyReducerSet ("first-sample-of-
+// bucket" everywhere except spawns/deaths) — anything else risks
+// silent visual drift in the frontend.
 //
 // Locator note: HighResPlayerData.Li is an integer index into
 // TimelineAnalysisResult.LocTable. The reducer hands the loc index

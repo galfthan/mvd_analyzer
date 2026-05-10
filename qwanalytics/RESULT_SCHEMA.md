@@ -360,27 +360,37 @@ shared mutable state, no mutation of the input `*Result`.
 These codes are used identically in JSON wire keys, view-API
 parameters, CLI `-fields` values, and (future) MCP tool inputs.
 
+All default reducers use **first-sample-of-bucket** semantics: bucket
+N's value represents player state at time `t = N × bucketDur`.
+Bucket 0 is match-start state, consistent with the timeline-playback
+mental model where each bucket is a snapshot at its own T. Override
+per-call via `BucketsOptions.Reducers` if you want analytics-style
+aggregation (`min`, `max`, `mean`, `dominant`, etc.).
+
 | Code | Field | Stream form | Default reducer |
 |------|-------|-------------|-----------------|
-| `h` | Health | `[]ChangeI16` | `last` |
-| `a` | Armor | `[]ChangeI16` | `last` |
-| `at` | Armor type | `[]ChangeStr` | `last` |
-| `li` | Loc index | `[]ChangeI16` | `last` |
-| `pos` | Position xyz | `*PositionTrack` | `last` |
-| `rl` | Rocket Launcher held | `[]Interval` | `held-any` |
-| `lg` | Lightning Gun held | `[]Interval` | `held-any` |
-| `gl` | Grenade Launcher held | `[]Interval` | `held-any` |
-| `ssg` | Super Shotgun held | `[]Interval` | `held-any` |
-| `sng` | Super Nailgun held | `[]Interval` | `held-any` |
-| `q` | Quad | `[]Interval` | `held-any` |
-| `pe` | Pentagram | `[]Interval` | `held-any` |
-| `r` | Ring of Shadows | `[]Interval` | `held-any` |
-| `sh` | Shells | `[]ChangeI16` | `last` |
-| `nl` | Nails | `[]ChangeI16` | `last` |
-| `rk` | Rockets | `[]ChangeI16` | `last` |
-| `cl` | Cells | `[]ChangeI16` | `last` |
+| `h` | Health | `[]ChangeI16` | `first` |
+| `a` | Armor | `[]ChangeI16` | `first` |
+| `at` | Armor type | `[]ChangeStr` | `first` |
+| `li` | Loc index | `[]ChangeI16` | `first` |
+| `pos` | Position xyz | `*PositionTrack` | `first` |
+| `rl` | Rocket Launcher held | `[]Interval` | `first` |
+| `lg` | Lightning Gun held | `[]Interval` | `first` |
+| `gl` | Grenade Launcher held | `[]Interval` | `first` |
+| `ssg` | Super Shotgun held | `[]Interval` | `first` |
+| `sng` | Super Nailgun held | `[]Interval` | `first` |
+| `q` | Quad | `[]Interval` | `first` |
+| `pe` | Pentagram | `[]Interval` | `first` |
+| `r` | Ring of Shadows | `[]Interval` | `first` |
+| `sh` | Shells | `[]ChangeI16` | `first` |
+| `nl` | Nails | `[]ChangeI16` | `first` |
+| `rk` | Rockets | `[]ChangeI16` | `first` |
+| `cl` | Cells | `[]ChangeI16` | `first` |
 | `sp` | Spawn timestamps | `[]float64` | `any` |
 | `d` | Death timestamps | `[]float64` | `any` |
+
+`sp` / `d` stay on `any` because they need a bool ("did this event
+happen during the bucket?"); `first` would return a timestamp.
 
 ### Reducer registry
 
