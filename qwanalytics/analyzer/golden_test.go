@@ -172,12 +172,12 @@ func networkAllowed() bool {
 //
 //  1. filePath is stripped — it's a per-machine cache path that would
 //     force a diff on every developer machine.
-//  2. timelineAnalysis.highResBuckets is sliced down to three 15 s
-//     windows (start, 1:00–1:15, end). The full 50 ms position track
-//     is ~20 MB per 4on4 demo and most of it is redundant for
-//     regression detection; the three windows are enough to catch
-//     bucketer / position-extractor drift while keeping committed
-//     goldens around 1 MB.
+//  2. streams.players[].* time series are sliced down to three 15 s
+//     windows (start, 1:00–1:15, last 15 s). The full native-rate
+//     position track is ~18 MB per 4on4 demo; sparse change streams
+//     and intervals are smaller but together still bloat the corpus.
+//     The three windows are enough sampling to catch bucketer /
+//     stream-emitter drift while keeping committed goldens around 1 MB.
 //
 // Everything else (locGraph, schemaVersion, durations, weapon stats,
 // items, frags, …) is pinned in full; changes to those should be
@@ -192,7 +192,7 @@ func canonicalJSON(v interface{}) ([]byte, error) {
 		return nil, err
 	}
 	delete(m, "filePath")
-	sampleHighResBuckets(m)
+	sampleStreams(m)
 	out, err := json.MarshalIndent(m, "", "  ")
 	if err != nil {
 		return nil, err
@@ -200,40 +200,159 @@ func canonicalJSON(v interface{}) ([]byte, error) {
 	return append(out, '\n'), nil
 }
 
-// sampleHighResBuckets replaces timelineAnalysis.highResBuckets with a
-// concatenation of three 15 s windows: [0, 15], [60, 75], and the
-// trailing 15 s. Buckets are kept in order. Demos shorter than the
-// middle window simply contribute no middle samples — the slice is
-// taken with bounds checks only, no synthetic padding.
-func sampleHighResBuckets(m map[string]interface{}) {
-	ta, ok := m["timelineAnalysis"].(map[string]interface{})
+// goldenWindows is the three 15 s windows used to slice every
+// per-player time series in the golden corpus. Match ends at
+// global.matchEnd; the trailing window starts at matchEnd - 15.
+var goldenWindows = []struct{ start, end float64 }{
+	{0, 15},
+	{60, 75},
+	// (end - 15, end) appended dynamically per demo.
+}
+
+// sampleStreams replaces every per-player time series in
+// streams.players[] with the concatenation of three 15 s windows. The
+// global matchEnd is read from streams.global.matchEnd.
+func sampleStreams(m map[string]interface{}) {
+	streams, ok := m["streams"].(map[string]interface{})
 	if !ok {
 		return
 	}
-	raw, ok := ta["highResBuckets"].([]interface{})
-	if !ok || len(raw) == 0 {
+	matchEnd := 0.0
+	if g, ok := streams["global"].(map[string]interface{}); ok {
+		if t, ok := g["matchEnd"].(float64); ok {
+			matchEnd = t
+		}
+	}
+	windows := append([]struct{ start, end float64 }(nil), goldenWindows...)
+	if matchEnd > 15 {
+		windows = append(windows, struct{ start, end float64 }{matchEnd - 15, matchEnd})
+	}
+
+	players, ok := streams["players"].([]interface{})
+	if !ok {
 		return
 	}
-	lastT := 0.0
-	if t, ok := raw[len(raw)-1].(map[string]interface{})["t"].(float64); ok {
-		lastT = t
-	}
-	endStart := lastT - 15
-	keep := raw[:0:0]
-	for _, b := range raw {
-		bm, ok := b.(map[string]interface{})
+	for _, pi := range players {
+		p, ok := pi.(map[string]interface{})
 		if !ok {
 			continue
 		}
-		t, ok := bm["t"].(float64)
+		// Change streams: []{t, v}.
+		for _, key := range []string{"h", "a", "at", "li", "sh", "nl", "rk", "cl"} {
+			if arr, ok := p[key].([]interface{}); ok {
+				p[key] = filterChangeStream(arr, windows)
+			}
+		}
+		// Intervals: []{s, e}. Clamp to overlapping window slice.
+		for _, key := range []string{"rl", "lg", "gl", "ssg", "sng", "q", "pe", "r"} {
+			if arr, ok := p[key].([]interface{}); ok {
+				p[key] = filterIntervalStream(arr, windows)
+			}
+		}
+		// Discrete event timestamps.
+		for _, key := range []string{"sp", "d"} {
+			if arr, ok := p[key].([]interface{}); ok {
+				p[key] = filterTimestamps(arr, windows)
+			}
+		}
+		// Position track (columnar) — slice each axis array.
+		if pos, ok := p["pos"].(map[string]interface{}); ok {
+			ts, _ := pos["t"].([]interface{})
+			xs, _ := pos["x"].([]interface{})
+			ys, _ := pos["y"].([]interface{})
+			zs, _ := pos["z"].([]interface{})
+			keepIdx := indicesInWindows(ts, windows)
+			pos["t"] = pickByIndex(ts, keepIdx)
+			pos["x"] = pickByIndex(xs, keepIdx)
+			pos["y"] = pickByIndex(ys, keepIdx)
+			pos["z"] = pickByIndex(zs, keepIdx)
+		}
+	}
+}
+
+func filterChangeStream(arr []interface{}, windows []struct{ start, end float64 }) []interface{} {
+	out := arr[:0:0]
+	for _, e := range arr {
+		em, ok := e.(map[string]interface{})
 		if !ok {
 			continue
 		}
-		if t <= 15 || (t >= 60 && t <= 75) || t >= endStart {
-			keep = append(keep, b)
+		t, ok := em["t"].(float64)
+		if !ok {
+			continue
+		}
+		if inGoldenWindows(t, windows) {
+			out = append(out, e)
 		}
 	}
-	ta["highResBuckets"] = keep
+	return out
+}
+
+func filterIntervalStream(arr []interface{}, windows []struct{ start, end float64 }) []interface{} {
+	out := arr[:0:0]
+	for _, e := range arr {
+		em, ok := e.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		s, _ := em["s"].(float64)
+		ee, _ := em["e"].(float64)
+		// Keep intervals overlapping any window.
+		for _, w := range windows {
+			if ee > w.start && s < w.end {
+				out = append(out, e)
+				break
+			}
+		}
+	}
+	return out
+}
+
+func filterTimestamps(arr []interface{}, windows []struct{ start, end float64 }) []interface{} {
+	out := arr[:0:0]
+	for _, e := range arr {
+		t, ok := e.(float64)
+		if !ok {
+			continue
+		}
+		if inGoldenWindows(t, windows) {
+			out = append(out, e)
+		}
+	}
+	return out
+}
+
+func indicesInWindows(ts []interface{}, windows []struct{ start, end float64 }) []int {
+	out := make([]int, 0, len(ts))
+	for i, e := range ts {
+		t, ok := e.(float64)
+		if !ok {
+			continue
+		}
+		if inGoldenWindows(t, windows) {
+			out = append(out, i)
+		}
+	}
+	return out
+}
+
+func pickByIndex(arr []interface{}, idx []int) []interface{} {
+	out := make([]interface{}, 0, len(idx))
+	for _, i := range idx {
+		if i < len(arr) {
+			out = append(out, arr[i])
+		}
+	}
+	return out
+}
+
+func inGoldenWindows(t float64, windows []struct{ start, end float64 }) bool {
+	for _, w := range windows {
+		if t >= w.start && t <= w.end {
+			return true
+		}
+	}
+	return false
 }
 
 // firstDiffLine returns a short summary of where two byte slices first
