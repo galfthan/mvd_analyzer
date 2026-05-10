@@ -45,7 +45,11 @@ type BucketsView struct {
 type ViewBucket struct {
 	T       float64                       `json:"t"`
 	Players map[string]map[string]any     `json:"p"`
-	Team    map[string]map[string]int     `json:"team,omitempty"`
+	// Team is keyed by team name → field → value. Most fields are
+	// int counters (rl, lg, w, th, ta, …); the special key "abt"
+	// holds an armor-by-type map (string → int, "ra"/"ya"/"ga"
+	// to count). The mixed-type value is why this is map[string]any.
+	Team    map[string]map[string]any     `json:"team,omitempty"`
 	Partial bool                          `json:"partial,omitempty"`
 }
 
@@ -586,12 +590,28 @@ func streamEventList(p result.PlayerStream, field string) []float64 {
 // aggregateTeams produces the per-team counters historically baked
 // into HighResBucket.TD. We re-derive from each player's reduced
 // values (booleans for weapons / powerups) so the team aggregate is
-// always consistent with the per-player display.
+// always consistent with the per-player display. Most fields are
+// int; the "abt" key carries an armor-by-type sub-map ("ra"/"ya"/"ga"
+// → count) so the frontend can colour-segment the team-armor bar.
 func aggregateTeams(
 	players []result.PlayerStream,
 	reduced map[string]map[string]any,
-) map[string]map[string]int {
-	teams := make(map[string]map[string]int)
+) map[string]map[string]any {
+	teams := make(map[string]map[string]any)
+	bumpInt := func(td map[string]any, key string) {
+		if v, ok := td[key]; ok {
+			td[key] = v.(int) + 1
+		} else {
+			td[key] = 1
+		}
+	}
+	addInt := func(td map[string]any, key string, n int) {
+		if v, ok := td[key]; ok {
+			td[key] = v.(int) + n
+		} else {
+			td[key] = n
+		}
+	}
 	for _, p := range players {
 		pdata, ok := reduced[p.Name]
 		if !ok {
@@ -602,7 +622,7 @@ func aggregateTeams(
 		}
 		td := teams[p.Team]
 		if td == nil {
-			td = make(map[string]int)
+			td = make(map[string]any)
 			teams[p.Team] = td
 		}
 		hasRL := boolField(pdata, FieldRL)
@@ -610,36 +630,47 @@ func aggregateTeams(
 		hasGL := boolField(pdata, FieldGL)
 		switch {
 		case hasRL && hasLG:
-			td["rllg"]++
-			td["w"]++
+			bumpInt(td, "rllg")
+			bumpInt(td, "w")
 		case hasRL:
-			td["rl"]++
-			td["w"]++
+			bumpInt(td, "rl")
+			bumpInt(td, "w")
 		case hasLG:
-			td["lg"]++
-			td["w"]++
+			bumpInt(td, "lg")
+			bumpInt(td, "w")
 		}
 		if hasGL {
-			td["gl"]++
+			bumpInt(td, "gl")
 		}
 		if boolField(pdata, FieldQuad) {
-			td["q"]++
-			td["pw"]++
+			bumpInt(td, "q")
+			bumpInt(td, "pw")
 		}
 		if boolField(pdata, FieldPent) {
-			td["pe"]++
-			td["pw"]++
+			bumpInt(td, "pe")
+			bumpInt(td, "pw")
 		}
 		if boolField(pdata, FieldRing) {
-			td["r"]++
-			td["pw"]++
+			bumpInt(td, "r")
+			bumpInt(td, "pw")
 		}
 		// Health / armor sums.
 		if h, ok := numericFromAny(pdata[FieldHealth]); ok {
-			td["th"] += int(h)
+			addInt(td, "th", int(h))
 		}
 		if a, ok := numericFromAny(pdata[FieldArmor]); ok {
-			td["ta"] += int(a)
+			addInt(td, "ta", int(a))
+		}
+		// Armor-by-type (abt) — sub-map keyed by armor type code.
+		if atVal, ok := pdata[FieldArmorType]; ok {
+			if at, ok := atVal.(string); ok && at != "" {
+				abt, ok := td["abt"].(map[string]int)
+				if !ok {
+					abt = make(map[string]int)
+					td["abt"] = abt
+				}
+				abt[at]++
+			}
 		}
 	}
 	if len(teams) == 0 {

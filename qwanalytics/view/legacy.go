@@ -124,18 +124,38 @@ func legacyPlayerFromMap(pdata map[string]any) *result.HighResPlayerData {
 	return out
 }
 
-func legacyTeamFromMap(td map[string]int) *result.HighResTeamData {
-	return &result.HighResTeamData{
-		RL:   td["rl"],
-		LG:   td["lg"],
-		RLLG: td["rllg"],
-		W:    td["w"],
-		GL:   td["gl"],
-		Q:    td["q"],
-		Pe:   td["pe"],
-		R:    td["r"],
-		Pw:   td["pw"],
-		TH:   td["th"],
-		TA:   td["ta"],
+func legacyTeamFromMap(td map[string]any) *result.HighResTeamData {
+	out := &result.HighResTeamData{
+		RL:   intFromAny(td["rl"]),
+		LG:   intFromAny(td["lg"]),
+		RLLG: intFromAny(td["rllg"]),
+		W:    intFromAny(td["w"]),
+		GL:   intFromAny(td["gl"]),
+		Q:    intFromAny(td["q"]),
+		Pe:   intFromAny(td["pe"]),
+		R:    intFromAny(td["r"]),
+		Pw:   intFromAny(td["pw"]),
+		TH:   intFromAny(td["th"]),
+		TA:   intFromAny(td["ta"]),
 	}
+	if abt, ok := td["abt"].(map[string]int); ok && len(abt) > 0 {
+		out.ABT = make(map[string]int, len(abt))
+		for k, v := range abt {
+			out.ABT[k] = v
+		}
+	}
+	return out
+}
+
+// intFromAny coerces a map[string]any value back to int. Counter
+// values from aggregateTeams are stored as int; anything else returns
+// 0.
+func intFromAny(v any) int {
+	if v == nil {
+		return 0
+	}
+	if n, ok := v.(int); ok {
+		return n
+	}
+	return 0
 }

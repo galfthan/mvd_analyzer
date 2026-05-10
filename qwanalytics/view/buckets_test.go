@@ -172,15 +172,15 @@ func TestBucketsTeamAggregates(t *testing.T) {
 	}
 	td := bv.Buckets[0].Team["red"]
 	if td["rl"] != 1 {
-		t.Fatalf("team rl = %d, want 1", td["rl"])
+		t.Fatalf("team rl = %v, want 1", td["rl"])
 	}
 	if td["lg"] != 1 {
-		t.Fatalf("team lg = %d, want 1", td["lg"])
+		t.Fatalf("team lg = %v, want 1", td["lg"])
 	}
 	if td["w"] != 2 {
-		t.Fatalf("team w = %d, want 2", td["w"])
+		t.Fatalf("team w = %v, want 2", td["w"])
 	}
 	if td["th"] != 180 {
-		t.Fatalf("team th = %d, want 180", td["th"])
+		t.Fatalf("team th = %v, want 180", td["th"])
 	}
 }
