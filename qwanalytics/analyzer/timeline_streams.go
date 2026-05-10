@@ -324,7 +324,13 @@ func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToT
 // Called from Finalize after the blip filter has smoothed
 // pData.location — so result.Streams.Players[].Loc reflects the same
 // authoritative loc track every v6 consumer saw.
+//
+// Also emits a synthetic spawn timestamp at each player's first
+// match-time bucket, matching v6's firstMatchBucketSeen flag. The
+// loc-graph cursor reset depends on this marker; without it, the
+// player's first observed loc transition gets counted as a real edge.
 func (a *TimelineAnalyzer) emitLocStreams(slotToName map[int]string, locIndex map[string]int) {
+	firstBucketSeen := make(map[int]bool, len(a.playerState))
 	for _, bucket := range a.buckets {
 		for slot, pData := range bucket.playerData {
 			if pData == nil {
@@ -343,6 +349,18 @@ func (a *TimelineAnalyzer) emitLocStreams(slotToName map[int]string, locIndex ma
 				idx = 0
 			}
 			state.streams.recordLoc(bucket.startTime, int16(idx))
+
+			if !firstBucketSeen[slot] {
+				firstBucketSeen[slot] = true
+				// If the parser didn't already emit a SpawnEvent at or
+				// before this bucket, synthesise one so loc-graph cursor
+				// reset works the same way it did in v6.
+				existing := state.streams.spawns
+				if len(existing) == 0 || existing[0] > bucket.startTime {
+					prepended := append([]float64{bucket.startTime}, existing...)
+					state.streams.spawns = prepended
+				}
+			}
 		}
 	}
 }
