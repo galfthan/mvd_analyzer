@@ -3,6 +3,7 @@ package view
 import (
 	"fmt"
 	"math"
+	"sort"
 
 	"github.com/mvd-analyzer/qwanalytics/result"
 )
@@ -204,20 +205,15 @@ func playerActiveInWindow(p result.PlayerStream, bStart, bEnd float64) bool {
 }
 
 func positionTouchesWindow(pt *result.PositionTrack, bStart, bEnd float64) bool {
-	if pt == nil {
+	if pt == nil || len(pt.T) == 0 {
 		return false
 	}
 	const fudge = 0.1 // slightly more than one 50 ms bucket
-	for _, t := range pt.T {
-		ft := float64(t)
-		if ft >= bEnd {
-			break
-		}
-		if ft >= bStart-fudge {
-			return true
-		}
-	}
-	return false
+	// Binary-search for the first sample >= bStart-fudge; if it lands
+	// before bEnd we have a touch.
+	lo := bStart - fudge
+	i := sort.Search(len(pt.T), func(i int) bool { return float64(pt.T[i]) >= lo })
+	return i < len(pt.T) && float64(pt.T[i]) < bEnd
 }
 
 func bucketWindowMsOrDefault(ms int) int {
@@ -375,10 +371,17 @@ func positionSamples(p result.PlayerStream, bStart, bEnd float64) []Sample {
 	out := make([]Sample, 0, 4)
 	// Prepend the latest sample <= bStart so "last" / "first" reducers
 	// see the carrying state.
-	if idx := positionIndexAtOrBefore(pt, bStart); idx >= 0 {
-		out = append(out, Sample{T: float64(pt.T[idx]), V: positionTriple(pt, idx)})
+	carry := positionIndexAtOrBefore(pt, bStart)
+	if carry >= 0 {
+		out = append(out, Sample{T: float64(pt.T[carry]), V: positionTriple(pt, carry)})
 	}
-	for i := range pt.T {
+	// Walk samples in [bStart, bEnd) starting at carry+1 — everything
+	// before that is by definition <= bStart.
+	startIdx := carry + 1
+	if startIdx < 0 {
+		startIdx = 0
+	}
+	for i := startIdx; i < len(pt.T); i++ {
 		t := float64(pt.T[i])
 		if t < bStart {
 			continue
@@ -396,18 +399,20 @@ func positionTriple(pt *result.PositionTrack, i int) [3]int32 {
 	return [3]int32{pt.X[i], pt.Y[i], pt.Z[i]}
 }
 
+// positionIndexAtOrBefore returns the index of the latest position
+// sample with T <= t, or -1 if all samples are after t. Binary search
+// keeps Buckets() per-window cost O(log N) instead of O(N) — material
+// for the position track which can be ~100K samples per player per
+// match. Without this Buckets() over a 24K-bucket grid was O(N²).
 func positionIndexAtOrBefore(pt *result.PositionTrack, t float64) int {
-	// Linear scan: position arrays are large but per-window bins are
-	// small, and binary search adds complexity. Optimise later if hot.
-	idx := -1
-	for i := range pt.T {
-		if float64(pt.T[i]) <= t {
-			idx = i
-			continue
-		}
-		break
+	n := len(pt.T)
+	if n == 0 {
+		return -1
 	}
-	return idx
+	// sort.Search finds the smallest i for which pt.T[i] > t.
+	// Latest <= t is i-1.
+	i := sort.Search(n, func(i int) bool { return float64(pt.T[i]) > t })
+	return i - 1
 }
 
 func eventListSamples(p result.PlayerStream, field string, bStart, bEnd float64) []Sample {
@@ -428,13 +433,21 @@ func eventListSamples(p result.PlayerStream, field string, bStart, bEnd float64)
 // changeSamplesI8 returns the samples from an int8 change stream that
 // fall in [bStart, bEnd), prepending the latest entry with T <= bStart
 // (carry-forward). Empty result when the player has no entries before
-// or in this window.
+// or in this window. Uses binary search for the carry-forward and
+// starts the window walk at the search result so we never re-scan
+// pre-bStart entries.
 func changeSamplesI8(stream []result.ChangeI8, bStart, bEnd float64) []Sample {
 	out := make([]Sample, 0, 4)
-	if idx := indexI8AtOrBefore(stream, bStart); idx >= 0 {
-		out = append(out, Sample{T: stream[idx].T, V: stream[idx].V})
+	carry := indexI8AtOrBefore(stream, bStart)
+	if carry >= 0 {
+		out = append(out, Sample{T: stream[carry].T, V: stream[carry].V})
 	}
-	for _, c := range stream {
+	startIdx := carry + 1
+	if startIdx < 0 {
+		startIdx = 0
+	}
+	for i := startIdx; i < len(stream); i++ {
+		c := stream[i]
 		if c.T < bStart {
 			continue
 		}
@@ -448,10 +461,16 @@ func changeSamplesI8(stream []result.ChangeI8, bStart, bEnd float64) []Sample {
 
 func changeSamplesI16(stream []result.ChangeI16, bStart, bEnd float64) []Sample {
 	out := make([]Sample, 0, 4)
-	if idx := indexI16AtOrBefore(stream, bStart); idx >= 0 {
-		out = append(out, Sample{T: stream[idx].T, V: stream[idx].V})
+	carry := indexI16AtOrBefore(stream, bStart)
+	if carry >= 0 {
+		out = append(out, Sample{T: stream[carry].T, V: stream[carry].V})
 	}
-	for _, c := range stream {
+	startIdx := carry + 1
+	if startIdx < 0 {
+		startIdx = 0
+	}
+	for i := startIdx; i < len(stream); i++ {
+		c := stream[i]
 		if c.T < bStart {
 			continue
 		}
@@ -465,10 +484,16 @@ func changeSamplesI16(stream []result.ChangeI16, bStart, bEnd float64) []Sample 
 
 func changeSamplesStr(stream []result.ChangeStr, bStart, bEnd float64) []Sample {
 	out := make([]Sample, 0, 4)
-	if idx := indexStrAtOrBefore(stream, bStart); idx >= 0 {
-		out = append(out, Sample{T: stream[idx].T, V: stream[idx].V})
+	carry := indexStrAtOrBefore(stream, bStart)
+	if carry >= 0 {
+		out = append(out, Sample{T: stream[carry].T, V: stream[carry].V})
 	}
-	for _, c := range stream {
+	startIdx := carry + 1
+	if startIdx < 0 {
+		startIdx = 0
+	}
+	for i := startIdx; i < len(stream); i++ {
+		c := stream[i]
 		if c.T < bStart {
 			continue
 		}
@@ -481,39 +506,18 @@ func changeSamplesStr(stream []result.ChangeStr, bStart, bEnd float64) []Sample 
 }
 
 func indexI8AtOrBefore(stream []result.ChangeI8, t float64) int {
-	idx := -1
-	for i, c := range stream {
-		if c.T <= t {
-			idx = i
-			continue
-		}
-		break
-	}
-	return idx
+	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > t })
+	return i - 1
 }
 
 func indexI16AtOrBefore(stream []result.ChangeI16, t float64) int {
-	idx := -1
-	for i, c := range stream {
-		if c.T <= t {
-			idx = i
-			continue
-		}
-		break
-	}
-	return idx
+	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > t })
+	return i - 1
 }
 
 func indexStrAtOrBefore(stream []result.ChangeStr, t float64) int {
-	idx := -1
-	for i, c := range stream {
-		if c.T <= t {
-			idx = i
-			continue
-		}
-		break
-	}
-	return idx
+	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > t })
+	return i - 1
 }
 
 func intervalContains(stream []result.Interval, t float64) bool {
