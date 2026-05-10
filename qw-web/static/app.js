@@ -135,7 +135,11 @@ worker.onmessage = (e) => {
         }
     } else if (e.data.type === 'result') {
         if (analyzeResolve) {
-            analyzeResolve(e.data.json);
+            analyzeResolve({
+                json: e.data.json,
+                bucketsJSON: e.data.bucketsJSON,
+                regionStatesJSON: e.data.regionStatesJSON,
+            });
             analyzeResolve = null;
             analyzeReject = null;
         }
@@ -160,9 +164,43 @@ worker.onmessage = (e) => {
     }
 };
 
+// analyzeInWorker returns the parsed Result object with the legacy
+// 50ms bucket array stashed on result.timelineAnalysis.highResBuckets.
+// Bucket data is built by the worker (calling getDefaultBuckets after
+// analyzeMVD) since WASM exports live on the worker's global, not the
+// main page. Pre-v7 callers expected JSON.parse on the resolved value;
+// new callers just use the returned object directly.
 function analyzeInWorker(bytes, filename) {
     return new Promise((resolve, reject) => {
-        analyzeResolve = resolve;
+        analyzeResolve = (payload) => {
+            try {
+                const result = JSON.parse(payload.json);
+                if (result && result.timelineAnalysis && payload.bucketsJSON) {
+                    try {
+                        const buckets = JSON.parse(payload.bucketsJSON);
+                        if (Array.isArray(buckets)) {
+                            result.timelineAnalysis.highResBuckets = buckets;
+                        }
+                    } catch (e) {
+                        console.warn('parse legacy buckets failed:', e);
+                    }
+                }
+                if (result && result.timelineAnalysis && result.timelineAnalysis.regionControl && payload.regionStatesJSON) {
+                    try {
+                        const rs = JSON.parse(payload.regionStatesJSON);
+                        if (!rs.error && rs.bucketStates) {
+                            result.timelineAnalysis.regionControl.bucketStates = rs.bucketStates;
+                            if (rs.stats) result.timelineAnalysis.regionControl.stats = rs.stats;
+                        }
+                    } catch (e) {
+                        console.warn('parse default region states failed:', e);
+                    }
+                }
+                resolve(result);
+            } catch (e) {
+                reject(e);
+            }
+        };
         analyzeReject = reject;
         // Transfer the ArrayBuffer (zero-copy)
         worker.postMessage(
@@ -545,8 +583,7 @@ async function uploadFile(file) {
 
         const buffer = await file.arrayBuffer();
         const bytes = new Uint8Array(buffer);
-        const jsonStr = await analyzeInWorker(bytes, file.name);
-        const result = JSON.parse(jsonStr);
+        const result = await analyzeInWorker(bytes, file.name);
         if (result.error) throw new Error(result.error);
 
         status.textContent = 'Analysis complete!';
@@ -610,8 +647,7 @@ async function loadGameFromHub(game) {
 
     status.textContent = 'Analyzing...';
     const filename = generateDemoFilename(game);
-    const jsonStr = await analyzeInWorker(demoBytes, filename);
-    const result = JSON.parse(jsonStr);
+    const result = await analyzeInWorker(demoBytes, filename);
     if (result.error) throw new Error(result.error);
 
     status.textContent = 'Analysis complete!';
@@ -2600,24 +2636,10 @@ function displayTimelineAnalysis(result) {
     const teams = timelineState.teams;
 
     // Schema v7: highResBuckets is no longer a parse-time field on the
-    // result; rebuild it on-demand from result.streams via the WASM
-    // bridge's getDefaultBuckets helper. Returns the same v6-shape
-    // []HighResBucket array the panels iterate.
-    let bucketsArr = [];
-    if (typeof window.getDefaultBuckets === "function") {
-        try {
-            const json = window.getDefaultBuckets();
-            if (json) {
-                const parsed = JSON.parse(json);
-                if (Array.isArray(parsed)) {
-                    bucketsArr = parsed;
-                }
-            }
-        } catch (e) {
-            console.warn("getDefaultBuckets failed:", e);
-        }
-    }
-    timelineState.highResBuckets = bucketsArr;
+    // canonical result, but analyzeInWorker stashes a v6-shape array
+    // on timeline.highResBuckets after the WASM worker calls
+    // getDefaultBuckets. Panels still iterate the same array shape.
+    timelineState.highResBuckets = timeline?.highResBuckets || [];
     timelineState.highResDuration = 0.05;
     timelineState.matchStartTime = timeline?.matchStartTime || 0;
     timelineState.demoOffset = timeline?.demoOffset || 0;
@@ -4934,12 +4956,11 @@ function initRegionControlData(result) {
     }
     computeRegionStacking(mapState.controlRegions);
 
-    // v7: bucketStates is no longer baked at parse time — only Stats,
-    // TeamA, TeamB are on the result. The bridge derives bucketStates
-    // on demand from streams; initRegionControl below calls
-    // recomputeRegionControl to populate mapState.bucketStates from
-    // the same regions definition the analyser used.
-    mapState.bucketStates      = null;
+    // v7: bucketStates and stats are populated by analyzeInWorker —
+    // the worker calls recomputeRegionControl with the default regions
+    // after analyzeMVD and the result is stashed back onto the parsed
+    // result before displayResults runs. Same code shape as v6.
+    mapState.bucketStates      = rc.bucketStates || null;
     mapState.regionControlStats = rc.stats || null;
     mapState.teamA              = rc.teamA || null;
     mapState.teamB              = rc.teamB || null;
@@ -4975,29 +4996,6 @@ function initRegionControl(result) {
 
     if (panel) panel.style.display = '';
     if (statusPanel) statusPanel.style.display = '';
-
-    // v7: pull the per-bucket region states via the bridge so the map
-    // heatmap has data on initial load. Mirrors what applyRegionConfig
-    // does after user edits.
-    if (typeof window.recomputeRegionControl === "function") {
-        try {
-            const overrideJSON = JSON.stringify({
-                regions: rc.regions.map(r => ({
-                    name: r.name,
-                    locs: [...new Set((r.points || []).map(p => p.name))],
-                })),
-            });
-            const json = window.recomputeRegionControl(overrideJSON);
-            const res = JSON.parse(json);
-            if (!res.error && res.bucketStates) {
-                mapState.bucketStates = res.bucketStates;
-                if (res.stats) mapState.regionControlStats = res.stats;
-                mapState.renderDirty = true;
-            }
-        } catch (e) {
-            console.warn("init recomputeRegionControl failed:", e);
-        }
-    }
 }
 
 function buildRegionConfig(regions) {
