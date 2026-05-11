@@ -20,8 +20,8 @@ package mapgeom
 import (
 	"sort"
 
-	"github.com/mvd-analyzer/qwanalytics/mapgen/bsp"
-	"github.com/mvd-analyzer/qwanalytics/loc"
+	"github.com/mvd-analyzer/mvd-analytics/mapgen/bsp"
+	"github.com/mvd-analyzer/mvd-analytics/loc"
 )
 
 const (

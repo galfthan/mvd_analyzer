@@ -1,6 +1,6 @@
 package analyzer
 
-import "github.com/mvd-analyzer/qwanalytics/result"
+import "github.com/mvd-analyzer/mvd-analytics/result"
 
 // Default post-processors for the registry. Each one is registered by
 // NewDefaultRegistry; callers building a registry from scratch can

@@ -3,7 +3,7 @@ package analyzer
 import (
 	"strings"
 
-	"github.com/mvd-analyzer/qwdemo/events"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // MessagesAnalyzer captures frags and chat messages for timeline display

@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mvd-analyzer/qwdemo/events"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // MetadataAnalyzer collects server-level and match-level metadata that

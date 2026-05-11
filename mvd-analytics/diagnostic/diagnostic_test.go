@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mvd-analyzer/qwanalytics/analyzer"
-	"github.com/mvd-analyzer/qwdemo/mvd"
-	"github.com/mvd-analyzer/qwdemo/parser"
-	"github.com/mvd-analyzer/qwdemo/mvdfile"
+	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-reader/mvd"
+	"github.com/mvd-analyzer/mvd-reader/parser"
+	"github.com/mvd-analyzer/mvd-reader/mvdfile"
 )
 
 // TestDiagnosticParseDemos runs every demo in testdata/ through the parser in

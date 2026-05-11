@@ -38,7 +38,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mvd-analyzer/qwanalytics/analyzer"
+	"github.com/mvd-analyzer/mvd-analytics/analyzer"
 )
 
 // ktxItemNameToKind maps the KTX demoinfo `items` map key to the

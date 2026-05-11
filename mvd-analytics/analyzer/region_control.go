@@ -3,7 +3,7 @@ package analyzer
 import (
 	"strings"
 
-	"github.com/mvd-analyzer/qwanalytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // Region-control state codes used by ComputeRegionControl as a compact

@@ -3,7 +3,7 @@ package view
 import (
 	"testing"
 
-	"github.com/mvd-analyzer/qwanalytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // makeStream builds a tiny synthetic Result with one player and a

@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mvd-analyzer/qwdemo/mvd"
+	"github.com/mvd-analyzer/mvd-reader/mvd"
 )
 
 // This file implements the subset of the QW entity-state protocol we need

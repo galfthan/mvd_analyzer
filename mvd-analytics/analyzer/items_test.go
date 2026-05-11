@@ -3,7 +3,7 @@ package analyzer
 import (
 	"testing"
 
-	"github.com/mvd-analyzer/qwdemo/events"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // newTestItemAnalyzer wires an analyzer for unit tests — skips the

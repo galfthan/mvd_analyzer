@@ -3,8 +3,8 @@ package analyzer
 import (
 	"sort"
 
-	"github.com/mvd-analyzer/qwanalytics/result"
-	"github.com/mvd-analyzer/qwdemo/events"
+	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 

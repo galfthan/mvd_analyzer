@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/mvd-analyzer/qwdemo/mvd"
+	"github.com/mvd-analyzer/mvd-reader/mvd"
 )
 
 // PlayerPositionEvent is emitted when a player position is updated

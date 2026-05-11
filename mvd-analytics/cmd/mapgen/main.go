@@ -25,9 +25,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mvd-analyzer/qwanalytics/mapgen/bsp"
-	"github.com/mvd-analyzer/qwanalytics/loc"
-	"github.com/mvd-analyzer/qwanalytics/mapgen/mapgeom"
+	"github.com/mvd-analyzer/mvd-analytics/mapgen/bsp"
+	"github.com/mvd-analyzer/mvd-analytics/loc"
+	"github.com/mvd-analyzer/mvd-analytics/mapgen/mapgeom"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package parser
 import (
 	"testing"
 
-	"github.com/mvd-analyzer/qwdemo/mvd"
+	"github.com/mvd-analyzer/mvd-reader/mvd"
 )
 
 func TestParseUserInfoString_AuthKey(t *testing.T) {

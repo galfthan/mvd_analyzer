@@ -3,7 +3,7 @@ package view
 import (
 	"fmt"
 
-	"github.com/mvd-analyzer/qwanalytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // StateAtOptions specifies the moment in time to interrogate plus the

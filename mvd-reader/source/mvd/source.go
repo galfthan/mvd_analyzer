@@ -10,10 +10,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/mvd-analyzer/qwdemo/events"
-	"github.com/mvd-analyzer/qwdemo/mvd"
-	"github.com/mvd-analyzer/qwdemo/mvdfile"
-	"github.com/mvd-analyzer/qwdemo/parser"
+	"github.com/mvd-analyzer/mvd-reader/events"
+	"github.com/mvd-analyzer/mvd-reader/mvd"
+	"github.com/mvd-analyzer/mvd-reader/mvdfile"
+	"github.com/mvd-analyzer/mvd-reader/parser"
 )
 
 // Source is an events.Source implementation that pulls events from an

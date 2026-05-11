@@ -3,7 +3,7 @@ package analyzer
 import (
 	"testing"
 
-	"github.com/mvd-analyzer/qwanalytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // makePlayerStream builds a synthetic PlayerStream from a per-bucket

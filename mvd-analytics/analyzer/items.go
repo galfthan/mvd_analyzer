@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mvd-analyzer/qwanalytics/loc"
-	"github.com/mvd-analyzer/qwdemo/events"
+	"github.com/mvd-analyzer/mvd-analytics/loc"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // ItemAnalyzer builds the per-item pickup / respawn timeline by

@@ -1,7 +1,7 @@
 package view
 
 import (
-	"github.com/mvd-analyzer/qwanalytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // StreamSliceOptions specifies a window and player/field filter for a

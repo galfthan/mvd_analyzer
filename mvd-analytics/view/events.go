@@ -3,7 +3,7 @@ package view
 import (
 	"sort"
 
-	"github.com/mvd-analyzer/qwanalytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // EventsFilter narrows an Events query by time, player set, or event

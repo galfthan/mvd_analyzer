@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mvd-analyzer/qwdemo/mvd"
+	"github.com/mvd-analyzer/mvd-reader/mvd"
 )
 
 // ItemPickupPrintEvent is the typed representation of KTX's per-client

@@ -8,11 +8,11 @@ import (
 	"strings"
 	"syscall/js"
 
-	"github.com/mvd-analyzer/qwanalytics/analyzer"
-	"github.com/mvd-analyzer/qwanalytics/config"
-	"github.com/mvd-analyzer/qwanalytics/result"
-	"github.com/mvd-analyzer/qwanalytics/view"
-	"github.com/mvd-analyzer/qwdemo/mvdfile"
+	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-analytics/config"
+	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/view"
+	"github.com/mvd-analyzer/mvd-reader/mvdfile"
 )
 
 // lastResult retains the most recently analysed demo so JS can call

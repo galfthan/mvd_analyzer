@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mvd-analyzer/qwdemo/events"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // MatchAnalyzer extracts match summary information

@@ -4,7 +4,7 @@ import (
 	"math"
 	"sort"
 
-	"github.com/mvd-analyzer/qwdemo/events"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // WeaponPickupsAnalyzer records every slot-weapon acquisition and

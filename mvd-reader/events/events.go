@@ -15,8 +15,8 @@
 package events
 
 import (
-	"github.com/mvd-analyzer/qwdemo/mvd"
-	"github.com/mvd-analyzer/qwdemo/parser"
+	"github.com/mvd-analyzer/mvd-reader/mvd"
+	"github.com/mvd-analyzer/mvd-reader/parser"
 )
 
 // Source is a pull-style iterator over events from a QuakeWorld data

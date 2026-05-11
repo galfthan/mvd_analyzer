@@ -5,7 +5,7 @@ import (
 	"math"
 	"sort"
 
-	"github.com/mvd-analyzer/qwanalytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // BucketsOptions controls the windowing, field selection, and reducer

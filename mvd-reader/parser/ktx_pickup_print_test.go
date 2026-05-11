@@ -3,7 +3,7 @@ package parser
 import (
 	"testing"
 
-	"github.com/mvd-analyzer/qwdemo/mvd"
+	"github.com/mvd-analyzer/mvd-reader/mvd"
 )
 
 func TestTryEmitPickupPrint_Armor(t *testing.T) {

@@ -1,7 +1,7 @@
 package view
 
 import (
-	"github.com/mvd-analyzer/qwanalytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // LegacyHighResBucket is the v6 wire shape produced for the WASM

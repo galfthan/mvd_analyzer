@@ -3,10 +3,10 @@ package analyzer
 import (
 	"io"
 
-	"github.com/mvd-analyzer/qwanalytics/config"
-	resultpkg "github.com/mvd-analyzer/qwanalytics/result"
-	"github.com/mvd-analyzer/qwdemo/events"
-	mvdsource "github.com/mvd-analyzer/qwdemo/source/mvd"
+	"github.com/mvd-analyzer/mvd-analytics/config"
+	resultpkg "github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-reader/events"
+	mvdsource "github.com/mvd-analyzer/mvd-reader/source/mvd"
 )
 
 // Registry manages registered analyzers. Config carries the tunable

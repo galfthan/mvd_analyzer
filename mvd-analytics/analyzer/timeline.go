@@ -1,9 +1,9 @@
 package analyzer
 
 import (
-	"github.com/mvd-analyzer/qwanalytics/config"
-	"github.com/mvd-analyzer/qwanalytics/loc"
-	"github.com/mvd-analyzer/qwdemo/events"
+	"github.com/mvd-analyzer/mvd-analytics/config"
+	"github.com/mvd-analyzer/mvd-analytics/loc"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // TimelineAnalyzer collects per-event state into result.Streams and

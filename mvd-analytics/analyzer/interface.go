@@ -10,8 +10,8 @@
 package analyzer
 
 import (
-	"github.com/mvd-analyzer/qwdemo/events"
-	"github.com/mvd-analyzer/qwanalytics/result"
+	"github.com/mvd-analyzer/mvd-reader/events"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // Context provides shared state for analyzers during a single analysis

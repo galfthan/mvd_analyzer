@@ -27,8 +27,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mvd-analyzer/qwanalytics/analyzer"
-	"github.com/mvd-analyzer/qwanalytics/internal/hubfetch"
+	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-analytics/hubfetch"
 )
 
 // updateGolden regenerates every golden file from the current pipeline

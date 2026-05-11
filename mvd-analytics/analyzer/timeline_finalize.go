@@ -3,8 +3,8 @@ package analyzer
 import (
 	"sort"
 
-	"github.com/mvd-analyzer/qwanalytics/loc"
-	"github.com/mvd-analyzer/qwdemo/events"
+	"github.com/mvd-analyzer/mvd-analytics/loc"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // Finalize converts the raw per-bucket player state collected during parsing

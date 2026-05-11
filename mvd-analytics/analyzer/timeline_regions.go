@@ -4,8 +4,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mvd-analyzer/qwanalytics/config"
-	"github.com/mvd-analyzer/qwanalytics/loc"
+	"github.com/mvd-analyzer/mvd-analytics/config"
+	"github.com/mvd-analyzer/mvd-analytics/loc"
 )
 
 // ============================================================================
