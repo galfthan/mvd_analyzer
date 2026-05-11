@@ -30,21 +30,25 @@ mvd-mcp version
 
 ## Tool surface
 
-Nine tools. Inputs are typed Go structs with JSON-Schema inference;
-outputs are passed through as opaque JSON (the shim doesn't need to
-track `mvd-analytics/view` types).
+Nine tools. Inputs are typed Go structs with JSON-Schema inference
+(this file); outputs are passed through as opaque JSON — see
+[`../mvd-api/README.md`](../mvd-api/README.md) for the response shape
+of each per-demo endpoint, and
+[`../mvd-analytics/RESULT_SCHEMA.md`](../mvd-analytics/RESULT_SCHEMA.md)
+for the view types (`BucketsView`, `EventsView`, etc.), the field-code
+vocabulary, and the reducer registry.
 
-| Tool | Backing endpoint |
+| Tool | Backing |
 |---|---|
-| `searchGames(players, teams, map, mode, matchtag, from, to, limit, offset)` | hub.quakeworld.nu Supabase — **not** mvd-api |
-| `loadDemo(gameId or sha256)` | `POST /v1/demos/{id}` |
-| `getOverview(demoId)` | `GET /v1/demos/{id}/overview` |
-| `getBuckets(demoId, windowMs, ...)` | `GET /v1/demos/{id}/buckets` |
-| `getEvents(demoId, types, ...)` | `GET /v1/demos/{id}/events` |
-| `getStreamSlice(demoId, from, to, fields, ...)` | `GET /v1/demos/{id}/stream-slice` |
-| `getStateAt(demoId, time, fields, ...)` | `GET /v1/demos/{id}/state-at` |
-| `getLocTrails(demoId, minDwellMs, ...)` | `GET /v1/demos/{id}/loc-trails` |
-| `getRegionControl(demoId, windowMs)` | `GET /v1/demos/{id}/region-control` |
+| `searchGames` | hub.quakeworld.nu Supabase (direct) |
+| `loadDemo` | `mvd-api` `POST /v1/demos/{id}` |
+| `getOverview` | `mvd-api` `GET /v1/demos/{id}/overview` |
+| `getBuckets` | `mvd-api` `GET /v1/demos/{id}/buckets` |
+| `getEvents` | `mvd-api` `GET /v1/demos/{id}/events` |
+| `getStreamSlice` | `mvd-api` `GET /v1/demos/{id}/stream-slice` |
+| `getStateAt` | `mvd-api` `GET /v1/demos/{id}/state-at` |
+| `getLocTrails` | `mvd-api` `GET /v1/demos/{id}/loc-trails` |
+| `getRegionControl` | `mvd-api` `GET /v1/demos/{id}/region-control` |
 
 `demoId` is the string returned by `loadDemo` (`sha:HEX`) or any
 `gameId:NNNN` reference.
@@ -52,6 +56,142 @@ track `mvd-analytics/view` types).
 Tool errors come back as MCP `isError: true` results with the
 upstream error message in `TextContent`. The model can read them and
 recover (e.g. by calling `loadDemo` first).
+
+### Input schemas
+
+The Go types below are what `registerTools` declares; the MCP SDK
+infers their JSON Schemas from struct tags and exposes them via
+`tools/list`. Source of truth:
+[`mcp_backend.go`](mcp_backend.go).
+
+#### `searchGames(...)`
+
+All fields optional; an empty filter returns the most recent matches.
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `players`  | `string[]` | — | Player names; FTS on `players_fts`, AND'd across multiple |
+| `teams`    | `string[]` | — | Team names; `contains` on `team_names` |
+| `map`      | `string`   | — | Map name, exact match (e.g. `dm6`) |
+| `mode`     | `string`   | — | Game mode, exact match (`1on1`, `2on2`, `4on4`, `FFA`) |
+| `matchtag` | `string`   | — | Tournament/event tag, case-insensitive substring (e.g. `qwsl`) |
+| `from`     | `string`   | — | ISO date lower bound, inclusive (YYYY-MM-DD) |
+| `to`       | `string`   | — | ISO date upper bound, inclusive (YYYY-MM-DD) |
+| `limit`    | `int`      | 20 | Max rows; capped at 100 |
+| `offset`   | `int`      | 0 | Pagination offset |
+
+Output: `{ limit, offset, count, games: [hub_row, ...] }`. The hub
+row is the Supabase `v1_games` projection
+(`id, timestamp, mode, matchtag, map, teams, players, demo_sha256,
+demo_source_url`).
+
+#### `loadDemo({gameId | sha256})`
+
+Warms `mvd-api`'s cache for the demo and returns the canonical
+`demoId` (`sha:HEX`). Idempotent.
+
+| Param | Type | Description |
+|---|---|---|
+| `gameId` | `int`    | hub.quakeworld.nu game id |
+| `sha256` | `string` | 64-char hex of a demo already in the local cache |
+
+Exactly one of `gameId` / `sha256` must be set.
+
+Output: `LoadDemoOutput` —
+`{ demoId, sha256, fromCache, schemaVersion }`. The `demoId` is what
+every subsequent per-demo tool expects.
+
+#### `getOverview({demoId})`
+
+| Param | Type | Description |
+|---|---|---|
+| `demoId` | `string` (required) | `gameId:N` or `sha:HEX` |
+
+Output: `Overview` —
+see [`../mvd-api/README.md`](../mvd-api/README.md#getoverview).
+
+#### `getBuckets({demoId, ...})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`      | `string` (required) | — | — |
+| `windowMs`    | `int`     | 50 | Bucket size in ms |
+| `startTime`   | `float64` | match start | Window start, match-relative seconds |
+| `endTime`     | `float64` | match end | Window end |
+| `players`     | `string[]` | all | Restrict to these player names |
+| `fields`      | `string[]` | all standard | Field codes — see RESULT_SCHEMA.md |
+| `reducers`    | `{[code]: name}` | per-field defaults | Reducer-name override per field |
+| `includeTeam` | `bool`    | `false` | Also emit per-team aggregates per bucket |
+
+Output: `view.BucketsView` — see
+[RESULT_SCHEMA.md → view.Buckets](../mvd-analytics/RESULT_SCHEMA.md#field-vocabulary).
+
+#### `getEvents({demoId, ...})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`    | `string` (required) | — | — |
+| `startTime` | `float64` | match start | — |
+| `endTime`   | `float64` | match end | — |
+| `players`   | `string[]` | all | — |
+| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat` (default), opt-in: `loc, health, armor` |
+
+Output: `view.EventsView` —
+`{ events: [{ t, type, player, detail }, …] }`. Per-type `detail`
+keys are in RESULT_SCHEMA.md.
+
+#### `getStreamSlice({demoId, ...})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`    | `string` (required) | — | — |
+| `startTime` | `float64` | match start | — |
+| `endTime`   | `float64` | match end | — |
+| `players`   | `string[]` | all | — |
+| `fields`    | `string[]` | all standard | — |
+
+Output: `view.StreamSliceView`. Per-player change-stream entries
+inside the window (carry-forward entry prepended at `startTime`;
+intervals clamped to the window).
+
+#### `getStateAt({demoId, time, ...})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`  | `string`  (required) | — | — |
+| `time`    | `float64` (required) | — | Match-relative seconds |
+| `players` | `string[]` | all | — |
+| `fields`  | `string[]` | all standard minus `sp`/`d` | Spawn/death timestamps are rejected — they're events, not state |
+
+Output: `view.StateAtView` — `{ t, players: { name: {...fields} } }`.
+Change streams resolve to "latest entry ≤ time" (carry-forward);
+intervals to membership; position to nearest sample.
+
+#### `getLocTrails({demoId, ...})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`     | `string` (required) | — | — |
+| `players`    | `string[]` | all | — |
+| `minDwellMs` | `int`     | 0 | Drop transitions shorter than this; folded into neighbour |
+| `startTime`  | `float64` | match start | — |
+| `endTime`    | `float64` | match end | — |
+
+Output: `view.LocTrailsView` —
+`{ players: [{ name, sequence: [{ s, e, loc }, …] }, …] }`.
+
+#### `getRegionControl({demoId, windowMs})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`   | `string` (required) | — | — |
+| `windowMs` | `int` | 50 | Bucket size for the per-region state strings |
+
+Output: `result.RegionControlResult`. Errors with
+`region_control_unavailable` (HTTP 422) if the demo's map has no
+region layout. See RESULT_SCHEMA.md for the encoding of
+`bucketStates` (per-region one-char-per-bucket string) and `stats`
+(match-aggregate percentages).
 
 ### Why search bypasses mvd-api
 

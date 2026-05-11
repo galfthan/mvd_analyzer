@@ -58,8 +58,83 @@ immutable`, `X-Schema-Version: 7`, `X-Cache: HIT|WARM|MISS`, and
 - `players`, `fields`, `types`: comma-separated; URL-decode once.
 - `reducers`: comma-separated `field=name` pairs (e.g. `h=min,a=last`).
 - Times are match-relative seconds (float). `windowMs` is integer.
-- Empty defaults match the view function defaults
-  (see `mvd-analytics/view/fields.go` for field codes).
+- Empty defaults match the view function defaults — see
+  [`mvd-analytics/RESULT_SCHEMA.md`](../mvd-analytics/RESULT_SCHEMA.md)
+  for the field-code vocabulary and the reducer registry.
+
+### Response shapes
+
+The view-shaped endpoints (`/buckets`, `/events`, `/stream-slice`,
+`/state-at`, `/loc-trails`, `/region-control`) return the
+corresponding Go types from
+[`mvd-analytics/view`](../mvd-analytics/view) — see RESULT_SCHEMA.md
+for `BucketsView`, `EventsView`, `StreamSliceView`, `StateAtView`,
+`LocTrailsView`, and `result.RegionControlResult`. They're produced
+identically whether reached via the WASM bridge, the CLI, or this
+REST surface.
+
+Two API-specific shapes are documented inline below.
+
+#### `loadDemo` — `POST /v1/demos/{id}`
+
+```jsonc
+{
+  "demoId":        "sha:abc...",      // canonical id for subsequent calls
+  "sha256":        "abc...",
+  "fromCache":     true,              // false on first call for an uncached demo
+  "schemaVersion": 7
+}
+```
+
+Idempotent. Slow only on cold demos (the hub fetch + parse). Warm
+cache returns sub-millisecond.
+
+#### `getOverview` — `GET /v1/demos/{id}/overview`
+
+Curated summary cheap enough to call as a first step after
+`loadDemo`. Composed in
+[`overview.go`](overview.go) from `result.Match`, `result.Frags`,
+`result.Metadata.MatchSettings`, and
+`result.TimelineAnalysis.{FragStreaks,PowerupEvents,LocTable,RegionControl}` —
+no new analytics, just a shape that surfaces "what was this match"
+in one round-trip.
+
+```jsonc
+{
+  "schemaVersion": 7,
+  "filePath":      "abc....mvd.gz",
+  "map":           "dm6",
+  "gameDir":       "qw",
+  "mode":          "4on4",                          // omitempty
+  "matchtag":      "qwsl",                          // omitempty
+  "duration":      613.4,                           // seconds, parser-derived
+  "matchStart":    0,                               // match-relative seconds
+  "matchEnd":      613.4,
+  "teams": [                                        // omitempty, sorted by frags desc
+    { "name": "Die",   "frags": 89 },
+    { "name": "okkis", "frags": 76 }
+  ],
+  "players": [                                      // sorted by frags desc
+    { "name": "bps",    "team": "Die",   "frags": 35 },
+    { "name": "valla",  "team": "okkis", "frags": 30 }
+    // ...
+  ],
+  "topStreaks": [                                   // omitempty, ≤ 5, sorted by length desc
+    { "player": "bps",    "team": "Die",   "weapon": "rl", "length": 7, "start": 234.1, "duration": 18.3 }
+    // ...
+  ],
+  "topPowerups": [                                  // omitempty, ≤ 5, sorted by frags desc
+    { "player": "milton", "team": "Die",   "type":   "quad", "start": 412.0, "duration": 29.7, "frags": 5 }
+    // ...
+  ],
+  "locCount":         47,                           // len(TimelineAnalysis.LocTable)
+  "hasRegionControl": true                          // true if /region-control will succeed
+}
+```
+
+The top-streaks / top-powerups arrays are capped at 5 each — for the
+full lists, walk `TimelineAnalysisResult.FragStreaks` /
+`PowerupEvents` via the standard view surface.
 
 ### Error envelope (4xx, 5xx)
 

@@ -93,22 +93,198 @@ make build-api-linux build-api-darwin build-api-windows
 benefits from server-side caching). See
 [`mvd-api/README.md`](mvd-api/README.md) for the endpoint table.
 
-### Distribute MCP locally (`mvd-mcp`)
+### Run MCP locally (`mvd-mcp`)
+
+`mvd-mcp` is a thin (~7 MB) stdio MCP server that lets AI clients
+(Claude Desktop, Claude Code, Cursor, anything that speaks MCP) query
+the QuakeWorld demo corpus. It carries no analytics code of its own
+— two of its tool calls go straight to hub.quakeworld.nu Supabase
+(search), and the rest are forwarded as HTTP requests to a running
+`mvd-api`. The split lets you ship a small distributable binary for
+end-users without bundling the parser, and keeps the wire contract
+owned by `mvd-api`.
 
 ```bash
 make build-mcp                              # ./dist/mvd-mcp
 ./dist/mvd-api -addr :8080 &                # local API (or point at a remote one)
-./dist/mvd-mcp -api http://localhost:8080   # stdio MCP shim, forwards tools over HTTP
+./dist/mvd-mcp -api http://localhost:8080   # stdio MCP shim — read from stdin, respond on stdout
 make build-mcp-windows                      # dist/mvd-mcp-windows-amd64.exe for Claude Desktop
+make build-all-platforms                    # cross-compile both mvd-api and mvd-mcp
 ```
 
-`mvd-mcp` is a thin (~5 MB) stdio MCP server. It has no analytics
-code of its own — every tool call is a forwarded HTTP request to a
-running `mvd-api`. The split lets you ship a small distributable
-binary for end-users (Claude Desktop / Cursor / Claude Code) without
-bundling the parser. See
-[`mvd-mcp/README.md`](mvd-mcp/README.md) and
-[`mvd-mcp/CLAUDE_DESKTOP.md`](mvd-mcp/CLAUDE_DESKTOP.md).
+#### Tool surface
+
+Nine tools, one for discovery and eight for per-demo analytics:
+
+| Tool | Backing |
+|---|---|
+| `searchGames(players, teams, map, mode, matchtag, from, to, limit, offset)` | hub.quakeworld.nu Supabase (direct) |
+| `loadDemo({gameId or sha256})` | `mvd-api` `POST /v1/demos/{id}` |
+| `getOverview(demoId)` | `mvd-api` `GET /v1/demos/{id}/overview` |
+| `getBuckets(demoId, windowMs, fields, reducers, …)` | `mvd-api` `/buckets` |
+| `getEvents(demoId, types, …)` | `mvd-api` `/events` |
+| `getStreamSlice(demoId, from, to, fields, …)` | `mvd-api` `/stream-slice` |
+| `getStateAt(demoId, time, fields, …)` | `mvd-api` `/state-at` |
+| `getLocTrails(demoId, minDwellMs, …)` | `mvd-api` `/loc-trails` |
+| `getRegionControl(demoId, windowMs)` | `mvd-api` `/region-control` |
+
+**Full schemas live in three places:**
+
+- **[`mvd-mcp/README.md`](mvd-mcp/README.md)** — per-tool *input* schemas
+  (parameters, types, defaults). What the MCP SDK exposes via
+  `tools/list`.
+- **[`mvd-api/README.md`](mvd-api/README.md)** — REST endpoint
+  responses, including the `Overview` shape that's unique to the API
+  layer.
+- **[`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md)**
+  — view types (`BucketsView`, `EventsView`, `StreamSliceView`,
+  `StateAtView`, `LocTrailsView`), the field-code vocabulary, the
+  reducer registry, the `RegionControlResult` shape, and the
+  underlying `Result` / `Streams` types. View outputs are the same
+  whether reached via WASM, the CLI, or MCP.
+
+Tool errors come back as MCP `isError: true` results with the upstream
+error message in `TextContent`. The model can read them and recover
+(e.g. call `loadDemo` first when a per-demo tool says `demo_not_found`).
+
+#### Typical session shape
+
+```
+1. searchGames({player: "bps", map: "dm6"})
+     → list of recent matches with rosters, scores, dates.
+       Direct hit on the hub; no mvd-api round-trip.
+
+2. loadDemo({gameId: 12345})
+     → mvd-api fetches MVD bytes, parses, caches.
+       Slow only on cold demos (2–10 s); warm cache is sub-millisecond.
+
+3. getOverview({demoId: "sha:..."}) | getBuckets | getStateAt | ...
+     → analytics for the chosen demo. Fast on warm cache.
+```
+
+If the answer is already in a search-result row (e.g. "what was the
+score?", "who played?"), the agent should stop there — no
+`loadDemo` needed.
+
+#### Architecture
+
+```
+                            ┌─────────────────────────────────────┐
+                            │ hub.quakeworld.nu (Supabase + CDN)  │
+                            └─────────────────┬───────────────────┘
+                                              │
+                            ┌─────────────────┴──────────────────┐
+                            ▼                                    ▼
+                   GET / FTS search                    GET .mvd.gz bytes
+                            │                                    │
+   ┌──────────┐             │                                    │
+   │ mvd-web  │ ────────────┘                                    │
+   └──────────┘                                                  │
+                                                                 │
+                                                          ┌──────┴──────┐
+                                                          │   mvd-api   │
+                                                          │ (parse +    │
+                                                          │  cache +    │
+                                                          │  view)      │
+                                                          └─────┬───────┘
+   ┌──────────┐                                                 │ HTTP REST
+   │ mvd-mcp  │ ◀─── stdio JSON-RPC ─── Claude / Cursor / etc.  │
+   │ (shim)   │ ────────────────────── searchGames ─────────────│
+   │          │ ────────────────────── load/get* ───────────────┘
+   └──────────┘
+```
+
+- **`searchGames`** goes directly to the hub. Discovery is the hub's
+  job — `mvd-api` is narrowly responsible for "given a known
+  `demoId`: fetch bytes, parse, cache, serve view analytics."
+- **`loadDemo` / `get*`** go through `mvd-api`, which talks to the
+  hub only to download `.mvd.gz` bytes (the rest comes from its
+  two-tier on-disk cache).
+- `mvd-web` (the browser UI) uses the same Supabase search path
+  directly — both consumers behave identically against the hub.
+
+#### Authentication
+
+There is none, by design. The QW demo corpus is public, the API is
+read-only, and the Supabase anon key is the same one shipped in the
+web bundle. The optional `-label TAG` flag (or `Authorization: Bearer
+<label>` on `mvd-api`) is **not** validated — it's a non-secret
+request-source tag captured in `mvd-api`'s access log for analytics.
+Common labels: `mcp-claude-desktop`, `claude-code-local`,
+`web-community`.
+
+If real auth ever becomes necessary (abuse / rate-limit enforcement),
+the surface is small enough to add bearer-token validation in
+`mvd-api`'s middleware without changes to the MCP shim.
+
+#### Client setup
+
+The shortest path for each major MCP client:
+
+**Claude Code** — drop a `.mcp.json` in the repo root:
+
+```json
+{
+  "mcpServers": {
+    "mvd-mcp": {
+      "command": "/path/to/mvd-mcp",
+      "args": ["-api", "http://localhost:8080", "-label", "claude-code-local"]
+    }
+  }
+}
+```
+
+Auto-approve tool calls (skip the permission prompt each time) via
+`.claude/settings.local.json`:
+
+```json
+{ "permissions": { "allow": ["mcp__mvd-mcp__*"] } }
+```
+
+**Claude Desktop** — edit `claude_desktop_config.json`
+(`%APPDATA%\Claude\` on Windows, `~/Library/Application Support/Claude/`
+on macOS, `~/.config/Claude/` on Linux):
+
+```json
+{
+  "mcpServers": {
+    "mvd-mcp": {
+      "command": "C:\\Tools\\mvd-mcp.exe",
+      "args": ["-api", "https://mvd-api.example.com", "-label", "mcp-claude-desktop"]
+    }
+  }
+}
+```
+
+Restart the client after editing. See
+[`mvd-mcp/CLAUDE_DESKTOP.md`](mvd-mcp/CLAUDE_DESKTOP.md) for the full
+matrix (proxy vs local-API, Windows SmartScreen / macOS Gatekeeper
+notes, Cursor setup).
+
+#### Distribution
+
+Cross-compile produces unsigned binaries:
+
+```bash
+make build-all-platforms
+# dist/mvd-mcp-linux-amd64
+# dist/mvd-mcp-darwin-amd64
+# dist/mvd-mcp-darwin-arm64
+# dist/mvd-mcp-windows-amd64.exe
+```
+
+For end-users, distribute the platform-matching `mvd-mcp-*` binary
+and the client config snippet. They don't need `mvd-api` locally if
+you operate one publicly; otherwise the shim runs against a local
+`mvd-api` on `localhost:8080`.
+
+Windows SmartScreen / macOS Gatekeeper will warn on first run
+(unsigned binaries). Documented workarounds in
+[`mvd-mcp/CLAUDE_DESKTOP.md`](mvd-mcp/CLAUDE_DESKTOP.md); real
+code-signing is a planned follow-up.
+
+See [`mvd-mcp/README.md`](mvd-mcp/README.md) for the per-tool input
+schemas and the rationale behind keeping the shim small.
 
 Other Makefile targets: `make test`, `make fmt`, `make clean`, `make help`.
 
