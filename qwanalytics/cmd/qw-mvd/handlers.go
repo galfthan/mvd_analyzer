@@ -1,0 +1,368 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"strings"
+
+	"github.com/mvd-analyzer/qwanalytics/analyzer"
+	"github.com/mvd-analyzer/qwanalytics/internal/democache"
+	"github.com/mvd-analyzer/qwanalytics/result"
+	"github.com/mvd-analyzer/qwanalytics/view"
+)
+
+// demoStore is the subset of *democache.Cache the handlers depend on.
+// Tests inject a fake.
+type demoStore interface {
+	GetResult(ctx context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error)
+}
+
+// httpError carries the wire-format error body.
+type httpError struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type errorEnvelope struct {
+	Error httpError `json:"error"`
+}
+
+// writeError emits the error envelope and the appropriate status.
+func writeError(w http.ResponseWriter, status int, code, msg string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(errorEnvelope{Error: httpError{Code: code, Message: msg}})
+}
+
+// writeJSON emits a JSON body with the standard cache headers (set by
+// the caller via the resp.cacheHeader call before invoking writeJSON).
+func writeJSON(w http.ResponseWriter, status int, body any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(body)
+}
+
+// resolveDemo parses the {id} path param, fetches the *Result, and
+// sets the cache headers. Returns (r, meta, ok=true) on success; on
+// failure, writes the error to w and returns ok=false.
+func (s *server) resolveDemo(w http.ResponseWriter, r *http.Request) (*result.Result, democache.CacheMeta, bool) {
+	raw := r.PathValue("id")
+	id, err := democache.ParseDemoID(raw)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_demo_id", err.Error())
+		return nil, democache.CacheMeta{}, false
+	}
+	res, meta, err := s.store.GetResult(r.Context(), id)
+	if err != nil {
+		mapStoreError(w, err)
+		return nil, democache.CacheMeta{}, false
+	}
+	setCacheHeaders(w, meta)
+	// Honor If-None-Match for cheap 304s.
+	etag := fmt.Sprintf(`"%s-v%d"`, meta.SHA256, meta.SchemaVersion)
+	if match := r.Header.Get("If-None-Match"); match != "" && strings.Contains(match, etag) {
+		w.WriteHeader(http.StatusNotModified)
+		return nil, meta, false
+	}
+	return res, meta, true
+}
+
+func mapStoreError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, democache.ErrInvalidDemoID):
+		writeError(w, http.StatusBadRequest, "invalid_demo_id", err.Error())
+	case errors.Is(err, democache.ErrDemoNotFound):
+		writeError(w, http.StatusNotFound, "demo_not_found", err.Error())
+	case errors.Is(err, democache.ErrHubUpstream):
+		writeError(w, http.StatusBadGateway, "hub_upstream", err.Error())
+	default:
+		writeError(w, http.StatusInternalServerError, "internal", err.Error())
+	}
+}
+
+func setCacheHeaders(w http.ResponseWriter, meta democache.CacheMeta) {
+	w.Header().Set("Cache-Control", "public, max-age=86400, immutable")
+	w.Header().Set("X-Schema-Version", fmt.Sprintf("%d", meta.SchemaVersion))
+	switch {
+	case meta.FromCache:
+		w.Header().Set("X-Cache", "HIT")
+	case meta.FromMVDTier:
+		w.Header().Set("X-Cache", "WARM")
+	default:
+		w.Header().Set("X-Cache", "MISS")
+	}
+	w.Header().Set("ETag", fmt.Sprintf(`"%s-v%d"`, meta.SHA256, meta.SchemaVersion))
+}
+
+// --- Endpoint handlers ---
+
+func (s *server) handleHealth(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]any{
+		"ok":            true,
+		"schemaVersion": result.CurrentSchemaVersion,
+	})
+}
+
+func (s *server) handleVersion(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]string{
+		"hash":      GitHash,
+		"tag":       GitTag,
+		"buildDate": BuildDate,
+	})
+}
+
+// handleLoad: POST /v1/demos/{id} — warm the cache for an id and
+// return identity metadata. Idempotent.
+func (s *server) handleLoad(w http.ResponseWriter, r *http.Request) {
+	raw := r.PathValue("id")
+	id, err := democache.ParseDemoID(raw)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_demo_id", err.Error())
+		return
+	}
+	_, meta, err := s.store.GetResult(r.Context(), id)
+	if err != nil {
+		mapStoreError(w, err)
+		return
+	}
+	setCacheHeaders(w, meta)
+	writeJSON(w, http.StatusOK, map[string]any{
+		"demoId":        "sha:" + meta.SHA256,
+		"sha256":        meta.SHA256,
+		"fromCache":     meta.FromCache,
+		"schemaVersion": meta.SchemaVersion,
+	})
+}
+
+func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	writeJSON(w, http.StatusOK, BuildOverview(res))
+}
+
+func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	q := r.URL.Query()
+	windowMs, err := parseInt(q, "windowMs", 50)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	start, err := parseFloat(q, "from", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	end, err := parseFloat(q, "to", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	reducers, err := parseReducers(q.Get("reducers"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	opts := view.BucketsOptions{
+		WindowMs:    windowMs,
+		StartTime:   start,
+		EndTime:     end,
+		Players:     parseCSV(q.Get("players")),
+		Fields:      parseCSV(q.Get("fields")),
+		Reducers:    reducers,
+		IncludeTeam: parseBool(q, "includeTeam"),
+	}
+	bv, err := view.Buckets(res, opts)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "view_error", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, bv)
+}
+
+func (s *server) handleEvents(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	q := r.URL.Query()
+	start, err := parseFloat(q, "from", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	end, err := parseFloat(q, "to", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	filter := view.EventsFilter{
+		StartTime: start,
+		EndTime:   end,
+		Players:   parseCSV(q.Get("players")),
+		Types:     parseCSV(q.Get("types")),
+	}
+	ev, err := view.Events(res, filter)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "view_error", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, ev)
+}
+
+func (s *server) handleStreamSlice(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	q := r.URL.Query()
+	start, err := parseFloat(q, "from", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	end, err := parseFloat(q, "to", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	opts := view.StreamSliceOptions{
+		StartTime: start,
+		EndTime:   end,
+		Players:   parseCSV(q.Get("players")),
+		Fields:    parseCSV(q.Get("fields")),
+	}
+	sl, err := view.StreamSlice(res, opts)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "view_error", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, sl)
+}
+
+func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	q := r.URL.Query()
+	if q.Get("time") == "" {
+		writeError(w, http.StatusBadRequest, "missing_param", "time is required")
+		return
+	}
+	t, err := parseFloat(q, "time", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	opts := view.StateAtOptions{
+		Time:    t,
+		Players: parseCSV(q.Get("players")),
+		Fields:  parseCSV(q.Get("fields")),
+	}
+	sa, err := view.StateAt(res, opts)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "view_error", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, sa)
+}
+
+func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	q := r.URL.Query()
+	start, err := parseFloat(q, "from", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	end, err := parseFloat(q, "to", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	minDwell, err := parseInt(q, "minDwellMs", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	opts := view.LocTrailsOptions{
+		Players:    parseCSV(q.Get("players")),
+		MinDwellMs: minDwell,
+		StartTime:  start,
+		EndTime:    end,
+	}
+	tr, err := view.LocTrails(res, opts)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "view_error", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, tr)
+}
+
+func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if res.TimelineAnalysis == nil || res.TimelineAnalysis.RegionControl == nil {
+		writeError(w, http.StatusUnprocessableEntity, "region_control_unavailable", "this demo has no region-control layout")
+		return
+	}
+	q := r.URL.Query()
+	windowMs, err := parseInt(q, "windowMs", 50)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	rc := res.TimelineAnalysis.RegionControl
+	teamOf := func(name string) string {
+		if res.Match == nil {
+			return ""
+		}
+		for _, p := range res.Match.Players {
+			if p.Name == name {
+				return p.Team
+			}
+		}
+		return ""
+	}
+	rcv, err := view.RegionControl(
+		res, rc.Regions, rc.TeamA, rc.TeamB,
+		teamOf, analyzer.ComputeRegionControl,
+		view.RegionControlOptions{WindowMs: windowMs},
+	)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "view_error", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, rcv)
+}
+
+// recoverMiddleware turns a panic into a 500 + slog error line so a
+// single buggy handler can't take down the server.
+func recoverMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if rec := recover(); rec != nil {
+				logger.Error("panic in handler",
+					"method", r.Method, "path", r.URL.Path, "panic", rec)
+				writeError(w, http.StatusInternalServerError, "panic", fmt.Sprintf("%v", rec))
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}

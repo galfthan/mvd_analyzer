@@ -111,37 +111,50 @@ When this lands, the WASM bridge's `getDefaultBuckets` shim and the
 legacy-shape types in `view/legacy.go` become dead code and can be
 deleted.
 
-## Phase 2 — hosted REST API + MCP server
+## Phase 2 — hosted REST API + MCP server (landed)
 
-[Plan v3 §11.1](PLAN-event-streams-and-views-v3.md). Intent only — no
-detailed design yet.
+Implemented at [`qwanalytics/cmd/qw-mvd/`](qwanalytics/cmd/qw-mvd/).
+The binary has three subcommands: `serve` (HTTP REST), `mcp` (stdio
+MCP, local), and `mcp -api URL` (stdio MCP proxy → hosted serve).
+The Plan-v3 §11.1 scope (transports = stdio MCP + REST only; intake =
+hub gameId only; cache = two-tier disk; CLI = serve/mcp only) landed
+verbatim. See [`qwanalytics/cmd/qw-mvd/README.md`](qwanalytics/cmd/qw-mvd/README.md).
 
-**Goal**: open the analytics surface to non-Go / hosted consumers
-(AI agents via MCP, third-party integrations via REST, future web
-frontends that benefit from server-side caching).
+`make serve` (the WASM web app) is unchanged.
 
-**Rough shape**:
+### qw-mvd v1 follow-ups
 
-- Single binary `qw-mvd` with subcommands:
-  - `qw-mvd serve` — HTTP REST API
-  - `qw-mvd mcp` — MCP over stdio (local mode, imports view package directly)
-  - `qw-mvd mcp --api URL` — MCP shim that proxies to a remote `serve`
-- All subcommands shim over `qwanalytics/view/` — no transport
-  reimplements analytics.
-- Cache module under `qwanalytics/internal/democache/` — two-tier
-  (raw MVD bytes content-hashed; parsed `*Result` schema-versioned).
-  Schema bumps invalidate the result tier but keep the MVD tier;
-  reparse on next access, no re-fetch from hub.
-- Non-secret traffic-label tokens (e.g. `web-community`,
-  `mcp-claude`, `cli-script`) for request-source analytics, not auth.
-  Open access in v1.
-- Tool / endpoint surface: `loadDemo`, `getOverview`, `getBuckets`,
-  `getEvents`, `getStreamSlice`, `getStateAt`, `getLocTrails`,
-  `getRegionControl`. Demo identity = hub gameId for hub URLs,
-  SHA-256 for uploads. `loadDemo` idempotent.
-
-**`make serve` is unchanged in this phase** — the existing WASM web
-app stays as-is; the API serves a different audience.
+- **No cache eviction.** Tier 1 + tier 2 grow without bound. Ship
+  a `qw-mvd cache prune --older-than 30d` (or similar) subcommand
+  before the cache becomes a real ops problem.
+- **No pre-rendered view tier.** Every REST hit recomputes the view
+  from the cached `*Result`. If a hot `(demoId, view, opts)` tuple
+  shows up in access logs at meaningful rate, add the third tier
+  keyed by `(demoId, schemaVersion, view, optsHash)`.
+- **No rate limiting.** Labels are recorded for analytics but not
+  acted on. Add per-label / per-IP token bucket if abuse appears.
+- **No release pipeline.** `make build-mvd-all` produces binaries
+  locally; wire a GitHub Actions workflow that attaches them to
+  releases.
+- **Windows code-signing.** Unsigned `.exe` triggers SmartScreen.
+  Either accept the warning (documented in `CLAUDE_DESKTOP.md`) or
+  obtain an Authenticode cert.
+- **No remote MCP transport.** Streamable HTTP MCP isn't exposed.
+  Once a specific MCP client demands it, add a `/mcp` route that
+  uses the SDK's HTTP handler — open access remains acceptable for
+  public read-only data, but the MCP spec is moving toward an OAuth
+  protected-resource convention, so plan for `.well-known/oauth-
+  protected-resource` if real auth is needed.
+- **No streaming responses for huge views.** A 4on4 buckets call at
+  50ms can exceed 10 MB; encoded as a single JSON document. Move to
+  newline-delimited JSON or chunked responses if a client chokes.
+- **Toolchain bump.** Pulling in `github.com/modelcontextprotocol/
+  go-sdk` v1.6 required Go 1.25; `go.work` and `qwanalytics/go.mod`
+  pin via the `toolchain` directive (`go1.25.0`). Older Go versions
+  fetch the toolchain automatically via `GOTOOLCHAIN=auto`. Workspace-
+  internal modules now have explicit `replace` directives in
+  `qw-web/go.mod` and `qwanalytics/go.mod` so `go mod tidy` resolves
+  without contacting github.com.
 
 ## Phase 3 — cross-demo / corpus tools
 

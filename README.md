@@ -73,6 +73,23 @@ make serve                                  # http://localhost:8080
 make build                                  # output in dist/
 ```
 
+### Serve the REST + MCP API (`qw-mvd`)
+
+```bash
+make build-mvd                              # ./dist/qw-mvd
+./dist/qw-mvd serve -addr :8080             # HTTP REST API on top of the view package
+./dist/qw-mvd mcp                           # stdio MCP server, local mode
+./dist/qw-mvd mcp -api https://...          # stdio MCP proxy → hosted serve
+make build-mvd-all                          # cross-compile for linux/darwin/windows
+```
+
+`qw-mvd` exposes the analytics surface to non-Go / hosted consumers
+(AI agents via MCP, third-party integrations via REST). See
+[`qwanalytics/cmd/qw-mvd/README.md`](qwanalytics/cmd/qw-mvd/README.md)
+for the endpoint table and tool list, and
+[`qwanalytics/cmd/qw-mvd/CLAUDE_DESKTOP.md`](qwanalytics/cmd/qw-mvd/CLAUDE_DESKTOP.md)
+for Claude Desktop wiring.
+
 Other Makefile targets: `make test`, `make fmt`, `make clean`, `make help`.
 
 ## The contracts
@@ -196,8 +213,11 @@ mvd-analyzer/
       bsp/                  Quake 1 BSP reader (+ entities lump decoder)
       mapgeom/              Floor-face extraction
     diagnostic/             Opt-in bulk validation harness
+    internal/democache/     Two-tier disk cache (raw MVD + parsed Result) for qw-mvd
+    internal/hubfetch/      Resolve + download from hub.quakeworld.nu
     cmd/mapgen/             Developer tool: BSP -> per-loc floor-polygon JSON
     cmd/qw-analyze/         CLI: demo -> json|md|events
+    cmd/qw-mvd/             REST + stdio MCP server on top of qwanalytics/view
 
   qw-web/                   Module: browser UX + WASM glue
     static/                 index.html, app.js, worker.js, styles.css, maps/
