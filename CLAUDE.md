@@ -16,20 +16,20 @@ The docs that matter, in priority order:
 | Doc | Scope |
 |---|---|
 | [`README.md`](README.md) | Top-level: architecture, event list, result schema shape, repo layout, known limitations |
-| [`qwdemo/README.md`](qwdemo/README.md) | Layer 1: event table + derivation notes, Source implementation guide |
-| [`qwanalytics/README.md`](qwanalytics/README.md) | Layer 2: registered analyzers, Result schema, how to add an analyzer, MH / items semantics |
-| [`qw-web/README.md`](qw-web/README.md) | Layer 3: build targets, dist/ layout, map-tab overlay behaviour, loc corpus fetch |
-| [`qwdemo/MVD_FORMAT.md`](qwdemo/MVD_FORMAT.md) | MVD binary format reference — every svc_* we decode, entity-state item tracking, derived events, ezquake/mvdsv line refs |
+| [`mvd-reader/README.md`](mvd-reader/README.md) | Layer 1: event table + derivation notes, Source implementation guide |
+| [`mvd-analytics/README.md`](mvd-analytics/README.md) | Layer 2: registered analyzers, Result schema, how to add an analyzer, MH / items semantics |
+| [`mvd-web/README.md`](mvd-web/README.md) | Layer 3: build targets, dist/ layout, map-tab overlay behaviour, loc corpus fetch |
+| [`mvd-reader/MVD_FORMAT.md`](mvd-reader/MVD_FORMAT.md) | MVD binary format reference — every svc_* we decode, entity-state item tracking, derived events, ezquake/mvdsv line refs |
 
 **When you add a new feature or event type**, update:
 1. The relevant layer's README (event table, result schema, or UI docs).
-2. `qwdemo/MVD_FORMAT.md` if the feature touches the wire protocol, entity
+2. `mvd-reader/MVD_FORMAT.md` if the feature touches the wire protocol, entity
    state, KTX protocol, or hidden messages.
 3. The top-level README's event list, result-schema blurb, and known-
    limitations list if consumers can see the change.
 
 **When you change the schema**, bump `CurrentSchemaVersion` in
-`qwanalytics/result/result.go` and mention the bump in the commit message.
+`mvd-analytics/result/result.go` and mention the bump in the commit message.
 
 **When you delete or move files**, fix every README / doc cross-reference
 that pointed at them. `grep -r` before committing.
@@ -42,17 +42,17 @@ future reader can find it.
 
 Three modules in a Go workspace (`go.work`):
 
-- **`qwdemo/` (Layer 1)** owns the MVD wire format. `events/` is the
+- **`mvd-reader/` (Layer 1)** owns the MVD wire format. `events/` is the
   public contract; `parser/` does the decoding; `source/mvd/` wraps it
-  in the Source iterator interface. No `qwanalytics` or `qw-web`
+  in the Source iterator interface. No `mvd-analytics` or `mvd-web`
   imports allowed here.
-- **`qwanalytics/` (Layer 2)** takes an `events.Source` and produces a
+- **`mvd-analytics/` (Layer 2)** takes an `events.Source` and produces a
   `result.Result`. `result/` is the stable JSON contract. `analyzer/`
   implements each sub-analyzer. Nothing here reaches into MVD bytes —
   everything flows through events.
-- **`qw-web/` (Layer 3)** is one consumer of Result. The WASM entry
+- **`mvd-web/` (Layer 3)** is one consumer of Result. The WASM entry
   is in `cmd/wasm/`; the static frontend is in `static/`. Nothing
-  qwdemo or qwanalytics imports from here.
+  mvd-reader or mvd-analytics imports from here.
 
 Put logic in the lowest layer that can express it. Protocol-level signals
 (entity state, health transitions) belong in the parser. Cross-event
@@ -69,33 +69,33 @@ belongs in the frontend.
 - Match existing code style — no new lint configs, no reformatting
   of untouched files.
 - **Always run tests.** `make test` (which runs
-  `go test ./qwdemo/... ./qwanalytics/... ./qw-web/...`) before every
+  `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-web/...`) before every
   commit, no exceptions for "trivial" changes. If a test you don't
   understand fails, surface it — don't skip it.
 - Tests come in three layers:
   1. **Unit tests** alongside the code (`*_test.go`). Coverage spans
-     `qwdemo/parser/` (KTX pickup/drop/print, stats, userinfo),
-     `qwanalytics/analyzer/` (backpacks, duel normalisation, items,
+     `mvd-reader/parser/` (KTX pickup/drop/print, stats, userinfo),
+     `mvd-analytics/analyzer/` (backpacks, duel normalisation, items,
      loc graph, metadata, obituaries, pickup invariants, timeline +
-     blip filter, weapon pickups), `qwanalytics/internal/hubfetch/`,
-     and `qwanalytics/mapgen/{bsp,mapgeom}/`.
-  2. **Golden corpus** — `qwanalytics/analyzer/golden_test.go` reads
-     `qwanalytics/testdata/corpus.json` (a manifest of hub.quakeworld.nu
+     blip filter, weapon pickups), `mvd-analytics/internal/hubfetch/`,
+     and `mvd-analytics/mapgen/{bsp,mapgeom}/`.
+  2. **Golden corpus** — `mvd-analytics/analyzer/golden_test.go` reads
+     `mvd-analytics/testdata/corpus.json` (a manifest of hub.quakeworld.nu
      gameIds), fetches each demo on first run into
-     `qwanalytics/testdata/cache/` (gitignored), and pins the full
-     pipeline output to `qwanalytics/testdata/golden/<label>.json`
+     `mvd-analytics/testdata/cache/` (gitignored), and pins the full
+     pipeline output to `mvd-analytics/testdata/golden/<label>.json`
      (committed). Steady-state runs are offline.
-  3. **Diagnostic harness** in `qwanalytics/diagnostic/` —
+  3. **Diagnostic harness** in `mvd-analytics/diagnostic/` —
      `TestDiagnosticParseDemos` runs every `.mvd` / `.mvd.gz` dropped
      into its `testdata/` through the parser in warning-collecting
      mode and applies data-quality invariants on the result. No-op
      when no demos are present.
 - If the golden test fails on an intended change, regenerate with
-  `go test ./qwanalytics/analyzer/... -run TestGoldenCorpus -args -update-golden`
+  `go test ./mvd-analytics/analyzer/... -run TestGoldenCorpus -args -update-golden`
   (the `-update-golden` flag is registered only in the analyzer
-  package — wider scopes like `./qwanalytics/...` fail in `mapgen`
+  package — wider scopes like `./mvd-analytics/...` fail in `mapgen`
   with "flag provided but not defined") and commit the regenerated
-  `qwanalytics/testdata/golden/*.json` together with the code change.
+  `mvd-analytics/testdata/golden/*.json` together with the code change.
 
 ## Surface authoritative data, don't filter
 
@@ -139,7 +139,7 @@ at the top of this repo. Memory pointer: see
   above). For deeper sanity-checking on non-trivial work, also run a
   sample analysis: the demos under `demos/` are the regression corpus,
   and a quick
-  `go run ./qwanalytics/cmd/qw-analyze -format json demos/broken.mvd.gz`
+  `go run ./mvd-analytics/cmd/qw-analyze -format json demos/broken.mvd.gz`
   catches most categories of break that unit tests miss.
 - **Don't commit generated artefacts** (`mapgen` binary, `dist/`).
   Those are in `.gitignore` — don't route around.
@@ -151,5 +151,5 @@ at the top of this repo. Memory pointer: see
 Build everything: `make build`
 Serve the web UI: `make serve`
 Run all tests: `make test`
-Regenerate map geometry: `go run ./qwanalytics/cmd/mapgen -bsp-dir /path/to/bsps -verbose`
-Analyze one demo: `go run ./qwanalytics/cmd/qw-analyze -format json demos/X.mvd.gz | jq`
+Regenerate map geometry: `go run ./mvd-analytics/cmd/mapgen -bsp-dir /path/to/bsps -verbose`
+Analyze one demo: `go run ./mvd-analytics/cmd/qw-analyze -format json demos/X.mvd.gz | jq`

@@ -1,0 +1,98 @@
+package main
+
+import "context"
+
+// MCPBackend is the contract every MCP tool handler depends on. The
+// proxy backend below implements it by forwarding HTTP calls to a
+// running mvd-api. By design the shim is independent of mvd-analytics
+// — view-shaped outputs are passed through as opaque JSON (`any`) so
+// the binary stays small and the wire contract is owned by mvd-api.
+type MCPBackend interface {
+	LoadDemo(ctx context.Context, in LoadDemoInput) (*LoadDemoOutput, error)
+	GetOverview(ctx context.Context, in GetOverviewInput) (any, error)
+	GetBuckets(ctx context.Context, in GetBucketsInput) (any, error)
+	GetEvents(ctx context.Context, in GetEventsInput) (any, error)
+	GetStreamSlice(ctx context.Context, in GetStreamSliceInput) (any, error)
+	GetStateAt(ctx context.Context, in GetStateAtInput) (any, error)
+	GetLocTrails(ctx context.Context, in GetLocTrailsInput) (any, error)
+	GetRegionControl(ctx context.Context, in GetRegionControlInput) (any, error)
+}
+
+// --- Tool input/output structs ---
+//
+// Each Input mirrors the corresponding REST query params (the API is
+// the source of truth for parameter names and defaults). LoadDemoOutput
+// is the one structured output kept here, since the model needs the
+// resolved demoId from it to drive subsequent tool calls.
+
+// LoadDemoInput identifies a demo by exactly one of GameID or SHA256.
+type LoadDemoInput struct {
+	GameID int    `json:"gameId,omitempty" jsonschema:"hub.quakeworld.nu game id (exactly one of gameId or sha256 required)"`
+	SHA256 string `json:"sha256,omitempty" jsonschema:"SHA-256 of a previously-resolved demo (mostly for bookmarking warm cache entries)"`
+}
+
+// LoadDemoOutput mirrors POST /v1/demos/{id} on mvd-api.
+type LoadDemoOutput struct {
+	DemoID        string `json:"demoId"`
+	SHA256        string `json:"sha256"`
+	FromCache     bool   `json:"fromCache"`
+	SchemaVersion int    `json:"schemaVersion"`
+}
+
+// GetOverviewInput is just a demoId reference (gameId:N or sha:HEX).
+type GetOverviewInput struct {
+	DemoID string `json:"demoId" jsonschema:"the demo id from loadDemo: 'gameId:NNNN' or 'sha:HEX'"`
+}
+
+// GetBucketsInput mirrors /v1/demos/{id}/buckets query params.
+type GetBucketsInput struct {
+	DemoID      string            `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	WindowMs    int               `json:"windowMs,omitempty" jsonschema:"bucket size in ms; default 50"`
+	StartTime   float64           `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds"`
+	EndTime     float64           `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds"`
+	Players     []string          `json:"players,omitempty"`
+	Fields      []string          `json:"fields,omitempty" jsonschema:"field codes (h, a, rl, lg, ...). Empty = all standard fields"`
+	Reducers    map[string]string `json:"reducers,omitempty" jsonschema:"per-field reducer override, e.g. {\"h\":\"min\"}"`
+	IncludeTeam bool              `json:"includeTeam,omitempty"`
+}
+
+// GetEventsInput mirrors /v1/demos/{id}/events query params.
+type GetEventsInput struct {
+	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	StartTime float64  `json:"startTime,omitempty"`
+	EndTime   float64  `json:"endTime,omitempty"`
+	Players   []string `json:"players,omitempty"`
+	Types     []string `json:"types,omitempty" jsonschema:"event types: frag, powerup, streak, spawn, death, weapon, item, chat, loc, health, armor"`
+}
+
+// GetStreamSliceInput mirrors /v1/demos/{id}/stream-slice query params.
+type GetStreamSliceInput struct {
+	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	StartTime float64  `json:"startTime,omitempty"`
+	EndTime   float64  `json:"endTime,omitempty"`
+	Players   []string `json:"players,omitempty"`
+	Fields    []string `json:"fields,omitempty"`
+}
+
+// GetStateAtInput mirrors /v1/demos/{id}/state-at query params.
+type GetStateAtInput struct {
+	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Time    float64  `json:"time" jsonschema:"required; match-relative seconds"`
+	Players []string `json:"players,omitempty"`
+	Fields  []string `json:"fields,omitempty"`
+}
+
+// GetLocTrailsInput mirrors /v1/demos/{id}/loc-trails query params.
+type GetLocTrailsInput struct {
+	DemoID     string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Players    []string `json:"players,omitempty"`
+	MinDwellMs int      `json:"minDwellMs,omitempty"`
+	StartTime  float64  `json:"startTime,omitempty"`
+	EndTime    float64  `json:"endTime,omitempty"`
+}
+
+// GetRegionControlInput mirrors /v1/demos/{id}/region-control query params.
+type GetRegionControlInput struct {
+	DemoID   string `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	WindowMs int    `json:"windowMs,omitempty" jsonschema:"bucket size for per-region state strings; default 50"`
+}
