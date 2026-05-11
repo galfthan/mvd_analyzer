@@ -76,10 +76,10 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerU
 				deathT = deaths[di]
 				di++
 			} else {
-				// No death found - run extends to end of match
-				if len(a.buckets) > 0 {
-					deathT = a.buckets[len(a.buckets)-1].endTime
-				}
+				// No death found - run extends to match end (from
+				// the timing detector). 0 falls through to the
+				// no-frags-skip below.
+				deathT = a.timing.EndTime
 			}
 			if deathT > spawnT {
 				runs = append(runs, run{

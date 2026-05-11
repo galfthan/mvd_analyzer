@@ -135,9 +135,15 @@ backpacks (RL/LG drops attributed to the dropping player via KTX's
 `//ktx drop` hint), and weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==
-`backpacks[].entNum`).
+`backpacks[].entNum`). At schema v7 `streams` is the canonical
+event-rate storage — every per-player field (vitals, weapons, ammo,
+position) recorded at the rate it actually changed. Bucketed,
+event-list, and point-in-time views are produced on demand by the
+`qwanalytics/view` query API (also surfaced via the CLI's `-view`
+flag and the WASM bridge's `getBuckets` / `getEvents` /
+`getStreamSlice` / `getStateAt` exports).
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `6`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `7`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [qwanalytics/RESULT_SCHEMA.md](qwanalytics/RESULT_SCHEMA.md).
@@ -227,13 +233,18 @@ On first run it downloads each demo into
 hit the cache and stay offline. Each demo's `Result` JSON is pinned
 against `qwanalytics/testdata/golden/<label>.json`.
 
-What is pinned: everything except `filePath` and a sliced
-`timelineAnalysis.highResBuckets`. The full 50 ms position track
-runs ~20 MB per 4on4 demo and most of it is redundant for regression
-detection, so `canonicalJSON` keeps three 15 s windows — `[0, 15]`,
-`[60, 75]`, and the trailing 15 s — enough sampling to catch
-bucketer / position-extractor drift while keeping the committed
-corpus around 18 MB total.
+What is pinned: everything except `filePath`. At schema v7 the
+canonical event-rate storage is `streams` (per-player change streams +
+intervals + native position track) — bucketed views are produced on
+demand by `qwanalytics/view.Buckets` and not stored. Per-player time
+series in `streams.players[]` are sliced to three 15 s windows
+(`[0, 15]`, `[60, 75]`, last 15 s) before comparison — the native
+position track alone would otherwise run ~10 MB per 4on4 demo and
+swamp the git history (see [`golden_test.go`](qwanalytics/analyzer/golden_test.go)
+`sampleStreams`). The three windows are enough sampling to catch
+stream-emitter / bucketer drift while keeping the committed corpus
+~4 MB per 4on4. Bucketed-view behavior is exercised through the unit
+tests in `qwanalytics/view/equivalence_test.go`.
 
 The manifest ships with nine demos (three each of 1on1, 2on2, 4on4).
 Add entries by appending to the JSON array; labels follow

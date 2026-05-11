@@ -1,18 +1,21 @@
 package result
 
-// TimelineAnalysisResult contains time-bucketed data for timeline visualization.
+// TimelineAnalysisResult contains the event-shaped derived results
+// (frag events, powerup events, streaks) plus the loc / region
+// metadata needed to interpret per-player data in result.Streams.
+//
+// HighResBuckets and HighResDuration were deleted at schema v7;
+// bucketed data is now produced on demand by qwanalytics/view.Buckets.
 type TimelineAnalysisResult struct {
-	HighResDuration float64              `json:"highResDuration,omitempty"` // Seconds per high-res bucket (0.05s)
-	MatchStartTime  float64              `json:"matchStartTime"`            // When match actually started (after warmup)
-	DemoOffset      float64              `json:"demoOffset,omitempty"`      // Seconds from demo start to match start (for Hub viewer links)
-	HighResBuckets  []HighResBucket      `json:"highResBuckets,omitempty"`  // High-res buckets with per-player and per-team data
-	FragEvents      []TimelineFragEvent  `json:"fragEvents,omitempty"`      // Frag events for score timeline
-	PowerupEvents   []PowerupEvent       `json:"powerupEvents,omitempty"`   // Powerup pickups for Key Moments
-	FragStreaks     []FragStreakEvent    `json:"fragStreaks,omitempty"`     // Top longest frag streaks for Key Moments
-	LocationData    []MapLocation        `json:"locationData,omitempty"`    // Location points from .loc file for map view
-	LocTable        []string             `json:"locTable,omitempty"`        // Interned loc names; index 0 is "" sentinel.
-	PlayerUserIDs   map[string]int       `json:"playerUserIDs,omitempty"`   // Player name -> UserID for Hub viewer links
-	RegionControl   *RegionControlResult `json:"regionControl,omitempty"`   // Region control stats
+	MatchStartTime float64              `json:"matchStartTime"`          // When match actually started (after warmup)
+	DemoOffset     float64              `json:"demoOffset,omitempty"`    // Seconds from demo start to match start (for Hub viewer links)
+	FragEvents     []TimelineFragEvent  `json:"fragEvents,omitempty"`    // Frag events for score timeline
+	PowerupEvents  []PowerupEvent       `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
+	FragStreaks    []FragStreakEvent    `json:"fragStreaks,omitempty"`   // Top longest frag streaks for Key Moments
+	LocationData   []MapLocation        `json:"locationData,omitempty"`  // Location points from .loc file for map view
+	LocTable       []string             `json:"locTable,omitempty"`      // Interned loc names; index 0 is "" sentinel.
+	PlayerUserIDs  map[string]int       `json:"playerUserIDs,omitempty"` // Player name -> UserID for Hub viewer links
+	RegionControl  *RegionControlResult `json:"regionControl,omitempty"` // Region control stats
 }
 
 // ControlRegion represents a named area on the map for control tracking.
@@ -31,10 +34,15 @@ type ControlRegion struct {
 }
 
 // RegionControlResult contains region definitions plus per-bucket and
-// match-aggregate control state computed by analyzer.ComputeRegionControl.
+// match-aggregate control state. At schema v7 the per-bucket
+// BucketStates field is no longer baked into the default result —
+// callers that want it ask for it via view.RegionControl(opts) or the
+// WASM bridge's recomputeRegionControl, which derive it at the
+// requested resolution from result.Streams.
 //
-// BucketStates is a compact representation: one ASCII char per
-// HighResBucket per region. Codes mirror classifyRegionState in
+// BucketStates may still be populated by query-time results (the
+// JSON shape is unchanged when the field is present): one ASCII char
+// per bucket per region. Codes mirror classifyRegionState in
 // qw-web/static/app.js:
 //
 //	'_'  empty (no living players)

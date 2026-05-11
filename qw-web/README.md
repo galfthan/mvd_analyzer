@@ -6,9 +6,15 @@ talks to it through a JS shim.
 
 ## What's in the box
 
-- `cmd/wasm/` — WASM entry point. Exports a single `analyzeMVD(bytes,
-  filename)` function to the JS global scope; everything else in the
-  pipeline is in qwanalytics.
+- `cmd/wasm/` — WASM entry point. Exports `analyzeMVD(bytes, filename)`
+  for the parse-and-pin call, plus the schema-v7 query API as bridge
+  functions: `getDefaultBuckets()` (legacy 50 ms []HighResBucket shape
+  for the existing panels), `getBuckets(optsJSON)`,
+  `getEvents(filterJSON)`, `getStreamSlice(optsJSON)`,
+  `getStateAt(optsJSON)`, `getLocTrails(optsJSON)`, and
+  `recomputeRegionControl(regionsJSON)`. All take a JSON-string argument
+  (or none for `getDefaultBuckets`) and return a JSON string; under the
+  hood they call into `qwanalytics/view` over the cached `lastResult`.
 - `static/` — the browser frontend.
   - `index.html`, `styles.css`, `app.js` — main page and the tabbed
     analyzer UI (scoreboard, timeline, map, chat, loc graph, ...).
@@ -73,10 +79,22 @@ strip above the main pane.
    URL, or picks a row from the search results.
 2. `app.js` hands the bytes to `worker.js` via `postMessage`.
 3. The worker calls `analyzeMVD(bytes, filename)` on the WASM instance.
-4. WASM code (`cmd/wasm/main.go`) runs the qwanalytics default pipeline,
-   marshals the Result to JSON, returns it as a string.
-5. Worker sends the JSON back to `app.js`, which clears the no-demo
-   class, switches to the Summary tab, and renders across the tabs.
+4. WASM code (`cmd/wasm/main.go`) runs the qwanalytics default pipeline
+   and marshals the Result to JSON. The worker then runs two
+   schema-v7 bridge calls — `getDefaultBuckets()` (builds the legacy
+   50 ms []HighResBucket array via `view.Buckets`) and
+   `recomputeRegionControl(defaults)` (region-control bucket states
+   at 50 ms) — and bundles both JSON blobs into the result message.
+   These extras exist because the existing frontend panels still
+   read `result.timelineAnalysis.highResBuckets` and
+   `.regionControl.bucketStates` synchronously; Phase 1.5 (per-panel
+   `getBuckets({windowMs})` calls) will drop the bridge step.
+5. Worker sends the bundled message back to `app.js`. `analyzeInWorker`
+   parses the result JSON, stashes the bridge outputs onto
+   `result.timelineAnalysis.highResBuckets` /
+   `.regionControl.bucketStates`, then resolves the promise. `app.js`
+   clears the no-demo class, switches to the Summary tab, and
+   renders across the tabs.
 
 The WASM boundary is the only place that bridges Go and JS. The rest of
 the frontend is dependency-free JS plus a sprinkle of CSS.

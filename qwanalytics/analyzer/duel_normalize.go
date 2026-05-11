@@ -113,63 +113,15 @@ func normalizeDuelTeams(result *Result) {
 		result.Match.Teams = teams
 	}
 
-	// Rebuild high-res bucket team data (TD) for duel mode. The original
-	// TD was built during Finalize with the pre-normalization team names,
-	// and players with team="" (e.g., bots) were skipped entirely. Rebuild
-	// from the per-player data (P) using the synthetic name→name teams.
-	if result.TimelineAnalysis != nil {
-		for i := range result.TimelineAnalysis.HighResBuckets {
-			hb := &result.TimelineAnalysis.HighResBuckets[i]
-			if len(hb.P) == 0 {
-				continue
+	// Rewrite per-stream team labels. Bots that played without a real
+	// team string get a synthetic team set to their own name (matching
+	// the rule applied to MatchPlayers / DemoInfo above).
+	if result.Streams != nil {
+		for i := range result.Streams.Players {
+			p := &result.Streams.Players[i]
+			if t, ok := nameToTeam[p.Name]; ok {
+				p.Team = t
 			}
-			newTD := make(map[string]*HighResTeamData, 2)
-			for name, pd := range hb.P {
-				team, ok := nameToTeam[name]
-				if !ok {
-					continue
-				}
-				td := newTD[team]
-				if td == nil {
-					td = &HighResTeamData{}
-					newTD[team] = td
-				}
-				// Weapon categories (mutually exclusive)
-				switch {
-				case pd.RL && pd.LG:
-					td.RLLG++
-					td.W++
-				case pd.RL:
-					td.RL++
-					td.W++
-				case pd.LG:
-					td.LG++
-					td.W++
-				}
-				// Powerups
-				if pd.Q {
-					td.Q++
-					td.Pw++
-				}
-				if pd.Pent {
-					td.Pe++
-					td.Pw++
-				}
-				if pd.R {
-					td.R++
-					td.Pw++
-				}
-				// Vitals
-				td.TH += pd.H
-				td.TA += pd.A
-				if pd.AT != "" {
-					if td.ABT == nil {
-						td.ABT = make(map[string]int)
-					}
-					td.ABT[pd.AT]++
-				}
-			}
-			hb.TD = newTD
 		}
 	}
 

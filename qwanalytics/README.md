@@ -8,7 +8,9 @@ that downstream consumers render, summarise, or feed to an agent.
 
 - `result/` — the **stable JSON schema** every pipeline run produces.
   Consumers (web UI, CLI, AI agent) should import this package and pin
-  against `result.CurrentSchemaVersion`.
+  against `result.CurrentSchemaVersion`. At v7 the canonical event-rate
+  storage is `Streams` (per-player change streams + intervals + native
+  position track) — see [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
 - `analyzer/` — the `Analyzer` interface, the read-only event/userinfo
   `Context`, the typed `CoreOutputs` bundle that producer analysers
   populate for downstream consumers, and the `Registry` that drives a
@@ -19,6 +21,14 @@ that downstream consumers render, summarise, or feed to an agent.
   finalise after, with `CoreOutputs` already populated. Three default
   result post-processors run last (time normalisation, duel team
   rewrite, locgraph synthesis) — see `postprocess.go`.
+- `view/` — the **query API** over a finalised `*Result`. Pure functions
+  (`Buckets`, `Events`, `StreamSlice`, `StateAt`, `LocTrails`,
+  `RegionControl`) read `result.Streams` and produce derived shapes
+  (bucketed timelines, raw stream slices, point-in-time state, etc.) at
+  the caller's chosen window / fields / reducers. Used by the CLI's
+  `-view` family of flags and the WASM bridge's `getBuckets` /
+  `getEvents` / `getStreamSlice` / `getStateAt` / `getLocTrails` /
+  `recomputeRegionControl` exports.
 - `loc/` — `.loc` file parser. For native builds the corpus is embedded
   via `//go:embed data/*.loc` (466 maps today); for WASM builds the host
   provides `fetchLocSync` so only the loc for the current demo is
@@ -504,17 +514,20 @@ Three layers exercise different things:
    — `-update-golden` is registered only in this test package and
    wider scopes fail in `mapgen` with "flag provided but not defined".)
 
-   Two transforms are applied before comparison: `filePath` is
-   stripped (per-machine cache path), and `timelineAnalysis.highResBuckets`
-   is sliced to three 15 s windows (`[0, 15]`, `[60, 75]`, last 15 s).
-   The high-res slice is necessary because the full 50 ms position
-   track is ~20 MB per 4on4 demo, and the three windows are enough
-   sampling to catch bucketer / position-extractor drift. Everything
-   else — `locGraph`, `schemaVersion`, ammo counts, frag totals,
-   weapon stats, items, powerup events — is pinned in full, so any
-   unintended drift surfaces. (The `locGraph` slices are sorted in
-   `BuildLocGraph` for run-to-run determinism; map-keyed sub-objects
-   already serialise alphabetically.)
+   `filePath` is stripped before comparison (per-machine cache path).
+   At schema v7 the parse-time `highResBuckets` is gone; the canonical
+   storage is `streams` (per-player change streams + intervals + native
+   position track). Per-player time series in `streams.players[]` are
+   sliced to three 15 s windows (`[0, 15]`, `[60, 75]`, last 15 s)
+   before comparison — `sampleStreams` in `golden_test.go` handles
+   this so a 4on4 demo's ~10 MB native position track doesn't bloat
+   the committed corpus. Three windows are enough sampling to catch
+   stream-emitter / bucketer drift while keeping commits ~4 MB per
+   4on4. Everything else — `locGraph`, `schemaVersion`, ammo counts,
+   frag totals, weapon stats, items, powerup events — is pinned in
+   full, so any unintended drift surfaces. (The `locGraph` slices
+   are sorted in `BuildLocGraph` for run-to-run determinism;
+   map-keyed sub-objects already serialise alphabetically.)
 
 3. **Diagnostic corpus** (`diagnostic/diagnostic_test.go`) is opt-in
    and complementary — it runs data-quality invariants

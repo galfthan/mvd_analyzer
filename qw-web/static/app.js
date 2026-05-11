@@ -135,7 +135,11 @@ worker.onmessage = (e) => {
         }
     } else if (e.data.type === 'result') {
         if (analyzeResolve) {
-            analyzeResolve(e.data.json);
+            analyzeResolve({
+                json: e.data.json,
+                bucketsJSON: e.data.bucketsJSON,
+                regionStatesJSON: e.data.regionStatesJSON,
+            });
             analyzeResolve = null;
             analyzeReject = null;
         }
@@ -160,9 +164,43 @@ worker.onmessage = (e) => {
     }
 };
 
+// analyzeInWorker returns the parsed Result object with the legacy
+// 50ms bucket array stashed on result.timelineAnalysis.highResBuckets.
+// Bucket data is built by the worker (calling getDefaultBuckets after
+// analyzeMVD) since WASM exports live on the worker's global, not the
+// main page. Pre-v7 callers expected JSON.parse on the resolved value;
+// new callers just use the returned object directly.
 function analyzeInWorker(bytes, filename) {
     return new Promise((resolve, reject) => {
-        analyzeResolve = resolve;
+        analyzeResolve = (payload) => {
+            try {
+                const result = JSON.parse(payload.json);
+                if (result && result.timelineAnalysis && payload.bucketsJSON) {
+                    try {
+                        const buckets = JSON.parse(payload.bucketsJSON);
+                        if (Array.isArray(buckets)) {
+                            result.timelineAnalysis.highResBuckets = buckets;
+                        }
+                    } catch (e) {
+                        console.warn('parse legacy buckets failed:', e);
+                    }
+                }
+                if (result && result.timelineAnalysis && result.timelineAnalysis.regionControl && payload.regionStatesJSON) {
+                    try {
+                        const rs = JSON.parse(payload.regionStatesJSON);
+                        if (!rs.error && rs.bucketStates) {
+                            result.timelineAnalysis.regionControl.bucketStates = rs.bucketStates;
+                            if (rs.stats) result.timelineAnalysis.regionControl.stats = rs.stats;
+                        }
+                    } catch (e) {
+                        console.warn('parse default region states failed:', e);
+                    }
+                }
+                resolve(result);
+            } catch (e) {
+                reject(e);
+            }
+        };
         analyzeReject = reject;
         // Transfer the ArrayBuffer (zero-copy)
         worker.postMessage(
@@ -545,8 +583,7 @@ async function uploadFile(file) {
 
         const buffer = await file.arrayBuffer();
         const bytes = new Uint8Array(buffer);
-        const jsonStr = await analyzeInWorker(bytes, file.name);
-        const result = JSON.parse(jsonStr);
+        const result = await analyzeInWorker(bytes, file.name);
         if (result.error) throw new Error(result.error);
 
         status.textContent = 'Analysis complete!';
@@ -610,8 +647,7 @@ async function loadGameFromHub(game) {
 
     status.textContent = 'Analyzing...';
     const filename = generateDemoFilename(game);
-    const jsonStr = await analyzeInWorker(demoBytes, filename);
-    const result = JSON.parse(jsonStr);
+    const result = await analyzeInWorker(demoBytes, filename);
     if (result.error) throw new Error(result.error);
 
     status.textContent = 'Analysis complete!';
@@ -2599,8 +2635,12 @@ function displayTimelineAnalysis(result) {
     }
     const teams = timelineState.teams;
 
+    // Schema v7: highResBuckets is no longer a parse-time field on the
+    // canonical result, but analyzeInWorker stashes a v6-shape array
+    // on timeline.highResBuckets after the WASM worker calls
+    // getDefaultBuckets. Panels still iterate the same array shape.
     timelineState.highResBuckets = timeline?.highResBuckets || [];
-    timelineState.highResDuration = timeline?.highResDuration || 0.05;
+    timelineState.highResDuration = 0.05;
     timelineState.matchStartTime = timeline?.matchStartTime || 0;
     timelineState.demoOffset = timeline?.demoOffset || 0;
     timelineState.duration = result.match?.duration || 600;
@@ -4916,10 +4956,10 @@ function initRegionControlData(result) {
     }
     computeRegionStacking(mapState.controlRegions);
 
-    // Pick up the Go-precomputed control data when the result schema
-    // carries it (v6+). Used by getRegionControlAtTime for cheap
-    // lookups and by initRegionControl to skip the JS recompute on
-    // initial load.
+    // v7: bucketStates and stats are populated by analyzeInWorker —
+    // the worker calls recomputeRegionControl with the default regions
+    // after analyzeMVD and the result is stashed back onto the parsed
+    // result before displayResults runs. Same code shape as v6.
     mapState.bucketStates      = rc.bucketStates || null;
     mapState.regionControlStats = rc.stats || null;
     mapState.teamA              = rc.teamA || null;
@@ -4948,7 +4988,7 @@ function initRegionControl(result) {
     // Build region config UI (editable text fields per region)
     buildRegionConfig(rc.regions);
 
-    // Render the table from the Go-supplied bucketStates / stats that
+    // Render the table from the Go-supplied stats that
     // initRegionControlData stashed on mapState. User edits route through
     // applyRegionConfig, which calls the WASM bridge to refresh both.
     renderRegionControlTableFromGo(rc.regions, mapState.regionControlStats, mapState.teamA, mapState.teamB);
@@ -5287,8 +5327,10 @@ function calculateMapBounds(result) {
         maxY = Math.max(maxY, loc.y);
     }
 
-    // From high-res buckets - position bounds
-    const highResBuckets = result.timelineAnalysis?.highResBuckets || [];
+    // From high-res buckets - position bounds. v7: read from the
+    // bridge-derived timelineState.highResBuckets instead of the
+    // (deleted) result.timelineAnalysis.highResBuckets field.
+    const highResBuckets = timelineState.highResBuckets || [];
     for (const bucket of highResBuckets) {
         for (const data of Object.values(bucket.p || {})) {
             if (data.x !== 0 || data.y !== 0) {

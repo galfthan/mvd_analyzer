@@ -58,7 +58,35 @@ onmessage = function(e) {
             const bytes = new Uint8Array(e.data.bytes);
             const filename = e.data.filename || 'demo.mvd';
             const jsonStr = analyzeMVD(bytes, filename);
-            postMessage({ type: 'result', json: jsonStr });
+            // Schema v7: highResBuckets and regionControl.bucketStates
+            // are no longer on the parse-time result. Build them via
+            // the bridge (lives on the worker's global where the WASM
+            // exports do) and pass back so the main thread can stash
+            // both onto the parsed result — keeping every existing
+            // panel's read pattern working unchanged.
+            let bucketsJSON = '';
+            try {
+                bucketsJSON = getDefaultBuckets();
+            } catch (err) {
+                bucketsJSON = '';
+            }
+            let regionStatesJSON = '';
+            try {
+                const parsed = JSON.parse(jsonStr);
+                const rc = parsed.timelineAnalysis && parsed.timelineAnalysis.regionControl;
+                if (rc && rc.regions && rc.teamA && rc.teamB) {
+                    const overrideJSON = JSON.stringify({
+                        regions: rc.regions.map(r => ({
+                            name: r.name,
+                            locs: [...new Set((r.points || []).map(p => p.name))],
+                        })),
+                    });
+                    regionStatesJSON = recomputeRegionControl(overrideJSON);
+                }
+            } catch (err) {
+                regionStatesJSON = '';
+            }
+            postMessage({ type: 'result', json: jsonStr, bucketsJSON, regionStatesJSON });
         } catch (err) {
             postMessage({ type: 'error', message: err.message || String(err) });
         }

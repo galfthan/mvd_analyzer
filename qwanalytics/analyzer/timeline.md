@@ -5,104 +5,126 @@
             `StatUpdateEvent`, `FragUpdateEvent`, `DeathEvent`,
             `SpawnEvent`, `UserInfoEvent`
 **Reads from CoreOutputs:** `co.DemoInfo`, `co.Names`, `co.FragEntries`
-**Writes to Result:** `result.TimelineAnalysis` (`*TimelineAnalysisResult`)
+**Writes to Result:** `result.Streams` (canonical event-rate storage)
+                    plus `result.TimelineAnalysis` (frag / powerup /
+                    streak event records, loc table, region control
+                    stats, hub-viewer offset).
 
 ## What it does
 
-Reconstructs per-player time-bucketed state at 50 ms resolution: position,
-health, armor, weapons in inventory, items held, current location label.
-Aggregates that state into the timeline view's high-resolution stream,
-plus higher-order analyses: spawn-to-death streaks, region control,
-powerup events, frag events.
+Reconstructs per-player state at native event rate into
+`result.Streams` — sparse change streams (health, armor, armor type,
+loc, ammo) + interval lists (weapons, powerups) + a columnar position
+track at the demo's native sampling cadence (~77 Hz). All higher-order
+analyses (frag streaks, region control, powerup events) are computed
+during finalize from this storage. Bucketed views are no longer baked
+at parse time; `qwanalytics/view.Buckets` produces them on demand at
+any window resolution.
 
 The analyser is split across several files:
 
 | File | Role |
 |---|---|
-| [`timeline.go`](timeline.go) | OnEvent dispatch + per-bucket sampling |
-| [`timeline_buckets.go`](timeline_buckets.go) | Convert internal buckets → result `HighResBucket` |
-| [`timeline_blipfilter.go`](timeline_blipfilter.go) | In-place loc smoothing — see "Loc smoothing" below |
-| [`timeline_powerups.go`](timeline_powerups.go) | Quad/Pent/Ring pickup → loss event detection |
+| [`timeline.go`](timeline.go) | `OnEvent` dispatch — updates running per-player cursor + appends transitions to the stream builders |
+| [`timeline_streams.go`](timeline_streams.go) | Stream builder type, dedup rules, loc resolution + blip filter on `PositionTrack.Li`, finalize-time stream assembly |
+| [`timeline_powerups.go`](timeline_powerups.go) | Quad/Pent/Ring interval closure → `PowerupEvent` records |
 | [`timeline_streaks.go`](timeline_streaks.go) | Top-N spawn-to-death frag streaks |
-| [`timeline_regions.go`](timeline_regions.go) | Map region transit + dwell aggregates |
+| [`timeline_regions.go`](timeline_regions.go) | Map region auto-detect + per-map overrides |
 | [`timeline_finalize.go`](timeline_finalize.go) | Orchestrates the pipeline above |
 
 ## How it works
 
-1. **Sampling**: every 50 ms a snapshot of each player's state is
-   appended to a bucket. Position/health/armor come from
-   `PlayerPositionEvent` and `StatUpdateEvent`s as they arrive.
-2. **Loc resolution**: each bucket's location label comes from
-   `loc.Finder.FindNearest(x, y, z)`. The loc finder is loaded from
-   the demoinfo map name when available.
-3. **Loc smoothing (blip filter)**: `applyBlipFilter` rewrites
-   `pData.location` *in place* on every bucket, collapsing residences
-   shorter than the threshold (default 250 ms) into adjacent stable
-   residences. **Every downstream consumer (streaks, regions,
-   locgraph) must read the smoothed track.** This is enforced
-   structurally — the rewrite happens before any consumer reads the
-   field.
-4. **Match window**: `MatchTimingDetector` gates everything. Buckets
-   sampled outside the match window (warmup, intermission) are
-   excluded from output during finalize.
-5. **Frag events**: `co.FragEntries` are joined onto buckets with the
-   demoinfo-resolved player name + team.
-6. **Streaks**: spawn-to-death runs are paired up, each scored by
-   frag count during the run. Top 10 by frag count are emitted as
+1. **Per-event recording.** Every `OnEvent` dispatch updates the
+   running cursor (`timelinePlayerState`) AND the historical record
+   (the `streamBuilder` substruct). The cursor tells "what is X
+   right now"; the builder is the append-only ledger that becomes
+   `result.PlayerStream` at finalize. Append rules:
+   - Change streams (health, armor, ammo, loc) dedup against the
+     previous value — every entry is a transition.
+   - Position appends every native sample (no dedup; positions
+     almost always differ between samples).
+   - Interval streams (weapons, powerups) open an anchor on
+     `false→true` and close on `true→false`.
+   - Spawn/death timestamps just append.
+2. **Match window gating.** `MatchTimingDetector` gates everything.
+   Pre-match and post-intermission events bypass stream emission so
+   warmup state doesn't pollute the output.
+3. **Loc resolution + blip filter** (finalize, in
+   `resolveLocsAndFilterBlips`): walk each player's `PositionTrack`
+   and call `loc.Finder.FindNearest(x, y, z)` per native sample,
+   populating `PositionTrack.Li` (int16 column parallel to T/X/Y/Z).
+   Then run the blip filter on the Li column — collapsing
+   short-residence wall-bleed onto adjacent stable runs at the
+   native sample rate, split at spawn/death boundaries. Finally
+   emit the sparse `PlayerStream.Loc` change stream from the
+   smoothed Li column.
+4. **Frag events.** `co.FragEntries` are joined with demoinfo
+   names + teams into `TimelineFragEvent` records.
+5. **Streaks.** Spawn-to-death runs (from `Spawns`/`Deaths` streams)
+   are paired and scored by frag count; top 10 emit as
    `FragStreakEvent`.
-7. **Regions**: region definitions come from per-map config
-   (`config/regions/<map>.json`); a CLI flag (`-regions <path>`) or a
-   programmatic setter (`Registry.SetRegionsOverride`) can replace
-   them. Each `ControlRegion` carries an explicit `locs` list that
-   names its membership.
-8. **Region control**: `ComputeRegionControl` (in
-   [`region_control.go`](region_control.go)) classifies each high-res
-   bucket into one of seven states — empty / teamA[Weak]Control /
-   teamB[Weak]Control / contested / weakContested — with "armed" =
-   carrying RL or LG. Output is per-region `bucketStates` (one ASCII
-   char per bucket) plus match-aggregate `stats`. The function is
-   pure and re-callable: WASM exposes `recomputeRegionControl` for
-   the web UI's region-edit flow, and a future MCP wrapper will use
-   the same entrypoint.
-9. **Powerups**: per-slot quad/pent/ring presence transitions are
-   converted to `PowerupEvent` records with start/end times.
+6. **Regions.** Region definitions come from per-map JSON
+   (`qwanalytics/config/regions/<map>.json`) or auto-detection in
+   `timeline_regions.go`. A CLI flag (`-regions <path>`) or
+   `Registry.SetRegionsOverride` can replace them at runtime.
+7. **Region control** (`ComputeRegionControl` in
+   [`region_control.go`](region_control.go)): walks each player's
+   `PositionTrack` natively. For each bucket window, sample the
+   player's Li at `bucketStart` (carry-forward from the latest
+   position sample) and the armed state via the RL/LG interval
+   streams. Classify each bucket into one of seven states (empty,
+   teamA[Weak]Control, teamB[Weak]Control, contested,
+   weakContested). Output is per-region `bucketStates` (one ASCII
+   char per bucket) + match-aggregate `stats`. `view.RegionControl`
+   wraps this as a query function callable from any transport;
+   WASM exposes `recomputeRegionControl` for the web UI's
+   region-edit flow.
+8. **Powerups.** Each player's Quad/Pent/Ring interval list maps
+   directly to `PowerupEvent` records (one per closed interval).
+   Frag-during-powerup counts attach during finalize via
+   `co.FragEntries`.
 
-### Per-bucket player state (compact JSON keys)
+### Stream JSON shape (compact keys)
 
-Each `HighResPlayerData` snapshot ships:
+Every per-player field lives on `result.Streams.Players[].*` with
+short JSON keys — see `qwanalytics/RESULT_SCHEMA.md` for the
+authoritative table. Summary:
 
-- position `x`/`y`/`z`, health `h`, armor `a`, armor type `at` (`ga`/`ya`/`ra`)
-- weapons: `rl`, `lg`, `gl` (added v6), `ssg`, `sng`. Shotgun (baseline)
-  and NG (functionally useless) are intentionally not tracked.
-- powerups: `q` (quad), `pe` (pent), `r` (ring)
-- ammo: `sh` shells (v6), `nl` nails (v6), `rk` rockets, `cl` cells
-- `d` death-frame marker, `sp` spawn-frame marker, `li` loc-table index
-
-Per-team aggregates (`HighResTeamData`) include the heavy-weapon
-RL/LG/RLLG/W counters plus an independent `gl` axis (v6),
-powerup-holder counts, total health/armor, and armor-by-type breakdown.
+- `h` / `a` — health / armor change streams (`[]ChangeI16`).
+- `at` — armor type (`""` / `"ga"` / `"ya"` / `"ra"`) change stream.
+- `li` — loc index (into `TimelineAnalysisResult.LocTable`) change
+  stream.
+- `pos` — native-rate position track (`PositionTrack` with parallel
+  T/X/Y/Z/Li columns).
+- `rl` / `lg` / `gl` / `ssg` / `sng` — weapon-held intervals.
+- `q` / `pe` / `r` — Quad / Pent / Ring intervals.
+- `sh` / `nl` / `rk` / `cl` — ammo change streams.
+- `sp` / `d` — spawn / death timestamps.
 
 ## Limitations / known issues
 
-- High-res buckets are **50 ms** by default. The frontend slices these
-  into wider windows for graphs; the raw stream is preserved for the
-  map tab playback.
 - The blip filter is a heuristic — pathological maps with many
   near-equidistant locs (e.g. dm6's GA cluster) can still produce
   short residences that survive the threshold.
-- Powerup detection only fires on transitions of the underlying
-  `STAT_ITEMS` bits. A player who picks up the same powerup with
-  zero gap (warm pent grab) emits as one continuous event, not two.
-- `co.FragEntries` is required for streak/powerup-frag attribution;
-  if the frag analyser is unregistered, those derived fields are
-  empty (but the bucket stream still works).
+- Powerup detection fires on `STAT_ITEMS` bit transitions. A player
+  who picks up the same powerup with zero gap (warm pent grab)
+  emits as one continuous interval, not two.
+- `co.FragEntries` is required for streak / powerup-frag
+  attribution; if the frag analyser is unregistered, those derived
+  fields are empty (but the streams still populate normally).
+- `PositionTrack.Li` is populated only when the loc finder loaded
+  for the demo's map. Maps with no `.loc` file produce streams
+  with empty `Li` and no derived loc graph / region control.
 
 ## Reference
 
-- 50 ms cadence is the QW server tick (KTX `pmove.c`).
-- Region/loc heuristics: see `qwanalytics/loc/data/*.loc`. Auto-detect
-  keywords live in `timeline_regions.go`; per-map region overrides ship
-  as JSON in `qwanalytics/config/regions/<map>.json` (drop a new file
-  in that directory, no Go code change needed). Maps with no RA loc
-  fall back to YA in the auto-detector. The web UI's Region Control
+- Native position sampling cadence is the QW server tick rate
+  (typically ~77 Hz, ~13 ms between samples; varies with
+  `sv_demoPings` and per-player update rate).
+- Region / loc heuristics: see `qwanalytics/loc/data/*.loc`.
+  Auto-detect keywords live in `timeline_regions.go`; per-map
+  region overrides ship as JSON in
+  `qwanalytics/config/regions/<map>.json` (drop a new file in that
+  directory, no Go code change needed). Maps with no RA loc fall
+  back to YA in the auto-detector. The web UI's Region Control
   panel saves/loads this exact JSON shape.

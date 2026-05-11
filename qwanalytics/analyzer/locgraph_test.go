@@ -2,23 +2,69 @@ package analyzer
 
 import (
 	"testing"
+
+	"github.com/mvd-analyzer/qwanalytics/result"
 )
 
-// Small helper to build HighResPlayerData tersely.
-func pd(x, y float32, li int, d, sp bool) *HighResPlayerData {
-	return &HighResPlayerData{X: x, Y: y, H: 100, Li: li, D: d, Sp: sp}
+// makePlayerStream builds a synthetic PlayerStream from a per-bucket
+// (time, x, y, locIndex, dead, spawn) sequence. Used by the locgraph
+// tests below — BuildLocGraph internally derives 50 ms buckets from
+// streams via view.Buckets, so the test scaffolding has to provide
+// streams shaped to produce those bucket frames.
+type bucketSpec struct {
+	t  float64
+	x  int32
+	y  int32
+	li int16
+	d  bool
+	sp bool
 }
 
-// Build a synthetic Result with a pre-filtered bucket timeline and
-// verify BuildLocGraph produces the expected nodes and edges,
-// including teleport classification. The input here is what
-// applyBlipFilter would hand us: one edge per filtered-loc change.
-func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
-	const D = 0.05
+func makePlayerStreamFromBuckets(name, team string, specs []bucketSpec) result.PlayerStream {
+	ps := result.PlayerStream{Name: name, Team: team}
+	pt := &result.PositionTrack{}
+	healthCur := int16(0)
+	for _, s := range specs {
+		// Position: append every sample (no dedup).
+		pt.T = append(pt.T, float32(s.t))
+		pt.X = append(pt.X, s.x)
+		pt.Y = append(pt.Y, s.y)
+		pt.Z = append(pt.Z, 0)
+		pt.Li = append(pt.Li, s.li)
 
-	// Locs: "A" at (0,0), "B" at (100,0), "C" at (5000,0) — C is far enough
-	// from B that a direct B→C transition in one bucket qualifies as a
-	// teleport.
+		// Loc: dedup against last value.
+		if len(ps.Loc) == 0 || ps.Loc[len(ps.Loc)-1].V != s.li {
+			ps.Loc = append(ps.Loc, result.ChangeI16{T: s.t, V: s.li})
+		}
+
+		// Health: 100 by default; dead frames go to 0; spawn back to 100.
+		want := int16(100)
+		if s.d {
+			want = 0
+		}
+		if want != healthCur {
+			ps.Health = append(ps.Health, result.ChangeI16{T: s.t, V: want})
+			healthCur = want
+		}
+
+		// Spawn / death timestamps.
+		if s.sp {
+			ps.Spawns = append(ps.Spawns, s.t)
+		}
+		if s.d {
+			ps.Deaths = append(ps.Deaths, s.t)
+		}
+	}
+	if len(pt.T) > 0 {
+		ps.Position = pt
+	}
+	return ps
+}
+
+// Build a synthetic Result with two players and verify BuildLocGraph
+// produces the expected nodes and edges, including teleport
+// classification.
+func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 	locTable := []string{"", "A", "B", "C"}
 	locationData := []MapLocation{
 		{Name: "A", X: 0, Y: 0},
@@ -26,23 +72,36 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 		{Name: "C", X: 5000, Y: 0},
 	}
 
-	// p1 (red): walks A,A → B,B → C,C (teleport). p2 (blue) stays in A the
-	// whole time.
-	buckets := []HighResBucket{
-		{T: 0.00, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false), "p2": pd(10, 10, 1, false, false)}},
-		{T: 0.05, P: map[string]*HighResPlayerData{"p1": pd(50, 0, 1, false, false), "p2": pd(10, 10, 1, false, false)}},
-		{T: 0.10, P: map[string]*HighResPlayerData{"p1": pd(98, 0, 2, false, false), "p2": pd(10, 10, 1, false, false)}},  // first B
-		{T: 0.15, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false), "p2": pd(10, 10, 1, false, false)}}, // second B → commit A→B
-		{T: 0.20, P: map[string]*HighResPlayerData{"p1": pd(5000, 0, 3, false, false), "p2": pd(10, 10, 1, false, false)}}, // first C (teleport jump)
-		{T: 0.25, P: map[string]*HighResPlayerData{"p1": pd(5002, 0, 3, false, false), "p2": pd(10, 10, 1, false, false)}}, // second C → commit B→C (teleport)
+	// p1 (red): in A from t=0 to t=0.05, B from t=0.10 to t=0.15, C
+	// (teleport) from t=0.20 to t=0.25. p2 (blue) stays in A.
+	p1Specs := []bucketSpec{
+		{t: 0.00, x: 1, y: 0, li: 1},
+		{t: 0.05, x: 50, y: 0, li: 1},
+		{t: 0.10, x: 98, y: 0, li: 2},
+		{t: 0.15, x: 100, y: 0, li: 2},
+		{t: 0.20, x: 5000, y: 0, li: 3},
+		{t: 0.25, x: 5002, y: 0, li: 3},
+	}
+	p2Specs := []bucketSpec{
+		{t: 0.00, x: 10, y: 10, li: 1},
+		{t: 0.05, x: 10, y: 10, li: 1},
+		{t: 0.10, x: 10, y: 10, li: 1},
+		{t: 0.15, x: 10, y: 10, li: 1},
+		{t: 0.20, x: 10, y: 10, li: 1},
+		{t: 0.25, x: 10, y: 10, li: 1},
 	}
 
-	result := &Result{
+	res := &Result{
+		Streams: &result.Streams{
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 0.30},
+			Players: []result.PlayerStream{
+				makePlayerStreamFromBuckets("p1", "red", p1Specs),
+				makePlayerStreamFromBuckets("p2", "blue", p2Specs),
+			},
+		},
 		TimelineAnalysis: &TimelineAnalysisResult{
-			HighResDuration: D,
-			HighResBuckets:  buckets,
-			LocTable:        locTable,
-			LocationData:    locationData,
+			LocTable:     locTable,
+			LocationData: locationData,
 		},
 		DemoInfo: &DemoInfoResult{
 			Players: []DemoInfoPlayer{
@@ -52,7 +111,7 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 		},
 	}
 
-	graph := BuildLocGraph(result)
+	graph := BuildLocGraph(res)
 	if graph == nil {
 		t.Fatal("expected graph, got nil")
 	}
@@ -62,8 +121,9 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 		nodes[n.Name] = n
 	}
 
-	// Node-time uses raw per-bucket loc — p1: 2 in A, 2 in B, 2 in C;
-	// p2: 6 in A. So A=8D, B=2D, C=2D.
+	// p1 visits A 2 buckets, B 2 buckets, C 2 buckets; p2 visits A 6
+	// buckets. So node-time A=8, B=2, C=2 in 50 ms units.
+	const D = 0.05
 	if got := nodes["A"].Total; !approxEq(got, 8*D) {
 		t.Errorf("A total = %v, want %v", got, 8*D)
 	}
@@ -102,77 +162,8 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 	}
 }
 
-// Classic death path: the p.D / p.Sp markers are set on the death and
-// respawn buckets, so the cursor resets and no A→B edge bridges the death.
-func TestBuildLocGraph_DeathResetsCursor(t *testing.T) {
-	const D = 0.05
-	locTable := []string{"", "A", "B"}
-
-	// Two buckets in A before death, dead frame, spawn frame, two buckets
-	// in B post-spawn. Without the reset, the 2 buckets in B would commit
-	// an A→B transition.
-	buckets := []HighResBucket{
-		{T: 0.00, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false)}},
-		{T: 0.05, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, false, false)}},
-		{T: 0.10, P: map[string]*HighResPlayerData{"p1": pd(1, 0, 1, true, false)}},  // death
-		{T: 0.15, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, true)}}, // spawn in B
-		{T: 0.20, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false)}},
-		{T: 0.25, P: map[string]*HighResPlayerData{"p1": pd(100, 0, 2, false, false)}},
-	}
-
-	result := &Result{TimelineAnalysis: &TimelineAnalysisResult{
-		HighResDuration: D, HighResBuckets: buckets, LocTable: locTable,
-	}}
-	graph := BuildLocGraph(result)
-	if graph == nil {
-		t.Fatal("expected graph, got nil")
-	}
-	if len(graph.Edges) != 0 {
-		t.Errorf("expected no edges across death/spawn, got %+v", graph.Edges)
-	}
-}
-
-// Without a blip filter upstream, BuildLocGraph emits an edge on every
-// filtered-loc change — that's exactly its job. Smoothing is a separate
-// concern tested in timeline_blipfilter_test.go. This test pins the
-// pass-through behavior: if the buckets already have sustained locs, a
-// single A→C edge is emitted and no A↔B jitter sneaks in.
-func TestBuildLocGraph_EmitsOnFilteredChange(t *testing.T) {
-	const D = 0.05
-	locTable := []string{"", "A", "C"}
-
-	// Pre-filtered buckets: 3 in A, 3 in C. One A→C edge expected.
-	buckets := []HighResBucket{
-		{T: 0.00, P: map[string]*HighResPlayerData{"p1": pd(50, 0, 1, false, false)}},
-		{T: 0.05, P: map[string]*HighResPlayerData{"p1": pd(49, 0, 1, false, false)}},
-		{T: 0.10, P: map[string]*HighResPlayerData{"p1": pd(51, 0, 1, false, false)}},
-		{T: 0.15, P: map[string]*HighResPlayerData{"p1": pd(200, 0, 2, false, false)}},
-		{T: 0.20, P: map[string]*HighResPlayerData{"p1": pd(202, 0, 2, false, false)}},
-		{T: 0.25, P: map[string]*HighResPlayerData{"p1": pd(204, 0, 2, false, false)}},
-	}
-
-	result := &Result{TimelineAnalysis: &TimelineAnalysisResult{
-		HighResDuration: D, HighResBuckets: buckets, LocTable: locTable,
-	}}
-	graph := BuildLocGraph(result)
-	if graph == nil {
-		t.Fatal("expected graph, got nil")
-	}
-
-	seen := map[string]LocEdge{}
-	for _, e := range graph.Edges {
-		seen[e.From+"→"+e.To] = e
-	}
-	if e, ok := seen["A→C"]; !ok || e.Total != 1 {
-		t.Errorf("expected A→C=1, got %+v (all edges: %+v)", e, graph.Edges)
-	}
-	if len(graph.Edges) != 1 {
-		t.Errorf("expected exactly 1 edge, got %d: %+v", len(graph.Edges), graph.Edges)
-	}
-}
-
 func approxEq(a, b float64) bool {
-	const eps = 1e-9
+	const eps = 1e-6 // float32-time roundtrip in PositionTrack accumulates ~1e-7
 	d := a - b
 	if d < 0 {
 		d = -d

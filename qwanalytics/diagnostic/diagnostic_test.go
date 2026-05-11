@@ -167,28 +167,30 @@ func checkDataQuality(r *analyzer.Result) []string {
 				seen[fe.Player] = true
 			}
 		}
-		bucketNames := map[string]bool{}
-		for _, b := range r.TimelineAnalysis.HighResBuckets {
-			for name := range b.P {
-				bucketNames[name] = true
+		streamNames := map[string]bool{}
+		if r.Streams != nil {
+			for _, p := range r.Streams.Players {
+				streamNames[p.Name] = true
 			}
 		}
-		for name := range bucketNames {
+		for name := range streamNames {
 			if !demoNames[name] {
-				warn("timeline bucket player %q not in demoInfo", name)
+				warn("stream player %q not in demoInfo", name)
 			}
 		}
 	}
 
-	// Impossible stat values in high-res timeline buckets
-	if r.TimelineAnalysis != nil {
-		for _, b := range r.TimelineAnalysis.HighResBuckets {
-			for name, pd := range b.P {
-				if pd.H > 250 {
-					warn("player %q has health=%d at t=%.1f (max 250)", name, pd.H, b.T)
+	// Impossible stat values in per-player streams.
+	if r.Streams != nil {
+		for _, p := range r.Streams.Players {
+			for _, c := range p.Health {
+				if c.V > 250 {
+					warn("player %q has health=%d at t=%.1f (max 250)", p.Name, c.V, c.T)
 				}
-				if pd.A > 200 {
-					warn("player %q has armor=%d at t=%.1f (max 200)", name, pd.A, b.T)
+			}
+			for _, c := range p.Armor {
+				if c.V > 200 {
+					warn("player %q has armor=%d at t=%.1f (max 200)", p.Name, c.V, c.T)
 				}
 			}
 		}

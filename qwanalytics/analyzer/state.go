@@ -46,3 +46,67 @@ type ammoCounts struct {
 type playerPosition struct {
 	x, y, z float32
 }
+
+// streamBuilder is the per-slot append-only record that becomes
+// result.PlayerStream at finalize. It's the historical companion to
+// timelinePlayerState (the running cursor): the cursor holds "what
+// is the value right now," the builder holds "every transition we've
+// seen." Both share OnEvent dispatch.
+//
+// Append rules (D11 in PLAN-v3):
+//
+//   - Change streams (health, armor, ammo, ...) dedup against the
+//     previous value: appendChange iff v != lastValue.
+//   - Position track appends every native sample (positions almost
+//     always differ; checking is overhead with no payoff).
+//   - Interval streams open an anchor on false→true and close on
+//     true→false; intervals open at match end are closed in
+//     finalize.
+//   - Spawns / deaths are timestamps; just append.
+type streamBuilder struct {
+	health    []changeI16
+	armor     []changeI16
+	armorType []changeStr
+	loc       []changeI16
+
+	rl, lg, gl, ssg, sng intervalState
+	quad, pent, ring     intervalState
+
+	shells, nails, rockets, cells []changeI16
+
+	posT  []float32
+	posX  []int32
+	posY  []int32
+	posZ  []int32
+	posLi []int16 // resolved loc index per sample, populated in finalize
+
+	spawns []float64
+	deaths []float64
+}
+
+// changeI16 / changeStr mirror result.ChangeI16 etc. Stored here in
+// the analyser package so tests don't have to round-trip through
+// result every time. Health/armor/loc/ammo all share int16, since
+// Quake values regularly exceed int8 range (mega-health = 200, RA = 200).
+type changeI16 struct {
+	t float64
+	v int16
+}
+
+type changeStr struct {
+	t float64
+	v string
+}
+
+// intervalState tracks an open-anchor period for a boolean stream.
+// When held flips true the analyser sets anchor; on flip-false (or at
+// match end) the [anchor, t) interval is appended to closed.
+type intervalState struct {
+	held       bool
+	anchor     float64
+	closed     []intervalRecord
+}
+
+type intervalRecord struct {
+	start, end float64
+}
