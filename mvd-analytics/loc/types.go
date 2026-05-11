@@ -6,10 +6,14 @@ type Location struct {
 	Name    string  // Human-readable location name (variables substituted)
 }
 
-// Finder provides efficient nearest-location lookup for a map
+// Finder provides nearest-location lookup for a map. FindNearest is
+// backed by a lazily-built XY-pencil cell index (see index.go) — beats
+// linear scan once L grows past a few hundred; competitive-map sizes
+// (L ≤ ~316) wouldn't care either way.
 type Finder struct {
 	mapName   string
 	locations []Location
+	index     indexOnce
 }
 
 // MapName returns the name of the map this finder is for

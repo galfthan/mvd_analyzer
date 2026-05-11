@@ -90,12 +90,21 @@ For local-only MCP, run `mvd-api` on `localhost` and point
 ### Parse laziness — fast vs. full level
 
 Today the analyzer is one-shot: every cold parse runs every registered
-analyzer, including the position-track build (~750 K samples per
-4on4 — the dominant ~70–90 % of parse wall-clock).
+analyzer, including the position-track build (~750 K samples per 4on4).
+Position handling — wire-decode of `svc_playerinfo`, append to per-slot
+position tracks, and nearest-loc resolution — is a real chunk of cold
+parse but no longer the dominant slice it once was: a measured
+benchmark on the corpus (`mvd-analytics/loc/bench_test.go`) puts loc
+resolution at ~90 ms on dm6 and ~400 ms on the largest custom maps
+(tf2k / 2fort5 with L > 2800) after the pencil-index optimization. The
+remaining cost is mostly the MVD wire decode itself, which a fast
+level can't help with — but the *whole* `Streams.Position` build can be
+skipped, plus the analyzers that depend on it (Items, Backpacks).
 
 A two-level parse would let "show me the score / players / map / top
-streaks" (i.e. anything that doesn't need positions) skip the heavy
-work entirely. Cold overview drops from 2–10 s to ~50–200 ms.
+streaks" (i.e. anything that doesn't need positions) skip the position
+build entirely. Cold overview drops by whatever fraction position
+handling occupies on the target map.
 
 **Sketch:**
 
