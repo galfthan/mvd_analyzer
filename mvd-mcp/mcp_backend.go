@@ -96,3 +96,19 @@ type GetRegionControlInput struct {
 	DemoID   string `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
 	WindowMs int    `json:"windowMs,omitempty" jsonschema:"bucket size for per-region state strings; default 50"`
 }
+
+// SearchGamesInput hits hub.quakeworld.nu's Supabase directly — not
+// mvd-api. Discovery is the hub's job; mvd-api only handles parse +
+// cache for demos chosen from a search. All fields optional; an
+// empty filter returns the most recent matches.
+type SearchGamesInput struct {
+	Players  []string `json:"players,omitempty"  jsonschema:"player names to match (FTS on players_fts, AND'd across multiple)"`
+	Teams    []string `json:"teams,omitempty"    jsonschema:"team names that must appear in team_names (contains)"`
+	Map      string   `json:"map,omitempty"      jsonschema:"map name, exact match (e.g. dm6)"`
+	Mode     string   `json:"mode,omitempty"     jsonschema:"game mode, exact match (e.g. 1on1, 2on2, 4on4, FFA)"`
+	Matchtag string   `json:"matchtag,omitempty" jsonschema:"tournament/event tag, case-insensitive substring (e.g. qwsl)"`
+	From     string   `json:"from,omitempty"     jsonschema:"ISO date lower bound, inclusive (YYYY-MM-DD)"`
+	To       string   `json:"to,omitempty"       jsonschema:"ISO date upper bound, inclusive (YYYY-MM-DD)"`
+	Limit    int      `json:"limit,omitempty"    jsonschema:"max rows (default 20, capped at 100)"`
+	Offset   int      `json:"offset,omitempty"   jsonschema:"pagination offset"`
+}

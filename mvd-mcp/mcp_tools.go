@@ -7,10 +7,24 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// registerTools wires every qw-mvd tool onto the given MCP server.
-// All view-shaped tools return opaque JSON; only LoadDemo is typed,
-// because consumers need to extract `demoId` from its result.
-func registerTools(s *mcp.Server, b MCPBackend) {
+// registerTools wires every MCP tool onto the given server. Tools
+// that act on a single demo go through `b` (the mvd-api proxy);
+// `searchGames` goes through `sr` (a direct hub.quakeworld.nu
+// Supabase client — discovery is the hub's responsibility, not
+// mvd-api's).
+//
+// All view-shaped tool outputs are opaque JSON pass-through; only
+// LoadDemo is typed, because consumers need to extract `demoId`
+// from its result.
+func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "searchGames",
+		Description: "Search hub.quakeworld.nu for matches by player names, teams, map, mode, matchtag, or date range. Returns identity + lightweight match summary (gameId, sha256, map, teams w/ scores + rosters, timestamp). Use this first to find demos, then call loadDemo for any you want analyzed.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in SearchGamesInput) (*mcp.CallToolResult, any, error) {
+		out, err := sr.Search(ctx, in)
+		return toolResult(out, err)
+	})
+
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "loadDemo",
 		Description: "Resolve, fetch, parse, and cache a demo on the mvd-api. Returns the demoId (sha:HEX) to use with subsequent tool calls. Idempotent — cheap on warm cache.",

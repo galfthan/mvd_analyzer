@@ -55,15 +55,35 @@ func (f *fakeBackend) GetRegionControl(_ context.Context, _ GetRegionControlInpu
 	return map[string]any{"regions": []any{}, "stats": map[string]any{}}, nil
 }
 
+// fakeSearcher is the default no-op searcher for backend-focused tests.
+type fakeSearcher struct {
+	out any
+	err error
+}
+
+func (f *fakeSearcher) Search(_ context.Context, _ SearchGamesInput) (any, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	if f.out == nil {
+		return map[string]any{"limit": 20, "offset": 0, "count": 0, "games": []any{}}, nil
+	}
+	return f.out, nil
+}
+
 // testMCPSession spins up an MCP server with the given backend on an
 // in-memory transport and returns a connected client session ready
 // for tools/list / tools/call.
 func testMCPSession(t *testing.T, backend MCPBackend) *mcp.ClientSession {
+	return testMCPSessionWith(t, backend, &fakeSearcher{})
+}
+
+func testMCPSessionWith(t *testing.T, backend MCPBackend, sr searcher) *mcp.ClientSession {
 	t.Helper()
 	serverTransport, clientTransport := mcp.NewInMemoryTransports()
 
 	srv := mcp.NewServer(&mcp.Implementation{Name: "mvd-mcp-test", Version: "test"}, nil)
-	registerTools(srv, backend)
+	registerTools(srv, backend, sr)
 
 	serverErrCh := make(chan error, 1)
 	go func() {
@@ -100,7 +120,7 @@ func TestMCP_ListTools(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListTools: %v", err)
 	}
-	want := []string{"loadDemo", "getOverview", "getBuckets", "getEvents",
+	want := []string{"searchGames", "loadDemo", "getOverview", "getBuckets", "getEvents",
 		"getStreamSlice", "getStateAt", "getLocTrails", "getRegionControl"}
 	got := map[string]bool{}
 	for _, tool := range res.Tools {

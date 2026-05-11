@@ -71,12 +71,13 @@ func run(args []string) error {
 	logger.Info("mvd-mcp starting", "api", *apiURL, "label", *label)
 
 	backend := newProxyBackend(*apiURL, *label, time.Duration(*timeoutS)*time.Second)
+	search := newSupabaseClient(time.Duration(*timeoutS) * time.Second)
 	srv := mcp.NewServer(&mcp.Implementation{
 		Name:    serverName,
-		Title:   "QuakeWorld MVD analytics (proxy to mvd-api)",
+		Title:   "QuakeWorld MVD analytics (proxy to mvd-api + hub Supabase search)",
 		Version: GitTag,
 	}, nil)
-	registerTools(srv, backend)
+	registerTools(srv, backend, search)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

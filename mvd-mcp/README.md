@@ -30,12 +30,13 @@ mvd-mcp version
 
 ## Tool surface
 
-Eight tools, mirroring `mvd-api` 1:1. Inputs are typed Go structs with
-JSON-Schema inference; outputs are passed through verbatim as opaque
-JSON (so this shim doesn't need to track `mvd-analytics/view` types).
+Nine tools. Inputs are typed Go structs with JSON-Schema inference;
+outputs are passed through as opaque JSON (the shim doesn't need to
+track `mvd-analytics/view` types).
 
 | Tool | Backing endpoint |
 |---|---|
+| `searchGames(players, teams, map, mode, matchtag, from, to, limit, offset)` | hub.quakeworld.nu Supabase — **not** mvd-api |
 | `loadDemo(gameId or sha256)` | `POST /v1/demos/{id}` |
 | `getOverview(demoId)` | `GET /v1/demos/{id}/overview` |
 | `getBuckets(demoId, windowMs, ...)` | `GET /v1/demos/{id}/buckets` |
@@ -49,8 +50,21 @@ JSON (so this shim doesn't need to track `mvd-analytics/view` types).
 `gameId:NNNN` reference.
 
 Tool errors come back as MCP `isError: true` results with the
-`mvd-api` error message in `TextContent`. The model can read them and
+upstream error message in `TextContent`. The model can read them and
 recover (e.g. by calling `loadDemo` first).
+
+### Why search bypasses mvd-api
+
+Discovery (finding demos by player names, teams, map, etc.) is
+hub.quakeworld.nu's job — `mvd-mcp` queries its public Supabase
+endpoint directly, the same way the web frontend does. `mvd-api` is
+narrowly responsible for "given a known demoId, fetch the bytes,
+parse, cache, and serve analytics views." We don't shadow-host hub
+search.
+
+The Supabase anon key is public (shipped in the web bundle) and the
+request shape mirrors the web's exactly, so there's no second source
+of truth for the search semantics.
 
 ## Local MCP
 
@@ -81,6 +95,19 @@ make build-mcp-darwin                       # dist/mvd-mcp-darwin-{amd64,arm64}
 make build-mcp-linux                        # dist/mvd-mcp-linux-amd64
 make build-all-platforms                    # everything above + mvd-api targets
 ```
+
+## Typical session shape
+
+1. `searchGames({player: "bps", map: "dm6"})` → list of recent
+   matches with rosters, scores, dates — directly from the hub. Cheap.
+   No `mvd-api` round-trip; agent can filter / rank from the rows.
+2. `loadDemo({gameId: 12345})` → tells `mvd-api` to fetch + parse +
+   cache. Slow only on cold demos.
+3. `getOverview` / `getBuckets` / `getStateAt` / ... → analytics for
+   the chosen demo. Fast on warm cache.
+
+If the answer is in the search-result rows alone (e.g. "what was
+the score?"), the agent should stop there — no need to parse.
 
 ## Module dependencies
 

@@ -87,6 +87,50 @@ For local-only MCP, run `mvd-api` on `localhost` and point
   newline-delimited JSON or chunked transfer if a real client
   chokes.
 
+### Parse laziness — fast vs. full level
+
+Today the analyzer is one-shot: every cold parse runs every registered
+analyzer, including the position-track build (~750 K samples per
+4on4 — the dominant ~70–90 % of parse wall-clock).
+
+A two-level parse would let "show me the score / players / map / top
+streaks" (i.e. anything that doesn't need positions) skip the heavy
+work entirely. Cold overview drops from 2–10 s to ~50–200 ms.
+
+**Sketch:**
+
+- `analyzer.Registry.WithLevel(Fast)` flag. At `Fast`:
+  - Keep `DemoInfo`, `Frag`, `Match`, `Metadata`, `Messages`, `WeaponPickups`.
+  - Keep `Timeline` but set `SkipPositionTracks: true` — still emits
+    `FragEvents`, `PowerupEvents`, `FragStreaks`, `LocTable`, region
+    region-list, and the non-position `Streams` fields (health,
+    armor, weapons, powerups, ammo, spawns, deaths).
+  - Skip `Items`, `Backpacks` (both attribute via nearest-player and
+    need positions).
+- `democache`: two gob tiers per schema — `results/v7/fast/<sha>.gob`
+  and `results/v7/full/<sha>.gob`. A `full` hit satisfies any
+  request (full ⊃ fast). A `fast` hit satisfies overview / score
+  requests; position-needing requests transparently upgrade by
+  reparsing from tier-1 MVD (no re-download).
+- `mvd-api`:
+  - `loadDemo` defaults to `level=fast`; accepts `?level=full` to
+    prewarm.
+  - `/overview`, `/events` (default types) → fast suffices.
+  - `/buckets`, `/stream-slice`, `/state-at`, `/loc-trails`,
+    `/region-control` → need full; trigger upgrade.
+- Items / Backpacks views become an explicit endpoint that requires
+  `level=full` (they're absent at fast).
+
+When combined with the planned `searchGames` (Supabase direct from
+mvd-mcp + mvd-web — no mvd-api round-trip), most agent sessions
+should never pay the position-track cost: search → pick → fast
+parse → overview, with full parse only when the user asks for
+position-derived analytics.
+
+Estimate: 1–2 days for the analyzer plumbing + level-aware cache +
+per-endpoint mapping + tests. Not blocked on anything; pure
+performance work.
+
 ### Surface gaps
 
 - **No remote MCP transport.** Streamable HTTP MCP isn't exposed.
