@@ -235,7 +235,7 @@ Output: `[]result.WeaponPickup` — `time`, `player`, `team`, `weapon`,
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `demoId`      | `string` (required) | — | — |
-| `windowMs`    | `int`     | 50 | Bucket size in ms |
+| `windowMs`    | `int`     | **1000** (MCP default) | Bucket size in ms. The REST API itself defaults to 50 — the MCP proxy injects 1000 when caller omits, since 50 ms emits ~24K buckets per match (drowns an LLM context). Pass an explicit value to override either way. |
 | `startTime`   | `float64` | match start | Window start, match-relative seconds |
 | `endTime`     | `float64` | match end | Window end |
 | `players`     | `string[]` | all | Restrict to these player names |
@@ -305,7 +305,7 @@ Output: `view.LocTrailsView` —
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `demoId`   | `string` (required) | — | — |
-| `windowMs` | `int` | 50 | Bucket size for the per-region state strings |
+| `windowMs` | `int` | **1000** (MCP default) | Bucket size for the per-region state strings. Same MCP-vs-REST split as `getBuckets`: REST default is 50, MCP proxy injects 1000 to keep `bucketStates` lengths manageable. |
 
 Output: `result.RegionControlResult`. Errors with
 `region_control_unavailable` (HTTP 422) if the demo's map has no

@@ -123,6 +123,41 @@ func TestProxy_GetBuckets_WindowMs(t *testing.T) {
 	}
 }
 
+// TestProxy_GetBuckets_MCPDefaultIs1s verifies that omitting
+// WindowMs in the MCP input forwards windowMs=1000 to the REST API
+// (not 50, which is what the API itself defaults to). This is the
+// MCP-side ergonomic default to keep buckets responses
+// LLM-readable.
+func TestProxy_GetBuckets_MCPDefaultIs1s(t *testing.T) {
+	srv := cannedAPI(t, nil)
+	b := newProxyBackend(srv.URL, "", 5*time.Second)
+	out, err := b.GetBuckets(context.Background(), GetBucketsInput{DemoID: "gameId:42"})
+	if err != nil {
+		t.Fatalf("GetBuckets: %v", err)
+	}
+	m := out.(map[string]any)
+	if m["windowMs"].(float64) != 1000 {
+		t.Errorf("MCP default windowMs=%v; want 1000 (proxy must inject)", m["windowMs"])
+	}
+}
+
+func TestProxy_GetRegionControl_MCPDefaultIs1s(t *testing.T) {
+	var seenQuery string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seenQuery = r.URL.RawQuery
+		w.Write([]byte(`{"regions":[],"stats":{}}`))
+	}))
+	defer srv.Close()
+	b := newProxyBackend(srv.URL, "", 5*time.Second)
+
+	if _, err := b.GetRegionControl(context.Background(), GetRegionControlInput{DemoID: "gameId:42"}); err != nil {
+		t.Fatalf("GetRegionControl: %v", err)
+	}
+	if !strings.Contains(seenQuery, "windowMs=1000") {
+		t.Errorf("expected windowMs=1000 in query; got %q", seenQuery)
+	}
+}
+
 func TestProxy_GetStateAt(t *testing.T) {
 	srv := cannedAPI(t, nil)
 	b := newProxyBackend(srv.URL, "", 5*time.Second)

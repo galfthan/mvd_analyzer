@@ -289,9 +289,15 @@ func (p *proxyBackend) GetBuckets(ctx context.Context, in GetBucketsInput) (any,
 		return nil, errors.New("demoId required")
 	}
 	q := url.Values{}
-	if in.WindowMs > 0 {
-		q.Set("windowMs", strconv.Itoa(in.WindowMs))
+	// MCP default: 1 s windows. The REST API still defaults to 50 ms
+	// when omitted, but for the typical MCP consumer 50 ms emits ~24K
+	// buckets / 4on4 — far too verbose for an LLM context. Explicit
+	// override (windowMs: 50) reaches the finer resolution.
+	windowMs := in.WindowMs
+	if windowMs <= 0 {
+		windowMs = 1000
 	}
+	q.Set("windowMs", strconv.Itoa(windowMs))
 	if in.StartTime != 0 {
 		q.Set("from", strconv.FormatFloat(in.StartTime, 'f', -1, 64))
 	}
@@ -397,8 +403,13 @@ func (p *proxyBackend) GetRegionControl(ctx context.Context, in GetRegionControl
 		return nil, errors.New("demoId required")
 	}
 	q := url.Values{}
-	if in.WindowMs > 0 {
-		q.Set("windowMs", strconv.Itoa(in.WindowMs))
+	// Same MCP-vs-REST default split as GetBuckets — 1 s buckets are
+	// the right granularity for an LLM reading region-control state
+	// strings; pass windowMs explicitly to override.
+	windowMs := in.WindowMs
+	if windowMs <= 0 {
+		windowMs = 1000
 	}
+	q.Set("windowMs", strconv.Itoa(windowMs))
 	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/region-control", q)
 }
