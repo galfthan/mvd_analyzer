@@ -50,6 +50,30 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 	})
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getMetadata",
+		Description: "Server cvars + KTX match settings: mode, timelimit, fraglimit, antilag, spawnmodel (k_spw), midair, instagib, overtime, powerups, noitems, vwep, noweapon, matchtag. Plus the full fullserverinfo cvar dump (hostname, version, watervis, dmgfrags, etc.). Used to answer 'what ruleset was this played under'.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetMetadataInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetMetadata(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getFrags",
+		Description: "Frag aggregates + full kill log. totalFrags + byPlayer (kills/deaths/byWeapon per player) + byWeapon (kills per weapon) + frags (every kill with time/killer/victim/weapon/isSuicide/isTeamKill). Optional players= / weapon= filters narrow both aggregates and log. Use this instead of aggregating getEvents(types:['frag']) yourself.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetFragsInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetFrags(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getLocGraph",
+		Description: "Per-map adjacency graph of named locations: which locs are reachable from which, with edge weights derived from per-player loc-to-loc transitions. Useful for movement-pattern reasoning ('what's adjacent to RA?').",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetLocGraphInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetLocGraph(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getChat",
 		Description: "All-chat and team-chat messages within an optional time window. Returns time, type ('chat' or 'teamsay'), player, team, message (raw with ezQuake markup), messageClean (markup stripped). Cheaper and shape-cleaner than getEvents(types:['chat']) when you only want chat.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetChatInput) (*mcp.CallToolResult, any, error) {

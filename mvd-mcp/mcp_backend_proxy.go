@@ -188,6 +188,34 @@ func (p *proxyBackend) GetDemoInfo(ctx context.Context, in GetDemoInfoInput) (an
 	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/demoinfo", nil)
 }
 
+func (p *proxyBackend) GetMetadata(ctx context.Context, in GetMetadataInput) (any, error) {
+	if in.DemoID == "" {
+		return nil, errors.New("demoId required")
+	}
+	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/metadata", nil)
+}
+
+func (p *proxyBackend) GetFrags(ctx context.Context, in GetFragsInput) (any, error) {
+	if in.DemoID == "" {
+		return nil, errors.New("demoId required")
+	}
+	q := url.Values{}
+	if len(in.Players) > 0 {
+		q.Set("players", strings.Join(in.Players, ","))
+	}
+	if len(in.Weapon) > 0 {
+		q.Set("weapon", strings.Join(in.Weapon, ","))
+	}
+	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/frags", q)
+}
+
+func (p *proxyBackend) GetLocGraph(ctx context.Context, in GetLocGraphInput) (any, error) {
+	if in.DemoID == "" {
+		return nil, errors.New("demoId required")
+	}
+	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/loc-graph", nil)
+}
+
 func (p *proxyBackend) GetChat(ctx context.Context, in GetChatInput) (any, error) {
 	if in.DemoID == "" {
 		return nil, errors.New("demoId required")

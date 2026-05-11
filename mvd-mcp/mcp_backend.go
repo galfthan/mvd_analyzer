@@ -11,6 +11,9 @@ type MCPBackend interface {
 	LoadDemo(ctx context.Context, in LoadDemoInput) (*LoadDemoOutput, error)
 	GetOverview(ctx context.Context, in GetOverviewInput) (any, error)
 	GetDemoInfo(ctx context.Context, in GetDemoInfoInput) (any, error)
+	GetMetadata(ctx context.Context, in GetMetadataInput) (any, error)
+	GetFrags(ctx context.Context, in GetFragsInput) (any, error)
+	GetLocGraph(ctx context.Context, in GetLocGraphInput) (any, error)
 	GetChat(ctx context.Context, in GetChatInput) (any, error)
 	GetBackpacks(ctx context.Context, in GetBackpacksInput) (any, error)
 	GetItems(ctx context.Context, in GetItemsInput) (any, error)
@@ -104,6 +107,24 @@ type GetRegionControlInput struct {
 
 // GetDemoInfoInput identifies a demo for the KTX demoinfo blob.
 type GetDemoInfoInput struct {
+	DemoID string `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+}
+
+// GetMetadataInput identifies a demo for its server cvars + KTX
+// match settings.
+type GetMetadataInput struct {
+	DemoID string `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+}
+
+// GetFragsInput filters /v1/demos/{id}/frags.
+type GetFragsInput struct {
+	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Players []string `json:"players,omitempty" jsonschema:"restrict aggregates + kill log to entries involving these players (killer OR victim)"`
+	Weapon  []string `json:"weapon,omitempty" jsonschema:"restrict aggregates + kill log to these weapon codes (rl, lg, gl, ssg, sng, ng, axe, sg, ...)"`
+}
+
+// GetLocGraphInput identifies a demo for its per-loc adjacency graph.
+type GetLocGraphInput struct {
 	DemoID string `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
 }
 

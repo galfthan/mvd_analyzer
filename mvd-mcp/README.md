@@ -44,6 +44,9 @@ vocabulary, and the reducer registry.
 | `loadDemo` | `mvd-api` `POST /v1/demos/{id}` |
 | `getOverview` | `mvd-api` `GET /v1/demos/{id}/overview` |
 | `getDemoInfo` | `mvd-api` `GET /v1/demos/{id}/demoinfo` |
+| `getMetadata` | `mvd-api` `GET /v1/demos/{id}/metadata` |
+| `getFrags` | `mvd-api` `GET /v1/demos/{id}/frags` |
+| `getLocGraph` | `mvd-api` `GET /v1/demos/{id}/loc-graph` |
 | `getChat` | `mvd-api` `GET /v1/demos/{id}/chat` |
 | `getBackpacks` | `mvd-api` `GET /v1/demos/{id}/backpacks` |
 | `getItems` | `mvd-api` `GET /v1/demos/{id}/items` |
@@ -128,6 +131,48 @@ Output: `result.DemoInfoResult`. Per-player `Weapons.<rl|lg|gl|ssg|ng>.acc`
 `Dmg.taken/given`, `Spree.{quad,run,ring,pent}.{frags,duration}`,
 RL/LG transfers, etc. Errors with `demoinfo_unavailable` (422) if the
 demo has no KTX demoinfo block (rare; non-KTX or aborted matches).
+
+#### `getMetadata({demoId})`
+
+Server cvars + KTX match settings. Used to answer "what ruleset
+was this played under".
+
+| Param | Type | Description |
+|---|---|---|
+| `demoId` | `string` (required) | — |
+
+Output: `result.MetadataResult` — `serverInfo` (map of cvar →
+value), `matchSettings` (mode, timelimit, fraglimit, antilag,
+spawnmodel/spawnK, midair, instagib, overtime, powerups, vwep,
+noweapon, matchtag, …), `countdownText` (raw KTX
+countdown centerprint).
+
+#### `getFrags({demoId, ...})`
+
+Frag aggregates + the full kill log. Cheaper than aggregating
+`getEvents(types:["frag"])` client-side.
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`  | `string` (required) | — | — |
+| `players` | `string[]` | all | Restrict aggregates + log to entries involving these (killer OR victim) |
+| `weapon`  | `string[]` | all | Restrict aggregates + log to these weapon codes (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `axe`, `sg`, …) |
+
+Output: `result.FragResult` —
+`{ totalFrags, byPlayer: {name: {kills, deaths, byWeapon}}, byWeapon: {weapon: count}, frags: [{time, killer, victim, weapon, isSuicide, isTeamKill}, ...] }`.
+
+#### `getLocGraph({demoId})`
+
+Per-map adjacency graph of named locations.
+
+| Param | Type | Description |
+|---|---|---|
+| `demoId` | `string` (required) | — |
+
+Output: `result.LocGraphResult` —
+`{ locs: [{ name, x, y, z, ... }, ...], edges: [{ from, to, weight, ... }, ...] }`.
+Useful for movement-pattern reasoning ("what's adjacent to RA?",
+"which paths connect quad to RL?").
 
 #### `getChat({demoId, ...})`
 

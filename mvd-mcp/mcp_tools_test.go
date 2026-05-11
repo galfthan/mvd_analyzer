@@ -57,6 +57,15 @@ func (f *fakeBackend) GetRegionControl(_ context.Context, _ GetRegionControlInpu
 func (f *fakeBackend) GetDemoInfo(_ context.Context, _ GetDemoInfoInput) (any, error) {
 	return map[string]any{"version": 3, "mode": "4on4", "players": []any{}}, nil
 }
+func (f *fakeBackend) GetMetadata(_ context.Context, _ GetMetadataInput) (any, error) {
+	return map[string]any{"matchSettings": map[string]any{"mode": "4on4"}}, nil
+}
+func (f *fakeBackend) GetFrags(_ context.Context, _ GetFragsInput) (any, error) {
+	return map[string]any{"totalFrags": 165, "byWeapon": map[string]any{"rl": 100}}, nil
+}
+func (f *fakeBackend) GetLocGraph(_ context.Context, _ GetLocGraphInput) (any, error) {
+	return map[string]any{"locs": []any{}, "edges": []any{}}, nil
+}
 func (f *fakeBackend) GetChat(_ context.Context, _ GetChatInput) (any, error) {
 	return []any{}, nil
 }
@@ -137,7 +146,8 @@ func TestMCP_ListTools(t *testing.T) {
 	}
 	want := []string{
 		"searchGames", "loadDemo",
-		"getOverview", "getDemoInfo", "getChat",
+		"getOverview", "getDemoInfo", "getMetadata", "getFrags",
+		"getLocGraph", "getChat",
 		"getBackpacks", "getItems", "getWeaponPickups",
 		"getBuckets", "getEvents", "getStreamSlice", "getStateAt",
 		"getLocTrails", "getRegionControl",

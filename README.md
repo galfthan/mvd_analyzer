@@ -114,9 +114,10 @@ make build-all-platforms                    # cross-compile both mvd-api and mvd
 
 #### Tool surface
 
-Fourteen tools — one for discovery, two for cache control + curated
-summary, four for the high-level Result sections (KTX demoinfo, chat,
-backpacks, items, weapon-pickups), and six for the view query layer:
+Seventeen tools — one for discovery, two for cache control + curated
+summary, eight for the high-level Result sections (KTX demoinfo,
+metadata, frags, loc-graph, chat, backpacks, items, weapon-pickups),
+and six for the view query layer:
 
 | Tool | Backing |
 |---|---|
@@ -127,6 +128,9 @@ backpacks, items, weapon-pickups), and six for the view query layer:
 | `getOverview(demoId)` | `mvd-api` `GET /v1/demos/{id}/overview` |
 | **Result section pass-throughs** | |
 | `getDemoInfo(demoId)` | `mvd-api` `/demoinfo` (KTX scoreboard) |
+| `getMetadata(demoId)` | `mvd-api` `/metadata` (server cvars + match settings) |
+| `getFrags(demoId, players, weapon)` | `mvd-api` `/frags` (aggregates + full kill log) |
+| `getLocGraph(demoId)` | `mvd-api` `/loc-graph` (per-map loc adjacency) |
 | `getChat(demoId, players, from, to, types)` | `mvd-api` `/chat` |
 | `getBackpacks(demoId, players, weapon)` | `mvd-api` `/backpacks` |
 | `getItems(demoId, items, players, kinds)` | `mvd-api` `/items` |

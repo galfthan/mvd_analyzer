@@ -45,8 +45,11 @@ immutable`, `X-Schema-Version: 7`, `X-Cache: HIT|WARM|MISS`, and
 | GET | `/healthz` | — | `{ok, schemaVersion}` |
 | GET | `/v1/version` | — | `{hash, tag, buildDate}` |
 | POST | `/v1/demos/{id}` | — | `{demoId, sha256, fromCache, schemaVersion}` (`loadDemo` — warms the cache) |
-| GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, top streaks, top powerups) |
+| GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, top streaks, top powerups, playerUserIDs) |
 | GET | `/v1/demos/{id}/demoinfo` | — | `result.DemoInfoResult` (KTX scoreboard — per-player weapon accuracy, kills/deaths/TK, damage, sprees, item counts, RL/LG transfers) |
+| GET | `/v1/demos/{id}/metadata` | — | `result.MetadataResult` (full fullserverinfo cvars + KTX match settings: timelimit, fraglimit, spawnmodel, antilag, midair, instagib, …) |
+| GET | `/v1/demos/{id}/frags` | `players`, `weapon` | `result.FragResult` (totalFrags + byPlayer + byWeapon + full kill log) |
+| GET | `/v1/demos/{id}/loc-graph` | — | `result.LocGraphResult` (per-map loc adjacency + edge weights) |
 | GET | `/v1/demos/{id}/chat` | `from`, `to`, `players`, `types` | `[]result.MatchEvent` (chat + teamsay only; types defaults to both) |
 | GET | `/v1/demos/{id}/backpacks` | `players`, `weapon` | `[]result.BackpackDrop` (RL/LG drops via `//ktx drop`) |
 | GET | `/v1/demos/{id}/items` | `items`, `players`, `kinds` | `result.ItemsResult` (per-item pickup/respawn timeline) |
@@ -133,7 +136,8 @@ in one round-trip.
     // ...
   ],
   "locCount":         47,                           // len(TimelineAnalysis.LocTable)
-  "hasRegionControl": true                          // true if /region-control will succeed
+  "hasRegionControl": true,                         // true if /region-control will succeed
+  "playerUserIDs":    { "bps": 123, "valla": 456 } // omitempty — for hub.quakeworld.nu/games/<gameId>?track=<userId>
 }
 ```
 
@@ -155,6 +159,9 @@ Stable codes:
 - `404 demo_not_found` — hub has no row for this gameId
 - `422 region_control_unavailable` — demo has no region-control layout
 - `422 demoinfo_unavailable` — demo has no KTX demoinfo block (non-KTX server or aborted match)
+- `422 metadata_unavailable` — demo has no metadata (no fullserverinfo / no countdown centerprint)
+- `422 frags_unavailable` — demo has no frag log
+- `422 locgraph_unavailable` — demo has no loc graph (probably no position track)
 - `502 hub_upstream` — network / 5xx from hub
 - `500 internal` / `500 panic` — unexpected
 

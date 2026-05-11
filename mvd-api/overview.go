@@ -26,6 +26,10 @@ type Overview struct {
 	TopPowerups      []OverviewPowerup  `json:"topPowerups,omitempty"`
 	LocCount         int                `json:"locCount"`
 	HasRegionControl bool               `json:"hasRegionControl"`
+	// PlayerUserIDs maps player name → hub.quakeworld.nu user id. Use it
+	// to build deep links of the form
+	// https://hub.quakeworld.nu/games/<gameId>?track=<userId>.
+	PlayerUserIDs map[string]int `json:"playerUserIDs,omitempty"`
 }
 
 // OverviewTeam mirrors result.TeamStat.
@@ -104,6 +108,10 @@ func BuildOverview(r *result.Result) Overview {
 
 		ov.TopStreaks = topStreaks(r.TimelineAnalysis.FragStreaks, 5)
 		ov.TopPowerups = topPowerups(r.TimelineAnalysis.PowerupEvents, 5)
+
+		if len(r.TimelineAnalysis.PlayerUserIDs) > 0 {
+			ov.PlayerUserIDs = r.TimelineAnalysis.PlayerUserIDs
+		}
 	}
 
 	// Stable ordering — players by frags desc, teams by frags desc.

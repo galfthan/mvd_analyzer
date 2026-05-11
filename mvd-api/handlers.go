@@ -147,6 +147,111 @@ func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, BuildOverview(res))
 }
 
+// handleMetadata: GET /v1/demos/{id}/metadata — full server cvars +
+// KTX match settings (timelimit, fraglimit, antilag, midair, spawnmodel,
+// instagib, ...). Used by the web's Summary tab.
+func (s *server) handleMetadata(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if res.Metadata == nil {
+		writeError(w, http.StatusUnprocessableEntity, "metadata_unavailable",
+			"this demo has no metadata (no fullserverinfo / no countdown centerprint)")
+		return
+	}
+	writeJSON(w, http.StatusOK, res.Metadata)
+}
+
+// handleLocGraph: GET /v1/demos/{id}/loc-graph — per-map loc
+// adjacency graph (which locs are reachable from which). Used by
+// the web's Loc Graph tab.
+func (s *server) handleLocGraph(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if res.LocGraph == nil {
+		writeError(w, http.StatusUnprocessableEntity, "locgraph_unavailable",
+			"this demo has no loc graph (probably no position track was emitted)")
+		return
+	}
+	writeJSON(w, http.StatusOK, res.LocGraph)
+}
+
+// handleFrags: GET /v1/demos/{id}/frags — top-level frag aggregates +
+// the full kill log. Optional filters narrow both views to entries
+// involving the named players / weapon.
+//
+// Query params:
+//
+//	players  csv — restrict ByPlayer keys + the Frags list to entries
+//	             where killer or victim is in the set
+//	weapon   csv — restrict ByWeapon keys + the Frags list to these weapons
+func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if res.Frags == nil {
+		writeError(w, http.StatusUnprocessableEntity, "frags_unavailable",
+			"this demo has no frag log")
+		return
+	}
+	q := r.URL.Query()
+	playerSet := csvSet(q.Get("players"))
+	weaponSet := csvSet(q.Get("weapon"))
+	if len(playerSet) == 0 && len(weaponSet) == 0 {
+		writeJSON(w, http.StatusOK, res.Frags)
+		return
+	}
+
+	out := &result.FragResult{TotalFrags: res.Frags.TotalFrags}
+
+	if res.Frags.ByPlayer != nil {
+		out.ByPlayer = make(map[string]*result.PlayerFrags, len(res.Frags.ByPlayer))
+		for name, pf := range res.Frags.ByPlayer {
+			if len(playerSet) > 0 && !playerSet[name] {
+				continue
+			}
+			if len(weaponSet) > 0 {
+				filtered := &result.PlayerFrags{
+					Kills:    pf.Kills,
+					Deaths:   pf.Deaths,
+					ByWeapon: map[string]int{},
+				}
+				for wpn, n := range pf.ByWeapon {
+					if weaponSet[wpn] {
+						filtered.ByWeapon[wpn] = n
+					}
+				}
+				out.ByPlayer[name] = filtered
+			} else {
+				out.ByPlayer[name] = pf
+			}
+		}
+	}
+	if res.Frags.ByWeapon != nil {
+		out.ByWeapon = make(map[string]int, len(res.Frags.ByWeapon))
+		for wpn, n := range res.Frags.ByWeapon {
+			if len(weaponSet) > 0 && !weaponSet[wpn] {
+				continue
+			}
+			out.ByWeapon[wpn] = n
+		}
+	}
+	for _, fe := range res.Frags.Frags {
+		if len(weaponSet) > 0 && !weaponSet[fe.Weapon] {
+			continue
+		}
+		if len(playerSet) > 0 && !playerSet[fe.Killer] && !playerSet[fe.Victim] {
+			continue
+		}
+		out.Frags = append(out.Frags, fe)
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
 // handleChat: GET /v1/demos/{id}/chat — chat-only slice of
 // result.Messages.Events, with optional player / time-window / type
 // filters.
