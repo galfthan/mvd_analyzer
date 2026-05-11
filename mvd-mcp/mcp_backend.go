@@ -10,6 +10,11 @@ import "context"
 type MCPBackend interface {
 	LoadDemo(ctx context.Context, in LoadDemoInput) (*LoadDemoOutput, error)
 	GetOverview(ctx context.Context, in GetOverviewInput) (any, error)
+	GetDemoInfo(ctx context.Context, in GetDemoInfoInput) (any, error)
+	GetChat(ctx context.Context, in GetChatInput) (any, error)
+	GetBackpacks(ctx context.Context, in GetBackpacksInput) (any, error)
+	GetItems(ctx context.Context, in GetItemsInput) (any, error)
+	GetWeaponPickups(ctx context.Context, in GetWeaponPickupsInput) (any, error)
 	GetBuckets(ctx context.Context, in GetBucketsInput) (any, error)
 	GetEvents(ctx context.Context, in GetEventsInput) (any, error)
 	GetStreamSlice(ctx context.Context, in GetStreamSliceInput) (any, error)
@@ -95,6 +100,44 @@ type GetLocTrailsInput struct {
 type GetRegionControlInput struct {
 	DemoID   string `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
 	WindowMs int    `json:"windowMs,omitempty" jsonschema:"bucket size for per-region state strings; default 50"`
+}
+
+// GetDemoInfoInput identifies a demo for the KTX demoinfo blob.
+type GetDemoInfoInput struct {
+	DemoID string `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+}
+
+// GetChatInput filters /v1/demos/{id}/chat by player, time window,
+// and chat kind (`say` / `teamsay`).
+type GetChatInput struct {
+	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	StartTime float64  `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds"`
+	EndTime   float64  `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds"`
+	Players   []string `json:"players,omitempty" jsonschema:"restrict to these speaker names"`
+	Types     []string `json:"types,omitempty" jsonschema:"chat-event types: 'chat' (public say), 'teamsay'. Empty = both."`
+}
+
+// GetBackpacksInput filters /v1/demos/{id}/backpacks.
+type GetBackpacksInput struct {
+	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Players []string `json:"players,omitempty" jsonschema:"restrict to drops by these dropper names"`
+	Weapon  string   `json:"weapon,omitempty" jsonschema:"'rl' or 'lg' (single-weapon filter)"`
+}
+
+// GetItemsInput filters /v1/demos/{id}/items.
+type GetItemsInput struct {
+	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Items   []string `json:"items,omitempty" jsonschema:"item names: RA, YA, GA, MH, Quad, Pent, Ring, RL, LG, GL, SSG, NG, SNG, ..."`
+	Players []string `json:"players,omitempty" jsonschema:"restrict phases to those taken by these player names (phases with no TakenBy survive)"`
+	Kinds   []string `json:"kinds,omitempty" jsonschema:"item kinds: armor, mega, powerup, weapon, ammo, health"`
+}
+
+// GetWeaponPickupsInput filters /v1/demos/{id}/weapon-pickups.
+type GetWeaponPickupsInput struct {
+	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Players []string `json:"players,omitempty" jsonschema:"restrict to picks by these names"`
+	Weapon  []string `json:"weapon,omitempty" jsonschema:"weapon codes: rl, lg, gl, ssg, sng, ng"`
+	Source  string   `json:"source,omitempty" jsonschema:"'world' (spawner) or 'backpack' (RL/LG drop)"`
 }
 
 // SearchGamesInput hits hub.quakeworld.nu's Supabase directly — not

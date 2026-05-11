@@ -114,13 +114,24 @@ make build-all-platforms                    # cross-compile both mvd-api and mvd
 
 #### Tool surface
 
-Nine tools, one for discovery and eight for per-demo analytics:
+Fourteen tools — one for discovery, two for cache control + curated
+summary, four for the high-level Result sections (KTX demoinfo, chat,
+backpacks, items, weapon-pickups), and six for the view query layer:
 
 | Tool | Backing |
 |---|---|
+| **Discovery** | |
 | `searchGames(players, teams, map, mode, matchtag, from, to, limit, offset)` | hub.quakeworld.nu Supabase (direct) |
+| **Cache + summary** | |
 | `loadDemo({gameId or sha256})` | `mvd-api` `POST /v1/demos/{id}` |
 | `getOverview(demoId)` | `mvd-api` `GET /v1/demos/{id}/overview` |
+| **Result section pass-throughs** | |
+| `getDemoInfo(demoId)` | `mvd-api` `/demoinfo` (KTX scoreboard) |
+| `getChat(demoId, players, from, to, types)` | `mvd-api` `/chat` |
+| `getBackpacks(demoId, players, weapon)` | `mvd-api` `/backpacks` |
+| `getItems(demoId, items, players, kinds)` | `mvd-api` `/items` |
+| `getWeaponPickups(demoId, players, weapon, source)` | `mvd-api` `/weapon-pickups` |
+| **View queries** | |
 | `getBuckets(demoId, windowMs, fields, reducers, …)` | `mvd-api` `/buckets` |
 | `getEvents(demoId, types, …)` | `mvd-api` `/events` |
 | `getStreamSlice(demoId, from, to, fields, …)` | `mvd-api` `/stream-slice` |

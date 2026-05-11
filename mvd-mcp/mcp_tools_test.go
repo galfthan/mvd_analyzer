@@ -54,6 +54,21 @@ func (f *fakeBackend) GetLocTrails(_ context.Context, _ GetLocTrailsInput) (any,
 func (f *fakeBackend) GetRegionControl(_ context.Context, _ GetRegionControlInput) (any, error) {
 	return map[string]any{"regions": []any{}, "stats": map[string]any{}}, nil
 }
+func (f *fakeBackend) GetDemoInfo(_ context.Context, _ GetDemoInfoInput) (any, error) {
+	return map[string]any{"version": 3, "mode": "4on4", "players": []any{}}, nil
+}
+func (f *fakeBackend) GetChat(_ context.Context, _ GetChatInput) (any, error) {
+	return []any{}, nil
+}
+func (f *fakeBackend) GetBackpacks(_ context.Context, _ GetBackpacksInput) (any, error) {
+	return []any{}, nil
+}
+func (f *fakeBackend) GetItems(_ context.Context, _ GetItemsInput) (any, error) {
+	return map[string]any{"items": []any{}}, nil
+}
+func (f *fakeBackend) GetWeaponPickups(_ context.Context, _ GetWeaponPickupsInput) (any, error) {
+	return []any{}, nil
+}
 
 // fakeSearcher is the default no-op searcher for backend-focused tests.
 type fakeSearcher struct {
@@ -120,8 +135,13 @@ func TestMCP_ListTools(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListTools: %v", err)
 	}
-	want := []string{"searchGames", "loadDemo", "getOverview", "getBuckets", "getEvents",
-		"getStreamSlice", "getStateAt", "getLocTrails", "getRegionControl"}
+	want := []string{
+		"searchGames", "loadDemo",
+		"getOverview", "getDemoInfo", "getChat",
+		"getBackpacks", "getItems", "getWeaponPickups",
+		"getBuckets", "getEvents", "getStreamSlice", "getStateAt",
+		"getLocTrails", "getRegionControl",
+	}
 	got := map[string]bool{}
 	for _, tool := range res.Tools {
 		got[tool.Name] = true

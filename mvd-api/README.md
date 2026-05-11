@@ -46,6 +46,11 @@ immutable`, `X-Schema-Version: 7`, `X-Cache: HIT|WARM|MISS`, and
 | GET | `/v1/version` | — | `{hash, tag, buildDate}` |
 | POST | `/v1/demos/{id}` | — | `{demoId, sha256, fromCache, schemaVersion}` (`loadDemo` — warms the cache) |
 | GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, top streaks, top powerups) |
+| GET | `/v1/demos/{id}/demoinfo` | — | `result.DemoInfoResult` (KTX scoreboard — per-player weapon accuracy, kills/deaths/TK, damage, sprees, item counts, RL/LG transfers) |
+| GET | `/v1/demos/{id}/chat` | `from`, `to`, `players`, `types` | `[]result.MatchEvent` (chat + teamsay only; types defaults to both) |
+| GET | `/v1/demos/{id}/backpacks` | `players`, `weapon` | `[]result.BackpackDrop` (RL/LG drops via `//ktx drop`) |
+| GET | `/v1/demos/{id}/items` | `items`, `players`, `kinds` | `result.ItemsResult` (per-item pickup/respawn timeline) |
+| GET | `/v1/demos/{id}/weapon-pickups` | `players`, `weapon`, `source` | `[]result.WeaponPickup` (kills-before-next-death; joins to backpacks via `backpackEnt`) |
 | GET | `/v1/demos/{id}/buckets` | `windowMs`, `from`, `to`, `players`, `fields`, `reducers`, `includeTeam` | `view.BucketsView` |
 | GET | `/v1/demos/{id}/events` | `from`, `to`, `players`, `types` | `view.EventsView` |
 | GET | `/v1/demos/{id}/stream-slice` | `from`, `to`, `players`, `fields` | `view.StreamSliceView` |
@@ -149,6 +154,7 @@ Stable codes:
 - `400 missing_param` — required param missing (e.g. `time` on state-at)
 - `404 demo_not_found` — hub has no row for this gameId
 - `422 region_control_unavailable` — demo has no region-control layout
+- `422 demoinfo_unavailable` — demo has no KTX demoinfo block (non-KTX server or aborted match)
 - `502 hub_upstream` — network / 5xx from hub
 - `500 internal` / `500 panic` — unexpected
 

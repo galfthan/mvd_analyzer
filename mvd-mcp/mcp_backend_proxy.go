@@ -181,6 +181,81 @@ func (p *proxyBackend) GetOverview(ctx context.Context, in GetOverviewInput) (an
 	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/overview", nil)
 }
 
+func (p *proxyBackend) GetDemoInfo(ctx context.Context, in GetDemoInfoInput) (any, error) {
+	if in.DemoID == "" {
+		return nil, errors.New("demoId required")
+	}
+	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/demoinfo", nil)
+}
+
+func (p *proxyBackend) GetChat(ctx context.Context, in GetChatInput) (any, error) {
+	if in.DemoID == "" {
+		return nil, errors.New("demoId required")
+	}
+	q := url.Values{}
+	if in.StartTime != 0 {
+		q.Set("from", strconv.FormatFloat(in.StartTime, 'f', -1, 64))
+	}
+	if in.EndTime != 0 {
+		q.Set("to", strconv.FormatFloat(in.EndTime, 'f', -1, 64))
+	}
+	if len(in.Players) > 0 {
+		q.Set("players", strings.Join(in.Players, ","))
+	}
+	if len(in.Types) > 0 {
+		q.Set("types", strings.Join(in.Types, ","))
+	}
+	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/chat", q)
+}
+
+func (p *proxyBackend) GetBackpacks(ctx context.Context, in GetBackpacksInput) (any, error) {
+	if in.DemoID == "" {
+		return nil, errors.New("demoId required")
+	}
+	q := url.Values{}
+	if len(in.Players) > 0 {
+		q.Set("players", strings.Join(in.Players, ","))
+	}
+	if in.Weapon != "" {
+		q.Set("weapon", in.Weapon)
+	}
+	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/backpacks", q)
+}
+
+func (p *proxyBackend) GetItems(ctx context.Context, in GetItemsInput) (any, error) {
+	if in.DemoID == "" {
+		return nil, errors.New("demoId required")
+	}
+	q := url.Values{}
+	if len(in.Items) > 0 {
+		q.Set("items", strings.Join(in.Items, ","))
+	}
+	if len(in.Players) > 0 {
+		q.Set("players", strings.Join(in.Players, ","))
+	}
+	if len(in.Kinds) > 0 {
+		q.Set("kinds", strings.Join(in.Kinds, ","))
+	}
+	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/items", q)
+}
+
+func (p *proxyBackend) GetWeaponPickups(ctx context.Context, in GetWeaponPickupsInput) (any, error) {
+	if in.DemoID == "" {
+		return nil, errors.New("demoId required")
+	}
+	q := url.Values{}
+	if len(in.Players) > 0 {
+		q.Set("players", strings.Join(in.Players, ","))
+	}
+	if len(in.Weapon) > 0 {
+		q.Set("weapon", strings.Join(in.Weapon, ","))
+	}
+	if in.Source != "" {
+		q.Set("source", in.Source)
+	}
+	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/weapon-pickups", q)
+}
+
 func (p *proxyBackend) GetBuckets(ctx context.Context, in GetBucketsInput) (any, error) {
 	if in.DemoID == "" {
 		return nil, errors.New("demoId required")

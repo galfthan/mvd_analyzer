@@ -73,6 +73,40 @@ func stubResult() *result.Result {
 		Metadata: &result.MetadataResult{
 			MatchSettings: &result.MatchSettings{Mode: "Team", Matchtag: "testcup"},
 		},
+		Messages: &result.MessagesResult{
+			Events: []result.MatchEvent{
+				{Time: 10, Type: "chat", Player: "bps", Team: "blue", Message: "gl hf", MessageClean: "gl hf"},
+				{Time: 20, Type: "teamsay", Player: "milton", Team: "blue", Message: "watch RA"},
+				{Time: 30, Type: "frag", Player: "bps", Victim: "valla", Weapon: "rl"},
+				{Time: 590, Type: "chat", Player: "valla", Team: "red", Message: "gg"},
+			},
+		},
+		DemoInfo: &result.DemoInfoResult{
+			Version: 3,
+			Mode:    "4on4",
+			Players: []result.DemoInfoPlayer{
+				{Name: "bps", Team: "blue"},
+				{Name: "valla", Team: "red"},
+			},
+		},
+		Backpacks: []result.BackpackDrop{
+			{Time: 100, Player: "bps", Team: "blue", Weapon: "rl", EntNum: 17},
+			{Time: 200, Player: "valla", Team: "red", Weapon: "lg", EntNum: 23},
+		},
+		Items: &result.ItemsResult{
+			Items: []result.ItemTimeline{
+				{Name: "RA", Kind: "armor", EntNum: 9, Phases: []result.ItemPhase{
+					{AvailableFrom: 0, TakenAt: 20, TakenBy: "bps", Team: "blue", RespawnAt: 40},
+				}},
+				{Name: "MH", Kind: "mega", EntNum: 11, Phases: []result.ItemPhase{
+					{AvailableFrom: 0, TakenAt: 35, TakenBy: "valla", Team: "red"},
+				}},
+			},
+		},
+		WeaponPickups: []result.WeaponPickup{
+			{Time: 5, Player: "bps", Team: "blue", Weapon: "rl", Source: "world", Kills: 3},
+			{Time: 100, Player: "milton", Team: "blue", Weapon: "rl", Source: "backpack", BackpackEnt: 17, Dropper: "bps", Kills: 1},
+		},
 	}
 }
 
@@ -278,6 +312,126 @@ func TestLocTrails(t *testing.T) {
 	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/loc-trails?players=bps")
 	if status != 200 {
 		t.Errorf("status = %d; want 200 (body=%s)", status, string(resp))
+	}
+}
+
+func TestDemoInfo(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/demoinfo", 200)
+	if resp["mode"] != "4on4" {
+		t.Errorf("mode = %v", resp["mode"])
+	}
+	players, _ := resp["players"].([]any)
+	if len(players) != 2 {
+		t.Errorf("len(players) = %d; want 2", len(players))
+	}
+}
+
+func TestDemoInfo_Unavailable(t *testing.T) {
+	store := &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no DemoInfo
+	}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/demoinfo")
+	if status != 422 {
+		t.Errorf("status = %d; want 422 (%s)", status, resp)
+	}
+}
+
+func TestChat_All(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	var arr []map[string]any
+	_ = json.Unmarshal(body, &arr)
+	// 3 chat/teamsay events (frag is filtered out by default types).
+	if len(arr) != 3 {
+		t.Errorf("len = %d; want 3 (body=%s)", len(arr), body)
+	}
+}
+
+func TestChat_PlayerFilter(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat?players=bps")
+	var arr []map[string]any
+	_ = json.Unmarshal(body, &arr)
+	if len(arr) != 1 || arr[0]["player"] != "bps" {
+		t.Errorf("expected only bps; got %s", body)
+	}
+}
+
+func TestChat_TimeWindow(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat?from=15&to=100")
+	var arr []map[string]any
+	_ = json.Unmarshal(body, &arr)
+	// only the teamsay at t=20 is in [15, 100].
+	if len(arr) != 1 || arr[0]["type"] != "teamsay" {
+		t.Errorf("expected only the teamsay; got %s", body)
+	}
+}
+
+func TestChat_TypesFilter(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat?types=teamsay")
+	var arr []map[string]any
+	_ = json.Unmarshal(body, &arr)
+	if len(arr) != 1 || arr[0]["type"] != "teamsay" {
+		t.Errorf("expected one teamsay; got %s", body)
+	}
+}
+
+func TestBackpacks(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/backpacks")
+	var arr []map[string]any
+	_ = json.Unmarshal(body, &arr)
+	if len(arr) != 2 {
+		t.Errorf("len = %d; want 2", len(arr))
+	}
+
+	// weapon=lg filter
+	body, _ = getRaw(t, srv.URL+"/v1/demos/gameId:42/backpacks?weapon=lg")
+	_ = json.Unmarshal(body, &arr)
+	if len(arr) != 1 || arr[0]["weapon"] != "lg" {
+		t.Errorf("weapon=lg filter failed: %s", body)
+	}
+}
+
+func TestItems_AndFilter(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/items?items=RA", 200)
+	items, _ := resp["items"].([]any)
+	if len(items) != 1 {
+		t.Errorf("items=RA filter: got %d, want 1", len(items))
+	}
+
+	// players=valla filter — should drop the RA phase (taken by bps).
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/items?players=valla", 200)
+	items, _ = resp["items"].([]any)
+	if len(items) != 1 {
+		t.Errorf("players=valla: got %d items, want 1 (MH only)", len(items))
+	}
+}
+
+func TestWeaponPickups_SourceFilter(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/weapon-pickups?source=backpack")
+	var arr []map[string]any
+	_ = json.Unmarshal(body, &arr)
+	if len(arr) != 1 || arr[0]["source"] != "backpack" {
+		t.Errorf("source=backpack: %s", body)
 	}
 }
 

@@ -147,6 +147,229 @@ func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, BuildOverview(res))
 }
 
+// handleChat: GET /v1/demos/{id}/chat — chat-only slice of
+// result.Messages.Events, with optional player / time-window / type
+// filters.
+//
+// Query params:
+//
+//	from, to   match-relative seconds, both inclusive
+//	players    csv — restrict to these speakers
+//	types      csv — defaults to ["chat","teamsay"]; pass a subset to narrow
+//
+// Returned shape mirrors result.MatchEvent, so callers see Time,
+// Type, Player, Team, Message, MessageClean directly (no MCP-event
+// envelope, unlike getEvents).
+func (s *server) handleChat(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if res.Messages == nil {
+		writeJSON(w, http.StatusOK, []result.MatchEvent{})
+		return
+	}
+	q := r.URL.Query()
+	start, err := parseFloat(q, "from", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	end, err := parseFloat(q, "to", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
+	playerSet := csvSet(q.Get("players"))
+	typeSet := csvSet(q.Get("types"))
+	if len(typeSet) == 0 {
+		typeSet = map[string]bool{"chat": true, "teamsay": true}
+	}
+
+	out := make([]result.MatchEvent, 0, len(res.Messages.Events))
+	for _, ev := range res.Messages.Events {
+		if !typeSet[ev.Type] {
+			continue
+		}
+		if start != 0 && ev.Time < start {
+			continue
+		}
+		if end != 0 && ev.Time > end {
+			continue
+		}
+		if len(playerSet) > 0 && !playerSet[ev.Player] {
+			continue
+		}
+		out = append(out, ev)
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// handleDemoInfo: GET /v1/demos/{id}/demoinfo — KTX demoinfo blob
+// pass-through. Carries per-player weapon accuracy, kills, deaths,
+// damage, sprees, item pickup counts, RL/LG transfers.
+func (s *server) handleDemoInfo(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if res.DemoInfo == nil {
+		writeError(w, http.StatusUnprocessableEntity, "demoinfo_unavailable",
+			"this demo has no KTX demoinfo block (likely non-KTX or pre-match abort)")
+		return
+	}
+	writeJSON(w, http.StatusOK, res.DemoInfo)
+}
+
+// handleBackpacks: GET /v1/demos/{id}/backpacks — RL/LG drops with
+// optional player/weapon filters.
+//
+// Query params:
+//
+//	players  csv — restrict to drops by these dropper names
+//	weapon   "rl" or "lg" — restrict to this weapon
+func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if res.Backpacks == nil {
+		writeJSON(w, http.StatusOK, []result.BackpackDrop{})
+		return
+	}
+	q := r.URL.Query()
+	playerSet := csvSet(q.Get("players"))
+	wantWeapon := strings.ToLower(strings.TrimSpace(q.Get("weapon")))
+
+	out := make([]result.BackpackDrop, 0, len(res.Backpacks))
+	for _, b := range res.Backpacks {
+		if len(playerSet) > 0 && !playerSet[b.Player] {
+			continue
+		}
+		if wantWeapon != "" && b.Weapon != wantWeapon {
+			continue
+		}
+		out = append(out, b)
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// handleItems: GET /v1/demos/{id}/items — per-item pickup/respawn
+// timeline with optional filters.
+//
+// Query params:
+//
+//	items    csv — restrict to these item names (RA, YA, GA, MH, Quad, Pent, Ring, ...)
+//	players  csv — restrict to phases where TakenBy is one of these names
+//	kinds    csv — restrict to these kinds (armor, mega, powerup, weapon, ammo, ...)
+//
+// Phases with no TakenBy survive any players= filter (they represent
+// the item's availability state at match end / dropped runs).
+func (s *server) handleItems(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if res.Items == nil {
+		writeJSON(w, http.StatusOK, &result.ItemsResult{Items: []result.ItemTimeline{}})
+		return
+	}
+	q := r.URL.Query()
+	itemSet := csvSet(q.Get("items"))
+	playerSet := csvSet(q.Get("players"))
+	kindSet := csvSet(q.Get("kinds"))
+
+	if len(itemSet) == 0 && len(playerSet) == 0 && len(kindSet) == 0 {
+		writeJSON(w, http.StatusOK, res.Items)
+		return
+	}
+
+	out := &result.ItemsResult{Items: make([]result.ItemTimeline, 0, len(res.Items.Items))}
+	for _, it := range res.Items.Items {
+		if len(itemSet) > 0 && !itemSet[it.Name] {
+			continue
+		}
+		if len(kindSet) > 0 && !kindSet[it.Kind] {
+			continue
+		}
+		if len(playerSet) > 0 {
+			kept := it
+			kept.Phases = make([]result.ItemPhase, 0, len(it.Phases))
+			for _, ph := range it.Phases {
+				if ph.TakenBy == "" {
+					kept.Phases = append(kept.Phases, ph)
+					continue
+				}
+				if playerSet[ph.TakenBy] {
+					kept.Phases = append(kept.Phases, ph)
+				}
+			}
+			if len(kept.Phases) == 0 {
+				continue
+			}
+			out.Items = append(out.Items, kept)
+			continue
+		}
+		out.Items = append(out.Items, it)
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// handleWeaponPickups: GET /v1/demos/{id}/weapon-pickups — slot-weapon
+// acquisitions with effectiveness (kills-before-next-death). Optional
+// filters by player / weapon / source.
+//
+// Query params:
+//
+//	players  csv — restrict to picks by these names
+//	weapon   csv — "rl","lg","gl","ssg","sng","ng" (csv accepted but typically one)
+//	source   "world" | "backpack"
+func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if len(res.WeaponPickups) == 0 {
+		writeJSON(w, http.StatusOK, []result.WeaponPickup{})
+		return
+	}
+	q := r.URL.Query()
+	playerSet := csvSet(q.Get("players"))
+	weaponSet := csvSet(q.Get("weapon"))
+	wantSource := strings.ToLower(strings.TrimSpace(q.Get("source")))
+
+	out := make([]result.WeaponPickup, 0, len(res.WeaponPickups))
+	for _, wp := range res.WeaponPickups {
+		if len(playerSet) > 0 && !playerSet[wp.Player] {
+			continue
+		}
+		if len(weaponSet) > 0 && !weaponSet[wp.Weapon] {
+			continue
+		}
+		if wantSource != "" && wp.Source != wantSource {
+			continue
+		}
+		out = append(out, wp)
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// csvSet builds a set from a comma-separated query value. Empty
+// string → nil (caller should treat that as "no filter").
+func csvSet(v string) map[string]bool {
+	if v == "" {
+		return nil
+	}
+	out := map[string]bool{}
+	for _, p := range strings.Split(v, ",") {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out[p] = true
+		}
+	}
+	return out
+}
+
 func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {

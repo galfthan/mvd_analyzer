@@ -43,6 +43,11 @@ vocabulary, and the reducer registry.
 | `searchGames` | hub.quakeworld.nu Supabase (direct) |
 | `loadDemo` | `mvd-api` `POST /v1/demos/{id}` |
 | `getOverview` | `mvd-api` `GET /v1/demos/{id}/overview` |
+| `getDemoInfo` | `mvd-api` `GET /v1/demos/{id}/demoinfo` |
+| `getChat` | `mvd-api` `GET /v1/demos/{id}/chat` |
+| `getBackpacks` | `mvd-api` `GET /v1/demos/{id}/backpacks` |
+| `getItems` | `mvd-api` `GET /v1/demos/{id}/items` |
+| `getWeaponPickups` | `mvd-api` `GET /v1/demos/{id}/weapon-pickups` |
 | `getBuckets` | `mvd-api` `GET /v1/demos/{id}/buckets` |
 | `getEvents` | `mvd-api` `GET /v1/demos/{id}/events` |
 | `getStreamSlice` | `mvd-api` `GET /v1/demos/{id}/stream-slice` |
@@ -109,6 +114,76 @@ every subsequent per-demo tool expects.
 
 Output: `Overview` —
 see [`../mvd-api/README.md`](../mvd-api/README.md#getoverview).
+
+#### `getDemoInfo({demoId})`
+
+KTX demoinfo blob pass-through — the authoritative scoreboard.
+
+| Param | Type | Description |
+|---|---|---|
+| `demoId` | `string` (required) | — |
+
+Output: `result.DemoInfoResult`. Per-player `Weapons.<rl|lg|gl|ssg|ng>.acc`
+(hit accuracy), `Weapons.<...>.kills`, `Items.<RA|YA|GA|MH|...>.count`,
+`Dmg.taken/given`, `Spree.{quad,run,ring,pent}.{frags,duration}`,
+RL/LG transfers, etc. Errors with `demoinfo_unavailable` (422) if the
+demo has no KTX demoinfo block (rare; non-KTX or aborted matches).
+
+#### `getChat({demoId, ...})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`    | `string` (required) | — | — |
+| `startTime` | `float64` | match start | Window start, match-relative seconds |
+| `endTime`   | `float64` | match end | Window end |
+| `players`   | `string[]` | all | Restrict to these speakers |
+| `types`     | `string[]` | `["chat","teamsay"]` | Narrow to one of the two |
+
+Output: `[]result.MatchEvent` — each entry has `time`, `type` (`chat`
+or `teamsay`), `player`, `team`, `message` (raw with ezQuake markup),
+`messageClean` (markup stripped). Cleaner shape than
+`getEvents(types:["chat"])` when you only want chat.
+
+#### `getBackpacks({demoId, ...})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`  | `string` (required) | — | — |
+| `players` | `string[]` | all | Restrict to drops by these dropper names |
+| `weapon`  | `string`   | both | `rl` or `lg` |
+
+Output: `[]result.BackpackDrop` — `time`, `player` (dropper), `team`,
+`weapon` (`rl`/`lg`), `origin` (XYZ), `loc` (resolved name),
+`entNum` (server edict — joins to `weapon-pickups[].backpackEnt`).
+
+#### `getItems({demoId, ...})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`  | `string` (required) | — | — |
+| `items`   | `string[]` | all | Item names: `RA`, `YA`, `GA`, `MH`, `Quad`, `Pent`, `Ring`, `RL`, `LG`, `GL`, `SSG`, `NG`, `SNG`, … |
+| `players` | `string[]` | all | Restrict phases to those taken by these names; phases with no `takenBy` survive |
+| `kinds`   | `string[]` | all | `armor`, `mega`, `powerup`, `weapon`, `ammo`, `health` |
+
+Output: `result.ItemsResult` —
+`{ items: [{ name, kind, entNum, x, y, z, loc, phases: [...] }, ...] }`.
+Each phase: `availableFrom`, `takenAt`, `takenBy`, `team`,
+`respawnAt`.
+
+#### `getWeaponPickups({demoId, ...})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId`  | `string` (required) | — | — |
+| `players` | `string[]` | all | Restrict to picks by these names |
+| `weapon`  | `string[]` | all | `rl`, `lg`, `gl`, `ssg`, `sng`, `ng` |
+| `source`  | `string`   | both | `world` (spawner) or `backpack` (RL/LG drop) |
+
+Output: `[]result.WeaponPickup` — `time`, `player`, `team`, `weapon`,
+`source`, `hadBefore`, `kills` (before picker's next death),
+`nextDeathTime`, plus for backpack pickups `backpackEnt`, `dropper`,
+`dropperTeam`, `dropTime`. Joins to `getBackpacks` via `backpackEnt`
+== `backpacks[].entNum`.
 
 #### `getBuckets({demoId, ...})`
 

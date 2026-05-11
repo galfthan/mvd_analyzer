@@ -22,6 +22,11 @@ func newRouter(store demoStore, logger *slog.Logger) http.Handler {
 
 	mux.HandleFunc("POST /v1/demos/{id}", s.handleLoad)
 	mux.HandleFunc("GET /v1/demos/{id}/overview", s.handleOverview)
+	mux.HandleFunc("GET /v1/demos/{id}/demoinfo", s.handleDemoInfo)
+	mux.HandleFunc("GET /v1/demos/{id}/chat", s.handleChat)
+	mux.HandleFunc("GET /v1/demos/{id}/backpacks", s.handleBackpacks)
+	mux.HandleFunc("GET /v1/demos/{id}/items", s.handleItems)
+	mux.HandleFunc("GET /v1/demos/{id}/weapon-pickups", s.handleWeaponPickups)
 	mux.HandleFunc("GET /v1/demos/{id}/buckets", s.handleBuckets)
 	mux.HandleFunc("GET /v1/demos/{id}/events", s.handleEvents)
 	mux.HandleFunc("GET /v1/demos/{id}/stream-slice", s.handleStreamSlice)

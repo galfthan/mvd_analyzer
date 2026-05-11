@@ -42,6 +42,46 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 	})
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getDemoInfo",
+		Description: "KTX demoinfo blob — per-player weapon accuracy (hits/fires), kills/deaths/TK, damage dealt/taken, sprees, control time, item pickup counts, RL/LG transfers. Authoritative KTX scoreboard. Errors if the demo has no KTX demoinfo (rare; non-KTX servers or aborted matches).",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetDemoInfoInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetDemoInfo(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getChat",
+		Description: "All-chat and team-chat messages within an optional time window. Returns time, type ('chat' or 'teamsay'), player, team, message (raw with ezQuake markup), messageClean (markup stripped). Cheaper and shape-cleaner than getEvents(types:['chat']) when you only want chat.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetChatInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetChat(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getBackpacks",
+		Description: "RL/LG backpack drops emitted by KTX's //ktx drop hint — each entry carries time, dropper, weapon ('rl'/'lg'), origin XYZ, resolved loc, and the server ent number that joins to weapon-pickups.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetBackpacksInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetBackpacks(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getItems",
+		Description: "Per-item pickup/respawn timeline. Each item (RA/YA/GA/MH/Quad/Pent/Ring/RL/LG/...) has its world position + nearest loc, and a phases list — when it became available, when it was taken (if at all), by whom, when it respawned.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetItemsInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetItems(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getWeaponPickups",
+		Description: "Slot-weapon acquisitions (world spawners + RL/LG backpacks) with kills-before-next-death effectiveness. Each pickup carries time, player, weapon, source ('world'/'backpack'), kills earned, next death time. Backpack pickups also carry the dropper and the joining ent number.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetWeaponPickupsInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetWeaponPickups(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getBuckets",
 		Description: "Bucketed per-player time series over the match (health, armor, weapons, powerups, ammo, position, loc). Choose a windowMs that matches your visualization or query resolution. Response shape: see mvd-api /v1/demos/{id}/buckets.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetBucketsInput) (*mcp.CallToolResult, any, error) {
