@@ -77,20 +77,22 @@ func (b *streamBuilder) recordCells(t float64, v int16) {
 }
 
 // recordPosition appends every native sample (no dedup; D11
-// asymmetry).
-func (b *streamBuilder) recordPosition(t float64, x, y, z float32) {
-	b.posT = append(b.posT, float32(t))
+// asymmetry). Time is integer milliseconds — the canonical wire-native
+// unit; we never narrow it back to float to avoid drift across the
+// boundary comparisons in locgraph / blip filter.
+func (b *streamBuilder) recordPosition(tMs int32, x, y, z float32) {
+	b.posT = append(b.posT, tMs)
 	b.posX = append(b.posX, int32(x))
 	b.posY = append(b.posY, int32(y))
 	b.posZ = append(b.posZ, int32(z))
 }
 
-func (b *streamBuilder) recordSpawn(t float64) {
-	b.spawns = append(b.spawns, t)
+func (b *streamBuilder) recordSpawn(tMs int32) {
+	b.spawns = append(b.spawns, tMs)
 }
 
-func (b *streamBuilder) recordDeath(t float64) {
-	b.deaths = append(b.deaths, t)
+func (b *streamBuilder) recordDeath(tMs int32) {
+	b.deaths = append(b.deaths, tMs)
 }
 
 // updateInterval drives an interval stream based on a boolean flip.
@@ -212,7 +214,7 @@ func (b *streamBuilder) toPlayerStream(name, team string) result.PlayerStream {
 	}
 	if len(b.posT) > 0 {
 		pos := &result.PositionTrack{
-			T: append([]float32(nil), b.posT...),
+			T: append([]int32(nil), b.posT...),
 			X: append([]int32(nil), b.posX...),
 			Y: append([]int32(nil), b.posY...),
 			Z: append([]int32(nil), b.posZ...),
@@ -223,10 +225,10 @@ func (b *streamBuilder) toPlayerStream(name, team string) result.PlayerStream {
 		ps.Position = pos
 	}
 	if len(b.spawns) > 0 {
-		ps.Spawns = append([]float64(nil), b.spawns...)
+		ps.Spawns = append([]int32(nil), b.spawns...)
 	}
 	if len(b.deaths) > 0 {
-		ps.Deaths = append([]float64(nil), b.deaths...)
+		ps.Deaths = append([]int32(nil), b.deaths...)
 	}
 	return ps
 }
@@ -342,7 +344,7 @@ func (a *TimelineAnalyzer) resolveLocsAndFilterBlips() (locTable []string, locIn
 	if a.locFinder == nil {
 		return locTable, locIndex
 	}
-	threshold := float64(a.blipThresholdMs) / 1000.0
+	thresholdMs := int32(a.blipThresholdMs)
 
 	// First pass: resolve every native sample's nearest loc, populate
 	// PositionTrack.Li. Build the loc-name → index map incrementally
@@ -393,7 +395,7 @@ func (a *TimelineAnalyzer) resolveLocsAndFilterBlips() (locTable []string, locIn
 
 	// Second pass: run the blip filter on each player's Li column,
 	// using each player's spawn / death timestamps to split runs.
-	if threshold > 0 {
+	if thresholdMs > 0 {
 		for _, slot := range slots {
 			state := a.playerState[slot]
 			b := &state.streams
@@ -401,17 +403,20 @@ func (a *TimelineAnalyzer) resolveLocsAndFilterBlips() (locTable []string, locIn
 				continue
 			}
 			boundaries := mergeBoundaries(b.spawns, b.deaths)
-			filterPositionLiBlips(b, boundaries, threshold)
+			filterPositionLiBlips(b, boundaries, thresholdMs)
 		}
 	}
 
 	// Third pass: emit the sparse PlayerStream.Loc change stream from
-	// the (now-smoothed) Li column.
+	// the (now-smoothed) Li column. ChangeI16.T stays float64 seconds
+	// (deferred from the int32-ms migration); convert here at the
+	// boundary between the int32-ms storage and the float64-seconds
+	// change-stream representation.
 	for _, slot := range slots {
 		state := a.playerState[slot]
 		b := &state.streams
 		for i := range b.posT {
-			state.streams.recordLoc(float64(b.posT[i]), b.posLi[i])
+			state.streams.recordLoc(float64(b.posT[i])*0.001, b.posLi[i])
 		}
 	}
 	return locTable, locIndex
@@ -420,11 +425,13 @@ func (a *TimelineAnalyzer) resolveLocsAndFilterBlips() (locTable []string, locIn
 // mergeBoundaries returns a sorted list of timestamps where the blip
 // filter must split runs: every spawn and every death. Spawns and
 // deaths can interleave; merge sorts both into one ascending slice.
-func mergeBoundaries(spawns, deaths []float64) []float64 {
+// Values are integer milliseconds — comparisons against b.posT are
+// exact, no eps slack needed.
+func mergeBoundaries(spawns, deaths []int32) []int32 {
 	if len(spawns) == 0 && len(deaths) == 0 {
 		return nil
 	}
-	out := make([]float64, 0, len(spawns)+len(deaths))
+	out := make([]int32, 0, len(spawns)+len(deaths))
 	i, j := 0, 0
 	for i < len(spawns) && j < len(deaths) {
 		if spawns[i] <= deaths[j] {
@@ -447,9 +454,13 @@ func mergeBoundaries(spawns, deaths []float64) []float64 {
 // Splits the sample stream into segments at boundary timestamps
 // (spawn / death) and at Li=0 gaps (no resolved loc). Within each
 // segment, groups consecutive same-Li samples; segments whose
-// duration is below threshold become "blips" that get reassigned to
-// the surrounding stable Li values. Mutates b.posLi in place.
-func filterPositionLiBlips(b *streamBuilder, boundaries []float64, threshold float64) {
+// duration is below thresholdMs become "blips" that get reassigned
+// to the surrounding stable Li values. Mutates b.posLi in place.
+//
+// All time arithmetic is integer milliseconds — boundaries and
+// b.posT both use int32 ms so comparisons are exact (this is the
+// site of the gib-respawn precision bug schema v8 fixed).
+func filterPositionLiBlips(b *streamBuilder, boundaries []int32, thresholdMs int32) {
 	if b == nil || len(b.posT) == 0 || len(b.posLi) != len(b.posT) {
 		return
 	}
@@ -466,9 +477,9 @@ func filterPositionLiBlips(b *streamBuilder, boundaries []float64, threshold flo
 		}
 		runEnd := runStart + 1
 		for runEnd < len(b.posT) && b.posLi[runEnd] != 0 {
-			t := float64(b.posT[runEnd])
+			t := b.posT[runEnd]
 			for bIdx < len(boundaries) && boundaries[bIdx] <= t {
-				if boundaries[bIdx] > float64(b.posT[runStart]) {
+				if boundaries[bIdx] > b.posT[runStart] {
 					goto runComplete
 				}
 				bIdx++
@@ -476,7 +487,7 @@ func filterPositionLiBlips(b *streamBuilder, boundaries []float64, threshold flo
 			runEnd++
 		}
 	runComplete:
-		filterBlipsInPositionRun(b, runStart, runEnd, threshold)
+		filterBlipsInPositionRun(b, runStart, runEnd, thresholdMs)
 		runStart = runEnd
 	}
 }
@@ -486,14 +497,14 @@ func filterPositionLiBlips(b *streamBuilder, boundaries []float64, threshold flo
 // follows v6's filterBlipsInRun (leading/trailing blips inherit
 // nearest stable; blips between two stables split ceil/floor; blips
 // between same-loc stables collapse).
-func filterBlipsInPositionRun(b *streamBuilder, runStart, runEnd int, threshold float64) {
+func filterBlipsInPositionRun(b *streamBuilder, runStart, runEnd int, thresholdMs int32) {
 	if runEnd-runStart < 2 {
 		return
 	}
 	type segment struct {
 		li         int16
 		start, end int
-		duration   float64
+		duration   int32 // ms
 	}
 	var segs []segment
 	for i := runStart; i < runEnd; {
@@ -502,13 +513,13 @@ func filterBlipsInPositionRun(b *streamBuilder, runStart, runEnd int, threshold 
 		for j < runEnd && b.posLi[j] == li {
 			j++
 		}
-		var dur float64
+		var dur int32
 		if j < runEnd {
-			dur = float64(b.posT[j]) - float64(b.posT[i])
+			dur = b.posT[j] - b.posT[i]
 		} else if runEnd < len(b.posT) {
-			dur = float64(b.posT[runEnd]) - float64(b.posT[i])
+			dur = b.posT[runEnd] - b.posT[i]
 		} else if j-1 > i {
-			dur = float64(b.posT[j-1]) - float64(b.posT[i])
+			dur = b.posT[j-1] - b.posT[i]
 		}
 		segs = append(segs, segment{li: li, start: i, end: j, duration: dur})
 		i = j
@@ -519,7 +530,7 @@ func filterBlipsInPositionRun(b *streamBuilder, runStart, runEnd int, threshold 
 	stable := make([]bool, len(segs))
 	firstStable, lastStable := -1, -1
 	for i, s := range segs {
-		if s.duration >= threshold {
+		if s.duration >= thresholdMs {
 			stable[i] = true
 			if firstStable < 0 {
 				firstStable = i

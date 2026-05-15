@@ -1,6 +1,10 @@
 package analyzer
 
-import "github.com/mvd-analyzer/mvd-analytics/result"
+import (
+	"math"
+
+	"github.com/mvd-analyzer/mvd-analytics/result"
+)
 
 // Default post-processors for the registry. Each one is registered by
 // NewDefaultRegistry; callers building a registry from scratch can
@@ -23,6 +27,12 @@ func normalizeMatchRelativeTimes(res *Result, _ *CoreOutputs) {
 	if matchStart <= 0 {
 		return
 	}
+	// matchStartMs is the int32-ms view of matchStart, used to shift
+	// the int32-ms schema-v8 streams (PositionTrack.T, Spawns, Deaths).
+	// This is the only place we round a float-second matchStart into
+	// integer ms — a one-time normalisation rather than a per-sample
+	// round-trip, so the precision class of bug doesn't reappear here.
+	matchStartMs := int32(math.Round(matchStart * 1000))
 
 	if ta := res.TimelineAnalysis; ta != nil {
 		for i := range ta.FragEvents {
@@ -68,11 +78,11 @@ func normalizeMatchRelativeTimes(res *Result, _ *CoreOutputs) {
 			p.Pent = shiftAndFilterIntervals(p.Pent, matchStart)
 			p.Ring = shiftAndFilterIntervals(p.Ring, matchStart)
 
-			p.Spawns = shiftAndFilterFloats(p.Spawns, matchStart)
-			p.Deaths = shiftAndFilterFloats(p.Deaths, matchStart)
+			p.Spawns = shiftAndFilterInts(p.Spawns, matchStartMs)
+			p.Deaths = shiftAndFilterInts(p.Deaths, matchStartMs)
 
 			if p.Position != nil {
-				shiftAndFilterPosition(p.Position, matchStart)
+				shiftAndFilterPosition(p.Position, matchStartMs)
 			}
 		}
 	}
@@ -214,16 +224,19 @@ func shiftAndFilterIntervals(stream []result.Interval, matchStart float64) []res
 	return out
 }
 
-func shiftAndFilterFloats(stream []float64, matchStart float64) []float64 {
+// shiftAndFilterInts subtracts matchStartMs from each entry and drops
+// entries that fall before the match start. Used for the int32-ms
+// schema-v8 streams (Spawns, Deaths).
+func shiftAndFilterInts(stream []int32, matchStartMs int32) []int32 {
 	if len(stream) == 0 {
 		return nil
 	}
-	out := make([]float64, 0, len(stream))
+	out := make([]int32, 0, len(stream))
 	for _, t := range stream {
-		if t < matchStart {
+		if t < matchStartMs {
 			continue
 		}
-		out = append(out, t-matchStart)
+		out = append(out, t-matchStartMs)
 	}
 	if len(out) == 0 {
 		return nil
@@ -235,14 +248,14 @@ func shiftAndFilterFloats(stream []float64, matchStart float64) []float64 {
 // the survivors. Mutates pt in place. Must keep all five columns
 // (T/X/Y/Z/Li) aligned — BuildLocGraph and ComputeRegionControl
 // both guard on `len(pt.Li) == len(pt.T)` and will silently skip the
-// player if the lengths drift.
-func shiftAndFilterPosition(pt *result.PositionTrack, matchStart float64) {
+// player if the lengths drift. All time arithmetic is int32 ms.
+func shiftAndFilterPosition(pt *result.PositionTrack, matchStartMs int32) {
 	if pt == nil || len(pt.T) == 0 {
 		return
 	}
 	oldLen := len(pt.T)
 	keepFrom := 0
-	for keepFrom < oldLen && float64(pt.T[keepFrom]) < matchStart {
+	for keepFrom < oldLen && pt.T[keepFrom] < matchStartMs {
 		keepFrom++
 	}
 	if keepFrom > 0 {
@@ -255,7 +268,7 @@ func shiftAndFilterPosition(pt *result.PositionTrack, matchStart float64) {
 		}
 	}
 	for i := range pt.T {
-		pt.T[i] = float32(float64(pt.T[i]) - matchStart)
+		pt.T[i] -= matchStartMs
 	}
 }
 

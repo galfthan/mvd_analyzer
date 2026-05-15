@@ -204,7 +204,7 @@ func TestLoad(t *testing.T) {
 	if resp.Header.Get("X-Cache") == "" {
 		t.Errorf("X-Cache header missing")
 	}
-	if resp.Header.Get("X-Schema-Version") != "7" {
+	if resp.Header.Get("X-Schema-Version") != "8" {
 		t.Errorf("X-Schema-Version = %q", resp.Header.Get("X-Schema-Version"))
 	}
 	if resp.Header.Get("ETag") == "" {

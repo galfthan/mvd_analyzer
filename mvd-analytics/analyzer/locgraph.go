@@ -102,8 +102,11 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 		team := teamByName[p.Name]
 
 		for i := range pt.T {
-			t := float64(pt.T[i])
-			// Cross any boundaries we've passed; reset cursor.
+			t := pt.T[i] // int32 ms
+			// Cross any boundaries we've passed; reset cursor. Both
+			// sides are int32 ms — comparison is exact (this is the
+			// site where float roundtrip previously produced spurious
+			// teleport edges across gib-respawn boundaries).
 			for bIdx < len(boundaries) && boundaries[bIdx] <= t {
 				havePrev = false
 				bIdx++
@@ -125,10 +128,12 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 
 			// Node-time: residence in this loc grows by the gap to the
 			// next sample (clamped by locgraphSampleDt to avoid death
-			// gaps inflating node-time).
+			// gaps inflating node-time). dt is float64 seconds — the
+			// public LocNode.Total unit — converted once from the int32-
+			// ms delta.
 			var dt float64
 			if i+1 < len(pt.T) {
-				dt = float64(pt.T[i+1]) - t
+				dt = float64(pt.T[i+1]-t) * 0.001
 			} else {
 				dt = locgraphSampleDt
 			}

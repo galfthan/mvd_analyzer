@@ -58,8 +58,10 @@ type PlayerSlice struct {
 	Rockets []result.ChangeI16 `json:"rk,omitempty"`
 	Cells   []result.ChangeI16 `json:"cl,omitempty"`
 
-	Spawns []float64 `json:"sp,omitempty"`
-	Deaths []float64 `json:"d,omitempty"`
+	// Spawns / Deaths inherit the schema-v8 int32-ms representation
+	// from result.PlayerStream — same JSON keys, same unit.
+	Spawns []int32 `json:"sp,omitempty"`
+	Deaths []int32 `json:"d,omitempty"`
 }
 
 // StreamSlice walks each player's streams and returns the entries
@@ -147,10 +149,10 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 			ps.Ring = sliceInterval(p.Ring, start, end)
 		}
 		if requested[FieldSpawns] {
-			ps.Spawns = sliceFloats(p.Spawns, start, end)
+			ps.Spawns = sliceInts(p.Spawns, start, end)
 		}
 		if requested[FieldDeaths] {
-			ps.Deaths = sliceFloats(p.Deaths, start, end)
+			ps.Deaths = sliceInts(p.Deaths, start, end)
 		}
 		if requested[FieldPosition] && p.Position != nil {
 			ps.Position = slicePosition(p.Position, start, end)
@@ -229,10 +231,15 @@ func sliceInterval(stream []result.Interval, start, end float64) []result.Interv
 	return out
 }
 
-func sliceFloats(stream []float64, start, end float64) []float64 {
-	out := make([]float64, 0, 4)
+// sliceInts is the int32-ms variant of sliceFloats, used for the
+// schema-v8 Spawns / Deaths streams. Window bounds are float64 seconds
+// (public view API); convert once and stay in int32 for the loop.
+func sliceInts(stream []int32, start, end float64) []int32 {
+	startMs := int32(start * 1000)
+	endMs := int32(end * 1000)
+	out := make([]int32, 0, 4)
 	for _, t := range stream {
-		if t < start || t >= end {
+		if t < startMs || t >= endMs {
 			continue
 		}
 		out = append(out, t)
@@ -247,13 +254,16 @@ func slicePosition(pt *result.PositionTrack, start, end float64) *result.Positio
 	if pt == nil {
 		return nil
 	}
+	// pt.T is int32 ms (schema v8); convert window once.
+	startMs := int32(start * 1000)
+	endMs := int32(end * 1000)
 	out := &result.PositionTrack{}
 	for i := range pt.T {
-		t := float64(pt.T[i])
-		if t < start {
+		t := pt.T[i]
+		if t < startMs {
 			continue
 		}
-		if t >= end {
+		if t >= endMs {
 			break
 		}
 		out.T = append(out.T, pt.T[i])

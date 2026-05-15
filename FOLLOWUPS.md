@@ -257,3 +257,19 @@ neither refactor touched the analyzers themselves.
 
 Recommended triage order: §2 first (one-line fix, visible bug),
 then §3 with a divergence harness against KTX counts, then §4.
+
+## Schema v8 int-ms time — remaining float-seconds fields
+
+Schema v8 migrated `PositionTrack.T` and per-player `Spawns` /
+`Deaths` from float seconds to `int32` milliseconds (commit landing
+this branch). Three other timestamped families (`ChangeI16.T`,
+`Interval.Start/End`, `MatchEvent.Time` + timeline frag/powerup event
+times) stayed float64 seconds — they didn't participate in the
+spawn/death-boundary comparison that motivated v8.
+
+The pros/cons of finishing the migration in a future schema bump,
+plus an implementation sketch, are in
+[`mvd-analytics/INT_MS_FOLLOWUPS.md`](mvd-analytics/INT_MS_FOLLOWUPS.md).
+Net recommendation in that doc: keep deferred unless a new precision
+bug surfaces in those fields or another schema break is happening
+anyway.

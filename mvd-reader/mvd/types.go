@@ -204,7 +204,15 @@ type DemoMessage struct {
 	Header     MessageHeader
 	PlayerMask uint32 // For dem_multiple
 	Payload    []byte
-	Time       float64 // Cumulative time in seconds
+	// TimeMs is the canonical cumulative demo time in integer milliseconds.
+	// MVD wire format encodes time as 1-byte ms deltas; we accumulate them as
+	// int32 to keep the value exact and avoid float-precision drift that
+	// previously broke spawn/death boundary comparisons in the analyzer.
+	TimeMs int32
+	// Time is the same value derived as float64 seconds, for non-boundary
+	// arithmetic where seconds ergonomics are nicer. Persistence and exact
+	// comparisons should use TimeMs instead.
+	Time float64
 }
 
 // PlayerState represents the state of a player at a point in time

@@ -178,7 +178,7 @@ func (a *TimelineAnalyzer) handlePositionUpdate(e *events.PlayerPositionEvent) {
 	// positions don't dedup). Match-time only; warmup positions would
 	// pollute the stream with garbage.
 	if a.timing.Started && !a.timing.Ended {
-		state.streams.recordPosition(e.Time, e.Origin[0], e.Origin[1], e.Origin[2])
+		state.streams.recordPosition(e.TimeMs, e.Origin[0], e.Origin[1], e.Origin[2])
 	}
 }
 
@@ -267,7 +267,7 @@ func (a *TimelineAnalyzer) handleDeath(e *events.DeathEvent) {
 	}
 	state := a.getOrCreatePlayerState(e.PlayerNum)
 	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: e.Time, PlayerNum: e.PlayerNum})
-	state.streams.recordDeath(e.Time)
+	state.streams.recordDeath(e.TimeMs)
 	state.isDead = true
 }
 
@@ -280,7 +280,7 @@ func (a *TimelineAnalyzer) handleSpawn(e *events.SpawnEvent) {
 	}
 	state := a.getOrCreatePlayerState(e.PlayerNum)
 	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: e.Time, PlayerNum: e.PlayerNum})
-	state.streams.recordSpawn(e.Time)
+	state.streams.recordSpawn(e.TimeMs)
 	state.isDead = false
 }
 

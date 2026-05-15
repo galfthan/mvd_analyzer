@@ -252,13 +252,13 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			}
 
 		case mvd.SvcUpdateStat:
-			if err := p.parseUpdateStat(r, msg.Time, msg.Header.PlayerNum); err != nil {
+			if err := p.parseUpdateStat(r, msg.Time, msg.TimeMs, msg.Header.PlayerNum); err != nil {
 				p.warn(msg.Time, "parse_error", "svc_updatestat: %v", err)
 				return nil
 			}
 
 		case mvd.SvcUpdateStatLong:
-			if err := p.parseUpdateStatLong(r, msg.Time, msg.Header.PlayerNum); err != nil {
+			if err := p.parseUpdateStatLong(r, msg.Time, msg.TimeMs, msg.Header.PlayerNum); err != nil {
 				p.warn(msg.Time, "parse_error", "svc_updatestatlong: %v", err)
 				return nil
 			}
@@ -270,7 +270,7 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			}
 
 		case mvd.SvcPlayerInfo:
-			if err := p.parsePlayerInfo(r, msg.Time, p.floatCoords); err != nil {
+			if err := p.parsePlayerInfo(r, msg.Time, msg.TimeMs, p.floatCoords); err != nil {
 				p.warn(msg.Time, "parse_error", "svc_playerinfo: %v", err)
 				return nil
 			}

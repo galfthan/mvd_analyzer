@@ -12,9 +12,13 @@ var (
 
 // Decoder reads MVD demo messages from a stream
 type Decoder struct {
-	reader     *BinaryReader
-	time       float64 // Cumulative time in seconds
-	extensions *Extensions
+	reader *BinaryReader
+	// timeMs is the canonical cumulative demo time in integer milliseconds.
+	// Each MVD message carries a 1-byte ms delta; accumulating as int32
+	// keeps the running total exact (1/1000 is not representable in base-2
+	// float, so float seconds drift). int32 holds ±24.8 days — plenty.
+	timeMs      int32
+	extensions  *Extensions
 	floatCoords bool
 }
 
@@ -33,9 +37,17 @@ func NewDecoder(r io.Reader) *Decoder {
 	}
 }
 
-// CurrentTime returns the current demo time in seconds
+// CurrentTime returns the current demo time as float64 seconds. This is a
+// derived view over the canonical int32-ms accumulator; do not rely on it
+// for comparisons against persisted int32-ms values.
 func (d *Decoder) CurrentTime() float64 {
-	return d.time
+	return float64(d.timeMs) * 0.001
+}
+
+// CurrentTimeMs returns the current demo time in integer milliseconds —
+// the canonical value, exact, wire-native.
+func (d *Decoder) CurrentTimeMs() int32 {
+	return d.timeMs
 }
 
 // Extensions returns the detected protocol extensions
@@ -65,8 +77,9 @@ func (d *Decoder) NextMessage() (*DemoMessage, error) {
 		return nil, err
 	}
 
-	// Update cumulative time (delta is in milliseconds)
-	d.time += float64(timeDelta) / 1000.0
+	// Update cumulative time. Delta is 1 byte in milliseconds; integer
+	// accumulation keeps the running total exact.
+	d.timeMs += int32(timeDelta)
 
 	// Read message type byte
 	typeByte, err := d.reader.ReadByte()
@@ -84,7 +97,8 @@ func (d *Decoder) NextMessage() (*DemoMessage, error) {
 			MessageType: messageType,
 			PlayerNum:   playerNum,
 		},
-		Time: d.time,
+		TimeMs: d.timeMs,
+		Time:   float64(d.timeMs) * 0.001,
 	}
 
 	// Handle each message type

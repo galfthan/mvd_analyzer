@@ -58,7 +58,8 @@ func TestStreamSlicePosition(t *testing.T) {
 	r := makeStream(t, result.PlayerStream{
 		Name: "p1",
 		Position: &result.PositionTrack{
-			T: []float32{0, 1, 2, 3, 4},
+			// Schema v8: T is int32 ms. Samples at 0, 1s, 2s, 3s, 4s.
+			T: []int32{0, 1000, 2000, 3000, 4000},
 			X: []int32{0, 100, 200, 300, 400},
 			Y: []int32{0, 0, 0, 0, 0},
 			Z: []int32{0, 0, 0, 0, 0},
@@ -76,11 +77,14 @@ func TestStreamSlicePosition(t *testing.T) {
 	if pos == nil {
 		t.Fatalf("Position nil")
 	}
-	// Should include samples at t=2 and t=3.
+	// Should include samples at t=2 and t=3 (i.e. 2000 ms, 3000 ms).
 	if len(pos.T) != 2 {
 		t.Fatalf("len pos = %d, want 2", len(pos.T))
 	}
 	if pos.X[0] != 200 || pos.X[1] != 300 {
 		t.Fatalf("positions = %v, want [200, 300]", pos.X)
+	}
+	if pos.T[0] != 2000 || pos.T[1] != 3000 {
+		t.Fatalf("pos.T = %v, want [2000, 3000]", pos.T)
 	}
 }

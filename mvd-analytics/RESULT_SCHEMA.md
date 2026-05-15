@@ -308,7 +308,7 @@ state, loc trails) are computed on demand from this storage by the
 | RL / LG / GL / SSG / SNG | `rl` / `lg` / `gl` / `ssg` / `sng` | []Interval | Half-open `[Start, End)` periods the weapon was held. |
 | Quad / Pent / Ring | `q` / `pe` / `r` | []Interval | Same shape as weapons. |
 | Shells / Nails / Rockets / Cells | `sh` / `nl` / `rk` / `cl` | []ChangeI16 | Ammo change streams. |
-| Spawns / Deaths | `sp` / `d` | []float64 | Discrete event timestamps (no associated value). |
+| Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds (schema v8 — changed from float64 seconds for exact comparison against PositionTrack.T). |
 
 ### ChangeI16 / ChangeStr / Interval
 
@@ -323,10 +323,25 @@ Interval  = { "s": float64, "e": float64 }   // half-open [s, e)
 Columnar to compress JSON. Indices align across the four arrays.
 
 ```
-PositionTrack = { "t": [float32...], "x": [int32...], "y": [int32...], "z": [int32...] }
+PositionTrack = { "t": [int32...], "x": [int32...], "y": [int32...], "z": [int32...] }
 ```
 
-`int32` (not `int16`) because Quake maps can exceed ±32 768 in any axis.
+`t` is **integer milliseconds** since the stream's time origin
+(schema v8 — changed from `float32` seconds). The MVD wire format
+delivers a 1-byte ms delta per message; storing the cumulative value
+as `int32` keeps it exact across the persistence boundary. Consumers
+reading the JSON as seconds must scale by `* 0.001`. Range is ±24.8
+days, ample for matches that run minutes to hours; values can go
+negative for pre-match warmup samples after time normalisation.
+
+`x` / `y` / `z` are `int32` (not `int16`) because Quake maps can
+exceed ±32 768 in any axis.
+
+Other timestamped fields in this schema (`ChangeI16.T`,
+`Interval.Start/End`, `MatchEvent.Time`, frag/powerup event times)
+remain `float64` seconds — they are computed once from the canonical
+int32-ms source and never re-quantised, so the precision class of bug
+this migration addresses doesn't apply to them.
 
 ### Append rules (the dedup invariant)
 

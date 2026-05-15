@@ -14,7 +14,8 @@ func TestEventsDefaultExcludesHealth(t *testing.T) {
 				{
 					Name:   "p1",
 					Health: []result.ChangeI16{{T: 1, V: 100}, {T: 2, V: 50}},
-					Spawns: []float64{0.5},
+					// Spawns/Deaths are int32 ms in schema v8.
+					Spawns: []int32{500},
 				},
 			},
 		},
@@ -71,8 +72,8 @@ func TestEventsTimeOrdered(t *testing.T) {
 			Players: []result.PlayerStream{
 				{
 					Name:   "p1",
-					Spawns: []float64{1.0, 5.0},
-					Deaths: []float64{3.0, 7.0},
+					Spawns: []int32{1000, 5000},
+					Deaths: []int32{3000, 7000},
 				},
 			},
 		},

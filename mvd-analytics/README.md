@@ -10,7 +10,12 @@ that downstream consumers render, summarise, or feed to an agent.
   Consumers (web UI, CLI, AI agent) should import this package and pin
   against `result.CurrentSchemaVersion`. At v7 the canonical event-rate
   storage is `Streams` (per-player change streams + intervals + native
-  position track) — see [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
+  position track). v8 stores `PositionTrack.T` and per-player `Spawns`
+  / `Deaths` as `int32` milliseconds rather than float seconds (other
+  timestamped fields kept as float seconds — see
+  [INT_MS_FOLLOWUPS.md](INT_MS_FOLLOWUPS.md) for the pros/cons of
+  finishing that migration). Full field reference in
+  [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
 - `analyzer/` — the `Analyzer` interface, the read-only event/userinfo
   `Context`, the typed `CoreOutputs` bundle that producer analysers
   populate for downstream consumers, and the `Registry` that drives a

@@ -74,14 +74,19 @@ type streamBuilder struct {
 
 	shells, nails, rockets, cells []changeI16
 
-	posT  []float32
+	// posT / spawns / deaths are integer milliseconds — the canonical,
+	// wire-native unit. Comparisons between pt.T and spawn/death boundaries
+	// stay exact int32 here and downstream; converting to float seconds
+	// would reintroduce the precision drift this schema-v8 type was
+	// chosen to eliminate.
+	posT  []int32
 	posX  []int32
 	posY  []int32
 	posZ  []int32
 	posLi []int16 // resolved loc index per sample, populated in finalize
 
-	spawns []float64
-	deaths []float64
+	spawns []int32
+	deaths []int32
 }
 
 // changeI16 / changeStr mirror result.ChangeI16 etc. Stored here in

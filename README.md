@@ -363,15 +363,19 @@ backpacks (RL/LG drops attributed to the dropping player via KTX's
 `//ktx drop` hint), and weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==
-`backpacks[].entNum`). At schema v7 `streams` is the canonical
+`backpacks[].entNum`). Schema v7 introduced `streams` as the canonical
 event-rate storage — every per-player field (vitals, weapons, ammo,
-position) recorded at the rate it actually changed. Bucketed,
-event-list, and point-in-time views are produced on demand by the
-`mvd-analytics/view` query API (also surfaced via the CLI's `-view`
-flag and the WASM bridge's `getBuckets` / `getEvents` /
-`getStreamSlice` / `getStateAt` exports).
+position) recorded at the rate it actually changed. Schema v8 stores
+`PositionTrack.T` and per-player `Spawns` / `Deaths` as `int32`
+milliseconds rather than float seconds — the MVD wire format already
+delivers ms deltas, and keeping them integer eliminates the float-
+precision drift that previously broke spawn/death-boundary comparisons
+in locgraph. Bucketed, event-list, and point-in-time views are
+produced on demand by the `mvd-analytics/view` query API (also
+surfaced via the CLI's `-view` flag and the WASM bridge's `getBuckets`
+/ `getEvents` / `getStreamSlice` / `getStateAt` exports).
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `7`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `8`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).

@@ -168,27 +168,35 @@ func playerActiveInWindow(p result.PlayerStream, bStart, bEnd float64) bool {
 		return true
 	}
 
+	// Spawns / Deaths are int32 ms (schema v8); convert the window
+	// bounds once and stay in int32 for the comparison loop.
+	bStartMs := int32(bStart * 1000)
+	bEndMs := int32(bEnd * 1000)
+
 	if hasSpawnDeath {
 		latestKind := ""
-		latestT := -1.0
+		latestT := int32(-1)
+		seen := false
 		for _, t := range p.Spawns {
-			if t >= bStart && t < bEnd {
+			if t >= bStartMs && t < bEndMs {
 				return true // spawned inside the window
 			}
-			if t < bStart && t > latestT {
+			if t < bStartMs && (!seen || t > latestT) {
 				latestT = t
 				latestKind = "spawn"
+				seen = true
 			}
-			if t >= bEnd {
+			if t >= bEndMs {
 				break
 			}
 		}
 		for _, t := range p.Deaths {
-			if t < bStart && t > latestT {
+			if t < bStartMs && (!seen || t > latestT) {
 				latestT = t
 				latestKind = "death"
+				seen = true
 			}
-			if t >= bEnd {
+			if t >= bEndMs {
 				break
 			}
 		}
@@ -209,11 +217,13 @@ func positionTouchesWindow(pt *result.PositionTrack, bStart, bEnd float64) bool 
 		return false
 	}
 	const fudge = 0.1 // slightly more than one 50 ms bucket
-	// Binary-search for the first sample >= bStart-fudge; if it lands
-	// before bEnd we have a touch.
-	lo := bStart - fudge
-	i := sort.Search(len(pt.T), func(i int) bool { return float64(pt.T[i]) >= lo })
-	return i < len(pt.T) && float64(pt.T[i]) < bEnd
+	// pt.T is int32 ms (schema v8); convert window bounds once.
+	loMs := int32((bStart - fudge) * 1000)
+	bEndMs := int32(bEnd * 1000)
+	// Binary-search for the first sample >= loMs; if it lands before
+	// bEndMs we have a touch.
+	i := sort.Search(len(pt.T), func(i int) bool { return pt.T[i] >= loMs })
+	return i < len(pt.T) && pt.T[i] < bEndMs
 }
 
 func bucketWindowMsOrDefault(ms int) int {
@@ -419,12 +429,17 @@ func eventListSamples(p result.PlayerStream, field string, bStart, bEnd float64)
 	if stream == nil {
 		return nil
 	}
+	// Stream is int32 ms (schema v8); compare in ms then convert each
+	// in-window timestamp to seconds for the public Sample.
+	bStartMs := int32(bStart * 1000)
+	bEndMs := int32(bEnd * 1000)
 	out := make([]Sample, 0, 2)
 	for _, t := range stream {
-		if t < bStart || t >= bEnd {
+		if t < bStartMs || t >= bEndMs {
 			continue
 		}
-		out = append(out, Sample{T: t, V: t})
+		ts := float64(t) * 0.001
+		out = append(out, Sample{T: ts, V: ts})
 	}
 	return out
 }
@@ -580,7 +595,10 @@ func streamInterval(p result.PlayerStream, field string) []result.Interval {
 	return nil
 }
 
-func streamEventList(p result.PlayerStream, field string) []float64 {
+// streamEventList returns the raw int32-ms timestamp slice for a
+// spawn/death-style event field. Callers wrap the seconds conversion
+// where the public Sample type (float64 seconds) is materialised.
+func streamEventList(p result.PlayerStream, field string) []int32 {
 	switch field {
 	case FieldSpawns:
 		return p.Spawns

@@ -54,7 +54,22 @@ package result
 //     resolution.
 //   - Health/Armor change streams use int16 (Quake values reach 250,
 //     above int8 range).
-const CurrentSchemaVersion = 7
+//
+// v8:
+//   - PositionTrack.T changes from []float32 seconds to []int32
+//     milliseconds. PlayerStream.Spawns / Deaths change from []float64
+//     seconds to []int32 milliseconds. JSON keys unchanged; consumers
+//     reading these as seconds must scale by 1/1000. The integer-ms
+//     unit is what the MVD wire format already carries (1-byte ms
+//     delta per message); keeping it integer eliminates the float-
+//     precision drift that caused spurious teleport edges in locgraph
+//     when a respawn boundary and a position sample shared the same
+//     wire timestamp but disagreed by ~1e-6 after float roundtrip.
+//   - Other timestamped result fields (ChangeI16.T, Interval.Start/End,
+//     MatchEvent.Time, frag/powerup event times) remain float64
+//     seconds — they don't participate in the boundary comparison
+//     that motivated this change.
+const CurrentSchemaVersion = 8
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

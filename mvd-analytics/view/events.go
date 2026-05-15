@@ -144,20 +144,25 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			if !pf.accepts(p.Name) {
 				continue
 			}
+			// Spawns / Deaths are int32 ms (schema v8); the TaggedEvent
+			// public schema is float64 seconds. Convert per-entry; the
+			// outer filter / window is in seconds.
 			if want["spawn"] {
-				for _, t := range p.Spawns {
-					if !inWindow(t, filter.StartTime, end) {
+				for _, tMs := range p.Spawns {
+					ts := float64(tMs) * 0.001
+					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
-					events = append(events, TaggedEvent{T: t, Type: "spawn", Player: p.Name})
+					events = append(events, TaggedEvent{T: ts, Type: "spawn", Player: p.Name})
 				}
 			}
 			if want["death"] {
-				for _, t := range p.Deaths {
-					if !inWindow(t, filter.StartTime, end) {
+				for _, tMs := range p.Deaths {
+					ts := float64(tMs) * 0.001
+					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
-					events = append(events, TaggedEvent{T: t, Type: "death", Player: p.Name})
+					events = append(events, TaggedEvent{T: ts, Type: "death", Player: p.Name})
 				}
 			}
 			if want["weapon"] {
