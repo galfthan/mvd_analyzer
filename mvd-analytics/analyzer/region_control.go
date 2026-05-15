@@ -132,14 +132,18 @@ func ComputeRegionControl(
 		// time bucketStart = matchStart + bi*bucketDur. sIdx points
 		// to the latest position sample with T <= bucketStart, so
 		// pt.Li[sIdx] is the loc index at that moment.
+		//
+		// pt.T is int32 ms (schema v8); bucketStart is float64 seconds.
+		// Convert per-bucket so the inner walk stays in int32.
 		sIdx := 0
 		for bi := 0; bi < nBuckets; bi++ {
 			bucketStart := matchStart + float64(bi)*bucketDur
-			for sIdx+1 < len(pt.T) && float64(pt.T[sIdx+1]) <= bucketStart {
+			bucketStartMs := int32(bucketStart * 1000)
+			for sIdx+1 < len(pt.T) && pt.T[sIdx+1] <= bucketStartMs {
 				sIdx++
 			}
 			// Skip if the player hasn't started emitting positions yet.
-			if float64(pt.T[sIdx]) > bucketStart {
+			if pt.T[sIdx] > bucketStartMs {
 				continue
 			}
 			li := pt.Li[sIdx]

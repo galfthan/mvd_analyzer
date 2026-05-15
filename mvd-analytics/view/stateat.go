@@ -194,15 +194,18 @@ func stateAtDefaultFields() []string {
 
 // nearestPositionIndex finds the position sample closest to t. If t
 // is between two samples, the closer one wins; ties go to the earlier
-// sample. -1 if pt is empty.
+// sample. -1 if pt is empty. t is float64 seconds (public view API);
+// pt.T is int32 ms (schema v8) — convert the query once and stay in
+// int32 for the loop.
 func nearestPositionIndex(pt *result.PositionTrack, t float64) int {
 	if len(pt.T) == 0 {
 		return -1
 	}
+	tMs := int32(t * 1000)
 	best := -1
-	bestDiff := 0.0
+	bestDiff := int32(0)
 	for i := range pt.T {
-		diff := float64(pt.T[i]) - t
+		diff := pt.T[i] - tMs
 		if diff < 0 {
 			diff = -diff
 		}

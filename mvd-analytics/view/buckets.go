@@ -399,22 +399,28 @@ func positionSamples(p result.PlayerStream, bStart, bEnd float64) []Sample {
 	if n == 0 {
 		return nil
 	}
-	// First sample with T >= bStart (inclusive). Treats samples
+	// pt.T is int32 ms (schema v8); window bounds arrive in float64
+	// seconds (public view API). Convert window once; the comparison
+	// loop stays in int32 ms. Sample.T is the public unit, float64
+	// seconds, converted once per emitted sample.
+	bStartMs := int32(bStart * 1000)
+	bEndMs := int32(bEnd * 1000)
+	// First sample with T >= bStartMs (inclusive). Treats samples
 	// landing exactly on the bucket boundary as the bucket's first
 	// event, matching v6's int-division semantics.
-	firstIn := sort.Search(n, func(i int) bool { return float64(pt.T[i]) >= bStart })
+	firstIn := sort.Search(n, func(i int) bool { return pt.T[i] >= bStartMs })
 	out := make([]Sample, 0, 4)
 	for i := firstIn; i < n; i++ {
-		t := float64(pt.T[i])
-		if t >= bEnd {
+		t := pt.T[i]
+		if t >= bEndMs {
 			break
 		}
-		out = append(out, Sample{T: t, V: positionTriple(pt, i)})
+		out = append(out, Sample{T: float64(t) * 0.001, V: positionTriple(pt, i)})
 	}
 	if len(out) == 0 && firstIn > 0 {
 		// Gap bucket — fall back to the latest sample before bStart.
 		idx := firstIn - 1
-		out = append(out, Sample{T: float64(pt.T[idx]), V: positionTriple(pt, idx)})
+		out = append(out, Sample{T: float64(pt.T[idx]) * 0.001, V: positionTriple(pt, idx)})
 	}
 	return out
 }
