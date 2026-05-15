@@ -1,7 +1,11 @@
-go 1.21
+go 1.25.0
+
+toolchain go1.25.0
 
 use (
-	./qwdemo
-	./qwanalytics
-	./qw-web
+	./mvd-reader
+	./mvd-analytics
+	./mvd-api
+	./mvd-mcp
+	./mvd-web
 )

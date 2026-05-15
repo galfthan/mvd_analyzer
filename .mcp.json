@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mvd-mcp": {
+      "command": "/workspace/mvd-analyzer/dist/mvd-mcp",
+      "args": ["-api", "http://localhost:8080", "-label", "claude-code-local"]
+    }
+  }
+}

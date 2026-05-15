@@ -1,24 +1,30 @@
-# Top-level Makefile — coordinates the three-module workspace.
+# Top-level Makefile — coordinates the workspace.
 #
 # Layout:
-#   qwdemo/       — event schema + MVD source (ingestion layer)
-#   qwanalytics/  — analysis pipeline + result schema
-#   qw-web/       — browser UX + WASM glue
+#   mvd-reader/     — event schema + MVD source (ingestion layer)
+#   mvd-analytics/  — analysis pipeline + result schema + view query API
+#   mvd-api/        — HTTP REST server on top of mvd-analytics/view
+#   mvd-mcp/        — stdio MCP shim that forwards to a running mvd-api
+#   mvd-web/        — browser UX + WASM glue
 #
-# `make build` produces dist/ for Netlify deploy. Other targets wrap the
-# usual Go tools so contributors don't have to remember which module is
-# where.
+# `make build` produces dist/ for Netlify deploy (the web app). Build
+# targets for mvd-api / mvd-mcp produce distributable binaries.
 
-WASM_MAIN  := ./qw-web/cmd/wasm
+WASM_MAIN  := ./mvd-web/cmd/wasm
+API_MAIN   := ./mvd-api
+MCP_MAIN   := ./mvd-mcp
 DIST_DIR   := dist
-STATIC_DIR := qw-web/static
-LOC_DATA   := qwanalytics/loc/data
+STATIC_DIR := mvd-web/static
+LOC_DATA   := mvd-analytics/loc/data
 GIT_HASH   := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 GIT_TAG    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
 BUILD_DATE := $(shell date -u +%Y-%m-%d)
 LDFLAGS    := -ldflags "-s -w -X main.GitHash=$(GIT_HASH) -X main.GitTag=$(GIT_TAG) -X main.BuildDate=$(BUILD_DATE)"
 
-.PHONY: build serve clean test fmt help
+.PHONY: build build-api build-mcp build-bin build-all-platforms \
+        build-api-linux build-api-darwin build-api-windows \
+        build-mcp-linux build-mcp-darwin build-mcp-windows \
+        serve clean test fmt help
 
 # Build the deployable web bundle into dist/.
 build:
@@ -39,32 +45,78 @@ build:
 	@echo "Build complete!"
 	@ls -lh $(DIST_DIR)/
 
-# Serve the built bundle on localhost.
+# Build the host-platform binaries.
+build-api:
+	@mkdir -p $(DIST_DIR)
+	go build $(LDFLAGS) -o $(DIST_DIR)/mvd-api $(API_MAIN)
+
+build-mcp:
+	@mkdir -p $(DIST_DIR)
+	go build $(LDFLAGS) -o $(DIST_DIR)/mvd-mcp $(MCP_MAIN)
+
+build-bin: build-api build-mcp
+
+# Cross-compile binaries for distribution.
+build-api-linux:
+	@mkdir -p $(DIST_DIR)
+	GOOS=linux   GOARCH=amd64 go build $(LDFLAGS) -o $(DIST_DIR)/mvd-api-linux-amd64    $(API_MAIN)
+
+build-api-darwin:
+	@mkdir -p $(DIST_DIR)
+	GOOS=darwin  GOARCH=amd64 go build $(LDFLAGS) -o $(DIST_DIR)/mvd-api-darwin-amd64   $(API_MAIN)
+	GOOS=darwin  GOARCH=arm64 go build $(LDFLAGS) -o $(DIST_DIR)/mvd-api-darwin-arm64   $(API_MAIN)
+
+build-api-windows:
+	@mkdir -p $(DIST_DIR)
+	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o $(DIST_DIR)/mvd-api-windows-amd64.exe $(API_MAIN)
+
+build-mcp-linux:
+	@mkdir -p $(DIST_DIR)
+	GOOS=linux   GOARCH=amd64 go build $(LDFLAGS) -o $(DIST_DIR)/mvd-mcp-linux-amd64    $(MCP_MAIN)
+
+build-mcp-darwin:
+	@mkdir -p $(DIST_DIR)
+	GOOS=darwin  GOARCH=amd64 go build $(LDFLAGS) -o $(DIST_DIR)/mvd-mcp-darwin-amd64   $(MCP_MAIN)
+	GOOS=darwin  GOARCH=arm64 go build $(LDFLAGS) -o $(DIST_DIR)/mvd-mcp-darwin-arm64   $(MCP_MAIN)
+
+build-mcp-windows:
+	@mkdir -p $(DIST_DIR)
+	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o $(DIST_DIR)/mvd-mcp-windows-amd64.exe $(MCP_MAIN)
+
+build-all-platforms: build-api-linux build-api-darwin build-api-windows \
+                     build-mcp-linux build-mcp-darwin build-mcp-windows
+	@ls -lh $(DIST_DIR)/mvd-api-* $(DIST_DIR)/mvd-mcp-*
+
+# Serve the built web bundle on localhost.
 serve: build
 	@echo "Serving on http://localhost:8080"
 	@cd $(DIST_DIR) && python3 -m http.server 8080
 
-# Run tests across all modules in the workspace.
+# Run tests across every workspace module.
 test:
-	go test ./qwdemo/... ./qwanalytics/... ./qw-web/...
+	go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...
 
-# Remove the dist/ tree.
+# Remove dist/.
 clean:
 	rm -rf $(DIST_DIR)
 
 # Format every module.
 fmt:
-	go fmt ./qwdemo/... ./qwanalytics/... ./qw-web/...
+	go fmt ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...
 
 # Help.
 help:
-	@echo "MVD Analyzer — three-module workspace"
+	@echo "MVD Analyzer — five-module workspace"
 	@echo ""
 	@echo "Usage: make [target]"
 	@echo ""
-	@echo "  build   Build WASM + copy static assets + loc corpus into dist/"
-	@echo "  serve   make build, then python3 -m http.server 8080 in dist/"
-	@echo "  test    Run tests across every module"
-	@echo "  clean   Remove dist/"
-	@echo "  fmt     Format code across every module"
-	@echo "  help    Show this help"
+	@echo "  build               Build WASM + copy static assets + loc corpus into dist/"
+	@echo "  build-api           Build mvd-api binary for the host platform"
+	@echo "  build-mcp           Build mvd-mcp binary for the host platform"
+	@echo "  build-bin           build-api + build-mcp"
+	@echo "  build-all-platforms Cross-compile mvd-api and mvd-mcp for linux/darwin/windows"
+	@echo "  serve               make build, then python3 -m http.server 8080 in dist/"
+	@echo "  test                Run tests across every module"
+	@echo "  clean               Remove dist/"
+	@echo "  fmt                 Format code across every module"
+	@echo "  help                Show this help"
