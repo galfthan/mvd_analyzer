@@ -18,15 +18,15 @@ import (
 func TestBucketsCountInvariant(t *testing.T) {
 	cases := []struct {
 		name     string
-		start    float64
-		end      float64
+		start    int32 // ms
+		end      int32 // ms
 		windowMs int
 		want     int
 	}{
-		{"exact division", 0, 10, 1000, 10},
-		{"partial tail", 0, 10, 3000, 4},
-		{"sub-second", 0, 0.250, 50, 5},
-		{"single bucket", 0, 1, 1000, 1},
+		{"exact division", 0, 10000, 1000, 10},
+		{"partial tail", 0, 10000, 3000, 4},
+		{"sub-second", 0, 250, 50, 5},
+		{"single bucket", 0, 1000, 1000, 1},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -58,14 +58,14 @@ func TestBucketsCountInvariant(t *testing.T) {
 func TestRoundTripBuckets(t *testing.T) {
 	r := &result.Result{
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 5},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 5000},
 			Players: []result.PlayerStream{
 				{
 					Name: "p1",
 					Health: []result.ChangeI16{
 						{T: 0, V: 100},
-						{T: 1.2, V: 60},
-						{T: 3.5, V: 100},
+						{T: 1200, V: 60},
+						{T: 3500, V: 100},
 					},
 					Armor: []result.ChangeI16{
 						{T: 0, V: 50},
@@ -87,7 +87,7 @@ func TestRoundTripBuckets(t *testing.T) {
 	// again at the same window; result should equal bv1.
 	r2 := &result.Result{
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 5},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 5000},
 			Players: []result.PlayerStream{
 				{
 					Name:   "p1",
@@ -127,7 +127,9 @@ func synthFromBucketView(bv *BucketsView, field, player string) []result.ChangeI
 		if !ok {
 			continue
 		}
-		out = append(out, result.ChangeI16{T: b.T, V: int16(f)})
+		// b.T is float64 seconds (public ViewBucket API); ChangeI16.T
+		// is int32 ms in schema v8.
+		out = append(out, result.ChangeI16{T: int32(b.T * 1000), V: int16(f)})
 	}
 	return out
 }

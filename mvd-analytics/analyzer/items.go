@@ -357,7 +357,7 @@ func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
 		if last.TakenAt > 0 {
 			return
 		}
-		last.TakenAt = e.Time
+		last.TakenAt = msTime(e.Time)
 		slot, source := a.attributeWithLayeredSignals(e.EntNum, it.kind, it.origin, e.Time)
 		it.pickups[len(it.pickups)-1] = phaseAttribution{slot: slot, source: source}
 		a.attrCounts[source]++
@@ -372,7 +372,7 @@ func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
 			return
 		}
 		if sec, ok := kindRespawnSec[it.kind]; ok {
-			last.RespawnAt = e.Time + sec
+			last.RespawnAt = msTime(e.Time + sec)
 			a.scheduleSyntheticRespawn(e.EntNum, e.Time+sec, 0)
 		}
 		return
@@ -381,7 +381,7 @@ func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
 	// Wire respawn: open the next available phase. Cancel any pending
 	// synthetic schedule for this entity — the wire just told us
 	// nobody picked it up at the predicted moment.
-	it.phases = append(it.phases, ItemPhase{AvailableFrom: e.Time})
+	it.phases = append(it.phases, ItemPhase{AvailableFrom: msTime(e.Time)})
 	it.pickups = append(it.pickups, phaseAttribution{slot: -1})
 	delete(a.syntheticChain, e.EntNum)
 }
@@ -540,11 +540,12 @@ func (a *ItemAnalyzer) recordSyntheticPickup(ent int, t float64, slot int, chain
 	if it == nil {
 		return
 	}
-	it.phases = append(it.phases, ItemPhase{AvailableFrom: t, TakenAt: t})
+	tMs := msTime(t)
+	it.phases = append(it.phases, ItemPhase{AvailableFrom: tMs, TakenAt: tMs})
 	it.pickups = append(it.pickups, phaseAttribution{slot: slot, source: "synthetic"})
 	last := &it.phases[len(it.phases)-1]
 	if sec, ok := kindRespawnSec[it.kind]; ok {
-		last.RespawnAt = t + sec
+		last.RespawnAt = msTime(t + sec)
 		a.scheduleSyntheticRespawn(ent, t+sec, chainLen)
 	} else {
 		delete(a.syntheticChain, ent)
@@ -735,7 +736,8 @@ func (a *ItemAnalyzer) recordSyntheticTakeFromHint(ent int, t float64, slot int)
 	if it == nil {
 		return
 	}
-	it.phases = append(it.phases, ItemPhase{AvailableFrom: t, TakenAt: t})
+	tMs := msTime(t)
+	it.phases = append(it.phases, ItemPhase{AvailableFrom: tMs, TakenAt: tMs})
 	it.pickups = append(it.pickups, phaseAttribution{slot: slot, source: "hint"})
 	last := &it.phases[len(it.phases)-1]
 
@@ -759,7 +761,7 @@ func (a *ItemAnalyzer) recordSyntheticTakeFromHint(ent int, t float64, slot int)
 		// MH respawn is rot-driven; no synthetic schedule.
 		delete(a.syntheticChain, ent)
 	} else if sec, ok := kindRespawnSec[it.kind]; ok {
-		last.RespawnAt = t + sec
+		last.RespawnAt = msTime(t + sec)
 		a.scheduleSyntheticRespawn(ent, t+sec, 0)
 	} else {
 		delete(a.syntheticChain, ent)
@@ -1045,7 +1047,7 @@ func (a *ItemAnalyzer) stampHeldMHs(slot int, crossing float64) {
 		if pickup+5 > rotEnd {
 			rotEnd = pickup + 5
 		}
-		last.RespawnAt = rotEnd + 20
+		last.RespawnAt = msTime(rotEnd + 20)
 		delete(a.mhPickup, ent)
 	}
 	delete(a.heldMHs, slot)

@@ -30,9 +30,9 @@ type ItemTimeline struct {
 // held". TakenBy / Team are set to the picker's display name and
 // team; empty for the initial "available from match start" phase.
 type ItemPhase struct {
-	AvailableFrom float64 `json:"availableFrom"`
-	TakenAt       float64 `json:"takenAt,omitempty"`
-	TakenBy       string  `json:"takenBy,omitempty"`
-	Team          string  `json:"team,omitempty"`
-	RespawnAt     float64 `json:"respawnAt,omitempty"`
+	AvailableFrom int32  `json:"availableFrom"` // ms (schema v8)
+	TakenAt       int32  `json:"takenAt,omitempty"`
+	TakenBy       string `json:"takenBy,omitempty"`
+	Team          string `json:"team,omitempty"`
+	RespawnAt     int32  `json:"respawnAt,omitempty"`
 }

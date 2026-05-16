@@ -25,11 +25,11 @@ func TestUpdateStat_HealthTransitionsEmitDeathAndSpawn(t *testing.T) {
 	p.playerStats[0].Health = 100
 
 	// Gib: 100 → -60 should emit StatUpdateEvent then DeathEvent.
-	if err := p.updateStat(0, mvd.StatHealth, -60, 10.03); err != nil {
+	if err := p.updateStat(0, mvd.StatHealth, -60, 10.03, 10030); err != nil {
 		t.Fatalf("gib update: %v", err)
 	}
 	// Instant respawn: -60 → 100 should emit StatUpdateEvent then SpawnEvent.
-	if err := p.updateStat(0, mvd.StatHealth, 100, 10.04); err != nil {
+	if err := p.updateStat(0, mvd.StatHealth, 100, 10.04, 10040); err != nil {
 		t.Fatalf("respawn update: %v", err)
 	}
 
@@ -44,7 +44,7 @@ func TestUpdateStat_HealthTransitionsEmitDeathAndSpawn(t *testing.T) {
 	if !ok {
 		t.Fatalf("events[1] = %T, want *DeathEvent", events[1])
 	}
-	if d.PlayerNum != 0 || d.Time != 10.03 {
+	if d.PlayerNum != 0 || d.Time != 10.03 || d.TimeMs != 10030 {
 		t.Errorf("DeathEvent = %+v", d)
 	}
 	if _, ok := events[2].(*StatUpdateEvent); !ok {
@@ -54,7 +54,7 @@ func TestUpdateStat_HealthTransitionsEmitDeathAndSpawn(t *testing.T) {
 	if !ok {
 		t.Fatalf("events[3] = %T, want *SpawnEvent", events[3])
 	}
-	if s.PlayerNum != 0 || s.Time != 10.04 {
+	if s.PlayerNum != 0 || s.Time != 10.04 || s.TimeMs != 10040 {
 		t.Errorf("SpawnEvent = %+v", s)
 	}
 }
@@ -73,7 +73,7 @@ func TestUpdateStat_HealthNoTransitionDoesNotEmitDeathOrSpawn(t *testing.T) {
 
 	p.playerStats[0].Health = 100
 
-	if err := p.updateStat(0, mvd.StatHealth, 50, 1.0); err != nil {
+	if err := p.updateStat(0, mvd.StatHealth, 50, 1.0, 1000); err != nil {
 		t.Fatalf("damage update: %v", err)
 	}
 
@@ -99,10 +99,10 @@ func TestUpdateStat_FirstHealthFiresSpawn(t *testing.T) {
 		return nil
 	})
 
-	if err := p.updateStat(0, mvd.StatHealth, 100, 0.5); err != nil {
+	if err := p.updateStat(0, mvd.StatHealth, 100, 0.5, 500); err != nil {
 		t.Fatalf("first update: %v", err)
 	}
-	if err := p.updateStat(0, mvd.StatHealth, 100, 0.6); err != nil {
+	if err := p.updateStat(0, mvd.StatHealth, 100, 0.6, 600); err != nil {
 		t.Fatalf("second update: %v", err)
 	}
 

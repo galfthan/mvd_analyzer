@@ -257,3 +257,25 @@ neither refactor touched the analyzers themselves.
 
 Recommended triage order: §2 first (one-line fix, visible bug),
 then §3 with a divergence harness against KTX counts, then §4.
+
+## Schema v8 int-ms time — completed
+
+Schema v8 migrated **every** timestamped field in the result schema
+from float seconds to `int32` milliseconds. The first cut covered
+`PositionTrack.T` and per-player `Spawns` / `Deaths`; the follow-up
+extended the migration to `ChangeI16` / `ChangeI8` / `ChangeStr`,
+`Interval`, `MatchEvent`, `GlobalStream`, `MatchResult`, all of
+`TimelineAnalysisResult`, frag / powerup / streak event times,
+`BackpackDrop`, `WeaponPickup`, and `ItemPhase`. JSON keys are
+unchanged; external consumers reading these as seconds must scale by
+`* 0.001`.
+
+Public view-layer outputs (`view.Buckets`, `view.Events`,
+`view.StreamSlice`, `view.StateAt`, `view.LocTrails`) still emit
+float64 seconds, so the WASM-fed frontend panels are largely
+oblivious. The few app.js sites that read raw schema fields directly
+convert ms→seconds at the read site.
+
+Design rationale and the convention to follow when adding new
+timestamped fields are documented in
+[`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md#schema-v8-all-times-are-int32-milliseconds).

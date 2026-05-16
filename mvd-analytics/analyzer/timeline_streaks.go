@@ -100,11 +100,15 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerU
 		frags := 0
 		weaponCounts := make(map[string]int)
 
+		spawnTimeMs := msTime(r.spawnTime)
+		deathTimeMs := msTime(r.deathTime)
 		for _, fe := range fragEntries {
 			if fe.Killer != r.playerName {
 				continue
 			}
-			if fe.Time < r.spawnTime || fe.Time > r.deathTime {
+			// FragEntry.Time is int32 ms (schema v8); compare against
+			// the same unit.
+			if fe.Time < spawnTimeMs || fe.Time > deathTimeMs {
 				continue
 			}
 			if fe.IsSuicide || fe.IsTeamKill {
@@ -137,12 +141,12 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerU
 		}
 
 		allStreaks = append(allStreaks, FragStreakEvent{
-			Time:       r.spawnTime,
-			EndTime:    r.deathTime,
+			Time:       spawnTimeMs,
+			EndTime:    deathTimeMs,
 			PlayerName: r.playerName,
 			Team:       r.team,
 			Frags:      frags,
-			Duration:   r.deathTime - r.spawnTime,
+			Duration:   deathTimeMs - spawnTimeMs,
 			Ewep:       ewep,
 		})
 	}

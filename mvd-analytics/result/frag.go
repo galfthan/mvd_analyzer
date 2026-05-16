@@ -8,14 +8,15 @@ type FragResult struct {
 	ByPlayer   map[string]*PlayerFrags `json:"byPlayer"`
 }
 
-// FragEntry represents a single frag event.
+// FragEntry represents a single frag event. Time is match-relative
+// milliseconds (schema v8).
 type FragEntry struct {
-	Time       float64 `json:"time"`
-	Killer     string  `json:"killer"`
-	Victim     string  `json:"victim"`
-	Weapon     string  `json:"weapon"`
-	IsSuicide  bool    `json:"isSuicide,omitempty"`
-	IsTeamKill bool    `json:"isTeamKill,omitempty"`
+	Time       int32  `json:"time"`
+	Killer     string `json:"killer"`
+	Victim     string `json:"victim"`
+	Weapon     string `json:"weapon"`
+	IsSuicide  bool   `json:"isSuicide,omitempty"`
+	IsTeamKill bool   `json:"isTeamKill,omitempty"`
 }
 
 // PlayerFrags holds per-player frag statistics.

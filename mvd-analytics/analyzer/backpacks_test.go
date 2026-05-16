@@ -40,8 +40,8 @@ func TestBackpackAnalyzer_RLHintEmitsDrop(t *testing.T) {
 	if d.Player != "ace" || d.Team != "red" {
 		t.Errorf("dropper = %q/%q, want ace/red", d.Player, d.Team)
 	}
-	if d.EntNum != 142 || d.Time != 30 {
-		t.Errorf("ent/time = %d/%f", d.EntNum, d.Time)
+	if d.EntNum != 142 || d.Time != 30000 {
+		t.Errorf("ent/time = %d/%d", d.EntNum, d.Time)
 	}
 	if d.Origin != [3]float32{200, 0, 0} {
 		t.Errorf("Origin = %v, want (200,0,0)", d.Origin)
@@ -148,8 +148,8 @@ func TestBackpackAnalyzer_SortedByTime(t *testing.T) {
 	_ = a.Finalize(r)
 	out := r.Backpacks
 	drops := out
-	if drops[0].Time != 10 || drops[1].Time != 20 {
-		t.Errorf("times = %v, want [10, 20]", []float64{drops[0].Time, drops[1].Time})
+	if drops[0].Time != 10000 || drops[1].Time != 20000 {
+		t.Errorf("times = %v, want [10000, 20000]", []int32{drops[0].Time, drops[1].Time})
 	}
 	if drops[0].Player != "b" || drops[1].Player != "a" {
 		t.Errorf("players = %q, %q, want b, a", drops[0].Player, drops[1].Player)

@@ -19,14 +19,17 @@ func (a *TimelineAnalyzer) detectPowerupEvents(names *NameTable, slotToTeam map[
 		}
 		// Close any still-open intervals at the timing detector's end
 		// time (or the latest position sample) so finalize doesn't
-		// drop ongoing powerup runs.
-		matchEnd := a.timing.EndTime
-		if matchEnd == 0 && len(state.streams.posT) > 0 {
-			matchEnd = float64(state.streams.posT[len(state.streams.posT)-1])
+		// drop ongoing powerup runs. All time arithmetic is int32 ms;
+		// EndTime is float64 seconds and is converted at the boundary.
+		var matchEndMs int32
+		if a.timing.EndTime > 0 {
+			matchEndMs = msTime(a.timing.EndTime)
+		} else if len(state.streams.posT) > 0 {
+			matchEndMs = state.streams.posT[len(state.streams.posT)-1]
 		}
-		state.streams.quad.closeAtMatchEnd(matchEnd)
-		state.streams.pent.closeAtMatchEnd(matchEnd)
-		state.streams.ring.closeAtMatchEnd(matchEnd)
+		state.streams.quad.closeAtMatchEnd(matchEndMs)
+		state.streams.pent.closeAtMatchEnd(matchEndMs)
+		state.streams.ring.closeAtMatchEnd(matchEndMs)
 
 		appendRuns := func(runs []intervalRecord, kind string) {
 			for _, r := range runs {
@@ -44,8 +47,9 @@ func (a *TimelineAnalyzer) detectPowerupEvents(names *NameTable, slotToTeam map[
 	return events
 }
 
-// createPowerupEvent creates a PowerupEvent with resolved player info
-func (a *TimelineAnalyzer) createPowerupEvent(slot int, powerupType string, startTime, endTime float64, names *NameTable, slotToTeam map[int]string, slotToPlayer map[int]string) PowerupEvent {
+// createPowerupEvent creates a PowerupEvent with resolved player info.
+// startTime/endTime are int32 ms (schema v8).
+func (a *TimelineAnalyzer) createPowerupEvent(slot int, powerupType string, startTime, endTime int32, names *NameTable, slotToTeam map[int]string, slotToPlayer map[int]string) PowerupEvent {
 	event := PowerupEvent{
 		Time:        startTime,
 		EndTime:     endTime,

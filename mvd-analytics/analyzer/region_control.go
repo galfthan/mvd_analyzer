@@ -61,7 +61,10 @@ func ComputeRegionControl(
 	if windowMs <= 0 {
 		windowMs = 50
 	}
-	bucketDur := float64(windowMs) / 1000.0
+	// All time arithmetic in int32 ms. windowMs is the bucket duration
+	// directly; no float seconds involved (schema v8 stores all stream
+	// times as int32 ms).
+	bucketDurMs := int32(windowMs)
 
 	var locTable []string
 	if r.TimelineAnalysis != nil {
@@ -103,7 +106,8 @@ func ComputeRegionControl(
 	if matchEnd <= matchStart {
 		return nil, nil
 	}
-	nBuckets := int(((matchEnd - matchStart) / bucketDur) + 0.5)
+	// Round-half-up integer division (mirrors the old `+0.5` float math).
+	nBuckets := int((matchEnd - matchStart + bucketDurMs/2) / bucketDurMs)
 	if nBuckets <= 0 {
 		return nil, nil
 	}
@@ -132,14 +136,17 @@ func ComputeRegionControl(
 		// time bucketStart = matchStart + bi*bucketDur. sIdx points
 		// to the latest position sample with T <= bucketStart, so
 		// pt.Li[sIdx] is the loc index at that moment.
+		//
+		// pt.T is int32 ms (schema v8); bucketStart is float64 seconds.
+		// Convert per-bucket so the inner walk stays in int32.
 		sIdx := 0
 		for bi := 0; bi < nBuckets; bi++ {
-			bucketStart := matchStart + float64(bi)*bucketDur
-			for sIdx+1 < len(pt.T) && float64(pt.T[sIdx+1]) <= bucketStart {
+			bucketStart := matchStart + int32(bi)*bucketDurMs
+			for sIdx+1 < len(pt.T) && pt.T[sIdx+1] <= bucketStart {
 				sIdx++
 			}
 			// Skip if the player hasn't started emitting positions yet.
-			if float64(pt.T[sIdx]) > bucketStart {
+			if pt.T[sIdx] > bucketStart {
 				continue
 			}
 			li := pt.Li[sIdx]
@@ -225,12 +232,13 @@ func ComputeRegionControl(
 	return bucketStates, stats
 }
 
-// intervalsOverlapAt returns true iff t falls inside any half-open
+// intervalsOverlapAt returns true iff tMs falls inside any half-open
 // interval [Start, End). Used to test "did the player have weapon W
-// at this exact time" without a separate state-at lookup.
-func intervalsOverlapAt(iv []result.Interval, t float64) bool {
+// at this exact time" without a separate state-at lookup. Times are
+// integer milliseconds (schema v8).
+func intervalsOverlapAt(iv []result.Interval, tMs int32) bool {
 	for _, in := range iv {
-		if t >= in.Start && t < in.End {
+		if tMs >= in.Start && tMs < in.End {
 			return true
 		}
 	}

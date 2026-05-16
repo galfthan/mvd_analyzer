@@ -292,8 +292,8 @@ state, loc trails) are computed on demand from this storage by the
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| MatchStart | `matchStart` | float64 | Match window start (always 0 after post-process). |
-| MatchEnd | `matchEnd` | float64 | Match window end (seconds). |
+| MatchStart | `matchStart` | int32 | Match window start in milliseconds (always 0 after post-process). |
+| MatchEnd | `matchEnd` | int32 | Match window end in milliseconds. |
 
 ### PlayerStream
 
@@ -308,25 +308,102 @@ state, loc trails) are computed on demand from this storage by the
 | RL / LG / GL / SSG / SNG | `rl` / `lg` / `gl` / `ssg` / `sng` | []Interval | Half-open `[Start, End)` periods the weapon was held. |
 | Quad / Pent / Ring | `q` / `pe` / `r` | []Interval | Same shape as weapons. |
 | Shells / Nails / Rockets / Cells | `sh` / `nl` / `rk` / `cl` | []ChangeI16 | Ammo change streams. |
-| Spawns / Deaths | `sp` / `d` | []float64 | Discrete event timestamps (no associated value). |
+| Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds (schema v8). |
 
 ### ChangeI16 / ChangeStr / Interval
 
 ```
-ChangeI16 = { "t": float64, "v": int16 }
-ChangeStr = { "t": float64, "v": string }
-Interval  = { "s": float64, "e": float64 }   // half-open [s, e)
+ChangeI16 = { "t": int32, "v": int16 }
+ChangeStr = { "t": int32, "v": string }
+Interval  = { "s": int32, "e": int32 }   // half-open [s, e)
 ```
+
+`t` / `s` / `e` are **integer milliseconds** since the stream's time
+origin (schema v8 — changed from `float64` seconds; see PositionTrack
+for the unit rationale).
 
 ### PositionTrack
 
 Columnar to compress JSON. Indices align across the four arrays.
 
 ```
-PositionTrack = { "t": [float32...], "x": [int32...], "y": [int32...], "z": [int32...] }
+PositionTrack = { "t": [int32...], "x": [int32...], "y": [int32...], "z": [int32...] }
 ```
 
-`int32` (not `int16`) because Quake maps can exceed ±32 768 in any axis.
+`t` is **integer milliseconds** since the stream's time origin
+(schema v8 — changed from `float32` seconds). The MVD wire format
+delivers a 1-byte ms delta per message; storing the cumulative value
+as `int32` keeps it exact across the persistence boundary. Consumers
+reading the JSON as seconds must scale by `* 0.001`. Range is ±24.8
+days, ample for matches that run minutes to hours; values can go
+negative for pre-match warmup samples after time normalisation.
+
+`x` / `y` / `z` are `int32` (not `int16`) because Quake maps can
+exceed ±32 768 in any axis.
+
+### Schema v8: all times are int32 milliseconds
+
+Every timestamped field in this schema — `PositionTrack.T`,
+`PlayerStream.Spawns/Deaths`, `ChangeI16.T` / `ChangeI8.T` /
+`ChangeStr.T`, `Interval.Start/End`, `GlobalStream.MatchStart/End`,
+`MatchResult.Duration/StartTime/EndTime`,
+`TimelineAnalysisResult.MatchStartTime/DemoOffset`,
+`TimelineFragEvent.Time`, `PowerupEvent.Time/EndTime/Duration`,
+`FragStreakEvent.Time/EndTime/Duration`, `MatchEvent.Time`,
+`FragEntry.Time`, `BackpackDrop.Time`,
+`WeaponPickup.Time/NextDeathTime/DropTime`,
+`ItemPhase.AvailableFrom/TakenAt/RespawnAt`, `HighResBucket.T` —
+is stored as `int32` integer milliseconds. JSON keys are unchanged;
+external consumers reading these as seconds must scale by `* 0.001`.
+The view-layer query API (`view.Buckets`, `view.Events`,
+`view.StreamSlice.StartTime/EndTime`, `view.StateAt.Time`) still
+takes and returns `float64` seconds at its public surface, so any
+consumer querying through `view.*` is unaffected.
+
+#### Why integer ms
+
+The MVD wire format carries time as a 1-byte millisecond delta per
+message; the decoder accumulator (`mvd.Decoder.timeMs`) keeps this
+integer end-to-end. Float seconds is a derived view, not a source of
+truth. Integer storage:
+
+- Eliminates float-precision drift across boundary comparisons. The
+  motivating bug was a gib-respawn case where a spawn-boundary at
+  wire-exact `658.279` compared against a position sample narrowed to
+  `658.278992` produced a spurious `MH.low → start` teleport edge.
+- Keeps comparison cost flat — `int32 <= int32` is exact.
+- Removes float-noise artefacts (`5.499999999999972`) from JSON,
+  making goldens stable and JSON human-readable.
+- `int32` ms = ±24.8 days, comfortably more than any match.
+
+#### Adding a new timestamped field
+
+1. **Storage**: `int32` ms in the result schema. Same JSON-key shape
+   as adjacent fields.
+2. **Producer** (`mvd-analytics/analyzer/`): if the source event has
+   a `TimeMs int32` field, use that directly. Otherwise convert at
+   the write site via `msTime(e.Time)` (defined in
+   [`analyzer/timeline_streams.go`](analyzer/timeline_streams.go);
+   `int32(math.Round(t*1000))` — well-conditioned because the
+   float64-seconds view derives once from the decoder's int32-ms
+   accumulator).
+3. **Postprocess** (`normalizeMatchRelativeTimes` in
+   `analyzer/postprocess.go`): if the field shifts with match start,
+   add it there. Everything works in int32 ms;
+   `matchStartMs` comes from `res.TimelineAnalysis.MatchStartTime`
+   directly.
+4. **View layer** (`mvd-analytics/view/`): if the field is queryable
+   via `view.Buckets` / `view.Events` / `view.StreamSlice` /
+   `view.StateAt`, follow the existing pattern — accept window
+   bounds in float64 seconds, convert to int32 ms once at entry, do
+   comparisons in int32 ms, emit float64 seconds at the public
+   output. Don't push ms through the view's public surface without a
+   deliberate decision.
+5. **Tests**: write fixtures with int32-ms literals (`Time: 5000`,
+   not `Time: 5.0`).
+6. **Frontend** (`mvd-web/static/app.js`): if the new field is read
+   from the raw schema (not via the view layer), add a `* 0.001` at
+   the read site. View-layer consumers (most panels) need no change.
 
 ### Append rules (the dedup invariant)
 

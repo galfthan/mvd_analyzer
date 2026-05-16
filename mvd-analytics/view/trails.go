@@ -49,7 +49,7 @@ func LocTrails(r *result.Result, opts LocTrailsOptions) (*LocTrailsView, error) 
 	}
 	end := opts.EndTime
 	if end == 0 {
-		end = r.Streams.Global.MatchEnd
+		end = float64(r.Streams.Global.MatchEnd) * 0.001
 	}
 	pf := newPlayerFilter(opts.Players)
 	out := &LocTrailsView{}
@@ -75,30 +75,37 @@ func LocTrails(r *result.Result, opts LocTrailsOptions) (*LocTrailsView, error) 
 // buildTrailRaw walks the loc-change stream and emits a [Start, End)
 // entry per residence. The final entry is closed at windowEnd (or
 // match end). Entries entirely outside the window are dropped.
+//
+// The loc-change stream T is int32 ms (schema v8); windowStart and
+// windowEnd are float64 seconds (public view API). Convert windows
+// once and keep the inner walk in int32 ms; TrailEntry.Start/End are
+// the public float64-seconds shape.
 func buildTrailRaw(stream []result.ChangeI16, windowStart, windowEnd float64, locTable []string) []TrailEntry {
 	if len(stream) == 0 {
 		return nil
 	}
+	windowStartMs := int32(windowStart * 1000)
+	windowEndMs := int32(windowEnd * 1000)
 	out := make([]TrailEntry, 0, len(stream))
 	for i, c := range stream {
 		segStart := c.T
-		var segEnd float64
+		var segEnd int32
 		if i+1 < len(stream) {
 			segEnd = stream[i+1].T
 		} else {
-			segEnd = windowEnd
+			segEnd = windowEndMs
 		}
-		if segEnd <= windowStart {
+		if segEnd <= windowStartMs {
 			continue
 		}
-		if windowEnd > 0 && segStart >= windowEnd {
+		if windowEndMs > 0 && segStart >= windowEndMs {
 			break
 		}
-		if segStart < windowStart {
-			segStart = windowStart
+		if segStart < windowStartMs {
+			segStart = windowStartMs
 		}
-		if windowEnd > 0 && segEnd > windowEnd {
-			segEnd = windowEnd
+		if windowEndMs > 0 && segEnd > windowEndMs {
+			segEnd = windowEndMs
 		}
 		idx := int(c.V)
 		locName := ""
@@ -108,7 +115,11 @@ func buildTrailRaw(stream []result.ChangeI16, windowStart, windowEnd float64, lo
 		if locName == "" {
 			continue
 		}
-		out = append(out, TrailEntry{Start: segStart, End: segEnd, Loc: locName})
+		out = append(out, TrailEntry{
+			Start: float64(segStart) * 0.001,
+			End:   float64(segEnd) * 0.001,
+			Loc:   locName,
+		})
 	}
 	return out
 }

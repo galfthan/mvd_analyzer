@@ -73,7 +73,7 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 
 		if team != "" {
 			fragEvents = append(fragEvents, TimelineFragEvent{
-				Time:   raw.Time,
+				Time:   msTime(raw.Time),
 				Player: playerName,
 				Team:   team,
 				Delta:  raw.Delta,
@@ -162,7 +162,7 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// then result.Streams — both are needed by ComputeRegionControl
 	// in the new (v7) flow that walks streams directly.
 	result.TimelineAnalysis = &TimelineAnalysisResult{
-		MatchStartTime: a.timing.StartTime,
+		MatchStartTime: msTime(a.timing.StartTime),
 		FragEvents:     fragEvents,
 		PowerupEvents:  powerupEvents,
 		FragStreaks:    fragStreaks,
@@ -175,9 +175,11 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	if matchEnd == 0 {
 		// Fall back to latest position sample if timing didn't observe
 		// an explicit end (e.g. demo cut short before intermission).
+		// posT is int32 ms (schema v8); convert to seconds for the
+		// comparison against the float64 EndTime placeholder.
 		for _, state := range a.playerState {
 			if n := len(state.streams.posT); n > 0 {
-				if t := float64(state.streams.posT[n-1]); t > matchEnd {
+				if t := float64(state.streams.posT[n-1]) * 0.001; t > matchEnd {
 					matchEnd = t
 				}
 			}

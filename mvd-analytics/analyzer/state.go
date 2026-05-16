@@ -74,39 +74,46 @@ type streamBuilder struct {
 
 	shells, nails, rockets, cells []changeI16
 
-	posT  []float32
+	// posT / spawns / deaths are integer milliseconds — the canonical,
+	// wire-native unit. Comparisons between pt.T and spawn/death boundaries
+	// stay exact int32 here and downstream; converting to float seconds
+	// would reintroduce the precision drift this schema-v8 type was
+	// chosen to eliminate.
+	posT  []int32
 	posX  []int32
 	posY  []int32
 	posZ  []int32
 	posLi []int16 // resolved loc index per sample, populated in finalize
 
-	spawns []float64
-	deaths []float64
+	spawns []int32
+	deaths []int32
 }
 
 // changeI16 / changeStr mirror result.ChangeI16 etc. Stored here in
 // the analyser package so tests don't have to round-trip through
 // result every time. Health/armor/loc/ammo all share int16, since
 // Quake values regularly exceed int8 range (mega-health = 200, RA = 200).
+// t is integer milliseconds (schema v8) — same unit as the result type.
 type changeI16 struct {
-	t float64
+	t int32
 	v int16
 }
 
 type changeStr struct {
-	t float64
+	t int32
 	v string
 }
 
 // intervalState tracks an open-anchor period for a boolean stream.
 // When held flips true the analyser sets anchor; on flip-false (or at
-// match end) the [anchor, t) interval is appended to closed.
+// match end) the [anchor, t) interval is appended to closed. Times
+// are integer milliseconds (schema v8).
 type intervalState struct {
-	held       bool
-	anchor     float64
-	closed     []intervalRecord
+	held   bool
+	anchor int32
+	closed []intervalRecord
 }
 
 type intervalRecord struct {
-	start, end float64
+	start, end int32
 }

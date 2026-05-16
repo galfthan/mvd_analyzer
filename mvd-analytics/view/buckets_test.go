@@ -7,13 +7,14 @@ import (
 )
 
 // makeStream builds a tiny synthetic Result with one player and a
-// known set of changes for unit tests. Streams.Global covers [0, 10).
+// known set of changes for unit tests. Streams.Global covers [0, 10s)
+// (MatchEnd is int32 ms in schema v8).
 func makeStream(t *testing.T, p result.PlayerStream) *result.Result {
 	t.Helper()
 	return &result.Result{
 		Streams: &result.Streams{
 			Players: []result.PlayerStream{p},
-			Global:  result.GlobalStream{MatchStart: 0, MatchEnd: 10},
+			Global:  result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
 		},
 	}
 }
@@ -23,9 +24,9 @@ func TestBucketsBasicHealth(t *testing.T) {
 		Name: "p1",
 		Health: []result.ChangeI16{
 			{T: 0, V: 100},
-			{T: 0.3, V: 60},
-			{T: 1.2, V: 30},
-			{T: 2.0, V: 100},
+			{T: 300, V: 60},
+			{T: 1200, V: 30},
+			{T: 2000, V: 100},
 		},
 	})
 	bv, err := Buckets(r, BucketsOptions{
@@ -75,7 +76,7 @@ func TestBucketsPartialFlag(t *testing.T) {
 		WindowMs:  3000,
 		Fields:    []string{FieldHealth},
 		StartTime: 0, EndTime: 10,
-	})
+	}) // StartTime/EndTime are seconds (public API)
 	if err != nil {
 		t.Fatalf("Buckets error: %v", err)
 	}
@@ -117,7 +118,7 @@ func TestBucketsIntervalHeldAny(t *testing.T) {
 	r := makeStream(t, result.PlayerStream{
 		Name: "p1",
 		RL: []result.Interval{
-			{Start: 1.0, End: 2.0},
+			{Start: 1000, End: 2000},
 		},
 	})
 	bv, err := Buckets(r, BucketsOptions{
@@ -145,19 +146,19 @@ func TestBucketsIntervalHeldAny(t *testing.T) {
 func TestBucketsTeamAggregates(t *testing.T) {
 	r := &result.Result{
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 1},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 1000},
 			Players: []result.PlayerStream{
 				{
 					Name: "p1", Team: "red",
 					Health: []result.ChangeI16{{T: 0, V: 100}},
 					Armor:  []result.ChangeI16{{T: 0, V: 50}},
-					RL:     []result.Interval{{Start: 0, End: 1}},
+					RL:     []result.Interval{{Start: 0, End: 1000}},
 				},
 				{
 					Name: "p2", Team: "red",
 					Health: []result.ChangeI16{{T: 0, V: 80}},
 					Armor:  []result.ChangeI16{{T: 0, V: 25}},
-					LG:     []result.Interval{{Start: 0, End: 1}},
+					LG:     []result.Interval{{Start: 0, End: 1000}},
 				},
 			},
 		},

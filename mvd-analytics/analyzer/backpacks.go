@@ -92,7 +92,7 @@ func (a *BackpackAnalyzer) handleHint(e *events.BackpackDropHintEvent) {
 	}
 	pl := a.ctx.Players[slot]
 	a.drops = append(a.drops, BackpackDrop{
-		Time:   e.Time,
+		Time:   msTime(e.Time),
 		Player: pl.Name,
 		Team:   pl.Team,
 		Weapon: weapon,

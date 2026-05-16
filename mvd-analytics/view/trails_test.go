@@ -9,14 +9,14 @@ import (
 func TestLocTrailsBasic(t *testing.T) {
 	r := &result.Result{
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
 			Players: []result.PlayerStream{
 				{
 					Name: "p1",
 					Loc: []result.ChangeI16{
-						{T: 0, V: 1}, // start in loc "rl"
-						{T: 3, V: 2}, // move to "ya"
-						{T: 7, V: 1}, // back to "rl"
+						{T: 0, V: 1},    // start in loc "rl"
+						{T: 3000, V: 2}, // move to "ya"
+						{T: 7000, V: 1}, // back to "rl"
 					},
 				},
 			},
@@ -50,14 +50,14 @@ func TestLocTrailsBasic(t *testing.T) {
 func TestLocTrailsMinDwell(t *testing.T) {
 	r := &result.Result{
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
 			Players: []result.PlayerStream{
 				{
 					Name: "p1",
 					Loc: []result.ChangeI16{
 						{T: 0, V: 1},
-						{T: 5, V: 2},   // 100ms blip
-						{T: 5.1, V: 1}, // back to rl
+						{T: 5000, V: 2}, // 100ms blip
+						{T: 5100, V: 1}, // back to rl
 					},
 				},
 			},

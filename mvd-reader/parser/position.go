@@ -4,19 +4,26 @@ import (
 	"github.com/mvd-analyzer/mvd-reader/mvd"
 )
 
-// PlayerPositionEvent is emitted when a player position is updated
+// PlayerPositionEvent is emitted when a player position is updated.
+//
+// Time is float64 seconds (the derived ergonomic view); TimeMs is the
+// canonical wire-native value in integer milliseconds — consumers that
+// persist this into the result schema or compare against other ms
+// timestamps must use TimeMs to avoid the float-precision drift that
+// caused spurious spawn/death-boundary crossings.
 type PlayerPositionEvent struct {
 	PlayerNum int
 	Origin    [3]float32 // X, Y, Z world coordinates
 	Angles    [3]float32 // Pitch, Yaw, Roll
 	Time      float64
+	TimeMs    int32
 }
 
 func (e *PlayerPositionEvent) EventType() EventType { return EventPlayerInfo }
 func (e *PlayerPositionEvent) EventTime() float64   { return e.Time }
 
 // parsePlayerInfo parses svc_playerinfo message and emits position events
-func (p *Parser) parsePlayerInfo(r *mvd.BufferReader, time float64, floatCoords bool) error {
+func (p *Parser) parsePlayerInfo(r *mvd.BufferReader, time float64, timeMs int32, floatCoords bool) error {
 	playerNum, err := r.ReadByte()
 	if err != nil {
 		return err
@@ -100,6 +107,7 @@ func (p *Parser) parsePlayerInfo(r *mvd.BufferReader, time float64, floatCoords 
 			Origin:    origin,
 			Angles:    angles,
 			Time:      time,
+			TimeMs:    timeMs,
 		})
 	}
 

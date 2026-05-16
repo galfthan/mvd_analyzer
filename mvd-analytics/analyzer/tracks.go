@@ -70,7 +70,11 @@ func ExtractTracks(result *Result) *TracksResult {
 		return ""
 	}
 
-	matchEnd := result.Streams.Global.MatchEnd
+	// matchEnd is float64 seconds on the public schema; convert once to
+	// int32 ms for boundary walking. processBoundaries below works
+	// entirely in ms — both pt.T and Spawns/Deaths are []int32 ms after
+	// schema v8 so comparisons are exact.
+	matchEndMs := int32(result.Streams.Global.MatchEnd * 1000)
 
 	for _, p := range result.Streams.Players {
 		pt := p.Position
@@ -89,34 +93,34 @@ func ExtractTracks(result *Result) *TracksResult {
 		)
 
 		// processBoundaries advances the spawn/death cursors to time
-		// `t` (inclusive), opening / closing lives along the way.
-		// Spawn at exact t opens a life *before* the position sample
-		// at t is evaluated; death at exact t closes it before — so
+		// `tMs` (inclusive), opening / closing lives along the way.
+		// Spawn at exact tMs opens a life *before* the position sample
+		// at tMs is evaluated; death at exact tMs closes it before — so
 		// a sample that lands exactly on a death boundary is treated
 		// as already-dead.
-		processBoundaries := func(t float64) {
+		processBoundaries := func(tMs int32) {
 			for sIdx < len(spawns) || dIdx < len(deaths) {
-				var nextT float64
+				var nextMs int32
 				isSpawn := false
 				switch {
 				case sIdx < len(spawns) && (dIdx >= len(deaths) || spawns[sIdx] <= deaths[dIdx]):
-					nextT = spawns[sIdx]
+					nextMs = spawns[sIdx]
 					isSpawn = true
 				default:
-					nextT = deaths[dIdx]
+					nextMs = deaths[dIdx]
 				}
-				if nextT > t {
+				if nextMs > tMs {
 					return
 				}
 				if isSpawn {
 					if !alive {
 						alive = true
-						curLife = &LifeTrack{SpawnTime: nextT}
+						curLife = &LifeTrack{SpawnTime: float64(nextMs) * 0.001}
 					}
 					sIdx++
 				} else {
 					if alive && curLife != nil {
-						curLife.DeathTime = nextT
+						curLife.DeathTime = float64(nextMs) * 0.001
 						lives = append(lives, *curLife)
 						curLife = nil
 					}
@@ -127,8 +131,8 @@ func ExtractTracks(result *Result) *TracksResult {
 		}
 
 		for i := range pt.T {
-			t := float64(pt.T[i])
-			processBoundaries(t)
+			tMs := pt.T[i]
+			processBoundaries(tMs)
 			if !alive || curLife == nil {
 				continue
 			}
@@ -139,14 +143,14 @@ func ExtractTracks(result *Result) *TracksResult {
 			n := len(curLife.Positions)
 			if n == 0 || curLife.Positions[n-1].Location != locName {
 				curLife.Positions = append(curLife.Positions, TrackPosition{
-					Time: t, Location: locName,
+					Time: float64(tMs) * 0.001, Location: locName,
 				})
 			}
 		}
 
 		// Drain remaining boundaries past the last position sample
 		// (e.g. a death at match end with no further positions).
-		processBoundaries(matchEnd)
+		processBoundaries(matchEndMs)
 
 		// Finalize any life still open at match end (player alive
 		// when the demo cut). DeathTime stays zero — JSON omitempty

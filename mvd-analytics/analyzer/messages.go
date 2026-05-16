@@ -100,7 +100,7 @@ func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEven
 			team := a.getPlayerTeam(playerName)
 
 			return &MatchEvent{
-				Time:    time,
+				Time:    msTime(time),
 				Type:    "teamsay",
 				Player:  playerName,
 				Team:    team,
@@ -116,7 +116,7 @@ func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEven
 			team := a.getPlayerTeam(playerName)
 
 			return &MatchEvent{
-				Time:    time,
+				Time:    msTime(time),
 				Type:    "teamsay",
 				Player:  playerName,
 				Team:    team,
@@ -138,7 +138,7 @@ func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEven
 	team := a.getPlayerTeam(playerName)
 
 	return &MatchEvent{
-		Time:    time,
+		Time:    msTime(time),
 		Type:    "chat",
 		Player:  playerName,
 		Team:    team,
@@ -164,7 +164,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 			killer := strings.TrimSpace(msg[:idx])
 			if killer != "" && !isGenericPlayer(killer) {
 				return &MatchEvent{
-					Time:    time,
+					Time:    msTime(time),
 					Type:    "frag",
 					Player:  killer,
 					Team:    a.getPlayerTeam(killer),
@@ -190,7 +190,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 			victim := strings.TrimSpace(msg[:idx])
 			if victim != "" && !isGenericPlayer(victim) {
 				return &MatchEvent{
-					Time:    time,
+					Time:    msTime(time),
 					Type:    "frag",
 					Player:  "teammate",
 					Team:    a.getPlayerTeam(victim),
@@ -210,7 +210,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 			victim := strings.TrimSpace(rest[:victimEnd])
 			if killer != "" && victim != "" {
 				return &MatchEvent{
-					Time: time, Type: "frag", Player: killer, Team: a.getPlayerTeam(killer),
+					Time: msTime(time), Type: "frag", Player: killer, Team: a.getPlayerTeam(killer),
 					Message: msg, Victim: victim, Weapon: "rl",
 				}
 			}
@@ -222,7 +222,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 			victim := strings.TrimSpace(msg[idx+len(kf.pattern):])
 			if killer != "" && victim != "" {
 				return &MatchEvent{
-					Time: time, Type: "frag", Player: killer, Team: a.getPlayerTeam(killer),
+					Time: msTime(time), Type: "frag", Player: killer, Team: a.getPlayerTeam(killer),
 					Message: msg, Victim: victim, Weapon: kf.weapon,
 				}
 			}
@@ -243,7 +243,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 				killer := strings.TrimSpace(rest[loadsIdx+10 : killerEnd])
 				if victim != "" && killer != "" && !isGenericPlayer(victim) && !isGenericPlayer(killer) {
 					return &MatchEvent{
-						Time: time, Type: "frag", Player: killer, Team: a.getPlayerTeam(killer),
+						Time: msTime(time), Type: "frag", Player: killer, Team: a.getPlayerTeam(killer),
 						Message: msg, Victim: victim, Weapon: "ssg",
 					}
 				}
@@ -307,7 +307,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 
 			if victim != "" && killer != "" && !isGenericPlayer(victim) && !isGenericPlayer(killer) {
 				return &MatchEvent{
-					Time:    time,
+					Time:    msTime(time),
 					Type:    "frag",
 					Player:  killer,
 					Team:    a.getPlayerTeam(killer),
@@ -330,7 +330,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 		killer := extractKillerName(rest)
 		if victim != "" && killer != "" && !isGenericPlayer(victim) && !isGenericPlayer(killer) {
 			return &MatchEvent{
-				Time: time, Type: "frag", Player: killer, Team: a.getPlayerTeam(killer),
+				Time: msTime(time), Type: "frag", Player: killer, Team: a.getPlayerTeam(killer),
 				Message: msg, Victim: victim, Weapon: weapon,
 			}
 		}
@@ -374,7 +374,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 			victim := strings.TrimSpace(msg[:idx])
 			if victim != "" && !isGenericPlayer(victim) {
 				return &MatchEvent{
-					Time:    time,
+					Time:    msTime(time),
 					Type:    "frag",
 					Player:  victim,
 					Team:    a.getPlayerTeam(victim),

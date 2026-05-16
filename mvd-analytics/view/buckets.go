@@ -82,13 +82,15 @@ func Buckets(r *result.Result, opts BucketsOptions) (*BucketsView, error) {
 		reducers[f] = red
 	}
 
+	// Public API uses float64 seconds; the schema stores Global.Match*
+	// as int32 ms (schema v8) — convert once at the entry.
 	start := opts.StartTime
 	end := opts.EndTime
 	if end == 0 {
-		end = r.Streams.Global.MatchEnd
+		end = float64(r.Streams.Global.MatchEnd) * 0.001
 	}
 	if start == 0 {
-		start = r.Streams.Global.MatchStart
+		start = float64(r.Streams.Global.MatchStart) * 0.001
 	}
 	if end <= start {
 		return &BucketsView{WindowMs: windowMs, Buckets: nil}, nil
@@ -168,27 +170,35 @@ func playerActiveInWindow(p result.PlayerStream, bStart, bEnd float64) bool {
 		return true
 	}
 
+	// Spawns / Deaths are int32 ms (schema v8); convert the window
+	// bounds once and stay in int32 for the comparison loop.
+	bStartMs := int32(bStart * 1000)
+	bEndMs := int32(bEnd * 1000)
+
 	if hasSpawnDeath {
 		latestKind := ""
-		latestT := -1.0
+		latestT := int32(-1)
+		seen := false
 		for _, t := range p.Spawns {
-			if t >= bStart && t < bEnd {
+			if t >= bStartMs && t < bEndMs {
 				return true // spawned inside the window
 			}
-			if t < bStart && t > latestT {
+			if t < bStartMs && (!seen || t > latestT) {
 				latestT = t
 				latestKind = "spawn"
+				seen = true
 			}
-			if t >= bEnd {
+			if t >= bEndMs {
 				break
 			}
 		}
 		for _, t := range p.Deaths {
-			if t < bStart && t > latestT {
+			if t < bStartMs && (!seen || t > latestT) {
 				latestT = t
 				latestKind = "death"
+				seen = true
 			}
-			if t >= bEnd {
+			if t >= bEndMs {
 				break
 			}
 		}
@@ -209,11 +219,13 @@ func positionTouchesWindow(pt *result.PositionTrack, bStart, bEnd float64) bool 
 		return false
 	}
 	const fudge = 0.1 // slightly more than one 50 ms bucket
-	// Binary-search for the first sample >= bStart-fudge; if it lands
-	// before bEnd we have a touch.
-	lo := bStart - fudge
-	i := sort.Search(len(pt.T), func(i int) bool { return float64(pt.T[i]) >= lo })
-	return i < len(pt.T) && float64(pt.T[i]) < bEnd
+	// pt.T is int32 ms (schema v8); convert window bounds once.
+	loMs := int32((bStart - fudge) * 1000)
+	bEndMs := int32(bEnd * 1000)
+	// Binary-search for the first sample >= loMs; if it lands before
+	// bEndMs we have a touch.
+	i := sort.Search(len(pt.T), func(i int) bool { return pt.T[i] >= loMs })
+	return i < len(pt.T) && pt.T[i] < bEndMs
 }
 
 func bucketWindowMsOrDefault(ms int) int {
@@ -357,10 +369,10 @@ func intervalSamples(p result.PlayerStream, field string, bStart, bEnd float64) 
 	const samplesPerWindow = 8
 	out := make([]Sample, samplesPerWindow)
 	span := bEnd - bStart
-	out[0] = Sample{T: bStart, V: intervalContains(stream, bStart)}
+	out[0] = Sample{T: bStart, V: intervalContains(stream, int32(bStart*1000))}
 	for i := 1; i < samplesPerWindow; i++ {
 		t := bStart + float64(i)*span/float64(samplesPerWindow)
-		out[i] = Sample{T: t, V: intervalContains(stream, t)}
+		out[i] = Sample{T: t, V: intervalContains(stream, int32(t*1000))}
 	}
 	return out
 }
@@ -389,22 +401,28 @@ func positionSamples(p result.PlayerStream, bStart, bEnd float64) []Sample {
 	if n == 0 {
 		return nil
 	}
-	// First sample with T >= bStart (inclusive). Treats samples
+	// pt.T is int32 ms (schema v8); window bounds arrive in float64
+	// seconds (public view API). Convert window once; the comparison
+	// loop stays in int32 ms. Sample.T is the public unit, float64
+	// seconds, converted once per emitted sample.
+	bStartMs := int32(bStart * 1000)
+	bEndMs := int32(bEnd * 1000)
+	// First sample with T >= bStartMs (inclusive). Treats samples
 	// landing exactly on the bucket boundary as the bucket's first
 	// event, matching v6's int-division semantics.
-	firstIn := sort.Search(n, func(i int) bool { return float64(pt.T[i]) >= bStart })
+	firstIn := sort.Search(n, func(i int) bool { return pt.T[i] >= bStartMs })
 	out := make([]Sample, 0, 4)
 	for i := firstIn; i < n; i++ {
-		t := float64(pt.T[i])
-		if t >= bEnd {
+		t := pt.T[i]
+		if t >= bEndMs {
 			break
 		}
-		out = append(out, Sample{T: t, V: positionTriple(pt, i)})
+		out = append(out, Sample{T: float64(t) * 0.001, V: positionTriple(pt, i)})
 	}
 	if len(out) == 0 && firstIn > 0 {
 		// Gap bucket — fall back to the latest sample before bStart.
 		idx := firstIn - 1
-		out = append(out, Sample{T: float64(pt.T[idx]), V: positionTriple(pt, idx)})
+		out = append(out, Sample{T: float64(pt.T[idx]) * 0.001, V: positionTriple(pt, idx)})
 	}
 	return out
 }
@@ -419,12 +437,17 @@ func eventListSamples(p result.PlayerStream, field string, bStart, bEnd float64)
 	if stream == nil {
 		return nil
 	}
+	// Stream is int32 ms (schema v8); compare in ms then convert each
+	// in-window timestamp to seconds for the public Sample.
+	bStartMs := int32(bStart * 1000)
+	bEndMs := int32(bEnd * 1000)
 	out := make([]Sample, 0, 2)
 	for _, t := range stream {
-		if t < bStart || t >= bEnd {
+		if t < bStartMs || t >= bEndMs {
 			continue
 		}
-		out = append(out, Sample{T: t, V: t})
+		ts := float64(t) * 0.001
+		out = append(out, Sample{T: ts, V: ts})
 	}
 	return out
 }
@@ -435,11 +458,18 @@ func eventListSamples(p result.PlayerStream, field string, bStart, bEnd float64)
 // or in this window. Uses binary search for the carry-forward and
 // starts the window walk at the search result so we never re-scan
 // pre-bStart entries.
+//
+// Window bounds are float64 seconds (public view API); change-stream
+// T is int32 ms (schema v8). Convert once and compare in int32. The
+// public Sample.T is float64 seconds so consumers downstream stay
+// oblivious to the ms storage.
 func changeSamplesI8(stream []result.ChangeI8, bStart, bEnd float64) []Sample {
+	bStartMs := int32(bStart * 1000)
+	bEndMs := int32(bEnd * 1000)
 	out := make([]Sample, 0, 4)
-	carry := indexI8AtOrBefore(stream, bStart)
+	carry := indexI8AtOrBefore(stream, bStartMs)
 	if carry >= 0 {
-		out = append(out, Sample{T: stream[carry].T, V: stream[carry].V})
+		out = append(out, Sample{T: float64(stream[carry].T) * 0.001, V: stream[carry].V})
 	}
 	startIdx := carry + 1
 	if startIdx < 0 {
@@ -447,22 +477,24 @@ func changeSamplesI8(stream []result.ChangeI8, bStart, bEnd float64) []Sample {
 	}
 	for i := startIdx; i < len(stream); i++ {
 		c := stream[i]
-		if c.T < bStart {
+		if c.T < bStartMs {
 			continue
 		}
-		if c.T >= bEnd {
+		if c.T >= bEndMs {
 			break
 		}
-		out = append(out, Sample{T: c.T, V: c.V})
+		out = append(out, Sample{T: float64(c.T) * 0.001, V: c.V})
 	}
 	return out
 }
 
 func changeSamplesI16(stream []result.ChangeI16, bStart, bEnd float64) []Sample {
+	bStartMs := int32(bStart * 1000)
+	bEndMs := int32(bEnd * 1000)
 	out := make([]Sample, 0, 4)
-	carry := indexI16AtOrBefore(stream, bStart)
+	carry := indexI16AtOrBefore(stream, bStartMs)
 	if carry >= 0 {
-		out = append(out, Sample{T: stream[carry].T, V: stream[carry].V})
+		out = append(out, Sample{T: float64(stream[carry].T) * 0.001, V: stream[carry].V})
 	}
 	startIdx := carry + 1
 	if startIdx < 0 {
@@ -470,22 +502,24 @@ func changeSamplesI16(stream []result.ChangeI16, bStart, bEnd float64) []Sample 
 	}
 	for i := startIdx; i < len(stream); i++ {
 		c := stream[i]
-		if c.T < bStart {
+		if c.T < bStartMs {
 			continue
 		}
-		if c.T >= bEnd {
+		if c.T >= bEndMs {
 			break
 		}
-		out = append(out, Sample{T: c.T, V: c.V})
+		out = append(out, Sample{T: float64(c.T) * 0.001, V: c.V})
 	}
 	return out
 }
 
 func changeSamplesStr(stream []result.ChangeStr, bStart, bEnd float64) []Sample {
+	bStartMs := int32(bStart * 1000)
+	bEndMs := int32(bEnd * 1000)
 	out := make([]Sample, 0, 4)
-	carry := indexStrAtOrBefore(stream, bStart)
+	carry := indexStrAtOrBefore(stream, bStartMs)
 	if carry >= 0 {
-		out = append(out, Sample{T: stream[carry].T, V: stream[carry].V})
+		out = append(out, Sample{T: float64(stream[carry].T) * 0.001, V: stream[carry].V})
 	}
 	startIdx := carry + 1
 	if startIdx < 0 {
@@ -493,35 +527,40 @@ func changeSamplesStr(stream []result.ChangeStr, bStart, bEnd float64) []Sample 
 	}
 	for i := startIdx; i < len(stream); i++ {
 		c := stream[i]
-		if c.T < bStart {
+		if c.T < bStartMs {
 			continue
 		}
-		if c.T >= bEnd {
+		if c.T >= bEndMs {
 			break
 		}
-		out = append(out, Sample{T: c.T, V: c.V})
+		out = append(out, Sample{T: float64(c.T) * 0.001, V: c.V})
 	}
 	return out
 }
 
-func indexI8AtOrBefore(stream []result.ChangeI8, t float64) int {
-	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > t })
+// index*AtOrBefore returns the largest index i for which stream[i].T
+// is <= the query tMs. The query is integer ms (schema v8); callers
+// converting from seconds use int32(t * 1000) at the boundary.
+func indexI8AtOrBefore(stream []result.ChangeI8, tMs int32) int {
+	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > tMs })
 	return i - 1
 }
 
-func indexI16AtOrBefore(stream []result.ChangeI16, t float64) int {
-	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > t })
+func indexI16AtOrBefore(stream []result.ChangeI16, tMs int32) int {
+	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > tMs })
 	return i - 1
 }
 
-func indexStrAtOrBefore(stream []result.ChangeStr, t float64) int {
-	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > t })
+func indexStrAtOrBefore(stream []result.ChangeStr, tMs int32) int {
+	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > tMs })
 	return i - 1
 }
 
-func intervalContains(stream []result.Interval, t float64) bool {
+// intervalContains tests whether tMs falls inside any half-open
+// interval [Start, End). All times are integer milliseconds.
+func intervalContains(stream []result.Interval, tMs int32) bool {
 	for _, iv := range stream {
-		if t >= iv.Start && t < iv.End {
+		if tMs >= iv.Start && tMs < iv.End {
 			return true
 		}
 	}
@@ -580,7 +619,10 @@ func streamInterval(p result.PlayerStream, field string) []result.Interval {
 	return nil
 }
 
-func streamEventList(p result.PlayerStream, field string) []float64 {
+// streamEventList returns the raw int32-ms timestamp slice for a
+// spawn/death-style event field. Callers wrap the seconds conversion
+// where the public Sample type (float64 seconds) is materialised.
+func streamEventList(p result.PlayerStream, field string) []int32 {
 	switch field {
 	case FieldSpawns:
 		return p.Spawns

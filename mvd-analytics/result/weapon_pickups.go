@@ -21,14 +21,14 @@ package result
 // a weapon is by construction HadBefore=false, and all subsequent
 // pickups of that same weapon in the same life are HadBefore=true.
 type WeaponPickup struct {
-	Time          float64 `json:"time"`
-	Player        string  `json:"player"`
-	Team          string  `json:"team,omitempty"`
-	Weapon        string  `json:"weapon"` // "rl","lg","gl","ssg","sng","ng"
-	Source        string  `json:"source"` // "world" | "backpack"
-	HadBefore     bool    `json:"hadBefore"`
-	Kills         int     `json:"kills"`
-	NextDeathTime float64 `json:"nextDeathTime,omitempty"` // 0 if picker never died before match end
+	Time          int32  `json:"time"` // Match-relative milliseconds (schema v8)
+	Player        string `json:"player"`
+	Team          string `json:"team,omitempty"`
+	Weapon        string `json:"weapon"` // "rl","lg","gl","ssg","sng","ng"
+	Source        string `json:"source"` // "world" | "backpack"
+	HadBefore     bool   `json:"hadBefore"`
+	Kills         int    `json:"kills"`
+	NextDeathTime int32  `json:"nextDeathTime,omitempty"` // ms; 0 if picker never died before match end
 
 	// Backpack-source fields. Only set when Source == "backpack".
 	// BackpackEnt pairs with BackpackDrop.EntNum so the frontend can
@@ -36,5 +36,5 @@ type WeaponPickup struct {
 	BackpackEnt int    `json:"backpackEnt,omitempty"`
 	Dropper     string `json:"dropper,omitempty"`
 	DropperTeam string `json:"dropperTeam,omitempty"`
-	DropTime    float64 `json:"dropTime,omitempty"`
+	DropTime    int32  `json:"dropTime,omitempty"` // ms
 }

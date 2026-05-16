@@ -27,10 +27,10 @@ func TestWeaponPickups_WorldRLWithKills(t *testing.T) {
 	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 4, Time: 30})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
-		{Time: 12, Killer: "ace", Victim: "x", Weapon: "rl"},
-		{Time: 15, Killer: "ace", Victim: "y", Weapon: "axe"}, // wrong weapon
-		{Time: 20, Killer: "ace", Victim: "z", Weapon: "rl"},
-		{Time: 40, Killer: "ace", Victim: "w", Weapon: "rl"}, // post-death
+		{Time: 12000, Killer: "ace", Victim: "x", Weapon: "rl"},
+		{Time: 15000, Killer: "ace", Victim: "y", Weapon: "axe"}, // wrong weapon
+		{Time: 20000, Killer: "ace", Victim: "z", Weapon: "rl"},
+		{Time: 40000, Killer: "ace", Victim: "w", Weapon: "rl"}, // post-death
 	}}
 
 	r := &Result{}
@@ -48,8 +48,8 @@ func TestWeaponPickups_WorldRLWithKills(t *testing.T) {
 	if p.Kills != 2 {
 		t.Errorf("Kills = %d, want 2 (two RL frags in the window)", p.Kills)
 	}
-	if p.NextDeathTime != 30 {
-		t.Errorf("NextDeathTime = %v, want 30", p.NextDeathTime)
+	if p.NextDeathTime != 30000 {
+		t.Errorf("NextDeathTime = %v, want 30000", p.NextDeathTime)
 	}
 }
 
@@ -68,7 +68,7 @@ func TestWeaponPickups_HadBeforeDoesNotClaimKills(t *testing.T) {
 	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 77, PlayerEnt: 3, Time: 5})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
-		{Time: 6, Killer: "hoarder", Weapon: "rl"},
+		{Time: 6000, Killer: "hoarder", Weapon: "rl"},
 	}}
 
 	r := &Result{}
@@ -110,7 +110,7 @@ func TestWeaponPickups_BackpackPickupAttribution(t *testing.T) {
 	if p.Dropper != "dropper" || p.DropperTeam != "red" {
 		t.Errorf("dropper = %s/%s, want dropper/red", p.Dropper, p.DropperTeam)
 	}
-	if p.BackpackEnt != 200 || p.DropTime != 10 {
+	if p.BackpackEnt != 200 || p.DropTime != 10000 {
 		t.Errorf("entNum/dropTime = %d/%v", p.BackpackEnt, p.DropTime)
 	}
 }
@@ -146,9 +146,9 @@ func TestWeaponPickups_TeamkillsAndSuicidesExcluded(t *testing.T) {
 	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
-		{Time: 10, Killer: "p", Weapon: "rl", IsSuicide: true},
-		{Time: 15, Killer: "p", Weapon: "rl", IsTeamKill: true},
-		{Time: 20, Killer: "p", Weapon: "rl"}, // the only real frag
+		{Time: 10000, Killer: "p", Weapon: "rl", IsSuicide: true},
+		{Time: 15000, Killer: "p", Weapon: "rl", IsTeamKill: true},
+		{Time: 20000, Killer: "p", Weapon: "rl"}, // the only real frag
 	}}
 
 	r := &Result{}
@@ -179,10 +179,10 @@ func TestWeaponPickups_RedundantSecondPickupGetsZero(t *testing.T) {
 	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
-		{Time: 12, Killer: "p", Weapon: "rl"},
-		{Time: 15, Killer: "p", Weapon: "rl"},
-		{Time: 25, Killer: "p", Weapon: "rl"},
-		{Time: 28, Killer: "p", Weapon: "rl"},
+		{Time: 12000, Killer: "p", Weapon: "rl"},
+		{Time: 15000, Killer: "p", Weapon: "rl"},
+		{Time: 25000, Killer: "p", Weapon: "rl"},
+		{Time: 28000, Killer: "p", Weapon: "rl"},
 	}}
 
 	r := &Result{}
@@ -221,9 +221,9 @@ func TestWeaponPickups_FreshPickupAfterDeathIsItsOwnGrant(t *testing.T) {
 	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 40})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
-		{Time: 20, Killer: "p", Weapon: "rl"}, // life 1
-		{Time: 45, Killer: "p", Weapon: "rl"}, // life 2
-		{Time: 50, Killer: "p", Weapon: "rl"}, // life 2
+		{Time: 20000, Killer: "p", Weapon: "rl"}, // life 1
+		{Time: 45000, Killer: "p", Weapon: "rl"}, // life 2
+		{Time: 50000, Killer: "p", Weapon: "rl"}, // life 2
 	}}
 
 	r := &Result{}
@@ -248,9 +248,9 @@ func TestWeaponPickups_NoNextDeathKillsUnbounded(t *testing.T) {
 	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 5})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
-		{Time: 10, Killer: "survivor", Weapon: "lg"},
-		{Time: 50, Killer: "survivor", Weapon: "lg"},
-		{Time: 99, Killer: "survivor", Weapon: "lg"},
+		{Time: 10000, Killer: "survivor", Weapon: "lg"},
+		{Time: 50000, Killer: "survivor", Weapon: "lg"},
+		{Time: 99000, Killer: "survivor", Weapon: "lg"},
 	}}
 
 	r := &Result{}

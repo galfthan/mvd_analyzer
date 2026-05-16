@@ -54,9 +54,14 @@ func (e *DemoInfoEvent) EventTime() float64   { return e.Time }
 // independent of any sampling interval (no missed instant respawns) and
 // without having to parse KTX obituary text. Obituary parsing for killer
 // / weapon attribution remains a separate concern in analytics.
+//
+// TimeMs is the canonical wire-native time in integer milliseconds. Use it
+// for boundary comparisons (analyzer persistence layer); Time is the
+// derived float64 seconds view.
 type DeathEvent struct {
 	PlayerNum int
 	Time      float64
+	TimeMs    int32
 }
 
 func (e *DeathEvent) EventType() EventType { return EventDeath }
@@ -66,16 +71,19 @@ func (e *DeathEvent) EventTime() float64   { return e.Time }
 // to >0 — either a respawn after death, or a first-spawn when a player
 // transitions from spectator / pre-connect into active play. Consumers
 // treat both cases identically.
+//
+// TimeMs is the canonical wire-native time in integer milliseconds.
 type SpawnEvent struct {
 	PlayerNum int
 	Time      float64
+	TimeMs    int32
 }
 
 func (e *SpawnEvent) EventType() EventType { return EventSpawn }
 func (e *SpawnEvent) EventTime() float64   { return e.Time }
 
 // parseUpdateStat parses svc_updatestat message (byte value)
-func (p *Parser) parseUpdateStat(r *mvd.BufferReader, time float64, playerNum int) error {
+func (p *Parser) parseUpdateStat(r *mvd.BufferReader, time float64, timeMs int32, playerNum int) error {
 	statIndex, err := r.ReadByte()
 	if err != nil {
 		return err
@@ -86,11 +94,11 @@ func (p *Parser) parseUpdateStat(r *mvd.BufferReader, time float64, playerNum in
 		return err
 	}
 
-	return p.updateStat(playerNum, int(statIndex), int(value), time)
+	return p.updateStat(playerNum, int(statIndex), int(value), time, timeMs)
 }
 
 // parseUpdateStatLong parses svc_updatestatlong message (long value)
-func (p *Parser) parseUpdateStatLong(r *mvd.BufferReader, time float64, playerNum int) error {
+func (p *Parser) parseUpdateStatLong(r *mvd.BufferReader, time float64, timeMs int32, playerNum int) error {
 	statIndex, err := r.ReadByte()
 	if err != nil {
 		return err
@@ -101,7 +109,7 @@ func (p *Parser) parseUpdateStatLong(r *mvd.BufferReader, time float64, playerNu
 		return err
 	}
 
-	return p.updateStat(playerNum, int(statIndex), int(value), time)
+	return p.updateStat(playerNum, int(statIndex), int(value), time, timeMs)
 }
 
 // parseUpdateFrags parses svc_updatefrags message
@@ -133,7 +141,7 @@ func (p *Parser) parseUpdateFrags(r *mvd.BufferReader, time float64) error {
 }
 
 // updateStat updates player stats and emits event
-func (p *Parser) updateStat(playerNum, statIndex, value int, time float64) error {
+func (p *Parser) updateStat(playerNum, statIndex, value int, time float64, timeMs int32) error {
 	// Health-transition detection for DeathEvent / SpawnEvent — captured
 	// from the pre-mutation value so the transition check below is driven
 	// by the actual 100→-20 style edge, not the post-mutation state.
@@ -185,10 +193,10 @@ func (p *Parser) updateStat(playerNum, statIndex, value int, time float64) error
 	// analytics never need to compare health across sampling boundaries.
 	if isHealthUpdate {
 		if healthOld > 0 && healthNew <= 0 {
-			return p.emit(&DeathEvent{PlayerNum: playerNum, Time: time})
+			return p.emit(&DeathEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
 		}
 		if healthOld <= 0 && healthNew > 0 {
-			return p.emit(&SpawnEvent{PlayerNum: playerNum, Time: time})
+			return p.emit(&SpawnEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
 		}
 	}
 	return nil

@@ -50,13 +50,13 @@ func TestItemAnalyzer_RAPickupRespawn(t *testing.T) {
 		t.Fatalf("phases = %+v", it.Phases)
 	}
 	p0 := it.Phases[0]
-	if p0.AvailableFrom != 0 || p0.TakenAt != 10 || p0.TakenBy != "nexus" || p0.Team != "ahoy" {
+	if p0.AvailableFrom != 0 || p0.TakenAt != 10000 || p0.TakenBy != "nexus" || p0.Team != "ahoy" {
 		t.Errorf("phase[0] meta = %+v", p0)
 	}
-	if p0.RespawnAt != 30 {
-		t.Errorf("phase[0] RespawnAt = %v, want 30 (TakenAt+20)", p0.RespawnAt)
+	if p0.RespawnAt != 30000 {
+		t.Errorf("phase[0] RespawnAt = %v, want 30000 (TakenAt+20s)", p0.RespawnAt)
 	}
-	if it.Phases[1].AvailableFrom != 45 || it.Phases[1].TakenAt != 0 {
+	if it.Phases[1].AvailableFrom != 45000 || it.Phases[1].TakenAt != 0 {
 		t.Errorf("phase[1] = %+v", it.Phases[1])
 	}
 }
@@ -79,8 +79,8 @@ func TestItemAnalyzer_QuadNominalRespawn(t *testing.T) {
 	res := out
 	p0 := res.Items[0].Phases[0]
 	got := p0.RespawnAt - p0.TakenAt
-	if got < 59.999 || got > 60.001 {
-		t.Errorf("quad RespawnAt - TakenAt = %v, want 60", got)
+	if got < 59999 || got > 60001 {
+		t.Errorf("quad RespawnAt - TakenAt = %v, want 60000", got)
 	}
 }
 
@@ -124,12 +124,12 @@ func TestItemAnalyzer_TwoMHs(t *testing.T) {
 	if mh1.TakenBy != "p2" {
 		t.Errorf("mh_1 picker = %q, want p2", mh1.TakenBy)
 	}
-	if mh1.RespawnAt != 110 { // rot-end 90 + 20
-		t.Errorf("mh_1 RespawnAt = %v, want 110 (90 + 20)", mh1.RespawnAt)
+	if mh1.RespawnAt != 110000 { // rot-end 90s + 20s
+		t.Errorf("mh_1 RespawnAt = %v, want 110000 (90s + 20s)", mh1.RespawnAt)
 	}
 	mh2 := res.Items[1].Phases[0]
-	if mh2.RespawnAt != 130 { // rot-end 110 + 20
-		t.Errorf("mh_2 RespawnAt = %v, want 130 (110 + 20)", mh2.RespawnAt)
+	if mh2.RespawnAt != 130000 { // rot-end 110s + 20s
+		t.Errorf("mh_2 RespawnAt = %v, want 130000 (110s + 20s)", mh2.RespawnAt)
 	}
 }
 
@@ -153,8 +153,8 @@ func TestItemAnalyzer_MHRotTickdown(t *testing.T) {
 	out := r.Items
 	res := out
 	p0 := res.Items[0].Phases[0]
-	if p0.RespawnAt != 130 {
-		t.Errorf("MH RespawnAt = %v, want 130 (crossing 110 + 20)", p0.RespawnAt)
+	if p0.RespawnAt != 130000 {
+		t.Errorf("MH RespawnAt = %v, want 130000 (crossing 110s + 20s)", p0.RespawnAt)
 	}
 }
 
@@ -176,8 +176,8 @@ func TestItemAnalyzer_MHHolderDiesMidRot(t *testing.T) {
 	out := r.Items
 	res := out
 	p0 := res.Items[0].Phases[0]
-	if p0.RespawnAt != 50 {
-		t.Errorf("MH RespawnAt = %v, want 50 (death 30 + 20)", p0.RespawnAt)
+	if p0.RespawnAt != 50000 {
+		t.Errorf("MH RespawnAt = %v, want 50000 (death 30s + 20s)", p0.RespawnAt)
 	}
 }
 
@@ -199,8 +199,8 @@ func TestItemAnalyzer_MHInstantDeathFloor(t *testing.T) {
 	out := r.Items
 	res := out
 	p0 := res.Items[0].Phases[0]
-	if p0.RespawnAt != 35 { // pickup 10 + 5 (floor) + 20
-		t.Errorf("MH RespawnAt = %v, want 35 (pickup+5+20 from the 5 s floor)", p0.RespawnAt)
+	if p0.RespawnAt != 35000 { // pickup 10s + 5s (floor) + 20s
+		t.Errorf("MH RespawnAt = %v, want 35000 (pickup+5+20 from the 5 s floor)", p0.RespawnAt)
 	}
 }
 
@@ -230,8 +230,8 @@ func TestItemAnalyzer_TwoMHsSameHolder(t *testing.T) {
 		t.Fatalf("want 2 MH items, got %d", len(res.Items))
 	}
 	for _, it := range res.Items {
-		if it.Phases[0].RespawnAt != 100 {
-			t.Errorf("%s RespawnAt = %v, want 100 (crossing 80 + 20)", it.Name, it.Phases[0].RespawnAt)
+		if it.Phases[0].RespawnAt != 100000 {
+			t.Errorf("%s RespawnAt = %v, want 100000 (crossing 80s + 20s)", it.Name, it.Phases[0].RespawnAt)
 		}
 	}
 }

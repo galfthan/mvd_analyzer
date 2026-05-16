@@ -25,16 +25,19 @@ func makePlayerStreamFromBuckets(name, team string, specs []bucketSpec) result.P
 	pt := &result.PositionTrack{}
 	healthCur := int16(0)
 	for _, s := range specs {
-		// Position: append every sample (no dedup).
-		pt.T = append(pt.T, float32(s.t))
+		// Position: append every sample (no dedup). pt.T is int32 ms
+		// in schema v8.
+		tMs := int32(s.t * 1000)
+		pt.T = append(pt.T, tMs)
 		pt.X = append(pt.X, s.x)
 		pt.Y = append(pt.Y, s.y)
 		pt.Z = append(pt.Z, 0)
 		pt.Li = append(pt.Li, s.li)
 
-		// Loc: dedup against last value.
+		// Loc: dedup against last value. ChangeI16.T is int32 ms in
+		// schema v8.
 		if len(ps.Loc) == 0 || ps.Loc[len(ps.Loc)-1].V != s.li {
-			ps.Loc = append(ps.Loc, result.ChangeI16{T: s.t, V: s.li})
+			ps.Loc = append(ps.Loc, result.ChangeI16{T: tMs, V: s.li})
 		}
 
 		// Health: 100 by default; dead frames go to 0; spawn back to 100.
@@ -43,16 +46,16 @@ func makePlayerStreamFromBuckets(name, team string, specs []bucketSpec) result.P
 			want = 0
 		}
 		if want != healthCur {
-			ps.Health = append(ps.Health, result.ChangeI16{T: s.t, V: want})
+			ps.Health = append(ps.Health, result.ChangeI16{T: tMs, V: want})
 			healthCur = want
 		}
 
-		// Spawn / death timestamps.
+		// Spawn / death timestamps are int32 ms in schema v8.
 		if s.sp {
-			ps.Spawns = append(ps.Spawns, s.t)
+			ps.Spawns = append(ps.Spawns, tMs)
 		}
 		if s.d {
-			ps.Deaths = append(ps.Deaths, s.t)
+			ps.Deaths = append(ps.Deaths, tMs)
 		}
 	}
 	if len(pt.T) > 0 {
@@ -93,7 +96,7 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 
 	res := &Result{
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 0.30},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 300},
 			Players: []result.PlayerStream{
 				makePlayerStreamFromBuckets("p1", "red", p1Specs),
 				makePlayerStreamFromBuckets("p2", "blue", p2Specs),
@@ -163,7 +166,11 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 }
 
 func approxEq(a, b float64) bool {
-	const eps = 1e-6 // float32-time roundtrip in PositionTrack accumulates ~1e-7
+	// Node-time is float64 accumulated from int32-ms-derived dts;
+	// a small fp tolerance is still sensible since the *.05 dts
+	// individually aren't representable exactly, even if there's no
+	// per-sample roundtrip.
+	const eps = 1e-9
 	d := a - b
 	if d < 0 {
 		d = -d

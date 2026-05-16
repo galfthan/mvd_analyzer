@@ -55,22 +55,40 @@ type PlayerStream struct {
 	Rockets []ChangeI16 `json:"rk,omitempty"`
 	Cells   []ChangeI16 `json:"cl,omitempty"`
 
-	// Discrete event timestamps (no value).
-	Spawns []float64 `json:"sp,omitempty"`
-	Deaths []float64 `json:"d,omitempty"`
+	// Discrete event timestamps (no value). Integer milliseconds since
+	// the stream's time origin (the same epoch as match-relative seconds
+	// elsewhere; schema v8 changed the type and unit to give exact
+	// comparisons against PositionTrack.T — see PositionTrack comment).
+	Spawns []int32 `json:"sp,omitempty"`
+	Deaths []int32 `json:"d,omitempty"`
 }
 
 // GlobalStream carries match-window anchors so consumers can resolve
 // what "start" / "end" mean without cross-referencing other Result
-// fields.
+// fields. Times are integer milliseconds since the stream's time
+// origin (schema v8 — see PositionTrack for the unit rationale).
 type GlobalStream struct {
-	MatchStart float64 `json:"matchStart"`
-	MatchEnd   float64 `json:"matchEnd"`
+	MatchStart int32 `json:"matchStart"`
+	MatchEnd   int32 `json:"matchEnd"`
 }
 
 // PositionTrack is columnar to compress JSON. Indices align across the
 // five arrays. Coordinates are int32 — Quake maps can exceed ±32 768
 // in any axis, so int16 would silently truncate.
+//
+// T is integer milliseconds since the stream's time origin (the same
+// epoch as the float-seconds version it replaced in schema v8). The
+// JSON key stayed "t" for compactness; consumers that previously read
+// it as seconds must scale by 1/1000 — the schema-version bump is the
+// signal. The wire format gives us a 1-byte ms delta per message, so
+// integer-ms storage keeps that exact value all the way from the
+// decoder through the persistence layer; float seconds reintroduced a
+// 1e-6 drift that caused spawn/death-boundary comparisons in locgraph
+// and the blip filter to land on the wrong side of an edge.
+//
+// Range: int32 ms gives ±24.8 days. Demos run minutes to hours, so
+// overflow isn't a concern. Negative values are valid after the
+// post-processor subtracts matchStart (warmup samples shift below 0).
 //
 // Li is the resolved loc-name index per native-rate sample (indexes
 // into TimelineAnalysisResult.LocTable, with 0 = "no loc"). Populated
@@ -80,34 +98,38 @@ type GlobalStream struct {
 // view.Buckets — read this column directly instead of deriving locs
 // from x/y/z separately.
 type PositionTrack struct {
-	T  []float32 `json:"t"`
-	X  []int32   `json:"x"`
-	Y  []int32   `json:"y"`
-	Z  []int32   `json:"z"`
-	Li []int16   `json:"li,omitempty"`
+	T  []int32 `json:"t"` // milliseconds since the stream's time origin
+	X  []int32 `json:"x"`
+	Y  []int32 `json:"y"`
+	Z  []int32 `json:"z"`
+	Li []int16 `json:"li,omitempty"`
 }
 
-// ChangeI8 is a single transition in an int8 stream.
+// ChangeI8 is a single transition in an int8 stream. T is integer
+// milliseconds since the stream's time origin (schema v8).
 type ChangeI8 struct {
-	T float64 `json:"t"`
-	V int8    `json:"v"`
+	T int32 `json:"t"`
+	V int8  `json:"v"`
 }
 
-// ChangeI16 is a single transition in an int16 stream.
+// ChangeI16 is a single transition in an int16 stream. T is integer
+// milliseconds since the stream's time origin (schema v8).
 type ChangeI16 struct {
-	T float64 `json:"t"`
-	V int16   `json:"v"`
+	T int32 `json:"t"`
+	V int16 `json:"v"`
 }
 
-// ChangeStr is a single transition in a string-valued stream.
+// ChangeStr is a single transition in a string-valued stream. T is
+// integer milliseconds since the stream's time origin (schema v8).
 type ChangeStr struct {
-	T float64 `json:"t"`
-	V string  `json:"v"`
+	T int32  `json:"t"`
+	V string `json:"v"`
 }
 
 // Interval is a half-open period [Start, End) during which a boolean
-// field was true.
+// field was true. Bounds are integer milliseconds since the stream's
+// time origin (schema v8).
 type Interval struct {
-	Start float64 `json:"s"`
-	End   float64 `json:"e"`
+	Start int32 `json:"s"`
+	End   int32 `json:"e"`
 }

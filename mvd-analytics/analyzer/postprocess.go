@@ -1,6 +1,8 @@
 package analyzer
 
-import "github.com/mvd-analyzer/mvd-analytics/result"
+import (
+	"github.com/mvd-analyzer/mvd-analytics/result"
+)
 
 // Default post-processors for the registry. Each one is registered by
 // NewDefaultRegistry; callers building a registry from scratch can
@@ -15,83 +17,86 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 // Warmup entries (those with negative t after the shift) are dropped
 // from result.Streams — they would otherwise produce garbage pre-match
 // samples that downstream consumers have no use for.
+//
+// All time fields are integer milliseconds at schema v8; the shift is
+// a single int32 subtraction per value.
 func normalizeMatchRelativeTimes(res *Result, _ *CoreOutputs) {
-	matchStart := 0.0
+	matchStartMs := int32(0)
 	if res.TimelineAnalysis != nil {
-		matchStart = res.TimelineAnalysis.MatchStartTime
+		matchStartMs = res.TimelineAnalysis.MatchStartTime
 	}
-	if matchStart <= 0 {
+	if matchStartMs <= 0 {
 		return
 	}
 
 	if ta := res.TimelineAnalysis; ta != nil {
 		for i := range ta.FragEvents {
-			ta.FragEvents[i].Time -= matchStart
+			ta.FragEvents[i].Time -= matchStartMs
 		}
 		for i := range ta.PowerupEvents {
-			ta.PowerupEvents[i].Time -= matchStart
-			ta.PowerupEvents[i].EndTime -= matchStart
+			ta.PowerupEvents[i].Time -= matchStartMs
+			ta.PowerupEvents[i].EndTime -= matchStartMs
 		}
 		for i := range ta.FragStreaks {
-			ta.FragStreaks[i].Time -= matchStart
-			ta.FragStreaks[i].EndTime -= matchStart
+			ta.FragStreaks[i].Time -= matchStartMs
+			ta.FragStreaks[i].EndTime -= matchStartMs
 		}
-		ta.DemoOffset = matchStart
+		ta.DemoOffset = matchStartMs
 		ta.MatchStartTime = 0
 	}
 
 	// Shift every per-player stream's timestamps and drop warmup
 	// entries. The match-window anchors on Streams.Global also rebase.
 	if streams := res.Streams; streams != nil {
-		streams.Global.MatchStart -= matchStart
-		streams.Global.MatchEnd -= matchStart
+		streams.Global.MatchStart -= matchStartMs
+		streams.Global.MatchEnd -= matchStartMs
 		if streams.Global.MatchStart < 0 {
 			streams.Global.MatchStart = 0
 		}
 		for pi := range streams.Players {
 			p := &streams.Players[pi]
-			p.Health = shiftAndFilterChangeI16(p.Health, matchStart)
-			p.Armor = shiftAndFilterChangeI16(p.Armor, matchStart)
-			p.ArmorType = shiftAndFilterChangeStr(p.ArmorType, matchStart)
-			p.Loc = shiftAndFilterChangeI16(p.Loc, matchStart)
-			p.Shells = shiftAndFilterChangeI16(p.Shells, matchStart)
-			p.Nails = shiftAndFilterChangeI16(p.Nails, matchStart)
-			p.Rockets = shiftAndFilterChangeI16(p.Rockets, matchStart)
-			p.Cells = shiftAndFilterChangeI16(p.Cells, matchStart)
+			p.Health = shiftAndFilterChangeI16(p.Health, matchStartMs)
+			p.Armor = shiftAndFilterChangeI16(p.Armor, matchStartMs)
+			p.ArmorType = shiftAndFilterChangeStr(p.ArmorType, matchStartMs)
+			p.Loc = shiftAndFilterChangeI16(p.Loc, matchStartMs)
+			p.Shells = shiftAndFilterChangeI16(p.Shells, matchStartMs)
+			p.Nails = shiftAndFilterChangeI16(p.Nails, matchStartMs)
+			p.Rockets = shiftAndFilterChangeI16(p.Rockets, matchStartMs)
+			p.Cells = shiftAndFilterChangeI16(p.Cells, matchStartMs)
 
-			p.RL = shiftAndFilterIntervals(p.RL, matchStart)
-			p.LG = shiftAndFilterIntervals(p.LG, matchStart)
-			p.GL = shiftAndFilterIntervals(p.GL, matchStart)
-			p.SSG = shiftAndFilterIntervals(p.SSG, matchStart)
-			p.SNG = shiftAndFilterIntervals(p.SNG, matchStart)
-			p.Quad = shiftAndFilterIntervals(p.Quad, matchStart)
-			p.Pent = shiftAndFilterIntervals(p.Pent, matchStart)
-			p.Ring = shiftAndFilterIntervals(p.Ring, matchStart)
+			p.RL = shiftAndFilterIntervals(p.RL, matchStartMs)
+			p.LG = shiftAndFilterIntervals(p.LG, matchStartMs)
+			p.GL = shiftAndFilterIntervals(p.GL, matchStartMs)
+			p.SSG = shiftAndFilterIntervals(p.SSG, matchStartMs)
+			p.SNG = shiftAndFilterIntervals(p.SNG, matchStartMs)
+			p.Quad = shiftAndFilterIntervals(p.Quad, matchStartMs)
+			p.Pent = shiftAndFilterIntervals(p.Pent, matchStartMs)
+			p.Ring = shiftAndFilterIntervals(p.Ring, matchStartMs)
 
-			p.Spawns = shiftAndFilterFloats(p.Spawns, matchStart)
-			p.Deaths = shiftAndFilterFloats(p.Deaths, matchStart)
+			p.Spawns = shiftAndFilterInts(p.Spawns, matchStartMs)
+			p.Deaths = shiftAndFilterInts(p.Deaths, matchStartMs)
 
 			if p.Position != nil {
-				shiftAndFilterPosition(p.Position, matchStart)
+				shiftAndFilterPosition(p.Position, matchStartMs)
 			}
 		}
 	}
 
 	if res.Messages != nil {
 		for i := range res.Messages.Events {
-			res.Messages.Events[i].Time -= matchStart
+			res.Messages.Events[i].Time -= matchStartMs
 		}
 	}
 
 	if res.Frags != nil {
 		for i := range res.Frags.Frags {
-			res.Frags.Frags[i].Time -= matchStart
+			res.Frags.Frags[i].Time -= matchStartMs
 		}
 	}
 
 	if res.Match != nil {
-		res.Match.StartTime -= matchStart
-		res.Match.EndTime -= matchStart
+		res.Match.StartTime -= matchStartMs
+		res.Match.EndTime -= matchStartMs
 	}
 
 	if res.Items != nil {
@@ -102,45 +107,45 @@ func normalizeMatchRelativeTimes(res *Result, _ *CoreOutputs) {
 				// for initial phases; leave it alone. All real
 				// timestamps get shifted.
 				if ph[j].AvailableFrom > 0 {
-					ph[j].AvailableFrom -= matchStart
+					ph[j].AvailableFrom -= matchStartMs
 				}
 				if ph[j].TakenAt > 0 {
-					ph[j].TakenAt -= matchStart
+					ph[j].TakenAt -= matchStartMs
 				}
 				if ph[j].RespawnAt > 0 {
-					ph[j].RespawnAt -= matchStart
+					ph[j].RespawnAt -= matchStartMs
 				}
 			}
 		}
 	}
 
 	for i := range res.Backpacks {
-		res.Backpacks[i].Time -= matchStart
+		res.Backpacks[i].Time -= matchStartMs
 	}
 
 	for i := range res.WeaponPickups {
-		res.WeaponPickups[i].Time -= matchStart
+		res.WeaponPickups[i].Time -= matchStartMs
 		if res.WeaponPickups[i].NextDeathTime > 0 {
-			res.WeaponPickups[i].NextDeathTime -= matchStart
+			res.WeaponPickups[i].NextDeathTime -= matchStartMs
 		}
 		if res.WeaponPickups[i].DropTime > 0 {
-			res.WeaponPickups[i].DropTime -= matchStart
+			res.WeaponPickups[i].DropTime -= matchStartMs
 		}
 	}
 }
 
-// shiftAndFilterChangeI16 subtracts matchStart from each entry's T
+// shiftAndFilterChangeI16 subtracts matchStartMs from each entry's T
 // and drops entries with negative T. The first surviving entry is
-// the carry-forward state at t=0.
-func shiftAndFilterChangeI16(stream []result.ChangeI16, matchStart float64) []result.ChangeI16 {
+// the carry-forward state at t=0. All times are integer milliseconds.
+func shiftAndFilterChangeI16(stream []result.ChangeI16, matchStartMs int32) []result.ChangeI16 {
 	if len(stream) == 0 {
 		return nil
 	}
-	// Find the latest entry at or before matchStart — it becomes the
+	// Find the latest entry at or before matchStartMs — it becomes the
 	// carry-forward "value at t=0" entry.
 	carryIdx := -1
 	for i, c := range stream {
-		if c.T <= matchStart {
+		if c.T <= matchStartMs {
 			carryIdx = i
 			continue
 		}
@@ -151,10 +156,10 @@ func shiftAndFilterChangeI16(stream []result.ChangeI16, matchStart float64) []re
 		out = append(out, result.ChangeI16{T: 0, V: stream[carryIdx].V})
 	}
 	for _, c := range stream {
-		if c.T <= matchStart {
+		if c.T <= matchStartMs {
 			continue
 		}
-		out = append(out, result.ChangeI16{T: c.T - matchStart, V: c.V})
+		out = append(out, result.ChangeI16{T: c.T - matchStartMs, V: c.V})
 	}
 	if len(out) == 0 {
 		return nil
@@ -162,13 +167,13 @@ func shiftAndFilterChangeI16(stream []result.ChangeI16, matchStart float64) []re
 	return out
 }
 
-func shiftAndFilterChangeStr(stream []result.ChangeStr, matchStart float64) []result.ChangeStr {
+func shiftAndFilterChangeStr(stream []result.ChangeStr, matchStartMs int32) []result.ChangeStr {
 	if len(stream) == 0 {
 		return nil
 	}
 	carryIdx := -1
 	for i, c := range stream {
-		if c.T <= matchStart {
+		if c.T <= matchStartMs {
 			carryIdx = i
 			continue
 		}
@@ -179,10 +184,10 @@ func shiftAndFilterChangeStr(stream []result.ChangeStr, matchStart float64) []re
 		out = append(out, result.ChangeStr{T: 0, V: stream[carryIdx].V})
 	}
 	for _, c := range stream {
-		if c.T <= matchStart {
+		if c.T <= matchStartMs {
 			continue
 		}
-		out = append(out, result.ChangeStr{T: c.T - matchStart, V: c.V})
+		out = append(out, result.ChangeStr{T: c.T - matchStartMs, V: c.V})
 	}
 	if len(out) == 0 {
 		return nil
@@ -191,22 +196,22 @@ func shiftAndFilterChangeStr(stream []result.ChangeStr, matchStart float64) []re
 }
 
 // shiftAndFilterIntervals shifts each interval and clamps to t >= 0.
-// Intervals entirely before matchStart are dropped; intervals
-// straddling are clamped to start at 0.
-func shiftAndFilterIntervals(stream []result.Interval, matchStart float64) []result.Interval {
+// Intervals entirely before matchStartMs are dropped; intervals
+// straddling are clamped to start at 0. Times are integer milliseconds.
+func shiftAndFilterIntervals(stream []result.Interval, matchStartMs int32) []result.Interval {
 	if len(stream) == 0 {
 		return nil
 	}
 	out := make([]result.Interval, 0, len(stream))
 	for _, iv := range stream {
-		if iv.End <= matchStart {
+		if iv.End <= matchStartMs {
 			continue
 		}
-		s := iv.Start - matchStart
+		s := iv.Start - matchStartMs
 		if s < 0 {
 			s = 0
 		}
-		out = append(out, result.Interval{Start: s, End: iv.End - matchStart})
+		out = append(out, result.Interval{Start: s, End: iv.End - matchStartMs})
 	}
 	if len(out) == 0 {
 		return nil
@@ -214,16 +219,19 @@ func shiftAndFilterIntervals(stream []result.Interval, matchStart float64) []res
 	return out
 }
 
-func shiftAndFilterFloats(stream []float64, matchStart float64) []float64 {
+// shiftAndFilterInts subtracts matchStartMs from each entry and drops
+// entries that fall before the match start. Used for the int32-ms
+// schema-v8 streams (Spawns, Deaths).
+func shiftAndFilterInts(stream []int32, matchStartMs int32) []int32 {
 	if len(stream) == 0 {
 		return nil
 	}
-	out := make([]float64, 0, len(stream))
+	out := make([]int32, 0, len(stream))
 	for _, t := range stream {
-		if t < matchStart {
+		if t < matchStartMs {
 			continue
 		}
-		out = append(out, t-matchStart)
+		out = append(out, t-matchStartMs)
 	}
 	if len(out) == 0 {
 		return nil
@@ -235,14 +243,14 @@ func shiftAndFilterFloats(stream []float64, matchStart float64) []float64 {
 // the survivors. Mutates pt in place. Must keep all five columns
 // (T/X/Y/Z/Li) aligned — BuildLocGraph and ComputeRegionControl
 // both guard on `len(pt.Li) == len(pt.T)` and will silently skip the
-// player if the lengths drift.
-func shiftAndFilterPosition(pt *result.PositionTrack, matchStart float64) {
+// player if the lengths drift. All time arithmetic is int32 ms.
+func shiftAndFilterPosition(pt *result.PositionTrack, matchStartMs int32) {
 	if pt == nil || len(pt.T) == 0 {
 		return
 	}
 	oldLen := len(pt.T)
 	keepFrom := 0
-	for keepFrom < oldLen && float64(pt.T[keepFrom]) < matchStart {
+	for keepFrom < oldLen && pt.T[keepFrom] < matchStartMs {
 		keepFrom++
 	}
 	if keepFrom > 0 {
@@ -255,7 +263,7 @@ func shiftAndFilterPosition(pt *result.PositionTrack, matchStart float64) {
 		}
 	}
 	for i := range pt.T {
-		pt.T[i] = float32(float64(pt.T[i]) - matchStart)
+		pt.T[i] -= matchStartMs
 	}
 }
 

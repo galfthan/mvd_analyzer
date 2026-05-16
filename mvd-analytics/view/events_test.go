@@ -9,12 +9,13 @@ import (
 func TestEventsDefaultExcludesHealth(t *testing.T) {
 	r := &result.Result{
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
 			Players: []result.PlayerStream{
 				{
 					Name:   "p1",
-					Health: []result.ChangeI16{{T: 1, V: 100}, {T: 2, V: 50}},
-					Spawns: []float64{0.5},
+					Health: []result.ChangeI16{{T: 1000, V: 100}, {T: 2000, V: 50}},
+					// Spawns/Deaths are int32 ms in schema v8.
+					Spawns: []int32{500},
 				},
 			},
 		},
@@ -43,11 +44,11 @@ func TestEventsDefaultExcludesHealth(t *testing.T) {
 func TestEventsHealthOptIn(t *testing.T) {
 	r := &result.Result{
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
 			Players: []result.PlayerStream{
 				{
 					Name:   "p1",
-					Health: []result.ChangeI16{{T: 1, V: 100}, {T: 2, V: 50}},
+					Health: []result.ChangeI16{{T: 1000, V: 100}, {T: 2000, V: 50}},
 				},
 			},
 		},
@@ -67,12 +68,12 @@ func TestEventsHealthOptIn(t *testing.T) {
 func TestEventsTimeOrdered(t *testing.T) {
 	r := &result.Result{
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
 			Players: []result.PlayerStream{
 				{
 					Name:   "p1",
-					Spawns: []float64{1.0, 5.0},
-					Deaths: []float64{3.0, 7.0},
+					Spawns: []int32{1000, 5000},
+					Deaths: []int32{3000, 7000},
 				},
 			},
 		},
