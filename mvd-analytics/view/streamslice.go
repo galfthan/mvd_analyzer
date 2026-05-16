@@ -85,11 +85,13 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 	}
 	start := opts.StartTime
 	end := opts.EndTime
+	// Global.Match* is int32 ms (schema v8); public view API is
+	// float64 seconds — convert once at the entry.
 	if end == 0 {
-		end = r.Streams.Global.MatchEnd
+		end = float64(r.Streams.Global.MatchEnd) * 0.001
 	}
 	if start == 0 {
-		start = r.Streams.Global.MatchStart
+		start = float64(r.Streams.Global.MatchStart) * 0.001
 	}
 	pf := newPlayerFilter(opts.Players)
 
@@ -163,19 +165,24 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 	return out, nil
 }
 
+// Slice helpers operate in int32 ms (schema v8). The public view API
+// takes float64 seconds; convert once at the entry of each helper.
+
 func sliceI16(stream []result.ChangeI16, start, end float64) []result.ChangeI16 {
+	startMs := int32(start * 1000)
+	endMs := int32(end * 1000)
 	out := make([]result.ChangeI16, 0, 4)
-	if idx := indexI16AtOrBefore(stream, start); idx >= 0 {
-		out = append(out, result.ChangeI16{T: start, V: stream[idx].V})
+	if idx := indexI16AtOrBefore(stream, startMs); idx >= 0 {
+		out = append(out, result.ChangeI16{T: startMs, V: stream[idx].V})
 	}
 	for _, c := range stream {
-		if c.T < start {
+		if c.T < startMs {
 			continue
 		}
-		if c.T >= end {
+		if c.T >= endMs {
 			break
 		}
-		if len(out) == 1 && c.T == start && c.V == out[0].V {
+		if len(out) == 1 && c.T == startMs && c.V == out[0].V {
 			continue
 		}
 		out = append(out, c)
@@ -187,18 +194,20 @@ func sliceI16(stream []result.ChangeI16, start, end float64) []result.ChangeI16 
 }
 
 func sliceStr(stream []result.ChangeStr, start, end float64) []result.ChangeStr {
+	startMs := int32(start * 1000)
+	endMs := int32(end * 1000)
 	out := make([]result.ChangeStr, 0, 4)
-	if idx := indexStrAtOrBefore(stream, start); idx >= 0 {
-		out = append(out, result.ChangeStr{T: start, V: stream[idx].V})
+	if idx := indexStrAtOrBefore(stream, startMs); idx >= 0 {
+		out = append(out, result.ChangeStr{T: startMs, V: stream[idx].V})
 	}
 	for _, c := range stream {
-		if c.T < start {
+		if c.T < startMs {
 			continue
 		}
-		if c.T >= end {
+		if c.T >= endMs {
 			break
 		}
-		if len(out) == 1 && c.T == start && c.V == out[0].V {
+		if len(out) == 1 && c.T == startMs && c.V == out[0].V {
 			continue
 		}
 		out = append(out, c)
@@ -210,18 +219,20 @@ func sliceStr(stream []result.ChangeStr, start, end float64) []result.ChangeStr 
 }
 
 func sliceInterval(stream []result.Interval, start, end float64) []result.Interval {
+	startMs := int32(start * 1000)
+	endMs := int32(end * 1000)
 	out := make([]result.Interval, 0, 4)
 	for _, iv := range stream {
-		if iv.End <= start || iv.Start >= end {
+		if iv.End <= startMs || iv.Start >= endMs {
 			continue
 		}
 		s := iv.Start
 		e := iv.End
-		if s < start {
-			s = start
+		if s < startMs {
+			s = startMs
 		}
-		if e > end {
-			e = end
+		if e > endMs {
+			e = endMs
 		}
 		out = append(out, result.Interval{Start: s, End: e})
 	}

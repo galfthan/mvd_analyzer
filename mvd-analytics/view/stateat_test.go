@@ -11,9 +11,9 @@ func TestStateAtCarryForward(t *testing.T) {
 		Name: "p1",
 		Health: []result.ChangeI16{
 			{T: 0, V: 100},
-			{T: 5, V: 50},
+			{T: 5000, V: 50},
 		},
-		RL: []result.Interval{{Start: 1, End: 3}},
+		RL: []result.Interval{{Start: 1000, End: 3000}},
 	})
 	v, err := StateAt(r, StateAtOptions{
 		Time:   2.5,
@@ -34,7 +34,7 @@ func TestStateAtCarryForward(t *testing.T) {
 func TestStateAtBeforeFirstSample(t *testing.T) {
 	r := makeStream(t, result.PlayerStream{
 		Name:   "p1",
-		Health: []result.ChangeI16{{T: 5, V: 100}},
+		Health: []result.ChangeI16{{T: 5000, V: 100}},
 	})
 	v, err := StateAt(r, StateAtOptions{
 		Time:   2.0,
@@ -52,7 +52,7 @@ func TestStateAtBeforeFirstSample(t *testing.T) {
 func TestStateAtIntervalBoundary(t *testing.T) {
 	r := makeStream(t, result.PlayerStream{
 		Name: "p1",
-		Quad: []result.Interval{{Start: 1.0, End: 2.0}},
+		Quad: []result.Interval{{Start: 1000, End: 2000}},
 	})
 	// At end boundary (half-open): Time=2.0 should NOT be in interval.
 	v, _ := StateAt(r, StateAtOptions{Time: 2.0, Fields: []string{FieldQuad}})

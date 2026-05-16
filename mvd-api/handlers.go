@@ -291,15 +291,19 @@ func (s *server) handleChat(w http.ResponseWriter, r *http.Request) {
 		typeSet = map[string]bool{"chat": true, "teamsay": true}
 	}
 
+	// Query params arrive in float64 seconds; MatchEvent.Time is
+	// int32 ms (schema v8). Convert window once at the entry.
+	startMs := int32(start * 1000)
+	endMs := int32(end * 1000)
 	out := make([]result.MatchEvent, 0, len(res.Messages.Events))
 	for _, ev := range res.Messages.Events {
 		if !typeSet[ev.Type] {
 			continue
 		}
-		if start != 0 && ev.Time < start {
+		if startMs != 0 && ev.Time < startMs {
 			continue
 		}
-		if end != 0 && ev.Time > end {
+		if endMs != 0 && ev.Time > endMs {
 			continue
 		}
 		if len(playerSet) > 0 && !playerSet[ev.Player] {

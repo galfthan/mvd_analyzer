@@ -1,214 +1,128 @@
-# Schema v8 int-ms time — deferred follow-ups
+# Schema v8 int-ms time migration — completed
 
-Schema v8 migrated `PositionTrack.T` and per-player `Spawns` / `Deaths`
-from float seconds to `int32` milliseconds (see
-[`result/result.go`](result/result.go) v8 history block and
-[`RESULT_SCHEMA.md`](RESULT_SCHEMA.md#positiontrack) for the
-production cut). Three other timestamped result-schema field families
-were considered for the same migration and **deliberately deferred**.
-This document captures what they are, why deferring was the right call
-for the v8 cut, and what the pros and cons of revisiting that decision
-look like.
+Schema v8 migrated **every timestamped field** in the result schema
+from float64/float32 seconds to `int32` milliseconds. Earlier drafts
+of this document captured the deferred half of the migration
+(`ChangeI16.T`, `Interval.Start/End`, `MatchEvent.Time`, frag/powerup
+event times, etc.) as a separate follow-up; that work has now landed
+in the same v8 cut so the whole schema is consistent.
 
-## What was deferred
+This file is kept as a record of the design decision and what to
+audit when extending the schema in the future. For the live
+field-by-field reference see [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
 
-### 1. `ChangeI16` / `ChangeI8` / `ChangeStr` — sparse change streams
+## What's in schema v8
 
-[`result/streams.go`](result/streams.go) ~lines 91-106:
+Every time field is `int32` milliseconds:
 
-```go
-type ChangeI16 struct {
-    T float64 `json:"t"` // match-relative seconds
-    V int16   `json:"v"`
-}
-```
+- `PositionTrack.T` (already migrated in the first cut)
+- `PlayerStream.Spawns` / `Deaths` (already migrated in the first cut)
+- `ChangeI16.T` / `ChangeI8.T` / `ChangeStr.T`
+- `Interval.Start` / `End`
+- `GlobalStream.MatchStart` / `MatchEnd`
+- `MatchResult.Duration` / `StartTime` / `EndTime`
+- `TimelineAnalysisResult.MatchStartTime` / `DemoOffset`
+- `TimelineFragEvent.Time`
+- `PowerupEvent.Time` / `EndTime` / `Duration`
+- `FragStreakEvent.Time` / `EndTime` / `Duration`
+- `MatchEvent.Time`
+- `FragEntry.Time`
+- `BackpackDrop.Time`
+- `WeaponPickup.Time` / `NextDeathTime` / `DropTime`
+- `ItemPhase.AvailableFrom` / `TakenAt` / `RespawnAt`
+- `HighResBucket.T`
 
-Used for the per-player **Health**, **Armor**, **Shells / Nails /
-Rockets / Cells** (ammo), **ArmorType**, and **Loc** fields on
-`PlayerStream`. One entry per actual transition; typically a few
-hundred entries per match per player.
+JSON keys are unchanged from v7. External consumers reading these
+values as seconds must scale by `* 0.001`. The schema-version bump
+is the signal.
 
-### 2. `Interval` — half-open ownership periods
+## What stayed float64 seconds
 
-```go
-type Interval struct {
-    Start float64 `json:"s"` // match-relative seconds
-    End   float64 `json:"e"`
-}
-```
+The **view-layer query API** keeps its public surface in float64
+seconds for ergonomic consumer code:
 
-Used for weapon possession (**RL**, **LG**, **GL**, **SSG**, **SNG**)
-and powerup possession (**Quad**, **Pent**, **Ring**). One entry per
-contiguous ownership span.
+- `view.Buckets` — `ViewBucket.T` is `float64` seconds
+- `view.Events` — `TaggedEvent.T` is `float64` seconds (plus
+  `detail.endTime` / `detail.duration` for the powerup / streak event
+  types, also seconds)
+- `view.StreamSlice` — `StartTime` / `EndTime` opts are seconds
+- `view.StateAt` — `opts.Time` is seconds; nothing in the response
+  carries time anyway
+- `view.LocTrails` — `TrailEntry.Start` / `End` and `LifeTrack.SpawnTime` /
+  `DeathTime`, `TrackPosition.Time` are seconds
 
-### 3. Frag / message / powerup event times
+The view layer is the boundary where ms→seconds conversion happens
+exactly once. All internal comparisons against schema fields use ms;
+emission to public views uses `float64(tMs) * 0.001`.
 
-- `result/messages.go` — `MatchEvent.Time float64` (frag, chat,
-  teamsay events on `Result.Messages.Events`).
-- `result/timeline.go` (or equivalent) — `TimelineFragEvent.Time`,
-  `TimelinePowerupEvent.Time/EndTime`.
-- `analyzer/locgraph.go` — `LocNode.Total`, `LocEdge` time
-  accumulators stay seconds.
+The frontend (`mvd-web/static/app.js`) reads the WASM bridge through
+these view-layer outputs almost entirely — the few sites that read
+raw schema fields (chat panel, key moments, backpacks, items panel,
+weapon-pickup overlay, hub-viewer URL builders) convert ms→seconds at
+the read site. The bulk happens in one spot — `displayTimelineAnalysis`
+projects everything onto `timelineState` in seconds, and every
+downstream UI panel consumes the seconds view.
 
-## Why deferred for v8
+## How to add a new timestamped field
 
-The bug class that motivated v8 was specifically the **boundary
-comparison** `boundaries[bIdx] <= t` in
-[`analyzer/locgraph.go`](analyzer/locgraph.go) and
-[`analyzer/timeline_streams.go`](analyzer/timeline_streams.go) — where
-`boundaries` was built from `Spawns` / `Deaths` and `t` was
-`PositionTrack.T`. Both sides crossed the float32-persistence boundary,
-both sides drifted, and the drift was enough to land on the wrong side
-of an edge. Concretely: a gib-respawn at wire-exact `658.279000` ended
-up compared against a position sample narrowed to `658.278992`, the
-boundary cursor failed to reset, and locgraph emitted a spurious
-`MH.low → start` teleport edge.
+The convention:
 
-`ChangeI16.T` / `Interval` / `MatchEvent.Time` never participate in
-that comparison. They are produced once from the decoder's canonical
-`int32`-ms source via `float64(timeMs) * 0.001` and consumed against
-**view-layer bucket windows** (also float64 seconds, produced from the
-same source). There's no second lossy step to amplify error and no
-known precision-class bug.
+1. **Storage**: `int32` milliseconds in the result schema. Same JSON
+   key shape as adjacent fields.
+2. **Producer** (`analyzer/`): if the event you're consuming has a
+   `TimeMs int32` field, use that directly. Otherwise convert at the
+   write site with `msTime(e.Time)` — defined in
+   [`analyzer/timeline_streams.go`](analyzer/timeline_streams.go).
+   The conversion is well-conditioned (`int32(math.Round(t*1000))`)
+   because the float64-seconds value is itself derived once from the
+   decoder's `int32`-ms accumulator and never re-accumulated.
+3. **View-layer dispatcher**: if the new field needs to be queryable
+   via `view.Buckets` / `view.Events` / `view.StreamSlice` /
+   `view.StateAt`, follow the existing pattern — accept window
+   bounds in float64 seconds, convert to int32 ms once at entry, do
+   the comparison in int32 ms, emit float64 seconds at the public
+   output. Don't push the ms unit through the view's public surface
+   without a deliberate design decision.
+4. **Postprocess** (`normalizeMatchRelativeTimes` in
+   `analyzer/postprocess.go`): if the new field shifts with match
+   start, add it here. It works entirely in int32 ms; `matchStartMs`
+   comes from `res.TimelineAnalysis.MatchStartTime` directly.
+5. **Tests**: write fixtures with int32-ms literals (`Time: 5000`
+   not `Time: 5.0`).
+6. **Frontend**: if the new field is consumed directly from the raw
+   schema (not via view layer), add a `* 0.001` at the read site. If
+   it's consumed via `getBuckets` / `getEvents` etc., no change.
 
-So v8 took the smallest cut that fixed the bug: change the two types
-that mattered, leave the rest. Scope stayed local; one schema bump,
-one golden regen.
+## Why this design
 
-## Pros of migrating the deferred families later
+The wire format carries time as a 1-byte millisecond delta per
+message; the canonical decoder accumulator (`mvd.Decoder.timeMs`)
+keeps this integer end-to-end. Float seconds is a derived view, not
+a source of truth.
 
-- **Uniform internal time idiom in the view layer.** Today
-  `view/buckets.go`, `view/stateat.go`, `view/streamslice.go`,
-  `view/events.go` work in **int32 ms** when comparing windows against
-  `PositionTrack.T` / `Spawns` / `Deaths`, and in **float64 seconds**
-  when comparing windows against `ChangeI16.T` / `Interval.Start/End` /
-  `MatchEvent.Time`. Two idioms in one file, conversion at the meeting
-  points. Migrating would collapse this to a single ms idiom with a
-  single seconds-conversion site at `ViewBucket.T` emission.
-- **Eliminates a class of "obviously dirty" JSON numbers.** Even with
-  v8 in place, ChangeI16/Interval/MatchEvent times still show up as
-  e.g. `0.5499999999999972` in the JSON — visually noisy and
-  surprising. Integer ms is `550` and unambiguous.
-- **Marginally smaller JSON.** Integer ms tends to encode in fewer
-  characters than decimal seconds for typical match durations
-  (`550` vs `0.5499999999999972`), especially after the float-noise
-  trailing zeros. Probably a low single-digit percent on a typical
-  result.
-- **Symmetry with the existing v8 migration.** Future readers don't
-  have to re-derive why two fields use ms and the rest use seconds.
-  One rule is simpler than a partial.
-- **Locgraph node-time precision.** Today
-  `LocNode.Total` accumulates float64 seconds derived from int-ms
-  deltas. Migrating to integer ms throughout the locgraph and exposing
-  ms in the output would let consumers do exact arithmetic (e.g.
-  "RA control = 35,200 ms / 600,000 ms" is exact; the same in float
-  seconds isn't).
+Storing schema time as `int32` ms:
 
-## Cons / costs of migrating
+- Eliminates float-precision drift across boundary comparisons. The
+  motivating bug was a gib-respawn case where a spawn-boundary at
+  wire-exact `658.279000` compared against a position sample
+  narrowed to `658.278992` produced a spurious `MH.low → start`
+  teleport edge in locgraph.
+- Keeps the comparison cost flat — `int32 <= int32` is exact and
+  cheap.
+- Removes a class of "this float number has a trailing `0000007`
+  artifact" surprises in JSON output, making goldens stable and
+  human-readable.
+- Lets postprocess collapse what used to be three families of
+  `shiftAndFilter*` helpers (one per element type) into a single
+  int32-typed implementation per element shape.
 
-- **Wider JSON-schema break.** `mvd-api/handlers.go` filters
-  `MatchEvent.Time` by query parameter; the public REST contract sees
-  the unit change. The schema-version bump signals it, but anyone
-  consuming the API outside this repo has to rewrite parsing on every
-  affected field — and there are many fields (every per-player change
-  stream, every interval, every MatchEvent.Time, every TimelineFrag /
-  Powerup event). v8's break was scoped to three fields; a "v9 full
-  ms" break would touch dozens.
-- **Test churn.** Every test that builds a Change/Interval/MatchEvent
-  literal with a float-second time value has to be re-typed and
-  re-numbered. The analyzer test suite has hundreds of these. v8's
-  test changes were a few dozen because Spawns/Deaths only show up in
-  ~5 fixtures; a full migration multiplies that by ~10×.
-- **No bug fix attached.** The whole reason v8 happened was a visible
-  failure mode (spurious teleport edges). Migrating the rest is
-  cosmetic uniformity — a refactor, not a fix. Hard to justify the
-  break window without something else needing it.
-- **Frontend impact resurfaces.** With v8, `ViewBucket.T` stays
-  float64 seconds and `mvd-web/static/app.js` is completely
-  untouched. If `MatchEvent.Time` flips to ms, the frontend's chat
-  panel, frag-feed panel, and time-range filters all need a
-  `* 0.001` scale where they currently consume seconds verbatim. The
-  v8 cut was deliberately designed to avoid this.
-- **Postprocess simplification is limited.** `postprocess.go` already
-  has `shiftAndFilterChangeI16` / `shiftAndFilterChangeStr` /
-  `shiftAndFilterIntervals` / `shiftAndFilterInts` — four helpers
-  doing the same shape of work in different types. Migrating would
-  collapse three of them into the int32 variant, saving a few dozen
-  lines. Modest win.
+`int32` ms gives ±24.8 days of range — comfortable for matches that
+last minutes to hours.
 
-## Recommendation
+## See also
 
-Keep deferred unless one of the following triggers a fresh cut:
-
-1. A new precision-class bug surfaces that involves any of these
-   fields crossing a comparison boundary (e.g. someone adds a feature
-   that compares `Interval.Start` against `PositionTrack.T`
-   directly).
-2. The view-layer mixed-unit comparison sites become genuinely
-   confusing — i.e. when reading
-   [`view/buckets.go`](view/buckets.go),
-   [`view/streamslice.go`](view/streamslice.go), or
-   [`view/stateat.go`](view/stateat.go), the cognitive cost of
-   tracking "is this comparison in ms or seconds?" starts producing
-   bugs.
-3. A different schema break is happening anyway (a v9 motivated by
-   something else), and folding this in is cheap on the
-   already-planned diff.
-
-Outside those triggers, the partial migration is the right resting
-state: the bug is fixed, the JSON-break surface area was minimised,
-and the cosmetic "all timestamps in one unit" win isn't worth the
-test/API churn on its own.
-
-## Implementation sketch (if revisited)
-
-For a future v9 that finishes the migration:
-
-1. **Types** in `result/streams.go`:
-   ```go
-   type ChangeI16 struct { T int32 `json:"t"`; V int16 `json:"v"` }
-   type ChangeI8  struct { T int32 `json:"t"`; V int8  `json:"v"` }
-   type ChangeStr struct { T int32 `json:"t"`; V string `json:"v"` }
-   type Interval  struct { Start int32 `json:"s"`; End int32 `json:"e"` }
-   ```
-   And `MatchEvent.Time int32` in `result/messages.go`,
-   `TimelineFragEvent.Time int32`, `TimelinePowerupEvent.Time/EndTime
-   int32` in the timeline result.
-
-2. **Producers** (`analyzer/timeline_streams.go`,
-   `analyzer/messages.go`, `analyzer/frag.go`, etc.) — switch the
-   `recordX(t float64, ...)` signatures to `recordX(tMs int32, ...)`
-   and plumb `e.TimeMs` from the events. The events package already
-   has `TimeMs` on the position/spawn/death events; add it to
-   `StatUpdateEvent`, `FragUpdateEvent`, `PrintEvent`, `DamageEvent`
-   for full coverage.
-
-3. **Postprocess** (`analyzer/postprocess.go`) — collapse
-   `shiftAndFilterChangeI16` / `shiftAndFilterChangeStr` /
-   `shiftAndFilterIntervals` into single int32-typed implementations.
-   `shiftAndFilterInts` is already there from v8.
-
-4. **View layer** (`view/buckets.go`, `view/streamslice.go`,
-   `view/stateat.go`, `view/events.go`) — drop the seconds-conversion
-   sites that exist for ChangeI16/Interval today. Internal idiom
-   becomes uniformly int32 ms. `ViewBucket.T` either stays float64
-   seconds (single conversion at emission, frontend untouched) or
-   becomes int32 ms (frontend churn — see "Cons" above).
-
-5. **mvd-api** (`mvd-api/handlers.go`, `mvd-api/handlers_test.go`) —
-   any code path that filters or formats `MatchEvent.Time`
-   parametrically needs the unit fix and the test-expectation update.
-
-6. **Frontend** (`mvd-web/static/app.js`) — only required if
-   `ViewBucket.T` migrates too. Otherwise the frontend stays oblivious
-   (same scoping decision as v8).
-
-7. **Goldens regen** — every JSON file in `testdata/golden/` rewrites
-   most of its numeric fields. Diffs are mechanical but enormous.
-
-8. **Schema bump** — `CurrentSchemaVersion = 9` with a v9 history
-   block.
-
-Estimated diff size: ~3-5× the v8 cut. The mechanical scope is well
-understood; the cost is mostly test churn and the JSON contract
-break.
+- [RESULT_SCHEMA.md](RESULT_SCHEMA.md) — live field reference
+- [`mvd-reader/MVD_FORMAT.md`](../mvd-reader/MVD_FORMAT.md) — the wire
+  format's millisecond delta encoding
+- [`mvd-reader/mvd/decoder.go`](../mvd-reader/mvd/decoder.go) — the
+  canonical int32-ms accumulator

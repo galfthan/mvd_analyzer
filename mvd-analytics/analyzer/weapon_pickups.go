@@ -304,10 +304,13 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 		}
 		windows := windowsByPW[pwKey{f.Killer, f.Weapon}]
 		best := -1
+		// FragEntry.Time is int32 ms (schema v8); pickup window
+		// start/end are still float64 seconds — convert per-frag.
+		fTimeSec := float64(f.Time) * 0.001
 		for _, w := range windows {
-			if w.start < f.Time && f.Time <= w.end {
+			if w.start < fTimeSec && fTimeSec <= w.end {
 				best = w.pickupIdx
-			} else if w.start >= f.Time {
+			} else if w.start >= fTimeSec {
 				break // windows are time-ordered; further starts are all in the future
 			}
 		}
@@ -325,18 +328,18 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 		nextDeath := findNextAfter(deathsBySlot[p.pickerSlot], p.time)
 
 		entry := WeaponPickup{
-			Time:          p.time,
+			Time:          msTime(p.time),
 			Player:        a.playerName(p.pickerSlot),
 			Team:          picker.Team,
 			Weapon:        p.weapon,
 			Source:        p.source,
 			HadBefore:     p.hadBefore,
 			Kills:         kills[i],
-			NextDeathTime: nextDeath,
+			NextDeathTime: msTime(nextDeath),
 		}
 		if p.source == "backpack" {
 			entry.BackpackEnt = p.backpackEnt
-			entry.DropTime = p.dropTime
+			entry.DropTime = msTime(p.dropTime)
 			if dropper := a.ctx.Players[p.dropperSlot]; dropper != nil {
 				entry.Dropper = a.playerName(p.dropperSlot)
 				entry.DropperTeam = dropper.Team

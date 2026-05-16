@@ -366,14 +366,16 @@ effectiveness metric; joins to backpacks via `backpackEnt` ==
 `backpacks[].entNum`). Schema v7 introduced `streams` as the canonical
 event-rate storage — every per-player field (vitals, weapons, ammo,
 position) recorded at the rate it actually changed. Schema v8 stores
-`PositionTrack.T` and per-player `Spawns` / `Deaths` as `int32`
-milliseconds rather than float seconds — the MVD wire format already
-delivers ms deltas, and keeping them integer eliminates the float-
-precision drift that previously broke spawn/death-boundary comparisons
-in locgraph. Bucketed, event-list, and point-in-time views are
-produced on demand by the `mvd-analytics/view` query API (also
-surfaced via the CLI's `-view` flag and the WASM bridge's `getBuckets`
-/ `getEvents` / `getStreamSlice` / `getStateAt` exports).
+**every timestamped field** as `int32` milliseconds rather than float
+seconds — the MVD wire format delivers ms deltas, and keeping the
+unit integer end-to-end eliminates the float-precision drift that
+previously broke spawn/death-boundary comparisons in locgraph and
+keeps the schema consistent and sensible to extend. The view-layer
+query API (`view.Buckets`, `view.Events`, `view.StreamSlice`,
+`view.StateAt`) still takes and emits float64 seconds at its public
+surface, so consumers querying through `view.*` (including the WASM
+bridge's `getBuckets` / `getEvents` / `getStreamSlice` / `getStateAt`
+exports) are unaffected.
 
 Every breaking change bumps `CurrentSchemaVersion` (currently `8`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.

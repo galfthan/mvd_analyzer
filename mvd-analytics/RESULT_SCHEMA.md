@@ -292,8 +292,8 @@ state, loc trails) are computed on demand from this storage by the
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| MatchStart | `matchStart` | float64 | Match window start (always 0 after post-process). |
-| MatchEnd | `matchEnd` | float64 | Match window end (seconds). |
+| MatchStart | `matchStart` | int32 | Match window start in milliseconds (always 0 after post-process). |
+| MatchEnd | `matchEnd` | int32 | Match window end in milliseconds. |
 
 ### PlayerStream
 
@@ -308,15 +308,19 @@ state, loc trails) are computed on demand from this storage by the
 | RL / LG / GL / SSG / SNG | `rl` / `lg` / `gl` / `ssg` / `sng` | []Interval | Half-open `[Start, End)` periods the weapon was held. |
 | Quad / Pent / Ring | `q` / `pe` / `r` | []Interval | Same shape as weapons. |
 | Shells / Nails / Rockets / Cells | `sh` / `nl` / `rk` / `cl` | []ChangeI16 | Ammo change streams. |
-| Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds (schema v8 — changed from float64 seconds for exact comparison against PositionTrack.T). |
+| Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds (schema v8). |
 
 ### ChangeI16 / ChangeStr / Interval
 
 ```
-ChangeI16 = { "t": float64, "v": int16 }
-ChangeStr = { "t": float64, "v": string }
-Interval  = { "s": float64, "e": float64 }   // half-open [s, e)
+ChangeI16 = { "t": int32, "v": int16 }
+ChangeStr = { "t": int32, "v": string }
+Interval  = { "s": int32, "e": int32 }   // half-open [s, e)
 ```
+
+`t` / `s` / `e` are **integer milliseconds** since the stream's time
+origin (schema v8 — changed from `float64` seconds; see PositionTrack
+for the unit rationale).
 
 ### PositionTrack
 
@@ -337,11 +341,24 @@ negative for pre-match warmup samples after time normalisation.
 `x` / `y` / `z` are `int32` (not `int16`) because Quake maps can
 exceed ±32 768 in any axis.
 
-Other timestamped fields in this schema (`ChangeI16.T`,
-`Interval.Start/End`, `MatchEvent.Time`, frag/powerup event times)
-remain `float64` seconds — they are computed once from the canonical
-int32-ms source and never re-quantised, so the precision class of bug
-this migration addresses doesn't apply to them.
+### Schema v8: all times are int32 milliseconds
+
+Every timestamped field in this schema — `PositionTrack.T`,
+`PlayerStream.Spawns/Deaths`, `ChangeI16.T` / `ChangeI8.T` /
+`ChangeStr.T`, `Interval.Start/End`, `GlobalStream.MatchStart/End`,
+`MatchResult.Duration/StartTime/EndTime`,
+`TimelineAnalysisResult.MatchStartTime/DemoOffset`,
+`TimelineFragEvent.Time`, `PowerupEvent.Time/EndTime/Duration`,
+`FragStreakEvent.Time/EndTime/Duration`, `MatchEvent.Time`,
+`FragEntry.Time`, `BackpackDrop.Time`,
+`WeaponPickup.Time/NextDeathTime/DropTime`,
+`ItemPhase.AvailableFrom/TakenAt/RespawnAt`, `HighResBucket.T` —
+is stored as `int32` integer milliseconds. JSON keys are unchanged;
+external consumers reading these as seconds must scale by `* 0.001`.
+The view-layer query API (`view.Buckets`, `view.Events`,
+`view.StreamSlice.StartTime/EndTime`, `view.StateAt.Time`) still
+takes and returns `float64` seconds at its public surface, so any
+consumer querying through `view.*` is unaffected.
 
 ### Append rules (the dedup invariant)
 

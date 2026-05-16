@@ -200,18 +200,20 @@ func canonicalJSON(v interface{}) ([]byte, error) {
 	return append(out, '\n'), nil
 }
 
-// goldenWindows is the three 15 s windows used to slice every
-// per-player time series in the golden corpus. Match ends at
-// global.matchEnd; the trailing window starts at matchEnd - 15.
+// goldenWindows is the three 15-second windows used to slice every
+// per-player time series in the golden corpus. Schema v8: all stream
+// timestamps are int32 ms in the JSON, so the window bounds are
+// expressed in ms (0..15000, 60000..75000). Match ends at
+// global.matchEnd; the trailing window starts at matchEnd - 15000.
 var goldenWindows = []struct{ start, end float64 }{
-	{0, 15},
-	{60, 75},
-	// (end - 15, end) appended dynamically per demo.
+	{0, 15000},
+	{60000, 75000},
+	// (end - 15000, end) appended dynamically per demo.
 }
 
 // sampleStreams replaces every per-player time series in
-// streams.players[] with the concatenation of three 15 s windows. The
-// global matchEnd is read from streams.global.matchEnd.
+// streams.players[] with the concatenation of three 15-second windows.
+// The global matchEnd is read from streams.global.matchEnd (ms).
 func sampleStreams(m map[string]interface{}) {
 	streams, ok := m["streams"].(map[string]interface{})
 	if !ok {
@@ -224,8 +226,8 @@ func sampleStreams(m map[string]interface{}) {
 		}
 	}
 	windows := append([]struct{ start, end float64 }(nil), goldenWindows...)
-	if matchEnd > 15 {
-		windows = append(windows, struct{ start, end float64 }{matchEnd - 15, matchEnd})
+	if matchEnd > 15000 {
+		windows = append(windows, struct{ start, end float64 }{matchEnd - 15000, matchEnd})
 	}
 
 	players, ok := streams["players"].([]interface{})

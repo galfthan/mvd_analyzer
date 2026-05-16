@@ -7,8 +7,8 @@ package result
 // HighResBuckets and HighResDuration were deleted at schema v7;
 // bucketed data is now produced on demand by qwanalytics/view.Buckets.
 type TimelineAnalysisResult struct {
-	MatchStartTime float64              `json:"matchStartTime"`          // When match actually started (after warmup)
-	DemoOffset     float64              `json:"demoOffset,omitempty"`    // Seconds from demo start to match start (for Hub viewer links)
+	MatchStartTime int32                `json:"matchStartTime"`          // When match actually started (after warmup), in ms
+	DemoOffset     int32                `json:"demoOffset,omitempty"`    // Milliseconds from demo start to match start (for Hub viewer links)
 	FragEvents     []TimelineFragEvent  `json:"fragEvents,omitempty"`    // Frag events for score timeline
 	PowerupEvents  []PowerupEvent       `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
 	FragStreaks    []FragStreakEvent    `json:"fragStreaks,omitempty"`   // Top longest frag streaks for Key Moments
@@ -78,8 +78,10 @@ type RegionStats struct {
 // HighResBucket is a compact bucket for high-resolution timeline data.
 // Uses short JSON keys to reduce payload size. Each bucket contains
 // per-player state snapshots and pre-computed team aggregations.
+// (Vestigial — at schema v7 buckets are produced on demand by
+// view.Buckets; this type survives only as a legacy adapter shape.)
 type HighResBucket struct {
-	T  float64                       `json:"t"`            // Start time
+	T  int32                         `json:"t"`            // Start time (ms, schema v8)
 	P  map[string]*HighResPlayerData `json:"p,omitempty"`  // Player data by name
 	TD map[string]*HighResTeamData   `json:"td,omitempty"` // Pre-computed team aggregations by team name
 }
@@ -135,34 +137,37 @@ type MapLocation struct {
 }
 
 // TimelineFragEvent represents a single frag with time, player and team info.
+// Time is integer milliseconds (schema v8).
 type TimelineFragEvent struct {
-	Time   float64 `json:"time"`
-	Player string  `json:"player"` // Player name who got the frag
-	Team   string  `json:"team"`
-	Delta  int     `json:"delta"` // Frag count change (+1 for kill, -1 for suicide/teamkill)
+	Time   int32  `json:"time"`
+	Player string `json:"player"` // Player name who got the frag
+	Team   string `json:"team"`
+	Delta  int    `json:"delta"` // Frag count change (+1 for kill, -1 for suicide/teamkill)
 }
 
 // PowerupEvent represents a powerup pickup event for Key Moments.
+// Time/EndTime/Duration are integer milliseconds (schema v8).
 type PowerupEvent struct {
-	Time         float64 `json:"time"`         // Demo time when picked up
-	EndTime      float64 `json:"endTime"`      // Demo time when lost/expired
-	PlayerName   string  `json:"playerName"`   // Player name
-	PlayerSlot   int     `json:"playerSlot"`   // Player slot in demo
-	PlayerUserID int     `json:"playerUserID"` // Player UserID for Hub viewer track param
-	Team         string  `json:"team"`         // Player's team
-	PowerupType  string  `json:"powerupType"`  // "quad", "pent", or "ring"
-	Duration     float64 `json:"duration"`     // Seconds held
-	Frags        int     `json:"frags"`        // Kills during powerup run
+	Time         int32  `json:"time"`         // Demo time when picked up (ms)
+	EndTime      int32  `json:"endTime"`      // Demo time when lost/expired (ms)
+	PlayerName   string `json:"playerName"`   // Player name
+	PlayerSlot   int    `json:"playerSlot"`   // Player slot in demo
+	PlayerUserID int    `json:"playerUserID"` // Player UserID for Hub viewer track param
+	Team         string `json:"team"`         // Player's team
+	PowerupType  string `json:"powerupType"`  // "quad", "pent", or "ring"
+	Duration     int32  `json:"duration"`     // Milliseconds held
+	Frags        int    `json:"frags"`        // Kills during powerup run
 }
 
 // FragStreakEvent represents a frag streak (spawn-to-death run) for Key Moments.
+// Time/EndTime/Duration are integer milliseconds (schema v8).
 type FragStreakEvent struct {
-	Time         float64 `json:"time"`         // Demo time when player spawned
-	EndTime      float64 `json:"endTime"`      // Demo time when player died (or match ended)
-	PlayerName   string  `json:"playerName"`   // Player name
-	PlayerUserID int     `json:"playerUserID"` // Player UserID for Hub viewer track param
-	Team         string  `json:"team"`         // Player's team
-	Frags        int     `json:"frags"`        // Number of kills during run
-	Duration     float64 `json:"duration"`     // Seconds alive
-	Ewep         string  `json:"ewep"`         // Effective weapon (most kills with)
+	Time         int32  `json:"time"`         // Demo time when player spawned (ms)
+	EndTime      int32  `json:"endTime"`      // Demo time when player died (or match ended) (ms)
+	PlayerName   string `json:"playerName"`   // Player name
+	PlayerUserID int    `json:"playerUserID"` // Player UserID for Hub viewer track param
+	Team         string `json:"team"`         // Player's team
+	Frags        int    `json:"frags"`        // Number of kills during run
+	Duration     int32  `json:"duration"`     // Milliseconds alive
+	Ewep         string `json:"ewep"`         // Effective weapon (most kills with)
 }

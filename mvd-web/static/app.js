@@ -863,16 +863,19 @@ function displayResults(result) {
 
     const demoInfo = result.demoInfo;
 
-    // Match info from demoInfo
+    // Match info from demoInfo. demoInfo.duration is verbatim from the
+    // KTX JSON (integer seconds, untransformed by design); result.match
+    // .duration flipped to int32 ms in schema v8 — convert to seconds for
+    // formatDuration.
     if (demoInfo) {
         document.getElementById('map-name').textContent = demoInfo.map || result.match?.map || '-';
-        document.getElementById('duration').textContent = formatDuration(demoInfo.duration || result.match?.duration);
+        document.getElementById('duration').textContent = formatDuration(demoInfo.duration || ((result.match?.duration || 0) * 0.001));
         document.getElementById('mode').textContent = demoInfo.mode || '-';
         document.getElementById('hostname').textContent = demoInfo.hostname || '-';
         document.getElementById('match-date').textContent = demoInfo.date || '-';
     } else if (result.match) {
         document.getElementById('map-name').textContent = result.match.map || '-';
-        document.getElementById('duration').textContent = formatDuration(result.match.duration);
+        document.getElementById('duration').textContent = formatDuration((result.match.duration || 0) * 0.001);
     }
 
     // Match settings + server info from the new metadata analyzer.
@@ -1605,7 +1608,16 @@ function displayKeyMoments(result) {
     // Get hub info for viewer links (from currentResult which may have hubInfo set)
     const hubInfo = currentResult?.hubInfo;
 
-    const powerupEvents = result.timelineAnalysis?.powerupEvents || [];
+    // Schema v8: powerupEvents/fragStreaks time/endTime/duration fields
+    // are int32 ms on the raw result. Convert to seconds at intake so
+    // the rest of this function (formatDuration, setCurrentTime, hub
+    // URL `from`/`to` which expect seconds) is unchanged.
+    const powerupEvents = (result.timelineAnalysis?.powerupEvents || []).map(ev => ({
+        ...ev,
+        time: ev.time * 0.001,
+        endTime: (ev.endTime || 0) * 0.001,
+        duration: (ev.duration || 0) * 0.001,
+    }));
 
     // Powerups don't exist on duel / 2v2 maps, so powerupEvents is routinely
     // empty. Show the empty-state for the powerup table but DO NOT return —
@@ -1655,7 +1667,13 @@ function displayKeyMoments(result) {
     const streakEmpty = document.getElementById('fragstreaks-empty');
     streakBody.innerHTML = '';
 
-    const fragStreaks = result.timelineAnalysis?.fragStreaks || [];
+    // Same v8 ms→s conversion for fragStreaks (time/endTime/duration are ms).
+    const fragStreaks = (result.timelineAnalysis?.fragStreaks || []).map(s => ({
+        ...s,
+        time: s.time * 0.001,
+        endTime: (s.endTime || 0) * 0.001,
+        duration: (s.duration || 0) * 0.001,
+    }));
 
     if (fragStreaks.length === 0) {
         streakEmpty.style.display = 'block';
@@ -2132,8 +2150,13 @@ function displayPackDrops(result) {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    const drops = result.backpacks || [];
-    if (drops.length === 0) {
+    // Schema v8: backpacks[].time, weaponPickups[].time / .nextDeathTime /
+    // .dropTime are int32 ms. The pickup↔drop join must happen in the
+    // same time space — index against raw ms `dropTime` (an exact int)
+    // before converting. After the join, convert ms→s so hubAnchor /
+    // formatDuration further down (which expect seconds) is unchanged.
+    const rawDrops = result.backpacks || [];
+    if (rawDrops.length === 0) {
         emptyMsg.style.display = 'block';
         document.getElementById('packdrops-count').textContent = '';
         return;
@@ -2147,8 +2170,16 @@ function displayPackDrops(result) {
         }
     }
 
-    const rows = drops.map(drop => {
-        const pickup = pickupByKey[`${drop.entNum}@${drop.time}`] || null;
+    const rows = rawDrops.map(rawDrop => {
+        const rawPickup = pickupByKey[`${rawDrop.entNum}@${rawDrop.time}`] || null;
+        // Convert ms→s on the per-row copy so downstream renderers see seconds.
+        const drop = { ...rawDrop, time: rawDrop.time * 0.001 };
+        const pickup = rawPickup ? {
+            ...rawPickup,
+            time: rawPickup.time * 0.001,
+            nextDeathTime: (rawPickup.nextDeathTime || 0) * 0.001,
+            dropTime: (rawPickup.dropTime || 0) * 0.001,
+        } : null;
         return { drop, pickup, status: packDropStatusFor(drop, pickup) };
     });
 
@@ -2641,13 +2672,24 @@ function displayTimelineAnalysis(result) {
     // getDefaultBuckets. Panels still iterate the same array shape.
     timelineState.highResBuckets = timeline?.highResBuckets || [];
     timelineState.highResDuration = 0.05;
-    timelineState.matchStartTime = timeline?.matchStartTime || 0;
-    timelineState.demoOffset = timeline?.demoOffset || 0;
-    timelineState.duration = result.match?.duration || 600;
-    timelineState.events = result.messages?.events || [];
-    timelineState.fragEvents = timeline?.fragEvents || []; // Frag events from stat tracking
-    timelineState.backpacks = result.backpacks || [];      // RL/LG drops from KTX hint
-    timelineState.powerupEvents = timeline?.powerupEvents || []; // per-run records: player, team, frags, duration
+    // Schema v8: raw time fields on result/timelineAnalysis flipped from
+    // float seconds to int32 ms. The frontend internally still works in
+    // seconds (mapState.currentTime, formatDuration, CHAT_PX_PER_SEC,
+    // hub URL `from`/`to`, etc. all expect seconds), so convert ms→s once
+    // here at intake. Anything copied into timelineState below is in
+    // seconds and panels downstream are unchanged.
+    timelineState.matchStartTime = (timeline?.matchStartTime || 0) * 0.001;
+    timelineState.demoOffset = (timeline?.demoOffset || 0) * 0.001;
+    timelineState.duration = (result.match?.duration || 600000) * 0.001;
+    timelineState.events = (result.messages?.events || []).map(e => ({ ...e, time: e.time * 0.001 }));
+    timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.time * 0.001 })); // Frag events from stat tracking
+    timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.time * 0.001 })); // RL/LG drops from KTX hint
+    timelineState.powerupEvents = (timeline?.powerupEvents || []).map(ev => ({ // per-run records: player, team, frags, duration
+        ...ev,
+        time: ev.time * 0.001,
+        endTime: (ev.endTime || 0) * 0.001,
+        duration: (ev.duration || 0) * 0.001,
+    }));
 
     // Set shared current time to start (all times are now match-relative, starting at 0)
     mapState.currentTime = 0;
@@ -3582,8 +3624,12 @@ function buildFullChat() {
 
     if (!currentResult?.messages?.events || teams.length < 2) return;
 
+    // Schema v8: messages.events[].time is int32 ms on the raw result;
+    // timelineState.events was already converted to seconds at intake in
+    // displayTimelineAnalysis, so use that pre-converted copy here.
+    // `duration` (timelineState.duration) is also seconds.
     const seen = new Map();
-    const events = currentResult.messages.events.filter(e => {
+    const events = (timelineState.events || []).filter(e => {
         if (e.time < 0 || e.time > duration) return false;
         const key = e.message;
         const prevTime = seen.get(key);
@@ -4899,8 +4945,11 @@ function initMapView(result) {
     // Backpack drops — mirrors mapState.deathEvents in shape so renderMap
     // can fade them on the same DEATH_X_DURATION timeline. Only RL/LG drops
     // exist in result.backpacks today (see qwanalytics/result/backpacks.go).
+    // Schema v8: d.time is int32 ms; convert to seconds because the renderMap
+    // fade compares against mapState.currentTime (seconds) and DEATH_X_DURATION
+    // (seconds).
     mapState.dropEvents = (result.backpacks || []).map(d => ({
-        t:      d.time,
+        t:      d.time * 0.001,
         wx:     d.origin?.[0] || 0,
         wy:     d.origin?.[1] || 0,
         weapon: d.weapon,
@@ -6173,18 +6222,23 @@ const ITEM_DIM_ALPHA = 0.35;  // alpha multiplier when item is taken
 // given time — i.e., we're inside an "available" phase. Handles the MH
 // pending-respawn case (phase with TakenAt set but RespawnAt==0 is
 // still held).
+//
+// `time` is in seconds (mapState.currentTime). Schema v8: item.phases[]
+// .availableFrom / .takenAt / .respawnAt are int32 ms — promote `time`
+// to ms once here so all comparisons happen in the phase's native unit.
 function isItemUp(item, time) {
     const phases = item.phases;
     if (!phases || phases.length === 0) return true;
+    const timeMs = time * 1000;
     for (let i = 0; i < phases.length; i++) {
         const p = phases[i];
-        if (p.availableFrom > time) break;
+        if (p.availableFrom > timeMs) break;
         const takenAt = p.takenAt || 0;
         if (takenAt === 0) return true; // phase open, not yet taken (this phase is current → up)
-        if (time < takenAt) return true; // available window
+        if (timeMs < takenAt) return true; // available window
         // taken at takenAt; respawnAt may be 0 (MH pending) or a future/past value
         const respawnAt = p.respawnAt || 0;
-        if (respawnAt > 0 && time >= respawnAt) {
+        if (respawnAt > 0 && timeMs >= respawnAt) {
             // Respawned; if this is the last phase or the next phase
             // opens at respawnAt, let the loop continue.
             continue;
@@ -6198,17 +6252,22 @@ function isItemUp(item, time) {
 //   { up: bool, secsToRespawn: number|null, pending: bool }
 // secsToRespawn is the wait time in seconds (null when up).
 // pending is true for MH in its rot window (TakenAt set, RespawnAt==0).
+//
+// `time` is in seconds. Schema v8: phase fields are ms — promote `time`
+// to ms for comparisons, then convert the result back to seconds before
+// returning.
 function itemStatus(item, time) {
     const phases = item.phases;
     if (!phases || phases.length === 0) {
         return { up: true, secsToRespawn: null, pending: false };
     }
-    // Find the phase whose window contains `time` (availableFrom <= time < nextAvailableFrom).
+    const timeMs = time * 1000;
+    // Find the phase whose window contains `time` (availableFrom <= timeMs < nextAvailableFrom).
     let activePhase = null;
     for (let i = 0; i < phases.length; i++) {
         const p = phases[i];
         const next = phases[i + 1];
-        if (p.availableFrom <= time && (!next || next.availableFrom > time)) {
+        if (p.availableFrom <= timeMs && (!next || next.availableFrom > timeMs)) {
             activePhase = p;
             break;
         }
@@ -6218,7 +6277,7 @@ function itemStatus(item, time) {
         return { up: true, secsToRespawn: null, pending: false };
     }
     const takenAt = activePhase.takenAt || 0;
-    if (takenAt === 0 || time < takenAt) {
+    if (takenAt === 0 || timeMs < takenAt) {
         return { up: true, secsToRespawn: null, pending: false };
     }
     const respawnAt = activePhase.respawnAt || 0;
@@ -6226,10 +6285,10 @@ function itemStatus(item, time) {
         // Held with pending respawn (MH during rot).
         return { up: false, secsToRespawn: null, pending: true };
     }
-    if (time >= respawnAt) {
+    if (timeMs >= respawnAt) {
         return { up: true, secsToRespawn: null, pending: false };
     }
-    return { up: false, secsToRespawn: respawnAt - time, pending: false };
+    return { up: false, secsToRespawn: (respawnAt - timeMs) * 0.001, pending: false };
 }
 
 // Items are biased this much below their real z when sorting against
@@ -7599,7 +7658,16 @@ function buildMapPowerupList(result) {
 
     list.innerHTML = '';
 
-    const events = result.timelineAnalysis?.powerupEvents || [];
+    // Prefer timelineState.powerupEvents (already converted ms→s at intake
+    // in displayTimelineAnalysis). Fall back to the raw schema field with
+    // its own conversion so the panel still renders if displayResults runs
+    // displayMap before displayTimelineAnalysis on some path.
+    const events = timelineState.powerupEvents && timelineState.powerupEvents.length
+        ? timelineState.powerupEvents
+        : (result.timelineAnalysis?.powerupEvents || []).map(ev => ({
+              ...ev,
+              time: ev.time * 0.001,
+          }));
 
     if (events.length === 0) {
         list.innerHTML = '<li style="color: #666; font-style: italic;">No powerup events</li>';

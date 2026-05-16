@@ -160,16 +160,16 @@ func TestNormalizeDuelTeams_NoOpForTeamMatches(t *testing.T) {
 
 func TestMergeFragEventsByTime(t *testing.T) {
 	a := []TimelineFragEvent{
-		{Time: 1.0, Player: "a"},
-		{Time: 5.0, Player: "a"},
-		{Time: 10.0, Player: "a"},
+		{Time: 1000, Player: "a"},
+		{Time: 5000, Player: "a"},
+		{Time: 10000, Player: "a"},
 	}
 	b := []TimelineFragEvent{
-		{Time: 3.0, Player: "b"},
-		{Time: 7.0, Player: "b"},
+		{Time: 3000, Player: "b"},
+		{Time: 7000, Player: "b"},
 	}
 	merged := mergeFragEventsByTime(a, b)
-	wantTimes := []float64{1, 3, 5, 7, 10}
+	wantTimes := []int32{1000, 3000, 5000, 7000, 10000}
 	if len(merged) != len(wantTimes) {
 		t.Fatalf("merged len = %d, want %d", len(merged), len(wantTimes))
 	}

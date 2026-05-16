@@ -425,7 +425,7 @@ func dumpMarkdown(path string, w io.Writer, regionsOverride []config.MapRegionOv
 	var b strings.Builder
 	fmt.Fprintf(&b, "# %s\n\n", filepath.Base(path))
 	if res.Match != nil {
-		fmt.Fprintf(&b, "- duration: %.1fs\n", res.Match.Duration)
+		fmt.Fprintf(&b, "- duration: %.1fs\n", float64(res.Match.Duration)*0.001)
 		fmt.Fprintf(&b, "- map: %s\n", res.Match.Map)
 		fmt.Fprintf(&b, "- game dir: %s\n", res.Match.GameDir)
 	}
@@ -472,7 +472,7 @@ func dumpMarkdown(path string, w io.Writer, regionsOverride []config.MapRegionOv
 			}
 			fmt.Fprintf(&b, "\n## Top frag streaks\n\n| Player | Team | Frags | Duration | Weapon |\n|---|---|---:|---:|---|\n")
 			for _, s := range ta.FragStreaks[:show] {
-				fmt.Fprintf(&b, "| %s | %s | %d | %.1fs | %s |\n", s.PlayerName, s.Team, s.Frags, s.Duration, s.Ewep)
+				fmt.Fprintf(&b, "| %s | %s | %d | %.1fs | %s |\n", s.PlayerName, s.Team, s.Frags, float64(s.Duration)*0.001, s.Ewep)
 			}
 		}
 		if n := len(ta.PowerupEvents); n > 0 {
@@ -482,7 +482,7 @@ func dumpMarkdown(path string, w io.Writer, regionsOverride []config.MapRegionOv
 			}
 			fmt.Fprintf(&b, "\n## Top powerup runs\n\n| Player | Team | Powerup | Duration | Frags |\n|---|---|---|---:|---:|\n")
 			for _, p := range ta.PowerupEvents[:show] {
-				fmt.Fprintf(&b, "| %s | %s | %s | %.1fs | %d |\n", p.PlayerName, p.Team, p.PowerupType, p.Duration, p.Frags)
+				fmt.Fprintf(&b, "| %s | %s | %s | %.1fs | %d |\n", p.PlayerName, p.Team, p.PowerupType, float64(p.Duration)*0.001, p.Frags)
 			}
 		}
 	}

@@ -1,12 +1,13 @@
 package result
 
-// MatchResult contains match summary information.
+// MatchResult contains match summary information. Time fields are
+// integer milliseconds (schema v8).
 type MatchResult struct {
 	Map       string       `json:"map"`
 	GameDir   string       `json:"gameDir"`
-	Duration  float64      `json:"duration"`
-	StartTime float64      `json:"startTime,omitempty"`
-	EndTime   float64      `json:"endTime,omitempty"`
+	Duration  int32        `json:"duration"` // ms
+	StartTime int32        `json:"startTime,omitempty"`
+	EndTime   int32        `json:"endTime,omitempty"`
 	Players   []PlayerStat `json:"players"`
 	Teams     []TeamStat   `json:"teams,omitempty"`
 }

@@ -258,18 +258,24 @@ neither refactor touched the analyzers themselves.
 Recommended triage order: §2 first (one-line fix, visible bug),
 then §3 with a divergence harness against KTX counts, then §4.
 
-## Schema v8 int-ms time — remaining float-seconds fields
+## Schema v8 int-ms time — completed
 
-Schema v8 migrated `PositionTrack.T` and per-player `Spawns` /
-`Deaths` from float seconds to `int32` milliseconds (commit landing
-this branch). Three other timestamped families (`ChangeI16.T`,
-`Interval.Start/End`, `MatchEvent.Time` + timeline frag/powerup event
-times) stayed float64 seconds — they didn't participate in the
-spawn/death-boundary comparison that motivated v8.
+Schema v8 migrated **every** timestamped field in the result schema
+from float seconds to `int32` milliseconds. The first cut covered
+`PositionTrack.T` and per-player `Spawns` / `Deaths`; the follow-up
+extended the migration to `ChangeI16` / `ChangeI8` / `ChangeStr`,
+`Interval`, `MatchEvent`, `GlobalStream`, `MatchResult`, all of
+`TimelineAnalysisResult`, frag / powerup / streak event times,
+`BackpackDrop`, `WeaponPickup`, and `ItemPhase`. JSON keys are
+unchanged; external consumers reading these as seconds must scale by
+`* 0.001`.
 
-The pros/cons of finishing the migration in a future schema bump,
-plus an implementation sketch, are in
-[`mvd-analytics/INT_MS_FOLLOWUPS.md`](mvd-analytics/INT_MS_FOLLOWUPS.md).
-Net recommendation in that doc: keep deferred unless a new precision
-bug surfaces in those fields or another schema break is happening
-anyway.
+Public view-layer outputs (`view.Buckets`, `view.Events`,
+`view.StreamSlice`, `view.StateAt`, `view.LocTrails`) still emit
+float64 seconds, so the WASM-fed frontend panels are largely
+oblivious. The few app.js sites that read raw schema fields directly
+convert ms→seconds at the read site.
+
+See [`mvd-analytics/INT_MS_FOLLOWUPS.md`](mvd-analytics/INT_MS_FOLLOWUPS.md)
+for the design rationale and the convention to follow when adding new
+timestamped fields.

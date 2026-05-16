@@ -55,18 +55,25 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 		want[t] = true
 	}
 	pf := newPlayerFilter(filter.Players)
+	// Public end is float64 seconds; schema stores int32 ms. Convert at
+	// the boundary.
 	end := filter.EndTime
 	if end == 0 && r.Streams != nil {
-		end = r.Streams.Global.MatchEnd
+		end = float64(r.Streams.Global.MatchEnd) * 0.001
 	}
 	if end == 0 {
 		end = inferMatchEnd(r)
 	}
 
+	// Helper: convert int32-ms timestamp from a result-schema field
+	// into the float64-seconds TaggedEvent.T, plus window check.
+	msToSec := func(tMs int32) float64 { return float64(tMs) * 0.001 }
+
 	var events []TaggedEvent
 	if want["frag"] && r.TimelineAnalysis != nil {
 		for _, fe := range r.TimelineAnalysis.FragEvents {
-			if !inWindow(fe.Time, filter.StartTime, end) {
+			ts := msToSec(fe.Time)
+			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
 			if !pf.accepts(fe.Player) {
@@ -74,13 +81,14 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			}
 			detail := map[string]any{"team": fe.Team, "delta": fe.Delta}
 			events = append(events, TaggedEvent{
-				T: fe.Time, Type: "frag", Player: fe.Player, Detail: detail,
+				T: ts, Type: "frag", Player: fe.Player, Detail: detail,
 			})
 		}
 	}
 	if want["powerup"] && r.TimelineAnalysis != nil {
 		for _, pe := range r.TimelineAnalysis.PowerupEvents {
-			if !inWindow(pe.Time, filter.StartTime, end) {
+			ts := msToSec(pe.Time)
+			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
 			if !pf.accepts(pe.PlayerName) {
@@ -88,19 +96,20 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			}
 			detail := map[string]any{
 				"powerup":  pe.PowerupType,
-				"endTime":  pe.EndTime,
-				"duration": pe.Duration,
+				"endTime":  msToSec(pe.EndTime),
+				"duration": msToSec(pe.Duration),
 				"frags":    pe.Frags,
 				"team":     pe.Team,
 			}
 			events = append(events, TaggedEvent{
-				T: pe.Time, Type: "powerup", Player: pe.PlayerName, Detail: detail,
+				T: ts, Type: "powerup", Player: pe.PlayerName, Detail: detail,
 			})
 		}
 	}
 	if want["streak"] && r.TimelineAnalysis != nil {
 		for _, fs := range r.TimelineAnalysis.FragStreaks {
-			if !inWindow(fs.Time, filter.StartTime, end) {
+			ts := msToSec(fs.Time)
+			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
 			if !pf.accepts(fs.PlayerName) {
@@ -108,19 +117,20 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			}
 			detail := map[string]any{
 				"length":   fs.Frags,
-				"endTime":  fs.EndTime,
-				"duration": fs.Duration,
+				"endTime":  msToSec(fs.EndTime),
+				"duration": msToSec(fs.Duration),
 				"weapon":   fs.Ewep,
 				"team":     fs.Team,
 			}
 			events = append(events, TaggedEvent{
-				T: fs.Time, Type: "streak", Player: fs.PlayerName, Detail: detail,
+				T: ts, Type: "streak", Player: fs.PlayerName, Detail: detail,
 			})
 		}
 	}
 	if want["chat"] && r.Messages != nil {
 		for _, msg := range r.Messages.Events {
-			if !inWindow(msg.Time, filter.StartTime, end) {
+			ts := msToSec(msg.Time)
+			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
 			if !pf.accepts(msg.Player) {
@@ -134,7 +144,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 				detail["team"] = msg.Team
 			}
 			events = append(events, TaggedEvent{
-				T: msg.Time, Type: "chat", Player: msg.Player, Detail: detail,
+				T: ts, Type: "chat", Player: msg.Player, Detail: detail,
 			})
 		}
 	}
@@ -186,35 +196,38 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			if want["health"] {
 				prev := int16(0)
 				for i, c := range p.Health {
-					if !inWindow(c.T, filter.StartTime, end) {
+					ts := msToSec(c.T)
+					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
 					detail := map[string]any{"value": c.V}
 					if i > 0 {
 						detail["delta"] = int(c.V) - int(prev)
 					}
-					events = append(events, TaggedEvent{T: c.T, Type: "health", Player: p.Name, Detail: detail})
+					events = append(events, TaggedEvent{T: ts, Type: "health", Player: p.Name, Detail: detail})
 					prev = c.V
 				}
 			}
 			if want["armor"] {
 				prev := int16(0)
 				for i, c := range p.Armor {
-					if !inWindow(c.T, filter.StartTime, end) {
+					ts := msToSec(c.T)
+					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
 					detail := map[string]any{"value": c.V}
 					if i > 0 {
 						detail["delta"] = int(c.V) - int(prev)
 					}
-					events = append(events, TaggedEvent{T: c.T, Type: "armor", Player: p.Name, Detail: detail})
+					events = append(events, TaggedEvent{T: ts, Type: "armor", Player: p.Name, Detail: detail})
 					prev = c.V
 				}
 			}
 			if want["loc"] && r.TimelineAnalysis != nil {
 				locTable := r.TimelineAnalysis.LocTable
 				for _, c := range p.Loc {
-					if !inWindow(c.T, filter.StartTime, end) {
+					ts := msToSec(c.T)
+					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
 					locName := ""
@@ -222,7 +235,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 						locName = locTable[c.V]
 					}
 					events = append(events, TaggedEvent{
-						T: c.T, Type: "loc", Player: p.Name,
+						T: ts, Type: "loc", Player: p.Name,
 						Detail: map[string]any{"loc": locName, "index": int(c.V)},
 					})
 				}
@@ -255,17 +268,21 @@ func appendIntervalEvents(
 	streams map[string][]result.Interval,
 	start, end float64,
 ) []TaggedEvent {
+	// Interval.Start/End are int32 ms (schema v8); TaggedEvent.T is
+	// float64 seconds — convert each emission.
 	for code, ivs := range streams {
 		for _, iv := range ivs {
-			if inWindow(iv.Start, start, end) {
+			startSec := float64(iv.Start) * 0.001
+			endSec := float64(iv.End) * 0.001
+			if inWindow(startSec, start, end) {
 				events = append(events, TaggedEvent{
-					T: iv.Start, Type: kindLabel, Player: player,
+					T: startSec, Type: kindLabel, Player: player,
 					Detail: map[string]any{kindLabel: code, "kind": "gain"},
 				})
 			}
-			if inWindow(iv.End, start, end) {
+			if inWindow(endSec, start, end) {
 				events = append(events, TaggedEvent{
-					T: iv.End, Type: kindLabel, Player: player,
+					T: endSec, Type: kindLabel, Player: player,
 					Detail: map[string]any{kindLabel: code, "kind": "lose"},
 				})
 			}
@@ -275,10 +292,11 @@ func appendIntervalEvents(
 }
 
 // inferMatchEnd is a fallback when r.Streams is absent. Reads
-// Match.EndTime if present.
+// Match.EndTime if present and converts to float64 seconds (public
+// view API unit; result schema stores ms).
 func inferMatchEnd(r *result.Result) float64 {
 	if r.Match != nil {
-		return r.Match.EndTime
+		return float64(r.Match.EndTime) * 0.001
 	}
 	return 0
 }

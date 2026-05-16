@@ -236,7 +236,7 @@ func (a *FragAnalyzer) checkSuicide(msg string, time float64) *FragEntry {
 			victim := strings.TrimSpace(msg[:idx])
 			if victim != "" {
 				return &FragEntry{
-					Time:      time,
+					Time:      msTime(time),
 					Killer:    victim,
 					Victim:    victim,
 					Weapon:    p.weapon,
@@ -329,7 +329,7 @@ func (a *FragAnalyzer) checkKill(msg string, time float64) *FragEntry {
 				isTeamKill := a.isTeamKill(victim, killer)
 
 				return &FragEntry{
-					Time:       time,
+					Time:       msTime(time),
 					Killer:     killer,
 					Victim:     victim,
 					Weapon:     p.weapon,
@@ -367,7 +367,7 @@ func (a *FragAnalyzer) checkTeamKill(msg string, time float64) *FragEntry {
 			player := strings.TrimSpace(msg[:idx])
 			isSuicide := pattern == " gets a frag for the other team"
 			return &FragEntry{
-				Time:       time,
+				Time:       msTime(time),
 				Killer:     player,
 				Victim:     "teammate",
 				Weapon:     "teamkill",
@@ -390,7 +390,7 @@ func (a *FragAnalyzer) checkTeamKill(msg string, time float64) *FragEntry {
 		if idx := strings.Index(msg, pattern); idx > 0 {
 			victim := strings.TrimSpace(msg[:idx])
 			return &FragEntry{
-				Time:       time,
+				Time:       msTime(time),
 				Killer:     "teammate",
 				Victim:     victim,
 				Weapon:     "teamkill",
@@ -413,7 +413,7 @@ func (a *FragAnalyzer) checkKillerFirstPatterns(msg string, time float64) *FragE
 			if victimEnd > 0 {
 				victim := strings.TrimSpace(rest[:victimEnd])
 				return &FragEntry{
-					Time:       time,
+					Time:       msTime(time),
 					Killer:     killer,
 					Victim:     victim,
 					Weapon:     "rl",
@@ -429,7 +429,7 @@ func (a *FragAnalyzer) checkKillerFirstPatterns(msg string, time float64) *FragE
 		victim := strings.TrimSpace(msg[idx+8:])
 		if killer != "" && victim != "" {
 			return &FragEntry{
-				Time:       time,
+				Time:       msTime(time),
 				Killer:     killer,
 				Victim:     victim,
 				Weapon:     "stomp",
@@ -444,7 +444,7 @@ func (a *FragAnalyzer) checkKillerFirstPatterns(msg string, time float64) *FragE
 		victim := strings.TrimSpace(msg[idx+10:])
 		if killer != "" && victim != "" {
 			return &FragEntry{
-				Time:       time,
+				Time:       msTime(time),
 				Killer:     killer,
 				Victim:     victim,
 				Weapon:     "squish",
@@ -477,7 +477,7 @@ func (a *FragAnalyzer) checkGibbedBy(msg string, time float64) *FragEntry {
 	}
 
 	return &FragEntry{
-		Time:       time,
+		Time:       msTime(time),
 		Killer:     killer,
 		Victim:     victim,
 		Weapon:     weapon,
@@ -504,7 +504,7 @@ func (a *FragAnalyzer) checkAtePattern(msg string, time float64) *FragEntry {
 			if loadsIdx >= 0 && loadsIdx < killerEnd {
 				killer := strings.TrimSpace(rest[loadsIdx+10 : killerEnd])
 				return &FragEntry{
-					Time:       time,
+					Time:       msTime(time),
 					Killer:     killer,
 					Victim:     victim,
 					Weapon:     "ssg", // Buckshot = super shotgun
@@ -518,7 +518,7 @@ func (a *FragAnalyzer) checkAtePattern(msg string, time float64) *FragEntry {
 				killer := strings.TrimSpace(rest[loadsIdx+14:])
 				killer = stripQuadSuffix(killer)
 				return &FragEntry{
-					Time:       time,
+					Time:       msTime(time),
 					Killer:     killer,
 					Victim:     victim,
 					Weapon:     "rl",

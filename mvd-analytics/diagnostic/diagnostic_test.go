@@ -185,12 +185,12 @@ func checkDataQuality(r *analyzer.Result) []string {
 		for _, p := range r.Streams.Players {
 			for _, c := range p.Health {
 				if c.V > 250 {
-					warn("player %q has health=%d at t=%.1f (max 250)", p.Name, c.V, c.T)
+					warn("player %q has health=%d at t=%.1fs (max 250)", p.Name, c.V, float64(c.T)*0.001)
 				}
 			}
 			for _, c := range p.Armor {
 				if c.V > 200 {
-					warn("player %q has armor=%d at t=%.1f (max 200)", p.Name, c.V, c.T)
+					warn("player %q has armor=%d at t=%.1fs (max 200)", p.Name, c.V, float64(c.T)*0.001)
 				}
 			}
 		}

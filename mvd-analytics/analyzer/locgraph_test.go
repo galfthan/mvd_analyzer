@@ -34,10 +34,10 @@ func makePlayerStreamFromBuckets(name, team string, specs []bucketSpec) result.P
 		pt.Z = append(pt.Z, 0)
 		pt.Li = append(pt.Li, s.li)
 
-		// Loc: dedup against last value. ChangeI16.T stays float64
-		// seconds (deferred from the int32-ms migration).
+		// Loc: dedup against last value. ChangeI16.T is int32 ms in
+		// schema v8.
 		if len(ps.Loc) == 0 || ps.Loc[len(ps.Loc)-1].V != s.li {
-			ps.Loc = append(ps.Loc, result.ChangeI16{T: s.t, V: s.li})
+			ps.Loc = append(ps.Loc, result.ChangeI16{T: tMs, V: s.li})
 		}
 
 		// Health: 100 by default; dead frames go to 0; spawn back to 100.
@@ -46,7 +46,7 @@ func makePlayerStreamFromBuckets(name, team string, specs []bucketSpec) result.P
 			want = 0
 		}
 		if want != healthCur {
-			ps.Health = append(ps.Health, result.ChangeI16{T: s.t, V: want})
+			ps.Health = append(ps.Health, result.ChangeI16{T: tMs, V: want})
 			healthCur = want
 		}
 
@@ -96,7 +96,7 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 
 	res := &Result{
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 0.30},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 300},
 			Players: []result.PlayerStream{
 				makePlayerStreamFromBuckets("p1", "red", p1Specs),
 				makePlayerStreamFromBuckets("p2", "blue", p2Specs),

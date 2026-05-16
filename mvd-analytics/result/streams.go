@@ -65,10 +65,11 @@ type PlayerStream struct {
 
 // GlobalStream carries match-window anchors so consumers can resolve
 // what "start" / "end" mean without cross-referencing other Result
-// fields.
+// fields. Times are integer milliseconds since the stream's time
+// origin (schema v8 — see PositionTrack for the unit rationale).
 type GlobalStream struct {
-	MatchStart float64 `json:"matchStart"`
-	MatchEnd   float64 `json:"matchEnd"`
+	MatchStart int32 `json:"matchStart"`
+	MatchEnd   int32 `json:"matchEnd"`
 }
 
 // PositionTrack is columnar to compress JSON. Indices align across the
@@ -104,27 +105,31 @@ type PositionTrack struct {
 	Li []int16 `json:"li,omitempty"`
 }
 
-// ChangeI8 is a single transition in an int8 stream.
+// ChangeI8 is a single transition in an int8 stream. T is integer
+// milliseconds since the stream's time origin (schema v8).
 type ChangeI8 struct {
-	T float64 `json:"t"`
-	V int8    `json:"v"`
+	T int32 `json:"t"`
+	V int8  `json:"v"`
 }
 
-// ChangeI16 is a single transition in an int16 stream.
+// ChangeI16 is a single transition in an int16 stream. T is integer
+// milliseconds since the stream's time origin (schema v8).
 type ChangeI16 struct {
-	T float64 `json:"t"`
-	V int16   `json:"v"`
+	T int32 `json:"t"`
+	V int16 `json:"v"`
 }
 
-// ChangeStr is a single transition in a string-valued stream.
+// ChangeStr is a single transition in a string-valued stream. T is
+// integer milliseconds since the stream's time origin (schema v8).
 type ChangeStr struct {
-	T float64 `json:"t"`
-	V string  `json:"v"`
+	T int32  `json:"t"`
+	V string `json:"v"`
 }
 
 // Interval is a half-open period [Start, End) during which a boolean
-// field was true.
+// field was true. Bounds are integer milliseconds since the stream's
+// time origin (schema v8).
 type Interval struct {
-	Start float64 `json:"s"`
-	End   float64 `json:"e"`
+	Start int32 `json:"s"`
+	End   int32 `json:"e"`
 }

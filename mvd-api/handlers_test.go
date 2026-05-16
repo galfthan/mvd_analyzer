@@ -46,7 +46,7 @@ func stubResult() *result.Result {
 		Match: &result.MatchResult{
 			Map:      "dm6",
 			GameDir:  "qw",
-			Duration: 600.0,
+			Duration: 600000,
 			Players: []result.PlayerStat{
 				{Name: "bps", Team: "blue", Frags: 35},
 				{Name: "milton", Team: "blue", Frags: 28},
@@ -58,12 +58,12 @@ func stubResult() *result.Result {
 			},
 		},
 		Streams: &result.Streams{
-			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 600},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 600000},
 			Players: []result.PlayerStream{
 				{Name: "bps", Team: "blue",
-					Health: []result.ChangeI16{{T: 0, V: 100}, {T: 10, V: 50}, {T: 20, V: 100}},
-					Armor:  []result.ChangeI16{{T: 0, V: 0}, {T: 5, V: 100}},
-					RL:     []result.Interval{{Start: 5, End: 60}},
+					Health: []result.ChangeI16{{T: 0, V: 100}, {T: 10000, V: 50}, {T: 20000, V: 100}},
+					Armor:  []result.ChangeI16{{T: 0, V: 0}, {T: 5000, V: 100}},
+					RL:     []result.Interval{{Start: 5000, End: 60000}},
 				},
 			},
 		},
@@ -75,10 +75,10 @@ func stubResult() *result.Result {
 		},
 		Messages: &result.MessagesResult{
 			Events: []result.MatchEvent{
-				{Time: 10, Type: "chat", Player: "bps", Team: "blue", Message: "gl hf", MessageClean: "gl hf"},
-				{Time: 20, Type: "teamsay", Player: "milton", Team: "blue", Message: "watch RA"},
-				{Time: 30, Type: "frag", Player: "bps", Victim: "valla", Weapon: "rl"},
-				{Time: 590, Type: "chat", Player: "valla", Team: "red", Message: "gg"},
+				{Time: 10000, Type: "chat", Player: "bps", Team: "blue", Message: "gl hf", MessageClean: "gl hf"},
+				{Time: 20000, Type: "teamsay", Player: "milton", Team: "blue", Message: "watch RA"},
+				{Time: 30000, Type: "frag", Player: "bps", Victim: "valla", Weapon: "rl"},
+				{Time: 590000, Type: "chat", Player: "valla", Team: "red", Message: "gg"},
 			},
 		},
 		DemoInfo: &result.DemoInfoResult{
@@ -90,22 +90,22 @@ func stubResult() *result.Result {
 			},
 		},
 		Backpacks: []result.BackpackDrop{
-			{Time: 100, Player: "bps", Team: "blue", Weapon: "rl", EntNum: 17},
-			{Time: 200, Player: "valla", Team: "red", Weapon: "lg", EntNum: 23},
+			{Time: 100000, Player: "bps", Team: "blue", Weapon: "rl", EntNum: 17},
+			{Time: 200000, Player: "valla", Team: "red", Weapon: "lg", EntNum: 23},
 		},
 		Items: &result.ItemsResult{
 			Items: []result.ItemTimeline{
 				{Name: "RA", Kind: "armor", EntNum: 9, Phases: []result.ItemPhase{
-					{AvailableFrom: 0, TakenAt: 20, TakenBy: "bps", Team: "blue", RespawnAt: 40},
+					{AvailableFrom: 0, TakenAt: 20000, TakenBy: "bps", Team: "blue", RespawnAt: 40000},
 				}},
 				{Name: "MH", Kind: "mega", EntNum: 11, Phases: []result.ItemPhase{
-					{AvailableFrom: 0, TakenAt: 35, TakenBy: "valla", Team: "red"},
+					{AvailableFrom: 0, TakenAt: 35000, TakenBy: "valla", Team: "red"},
 				}},
 			},
 		},
 		WeaponPickups: []result.WeaponPickup{
-			{Time: 5, Player: "bps", Team: "blue", Weapon: "rl", Source: "world", Kills: 3},
-			{Time: 100, Player: "milton", Team: "blue", Weapon: "rl", Source: "backpack", BackpackEnt: 17, Dropper: "bps", Kills: 1},
+			{Time: 5000, Player: "bps", Team: "blue", Weapon: "rl", Source: "world", Kills: 3},
+			{Time: 100000, Player: "milton", Team: "blue", Weapon: "rl", Source: "backpack", BackpackEnt: 17, Dropper: "bps", Kills: 1},
 		},
 	}
 }
@@ -228,8 +228,8 @@ func TestOverview(t *testing.T) {
 	if resp["map"] != "dm6" {
 		t.Errorf("map = %v", resp["map"])
 	}
-	if resp["matchEnd"].(float64) != 600.0 {
-		t.Errorf("matchEnd = %v", resp["matchEnd"])
+	if resp["matchEnd"].(float64) != 600000.0 {
+		t.Errorf("matchEnd = %v (want 600000 ms in schema v8)", resp["matchEnd"])
 	}
 	if resp["mode"] != "Team" {
 		t.Errorf("mode = %v", resp["mode"])

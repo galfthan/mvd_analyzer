@@ -11,14 +11,14 @@ func TestStreamSliceCarryForward(t *testing.T) {
 		Name: "p1",
 		Health: []result.ChangeI16{
 			{T: 0, V: 100},
-			{T: 5, V: 50},
+			{T: 5000, V: 50},
 		},
 	})
 	v, err := StreamSlice(r, StreamSliceOptions{
 		StartTime: 2,
 		EndTime:   4,
 		Fields:    []string{FieldHealth},
-	})
+	}) // StartTime/EndTime are seconds (public API)
 	if err != nil {
 		t.Fatalf("StreamSlice: %v", err)
 	}
@@ -26,22 +26,23 @@ func TestStreamSliceCarryForward(t *testing.T) {
 		t.Fatalf("len players = %d, want 1", len(v.Players))
 	}
 	h := v.Players[0].Health
-	// Window has no native entry; carry-forward synthesises one at StartTime.
-	if len(h) != 1 || h[0].T != 2 || h[0].V != 100 {
-		t.Fatalf("expected 1 entry at t=2 v=100, got %+v", h)
+	// Window has no native entry; carry-forward synthesises one at
+	// StartTime (2000 ms in schema v8).
+	if len(h) != 1 || h[0].T != 2000 || h[0].V != 100 {
+		t.Fatalf("expected 1 entry at t=2000ms v=100, got %+v", h)
 	}
 }
 
 func TestStreamSliceIntervalClamping(t *testing.T) {
 	r := makeStream(t, result.PlayerStream{
 		Name: "p1",
-		RL:   []result.Interval{{Start: 1, End: 6}},
+		RL:   []result.Interval{{Start: 1000, End: 6000}},
 	})
 	v, err := StreamSlice(r, StreamSliceOptions{
 		StartTime: 2,
 		EndTime:   4,
 		Fields:    []string{FieldRL},
-	})
+	}) // StartTime/EndTime are seconds (public API)
 	if err != nil {
 		t.Fatalf("StreamSlice: %v", err)
 	}
@@ -49,8 +50,9 @@ func TestStreamSliceIntervalClamping(t *testing.T) {
 	if len(rl) != 1 {
 		t.Fatalf("len rl = %d, want 1", len(rl))
 	}
-	if rl[0].Start != 2 || rl[0].End != 4 {
-		t.Fatalf("clamped interval = %+v, want [2,4)", rl[0])
+	// Clamped to [2000, 4000) ms (schema v8: Interval is int32 ms).
+	if rl[0].Start != 2000 || rl[0].End != 4000 {
+		t.Fatalf("clamped interval = %+v, want [2000,4000)", rl[0])
 	}
 }
 

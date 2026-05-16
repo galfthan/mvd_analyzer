@@ -9,7 +9,8 @@ import (
 // Overview is a curated summary of a parsed *Result, cheap to compute
 // from existing fields. It gives an AI agent (or a quick CLI consumer)
 // enough metadata to decide which detailed view to query next without
-// echoing the whole Result.
+// echoing the whole Result. Time fields are integer milliseconds
+// (matches schema v8).
 type Overview struct {
 	SchemaVersion    int                `json:"schemaVersion"`
 	FilePath         string             `json:"filePath,omitempty"`
@@ -17,9 +18,9 @@ type Overview struct {
 	GameDir          string             `json:"gameDir,omitempty"`
 	Mode             string             `json:"mode,omitempty"`
 	Matchtag         string             `json:"matchtag,omitempty"`
-	Duration         float64            `json:"duration"`
-	MatchStart       float64            `json:"matchStart"`
-	MatchEnd         float64            `json:"matchEnd"`
+	Duration         int32              `json:"duration"`
+	MatchStart       int32              `json:"matchStart"`
+	MatchEnd         int32              `json:"matchEnd"`
 	Teams            []OverviewTeam     `json:"teams,omitempty"`
 	Players          []OverviewPlayer   `json:"players"`
 	TopStreaks       []OverviewStreak   `json:"topStreaks,omitempty"`
@@ -49,22 +50,22 @@ type OverviewPlayer struct {
 
 // OverviewStreak is a slimmed-down result.FragStreakEvent.
 type OverviewStreak struct {
-	Player   string  `json:"player"`
-	Team     string  `json:"team,omitempty"`
-	Weapon   string  `json:"weapon,omitempty"`
-	Length   int     `json:"length"`
-	Start    float64 `json:"start"`
-	Duration float64 `json:"duration"`
+	Player   string `json:"player"`
+	Team     string `json:"team,omitempty"`
+	Weapon   string `json:"weapon,omitempty"`
+	Length   int    `json:"length"`
+	Start    int32  `json:"start"`    // ms
+	Duration int32  `json:"duration"` // ms
 }
 
 // OverviewPowerup is a slimmed-down result.PowerupEvent.
 type OverviewPowerup struct {
-	Player   string  `json:"player"`
-	Team     string  `json:"team,omitempty"`
-	Type     string  `json:"type"`
-	Start    float64 `json:"start"`
-	Duration float64 `json:"duration"`
-	Frags    int     `json:"frags"`
+	Player   string `json:"player"`
+	Team     string `json:"team,omitempty"`
+	Type     string `json:"type"`
+	Start    int32  `json:"start"`    // ms
+	Duration int32  `json:"duration"` // ms
+	Frags    int    `json:"frags"`
 }
 
 // BuildOverview composes an Overview from a parsed *Result. All inputs

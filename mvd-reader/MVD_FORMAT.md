@@ -231,7 +231,7 @@ Bits 3-7: Additional data (for dem_single and dem_stats: player number)
 
 **Important**: The first message typically has `time_delta = 0`. Subsequent messages accumulate time deltas to track demo time.
 
-The decoder accumulates these deltas as an `int32` cumulative millisecond counter (`mvd.Decoder.timeMs`) — the canonical, exact wire-native value. A derived `float64` seconds view (`CurrentTime()`) is exposed for callers that prefer seconds arithmetic, but persistence-layer consumers should use the integer-ms value to avoid float-precision drift across boundary comparisons. The analytics layer's schema v8 stores `PositionTrack.T` and per-player `Spawns` / `Deaths` as `int32` ms for the same reason.
+The decoder accumulates these deltas as an `int32` cumulative millisecond counter (`mvd.Decoder.timeMs`) — the canonical, exact wire-native value. A derived `float64` seconds view (`CurrentTime()`) is exposed for callers that prefer seconds arithmetic, but persistence-layer consumers should use the integer-ms value to avoid float-precision drift across boundary comparisons. The analytics layer's schema v8 stores **every** timestamped result field as `int32` ms for the same reason — the wire format's integer unit flows end-to-end through the pipeline.
 
 ### Message Types
 

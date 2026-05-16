@@ -93,25 +93,27 @@ type streamBuilder struct {
 // the analyser package so tests don't have to round-trip through
 // result every time. Health/armor/loc/ammo all share int16, since
 // Quake values regularly exceed int8 range (mega-health = 200, RA = 200).
+// t is integer milliseconds (schema v8) — same unit as the result type.
 type changeI16 struct {
-	t float64
+	t int32
 	v int16
 }
 
 type changeStr struct {
-	t float64
+	t int32
 	v string
 }
 
 // intervalState tracks an open-anchor period for a boolean stream.
 // When held flips true the analyser sets anchor; on flip-false (or at
-// match end) the [anchor, t) interval is appended to closed.
+// match end) the [anchor, t) interval is appended to closed. Times
+// are integer milliseconds (schema v8).
 type intervalState struct {
-	held       bool
-	anchor     float64
-	closed     []intervalRecord
+	held   bool
+	anchor int32
+	closed []intervalRecord
 }
 
 type intervalRecord struct {
-	start, end float64
+	start, end int32
 }

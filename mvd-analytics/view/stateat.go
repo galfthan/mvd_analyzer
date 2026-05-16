@@ -86,6 +86,10 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 	}
 	pf := newPlayerFilter(opts.Players)
 
+	// Public opts.Time is float64 seconds; schema stores int32 ms.
+	// Convert once at the entry; every index/contains lookup below
+	// takes int32 ms.
+	tMs := int32(opts.Time * 1000)
 	out := &StateAtView{Time: opts.Time, Players: make(map[string]PlayerStateAt)}
 	for _, p := range r.Streams.Players {
 		if !pf.accepts(p.Name) {
@@ -93,77 +97,77 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 		}
 		ps := PlayerStateAt{}
 		if requested[FieldHealth] {
-			if idx := indexI16AtOrBefore(p.Health, opts.Time); idx >= 0 {
+			if idx := indexI16AtOrBefore(p.Health, tMs); idx >= 0 {
 				v := p.Health[idx].V
 				ps.Health = &v
 			}
 		}
 		if requested[FieldArmor] {
-			if idx := indexI16AtOrBefore(p.Armor, opts.Time); idx >= 0 {
+			if idx := indexI16AtOrBefore(p.Armor, tMs); idx >= 0 {
 				v := p.Armor[idx].V
 				ps.Armor = &v
 			}
 		}
 		if requested[FieldArmorType] {
-			if idx := indexStrAtOrBefore(p.ArmorType, opts.Time); idx >= 0 {
+			if idx := indexStrAtOrBefore(p.ArmorType, tMs); idx >= 0 {
 				v := p.ArmorType[idx].V
 				ps.ArmorType = &v
 			}
 		}
 		if requested[FieldLoc] {
-			if idx := indexI16AtOrBefore(p.Loc, opts.Time); idx >= 0 {
+			if idx := indexI16AtOrBefore(p.Loc, tMs); idx >= 0 {
 				v := p.Loc[idx].V
 				ps.Loc = &v
 			}
 		}
 		if requested[FieldShells] {
-			if idx := indexI16AtOrBefore(p.Shells, opts.Time); idx >= 0 {
+			if idx := indexI16AtOrBefore(p.Shells, tMs); idx >= 0 {
 				v := p.Shells[idx].V
 				ps.Shells = &v
 			}
 		}
 		if requested[FieldNails] {
-			if idx := indexI16AtOrBefore(p.Nails, opts.Time); idx >= 0 {
+			if idx := indexI16AtOrBefore(p.Nails, tMs); idx >= 0 {
 				v := p.Nails[idx].V
 				ps.Nails = &v
 			}
 		}
 		if requested[FieldRockets] {
-			if idx := indexI16AtOrBefore(p.Rockets, opts.Time); idx >= 0 {
+			if idx := indexI16AtOrBefore(p.Rockets, tMs); idx >= 0 {
 				v := p.Rockets[idx].V
 				ps.Rockets = &v
 			}
 		}
 		if requested[FieldCells] {
-			if idx := indexI16AtOrBefore(p.Cells, opts.Time); idx >= 0 {
+			if idx := indexI16AtOrBefore(p.Cells, tMs); idx >= 0 {
 				v := p.Cells[idx].V
 				ps.Cells = &v
 			}
 		}
 
 		if requested[FieldRL] {
-			ps.RL = boolPtr(intervalContains(p.RL, opts.Time))
+			ps.RL = boolPtr(intervalContains(p.RL, tMs))
 		}
 		if requested[FieldLG] {
-			ps.LG = boolPtr(intervalContains(p.LG, opts.Time))
+			ps.LG = boolPtr(intervalContains(p.LG, tMs))
 		}
 		if requested[FieldGL] {
-			ps.GL = boolPtr(intervalContains(p.GL, opts.Time))
+			ps.GL = boolPtr(intervalContains(p.GL, tMs))
 		}
 		if requested[FieldSSG] {
-			ps.SSG = boolPtr(intervalContains(p.SSG, opts.Time))
+			ps.SSG = boolPtr(intervalContains(p.SSG, tMs))
 		}
 		if requested[FieldSNG] {
-			ps.SNG = boolPtr(intervalContains(p.SNG, opts.Time))
+			ps.SNG = boolPtr(intervalContains(p.SNG, tMs))
 		}
 		if requested[FieldQuad] {
-			ps.Quad = boolPtr(intervalContains(p.Quad, opts.Time))
+			ps.Quad = boolPtr(intervalContains(p.Quad, tMs))
 		}
 		if requested[FieldPent] {
-			ps.Pent = boolPtr(intervalContains(p.Pent, opts.Time))
+			ps.Pent = boolPtr(intervalContains(p.Pent, tMs))
 		}
 		if requested[FieldRing] {
-			ps.Ring = boolPtr(intervalContains(p.Ring, opts.Time))
+			ps.Ring = boolPtr(intervalContains(p.Ring, tMs))
 		}
 
 		if requested[FieldPosition] && p.Position != nil && len(p.Position.T) > 0 {

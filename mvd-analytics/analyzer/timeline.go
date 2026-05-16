@@ -227,7 +227,7 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 		// Drop sentinel values so they don't get sampled into buckets.
 		if e.Value <= 250 {
 			state.vitals.health = e.Value
-			state.streams.recordHealth(e.Time, int16(e.Value))
+			state.streams.recordHealth(msTime(e.Time), int16(e.Value))
 		}
 	case events.StatArmor:
 		// Same shape: KTX overwrites armorvalue in pre-match speed-meter
@@ -235,25 +235,25 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 		// at 200 (RA). Reject anything larger.
 		if e.Value <= 200 {
 			state.vitals.armor = e.Value
-			state.streams.recordArmor(e.Time, int16(e.Value))
+			state.streams.recordArmor(msTime(e.Time), int16(e.Value))
 		}
 	case events.StatItems:
 		state.items = e.Value
 		w, p, at := itemBitsToLoadouts(e.Value)
-		state.streams.recordItemFlags(e.Time, w, p)
-		state.streams.recordArmorType(e.Time, at)
+		state.streams.recordItemFlags(msTime(e.Time), w, p)
+		state.streams.recordArmorType(msTime(e.Time), at)
 	case events.StatShells:
 		state.ammo.shells = e.Value
-		state.streams.recordShells(e.Time, int16(e.Value))
+		state.streams.recordShells(msTime(e.Time), int16(e.Value))
 	case events.StatNails:
 		state.ammo.nails = e.Value
-		state.streams.recordNails(e.Time, int16(e.Value))
+		state.streams.recordNails(msTime(e.Time), int16(e.Value))
 	case events.StatRockets:
 		state.ammo.rockets = e.Value
-		state.streams.recordRockets(e.Time, int16(e.Value))
+		state.streams.recordRockets(msTime(e.Time), int16(e.Value))
 	case events.StatCells:
 		state.ammo.cells = e.Value
-		state.streams.recordCells(e.Time, int16(e.Value))
+		state.streams.recordCells(msTime(e.Time), int16(e.Value))
 	}
 	return nil
 }
