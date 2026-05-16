@@ -360,6 +360,51 @@ The view-layer query API (`view.Buckets`, `view.Events`,
 takes and returns `float64` seconds at its public surface, so any
 consumer querying through `view.*` is unaffected.
 
+#### Why integer ms
+
+The MVD wire format carries time as a 1-byte millisecond delta per
+message; the decoder accumulator (`mvd.Decoder.timeMs`) keeps this
+integer end-to-end. Float seconds is a derived view, not a source of
+truth. Integer storage:
+
+- Eliminates float-precision drift across boundary comparisons. The
+  motivating bug was a gib-respawn case where a spawn-boundary at
+  wire-exact `658.279` compared against a position sample narrowed to
+  `658.278992` produced a spurious `MH.low → start` teleport edge.
+- Keeps comparison cost flat — `int32 <= int32` is exact.
+- Removes float-noise artefacts (`5.499999999999972`) from JSON,
+  making goldens stable and JSON human-readable.
+- `int32` ms = ±24.8 days, comfortably more than any match.
+
+#### Adding a new timestamped field
+
+1. **Storage**: `int32` ms in the result schema. Same JSON-key shape
+   as adjacent fields.
+2. **Producer** (`mvd-analytics/analyzer/`): if the source event has
+   a `TimeMs int32` field, use that directly. Otherwise convert at
+   the write site via `msTime(e.Time)` (defined in
+   [`analyzer/timeline_streams.go`](analyzer/timeline_streams.go);
+   `int32(math.Round(t*1000))` — well-conditioned because the
+   float64-seconds view derives once from the decoder's int32-ms
+   accumulator).
+3. **Postprocess** (`normalizeMatchRelativeTimes` in
+   `analyzer/postprocess.go`): if the field shifts with match start,
+   add it there. Everything works in int32 ms;
+   `matchStartMs` comes from `res.TimelineAnalysis.MatchStartTime`
+   directly.
+4. **View layer** (`mvd-analytics/view/`): if the field is queryable
+   via `view.Buckets` / `view.Events` / `view.StreamSlice` /
+   `view.StateAt`, follow the existing pattern — accept window
+   bounds in float64 seconds, convert to int32 ms once at entry, do
+   comparisons in int32 ms, emit float64 seconds at the public
+   output. Don't push ms through the view's public surface without a
+   deliberate decision.
+5. **Tests**: write fixtures with int32-ms literals (`Time: 5000`,
+   not `Time: 5.0`).
+6. **Frontend** (`mvd-web/static/app.js`): if the new field is read
+   from the raw schema (not via the view layer), add a `* 0.001` at
+   the read site. View-layer consumers (most panels) need no change.
+
 ### Append rules (the dedup invariant)
 
 - **Change streams** (Health, Armor, ArmorType, Loc, ammo): every entry

@@ -42,10 +42,11 @@ func ToLegacyHighResBuckets(bv *BucketsView) []result.HighResBucket {
 		if len(vb.Players) == 0 {
 			continue
 		}
-		// HighResBucket.T is int32 ms (schema v8); ViewBucket.T is
-		// float64 seconds — convert at the boundary.
+		// Both ViewBucket.T and HighResBucket.T are float64 seconds
+		// — HighResBucket is the legacy frontend wire shape and stays
+		// in seconds to match the v6 panels that read it.
 		hb := result.HighResBucket{
-			T: int32(vb.T * 1000),
+			T: vb.T,
 			P: make(map[string]*result.HighResPlayerData, len(vb.Players)),
 		}
 		for name, pdata := range vb.Players {

@@ -78,10 +78,18 @@ type RegionStats struct {
 // HighResBucket is a compact bucket for high-resolution timeline data.
 // Uses short JSON keys to reduce payload size. Each bucket contains
 // per-player state snapshots and pre-computed team aggregations.
-// (Vestigial — at schema v7 buckets are produced on demand by
-// view.Buckets; this type survives only as a legacy adapter shape.)
+//
+// Vestigial — at schema v7 buckets are produced on demand by
+// view.Buckets; this type survives only as the wire shape the v6
+// frontend panels in mvd-web/static/app.js still consume via the
+// WASM bridge's getDefaultBuckets / ToLegacyHighResBuckets adapter.
+// T stays float64 seconds (the v6 shape) even though the rest of
+// schema v8 is int32 ms — the frontend compares bucket.t against
+// seconds-valued cursor times in ~20 panels, and a unit flip here
+// would force a parallel sweep of the legacy panel code. The
+// adapter does the ms→seconds conversion once at the boundary.
 type HighResBucket struct {
-	T  int32                         `json:"t"`            // Start time (ms, schema v8)
+	T  float64                       `json:"t"`            // Start time (float64 seconds, legacy frontend wire shape)
 	P  map[string]*HighResPlayerData `json:"p,omitempty"`  // Player data by name
 	TD map[string]*HighResTeamData   `json:"td,omitempty"` // Pre-computed team aggregations by team name
 }

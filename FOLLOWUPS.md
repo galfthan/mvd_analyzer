@@ -276,6 +276,6 @@ float64 seconds, so the WASM-fed frontend panels are largely
 oblivious. The few app.js sites that read raw schema fields directly
 convert ms→seconds at the read site.
 
-See [`mvd-analytics/INT_MS_FOLLOWUPS.md`](mvd-analytics/INT_MS_FOLLOWUPS.md)
-for the design rationale and the convention to follow when adding new
-timestamped fields.
+Design rationale and the convention to follow when adding new
+timestamped fields are documented in
+[`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md#schema-v8-all-times-are-int32-milliseconds).
