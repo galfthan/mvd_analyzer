@@ -249,12 +249,14 @@ Control rule (faithful port of `mvd-web/static/app.js:classifyRegionState`):
 least one armed player; weak = present but unarmed; contested = both
 present and armed. Dead players (`D=true` or `H<=0`) are skipped.
 
-`ComputeRegionControl` (Go pure function in
-`analyzer/region_control.go`) is callable post-analysis with edited
-regions: WASM exports `recomputeRegionControl(regionsJSON)` for the
-web UI; a future MCP wrapper imports the same function. The CLI's
-`-regions <path>` flag overrides the embedded per-map regions at
-analysis time.
+`view.RegionControl` (Go pure function in `view/region_control.go`)
+is callable post-analysis with edited regions, custom team labels,
+or a custom `teamOf` closure via `RegionControlOptions`. WASM
+exports `recomputeRegionControl(regionsJSON)` for the web UI's
+in-page region editing; the REST/MCP `/v1/demos/{id}/region-control`
+endpoint exposes the same function with a `windowMs` query
+parameter. The CLI's `-regions <path>` flag overrides the embedded
+per-map regions at analysis time, before the result is cached.
 
 ### ControlRegion
 
@@ -268,9 +270,35 @@ analysis time.
 
 ### RegionStats
 
-`{ teamAControl, teamAWeakControl, contested, weakContested, empty,
-teamBWeakControl, teamBControl }`. Each value is a percentage 0..100
-with one decimal place; the seven sum to 100 within rounding.
+```
+RegionStats = {
+  // Seven aggregate control-state percentages (0..100, one decimal,
+  // sum to 100 within rounding).
+  "teamAControl":     float,
+  "teamAWeakControl": float,
+  "contested":        float,
+  "weakContested":    float,
+  "empty":            float,
+  "teamBWeakControl": float,
+  "teamBControl":     float,
+  // Per-player attribution. Map: player name → counts of buckets this
+  // player was present in the region. Multiply by the bucket WindowMs
+  // to convert to milliseconds of presence.
+  "byPlayer": {
+    "<player>": {
+      "team":    "<team>",
+      "armed":   <int>,  // buckets present carrying RL or LG
+      "unarmed": <int>   // buckets present without RL/LG
+    }, ...
+  }
+}
+```
+
+`byPlayer` answers "who was responsible for keeping <region>?" Sort
+its entries by `armed + unarmed` for total presence, or by `armed`
+alone for armed-presence share. Total per team in the region equals
+the team-aggregate state count, so you can also compute "what
+fraction of team A's presence in QUAD came from sailorman".
 
 ## Streams (`streams`)
 
@@ -562,9 +590,23 @@ the underlying loc stream).
 
 #### RegionControl
 
-Re-derives per-bucket region state strings at the requested
-`WindowMs`. Takes a `RegionControlClassifier` callback so the view
-package stays independent of the analyser's classifier.
+Re-derives per-bucket region state strings + per-region per-player
+attribution (`RegionStats.byPlayer`) at the requested `WindowMs`,
+optionally clipped to a `[StartTime, EndTime)` sub-window. Options
+(`RegionControlOptions`) optionally override the regions (caller-
+edited region defs from the web UI), `TeamA`/`TeamB` labels, and
+the `teamOf` lookup; defaults pull from
+`TimelineAnalysisResult.RegionControl.Regions` (set at parse time)
+and `r.Match.Players` (post-normalize team mapping). No `Players`
+filter — region control is by team; filtering individuals would
+skew the team tallies. To attribute control to specific players,
+read the `byPlayer` field on each `RegionStats`.
+
+The function's view-layer return type is aliased as
+`RegionControlView = result.RegionControlResult` so the
+`XxxView` naming is symmetric with the other five views;
+the aliased type is the canonical one because the same shape is
+baked into parse-time Result.
 
 ## MetadataResult (`metadata`)
 
@@ -661,7 +703,7 @@ duplication exists, the canonical fix lives on the other side.
 
 | Version | Changes |
 |---|---|
-| v7 | `Streams` added as the canonical event-rate storage (per-player change streams + intervals + native-rate position track with parallel `Li` column). `TimelineAnalysisResult.HighResBuckets` and `HighResDuration` removed; bucketed views are now produced on demand by `mvd-analytics/view.Buckets`. `RegionControlResult.BucketStates` removed from the parse-time output (still produced by `view.RegionControl` at the requested resolution). Health / Armor change streams use int16 (Quake values reach 250). `BuildLocGraph` and `ComputeRegionControl` walk `Streams` natively — no bucket intermediate. Default reducer policy is "first-sample-of-bucket" (point-sampling at bucket start; bucket N == state at t = N × windowMs). Bucket grid is anchored at match-relative t = 0; v6 anchored at the wall-clock 50 ms grid post-shifted by `−matchStart`, so the new grid is offset by up to one sample-interval from main's. Discrete event analytics (frags, items, weapon pickups, scoreboard) are byte-identical with v6; locgraph and region-control percentages drift slightly because of the native-rate sampling cadence (~13 ms between position samples vs v6's 50 ms grid). |
+| v7 | `Streams` added as the canonical event-rate storage (per-player change streams + intervals + native-rate position track with parallel `Li` column). `TimelineAnalysisResult.HighResBuckets` and `HighResDuration` removed; bucketed views are now produced on demand by `mvd-analytics/view.Buckets`. `RegionControlResult.BucketStates` removed from the parse-time output (still produced by `view.RegionControl` at the requested resolution). Health / Armor change streams use int16 (Quake values reach 250). `BuildLocGraph` and the region-control classifier (then `analyzer.ComputeRegionControl`, since folded into `view.RegionControl` as the sixth view function) walk `Streams` natively — no bucket intermediate. Default reducer policy is "first-sample-of-bucket" (point-sampling at bucket start; bucket N == state at t = N × windowMs). Bucket grid is anchored at match-relative t = 0; v6 anchored at the wall-clock 50 ms grid post-shifted by `−matchStart`, so the new grid is offset by up to one sample-interval from main's. Discrete event analytics (frags, items, weapon pickups, scoreboard) are byte-identical with v6; locgraph and region-control percentages drift slightly because of the native-rate sampling cadence (~13 ms between position samples vs v6's 50 ms grid). |
 | v6 | HighResPlayerData adds `gl`, `sh`, `nl`. HighResTeamData adds `gl`. MatchEvent adds `messageClean`. ControlRegion adds `locs`. RegionControlResult adds `teamA`/`teamB`/`bucketStates`/`stats` + new `RegionStats`. Top-level `duration` removed (use `match.duration`). MatchResult.PlayerStat drops dead `kills`/`deaths`. |
 | v5 | WeaponPickups added — slot-weapon acquisitions with kills-before-next-death effectiveness. Backpack pickups carry `backpackEnt` joining to `backpacks[].entNum`. |
 | v4 | Backpacks added — RL/LG backpack drops sourced from KTX `//ktx drop` STUFFCMD_DEMOONLY directive. |

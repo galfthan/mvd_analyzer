@@ -22,17 +22,22 @@ that downstream consumers render, summarise, or feed to an agent.
   into two phases: **core** (`demoinfo`, `frag` — the producers that
   fill `CoreOutputs`) finalise first; **derived** (`metadata`, `match`,
   `messages`, `timeline`, `items`, `backpacks`, `weapon_pickups`)
-  finalise after, with `CoreOutputs` already populated. Three default
+  finalise after, with `CoreOutputs` already populated. Four default
   result post-processors run last (time normalisation, duel team
-  rewrite, locgraph synthesis) — see `postprocess.go`.
-- `view/` — the **query API** over a finalised `*Result`. Pure functions
-  (`Buckets`, `Events`, `StreamSlice`, `StateAt`, `LocTrails`,
-  `RegionControl`) read `result.Streams` and produce derived shapes
-  (bucketed timelines, raw stream slices, point-in-time state, etc.) at
-  the caller's chosen window / fields / reducers. Used by the CLI's
-  `-view` family of flags and the WASM bridge's `getBuckets` /
-  `getEvents` / `getStreamSlice` / `getStateAt` / `getLocTrails` /
-  `recomputeRegionControl` exports.
+  rewrite, locgraph synthesis, region-control classification) — see
+  `postprocess.go`.
+- `view/` — **time-parameterised query API** over a finalised
+  `*Result`. Six pure functions (`Buckets`, `Events`, `StreamSlice`,
+  `StateAt`, `LocTrails`, `RegionControl`) read `result.Streams` and
+  produce derived shapes (bucketed timelines, raw stream slices,
+  point-in-time state, loc trails, region-control bucket states) at
+  the caller's chosen window / fields / reducers. Every entry takes
+  at least one time-related option that the caller controls; static
+  derivations (`FragResult`, `LocGraphResult`, `MetadataResult`, …)
+  don't belong here and are served directly from result fields. Used
+  by the CLI's `-view` family of flags and the WASM bridge's
+  `getBuckets` / `getEvents` / `getStreamSlice` / `getStateAt` /
+  `getLocTrails` / `recomputeRegionControl` exports.
 - `loc/` — `.loc` file parser. For native builds the corpus is embedded
   via `//go:embed data/*.loc` (466 maps today); for WASM builds the host
   provides `fetchLocSync` so only the loc for the current demo is

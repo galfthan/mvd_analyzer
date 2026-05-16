@@ -106527,6 +106527,18 @@
       ],
       "stats": {
         "LG": {
+          "byPlayer": {
+            "42": {
+              "armed": 639,
+              "team": "42",
+              "unarmed": 6
+            },
+            "AHemlocksLie": {
+              "armed": 390,
+              "team": "AHemlocksLie",
+              "unarmed": 6
+            }
+          },
           "contested": 0,
           "empty": 91.3,
           "teamAControl": 3.3,
@@ -106536,6 +106548,18 @@
           "weakContested": 0
         },
         "RA": {
+          "byPlayer": {
+            "42": {
+              "armed": 179,
+              "team": "42",
+              "unarmed": 20
+            },
+            "AHemlocksLie": {
+              "armed": 430,
+              "team": "AHemlocksLie",
+              "unarmed": 225
+            }
+          },
           "contested": 0,
           "empty": 92.9,
           "teamAControl": 3.6,
@@ -106545,6 +106569,18 @@
           "weakContested": 0
         },
         "RL": {
+          "byPlayer": {
+            "42": {
+              "armed": 1808,
+              "team": "42",
+              "unarmed": 157
+            },
+            "AHemlocksLie": {
+              "armed": 1288,
+              "team": "AHemlocksLie",
+              "unarmed": 403
+            }
+          },
           "contested": 2.1,
           "empty": 72.3,
           "teamAControl": 8.7,
@@ -106554,8 +106590,8 @@
           "weakContested": 0
         }
       },
-      "teamA": "'tro",
-      "teamB": "red"
+      "teamA": "AHemlocksLie",
+      "teamB": "42"
     }
   },
   "weaponPickups": [

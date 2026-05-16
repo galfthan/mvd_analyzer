@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mvd-analyzer/mvd-analytics/analyzer"
 	"github.com/mvd-analyzer/mvd-api/internal/democache"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
@@ -660,23 +659,7 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
 		return
 	}
-	rc := res.TimelineAnalysis.RegionControl
-	teamOf := func(name string) string {
-		if res.Match == nil {
-			return ""
-		}
-		for _, p := range res.Match.Players {
-			if p.Name == name {
-				return p.Team
-			}
-		}
-		return ""
-	}
-	rcv, err := view.RegionControl(
-		res, rc.Regions, rc.TeamA, rc.TeamB,
-		teamOf, analyzer.ComputeRegionControl,
-		view.RegionControlOptions{WindowMs: windowMs},
-	)
+	rcv, err := view.RegionControl(res, view.RegionControlOptions{WindowMs: windowMs})
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "view_error", err.Error())
 		return

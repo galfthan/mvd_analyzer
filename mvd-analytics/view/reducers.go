@@ -1,12 +1,26 @@
-// Package view provides pure query functions over a finalised
-// result.Result. Each function reads result.Streams (the canonical
-// event-rate storage) and returns a derived shape — bucketed timelines,
-// raw stream slices, point-in-time state, tagged event lists, loc
-// trails, region control. No function mutates its input.
+// Package view provides time-parameterised queries over a finalised
+// result.Result. Every function here takes at least one time-related
+// option (window resolution, time range, point-in-time) that the
+// caller controls and re-walks result.Streams at the requested
+// resolution. Six entry points: Buckets, Events, StreamSlice,
+// StateAt, LocTrails, RegionControl.
 //
-// The query functions are the contract every transport (CLI, WASM,
-// future REST/MCP) shims over. None of them re-parse the demo or do
-// I/O; given the same Result they always produce the same output.
+// Static derivations the analyzer baked at parse time — FragResult,
+// MessagesResult, LocGraphResult, BackpackDrop, WeaponPickup,
+// MetadataResult, DemoInfoResult, MatchResult — don't belong here.
+// They have no caller-tunable parameters, so they're served directly
+// from result fields by the transport layer (mvd-api routes them
+// straight to JSON). The rule keeps view's surface coherent: if a
+// query has a time/window knob, it belongs in this package; if it
+// doesn't, it's a result-field passthrough elsewhere.
+//
+// All view functions read result.Streams (the canonical event-rate
+// storage) and return derived shapes — bucketed timelines, raw
+// stream slices, point-in-time state, tagged event lists, loc
+// trails, region-control bucket states. No function mutates its
+// input. Given the same Result and the same options they always
+// produce the same output; none of them re-parse the demo or do
+// I/O.
 package view
 
 import "fmt"
