@@ -249,12 +249,14 @@ Control rule (faithful port of `mvd-web/static/app.js:classifyRegionState`):
 least one armed player; weak = present but unarmed; contested = both
 present and armed. Dead players (`D=true` or `H<=0`) are skipped.
 
-`ComputeRegionControl` (Go pure function in
-`analyzer/region_control.go`) is callable post-analysis with edited
-regions: WASM exports `recomputeRegionControl(regionsJSON)` for the
-web UI; a future MCP wrapper imports the same function. The CLI's
-`-regions <path>` flag overrides the embedded per-map regions at
-analysis time.
+`view.RegionControl` (Go pure function in `view/region_control.go`)
+is callable post-analysis with edited regions, custom team labels,
+or a custom `teamOf` closure via `RegionControlOptions`. WASM
+exports `recomputeRegionControl(regionsJSON)` for the web UI's
+in-page region editing; the REST/MCP `/v1/demos/{id}/region-control`
+endpoint exposes the same function with a `windowMs` query
+parameter. The CLI's `-regions <path>` flag overrides the embedded
+per-map regions at analysis time, before the result is cached.
 
 ### ControlRegion
 
@@ -563,8 +565,11 @@ the underlying loc stream).
 #### RegionControl
 
 Re-derives per-bucket region state strings at the requested
-`WindowMs`. Takes a `RegionControlClassifier` callback so the view
-package stays independent of the analyser's classifier.
+`WindowMs`. Options (`RegionControlOptions`) optionally override
+the regions (caller-edited region defs from the web UI), `TeamA`/
+`TeamB` labels, and the `teamOf` lookup; defaults pull from
+`TimelineAnalysisResult.RegionControl.Regions` (set at parse time)
+and `r.Match.Players` (post-normalize team mapping).
 
 ## MetadataResult (`metadata`)
 

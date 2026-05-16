@@ -153,10 +153,14 @@ and six for the view query layer:
   layer.
 - **[`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md)**
   — view types (`BucketsView`, `EventsView`, `StreamSliceView`,
-  `StateAtView`, `LocTrailsView`), the field-code vocabulary, the
-  reducer registry, the `RegionControlResult` shape, and the
-  underlying `Result` / `Streams` types. View outputs are the same
-  whether reached via WASM, the CLI, or MCP.
+  `StateAtView`, `LocTrailsView`, `RegionControlResult`), the
+  field-code vocabulary, the reducer registry, and the underlying
+  `Result` / `Streams` types. View outputs are the same whether
+  reached via WASM, the CLI, or MCP. The view layer is the
+  parameterised-query seam — any function that takes a time / window
+  knob lives there; static analyzer derivations
+  (`FragResult`, `LocGraphResult`, `MetadataResult`, …) are served
+  directly from result fields by the REST/MCP layer.
 
 Tool errors come back as MCP `isError: true` results with the upstream
 error message in `TextContent`. The model can read them and recover

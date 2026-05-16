@@ -345,19 +345,9 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 		if ta == nil || ta.RegionControl == nil {
 			return fmt.Errorf("region-control unavailable for this demo")
 		}
-		teamOf := func(name string) string {
-			for _, p := range res.Match.Players {
-				if p.Name == name {
-					return p.Team
-				}
-			}
-			return ""
-		}
-		rcv, err := view.RegionControl(
-			res, ta.RegionControl.Regions, ta.RegionControl.TeamA, ta.RegionControl.TeamB,
-			teamOf, analyzer.ComputeRegionControl,
-			view.RegionControlOptions{WindowMs: int(vopts.bucketDur / time.Millisecond)},
-		)
+		rcv, err := view.RegionControl(res, view.RegionControlOptions{
+			WindowMs: int(vopts.bucketDur / time.Millisecond),
+		})
 		if err != nil {
 			return err
 		}

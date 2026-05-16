@@ -5,7 +5,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"strings"
 	"syscall/js"
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
@@ -207,10 +206,9 @@ func getLocTrails(this js.Value, args []js.Value) interface{} {
 }
 
 // recomputeRegionControl is the JS-callable region recompute hook.
-// At schema v7 it walks result.Streams natively (via
-// analyzer.ComputeRegionControl, which reads PositionTrack.Li + the
-// RL/LG interval streams per native sample) — no bucket intermediate
-// and no read of the deleted ta.HighResBuckets field.
+// Walks result.Streams via view.RegionControl with caller-supplied
+// region overrides (the user edits region definitions in the map
+// tab UI).
 //
 // The caller passes a JSON string of {"regions":[{"name":...,"locs":[...]}]}.
 // Returns an error envelope when no demo has been analysed yet, the
@@ -232,7 +230,6 @@ func recomputeRegionControl(this js.Value, args []js.Value) interface{} {
 		return errorJSON("region control unavailable (non-binary team layout)")
 	}
 
-	nameToTeam := buildNameToTeam(lastResult)
 	regions := make([]result.ControlRegion, 0, len(ov.Regions))
 	for _, r := range ov.Regions {
 		regions = append(regions, result.ControlRegion{
@@ -240,22 +237,16 @@ func recomputeRegionControl(this js.Value, args []js.Value) interface{} {
 			Locs: append([]string(nil), r.Locs...),
 		})
 	}
-	teamOf := func(name string) string {
-		// Strip the "#slot" disambiguation suffix (D12) if present so
-		// regions classifier sees the canonical name.
-		base := name
-		if idx := strings.LastIndex(name, "#"); idx >= 0 {
-			base = name[:idx]
-		}
-		return nameToTeam[base]
-	}
-
-	rcv, err := view.RegionControl(
-		lastResult, regions,
-		ta.RegionControl.TeamA, ta.RegionControl.TeamB,
-		teamOf, analyzer.ComputeRegionControl,
-		view.RegionControlOptions{WindowMs: 50},
-	)
+	// view.RegionControl's default teamOf already handles the
+	// disambiguation suffix via Match.Players lookup, so we don't need
+	// to pass TeamOf explicitly. Regions are caller-edited and must be
+	// passed via the override.
+	rcv, err := view.RegionControl(lastResult, view.RegionControlOptions{
+		WindowMs: 50,
+		Regions:  regions,
+		TeamA:    ta.RegionControl.TeamA,
+		TeamB:    ta.RegionControl.TeamB,
+	})
 	if err != nil {
 		return errorJSON(err.Error())
 	}
@@ -265,30 +256,6 @@ func recomputeRegionControl(this js.Value, args []js.Value) interface{} {
 		return errorJSON(err.Error())
 	}
 	return string(b)
-}
-
-// buildNameToTeam derives a player-name -> team mapping from the
-// analysed result. Prefers Match.Players (the canonical scoreboard
-// view); falls back to demoinfo if Match is absent.
-func buildNameToTeam(r *analyzer.Result) map[string]string {
-	m := make(map[string]string)
-	if r.Match != nil {
-		for _, p := range r.Match.Players {
-			if p.Name != "" && p.Team != "" {
-				m[p.Name] = p.Team
-			}
-		}
-	}
-	if r.DemoInfo != nil {
-		for _, p := range r.DemoInfo.Players {
-			if p.Name != "" && p.Team != "" {
-				if _, ok := m[p.Name]; !ok {
-					m[p.Name] = p.Team
-				}
-			}
-		}
-	}
-	return m
 }
 
 func errorJSON(msg string) string {

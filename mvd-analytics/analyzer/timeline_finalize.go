@@ -189,7 +189,13 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		result.Streams = streams
 	}
 
-	// Region control: reads result.Streams via ComputeRegionControl.
+	// Region control: detect regions + resolve team labels. The
+	// per-bucket classification (BucketStates, Stats) is filled by the
+	// regionControlPost post-processor, which calls view.RegionControl
+	// on the assembled Result. We keep the analyzer-side work here
+	// because region detection depends on locFinder + region overrides
+	// + the analyzer's slot-to-team mapping (none of which view/
+	// should reach for).
 	if a.locFinder != nil {
 		regions := a.buildControlRegions()
 		for i := range regions {
@@ -234,23 +240,8 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 					}
 					sort.Strings(teamNames)
 				}
-				teamA, teamB := teamNames[0], teamNames[1]
-
-				nameToTeam := make(map[string]string, len(slotToName))
-				for slot, name := range slotToName {
-					if t, ok := slotToTeam[slot]; ok && name != "" {
-						nameToTeam[name] = t
-					}
-				}
-				teamOf := func(name string) string { return nameToTeam[name] }
-
-				bucketStates, stats := ComputeRegionControl(
-					result, regions, teamA, teamB, teamOf, 50,
-				)
-				regionControl.TeamA = teamA
-				regionControl.TeamB = teamB
-				regionControl.BucketStates = bucketStates
-				regionControl.Stats = stats
+				regionControl.TeamA = teamNames[0]
+				regionControl.TeamB = teamNames[1]
 			}
 			result.TimelineAnalysis.RegionControl = regionControl
 		}

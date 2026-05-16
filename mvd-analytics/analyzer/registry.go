@@ -208,7 +208,8 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 	// access. The default ordering (set in NewDefaultRegistry) is:
 	//   1. normalizeMatchRelativeTimes
 	//   2. normalizeDuelTeams
-	//   3. buildLocGraphPost
+	//   3. locGraphPost
+	//   4. regionControlPost
 	// — but the slice is otherwise unconstrained. Add a step by
 	// calling r.RegisterPostProcessor(...) before Analyze.
 	for _, p := range r.postProcessors {
@@ -250,11 +251,13 @@ func NewDefaultRegistry() *Registry {
 
 	// Post-processors run in registration order on the assembled
 	// Result. Order matters: time normalisation has to land first so
-	// duel team rewrite and loc graph construction see match-relative
-	// timestamps; locgraph runs last because it consumes the
-	// already-rewritten team labels and timeline buckets.
+	// downstream processors see match-relative timestamps; duel team
+	// rewrite next so per-player team labels are stable; locgraph and
+	// regionControl last because they consume both rewritten teams
+	// and normalised time anchors.
 	r.RegisterPostProcessor(normalizeMatchRelativeTimes)
 	r.RegisterPostProcessor(duelTeamNormalize)
 	r.RegisterPostProcessor(locGraphPost)
+	r.RegisterPostProcessor(regionControlPost)
 	return r
 }

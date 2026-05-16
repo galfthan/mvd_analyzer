@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/view"
 )
 
 // Default post-processors for the registry. Each one is registered by
@@ -278,4 +279,40 @@ func duelTeamNormalize(res *Result, _ *CoreOutputs) {
 // the same time base and team labels as the rest of the result.
 func locGraphPost(res *Result, _ *CoreOutputs) {
 	res.LocGraph = BuildLocGraph(res)
+}
+
+// regionControlPost runs view.RegionControl on the assembled Result to
+// fill in TimelineAnalysisResult.RegionControl.BucketStates and Stats.
+// The analyzer's Finalize has already populated Regions/TeamA/TeamB
+// from analyzer-internal state (locFinder, slotToTeam, region
+// auto-detection); the view function reads those plus result.Streams
+// and emits the classified bucket states + percentages.
+//
+// Must run after normalizeMatchRelativeTimes (so MatchStart=0) and
+// after duelTeamNormalize (so per-player team labels are stable).
+func regionControlPost(res *Result, _ *CoreOutputs) {
+	if res == nil || res.TimelineAnalysis == nil {
+		return
+	}
+	existing := res.TimelineAnalysis.RegionControl
+	if existing == nil || len(existing.Regions) == 0 {
+		return
+	}
+	rc, err := view.RegionControl(res, view.RegionControlOptions{})
+	if err != nil || rc == nil {
+		return
+	}
+	// Finalize wrote Regions + tentative TeamA/TeamB (computed pre-
+	// duel-normalize). The view recomputes TeamA/TeamB from the now-
+	// canonical Match.Players and fills BucketStates/Stats. Overwrite
+	// both so external view-time callers see the same labels the
+	// classifier used.
+	if rc.TeamA != "" {
+		existing.TeamA = rc.TeamA
+	}
+	if rc.TeamB != "" {
+		existing.TeamB = rc.TeamB
+	}
+	existing.BucketStates = rc.BucketStates
+	existing.Stats = rc.Stats
 }
