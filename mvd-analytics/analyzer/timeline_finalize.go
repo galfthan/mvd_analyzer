@@ -158,9 +158,10 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// Detect top 5 longest frag streaks for Key Moments
 	fragStreaks := a.detectFragStreaks(10, names, playerUserIDsByName)
 
-	// Build result.TimelineAnalysis (sans RegionControl for now) and
-	// then result.Streams — both are needed by ComputeRegionControl
-	// in the new (v7) flow that walks streams directly.
+	// Build result.TimelineAnalysis (with regions but no BucketStates
+	// yet) and then result.Streams — both are needed by
+	// regionControlPost (which calls view.RegionControl) to fill in
+	// BucketStates/Stats from streams.
 	result.TimelineAnalysis = &TimelineAnalysisResult{
 		MatchStartTime: msTime(a.timing.StartTime),
 		FragEvents:     fragEvents,

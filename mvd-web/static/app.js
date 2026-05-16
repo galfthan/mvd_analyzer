@@ -3886,9 +3886,9 @@ function updateScoreTimeline(startTime, endTime) {
 //
 // One row per control region; each row colors contiguous spans by indexing
 // into mapState.bucketStates (the Go-supplied per-bucket state strings from
-// analyzer.ComputeRegionControl). Only the "strong" states (solo armed
-// control + armed-vs-armed contested) paint pixels — weak states render as
-// gaps to keep the color story readable.
+// view.RegionControl). Only the "strong" states (solo armed control +
+// armed-vs-armed contested) paint pixels — weak states render as gaps to
+// keep the color story readable.
 
 const RC_ROW_H = 20;
 const RC_AXIS_H = 20;
@@ -5193,9 +5193,9 @@ async function applyRegionConfig() {
         }
     }
 
-    // Recompute control stats via the WASM bridge
-    // (analyzer.ComputeRegionControl). Built and shipped together
-    // with this JS, so the export is always available.
+    // Recompute control stats via the WASM bridge (view.RegionControl).
+    // Built and shipped together with this JS, so the export is always
+    // available.
     const overrideJSON = JSON.stringify({
         regions: regions.map(r => ({
             name: r.name,
@@ -5350,7 +5350,7 @@ function cellBg(color, pct, intensityScale) {
 }
 
 // Look up region control state at a given time by indexing into the
-// Go-supplied bucketStates strings (analyzer.ComputeRegionControl).
+// Go-supplied bucketStates strings (view.RegionControl).
 function getRegionControlAtTime(time) {
     if (!mapState.controlRegions || !mapState.bucketStates) return null;
     const idx = findHighResBucketIndexAtTime(time);

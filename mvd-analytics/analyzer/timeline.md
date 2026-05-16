@@ -67,18 +67,22 @@ The analyser is split across several files:
    (`mvd-analytics/config/regions/<map>.json`) or auto-detection in
    `timeline_regions.go`. A CLI flag (`-regions <path>`) or
    `Registry.SetRegionsOverride` can replace them at runtime.
-7. **Region control** (`ComputeRegionControl` in
-   [`region_control.go`](region_control.go)): walks each player's
-   `PositionTrack` natively. For each bucket window, sample the
-   player's Li at `bucketStart` (carry-forward from the latest
-   position sample) and the armed state via the RL/LG interval
-   streams. Classify each bucket into one of seven states (empty,
-   teamA[Weak]Control, teamB[Weak]Control, contested,
-   weakContested). Output is per-region `bucketStates` (one ASCII
-   char per bucket) + match-aggregate `stats`. `view.RegionControl`
-   wraps this as a query function callable from any transport;
-   WASM exposes `recomputeRegionControl` for the web UI's
-   region-edit flow.
+7. **Region control** (`view.RegionControl` in
+   [`../view/region_control.go`](../view/region_control.go)):
+   walks each player's `PositionTrack` natively. For each bucket
+   window, sample the player's Li at `bucketStart` (carry-forward
+   from the latest position sample) and the armed state via the
+   RL/LG interval streams. Classify each bucket into one of seven
+   states (empty, teamA[Weak]Control, teamB[Weak]Control,
+   contested, weakContested). Output is per-region `bucketStates`
+   (one ASCII char per bucket) + match-aggregate `stats`. Region
+   definitions and team labels come from `TimelineAnalysisResult.
+   RegionControl` (populated by analyzer Finalize); `BucketStates`
+   and `Stats` are filled by the `regionControlPost` post-processor
+   calling the view function with defaults. WASM exposes
+   `recomputeRegionControl` for the web UI's region-edit flow,
+   which calls `view.RegionControl` directly with the edited
+   regions as an option override.
 8. **Powerups.** Each player's Quad/Pent/Ring interval list maps
    directly to `PowerupEvent` records (one per closed interval).
    Frag-during-powerup counts attach during finalize via

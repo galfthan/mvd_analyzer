@@ -242,8 +242,8 @@ func shiftAndFilterInts(stream []int32, matchStartMs int32) []int32 {
 
 // shiftAndFilterPosition trims pre-match position samples and shifts
 // the survivors. Mutates pt in place. Must keep all five columns
-// (T/X/Y/Z/Li) aligned — BuildLocGraph and ComputeRegionControl
-// both guard on `len(pt.Li) == len(pt.T)` and will silently skip the
+// (T/X/Y/Z/Li) aligned — BuildLocGraph and view.RegionControl both
+// guard on `len(pt.Li) == len(pt.T)` and will silently skip the
 // player if the lengths drift. All time arithmetic is int32 ms.
 func shiftAndFilterPosition(pt *result.PositionTrack, matchStartMs int32) {
 	if pt == nil || len(pt.T) == 0 {
