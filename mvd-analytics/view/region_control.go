@@ -29,12 +29,21 @@ const (
 // where the user is editing region definitions in the UI — pass
 // explicit Regions / TeamA / TeamB / TeamOf overrides.
 type RegionControlOptions struct {
-	WindowMs int                      // bucket resolution; 0 → 50
-	Regions  []result.ControlRegion   // overrides r.TimelineAnalysis.RegionControl.Regions
-	TeamA    string                   // overrides r.TimelineAnalysis.RegionControl.TeamA
-	TeamB    string                   // overrides r.TimelineAnalysis.RegionControl.TeamB
-	TeamOf   func(name string) string // overrides default closure over r.Match.Players
+	WindowMs  int                      // bucket resolution; 0 → 50
+	StartTime float64                  // sub-window lower bound in seconds; 0 → match start
+	EndTime   float64                  // sub-window upper bound in seconds; 0 → match end
+	Regions   []result.ControlRegion   // overrides r.TimelineAnalysis.RegionControl.Regions
+	TeamA     string                   // overrides r.TimelineAnalysis.RegionControl.TeamA
+	TeamB     string                   // overrides r.TimelineAnalysis.RegionControl.TeamB
+	TeamOf    func(name string) string // overrides default closure over r.Match.Players
 }
+
+// RegionControlView aliases result.RegionControlResult so the view-
+// package surface uses the same XxxView vocabulary as the other view
+// functions. The aliased type is the canonical one because the same
+// shape is baked into parse-time Result by the regionControlPost
+// post-processor.
+type RegionControlView = result.RegionControlResult
 
 // RegionControl computes per-bucket region presence + armed-state
 // classification (A/a/B/b/C/c/_) and match-aggregate state
@@ -117,13 +126,20 @@ func RegionControl(r *result.Result, opts RegionControlOptions) (*result.RegionC
 		}
 	}
 
-	// 4. Window resolution.
+	// 4. Window resolution + optional sub-window.
 	windowMs := opts.WindowMs
 	if windowMs <= 0 {
 		windowMs = 50
 	}
+	var startMs, endMs int32
+	if opts.StartTime > 0 {
+		startMs = int32(opts.StartTime * 1000)
+	}
+	if opts.EndTime > 0 {
+		endMs = int32(opts.EndTime * 1000)
+	}
 
-	bucketStates, stats := classifyRegions(r, regions, teamA, teamB, teamOf, windowMs)
+	bucketStates, stats := classifyRegions(r, regions, teamA, teamB, teamOf, windowMs, startMs, endMs)
 	out.BucketStates = bucketStates
 	out.Stats = stats
 	return out, nil
@@ -242,12 +258,16 @@ func defaultNameToTeam(r *result.Result) map[string]string {
 // classifyRegions is the per-bucket walker — formerly
 // analyzer.ComputeRegionControl. Kept private; callers go through
 // RegionControl, which resolves defaults from the Result.
+//
+// optsStartMs / optsEndMs clamp the bucket grid to a sub-window; 0
+// means "no override" (use MatchStart / MatchEnd respectively).
 func classifyRegions(
 	r *result.Result,
 	regions []result.ControlRegion,
 	teamA, teamB string,
 	teamOf func(playerName string) string,
 	windowMs int,
+	optsStartMs, optsEndMs int32,
 ) (map[string]string, map[string]result.RegionStats) {
 	if r == nil || r.Streams == nil || len(regions) == 0 {
 		return nil, nil
@@ -283,17 +303,25 @@ func classifyRegions(
 		return nil, nil
 	}
 
-	// Bucket grid is anchored at MatchStart. At Finalize MatchStart is
-	// the wall-clock match-start ms; after normalizeMatchRelativeTimes
-	// it is 0 and MatchEnd is the duration. Either way the per-bucket
-	// window is [MatchStart + bi*dur, MatchStart + (bi+1)*dur).
+	// Bucket grid is anchored at MatchStart (after
+	// normalizeMatchRelativeTimes that's 0). The optional sub-window
+	// clamps to a tighter range; default behaviour (both opts zero)
+	// covers the full match.
 	matchStart := r.Streams.Global.MatchStart
 	matchEnd := r.Streams.Global.MatchEnd
-	if matchEnd <= matchStart {
+	gridStart := matchStart
+	gridEnd := matchEnd
+	if optsStartMs > gridStart {
+		gridStart = optsStartMs
+	}
+	if optsEndMs > 0 && optsEndMs < gridEnd {
+		gridEnd = optsEndMs
+	}
+	if gridEnd <= gridStart {
 		return nil, nil
 	}
 	// Round-half-up integer division.
-	nBuckets := int((matchEnd - matchStart + bucketDurMs/2) / bucketDurMs)
+	nBuckets := int((gridEnd - gridStart + bucketDurMs/2) / bucketDurMs)
 	if nBuckets <= 0 {
 		return nil, nil
 	}
@@ -305,6 +333,19 @@ func classifyRegions(
 		for _, rg := range regions {
 			presence[i][rg.Name] = &counts{}
 		}
+	}
+
+	// Per-region per-player attribution tally. Counted in lock-step with
+	// the team-aggregate `presence` above so the two views never disagree
+	// about who was where.
+	type playerTally struct {
+		team    string
+		armed   int
+		unarmed int
+	}
+	byPlayer := make(map[string]map[string]*playerTally, len(regions))
+	for _, rg := range regions {
+		byPlayer[rg.Name] = make(map[string]*playerTally)
 	}
 
 	// Per-player walk: for each bucket find the latest position sample
@@ -320,7 +361,7 @@ func classifyRegions(
 		}
 		sIdx := 0
 		for bi := 0; bi < nBuckets; bi++ {
-			bucketStart := matchStart + int32(bi)*bucketDurMs
+			bucketStart := gridStart + int32(bi)*bucketDurMs
 			for sIdx+1 < len(pt.T) && pt.T[sIdx+1] <= bucketStart {
 				sIdx++
 			}
@@ -355,6 +396,19 @@ func classifyRegions(
 				} else {
 					c.bNo++
 				}
+			}
+			// Per-player attribution: bump this player's counter for
+			// this region. Lazy-allocate so we only record entries for
+			// players that actually appeared in the region.
+			pt := byPlayer[regionName][p.Name]
+			if pt == nil {
+				pt = &playerTally{team: team}
+				byPlayer[regionName][p.Name] = pt
+			}
+			if armed {
+				pt.armed++
+			} else {
+				pt.unarmed++
 			}
 		}
 	}
@@ -398,7 +452,7 @@ func classifyRegions(
 	for _, rg := range regions {
 		bucketStates[rg.Name] = string(stateBuf[rg.Name])
 		t := totals[rg.Name]
-		stats[rg.Name] = result.RegionStats{
+		rgStats := result.RegionStats{
 			TeamAControl:     pct(t.TeamAControl),
 			TeamAWeakControl: pct(t.TeamAWeakControl),
 			Contested:        pct(t.Contested),
@@ -407,6 +461,17 @@ func classifyRegions(
 			TeamBWeakControl: pct(t.TeamBWeakControl),
 			TeamBControl:     pct(t.TeamBControl),
 		}
+		if pm := byPlayer[rg.Name]; len(pm) > 0 {
+			rgStats.ByPlayer = make(map[string]result.RegionPlayerStats, len(pm))
+			for name, t := range pm {
+				rgStats.ByPlayer[name] = result.RegionPlayerStats{
+					Team:    t.team,
+					Armed:   t.armed,
+					Unarmed: t.unarmed,
+				}
+			}
+		}
+		stats[rg.Name] = rgStats
 	}
 	return bucketStates, stats
 }

@@ -270,9 +270,35 @@ per-map regions at analysis time, before the result is cached.
 
 ### RegionStats
 
-`{ teamAControl, teamAWeakControl, contested, weakContested, empty,
-teamBWeakControl, teamBControl }`. Each value is a percentage 0..100
-with one decimal place; the seven sum to 100 within rounding.
+```
+RegionStats = {
+  // Seven aggregate control-state percentages (0..100, one decimal,
+  // sum to 100 within rounding).
+  "teamAControl":     float,
+  "teamAWeakControl": float,
+  "contested":        float,
+  "weakContested":    float,
+  "empty":            float,
+  "teamBWeakControl": float,
+  "teamBControl":     float,
+  // Per-player attribution. Map: player name → counts of buckets this
+  // player was present in the region. Multiply by the bucket WindowMs
+  // to convert to milliseconds of presence.
+  "byPlayer": {
+    "<player>": {
+      "team":    "<team>",
+      "armed":   <int>,  // buckets present carrying RL or LG
+      "unarmed": <int>   // buckets present without RL/LG
+    }, ...
+  }
+}
+```
+
+`byPlayer` answers "who was responsible for keeping <region>?" Sort
+its entries by `armed + unarmed` for total presence, or by `armed`
+alone for armed-presence share. Total per team in the region equals
+the team-aggregate state count, so you can also compute "what
+fraction of team A's presence in QUAD came from sailorman".
 
 ## Streams (`streams`)
 
@@ -564,12 +590,23 @@ the underlying loc stream).
 
 #### RegionControl
 
-Re-derives per-bucket region state strings at the requested
-`WindowMs`. Options (`RegionControlOptions`) optionally override
-the regions (caller-edited region defs from the web UI), `TeamA`/
-`TeamB` labels, and the `teamOf` lookup; defaults pull from
+Re-derives per-bucket region state strings + per-region per-player
+attribution (`RegionStats.byPlayer`) at the requested `WindowMs`,
+optionally clipped to a `[StartTime, EndTime)` sub-window. Options
+(`RegionControlOptions`) optionally override the regions (caller-
+edited region defs from the web UI), `TeamA`/`TeamB` labels, and
+the `teamOf` lookup; defaults pull from
 `TimelineAnalysisResult.RegionControl.Regions` (set at parse time)
-and `r.Match.Players` (post-normalize team mapping).
+and `r.Match.Players` (post-normalize team mapping). No `Players`
+filter — region control is by team; filtering individuals would
+skew the team tallies. To attribute control to specific players,
+read the `byPlayer` field on each `RegionStats`.
+
+The function's view-layer return type is aliased as
+`RegionControlView = result.RegionControlResult` so the
+`XxxView` naming is symmetric with the other five views;
+the aliased type is the canonical one because the same shape is
+baked into parse-time Result.
 
 ## MetadataResult (`metadata`)
 

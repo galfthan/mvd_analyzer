@@ -225457,6 +225457,28 @@
       ],
       "stats": {
         "QUAD": {
+          "byPlayer": {
+            "psy*overon": {
+              "armed": 3033,
+              "team": "pys",
+              "unarmed": 627
+            },
+            "wd.cao": {
+              "armed": 2285,
+              "team": "wd",
+              "unarmed": 1655
+            },
+            "wd.char": {
+              "armed": 3127,
+              "team": "wd",
+              "unarmed": 423
+            },
+            "wd.dilbert": {
+              "armed": 2795,
+              "team": "pys",
+              "unarmed": 1531
+            }
+          },
           "contested": 19,
           "empty": 27.1,
           "teamAControl": 17.8,
@@ -225466,6 +225488,28 @@
           "weakContested": 1.5
         },
         "RA": {
+          "byPlayer": {
+            "psy*overon": {
+              "armed": 1421,
+              "team": "pys",
+              "unarmed": 508
+            },
+            "wd.cao": {
+              "armed": 3260,
+              "team": "wd",
+              "unarmed": 230
+            },
+            "wd.char": {
+              "armed": 2932,
+              "team": "wd",
+              "unarmed": 162
+            },
+            "wd.dilbert": {
+              "armed": 2224,
+              "team": "pys",
+              "unarmed": 503
+            }
+          },
           "contested": 12.7,
           "empty": 33.8,
           "teamAControl": 33.6,
@@ -225475,6 +225519,28 @@
           "weakContested": 0.3
         },
         "RL": {
+          "byPlayer": {
+            "psy*overon": {
+              "armed": 1792,
+              "team": "pys",
+              "unarmed": 604
+            },
+            "wd.cao": {
+              "armed": 2007,
+              "team": "wd",
+              "unarmed": 434
+            },
+            "wd.char": {
+              "armed": 2274,
+              "team": "wd",
+              "unarmed": 297
+            },
+            "wd.dilbert": {
+              "armed": 2012,
+              "team": "pys",
+              "unarmed": 649
+            }
+          },
           "contested": 9.4,
           "empty": 39,
           "teamAControl": 23.4,

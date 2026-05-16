@@ -101311,6 +101311,18 @@
       ],
       "stats": {
         "LG": {
+          "byPlayer": {
+            "mj": {
+              "armed": 1787,
+              "team": "mj",
+              "unarmed": 537
+            },
+            "speedball": {
+              "armed": 2441,
+              "team": "speedball",
+              "unarmed": 105
+            }
+          },
           "contested": 2.1,
           "empty": 62.4,
           "teamAControl": 18.3,
@@ -101320,6 +101332,18 @@
           "weakContested": 0
         },
         "QUAD": {
+          "byPlayer": {
+            "mj": {
+              "armed": 122,
+              "team": "mj",
+              "unarmed": 0
+            },
+            "speedball": {
+              "armed": 67,
+              "team": "speedball",
+              "unarmed": 0
+            }
+          },
           "contested": 0,
           "empty": 98.4,
           "teamAControl": 0.6,
@@ -101329,6 +101353,18 @@
           "weakContested": 0
         },
         "RA": {
+          "byPlayer": {
+            "mj": {
+              "armed": 435,
+              "team": "mj",
+              "unarmed": 0
+            },
+            "speedball": {
+              "armed": 897,
+              "team": "speedball",
+              "unarmed": 0
+            }
+          },
           "contested": 0,
           "empty": 88.9,
           "teamAControl": 7.5,
@@ -101338,6 +101374,18 @@
           "weakContested": 0
         },
         "RL": {
+          "byPlayer": {
+            "mj": {
+              "armed": 1321,
+              "team": "mj",
+              "unarmed": 304
+            },
+            "speedball": {
+              "armed": 739,
+              "team": "speedball",
+              "unarmed": 39
+            }
+          },
           "contested": 0.6,
           "empty": 80.7,
           "teamAControl": 5.5,
@@ -101347,6 +101395,18 @@
           "weakContested": 0
         },
         "low.RL": {
+          "byPlayer": {
+            "mj": {
+              "armed": 1415,
+              "team": "mj",
+              "unarmed": 193
+            },
+            "speedball": {
+              "armed": 1728,
+              "team": "speedball",
+              "unarmed": 76
+            }
+          },
           "contested": 2.1,
           "empty": 74.3,
           "teamAControl": 12.4,

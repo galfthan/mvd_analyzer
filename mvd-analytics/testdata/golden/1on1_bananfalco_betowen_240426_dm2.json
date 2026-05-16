@@ -47818,6 +47818,18 @@
       ],
       "stats": {
         "Backroom": {
+          "byPlayer": {
+            "banan falco": {
+              "armed": 791,
+              "team": "banan falco",
+              "unarmed": 0
+            },
+            "betowen": {
+              "armed": 1004,
+              "team": "betowen",
+              "unarmed": 0
+            }
+          },
           "contested": 0.5,
           "empty": 85.5,
           "teamAControl": 7.9,
@@ -47827,6 +47839,18 @@
           "weakContested": 0
         },
         "QUAD": {
+          "byPlayer": {
+            "banan falco": {
+              "armed": 1214,
+              "team": "banan falco",
+              "unarmed": 46
+            },
+            "betowen": {
+              "armed": 898,
+              "team": "betowen",
+              "unarmed": 245
+            }
+          },
           "contested": 0.5,
           "empty": 80.9,
           "teamAControl": 7,
@@ -47836,6 +47860,18 @@
           "weakContested": 0
         },
         "Secret": {
+          "byPlayer": {
+            "banan falco": {
+              "armed": 255,
+              "team": "banan falco",
+              "unarmed": 0
+            },
+            "betowen": {
+              "armed": 132,
+              "team": "betowen",
+              "unarmed": 6
+            }
+          },
           "contested": 0,
           "empty": 96.8,
           "teamAControl": 1.1,
@@ -47845,6 +47881,18 @@
           "weakContested": 0
         },
         "Tele": {
+          "byPlayer": {
+            "banan falco": {
+              "armed": 1099,
+              "team": "banan falco",
+              "unarmed": 790
+            },
+            "betowen": {
+              "armed": 852,
+              "team": "betowen",
+              "unarmed": 1258
+            }
+          },
           "contested": 0.8,
           "empty": 69.1,
           "teamAControl": 6.3,
@@ -47854,6 +47902,18 @@
           "weakContested": 0
         },
         "high.RL": {
+          "byPlayer": {
+            "banan falco": {
+              "armed": 347,
+              "team": "banan falco",
+              "unarmed": 59
+            },
+            "betowen": {
+              "armed": 130,
+              "team": "betowen",
+              "unarmed": 38
+            }
+          },
           "contested": 0.3,
           "empty": 95.5,
           "teamAControl": 0.8,
@@ -47863,6 +47923,18 @@
           "weakContested": 0
         },
         "low.RL": {
+          "byPlayer": {
+            "banan falco": {
+              "armed": 1274,
+              "team": "banan falco",
+              "unarmed": 81
+            },
+            "betowen": {
+              "armed": 1258,
+              "team": "betowen",
+              "unarmed": 209
+            }
+          },
           "contested": 0.9,
           "empty": 77.4,
           "teamAControl": 9.6,

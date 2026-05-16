@@ -224492,6 +224492,28 @@
       ],
       "stats": {
         "LG": {
+          "byPlayer": {
+            "SS": {
+              "armed": 155,
+              "team": "nAnI",
+              "unarmed": 0
+            },
+            "gLAd": {
+              "armed": 457,
+              "team": "nAnI",
+              "unarmed": 14
+            },
+            "kippo": {
+              "armed": 638,
+              "team": "pora",
+              "unarmed": 4
+            },
+            "rusti": {
+              "armed": 134,
+              "team": "pora",
+              "unarmed": 2
+            }
+          },
           "contested": 0.4,
           "empty": 88.9,
           "teamAControl": 4.6,
@@ -224501,6 +224523,28 @@
           "weakContested": 0
         },
         "RA": {
+          "byPlayer": {
+            "SS": {
+              "armed": 5489,
+              "team": "nAnI",
+              "unarmed": 572
+            },
+            "gLAd": {
+              "armed": 4301,
+              "team": "nAnI",
+              "unarmed": 225
+            },
+            "kippo": {
+              "armed": 2677,
+              "team": "pora",
+              "unarmed": 824
+            },
+            "rusti": {
+              "armed": 4472,
+              "team": "pora",
+              "unarmed": 442
+            }
+          },
           "contested": 23.7,
           "empty": 10.7,
           "teamAControl": 37.2,

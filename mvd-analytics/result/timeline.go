@@ -65,14 +65,31 @@ type RegionControlResult struct {
 // RegionStats is the match-aggregate share of each control state for a
 // single region, expressed as a percentage (0..100, one decimal place).
 // The seven values sum to 100 within rounding.
+//
+// ByPlayer attributes presence to individual players: who actually held
+// the region. Each entry counts the number of buckets that player was
+// observed in the region, split by whether they were armed (carrying
+// RL or LG) at the time. Consumers answer "who kept red?" by sorting
+// the region's ByPlayer entries by Armed+Unarmed descending; "who was
+// the armed presence?" by sorting on Armed alone.
 type RegionStats struct {
-	TeamAControl     float64 `json:"teamAControl"`
-	TeamAWeakControl float64 `json:"teamAWeakControl"`
-	Contested        float64 `json:"contested"`
-	WeakContested    float64 `json:"weakContested"`
-	Empty            float64 `json:"empty"`
-	TeamBWeakControl float64 `json:"teamBWeakControl"`
-	TeamBControl     float64 `json:"teamBControl"`
+	TeamAControl     float64                      `json:"teamAControl"`
+	TeamAWeakControl float64                      `json:"teamAWeakControl"`
+	Contested        float64                      `json:"contested"`
+	WeakContested    float64                      `json:"weakContested"`
+	Empty            float64                      `json:"empty"`
+	TeamBWeakControl float64                      `json:"teamBWeakControl"`
+	TeamBControl     float64                      `json:"teamBControl"`
+	ByPlayer         map[string]RegionPlayerStats `json:"byPlayer,omitempty"`
+}
+
+// RegionPlayerStats is one player's presence in one region, summed
+// across all buckets in the (sub-)match window. Multiplying Armed or
+// Unarmed by the bucket WindowMs yields presence in milliseconds.
+type RegionPlayerStats struct {
+	Team    string `json:"team"`
+	Armed   int    `json:"armed"`   // bucket count present while carrying RL or LG
+	Unarmed int    `json:"unarmed"` // bucket count present without RL/LG
 }
 
 // HighResBucket is a compact bucket for high-resolution timeline data.

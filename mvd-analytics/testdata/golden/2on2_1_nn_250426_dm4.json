@@ -237569,6 +237569,28 @@
       ],
       "stats": {
         "LG": {
+          "byPlayer": {
+            "Milton": {
+              "armed": 1765,
+              "team": "1",
+              "unarmed": 142
+            },
+            "shazam": {
+              "armed": 2186,
+              "team": "n n",
+              "unarmed": 143
+            },
+            "squeeze": {
+              "armed": 1435,
+              "team": "1",
+              "unarmed": 105
+            },
+            "stepcop": {
+              "armed": 1015,
+              "team": "n n",
+              "unarmed": 159
+            }
+          },
           "contested": 2.6,
           "empty": 50,
           "teamAControl": 22.1,
@@ -237578,6 +237600,28 @@
           "weakContested": 0
         },
         "QUAD": {
+          "byPlayer": {
+            "Milton": {
+              "armed": 999,
+              "team": "1",
+              "unarmed": 236
+            },
+            "shazam": {
+              "armed": 1041,
+              "team": "n n",
+              "unarmed": 409
+            },
+            "squeeze": {
+              "armed": 855,
+              "team": "1",
+              "unarmed": 408
+            },
+            "stepcop": {
+              "armed": 1500,
+              "team": "n n",
+              "unarmed": 437
+            }
+          },
           "contested": 2,
           "empty": 56.4,
           "teamAControl": 12.8,
@@ -237587,6 +237631,28 @@
           "weakContested": 0
         },
         "RA": {
+          "byPlayer": {
+            "Milton": {
+              "armed": 938,
+              "team": "1",
+              "unarmed": 180
+            },
+            "shazam": {
+              "armed": 475,
+              "team": "n n",
+              "unarmed": 228
+            },
+            "squeeze": {
+              "armed": 1255,
+              "team": "1",
+              "unarmed": 124
+            },
+            "stepcop": {
+              "armed": 982,
+              "team": "n n",
+              "unarmed": 309
+            }
+          },
           "contested": 1.7,
           "empty": 66.1,
           "teamAControl": 15.9,
