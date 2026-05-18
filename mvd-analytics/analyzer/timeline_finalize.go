@@ -3,7 +3,7 @@ package analyzer
 import (
 	"sort"
 
-	"github.com/mvd-analyzer/mvd-analytics/loc"
+	"github.com/mvd-analyzer/mvd-analytics/locvis"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -14,7 +14,7 @@ import (
 func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// Try to load loc file from DemoInfo.Map if not already loaded
 	if a.locFinder == nil && a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
-		if finder, err := loc.LoadForMap(a.core.DemoInfo.Map); err == nil {
+		if finder, err := locvis.LoadForMap(a.core.DemoInfo.Map); err == nil {
 			a.locFinder = finder
 		}
 	}

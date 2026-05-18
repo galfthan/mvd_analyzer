@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mvd-analyzer/mvd-analytics/loc"
+	"github.com/mvd-analyzer/mvd-analytics/locvis"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -45,7 +45,7 @@ type ItemAnalyzer struct {
 	playerPosTime map[int]float64 // slot -> time of last position update
 	playerPosHist map[int][]posSample // slot -> recent position samples (for synthesis)
 	mapName   string
-	locFinder *loc.Finder
+	locFinder *locvis.Finder
 	timing    MatchTimingDetector
 
 	// Per-slot stat snapshots used to produce delta-based evidence.
@@ -1083,7 +1083,7 @@ func (a *ItemAnalyzer) Finalize(result *Result) error {
 
 	// Best-effort loc lookup — does NOT affect whether items appear.
 	if a.locFinder == nil && a.mapName != "" {
-		if f, err := loc.LoadForMap(a.mapName); err == nil {
+		if f, err := locvis.LoadForMap(a.mapName); err == nil {
 			a.locFinder = f
 		}
 	}

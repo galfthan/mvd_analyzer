@@ -2,7 +2,7 @@ package analyzer
 
 import (
 	"github.com/mvd-analyzer/mvd-analytics/config"
-	"github.com/mvd-analyzer/mvd-analytics/loc"
+	"github.com/mvd-analyzer/mvd-analytics/locvis"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -31,7 +31,7 @@ type TimelineAnalyzer struct {
 	rawDeaths       []deathEvent   // Raw death events (player num, time)
 	rawSpawns       []deathEvent   // Raw spawn events (reusing deathEvent type)
 	timing          MatchTimingDetector
-	locFinder       *loc.Finder                // Location finder for map (nil if no .loc file)
+	locFinder       *locvis.Finder             // Visibility-aware loc finder for map (nil if no .loc file)
 	blipThresholdMs int                        // Per-player loc smoothing threshold, 0 disables
 	regionsOverride []config.MapRegionOverride // Optional caller-supplied region defs (e.g. CLI -regions). When non-nil, overrides config.RegionsForMap.
 }
@@ -124,8 +124,10 @@ func (a *TimelineAnalyzer) Init(ctx *Context) error {
 	return nil
 }
 
-// SetLocFinder sets the location finder for map position lookups
-func (a *TimelineAnalyzer) SetLocFinder(finder *loc.Finder) {
+// SetLocFinder sets the visibility-aware location finder for map
+// position lookups. Used by callers that have already loaded the loc
+// corpus (e.g. tooling that pre-builds finders for many maps).
+func (a *TimelineAnalyzer) SetLocFinder(finder *locvis.Finder) {
 	a.locFinder = finder
 }
 

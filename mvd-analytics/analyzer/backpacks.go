@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mvd-analyzer/mvd-analytics/loc"
+	"github.com/mvd-analyzer/mvd-analytics/locvis"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -32,7 +32,7 @@ type BackpackAnalyzer struct {
 	playerPos map[int][3]float32 // slot -> last-known origin (for drop origin)
 	drops     []BackpackDrop
 	mapName   string
-	locFinder *loc.Finder
+	locFinder *locvis.Finder
 	timing    MatchTimingDetector
 }
 
@@ -144,7 +144,7 @@ func (a *BackpackAnalyzer) Finalize(result *Result) error {
 		return nil
 	}
 	if a.locFinder == nil && a.mapName != "" {
-		if f, err := loc.LoadForMap(a.mapName); err == nil {
+		if f, err := locvis.LoadForMap(a.mapName); err == nil {
 			a.locFinder = f
 		}
 	}

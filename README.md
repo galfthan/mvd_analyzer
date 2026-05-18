@@ -77,8 +77,15 @@ make serve                                  # http://localhost:8080
 ### Build the WASM bundle for deploy
 
 ```bash
+make bsps                                   # (optional) fetch ~12 BSPs for visibility-aware loc attribution
 make build                                  # output in dist/
 ```
+
+`make bsps` populates a gitignored `bsps/` directory from public QW
+maps mirrors; `make build` then copies them into `dist/bsps/` for the
+WASM worker to lazy-fetch per map. Without `make bsps` everything
+still works — maps without a BSP fall back to the V1 Euclidean
+nearest-neighbour attribution (i.e. the pre-v9 behaviour).
 
 ### Serve the REST API (`mvd-api`)
 
@@ -379,9 +386,18 @@ query API (`view.Buckets`, `view.Events`, `view.StreamSlice`,
 `view.StateAt`) still takes and emits float64 seconds at its public
 surface, so consumers querying through `view.*` (including the WASM
 bridge's `getBuckets` / `getEvents` / `getStreamSlice` / `getStateAt`
-exports) are unaffected.
+exports) are unaffected. Schema v9 adds visibility-aware loc
+attribution: when a per-map BSP is available, the analyzer rejects
+candidate loc-points that fall outside the player's potentially-
+visible-set (PVS), eliminating brief "wall-bleed" phantom loc visits
+the V1 pure-Euclidean nearest-neighbour produced (see
+[mvd-analytics/locvis](mvd-analytics/locvis/) and
+[experiments/locattr/V2b-V6-HANDOFF.md](experiments/locattr/V2b-V6-HANDOFF.md)
+for the empirical evidence). Field shapes are unchanged — only the
+contents of `PlayerStream.Loc` (and everything derived: LocTrails,
+LocGraph edges, RegionControl) shift for maps with BSPs.
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `8`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `9`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).

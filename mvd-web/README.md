@@ -19,9 +19,11 @@ talks to it through a JS shim.
   - `index.html`, `styles.css`, `app.js` — main page and the tabbed
     analyzer UI (scoreboard, timeline, map, chat, loc graph, ...).
   - `worker.js` — wraps the WASM module in a Web Worker so analysis
-    doesn't block the main thread. Also provides `fetchLocSync` which
-    the WASM-side loc loader calls (sync XHR is still allowed inside
-    Web Workers).
+    doesn't block the main thread. Provides the host callbacks the
+    WASM side calls synchronously: `fetchLocSync(mapName)` for the
+    per-map `.loc` corpus and `fetchBspSync(mapName)` for the per-map
+    BSP used by the visibility-aware loc attribution (locvis). Sync
+    XHR is still allowed inside Web Workers.
   - `wasm_exec.js` — Go runtime glue, copied from the Go toolchain at
     build time.
   - `maps/` — pre-generated per-map floor polygon JSON. Committed; the
@@ -47,6 +49,7 @@ dist/
   app.js, worker.js           frontend
   maps/                       pre-generated map geometry
   locs/                       .loc files copied from mvd-analytics/loc/data
+  bsps/                       (optional) BSP files from `make bsps` for locvis
 ```
 
 ### Netlify deploy
@@ -131,6 +134,19 @@ bundle). Instead, when the analyzer needs a loc file, it calls
 `fetchLocSync(mapName)`, which the worker implements as a synchronous
 XHR against `locs/<name>.loc`. `make build` copies the corpus from
 `mvd-analytics/loc/data/` into `dist/locs/`.
+
+## BSPs at runtime (visibility filter)
+
+The locvis visibility filter (see [`mvd-analytics/locvis/`](../mvd-analytics/locvis/))
+loads per-map BSP files on demand via `fetchBspSync(mapName)`, which
+worker.js implements identically to `fetchLocSync` but against
+`bsps/<name>.bsp`. `make bsps` populates a gitignored top-level
+`bsps/` directory from public mirrors; `make build` then copies them
+into `dist/bsps/`. When a map has no BSP available the WASM side
+returns `null` and locvis transparently degrades to the V1 Euclidean
+nearest-neighbour attribution — no UI change beyond losing the wall-
+bleed correction for that map. Skipping `make bsps` entirely is
+supported; the build still works, you just get V1 everywhere.
 
 ## Pack Drops tab
 

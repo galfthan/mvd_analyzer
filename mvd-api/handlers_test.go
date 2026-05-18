@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -204,8 +205,8 @@ func TestLoad(t *testing.T) {
 	if resp.Header.Get("X-Cache") == "" {
 		t.Errorf("X-Cache header missing")
 	}
-	if resp.Header.Get("X-Schema-Version") != "8" {
-		t.Errorf("X-Schema-Version = %q", resp.Header.Get("X-Schema-Version"))
+	if resp.Header.Get("X-Schema-Version") != fmt.Sprintf("%d", result.CurrentSchemaVersion) {
+		t.Errorf("X-Schema-Version = %q, want %d", resp.Header.Get("X-Schema-Version"), result.CurrentSchemaVersion)
 	}
 	if resp.Header.Get("ETag") == "" {
 		t.Errorf("ETag missing")

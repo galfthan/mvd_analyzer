@@ -13,8 +13,11 @@ that downstream consumers render, summarise, or feed to an agent.
   position track). v8 stores **every timestamped field** as `int32`
   milliseconds rather than float seconds — the wire format delivers
   ms deltas and integer storage eliminates float-precision drift end
-  to end. Public view-layer outputs still emit seconds. Full field
-  reference in [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
+  to end. v9 adds visibility-aware loc attribution (see `locvis/` and
+  `bspvis/` below) — field shapes are unchanged but `PlayerStream.Loc`
+  no longer reports phantom wall-bleed visits on maps with a BSP.
+  Public view-layer outputs still emit seconds. Full field reference
+  in [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
 - `analyzer/` — the `Analyzer` interface, the read-only event/userinfo
   `Context`, the typed `CoreOutputs` bundle that producer analysers
   populate for downstream consumers, and the `Registry` that drives a
@@ -220,7 +223,7 @@ type Result struct {
 
 Each sub-type is defined in its own file under `result/`. The JSON shape
 is the wire contract with every consumer; breaking changes bump
-`CurrentSchemaVersion` (currently `6`). For "how long was the match"
+`CurrentSchemaVersion` (currently `9`). For "how long was the match"
 read `Match.Duration` (float, parser-derived) or `DemoInfo.Duration`
 (integer, KTX-authoritative); the legacy top-level `duration` was
 removed in v6.
@@ -494,6 +497,44 @@ and `BuildLocGraph` are wired this way (see `analyzer/postprocess.go`).
 that map. Native builds read from the embedded corpus; WASM callers hit
 the JS host via `fetchLocSync`. `loc.SetLocDir(dir)` overrides the
 native source (used by `cmd/mapgen` when pointing at a working copy).
+
+## Visibility-aware loc attribution (`locvis` + `bspvis`)
+
+Analyzers consume loc attribution via [`locvis.LoadForMap`](locvis/)
+rather than `loc.LoadForMap` directly. `locvis.Finder` wraps `loc.Finder`
+with a per-map BSP-backed visibility veto:
+
+- **V1** (the bare `loc.Finder.FindNearest`) picks the geometrically
+  closest loc-point and is unaware of intervening walls. It produces
+  brief "wall-bleed" loc visits when a wall sits between the player
+  and the chosen loc.
+- **V6** walks locs by ascending Euclidean distance and vetoes any
+  whose BSP leaf is not in the player's PVS row. First survivor wins;
+  falls back to V1 if every loc is vetoed. Validated on demo 216406
+  (e1m2): 178 wall-bleed spans corrected, zero false positives.
+- **V6a** is the line-of-sight variant: same control flow, but the
+  veto is a raycast through the BSP rather than a PVS bit-test.
+  Stricter; catches additional thin-pillar cases but with known
+  regressions in the research corpus.
+
+Default: `AlgoV6`. To compare, change `ActiveAlgorithm` in
+[`locvis/locvis.go`](locvis/locvis.go) and rebuild — it's a
+compile-time const, not a runtime flag.
+
+When no BSP is available for the current map (file missing, parse
+error, WASM host did not install `fetchBspSync`), `locvis.Finder`
+degenerates to `loc.Finder` — bit-identical V1 behaviour. The full
+pipeline therefore always works whether or not `make bsps` has been
+run.
+
+The BSP parser is in [`bspvis/`](bspvis/) (Q1 v29 / 2PSB / BSP2,
+~1000 LOC, no cgo). It is intentionally separate from
+[`mapgen/bsp/`](mapgen/bsp/) — that package reads the geometry lumps
+(vertices, edges, faces, models) for the floor-polygon `mapgen` tool;
+bspvis reads the visibility lumps (planes, nodes, leaves, visdata).
+
+Background and validated case study:
+[`experiments/locattr/V2b-V6-HANDOFF.md`](../experiments/locattr/V2b-V6-HANDOFF.md).
 
 ## Running tests
 

@@ -69,7 +69,19 @@ package result
 //     MatchEvent.Time, frag/powerup event times) remain float64
 //     seconds — they don't participate in the boundary comparison
 //     that motivated this change.
-const CurrentSchemaVersion = 8
+//
+// v9:
+//   - Loc attribution gains visibility awareness (V6 algorithm in
+//     mvd-analytics/locvis). When a BSP is available for the demo's
+//     map the analyzer rejects candidate loc-points that fall outside
+//     the player's potentially-visible-set, eliminating the brief
+//     "wall-bleed" phantom loc visits V1's pure-Euclidean nearest-
+//     neighbour produced. Maps without a BSP fall back to V1 unchanged.
+//     Affected fields: PlayerStream.Loc (li), Backpacks[i].Loc,
+//     ItemTimeline[i].Loc, plus everything derived from those
+//     (LocTrails, LocGraph edges, RegionControl). Field shapes are
+//     unchanged — only the contents shift for maps with BSPs.
+const CurrentSchemaVersion = 9
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

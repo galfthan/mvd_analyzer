@@ -32,6 +32,30 @@ self.fetchLocSync = function(mapName) {
     return null;
 };
 
+// Synchronous BSP fetcher exposed to the WASM module. The Go side calls
+// this from mvd-analytics/locvis/loader_wasm.go during analysis to pull
+// the per-map .bsp file used by the visibility-aware loc attribution
+// filter (V6 / V6a). Returns null on 404 / missing BSP, which causes
+// locvis to degrade to V1 (pure Euclidean nearest-neighbour) for that
+// map — never a hard error. BSPs are deployed to dist/bsps/ by `make
+// build` when `make bsps` has been run; deployments without the BSP
+// directory simply get V1 everywhere.
+self.fetchBspSync = function(mapName) {
+    if (!mapName) return null;
+    try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'bsps/' + mapName + '.bsp', false);
+        xhr.responseType = 'arraybuffer';
+        xhr.send(null);
+        if (xhr.status === 200 && xhr.response) {
+            return new Uint8Array(xhr.response);
+        }
+    } catch (e) {
+        // 404 / network / CORS — null falls back to V1 on the Go side.
+    }
+    return null;
+};
+
 let wasmReady = false;
 
 async function initWasm() {
