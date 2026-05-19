@@ -87,20 +87,26 @@ package result
 //     v9 StatHealth-crossing detector:
 //       1. The DF_DEAD bit in svc_playerinfo (broadcast every frame
 //          for every player), captured in mvd-reader/parser/position.go.
-//       2. Victim-prefix obituary prints (rocketed by, telefragged
-//          by, …) matched in mvd-reader/parser/obituary.go and
-//          consumed in parsePrint, gated on a parser-internal
-//          match-started flag so warmup obits cannot pre-seed dedup
-//          state.
-//     The three sources flow through maybeEmitDeath / maybeEmitSpawn
-//     which dedupe across them; the obit path catches deaths the
-//     server compresses so tightly that no svc_playerinfo frame ever
-//     shows DF_DEAD set and the dem_stats block carrying the health
-//     drop is addressed to a different POV. PlayerStream.Spawns /
-//     Deaths counts go up for affected demos; downstream LocGraph,
-//     LocTrails, RegionControl, WeaponPickups (kills-before-next-
-//     death), and streak boundaries shift accordingly. Field shapes
-//     are unchanged.
+//       2. Victim-prefix and infix obituary prints (rocketed by,
+//          telefragged by, "Satan's power deflects X's telefrag", the
+//          CRMod-added "disembowled" / "shish-kebabed" / etc. set,
+//          KTX's k_spawnicide variants) matched in
+//          mvd-reader/parser/obituary.go and consumed in parsePrint,
+//          gated on a parser-internal match-started flag so warmup
+//          obits cannot pre-seed dedup state.
+//     The first two sources flow through maybeEmitDeath /
+//     maybeEmitSpawn which dedupe against each other. The obit path
+//     uses forceEmitDeath instead, bypassing dedup, because KTX's
+//     own deathcount (logfrag) can increment without any visible
+//     DF_DEAD / stat transition on the wire — the most common case
+//     being a Satan-pent deflection (dtTELE2) that fires against a
+//     player whose entity state never visibly leaves the previous
+//     dead interval. Cross-validated end-to-end against KTX's
+//     authoritative demoinfo `stats.deaths` scoreboard. Field shapes
+//     are unchanged; PlayerStream.Spawns / Deaths counts rise for
+//     affected demos and downstream LocGraph, LocTrails,
+//     RegionControl, WeaponPickups, and streak boundaries shift
+//     accordingly.
 const CurrentSchemaVersion = 10
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each

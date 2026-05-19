@@ -746,6 +746,20 @@ To track frags over time, compute deltas between consecutive `svc_updatefrags` v
 
 **Recommendation**: Use `svc_updatefrags` for timeline/score tracking. Use obituary parsing only when you need additional details like weapon type.
 
+### Death / Spawn Detection — Three Signal Sources
+
+Per-player "this player just died" / "this player just spawned" boundaries are not a single signal in MVD. Three independent sources contribute, and a complete parser uses all three because each misses cases the others catch:
+
+| # | Signal | Mechanism | Per-player? | Broadcast? | Misses |
+|---|---|---|---|---|---|
+| 1 | **`STAT_HEALTH` crossings** | `svc_updatestat` health crosses 0 | yes | **directed via `dem_stats`** | Kills whose stat update is bundled in a `dem_stats` block addressed to a different POV player. The recorder must currently be POV'd on (or near) the victim. |
+| 2 | **`DF_DEAD` bit in `svc_playerinfo`** | bit 8 of the flag word; set when `ent->v->health <= 0` (mvdsv/src/sv_demo.c) | yes | yes — every recorded frame | Tight respawn cycles compressed into a single inter-frame gap (no sampled frame ever shows `DF_DEAD=1` between two adjacent recorded frames). |
+| 3 | **Obituary `svc_print`** | KTX fragfile lines like `"X was rocketed by Y"`, `"X suicides"`, the pent-deflection `"Satan's power deflects X's telefrag"`, etc. | yes (victim is named) | yes | Deaths emitted by mods/death-types with no print path; pre-match obits arriving before the match-start phrase (parser-side `matchStarted` gate). |
+
+KTX's authoritative deaths counter (`logfrag(targ, targ)` and friends — see `ktx/src/client.c`) increments once per kill regardless of which of these wire-level signals fires. Validating reconstructed death counts against KTX's `demoInfo.players[].stats.deaths` is the cleanest end-to-end check.
+
+The mvd-reader parser deduplicates across the three signals so consumers see one `DeathEvent`/`SpawnEvent` per real transition; see `mvd-reader/parser/stats.go` (`maybeEmitDeath` / `maybeEmitSpawn`) and `mvd-reader/parser/print.go` (`tryEmitObituaryDeath`, `forceEmitDeath` — obit bypasses dedup so the dtTELE2 deflection corner case is still counted).
+
 ---
 
 ## svc_updateuserinfo (40)
@@ -1002,6 +1016,28 @@ Kill messages appear at `PRINT_MEDIUM` (level 1). Common patterns:
 |---------|-------------|
 | `"X mows down a teammate"` | Team kill |
 | `"X gets a frag for the other team"` | Self-damage hurting team |
+
+**KTX special telefrag variants** (`ktx/src/client.c:5141-5185`, death types `dtTELE2`–`dtTELE4`):
+
+| Pattern | Death type | Note |
+|---|---|---|
+| `"Satan's power deflects X's telefrag"` | `dtTELE2` | Pent player is the survivor; X (the would-be telefragger) dies. Infix form — victim is bracketed by the prefix `"Satan's power deflects "` and the suffix `"'s telefrag"`. KTX counts this against X's deathcount even though no `DF_DEAD` or stat transition may appear on the wire — see [Death / Spawn Detection](#death--spawn-detection--three-signal-sources). |
+| `"X was telefragged by Y's Satan's power"` | `dtTELE3` | Pent-vs-pent double-666 telefrag. Victim-prefix; killer suffix is `"'s Satan's power"`. |
+| `"X couldn't resist the shiny spawn point"` | `dtTELE4` | Spawnicide variant (random 1-of-3 when `k_spawnicide` is enabled). |
+| `"X got too close to the baby factory"` | `dtTELE4` | Spawnicide variant. |
+| `"X was fragged by poor life choices"` | `dtTELE4` | Spawnicide variant. |
+
+**CRMod-added obituary variants**: CRMod (Custom Rules Mod) added a parallel obituary table on top of KTX's fragfile; servers running the CR ruleset still emit these strings and KTX retains them for compatibility. All are victim-prefix.
+
+| Pattern | Weapon |
+|---|---|
+| `"X was disembowled by Y's shotgun"` *(sic — CRMod misspelling)* | sg |
+| `"X eats 2 scoops of Y's lead shot"` | ssg |
+| `"X is shish-kebabed by Y's rocket"` | rl |
+| `"X was blown to chunks by Y's rocket"` | rl |
+| `"X was blown to chunks by Y's grenade"` | gl |
+| `"X gets intimate with Y's grenade"` | gl |
+| `"X gets a warm fuzzy feeling from Y"` | lg |
 
 ### Example Obituary Messages from Real Demo
 

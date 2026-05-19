@@ -244,3 +244,40 @@ func (p *Parser) maybeEmitSpawn(playerNum int, time float64, timeMs int32) error
 	p.playerDead[playerNum] = false
 	return p.emit(&SpawnEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
 }
+
+// forceEmitDeath emits a DeathEvent unconditionally and updates the
+// per-player dead-state cursor — bypassing the
+// "skip-if-already-dead" check that maybeEmitDeath enforces for the
+// STAT_HEALTH and DF_DEAD sources. The obituary path needs this
+// because KTX can broadcast an obit whose corresponding entity-state
+// transition never reaches the wire:
+//
+//   - Tight respawn cycles where the player dies and respawns and dies
+//     again entirely between two MVD sample frames — DF_DEAD never
+//     appears clear between the two deaths but each kill still emits
+//     an obit.
+//   - The pent-deflection corner case (KTX dtTELE2): when a "mortal"
+//     tries to telefrag a Satan-pent player, KTX prints "Satan's
+//     power deflects X's telefrag" and decrements X's frag count
+//     (ktx/src/client.c:5141-5149). KTX's authoritative deathcount
+//     scoreboard counts this as a death, but DF_DEAD may not flip
+//     because the player was already in a dead state from a prior
+//     real death the wire still represents as one continuous "dead"
+//     interval.
+//
+// In both cases the stat-based detector and the DF_DEAD detector
+// (correctly) see no transition, and only the obit knows a death
+// happened. Bypass dedup so the death is recorded. The naturally-
+// following SpawnEvent (next svc_playerinfo with DF_DEAD clear)
+// arrives via the normal maybeEmitSpawn path; if no respawn ever
+// becomes observable on the wire (the deflection case), no
+// SpawnEvent fires and the death sits unpaired — that's a faithful
+// reflection of what KTX's own scoreboard reports.
+func (p *Parser) forceEmitDeath(playerNum int, time float64, timeMs int32) error {
+	if playerNum < 0 || playerNum >= mvd.MaxClients {
+		return nil
+	}
+	p.playerDeadKnown[playerNum] = true
+	p.playerDead[playerNum] = true
+	return p.emit(&DeathEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
+}

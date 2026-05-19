@@ -83,6 +83,14 @@ var suicideObituaries = []ObituaryPattern{
 	{Marker: " blew himself up", Weapon: "rl", Suicide: true},
 	{Marker: " blew herself up", Weapon: "rl", Suicide: true},
 	{Marker: " finds a way out", Weapon: "suicide", Suicide: true},
+
+	// KTX k_spawnicide variants (dtTELE4 — ktx/src/client.c:5164).
+	// Fire only when k_spawnicide is enabled; otherwise the server uses
+	// the regular " was telefragged by " pattern. Rare in pickup
+	// matches; common in some pug rulesets.
+	{Marker: " couldn't resist the shiny spawn point", Weapon: "tele", Suicide: true},
+	{Marker: " got too close to the baby factory", Weapon: "tele", Suicide: true},
+	{Marker: " was fragged by poor life choices", Weapon: "tele", Suicide: true},
 }
 
 // killObituaries: another player killed the victim. Marker order
@@ -132,6 +140,18 @@ var killObituaries = []ObituaryPattern{
 	// "was gibbed by" handled specially below — weapon depends on
 	// whether the suffix is "'s rocket" (rl) or "'s grenade" (gl).
 	{Marker: " was gibbed by ", Weapon: "rl"},
+
+	// CRMod-added obituary variants (kept here because servers running
+	// the CR ruleset still produce these strings; KTX retains them in
+	// the fragfile table). For each, the victim is the prefix before
+	// Marker; the suffix that disambiguates the weapon is handled in
+	// the analyzer's frag.go (parser-side only needs the victim).
+	{Marker: " was disembowled by ", Weapon: "sg"},        // CRMod misspelling [sic]; suffix "'s shotgun"
+	{Marker: " eats 2 scoops of ", Weapon: "ssg"},         // suffix "'s lead shot"
+	{Marker: " is shish-kebabed by ", Weapon: "rl"},       // suffix "'s rocket"
+	{Marker: " was blown to chunks by ", Weapon: "rl"},    // suffix "'s rocket" or "'s grenade" (disambiguate in analyzer)
+	{Marker: " gets intimate with ", Weapon: "gl"},        // suffix "'s grenade"
+	{Marker: " gets a warm fuzzy feeling from ", Weapon: "lg"}, // no suffix
 }
 
 // ObituaryVictimPatterns is the canonically-ordered union of every
@@ -146,6 +166,31 @@ var ObituaryVictimPatterns = func() []ObituaryPattern {
 	return out
 }()
 
+// ObituaryInfixPattern describes obit forms where the victim's name
+// sits between a fixed prefix and a fixed suffix rather than at the
+// start of the line. The canonical case is KTX's pentagram-deflection
+// telefrag: when a player tries to telefrag someone wearing pent, the
+// would-be telefragger dies and the obit is "Satan's power deflects
+// <victim>'s telefrag\n" (ktx/src/client.c:5143 — the death is
+// attributed to `targ`, i.e. the named player, with a frags -= 1
+// penalty). The victim-prefix scan would never pick that up, so it
+// rides on this separate list.
+type ObituaryInfixPattern struct {
+	Prefix   string
+	Suffix   string
+	Weapon   string
+	Suicide  bool
+	TeamKill bool
+}
+
+// ObituaryInfixPatterns is the canonical infix-form obit list. Kept
+// short: only patterns confirmed against KTX source go here. Mirrors
+// (with Weapon attribution) any matching pattern in the analyzer's
+// FragAnalyzer.
+var ObituaryInfixPatterns = []ObituaryInfixPattern{
+	{Prefix: "Satan's power deflects ", Suffix: "'s telefrag", Weapon: "tele"},
+}
+
 // FindObituaryVictim scans `msg` against the canonical obituary
 // patterns. On the first match it returns the victim's display name
 // (everything in `msg` before the matched marker, with surrounding
@@ -155,6 +200,12 @@ var ObituaryVictimPatterns = func() []ObituaryPattern {
 // Callers that need only "did somebody die" can ignore the pattern
 // pointer; callers building a frag log read Weapon / Suicide / TeamKill
 // off the returned pattern.
+//
+// Lookups are tried in order: victim-prefix first (the bulk of KTX's
+// fragfile lines), then infix patterns (Satan's-deflection-style
+// obits where the victim is bracketed by a fixed prefix and suffix).
+// Infix matches are synthesized into a returned *ObituaryPattern so
+// callers don't need to branch on which list matched.
 func FindObituaryVictim(msg string) (string, *ObituaryPattern) {
 	for i := range ObituaryVictimPatterns {
 		p := &ObituaryVictimPatterns[i]
@@ -167,6 +218,28 @@ func FindObituaryVictim(msg string) (string, *ObituaryPattern) {
 			continue
 		}
 		return victim, p
+	}
+	for i := range ObituaryInfixPatterns {
+		ip := &ObituaryInfixPatterns[i]
+		if !strings.HasPrefix(msg, ip.Prefix) {
+			continue
+		}
+		rest := msg[len(ip.Prefix):]
+		suffixIdx := strings.Index(rest, ip.Suffix)
+		if suffixIdx <= 0 {
+			continue
+		}
+		victim := strings.TrimSpace(rest[:suffixIdx])
+		if victim == "" {
+			continue
+		}
+		synthesized := ObituaryPattern{
+			Marker:   ip.Prefix + ip.Suffix,
+			Weapon:   ip.Weapon,
+			Suicide:  ip.Suicide,
+			TeamKill: ip.TeamKill,
+		}
+		return victim, &synthesized
 	}
 	return "", nil
 }

@@ -24,6 +24,29 @@ func TestFindObituaryVictim(t *testing.T) {
 		{"environmental lava", "Player visits the Volcano God\n", "Player"},
 		{"chat looking like obit", "(sailorman): nice rocket\n", ""},
 		{"empty", "", ""},
+
+		// Infix-form: Satan's-power-deflect (KTX dtTELE2).
+		{"pent deflect", "Satan's power deflects nlk's telefrag\n", "nlk"},
+
+		// KTX dtTELE3 — pent vs pent double-666. Caught by the
+		// existing " was telefragged by " marker; the killer suffix
+		// "'s Satan's power" is handled by extractKillerName in
+		// mvd-analytics/analyzer/obituary.go.
+		{"pent vs pent", "nlk was telefragged by lakso's Satan's power\n", "nlk"},
+
+		// KTX dtTELE4 — k_spawnicide random variants.
+		{"spawnicide 1", "doberman couldn't resist the shiny spawn point\n", "doberman"},
+		{"spawnicide 2", "doberman got too close to the baby factory\n", "doberman"},
+		{"spawnicide 3", "doberman was fragged by poor life choices\n", "doberman"},
+
+		// CRMod variants — confirmed by user against CRMod source.
+		{"crmod sg", "Player was disembowled by Other's shotgun\n", "Player"},
+		{"crmod ssg", "Player eats 2 scoops of Other's lead shot\n", "Player"},
+		{"crmod rl shish", "Player is shish-kebabed by Other's rocket\n", "Player"},
+		{"crmod blown chunks rl", "Player was blown to chunks by Other's rocket\n", "Player"},
+		{"crmod blown chunks gl", "Player was blown to chunks by Other's grenade\n", "Player"},
+		{"crmod gl intimate", "Player gets intimate with Other's grenade\n", "Player"},
+		{"crmod lg fuzzy", "Player gets a warm fuzzy feeling from Other\n", "Player"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -86,6 +109,40 @@ func TestObituaryDeath_GatedOnMatchStart(t *testing.T) {
 	}
 	if deaths != 1 {
 		t.Errorf("post-match deaths = %d, want 1", deaths)
+	}
+}
+
+// Obit-emitted DeathEvent bypasses the parser dedup so the pent-
+// deflection corner case (KTX dtTELE2, where DF_DEAD never visibly
+// leaves the prior dead interval) is still recorded. A second
+// consecutive obit for the same player must fire a second
+// DeathEvent — matching KTX's authoritative `logfrag(targ, targ)`
+// bookkeeping which increments deathcount per obit.
+func TestObituaryDeath_ForceEmitsEvenWhenStateAlreadyDead(t *testing.T) {
+	p := NewParser(nil)
+	p.players[2] = &mvd.PlayerInfo{Slot: 2, Name: "nlk"}
+	p.matchStarted = true
+	// Pre-seed: parser already thinks nlk is dead.
+	p.playerDeadKnown[2] = true
+	p.playerDead[2] = true
+
+	var deaths int
+	p.OnEvent(func(e Event) error {
+		if _, ok := e.(*DeathEvent); ok {
+			deaths++
+		}
+		return nil
+	})
+
+	// Two consecutive deflections while nlk's wire state stays dead.
+	if err := p.tryEmitObituaryDeath("Satan's power deflects nlk's telefrag\n", 631.4, 631419); err != nil {
+		t.Fatalf("first deflect: %v", err)
+	}
+	if err := p.tryEmitObituaryDeath("Satan's power deflects nlk's telefrag\n", 633.5, 633548); err != nil {
+		t.Fatalf("second deflect: %v", err)
+	}
+	if deaths != 2 {
+		t.Errorf("deaths = %d, want 2 (both deflections must fire even though state was already dead)", deaths)
 	}
 }
 

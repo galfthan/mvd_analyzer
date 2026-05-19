@@ -62,10 +62,13 @@ func (p *Parser) parsePrint(r *mvd.BufferReader, time float64, timeMs int32, tar
 
 // tryEmitObituaryDeath inspects an obituary print line, resolves the
 // named victim to a player slot via the userinfo table, and fires
-// DeathEvent through maybeEmitDeath so it deduplicates against the
-// STAT_HEALTH and DF_DEAD detectors. No-op when the line doesn't
-// match a known obit pattern or the victim's name isn't in the
-// userinfo table.
+// DeathEvent via forceEmitDeath (bypassing the
+// skip-if-already-dead dedup). KTX is authoritative for whether a
+// death happened: obits map 1:1 to "deaths++" on the server-side
+// scoreboard, even in the pent-deflection corner case where the
+// player's entity state never visibly leaves the previous dead
+// interval. See forceEmitDeath's doc for the full rationale and
+// the two scenarios (tight respawn cycles, dtTELE2 deflections).
 //
 // Gated on p.matchStarted: warmup-era obits (and the telefrag obits
 // that fire at the *exact* wire time of the start print but earlier
@@ -73,9 +76,8 @@ func (p *Parser) parsePrint(r *mvd.BufferReader, time float64, timeMs int32, tar
 // silenced so they cannot pre-seed the parser dedup state and starve
 // the stat-based detector of its match-start emission. After the
 // gate opens, the follow-up SpawnEvent arrives naturally on the
-// player's next svc_playerinfo frame: maybeEmitDeath flipped
-// playerDead[slot] to true, so the next frame with DF_DEAD clear
-// fires SpawnEvent through maybeEmitSpawn.
+// player's next svc_playerinfo frame with DF_DEAD clear — the same
+// state-transition the existing maybeEmitSpawn path detects.
 func (p *Parser) tryEmitObituaryDeath(msg string, time float64, timeMs int32) error {
 	if !p.matchStarted {
 		return nil
@@ -88,7 +90,7 @@ func (p *Parser) tryEmitObituaryDeath(msg string, time float64, timeMs int32) er
 	if slot < 0 {
 		return nil
 	}
-	return p.maybeEmitDeath(slot, time, timeMs)
+	return p.forceEmitDeath(slot, time, timeMs)
 }
 
 // matchStartedPhrases mirrors the analyzer's MatchTimingDetector
