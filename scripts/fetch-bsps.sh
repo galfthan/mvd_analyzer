@@ -1,45 +1,55 @@
 #!/usr/bin/env bash
-# fetch-bsps.sh — download a small curated set of Quake 1 BSP files used
-# by the locvis visibility filter. Populates the directory passed as
-# $1 (default ./bsps). Idempotent: existing files with a matching
-# SHA-256 are kept; mismatches are re-fetched.
+# fetch-bsps.sh — download the curated set of Quake 1 BSP files used by
+# the locvis visibility filter. Populates the directory passed as $1
+# (default ./bsps). Idempotent: existing files with a matching SHA-256
+# are kept; mismatches are re-fetched.
 #
 # These BSPs are NOT committed to the repository. They are downloaded
-# from public mirrors documented in experiments/locattr/bsps/SOURCES.md.
-# The 12 maps below are the most-played QuakeWorld competitive maps;
-# any map not in this set falls back to the V1 (Euclidean) attribution
-# in mvd-analytics/loc.Finder — locvis treats the missing-BSP case as
-# "no veto", so the rest of the pipeline keeps working.
+# from two public mirrors:
 #
-# Format of each entry: "<name> <url> <sha256-or-empty>".
-# When the sha256 column is empty the script downloads without integrity
-# checking and prints a warning; populate it from the curl output to
-# pin the file.
+#   - id-stock and registered maps (dm2, dm3, e1m2) from
+#     https://github.com/quakeworld/id-maps-gpl (gzipped, GPL-licensed).
+#   - Community competitive maps from
+#     https://maps.quakeworld.nu/core/<name>.bsp (the canonical QW maps
+#     mirror; /core/ holds the bsps shipped in the nquake client
+#     distribution).
+#
+# Local filenames use the LOC-CORPUS form (loc.NormalizeMapName) so the
+# locvis loader finds them by the same name `loc.LoadForMap` resolves
+# to. Notably "phantombase" → saved as "phantoma" because of the alias
+# in mvd-analytics/loc/loader.go.
+#
+# The script HARD FAILS on any download or sha mismatch. The Netlify
+# build chains `make bsps && make build` and any missing BSP should
+# fail the deploy rather than silently degrade to V1 in production.
+#
+# Format of each entry: "<localname> <url> <sha256-or-empty>".
+# When sha256 is empty the script downloads without integrity checking
+# and prints the observed sha so it can be pinned next iteration.
 
 set -euo pipefail
 
 BSP_DIR="${1:-bsps}"
 mkdir -p "$BSP_DIR"
 
-# Per-map URL + sha256. Multi-line read-friendly format; "" means
-# unverified — we still download but warn.
 ENTRIES=(
-  # name        url                                                                                         sha256
-  "aerowalk    https://maps.quakeworld.nu/all/aerowalk.bsp                                                  6c297aaa5ccb8f10f6f7ee4991ba6663f887414e31e6eac8358510e14e4ec98b"
-  "dm2         https://raw.githubusercontent.com/marcusgadbem/nquakesv/master/qw/maps/dm2.bsp              "
-  "dm3         https://raw.githubusercontent.com/marcusgadbem/nquakesv/master/qw/maps/dm3.bsp               aec9edbb727c0a206edc2c0688775ce8242c0d51e1ee7583c7126c76f7c3b2f1"
-  "dm4         https://raw.githubusercontent.com/marcusgadbem/nquakesv/master/qw/maps/dm4.bsp              "
-  "dm6         https://raw.githubusercontent.com/marcusgadbem/nquakesv/master/qw/maps/dm6.bsp               5b55566c88561b44534b3bdd4554923ff92e480f89bb4e10f9e45361bc2c5253"
-  "e1m2        https://raw.githubusercontent.com/quakeworld/id-maps-gpl/master/e1m2.bsp.gz                  62d270e89514e6e492fac0a8c5dea583ccabd6515a48919d750b08dd94fcb23a"
-  "ztndm3      https://maps.quakeworld.nu/all/ztndm3.bsp                                                   "
-  "povdmm4     https://maps.quakeworld.nu/all/povdmm4.bsp                                                  "
-  "schloss     https://maps.quakeworld.nu/all/schloss.bsp                                                  "
-  "obsidian    https://maps.quakeworld.nu/all/obsidian.bsp                                                 "
-  "skull       https://maps.quakeworld.nu/all/skull.bsp                                                    "
-  "bravado     https://maps.quakeworld.nu/all/bravado.bsp                                                  "
+  # localname    url                                                                              sha256
+  "dm2          https://github.com/quakeworld/id-maps-gpl/raw/refs/heads/main/dm2.bsp.gz         10af928ff914ea3ab991dcee0736b2e89c88d88cd9bdfd7b1c64e5b341974c84"
+  "dm3          https://github.com/quakeworld/id-maps-gpl/raw/refs/heads/main/dm3.bsp.gz         e6df9e9fd078b6d02aaa6c0f1ba40428111cb33da66dcf00234ba9ae2500a478"
+  "dm6          https://github.com/quakeworld/id-maps-gpl/raw/refs/heads/main/dm6.bsp.gz         a092b170f37965ad29560de4877adc4cd35049ce6459a9fd4e847d2544ef94f2"
+  "e1m2         https://github.com/quakeworld/id-maps-gpl/raw/refs/heads/main/e1m2.bsp.gz         62d270e89514e6e492fac0a8c5dea583ccabd6515a48919d750b08dd94fcb23a"
+  "aerowalk     https://maps.quakeworld.nu/core/aerowalk.bsp                                      6c297aaa5ccb8f10f6f7ee4991ba6663f887414e31e6eac8358510e14e4ec98b"
+  "schloss      https://maps.quakeworld.nu/core/schloss.bsp                                       947d6a01e293d27f387080011fea0bfecda55c574cb664494c7dd21af71eb2dd"
+  "phantoma     https://maps.quakeworld.nu/core/phantombase.bsp                                   14d743eb3bade9999dfddbdbf84b0859f2dc85e1294acaae041ae3c71953494e"
+  "cmt4         https://maps.quakeworld.nu/core/cmt4.bsp                                          ce25f8cff54b112aea2d50455841e8c54c0b72fcfdd57f317f9ad0e237c83e3c"
+  "obsidian     https://maps.quakeworld.nu/core/obsidian.bsp                                      f1183d583689d28a469326abdd63790369d3e2ff612f3f740b460a4351b561e8"
+  "qobblestone  https://maps.quakeworld.nu/core/qobblestone.bsp                                   ade0a3dc26a43d1a7638f788cf5e025bc62bad9bbab4a2bd03ba45e286d005ee"
+  "rocka        https://maps.quakeworld.nu/core/rocka.bsp                                         f66f77ad5767c47c27f677e500bba9a28df71ab8118577498c050d8f2e7295ef"
+  "steam        https://maps.quakeworld.nu/core/steam.bsp                                         39bd0203cbff42bebfd2f5577333ca78f787023f05f8a52ba923de6b4163a11f"
+  "anwalked     https://maps.quakeworld.nu/core/anwalked.bsp                                      0c808fe481290b543e293bc716bea4bff0e71e07f941f49e415ad882745ac68c"
+  "stronghold   https://maps.quakeworld.nu/core/stronghold.bsp                                    640443115de7be4f99f88b8f25b3f91c6e54bd624154ac072802e63957dcb4e9"
 )
 
-# Returns 0 if the file at $1 has SHA-256 == $2.
 check_sha() {
   local file="$1" expected="$2"
   [[ -z "$expected" ]] && return 0
@@ -49,32 +59,25 @@ check_sha() {
 }
 
 download_one() {
-  local name="$1" url="$2" expected_sha="$3"
-  local out="$BSP_DIR/$name.bsp"
+  local localname="$1" url="$2" expected_sha="$3"
+  local out="$BSP_DIR/$localname.bsp"
 
-  if [[ -f "$out" ]]; then
-    if check_sha "$out" "$expected_sha"; then
-      printf "  ok    %-12s %s\n" "$name" "(cached)"
-      return 0
-    else
-      printf "  redo  %-12s %s\n" "$name" "(sha mismatch, refetching)"
-      rm -f "$out"
-    fi
+  if [[ -f "$out" ]] && [[ -n "$expected_sha" ]] && check_sha "$out" "$expected_sha"; then
+    printf "  ok    %-12s %s\n" "$localname" "(cached, sha verified)"
+    return 0
   fi
 
   local tmp
   tmp="$(mktemp)"
   if ! curl -fsSL --retry 3 --retry-delay 2 -o "$tmp" "$url"; then
-    printf "  fail  %-12s %s\n" "$name" "(download failed: $url)"
+    printf "  FAIL  %-12s download failed: %s\n" "$localname" "$url"
     rm -f "$tmp"
     return 1
   fi
 
-  # Gzip-stream sources (only e1m2 today). curl writes the raw body; we
-  # gunzip in-place if the URL ends in .gz.
   if [[ "$url" == *.gz ]]; then
     if ! gunzip -c "$tmp" > "$out"; then
-      printf "  fail  %-12s %s\n" "$name" "(gunzip failed)"
+      printf "  FAIL  %-12s gunzip failed\n" "$localname"
       rm -f "$tmp" "$out"
       return 1
     fi
@@ -85,35 +88,27 @@ download_one() {
 
   if [[ -n "$expected_sha" ]]; then
     if check_sha "$out" "$expected_sha"; then
-      printf "  ok    %-12s %s\n" "$name" "(verified)"
+      printf "  ok    %-12s (verified)\n" "$localname"
     else
       local actual
       actual="$(sha256sum "$out" | awk '{print $1}')"
-      printf "  FAIL  %-12s sha mismatch: got %s want %s\n" "$name" "$actual" "$expected_sha"
+      printf "  FAIL  %-12s sha mismatch: got %s want %s\n" "$localname" "$actual" "$expected_sha"
       rm -f "$out"
       return 1
     fi
   else
     local actual
     actual="$(sha256sum "$out" | awk '{print $1}')"
-    printf "  ok    %-12s (downloaded, no sha pin — record %s)\n" "$name" "$actual"
+    printf "  ok    %-12s (downloaded, no sha pin — record %s)\n" "$localname" "$actual"
   fi
 }
 
 echo "Fetching BSPs into $BSP_DIR/ ..."
-fail=0
 for entry in "${ENTRIES[@]}"; do
   # shellcheck disable=SC2086
   set -- $entry
-  name="$1"; url="$2"; sha="${3:-}"
-  if ! download_one "$name" "$url" "$sha"; then
-    fail=$((fail + 1))
-  fi
+  localname="$1"; url="$2"; sha="${3:-}"
+  download_one "$localname" "$url" "$sha"
 done
 
-if (( fail > 0 )); then
-  echo "WARNING: $fail BSP(s) failed to download. The locvis filter will fall back"
-  echo "to V1 for those maps; the rest of the pipeline is unaffected."
-  exit 1
-fi
 echo "All BSPs ready in $BSP_DIR/"
