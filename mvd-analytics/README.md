@@ -508,18 +508,25 @@ with a per-map BSP-backed visibility veto:
   closest loc-point and is unaware of intervening walls. It produces
   brief "wall-bleed" loc visits when a wall sits between the player
   and the chosen loc.
-- **V6** walks locs by ascending Euclidean distance and vetoes any
-  whose BSP leaf is not in the player's PVS row. First survivor wins;
-  falls back to V1 if every loc is vetoed. Validated on demo 216406
-  (e1m2): 178 wall-bleed spans corrected, zero false positives.
-- **V6a** is the line-of-sight variant: same control flow, but the
-  veto is a raycast through the BSP rather than a PVS bit-test.
-  Stricter; catches additional thin-pillar cases but with known
-  regressions in the research corpus.
+- **V6** picks the Euclidean-nearest loc whose containing BSP leaf is
+  in the player's PVS row. Falls back to V1 if no loc is visible from
+  the player's leaf (or the wiggle can't escape solid). Validated on
+  demo 216406 (e1m2): 178 wall-bleed spans corrected, zero false
+  positives.
 
-Default: `AlgoV6`. To compare, change `ActiveAlgorithm` in
-[`locvis/locvis.go`](locvis/locvis.go) and rebuild — it's a
-compile-time const, not a runtime flag.
+Default: `AlgoV6`. Change `ActiveAlgorithm` in
+[`locvis/locvis.go`](locvis/locvis.go) and rebuild to A/B against V1.
+An earlier raycast variant (V6a) was prototyped but dropped — it was
+strictly more expensive than V6 and produced false positives in the
+research corpus.
+
+Implementation note: at `LoadForMap` we precompute, for every non-
+solid leaf L, the list of loc indices whose containing leaf is in L's
+PVS row (`leafVisLocs[L]`). Each `FindNearest` call is then a
+`PointInLeaf` for the player + a linear scan over a pre-filtered
+candidate list (M ≈ 30–80 on competitive maps) — no per-query sort,
+no per-query PVS decompression. The preprocessing cost is one-shot
+per map load (~300 µs on dm6-class maps).
 
 When no BSP is available for the current map (file missing, parse
 error, WASM host did not install `fetchBspSync`), `locvis.Finder`

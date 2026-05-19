@@ -40,8 +40,7 @@ func requireBspDir(t *testing.T, mapName string) string {
 // D2.coj at 06:11 on demo 216406 (e1m2), mid-jump over cross-water,
 // gets attributed to MH.low (loc#90) by V1 for 23 consecutive samples.
 // All 23 are wall-bleed: MH.low's loc-point sits behind a wall from the
-// jump trajectory. Both V6 (PVS-veto) and V6a (raycast-veto) reject
-// MH.low and pick cross.water instead.
+// jump trajectory. V6 (PVS-veto) rejects MH.low and picks cross.water.
 //
 // Player position used here is the midpoint of the 23-sample window
 // (player position ranged roughly (390..394, 120..230, 280..308) during
@@ -82,12 +81,6 @@ func TestColjMHLowWallBleed_PrototypePosition(t *testing.T) {
 		t.Errorf("V6 label = %q, want %q (wall-bleed should be suppressed)", v6Label, "cross.water")
 	}
 
-	// V6a (raycast-veto) must also pick cross.water on this case.
-	v6aLabel := f.attributeV6a(playerX, playerY, playerZ)
-	if v6aLabel != "cross.water" {
-		t.Errorf("V6a label = %q, want %q (wall-bleed should be suppressed)", v6aLabel, "cross.water")
-	}
-
 	// The dispatch under the default ActiveAlgorithm must agree with
 	// whichever variant is selected at compile time.
 	dispatched := f.FindNearest(playerX, playerY, playerZ)
@@ -99,10 +92,6 @@ func TestColjMHLowWallBleed_PrototypePosition(t *testing.T) {
 	case AlgoV6:
 		if dispatched != v6Label {
 			t.Errorf("FindNearest under AlgoV6 = %q, want %q", dispatched, v6Label)
-		}
-	case AlgoV6a:
-		if dispatched != v6aLabel {
-			t.Errorf("FindNearest under AlgoV6a = %q, want %q", dispatched, v6aLabel)
 		}
 	}
 }
@@ -129,17 +118,19 @@ func TestFloorPointPicksItself(t *testing.T) {
 	if len(locs) == 0 {
 		t.Fatalf("dm6 has no locs?")
 	}
-	// Pick the first loc whose stored leaf is non-solid — any artifact-
-	// in-solid loc would be vetoed by V6 (and not return itself).
+	// Pick the first loc whose leaf is non-solid and appears in its
+	// own leaf's visible list (the trivial case — loc visible from
+	// the leaf containing it).
 	target := -1
-	for i, leaf := range f.locLeaves {
-		if leaf >= 0 {
-			target = i
-			break
+	for L := 1; L < len(f.leafVisLocs); L++ {
+		if len(f.leafVisLocs[L]) == 0 {
+			continue
 		}
+		target = int(f.leafVisLocs[L][0])
+		break
 	}
 	if target < 0 {
-		t.Skipf("dm6: every loc landed in solid? unexpected corpus state")
+		t.Skipf("dm6: no leaf has visible locs? unexpected")
 	}
 	want := locs[target].Name
 	got := f.attributeV6(locs[target].X, locs[target].Y, locs[target].Z)
