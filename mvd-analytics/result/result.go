@@ -83,13 +83,20 @@ package result
 //     unchanged — only the contents shift for maps with BSPs.
 //
 // v10:
-//   - DeathEvent / SpawnEvent now derive primarily from the DF_DEAD
-//     bit in svc_playerinfo (broadcast every frame for every player)
-//     rather than only StatHealth crossings (directed at the POV
-//     player via dem_stats). The stat-based detector still runs and
-//     deduplicates against the new signal — whichever fires first
-//     wins. Net effect: deaths whose stat update was directed at a
-//     different player slot are now captured. PlayerStream.Spawns /
+//   - DeathEvent / SpawnEvent gain two new signal sources beyond the
+//     v9 StatHealth-crossing detector:
+//       1. The DF_DEAD bit in svc_playerinfo (broadcast every frame
+//          for every player), captured in mvd-reader/parser/position.go.
+//       2. Victim-prefix obituary prints (rocketed by, telefragged
+//          by, …) matched in mvd-reader/parser/obituary.go and
+//          consumed in parsePrint, gated on a parser-internal
+//          match-started flag so warmup obits cannot pre-seed dedup
+//          state.
+//     The three sources flow through maybeEmitDeath / maybeEmitSpawn
+//     which dedupe across them; the obit path catches deaths the
+//     server compresses so tightly that no svc_playerinfo frame ever
+//     shows DF_DEAD set and the dem_stats block carrying the health
+//     drop is addressed to a different POV. PlayerStream.Spawns /
 //     Deaths counts go up for affected demos; downstream LocGraph,
 //     LocTrails, RegionControl, WeaponPickups (kills-before-next-
 //     death), and streak boundaries shift accordingly. Field shapes

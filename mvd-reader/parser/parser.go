@@ -118,6 +118,17 @@ type Parser struct {
 	playerDead       [mvd.MaxClients]bool
 	playerDeadKnown  [mvd.MaxClients]bool
 	playerSeenInfo   [mvd.MaxClients]bool
+	// matchStarted flips on the first svc_print whose text matches one
+	// of the canonical match-start phrases (see matchStartedFromPrint).
+	// It gates the obituary-derived DeathEvent path in
+	// tryEmitObituaryDeath: telefrag obits that fire at the *exact*
+	// wire time of the start print arrive in the event stream before
+	// the start print itself, so the analyzer's timing gate drops them
+	// and the resulting parser-side dedup state silently suppresses
+	// the still-to-arrive stat-based DeathEvent. Gating obit emission
+	// on this flag keeps warmup obits silent and lets the dedup state
+	// flow normally once the match is live.
+	matchStarted    bool
 	handlers        []Handler
 	floatCoords     bool
 	fteExtensions   uint32 // FTE protocol extension flags
@@ -258,7 +269,7 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			if msg.Header.MessageType == mvd.DemSingle {
 				target = msg.Header.PlayerNum
 			}
-			if err := p.parsePrint(r, msg.Time, target); err != nil {
+			if err := p.parsePrint(r, msg.Time, msg.TimeMs, target); err != nil {
 				p.warn(msg.Time, "parse_error", "svc_print: %v", err)
 				return nil
 			}
