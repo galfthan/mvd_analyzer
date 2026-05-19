@@ -77,15 +77,23 @@ make serve                                  # http://localhost:8080
 ### Build the WASM bundle for deploy
 
 ```bash
-make bsps                                   # (optional) fetch ~12 BSPs for visibility-aware loc attribution
+make bsps                                   # fetch the curated BSP set for visibility-aware loc attribution
 make build                                  # output in dist/
 ```
 
-`make bsps` populates a gitignored `bsps/` directory from public QW
-maps mirrors; `make build` then copies them into `dist/bsps/` for the
-WASM worker to lazy-fetch per map. Without `make bsps` everything
-still works — maps without a BSP fall back to the V1 Euclidean
-nearest-neighbour attribution (i.e. the pre-v9 behaviour).
+`make bsps` populates a gitignored top-level `bsps/` directory with
+the competitive QW map set defined in
+[`scripts/fetch-bsps.sh`](scripts/fetch-bsps.sh) (id-stock from
+[id-maps-gpl](https://github.com/quakeworld/id-maps-gpl), community
+maps from [maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/),
+sha256-pinned). `make build` then copies them into `dist/bsps/` for
+the WASM worker to lazy-fetch per map. The script hard-fails on any
+download or sha mismatch so a flaky mirror produces a red build
+rather than a silent V1-everywhere deploy.
+
+For local dev the step is skippable — maps without a BSP fall back to
+the V1 Euclidean nearest-neighbour attribution (i.e. the pre-v9
+behaviour); only the wall-bleed correction is lost.
 
 ### Serve the REST API (`mvd-api`)
 

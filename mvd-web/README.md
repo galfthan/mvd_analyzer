@@ -49,13 +49,19 @@ dist/
   app.js, worker.js           frontend
   maps/                       pre-generated map geometry
   locs/                       .loc files copied from mvd-analytics/loc/data
-  bsps/                       (optional) BSP files from `make bsps` for locvis
+  bsps/                       BSP files from `make bsps` for the locvis
+                              visibility filter (skipped if bsps/ is empty)
 ```
 
 ### Netlify deploy
 
-`netlify.toml` at the repo root runs `make build` and publishes `dist/`.
-Every push to a branch with Netlify connected will rebuild and deploy.
+`netlify.toml` at the repo root chains `make bsps && make build` and
+publishes `dist/`. Every push to a branch with Netlify connected
+rebuilds and deploys. `make bsps` runs on Netlify's build container
+(it has `curl` and `bash`), fetches the ~14 competitive-map BSPs from
+the public mirrors documented in `scripts/fetch-bsps.sh`, and verifies
+each sha256 — a missing or corrupt BSP hard-fails the deploy, which
+is preferred to a silent V1-everywhere regression.
 
 ## Layout
 
@@ -141,12 +147,20 @@ The locvis visibility filter (see [`mvd-analytics/locvis/`](../mvd-analytics/loc
 loads per-map BSP files on demand via `fetchBspSync(mapName)`, which
 worker.js implements identically to `fetchLocSync` but against
 `bsps/<name>.bsp`. `make bsps` populates a gitignored top-level
-`bsps/` directory from public mirrors; `make build` then copies them
-into `dist/bsps/`. When a map has no BSP available the WASM side
-returns `null` and locvis transparently degrades to the V1 Euclidean
-nearest-neighbour attribution — no UI change beyond losing the wall-
-bleed correction for that map. Skipping `make bsps` entirely is
-supported; the build still works, you just get V1 everywhere.
+`bsps/` directory from the curated set in
+[`scripts/fetch-bsps.sh`](../scripts/fetch-bsps.sh) — id-stock maps
+(dm2/dm3/dm6/e1m2) from [id-maps-gpl](https://github.com/quakeworld/id-maps-gpl)
+gzipped, community competitive maps from
+[maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/), each
+sha256-pinned. `make build` then copies them into `dist/bsps/`. When
+a map has no BSP available the WASM side returns `null` and locvis
+transparently degrades to the V1 Euclidean nearest-neighbour
+attribution — no UI change beyond losing the wall-bleed correction
+for that map. Skipping `make bsps` entirely is supported for local
+dev; the build still works, you just get V1 everywhere.
+
+The Netlify deploy chains `make bsps && make build`, so production
+gets the visibility filter on every push.
 
 ## Pack Drops tab
 
