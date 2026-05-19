@@ -48,12 +48,20 @@ type DemoInfoEvent struct {
 func (e *DemoInfoEvent) EventType() EventType { return EventDemoInfo }
 func (e *DemoInfoEvent) EventTime() float64   { return e.Time }
 
-// DeathEvent is emitted when a player's StatHealth transitions from >0 to
-// <=0. Derived from protocol-level health updates, so analytics consumers
-// get a reliable per-player "just died" signal at the exact event time —
-// independent of any sampling interval (no missed instant respawns) and
-// without having to parse KTX obituary text. Obituary parsing for killer
-// / weapon attribution remains a separate concern in analytics.
+// DeathEvent is emitted when a player transitions from alive to dead.
+// Two protocol-level signals feed this:
+//   - StatHealth crossing >0 → ≤0 (this file). Reliable for the player
+//     whose dem_stats block we're currently consuming; structurally
+//     blind to deaths whose stat update lands in a block addressed to
+//     a different player.
+//   - The DF_DEAD bit in svc_playerinfo (position.go). Broadcast in
+//     every frame for every player, so it catches the deaths the
+//     stat-based detector misses.
+//
+// The two sources are deduplicated in maybeEmitDeath / maybeEmitSpawn,
+// so consumers see exactly one event per state transition regardless of
+// which signal fired first. Obituary parsing for killer / weapon
+// attribution remains a separate concern in analytics.
 //
 // TimeMs is the canonical wire-native time in integer milliseconds. Use it
 // for boundary comparisons (analyzer persistence layer); Time is the
@@ -67,10 +75,14 @@ type DeathEvent struct {
 func (e *DeathEvent) EventType() EventType { return EventDeath }
 func (e *DeathEvent) EventTime() float64   { return e.Time }
 
-// SpawnEvent is emitted when a player's StatHealth transitions from <=0
-// to >0 — either a respawn after death, or a first-spawn when a player
-// transitions from spectator / pre-connect into active play. Consumers
-// treat both cases identically.
+// SpawnEvent is emitted when a player transitions from dead to alive —
+// either a respawn after death, or a first-spawn when a player joins
+// active play (spectator / pre-connect → alive). Consumers treat both
+// cases identically.
+//
+// Sources mirror DeathEvent: StatHealth crossing ≤0 → >0, and the
+// DF_DEAD bit clearing in svc_playerinfo. Deduplicated via the
+// maybeEmit* helpers.
 //
 // TimeMs is the canonical wire-native time in integer milliseconds.
 type SpawnEvent struct {
@@ -191,13 +203,44 @@ func (p *Parser) updateStat(playerNum, statIndex, value int, time float64, timeM
 	// analyzer state that snapshots from vitals at sample time sees the
 	// post-damage health. The parser owns this signal so downstream
 	// analytics never need to compare health across sampling boundaries.
+	// Routed through maybeEmit* so the DF_DEAD detector in position.go
+	// can fire for the same transition without producing a duplicate.
 	if isHealthUpdate {
 		if healthOld > 0 && healthNew <= 0 {
-			return p.emit(&DeathEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
+			return p.maybeEmitDeath(playerNum, time, timeMs)
 		}
 		if healthOld <= 0 && healthNew > 0 {
-			return p.emit(&SpawnEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
+			return p.maybeEmitSpawn(playerNum, time, timeMs)
 		}
 	}
 	return nil
+}
+
+// maybeEmitDeath emits a DeathEvent for the given player only if their
+// last-known dead/alive state is "alive" or unknown. Deduplicates across
+// the two transition sources (StatHealth edges, DF_DEAD bit in
+// svc_playerinfo) so consumers see one event per real transition.
+func (p *Parser) maybeEmitDeath(playerNum int, time float64, timeMs int32) error {
+	if playerNum < 0 || playerNum >= mvd.MaxClients {
+		return nil
+	}
+	if p.playerDeadKnown[playerNum] && p.playerDead[playerNum] {
+		return nil
+	}
+	p.playerDeadKnown[playerNum] = true
+	p.playerDead[playerNum] = true
+	return p.emit(&DeathEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
+}
+
+// maybeEmitSpawn mirrors maybeEmitDeath for the alive transition.
+func (p *Parser) maybeEmitSpawn(playerNum int, time float64, timeMs int32) error {
+	if playerNum < 0 || playerNum >= mvd.MaxClients {
+		return nil
+	}
+	if p.playerDeadKnown[playerNum] && !p.playerDead[playerNum] {
+		return nil
+	}
+	p.playerDeadKnown[playerNum] = true
+	p.playerDead[playerNum] = false
+	return p.emit(&SpawnEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
 }

@@ -102,15 +102,44 @@ func (p *Parser) parsePlayerInfo(r *mvd.BufferReader, time float64, timeMs int32
 	// Only emit position event if we have valid position data
 	// (skip if all coordinates are zero - likely uninitialized)
 	if origin[0] != 0 || origin[1] != 0 || origin[2] != 0 {
-		return p.emit(&PlayerPositionEvent{
+		if err := p.emit(&PlayerPositionEvent{
 			PlayerNum: int(playerNum),
 			Origin:    origin,
 			Angles:    angles,
 			Time:      time,
 			TimeMs:    timeMs,
-		})
+		}); err != nil {
+			return err
+		}
 	}
 
+	// DF_DEAD / DF_GIB drive the primary DeathEvent / SpawnEvent path.
+	// svc_playerinfo is broadcast for every player on every frame, so
+	// this catches transitions the stat-based detector misses when the
+	// dem_stats block is addressed to a different player.
+	isDead := flags&(mvd.DFDead|mvd.DFGIB) != 0
+	if !p.playerSeenInfo[playerNum] {
+		p.playerSeenInfo[playerNum] = true
+		if isDead {
+			// First sample for this slot already shows dead — no prior
+			// alive state to transition from, so don't fabricate a
+			// DeathEvent. Pre-seed the dedup state so the next alive
+			// frame fires a SpawnEvent.
+			p.playerDeadKnown[playerNum] = true
+			p.playerDead[playerNum] = true
+			return nil
+		}
+		// First sample alive — synthesise a SpawnEvent so analytics has
+		// a starting boundary for the player. Deduped against stats.go
+		// in case StatHealth has already fired.
+		return p.maybeEmitSpawn(int(playerNum), time, timeMs)
+	}
+	if isDead != p.playerDead[playerNum] {
+		if isDead {
+			return p.maybeEmitDeath(int(playerNum), time, timeMs)
+		}
+		return p.maybeEmitSpawn(int(playerNum), time, timeMs)
+	}
 	return nil
 }
 

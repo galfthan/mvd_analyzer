@@ -106,6 +106,18 @@ type Parser struct {
 	players         [mvd.MaxClients]*mvd.PlayerInfo
 	playerStats     [mvd.MaxClients]*mvd.Stats
 	playerPositions [mvd.MaxClients][3]float32 // Last known position per player (for delta updates)
+	// Per-player dead/alive bookkeeping for DeathEvent / SpawnEvent
+	// emission. Two signals feed it: the StatHealth edge detector in
+	// stats.go (>0 ↔ ≤0) and the DF_DEAD bit on every svc_playerinfo
+	// in position.go. The two are deduplicated against playerDead /
+	// playerDeadKnown so whichever fires first wins; the other becomes
+	// a no-op. playerSeenInfo separately tracks "have we received a
+	// svc_playerinfo for this slot yet" so the first sample doesn't
+	// fabricate a DeathEvent for a player who joined the demo already
+	// dead (no prior alive state to transition from).
+	playerDead       [mvd.MaxClients]bool
+	playerDeadKnown  [mvd.MaxClients]bool
+	playerSeenInfo   [mvd.MaxClients]bool
 	handlers        []Handler
 	floatCoords     bool
 	fteExtensions   uint32 // FTE protocol extension flags

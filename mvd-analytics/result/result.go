@@ -81,7 +81,20 @@ package result
 //     ItemTimeline[i].Loc, plus everything derived from those
 //     (LocTrails, LocGraph edges, RegionControl). Field shapes are
 //     unchanged — only the contents shift for maps with BSPs.
-const CurrentSchemaVersion = 9
+//
+// v10:
+//   - DeathEvent / SpawnEvent now derive primarily from the DF_DEAD
+//     bit in svc_playerinfo (broadcast every frame for every player)
+//     rather than only StatHealth crossings (directed at the POV
+//     player via dem_stats). The stat-based detector still runs and
+//     deduplicates against the new signal — whichever fires first
+//     wins. Net effect: deaths whose stat update was directed at a
+//     different player slot are now captured. PlayerStream.Spawns /
+//     Deaths counts go up for affected demos; downstream LocGraph,
+//     LocTrails, RegionControl, WeaponPickups (kills-before-next-
+//     death), and streak boundaries shift accordingly. Field shapes
+//     are unchanged.
+const CurrentSchemaVersion = 10
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

@@ -15,7 +15,13 @@ that downstream consumers render, summarise, or feed to an agent.
   ms deltas and integer storage eliminates float-precision drift end
   to end. v9 adds visibility-aware loc attribution (see `locvis/` and
   `bspvis/` below) — field shapes are unchanged but `PlayerStream.Loc`
-  no longer reports phantom wall-bleed visits on maps with a BSP.
+  no longer reports phantom wall-bleed visits on maps with a BSP. v10
+  switches DeathEvent / SpawnEvent to derive primarily from the
+  `DF_DEAD` bit in `svc_playerinfo` (broadcast every frame for every
+  player) so deaths previously hidden in `dem_stats` blocks addressed
+  to a different player slot are no longer dropped — `PlayerStream`
+  Spawns/Deaths counts rise and the downstream LocGraph / LocTrails /
+  RegionControl / WeaponPickups shift across the new boundaries.
   Public view-layer outputs still emit seconds. Full field reference
   in [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
 - `analyzer/` — the `Analyzer` interface, the read-only event/userinfo
@@ -223,7 +229,7 @@ type Result struct {
 
 Each sub-type is defined in its own file under `result/`. The JSON shape
 is the wire contract with every consumer; breaking changes bump
-`CurrentSchemaVersion` (currently `9`). For "how long was the match"
+`CurrentSchemaVersion` (currently `10`). For "how long was the match"
 read `Match.Duration` (float, parser-derived) or `DemoInfo.Duration`
 (integer, KTX-authoritative); the legacy top-level `duration` was
 removed in v6.

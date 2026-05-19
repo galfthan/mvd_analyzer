@@ -403,9 +403,16 @@ the V1 pure-Euclidean nearest-neighbour produced (see
 [experiments/locattr/V2b-V6-HANDOFF.md](experiments/locattr/V2b-V6-HANDOFF.md)
 for the empirical evidence). Field shapes are unchanged — only the
 contents of `PlayerStream.Loc` (and everything derived: LocTrails,
-LocGraph edges, RegionControl) shift for maps with BSPs.
+LocGraph edges, RegionControl) shift for maps with BSPs. Schema v10
+makes the `DF_DEAD` bit in `svc_playerinfo` the primary
+DeathEvent / SpawnEvent signal, with the existing `STAT_HEALTH`
+detector dedupling against it as a safety net — deaths whose
+`dem_stats` block was directed at a different player slot are no
+longer dropped (PlayerStream.Spawns / Deaths counts rise; LocGraph
+edges, LocTrails durations, RegionControl ticks, and WeaponPickups
+windows shift across the now-present boundaries).
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `9`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `10`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).
