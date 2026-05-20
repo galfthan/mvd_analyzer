@@ -184,10 +184,12 @@ Useful for movement-pattern reasoning ("what's adjacent to RA?",
 | `players`   | `string[]` | all | Restrict to these speakers |
 | `types`     | `string[]` | `["chat","teamsay"]` | Narrow to one of the two |
 
-Output: `[]result.MatchEvent` — each entry has `time`, `type` (`chat`
-or `teamsay`), `player`, `team`, `message` (raw with ezQuake markup),
-`messageClean` (markup stripped). Cleaner shape than
-`getEvents(types:["chat"])` when you only want chat.
+Output: `{ messages: []result.MatchEvent }` — each entry has `time`,
+`type` (`chat` or `teamsay`), `player`, `team`, `message` (raw with
+ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
+`getEvents(types:["chat"])` when you only want chat. (mvd-api returns a
+bare array here; the MCP tool wraps it under `messages` because MCP
+structuredContent must be a JSON object.)
 
 #### `getBackpacks({demoId, ...})`
 
@@ -197,22 +199,26 @@ or `teamsay`), `player`, `team`, `message` (raw with ezQuake markup),
 | `players` | `string[]` | all | Restrict to drops by these dropper names |
 | `weapon`  | `string`   | both | `rl` or `lg` |
 
-Output: `[]result.BackpackDrop` — `time`, `player` (dropper), `team`,
-`weapon` (`rl`/`lg`), `origin` (XYZ), `loc` (resolved name),
-`entNum` (server edict — joins to `weapon-pickups[].backpackEnt`).
+Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
+`player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
+(resolved name), `entNum` (server edict — joins to
+`weapon-pickups[].backpackEnt`). (Wrapped under `backpacks`; see the
+`getChat` note.)
 
 #### `getItems({demoId, ...})`
 
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `demoId`  | `string` (required) | — | — |
-| `items`   | `string[]` | all | Item names: `RA`, `YA`, `GA`, `MH`, `Quad`, `Pent`, `Ring`, `RL`, `LG`, `GL`, `SSG`, `NG`, `SNG`, … |
+| `items`   | `string[]` | all | Item name or kind token, case-insensitive. A kind matches every instance of a type (`YA` → `ya_1`, `ya_2`; `RA`; `MH`; `Quad`; `Pent`; `Ring`; `RL`; `LG`; `GL`; `SSG`; `SNG`; `NG`); a suffixed name matches one instance (`ya_1`). |
 | `players` | `string[]` | all | Restrict phases to those taken by these names; phases with no `takenBy` survive |
-| `kinds`   | `string[]` | all | `armor`, `mega`, `powerup`, `weapon`, `ammo`, `health` |
+| `kinds`   | `string[]` | all | Category, case-insensitive: `armor`, `mega`, `health`, `powerup`, `weapon`, `ammo`. A raw kind token (`ra`, `quad`, …) also matches. |
 
 Output: `result.ItemsResult` —
 `{ items: [{ name, kind, entNum, x, y, z, loc, phases: [...] }, ...] }`.
-Each phase: `availableFrom`, `takenAt`, `takenBy`, `team`,
+`name` is unique per item (suffixed when a map has several of a kind:
+`ya_1`, `ya_2`, `mh_1`); `kind` is the raw token (`ra`/`ya`/`mh`/`quad`/
+`rl`/…). Each phase: `availableFrom`, `takenAt`, `takenBy`, `team`,
 `respawnAt`.
 
 #### `getWeaponPickups({demoId, ...})`
@@ -224,11 +230,12 @@ Each phase: `availableFrom`, `takenAt`, `takenBy`, `team`,
 | `weapon`  | `string[]` | all | `rl`, `lg`, `gl`, `ssg`, `sng`, `ng` |
 | `source`  | `string`   | both | `world` (spawner) or `backpack` (RL/LG drop) |
 
-Output: `[]result.WeaponPickup` — `time`, `player`, `team`, `weapon`,
-`source`, `hadBefore`, `kills` (before picker's next death),
-`nextDeathTime`, plus for backpack pickups `backpackEnt`, `dropper`,
-`dropperTeam`, `dropTime`. Joins to `getBackpacks` via `backpackEnt`
-== `backpacks[].entNum`.
+Output: `{ pickups: []result.WeaponPickup }` — each entry has `time`,
+`player`, `team`, `weapon`, `source`, `hadBefore`, `kills` (before
+picker's next death), `nextDeathTime`, plus for backpack pickups
+`backpackEnt`, `dropper`, `dropperTeam`, `dropTime`. Joins to
+`getBackpacks` via `backpackEnt` == `backpacks[].entNum`. (Wrapped under
+`pickups`; see the `getChat` note.)
 
 #### `getBuckets({demoId, ...})`
 

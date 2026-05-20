@@ -96,11 +96,17 @@ func stubResult() *result.Result {
 		},
 		Items: &result.ItemsResult{
 			Items: []result.ItemTimeline{
-				{Name: "RA", Kind: "armor", EntNum: 9, Phases: []result.ItemPhase{
+				{Name: "ra", Kind: "ra", EntNum: 9, Phases: []result.ItemPhase{
 					{AvailableFrom: 0, TakenAt: 20000, TakenBy: "bps", Team: "blue", RespawnAt: 40000},
 				}},
-				{Name: "MH", Kind: "mega", EntNum: 11, Phases: []result.ItemPhase{
+				{Name: "mh_1", Kind: "mh", EntNum: 11, Phases: []result.ItemPhase{
 					{AvailableFrom: 0, TakenAt: 35000, TakenBy: "valla", Team: "red"},
+				}},
+				{Name: "ya_1", Kind: "ya", EntNum: 12, Phases: []result.ItemPhase{
+					{AvailableFrom: 0, TakenAt: 10000, TakenBy: "bps", Team: "blue", RespawnAt: 30000},
+				}},
+				{Name: "ya_2", Kind: "ya", EntNum: 13, Phases: []result.ItemPhase{
+					{AvailableFrom: 0, TakenAt: 15000, TakenBy: "valla", Team: "red", RespawnAt: 35000},
 				}},
 			},
 		},
@@ -449,20 +455,54 @@ func TestBackpacks(t *testing.T) {
 	}
 }
 
-func TestItems_AndFilter(t *testing.T) {
+func TestItems_Filters(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
-	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/items?items=RA", 200)
-	items, _ := resp["items"].([]any)
-	if len(items) != 1 {
-		t.Errorf("items=RA filter: got %d, want 1", len(items))
+
+	count := func(query string) int {
+		t.Helper()
+		resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/items"+query, 200)
+		items, _ := resp["items"].([]any)
+		return len(items)
 	}
 
-	// players=valla filter — should drop the RA phase (taken by bps).
-	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/items?players=valla", 200)
-	items, _ = resp["items"].([]any)
-	if len(items) != 1 {
-		t.Errorf("players=valla: got %d items, want 1 (MH only)", len(items))
+	// items= is case-insensitive and matches the kind token, so the
+	// documented display vocabulary (RA, MH) resolves to the lowercase
+	// instances ra, mh_1.
+	if got := count("?items=RA"); got != 1 {
+		t.Errorf("items=RA: got %d, want 1 (ra)", got)
+	}
+	if got := count("?items=mh"); got != 1 {
+		t.Errorf("items=mh: got %d, want 1 (mh_1)", got)
+	}
+	// A bare kind token matches every instance of that type.
+	if got := count("?items=YA"); got != 2 {
+		t.Errorf("items=YA: got %d, want 2 (ya_1, ya_2)", got)
+	}
+	// A suffixed instance name matches just that one.
+	if got := count("?items=ya_1"); got != 1 {
+		t.Errorf("items=ya_1: got %d, want 1", got)
+	}
+
+	// kinds= matches the derived category.
+	if got := count("?kinds=armor"); got != 3 {
+		t.Errorf("kinds=armor: got %d, want 3 (ra, ya_1, ya_2)", got)
+	}
+	if got := count("?kinds=mega"); got != 1 {
+		t.Errorf("kinds=mega: got %d, want 1 (mh_1)", got)
+	}
+	if got := count("?kinds=powerup"); got != 0 {
+		t.Errorf("kinds=powerup: got %d, want 0", got)
+	}
+	// A raw kind token is also accepted by kinds=.
+	if got := count("?kinds=ya"); got != 2 {
+		t.Errorf("kinds=ya: got %d, want 2", got)
+	}
+
+	// players= keeps only phases taken by the named player. valla took
+	// mh_1 and ya_2; the ra/ya_1 phases (taken by bps) drop out.
+	if got := count("?players=valla"); got != 2 {
+		t.Errorf("players=valla: got %d items, want 2 (mh_1, ya_2)", got)
 	}
 }
 

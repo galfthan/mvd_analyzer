@@ -75,7 +75,7 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getChat",
-		Description: "All-chat and team-chat messages within an optional time window. Returns time, type ('chat' or 'teamsay'), player, team, message (raw with ezQuake markup), messageClean (markup stripped). Cheaper and shape-cleaner than getEvents(types:['chat']) when you only want chat.",
+		Description: "All-chat and team-chat messages within an optional time window. Returns {messages:[...]} where each message has time, type ('chat' or 'teamsay'), player, team, message (raw with ezQuake markup), messageClean (markup stripped). Cheaper and shape-cleaner than getEvents(types:['chat']) when you only want chat.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetChatInput) (*mcp.CallToolResult, any, error) {
 		out, err := b.GetChat(ctx, in)
 		return toolResult(out, err)
@@ -83,7 +83,7 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getBackpacks",
-		Description: "RL/LG backpack drops emitted by KTX's //ktx drop hint — each entry carries time, dropper, weapon ('rl'/'lg'), origin XYZ, resolved loc, and the server ent number that joins to weapon-pickups.",
+		Description: "RL/LG backpack drops emitted by KTX's //ktx drop hint. Returns {backpacks:[...]} where each entry carries time, dropper, weapon ('rl'/'lg'), origin XYZ, resolved loc, and the server ent number that joins to weapon-pickups.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetBackpacksInput) (*mcp.CallToolResult, any, error) {
 		out, err := b.GetBackpacks(ctx, in)
 		return toolResult(out, err)
@@ -91,7 +91,7 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getItems",
-		Description: "Per-item pickup/respawn timeline. Each item (RA/YA/GA/MH/Quad/Pent/Ring/RL/LG/...) has its world position + nearest loc, and a phases list — when it became available, when it was taken (if at all), by whom, when it respawned.",
+		Description: "Per-item pickup/respawn timeline, returned as {items:[...]}. Each item has a unique name (suffixed when a map has several of a type: ya_1, ya_2, mh_1), a kind token (ra/ya/ga/mh/quad/pent/ring/rl/lg/ssg/sng/ng/gl/h15/h25/nails/shells/rockets/cells), world position + nearest loc, and a phases list — when it became available, when it was taken (if at all), by whom, when it respawned. Filters (case-insensitive): items= matches a name or kind ('ya' → both yellow armors, 'ya_1' → one, 'RA'/'MH'/'Quad' all work); kinds= matches a category (armor, mega, health, powerup, weapon, ammo); players= keeps only phases taken by those players.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetItemsInput) (*mcp.CallToolResult, any, error) {
 		out, err := b.GetItems(ctx, in)
 		return toolResult(out, err)
@@ -99,7 +99,7 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getWeaponPickups",
-		Description: "Slot-weapon acquisitions (world spawners + RL/LG backpacks) with kills-before-next-death effectiveness. Each pickup carries time, player, weapon, source ('world'/'backpack'), kills earned, next death time. Backpack pickups also carry the dropper and the joining ent number.",
+		Description: "Slot-weapon acquisitions (world spawners + RL/LG backpacks) with kills-before-next-death effectiveness. Returns {pickups:[...]} where each pickup carries time, player, weapon, source ('world'/'backpack'), kills earned, next death time. Backpack pickups also carry the dropper and the joining ent number.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetWeaponPickupsInput) (*mcp.CallToolResult, any, error) {
 		out, err := b.GetWeaponPickups(ctx, in)
 		return toolResult(out, err)

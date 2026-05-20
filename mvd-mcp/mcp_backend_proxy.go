@@ -149,6 +149,28 @@ func (p *proxyBackend) fetchOpaque(ctx context.Context, method, path string, q u
 	return out, nil
 }
 
+// fetchOpaqueList is fetchOpaque for the mvd-api endpoints whose body is
+// a top-level JSON array (/chat, /backpacks, /weapon-pickups). The MCP
+// SDK requires a tool's structuredContent to be a JSON object, so a bare
+// array fails validation ("expected record, received array"). We wrap it
+// under `key` here, at the MCP boundary, rather than reshaping the REST
+// contract — bare-array bodies are valid HTTP and the array-only
+// constraint is the MCP layer's. An already-object body (defensive, e.g.
+// a future shape change or an error envelope) passes through untouched.
+func (p *proxyBackend) fetchOpaqueList(ctx context.Context, method, path string, q url.Values, key string) (any, error) {
+	var out any
+	if err := p.do(ctx, method, path, q, &out); err != nil {
+		return nil, err
+	}
+	if _, isObject := out.(map[string]any); isObject {
+		return out, nil
+	}
+	if out == nil {
+		out = []any{}
+	}
+	return map[string]any{key: out}, nil
+}
+
 // --- MCPBackend impl ---
 
 func (p *proxyBackend) LoadDemo(ctx context.Context, in LoadDemoInput) (*LoadDemoOutput, error) {
@@ -233,7 +255,7 @@ func (p *proxyBackend) GetChat(ctx context.Context, in GetChatInput) (any, error
 	if len(in.Types) > 0 {
 		q.Set("types", strings.Join(in.Types, ","))
 	}
-	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/chat", q)
+	return p.fetchOpaqueList(ctx, "GET", "/v1/demos/"+in.DemoID+"/chat", q, "messages")
 }
 
 func (p *proxyBackend) GetBackpacks(ctx context.Context, in GetBackpacksInput) (any, error) {
@@ -247,7 +269,7 @@ func (p *proxyBackend) GetBackpacks(ctx context.Context, in GetBackpacksInput) (
 	if in.Weapon != "" {
 		q.Set("weapon", in.Weapon)
 	}
-	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/backpacks", q)
+	return p.fetchOpaqueList(ctx, "GET", "/v1/demos/"+in.DemoID+"/backpacks", q, "backpacks")
 }
 
 func (p *proxyBackend) GetItems(ctx context.Context, in GetItemsInput) (any, error) {
@@ -281,7 +303,7 @@ func (p *proxyBackend) GetWeaponPickups(ctx context.Context, in GetWeaponPickups
 	if in.Source != "" {
 		q.Set("source", in.Source)
 	}
-	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/weapon-pickups", q)
+	return p.fetchOpaqueList(ctx, "GET", "/v1/demos/"+in.DemoID+"/weapon-pickups", q, "pickups")
 }
 
 func (p *proxyBackend) GetBuckets(ctx context.Context, in GetBucketsInput) (any, error) {

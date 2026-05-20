@@ -53,6 +53,17 @@ func cannedAPI(t *testing.T, recordAuth *string) *httptest.Server {
 	mux.HandleFunc("GET /v1/demos/{id}/region-control", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"regions":[],"stats":{}}`))
 	})
+	// These three mvd-api endpoints return top-level JSON arrays; the
+	// proxy must wrap them so the MCP SDK accepts the structuredContent.
+	mux.HandleFunc("GET /v1/demos/{id}/chat", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`[{"type":"chat","player":"bps"}]`))
+	})
+	mux.HandleFunc("GET /v1/demos/{id}/backpacks", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`[{"weapon":"rl","player":"bps"}]`))
+	})
+	mux.HandleFunc("GET /v1/demos/{id}/weapon-pickups", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`[]`))
+	})
 
 	srv := httptest.NewServer(mux)
 	t.Cleanup(srv.Close)
@@ -212,5 +223,49 @@ func TestProxy_AllView(t *testing.T) {
 	}
 	if _, err := b.GetRegionControl(ctx, GetRegionControlInput{DemoID: "gameId:42"}); err != nil {
 		t.Errorf("GetRegionControl: %v", err)
+	}
+}
+
+// The array-bodied endpoints must come back wrapped in an object under a
+// named key — a bare array fails the MCP SDK's structuredContent check.
+func TestProxy_ListEndpointsWrapped(t *testing.T) {
+	srv := cannedAPI(t, nil)
+	b := newProxyBackend(srv.URL, "", 5*time.Second)
+	ctx := context.Background()
+
+	cases := []struct {
+		name string
+		key  string
+		want int // expected element count under key
+		call func() (any, error)
+	}{
+		{"chat", "messages", 1, func() (any, error) {
+			return b.GetChat(ctx, GetChatInput{DemoID: "gameId:42"})
+		}},
+		{"backpacks", "backpacks", 1, func() (any, error) {
+			return b.GetBackpacks(ctx, GetBackpacksInput{DemoID: "gameId:42"})
+		}},
+		{"weapon-pickups", "pickups", 0, func() (any, error) {
+			return b.GetWeaponPickups(ctx, GetWeaponPickupsInput{DemoID: "gameId:42"})
+		}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			out, err := tc.call()
+			if err != nil {
+				t.Fatalf("%s: %v", tc.name, err)
+			}
+			m, ok := out.(map[string]any)
+			if !ok {
+				t.Fatalf("%s: structuredContent must be an object, got %T", tc.name, out)
+			}
+			arr, ok := m[tc.key].([]any)
+			if !ok {
+				t.Fatalf("%s: missing %q array, got %+v", tc.name, tc.key, m)
+			}
+			if len(arr) != tc.want {
+				t.Errorf("%s: len(%s)=%d; want %d", tc.name, tc.key, len(arr), tc.want)
+			}
+		})
 	}
 }

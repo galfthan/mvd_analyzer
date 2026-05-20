@@ -160,9 +160,9 @@ type GetBackpacksInput struct {
 // GetItemsInput filters /v1/demos/{id}/items.
 type GetItemsInput struct {
 	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
-	Items   []string `json:"items,omitempty" jsonschema:"item names: RA, YA, GA, MH, Quad, Pent, Ring, RL, LG, GL, SSG, NG, SNG, ..."`
+	Items   []string `json:"items,omitempty" jsonschema:"item name or kind token (case-insensitive). A kind matches every instance of a type (YA → ya_1, ya_2; RA; MH; Quad; Pent; Ring; RL; LG; GL; SSG; SNG; NG); a suffixed name matches one instance (ya_1)."`
 	Players []string `json:"players,omitempty" jsonschema:"restrict phases to those taken by these player names (phases with no TakenBy survive)"`
-	Kinds   []string `json:"kinds,omitempty" jsonschema:"item kinds: armor, mega, powerup, weapon, ammo, health"`
+	Kinds   []string `json:"kinds,omitempty" jsonschema:"item category (case-insensitive): armor, mega, health, powerup, weapon, ammo. A raw kind token (ra, quad, rl, ...) is also accepted."`
 }
 
 // GetWeaponPickupsInput filters /v1/demos/{id}/weapon-pickups.
