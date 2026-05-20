@@ -45,7 +45,7 @@ immutable`, `X-Schema-Version: 10`, `X-Cache: HIT|WARM|MISS`, and
 | GET | `/healthz` | — | `{ok, schemaVersion}` |
 | GET | `/v1/version` | — | `{hash, tag, buildDate}` |
 | POST | `/v1/demos/{id}` | — | `{demoId, sha256, fromCache, schemaVersion}` (`loadDemo` — warms the cache) |
-| GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, top streaks, top powerups, playerUserIDs) |
+| GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, top streaks, top powerups, playerUserIDs, analyzer `errors`) |
 | GET | `/v1/demos/{id}/demoinfo` | — | `result.DemoInfoResult` (KTX scoreboard — per-player weapon accuracy, kills/deaths/TK, damage, sprees, item counts, RL/LG transfers) |
 | GET | `/v1/demos/{id}/metadata` | — | `result.MetadataResult` (full fullserverinfo cvars + KTX match settings: timelimit, fraglimit, spawnmodel, antilag, midair, instagib, …) |
 | GET | `/v1/demos/{id}/frags` | `players`, `weapon` | `result.FragResult` (totalFrags + byPlayer + byWeapon + full kill log) |
@@ -102,10 +102,11 @@ cache returns sub-millisecond.
 Curated summary cheap enough to call as a first step after
 `loadDemo`. Composed in
 [`overview.go`](overview.go) from `result.Match`, `result.Frags`,
-`result.Metadata.MatchSettings`, and
-`result.TimelineAnalysis.{FragStreaks,PowerupEvents,LocTable,RegionControl}` —
-no new analytics, just a shape that surfaces "what was this match"
-in one round-trip.
+`result.Metadata.MatchSettings`,
+`result.TimelineAnalysis.{FragStreaks,PowerupEvents,LocTable,RegionControl}`,
+and `result.Errors` — no new analytics, just a shape that surfaces
+"what was this match" (and whether the analysis is degraded) in one
+round-trip.
 
 ```jsonc
 {
@@ -137,7 +138,8 @@ in one round-trip.
   ],
   "locCount":         47,                           // len(TimelineAnalysis.LocTable)
   "hasRegionControl": true,                         // true if /region-control will succeed
-  "playerUserIDs":    { "bps": 123, "valla": 456 } // omitempty — for hub.quakeworld.nu/games/<gameId>?track=<userId>
+  "playerUserIDs":    { "bps": 123, "valla": 456 }, // omitempty — for hub.quakeworld.nu/games/<gameId>?track=<userId>
+  "errors": [ "itemAnalyzer: respawn before pickup" ] // omitempty — analyzer non-fatal errors; non-empty ⇒ degraded result
 }
 ```
 
