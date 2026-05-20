@@ -28,10 +28,17 @@ var obituaryWeapons = []obituaryWeapon{
 	{weapon: "rl", suffixes: []string{"'s rocket", "'s pineapple", "' rocket"}, quadSuffixes: []string{"'s quad rocket", "'s quad pineapple"}},
 	{weapon: "lg", suffixes: []string{"'s shaft", "'s lightning", "'s discharge", "' discharge"}, quadSuffixes: []string{"'s quad shaft", "'s quad lightning"}},
 	{weapon: "gl", suffixes: []string{"'s grenade", "' grenade"}, quadSuffixes: []string{"'s quad grenade"}},
-	{weapon: "ssg", suffixes: []string{"'s boomstick", "'s buckshot", "' buckshot"}, quadSuffixes: []string{"'s quad boomstick"}},
+	{weapon: "ssg", suffixes: []string{"'s boomstick", "'s buckshot", "' buckshot", "'s lead shot"}, quadSuffixes: []string{"'s quad boomstick"}},
+	{weapon: "sg", suffixes: []string{"'s shotgun"}},
 	{weapon: "axe", suffixes: []string{"'s axe"}, quadSuffixes: []string{"'s quad axe"}},
 	{weapon: "ng", suffixes: []string{"'s batteries"}},
 	{weapon: "fall", suffixes: []string{"'s fall", "' fall"}},
+	// Pent-deflection (KTX dtTELE3): "<victim> was telefragged by
+	// <killer>'s Satan's power\n". Victim picks up the kill via the
+	// existing " was telefragged by " marker; this suffix lets
+	// extractKillerName stop at the right boundary instead of
+	// returning "<killer>'s Satan's power" as the killer name.
+	{weapon: "tele", suffixes: []string{"'s Satan's power"}},
 }
 
 // killerSuffixes is the flat suffix list extracted from obituaryWeapons in

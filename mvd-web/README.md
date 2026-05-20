@@ -19,9 +19,11 @@ talks to it through a JS shim.
   - `index.html`, `styles.css`, `app.js` — main page and the tabbed
     analyzer UI (scoreboard, timeline, map, chat, loc graph, ...).
   - `worker.js` — wraps the WASM module in a Web Worker so analysis
-    doesn't block the main thread. Also provides `fetchLocSync` which
-    the WASM-side loc loader calls (sync XHR is still allowed inside
-    Web Workers).
+    doesn't block the main thread. Provides the host callbacks the
+    WASM side calls synchronously: `fetchLocSync(mapName)` for the
+    per-map `.loc` corpus and `fetchBspSync(mapName)` for the per-map
+    BSP used by the visibility-aware loc attribution (locvis). Sync
+    XHR is still allowed inside Web Workers.
   - `wasm_exec.js` — Go runtime glue, copied from the Go toolchain at
     build time.
   - `maps/` — pre-generated per-map floor polygon JSON. Committed; the
@@ -47,12 +49,19 @@ dist/
   app.js, worker.js           frontend
   maps/                       pre-generated map geometry
   locs/                       .loc files copied from mvd-analytics/loc/data
+  bsps/                       BSP files from `make bsps` for the locvis
+                              visibility filter (skipped if bsps/ is empty)
 ```
 
 ### Netlify deploy
 
-`netlify.toml` at the repo root runs `make build` and publishes `dist/`.
-Every push to a branch with Netlify connected will rebuild and deploy.
+`netlify.toml` at the repo root chains `make bsps && make build` and
+publishes `dist/`. Every push to a branch with Netlify connected
+rebuilds and deploys. `make bsps` runs on Netlify's build container
+(it has `curl` and `bash`), fetches the ~14 competitive-map BSPs from
+the public mirrors documented in `scripts/fetch-bsps.sh`, and verifies
+each sha256 — a missing or corrupt BSP hard-fails the deploy, which
+is preferred to a silent V1-everywhere regression.
 
 ## Layout
 
@@ -131,6 +140,27 @@ bundle). Instead, when the analyzer needs a loc file, it calls
 `fetchLocSync(mapName)`, which the worker implements as a synchronous
 XHR against `locs/<name>.loc`. `make build` copies the corpus from
 `mvd-analytics/loc/data/` into `dist/locs/`.
+
+## BSPs at runtime (visibility filter)
+
+The locvis visibility filter (see [`mvd-analytics/locvis/`](../mvd-analytics/locvis/))
+loads per-map BSP files on demand via `fetchBspSync(mapName)`, which
+worker.js implements identically to `fetchLocSync` but against
+`bsps/<name>.bsp`. `make bsps` populates a gitignored top-level
+`bsps/` directory from the curated set in
+[`scripts/fetch-bsps.sh`](../scripts/fetch-bsps.sh) — id-stock maps
+(dm2/dm3/dm6/e1m2) from [id-maps-gpl](https://github.com/quakeworld/id-maps-gpl)
+gzipped, community competitive maps from
+[maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/), each
+sha256-pinned. `make build` then copies them into `dist/bsps/`. When
+a map has no BSP available the WASM side returns `null` and locvis
+transparently degrades to the V1 Euclidean nearest-neighbour
+attribution — no UI change beyond losing the wall-bleed correction
+for that map. Skipping `make bsps` entirely is supported for local
+dev; the build still works, you just get V1 everywhere.
+
+The Netlify deploy chains `make bsps && make build`, so production
+gets the visibility filter on every push.
 
 ## Pack Drops tab
 

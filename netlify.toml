@@ -1,5 +1,11 @@
 [build]
-  command = "make build"
+  # `make bsps` downloads the curated set of Quake 1 BSPs into bsps/
+  # (gitignored, see scripts/fetch-bsps.sh). `make build` then copies
+  # them into dist/bsps/ so the WASM worker can lazy-fetch per map for
+  # the locvis visibility filter. Hard-fails the deploy if any mirror
+  # is down — a deploy that silently regresses to V1 attribution would
+  # be worse than a red build.
+  command = "make bsps && make build"
   publish = "dist"
 
 # Ensure correct MIME type for WASM and enable compression

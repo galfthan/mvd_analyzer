@@ -229,6 +229,14 @@ func (a *FragAnalyzer) checkSuicide(msg string, time float64) *FragEntry {
 		{" blew himself up", "rl"},
 		{" blew herself up", "rl"},
 		{" finds a way out", "suicide"},
+
+		// KTX k_spawnicide variants (ktx/src/client.c:5164, dtTELE4).
+		// Only emitted when k_spawnicide is enabled; the regular
+		// telefrag print is used otherwise. Counted as a suicide for
+		// scoreboard purposes (KTX logfrag(targ, targ)).
+		{" couldn't resist the shiny spawn point", "tele"},
+		{" got too close to the baby factory", "tele"},
+		{" was fragged by poor life choices", "tele"},
 	}
 
 	for _, p := range suicidePatterns {
@@ -311,6 +319,19 @@ func (a *FragAnalyzer) checkKill(msg string, time float64) *FragEntry {
 		{" was jumped by ", "stomp"},
 		{" was crushed by ", "stomp"},
 
+		// CRMod obituary variants. CRMod added a parallel "X_FRAGGED_BY_Y"
+		// table on top of KTX's fragfile; servers running the CR ruleset
+		// still emit these and KTX retains them. Suffix-based weapon
+		// disambiguation happens via obituaryWeapons / extractKillerName,
+		// except for " was blown to chunks by " which is shared between
+		// rl ("'s rocket") and gl ("'s grenade") and is fixed up below.
+		{" was disembowled by ", "sg"},     // [sic] CRMod misspelling; suffix "'s shotgun"
+		{" eats 2 scoops of ", "ssg"},      // suffix "'s lead shot"
+		{" is shish-kebabed by ", "rl"},    // suffix "'s rocket"
+		{" was blown to chunks by ", "rl"}, // suffix "'s rocket" — fixed up to gl when suffix is "'s grenade"
+		{" gets intimate with ", "gl"},     // suffix "'s grenade"
+		{" gets a warm fuzzy feeling from ", "lg"}, // no weapon suffix; rest is just the killer name
+
 		// Generic patterns
 		{" was killed by ", "unknown"},
 		{" was fragged by ", "unknown"},
@@ -324,6 +345,17 @@ func (a *FragAnalyzer) checkKill(msg string, time float64) *FragEntry {
 			// Extract killer name (may have trailing text)
 			killer := extractKillerName(rest)
 
+			weapon := p.weapon
+			// "X was blown to chunks by Y's rocket" (rl) vs "X was
+			// blown to chunks by Y's grenade" (gl) share the same
+			// verb — disambiguate via the suffix, same shape as
+			// checkGibbedBy below.
+			if p.pattern == " was blown to chunks by " {
+				if strings.Contains(rest, "'s grenade") || strings.HasSuffix(strings.TrimSpace(rest), "' grenade") {
+					weapon = "gl"
+				}
+			}
+
 			if victim != "" && killer != "" {
 				// Check for team kill
 				isTeamKill := a.isTeamKill(victim, killer)
@@ -332,7 +364,7 @@ func (a *FragAnalyzer) checkKill(msg string, time float64) *FragEntry {
 					Time:       msTime(time),
 					Killer:     killer,
 					Victim:     victim,
-					Weapon:     p.weapon,
+					Weapon:     weapon,
 					IsTeamKill: isTeamKill,
 				}
 			}
@@ -345,7 +377,42 @@ func (a *FragAnalyzer) checkKill(msg string, time float64) *FragEntry {
 		return frag
 	}
 
+	// Satan's-power deflection (KTX dtTELE2 — ktx/src/client.c:5141).
+	// Infix-form obit where the victim's name sits between the
+	// "Satan's power deflects " prefix and the "'s telefrag" suffix.
+	// The dying player is the one who attempted the telefrag; KTX
+	// books this as a self-attributed suicide (logfrag(targ, targ)).
+	if frag := a.checkSatanDeflect(msg, time); frag != nil {
+		return frag
+	}
+
 	return nil
+}
+
+// checkSatanDeflect handles the "Satan's power deflects X's telefrag"
+// obit — see KTX ktx/src/client.c:5141.
+func (a *FragAnalyzer) checkSatanDeflect(msg string, time float64) *FragEntry {
+	const prefix = "Satan's power deflects "
+	const suffix = "'s telefrag"
+	if !strings.HasPrefix(msg, prefix) {
+		return nil
+	}
+	rest := msg[len(prefix):]
+	end := strings.Index(rest, suffix)
+	if end <= 0 {
+		return nil
+	}
+	victim := strings.TrimSpace(rest[:end])
+	if victim == "" {
+		return nil
+	}
+	return &FragEntry{
+		Time:      msTime(time),
+		Killer:    victim,
+		Victim:    victim,
+		Weapon:    "tele",
+		IsSuicide: true,
+	}
 }
 
 // checkTeamKill checks for team kill patterns

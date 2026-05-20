@@ -77,8 +77,23 @@ make serve                                  # http://localhost:8080
 ### Build the WASM bundle for deploy
 
 ```bash
+make bsps                                   # fetch the curated BSP set for visibility-aware loc attribution
 make build                                  # output in dist/
 ```
+
+`make bsps` populates a gitignored top-level `bsps/` directory with
+the competitive QW map set defined in
+[`scripts/fetch-bsps.sh`](scripts/fetch-bsps.sh) (id-stock from
+[id-maps-gpl](https://github.com/quakeworld/id-maps-gpl), community
+maps from [maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/),
+sha256-pinned). `make build` then copies them into `dist/bsps/` for
+the WASM worker to lazy-fetch per map. The script hard-fails on any
+download or sha mismatch so a flaky mirror produces a red build
+rather than a silent V1-everywhere deploy.
+
+For local dev the step is skippable — maps without a BSP fall back to
+the V1 Euclidean nearest-neighbour attribution (i.e. the pre-v9
+behaviour); only the wall-bleed correction is lost.
 
 ### Serve the REST API (`mvd-api`)
 
@@ -379,9 +394,25 @@ query API (`view.Buckets`, `view.Events`, `view.StreamSlice`,
 `view.StateAt`) still takes and emits float64 seconds at its public
 surface, so consumers querying through `view.*` (including the WASM
 bridge's `getBuckets` / `getEvents` / `getStreamSlice` / `getStateAt`
-exports) are unaffected.
+exports) are unaffected. Schema v9 adds visibility-aware loc
+attribution: when a per-map BSP is available, the analyzer rejects
+candidate loc-points that fall outside the player's potentially-
+visible-set (PVS), eliminating brief "wall-bleed" phantom loc visits
+the V1 pure-Euclidean nearest-neighbour produced (see
+[mvd-analytics/locvis](mvd-analytics/locvis/) and
+[experiments/locattr/V2b-V6-HANDOFF.md](experiments/locattr/V2b-V6-HANDOFF.md)
+for the empirical evidence). Field shapes are unchanged — only the
+contents of `PlayerStream.Loc` (and everything derived: LocTrails,
+LocGraph edges, RegionControl) shift for maps with BSPs. Schema v10
+makes the `DF_DEAD` bit in `svc_playerinfo` the primary
+DeathEvent / SpawnEvent signal, with the existing `STAT_HEALTH`
+detector dedupling against it as a safety net — deaths whose
+`dem_stats` block was directed at a different player slot are no
+longer dropped (PlayerStream.Spawns / Deaths counts rise; LocGraph
+edges, LocTrails durations, RegionControl ticks, and WeaponPickups
+windows shift across the now-present boundaries).
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `8`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `10`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).

@@ -16,6 +16,7 @@ MCP_MAIN   := ./mvd-mcp
 DIST_DIR   := dist
 STATIC_DIR := mvd-web/static
 LOC_DATA   := mvd-analytics/loc/data
+BSP_DIR    := bsps
 GIT_HASH   := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 GIT_TAG    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
 BUILD_DATE := $(shell date -u +%Y-%m-%d)
@@ -24,7 +25,7 @@ LDFLAGS    := -ldflags "-s -w -X main.GitHash=$(GIT_HASH) -X main.GitTag=$(GIT_T
 .PHONY: build build-api build-mcp build-bin build-all-platforms \
         build-api-linux build-api-darwin build-api-windows \
         build-mcp-linux build-mcp-darwin build-mcp-windows \
-        serve clean test fmt help
+        bsps serve clean test fmt help
 
 # Build the deployable web bundle into dist/.
 build:
@@ -42,6 +43,12 @@ build:
 	@cp -r $(STATIC_DIR)/maps $(DIST_DIR)/
 	@echo "Copying loc corpus from $(LOC_DATA)..."
 	@mkdir -p $(DIST_DIR)/locs && cp $(LOC_DATA)/*.loc $(DIST_DIR)/locs/
+	@if [ -d $(BSP_DIR) ] && ls $(BSP_DIR)/*.bsp >/dev/null 2>&1; then \
+		echo "Copying BSPs from $(BSP_DIR)/ for WASM visibility filter..."; \
+		mkdir -p $(DIST_DIR)/bsps && cp $(BSP_DIR)/*.bsp $(DIST_DIR)/bsps/; \
+	else \
+		echo "Skipping BSP copy ($(BSP_DIR)/ empty — run 'make bsps' to populate; locvis falls back to V1)."; \
+	fi
 	@echo "Build complete!"
 	@ls -lh $(DIST_DIR)/
 
@@ -87,6 +94,14 @@ build-all-platforms: build-api-linux build-api-darwin build-api-windows \
                      build-mcp-linux build-mcp-darwin build-mcp-windows
 	@ls -lh $(DIST_DIR)/mvd-api-* $(DIST_DIR)/mvd-mcp-*
 
+# Download the curated set of QW competitive BSPs into $(BSP_DIR). These
+# files are NOT committed to git (see .gitignore). The locvis visibility
+# filter loads them at runtime when attributing player positions to loc
+# names; maps without a BSP fall back to the V1 Euclidean nearest-
+# neighbour. See scripts/fetch-bsps.sh for the URL/sha256 list.
+bsps:
+	@./scripts/fetch-bsps.sh $(BSP_DIR)
+
 # Serve the built web bundle on localhost.
 serve: build
 	@echo "Serving on http://localhost:8080"
@@ -115,6 +130,7 @@ help:
 	@echo "  build-mcp           Build mvd-mcp binary for the host platform"
 	@echo "  build-bin           build-api + build-mcp"
 	@echo "  build-all-platforms Cross-compile mvd-api and mvd-mcp for linux/darwin/windows"
+	@echo "  bsps                Download competitive QW BSPs into $(BSP_DIR)/ for locvis visibility filter"
 	@echo "  serve               make build, then python3 -m http.server 8080 in dist/"
 	@echo "  test                Run tests across every module"
 	@echo "  clean               Remove dist/"

@@ -4550,7 +4550,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 8,
+  "schemaVersion": 10,
   "streams": {
     "global": {
       "matchEnd": 599993,

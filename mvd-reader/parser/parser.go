@@ -106,6 +106,29 @@ type Parser struct {
 	players         [mvd.MaxClients]*mvd.PlayerInfo
 	playerStats     [mvd.MaxClients]*mvd.Stats
 	playerPositions [mvd.MaxClients][3]float32 // Last known position per player (for delta updates)
+	// Per-player dead/alive bookkeeping for DeathEvent / SpawnEvent
+	// emission. Two signals feed it: the StatHealth edge detector in
+	// stats.go (>0 ↔ ≤0) and the DF_DEAD bit on every svc_playerinfo
+	// in position.go. The two are deduplicated against playerDead /
+	// playerDeadKnown so whichever fires first wins; the other becomes
+	// a no-op. playerSeenInfo separately tracks "have we received a
+	// svc_playerinfo for this slot yet" so the first sample doesn't
+	// fabricate a DeathEvent for a player who joined the demo already
+	// dead (no prior alive state to transition from).
+	playerDead       [mvd.MaxClients]bool
+	playerDeadKnown  [mvd.MaxClients]bool
+	playerSeenInfo   [mvd.MaxClients]bool
+	// matchStarted flips on the first svc_print whose text matches one
+	// of the canonical match-start phrases (see matchStartedFromPrint).
+	// It gates the obituary-derived DeathEvent path in
+	// tryEmitObituaryDeath: telefrag obits that fire at the *exact*
+	// wire time of the start print arrive in the event stream before
+	// the start print itself, so the analyzer's timing gate drops them
+	// and the resulting parser-side dedup state silently suppresses
+	// the still-to-arrive stat-based DeathEvent. Gating obit emission
+	// on this flag keeps warmup obits silent and lets the dedup state
+	// flow normally once the match is live.
+	matchStarted    bool
 	handlers        []Handler
 	floatCoords     bool
 	fteExtensions   uint32 // FTE protocol extension flags
@@ -246,7 +269,7 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			if msg.Header.MessageType == mvd.DemSingle {
 				target = msg.Header.PlayerNum
 			}
-			if err := p.parsePrint(r, msg.Time, target); err != nil {
+			if err := p.parsePrint(r, msg.Time, msg.TimeMs, target); err != nil {
 				p.warn(msg.Time, "parse_error", "svc_print: %v", err)
 				return nil
 			}
