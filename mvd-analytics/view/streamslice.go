@@ -16,6 +16,10 @@ type StreamSliceOptions struct {
 	EndTime   float64
 	Players   []string
 	Fields    []string
+	// LocIndex selects the loc representation: false (default) resolves
+	// to loc names (PlayerSlice.Loc); true emits the raw LocTable index
+	// stream (PlayerSlice.Li). Decode the index via /loc-table.
+	LocIndex bool
 }
 
 // StreamSliceView is the response shape: per-player slices over the
@@ -41,7 +45,13 @@ type PlayerSlice struct {
 	Health    []result.ChangeI16 `json:"h,omitempty"`
 	Armor     []result.ChangeI16 `json:"a,omitempty"`
 	ArmorType []result.ChangeStr `json:"at,omitempty"`
-	Loc       []result.ChangeI16 `json:"li,omitempty"`
+	// Loc / Li carry the loc change stream, one or the other depending
+	// on StreamSliceOptions.LocIndex. Loc (default) holds resolved names
+	// in V (e.g. "RA") so consumers never need the table; Li holds the
+	// raw LocTable index stream (opt-in, for index math; decode via
+	// /loc-table).
+	Loc []result.ChangeStr `json:"loc,omitempty"`
+	Li  []result.ChangeI16 `json:"li,omitempty"`
 
 	RL  []result.Interval `json:"rl,omitempty"`
 	LG  []result.Interval `json:"lg,omitempty"`
@@ -94,6 +104,7 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 		start = float64(r.Streams.Global.MatchStart) * 0.001
 	}
 	pf := newPlayerFilter(opts.Players)
+	locTable := locTableOf(r)
 
 	out := &StreamSliceView{StartTime: start, EndTime: end}
 	for _, p := range r.Streams.Players {
@@ -111,7 +122,11 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 			ps.ArmorType = sliceStr(p.ArmorType, start, end)
 		}
 		if requested[FieldLoc] {
-			ps.Loc = sliceI16(p.Loc, start, end)
+			if opts.LocIndex {
+				ps.Li = sliceI16(p.Loc, start, end)
+			} else {
+				ps.Loc = sliceLocNames(p.Loc, locTable, start, end)
+			}
 		}
 		if requested[FieldShells] {
 			ps.Shells = sliceI16(p.Shells, start, end)
@@ -186,6 +201,36 @@ func sliceI16(stream []result.ChangeI16, start, end float64) []result.ChangeI16 
 			continue
 		}
 		out = append(out, c)
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+// sliceLocNames is sliceI16 for the loc stream, resolving each index to
+// its loc name through locTable as it goes. Carry-forward and dedup
+// happen on the resolved name so two indices mapping to the same name
+// (or to "") collapse like any other no-op transition.
+func sliceLocNames(stream []result.ChangeI16, locTable []string, start, end float64) []result.ChangeStr {
+	startMs := int32(start * 1000)
+	endMs := int32(end * 1000)
+	out := make([]result.ChangeStr, 0, 4)
+	if idx := indexI16AtOrBefore(stream, startMs); idx >= 0 {
+		out = append(out, result.ChangeStr{T: startMs, V: locNameAt(locTable, stream[idx].V)})
+	}
+	for _, c := range stream {
+		if c.T < startMs {
+			continue
+		}
+		if c.T >= endMs {
+			break
+		}
+		name := locNameAt(locTable, c.V)
+		if len(out) == 1 && c.T == startMs && name == out[0].V {
+			continue
+		}
+		out = append(out, result.ChangeStr{T: c.T, V: name})
 	}
 	if len(out) == 0 {
 		return nil

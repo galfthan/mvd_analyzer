@@ -13,6 +13,10 @@ type LocTrailsOptions struct {
 	MinDwellMs int
 	StartTime  float64
 	EndTime    float64
+	// LocIndex selects the residence representation: false (default)
+	// names each residence (TrailEntry.Loc); true emits the raw
+	// LocTable index (TrailEntry.Li). Decode the index via /loc-table.
+	LocIndex bool
 }
 
 // LocTrailsView is the response shape: per-player loc-name sequence
@@ -28,11 +32,17 @@ type PlayerTrail struct {
 	Sequence []TrailEntry `json:"sequence"`
 }
 
-// TrailEntry is one continuous residence in a single loc.
+// TrailEntry is one continuous residence in a single loc. Loc (name)
+// or Li (raw LocTable index) is set per LocTrailsOptions.LocIndex; the
+// unexported li always holds the index so grouping/merging stay
+// name-agnostic and the index render is a final relabel.
 type TrailEntry struct {
 	Start float64 `json:"s"`
 	End   float64 `json:"e"`
-	Loc   string  `json:"loc"`
+	Loc   string  `json:"loc,omitempty"`
+	Li    *int16  `json:"li,omitempty"`
+
+	li int16
 }
 
 // LocTrails derives per-player loc residences from
@@ -66,6 +76,13 @@ func LocTrails(r *result.Result, opts LocTrailsOptions) (*LocTrailsView, error) 
 		}
 		if len(seq) == 0 {
 			continue
+		}
+		if opts.LocIndex {
+			for j := range seq {
+				li := seq[j].li
+				seq[j].Li = &li
+				seq[j].Loc = ""
+			}
 		}
 		out.Players = append(out.Players, PlayerTrail{Name: p.Name, Sequence: seq})
 	}
@@ -119,6 +136,7 @@ func buildTrailRaw(stream []result.ChangeI16, windowStart, windowEnd float64, lo
 			Start: float64(segStart) * 0.001,
 			End:   float64(segEnd) * 0.001,
 			Loc:   locName,
+			li:    c.V,
 		})
 	}
 	return out

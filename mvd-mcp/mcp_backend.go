@@ -23,6 +23,7 @@ type MCPBackend interface {
 	GetStreamSlice(ctx context.Context, in GetStreamSliceInput) (any, error)
 	GetStateAt(ctx context.Context, in GetStateAtInput) (any, error)
 	GetLocTrails(ctx context.Context, in GetLocTrailsInput) (any, error)
+	GetLocTable(ctx context.Context, in GetLocTableInput) (any, error)
 	GetRegionControl(ctx context.Context, in GetRegionControlInput) (any, error)
 }
 
@@ -62,6 +63,7 @@ type GetBucketsInput struct {
 	Fields      []string          `json:"fields,omitempty" jsonschema:"field codes (h, a, rl, lg, ...). Empty = all standard fields"`
 	Reducers    map[string]string `json:"reducers,omitempty" jsonschema:"per-field reducer override, e.g. {\"h\":\"min\"}"`
 	IncludeTeam bool              `json:"includeTeam,omitempty"`
+	Loc         string            `json:"loc,omitempty" jsonschema:"loc representation: 'name' (default, resolved loc names) or 'index' (raw LocTable indices; decode via getLocTable)"`
 }
 
 // GetEventsInput mirrors /v1/demos/{id}/events query params.
@@ -71,6 +73,7 @@ type GetEventsInput struct {
 	EndTime   float64  `json:"endTime,omitempty"`
 	Players   []string `json:"players,omitempty"`
 	Types     []string `json:"types,omitempty" jsonschema:"event types: frag, powerup, streak, spawn, death, weapon, item, chat, loc, health, armor"`
+	Loc       string   `json:"loc,omitempty" jsonschema:"loc-event representation: 'name' (default) or 'index' (raw LocTable index; decode via getLocTable)"`
 }
 
 // GetStreamSliceInput mirrors /v1/demos/{id}/stream-slice query params.
@@ -80,6 +83,7 @@ type GetStreamSliceInput struct {
 	EndTime   float64  `json:"endTime,omitempty"`
 	Players   []string `json:"players,omitempty"`
 	Fields    []string `json:"fields,omitempty"`
+	Loc       string   `json:"loc,omitempty" jsonschema:"loc representation: 'name' (default) or 'index' (raw LocTable index stream; decode via getLocTable)"`
 }
 
 // GetStateAtInput mirrors /v1/demos/{id}/state-at query params.
@@ -88,6 +92,7 @@ type GetStateAtInput struct {
 	Time    float64  `json:"time" jsonschema:"required; match-relative seconds"`
 	Players []string `json:"players,omitempty"`
 	Fields  []string `json:"fields,omitempty"`
+	Loc     string   `json:"loc,omitempty" jsonschema:"loc representation: 'name' (default) or 'index' (raw LocTable index; decode via getLocTable)"`
 }
 
 // GetLocTrailsInput mirrors /v1/demos/{id}/loc-trails query params.
@@ -97,6 +102,13 @@ type GetLocTrailsInput struct {
 	MinDwellMs int      `json:"minDwellMs,omitempty"`
 	StartTime  float64  `json:"startTime,omitempty"`
 	EndTime    float64  `json:"endTime,omitempty"`
+	Loc        string   `json:"loc,omitempty" jsonschema:"residence representation: 'name' (default) or 'index' (raw LocTable index; decode via getLocTable)"`
+}
+
+// GetLocTableInput identifies a demo for its interned loc-name table —
+// the decoder for li indices returned by the loc views in index mode.
+type GetLocTableInput struct {
+	DemoID string `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
 }
 
 // GetRegionControlInput mirrors /v1/demos/{id}/region-control query params.

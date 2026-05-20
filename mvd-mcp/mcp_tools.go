@@ -35,7 +35,7 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getOverview",
-		Description: "Return a curated summary of the demo (map, teams, top streaks, top powerups). Use this first to decide which detailed view to query next. Response shape: see mvd-api /v1/demos/{id}/overview.",
+		Description: "Return a curated summary of the demo (map, teams, top streaks, top powerups). Also carries `errors`: the analyzer's non-fatal errors — if non-empty the result is degraded (some sections may be missing/partial), so check it before trusting detail views. Use this first to decide which detailed view to query next. Response shape: see mvd-api /v1/demos/{id}/overview.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetOverviewInput) (*mcp.CallToolResult, any, error) {
 		out, err := b.GetOverview(ctx, in)
 		return toolResult(out, err)
@@ -139,9 +139,17 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getLocTrails",
-		Description: "Per-player sequence of loc residences with dwell durations. Use minDwellMs to filter nearest-loc flicker.",
+		Description: "Per-player sequence of loc residences with dwell durations. Use minDwellMs to filter nearest-loc flicker. Each residence is a resolved loc name by default; pass loc='index' for raw LocTable indices (decode via getLocTable).",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetLocTrailsInput) (*mcp.CallToolResult, any, error) {
 		out, err := b.GetLocTrails(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getLocTable",
+		Description: "The demo's interned loc-name table: a string array where index i is the loc name (index 0 = '' no-loc sentinel). Only needed when you've requested loc='index' on another tool and want to decode the raw `li` integers back to names. In the default 'name' mode you never need this.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetLocTableInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetLocTable(ctx, in)
 		return toolResult(out, err)
 	})
 

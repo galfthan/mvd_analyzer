@@ -51,6 +51,9 @@ func (f *fakeBackend) GetStateAt(_ context.Context, in GetStateAtInput) (any, er
 func (f *fakeBackend) GetLocTrails(_ context.Context, _ GetLocTrailsInput) (any, error) {
 	return map[string]any{"players": []any{}}, nil
 }
+func (f *fakeBackend) GetLocTable(_ context.Context, _ GetLocTableInput) (any, error) {
+	return map[string]any{"locTable": []any{"", "ra", "ya"}}, nil
+}
 func (f *fakeBackend) GetRegionControl(_ context.Context, _ GetRegionControlInput) (any, error) {
 	return map[string]any{"regions": []any{}, "stats": map[string]any{}}, nil
 }
@@ -150,7 +153,7 @@ func TestMCP_ListTools(t *testing.T) {
 		"getLocGraph", "getChat",
 		"getBackpacks", "getItems", "getWeaponPickups",
 		"getBuckets", "getEvents", "getStreamSlice", "getStateAt",
-		"getLocTrails", "getRegionControl",
+		"getLocTrails", "getLocTable", "getRegionControl",
 	}
 	got := map[string]bool{}
 	for _, tool := range res.Tools {

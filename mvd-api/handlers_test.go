@@ -108,6 +108,7 @@ func stubResult() *result.Result {
 			{Time: 5000, Player: "bps", Team: "blue", Weapon: "rl", Source: "world", Kills: 3},
 			{Time: 100000, Player: "milton", Team: "blue", Weapon: "rl", Source: "backpack", BackpackEnt: 17, Dropper: "bps", Kills: 1},
 		},
+		Errors: []string{"itemAnalyzer: respawn before pickup"},
 	}
 }
 
@@ -243,6 +244,21 @@ func TestOverview(t *testing.T) {
 	if len(teams) != 2 {
 		t.Errorf("len(teams) = %d; want 2", len(teams))
 	}
+	errs, _ := resp["errors"].([]any)
+	if len(errs) != 1 || errs[0] != "itemAnalyzer: respawn before pickup" {
+		t.Errorf("errors = %v; want the one stub analyzer error", resp["errors"])
+	}
+}
+
+func TestOverviewOmitsErrorsWhenClean(t *testing.T) {
+	clean := stubResult()
+	clean.Errors = nil
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": clean}})
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/overview", 200)
+	if _, present := resp["errors"]; present {
+		t.Errorf("errors key should be omitted when the analysis is clean, got %v", resp["errors"])
+	}
 }
 
 func TestBuckets_HappyPath(t *testing.T) {
@@ -313,6 +329,31 @@ func TestLocTrails(t *testing.T) {
 	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/loc-trails?players=bps")
 	if status != 200 {
 		t.Errorf("status = %d; want 200 (body=%s)", status, string(resp))
+	}
+}
+
+func TestLocTable(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/loc-table", 200)
+	table, _ := resp["locTable"].([]any)
+	want := []string{"", "ra", "ya", "rl"}
+	if len(table) != len(want) {
+		t.Fatalf("locTable len = %d, want %d (%v)", len(table), len(want), resp["locTable"])
+	}
+	for i, w := range want {
+		if table[i] != w {
+			t.Fatalf("locTable[%d] = %v, want %q", i, table[i], w)
+		}
+	}
+}
+
+func TestLocParam_Invalid(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	_, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/buckets?loc=banana")
+	if status != 400 {
+		t.Errorf("loc=banana status = %d; want 400", status)
 	}
 }
 

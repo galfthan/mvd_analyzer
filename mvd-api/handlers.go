@@ -504,6 +504,11 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
 		return
 	}
+	locIndex, err := parseLocIndex(q)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
 	opts := view.BucketsOptions{
 		WindowMs:    windowMs,
 		StartTime:   start,
@@ -512,6 +517,7 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 		Fields:      parseCSV(q.Get("fields")),
 		Reducers:    reducers,
 		IncludeTeam: parseBool(q, "includeTeam"),
+		LocIndex:    locIndex,
 	}
 	bv, err := view.Buckets(res, opts)
 	if err != nil {
@@ -537,11 +543,17 @@ func (s *server) handleEvents(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
 		return
 	}
+	locIndex, err := parseLocIndex(q)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
 	filter := view.EventsFilter{
 		StartTime: start,
 		EndTime:   end,
 		Players:   parseCSV(q.Get("players")),
 		Types:     parseCSV(q.Get("types")),
+		LocIndex:  locIndex,
 	}
 	ev, err := view.Events(res, filter)
 	if err != nil {
@@ -567,11 +579,17 @@ func (s *server) handleStreamSlice(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
 		return
 	}
+	locIndex, err := parseLocIndex(q)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
 	opts := view.StreamSliceOptions{
 		StartTime: start,
 		EndTime:   end,
 		Players:   parseCSV(q.Get("players")),
 		Fields:    parseCSV(q.Get("fields")),
+		LocIndex:  locIndex,
 	}
 	sl, err := view.StreamSlice(res, opts)
 	if err != nil {
@@ -596,10 +614,16 @@ func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
 		return
 	}
+	locIndex, err := parseLocIndex(q)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
 	opts := view.StateAtOptions{
-		Time:    t,
-		Players: parseCSV(q.Get("players")),
-		Fields:  parseCSV(q.Get("fields")),
+		Time:     t,
+		Players:  parseCSV(q.Get("players")),
+		Fields:   parseCSV(q.Get("fields")),
+		LocIndex: locIndex,
 	}
 	sa, err := view.StateAt(res, opts)
 	if err != nil {
@@ -630,11 +654,17 @@ func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
 		return
 	}
+	locIndex, err := parseLocIndex(q)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
 	opts := view.LocTrailsOptions{
 		Players:    parseCSV(q.Get("players")),
 		MinDwellMs: minDwell,
 		StartTime:  start,
 		EndTime:    end,
+		LocIndex:   locIndex,
 	}
 	tr, err := view.LocTrails(res, opts)
 	if err != nil {
@@ -642,6 +672,22 @@ func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, tr)
+}
+
+// handleLocTable: GET /v1/demos/{id}/loc-table — the interned loc-name
+// table, the decoder for the `li` indices returned by the loc-bearing
+// views in index mode (?loc=index). Index 0 is the "" no-loc sentinel.
+// Empty array when the demo carried no loc data.
+func (s *server) handleLocTable(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	table := []string{}
+	if res.TimelineAnalysis != nil && res.TimelineAnalysis.LocTable != nil {
+		table = res.TimelineAnalysis.LocTable
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"locTable": table})
 }
 
 func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {

@@ -31,6 +31,12 @@ type Overview struct {
 	// to build deep links of the form
 	// https://hub.quakeworld.nu/games/<gameId>?track=<userId>.
 	PlayerUserIDs map[string]int `json:"playerUserIDs,omitempty"`
+	// Errors carries the analyzer's non-fatal errors verbatim (a
+	// sub-analyzer's Finalize failed but the pipeline continued). A
+	// non-empty list means the result is degraded — some sections may
+	// be missing or partial. Surfaced here so a consumer sees it on the
+	// first call without parsing the full result. Omitted when empty.
+	Errors []string `json:"errors,omitempty"`
 }
 
 // OverviewTeam mirrors result.TeamStat.
@@ -80,6 +86,7 @@ func BuildOverview(r *result.Result) Overview {
 	}
 	ov.SchemaVersion = r.SchemaVersion
 	ov.FilePath = r.FilePath
+	ov.Errors = r.Errors
 
 	if r.Match != nil {
 		ov.Map = r.Match.Map

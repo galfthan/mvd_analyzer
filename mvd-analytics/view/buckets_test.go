@@ -187,3 +187,40 @@ func TestBucketsTeamAggregates(t *testing.T) {
 		t.Fatalf("team th = %v, want 180", td["th"])
 	}
 }
+
+func TestBucketsLocNamesAndIndex(t *testing.T) {
+	r := &result.Result{
+		Streams: &result.Streams{
+			Players: []result.PlayerStream{{
+				Name: "p1",
+				Loc:  []result.ChangeI16{{T: 0, V: 1}},
+			}},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
+		},
+		TimelineAnalysis: &result.TimelineAnalysisResult{LocTable: []string{"", "rl", "ya"}},
+	}
+	// Default → resolved name under "loc", no "li".
+	bv, err := Buckets(r, BucketsOptions{WindowMs: 1000, Fields: []string{FieldLoc}})
+	if err != nil {
+		t.Fatalf("Buckets: %v", err)
+	}
+	p := bv.Buckets[0].Players["p1"]
+	if p["loc"] != "rl" {
+		t.Fatalf("bucket 0 loc = %v, want rl", p["loc"])
+	}
+	if _, present := p[FieldLoc]; present {
+		t.Fatalf("li should be absent in name mode, got %v", p[FieldLoc])
+	}
+	// Index mode → raw int16 index under "li", no "loc".
+	bvi, err := Buckets(r, BucketsOptions{WindowMs: 1000, Fields: []string{FieldLoc}, LocIndex: true})
+	if err != nil {
+		t.Fatalf("Buckets: %v", err)
+	}
+	pi := bvi.Buckets[0].Players["p1"]
+	if got := pi[FieldLoc]; got != int16(1) {
+		t.Fatalf("bucket 0 li = %v (%T), want int16(1)", got, got)
+	}
+	if _, present := pi["loc"]; present {
+		t.Fatalf("loc name should be absent in index mode, got %v", pi["loc"])
+	}
+}
