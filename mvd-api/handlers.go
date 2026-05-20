@@ -365,11 +365,20 @@ func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 // handleItems: GET /v1/demos/{id}/items — per-item pickup/respawn
 // timeline with optional filters.
 //
-// Query params:
+// Query params (all case-insensitive):
 //
-//	items    csv — restrict to these item names (RA, YA, GA, MH, Quad, Pent, Ring, ...)
+//	items    csv — restrict to items whose Name or Kind matches. Accepts
+//	             a kind token to match every instance of a type ("ya" →
+//	             ya_1, ya_2; "ra"; "mh") or a specific instance Name
+//	             ("ya_1"). RA/YA/GA/MH/Quad/Pent/Ring/RL/LG all work.
 //	players  csv — restrict to phases where TakenBy is one of these names
-//	kinds    csv — restrict to these kinds (armor, mega, powerup, weapon, ammo, ...)
+//	kinds    csv — restrict to item categories: armor, mega, health,
+//	             powerup, weapon, ammo (see ItemTimeline.Category). A raw
+//	             kind token ("ra", "quad") is also accepted.
+//
+// items/kinds match the canonical lowercase tokens regardless of input
+// case; players is matched against the exact display name (case-
+// sensitive — QW names are case-significant).
 //
 // Phases with no TakenBy survive any players= filter (they represent
 // the item's availability state at match end / dropped runs).
@@ -383,9 +392,9 @@ func (s *server) handleItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	q := r.URL.Query()
-	itemSet := csvSet(q.Get("items"))
+	itemSet := csvSetLower(q.Get("items"))
 	playerSet := csvSet(q.Get("players"))
-	kindSet := csvSet(q.Get("kinds"))
+	kindSet := csvSetLower(q.Get("kinds"))
 
 	if len(itemSet) == 0 && len(playerSet) == 0 && len(kindSet) == 0 {
 		writeJSON(w, http.StatusOK, res.Items)
@@ -394,10 +403,10 @@ func (s *server) handleItems(w http.ResponseWriter, r *http.Request) {
 
 	out := &result.ItemsResult{Items: make([]result.ItemTimeline, 0, len(res.Items.Items))}
 	for _, it := range res.Items.Items {
-		if len(itemSet) > 0 && !itemSet[it.Name] {
+		if len(itemSet) > 0 && !itemSet[strings.ToLower(it.Name)] && !itemSet[strings.ToLower(it.Kind)] {
 			continue
 		}
-		if len(kindSet) > 0 && !kindSet[it.Kind] {
+		if len(kindSet) > 0 && !kindSet[it.Category()] && !kindSet[strings.ToLower(it.Kind)] {
 			continue
 		}
 		if len(playerSet) > 0 {
@@ -471,6 +480,23 @@ func csvSet(v string) map[string]bool {
 	out := map[string]bool{}
 	for _, p := range strings.Split(v, ",") {
 		p = strings.TrimSpace(p)
+		if p != "" {
+			out[p] = true
+		}
+	}
+	return out
+}
+
+// csvSetLower is csvSet with each token lowercased — for filters
+// matched against canonical lowercase tokens (item names, kinds,
+// categories) where the caller's case shouldn't matter.
+func csvSetLower(v string) map[string]bool {
+	if v == "" {
+		return nil
+	}
+	out := map[string]bool{}
+	for _, p := range strings.Split(v, ",") {
+		p = strings.TrimSpace(strings.ToLower(p))
 		if p != "" {
 			out[p] = true
 		}

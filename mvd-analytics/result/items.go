@@ -23,6 +23,32 @@ type ItemTimeline struct {
 	Phases []ItemPhase `json:"phases"`
 }
 
+// Category maps the raw item Kind ("ra", "mh", "quad", "rl", "nails",
+// ...) to a coarse class ("armor", "mega", "health", "powerup",
+// "weapon", "ammo"). It's the vocabulary the /items?kinds= filter
+// exposes so callers can ask for "all armor" without enumerating
+// ga/ya/ra. Returns "" for kinds with no class (callers treat that as
+// "matches no category"). Kind vocabulary mirrors
+// mvd-reader's ItemSpawnEvent.Kind / ItemPickupPrintEvent.Kind.
+func (it ItemTimeline) Category() string {
+	switch it.Kind {
+	case "ga", "ya", "ra":
+		return "armor"
+	case "mh":
+		return "mega"
+	case "h15", "h25":
+		return "health"
+	case "quad", "pent", "ring", "suit":
+		return "powerup"
+	case "rl", "lg", "gl", "ssg", "sng", "ng":
+		return "weapon"
+	case "shells", "nails", "rockets", "cells":
+		return "ammo"
+	default:
+		return ""
+	}
+}
+
 // ItemPhase is one observable row of "item is up, then someone takes
 // it, then it'll come back at T". For MH the RespawnAt is unknown
 // until the matching `//ktx timer` event arrives — in that window we
