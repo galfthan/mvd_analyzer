@@ -90,3 +90,31 @@ func TestStreamSlicePosition(t *testing.T) {
 		t.Fatalf("pos.T = %v, want [2000, 3000]", pos.T)
 	}
 }
+
+func TestStreamSliceLocResolvesNames(t *testing.T) {
+	r := &result.Result{
+		Streams: &result.Streams{
+			Players: []result.PlayerStream{{
+				Name: "p1",
+				Loc:  []result.ChangeI16{{T: 0, V: 1}, {T: 3000, V: 2}, {T: 7000, V: 1}},
+			}},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
+		},
+		TimelineAnalysis: &result.TimelineAnalysisResult{LocTable: []string{"", "rl", "ya"}},
+	}
+	v, err := StreamSlice(r, StreamSliceOptions{StartTime: 0, EndTime: 10, Fields: []string{FieldLoc}})
+	if err != nil {
+		t.Fatalf("StreamSlice: %v", err)
+	}
+	loc := v.Players[0].Loc
+	wantV := []string{"rl", "ya", "rl"}
+	wantT := []int32{0, 3000, 7000}
+	if len(loc) != len(wantV) {
+		t.Fatalf("got %d loc entries, want %d: %+v", len(loc), len(wantV), loc)
+	}
+	for i := range wantV {
+		if loc[i].V != wantV[i] || loc[i].T != wantT[i] {
+			t.Fatalf("loc[%d] = {T:%d V:%q}, want {T:%d V:%q}", i, loc[i].T, loc[i].V, wantT[i], wantV[i])
+		}
+	}
+}

@@ -28,8 +28,12 @@ type PlayerStateAt struct {
 	Health    *int16      `json:"h,omitempty"`
 	Armor     *int16      `json:"a,omitempty"`
 	ArmorType *string     `json:"at,omitempty"`
-	Loc       *int16      `json:"li,omitempty"`
-	Pos       *Position3D `json:"pos,omitempty"`
+	// Loc is the resolved loc name (e.g. "RA"), not the raw LocTable
+	// index — this low-cardinality view spends the lookup so consumers
+	// don't have to carry the table. Empty string = "no loc". nil means
+	// the player had no loc sample at or before Time.
+	Loc *string     `json:"loc,omitempty"`
+	Pos *Position3D `json:"pos,omitempty"`
 
 	RL  *bool `json:"rl,omitempty"`
 	LG  *bool `json:"lg,omitempty"`
@@ -85,6 +89,7 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 		requested[f] = true
 	}
 	pf := newPlayerFilter(opts.Players)
+	locTable := locTableOf(r)
 
 	// Public opts.Time is float64 seconds; schema stores int32 ms.
 	// Convert once at the entry; every index/contains lookup below
@@ -116,8 +121,8 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 		}
 		if requested[FieldLoc] {
 			if idx := indexI16AtOrBefore(p.Loc, tMs); idx >= 0 {
-				v := p.Loc[idx].V
-				ps.Loc = &v
+				name := locNameAt(locTable, p.Loc[idx].V)
+				ps.Loc = &name
 			}
 		}
 		if requested[FieldShells] {

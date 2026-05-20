@@ -105,13 +105,6 @@ type PositionTrack struct {
 	Li []int16 `json:"li,omitempty"`
 }
 
-// ChangeI8 is a single transition in an int8 stream. T is integer
-// milliseconds since the stream's time origin (schema v8).
-type ChangeI8 struct {
-	T int32 `json:"t"`
-	V int8  `json:"v"`
-}
-
 // ChangeI16 is a single transition in an int16 stream. T is integer
 // milliseconds since the stream's time origin (schema v8).
 type ChangeI16 struct {

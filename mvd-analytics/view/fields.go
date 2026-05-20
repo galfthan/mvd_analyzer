@@ -43,8 +43,7 @@ const (
 type FieldKind int
 
 const (
-	KindChangeI8 FieldKind = iota // int8-valued change stream
-	KindChangeI16
+	KindChangeI16 FieldKind = iota
 	KindChangeStr
 	KindInterval // bool intervals
 	KindPosition // *PositionTrack

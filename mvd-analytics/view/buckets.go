@@ -25,9 +25,17 @@ type BucketsOptions struct {
 // BucketsView is the result of a Buckets call. WindowMs echoes back
 // the resolved window size (so callers reading 0 above can still see
 // what they got); Buckets is sorted by T ascending.
+//
+// LocTable is the index→name decoder for the `li` field, embedded so
+// this dense view stays self-contained: the per-bucket loc value keeps
+// the compact integer index (a name string per bucket per player would
+// bloat the wire), and a consumer resolves it via LocTable[index].
+// Populated only when `li` is among the requested fields and the
+// analysis carried loc data.
 type BucketsView struct {
 	WindowMs int          `json:"windowMs"`
 	Buckets  []ViewBucket `json:"buckets"`
+	LocTable []string     `json:"locTable,omitempty"`
 }
 
 // ViewBucket is the clean per-player map shape (D13 in the plan).
@@ -142,7 +150,13 @@ func Buckets(r *result.Result, opts BucketsOptions) (*BucketsView, error) {
 		buckets[i] = bucket
 	}
 
-	return &BucketsView{WindowMs: windowMs, Buckets: buckets}, nil
+	bv := &BucketsView{WindowMs: windowMs, Buckets: buckets}
+	// Ship the index→name decoder alongside the compact `li` values so
+	// the dense view is self-contained (see BucketsView doc).
+	if reducers[FieldLoc] != nil {
+		bv.LocTable = locTableOf(r)
+	}
+	return bv, nil
 }
 
 // playerActiveInWindow returns true if the player should appear in a
@@ -314,8 +328,6 @@ func collectSamples(p result.PlayerStream, field string, bStart, bEnd float64) [
 		return nil
 	}
 	switch kind {
-	case KindChangeI8:
-		return changeI8Samples(p, field, bStart, bEnd)
 	case KindChangeI16:
 		return changeI16Samples(p, field, bStart, bEnd)
 	case KindChangeStr:
@@ -327,17 +339,6 @@ func collectSamples(p result.PlayerStream, field string, bStart, bEnd float64) [
 	case KindEventList:
 		return eventListSamples(p, field, bStart, bEnd)
 	}
-	return nil
-}
-
-func changeI8Samples(p result.PlayerStream, field string, bStart, bEnd float64) []Sample {
-	// All current int-valued change streams now use int16 (health,
-	// armor, ammo). The KindChangeI8 enum value is preserved for
-	// future fields that fit; it currently has no callers.
-	_ = p
-	_ = field
-	_ = bStart
-	_ = bEnd
 	return nil
 }
 
@@ -452,42 +453,6 @@ func eventListSamples(p result.PlayerStream, field string, bStart, bEnd float64)
 	return out
 }
 
-// changeSamplesI8 returns the samples from an int8 change stream that
-// fall in [bStart, bEnd), prepending the latest entry with T <= bStart
-// (carry-forward). Empty result when the player has no entries before
-// or in this window. Uses binary search for the carry-forward and
-// starts the window walk at the search result so we never re-scan
-// pre-bStart entries.
-//
-// Window bounds are float64 seconds (public view API); change-stream
-// T is int32 ms (schema v8). Convert once and compare in int32. The
-// public Sample.T is float64 seconds so consumers downstream stay
-// oblivious to the ms storage.
-func changeSamplesI8(stream []result.ChangeI8, bStart, bEnd float64) []Sample {
-	bStartMs := int32(bStart * 1000)
-	bEndMs := int32(bEnd * 1000)
-	out := make([]Sample, 0, 4)
-	carry := indexI8AtOrBefore(stream, bStartMs)
-	if carry >= 0 {
-		out = append(out, Sample{T: float64(stream[carry].T) * 0.001, V: stream[carry].V})
-	}
-	startIdx := carry + 1
-	if startIdx < 0 {
-		startIdx = 0
-	}
-	for i := startIdx; i < len(stream); i++ {
-		c := stream[i]
-		if c.T < bStartMs {
-			continue
-		}
-		if c.T >= bEndMs {
-			break
-		}
-		out = append(out, Sample{T: float64(c.T) * 0.001, V: c.V})
-	}
-	return out
-}
-
 func changeSamplesI16(stream []result.ChangeI16, bStart, bEnd float64) []Sample {
 	bStartMs := int32(bStart * 1000)
 	bEndMs := int32(bEnd * 1000)
@@ -541,11 +506,6 @@ func changeSamplesStr(stream []result.ChangeStr, bStart, bEnd float64) []Sample 
 // index*AtOrBefore returns the largest index i for which stream[i].T
 // is <= the query tMs. The query is integer ms (schema v8); callers
 // converting from seconds use int32(t * 1000) at the boundary.
-func indexI8AtOrBefore(stream []result.ChangeI8, tMs int32) int {
-	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > tMs })
-	return i - 1
-}
-
 func indexI16AtOrBefore(stream []result.ChangeI16, tMs int32) int {
 	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > tMs })
 	return i - 1

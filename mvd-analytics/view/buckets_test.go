@@ -187,3 +187,35 @@ func TestBucketsTeamAggregates(t *testing.T) {
 		t.Fatalf("team th = %v, want 180", td["th"])
 	}
 }
+
+func TestBucketsEmbedsLocTable(t *testing.T) {
+	r := &result.Result{
+		Streams: &result.Streams{
+			Players: []result.PlayerStream{{
+				Name: "p1",
+				Loc:  []result.ChangeI16{{T: 0, V: 1}},
+			}},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
+		},
+		TimelineAnalysis: &result.TimelineAnalysisResult{LocTable: []string{"", "rl", "ya"}},
+	}
+	// li requested → LocTable embedded, bucket value stays the integer index.
+	bv, err := Buckets(r, BucketsOptions{WindowMs: 1000, Fields: []string{FieldLoc}})
+	if err != nil {
+		t.Fatalf("Buckets: %v", err)
+	}
+	if len(bv.LocTable) != 3 || bv.LocTable[1] != "rl" {
+		t.Fatalf("LocTable = %v, want [\"\" rl ya]", bv.LocTable)
+	}
+	if got := bv.Buckets[0].Players["p1"][FieldLoc]; got != int16(1) {
+		t.Fatalf("bucket 0 li = %v (%T), want int16(1)", got, got)
+	}
+	// li not requested → LocTable omitted.
+	bv2, err := Buckets(r, BucketsOptions{WindowMs: 1000, Fields: []string{FieldHealth}})
+	if err != nil {
+		t.Fatalf("Buckets: %v", err)
+	}
+	if bv2.LocTable != nil {
+		t.Fatalf("LocTable should be nil when li not requested, got %v", bv2.LocTable)
+	}
+}

@@ -372,8 +372,8 @@ exceed ±32 768 in any axis.
 ### Schema v8: all times are int32 milliseconds
 
 Every timestamped field in this schema — `PositionTrack.T`,
-`PlayerStream.Spawns/Deaths`, `ChangeI16.T` / `ChangeI8.T` /
-`ChangeStr.T`, `Interval.Start/End`, `GlobalStream.MatchStart/End`,
+`PlayerStream.Spawns/Deaths`, `ChangeI16.T` / `ChangeStr.T`,
+`Interval.Start/End`, `GlobalStream.MatchStart/End`,
 `MatchResult.Duration/StartTime/EndTime`,
 `TimelineAnalysisResult.MatchStartTime/DemoOffset`,
 `TimelineFragEvent.Time`, `PowerupEvent.Time/EndTime/Duration`,
@@ -531,11 +531,17 @@ view.Buckets(r, view.BucketsOptions{
     Reducers: map[string]string{"h": "mean"},
     IncludeTeam: true,
 })
-// → *BucketsView { WindowMs, Buckets: []ViewBucket }
+// → *BucketsView { WindowMs, Buckets: []ViewBucket, LocTable: []string }
 ```
 
 Partial last bucket carries `Partial: true` when the window doesn't
 divide evenly into `EndTime - StartTime`.
+
+The `li` field keeps the compact integer loc index per bucket (a name
+string per bucket per player would bloat this dense view). When `li` is
+among the requested fields the response embeds `LocTable` (`[]string`)
+so a consumer resolves `li` → name via `LocTable[index]` without a
+second request.
 
 #### Events
 
@@ -566,6 +572,10 @@ each requested field, a synthetic carry-forward entry is prepended at
 `StartTime` showing the value at window entry; intervals overlapping
 the window are clamped.
 
+The loc field is resolved to loc **names** here (JSON key `loc`,
+`[]ChangeStr`) rather than the raw `li` index — this low-cardinality
+view spends the lookup so consumers never need `LocTable`.
+
 #### StateAt
 
 ```go
@@ -579,7 +589,9 @@ view.StateAt(r, view.StateAtOptions{
 
 Resolves each requested field at `Time`. Change streams use latest
 entry with `T <= Time` (carry-forward). Intervals: `true` iff `Time` ∈
-some interval. Position: nearest sample by `T`.
+some interval. Position: nearest sample by `T`. The loc field comes
+back as a resolved name (JSON key `loc`, string) rather than the raw
+`li` index.
 
 #### LocTrails
 

@@ -76,6 +76,30 @@ func TestStateAtSpawnDeathRejected(t *testing.T) {
 	}
 }
 
+func TestStateAtLocResolvesName(t *testing.T) {
+	r := &result.Result{
+		Streams: &result.Streams{
+			Players: []result.PlayerStream{{
+				Name: "p1",
+				Loc:  []result.ChangeI16{{T: 0, V: 1}, {T: 5000, V: 2}},
+			}},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
+		},
+		TimelineAnalysis: &result.TimelineAnalysisResult{LocTable: []string{"", "rl", "ya"}},
+	}
+	v, err := StateAt(r, StateAtOptions{Time: 2.5, Fields: []string{FieldLoc}})
+	if err != nil {
+		t.Fatalf("StateAt: %v", err)
+	}
+	if got := v.Players["p1"].Loc; got == nil || *got != "rl" {
+		t.Fatalf("Loc at 2.5 = %v, want rl", got)
+	}
+	v, _ = StateAt(r, StateAtOptions{Time: 6, Fields: []string{FieldLoc}})
+	if got := v.Players["p1"].Loc; got == nil || *got != "ya" {
+		t.Fatalf("Loc at 6 = %v, want ya", got)
+	}
+}
+
 func deref(p *int16) int16 {
 	if p == nil {
 		return -1
