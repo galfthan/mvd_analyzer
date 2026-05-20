@@ -16,6 +16,10 @@ type StreamSliceOptions struct {
 	EndTime   float64
 	Players   []string
 	Fields    []string
+	// LocIndex selects the loc representation: false (default) resolves
+	// to loc names (PlayerSlice.Loc); true emits the raw LocTable index
+	// stream (PlayerSlice.Li). Decode the index via /loc-table.
+	LocIndex bool
 }
 
 // StreamSliceView is the response shape: per-player slices over the
@@ -41,10 +45,13 @@ type PlayerSlice struct {
 	Health    []result.ChangeI16 `json:"h,omitempty"`
 	Armor     []result.ChangeI16 `json:"a,omitempty"`
 	ArmorType []result.ChangeStr `json:"at,omitempty"`
-	// Loc entries carry the resolved loc name in V (e.g. "RA"), not the
-	// raw LocTable index — resolved here so consumers of this
-	// low-cardinality slice never need the table.
+	// Loc / Li carry the loc change stream, one or the other depending
+	// on StreamSliceOptions.LocIndex. Loc (default) holds resolved names
+	// in V (e.g. "RA") so consumers never need the table; Li holds the
+	// raw LocTable index stream (opt-in, for index math; decode via
+	// /loc-table).
 	Loc []result.ChangeStr `json:"loc,omitempty"`
+	Li  []result.ChangeI16 `json:"li,omitempty"`
 
 	RL  []result.Interval `json:"rl,omitempty"`
 	LG  []result.Interval `json:"lg,omitempty"`
@@ -115,7 +122,11 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 			ps.ArmorType = sliceStr(p.ArmorType, start, end)
 		}
 		if requested[FieldLoc] {
-			ps.Loc = sliceLocNames(p.Loc, locTable, start, end)
+			if opts.LocIndex {
+				ps.Li = sliceI16(p.Loc, start, end)
+			} else {
+				ps.Loc = sliceLocNames(p.Loc, locTable, start, end)
+			}
 		}
 		if requested[FieldShells] {
 			ps.Shells = sliceI16(p.Shells, start, end)

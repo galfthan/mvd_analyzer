@@ -59,6 +59,20 @@ func parseBool(q url.Values, key string) bool {
 	return false
 }
 
+// parseLocIndex reads ?loc=name|index. Empty or "name" → false
+// (resolved loc names, the default); "index" → true (raw LocTable
+// indices, decode via /loc-table). Any other value is an error.
+func parseLocIndex(q url.Values) (bool, error) {
+	switch strings.ToLower(strings.TrimSpace(q.Get("loc"))) {
+	case "", "name", "names":
+		return false, nil
+	case "index", "indices", "li":
+		return true, nil
+	default:
+		return false, fmt.Errorf("invalid loc=%q (want 'name' or 'index')", q.Get("loc"))
+	}
+}
+
 // parseReducers parses a comma-separated list of "field=name" pairs.
 // Empty → nil. Malformed → error.
 func parseReducers(v string) (map[string]string, error) {

@@ -54,11 +54,12 @@ immutable`, `X-Schema-Version: 10`, `X-Cache: HIT|WARM|MISS`, and
 | GET | `/v1/demos/{id}/backpacks` | `players`, `weapon` | `[]result.BackpackDrop` (RL/LG drops via `//ktx drop`) |
 | GET | `/v1/demos/{id}/items` | `items`, `players`, `kinds` | `result.ItemsResult` (per-item pickup/respawn timeline) |
 | GET | `/v1/demos/{id}/weapon-pickups` | `players`, `weapon`, `source` | `[]result.WeaponPickup` (kills-before-next-death; joins to backpacks via `backpackEnt`) |
-| GET | `/v1/demos/{id}/buckets` | `windowMs`, `from`, `to`, `players`, `fields`, `reducers`, `includeTeam` | `view.BucketsView` |
-| GET | `/v1/demos/{id}/events` | `from`, `to`, `players`, `types` | `view.EventsView` |
-| GET | `/v1/demos/{id}/stream-slice` | `from`, `to`, `players`, `fields` | `view.StreamSliceView` |
-| GET | `/v1/demos/{id}/state-at` | `time` (required), `players`, `fields` | `view.StateAtView` |
-| GET | `/v1/demos/{id}/loc-trails` | `from`, `to`, `players`, `minDwellMs` | `view.LocTrailsView` |
+| GET | `/v1/demos/{id}/buckets` | `windowMs`, `from`, `to`, `players`, `fields`, `reducers`, `includeTeam`, `loc` | `view.BucketsView` |
+| GET | `/v1/demos/{id}/events` | `from`, `to`, `players`, `types`, `loc` | `view.EventsView` |
+| GET | `/v1/demos/{id}/stream-slice` | `from`, `to`, `players`, `fields`, `loc` | `view.StreamSliceView` |
+| GET | `/v1/demos/{id}/state-at` | `time` (required), `players`, `fields`, `loc` | `view.StateAtView` |
+| GET | `/v1/demos/{id}/loc-trails` | `from`, `to`, `players`, `minDwellMs`, `loc` | `view.LocTrailsView` |
+| GET | `/v1/demos/{id}/loc-table` | — | `{ "locTable": []string }` (decoder for `loc=index`; index 0 = "" no-loc) |
 | GET | `/v1/demos/{id}/region-control` | `windowMs` | `result.RegionControlResult` |
 
 ### Query conventions
@@ -66,6 +67,10 @@ immutable`, `X-Schema-Version: 10`, `X-Cache: HIT|WARM|MISS`, and
 - `players`, `fields`, `types`: comma-separated; URL-decode once.
 - `reducers`: comma-separated `field=name` pairs (e.g. `h=min,a=last`).
 - Times are match-relative seconds (float). `windowMs` is integer.
+- `loc`: `name` (default) returns resolved loc names; `index` returns
+  raw `LocTable` indices for index-based math. Fetch the decoder from
+  `/loc-table`. Honoured by `buckets`, `events`, `stream-slice`,
+  `state-at`, `loc-trails`.
 - Empty defaults match the view function defaults — see
   [`mvd-analytics/RESULT_SCHEMA.md`](../mvd-analytics/RESULT_SCHEMA.md)
   for the field-code vocabulary and the reducer registry.

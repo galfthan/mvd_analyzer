@@ -20,22 +20,24 @@ type BucketsOptions struct {
 	Fields      []string          // AllStandardFields if empty
 	Reducers    map[string]string // per-field overrides; merged with DefaultReducers
 	IncludeTeam bool              // emit per-team aggregates on each bucket
+	// LocIndex selects the loc representation in each bucket's player
+	// map: false (default) resolves the reduced loc value to a name
+	// under key "loc"; true leaves the raw LocTable index under "li"
+	// (decode via /loc-table). The legacy WASM bridge needs the index,
+	// so getDefaultBuckets sets this true.
+	LocIndex bool
 }
 
 // BucketsView is the result of a Buckets call. WindowMs echoes back
 // the resolved window size (so callers reading 0 above can still see
 // what they got); Buckets is sorted by T ascending.
 //
-// LocTable is the index→name decoder for the `li` field, embedded so
-// this dense view stays self-contained: the per-bucket loc value keeps
-// the compact integer index (a name string per bucket per player would
-// bloat the wire), and a consumer resolves it via LocTable[index].
-// Populated only when `li` is among the requested fields and the
-// analysis carried loc data.
+// Loc rendering follows BucketsOptions.LocIndex: by default each
+// bucket's player map carries a "loc" name; in index mode it carries
+// the raw "li" index, which a consumer decodes against /loc-table.
 type BucketsView struct {
 	WindowMs int          `json:"windowMs"`
 	Buckets  []ViewBucket `json:"buckets"`
-	LocTable []string     `json:"locTable,omitempty"`
 }
 
 // ViewBucket is the clean per-player map shape (D13 in the plan).
@@ -150,13 +152,33 @@ func Buckets(r *result.Result, opts BucketsOptions) (*BucketsView, error) {
 		buckets[i] = bucket
 	}
 
-	bv := &BucketsView{WindowMs: windowMs, Buckets: buckets}
-	// Ship the index→name decoder alongside the compact `li` values so
-	// the dense view is self-contained (see BucketsView doc).
-	if reducers[FieldLoc] != nil {
-		bv.LocTable = locTableOf(r)
+	if !opts.LocIndex && reducers[FieldLoc] != nil {
+		resolveBucketLocNames(buckets, locTableOf(r))
 	}
-	return bv, nil
+	return &BucketsView{WindowMs: windowMs, Buckets: buckets}, nil
+}
+
+// resolveBucketLocNames rewrites each bucket's reduced loc value from
+// the raw LocTable index (key "li") to the resolved name (key "loc").
+// A no-loc index (name "") drops the key entirely so clean buckets stay
+// quiet. Index mode skips this and leaves "li" in place.
+func resolveBucketLocNames(buckets []ViewBucket, locTable []string) {
+	for i := range buckets {
+		for _, pdata := range buckets[i].Players {
+			v, ok := pdata[FieldLoc]
+			if !ok {
+				continue
+			}
+			delete(pdata, FieldLoc)
+			idx, ok := numericFromAny(v)
+			if !ok {
+				continue
+			}
+			if name := locNameAt(locTable, int16(idx)); name != "" {
+				pdata["loc"] = name
+			}
+		}
+	}
 }
 
 // playerActiveInWindow returns true if the player should appear in a

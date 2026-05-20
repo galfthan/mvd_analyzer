@@ -98,6 +98,15 @@ func TestStateAtLocResolvesName(t *testing.T) {
 	if got := v.Players["p1"].Loc; got == nil || *got != "ya" {
 		t.Fatalf("Loc at 6 = %v, want ya", got)
 	}
+	// Index mode → raw LocTable index in Li, Loc nil.
+	vi, _ := StateAt(r, StateAtOptions{Time: 2.5, Fields: []string{FieldLoc}, LocIndex: true})
+	st := vi.Players["p1"]
+	if st.Li == nil || *st.Li != 1 {
+		t.Fatalf("Li at 2.5 = %v, want 1", st.Li)
+	}
+	if st.Loc != nil {
+		t.Fatalf("Loc should be nil in index mode, got %v", *st.Loc)
+	}
 }
 
 func deref(p *int16) int16 {

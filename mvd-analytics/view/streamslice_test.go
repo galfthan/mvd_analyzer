@@ -117,4 +117,19 @@ func TestStreamSliceLocResolvesNames(t *testing.T) {
 			t.Fatalf("loc[%d] = {T:%d V:%q}, want {T:%d V:%q}", i, loc[i].T, loc[i].V, wantT[i], wantV[i])
 		}
 	}
+	// Index mode → raw int16 index stream under Li, Loc empty.
+	vi, _ := StreamSlice(r, StreamSliceOptions{StartTime: 0, EndTime: 10, Fields: []string{FieldLoc}, LocIndex: true})
+	li := vi.Players[0].Li
+	wantI := []int16{1, 2, 1}
+	if len(li) != len(wantI) {
+		t.Fatalf("got %d li entries, want %d: %+v", len(li), len(wantI), li)
+	}
+	for i := range wantI {
+		if li[i].V != wantI[i] {
+			t.Fatalf("li[%d].V = %d, want %d", i, li[i].V, wantI[i])
+		}
+	}
+	if vi.Players[0].Loc != nil {
+		t.Fatalf("Loc should be nil in index mode, got %+v", vi.Players[0].Loc)
+	}
 }

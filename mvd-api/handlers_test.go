@@ -332,6 +332,31 @@ func TestLocTrails(t *testing.T) {
 	}
 }
 
+func TestLocTable(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/loc-table", 200)
+	table, _ := resp["locTable"].([]any)
+	want := []string{"", "ra", "ya", "rl"}
+	if len(table) != len(want) {
+		t.Fatalf("locTable len = %d, want %d (%v)", len(table), len(want), resp["locTable"])
+	}
+	for i, w := range want {
+		if table[i] != w {
+			t.Fatalf("locTable[%d] = %v, want %q", i, table[i], w)
+		}
+	}
+}
+
+func TestLocParam_Invalid(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	_, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/buckets?loc=banana")
+	if status != 400 {
+		t.Errorf("loc=banana status = %d; want 400", status)
+	}
+}
+
 func TestDemoInfo(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()

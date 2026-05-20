@@ -14,6 +14,10 @@ type EventsFilter struct {
 	EndTime   float64
 	Players   []string
 	Types     []string
+	// LocIndex selects the loc-event representation: false (default)
+	// puts the resolved name under Detail["loc"]; true puts the raw
+	// LocTable index under Detail["li"] (decode via /loc-table).
+	LocIndex bool
 }
 
 // EventsView is the response shape: a flat list of TaggedEvent in
@@ -230,13 +234,14 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
-					locName := ""
-					if int(c.V) >= 0 && int(c.V) < len(locTable) {
-						locName = locTable[c.V]
+					var detail map[string]any
+					if filter.LocIndex {
+						detail = map[string]any{"li": int(c.V)}
+					} else {
+						detail = map[string]any{"loc": locNameAt(locTable, c.V)}
 					}
 					events = append(events, TaggedEvent{
-						T: ts, Type: "loc", Player: p.Name,
-						Detail: map[string]any{"loc": locName, "index": int(c.V)},
+						T: ts, Type: "loc", Player: p.Name, Detail: detail,
 					})
 				}
 			}

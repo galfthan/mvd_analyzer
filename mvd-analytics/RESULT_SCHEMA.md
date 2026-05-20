@@ -531,17 +531,16 @@ view.Buckets(r, view.BucketsOptions{
     Reducers: map[string]string{"h": "mean"},
     IncludeTeam: true,
 })
-// → *BucketsView { WindowMs, Buckets: []ViewBucket, LocTable: []string }
+// → *BucketsView { WindowMs, Buckets: []ViewBucket }
 ```
 
 Partial last bucket carries `Partial: true` when the window doesn't
 divide evenly into `EndTime - StartTime`.
 
-The `li` field keeps the compact integer loc index per bucket (a name
-string per bucket per player would bloat this dense view). When `li` is
-among the requested fields the response embeds `LocTable` (`[]string`)
-so a consumer resolves `li` → name via `LocTable[index]` without a
-second request.
+Loc rendering follows `BucketsOptions.LocIndex` (REST `?loc=`): by
+default each bucket's player map carries a resolved `loc` name; in
+index mode (`loc=index`) it carries the raw `li` integer instead, which
+you decode against the demo's loc-table (`GET /loc-table`).
 
 #### Events
 
@@ -554,7 +553,9 @@ view.Events(r, view.EventsFilter{
 ```
 
 Default Types omits high-frequency change events (`health`, `armor`,
-`loc`); pass them explicitly to opt back in.
+`loc`); pass them explicitly to opt back in. A `loc` event's `detail`
+holds the resolved name (`{"loc":"RA"}`) by default, or the raw index
+(`{"li":7}`) with `loc=index` — decode via `GET /loc-table`.
 
 #### StreamSlice
 
@@ -572,9 +573,10 @@ each requested field, a synthetic carry-forward entry is prepended at
 `StartTime` showing the value at window entry; intervals overlapping
 the window are clamped.
 
-The loc field is resolved to loc **names** here (JSON key `loc`,
-`[]ChangeStr`) rather than the raw `li` index — this low-cardinality
-view spends the lookup so consumers never need `LocTable`.
+The loc field is resolved to loc **names** by default (JSON key `loc`,
+`[]ChangeStr`) so consumers never need the table. Pass `loc=index` to
+get the raw `li` index stream (`[]ChangeI16`) instead — decode it via
+`GET /loc-table`.
 
 #### StateAt
 
@@ -590,15 +592,28 @@ view.StateAt(r, view.StateAtOptions{
 Resolves each requested field at `Time`. Change streams use latest
 entry with `T <= Time` (carry-forward). Intervals: `true` iff `Time` ∈
 some interval. Position: nearest sample by `T`. The loc field comes
-back as a resolved name (JSON key `loc`, string) rather than the raw
-`li` index.
+back as a resolved name by default (JSON key `loc`, string); pass
+`loc=index` for the raw `li` index — decode via `GET /loc-table`.
 
 #### LocTrails
 
 Per-player loc residences with dwell durations. `MinDwellMs` folds
 short blips into adjacent stable residences (defaults to 0 = no
 filter; the analyser's pre-existing blip filter has already smoothed
-the underlying loc stream).
+the underlying loc stream). Each residence carries the loc **name**
+(`loc`) by default, or the raw index (`li`) with `loc=index` — decode
+via `GET /loc-table`.
+
+##### Loc representation (shared)
+
+Every loc-bearing view (Buckets, Events, StreamSlice, StateAt,
+LocTrails) renders loc as a resolved **name** by default. Pass
+`loc=index` (REST query param; `LocIndex: true` on the Go options) to
+get the raw `LocTable` index instead — useful for index-based
+computation (transition matrices, clustering). Fetch the decoder once
+from `GET /v1/demos/{id}/loc-table` → `{ "locTable": [...] }` (index 0
+is the `""` no-loc sentinel). RegionControl is unaffected — it reports
+region names, not single loc indices.
 
 #### RegionControl
 

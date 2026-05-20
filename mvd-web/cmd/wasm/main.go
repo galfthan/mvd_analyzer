@@ -76,6 +76,9 @@ func getDefaultBuckets(this js.Value, args []js.Value) interface{} {
 		Fields:      view.AllStandardFields,
 		Reducers:    view.LegacyReducerSet,
 		IncludeTeam: true,
+		// The legacy HighResPlayerData.Li is an integer index; keep the
+		// raw index so ToLegacyHighResBuckets can read it.
+		LocIndex: true,
 	})
 	if err != nil {
 		return errorJSON(err.Error())

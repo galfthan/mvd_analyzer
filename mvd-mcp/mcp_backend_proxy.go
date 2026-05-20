@@ -320,6 +320,9 @@ func (p *proxyBackend) GetBuckets(ctx context.Context, in GetBucketsInput) (any,
 	if in.IncludeTeam {
 		q.Set("includeTeam", "1")
 	}
+	if in.Loc != "" {
+		q.Set("loc", in.Loc)
+	}
 	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/buckets", q)
 }
 
@@ -339,6 +342,9 @@ func (p *proxyBackend) GetEvents(ctx context.Context, in GetEventsInput) (any, e
 	}
 	if len(in.Types) > 0 {
 		q.Set("types", strings.Join(in.Types, ","))
+	}
+	if in.Loc != "" {
+		q.Set("loc", in.Loc)
 	}
 	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/events", q)
 }
@@ -360,6 +366,9 @@ func (p *proxyBackend) GetStreamSlice(ctx context.Context, in GetStreamSliceInpu
 	if len(in.Fields) > 0 {
 		q.Set("fields", strings.Join(in.Fields, ","))
 	}
+	if in.Loc != "" {
+		q.Set("loc", in.Loc)
+	}
 	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/stream-slice", q)
 }
 
@@ -374,6 +383,9 @@ func (p *proxyBackend) GetStateAt(ctx context.Context, in GetStateAtInput) (any,
 	}
 	if len(in.Fields) > 0 {
 		q.Set("fields", strings.Join(in.Fields, ","))
+	}
+	if in.Loc != "" {
+		q.Set("loc", in.Loc)
 	}
 	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/state-at", q)
 }
@@ -395,7 +407,17 @@ func (p *proxyBackend) GetLocTrails(ctx context.Context, in GetLocTrailsInput) (
 	if in.MinDwellMs > 0 {
 		q.Set("minDwellMs", strconv.Itoa(in.MinDwellMs))
 	}
+	if in.Loc != "" {
+		q.Set("loc", in.Loc)
+	}
 	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/loc-trails", q)
+}
+
+func (p *proxyBackend) GetLocTable(ctx context.Context, in GetLocTableInput) (any, error) {
+	if in.DemoID == "" {
+		return nil, errors.New("demoId required")
+	}
+	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/loc-table", nil)
 }
 
 func (p *proxyBackend) GetRegionControl(ctx context.Context, in GetRegionControlInput) (any, error) {

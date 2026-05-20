@@ -35,6 +35,7 @@ func newRouter(store demoStore, logger *slog.Logger) http.Handler {
 	mux.HandleFunc("GET /v1/demos/{id}/stream-slice", s.handleStreamSlice)
 	mux.HandleFunc("GET /v1/demos/{id}/state-at", s.handleStateAt)
 	mux.HandleFunc("GET /v1/demos/{id}/loc-trails", s.handleLocTrails)
+	mux.HandleFunc("GET /v1/demos/{id}/loc-table", s.handleLocTable)
 	mux.HandleFunc("GET /v1/demos/{id}/region-control", s.handleRegionControl)
 
 	return recoverMiddleware(logger, accessLogMiddleware(logger, mux))

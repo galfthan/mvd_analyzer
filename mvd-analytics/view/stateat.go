@@ -12,6 +12,11 @@ type StateAtOptions struct {
 	Time    float64
 	Players []string
 	Fields  []string
+	// LocIndex selects the loc representation: false (default) resolves
+	// to loc names (PlayerStateAt.Loc); true emits the raw LocTable
+	// index (PlayerStateAt.Li) for index-based computation. Decode the
+	// index with the demo's loc-table.
+	LocIndex bool
 }
 
 // StateAtView returns each requested player's state at Time. Empty
@@ -28,11 +33,13 @@ type PlayerStateAt struct {
 	Health    *int16      `json:"h,omitempty"`
 	Armor     *int16      `json:"a,omitempty"`
 	ArmorType *string     `json:"at,omitempty"`
-	// Loc is the resolved loc name (e.g. "RA"), not the raw LocTable
-	// index — this low-cardinality view spends the lookup so consumers
-	// don't have to carry the table. Empty string = "no loc". nil means
-	// the player had no loc sample at or before Time.
+	// Loc / Li carry the player's location, one or the other depending
+	// on StateAtOptions.LocIndex. Loc (default) is the resolved name
+	// (e.g. "RA"), so consumers don't carry the table; empty string =
+	// "no loc". Li is the raw LocTable index (opt-in, for index math;
+	// decode via /loc-table). Both nil ⇒ no loc sample at or before Time.
 	Loc *string     `json:"loc,omitempty"`
+	Li  *int16      `json:"li,omitempty"`
 	Pos *Position3D `json:"pos,omitempty"`
 
 	RL  *bool `json:"rl,omitempty"`
@@ -121,8 +128,13 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 		}
 		if requested[FieldLoc] {
 			if idx := indexI16AtOrBefore(p.Loc, tMs); idx >= 0 {
-				name := locNameAt(locTable, p.Loc[idx].V)
-				ps.Loc = &name
+				v := p.Loc[idx].V
+				if opts.LocIndex {
+					ps.Li = &v
+				} else {
+					name := locNameAt(locTable, v)
+					ps.Loc = &name
+				}
 			}
 		}
 		if requested[FieldShells] {

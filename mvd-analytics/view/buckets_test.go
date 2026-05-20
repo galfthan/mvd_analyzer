@@ -188,7 +188,7 @@ func TestBucketsTeamAggregates(t *testing.T) {
 	}
 }
 
-func TestBucketsEmbedsLocTable(t *testing.T) {
+func TestBucketsLocNamesAndIndex(t *testing.T) {
 	r := &result.Result{
 		Streams: &result.Streams{
 			Players: []result.PlayerStream{{
@@ -199,23 +199,28 @@ func TestBucketsEmbedsLocTable(t *testing.T) {
 		},
 		TimelineAnalysis: &result.TimelineAnalysisResult{LocTable: []string{"", "rl", "ya"}},
 	}
-	// li requested → LocTable embedded, bucket value stays the integer index.
+	// Default → resolved name under "loc", no "li".
 	bv, err := Buckets(r, BucketsOptions{WindowMs: 1000, Fields: []string{FieldLoc}})
 	if err != nil {
 		t.Fatalf("Buckets: %v", err)
 	}
-	if len(bv.LocTable) != 3 || bv.LocTable[1] != "rl" {
-		t.Fatalf("LocTable = %v, want [\"\" rl ya]", bv.LocTable)
+	p := bv.Buckets[0].Players["p1"]
+	if p["loc"] != "rl" {
+		t.Fatalf("bucket 0 loc = %v, want rl", p["loc"])
 	}
-	if got := bv.Buckets[0].Players["p1"][FieldLoc]; got != int16(1) {
-		t.Fatalf("bucket 0 li = %v (%T), want int16(1)", got, got)
+	if _, present := p[FieldLoc]; present {
+		t.Fatalf("li should be absent in name mode, got %v", p[FieldLoc])
 	}
-	// li not requested → LocTable omitted.
-	bv2, err := Buckets(r, BucketsOptions{WindowMs: 1000, Fields: []string{FieldHealth}})
+	// Index mode → raw int16 index under "li", no "loc".
+	bvi, err := Buckets(r, BucketsOptions{WindowMs: 1000, Fields: []string{FieldLoc}, LocIndex: true})
 	if err != nil {
 		t.Fatalf("Buckets: %v", err)
 	}
-	if bv2.LocTable != nil {
-		t.Fatalf("LocTable should be nil when li not requested, got %v", bv2.LocTable)
+	pi := bvi.Buckets[0].Players["p1"]
+	if got := pi[FieldLoc]; got != int16(1) {
+		t.Fatalf("bucket 0 li = %v (%T), want int16(1)", got, got)
+	}
+	if _, present := pi["loc"]; present {
+		t.Fatalf("loc name should be absent in index mode, got %v", pi["loc"])
 	}
 }

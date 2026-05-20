@@ -139,9 +139,17 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getLocTrails",
-		Description: "Per-player sequence of loc residences with dwell durations. Use minDwellMs to filter nearest-loc flicker.",
+		Description: "Per-player sequence of loc residences with dwell durations. Use minDwellMs to filter nearest-loc flicker. Each residence is a resolved loc name by default; pass loc='index' for raw LocTable indices (decode via getLocTable).",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetLocTrailsInput) (*mcp.CallToolResult, any, error) {
 		out, err := b.GetLocTrails(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getLocTable",
+		Description: "The demo's interned loc-name table: a string array where index i is the loc name (index 0 = '' no-loc sentinel). Only needed when you've requested loc='index' on another tool and want to decode the raw `li` integers back to names. In the default 'name' mode you never need this.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetLocTableInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetLocTable(ctx, in)
 		return toolResult(out, err)
 	})
 
