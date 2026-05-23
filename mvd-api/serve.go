@@ -14,6 +14,7 @@ import (
 
 	"github.com/mvd-analyzer/mvd-api/internal/democache"
 	"github.com/mvd-analyzer/mvd-analytics/hubfetch"
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 // runServe starts the HTTP REST server. Blocks until SIGINT/SIGTERM.
@@ -41,7 +42,7 @@ func runServe(args []string) error {
 	}
 
 	logger.Info("mvd-api starting",
-		"addr", *addr, "cacheDir", *cacheDir, "schemaVersion", 7)
+		"addr", *addr, "cacheDir", *cacheDir, "schemaVersion", result.CurrentSchemaVersion)
 
 	errCh := make(chan error, 1)
 	go func() {
