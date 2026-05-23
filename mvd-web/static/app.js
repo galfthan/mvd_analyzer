@@ -201,13 +201,16 @@ worker.onmessage = (e) => {
         if (analyzeResolve) {
             analyzeResolve({
                 json: e.data.json,
-                bucketsJSON: e.data.bucketsJSON,
-                regionStatesJSON: e.data.regionStatesJSON,
                 timings: e.data.timings,
             });
             analyzeResolve = null;
             analyzeReject = null;
         }
+    } else if (e.data.type === 'buckets') {
+        // Deferred 50ms bucket + region-control payload — arrives a few
+        // seconds after 'result'. Stash it and render the Timeline/Map
+        // tabs that displayResults intentionally skipped.
+        applyDeferredBuckets(e.data);
     } else if (e.data.type === 'error') {
         if (analyzeReject) {
             analyzeReject(new Error(e.data.message));
@@ -245,27 +248,9 @@ function analyzeInWorker(bytes, filename) {
                     loadTiming.parseMs = performance.now() - tParse;
                     loadTiming.worker = payload.timings || null;
                 }
-                if (result && result.timelineAnalysis && payload.bucketsJSON) {
-                    try {
-                        const buckets = JSON.parse(payload.bucketsJSON);
-                        if (Array.isArray(buckets)) {
-                            result.timelineAnalysis.highResBuckets = buckets;
-                        }
-                    } catch (e) {
-                        console.warn('parse legacy buckets failed:', e);
-                    }
-                }
-                if (result && result.timelineAnalysis && result.timelineAnalysis.regionControl && payload.regionStatesJSON) {
-                    try {
-                        const rs = JSON.parse(payload.regionStatesJSON);
-                        if (!rs.error && rs.bucketStates) {
-                            result.timelineAnalysis.regionControl.bucketStates = rs.bucketStates;
-                            if (rs.stats) result.timelineAnalysis.regionControl.stats = rs.stats;
-                        }
-                    } catch (e) {
-                        console.warn('parse default region states failed:', e);
-                    }
-                }
+                // Buckets / region states arrive later via the 'buckets'
+                // message and are stashed by applyDeferredBuckets — the
+                // summary renders without waiting for them.
                 resolve(result);
             } catch (e) {
                 reject(e);
@@ -278,6 +263,54 @@ function analyzeInWorker(bytes, filename) {
             [bytes.buffer]
         );
     });
+}
+
+// applyDeferredBuckets stashes the worker's deferred 50ms bucket + region
+// outputs onto the current result, then RE-RUNS the bucket-dependent
+// initialisers (region control, timeline, map). They already ran once in
+// displayResults with the bucket-derived fields empty (blank timeline
+// graph / map trails / region overlay); re-running them now that the data
+// is present fills those in. Finally re-render the active tab so a
+// Timeline/Map view the user already opened repaints. Called when the
+// 'buckets' message arrives, a few seconds after the result.
+function applyDeferredBuckets(data) {
+    if (!currentResult) return;
+    const ta = currentResult.timelineAnalysis;
+    if (ta && data.bucketsJSON) {
+        try {
+            const buckets = JSON.parse(data.bucketsJSON);
+            if (Array.isArray(buckets)) ta.highResBuckets = buckets;
+        } catch (e) {
+            console.warn('parse deferred buckets failed:', e);
+        }
+    }
+    if (ta && ta.regionControl && data.regionStatesJSON) {
+        try {
+            const rs = JSON.parse(data.regionStatesJSON);
+            if (!rs.error && rs.bucketStates) {
+                ta.regionControl.bucketStates = rs.bucketStates;
+                if (rs.stats) ta.regionControl.stats = rs.stats;
+            }
+        } catch (e) {
+            console.warn('parse deferred region states failed:', e);
+        }
+    }
+
+    // Re-run the inits, now that bucket-derived data is present. Order
+    // matches displayResults: region control feeds timeline + map.
+    if (ta && ta.regionControl) initRegionControlData(currentResult);
+    if (ta || currentResult.messages?.events) displayTimelineAnalysis(currentResult);
+    if (ta) initMapView(currentResult);
+
+    // Re-render whichever tab is active so Timeline/Map paint with the new
+    // data (re-clicking re-runs the tab's render path; harmless on Summary).
+    const active = document.querySelector('.sidebar-btn.active');
+    if (active) active.click();
+
+    if (typeof data.bucketsMs === 'number') {
+        const deferred = (data.bucketsMs + (data.regionMs || 0)).toFixed(0);
+        console.log(`[mvd-timing] Timeline/Map ready — ${deferred} ms of bucket work ran off the critical path`);
+    }
 }
 
 // recomputeInWorker round-trips an edited regions definition through
@@ -1015,7 +1048,13 @@ function displayResults(result) {
         displayWeaponsChart(result.frags.byWeapon);
     }
 
-    // Region control data (needed by both timeline and map)
+    // Region control data (needed by both timeline and map). Cheap on the
+    // main thread; the multi-second cost was the worker's bucket build,
+    // which now runs after the result is delivered. These run here with the
+    // bucket-derived fields still empty (timeline graph / map trails /
+    // region overlay blank) and applyDeferredBuckets() re-runs them once the
+    // 'buckets' message lands. displayTimelineAnalysis also populates the
+    // Chat tab's events and the timeline strip, so it must run now.
     if (result.timelineAnalysis?.regionControl) {
         initRegionControlData(result);
     }
@@ -2703,6 +2742,20 @@ function resetUIToCleanState() {
 
 function resetTimelineState() {
     if (mapState.isPlaying) stopPlayback();
+
+    // Map view data is rebuilt by initMapView, which is now deferred until
+    // the 50ms buckets arrive (see applyDeferredBuckets). Clear it here so a
+    // fast demo-swap can't render the previous demo's map during the window
+    // before the new demo's buckets finish building.
+    mapState.locations = [];
+    mapState.locationGroups = null;
+    mapState.mapGeometry = null;
+    mapState.fullTrails = {};
+    mapState.dropEvents = [];
+    mapState.bucketStates = null;
+    mapState.lastRenderedBucket = null;
+    mapState.renderDirty = true;
+
     timelineState.highResBuckets = [];
     timelineState.highResDuration = 0.05;
     timelineState.events = [];

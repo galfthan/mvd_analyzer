@@ -84,8 +84,6 @@ function logWorkerTimings(t) {
         );
         const rows = (t.goPhases || []).map(p => ({ phase: p.name, ms: +p.ms.toFixed(2) }));
         rows.push({ phase: 'marshal', ms: +(t.marshalMs || 0).toFixed(2) });
-        rows.push({ phase: 'getDefaultBuckets', ms: +t.bucketsMs.toFixed(2) });
-        rows.push({ phase: 'recomputeRegionControl', ms: +t.regionMs.toFixed(2) });
         console.table(rows);
         if (t.locFetch.length) console.table(t.locFetch);
         if (t.bspFetch.length) console.table(t.bspFetch);
@@ -142,12 +140,27 @@ onmessage = function(e) {
                 goTimings = {};
             }
 
-            // Schema v7: highResBuckets and regionControl.bucketStates
-            // are no longer on the parse-time result. Build them via
-            // the bridge (lives on the worker's global where the WASM
-            // exports do) and pass back so the main thread can stash
-            // both onto the parsed result — keeping every existing
-            // panel's read pattern working unchanged.
+            const timings = {
+                wasmAnalyzeMs,
+                goPhases: goTimings.phases || [],
+                marshalMs: goTimings.marshalMs || 0,
+                locFetch: locFetches,
+                bspFetch: bspFetches,
+            };
+            logWorkerTimings(timings);
+
+            // Deliver the analysed result immediately so the main thread can
+            // render the summary now. The expensive 50ms bucket / region
+            // views below are only needed by the Timeline/Map tabs, so they
+            // are built *after* the result is sent. The worker being busy
+            // here does not block the main thread — the result message is
+            // already queued for it and renders while we compute.
+            postMessage({ type: 'result', json: jsonStr, timings });
+
+            // ---- Deferred: legacy 50ms buckets + region-control states ----
+            // Schema v7: highResBuckets and regionControl.bucketStates are
+            // not parse-time fields; the existing panels still read them, so
+            // build via the bridge and ship a second 'buckets' message.
             let bucketsJSON = '';
             const tBuckets = performance.now();
             try {
@@ -176,18 +189,13 @@ onmessage = function(e) {
             }
             const regionMs = performance.now() - tRegion;
 
-            const timings = {
-                wasmAnalyzeMs,
-                goPhases: goTimings.phases || [],
-                marshalMs: goTimings.marshalMs || 0,
-                locFetch: locFetches,
-                bspFetch: bspFetches,
-                bucketsMs,
-                regionMs,
-            };
-            logWorkerTimings(timings);
+            console.log(
+                `[mvd-timing] deferred bucket build (off critical path): ` +
+                `getDefaultBuckets ${bucketsMs.toFixed(1)} ms, ` +
+                `recomputeRegionControl ${regionMs.toFixed(1)} ms`
+            );
 
-            postMessage({ type: 'result', json: jsonStr, bucketsJSON, regionStatesJSON, timings });
+            postMessage({ type: 'buckets', bucketsJSON, regionStatesJSON, bucketsMs, regionMs });
         } catch (err) {
             postMessage({ type: 'error', message: err.message || String(err) });
         }

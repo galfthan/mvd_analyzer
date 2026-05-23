@@ -86,6 +86,22 @@ func getAnalysisTimings(this js.Value, args []js.Value) interface{} {
 	return lastTimingsJSON
 }
 
+// getDemoInfo returns just the KTX demoinfo summary (result.DemoInfo —
+// map, players, teams, scores, date) from the most recent analyzeMVD call
+// as a JSON string, or "null" if unavailable. Zero extra cost: the data is
+// already computed and pinned in lastResult, so a consumer that only wants
+// the match summary can read it without re-marshalling the full Result.
+func getDemoInfo(this js.Value, args []js.Value) interface{} {
+	if lastResult == nil || lastResult.DemoInfo == nil {
+		return "null"
+	}
+	b, err := json.Marshal(lastResult.DemoInfo)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	return string(b)
+}
+
 // getDefaultBuckets returns the v6-shape []HighResBucket array — what
 // the existing qw-web frontend's panels iterate. Internally this is
 // view.Buckets({windowMs:50, fields:all, reducers:legacy,
@@ -310,6 +326,7 @@ func main() {
 	js.Global().Set("getStateAt", js.FuncOf(getStateAt))
 	js.Global().Set("getLocTrails", js.FuncOf(getLocTrails))
 	js.Global().Set("getAnalysisTimings", js.FuncOf(getAnalysisTimings))
+	js.Global().Set("getDemoInfo", js.FuncOf(getDemoInfo))
 	js.Global().Set("wasmVersion", map[string]interface{}{
 		"hash": GitHash,
 		"tag":  GitTag,
