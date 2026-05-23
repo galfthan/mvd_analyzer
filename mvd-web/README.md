@@ -108,6 +108,37 @@ strip above the main pane.
 The WASM boundary is the only place that bridges Go and JS. The rest of
 the frontend is dependency-free JS plus a sprinkle of CSS.
 
+## Performance timing (console)
+
+Every demo load prints a structured per-stage breakdown to the browser
+console (look for the `[mvd-timing]` group) and stashes the same object
+on `window.__mvdTimings`. It is dev-facing instrumentation only — there
+is no UI for it. Stages reported, in load order:
+
+- **wasm load** (one-time): fetch + `instantiateStreaming` + `go.run`,
+  timed in `worker.js` and sent on the `ready` message.
+- **network**: `gameInfoFetch` (Supabase metadata) and `demoDownload`,
+  timed on the main thread in `app.js`.
+- **WASM analyze**: total wall time of the `analyzeMVD` call, plus the
+  Go-side per-phase split from `getAnalysisTimings()` — `init`,
+  `eventPass` (decode + gzip + all OnEvent dispatch), one
+  `finalize:<analyzer>` row per analyzer (so `finalize:timelineAnalysis` — the
+  loc-resolution work — is isolated), one `post:<name>` row per
+  post-processor (`locGraphPost`, `regionControlPost`), and `marshal`.
+- **loc/bsp fetch**: per-map `fetchLocSync` / `fetchBspSync` durations.
+  These run **synchronously inside** the `analyzeMVD` call, so their
+  time is already included in the WASM analyze wall time *and* inside
+  `finalize:timelineAnalysis`. To get the **pure loc-resolution compute**,
+  subtract `locFetch + bspFetch` from `finalize:timelineAnalysis`.
+- **result JSON.parse** (main thread), each tab render
+  (`displayTimelineAnalysis`, `displayKeyMoments`, `displayPackDrops`,
+  `displayPickupsTab`, `initMapView`, `initLocGraphView`), and the
+  async `map geometry fetch` (logged separately as it resolves after
+  the UI is shown).
+
+This exists to replace guesswork about where load time goes (e.g. "is
+loc the slowest?") with measured data before optimizing.
+
 ## Demo search
 
 The Search tab queries the same Supabase `v1_games` table that the
