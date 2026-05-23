@@ -908,6 +908,16 @@ Offset  Size  Field
 | 2 | `PRINT_HIGH` | High priority | Match events, server messages |
 | 3 | `PRINT_CHAT` | Chat message | Player chat |
 
+### Per-recipient chat duplication (KTX)
+
+Vanilla `SV_Say` (`mvdsv/src/sv_user.c`) writes a chat line to the MVD **once** — `dem_all` for public say, `dem_multiple` (with a recipient bitmask) for say_team. But it first calls `PR_ClientSay`, and if the mod handles say it returns early *before* that single write (`sv_user.c:1832`/`:1837`). **KTX always handles say in QC** (`ClientSay`, `ktx/src/g_cmd.c:287`), looping over every eligible recipient and calling `G_sprint` per client (`g_cmd.c:560`). Each `G_sprint` → `SV_ClientPrintf` emits its own `MVDWrite_Begin(dem_single, …)` (`mvdsv/src/sv_send.c:220`), so on KTX demos **one chat line is written to the MVD once per recipient** and the parser faithfully emits one `PrintEvent` per copy. Public say reaches every client (most copies); say_team only teammates (fewer) — which is why public say duplicates more.
+
+All copies of a line share an identical wire-ms. Two wrinkles:
+- KTX sends the colored text (`str`) to colour-capable clients and a markup-stripped copy (`textuncolored`) to the rest (`g_cmd.c:558`), so the copies are byte-identical only when all recipients have the same colour-support capability (the common case on modern ezquake).
+- Personal/private say_team without the `$\` fake marker is flagged `SPRINT_IGNOREINDEMO` (`g_cmd.c:554-557`) and never reaches the MVD.
+
+The analytics layer collapses the identical copies — see `mvd-analytics/analyzer/messages.go` (`seenChat`) and `mvd-analytics/analyzer/messages.md`. The parser layer does **not** dedup: it reports every wire copy faithfully.
+
 ### Match Timing Detection
 
 KTX servers send `PRINT_HIGH` messages to indicate match state transitions. These are critical for determining when actual gameplay begins and ends.

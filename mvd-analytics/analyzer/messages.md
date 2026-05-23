@@ -27,6 +27,8 @@ already plain), so consumers should treat a missing `messageClean` as
 1. Chat is parsed by `parseChatMessage`: `(name): message`,
    `(name) message`, and `name: message` shapes are recognised. Server
    announcements are filtered (the join/leave/ready prefix list).
+   Identical chat/teamsay copies are then deduped by `seenChat` on
+   `(time, type, player, message)` — see the dedup note below.
 2. Obituaries are parsed by `parseObituarySimple` — a separate parser
    from frag.go that produces `MatchEvent`s carrying the raw print
    text. Pattern coverage mirrors `frag.go` for consistency.
@@ -36,6 +38,31 @@ already plain), so consumers should treat a missing `messageClean` as
    for events whose live lookup returned empty. Handles the
    auth-override case where userinfo `Name` differs from the displayed
    netname.
+
+## Chat dedup (per-recipient `svc_print`)
+
+KTX handles `say`/`say_team` in QC (`ClientSay`, `ktx/src/g_cmd.c`) and
+sprints the line to each eligible recipient individually. Every
+`G_sprint` becomes a `dem_single` `svc_print` in the MVD
+(`SV_ClientPrintf`, `mvdsv/src/sv_send.c`), so the parser faithfully
+emits one `PrintEvent` per recipient. A single public `say` line would
+otherwise appear N times — public `say` reaches every client and so
+duplicates the most, `say_team` only teammates. `seenChat` collapses
+these to one event keyed on `(time, type, player, message)`. All copies
+share an identical wire-ms, so the exact-match key is safe: a human
+cannot send the same line twice in the same millisecond, and a same-text
+line at a *different* time is preserved. This is the CLAUDE.md "filter
+only when a consumer cannot itself disambiguate" exception.
+
+Edge case: KTX sends the colored text to colour-capable clients and a
+markup-stripped copy to the rest (`g_cmd.c:558`), so a *mixed* lobby can
+leave one colored + one stripped survivor. This is rare on modern
+ezquake (everyone is colour-capable → byte-identical copies → collapses
+to one) and never drops a real message, so we accept it rather than key
+on stripped text and risk losing the colored variant.
+
+The obituary/frag path is **not** deduped: obituaries arrive as a single
+broadcast copy and must pass through verbatim.
 
 ## Limitations / known issues
 

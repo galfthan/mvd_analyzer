@@ -3919,20 +3919,6 @@
         "type": "chat"
       },
       {
-        "message": "f_modified",
-        "player": "42",
-        "team": "42",
-        "time": -9960,
-        "type": "chat"
-      },
-      {
-        "message": "f_ruleset",
-        "player": "42",
-        "team": "42",
-        "time": -9960,
-        "type": "chat"
-      },
-      {
         "message": "f_ruleset",
         "player": "42",
         "team": "42",
@@ -3947,29 +3933,7 @@
         "type": "chat"
       },
       {
-        "message": "f_version",
-        "player": "42",
-        "team": "42",
-        "time": -9960,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": -9945,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": -9945,
-        "type": "chat"
-      },
-      {
-        "message": "    108.61.117.210:27502         ezq3.6.8 smackdown-msfi",
-        "messageClean": "108.61.117.210:27502 ezq3.6.8 smackdown-msfi",
         "player": "AHemlocksLie",
         "team": "AHemlocksLie",
         "time": -9945,
@@ -3991,29 +3955,7 @@
         "type": "chat"
       },
       {
-        "message": "ezQuake 3.6.8 8019~f87af73da Linux64:GL",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": -9945,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "42",
-        "team": "42",
-        "time": -9945,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "42",
-        "team": "42",
-        "time": -9945,
-        "type": "chat"
-      },
-      {
-        "message": "              108.61.117.210:27502         ezq3.6.6 default-msfi",
-        "messageClean": "108.61.117.210:27502 ezq3.6.6 default-msfi",
         "player": "42",
         "team": "42",
         "time": -9945,
@@ -4032,20 +3974,6 @@
         "player": "42",
         "team": "42",
         "time": -9945,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.6.6 7947~baab4dfd7 Win64:GL",
-        "player": "42",
-        "team": "42",
-        "time": -9945,
-        "type": "chat"
-      },
-      {
-        "message": "glhf",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": -7818,
         "type": "chat"
       },
       {
@@ -4360,20 +4288,6 @@
         "type": "chat"
       },
       {
-        "message": "f_modified",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": 600007,
-        "type": "chat"
-      },
-      {
-        "message": "f_ruleset",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": 600007,
-        "type": "chat"
-      },
-      {
         "message": "f_ruleset",
         "player": "AHemlocksLie",
         "team": "AHemlocksLie",
@@ -4388,29 +4302,7 @@
         "type": "chat"
       },
       {
-        "message": "f_version",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": 600007,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": 600195,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": 600195,
-        "type": "chat"
-      },
-      {
-        "message": "    108.61.117.210:27502         ezq3.6.8 smackdown-msfi",
-        "messageClean": "108.61.117.210:27502 ezq3.6.8 smackdown-msfi",
         "player": "AHemlocksLie",
         "team": "AHemlocksLie",
         "time": 600195,
@@ -4432,29 +4324,7 @@
         "type": "chat"
       },
       {
-        "message": "ezQuake 3.6.8 8019~f87af73da Linux64:GL",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": 600195,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "42",
-        "team": "42",
-        "time": 600218,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "42",
-        "team": "42",
-        "time": 600218,
-        "type": "chat"
-      },
-      {
-        "message": "              108.61.117.210:27502         ezq3.6.6 default-msfi",
-        "messageClean": "108.61.117.210:27502 ezq3.6.6 default-msfi",
         "player": "42",
         "team": "42",
         "time": 600218,
@@ -4476,31 +4346,10 @@
         "type": "chat"
       },
       {
-        "message": "ezQuake 3.6.6 7947~baab4dfd7 Win64:GL",
-        "player": "42",
-        "team": "42",
-        "time": 600218,
-        "type": "chat"
-      },
-      {
         "message": "gg",
         "player": "42",
         "team": "42",
         "time": 602205,
-        "type": "chat"
-      },
-      {
-        "message": "gg",
-        "player": "42",
-        "team": "42",
-        "time": 602205,
-        "type": "chat"
-      },
-      {
-        "message": "gg",
-        "player": "AHemlocksLie",
-        "team": "AHemlocksLie",
-        "time": 602766,
         "type": "chat"
       },
       {

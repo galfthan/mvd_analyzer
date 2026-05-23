@@ -6282,48 +6282,6 @@
         "type": "chat"
       },
       {
-        "message": "f_modified",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9972,
-        "type": "chat"
-      },
-      {
-        "message": "f_modified",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9972,
-        "type": "chat"
-      },
-      {
-        "message": "f_modified",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9972,
-        "type": "chat"
-      },
-      {
-        "message": "f_ruleset",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9972,
-        "type": "chat"
-      },
-      {
-        "message": "f_ruleset",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9972,
-        "type": "chat"
-      },
-      {
-        "message": "f_ruleset",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9972,
-        "type": "chat"
-      },
-      {
         "message": "f_ruleset",
         "player": "SS",
         "team": "nAnI",
@@ -6338,73 +6296,7 @@
         "type": "chat"
       },
       {
-        "message": "f_version",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9972,
-        "type": "chat"
-      },
-      {
-        "message": "f_version",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9972,
-        "type": "chat"
-      },
-      {
-        "message": "f_version",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9972,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "kippo",
-        "team": "pora",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "kippo",
-        "team": "pora",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "kippo",
-        "team": "pora",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "kippo",
-        "team": "pora",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "             34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
-        "player": "kippo",
-        "team": "pora",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "             34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
-        "player": "kippo",
-        "team": "pora",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "             34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
         "player": "kippo",
         "team": "pora",
         "time": -9943,
@@ -6426,73 +6318,7 @@
         "type": "chat"
       },
       {
-        "message": "ezQuake 3.7.0-dev 8073~95eba3ccc Win64:GL",
-        "player": "kippo",
-        "team": "pora",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.7.0-dev 8073~95eba3ccc Win64:GL",
-        "player": "kippo",
-        "team": "pora",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.7.0-dev 8073~95eba3ccc Win64:GL",
-        "player": "kippo",
-        "team": "pora",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "                34.88.66.126:27500         ezq3.6.7 smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.6.7 smackdown-msfi",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "                34.88.66.126:27500         ezq3.6.7 smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.6.7 smackdown-msfi",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "                34.88.66.126:27500         ezq3.6.7 smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.6.7 smackdown-msfi",
         "player": "SS",
         "team": "nAnI",
         "time": -9943,
@@ -6514,73 +6340,7 @@
         "type": "chat"
       },
       {
-        "message": "ezQuake 3.6.7 8006~7b2f05520 Win64:GL",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.6.7 8006~7b2f05520 Win64:GL",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.6.7 8006~7b2f05520 Win64:GL",
-        "player": "SS",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "              34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "              34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "              34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
         "player": "gLAd",
         "team": "nAnI",
         "time": -9943,
@@ -6602,48 +6362,6 @@
         "type": "chat"
       },
       {
-        "message": "ezQuake 3.7.0-dev 8068~bea2515d0 Win64:GL",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.7.0-dev 8068~bea2515d0 Win64:GL",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.7.0-dev 8068~bea2515d0 Win64:GL",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": -9943,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "rusti",
-        "team": "pora",
-        "time": -9909,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "rusti",
-        "team": "pora",
-        "time": -9909,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "rusti",
-        "team": "pora",
-        "time": -9909,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
         "player": "rusti",
         "team": "pora",
@@ -6653,54 +6371,6 @@
       {
         "message": "{\u0026c777          34.88.66.126:27500\u0026r unez\u0026c9f61.3.9-dev-8434~\u0026r \u0026c9faclear\u0026r}",
         "messageClean": "34.88.66.126:27500 unez1.3.9-dev-8434~ clear",
-        "player": "rusti",
-        "team": "pora",
-        "time": -9909,
-        "type": "chat"
-      },
-      {
-        "message": "{\u0026c777          34.88.66.126:27500\u0026r unez\u0026c9f61.3.9-dev-8434~\u0026r \u0026c9faclear\u0026r}",
-        "messageClean": "34.88.66.126:27500 unez1.3.9-dev-8434~ clear",
-        "player": "rusti",
-        "team": "pora",
-        "time": -9909,
-        "type": "chat"
-      },
-      {
-        "message": "{\u0026c777          34.88.66.126:27500\u0026r unez\u0026c9f61.3.9-dev-8434~\u0026r \u0026c9faclear\u0026r}",
-        "messageClean": "34.88.66.126:27500 unez1.3.9-dev-8434~ clear",
-        "player": "rusti",
-        "team": "pora",
-        "time": -9909,
-        "type": "chat"
-      },
-      {
-        "message": "{\u0026c777          34.88.66.126:27500\u0026r unez\u0026c9f61.3.9-dev-8434~\u0026r \u0026c9faclear\u0026r}",
-        "messageClean": "34.88.66.126:27500 unez1.3.9-dev-8434~ clear",
-        "player": "rusti",
-        "team": "pora",
-        "time": -9909,
-        "type": "chat"
-      },
-      {
-        "message": "{unezQuake \u0026c9f61.3.9-dev\u0026r \u0026c7778434~a1f7637b5\u0026r Win64:GL}",
-        "messageClean": "unezQuake 1.3.9-dev 8434~a1f7637b5 Win64:GL",
-        "player": "rusti",
-        "team": "pora",
-        "time": -9909,
-        "type": "chat"
-      },
-      {
-        "message": "{unezQuake \u0026c9f61.3.9-dev\u0026r \u0026c7778434~a1f7637b5\u0026r Win64:GL}",
-        "messageClean": "unezQuake 1.3.9-dev 8434~a1f7637b5 Win64:GL",
-        "player": "rusti",
-        "team": "pora",
-        "time": -9909,
-        "type": "chat"
-      },
-      {
-        "message": "{unezQuake \u0026c9f61.3.9-dev\u0026r \u0026c7778434~a1f7637b5\u0026r Win64:GL}",
-        "messageClean": "unezQuake 1.3.9-dev 8434~a1f7637b5 Win64:GL",
         "player": "rusti",
         "team": "pora",
         "time": -9909,
@@ -6750,22 +6420,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{big-hatch}] 2\u003e!C",
-        "messageClean": "sn4 ## RL dropped big-hatch 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 7856,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: 0/100 {\u0026cf13rl\u0026cfff}:4 [{ra}]",
-        "messageClean": "rst: 0/100 rl:4 ra",
-        "player": "rusti",
-        "team": "pora",
-        "time": 13323,
-        "type": "teamsay"
-      },
-      {
         "message": "\rrst: 0/100 {\u0026cf13rl\u0026cfff}:4 [{ra}]",
         "messageClean": "rst: 0/100 rl:4 ra",
         "player": "rusti",
@@ -6804,31 +6458,7 @@
         "messageClean": "kip: dropped rl ra %E",
         "player": "kippo",
         "team": "pora",
-        "time": 15484,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 15624,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 15624,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## lost [{ra}] 1\u003e!C",
-        "messageClean": "sn4 ## lost ra 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 15640,
         "type": "teamsay"
       },
       {
@@ -6845,22 +6475,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 15752,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 15752,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{100} {\u0026c2aagl\u0026cfff} [{gl-ra}] r:5",
-        "messageClean": "kip: 0/100 gl gl-ra r:5",
-        "player": "kippo",
-        "team": "pora",
-        "time": 18133,
         "type": "teamsay"
       },
       {
@@ -6879,14 +6493,6 @@
         "type": "frag",
         "victim": "SS",
         "weapon": "rl"
-      },
-      {
-        "message": "\rsn4 ## LG dropped [{gl}] 1\u003e!C",
-        "messageClean": "sn4 ## LG dropped gl 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 27231,
-        "type": "teamsay"
       },
       {
         "message": "\rsn4 ## LG dropped [{gl}] 1\u003e!C",
@@ -6941,14 +6547,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{big}] 1\u003e!C",
-        "messageClean": "sn4 ## RL dropped big 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 46244,
-        "type": "teamsay"
-      },
-      {
         "message": "rusti rides SS's rocket",
         "player": "SS",
         "team": "nAnI",
@@ -6972,22 +6570,6 @@
         "player": "SS",
         "team": "nAnI",
         "time": 55463,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## RL dropped [{ra}] 1\u003e!C",
-        "messageClean": "sn4 ## RL dropped ra 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 55463,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: 0/200 {\u0026cf13rl\u0026cfff}:5 [{mega}]",
-        "messageClean": "rst: 0/200 rl:5 mega",
-        "player": "rusti",
-        "team": "pora",
-        "time": 58607,
         "type": "teamsay"
       },
       {
@@ -7025,22 +6607,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{ra}] 1\u003e!C",
-        "messageClean": "sn4 ## RL dropped ra 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 61994,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 62583,
-        "type": "teamsay"
-      },
-      {
         "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
         "messageClean": "kip: dropped rl ra %E",
         "player": "kippo",
@@ -7054,22 +6620,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 62740,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 62740,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 62868,
         "type": "teamsay"
       },
       {
@@ -7098,35 +6648,11 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## lost [{mega}] 1\u003e!C",
-        "messageClean": "sn4 ## lost mega 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 64398,
-        "type": "teamsay"
-      },
-      {
         "message": "\rgld ## {\u0026ce00136\u0026cfff}/55 [{ra}] {\u0026cf0frlg\u0026cfff}:2/0",
         "messageClean": "gld ## 136/55 ra rlg:2/0",
         "player": "gLAd",
         "team": "nAnI",
         "time": 77697,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## {\u0026ce00136\u0026cfff}/55 [{ra}] {\u0026cf0frlg\u0026cfff}:2/0",
-        "messageClean": "gld ## 136/55 ra rlg:2/0",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 77697,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{89} {\u0026cf60rl\u0026cfff}{\u0026cf60:8\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:63\u0026cfff} [{gl}]",
-        "messageClean": "kip: 0/89 rl:8 lg:63 gl",
-        "player": "kippo",
-        "team": "pora",
-        "time": 87972,
         "type": "teamsay"
       },
       {
@@ -7146,35 +6672,11 @@
         "type": "teamsay"
       },
       {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{89} {\u0026cf60rl\u0026cfff}{\u0026cf60:8\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:63\u0026cfff} [{ga}]",
-        "messageClean": "kip: 0/89 rl:8 lg:63 ga",
-        "player": "kippo",
-        "team": "pora",
-        "time": 91904,
-        "type": "teamsay"
-      },
-      {
         "message": "\rrst: {\u0026c0a0mega\u0026cfff} at [{mega}] {%E}",
         "messageClean": "rst: mega at mega %E",
         "player": "rusti",
         "team": "pora",
         "time": 95815,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026c0a0mega\u0026cfff} at [{mega}] {%E}",
-        "messageClean": "rst: mega at mega %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 95815,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026c0a0mega\u0026cfff} at [{mega}] {%E}",
-        "messageClean": "rst: mega at mega %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 95929,
         "type": "teamsay"
       },
       {
@@ -7203,22 +6705,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rrst: {\u0026cf00DROPPED} {\u0026c2aalg\u0026cfff} {\u0026cf00[\u0026cfff}{ga}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: DROPPED lg ga %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 102386,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## {\u0026ce00119\u0026cfff}/48 [{ra}] {\u0026cf0frl\u0026cfff}:7",
-        "messageClean": "sn4 ## 119/48 ra rl:7",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 105020,
-        "type": "teamsay"
-      },
-      {
         "message": "\rsn4 ## {\u0026ce00119\u0026cfff}/48 [{ra}] {\u0026cf0frl\u0026cfff}:7",
         "messageClean": "sn4 ## 119/48 ra rl:7",
         "player": "SS",
@@ -7244,14 +6730,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{ra}] 2\u003e!C",
-        "messageClean": "sn4 ## RL dropped ra 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 112536,
-        "type": "teamsay"
-      },
-      {
         "message": "gLAd accepts kippo's shaft",
         "player": "kippo",
         "team": "pora",
@@ -7259,14 +6737,6 @@
         "type": "frag",
         "victim": "gLAd",
         "weapon": "lg"
-      },
-      {
-        "message": "\rrst: {\u0026ce0057\u0026cfff}/16 {\u0026cf13rl\u0026cfff}:5 [{ra}] {\u0026c2aac\u0026cfff}:3",
-        "messageClean": "rst: 57/16 rl:5 ra c:3",
-        "player": "rusti",
-        "team": "pora",
-        "time": 115847,
-        "type": "teamsay"
       },
       {
         "message": "\rrst: {\u0026ce0057\u0026cfff}/16 {\u0026cf13rl\u0026cfff}:5 [{ra}] {\u0026c2aac\u0026cfff}:3",
@@ -7298,22 +6768,6 @@
         "messageClean": "kip: dropped lg ra %E",
         "player": "kippo",
         "team": "pora",
-        "time": 117968,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped lg ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 118132,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped lg ra %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 118132,
         "type": "teamsay"
       },
@@ -7323,22 +6777,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 118266,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped lg ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 118266,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped lg ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 118396,
         "type": "teamsay"
       },
       {
@@ -7403,22 +6841,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: lost ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 123268,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## 0/22 [{ra}] {\u0026cf0frl\u0026cfff}:4",
-        "messageClean": "sn4 ## 0/22 ra rl:4",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 123372,
-        "type": "teamsay"
-      },
-      {
         "message": "\rsn4 ## 0/22 [{ra}] {\u0026cf0frl\u0026cfff}:4",
         "messageClean": "sn4 ## 0/22 ra rl:4",
         "player": "SS",
@@ -7439,22 +6861,6 @@
         "messageClean": "kip: lost ra %E",
         "player": "kippo",
         "team": "pora",
-        "time": 123420,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: lost ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 123563,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: lost ra %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 123563,
         "type": "teamsay"
       },
@@ -7464,22 +6870,6 @@
         "player": "rusti",
         "team": "pora",
         "time": 125106,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026c0b0safe\u0026cfff} {\u0026c0b0[\u0026cfff}{mega-pipe}{\u0026c0b0]\u0026cfff} {\u0026cf13rl\u0026cfff}",
-        "messageClean": "rst: safe mega-pipe rl",
-        "player": "rusti",
-        "team": "pora",
-        "time": 125106,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## 0/22 [{ra}] {\u0026cf0frl\u0026cfff}:4",
-        "messageClean": "sn4 ## 0/22 ra rl:4",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 125524,
         "type": "teamsay"
       },
       {
@@ -7512,22 +6902,6 @@
         "messageClean": "kip: lost ga-cells %E",
         "player": "kippo",
         "team": "pora",
-        "time": 128008,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ga-cells}] {%E}",
-        "messageClean": "kip: lost ga-cells %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 128147,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ga-cells}] {%E}",
-        "messageClean": "kip: lost ga-cells %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 128147,
         "type": "teamsay"
       },
@@ -7537,22 +6911,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 128278,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ga-cells}] {%E}",
-        "messageClean": "kip: lost ga-cells %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 128278,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: 0/100 {\u0026cf13rl\u0026cfff}:5 [{mega-pipe}]",
-        "messageClean": "rst: 0/100 rl:5 mega-pipe",
-        "player": "rusti",
-        "team": "pora",
-        "time": 128967,
         "type": "teamsay"
       },
       {
@@ -7571,14 +6929,6 @@
         "type": "frag",
         "victim": "rusti",
         "weapon": "lg"
-      },
-      {
-        "message": "\rgld ## safe [{ra}] {\u0026cf0frl\u0026cfff}:9",
-        "messageClean": "gld ## safe ra rl:9",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 133799,
-        "type": "teamsay"
       },
       {
         "message": "\rgld ## safe [{ra}] {\u0026cf0frl\u0026cfff}:9",
@@ -7610,31 +6960,7 @@
         "messageClean": "kip: lost ga-shells %E",
         "player": "kippo",
         "team": "pora",
-        "time": 135238,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ga-shells}] {%E}",
-        "messageClean": "kip: lost ga-shells %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 135384,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ga-shells}] {%E}",
-        "messageClean": "kip: lost ga-shells %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 135384,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## {\u0026c0b076\u0026cfff}/100 [{ra}] {\u0026cf0frl\u0026cfff}:9",
-        "messageClean": "gld ## 76/100 ra rl:9",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 137248,
         "type": "teamsay"
       },
       {
@@ -7672,14 +6998,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rrst: 0/17 {\u0026cf13rl\u0026cfff}:6 {\u0026c2aalg\u0026cfff}:39 [{ga}]",
-        "messageClean": "rst: 0/17 rl:6 lg:39 ga",
-        "player": "rusti",
-        "team": "pora",
-        "time": 150688,
-        "type": "teamsay"
-      },
-      {
         "message": "kippo was gibbed by gLAd's rocket",
         "player": "gLAd",
         "team": "nAnI",
@@ -7706,22 +7024,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rrst: {\u0026c0b0100\u0026cfff}/42 {\u0026cf13rl\u0026cfff}:6 {\u0026c2aalg\u0026cfff}:51 [{mega}]",
-        "messageClean": "rst: 100/42 rl:6 lg:51 mega",
-        "player": "rusti",
-        "team": "pora",
-        "time": 159148,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{100} {\u0026cf60rl\u0026cfff}{\u0026cf60:4\u0026cfff} [{ra}]",
-        "messageClean": "kip: 0/100 rl:4 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 161275,
-        "type": "teamsay"
-      },
-      {
         "message": "\r{\u0026c777kip:\u0026cfff} {0}/{100} {\u0026cf60rl\u0026cfff}{\u0026cf60:4\u0026cfff} [{ra}]",
         "messageClean": "kip: 0/100 rl:4 ra",
         "player": "kippo",
@@ -7742,31 +7044,7 @@
         "messageClean": "kip: safe ra",
         "player": "kippo",
         "team": "pora",
-        "time": 162120,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c0b0safe\u0026cfff} [{ra}]",
-        "messageClean": "kip: safe ra",
-        "player": "kippo",
-        "team": "pora",
         "time": 162237,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c0b0safe\u0026cfff} [{ra}]",
-        "messageClean": "kip: safe ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 162237,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026c0b0100\u0026cfff}/42 {\u0026cf13rl\u0026cfff}:6 {\u0026c2aalg\u0026cfff}:51 [{mega}]",
-        "messageClean": "rst: 100/42 rl:6 lg:51 mega",
-        "player": "rusti",
-        "team": "pora",
-        "time": 162869,
         "type": "teamsay"
       },
       {
@@ -7804,14 +7082,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{ra}] 1\u003e!C",
-        "messageClean": "sn4 ## RL dropped ra 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 175495,
-        "type": "teamsay"
-      },
-      {
         "message": "kippo accepts gLAd's shaft",
         "player": "gLAd",
         "team": "nAnI",
@@ -7833,22 +7103,6 @@
         "messageClean": "kip: lost big %E",
         "player": "kippo",
         "team": "pora",
-        "time": 177173,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{big}] {%E}",
-        "messageClean": "kip: lost big %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 177329,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{big}] {%E}",
-        "messageClean": "kip: lost big %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 177329,
         "type": "teamsay"
       },
@@ -7858,22 +7112,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 177445,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{big}] {%E}",
-        "messageClean": "kip: lost big %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 177445,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{100} {\u0026c2aagl\u0026cfff} [{gl-ra}] r:5",
-        "messageClean": "kip: 0/100 gl gl-ra r:5",
-        "player": "kippo",
-        "team": "pora",
-        "time": 179634,
         "type": "teamsay"
       },
       {
@@ -7906,22 +7144,6 @@
         "messageClean": "rst: DROPPED rl ra %E",
         "player": "rusti",
         "team": "pora",
-        "time": 180491,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026cf00DROPPED} {\u0026cf13rl\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: DROPPED rl ra %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 180624,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026cf00DROPPED} {\u0026cf13rl\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: DROPPED rl ra %E",
-        "player": "rusti",
-        "team": "pora",
         "time": 180624,
         "type": "teamsay"
       },
@@ -7933,14 +7155,6 @@
         "type": "frag",
         "victim": "rusti",
         "weapon": "rl"
-      },
-      {
-        "message": "\rrst: {\u0026cf00lost\u0026cfff} {\u0026cf00[\u0026cfff}{ra-tunnel}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: lost ra-tunnel %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 182052,
-        "type": "teamsay"
       },
       {
         "message": "\rrst: {\u0026cf00lost\u0026cfff} {\u0026cf00[\u0026cfff}{ra-tunnel}{\u0026cf00]\u0026cfff} {%E}",
@@ -7972,31 +7186,7 @@
         "messageClean": "kip: dropped rl ra %E",
         "player": "kippo",
         "team": "pora",
-        "time": 183296,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 183445,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 183445,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 183585,
         "type": "teamsay"
       },
       {
@@ -8013,22 +7203,6 @@
         "player": "gLAd",
         "team": "nAnI",
         "time": 185906,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## item soon [{ra}]",
-        "messageClean": "gld ## item soon ra",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 185906,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## item soon [{ra}]",
-        "messageClean": "gld ## item soon ra",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 186054,
         "type": "teamsay"
       },
       {
@@ -8061,22 +7235,6 @@
         "messageClean": "kip: lost mega-pipe %E",
         "player": "kippo",
         "team": "pora",
-        "time": 187211,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{mega-pipe}] {%E}",
-        "messageClean": "kip: lost mega-pipe %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 187364,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{mega-pipe}] {%E}",
-        "messageClean": "kip: lost mega-pipe %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 187364,
         "type": "teamsay"
       },
@@ -8086,22 +7244,6 @@
         "player": "SS",
         "team": "nAnI",
         "time": 197859,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## {\u0026ce00200\u0026cfff}/92 [{ra}] {\u0026cf0frlg\u0026cfff}:0/27",
-        "messageClean": "sn4 ## 200/92 ra rlg:0/27",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 197859,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} took {\u0026c0b0ga\u0026cfff} [{ga}]",
-        "messageClean": "kip: took ga ga",
-        "player": "kippo",
-        "team": "pora",
-        "time": 199469,
         "type": "teamsay"
       },
       {
@@ -8120,14 +7262,6 @@
         "type": "frag",
         "victim": "rusti",
         "weapon": "lg"
-      },
-      {
-        "message": "\rrst: {\u0026cf00lost\u0026cfff} {\u0026cf00[\u0026cfff}{gl}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: lost gl %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 201975,
-        "type": "teamsay"
       },
       {
         "message": "\rrst: {\u0026cf00lost\u0026cfff} {\u0026cf00[\u0026cfff}{gl}{\u0026cf00]\u0026cfff} {%E}",
@@ -8159,31 +7293,7 @@
         "messageClean": "kip: dropped rl big %E",
         "player": "kippo",
         "team": "pora",
-        "time": 210987,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{big}] {%E}",
-        "messageClean": "kip: dropped rl big %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 211142,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{big}] {%E}",
-        "messageClean": "kip: dropped rl big %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 211142,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{big}] {%E}",
-        "messageClean": "kip: dropped rl big %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 211248,
         "type": "teamsay"
       },
       {
@@ -8212,14 +7322,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## lost [{big-hatch}] 1\u003e!C",
-        "messageClean": "sn4 ## lost big-hatch 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 212220,
-        "type": "teamsay"
-      },
-      {
         "message": "kippo accepts gLAd's shaft",
         "player": "gLAd",
         "team": "nAnI",
@@ -8237,35 +7339,11 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## 0/100 [{ra}]",
-        "messageClean": "sn4 ## 0/100 ra",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 213488,
-        "type": "teamsay"
-      },
-      {
         "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{gl}] {%E}",
         "messageClean": "kip: lost gl %E",
         "player": "kippo",
         "team": "pora",
         "time": 213505,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: lost gl %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 213505,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: lost gl %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 213624,
         "type": "teamsay"
       },
       {
@@ -8285,35 +7363,11 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## {\u0026ce00200\u0026cfff}/100 [{ra}] {\u0026cf0frl\u0026cfff}:3",
-        "messageClean": "sn4 ## 200/100 ra rl:3",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 219389,
-        "type": "teamsay"
-      },
-      {
         "message": "\rsn4 ## safe [{ra}] {\u0026cf0frl\u0026cfff}:3",
         "messageClean": "sn4 ## safe ra rl:3",
         "player": "SS",
         "team": "nAnI",
         "time": 220721,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## safe [{ra}] {\u0026cf0frl\u0026cfff}:3",
-        "messageClean": "sn4 ## safe ra rl:3",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 220721,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: took {\u0026c0a0mega\u0026cfff} [{mega}]",
-        "messageClean": "rst: took mega mega",
-        "player": "rusti",
-        "team": "pora",
-        "time": 229283,
         "type": "teamsay"
       },
       {
@@ -8342,14 +7396,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{ra}] 2\u003e!C",
-        "messageClean": "sn4 ## RL dropped ra 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 240711,
-        "type": "teamsay"
-      },
-      {
         "message": "gLAd accepts rusti's shaft",
         "player": "rusti",
         "team": "pora",
@@ -8357,14 +7403,6 @@
         "type": "frag",
         "victim": "gLAd",
         "weapon": "lg"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c931r\u0026cfff}{200}/{25} {\u0026cf60rl\u0026cfff}{\u0026cf60:0\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:54\u0026cfff} [{ra}]",
-        "messageClean": "kip: r200/25 rl:0 lg:54 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 242375,
-        "type": "teamsay"
       },
       {
         "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c931r\u0026cfff}{200}/{25} {\u0026cf60rl\u0026cfff}{\u0026cf60:0\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:54\u0026cfff} [{ra}]",
@@ -8401,35 +7439,11 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{ra-tunnel}] 1\u003e!C",
-        "messageClean": "sn4 ## RL dropped ra-tunnel 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 247804,
-        "type": "teamsay"
-      },
-      {
         "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c931r\u0026cfff}{57}/{51} {\u0026cf60rl\u0026cfff}{\u0026cf60:0\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:25\u0026cfff} [{ra-tunnel}]",
         "messageClean": "kip: r57/51 rl:0 lg:25 ra-tunnel",
         "player": "kippo",
         "team": "pora",
         "time": 252361,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c931r\u0026cfff}{57}/{51} {\u0026cf60rl\u0026cfff}{\u0026cf60:0\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:25\u0026cfff} [{ra-tunnel}]",
-        "messageClean": "kip: r57/51 rl:0 lg:25 ra-tunnel",
-        "player": "kippo",
-        "team": "pora",
-        "time": 252361,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## {\u0026c0b0100\u0026cfff}/95 [{ga}] {\u0026c099lg\u0026cfff}:34",
-        "messageClean": "gld ## 100/95 ga lg:34",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 252452,
         "type": "teamsay"
       },
       {
@@ -8453,31 +7467,7 @@
         "messageClean": "kip: r57/51 rl:0 lg:25 ra",
         "player": "kippo",
         "team": "pora",
-        "time": 253593,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c931r\u0026cfff}{57}/{51} {\u0026cf60rl\u0026cfff}{\u0026cf60:0\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:25\u0026cfff} [{ra}]",
-        "messageClean": "kip: r57/51 rl:0 lg:25 ra",
-        "player": "kippo",
-        "team": "pora",
         "time": 256933,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c931r\u0026cfff}{57}/{51} {\u0026cf60rl\u0026cfff}{\u0026cf60:0\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:25\u0026cfff} [{ra}]",
-        "messageClean": "kip: r57/51 rl:0 lg:25 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 256933,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c931r\u0026cfff}{57}/{51} {\u0026cf60rl\u0026cfff}{\u0026cf60:0\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:25\u0026cfff} [{ra}]",
-        "messageClean": "kip: r57/51 rl:0 lg:25 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 257074,
         "type": "teamsay"
       },
       {
@@ -8501,22 +7491,6 @@
         "messageClean": "gld ## safe gl lg:46",
         "player": "gLAd",
         "team": "nAnI",
-        "time": 257127,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## safe [{gl}] {\u0026c099lg\u0026cfff}:46",
-        "messageClean": "gld ## safe gl lg:46",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 257315,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## safe [{gl}] {\u0026c099lg\u0026cfff}:46",
-        "messageClean": "gld ## safe gl lg:46",
-        "player": "gLAd",
-        "team": "nAnI",
         "time": 257315,
         "type": "teamsay"
       },
@@ -8526,22 +7500,6 @@
         "player": "SS",
         "team": "nAnI",
         "time": 258244,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## 0/100 [{ga}] {\u0026cf0frlg\u0026cfff}:4/15",
-        "messageClean": "sn4 ## 0/100 ga rlg:4/15",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 258244,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c931r\u0026cfff}{200}/{51} {\u0026cf60rl\u0026cfff}{\u0026cf60:0\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:25\u0026cfff} [{ra}]",
-        "messageClean": "kip: r200/51 rl:0 lg:25 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 261764,
         "type": "teamsay"
       },
       {
@@ -8574,31 +7532,7 @@
         "messageClean": "kip: dropped lg gl-below %E",
         "player": "kippo",
         "team": "pora",
-        "time": 268566,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{gl-below}] {%E}",
-        "messageClean": "kip: dropped lg gl-below %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 268685,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{gl-below}] {%E}",
-        "messageClean": "kip: dropped lg gl-below %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 268685,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{gl-below}] {%E}",
-        "messageClean": "kip: dropped lg gl-below %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 268841,
         "type": "teamsay"
       },
       {
@@ -8627,14 +7561,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## 0/195 [{mega}] {\u0026cf0frlg\u0026cfff}:9/14",
-        "messageClean": "sn4 ## 0/195 mega rlg:9/14",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 272579,
-        "type": "teamsay"
-      },
-      {
         "message": "rusti accepts gLAd's shaft",
         "player": "gLAd",
         "team": "nAnI",
@@ -8651,14 +7577,6 @@
         "type": "frag",
         "victim": "kippo",
         "weapon": "rl"
-      },
-      {
-        "message": "\rrst: {\u0026cf00lost\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: lost ra %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 280755,
-        "type": "teamsay"
       },
       {
         "message": "\rrst: {\u0026cf00lost\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
@@ -8704,14 +7622,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rrst: 0/100 {\u0026cf13rl\u0026cfff}:5 [{mega-pipe}]",
-        "messageClean": "rst: 0/100 rl:5 mega-pipe",
-        "player": "rusti",
-        "team": "pora",
-        "time": 287814,
-        "type": "teamsay"
-      },
-      {
         "message": "SS rides rusti's rocket",
         "player": "rusti",
         "team": "pora",
@@ -8719,14 +7629,6 @@
         "type": "frag",
         "victim": "SS",
         "weapon": "rl"
-      },
-      {
-        "message": "\rsn4 ## lost [{mega}] 1\u003e!C",
-        "messageClean": "sn4 ## lost mega 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 288541,
-        "type": "teamsay"
       },
       {
         "message": "\rsn4 ## lost [{mega}] 1\u003e!C",
@@ -8767,31 +7669,7 @@
         "messageClean": "kip: dropped rl ra-tunnel %E",
         "player": "kippo",
         "team": "pora",
-        "time": 292644,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra-tunnel}] {%E}",
-        "messageClean": "kip: dropped rl ra-tunnel %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 292787,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra-tunnel}] {%E}",
-        "messageClean": "kip: dropped rl ra-tunnel %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 292787,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra-tunnel}] {%E}",
-        "messageClean": "kip: dropped rl ra-tunnel %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 292891,
         "type": "teamsay"
       },
       {
@@ -8820,22 +7698,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## lost [{ra}] 2\u003e!C",
-        "messageClean": "sn4 ## lost ra 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 295662,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: 0/21 {\u0026cf13rl\u0026cfff}:3 [{ra}]",
-        "messageClean": "rst: 0/21 rl:3 ra",
-        "player": "rusti",
-        "team": "pora",
-        "time": 297727,
-        "type": "teamsay"
-      },
-      {
         "message": "\rrst: 0/21 {\u0026cf13rl\u0026cfff}:3 [{ra}]",
         "messageClean": "rst: 0/21 rl:3 ra",
         "player": "rusti",
@@ -8849,22 +7711,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 299454,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{100} {\u0026cf60rl\u0026cfff}{\u0026cf60:13\u0026cfff} [{ra}]",
-        "messageClean": "kip: 0/100 rl:13 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 299454,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{100} {\u0026cf60rl\u0026cfff}{\u0026cf60:13\u0026cfff} [{ra}]",
-        "messageClean": "kip: 0/100 rl:13 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 299870,
         "type": "teamsay"
       },
       {
@@ -8883,14 +7729,6 @@
         "type": "frag",
         "victim": "rusti",
         "weapon": "rl"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} took {\u0026cf00ra\u0026cfff} [{ra}]",
-        "messageClean": "kip: took ra ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 303194,
-        "type": "teamsay"
       },
       {
         "message": "\r{\u0026c777kip:\u0026cfff} took {\u0026cf00ra\u0026cfff} [{ra}]",
@@ -8927,14 +7765,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{lg}] 2\u003e!C",
-        "messageClean": "sn4 ## RL dropped lg 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 312616,
-        "type": "teamsay"
-      },
-      {
         "message": "rusti rides gLAd's rocket",
         "player": "gLAd",
         "team": "nAnI",
@@ -8961,22 +7791,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rrst: {\u0026cf00lost\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: lost ra %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 316500,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## 0/84 [{ra}] {\u0026cf0frl\u0026cfff}:4",
-        "messageClean": "sn4 ## 0/84 ra rl:4",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 316656,
-        "type": "teamsay"
-      },
-      {
         "message": "\rsn4 ## 0/84 [{ra}] {\u0026cf0frl\u0026cfff}:4",
         "messageClean": "sn4 ## 0/84 ra rl:4",
         "player": "SS",
@@ -8997,31 +7811,7 @@
         "messageClean": "kip: r47/62 rl:10 lg:51 lg",
         "player": "kippo",
         "team": "pora",
-        "time": 323109,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c931r\u0026cfff}{47}/{62} {\u0026cf60rl\u0026cfff}{\u0026cf60:10\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:51\u0026cfff} [{lg}]",
-        "messageClean": "kip: r47/62 rl:10 lg:51 lg",
-        "player": "kippo",
-        "team": "pora",
         "time": 323226,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c931r\u0026cfff}{47}/{62} {\u0026cf60rl\u0026cfff}{\u0026cf60:10\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:51\u0026cfff} [{lg}]",
-        "messageClean": "kip: r47/62 rl:10 lg:51 lg",
-        "player": "kippo",
-        "team": "pora",
-        "time": 323226,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## {\u0026ce00200\u0026cfff}/100 [{ra}] {\u0026cf0frl\u0026cfff}:4",
-        "messageClean": "sn4 ## 200/100 ra rl:4",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 324511,
         "type": "teamsay"
       },
       {
@@ -9040,14 +7830,6 @@
         "type": "frag",
         "victim": "rusti",
         "weapon": "lg"
-      },
-      {
-        "message": "\rgld ## {\u0026cff0r\u0026cfff} safe [{big}] {\u0026cf0frlg\u0026cfff}:25",
-        "messageClean": "gld ## r safe big rlg:25",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 326614,
-        "type": "teamsay"
       },
       {
         "message": "\rgld ## {\u0026cff0r\u0026cfff} safe [{big}] {\u0026cf0frlg\u0026cfff}:25",
@@ -9079,31 +7861,7 @@
         "messageClean": "kip: dropped lg big %E",
         "player": "kippo",
         "team": "pora",
-        "time": 329810,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{big}] {%E}",
-        "messageClean": "kip: dropped lg big %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 329951,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{big}] {%E}",
-        "messageClean": "kip: dropped lg big %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 329951,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{100} {\u0026cf60rl\u0026cfff}{\u0026cf60:4\u0026cfff} [{ra}]",
-        "messageClean": "kip: 0/100 rl:4 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 332421,
         "type": "teamsay"
       },
       {
@@ -9122,14 +7880,6 @@
         "type": "frag",
         "victim": "kippo",
         "weapon": "lg"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 338250,
-        "type": "teamsay"
       },
       {
         "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
@@ -9161,22 +7911,6 @@
         "messageClean": "kip: lost ra %E",
         "player": "kippo",
         "team": "pora",
-        "time": 340992,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: lost ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 341147,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: lost ra %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 341147,
         "type": "teamsay"
       },
@@ -9198,22 +7932,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 \u003c\u003c\u003c\u003c {\u0026cf00ra\u0026cfff} [{ra}]",
-        "messageClean": "sn4 \u003c\u003c\u003c\u003c ra ra",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 346094,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: took {\u0026c0b0ga\u0026cfff} [{ga}]",
-        "messageClean": "rst: took ga ga",
-        "player": "rusti",
-        "team": "pora",
-        "time": 356891,
-        "type": "teamsay"
-      },
-      {
         "message": "\rrst: took {\u0026c0b0ga\u0026cfff} [{ga}]",
         "messageClean": "rst: took ga ga",
         "player": "rusti",
@@ -9229,14 +7947,6 @@
         "type": "frag",
         "victim": "kippo",
         "weapon": "rl"
-      },
-      {
-        "message": "\rrst: coming [{ga}]",
-        "messageClean": "rst: coming ga",
-        "player": "rusti",
-        "team": "pora",
-        "time": 358982,
-        "type": "teamsay"
       },
       {
         "message": "\rrst: coming [{ga}]",
@@ -9291,14 +8001,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rgld ## lost [{ra}] %E",
-        "messageClean": "gld ## lost ra %E",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 365163,
-        "type": "teamsay"
-      },
-      {
         "message": "rusti rides SS's rocket",
         "player": "SS",
         "team": "nAnI",
@@ -9320,31 +8022,7 @@
         "messageClean": "rst: lost ra %E",
         "player": "rusti",
         "team": "pora",
-        "time": 367663,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026cf00lost\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: lost ra %E",
-        "player": "rusti",
-        "team": "pora",
         "time": 367793,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026cf00lost\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: lost ra %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 367793,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 \u003c\u003c\u003c\u003c {\u0026c0a0pack\u0026cfff} [{ra}]",
-        "messageClean": "sn4 \u003c\u003c\u003c\u003c pack ra",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 371353,
         "type": "teamsay"
       },
       {
@@ -9363,14 +8041,6 @@
         "type": "frag",
         "victim": "kippo",
         "weapon": "rl"
-      },
-      {
-        "message": "\rsn4 ## safe [{ra}] {\u0026cf0frlg\u0026cfff}:43",
-        "messageClean": "sn4 ## safe ra rlg:43",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 372469,
-        "type": "teamsay"
       },
       {
         "message": "\rsn4 ## safe [{ra}] {\u0026cf0frlg\u0026cfff}:43",
@@ -9411,22 +8081,6 @@
         "messageClean": "kip: lost gl-ra %E",
         "player": "kippo",
         "team": "pora",
-        "time": 375911,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{gl-ra}] {%E}",
-        "messageClean": "kip: lost gl-ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 376071,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{gl-ra}] {%E}",
-        "messageClean": "kip: lost gl-ra %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 376071,
         "type": "teamsay"
       },
@@ -9452,22 +8106,6 @@
         "messageClean": "kip: lost ra %E",
         "player": "kippo",
         "team": "pora",
-        "time": 378993,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: lost ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 379130,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: lost ra %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 379130,
         "type": "teamsay"
       },
@@ -9477,22 +8115,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 379274,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: lost ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 379274,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: lost ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 379391,
         "type": "teamsay"
       },
       {
@@ -9516,31 +8138,7 @@
         "messageClean": "sn4 \u003c\u003c\u003c\u003c pack ra",
         "player": "SS",
         "team": "nAnI",
-        "time": 380014,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 \u003c\u003c\u003c\u003c {\u0026c0a0pack\u0026cfff} [{ra}]",
-        "messageClean": "sn4 \u003c\u003c\u003c\u003c pack ra",
-        "player": "SS",
-        "team": "nAnI",
         "time": 380171,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 \u003c\u003c\u003c\u003c {\u0026c0a0pack\u0026cfff} [{ra}]",
-        "messageClean": "sn4 \u003c\u003c\u003c\u003c pack ra",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 380171,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 \u003c\u003c\u003c\u003c {\u0026c0a0pack\u0026cfff} [{gl-ra}]",
-        "messageClean": "sn4 \u003c\u003c\u003c\u003c pack gl-ra",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 380668,
         "type": "teamsay"
       },
       {
@@ -9591,31 +8189,7 @@
         "messageClean": "kip: dropped lg gl %E",
         "player": "kippo",
         "team": "pora",
-        "time": 397753,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: dropped lg gl %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 397921,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: dropped lg gl %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 397921,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{100} {\u0026cf60rl\u0026cfff}{\u0026cf60:7\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:48\u0026cfff} [{mega}]",
-        "messageClean": "kip: 0/100 rl:7 lg:48 mega",
-        "player": "kippo",
-        "team": "pora",
-        "time": 403493,
         "type": "teamsay"
       },
       {
@@ -9653,14 +8227,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## took {\u0026cf00ra\u0026cfff} [{ra}]",
-        "messageClean": "sn4 ## took ra ra",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 411964,
-        "type": "teamsay"
-      },
-      {
         "message": "kippo accepts gLAd's shaft",
         "player": "gLAd",
         "team": "nAnI",
@@ -9668,14 +8234,6 @@
         "type": "frag",
         "victim": "kippo",
         "weapon": "lg"
-      },
-      {
-        "message": "\rsn4 ## {\u0026ce0080\u0026cfff}/20 [{ra}] {\u0026cf0frlg\u0026cfff}:13/34",
-        "messageClean": "sn4 ## 80/20 ra rlg:13/34",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 419478,
-        "type": "teamsay"
       },
       {
         "message": "\rsn4 ## {\u0026ce0080\u0026cfff}/20 [{ra}] {\u0026cf0frlg\u0026cfff}:13/34",
@@ -9712,22 +8270,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## lost [{ra}] 2\u003e!C",
-        "messageClean": "sn4 ## lost ra 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 425335,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{70} {\u0026cf60rl\u0026cfff}{\u0026cf60:2\u0026cfff} [{ra}]",
-        "messageClean": "kip: 0/70 rl:2 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 425569,
-        "type": "teamsay"
-      },
-      {
         "message": "\r{\u0026c777kip:\u0026cfff} {0}/{70} {\u0026cf60rl\u0026cfff}{\u0026cf60:2\u0026cfff} [{ra}]",
         "messageClean": "kip: 0/70 rl:2 ra",
         "player": "kippo",
@@ -9753,22 +8295,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## lost [{ra}] 2\u003e!C",
-        "messageClean": "sn4 ## lost ra 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 428270,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## took {\u0026c0b0ga\u0026cfff} [{ga}]",
-        "messageClean": "gld ## took ga ga",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 430568,
-        "type": "teamsay"
-      },
-      {
         "message": "\rgld ## took {\u0026c0b0ga\u0026cfff} [{ga}]",
         "messageClean": "gld ## took ga ga",
         "player": "gLAd",
@@ -9782,22 +8308,6 @@
         "player": "rusti",
         "team": "pora",
         "time": 431776,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: took {\u0026cf00ra\u0026cfff} [{ra}]",
-        "messageClean": "rst: took ra ra",
-        "player": "rusti",
-        "team": "pora",
-        "time": 431776,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{63} {\u0026cf60rl\u0026cfff}{\u0026cf60:2\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:40\u0026cfff} [{gl}]",
-        "messageClean": "kip: 0/63 rl:2 lg:40 gl",
-        "player": "kippo",
-        "team": "pora",
-        "time": 447350,
         "type": "teamsay"
       },
       {
@@ -9826,14 +8336,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rrst: {\u0026c0b0safe\u0026cfff} {\u0026c0b0[\u0026cfff}{ra}{\u0026c0b0]\u0026cfff} {\u0026ce00140\u0026cfff}/{\u0026cf13rl\u0026cfff}{\u0026c2aag\u0026cfff}",
-        "messageClean": "rst: safe ra 140/rlg",
-        "player": "rusti",
-        "team": "pora",
-        "time": 461712,
-        "type": "teamsay"
-      },
-      {
         "message": "SS mows down a teammate",
         "player": "SS",
         "team": "nAnI",
@@ -9841,14 +8343,6 @@
         "type": "frag",
         "victim": "teammate",
         "weapon": "teamkill"
-      },
-      {
-        "message": "\rgld ## lost [{mega-pipe}] %E",
-        "messageClean": "gld ## lost mega-pipe %E",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 466841,
-        "type": "teamsay"
       },
       {
         "message": "\rgld ## lost [{mega-pipe}] %E",
@@ -9880,22 +8374,6 @@
         "messageClean": "kip: lost mega-pipe %E",
         "player": "kippo",
         "team": "pora",
-        "time": 469595,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{mega-pipe}] {%E}",
-        "messageClean": "kip: lost mega-pipe %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 469738,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{mega-pipe}] {%E}",
-        "messageClean": "kip: lost mega-pipe %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 469738,
         "type": "teamsay"
       },
@@ -9905,22 +8383,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 469903,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{mega-pipe}] {%E}",
-        "messageClean": "kip: lost mega-pipe %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 469903,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{mega-pipe}] {%E}",
-        "messageClean": "kip: lost mega-pipe %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 470007,
         "type": "teamsay"
       },
       {
@@ -9953,31 +8415,7 @@
         "messageClean": "kip: lost gl %E",
         "player": "kippo",
         "team": "pora",
-        "time": 471841,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: lost gl %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 471984,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: lost gl %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 471984,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: lost gl %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 472124,
         "type": "teamsay"
       },
       {
@@ -10006,22 +8444,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{ra}] 2\u003e!C",
-        "messageClean": "sn4 ## RL dropped ra 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 474269,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{100} {\u0026cf60rl\u0026cfff}{\u0026cf60:4\u0026cfff} [{ra}]",
-        "messageClean": "kip: 0/100 rl:4 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 474386,
-        "type": "teamsay"
-      },
-      {
         "message": "\r{\u0026c777kip:\u0026cfff} {0}/{100} {\u0026cf60rl\u0026cfff}{\u0026cf60:4\u0026cfff} [{ra}]",
         "messageClean": "kip: 0/100 rl:4 ra",
         "player": "kippo",
@@ -10047,14 +8469,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{ra}] 1\u003e!C",
-        "messageClean": "sn4 ## RL dropped ra 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 478321,
-        "type": "teamsay"
-      },
-      {
         "message": "SS was gibbed by rusti's rocket",
         "player": "rusti",
         "team": "pora",
@@ -10069,22 +8483,6 @@
         "player": "SS",
         "team": "nAnI",
         "time": 492099,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## 0/100 [{ra}] {\u0026cf0frl\u0026cfff}:5",
-        "messageClean": "sn4 ## 0/100 ra rl:5",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 492099,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{73} {\u0026cf60rl\u0026cfff}{\u0026cf60:0\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:39\u0026cfff} [{big}]",
-        "messageClean": "kip: 0/73 rl:0 lg:39 big",
-        "player": "kippo",
-        "team": "pora",
-        "time": 493073,
         "type": "teamsay"
       },
       {
@@ -10113,35 +8511,11 @@
         "type": "teamsay"
       },
       {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{73} {\u0026cf60rl\u0026cfff}{\u0026cf60:0\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:34\u0026cfff} [{ra}]",
-        "messageClean": "kip: 0/73 rl:0 lg:34 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 495824,
-        "type": "teamsay"
-      },
-      {
         "message": "\rsn4 ## RL dropped [{ra}] 2\u003e!C",
         "messageClean": "sn4 ## RL dropped ra 2\u003e",
         "player": "SS",
         "team": "nAnI",
         "time": 496035,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## RL dropped [{ra}] 2\u003e!C",
-        "messageClean": "sn4 ## RL dropped ra 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 496035,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {0}/{73} {\u0026cf60rl\u0026cfff}{\u0026cf60:5\u0026cfff} {\u0026cf60lg\u0026cfff}{\u0026cf60:34\u0026cfff} [{ra}]",
-        "messageClean": "kip: 0/73 rl:5 lg:34 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 497291,
         "type": "teamsay"
       },
       {
@@ -10192,31 +8566,7 @@
         "messageClean": "kip: dropped rl ra %E",
         "player": "kippo",
         "team": "pora",
-        "time": 504618,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 504760,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 504760,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## 0/27 [{ra}] {\u0026cf0frl\u0026cfff}:3",
-        "messageClean": "sn4 ## 0/27 ra rl:3",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 504891,
         "type": "teamsay"
       },
       {
@@ -10233,22 +8583,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 504914,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 504914,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 505018,
         "type": "teamsay"
       },
       {
@@ -10277,14 +8611,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## lost [{ra}] 1\u003e!C",
-        "messageClean": "sn4 ## lost ra 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 506420,
-        "type": "teamsay"
-      },
-      {
         "message": "SS rides rusti's rocket",
         "player": "rusti",
         "team": "pora",
@@ -10292,14 +8618,6 @@
         "type": "frag",
         "victim": "SS",
         "weapon": "rl"
-      },
-      {
-        "message": "\rsn4 ## lost [{ra}] 1\u003e!C",
-        "messageClean": "sn4 ## lost ra 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 509345,
-        "type": "teamsay"
       },
       {
         "message": "\rsn4 ## lost [{ra}] 1\u003e!C",
@@ -10336,22 +8654,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rgld ## took {\u0026c0a0mega\u0026cfff} [{mega}]",
-        "messageClean": "gld ## took mega mega",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 513604,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026cf00DROPPED} {\u0026cf13rl\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: DROPPED rl ra %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 513760,
-        "type": "teamsay"
-      },
-      {
         "message": "\rrst: {\u0026cf00DROPPED} {\u0026cf13rl\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
         "messageClean": "rst: DROPPED rl ra %E",
         "player": "rusti",
@@ -10372,22 +8674,6 @@
         "messageClean": "rst: DROPPED rl ra %E",
         "player": "rusti",
         "team": "pora",
-        "time": 513912,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026cf00DROPPED} {\u0026cf13rl\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: DROPPED rl ra %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 514043,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: {\u0026cf00DROPPED} {\u0026cf13rl\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: DROPPED rl ra %E",
-        "player": "rusti",
-        "team": "pora",
         "time": 514043,
         "type": "teamsay"
       },
@@ -10397,22 +8683,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 514124,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c693g\u0026cfff}{85}/{81} {\u0026cf60rl\u0026cfff}{\u0026cf60:14\u0026cfff} [{gl-ra}]",
-        "messageClean": "kip: g85/81 rl:14 gl-ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 514124,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026c693g\u0026cfff}{85}/{81} {\u0026cf60rl\u0026cfff}{\u0026cf60:14\u0026cfff} [{ra}]",
-        "messageClean": "kip: g85/81 rl:14 ra",
-        "player": "kippo",
-        "team": "pora",
-        "time": 514303,
         "type": "teamsay"
       },
       {
@@ -10441,14 +8711,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## lost [{ra}] 1\u003e!C",
-        "messageClean": "sn4 ## lost ra 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 515342,
-        "type": "teamsay"
-      },
-      {
         "message": "SS rides kippo's rocket",
         "player": "kippo",
         "team": "pora",
@@ -10456,14 +8718,6 @@
         "type": "frag",
         "victim": "SS",
         "weapon": "rl"
-      },
-      {
-        "message": "\rrst: {\u0026c0b0safe\u0026cfff} {\u0026c0b0[\u0026cfff}{ra-tunnel}{\u0026c0b0]\u0026cfff} {\u0026cf13rl\u0026cfff}",
-        "messageClean": "rst: safe ra-tunnel rl",
-        "player": "rusti",
-        "team": "pora",
-        "time": 525016,
-        "type": "teamsay"
       },
       {
         "message": "\rrst: {\u0026c0b0safe\u0026cfff} {\u0026c0b0[\u0026cfff}{ra-tunnel}{\u0026c0b0]\u0026cfff} {\u0026cf13rl\u0026cfff}",
@@ -10500,35 +8754,11 @@
         "type": "teamsay"
       },
       {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ga}] {%E}",
-        "messageClean": "kip: lost ga %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 529811,
-        "type": "teamsay"
-      },
-      {
         "message": "\rsn4 ## 0/100 [{mega}] {\u0026cf0frl\u0026cfff}:5",
         "messageClean": "sn4 ## 0/100 mega rl:5",
         "player": "SS",
         "team": "nAnI",
         "time": 531366,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## 0/100 [{mega}] {\u0026cf0frl\u0026cfff}:5",
-        "messageClean": "sn4 ## 0/100 mega rl:5",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 531366,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## 0/100 [{mega}] {\u0026cf0frl\u0026cfff}:5",
-        "messageClean": "sn4 ## 0/100 mega rl:5",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 531510,
         "type": "teamsay"
       },
       {
@@ -10548,35 +8778,11 @@
         "type": "teamsay"
       },
       {
-        "message": "\rrst: {\u0026c0b0safe\u0026cfff} {\u0026c0b0[\u0026cfff}{ra}{\u0026c0b0]\u0026cfff} {\u0026cf13rl\u0026cfff}",
-        "messageClean": "rst: safe ra rl",
-        "player": "rusti",
-        "team": "pora",
-        "time": 531992,
-        "type": "teamsay"
-      },
-      {
         "message": "\rrst: took {\u0026cf00ra\u0026cfff} [{ra}]",
         "messageClean": "rst: took ra ra",
         "player": "rusti",
         "team": "pora",
         "time": 535395,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rrst: took {\u0026cf00ra\u0026cfff} [{ra}]",
-        "messageClean": "rst: took ra ra",
-        "player": "rusti",
-        "team": "pora",
-        "time": 535395,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## {\u0026c0b0100\u0026cfff}/179 [{ga-cells}] {\u0026cf0frl\u0026cfff}:36",
-        "messageClean": "gld ## 100/179 ga-cells rl:36",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 538797,
         "type": "teamsay"
       },
       {
@@ -10609,31 +8815,7 @@
         "messageClean": "kip: dropped lg ga-shells %E",
         "player": "kippo",
         "team": "pora",
-        "time": 542018,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{ga-shells}] {%E}",
-        "messageClean": "kip: dropped lg ga-shells %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 542162,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{ga-shells}] {%E}",
-        "messageClean": "kip: dropped lg ga-shells %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 542162,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60lg\u0026cfff} [{ga-shells}] {%E}",
-        "messageClean": "kip: dropped lg ga-shells %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 542288,
         "type": "teamsay"
       },
       {
@@ -10666,22 +8848,6 @@
         "messageClean": "kip: lost ga %E",
         "player": "kippo",
         "team": "pora",
-        "time": 543833,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ga}] {%E}",
-        "messageClean": "kip: lost ga %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 543978,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00lost\u0026cfff} [{ga}] {%E}",
-        "messageClean": "kip: lost ga %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 543978,
         "type": "teamsay"
       },
@@ -10700,22 +8866,6 @@
         "player": "SS",
         "team": "nAnI",
         "time": 546508,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## RL dropped [{gl-below}] 2\u003e!C",
-        "messageClean": "sn4 ## RL dropped gl-below 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 546508,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## {\u0026c0b0100\u0026cfff}/100 [{ga-cells}] {\u0026cf0frl\u0026cfff}:9",
-        "messageClean": "sn4 ## 100/100 ga-cells rl:9",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 556144,
         "type": "teamsay"
       },
       {
@@ -10744,14 +8894,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rsn4 ## RL dropped [{ga-cells}] 2\u003e!C",
-        "messageClean": "sn4 ## RL dropped ga-cells 2\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 564442,
-        "type": "teamsay"
-      },
-      {
         "message": "SS was gibbed by kippo's rocket",
         "player": "kippo",
         "team": "pora",
@@ -10759,14 +8901,6 @@
         "type": "frag",
         "victim": "SS",
         "weapon": "rl"
-      },
-      {
-        "message": "\rsn4 ## lost [{gl}] 1\u003e!C",
-        "messageClean": "sn4 ## lost gl 1\u003e",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 566740,
-        "type": "teamsay"
       },
       {
         "message": "\rsn4 ## lost [{gl}] 1\u003e!C",
@@ -10798,22 +8932,6 @@
         "messageClean": "kip: dropped rl gl %E",
         "player": "kippo",
         "team": "pora",
-        "time": 570495,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: dropped rl gl %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 570652,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: dropped rl gl %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 570652,
         "type": "teamsay"
       },
@@ -10823,22 +8941,6 @@
         "player": "kippo",
         "team": "pora",
         "time": 570780,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: dropped rl gl %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 570780,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{gl}] {%E}",
-        "messageClean": "kip: dropped rl gl %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 570911,
         "type": "teamsay"
       },
       {
@@ -10876,14 +8978,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rrst: {\u0026cf00DROPPED} {\u0026c2aalg\u0026cfff} {\u0026cf00[\u0026cfff}{ra}{\u0026cf00]\u0026cfff} {%E}",
-        "messageClean": "rst: DROPPED lg ra %E",
-        "player": "rusti",
-        "team": "pora",
-        "time": 574640,
-        "type": "teamsay"
-      },
-      {
         "message": "kippo accepts gLAd's shaft",
         "player": "gLAd",
         "team": "nAnI",
@@ -10901,35 +8995,11 @@
         "type": "teamsay"
       },
       {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ga-shells}] {%E}",
-        "messageClean": "kip: dropped rl ga-shells %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 576900,
-        "type": "teamsay"
-      },
-      {
         "message": "\rsn4 ## {\u0026ce00200\u0026cfff}/100 [{ra}] {\u0026c099lg\u0026cfff}:32",
         "messageClean": "sn4 ## 200/100 ra lg:32",
         "player": "SS",
         "team": "nAnI",
         "time": 577029,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## {\u0026ce00200\u0026cfff}/100 [{ra}] {\u0026c099lg\u0026cfff}:32",
-        "messageClean": "sn4 ## 200/100 ra lg:32",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 577029,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ga-shells}] {%E}",
-        "messageClean": "kip: dropped rl ga-shells %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 577051,
         "type": "teamsay"
       },
       {
@@ -10953,31 +9023,7 @@
         "messageClean": "kip: dropped rl ga-shells %E",
         "player": "kippo",
         "team": "pora",
-        "time": 577181,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ga-shells}] {%E}",
-        "messageClean": "kip: dropped rl ga-shells %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 577313,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ga-shells}] {%E}",
-        "messageClean": "kip: dropped rl ga-shells %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 577313,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rsn4 ## safe [{ra}] {\u0026c099lg\u0026cfff}:32",
-        "messageClean": "sn4 ## safe ra lg:32",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 577327,
         "type": "teamsay"
       },
       {
@@ -10996,14 +9042,6 @@
         "type": "frag",
         "victim": "rusti",
         "weapon": "rl"
-      },
-      {
-        "message": "\rsn4 ## {\u0026ce00200\u0026cfff}/100 [{ra}] {\u0026cf0frlg\u0026cfff}:5/32",
-        "messageClean": "sn4 ## 200/100 ra rlg:5/32",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 581610,
-        "type": "teamsay"
       },
       {
         "message": "\rsn4 ## {\u0026ce00200\u0026cfff}/100 [{ra}] {\u0026cf0frlg\u0026cfff}:5/32",
@@ -11044,22 +9082,6 @@
         "messageClean": "kip: dropped rl ra %E",
         "player": "kippo",
         "team": "pora",
-        "time": 586441,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
-        "time": 586574,
-        "type": "teamsay"
-      },
-      {
-        "message": "\r{\u0026c777kip:\u0026cfff} {\u0026cf00dropped\u0026cfff} {\u0026cf60rl\u0026cfff} [{ra}] {%E}",
-        "messageClean": "kip: dropped rl ra %E",
-        "player": "kippo",
-        "team": "pora",
         "time": 586574,
         "type": "teamsay"
       },
@@ -11085,22 +9107,6 @@
         "messageClean": "gld ## safe ra rlg:12",
         "player": "gLAd",
         "team": "nAnI",
-        "time": 594664,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## safe [{ra}] {\u0026cf0frlg\u0026cfff}:12",
-        "messageClean": "gld ## safe ra rlg:12",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 595521,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rgld ## safe [{ra}] {\u0026cf0frlg\u0026cfff}:12",
-        "messageClean": "gld ## safe ra rlg:12",
-        "player": "gLAd",
-        "team": "nAnI",
         "time": 595521,
         "type": "teamsay"
       },
@@ -11113,57 +9119,7 @@
         "type": "teamsay"
       },
       {
-        "message": "\rgld ## took rl-pack [{ra}]",
-        "messageClean": "gld ## took rl-pack ra",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 597131,
-        "type": "teamsay"
-      },
-      {
         "message": "f_modified",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600103,
-        "type": "chat"
-      },
-      {
-        "message": "f_modified",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600103,
-        "type": "chat"
-      },
-      {
-        "message": "f_modified",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600103,
-        "type": "chat"
-      },
-      {
-        "message": "f_modified",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600103,
-        "type": "chat"
-      },
-      {
-        "message": "f_ruleset",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600103,
-        "type": "chat"
-      },
-      {
-        "message": "f_ruleset",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600103,
-        "type": "chat"
-      },
-      {
-        "message": "f_ruleset",
         "player": "gLAd",
         "team": "nAnI",
         "time": 600103,
@@ -11184,73 +9140,7 @@
         "type": "chat"
       },
       {
-        "message": "f_version",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600103,
-        "type": "chat"
-      },
-      {
-        "message": "f_version",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600103,
-        "type": "chat"
-      },
-      {
-        "message": "f_version",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600103,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "kippo",
-        "team": "pora",
-        "time": 600116,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "kippo",
-        "team": "pora",
-        "time": 600116,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "kippo",
-        "team": "pora",
-        "time": 600116,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "kippo",
-        "team": "pora",
-        "time": 600116,
-        "type": "chat"
-      },
-      {
-        "message": "             34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
-        "player": "kippo",
-        "team": "pora",
-        "time": 600116,
-        "type": "chat"
-      },
-      {
-        "message": "             34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
-        "player": "kippo",
-        "team": "pora",
-        "time": 600116,
-        "type": "chat"
-      },
-      {
-        "message": "             34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
         "player": "kippo",
         "team": "pora",
         "time": 600116,
@@ -11272,73 +9162,7 @@
         "type": "chat"
       },
       {
-        "message": "ezQuake 3.7.0-dev 8073~95eba3ccc Win64:GL",
-        "player": "kippo",
-        "team": "pora",
-        "time": 600116,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.7.0-dev 8073~95eba3ccc Win64:GL",
-        "player": "kippo",
-        "team": "pora",
-        "time": 600116,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.7.0-dev 8073~95eba3ccc Win64:GL",
-        "player": "kippo",
-        "team": "pora",
-        "time": 600116,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600131,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600131,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600131,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600131,
-        "type": "chat"
-      },
-      {
-        "message": "              34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600131,
-        "type": "chat"
-      },
-      {
-        "message": "              34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600131,
-        "type": "chat"
-      },
-      {
-        "message": "              34.88.66.126:27500     ezq3.7.0-dev smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.7.0-dev smackdown-msfi",
         "player": "gLAd",
         "team": "nAnI",
         "time": 600131,
@@ -11360,73 +9184,7 @@
         "type": "chat"
       },
       {
-        "message": "ezQuake 3.7.0-dev 8068~bea2515d0 Win64:GL",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600131,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.7.0-dev 8068~bea2515d0 Win64:GL",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600131,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.7.0-dev 8068~bea2515d0 Win64:GL",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 600131,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 600147,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 600147,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 600147,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 600147,
-        "type": "chat"
-      },
-      {
-        "message": "                34.88.66.126:27500         ezq3.6.7 smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.6.7 smackdown-msfi",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 600147,
-        "type": "chat"
-      },
-      {
-        "message": "                34.88.66.126:27500         ezq3.6.7 smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.6.7 smackdown-msfi",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 600147,
-        "type": "chat"
-      },
-      {
-        "message": "                34.88.66.126:27500         ezq3.6.7 smackdown-msfi",
-        "messageClean": "34.88.66.126:27500 ezq3.6.7 smackdown-msfi",
         "player": "SS",
         "team": "nAnI",
         "time": 600147,
@@ -11448,73 +9206,7 @@
         "type": "chat"
       },
       {
-        "message": "ezQuake 3.6.7 8006~7b2f05520 Win64:GL",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 600147,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.6.7 8006~7b2f05520 Win64:GL",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 600147,
-        "type": "chat"
-      },
-      {
-        "message": "ezQuake 3.6.7 8006~7b2f05520 Win64:GL",
-        "player": "SS",
-        "team": "nAnI",
-        "time": 600147,
-        "type": "chat"
-      },
-      {
         "message": "all models ok",
-        "player": "rusti",
-        "team": "pora",
-        "time": 600180,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "rusti",
-        "team": "pora",
-        "time": 600180,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "rusti",
-        "team": "pora",
-        "time": 600180,
-        "type": "chat"
-      },
-      {
-        "message": "all models ok",
-        "player": "rusti",
-        "team": "pora",
-        "time": 600180,
-        "type": "chat"
-      },
-      {
-        "message": "{\u0026c777          34.88.66.126:27500\u0026r unez\u0026c9f61.3.9-dev-8434~\u0026r \u0026c9faclear\u0026r}",
-        "messageClean": "34.88.66.126:27500 unez1.3.9-dev-8434~ clear",
-        "player": "rusti",
-        "team": "pora",
-        "time": 600180,
-        "type": "chat"
-      },
-      {
-        "message": "{\u0026c777          34.88.66.126:27500\u0026r unez\u0026c9f61.3.9-dev-8434~\u0026r \u0026c9faclear\u0026r}",
-        "messageClean": "34.88.66.126:27500 unez1.3.9-dev-8434~ clear",
-        "player": "rusti",
-        "team": "pora",
-        "time": 600180,
-        "type": "chat"
-      },
-      {
-        "message": "{\u0026c777          34.88.66.126:27500\u0026r unez\u0026c9f61.3.9-dev-8434~\u0026r \u0026c9faclear\u0026r}",
-        "messageClean": "34.88.66.126:27500 unez1.3.9-dev-8434~ clear",
         "player": "rusti",
         "team": "pora",
         "time": 600180,
@@ -11534,51 +9226,6 @@
         "player": "rusti",
         "team": "pora",
         "time": 600180,
-        "type": "chat"
-      },
-      {
-        "message": "{unezQuake \u0026c9f61.3.9-dev\u0026r \u0026c7778434~a1f7637b5\u0026r Win64:GL}",
-        "messageClean": "unezQuake 1.3.9-dev 8434~a1f7637b5 Win64:GL",
-        "player": "rusti",
-        "team": "pora",
-        "time": 600180,
-        "type": "chat"
-      },
-      {
-        "message": "{unezQuake \u0026c9f61.3.9-dev\u0026r \u0026c7778434~a1f7637b5\u0026r Win64:GL}",
-        "messageClean": "unezQuake 1.3.9-dev 8434~a1f7637b5 Win64:GL",
-        "player": "rusti",
-        "team": "pora",
-        "time": 600180,
-        "type": "chat"
-      },
-      {
-        "message": "{unezQuake \u0026c9f61.3.9-dev\u0026r \u0026c7778434~a1f7637b5\u0026r Win64:GL}",
-        "messageClean": "unezQuake 1.3.9-dev 8434~a1f7637b5 Win64:GL",
-        "player": "rusti",
-        "team": "pora",
-        "time": 600180,
-        "type": "chat"
-      },
-      {
-        "message": "gg",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 601624,
-        "type": "chat"
-      },
-      {
-        "message": "gg",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 601624,
-        "type": "chat"
-      },
-      {
-        "message": "gg",
-        "player": "gLAd",
-        "team": "nAnI",
-        "time": 601624,
         "type": "chat"
       },
       {
