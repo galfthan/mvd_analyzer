@@ -294,17 +294,25 @@ onto every node):
 - The **movement graph** — a Cytoscape.js node/edge diagram with the
   filter / edge-mode / layout controls, driven by `initLocGraphView`
   and `buildOrRefreshCytoscape`.
-- The **Loc Heatmap** — a loc × player occupancy matrix
-  (`renderLocHeatmap`). Rows are locs (busiest first), columns are
-  players grouped by team. Each cell's brightness is the share of that
-  player's observed time spent in the loc, normalised to that player's
-  own busiest loc so every column reads independently (it answers
-  "where is this player", not "who controlled this loc"); the exact
-  seconds + percentage are in the hover tooltip. It is drawn entirely
-  in one canvas (left gutter = loc names, top band = team color bar +
-  rotated player names) and reuses `setupGraphCanvas` / `TEAM_COLORS` /
-  `PLOT_BG_COLOR` rather than the time-axis `renderSpansTimeline`. No
-  extra analyzer pass — both views read the same `locGraph` field and
+- Two **Loc Heatmaps** — loc-occupancy matrices built by
+  `buildLocHeatmap` / `renderHeatmapMatrix`. Rows are locs (busiest
+  first). One matrix has a column per **team** (every member's time
+  combined), the other a column per **player** (grouped by team). Each
+  cell's intensity is the share of that column's observed time spent in
+  the loc, normalised to that column's own busiest loc so every column
+  reads independently (it answers "where is this player / team", not
+  "who controlled this loc"); the exact seconds + percentage are in the
+  hover tooltip. Cell intensity is mapped through a sequential blue→red
+  colormap (`heatColor` / `HEAT_STOPS`, mirrored by the CSS
+  `.heatmap-legend-bar` gradient). Team identity is carried only by the
+  colored band above each column, which uses the canonical
+  `TEAM_COLORS`-by-`timelineState.teams` mapping shared with the rest of
+  the app (see the repo CLAUDE.md "Team colors" convention). The team
+  matrix is hidden for duels / single-team demos. Each matrix is drawn
+  entirely in one canvas (left gutter = loc names, top band = team bar +
+  rotated column names) and reuses `setupGraphCanvas` / `PLOT_BG_COLOR`
+  rather than the time-axis `renderSpansTimeline`. No extra analyzer
+  pass — both views read the same `locGraph` field and
   `demoInfo.{teams,players}`.
 
 ## Regenerating map geometry

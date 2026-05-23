@@ -1583,8 +1583,30 @@ table tbody tr:hover {
     width: 100%;
 }
 
-#locheatmap-canvas {
+#locheatmap-canvas,
+#locheatmap-team-canvas {
     display: block;
+}
+
+/* Sequential blue→red legend — gradient stops mirror HEAT_STOPS in app.js. */
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.heatmap-legend-bar {
+    width: 120px;
+    height: 10px;
+    border-radius: 2px;
+    background: linear-gradient(to right,
+        rgb(33, 80, 200) 0%,
+        rgb(40, 170, 220) 35%,
+        rgb(240, 205, 60) 65%,
+        rgb(220, 55, 45) 100%);
 }
 
 /* Diverging Health/Armor Graph */
