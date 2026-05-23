@@ -295,6 +295,34 @@ func TestColumnarLiIndexAlways(t *testing.T) {
 	}
 }
 
+// TestColumnarOmitsFieldlessPlayer: a player with no value for any
+// requested field (here a stats-less observer with only health, queried
+// for armor) is omitted from the columnar output, matching the row
+// builder — so the two layouts carry the same player set.
+func TestColumnarOmitsFieldlessPlayer(t *testing.T) {
+	r := &result.Result{
+		Streams: &result.Streams{
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
+			Players: []result.PlayerStream{
+				{Name: "fighter", Health: []result.ChangeI16{{T: 0, V: 100}}, Armor: []result.ChangeI16{{T: 0, V: 50}}, Spawns: []int32{0}},
+				{Name: "observer", Health: []result.ChangeI16{{T: 0, V: 100}}, Spawns: []int32{0}}, // no armor stream
+			},
+		},
+	}
+	cb, err := BucketsColumnar(r, BucketsOptions{WindowMs: 1000, Fields: []string{FieldArmor}})
+	if err != nil {
+		t.Fatalf("BucketsColumnar: %v", err)
+	}
+	if _, ok := cb.Players["observer"]; ok {
+		t.Fatalf("observer has no armor — should be omitted, got %v", cb.Players["observer"])
+	}
+	if _, ok := cb.Players["fighter"]; !ok {
+		t.Fatal("fighter has armor — should be present")
+	}
+	// And it must still match the row builder's player set.
+	assertParity(t, r, BucketsOptions{WindowMs: 1000, Fields: []string{FieldArmor}})
+}
+
 func TestColumnarEmpty(t *testing.T) {
 	cb, err := BucketsColumnar(nil, BucketsOptions{WindowMs: 50})
 	if err != nil {

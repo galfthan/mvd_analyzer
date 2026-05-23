@@ -231,7 +231,10 @@ func BucketsColumnar(r *result.Result, opts BucketsOptions) (*ColumnarBuckets, e
 }
 
 // buildColumnarPlayer fills one player's columns. Returns nil if the
-// player is never active over the grid.
+// player is never active over the grid, or if no requested field
+// produced any value (a stats-less observer) — the latter matches the
+// row builder, which omits a player whose reducePlayer yields nothing,
+// so column and row carry the same player set for any field selection.
 func buildColumnarPlayer(p *result.PlayerStream, fields []string, reds []Reducer, redNames []string, g bucketGrid) *ColumnarPlayer {
 	first, last := -1, -1
 	for i := 0; i < g.count; i++ {
@@ -270,6 +273,9 @@ func buildColumnarPlayer(p *result.PlayerStream, fields []string, reds []Reducer
 			}
 			cp.ValidFrom[f] = validFrom
 		}
+	}
+	if len(cp.Cols) == 0 {
+		return nil // no field data — row omits these too
 	}
 	return cp
 }
