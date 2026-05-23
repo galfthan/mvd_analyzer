@@ -295,36 +295,42 @@ pass:
 - The **movement graph** — a Cytoscape.js node/edge diagram with the
   filter / edge-mode / layout controls, driven by `initLocGraphView`
   and `buildOrRefreshCytoscape`.
-- The **Loc Heatmap** — a single loc-occupancy matrix built by
-  `buildLocHeatmap` / `renderHeatmapMatrix`. Rows are locs (busiest
-  first). The leading columns are the **teams** (every member's time
-  combined), followed by one column per **player** grouped by team, with
-  a separator between the two blocks. Each cell's intensity is the share
-  of that column's observed time spent in the loc, normalised to that
-  column's own busiest loc so every column reads independently (it
-  answers "where is this player / team", not "who controlled this loc");
-  the rounded share-% is stamped inside each roomy cell and the exact
-  seconds + percentage are in the hover tooltip. Intensity is mapped
-  through the **viridis** colormap (`heatColorRGB` / `HEAT_STOPS`,
-  mirrored by the CSS `.heatmap-legend-bar` gradient) — chosen for
-  red/green colour-vision-deficiency safety. Team identity is carried by
-  the colored band above each column, using the canonical
-  `TEAM_COLORS`-by-`timelineState.teams` mapping shared with the rest of
-  the app (see the repo CLAUDE.md "Team colors" convention). The team
-  columns / band are dropped for duels and single-team demos. It is
-  drawn entirely in one canvas (left gutter = loc names, top band = team
-  bar + rotated column names) and reuses `setupGraphCanvas` /
-  `PLOT_BG_COLOR` rather than the time-axis `renderSpansTimeline`.
-- **Region Control** — the region definition editor (`buildRegionConfig`,
-  group locs into named regions; save/load JSON) plus the per-region
-  control-state table (`displayRegionControlTable`). Moved here from the
-  Map tab; the live region *overlay* and *status* still render on the
-  Map. Still initialised by `initRegionControl` (called from
-  `initMapView`) and recomputed via the `recomputeRegionControl` WASM
-  bridge on edits. Table cells use the same viridis colormap
-  (`heatPctStyle`) with a contrast-aware ink; a small team-color swatch
-  on the team headers keeps the A/B identity legible now that cells are
-  no longer team-tinted.
+Two of the three (the Loc Heatmap and Region Control) share one canvas
+matrix renderer — `renderHeatmapMatrix` / `attachHeatmapTooltip` — fed a
+policy-free model (`{ rows:[{name,cells:[{i,p}]}], columns:[{label,team,
+teamIdx,…}], showBand, teamCols, tipHtml }`). Normalisation is baked into
+each cell's intensity `i` (0..1) by the `build*` function, so per-column
+vs per-row scaling lives in the data, not the renderer. Intensity maps
+through the **viridis** colormap (`heatColorRGB` / `HEAT_STOPS`, mirrored
+by the CSS `.heatmap-legend-bar` gradient) — chosen for red/green
+colour-vision-deficiency safety. Team identity is carried by the colored
+band above the columns, using the canonical
+`TEAM_COLORS`-by-`timelineState.teams` mapping shared with the rest of the
+app (see the repo CLAUDE.md "Team colors" convention).
+
+- The **movement graph** — a Cytoscape.js node/edge diagram with the
+  filter / edge-mode / layout controls, driven by `initLocGraphView`
+  and `buildOrRefreshCytoscape`.
+- The **Loc Heatmap** (`buildLocHeatmap`) — rows are locs (busiest
+  first); the leading columns are the **teams** (every member's time
+  combined), then one column per **player** grouped by team, with a
+  separator between the blocks. Cell intensity is that column's share of
+  its time in the loc, normalised **per column** to its own busiest loc
+  (sqrt-curved); the rounded share-% is stamped in each roomy cell. The
+  team columns / band are dropped for duels and single-team demos.
+- **Region Control** (`buildRegionHeatmap` / `renderRegionHeatmap`) — the
+  region definition editor (`buildRegionConfig`, group locs into named
+  regions; save/load JSON) plus the per-region control matrix: rows are
+  regions, columns are the seven control states (teamA control/weak,
+  contested, cont. weak, empty, teamB weak/control), with the team band
+  marking each team's columns. Moved here from the Map tab; the live
+  region *overlay* and *status* still render on the Map. Initialised by
+  `initRegionControl` (from `initMapView`) and recomputed through the
+  `recomputeRegionControl` WASM bridge on edits (`renderRegionControlFromGo`).
+  Cells are normalised **per region** to that region's busiest control
+  state (Empty excluded — it is filler, not a control state, and would
+  swamp the scale) so each row spans the full colormap; the printed %
+  stays the absolute match fraction.
 
 ## Regenerating map geometry
 

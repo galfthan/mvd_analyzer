@@ -1584,7 +1584,7 @@ table tbody tr:hover {
 }
 
 #locheatmap-canvas,
-#locheatmap-team-canvas {
+#region-heatmap-canvas {
     display: block;
 }
 
@@ -2719,23 +2719,6 @@ th.sortable.sort-desc::after {
 .region-config-actions button:hover {
     border-color: var(--accent-cyan);
     color: #fff;
-}
-
-.region-control-table {
-    font-size: 0.8rem;
-}
-
-.region-control-table td {
-    text-align: center;
-}
-
-.rc-team-swatch {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 2px;
-    margin-right: 5px;
-    vertical-align: middle;
 }
 
 .map-legend h4 {

@@ -667,30 +667,24 @@
                     </div>
                 </div>
 
-                <!-- Region Control (definition editor + per-region control table) -->
+                <!-- Region Control (definition editor + per-region control matrix) -->
                 <div class="panel" id="region-control-panel" style="display: none;">
                     <h3>Region Control</h3>
                     <div class="locheatmap-desc">
-                        Group locs into named regions; the table shows what fraction of
-                        the match each region spent under each control state. Cells use
-                        the same viridis scale as the heatmap above.
+                        Group locs into named regions. Rows = regions, columns = control
+                        states (the team bands above mark which team's columns are which).
+                        Cell color is normalised <em>per region</em> (brightest = that
+                        region's dominant control state, Empty excluded), so compare colors
+                        across a row — not down a column. The printed % is the absolute
+                        match fraction. Hover for the state name.
                     </div>
                     <div id="region-config" class="region-config"></div>
-                    <table class="stats-table region-control-table" id="region-control-table">
-                        <thead>
-                            <tr>
-                                <th>Region</th>
-                                <th id="rc-teamA-hdr" title="Team has player with RL/LG, opponent doesn't">-</th>
-                                <th id="rc-teamA-weak-hdr" title="Team has player without RL/LG, opponent absent">- weak</th>
-                                <th title="Both teams present, each with at least one RL/LG holder">Contested</th>
-                                <th title="Both teams present, neither has any RL/LG">Cont. weak</th>
-                                <th title="No players in region">Empty</th>
-                                <th id="rc-teamB-weak-hdr" title="Team has player without RL/LG, opponent absent">- weak</th>
-                                <th id="rc-teamB-hdr" title="Team has player with RL/LG, opponent doesn't">-</th>
-                            </tr>
-                        </thead>
-                        <tbody id="region-control-body"></tbody>
-                    </table>
+                    <div class="heatmap-legend">
+                        <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
+                    </div>
+                    <div class="locheatmap-outer">
+                        <canvas id="region-heatmap-canvas"></canvas>
+                    </div>
                 </div>
             </div>
 
