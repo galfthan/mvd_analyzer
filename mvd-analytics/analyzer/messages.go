@@ -11,6 +11,15 @@ type MessagesAnalyzer struct {
 	ctx    *Context
 	core   *CoreOutputs
 	events []MatchEvent
+	seen   map[chatKey]struct{} // dedup for per-recipient chat copies
+}
+
+// chatKey identifies a distinct chat/teamsay line for deduplication.
+type chatKey struct {
+	time    int32
+	typ     string
+	player  string
+	message string
 }
 
 // UseCoreOutputs is part of the CoreConsumer contract — Messages
@@ -22,6 +31,7 @@ func (a *MessagesAnalyzer) UseCoreOutputs(co *CoreOutputs) { a.core = co }
 func NewMessagesAnalyzer() *MessagesAnalyzer {
 	return &MessagesAnalyzer{
 		events: make([]MatchEvent, 0),
+		seen:   make(map[chatKey]struct{}),
 	}
 }
 
@@ -50,7 +60,7 @@ func (a *MessagesAnalyzer) handlePrint(e *events.PrintEvent) error {
 	if e.Level == events.PrintChat {
 		// Parse chat message format: "name: message" or "(team) name: message"
 		event := a.parseChatMessage(msg, e.Time)
-		if event != nil {
+		if event != nil && !a.seenChat(event) {
 			a.appendEvent(event)
 		}
 		return nil
@@ -78,6 +88,31 @@ func (a *MessagesAnalyzer) appendEvent(ev *MatchEvent) {
 		ev.MessageClean = cleaned
 	}
 	a.events = append(a.events, *ev)
+}
+
+// seenChat reports whether an identical chat/teamsay line has already been
+// recorded, registering it on first sight. KTX handles say/say_team in QC
+// (ClientSay, ktx/src/g_cmd.c) and sprints the line to each eligible recipient
+// individually; every G_sprint becomes a dem_single svc_print in the MVD
+// (SV_ClientPrintf, mvdsv/src/sv_send.c), so the parser faithfully emits one
+// PrintEvent per recipient. Public say reaches every client and duplicates the
+// most; say_team only teammates. All copies share an identical wire-ms, so an
+// exact (time, type, player, message) match is a safe duplicate — a human
+// cannot send the same line twice in the same millisecond. This is the
+// CLAUDE.md filter exception: a chat reader cannot itself tell N identical
+// copies from N distinct messages. (Edge: KTX sends the colored text to
+// colour-capable clients and a stripped copy to the rest — g_cmd.c:558 — so a
+// mixed lobby can leave one colored + one stripped survivor. That is rare on
+// modern ezquake and never drops a real message, so we accept it.) Frags are
+// not routed here; obituaries arrive as a single broadcast copy and stay
+// verbatim.
+func (a *MessagesAnalyzer) seenChat(ev *MatchEvent) bool {
+	k := chatKey{ev.Time, ev.Type, ev.Player, ev.Message}
+	if _, ok := a.seen[k]; ok {
+		return true
+	}
+	a.seen[k] = struct{}{}
+	return false
 }
 
 // parseChatMessage parses a chat message and extracts player, team, and text

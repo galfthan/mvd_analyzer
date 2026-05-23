@@ -9642,22 +9642,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rcao: took {\u0026cf00ra\u0026cfff} [{quad.up}]",
-        "messageClean": "cao: took ra quad.up",
-        "player": "wd.cao",
-        "team": "wd",
-        "time": 713,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rcao: took {\u0026cf00ra\u0026cfff} [{quad.up}]",
-        "messageClean": "cao: took ra quad.up",
-        "player": "wd.cao",
-        "team": "wd",
-        "time": 713,
-        "type": "teamsay"
-      },
-      {
         "message": "wd.dilbert was gibbed by wd.char's rocket",
         "player": "wd.char",
         "team": "wd",
@@ -10246,38 +10230,6 @@
         "messageClean": "cao: took ra ra",
         "player": "wd.cao",
         "team": "wd",
-        "time": 177130,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rcao: took {\u0026cf00ra\u0026cfff} [{ra}]",
-        "messageClean": "cao: took ra ra",
-        "player": "wd.cao",
-        "team": "wd",
-        "time": 177130,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rcao: took {\u0026cf00ra\u0026cfff} [{ra}]",
-        "messageClean": "cao: took ra ra",
-        "player": "wd.cao",
-        "team": "wd",
-        "time": 177312,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rcao: took {\u0026cf00ra\u0026cfff} [{ra}]",
-        "messageClean": "cao: took ra ra",
-        "player": "wd.cao",
-        "team": "wd",
-        "time": 177312,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rcao: took {\u0026cf00ra\u0026cfff} [{ra}]",
-        "messageClean": "cao: took ra ra",
-        "player": "wd.cao",
-        "team": "wd",
         "time": 177312,
         "type": "teamsay"
       },
@@ -10314,38 +10266,6 @@
         "player": "wd.cao",
         "team": "wd",
         "time": 180465,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rcao: get {quad}",
-        "messageClean": "cao: get quad",
-        "player": "wd.cao",
-        "team": "wd",
-        "time": 180465,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rcao: get {quad}",
-        "messageClean": "cao: get quad",
-        "player": "wd.cao",
-        "team": "wd",
-        "time": 180465,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rcao: get {quad}",
-        "messageClean": "cao: get quad",
-        "player": "wd.cao",
-        "team": "wd",
-        "time": 180650,
-        "type": "teamsay"
-      },
-      {
-        "message": "\rcao: get {quad}",
-        "messageClean": "cao: get quad",
-        "player": "wd.cao",
-        "team": "wd",
-        "time": 180650,
         "type": "teamsay"
       },
       {
@@ -10598,14 +10518,6 @@
         "type": "frag",
         "victim": "wd.dilbert",
         "weapon": "rl"
-      },
-      {
-        "message": "\rover{:} get {quad}",
-        "messageClean": "over: get quad",
-        "player": "psy*overon",
-        "team": "pys",
-        "time": 245130,
-        "type": "teamsay"
       },
       {
         "message": "\rover{:} get {quad}",
@@ -11407,14 +11319,6 @@
         "type": "teamsay"
       },
       {
-        "message": "\rcao: took {\u0026cf00ra\u0026cfff} [{ra}]",
-        "messageClean": "cao: took ra ra",
-        "player": "wd.cao",
-        "team": "wd",
-        "time": 472194,
-        "type": "teamsay"
-      },
-      {
         "message": "wd.char rides psy*overon's rocket",
         "player": "psy*overon",
         "team": "pys",
@@ -11647,34 +11551,6 @@
         "type": "frag",
         "victim": "teammate",
         "weapon": "teamkill"
-      },
-      {
-        "message": "boa",
-        "player": "psy*overon",
-        "team": "pys",
-        "time": 555719,
-        "type": "chat"
-      },
-      {
-        "message": "boa",
-        "player": "psy*overon",
-        "team": "pys",
-        "time": 555719,
-        "type": "chat"
-      },
-      {
-        "message": "boa",
-        "player": "psy*overon",
-        "team": "pys",
-        "time": 555719,
-        "type": "chat"
-      },
-      {
-        "message": "boa",
-        "player": "psy*overon",
-        "team": "pys",
-        "time": 555719,
-        "type": "chat"
       },
       {
         "message": "boa",
