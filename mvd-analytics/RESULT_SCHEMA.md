@@ -365,7 +365,7 @@ Every timestamped field in this schema — `PositionTrack.T`,
 `FragStreakEvent.Time/EndTime/Duration`, `MatchEvent.Time`,
 `FragEntry.Time`, `BackpackDrop.Time`,
 `WeaponPickup.Time/NextDeathTime/DropTime`,
-`ItemPhase.AvailableFrom/TakenAt/RespawnAt`, `HighResBucket.T` —
+`ItemPhase.AvailableFrom/TakenAt/RespawnAt` —
 is stored as `int32` integer milliseconds. JSON keys are unchanged;
 external consumers reading these as seconds must scale by `* 0.001`.
 The view-layer query API (`view.Buckets`, `view.Events`,
