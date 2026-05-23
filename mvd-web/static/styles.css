@@ -1588,7 +1588,7 @@ table tbody tr:hover {
     display: block;
 }
 
-/* Sequential blue→red legend — gradient stops mirror HEAT_STOPS in app.js. */
+/* Sequential viridis legend — gradient stops mirror HEAT_STOPS in app.js. */
 .heatmap-legend {
     display: flex;
     align-items: center;
@@ -1603,10 +1603,11 @@ table tbody tr:hover {
     height: 10px;
     border-radius: 2px;
     background: linear-gradient(to right,
-        rgb(33, 80, 200) 0%,
-        rgb(40, 170, 220) 35%,
-        rgb(240, 205, 60) 65%,
-        rgb(220, 55, 45) 100%);
+        rgb(68, 1, 84) 0%,
+        rgb(59, 82, 139) 25%,
+        rgb(33, 145, 140) 50%,
+        rgb(94, 201, 98) 75%,
+        rgb(253, 231, 37) 100%);
 }
 
 /* Diverging Health/Armor Graph */
@@ -2726,6 +2727,15 @@ th.sortable.sort-desc::after {
 
 .region-control-table td {
     text-align: center;
+}
+
+.rc-team-swatch {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin-right: 5px;
+    vertical-align: middle;
 }
 
 .map-legend h4 {

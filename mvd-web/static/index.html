@@ -582,25 +582,6 @@
                         <button id="map-reset-view" title="Reset pan / zoom">Reset view</button>
                         <button id="map-fullscreen" title="Toggle fullscreen">Fullscreen</button>
                     </div>
-                    <div id="region-control-panel" style="display: none;">
-                        <h4>Region Control</h4>
-                        <div id="region-config" class="region-config"></div>
-                        <table class="stats-table region-control-table" id="region-control-table">
-                            <thead>
-                                <tr>
-                                    <th>Region</th>
-                                    <th id="rc-teamA-hdr" title="Team has player with RL/LG, opponent doesn't">-</th>
-                                    <th id="rc-teamA-weak-hdr" title="Team has player without RL/LG, opponent absent">- weak</th>
-                                    <th title="Both teams present, each with at least one RL/LG holder">Contested</th>
-                                    <th title="Both teams present, neither has any RL/LG">Cont. weak</th>
-                                    <th title="No players in region">Empty</th>
-                                    <th id="rc-teamB-weak-hdr" title="Team has player without RL/LG, opponent absent">- weak</th>
-                                    <th id="rc-teamB-hdr" title="Team has player with RL/LG, opponent doesn't">-</th>
-                                </tr>
-                            </thead>
-                            <tbody id="region-control-body"></tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
 
@@ -665,30 +646,15 @@
                     </div>
                 </div>
 
-                <!-- Loc Heatmap — per team -->
-                <div class="panel locheatmap-panel" id="locheatmap-team-panel" style="display: none;">
-                    <h3>Loc Heatmap — Teams</h3>
-                    <div class="locheatmap-desc">
-                        Rows = locs, columns = teams (all players' time combined). Cell color =
-                        share of that team's time spent in the loc (normalised to the team's
-                        busiest loc). Hover for exact time.
-                    </div>
-                    <div class="heatmap-legend">
-                        <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
-                    </div>
-                    <div class="locheatmap-outer">
-                        <canvas id="locheatmap-team-canvas"></canvas>
-                    </div>
-                </div>
-
-                <!-- Loc Heatmap — per player -->
+                <!-- Loc Heatmap -->
                 <div class="panel locheatmap-panel" id="locheatmap-panel" style="display: none;">
-                    <h3>Loc Heatmap — Players</h3>
+                    <h3>Loc Heatmap</h3>
                     <div class="locheatmap-desc">
-                        Rows = locs, columns = players grouped by team. Cell color =
-                        share of that player's time spent in the loc (normalised to their
-                        busiest loc). The team color sits on the bar above each group;
-                        cells use a blue→red scale. Hover for exact time.
+                        Rows = locs. The first columns are the teams (all players'
+                        time combined), then one column per player grouped by team.
+                        Each cell shows the share of that column's time spent in the
+                        loc, normalised to its own busiest loc. The team color sits on
+                        the bar above each group; cell intensity uses the viridis scale.
                     </div>
                     <div class="heatmap-legend">
                         <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
@@ -699,6 +665,32 @@
                     <div id="locheatmap-no-data" class="map-no-data" style="display:none">
                         <p>No loc data available for this demo.</p>
                     </div>
+                </div>
+
+                <!-- Region Control (definition editor + per-region control table) -->
+                <div class="panel" id="region-control-panel" style="display: none;">
+                    <h3>Region Control</h3>
+                    <div class="locheatmap-desc">
+                        Group locs into named regions; the table shows what fraction of
+                        the match each region spent under each control state. Cells use
+                        the same viridis scale as the heatmap above.
+                    </div>
+                    <div id="region-config" class="region-config"></div>
+                    <table class="stats-table region-control-table" id="region-control-table">
+                        <thead>
+                            <tr>
+                                <th>Region</th>
+                                <th id="rc-teamA-hdr" title="Team has player with RL/LG, opponent doesn't">-</th>
+                                <th id="rc-teamA-weak-hdr" title="Team has player without RL/LG, opponent absent">- weak</th>
+                                <th title="Both teams present, each with at least one RL/LG holder">Contested</th>
+                                <th title="Both teams present, neither has any RL/LG">Cont. weak</th>
+                                <th title="No players in region">Empty</th>
+                                <th id="rc-teamB-weak-hdr" title="Team has player without RL/LG, opponent absent">- weak</th>
+                                <th id="rc-teamB-hdr" title="Team has player with RL/LG, opponent doesn't">-</th>
+                            </tr>
+                        </thead>
+                        <tbody id="region-control-body"></tbody>
+                    </table>
                 </div>
             </div>
 

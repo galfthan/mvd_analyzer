@@ -2671,7 +2671,6 @@ function resetUIToCleanState() {
     setHTML('locgraph-canvas', '');
     hide('locgraph-no-data');
     hide('locheatmap-panel');
-    hide('locheatmap-team-panel');
 
     // Key moments
     setHTML('keymoments-body', '');
@@ -5491,13 +5490,14 @@ function displayRegionControlTable(regions, stats) {
     if (firstStats) {
         const teamA = firstStats.teamA || 'Team A';
         const teamB = firstStats.teamB || 'Team B';
-        document.getElementById('rc-teamA-hdr').textContent = teamA;
-        document.getElementById('rc-teamA-weak-hdr').textContent = teamA + ' weak';
-        document.getElementById('rc-teamB-hdr').textContent = teamB;
-        document.getElementById('rc-teamB-weak-hdr').textContent = teamB + ' weak';
+        // Cells now carry the viridis intensity (not team tint), so a small
+        // team-color swatch on the header keeps the A/B identity legible.
+        const sw = (hex) => `<span class="rc-team-swatch" style="background:${hex}"></span>`;
+        document.getElementById('rc-teamA-hdr').innerHTML = sw(TEAM_COLORS[0]) + escapeHtml(teamA);
+        document.getElementById('rc-teamA-weak-hdr').innerHTML = sw(TEAM_COLORS[0]) + escapeHtml(teamA) + ' weak';
+        document.getElementById('rc-teamB-hdr').innerHTML = sw(TEAM_COLORS[1]) + escapeHtml(teamB);
+        document.getElementById('rc-teamB-weak-hdr').innerHTML = sw(TEAM_COLORS[1]) + escapeHtml(teamB) + ' weak';
     }
-
-
 
     for (const region of regions) {
         const s = stats[region.name];
@@ -5505,13 +5505,13 @@ function displayRegionControlTable(regions, stats) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${escapeHtml(region.name)}</strong></td>
-            <td style="background: ${cellBg(TEAM_COLORS[0], s.teamAControl)}">${s.teamAControl}%</td>
-            <td style="background: ${cellBg(TEAM_COLORS[0], s.teamAWeakControl, 0.5)}">${s.teamAWeakControl}%</td>
-            <td style="background: ${cellBg('#888', s.contested)}">${s.contested}%</td>
-            <td style="background: ${cellBg('#888', s.weakContested, 0.5)}">${s.weakContested}%</td>
-            <td>${s.empty}%</td>
-            <td style="background: ${cellBg(TEAM_COLORS[1], s.teamBWeakControl, 0.5)}">${s.teamBWeakControl}%</td>
-            <td style="background: ${cellBg(TEAM_COLORS[1], s.teamBControl)}">${s.teamBControl}%</td>
+            <td${heatPctStyle(s.teamAControl)}>${s.teamAControl}%</td>
+            <td${heatPctStyle(s.teamAWeakControl)}>${s.teamAWeakControl}%</td>
+            <td${heatPctStyle(s.contested)}>${s.contested}%</td>
+            <td${heatPctStyle(s.weakContested)}>${s.weakContested}%</td>
+            <td${heatPctStyle(s.empty)}>${s.empty}%</td>
+            <td${heatPctStyle(s.teamBWeakControl)}>${s.teamBWeakControl}%</td>
+            <td${heatPctStyle(s.teamBControl)}>${s.teamBControl}%</td>
         `;
         tbody.appendChild(tr);
     }
@@ -5577,14 +5577,13 @@ function loadRegionConfig(file) {
     reader.readAsText(file);
 }
 
-function cellBg(color, pct, intensityScale) {
-    if (!pct || pct <= 0) return 'transparent';
-    // Parse hex color to RGB
-    const r = parseInt(color.slice(1, 3), 16);
-    const g = parseInt(color.slice(3, 5), 16);
-    const b = parseInt(color.slice(5, 7), 16);
-    const alpha = Math.min(0.4, (pct / 100) * 0.6) * (intensityScale || 1);
-    return `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(2)})`;
+// Inline `style` attribute for a region-control percentage cell — viridis fill
+// (same colormap as the loc heatmap) with a contrast-aware ink. Empty cells get
+// no style so they stay transparent on the dark table background.
+function heatPctStyle(pct) {
+    if (!pct || pct <= 0) return '';
+    const rgb = heatColorRGB(pct / 100);
+    return ` style="background: rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}); color: ${contrastInk(rgb)}"`;
 }
 
 // Look up region control state at a given time by indexing into the
@@ -7779,57 +7778,71 @@ function renderLocGraph() {
 
 // ─── Loc Heatmap ─────────────────────────────────────────────────────────────
 //
-// Two loc-occupancy matrices living in the loc-graph tab: one with a column
-// per player (grouped by team), one with a column per team (every player's
-// time combined). Rows are locs (busiest first). Each cell's intensity is the
-// share of that column's observed time spent in the loc, normalised to that
-// column's busiest loc so every column reads independently — the question it
-// answers is "where is this player / team", not "who controlled this loc". The
-// raw seconds + percentage live in the hover tooltip.
+// A single loc-occupancy matrix living in the loc-graph tab. Rows are locs
+// (busiest first); the leading columns are the teams (every member's time
+// combined), then one column per player grouped by team. Each cell's intensity
+// is the share of that column's observed time spent in the loc, normalised to
+// that column's busiest loc so every column reads independently — the question
+// it answers is "where is this player / team", not "who controlled this loc".
+// The rounded share-% is stamped inside roomy cells; full seconds + percentage
+// live in the hover tooltip.
 //
-// Cell intensity is mapped through a sequential blue→red colormap (heatColor);
-// team identity is carried only by the colored band above each column, which
-// uses the canonical TEAM_COLORS-by-timelineState.teams mapping shared with the
-// Summary / scoreboard / map (see CLAUDE.md "Team colors").
+// Cell intensity is mapped through the viridis colormap (heatColorRGB), chosen
+// for red/green colour-vision-deficiency safety. Team identity is carried only
+// by the colored band above each column, which uses the canonical
+// TEAM_COLORS-by-timelineState.teams mapping shared with the Summary /
+// scoreboard / map (see CLAUDE.md "Team colors").
 //
 // All data comes from result.locGraph (per-player time-spent baked onto every
-// node) and result.demoInfo (team grouping) — no extra analyzer pass. Each
-// matrix is drawn in one canvas (left gutter = loc names, top band = team bar +
-// rotated column names) so headers stay aligned with cells at any dpr; it
-// reuses setupGraphCanvas / PLOT_BG_COLOR rather than renderSpansTimeline,
-// which is a time-axis renderer and doesn't fit a discrete-column matrix.
+// node) and result.demoInfo (team grouping) — no extra analyzer pass. It is
+// drawn in one canvas (left gutter = loc names, top band = team bar + rotated
+// column names) so headers stay aligned with cells at any dpr; it reuses
+// setupGraphCanvas / PLOT_BG_COLOR rather than renderSpansTimeline, which is a
+// time-axis renderer and doesn't fit a discrete-column matrix.
 
-const LH_ROW_H = 16;          // per-loc row height (CSS px)
+const LH_ROW_H = 19;          // per-loc row height (CSS px) — fits an in-cell %
 const LH_LEFT_GUTTER = 110;   // loc-name column width (CSS px)
 const LH_TEAM_BAND = 16;      // team color bar height (CSS px)
 const LH_PLAYER_BAND = 88;    // rotated column-name band height (CSS px)
 
-// Sequential blue→red colormap stops [t, [r,g,b]]. Kept in sync with the CSS
-// gradient legend (.heatmap-legend-bar) in styles.css.
+// Sequential colormap stops [t, [r,g,b]] — viridis. Chosen because it is
+// perceptually uniform and safe for red/green colour-vision deficiency (no
+// red↔green crossover; intensity reads monotonically in greyscale too). Kept
+// in sync with the CSS gradient legend (.heatmap-legend-bar) in styles.css.
 const HEAT_STOPS = [
-    [0.00, [ 33,  80, 200]], // blue
-    [0.35, [ 40, 170, 220]], // cyan
-    [0.65, [240, 205,  60]], // yellow
-    [1.00, [220,  55,  45]], // red
+    [0.00, [ 68,   1,  84]], // deep purple
+    [0.25, [ 59,  82, 139]], // blue
+    [0.50, [ 33, 145, 140]], // teal
+    [0.75, [ 94, 201,  98]], // green
+    [1.00, [253, 231,  37]], // yellow
 ];
 
-function heatColor(t) {
+function heatColorRGB(t) {
     t = Math.max(0, Math.min(1, t));
     for (let i = 1; i < HEAT_STOPS.length; i++) {
         if (t <= HEAT_STOPS[i][0]) {
             const [t0, c0] = HEAT_STOPS[i - 1];
             const [t1, c1] = HEAT_STOPS[i];
             const f = (t - t0) / (t1 - t0 || 1);
-            return `rgb(${Math.round(c0[0] + (c1[0] - c0[0]) * f)}, ${Math.round(c0[1] + (c1[1] - c0[1]) * f)}, ${Math.round(c0[2] + (c1[2] - c0[2]) * f)})`;
+            return [
+                Math.round(c0[0] + (c1[0] - c0[0]) * f),
+                Math.round(c0[1] + (c1[1] - c0[1]) * f),
+                Math.round(c0[2] + (c1[2] - c0[2]) * f),
+            ];
         }
     }
-    const last = HEAT_STOPS[HEAT_STOPS.length - 1][1];
-    return `rgb(${last[0]}, ${last[1]}, ${last[2]})`;
+    return HEAT_STOPS[HEAT_STOPS.length - 1][1].slice();
 }
 
-// Last-rendered layout for each heatmap's canvas hover tooltip. Coords in CSS px.
+// Readable text color over an [r,g,b] fill — dark ink on light cells, white
+// on dark ones (Rec. 601 luma).
+function contrastInk(rgb) {
+    const lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+    return lum > 150 ? '#10131f' : '#f0f0f0';
+}
+
+// Last-rendered layout for the heatmap canvas hover tooltip. Coords in CSS px.
 const locHeatmapHitState = { rows: [], columns: [], leftGutter: 0, top: 0, rowH: 0, colW: 0 };
-const locTeamHeatmapHitState = { rows: [], columns: [], leftGutter: 0, top: 0, rowH: 0, colW: 0 };
 
 // Canonical team order: TEAM_COLORS is indexed by position in
 // timelineState.teams (frag-sorted, set in displayResults) so the band colors
@@ -7852,11 +7865,13 @@ function heatmapColMaxFrac(rows, columns) {
     });
 }
 
-// Build a loc-occupancy matrix for the given mode ('player' | 'team').
-// Returns { rows:[{name, cells:[sec,...]}], columns:[{label, team, teamIdx, total}],
-// colMaxFrac, showBand, pctSuffix, showTeamLine } or null when there's nothing
-// to show.
-function buildLocHeatmap(result, mode) {
+// Build the combined loc-occupancy matrix. Columns are the team aggregates
+// first (every member's time combined) then one per player grouped by team;
+// rows are locs (busiest first). Each column carries a `members` list so a cell
+// value is uniformly sum(byPlayer[m]) — a player column just has one member.
+// `kind` ('team' | 'player') drives the tooltip wording. Returns null when
+// there's nothing to show; teamCols is 0 for duels / single-team demos.
+function buildLocHeatmap(result) {
     const graph = result && result.locGraph;
     if (!graph || !graph.locs || graph.locs.length === 0) return null;
     const players = (result.demoInfo && result.demoInfo.players) || [];
@@ -7881,65 +7896,58 @@ function buildLocHeatmap(result, mode) {
     if (baseLocs.length === 0) return null;
 
     const isDuel = players.length > 0 && players.every(p => p.team === p.name);
+    const hasTeams = !isDuel && teams.length >= 2 && !(teams.length === 1 && teams[0] === '');
 
-    let columns, rows, pctSuffix, showBand, showTeamLine;
-    if (mode === 'team') {
-        // One column per team, every member's time combined. Off for duels and
-        // single-team demos, where it would just duplicate the player matrix.
-        if (isDuel || teams.length < 2 || (teams.length === 1 && teams[0] === '')) return null;
-        columns = teams.map(t => {
+    const columns = [];
+
+    // Leading team-aggregate columns (skipped for duels / single team).
+    if (hasTeams) {
+        for (const t of teams) {
             const members = players
                 .filter(p => (p.team || '') === t && (playerTotal.get(p.name) || 0) > 0)
                 .map(p => p.name);
             const total = members.reduce((s, p) => s + (playerTotal.get(p) || 0), 0);
-            return { label: t, team: t, teamIdx: teamIdxOf(t), members, total };
-        }).filter(c => c.total > 0);
-        if (columns.length < 2) return null;
-        rows = baseLocs.map(n => ({
-            name: n.name,
-            cells: columns.map(c => c.members.reduce((s, p) => s + (n.byPlayer[p] || 0), 0)),
-        }));
-        pctSuffix = 'of team time';
-        showBand = true;
-        showTeamLine = false;
-    } else {
-        // One column per player, grouped by canonical team order; drop anyone
-        // with no loc time (spectators / no samples).
-        const teamOfPlayer = new Map();
-        for (const p of players) if (p.name) teamOfPlayer.set(p.name, p.team || '');
-        columns = [];
-        const seen = new Set();
-        for (const team of teams) {
-            for (const p of players) {
-                if (!p.name || seen.has(p.name)) continue;
-                if ((p.team || '') !== team) continue;
-                const total = playerTotal.get(p.name) || 0;
-                if (total <= 0) continue;
-                columns.push({ label: p.name, team, teamIdx: teamIdxOf(team), total });
-                seen.add(p.name);
-            }
+            if (total > 0) columns.push({ kind: 'team', label: t, team: t, teamIdx: teamIdxOf(t), members, total });
         }
-        // Players present in loc data but not in demoInfo.players (rare) trail.
-        for (const [p, total] of playerTotal) {
-            if (seen.has(p) || total <= 0) continue;
-            const team = teamOfPlayer.get(p) || '';
-            columns.push({ label: p, team, teamIdx: teamIdxOf(team), total });
-            seen.add(p);
-        }
-        if (columns.length === 0) return null;
-        rows = baseLocs.map(n => ({
-            name: n.name,
-            cells: columns.map(c => n.byPlayer[c.label] || 0),
-        }));
-        pctSuffix = 'of their time';
-        showBand = !isDuel;
-        showTeamLine = !isDuel;
     }
+    const teamCols = columns.length;
 
+    // Per-player columns, grouped by canonical team order; drop anyone with no
+    // loc time (spectators / no samples).
+    const teamOfPlayer = new Map();
+    for (const p of players) if (p.name) teamOfPlayer.set(p.name, p.team || '');
+    const seen = new Set();
+    for (const team of teams) {
+        for (const p of players) {
+            if (!p.name || seen.has(p.name)) continue;
+            if ((p.team || '') !== team) continue;
+            const total = playerTotal.get(p.name) || 0;
+            if (total <= 0) continue;
+            columns.push({ kind: 'player', label: p.name, team, teamIdx: teamIdxOf(team), members: [p.name], total });
+            seen.add(p.name);
+        }
+    }
+    // Players present in loc data but not in demoInfo.players (rare) trail.
+    for (const [p, total] of playerTotal) {
+        if (seen.has(p) || total <= 0) continue;
+        const team = teamOfPlayer.get(p) || '';
+        columns.push({ kind: 'player', label: p, team, teamIdx: teamIdxOf(team), members: [p], total });
+        seen.add(p);
+    }
+    if (columns.length === 0) return null;
+
+    let rows = baseLocs.map(n => ({
+        name: n.name,
+        cells: columns.map(c => c.members.reduce((s, p) => s + (n.byPlayer[p] || 0), 0)),
+    }));
     rows = rows.filter(r => r.cells.some(v => v > 0));
     if (rows.length === 0) return null;
 
-    return { rows, columns, colMaxFrac: heatmapColMaxFrac(rows, columns), showBand, pctSuffix, showTeamLine };
+    return {
+        rows, columns, teamCols,
+        colMaxFrac: heatmapColMaxFrac(rows, columns),
+        showBand: hasTeams,
+    };
 }
 
 // Clip text to a pixel width, appending an ellipsis when truncated.
@@ -7952,38 +7960,26 @@ function truncateToWidth(ctx, text, maxW) {
 }
 
 function renderLocHeatmap() {
-    renderHeatmapPanel('player', 'locheatmap-panel', 'locheatmap-canvas', 'locheatmap-no-data', locHeatmapHitState);
-    renderHeatmapPanel('team', 'locheatmap-team-panel', 'locheatmap-team-canvas', null, locTeamHeatmapHitState);
-}
-
-function renderHeatmapPanel(mode, panelId, canvasId, noDataId, hitState) {
-    const panel = document.getElementById(panelId);
+    const panel = document.getElementById('locheatmap-panel');
     if (!panel) return;
-    const data = locGraphState.result ? buildLocHeatmap(locGraphState.result, mode) : null;
-    const noData = noDataId ? document.getElementById(noDataId) : null;
+    const data = locGraphState.result ? buildLocHeatmap(locGraphState.result) : null;
+    const noData = document.getElementById('locheatmap-no-data');
     if (!data) {
-        // The player matrix keeps its panel + empty-state visible whenever the
-        // tab has a loc graph; the team matrix simply hides when there's no
-        // team split to show.
-        if (mode === 'team') {
-            panel.style.display = 'none';
-        } else {
-            const hasGraph = !!(locGraphState.graph && locGraphState.graph.locs && locGraphState.graph.locs.length);
-            panel.style.display = hasGraph ? '' : 'none';
-            if (noData) noData.style.display = hasGraph ? 'block' : 'none';
-        }
-        hitState.rows = [];
-        hitState.columns = [];
+        const hasGraph = !!(locGraphState.graph && locGraphState.graph.locs && locGraphState.graph.locs.length);
+        panel.style.display = hasGraph ? '' : 'none';
+        if (noData) noData.style.display = hasGraph ? 'block' : 'none';
+        locHeatmapHitState.rows = [];
+        locHeatmapHitState.columns = [];
         return;
     }
     panel.style.display = '';
     if (noData) noData.style.display = 'none';
-    renderHeatmapMatrix(canvasId, data, hitState);
-    attachHeatmapTooltip(canvasId, hitState);
+    renderHeatmapMatrix('locheatmap-canvas', data, locHeatmapHitState);
+    attachHeatmapTooltip('locheatmap-canvas', locHeatmapHitState);
 }
 
 function renderHeatmapMatrix(canvasId, data, hitState) {
-    const { rows, columns, colMaxFrac, showBand } = data;
+    const { rows, columns, colMaxFrac, showBand, teamCols } = data;
     const teamBandCss = showBand ? LH_TEAM_BAND : 0;
     const topCss = teamBandCss + LH_PLAYER_BAND;
     const cssHeight = topCss + rows.length * LH_ROW_H;
@@ -8005,15 +8001,32 @@ function renderHeatmapMatrix(canvasId, data, hitState) {
     ctx.fillRect(0, 0, W, graphH);
 
     // Cells: empty share stays background; otherwise sqrt(share / column-max)
-    // through the blue→red colormap (sqrt lifts the many small shares).
+    // through the viridis colormap (sqrt lifts the many small shares). When the
+    // cell is roomy, stamp the rounded share-% in a contrast-aware ink.
+    const cellFont = `${Math.round(9 * dpr)}px sans-serif`;
+    const minTextW = Math.round(16 * dpr);
+    const minTextH = Math.round(15 * dpr);
     rows.forEach((row, ri) => {
         const y = top + ri * rowH;
         columns.forEach((col, ci) => {
             const x = leftGutter + ci * colW;
+            const cw = Math.max(1, Math.round(colW) - gap);
             const sec = row.cells[ci] || 0;
             const norm = (col.total > 0 && colMaxFrac[ci] > 0) ? (sec / col.total) / colMaxFrac[ci] : 0;
-            ctx.fillStyle = sec > 0 ? heatColor(Math.sqrt(norm)) : PLOT_BG_COLOR;
-            ctx.fillRect(Math.round(x), y, Math.max(1, Math.round(colW) - gap), rowH - gap);
+            const rgb = sec > 0 ? heatColorRGB(Math.sqrt(norm)) : null;
+            ctx.fillStyle = rgb ? `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})` : PLOT_BG_COLOR;
+            ctx.fillRect(Math.round(x), y, cw, rowH - gap);
+
+            if (!rgb) return;
+            const pct = (sec / col.total) * 100;
+            if (pct < 0.5 || cw < minTextW || rowH < minTextH) return;
+            const label = `${Math.round(pct)}%`;
+            ctx.font = cellFont;
+            if (ctx.measureText(label).width > cw - Math.round(3 * dpr)) return;
+            ctx.fillStyle = contrastInk(rgb);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, Math.round(x) + cw / 2, y + (rowH - gap) / 2);
         });
     });
 
@@ -8051,13 +8064,14 @@ function renderHeatmapMatrix(canvasId, data, hitState) {
     // Column names, rotated to read bottom-to-top, centered over each column.
     // After rotate(-90°) the local +x axis points up the screen, so textAlign
     // 'left' starts each name just above the grid and extends it into the band.
-    ctx.fillStyle = '#ccc';
+    // Team-aggregate columns get a brighter ink to set them apart from players.
     ctx.font = `${Math.round(10 * dpr)}px sans-serif`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     columns.forEach((col, ci) => {
         const cx = leftGutter + ci * colW + colW / 2;
         const yBottom = top - Math.round(4 * dpr);
+        ctx.fillStyle = col.kind === 'team' ? '#fff' : '#bbb';
         ctx.save();
         ctx.translate(cx, yBottom);
         ctx.rotate(-Math.PI / 2);
@@ -8065,11 +8079,16 @@ function renderHeatmapMatrix(canvasId, data, hitState) {
         ctx.restore();
     });
 
+    // Separator between the team-aggregate block and the per-player block.
+    if (teamCols > 0 && teamCols < columns.length) {
+        const sx = Math.round(leftGutter + teamCols * colW - gap / 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.fillRect(sx, 0, Math.max(1, Math.round(dpr)), graphH);
+    }
+
     // Cache CSS-px layout for hit-testing.
     hitState.rows = rows;
     hitState.columns = columns;
-    hitState.pctSuffix = data.pctSuffix;
-    hitState.showTeamLine = data.showTeamLine;
     hitState.leftGutter = LH_LEFT_GUTTER;
     hitState.top = topCss;
     hitState.rowH = LH_ROW_H;
@@ -8103,10 +8122,11 @@ function attachHeatmapTooltip(canvasId, hitState) {
         const row = s.rows[ri];
         const sec = row.cells[ci] || 0;
         const pct = col.total > 0 ? (sec / col.total) * 100 : 0;
-        const teamLine = (s.showTeamLine && col.team && col.team !== col.label) ?
+        const suffix = col.kind === 'team' ? 'of team time' : 'of their time';
+        const teamLine = (col.kind === 'player' && col.team && col.team !== col.label) ?
             `<div>Team: ${escapeHtml(col.team)}</div>` : '';
         tip.innerHTML = `<div><strong>${escapeHtml(col.label)}</strong> · <strong>${escapeHtml(row.name)}</strong></div>
-${teamLine}<div>${sec.toFixed(1)}s · ${pct.toFixed(1)}% ${s.pctSuffix}</div>`;
+${teamLine}<div>${sec.toFixed(1)}s · ${pct.toFixed(1)}% ${suffix}</div>`;
         tip.style.display = 'block';
         const tipW = tip.offsetWidth || 200;
         const wrapW = wrapper.clientWidth;

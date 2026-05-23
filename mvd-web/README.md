@@ -287,33 +287,44 @@ full-sync tick in `animatePlayback`.
 
 ## Loc Graph tab
 
-Two views of the same `result.locGraph` aggregate (loc nodes weighted by
+Three views, all reading `result.locGraph` (loc nodes weighted by
 time-spent, transition edges; per-player and per-team breakdowns baked
-onto every node):
+onto every node) plus `demoInfo.{teams,players}` — no extra analyzer
+pass:
 
 - The **movement graph** — a Cytoscape.js node/edge diagram with the
   filter / edge-mode / layout controls, driven by `initLocGraphView`
   and `buildOrRefreshCytoscape`.
-- Two **Loc Heatmaps** — loc-occupancy matrices built by
+- The **Loc Heatmap** — a single loc-occupancy matrix built by
   `buildLocHeatmap` / `renderHeatmapMatrix`. Rows are locs (busiest
-  first). One matrix has a column per **team** (every member's time
-  combined), the other a column per **player** (grouped by team). Each
-  cell's intensity is the share of that column's observed time spent in
-  the loc, normalised to that column's own busiest loc so every column
-  reads independently (it answers "where is this player / team", not
-  "who controlled this loc"); the exact seconds + percentage are in the
-  hover tooltip. Cell intensity is mapped through a sequential blue→red
-  colormap (`heatColor` / `HEAT_STOPS`, mirrored by the CSS
-  `.heatmap-legend-bar` gradient). Team identity is carried only by the
-  colored band above each column, which uses the canonical
+  first). The leading columns are the **teams** (every member's time
+  combined), followed by one column per **player** grouped by team, with
+  a separator between the two blocks. Each cell's intensity is the share
+  of that column's observed time spent in the loc, normalised to that
+  column's own busiest loc so every column reads independently (it
+  answers "where is this player / team", not "who controlled this loc");
+  the rounded share-% is stamped inside each roomy cell and the exact
+  seconds + percentage are in the hover tooltip. Intensity is mapped
+  through the **viridis** colormap (`heatColorRGB` / `HEAT_STOPS`,
+  mirrored by the CSS `.heatmap-legend-bar` gradient) — chosen for
+  red/green colour-vision-deficiency safety. Team identity is carried by
+  the colored band above each column, using the canonical
   `TEAM_COLORS`-by-`timelineState.teams` mapping shared with the rest of
   the app (see the repo CLAUDE.md "Team colors" convention). The team
-  matrix is hidden for duels / single-team demos. Each matrix is drawn
-  entirely in one canvas (left gutter = loc names, top band = team bar +
-  rotated column names) and reuses `setupGraphCanvas` / `PLOT_BG_COLOR`
-  rather than the time-axis `renderSpansTimeline`. No extra analyzer
-  pass — both views read the same `locGraph` field and
-  `demoInfo.{teams,players}`.
+  columns / band are dropped for duels and single-team demos. It is
+  drawn entirely in one canvas (left gutter = loc names, top band = team
+  bar + rotated column names) and reuses `setupGraphCanvas` /
+  `PLOT_BG_COLOR` rather than the time-axis `renderSpansTimeline`.
+- **Region Control** — the region definition editor (`buildRegionConfig`,
+  group locs into named regions; save/load JSON) plus the per-region
+  control-state table (`displayRegionControlTable`). Moved here from the
+  Map tab; the live region *overlay* and *status* still render on the
+  Map. Still initialised by `initRegionControl` (called from
+  `initMapView`) and recomputed via the `recomputeRegionControl` WASM
+  bridge on edits. Table cells use the same viridis colormap
+  (`heatPctStyle`) with a contrast-aware ink; a small team-color swatch
+  on the team headers keeps the A/B identity legible now that cells are
+  no longer team-tinted.
 
 ## Regenerating map geometry
 
