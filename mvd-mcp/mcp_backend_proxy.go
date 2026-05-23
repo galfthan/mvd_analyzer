@@ -345,6 +345,9 @@ func (p *proxyBackend) GetBuckets(ctx context.Context, in GetBucketsInput) (any,
 	if in.Loc != "" {
 		q.Set("loc", in.Loc)
 	}
+	if in.Layout != "" {
+		q.Set("layout", in.Layout)
+	}
 	return p.fetchOpaque(ctx, "GET", "/v1/demos/"+in.DemoID+"/buckets", q)
 }
 

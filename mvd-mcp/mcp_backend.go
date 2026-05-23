@@ -63,7 +63,8 @@ type GetBucketsInput struct {
 	Fields      []string          `json:"fields,omitempty" jsonschema:"field codes (h, a, rl, lg, ...). Empty = all standard fields"`
 	Reducers    map[string]string `json:"reducers,omitempty" jsonschema:"per-field reducer override, e.g. {\"h\":\"min\"}"`
 	IncludeTeam bool              `json:"includeTeam,omitempty"`
-	Loc         string            `json:"loc,omitempty" jsonschema:"loc representation: 'name' (default, resolved loc names) or 'index' (raw LocTable indices; decode via getLocTable)"`
+	Loc         string            `json:"loc,omitempty" jsonschema:"loc representation: 'name' (default, resolved loc names) or 'index' (raw LocTable indices; decode via getLocTable). Ignored for layout=column, which always returns raw 'li' indices"`
+	Layout      string            `json:"layout,omitempty" jsonschema:"'column' (default) returns the compact column-major shape: per (player,field) one array indexed by bucket, where time(i)=startMs+i*windowMs — best for time-series/trend questions (far fewer tokens). 'row' returns one self-describing object per bucket. For point-in-time snapshots use getStateAt instead"`
 }
 
 // GetEventsInput mirrors /v1/demos/{id}/events query params.

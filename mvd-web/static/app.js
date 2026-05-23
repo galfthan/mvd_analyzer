@@ -232,12 +232,11 @@ worker.onmessage = (e) => {
     }
 };
 
-// analyzeInWorker returns the parsed Result object with the legacy
-// 50ms bucket array stashed on result.timelineAnalysis.highResBuckets.
-// Bucket data is built by the worker (calling getDefaultBuckets after
-// analyzeMVD) since WASM exports live on the worker's global, not the
-// main page. Pre-v7 callers expected JSON.parse on the resolved value;
-// new callers just use the returned object directly.
+// analyzeInWorker returns the parsed Result object. The 50ms column-major
+// bucket view is built by the worker (calling getDefaultBuckets after
+// analyzeMVD, since WASM exports live on the worker's global, not the main
+// page) and arrives later via the 'buckets' message, stashed on
+// result.timelineAnalysis.bucketView by applyDeferredBuckets.
 function analyzeInWorker(bytes, filename) {
     return new Promise((resolve, reject) => {
         analyzeResolve = (payload) => {
@@ -278,8 +277,9 @@ function applyDeferredBuckets(data) {
     const ta = currentResult.timelineAnalysis;
     if (ta && data.bucketsJSON) {
         try {
-            const buckets = JSON.parse(data.bucketsJSON);
-            if (Array.isArray(buckets)) ta.highResBuckets = buckets;
+            const view = JSON.parse(data.bucketsJSON);
+            // Column-major ColumnarBuckets object (not the old array shape).
+            if (view && typeof view === 'object' && !view.error) ta.bucketView = view;
         } catch (e) {
             console.warn('parse deferred buckets failed:', e);
         }
@@ -2557,7 +2557,7 @@ function formatQuakeMessage(text) {
 // Timeline Analysis State
 let timelineState = {
     buckets: [],
-    highResBuckets: [],    // High-res buckets for map (50ms)
+    bucketView: null,      // column-major ColumnarBuckets (50ms) from getDefaultBuckets
     highResDuration: 0.05, // High-res bucket interval
     events: [],
     duration: 0,
@@ -2756,7 +2756,7 @@ function resetTimelineState() {
     mapState.lastRenderedBucket = null;
     mapState.renderDirty = true;
 
-    timelineState.highResBuckets = [];
+    timelineState.bucketView = null;
     timelineState.highResDuration = 0.05;
     timelineState.events = [];
     timelineState.fragEvents = [];
@@ -2802,11 +2802,11 @@ function displayTimelineAnalysis(result) {
     }
     const teams = timelineState.teams;
 
-    // Schema v7: highResBuckets is no longer a parse-time field on the
-    // canonical result, but analyzeInWorker stashes a v6-shape array
-    // on timeline.highResBuckets after the WASM worker calls
-    // getDefaultBuckets. Panels still iterate the same array shape.
-    timelineState.highResBuckets = timeline?.highResBuckets || [];
+    // Schema v7: bucketed data is not a parse-time field; the WASM worker
+    // calls getDefaultBuckets after analyzeMVD and applyDeferredBuckets
+    // stashes the resulting column-major ColumnarBuckets object on
+    // timeline.bucketView. The panels read it via the bucket-view accessors.
+    timelineState.bucketView = timeline?.bucketView || null;
     timelineState.highResDuration = 0.05;
     // Schema v8: raw time fields on result/timelineAnalysis flipped from
     // float seconds to int32 ms. The frontend internally still works in
@@ -2858,15 +2858,118 @@ function displayTimelineAnalysis(result) {
     renderChatMessages();
 }
 
-// Binary search for first high-res bucket with t >= targetTime
-function binarySearchBucketStart(buckets, targetTime) {
-    let lo = 0, hi = buckets.length;
-    while (lo < hi) {
-        const mid = (lo + hi) >>> 1;
-        if (buckets[mid].t < targetTime) lo = mid + 1;
-        else hi = mid;
+// ─── Columnar bucket-view accessors ──────────────────────────────────────────
+//
+// The worker ships a column-major ColumnarBuckets object (see
+// mvd-analytics/view/columnar.go), stored on timelineState.bucketView:
+//   { windowMs, startMs, count,
+//     players: { name: { first, n, alive:[0/1], validFrom:{f:idx},
+//                        h|a|li|sh|nl|rk|cl:[i16], x|y|z:[i32], at:[str],
+//                        rl|lg|gl|ssg|sng|q|pe|r|sp|d:[0/1] } },
+//     teams:   { name: { rl|lg|rllg|w|gl|q|pe|r|pw|th|ta:[int], abt:{ra|ya|ga:[int]} } } }
+// Time axis is implicit: time(i) = (startMs + i*windowMs)/1000 seconds, so
+// time→index is O(1) arithmetic (no more per-bucket binary search). Booleans
+// and the alive mask are 0/1. A player only "exists" at bucket i while alive[i]
+// is set; values carry forward through dead buckets, so callers must gate on
+// liveness exactly as the old row shape omitted dead players per bucket.
+
+function bucketTimeSec(view, i) {
+    return (view.startMs + i * view.windowMs) / 1000;
+}
+
+// Bucket whose half-open span contains tSec (floor), clamped to a valid index.
+function bucketIndexAtTime(view, tSec) {
+    if (!view || !view.count) return -1;
+    let i = Math.floor((tSec * 1000 - view.startMs) / view.windowMs);
+    if (i < 0) i = 0;
+    if (i >= view.count) i = view.count - 1;
+    return i;
+}
+
+// First bucket at or after tSec (ceil), clamped to [0, count]. Replaces the old
+// binarySearchBucketStart for range scans over a visible window.
+function bucketIndexAtOrAfter(view, tSec) {
+    if (!view || !view.count) return 0;
+    let i = Math.ceil((tSec * 1000 - view.startMs) / view.windowMs);
+    if (i < 0) i = 0;
+    if (i > view.count) i = view.count;
+    return i;
+}
+
+// Value of a player's field column at absolute bucket i, or undefined when the
+// player is absent there (outside [first,first+n), dead, or before validFrom).
+function playerValAt(p, field, i) {
+    if (!p) return undefined;
+    const rel = i - p.first;
+    if (rel < 0 || rel >= p.n) return undefined;
+    if (!p.alive[rel]) return undefined;
+    const vf = p.validFrom && p.validFrom[field];
+    if (vf !== undefined && i < vf) return undefined;
+    const arr = p[field];
+    if (!arr) return undefined;
+    return arr[rel];
+}
+
+function playerAliveAt(p, i) {
+    if (!p) return false;
+    const rel = i - p.first;
+    return rel >= 0 && rel < p.n && !!p.alive[rel];
+}
+
+// Field codes whose row-shape value is a boolean (emitted 0/1 in the columnar
+// wire form) vs a number. armorType ("at") is a string.
+const COLUMNAR_NUM_FIELDS = ['x', 'y', 'z', 'h', 'a', 'li', 'sh', 'nl', 'rk', 'cl'];
+const COLUMNAR_BOOL_FIELDS = ['rl', 'lg', 'gl', 'ssg', 'sng', 'q', 'pe', 'r', 'sp', 'd'];
+
+// reconstructBucketPlayers rebuilds the old row-shape p{} (player → field map)
+// for the players alive at bucket i. Mirrors the Go columnarToRow oracle so the
+// panels that still think row-major keep working unchanged.
+function reconstructBucketPlayers(view, i) {
+    const out = {};
+    const players = view.players || {};
+    for (const name in players) {
+        const cp = players[name];
+        if (!playerAliveAt(cp, i)) continue;
+        const pd = {};
+        for (const f of COLUMNAR_NUM_FIELDS) {
+            const v = playerValAt(cp, f, i);
+            if (v !== undefined) pd[f] = v;
+        }
+        for (const f of COLUMNAR_BOOL_FIELDS) {
+            const v = playerValAt(cp, f, i);
+            if (v !== undefined) pd[f] = !!v;
+        }
+        const at = playerValAt(cp, 'at', i);
+        if (at !== undefined) pd.at = at;
+        out[name] = pd;
     }
-    return lo;
+    return out;
+}
+
+// teamSnapshot returns the old row-shape team-data object (counters + abt) for
+// one team at bucket i, or {} when the team is absent.
+function teamSnapshot(view, team, i) {
+    const t = view.teams && view.teams[team];
+    if (!t) return {};
+    const o = {};
+    for (const k in t) {
+        if (k === 'abt') {
+            const abt = {};
+            for (const a in t.abt) abt[a] = t.abt[a][i] || 0;
+            o.abt = abt;
+            continue;
+        }
+        o[k] = t[k][i] || 0;
+    }
+    return o;
+}
+
+// reconstructBucketTeams rebuilds the old row-shape td{} (team → data) at i.
+function reconstructBucketTeams(view, i) {
+    if (!view.teams) return undefined;
+    const td = {};
+    for (const team in view.teams) td[team] = teamSnapshot(view, team, i);
+    return td;
 }
 
 // ─── Unified Canvas Graph Renderer ──────────────────────────────────────────
@@ -3127,22 +3230,22 @@ function renderDivergingGraph(canvasId, {
 // ─── Data preparation: Weapons ──────────────────────────────────────────────
 
 function prepWeaponsData(startTime, endTime, teams) {
-    const hrBuckets = timelineState.highResBuckets;
-    if (!hrBuckets || !hrBuckets.length) return { points: [], max: 4 };
+    const view = timelineState.bucketView;
+    if (!view || !view.count) return { points: [], max: 4 };
     const hrDur = timelineState.highResDuration || 0.05;
     const points = [];
     let maxVal = 4;
-    const idx0 = binarySearchBucketStart(hrBuckets, startTime);
-    for (let i = idx0; i < hrBuckets.length; i++) {
-        const b = hrBuckets[i];
-        if (b.t > endTime) break;
-        const tdA = b.td?.[teams[0]] || {};
-        const tdB = b.td?.[teams[1]] || {};
+    const idx0 = bucketIndexAtOrAfter(view, startTime);
+    for (let i = idx0; i < view.count; i++) {
+        const bt = bucketTimeSec(view, i);
+        if (bt > endTime) break;
+        const tdA = teamSnapshot(view, teams[0], i);
+        const tdB = teamSnapshot(view, teams[1], i);
         const upT = (tdA.rl || 0) + (tdA.lg || 0) + (tdA.rllg || 0);
         const dnT = (tdB.rl || 0) + (tdB.lg || 0) + (tdB.rllg || 0);
         maxVal = Math.max(maxVal, upT, dnT);
         points.push({
-            t: b.t, dt: hrDur,
+            t: bt, dt: hrDur,
             up: [
                 { h: tdA.rllg || 0, color: GRAPH_COLORS.RLLG },
                 { h: tdA.lg || 0, color: GRAPH_COLORS.LG },
@@ -3197,20 +3300,20 @@ const weaponGraphHitState = {
 // ─── Data preparation: Health/Armor ─────────────────────────────────────────
 
 function prepHealthArmorData(startTime, endTime, teams) {
-    const hrBuckets = timelineState.highResBuckets;
-    if (!hrBuckets || !hrBuckets.length) return { points: [], max: 400 };
+    const view = timelineState.bucketView;
+    if (!view || !view.count) return { points: [], max: 400 };
     const hrDur = timelineState.highResDuration || 0.05;
     const points = [];
     let maxVal = 400;
-    const idx0 = binarySearchBucketStart(hrBuckets, startTime);
-    for (let i = idx0; i < hrBuckets.length; i++) {
-        const b = hrBuckets[i];
-        if (b.t > endTime) break;
-        const tdA = b.td?.[teams[0]] || {};
-        const tdB = b.td?.[teams[1]] || {};
+    const idx0 = bucketIndexAtOrAfter(view, startTime);
+    for (let i = idx0; i < view.count; i++) {
+        const bt = bucketTimeSec(view, i);
+        if (bt > endTime) break;
+        const tdA = teamSnapshot(view, teams[0], i);
+        const tdB = teamSnapshot(view, teams[1], i);
         maxVal = Math.max(maxVal, (tdA.th || 0) + (tdA.ta || 0), (tdB.th || 0) + (tdB.ta || 0));
         points.push({
-            t: b.t, dt: hrDur,
+            t: bt, dt: hrDur,
             up: buildHASegments(tdA),
             down: buildHASegments(tdB),
         });
@@ -4033,8 +4136,8 @@ function prepRegionControlData(startTime, endTime, teams) {
     const regions = mapState.controlRegions;
     const bucketStates = mapState.bucketStates;
     if (!regions || regions.length === 0 || !bucketStates) return null;
-    const hrBuckets = timelineState.highResBuckets;
-    if (!hrBuckets || !hrBuckets.length) return null;
+    const view = timelineState.bucketView;
+    if (!view || !view.count) return null;
 
     // Team labels come from the Go-supplied regionControl when present
     // (matches the bucketStates A/B encoding); fall back to mapState.teams
@@ -4042,7 +4145,10 @@ function prepRegionControlData(startTime, endTime, teams) {
     const teamA = mapState.teamA || teams[0];
     const teamB = mapState.teamB || teams[1];
 
-    const idx0 = binarySearchBucketStart(hrBuckets, startTime);
+    // bucketStates is computed at the same 50ms-from-match-start grid as the
+    // bucket view (recomputeRegionControl uses WindowMs:50), so its per-region
+    // string indexes 1:1 with the columnar bucket index.
+    const idx0 = bucketIndexAtOrAfter(view, startTime);
     const rows = [];
     for (const r of regions) {
         const s = bucketStates[r.name];
@@ -4050,15 +4156,15 @@ function prepRegionControlData(startTime, endTime, teams) {
         const spans = [];
         let curState = null;
         let curStart = startTime;
-        for (let i = idx0; i < hrBuckets.length; i++) {
-            const b = hrBuckets[i];
-            if (b.t > endTime) break;
+        for (let i = idx0; i < view.count; i++) {
+            const bt = bucketTimeSec(view, i);
+            if (bt > endTime) break;
             const c = i < s.length ? s[i] : '_';
             const state = decodeRegionStateChar(c);
             if (state !== curState) {
-                if (curState) spans.push({ start: curStart, end: b.t, state: curState });
+                if (curState) spans.push({ start: curStart, end: bt, state: curState });
                 curState = state;
-                curStart = b.t;
+                curStart = bt;
             }
         }
         if (curState) spans.push({ start: curStart, end: endTime, state: curState });
@@ -4314,8 +4420,8 @@ function updateTeamStatus() {
     if (!containerA || !containerB) return;
 
     const teams = timelineState.teams;
-    const hrBuckets = timelineState.highResBuckets;
-    if (!hrBuckets || hrBuckets.length === 0 || teams.length < 2) {
+    const view = timelineState.bucketView;
+    if (!view || !view.count || teams.length < 2) {
         containerA.innerHTML = '';
         containerB.innerHTML = '';
         return;
@@ -4499,19 +4605,11 @@ function decodeRegionStateChar(c) {
     return REGION_STATE_BY_CHAR[c] || 'empty';
 }
 
-// findHighResBucketIndexAtTime returns the index into
-// timelineState.highResBuckets that findHighResBucketAtTime would land
-// on — used for cheap lookups into Go-supplied bucketStates strings.
+// findHighResBucketIndexAtTime returns the bucket index whose span contains
+// `time` — used for cheap O(1) lookups into Go-supplied bucketStates strings
+// (which share the bucket view's grid).
 function findHighResBucketIndexAtTime(time) {
-    const buckets = timelineState.highResBuckets;
-    if (!buckets || buckets.length === 0) return -1;
-    let low = 0, high = buckets.length - 1;
-    while (low < high) {
-        const mid = Math.floor((low + high + 1) / 2);
-        if (buckets[mid].t <= time) low = mid;
-        else high = mid - 1;
-    }
-    return low;
+    return bucketIndexAtTime(timelineState.bucketView, time);
 }
 
 // Prefer the server-resolved loc name (3D nearest, matches ezQuake exactly).
@@ -5514,17 +5612,24 @@ function calculateMapBounds(result) {
         maxY = Math.max(maxY, loc.y);
     }
 
-    // From high-res buckets - position bounds. v7: read from the
-    // bridge-derived timelineState.highResBuckets instead of the
-    // (deleted) result.timelineAnalysis.highResBuckets field.
-    const highResBuckets = timelineState.highResBuckets || [];
-    for (const bucket of highResBuckets) {
-        for (const data of Object.values(bucket.p || {})) {
-            if (data.x !== 0 || data.y !== 0) {
-                minX = Math.min(minX, data.x);
-                maxX = Math.max(maxX, data.x);
-                minY = Math.min(minY, data.y);
-                maxY = Math.max(maxY, data.y);
+    // From the bucket view — position bounds. Walk each player's dense x/y
+    // columns over their active span; padding/dead slots read (0,0) and are
+    // skipped (matching the old row shape that omitted them).
+    const view = timelineState.bucketView;
+    if (view && view.players) {
+        for (const name in view.players) {
+            const cp = view.players[name];
+            const xs = cp.x, ys = cp.y;
+            if (!xs || !ys) continue;
+            for (let rel = 0; rel < cp.n; rel++) {
+                if (!cp.alive[rel]) continue;
+                const x = xs[rel], y = ys[rel];
+                if (x !== 0 || y !== 0) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
             }
         }
     }
@@ -6099,57 +6204,65 @@ function precomputeFullTrails() {
     // Sorted-by-time list of death frames in world space, used by renderMap
     // to draw a fading red "X" at the death location for a couple of seconds.
     mapState.deathEvents = [];
-    const buckets = timelineState.highResBuckets;
-    if (!buckets || buckets.length === 0) return;
+    const view = timelineState.bucketView;
+    if (!view || !view.players) return;
 
     const MAX_MOVE_PER_BUCKET = 2500 * (timelineState.highResDuration || 0.05);
     // "Meaningful movement" threshold — 2 canvas pixels at the base fit-to-canvas
     // scale, translated to world units so the filter is applied in world space.
     const MIN_MOVE_WORLD = _wtc.scale > 0 ? (2 / _wtc.scale) : 0;
-    const lastWorldPos = {};
 
-    for (const bucket of buckets) {
-        const playerData = bucket.p;
-        if (!playerData) continue;
-        const t = bucket.t;
+    // Walk each player's dense columns over their active span. Dead buckets
+    // (alive=0) are skipped, which breaks the trail across death→respawn just
+    // as the old row shape did by omitting the player from those buckets.
+    for (const name in view.players) {
+        const cp = view.players[name];
+        const symbolInfo = mapState.playerSymbols[name];
+        if (!symbolInfo) continue;
+        const xs = cp.x, ys = cp.y, ds = cp.d, sps = cp.sp;
+        if (!xs || !ys) continue;
 
-        for (const [name, data] of Object.entries(playerData)) {
-            if (data.x === 0 && data.y === 0) continue;
+        let lastWorld = null;
+        for (let rel = 0; rel < cp.n; rel++) {
+            if (!cp.alive[rel]) continue;
+            const x = xs[rel], y = ys[rel];
+            if (x === 0 && y === 0) continue;
 
-            const symbolInfo = mapState.playerSymbols[name];
-            if (!symbolInfo) continue;
+            const i = cp.first + rel;
+            const t = bucketTimeSec(view, i);
+            const isDeath = ds ? !!ds[rel] : false;
+            const isSpawn = sps ? !!sps[rel] : false;
 
             if (!mapState.fullTrails[name]) mapState.fullTrails[name] = [];
             const track = mapState.fullTrails[name];
             const last = track[track.length - 1];
-
-            const isDeath = !!data.d;
-            const isSpawn = !!data.sp;
 
             // Death frames also get added to the standalone deathEvents list
             // so renderMap can find them without scanning every player trail.
             // teamIdx is captured so the X is painted in the dead player's
             // own team color rather than a generic red.
             if (isDeath) {
-                mapState.deathEvents.push({ t, wx: data.x, wy: data.y, teamIdx: symbolInfo.teamIdx });
+                mapState.deathEvents.push({ t, wx: x, wy: y, teamIdx: symbolInfo.teamIdx });
             }
 
             // Always include death/spawn markers regardless of distance.
             if (!isDeath && !isSpawn) {
-                if (last && Math.abs(last.wx - data.x) <= MIN_MOVE_WORLD && Math.abs(last.wy - data.y) <= MIN_MOVE_WORLD) {
-                    lastWorldPos[name] = { x: data.x, y: data.y };
+                if (last && Math.abs(last.wx - x) <= MIN_MOVE_WORLD && Math.abs(last.wy - y) <= MIN_MOVE_WORLD) {
+                    lastWorld = { x, y };
                     continue;
                 }
             }
 
             // Teleport detection in world units (scale-independent)
-            const lw = lastWorldPos[name];
-            const isTeleport = !isDeath && !isSpawn && lw && (Math.abs(data.x - lw.x) > MAX_MOVE_PER_BUCKET || Math.abs(data.y - lw.y) > MAX_MOVE_PER_BUCKET);
+            const isTeleport = !isDeath && !isSpawn && lastWorld && (Math.abs(x - lastWorld.x) > MAX_MOVE_PER_BUCKET || Math.abs(y - lastWorld.y) > MAX_MOVE_PER_BUCKET);
 
-            lastWorldPos[name] = { x: data.x, y: data.y };
-            track.push({ wx: data.x, wy: data.y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
+            lastWorld = { x, y };
+            track.push({ wx: x, wy: y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
         }
     }
+
+    // deathEvents was filled per-player; renderMap expects it time-ordered.
+    mapState.deathEvents.sort((a, b) => a.t - b.t);
 
     // Initialize all players as disabled (user enables via All button or per-player checkboxes)
     mapState.enabledPlayers = {};
@@ -6792,52 +6905,29 @@ function drawTracks(ctx, time) {
     }
 }
 
-// Binary search for high-res bucket at or before time
+// Reconstruct the row-shape bucket ({t, p, td}) at `time` from the columnar
+// view. Memoised on (view, index): repeated calls at the same time return the
+// same object so renderMap's `bucket === lastRenderedBucket` redraw-skip and
+// the legend/region/hit-test callers all share one reconstruction per frame.
+let _bucketReconCache = { view: null, i: -1, bucket: null };
 function findHighResBucketAtTime(time) {
-    const buckets = timelineState.highResBuckets;
-    if (!buckets || buckets.length === 0) {
-        return null;
+    const view = timelineState.bucketView;
+    if (!view || !view.count) return null;
+    const i = bucketIndexAtTime(view, time);
+    if (i < 0) return null;
+    if (_bucketReconCache.view === view && _bucketReconCache.i === i) {
+        return _bucketReconCache.bucket;
     }
-
-    let low = 0, high = buckets.length - 1;
-    while (low < high) {
-        const mid = Math.floor((low + high + 1) / 2);
-        if (buckets[mid].t <= time) {
-            low = mid;
-        } else {
-            high = mid - 1;
-        }
-    }
-
-    const bucket = buckets[low];
-    if (!bucket) return null;
-
-    // Return high-res bucket directly — renderMap uses compact format (x, y)
+    const bucket = {
+        t: bucketTimeSec(view, i),
+        idx: i,
+        p: reconstructBucketPlayers(view, i),
+        td: reconstructBucketTeams(view, i),
+    };
+    _bucketReconCache = { view, i, bucket };
     return bucket;
 }
 
-// Convert compact high-res player data to standard format
-function convertHighResPlayerData(p) {
-    if (!p) return {};
-    const result = {};
-    for (const [name, data] of Object.entries(p)) {
-        result[name] = {
-            x: data.x,
-            y: data.y,
-            health: data.h,
-            armor: data.a,
-            armorType: data.at,
-            hasRL: data.rl,
-            hasLG: data.lg,
-            hasQuad: data.q,
-            hasPent: data.pe,
-            hasRing: data.r,
-            rockets: data.rk,
-            cells: data.cl
-        };
-    }
-    return result;
-}
 
 function findBucketAtTime(time) {
     return findHighResBucketAtTime(time);

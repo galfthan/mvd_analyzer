@@ -138,9 +138,6 @@ type (
 	ControlRegion          = result.ControlRegion
 	RegionControlResult    = result.RegionControlResult
 	RegionStats            = result.RegionStats
-	HighResBucket          = result.HighResBucket
-	HighResTeamData        = result.HighResTeamData
-	HighResPlayerData      = result.HighResPlayerData
 	MapLocation            = result.MapLocation
 	TimelineFragEvent      = result.TimelineFragEvent
 	PowerupEvent           = result.PowerupEvent

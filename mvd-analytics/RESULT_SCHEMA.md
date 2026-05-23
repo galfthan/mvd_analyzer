@@ -167,28 +167,13 @@ format here only carries the event-shaped derived results.
 | PlayerUserIDs | `playerUserIDs` | map[string]int (name → Hub viewer UserID) |
 | RegionControl | `regionControl` | *RegionControlResult |
 
-### HighResBucket (legacy shim shape)
-
-`HighResBucket` is no longer on the result wire format. The Go type
-remains as the shape returned by `view.ToLegacyHighResBuckets` (the
-WASM bridge's `getDefaultBuckets` shim). New consumers should target
-`view.BucketsView` directly via `view.Buckets`.
-
-| Field | JSON key | Type |
-|---|---|---|
-| T | `t` | float64 (bucket start time) |
-| P | `p` | map[string]*HighResPlayerData |
-| TD | `td` | map[string]*HighResTeamData |
-
-### HighResPlayerData / HighResTeamData
-
-Same compact field set as v6 (X/Y/Z, H, A, AT, RL/LG/GL/SSG/SNG,
-Q/Pent/R, Shells/Nails/Rockets/Cells, D, Sp, Li for player; RL/LG/
-RLLG/W/GL/Q/Pe/R/Pw/TH/TA/ABT for team). Returned by
-`view.ToLegacyHighResBuckets`. New consumers should access these
-fields via `view.Buckets` instead, where each player's per-bucket
-data is a `map[string]any` keyed by the field codes from
-[Field vocabulary](#field-vocabulary).
+The legacy `HighResBucket` / `HighResPlayerData` / `HighResTeamData`
+shim shapes (and `view.ToLegacyHighResBuckets`) were removed once the
+web frontend moved to the columnar layout. Bucketed data is now served
+only as `view.BucketsView` (row) or `view.ColumnarBuckets` (column) —
+see [Query API → Buckets](#buckets). Each player's per-bucket data is a
+`map[string]any` keyed by the [field vocabulary](#field-vocabulary)
+(row) or one dense array per field (column).
 
 ### TimelineFragEvent
 
@@ -541,6 +526,46 @@ Loc rendering follows `BucketsOptions.LocIndex` (REST `?loc=`): by
 default each bucket's player map carries a resolved `loc` name; in
 index mode (`loc=index`) it carries the raw `li` integer instead, which
 you decode against the demo's loc-table (`GET /loc-table`).
+
+##### Columnar layout (`view.BucketsColumnar`, REST `?layout=column`)
+
+The same per-bucket values in a column-major shape — for each
+`(player, field)` one dense typed array instead of a map per bucket.
+Far smaller and allocation-light for series/trend reads; use
+`StateAt` for point-in-time snapshots rather than aligning indices
+across arrays.
+
+```go
+view.BucketsColumnar(r, view.BucketsOptions{WindowMs: 50, IncludeTeam: true})
+// → *ColumnarBuckets {
+//     windowMs, startMs, count, partialLastMs?,
+//     players: { name: {
+//        first, n,                       // active span [first, first+n)
+//        alive: [0/1 …],                 // liveness per bucket in the span
+//        validFrom: { field: idx },      // sparse; field valid from idx (omitted when == first)
+//        h|a|li|sh|nl|rk|cl: [int16 …],  // dense, carry-forward
+//        x|y|z: [int32 …],               // position split
+//        at: [string …],
+//        rl|lg|gl|ssg|sng|q|pe|r|sp|d: [0/1 …],
+//     } },
+//     teams: { name: { rl|lg|rllg|w|gl|q|pe|r|pw|th|ta: [int …],
+//                      abt: { ra|ya|ga: [int …] } } },
+//   }
+```
+
+Conventions: `time(i) = startMs + i*windowMs` (int32 ms); booleans and
+the `alive` mask are `0`/`1`; a field array is omitted when the player
+never has it; values carry forward through dead buckets (the `alive`
+mask, not the arrays, marks liveness — row-major omits dead players, so
+treat `alive[i]==0` as "absent"); loc is always the raw `li` index
+(`LocIndex` does not apply). Team arrays span the full `count` grid.
+
+There is no per-life table: it would be a bucket-resolution approximation
+that undercounts a death+respawn falling in one window. A same-window
+death+respawn surfaces as that bucket carrying both `d=1` and `sp=1`
+while `alive` stays `1`; for authoritative life counts/durations read the
+per-player spawn/death event streams (`/events`, or the raw
+`Streams.Players[].sp`/`.d`).
 
 #### Events
 

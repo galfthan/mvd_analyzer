@@ -249,9 +249,11 @@ picker's next death), `nextDeathTime`, plus for backpack pickups
 | `fields`      | `string[]` | all standard | Field codes — see RESULT_SCHEMA.md |
 | `reducers`    | `{[code]: name}` | per-field defaults | Reducer-name override per field |
 | `includeTeam` | `bool`    | `false` | Also emit per-team aggregates per bucket |
+| `loc`         | `string`  | `name` | Ignored for `layout=column` (always raw `li` index) |
+| `layout`      | `string`  | **`column`** | `column` = compact column-major `ColumnarBuckets` (one array per `(player,field)`, `time(i)=startMs+i*windowMs`, booleans 0/1); `row` = one self-describing object per bucket. Prefer column for series/trend reads; use `getStateAt` for snapshots. |
 
-Output: `view.BucketsView` — see
-[RESULT_SCHEMA.md → view.Buckets](../mvd-analytics/RESULT_SCHEMA.md#field-vocabulary).
+Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
+— see [RESULT_SCHEMA.md → Buckets](../mvd-analytics/RESULT_SCHEMA.md#buckets).
 
 #### `getEvents({demoId, ...})`
 

@@ -7,10 +7,10 @@ talks to it through a JS shim.
 ## What's in the box
 
 - `cmd/wasm/` — WASM entry point. Exports `analyzeMVD(bytes, filename)`
-  for the parse-and-pin call, plus the schema-v7 query API as bridge
-  functions: `getDefaultBuckets()` (legacy 50 ms []HighResBucket shape
-  for the existing panels), `getBuckets(optsJSON)`,
-  `getEvents(filterJSON)`, `getStreamSlice(optsJSON)`,
+  for the parse-and-pin call, plus the query API as bridge functions:
+  `getDefaultBuckets()` (50 ms column-major `ColumnarBuckets` for the
+  Timeline/Map panels), `getBuckets(optsJSON)` (row or column via
+  `opts.layout`), `getEvents(filterJSON)`, `getStreamSlice(optsJSON)`,
   `getStateAt(optsJSON)`, `getLocTrails(optsJSON)`, and
   `recomputeRegionControl(regionsJSON)`. All take a JSON-string argument
   (or none for `getDefaultBuckets`) and return a JSON string; under the
@@ -92,17 +92,16 @@ strip above the main pane.
    and marshals the Result to JSON. The worker posts this back
    **immediately** as a `result` message — the main thread renders the
    Summary and the other non-bucket tabs right away.
-5. **Then**, off the critical path, the worker runs the two schema-v7
-   bridge calls — `getDefaultBuckets()` (builds the legacy 50 ms
-   []HighResBucket array via `view.Buckets`) and
+5. **Then**, off the critical path, the worker runs the two bridge
+   calls — `getDefaultBuckets()` (builds the 50 ms column-major
+   `ColumnarBuckets` via `view.BucketsColumnar`) and
    `recomputeRegionControl(defaults)` (region-control bucket states at
-   50 ms) — and posts them as a second `buckets` message. These are
-   expensive (the bucket build alone is multiple seconds in WASM), and
+   50 ms, same grid) — and posts them as a second `buckets` message.
+   These are expensive (the bucket build alone is ~1 s in WASM), and
    only the Timeline/Map tabs need them, so deferring them roughly halves
-   time-to-interactive. They exist at all because the existing panels
-   still read `result.timelineAnalysis.highResBuckets` and
-   `.regionControl.bucketStates`; Phase 1.5 (per-panel
-   `getBuckets({windowMs})` calls) will drop the bridge step.
+   time-to-interactive. The Timeline/Map panels read the columnar view
+   through the bucket-view accessors in `app.js` (`bucketIndexAtTime`,
+   `playerValAt`, `reconstructBucketPlayers`, `teamSnapshot`, …).
 6. On `result`, `app.js` parses the JSON, clears the no-demo class,
    switches to the Summary tab, and renders all tabs. The main-thread
    inits are cheap, so they run now even though the bucket-derived
@@ -110,7 +109,7 @@ strip above the main pane.
    key moments and loc graph are fully populated; only the timeline
    graph, map trails and region overlay are blank. On the later
    `buckets` message, `applyDeferredBuckets()` stashes the payload onto
-   `result.timelineAnalysis.highResBuckets` / `.regionControl
+   `result.timelineAnalysis.bucketView` / `.regionControl
    .bucketStates`, **re-runs** the bucket-dependent inits
    (`initRegionControlData`, `displayTimelineAnalysis`, `initMapView`),
    and re-renders the active tab so Timeline/Map fill in. The win is

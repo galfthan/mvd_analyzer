@@ -26,6 +26,13 @@ type BucketsOptions struct {
 	// (decode via /loc-table). The legacy WASM bridge needs the index,
 	// so getDefaultBuckets sets this true.
 	LocIndex bool
+	// Layout selects the output shape. "" / "row" build the bucket-major
+	// BucketsView via Buckets; "column" builds the column-major
+	// ColumnarBuckets via BucketsColumnar. The field documents caller
+	// intent — dispatch happens in the transport layer (handlers / WASM
+	// bridge), not inside Buckets itself. Columnar always emits the raw
+	// loc index ("li"); LocIndex does not apply to it.
+	Layout string
 }
 
 // BucketsView is the result of a Buckets call. WindowMs echoes back
@@ -40,10 +47,9 @@ type BucketsView struct {
 	Buckets  []ViewBucket `json:"buckets"`
 }
 
-// ViewBucket is the clean per-player map shape (D13 in the plan).
-// Distinct from result.HighResBucket; the WASM bridge's
-// getDefaultBuckets shim transforms a BucketsView into the v6 shape
-// via ToLegacyHighResBuckets in legacy.go.
+// ViewBucket is the row-major (bucket-major) per-player map shape. The
+// column-major counterpart is ColumnarBuckets (columnar.go), selected
+// via BucketsOptions.Layout / the API+MCP layout param.
 //
 // Players maps player name → field code → reduced value. Field codes
 // match the canonical vocabulary in fields.go. Values' Go types
@@ -51,8 +57,8 @@ type BucketsView struct {
 // float64; "last"/"first" preserve the underlying stream type;
 // boolean reducers (held-any/majority/any) emit bool.
 //
-// Team, when populated, is keyed by team name and carries the same
-// IncludeTeam aggregate counters that v6 stamped on every bucket.
+// Team, when populated, is keyed by team name and carries the
+// IncludeTeam aggregate counters.
 type ViewBucket struct {
 	T       float64                       `json:"t"`
 	Players map[string]map[string]any     `json:"p"`
@@ -742,8 +748,8 @@ func streamEventList(p *result.PlayerStream, field string) []int32 {
 	return nil
 }
 
-// aggregateTeams produces the per-team counters historically baked
-// into HighResBucket.TD. We re-derive from each player's reduced
+// aggregateTeams produces the per-team counters for a bucket's Team
+// map (IncludeTeam). We re-derive from each player's reduced
 // values (booleans for weapons / powerups) so the team aggregate is
 // always consistent with the per-player display. Most fields are
 // int; the "abt" key carries an armor-by-type sub-map ("ra"/"ya"/"ga"

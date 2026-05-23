@@ -152,6 +152,33 @@ func TestProxy_GetBuckets_MCPDefaultIs1s(t *testing.T) {
 	}
 }
 
+// TestProxy_GetBuckets_LayoutForwarded verifies that the layout input
+// reaches the REST query (and that omitting it sends no layout, leaving
+// the API default).
+func TestProxy_GetBuckets_LayoutForwarded(t *testing.T) {
+	var seenQuery string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seenQuery = r.URL.RawQuery
+		w.Write([]byte(`{"windowMs":1000,"count":0}`))
+	}))
+	defer srv.Close()
+	b := newProxyBackend(srv.URL, "", 5*time.Second)
+
+	if _, err := b.GetBuckets(context.Background(), GetBucketsInput{DemoID: "gameId:42", Layout: "column"}); err != nil {
+		t.Fatalf("GetBuckets: %v", err)
+	}
+	if !strings.Contains(seenQuery, "layout=column") {
+		t.Errorf("expected layout=column in query; got %q", seenQuery)
+	}
+
+	if _, err := b.GetBuckets(context.Background(), GetBucketsInput{DemoID: "gameId:42"}); err != nil {
+		t.Fatalf("GetBuckets: %v", err)
+	}
+	if strings.Contains(seenQuery, "layout=") {
+		t.Errorf("omitted layout should not be forwarded; got %q", seenQuery)
+	}
+}
+
 func TestProxy_GetRegionControl_MCPDefaultIs1s(t *testing.T) {
 	var seenQuery string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -151,7 +151,7 @@ and six for the view query layer:
 | `getItems(demoId, items, players, kinds)` | `mvd-api` `/items` |
 | `getWeaponPickups(demoId, players, weapon, source)` | `mvd-api` `/weapon-pickups` |
 | **View queries** | |
-| `getBuckets(demoId, windowMs, fields, reducers, …)` | `mvd-api` `/buckets` |
+| `getBuckets(demoId, windowMs, fields, reducers, layout, …)` | `mvd-api` `/buckets` (default column-major; `layout=row` for the per-bucket shape) |
 | `getEvents(demoId, types, …)` | `mvd-api` `/events` |
 | `getStreamSlice(demoId, from, to, fields, …)` | `mvd-api` `/stream-slice` |
 | `getStateAt(demoId, time, fields, …)` | `mvd-api` `/state-at` |
@@ -167,8 +167,9 @@ and six for the view query layer:
   responses, including the `Overview` shape that's unique to the API
   layer.
 - **[`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md)**
-  — view types (`BucketsView`, `EventsView`, `StreamSliceView`,
-  `StateAtView`, `LocTrailsView`, `RegionControlResult`), the
+  — view types (`BucketsView` / `ColumnarBuckets`, `EventsView`,
+  `StreamSliceView`, `StateAtView`, `LocTrailsView`,
+  `RegionControlResult`), the
   field-code vocabulary, the reducer registry, and the underlying
   `Result` / `Streams` types. View outputs are the same whether
   reached via WASM, the CLI, or MCP. The view layer is the
