@@ -285,6 +285,28 @@ the sidebar so verifying the event stream against gameplay is
 visual. The panel updates live during playback via the 200 ms
 full-sync tick in `animatePlayback`.
 
+## Loc Graph tab
+
+Two views of the same `result.locGraph` aggregate (loc nodes weighted by
+time-spent, transition edges; per-player and per-team breakdowns baked
+onto every node):
+
+- The **movement graph** — a Cytoscape.js node/edge diagram with the
+  filter / edge-mode / layout controls, driven by `initLocGraphView`
+  and `buildOrRefreshCytoscape`.
+- The **Loc Heatmap** — a loc × player occupancy matrix
+  (`renderLocHeatmap`). Rows are locs (busiest first), columns are
+  players grouped by team. Each cell's brightness is the share of that
+  player's observed time spent in the loc, normalised to that player's
+  own busiest loc so every column reads independently (it answers
+  "where is this player", not "who controlled this loc"); the exact
+  seconds + percentage are in the hover tooltip. It is drawn entirely
+  in one canvas (left gutter = loc names, top band = team color bar +
+  rotated player names) and reuses `setupGraphCanvas` / `TEAM_COLORS` /
+  `PLOT_BG_COLOR` rather than the time-axis `renderSpansTimeline`. No
+  extra analyzer pass — both views read the same `locGraph` field and
+  `demoInfo.{teams,players}`.
+
 ## Regenerating map geometry
 
 Per-map floor polygon JSON under `static/maps/` is produced by the

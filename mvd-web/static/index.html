@@ -664,6 +664,22 @@
                         <span class="legend-item">Drag nodes · scroll to zoom · click for details</span>
                     </div>
                 </div>
+
+                <!-- Loc Heatmap -->
+                <div class="panel locheatmap-panel" id="locheatmap-panel" style="display: none;">
+                    <h3>Loc Heatmap</h3>
+                    <div class="locheatmap-desc">
+                        Rows = locs, columns = players grouped by team. Cell brightness =
+                        share of that player's time spent in the loc (normalised to their
+                        busiest loc). Hover for exact time.
+                    </div>
+                    <div class="locheatmap-outer">
+                        <canvas id="locheatmap-canvas"></canvas>
+                    </div>
+                    <div id="locheatmap-no-data" class="map-no-data" style="display:none">
+                        <p>No loc data available for this demo.</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Key Moments Tab -->

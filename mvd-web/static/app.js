@@ -2670,6 +2670,7 @@ function resetUIToCleanState() {
     locGraphState.result = null;
     setHTML('locgraph-canvas', '');
     hide('locgraph-no-data');
+    hide('locheatmap-panel');
 
     // Key moments
     setHTML('keymoments-body', '');
@@ -7303,6 +7304,7 @@ function initLocGraphView(result) {
             locGraphState.cy.destroy();
             locGraphState.cy = null;
         }
+        renderLocHeatmap();
         return;
     }
     if (noData) noData.style.display = 'none';
@@ -7315,6 +7317,7 @@ function initLocGraphView(result) {
     }
 
     buildOrRefreshCytoscape();
+    renderLocHeatmap();
 }
 
 function populateLocGraphFilter(result) {
@@ -7770,6 +7773,281 @@ function renderLocGraph() {
     } else if (locGraphState.graph) {
         buildOrRefreshCytoscape();
     }
+    renderLocHeatmap();
+}
+
+// ─── Loc Heatmap ─────────────────────────────────────────────────────────────
+//
+// A loc × player occupancy matrix living in the loc-graph tab. Rows are locs
+// (busiest first), columns are players grouped by team. Each cell's brightness
+// is the share of that player's observed time spent in the loc, normalised to
+// their own busiest loc so every column reads independently — the question it
+// answers is "where is this player", not "who controlled this loc". The raw
+// seconds + percentage live in the hover tooltip.
+//
+// All data comes from result.locGraph (per-player time-spent already baked onto
+// every node) and result.demoInfo (team grouping) — no extra analyzer pass. The
+// whole element is drawn in one canvas (left gutter = loc names, top band =
+// team bar + rotated player names) so column headers stay aligned with cells
+// at any dpr; it reuses setupGraphCanvas / TEAM_COLORS / PLOT_BG_COLOR rather
+// than renderSpansTimeline, which is a time-axis renderer and doesn't fit a
+// discrete-column matrix.
+
+const LH_ROW_H = 16;          // per-loc row height (CSS px)
+const LH_LEFT_GUTTER = 110;   // loc-name column width (CSS px)
+const LH_TEAM_BAND = 16;      // team color bar height (CSS px)
+const LH_PLAYER_BAND = 88;    // rotated player-name band height (CSS px)
+
+// Last-rendered layout for the canvas hover tooltip. Coords in CSS px.
+const locHeatmapHitState = {
+    rows: [], columns: [],
+    leftGutter: 0, top: 0, rowH: 0, colW: 0,
+};
+
+function prepLocHeatmapData(result) {
+    const graph = result && result.locGraph;
+    if (!graph || !graph.locs || graph.locs.length === 0) return null;
+    const demoInfo = result.demoInfo || {};
+    const teams = (demoInfo.teams && demoInfo.teams.length) ? demoInfo.teams : [''];
+    const players = demoInfo.players || [];
+
+    const teamIdxOf = (team) => {
+        const i = teams.indexOf(team);
+        return i >= 0 ? i : teams.length; // unknown teams share the trailing color
+    };
+
+    // Each player's total observed loc time, summed across all locs — the
+    // denominator for the per-player share.
+    const playerTotal = new Map();
+    for (const node of graph.locs) {
+        for (const [p, t] of Object.entries(node.byPlayer || {})) {
+            playerTotal.set(p, (playerTotal.get(p) || 0) + t);
+        }
+    }
+
+    const teamOfPlayer = new Map();
+    for (const p of players) if (p.name) teamOfPlayer.set(p.name, p.team || '');
+
+    // Columns: teams in demoInfo order, players within a team in demoInfo
+    // order, dropping anyone with no loc time (spectators / no samples).
+    const columns = [];
+    const seen = new Set();
+    for (const team of teams) {
+        for (const p of players) {
+            if (!p.name || seen.has(p.name)) continue;
+            if ((p.team || '') !== team) continue;
+            const tot = playerTotal.get(p.name) || 0;
+            if (tot <= 0) continue;
+            columns.push({ player: p.name, team, teamIdx: teamIdxOf(team), total: tot });
+            seen.add(p.name);
+        }
+    }
+    // Players present in loc data but not in demoInfo.players (rare) trail the
+    // grid so their movement still shows up.
+    for (const [p, tot] of playerTotal) {
+        if (seen.has(p) || tot <= 0) continue;
+        const team = teamOfPlayer.get(p) || '';
+        columns.push({ player: p, team, teamIdx: teamIdxOf(team), total: tot });
+        seen.add(p);
+    }
+    if (columns.length === 0) return null;
+
+    // Rows: every loc with player time, busiest first.
+    const rows = graph.locs
+        .filter(n => n.byPlayer && Object.keys(n.byPlayer).length > 0)
+        .slice()
+        .sort((a, b) => (b.total || 0) - (a.total || 0))
+        .map(n => ({ name: n.name, total: n.total || 0, byPlayer: n.byPlayer || {} }));
+    if (rows.length === 0) return null;
+
+    // Per-column max share, so each player's busiest loc maps to full brightness.
+    const colMaxFrac = columns.map(c => {
+        let m = 0;
+        for (const row of rows) {
+            const f = c.total > 0 ? (row.byPlayer[c.player] || 0) / c.total : 0;
+            if (f > m) m = f;
+        }
+        return m || 1;
+    });
+
+    // Duel demos label each team with the player's own name; the team band is
+    // then pure duplication, so collapse it.
+    const isDuel = columns.every(c => c.team === c.player);
+
+    return { rows, columns, colMaxFrac, isDuel };
+}
+
+// Blend from the plot background toward a team's color by t in [0,1].
+function lerpBgToTeam(t, teamIdx) {
+    const [tr, tg, tb] = hexToRgb(TEAM_COLORS[teamIdx % TEAM_COLORS.length]);
+    const [br, bg, bb] = hexToRgb(PLOT_BG_COLOR);
+    const r = Math.round(br + (tr - br) * t);
+    const g = Math.round(bg + (tg - bg) * t);
+    const b = Math.round(bb + (tb - bb) * t);
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+// Clip text to a pixel width, appending an ellipsis when truncated.
+function truncateToWidth(ctx, text, maxW) {
+    text = String(text || '');
+    if (maxW <= 0 || ctx.measureText(text).width <= maxW) return text;
+    let s = text;
+    while (s.length > 1 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+    return s + '…';
+}
+
+function renderLocHeatmap() {
+    const panel = document.getElementById('locheatmap-panel');
+    if (!panel) return;
+
+    const data = locGraphState.result ? prepLocHeatmapData(locGraphState.result) : null;
+    const noData = document.getElementById('locheatmap-no-data');
+    if (!data) {
+        // Only surface the panel (with its empty-state) when the tab itself has
+        // a loc graph; otherwise stay fully hidden.
+        const hasGraph = !!(locGraphState.graph && locGraphState.graph.locs && locGraphState.graph.locs.length);
+        panel.style.display = hasGraph ? '' : 'none';
+        if (noData) noData.style.display = hasGraph ? 'block' : 'none';
+        locHeatmapHitState.rows = [];
+        locHeatmapHitState.columns = [];
+        return;
+    }
+    panel.style.display = '';
+    if (noData) noData.style.display = 'none';
+
+    const { rows, columns, colMaxFrac, isDuel } = data;
+    const teamBandCss = isDuel ? 0 : LH_TEAM_BAND;
+    const topCss = teamBandCss + LH_PLAYER_BAND;
+    const cssHeight = topCss + rows.length * LH_ROW_H;
+
+    const setup = setupGraphCanvas('locheatmap-canvas', cssHeight);
+    if (!setup) return;
+    const { ctx, Wcss, W, dpr } = setup;
+
+    const leftGutter = Math.round(LH_LEFT_GUTTER * dpr);
+    const teamBand = Math.round(teamBandCss * dpr);
+    const top = Math.round(topCss * dpr);
+    const rowH = Math.round(LH_ROW_H * dpr);
+    const gap = Math.max(1, Math.round(dpr));
+    const gridW = W - leftGutter;
+    const colW = columns.length ? gridW / columns.length : gridW;
+    const graphH = top + rows.length * rowH;
+
+    ctx.fillStyle = PLOT_BG_COLOR;
+    ctx.fillRect(0, 0, W, graphH);
+
+    // Cells: brightness = sqrt(share / column-max) for perceptual lift of the
+    // many small shares.
+    rows.forEach((row, ri) => {
+        const y = top + ri * rowH;
+        columns.forEach((col, ci) => {
+            const x = leftGutter + ci * colW;
+            const frac = col.total > 0 ? (row.byPlayer[col.player] || 0) / col.total : 0;
+            const norm = colMaxFrac[ci] > 0 ? frac / colMaxFrac[ci] : 0;
+            ctx.fillStyle = lerpBgToTeam(norm > 0 ? Math.sqrt(norm) : 0, col.teamIdx);
+            ctx.fillRect(Math.round(x), y, Math.max(1, Math.round(colW) - gap), rowH - gap);
+        });
+    });
+
+    // Loc-name labels in the left gutter, right-aligned per row.
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.font = `${Math.round(11 * dpr)}px sans-serif`;
+    ctx.fillStyle = '#aaa';
+    rows.forEach((row, ri) => {
+        const y = top + ri * rowH + rowH / 2;
+        const label = truncateToWidth(ctx, row.name, leftGutter - Math.round(8 * dpr));
+        ctx.fillText(label, leftGutter - Math.round(6 * dpr), y);
+    });
+
+    // Team color band across each contiguous group of same-team columns.
+    if (teamBand > 0) {
+        let gi = 0;
+        while (gi < columns.length) {
+            let gj = gi;
+            while (gj < columns.length && columns[gj].team === columns[gi].team) gj++;
+            const x1 = leftGutter + gi * colW;
+            const x2 = leftGutter + gj * colW;
+            ctx.fillStyle = TEAM_COLORS[columns[gi].teamIdx % TEAM_COLORS.length];
+            ctx.fillRect(Math.round(x1), 0, Math.max(1, Math.round(x2 - x1) - gap), teamBand - gap);
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `${Math.round(10 * dpr)}px sans-serif`;
+            const label = truncateToWidth(ctx, columns[gi].team, (x2 - x1) - 4 * dpr);
+            if (label) ctx.fillText(label, (x1 + x2) / 2, teamBand / 2);
+            gi = gj;
+        }
+    }
+
+    // Player names, rotated to read bottom-to-top, centered over each column.
+    // After rotate(-90°) the local +x axis points up the screen, so textAlign
+    // 'left' starts each name just above the grid and extends it into the band.
+    ctx.fillStyle = '#ccc';
+    ctx.font = `${Math.round(10 * dpr)}px sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    columns.forEach((col, ci) => {
+        const cx = leftGutter + ci * colW + colW / 2;
+        const yBottom = top - Math.round(4 * dpr);
+        ctx.save();
+        ctx.translate(cx, yBottom);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText(truncateToWidth(ctx, col.player, LH_PLAYER_BAND * dpr - Math.round(8 * dpr)), 0, 0);
+        ctx.restore();
+    });
+
+    // Cache CSS-px layout for hit-testing.
+    locHeatmapHitState.rows = rows;
+    locHeatmapHitState.columns = columns;
+    locHeatmapHitState.leftGutter = LH_LEFT_GUTTER;
+    locHeatmapHitState.top = topCss;
+    locHeatmapHitState.rowH = LH_ROW_H;
+    locHeatmapHitState.colW = columns.length ? (Wcss - LH_LEFT_GUTTER) / columns.length : 0;
+
+    attachLocHeatmapTooltip();
+}
+
+function attachLocHeatmapTooltip() {
+    const canvas = document.getElementById('locheatmap-canvas');
+    if (!canvas || canvas._lhTipAttached) return;
+    canvas._lhTipAttached = true;
+
+    const wrapper = canvas.parentElement; // .locheatmap-outer (positioned)
+    const tip = document.createElement('div');
+    tip.className = 'canvas-tooltip';
+    tip.style.display = 'none';
+    wrapper.appendChild(tip);
+
+    canvas.addEventListener('mousemove', (e) => {
+        const s = locHeatmapHitState;
+        if (!s.rows.length || !s.columns.length || s.colW <= 0) { tip.style.display = 'none'; return; }
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        if (mx < s.leftGutter || my < s.top) { tip.style.display = 'none'; return; }
+        const ci = Math.floor((mx - s.leftGutter) / s.colW);
+        const ri = Math.floor((my - s.top) / s.rowH);
+        if (ci < 0 || ci >= s.columns.length || ri < 0 || ri >= s.rows.length) {
+            tip.style.display = 'none'; return;
+        }
+        const col = s.columns[ci];
+        const row = s.rows[ri];
+        const sec = row.byPlayer[col.player] || 0;
+        const pct = col.total > 0 ? (sec / col.total) * 100 : 0;
+        const teamLine = (!col.team || col.team === col.player) ? '' :
+            `<div>Team: ${escapeHtml(col.team)}</div>`;
+        tip.innerHTML = `<div><strong>${escapeHtml(col.player)}</strong> · <strong>${escapeHtml(row.name)}</strong></div>
+${teamLine}<div>${sec.toFixed(1)}s · ${pct.toFixed(1)}% of their time</div>`;
+        tip.style.display = 'block';
+        const tipW = tip.offsetWidth || 200;
+        const wrapW = wrapper.clientWidth;
+        let left = mx + 12;
+        if (left + tipW > wrapW) left = mx - tipW - 12;
+        tip.style.left = Math.max(0, left) + 'px';
+        tip.style.top = (my + 12) + 'px';
+    });
+    canvas.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
 }
 
 // ─── Playback Engine ──────────────────────────────────────────────────────
