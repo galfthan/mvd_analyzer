@@ -48,6 +48,7 @@ ENTRIES=(
   "steam        https://maps.quakeworld.nu/core/steam.bsp                                         39bd0203cbff42bebfd2f5577333ca78f787023f05f8a52ba923de6b4163a11f"
   "anwalked     https://maps.quakeworld.nu/core/anwalked.bsp                                      0c808fe481290b543e293bc716bea4bff0e71e07f941f49e415ad882745ac68c"
   "stronghold   https://maps.quakeworld.nu/core/stronghold.bsp                                    640443115de7be4f99f88b8f25b3f91c6e54bd624154ac072802e63957dcb4e9"
+  "defer        https://maps.quakeworld.nu/core/defer.bsp                                         c01d9ec4b634ac07f8a8beabab95640eee2113aa64a3637d182357bf1e0a9416"
 )
 
 check_sha() {
