@@ -102,40 +102,35 @@ func getDemoInfo(this js.Value, args []js.Value) interface{} {
 	return string(b)
 }
 
-// getDefaultBuckets returns the v6-shape []HighResBucket array — what
-// the existing qw-web frontend's panels iterate. Internally this is
-// view.Buckets({windowMs:50, fields:all, reducers:legacy,
-// includeTeam:true}) followed by view.ToLegacyHighResBuckets.
-//
-// Phase 1.5 of the plan migrates panels to call view.Buckets directly
-// via getBuckets; this shim is the bridge that keeps the existing
-// frontend untouched.
+// getDefaultBuckets returns the column-major ColumnarBuckets the
+// frontend's Timeline/Map panels read (50 ms, all fields, legacy
+// "first-sample-of-bucket" reducers, team aggregates). Columnar always
+// emits the raw loc index "li". See mvd-analytics/view/columnar.go for
+// the shape and the app.js accessors that consume it.
 func getDefaultBuckets(this js.Value, args []js.Value) interface{} {
 	if lastResult == nil {
 		return errorJSON("no demo analyzed yet")
 	}
-	bv, err := view.Buckets(lastResult, view.BucketsOptions{
+	cb, err := view.BucketsColumnar(lastResult, view.BucketsOptions{
 		WindowMs:    50,
 		Fields:      view.AllStandardFields,
 		Reducers:    view.LegacyReducerSet,
 		IncludeTeam: true,
-		// The legacy HighResPlayerData.Li is an integer index; keep the
-		// raw index so ToLegacyHighResBuckets can read it.
-		LocIndex: true,
 	})
 	if err != nil {
 		return errorJSON(err.Error())
 	}
-	legacy := view.ToLegacyHighResBuckets(bv)
-	b, err := json.Marshal(legacy)
+	b, err := json.Marshal(cb)
 	if err != nil {
 		return errorJSON(err.Error())
 	}
 	return string(b)
 }
 
-// getBuckets is the new query API surface. Argument is a JSON string
-// of view.BucketsOptions. Returns BucketsView JSON.
+// getBuckets is the query API surface. Argument is a JSON string of
+// view.BucketsOptions; Layout ("row" default | "column") selects the
+// output shape. Returns BucketsView JSON (row) or ColumnarBuckets JSON
+// (column).
 func getBuckets(this js.Value, args []js.Value) interface{} {
 	if lastResult == nil {
 		return errorJSON("no demo analyzed yet")
@@ -146,6 +141,17 @@ func getBuckets(this js.Value, args []js.Value) interface{} {
 	var opts view.BucketsOptions
 	if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
 		return errorJSON("bad options JSON: " + err.Error())
+	}
+	if opts.Layout == "column" {
+		cb, err := view.BucketsColumnar(lastResult, opts)
+		if err != nil {
+			return errorJSON(err.Error())
+		}
+		b, err := json.Marshal(cb)
+		if err != nil {
+			return errorJSON(err.Error())
+		}
+		return string(b)
 	}
 	bv, err := view.Buckets(lastResult, opts)
 	if err != nil {

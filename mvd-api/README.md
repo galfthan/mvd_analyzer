@@ -54,7 +54,7 @@ immutable`, `X-Schema-Version: 10`, `X-Cache: HIT|WARM|MISS`, and
 | GET | `/v1/demos/{id}/backpacks` | `players`, `weapon` | `[]result.BackpackDrop` (RL/LG drops via `//ktx drop`) |
 | GET | `/v1/demos/{id}/items` | `items`, `players`, `kinds` | `result.ItemsResult` (per-item pickup/respawn timeline) |
 | GET | `/v1/demos/{id}/weapon-pickups` | `players`, `weapon`, `source` | `[]result.WeaponPickup` (kills-before-next-death; joins to backpacks via `backpackEnt`) |
-| GET | `/v1/demos/{id}/buckets` | `windowMs`, `from`, `to`, `players`, `fields`, `reducers`, `includeTeam`, `loc` | `view.BucketsView` |
+| GET | `/v1/demos/{id}/buckets` | `windowMs`, `from`, `to`, `players`, `fields`, `reducers`, `includeTeam`, `loc`, `layout` | `view.ColumnarBuckets` (`layout=column`, default) or `view.BucketsView` (`layout=row`) |
 | GET | `/v1/demos/{id}/events` | `from`, `to`, `players`, `types`, `loc` | `view.EventsView` |
 | GET | `/v1/demos/{id}/stream-slice` | `from`, `to`, `players`, `fields`, `loc` | `view.StreamSliceView` |
 | GET | `/v1/demos/{id}/state-at` | `time` (required), `players`, `fields`, `loc` | `view.StateAtView` |
@@ -71,6 +71,13 @@ immutable`, `X-Schema-Version: 10`, `X-Cache: HIT|WARM|MISS`, and
   raw `LocTable` indices for index-based math. Fetch the decoder from
   `/loc-table`. Honoured by `buckets`, `events`, `stream-slice`,
   `state-at`, `loc-trails`.
+- `layout` (`/buckets` only): `column` (default) is the compact
+  column-major `ColumnarBuckets` (one array per `(player, field)`,
+  `time(i) = startMs + i*windowMs`, booleans as `0`/`1`, loc always the
+  raw `li` index); `row` is the bucket-major `BucketsView` (one
+  self-describing object per bucket). Column is far smaller for
+  series/trend reads; use `state-at` for point-in-time snapshots. See
+  RESULT_SCHEMA.md for the `ColumnarBuckets` shape.
 - Empty defaults match the view function defaults — see
   [`mvd-analytics/RESULT_SCHEMA.md`](../mvd-analytics/RESULT_SCHEMA.md)
   for the field-code vocabulary and the reducer registry.
@@ -208,7 +215,11 @@ curl -s -X POST localhost:8080/v1/demos/gameId:12345
 
 curl -s 'localhost:8080/v1/demos/gameId:12345/overview' | jq '.map, .duration, .teams'
 
+# default layout is column: top-level count + per-player field arrays
 curl -s 'localhost:8080/v1/demos/gameId:12345/buckets?windowMs=1000&fields=h,a' \
+  | jq '.count, (.players | keys)'
+# row layout (one object per bucket) is opt-in
+curl -s 'localhost:8080/v1/demos/gameId:12345/buckets?windowMs=1000&fields=h,a&layout=row' \
   | jq '.buckets | length'
 
 curl -s 'localhost:8080/v1/demos/gameId:12345/state-at?time=65&fields=h,a,rl,pos' | jq .

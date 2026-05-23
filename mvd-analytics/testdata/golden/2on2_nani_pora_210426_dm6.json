@@ -9280,7 +9280,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 10,
+  "schemaVersion": 11,
   "streams": {
     "global": {
       "matchEnd": 600000,

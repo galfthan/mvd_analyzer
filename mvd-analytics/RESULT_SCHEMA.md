@@ -167,28 +167,13 @@ format here only carries the event-shaped derived results.
 | PlayerUserIDs | `playerUserIDs` | map[string]int (name → Hub viewer UserID) |
 | RegionControl | `regionControl` | *RegionControlResult |
 
-### HighResBucket (legacy shim shape)
-
-`HighResBucket` is no longer on the result wire format. The Go type
-remains as the shape returned by `view.ToLegacyHighResBuckets` (the
-WASM bridge's `getDefaultBuckets` shim). New consumers should target
-`view.BucketsView` directly via `view.Buckets`.
-
-| Field | JSON key | Type |
-|---|---|---|
-| T | `t` | float64 (bucket start time) |
-| P | `p` | map[string]*HighResPlayerData |
-| TD | `td` | map[string]*HighResTeamData |
-
-### HighResPlayerData / HighResTeamData
-
-Same compact field set as v6 (X/Y/Z, H, A, AT, RL/LG/GL/SSG/SNG,
-Q/Pent/R, Shells/Nails/Rockets/Cells, D, Sp, Li for player; RL/LG/
-RLLG/W/GL/Q/Pe/R/Pw/TH/TA/ABT for team). Returned by
-`view.ToLegacyHighResBuckets`. New consumers should access these
-fields via `view.Buckets` instead, where each player's per-bucket
-data is a `map[string]any` keyed by the field codes from
-[Field vocabulary](#field-vocabulary).
+The legacy `HighResBucket` / `HighResPlayerData` / `HighResTeamData`
+shim shapes (and `view.ToLegacyHighResBuckets`) were removed once the
+web frontend moved to the columnar layout. Bucketed data is now served
+only as `view.BucketsView` (row) or `view.ColumnarBuckets` (column) —
+see [Query API → Buckets](#buckets). Each player's per-bucket data is a
+`map[string]any` keyed by the [field vocabulary](#field-vocabulary)
+(row) or one dense array per field (column).
 
 ### TimelineFragEvent
 
@@ -380,7 +365,7 @@ Every timestamped field in this schema — `PositionTrack.T`,
 `FragStreakEvent.Time/EndTime/Duration`, `MatchEvent.Time`,
 `FragEntry.Time`, `BackpackDrop.Time`,
 `WeaponPickup.Time/NextDeathTime/DropTime`,
-`ItemPhase.AvailableFrom/TakenAt/RespawnAt`, `HighResBucket.T` —
+`ItemPhase.AvailableFrom/TakenAt/RespawnAt` —
 is stored as `int32` integer milliseconds. JSON keys are unchanged;
 external consumers reading these as seconds must scale by `* 0.001`.
 The view-layer query API (`view.Buckets`, `view.Events`,
@@ -541,6 +526,46 @@ Loc rendering follows `BucketsOptions.LocIndex` (REST `?loc=`): by
 default each bucket's player map carries a resolved `loc` name; in
 index mode (`loc=index`) it carries the raw `li` integer instead, which
 you decode against the demo's loc-table (`GET /loc-table`).
+
+##### Columnar layout (`view.BucketsColumnar`, REST `?layout=column`)
+
+The same per-bucket values in a column-major shape — for each
+`(player, field)` one dense typed array instead of a map per bucket.
+Far smaller and allocation-light for series/trend reads; use
+`StateAt` for point-in-time snapshots rather than aligning indices
+across arrays.
+
+```go
+view.BucketsColumnar(r, view.BucketsOptions{WindowMs: 50, IncludeTeam: true})
+// → *ColumnarBuckets {
+//     windowMs, startMs, count, partialLastMs?,
+//     players: { name: {
+//        first, n,                       // active span [first, first+n)
+//        alive: [0/1 …],                 // liveness per bucket in the span
+//        validFrom: { field: idx },      // sparse; field valid from idx (omitted when == first)
+//        h|a|li|sh|nl|rk|cl: [int16 …],  // dense, carry-forward
+//        x|y|z: [int32 …],               // position split
+//        at: [string …],
+//        rl|lg|gl|ssg|sng|q|pe|r|sp|d: [0/1 …],
+//     } },
+//     teams: { name: { rl|lg|rllg|w|gl|q|pe|r|pw|th|ta: [int …],
+//                      abt: { ra|ya|ga: [int …] } } },
+//   }
+```
+
+Conventions: `time(i) = startMs + i*windowMs` (int32 ms); booleans and
+the `alive` mask are `0`/`1`; a field array is omitted when the player
+never has it; values carry forward through dead buckets (the `alive`
+mask, not the arrays, marks liveness — row-major omits dead players, so
+treat `alive[i]==0` as "absent"); loc is always the raw `li` index
+(`LocIndex` does not apply). Team arrays span the full `count` grid.
+
+There is no per-life table: it would be a bucket-resolution approximation
+that undercounts a death+respawn falling in one window. A same-window
+death+respawn surfaces as that bucket carrying both `d=1` and `sp=1`
+while `alive` stays `1`; for authoritative life counts/durations read the
+per-player spawn/death event streams (`/events`, or the raw
+`Streams.Players[].sp`/`.d`).
 
 #### Events
 
@@ -730,6 +755,7 @@ duplication exists, the canonical fix lives on the other side.
 
 | Version | Changes |
 |---|---|
+| v11 | Bucket views gain a **column-major layout** (`view.ColumnarBuckets`): one dense typed array per `(player, field)` over the player's active span, implicit time axis (`time(i) = startMs + i*windowMs`), a `0`/`1` `alive[]` liveness mask, sparse per-field `validFrom`, booleans/alive as `0`/`1`, loc always the raw `li` index. It is the **default** for the web (`getDefaultBuckets`), REST `/buckets`, and MCP `getBuckets`; the row-major `BucketsView` stays available via `layout=row`. The legacy `HighResBucket`/`HighResPlayerData`/`HighResTeamData` shim and `view.ToLegacyHighResBuckets` are removed. The `Result` **structure is unchanged** — this bump versions the outward *view/query* wire surface so API/MCP/web consumers can feature-detect the new default shape and cached view responses (ETag/`X-Schema-Version`) are invalidated. |
 | v10 | DeathEvent / SpawnEvent now derive primarily from the `DF_DEAD` bit in `svc_playerinfo` (broadcast every frame for every player) instead of relying solely on `STAT_HEALTH` crossings (directed at the active POV via `dem_stats`). The stat-based detector still runs and is deduplicated against the new signal — whichever fires first wins. Deaths whose `dem_stats` block was addressed to a different player slot are now captured; `PlayerStream.Spawns`/`Deaths` counts go up for affected demos. Downstream `LocGraph` edges (some spurious `teleport` edges across previously-missed deaths disappear), `LocTrails`, `RegionControl`, `WeaponPickups` (kills-before-next-death windows), and streak boundaries shift accordingly. Field shapes are unchanged. |
 | v9 | Loc attribution gains visibility awareness via `mvd-analytics/locvis` (V6: Euclidean primary + PVS-veto). When a per-map BSP is available the analyzer rejects loc-points outside the player's potentially-visible-set, eliminating the brief "wall-bleed" phantom visits V1 produced. Field shapes unchanged: only the contents of `PlayerStream.Loc` (`li`) and everything derived (LocTrails, LocGraph edges, RegionControl) shift for maps with a BSP. Maps without a BSP fall back to V1 — bit-identical to v8 for those. Background: [`experiments/locattr/V2b-V6-HANDOFF.md`](../experiments/locattr/V2b-V6-HANDOFF.md). |
 | v8 | All timestamped result fields migrate from `float64` seconds to `int32` milliseconds — `PositionTrack.T`, `PlayerStream.Spawns`/`Deaths`. JSON keys unchanged; consumers reading as seconds must scale by 1/1000. Eliminates the float-precision drift that produced spurious teleport edges in locgraph when a respawn boundary and a position sample shared the same wire timestamp. Other timestamped fields (ChangeI16.T, Interval.Start/End, MatchEvent.Time, frag/powerup event times) stay float64 seconds. |
@@ -739,5 +765,7 @@ duplication exists, the canonical fix lives on the other side.
 | v4 | Backpacks added — RL/LG backpack drops sourced from KTX `//ktx drop` STUFFCMD_DEMOONLY directive. |
 
 `CurrentSchemaVersion` lives at `result/result.go:CurrentSchemaVersion`;
-bump when changes break consumers and update this table in the same
-commit.
+bump when a change breaks consumers of the outward data — either the
+`Result` structure **or** the on-demand view/query wire surface
+(`/buckets`, `/events`, `/state-at`, …) served identically via
+WASM/CLI/API/MCP — and update this table in the same commit.

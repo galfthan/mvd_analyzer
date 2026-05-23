@@ -73,6 +73,20 @@ func parseLocIndex(q url.Values) (bool, error) {
 	}
 }
 
+// parseLayout reads ?layout=row|column. Empty → "column" (the compact
+// column-major ColumnarBuckets, the default); "row" → the bucket-major
+// BucketsView. Any other value is an error.
+func parseLayout(q url.Values) (string, error) {
+	switch strings.ToLower(strings.TrimSpace(q.Get("layout"))) {
+	case "", "column", "columnar":
+		return "column", nil
+	case "row":
+		return "row", nil
+	default:
+		return "", fmt.Errorf("invalid layout=%q (want 'row' or 'column')", q.Get("layout"))
+	}
+}
+
 // parseReducers parses a comma-separated list of "field=name" pairs.
 // Empty → nil. Malformed → error.
 func parseReducers(v string) (map[string]string, error) {

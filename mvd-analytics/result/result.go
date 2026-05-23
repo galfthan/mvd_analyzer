@@ -10,8 +10,13 @@
 package result
 
 // CurrentSchemaVersion identifies the JSON schema shape. Bump on any
-// breaking change to the Result structure or its sub-types. Consumers
-// can pin or switch on this value when reading a stored analysis.
+// breaking change to the outward data the pipeline serves — both the
+// Result structure / its sub-types AND the on-demand view/query wire
+// surface (Buckets, Events, StreamSlice, StateAt, LocTrails,
+// RegionControl), which is served identically via WASM, CLI, the REST
+// API, and MCP. Consumers pin or switch on this value to feature-detect
+// breaking changes; it is also the REST API's ETag / X-Schema-Version,
+// so a bump invalidates cached view responses.
 //
 // v4 adds Backpacks: a list of RL/LG backpack drops sourced from
 // KTX's //ktx drop STUFFCMD_DEMOONLY directive. Pickup tracking is
@@ -107,7 +112,23 @@ package result
 //     affected demos and downstream LocGraph, LocTrails,
 //     RegionControl, WeaponPickups, and streak boundaries shift
 //     accordingly.
-const CurrentSchemaVersion = 10
+//
+// v11:
+//   - Bucket views gain a column-major layout (view.ColumnarBuckets):
+//     for each (player, field) one dense typed array over the player's
+//     active span, with an implicit time axis (time(i) =
+//     startMs + i*windowMs), a 0/1 alive[] liveness mask, a sparse
+//     per-field validFrom, and booleans/alive emitted as 0/1. It becomes
+//     the default for the web (getDefaultBuckets), the REST /buckets
+//     endpoint, and MCP getBuckets; the row-major view.BucketsView stays
+//     available via layout=row. Columnar always emits the raw loc index.
+//   - Removes the legacy HighResBucket / HighResPlayerData /
+//     HighResTeamData shim and view.ToLegacyHighResBuckets (the v6 WASM
+//     bridge shape). The Result *structure* is unchanged; this bump
+//     versions the outward view/query wire surface so API / MCP / web
+//     consumers can feature-detect the new default bucket shape and
+//     cached view responses are invalidated.
+const CurrentSchemaVersion = 11
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

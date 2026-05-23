@@ -92,67 +92,6 @@ type RegionPlayerStats struct {
 	Unarmed int    `json:"unarmed"` // bucket count present without RL/LG
 }
 
-// HighResBucket is a compact bucket for high-resolution timeline data.
-// Uses short JSON keys to reduce payload size. Each bucket contains
-// per-player state snapshots and pre-computed team aggregations.
-//
-// Vestigial — at schema v7 buckets are produced on demand by
-// view.Buckets; this type survives only as the wire shape the v6
-// frontend panels in mvd-web/static/app.js still consume via the
-// WASM bridge's getDefaultBuckets / ToLegacyHighResBuckets adapter.
-// T stays float64 seconds (the v6 shape) even though the rest of
-// schema v8 is int32 ms — the frontend compares bucket.t against
-// seconds-valued cursor times in ~20 panels, and a unit flip here
-// would force a parallel sweep of the legacy panel code. The
-// adapter does the ms→seconds conversion once at the boundary.
-type HighResBucket struct {
-	T  float64                       `json:"t"`            // Start time (float64 seconds, legacy frontend wire shape)
-	P  map[string]*HighResPlayerData `json:"p,omitempty"`  // Player data by name
-	TD map[string]*HighResTeamData   `json:"td,omitempty"` // Pre-computed team aggregations by team name
-}
-
-// HighResTeamData holds pre-computed team-level aggregations for a single
-// high-res bucket. Compact JSON keys match the player data convention.
-type HighResTeamData struct {
-	RL   int            `json:"rl,omitempty"`   // Players with RL only (no LG)
-	LG   int            `json:"lg,omitempty"`   // Players with LG only (no RL)
-	RLLG int            `json:"rllg,omitempty"` // Players with both RL and LG
-	W    int            `json:"w,omitempty"`    // Total players with RL or LG
-	GL   int            `json:"gl,omitempty"`   // Players carrying GL (independent of RL/LG)
-	Q    int            `json:"q,omitempty"`    // Players with quad
-	Pe   int            `json:"pe,omitempty"`   // Players with pent
-	R    int            `json:"r,omitempty"`    // Players with ring
-	Pw   int            `json:"pw,omitempty"`   // Total with any powerup
-	TH   int            `json:"th,omitempty"`   // Total health (sum across team)
-	TA   int            `json:"ta,omitempty"`   // Total armor (sum across team)
-	ABT  map[string]int `json:"abt,omitempty"`  // Armor by type: "ra"/"ya"/"ga" -> player count
-}
-
-// HighResPlayerData is a full player state snapshot (compact keys).
-type HighResPlayerData struct {
-	X       float32 `json:"x"`
-	Y       float32 `json:"y"`
-	Z       float32 `json:"z"`             // World z from svc_playerinfo origin[2]
-	H       int     `json:"h"`             // Health
-	A       int     `json:"a"`             // Armor
-	AT      string  `json:"at,omitempty"`  // Armor type: "ga"/"ya"/"ra"
-	RL      bool    `json:"rl,omitempty"`  // Has rocket launcher
-	LG      bool    `json:"lg,omitempty"`  // Has lightning gun
-	GL      bool    `json:"gl,omitempty"`  // Has grenade launcher
-	SSG     bool    `json:"ssg,omitempty"` // Has super shotgun
-	SNG     bool    `json:"sng,omitempty"` // Has super nailgun
-	Q       bool    `json:"q,omitempty"`   // Has quad
-	Pent    bool    `json:"pe,omitempty"`  // Has pent
-	R       bool    `json:"r,omitempty"`   // Has ring
-	Shells  int     `json:"sh,omitempty"`  // Shotgun shells
-	Nails   int     `json:"nl,omitempty"`  // Nailgun nails
-	Rockets int     `json:"rk,omitempty"`  // Rocket ammo
-	Cells   int     `json:"cl,omitempty"`  // Cell ammo
-	D       bool    `json:"d,omitempty"`   // Death frame marker
-	Sp      bool    `json:"sp,omitempty"`  // Spawn frame marker
-	Li      int     `json:"li,omitempty"`  // Loc-name index into TimelineAnalysisResult.LocTable (0 = no loc)
-}
-
 // MapLocation represents a named point in a map for visualization.
 type MapLocation struct {
 	X    float32 `json:"x"`

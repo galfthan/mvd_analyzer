@@ -267,15 +267,32 @@ func TestOverviewOmitsErrorsWhenClean(t *testing.T) {
 	}
 }
 
-func TestBuckets_HappyPath(t *testing.T) {
+// TestBuckets_DefaultIsColumn pins that omitting layout returns the
+// column-major shape (count + players, no row-major "buckets" array).
+func TestBuckets_DefaultIsColumn(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
 	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/buckets?windowMs=1000&fields=h,a", 200)
 	if int(resp["windowMs"].(float64)) != 1000 {
 		t.Errorf("windowMs = %v; want 1000", resp["windowMs"])
 	}
+	if _, ok := resp["count"].(float64); !ok {
+		t.Errorf("default layout should be columnar (missing count): %v", resp["count"])
+	}
+	if _, ok := resp["buckets"]; ok {
+		t.Errorf("default (column) layout must not carry a row-major 'buckets' key")
+	}
+}
+
+func TestBuckets_RowLayout(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/buckets?windowMs=1000&fields=h,a&layout=row", 200)
+	if int(resp["windowMs"].(float64)) != 1000 {
+		t.Errorf("windowMs = %v; want 1000", resp["windowMs"])
+	}
 	if _, ok := resp["buckets"].([]any); !ok {
-		t.Errorf("buckets not an array: %T", resp["buckets"])
+		t.Errorf("layout=row buckets not an array: %T", resp["buckets"])
 	}
 }
 
@@ -283,6 +300,46 @@ func TestBuckets_BadParam(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
 	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/buckets?windowMs=banana")
+	if status != 400 {
+		t.Errorf("status = %d; want 400 (body=%s)", status, string(resp))
+	}
+}
+
+func TestBuckets_ColumnLayout(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/buckets?windowMs=1000&fields=h,a&layout=column", 200)
+	if int(resp["windowMs"].(float64)) != 1000 {
+		t.Errorf("windowMs = %v; want 1000", resp["windowMs"])
+	}
+	count := int(resp["count"].(float64))
+	if count != 600 {
+		t.Errorf("count = %d; want 600", count)
+	}
+	if _, ok := resp["buckets"]; ok {
+		t.Errorf("column layout must not carry a row-major 'buckets' key")
+	}
+	players, ok := resp["players"].(map[string]any)
+	if !ok {
+		t.Fatalf("players not an object: %T", resp["players"])
+	}
+	bps, ok := players["bps"].(map[string]any)
+	if !ok {
+		t.Fatalf("player bps missing: %v", players)
+	}
+	h, ok := bps["h"].([]any)
+	if !ok {
+		t.Fatalf("bps.h not an array: %T", bps["h"])
+	}
+	if len(h) != int(bps["n"].(float64)) {
+		t.Errorf("h length %d != n %v", len(h), bps["n"])
+	}
+}
+
+func TestBuckets_BadLayout(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/buckets?layout=banana")
 	if status != 400 {
 		t.Errorf("status = %d; want 400 (body=%s)", status, string(resp))
 	}

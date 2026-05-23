@@ -535,6 +535,11 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
 		return
 	}
+	layout, err := parseLayout(q)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", err.Error())
+		return
+	}
 	opts := view.BucketsOptions{
 		WindowMs:    windowMs,
 		StartTime:   start,
@@ -544,6 +549,16 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 		Reducers:    reducers,
 		IncludeTeam: parseBool(q, "includeTeam"),
 		LocIndex:    locIndex,
+		Layout:      layout,
+	}
+	if layout == "column" {
+		cb, err := view.BucketsColumnar(res, opts)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "view_error", err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, cb)
+		return
 	}
 	bv, err := view.Buckets(res, opts)
 	if err != nil {
