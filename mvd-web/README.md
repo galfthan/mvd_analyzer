@@ -69,7 +69,8 @@ A slim top bar (wordmark + commit-hash version + GitHub link) sits
 above a Grafana-style frame: a fixed left **sidebar** with one button
 per analysis tab, and a **main pane** that fills the rest of the
 viewport (no width cap). Sidebar order is `Search`, `Summary`,
-`Timeline`, `Chat`, `Map`, `Locs & Regions`, `Key Moments`, `Pack Drops`.
+`Timeline`, `Chat`, `Map`, `Locs & Regions`, `Key Moments`, `Pack Drops`,
+`Pickups`, `Denials`.
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
@@ -270,6 +271,31 @@ The `Drop` and `Run` columns are hub.quakeworld.nu replay links.
 `Drop` spans 10 s leading into the drop, tracking the dropper;
 `Run` spans 3 s before pickup to the picker's next death (or +15 s
 if they survived to match end), tracking the picker.
+
+## Denials tab
+
+The Denials tab surfaces two derived metrics from
+[`result.denials`](../mvd-analytics/analyzer/denials.md):
+
+- **Denials** — per-team and per-player aggregate counts plus a
+  per-event filterable table showing every "stolen from enemy"
+  pickup: a player without RL/LG took an important item
+  (RA / YA / MH / RL / LG / Quad / Pent / Ring) while only the
+  opposing team had a weapon-or-Quad bearer in the spawn's region.
+  Columns: Time | Player | Team | Item | Loc | Enemy W. | Hub.
+- **Hoovers** — same shape, but for pickups that took value a
+  *teammate* needed: a player without RL/LG took an armor or MH
+  while a same-team weapon-or-Quad bearer in the region was below
+  the per-item threshold (RA: armor &lt; 75; YA: armor &lt; 50;
+  MH: health ≤ 50). Columns: Time | Player | Team | Item | Loc |
+  Needy Teammate | Need | Hub.
+
+Region for both metrics is the item's loc plus every loc connected by
+≥10 traversals in *both* directions (loc graph). Filters work like the
+Pack Drops tab — Player / Team / Item dropdowns auto-populated from the
+demo. Time cells seek the timeline scrubber; Hub cells link to
+`hub.quakeworld.nu` from `time − 5s` to `time + 3s` tracking the
+picker.
 
 ## Map-tab item overlay
 

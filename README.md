@@ -383,7 +383,11 @@ backpacks (RL/LG drops attributed to the dropping player via KTX's
 `//ktx drop` hint), and weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==
-`backpacks[].entNum`). Schema v7 introduced `streams` as the canonical
+`backpacks[].entNum`), and denials (per-match list of "denied"
+[stolen-from-enemy] and "hoovered" [stolen-from-team] pickups derived
+post-hoc from items + locgraph + per-player stream state — see
+[`mvd-analytics/analyzer/denials.md`](mvd-analytics/analyzer/denials.md)).
+Schema v7 introduced `streams` as the canonical
 event-rate storage — every per-player field (vitals, weapons, ammo,
 position) recorded at the rate it actually changed. Schema v8 stores
 **every timestamped field** as `int32` milliseconds rather than float
@@ -418,9 +422,11 @@ across web / REST / MCP. Schema v12 adds optional `armed`,
 edge (transition counts) — the same breakdown restricted to samples where
 the player held RL/LG, held neither, or had an active quad / pent — so
 consumers can render a self-contained loc graph / heatmap per combat
-posture.
+posture. Schema v13 adds `denials` — a per-match list of "denied"
+(stolen-from-enemy) and "hoovered" (stolen-from-team) item pickups,
+derived post-parse from `items` + `locGraph` + `streams`.
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `12`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `13`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).

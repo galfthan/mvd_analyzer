@@ -10,8 +10,8 @@
 package analyzer
 
 import (
-	"github.com/mvd-analyzer/mvd-reader/events"
 	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // Context provides shared state for analyzers during a single analysis
@@ -25,8 +25,8 @@ import (
 type Context struct {
 	ServerData  *events.ServerData
 	Players     [events.MaxClients]*events.PlayerInfo
-	FragsBySlot map[int]int         // Final frag count per slot
-	DemoInfo    *DemoInfoResult     // Parsed demoinfo (set during finalization, used by ResolveSlotDemoInfo)
+	FragsBySlot map[int]int     // Final frag count per slot
+	DemoInfo    *DemoInfoResult // Parsed demoinfo (set during finalization, used by ResolveSlotDemoInfo)
 }
 
 // SlotDemoInfo holds the resolved demoinfo player for a slot.
@@ -155,4 +155,7 @@ type (
 	ItemPhase              = result.ItemPhase
 	BackpackDrop           = result.BackpackDrop
 	WeaponPickup           = result.WeaponPickup
+	DenialsResult          = result.DenialsResult
+	DenialEvent            = result.DenialEvent
+	HooverEvent            = result.HooverEvent
 )

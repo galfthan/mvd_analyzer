@@ -258,6 +258,7 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 	//   2. normalizeDuelTeams
 	//   3. locGraphPost
 	//   4. regionControlPost
+	//   5. buildDenialsPost
 	// — but the slice is otherwise unconstrained. Add a step by
 	// calling r.RegisterPostProcessor(...) before Analyze.
 	for _, p := range r.postProcessors {
@@ -309,5 +310,9 @@ func NewDefaultRegistry() *Registry {
 	r.RegisterPostProcessor(duelTeamNormalize)
 	r.RegisterPostProcessor(locGraphPost)
 	r.RegisterPostProcessor(regionControlPost)
+	// Denials reads Items + LocGraph + result.Streams (via view.StateAt),
+	// so it must run after locGraphPost builds the graph and after time /
+	// duel normalisation puts every input on the match-relative ms base.
+	r.RegisterPostProcessor(buildDenialsPost)
 	return r
 }

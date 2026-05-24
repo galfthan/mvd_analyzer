@@ -90,15 +90,15 @@ package result
 // v10:
 //   - DeathEvent / SpawnEvent gain two new signal sources beyond the
 //     v9 StatHealth-crossing detector:
-//       1. The DF_DEAD bit in svc_playerinfo (broadcast every frame
-//          for every player), captured in mvd-reader/parser/position.go.
-//       2. Victim-prefix and infix obituary prints (rocketed by,
-//          telefragged by, "Satan's power deflects X's telefrag", the
-//          CRMod-added "disembowled" / "shish-kebabed" / etc. set,
-//          KTX's k_spawnicide variants) matched in
-//          mvd-reader/parser/obituary.go and consumed in parsePrint,
-//          gated on a parser-internal match-started flag so warmup
-//          obits cannot pre-seed dedup state.
+//     1. The DF_DEAD bit in svc_playerinfo (broadcast every frame
+//     for every player), captured in mvd-reader/parser/position.go.
+//     2. Victim-prefix and infix obituary prints (rocketed by,
+//     telefragged by, "Satan's power deflects X's telefrag", the
+//     CRMod-added "disembowled" / "shish-kebabed" / etc. set,
+//     KTX's k_spawnicide variants) matched in
+//     mvd-reader/parser/obituary.go and consumed in parsePrint,
+//     gated on a parser-internal match-started flag so warmup
+//     obits cannot pre-seed dedup state.
 //     The first two sources flow through maybeEmitDeath /
 //     maybeEmitSpawn which dedupe against each other. The obit path
 //     uses forceEmitDeath instead, bypassing dedup, because KTX's
@@ -137,7 +137,14 @@ package result
 //     active Quad / Pent powerup. Additive and backward-compatible (all
 //     omitempty), but the bump invalidates cached loc-graph responses so
 //     consumers pick them up.
-const CurrentSchemaVersion = 12
+//
+// v13:
+//   - Adds Result.Denials (*DenialsResult): "denied" (stolen-from-enemy)
+//     and "hoovered" (stolen-from-team) item pickups derived post-parse
+//     from Items + LocGraph + result.Streams. Additive and omitempty
+//     (nil when the demo yields neither), but the bump signals the new
+//     top-level field to consumers.
+const CurrentSchemaVersion = 13
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -160,5 +167,6 @@ type Result struct {
 	Backpacks        []BackpackDrop          `json:"backpacks,omitempty"`
 	WeaponPickups    []WeaponPickup          `json:"weaponPickups,omitempty"`
 	Streams          *Streams                `json:"streams,omitempty"`
+	Denials          *DenialsResult          `json:"denials,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
 }
