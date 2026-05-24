@@ -2801,6 +2801,50 @@
     "timelimit": 10,
     "version": 3
   },
+  "denials": {
+    "denials": [
+      {
+        "enemyWeapons": 1,
+        "item": "mh",
+        "loc": "MH",
+        "player": "squeeze",
+        "playerUserID": 14,
+        "team": "1",
+        "time": 86458
+      },
+      {
+        "enemyWeapons": 1,
+        "item": "ra",
+        "loc": "RA",
+        "player": "stepcop",
+        "playerUserID": 9,
+        "team": "n n",
+        "time": 197911
+      },
+      {
+        "enemyWeapons": 1,
+        "item": "ya",
+        "loc": "YA",
+        "player": "squeeze",
+        "playerUserID": 14,
+        "team": "1",
+        "time": 502119
+      }
+    ],
+    "hoovers": [
+      {
+        "item": "ra",
+        "loc": "RA",
+        "needyStat": "armor",
+        "needyTeammate": "squeeze",
+        "needyValue": 0,
+        "player": "Milton",
+        "playerUserID": 11,
+        "team": "1",
+        "time": 460429
+      }
+    ]
+  },
   "frags": {
     "byPlayer": {
       "Milton": {
@@ -15800,7 +15844,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "streams": {
     "global": {
       "matchEnd": 600050,
