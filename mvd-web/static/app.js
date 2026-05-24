@@ -601,7 +601,7 @@ function setupFileUpload() {
 const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map', 'keymoments'];
 
 // Tab URL aliases. The loc tab's internal data-tab stayed "loc-graph", but
-// the tab is now labelled "Loc & Regions" and the URL prefers the matching
+// the tab is now labelled "Locs & Regions" and the URL prefers the matching
 // "locs-regions" slug. Old "loc-graph" links still resolve; new URLs are
 // written as "locs-regions" (see updateUrlState).
 const TAB_URL_TO_INTERNAL = { 'locs-regions': 'loc-graph' };

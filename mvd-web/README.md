@@ -69,7 +69,7 @@ A slim top bar (wordmark + commit-hash version + GitHub link) sits
 above a Grafana-style frame: a fixed left **sidebar** with one button
 per analysis tab, and a **main pane** that fills the rest of the
 viewport (no width cap). Sidebar order is `Search`, `Summary`,
-`Timeline`, `Chat`, `Map`, `Loc & Regions`, `Key Moments`, `Pack Drops`.
+`Timeline`, `Chat`, `Map`, `Locs & Regions`, `Key Moments`, `Pack Drops`.
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
@@ -285,7 +285,7 @@ the sidebar so verifying the event stream against gameplay is
 visual. The panel updates live during playback via the 200 ms
 full-sync tick in `animatePlayback`.
 
-## Loc & Regions tab
+## Locs & Regions tab
 
 (`data-tab="loc-graph"`; the URL slug is now `locs-regions`, with
 `loc-graph` still accepted — see the tab-alias note below.) Top to bottom:
@@ -352,7 +352,7 @@ the full name on the header `title` — QuakeWorld's in-game short name
 demo stream, so there's no per-player short name to read.
 
 **Tab URL alias.** The tab's internal `data-tab` stayed `loc-graph` (so
-JS / CSS selectors are unchanged), but the rename to "Loc & Regions" gave
+JS / CSS selectors are unchanged), but the rename to "Locs & Regions" gave
 it the canonical URL slug `locs-regions`. `switchTab` / `applyUrlState`
 run incoming `?tab` through `resolveTabName` (`locs-regions → loc-graph`)
 and `updateUrlState` writes `locs-regions`, so new links use the new slug
