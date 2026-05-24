@@ -7281,6 +7281,7 @@ function initLocGraphView(result) {
     if (noData) noData.style.display = 'none';
 
     populateLocGraphFilter(result);
+    populateLocMetricOptions();
 
     if (!locGraphState.initialized) {
         setupLocGraphControls();
@@ -7289,6 +7290,34 @@ function initLocGraphView(result) {
 
     buildOrRefreshCytoscape();
     renderLocHeatmap();
+}
+
+// Show only the loc-analysis metrics this demo actually has data for —
+// "With Quad"/"With Pent" disappear on maps/modes where nobody held that
+// powerup (e.g. quad in most 1v1s), so the user can't land on an empty
+// graph + table. A node carries the conditioned sub-object only when some
+// sample met the condition (omitempty), so presence == availability. If the
+// current selection becomes unavailable, fall back to "Full time".
+function populateLocMetricOptions() {
+    const sel = document.getElementById('locgraph-metric');
+    if (!sel) return;
+    const avail = { all: true, armed: false, unarmed: false, quad: false, pent: false };
+    const locs = (locGraphState.graph && locGraphState.graph.locs) || [];
+    for (const n of locs) {
+        if (n.armed) avail.armed = true;
+        if (n.unarmed) avail.unarmed = true;
+        if (n.quad) avail.quad = true;
+        if (n.pent) avail.pent = true;
+        if (avail.armed && avail.unarmed && avail.quad && avail.pent) break;
+    }
+    let currentOk = false;
+    for (const opt of sel.options) {
+        const ok = !!avail[opt.value];
+        opt.hidden = !ok;
+        opt.disabled = !ok;
+        if (ok && opt.value === sel.value) currentOk = true;
+    }
+    if (!currentOk) sel.value = 'all';
 }
 
 function populateLocGraphFilter(result) {
@@ -7357,6 +7386,7 @@ function getLocMetric() {
 // (absent when no sample met the condition).
 function metricWeightsOf(node, metric) {
     if (metric === 'armed') return node.armed || EMPTY_WEIGHTS;
+    if (metric === 'unarmed') return node.unarmed || EMPTY_WEIGHTS;
     if (metric === 'quad') return node.quad || EMPTY_WEIGHTS;
     if (metric === 'pent') return node.pent || EMPTY_WEIGHTS;
     return node;
@@ -7374,6 +7404,7 @@ function nodeWeightFor(node, filter, metric) {
 // self-contained graph (its own nodes + edges).
 function metricEdgeWeightsOf(edge, metric) {
     if (metric === 'armed') return edge.armed || EMPTY_WEIGHTS;
+    if (metric === 'unarmed') return edge.unarmed || EMPTY_WEIGHTS;
     if (metric === 'quad') return edge.quad || EMPTY_WEIGHTS;
     if (metric === 'pent') return edge.pent || EMPTY_WEIGHTS;
     return edge;
@@ -8038,6 +8069,10 @@ function renderLocHeatmap() {
     const data = locGraphState.result ? buildLocHeatmap(locGraphState.result, metric) : null;
     const noData = document.getElementById('locheatmap-no-data');
     if (!data) {
+        // Clear any stale table from a previous metric so the empty-state
+        // isn't shown alongside an outdated grid.
+        setHTML('locheatmap-thead-row', '');
+        setHTML('locheatmap-body', '');
         const hasGraph = !!(locGraphState.graph && locGraphState.graph.locs && locGraphState.graph.locs.length);
         panel.style.display = hasGraph ? '' : 'none';
         if (noData) noData.style.display = hasGraph ? 'block' : 'none';

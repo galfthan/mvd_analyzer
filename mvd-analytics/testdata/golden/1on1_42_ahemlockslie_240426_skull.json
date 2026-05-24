@@ -2874,7 +2874,16 @@
         "from": "GA",
         "kind": "normal",
         "to": "GL",
-        "total": 14
+        "total": 14,
+        "unarmed": {
+          "byPlayer": {
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "AHemlocksLie": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -2899,7 +2908,18 @@
         "from": "GA",
         "kind": "normal",
         "to": "LG",
-        "total": 12
+        "total": 12,
+        "unarmed": {
+          "byPlayer": {
+            "42": 2,
+            "AHemlocksLie": 2
+          },
+          "byTeam": {
+            "42": 2,
+            "AHemlocksLie": 2
+          },
+          "total": 4
+        }
       },
       {
         "armed": {
@@ -2945,7 +2965,16 @@
         "from": "GL",
         "kind": "normal",
         "to": "GA",
-        "total": 8
+        "total": 8,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1
+          },
+          "byTeam": {
+            "42": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -2970,7 +2999,16 @@
         "from": "GL",
         "kind": "normal",
         "to": "MH.high",
-        "total": 30
+        "total": 30,
+        "unarmed": {
+          "byPlayer": {
+            "AHemlocksLie": 2
+          },
+          "byTeam": {
+            "AHemlocksLie": 2
+          },
+          "total": 2
+        }
       },
       {
         "armed": {
@@ -2995,7 +3033,18 @@
         "from": "GL",
         "kind": "normal",
         "to": "RA",
-        "total": 26
+        "total": 26,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1,
+            "AHemlocksLie": 4
+          },
+          "byTeam": {
+            "42": 1,
+            "AHemlocksLie": 4
+          },
+          "total": 5
+        }
       },
       {
         "armed": {
@@ -3045,7 +3094,16 @@
         "from": "GL",
         "kind": "normal",
         "to": "middle",
-        "total": 8
+        "total": 8,
+        "unarmed": {
+          "byPlayer": {
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "AHemlocksLie": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -3187,7 +3245,18 @@
         "from": "MH",
         "kind": "normal",
         "to": "YA",
-        "total": 25
+        "total": 25,
+        "unarmed": {
+          "byPlayer": {
+            "42": 4,
+            "AHemlocksLie": 2
+          },
+          "byTeam": {
+            "42": 4,
+            "AHemlocksLie": 2
+          },
+          "total": 6
+        }
       },
       {
         "armed": {
@@ -3254,7 +3323,18 @@
         "from": "MH",
         "kind": "normal",
         "to": "yard",
-        "total": 32
+        "total": 32,
+        "unarmed": {
+          "byPlayer": {
+            "42": 2,
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "42": 2,
+            "AHemlocksLie": 1
+          },
+          "total": 3
+        }
       },
       {
         "armed": {
@@ -3279,7 +3359,16 @@
         "from": "MH",
         "kind": "normal",
         "to": "yard.RL",
-        "total": 4
+        "total": 4,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1
+          },
+          "byTeam": {
+            "42": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -3304,7 +3393,18 @@
         "from": "MH.high",
         "kind": "normal",
         "to": "GL",
-        "total": 26
+        "total": 26,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1,
+            "AHemlocksLie": 4
+          },
+          "byTeam": {
+            "42": 1,
+            "AHemlocksLie": 4
+          },
+          "total": 5
+        }
       },
       {
         "armed": {
@@ -3329,7 +3429,18 @@
         "from": "MH.high",
         "kind": "normal",
         "to": "MH",
-        "total": 13
+        "total": 13,
+        "unarmed": {
+          "byPlayer": {
+            "42": 2,
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "42": 2,
+            "AHemlocksLie": 1
+          },
+          "total": 3
+        }
       },
       {
         "armed": {
@@ -3379,7 +3490,16 @@
         "from": "MH.high",
         "kind": "normal",
         "to": "RA",
-        "total": 8
+        "total": 8,
+        "unarmed": {
+          "byPlayer": {
+            "AHemlocksLie": 2
+          },
+          "byTeam": {
+            "AHemlocksLie": 2
+          },
+          "total": 2
+        }
       },
       {
         "armed": {
@@ -3450,7 +3570,18 @@
         "from": "MH.rox",
         "kind": "normal",
         "to": "MH",
-        "total": 10
+        "total": 10,
+        "unarmed": {
+          "byPlayer": {
+            "42": 3,
+            "AHemlocksLie": 2
+          },
+          "byTeam": {
+            "42": 3,
+            "AHemlocksLie": 2
+          },
+          "total": 5
+        }
       },
       {
         "armed": {
@@ -3492,7 +3623,16 @@
         "from": "RA",
         "kind": "normal",
         "to": "GL",
-        "total": 4
+        "total": 4,
+        "unarmed": {
+          "byPlayer": {
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "AHemlocksLie": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -3559,7 +3699,18 @@
         "from": "RA",
         "kind": "normal",
         "to": "yard.RL",
-        "total": 30
+        "total": 30,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1,
+            "AHemlocksLie": 5
+          },
+          "byTeam": {
+            "42": 1,
+            "AHemlocksLie": 5
+          },
+          "total": 6
+        }
       },
       {
         "armed": {
@@ -3584,7 +3735,16 @@
         "from": "YA",
         "kind": "normal",
         "to": "MH",
-        "total": 13
+        "total": 13,
+        "unarmed": {
+          "byPlayer": {
+            "42": 3
+          },
+          "byTeam": {
+            "42": 3
+          },
+          "total": 3
+        }
       },
       {
         "armed": {
@@ -3609,7 +3769,18 @@
         "from": "YA",
         "kind": "normal",
         "to": "YA.RL",
-        "total": 23
+        "total": 23,
+        "unarmed": {
+          "byPlayer": {
+            "42": 3,
+            "AHemlocksLie": 6
+          },
+          "byTeam": {
+            "42": 3,
+            "AHemlocksLie": 6
+          },
+          "total": 9
+        }
       },
       {
         "armed": {
@@ -3801,7 +3972,18 @@
         "from": "YA.balks",
         "kind": "normal",
         "to": "GL",
-        "total": 47
+        "total": 47,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1,
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "42": 1,
+            "AHemlocksLie": 1
+          },
+          "total": 2
+        }
       },
       {
         "armed": {
@@ -3932,7 +4114,18 @@
         "from": "YA.tele",
         "kind": "normal",
         "to": "YA",
-        "total": 3
+        "total": 3,
+        "unarmed": {
+          "byPlayer": {
+            "42": 2,
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "42": 2,
+            "AHemlocksLie": 1
+          },
+          "total": 3
+        }
       },
       {
         "armed": {
@@ -3957,7 +4150,16 @@
         "from": "YA.tele",
         "kind": "teleport",
         "to": "middle",
-        "total": 13
+        "total": 13,
+        "unarmed": {
+          "byPlayer": {
+            "AHemlocksLie": 2
+          },
+          "byTeam": {
+            "AHemlocksLie": 2
+          },
+          "total": 2
+        }
       },
       {
         "armed": {
@@ -3982,7 +4184,16 @@
         "from": "middle",
         "kind": "normal",
         "to": "GA",
-        "total": 16
+        "total": 16,
+        "unarmed": {
+          "byPlayer": {
+            "AHemlocksLie": 2
+          },
+          "byTeam": {
+            "AHemlocksLie": 2
+          },
+          "total": 2
+        }
       },
       {
         "armed": {
@@ -4074,7 +4285,18 @@
         "from": "middle",
         "kind": "normal",
         "to": "yard",
-        "total": 27
+        "total": 27,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1,
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "42": 1,
+            "AHemlocksLie": 1
+          },
+          "total": 2
+        }
       },
       {
         "armed": {
@@ -4095,7 +4317,16 @@
         "from": "middle",
         "kind": "normal",
         "to": "yard.RL",
-        "total": 5
+        "total": 5,
+        "unarmed": {
+          "byPlayer": {
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "AHemlocksLie": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -4145,7 +4376,18 @@
         "from": "yard",
         "kind": "teleport",
         "to": "MH.high",
-        "total": 19
+        "total": 19,
+        "unarmed": {
+          "byPlayer": {
+            "42": 2,
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "42": 2,
+            "AHemlocksLie": 1
+          },
+          "total": 3
+        }
       },
       {
         "armed": {
@@ -4170,7 +4412,18 @@
         "from": "yard",
         "kind": "normal",
         "to": "YA.balks",
-        "total": 48
+        "total": 48,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1,
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "42": 1,
+            "AHemlocksLie": 1
+          },
+          "total": 2
+        }
       },
       {
         "armed": {
@@ -4237,7 +4490,16 @@
         "from": "yard.RL",
         "kind": "normal",
         "to": "RA",
-        "total": 3
+        "total": 3,
+        "unarmed": {
+          "byPlayer": {
+            "AHemlocksLie": 1
+          },
+          "byTeam": {
+            "AHemlocksLie": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -4313,6 +4575,17 @@
         },
         "name": "GA",
         "total": 60.32000000000019,
+        "unarmed": {
+          "byPlayer": {
+            "42": 4.585999999999987,
+            "AHemlocksLie": 4.278999999999988
+          },
+          "byTeam": {
+            "42": 4.585999999999987,
+            "AHemlocksLie": 4.278999999999988
+          },
+          "total": 8.864999999999961
+        },
         "x": 617.25,
         "y": -2,
         "z": -151.875
@@ -4339,6 +4612,17 @@
         },
         "name": "GL",
         "total": 235.1730000000138,
+        "unarmed": {
+          "byPlayer": {
+            "42": 3.7829999999999933,
+            "AHemlocksLie": 12.304999999999948
+          },
+          "byTeam": {
+            "42": 3.7829999999999933,
+            "AHemlocksLie": 12.304999999999948
+          },
+          "total": 16.08799999999993
+        },
         "x": 559.875,
         "y": -76.875,
         "z": 56
@@ -4365,6 +4649,17 @@
         },
         "name": "LG",
         "total": 51.97800000000006,
+        "unarmed": {
+          "byPlayer": {
+            "42": 0.3080000000000001,
+            "AHemlocksLie": 0.3240000000000002
+          },
+          "byTeam": {
+            "42": 0.3080000000000001,
+            "AHemlocksLie": 0.3240000000000002
+          },
+          "total": 0.6320000000000005
+        },
         "x": 500.625,
         "y": 80.875,
         "z": -295.875
@@ -4391,6 +4686,17 @@
         },
         "name": "MH",
         "total": 106.23700000000525,
+        "unarmed": {
+          "byPlayer": {
+            "42": 10.063999999999975,
+            "AHemlocksLie": 2.4389999999999956
+          },
+          "byTeam": {
+            "42": 10.063999999999975,
+            "AHemlocksLie": 2.4389999999999956
+          },
+          "total": 12.502999999999956
+        },
         "x": -77.5,
         "y": -471.125,
         "z": -295.875
@@ -4417,6 +4723,17 @@
         },
         "name": "MH.high",
         "total": 139.37200000001093,
+        "unarmed": {
+          "byPlayer": {
+            "42": 4.391999999999989,
+            "AHemlocksLie": 5.577999999999982
+          },
+          "byTeam": {
+            "42": 4.391999999999989,
+            "AHemlocksLie": 5.577999999999982
+          },
+          "total": 9.96999999999996
+        },
         "x": 47.875,
         "y": -289.5,
         "z": 56
@@ -4443,6 +4760,17 @@
         },
         "name": "MH.rox",
         "total": 9.857999999999969,
+        "unarmed": {
+          "byPlayer": {
+            "42": 5.212999999999983,
+            "AHemlocksLie": 2.2099999999999955
+          },
+          "byTeam": {
+            "42": 5.212999999999983,
+            "AHemlocksLie": 2.2099999999999955
+          },
+          "total": 7.422999999999972
+        },
         "x": -30.25,
         "y": -446.25,
         "z": -39.875
@@ -4469,6 +4797,17 @@
         },
         "name": "RA",
         "total": 42.82200000000042,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1.0130000000000006,
+            "AHemlocksLie": 11.236999999999954
+          },
+          "byTeam": {
+            "42": 1.0130000000000006,
+            "AHemlocksLie": 11.236999999999954
+          },
+          "total": 12.24999999999995
+        },
         "x": 194,
         "y": 459.875,
         "z": -71.875
@@ -4495,6 +4834,17 @@
         },
         "name": "YA",
         "total": 95.21600000000254,
+        "unarmed": {
+          "byPlayer": {
+            "42": 6.887999999999986,
+            "AHemlocksLie": 10.706999999999955
+          },
+          "byTeam": {
+            "42": 6.887999999999986,
+            "AHemlocksLie": 10.706999999999955
+          },
+          "total": 17.59499999999998
+        },
         "x": 485.25,
         "y": -580.625,
         "z": -295.875
@@ -4521,6 +4871,17 @@
         },
         "name": "YA.RL",
         "total": 95.09600000000312,
+        "unarmed": {
+          "byPlayer": {
+            "42": 6.438999999999981,
+            "AHemlocksLie": 9.097999999999965
+          },
+          "byTeam": {
+            "42": 6.438999999999981,
+            "AHemlocksLie": 9.097999999999965
+          },
+          "total": 15.536999999999924
+        },
         "x": 519,
         "y": -571,
         "z": -279.875
@@ -4547,6 +4908,17 @@
         },
         "name": "YA.balks",
         "total": 54.24800000000017,
+        "unarmed": {
+          "byPlayer": {
+            "42": 0.5810000000000003,
+            "AHemlocksLie": 0.5620000000000003
+          },
+          "byTeam": {
+            "42": 0.5810000000000003,
+            "AHemlocksLie": 0.5620000000000003
+          },
+          "total": 1.1430000000000002
+        },
         "x": 842.25,
         "y": -144,
         "z": -103.875
@@ -4573,6 +4945,17 @@
         },
         "name": "YA.tele",
         "total": 13.17099999999995,
+        "unarmed": {
+          "byPlayer": {
+            "42": 2.1829999999999963,
+            "AHemlocksLie": 3.915999999999986
+          },
+          "byTeam": {
+            "42": 2.1829999999999963,
+            "AHemlocksLie": 3.915999999999986
+          },
+          "total": 6.09899999999998
+        },
         "x": -175,
         "y": -563,
         "z": -279.875
@@ -4599,6 +4982,17 @@
         },
         "name": "middle",
         "total": 94.91500000000408,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1.8829999999999958,
+            "AHemlocksLie": 7.471999999999974
+          },
+          "byTeam": {
+            "42": 1.8829999999999958,
+            "AHemlocksLie": 7.471999999999974
+          },
+          "total": 9.354999999999967
+        },
         "x": 563.625,
         "y": -262.25,
         "z": -231.875
@@ -4625,6 +5019,17 @@
         },
         "name": "yard",
         "total": 113.73500000000693,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1.8419999999999976,
+            "AHemlocksLie": 1.3979999999999995
+          },
+          "byTeam": {
+            "42": 1.8419999999999976,
+            "AHemlocksLie": 1.3979999999999995
+          },
+          "total": 3.2399999999999927
+        },
         "x": 176,
         "y": -236.75,
         "z": -359.875
@@ -4651,6 +5056,17 @@
         },
         "name": "yard.RL",
         "total": 87.91900000000348,
+        "unarmed": {
+          "byPlayer": {
+            "42": 1.294999999999999,
+            "AHemlocksLie": 11.116999999999946
+          },
+          "byTeam": {
+            "42": 1.294999999999999,
+            "AHemlocksLie": 11.116999999999946
+          },
+          "total": 12.411999999999939
+        },
         "x": 417.875,
         "y": 510,
         "z": -295.875

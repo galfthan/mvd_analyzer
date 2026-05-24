@@ -215,6 +215,8 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 			armed := rl || lg
 			if armed {
 				addWeight(&node.Armed, p.Name, team, dt)
+			} else {
+				addWeight(&node.Unarmed, p.Name, team, dt)
 			}
 			if quad {
 				addWeight(&node.Quad, p.Name, team, dt)
@@ -261,6 +263,8 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 				// graph (armed/quad edges + nodes).
 				if armed {
 					addEdgeWeight(&edge.Armed, p.Name, team)
+				} else {
+					addEdgeWeight(&edge.Unarmed, p.Name, team)
 				}
 				if quad {
 					addEdgeWeight(&edge.Quad, p.Name, team)

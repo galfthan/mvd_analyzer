@@ -11,8 +11,9 @@ type LocGraphResult struct {
 
 // LocNode is a single location on the map with aggregate time spent by
 // all observed players. Total / ByPlayer / ByTeam count all observed
-// time; Armed, Quad and Pent carry the same breakdown restricted to the
-// samples where the player held RL or LG (Armed) or an active Quad / Pent
+// time; Armed, Unarmed, Quad and Pent carry the same breakdown restricted
+// to the samples where the player held RL or LG (Armed), held neither
+// (Unarmed, the complement of Armed), or had an active Quad / Pent
 // powerup, so consumers can re-weight the graph / heatmap by combat
 // posture without re-deriving from streams.
 type LocNode struct {
@@ -24,6 +25,7 @@ type LocNode struct {
 	ByPlayer map[string]float64 `json:"byPlayer"`
 	ByTeam   map[string]float64 `json:"byTeam,omitempty"`
 	Armed    *LocWeights        `json:"armed,omitempty"`
+	Unarmed  *LocWeights        `json:"unarmed,omitempty"`
 	Quad     *LocWeights        `json:"quad,omitempty"`
 	Pent     *LocWeights        `json:"pent,omitempty"`
 }
@@ -38,10 +40,11 @@ type LocWeights struct {
 }
 
 // LocEdge is a directed transition from one loc to another, with
-// transition counts grouped by player and team. Armed, Quad and Pent
-// mirror the node-level conditioning: the subset of transitions made
-// while the player held RL or LG (Armed) or an active quad / pent, so the
-// frontend can draw a self-contained movement graph per combat posture.
+// transition counts grouped by player and team. Armed, Unarmed, Quad and
+// Pent mirror the node-level conditioning: the subset of transitions made
+// while the player held RL or LG (Armed), held neither (Unarmed), or had
+// an active quad / pent, so the frontend can draw a self-contained
+// movement graph per combat posture.
 type LocEdge struct {
 	From     string          `json:"from"`
 	To       string          `json:"to"`
@@ -50,6 +53,7 @@ type LocEdge struct {
 	ByPlayer map[string]int  `json:"byPlayer"`
 	ByTeam   map[string]int  `json:"byTeam,omitempty"`
 	Armed    *LocEdgeWeights `json:"armed,omitempty"`
+	Unarmed  *LocEdgeWeights `json:"unarmed,omitempty"`
 	Quad     *LocEdgeWeights `json:"quad,omitempty"`
 	Pent     *LocEdgeWeights `json:"pent,omitempty"`
 }

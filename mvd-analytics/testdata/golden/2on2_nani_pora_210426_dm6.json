@@ -5293,7 +5293,16 @@
         "from": "GA",
         "kind": "normal",
         "to": "GA.cells",
-        "total": 25
+        "total": 25,
+        "unarmed": {
+          "byPlayer": {
+            "gLAd": 1
+          },
+          "byTeam": {
+            "nAnI": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -5320,7 +5329,16 @@
         "from": "GA",
         "kind": "normal",
         "to": "GA.shells",
-        "total": 10
+        "total": 10,
+        "unarmed": {
+          "byPlayer": {
+            "kippo": 1
+          },
+          "byTeam": {
+            "pora": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -5349,7 +5367,20 @@
         "from": "GA",
         "kind": "teleport",
         "to": "MH",
-        "total": 66
+        "total": 66,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 9,
+            "gLAd": 4,
+            "kippo": 16,
+            "rusti": 11
+          },
+          "byTeam": {
+            "nAnI": 13,
+            "pora": 27
+          },
+          "total": 40
+        }
       },
       {
         "armed": {
@@ -5378,7 +5409,20 @@
         "from": "GA.cells",
         "kind": "normal",
         "to": "GA",
-        "total": 31
+        "total": 31,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 3,
+            "gLAd": 3,
+            "kippo": 9,
+            "rusti": 5
+          },
+          "byTeam": {
+            "nAnI": 6,
+            "pora": 14
+          },
+          "total": 20
+        }
       },
       {
         "armed": {
@@ -5407,7 +5451,19 @@
         "from": "GA.cells",
         "kind": "normal",
         "to": "GL",
-        "total": 30
+        "total": 30,
+        "unarmed": {
+          "byPlayer": {
+            "gLAd": 3,
+            "kippo": 3,
+            "rusti": 3
+          },
+          "byTeam": {
+            "nAnI": 3,
+            "pora": 6
+          },
+          "total": 9
+        }
       },
       {
         "byPlayer": {
@@ -5423,7 +5479,20 @@
         "from": "GA.hide",
         "kind": "normal",
         "to": "GA",
-        "total": 17
+        "total": 17,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 4,
+            "gLAd": 2,
+            "kippo": 5,
+            "rusti": 6
+          },
+          "byTeam": {
+            "nAnI": 6,
+            "pora": 11
+          },
+          "total": 17
+        }
       },
       {
         "armed": {
@@ -5477,7 +5546,16 @@
         "from": "GA.shells",
         "kind": "normal",
         "to": "big",
-        "total": 12
+        "total": 12,
+        "unarmed": {
+          "byPlayer": {
+            "kippo": 1
+          },
+          "byTeam": {
+            "pora": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -5535,7 +5613,20 @@
         "from": "GL",
         "kind": "normal",
         "to": "GL.RA",
-        "total": 38
+        "total": 38,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 5,
+            "gLAd": 2,
+            "kippo": 9,
+            "rusti": 1
+          },
+          "byTeam": {
+            "nAnI": 7,
+            "pora": 10
+          },
+          "total": 17
+        }
       },
       {
         "armed": {
@@ -5564,7 +5655,20 @@
         "from": "GL",
         "kind": "normal",
         "to": "big",
-        "total": 28
+        "total": 28,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 1,
+            "gLAd": 3,
+            "kippo": 2,
+            "rusti": 5
+          },
+          "byTeam": {
+            "nAnI": 4,
+            "pora": 7
+          },
+          "total": 11
+        }
       },
       {
         "armed": {
@@ -5593,7 +5697,19 @@
         "from": "GL.RA",
         "kind": "normal",
         "to": "GL",
-        "total": 32
+        "total": 32,
+        "unarmed": {
+          "byPlayer": {
+            "gLAd": 1,
+            "kippo": 1,
+            "rusti": 1
+          },
+          "byTeam": {
+            "nAnI": 1,
+            "pora": 2
+          },
+          "total": 3
+        }
       },
       {
         "armed": {
@@ -5618,7 +5734,16 @@
         "from": "GL.RA",
         "kind": "normal",
         "to": "GL.below",
-        "total": 3
+        "total": 3,
+        "unarmed": {
+          "byPlayer": {
+            "kippo": 1
+          },
+          "byTeam": {
+            "pora": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -5647,7 +5772,19 @@
         "from": "GL.RA",
         "kind": "normal",
         "to": "RA",
-        "total": 37
+        "total": 37,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 4,
+            "gLAd": 1,
+            "kippo": 6
+          },
+          "byTeam": {
+            "nAnI": 5,
+            "pora": 6
+          },
+          "total": 11
+        }
       },
       {
         "armed": {
@@ -5676,7 +5813,16 @@
         "from": "GL.below",
         "kind": "normal",
         "to": "RA",
-        "total": 25
+        "total": 25,
+        "unarmed": {
+          "byPlayer": {
+            "kippo": 1
+          },
+          "byTeam": {
+            "pora": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -5703,7 +5849,16 @@
         "from": "GL.below",
         "kind": "normal",
         "to": "big",
-        "total": 13
+        "total": 13,
+        "unarmed": {
+          "byPlayer": {
+            "kippo": 1
+          },
+          "byTeam": {
+            "pora": 1
+          },
+          "total": 1
+        }
       },
       {
         "byPlayer": {
@@ -5719,7 +5874,20 @@
         "from": "GL.hide",
         "kind": "normal",
         "to": "GL",
-        "total": 22
+        "total": 22,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 6,
+            "gLAd": 1,
+            "kippo": 13,
+            "rusti": 2
+          },
+          "byTeam": {
+            "nAnI": 7,
+            "pora": 15
+          },
+          "total": 22
+        }
       },
       {
         "armed": {
@@ -5777,7 +5945,16 @@
         "from": "MH",
         "kind": "teleport",
         "to": "GA",
-        "total": 37
+        "total": 37,
+        "unarmed": {
+          "byPlayer": {
+            "kippo": 2
+          },
+          "byTeam": {
+            "pora": 2
+          },
+          "total": 2
+        }
       },
       {
         "armed": {
@@ -5931,7 +6108,16 @@
         "from": "MH.pipe",
         "kind": "normal",
         "to": "MH",
-        "total": 13
+        "total": 13,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 1
+          },
+          "byTeam": {
+            "nAnI": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -6070,7 +6256,16 @@
         "from": "RA",
         "kind": "normal",
         "to": "GL.below",
-        "total": 12
+        "total": 12,
+        "unarmed": {
+          "byPlayer": {
+            "kippo": 1
+          },
+          "byTeam": {
+            "pora": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -6148,7 +6343,20 @@
         "from": "RA.behind",
         "kind": "normal",
         "to": "RA",
-        "total": 22
+        "total": 22,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 6,
+            "gLAd": 2,
+            "kippo": 5,
+            "rusti": 5
+          },
+          "byTeam": {
+            "nAnI": 8,
+            "pora": 10
+          },
+          "total": 18
+        }
       },
       {
         "armed": {
@@ -6177,7 +6385,19 @@
         "from": "RA.tunnel",
         "kind": "normal",
         "to": "RA",
-        "total": 28
+        "total": 28,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 2,
+            "kippo": 4,
+            "rusti": 2
+          },
+          "byTeam": {
+            "nAnI": 2,
+            "pora": 6
+          },
+          "total": 8
+        }
       },
       {
         "armed": {
@@ -6206,7 +6426,18 @@
         "from": "RA.tunnel",
         "kind": "normal",
         "to": "big",
-        "total": 27
+        "total": 27,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 1,
+            "kippo": 1
+          },
+          "byTeam": {
+            "nAnI": 1,
+            "pora": 1
+          },
+          "total": 2
+        }
       },
       {
         "armed": {
@@ -6235,7 +6466,18 @@
         "from": "big",
         "kind": "teleport",
         "to": "GA",
-        "total": 20
+        "total": 20,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 2,
+            "kippo": 2
+          },
+          "byTeam": {
+            "nAnI": 2,
+            "pora": 2
+          },
+          "total": 4
+        }
       },
       {
         "armed": {
@@ -6289,7 +6531,16 @@
         "from": "big",
         "kind": "normal",
         "to": "GL",
-        "total": 4
+        "total": 4,
+        "unarmed": {
+          "byPlayer": {
+            "rusti": 1
+          },
+          "byTeam": {
+            "pora": 1
+          },
+          "total": 1
+        }
       },
       {
         "armed": {
@@ -6397,7 +6648,19 @@
         "from": "big",
         "kind": "normal",
         "to": "big.hatch",
-        "total": 35
+        "total": 35,
+        "unarmed": {
+          "byPlayer": {
+            "gLAd": 3,
+            "kippo": 2,
+            "rusti": 2
+          },
+          "byTeam": {
+            "nAnI": 3,
+            "pora": 4
+          },
+          "total": 7
+        }
       },
       {
         "armed": {
@@ -6426,7 +6689,19 @@
         "from": "big.hatch",
         "kind": "normal",
         "to": "LG",
-        "total": 30
+        "total": 30,
+        "unarmed": {
+          "byPlayer": {
+            "gLAd": 3,
+            "kippo": 2,
+            "rusti": 2
+          },
+          "byTeam": {
+            "nAnI": 3,
+            "pora": 4
+          },
+          "total": 7
+        }
       },
       {
         "armed": {
@@ -6485,6 +6760,19 @@
         },
         "name": "GA",
         "total": 299.8089999999975,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 8.157999999999975,
+            "gLAd": 11.403999999999954,
+            "kippo": 25.006000000000228,
+            "rusti": 9.42799999999996
+          },
+          "byTeam": {
+            "nAnI": 19.562000000000083,
+            "pora": 34.43400000000039
+          },
+          "total": 53.996000000000315
+        },
         "x": 61,
         "y": -2019.25,
         "z": 88
@@ -6515,6 +6803,19 @@
         },
         "name": "GA.cells",
         "total": 101.44000000000477,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 2.126999999999995,
+            "gLAd": 7.040999999999981,
+            "kippo": 15.093999999999902,
+            "rusti": 6.414999999999979
+          },
+          "byTeam": {
+            "nAnI": 9.167999999999969,
+            "pora": 21.509000000000068
+          },
+          "total": 30.677000000000486
+        },
         "x": 495.875,
         "y": -1427.75,
         "z": 256
@@ -6532,6 +6833,19 @@
         },
         "name": "GA.hide",
         "total": 13.230999999999948,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 2.337999999999995,
+            "gLAd": 1.5269999999999986,
+            "kippo": 5.347999999999983,
+            "rusti": 4.017999999999987
+          },
+          "byTeam": {
+            "nAnI": 3.86499999999999,
+            "pora": 9.365999999999975
+          },
+          "total": 13.230999999999948
+        },
         "x": 247.625,
         "y": -1535.875,
         "z": 40
@@ -6562,6 +6876,15 @@
         },
         "name": "GA.shells",
         "total": 42.25100000000034,
+        "unarmed": {
+          "byPlayer": {
+            "kippo": 1.9019999999999975
+          },
+          "byTeam": {
+            "pora": 1.9019999999999975
+          },
+          "total": 1.9019999999999975
+        },
         "x": 1064.125,
         "y": -1560,
         "z": 40
@@ -6592,6 +6915,19 @@
         },
         "name": "GL",
         "total": 310.9799999999878,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 7.790999999999974,
+            "gLAd": 5.326999999999985,
+            "kippo": 27.630000000000372,
+            "rusti": 17.656999999999922
+          },
+          "byTeam": {
+            "nAnI": 13.117999999999965,
+            "pora": 45.28700000000054
+          },
+          "total": 58.405000000000314
+        },
         "x": 1230.25,
         "y": -1099.5,
         "z": 256
@@ -6622,6 +6958,19 @@
         },
         "name": "GL.RA",
         "total": 130.32100000000793,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 4.783999999999979,
+            "gLAd": 2.8259999999999916,
+            "kippo": 11.463999999999976,
+            "rusti": 2.0729999999999964
+          },
+          "byTeam": {
+            "nAnI": 7.609999999999972,
+            "pora": 13.53699999999994
+          },
+          "total": 21.147000000000116
+        },
         "x": 1807.875,
         "y": -1065.375,
         "z": 168
@@ -6652,6 +7001,15 @@
         },
         "name": "GL.below",
         "total": 94.68400000000442,
+        "unarmed": {
+          "byPlayer": {
+            "kippo": 3.1309999999999945
+          },
+          "byTeam": {
+            "pora": 3.1309999999999945
+          },
+          "total": 3.1309999999999945
+        },
         "x": 1511.375,
         "y": -1124.75,
         "z": 40
@@ -6669,6 +7027,19 @@
         },
         "name": "GL.hide",
         "total": 16.338999999999956,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 3.448999999999988,
+            "gLAd": 0.5590000000000003,
+            "kippo": 11.111999999999961,
+            "rusti": 1.2189999999999996
+          },
+          "byTeam": {
+            "nAnI": 4.007999999999986,
+            "pora": 12.33099999999995
+          },
+          "total": 16.338999999999956
+        },
         "x": 872.25,
         "y": -1440,
         "z": 256
@@ -6699,6 +7070,18 @@
         },
         "name": "LG",
         "total": 70.13100000000114,
+        "unarmed": {
+          "byPlayer": {
+            "gLAd": 0.6470000000000005,
+            "kippo": 0.17600000000000005,
+            "rusti": 0.135
+          },
+          "byTeam": {
+            "nAnI": 0.6470000000000005,
+            "pora": 0.3110000000000001
+          },
+          "total": 0.9580000000000007
+        },
         "x": 505.25,
         "y": -1091.5,
         "z": -279.875
@@ -6729,6 +7112,19 @@
         },
         "name": "MH",
         "total": 182.18000000001732,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 12.743999999999948,
+            "gLAd": 4.431999999999985,
+            "kippo": 13.459999999999924,
+            "rusti": 9.933999999999958
+          },
+          "byTeam": {
+            "nAnI": 17.17599999999999,
+            "pora": 23.394000000000194
+          },
+          "total": 40.570000000000455
+        },
         "x": 197.75,
         "y": -1129.625,
         "z": 112
@@ -6787,6 +7183,15 @@
         },
         "name": "MH.pipe",
         "total": 90.89500000000314,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 0.6450000000000004
+          },
+          "byTeam": {
+            "nAnI": 0.6450000000000004
+          },
+          "total": 0.6450000000000004
+        },
         "x": 466.375,
         "y": -1094.875,
         "z": 128
@@ -6817,6 +7222,19 @@
         },
         "name": "RA",
         "total": 651.242000000045,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 12.861999999999943,
+            "gLAd": 5.000999999999983,
+            "kippo": 14.903999999999888,
+            "rusti": 7.200999999999981
+          },
+          "byTeam": {
+            "nAnI": 17.86300000000003,
+            "pora": 22.105000000000103
+          },
+          "total": 39.96800000000034
+        },
         "x": 1779.25,
         "y": -639,
         "z": 168
@@ -6844,6 +7262,19 @@
         },
         "name": "RA.behind",
         "total": 25.353000000000296,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 5.961999999999974,
+            "gLAd": 2.018999999999996,
+            "kippo": 5.250999999999981,
+            "rusti": 4.032999999999985
+          },
+          "byTeam": {
+            "nAnI": 7.980999999999968,
+            "pora": 9.283999999999967
+          },
+          "total": 17.265000000000004
+        },
         "x": 1903.875,
         "y": -358.25,
         "z": 168
@@ -6874,6 +7305,19 @@
         },
         "name": "RA.tunnel",
         "total": 143.33200000001062,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 4.935999999999982,
+            "gLAd": 1.4509999999999987,
+            "kippo": 9.487999999999976,
+            "rusti": 8.784999999999961
+          },
+          "byTeam": {
+            "nAnI": 6.386999999999982,
+            "pora": 18.273
+          },
+          "total": 24.66000000000024
+        },
         "x": 1016.625,
         "y": -682.375,
         "z": 40
@@ -6904,6 +7348,19 @@
         },
         "name": "big",
         "total": 188.3060000000192,
+        "unarmed": {
+          "byPlayer": {
+            "SS": 1.1250000000000002,
+            "gLAd": 2.4069999999999934,
+            "kippo": 5.042999999999981,
+            "rusti": 5.4979999999999825
+          },
+          "byTeam": {
+            "nAnI": 3.531999999999987,
+            "pora": 10.540999999999944
+          },
+          "total": 14.072999999999919
+        },
         "x": 1124.75,
         "y": -1092.375,
         "z": -39.875
@@ -6934,6 +7391,18 @@
         },
         "name": "big.hatch",
         "total": 33.4200000000004,
+        "unarmed": {
+          "byPlayer": {
+            "gLAd": 3.3289999999999877,
+            "kippo": 0.9380000000000006,
+            "rusti": 1.1880000000000002
+          },
+          "byTeam": {
+            "nAnI": 3.3289999999999877,
+            "pora": 2.1259999999999954
+          },
+          "total": 5.454999999999977
+        },
         "x": 850.25,
         "y": -1074.25,
         "z": -43.875

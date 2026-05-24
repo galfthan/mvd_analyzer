@@ -243,6 +243,23 @@ func TestBuildLocGraph_ArmedAndQuadConditioning(t *testing.T) {
 		t.Errorf("B.Pent = %+v, want nil", B.Pent)
 	}
 
+	// Unarmed is the complement of Armed: only the ms-150 B sample lacked
+	// RL/LG, so A (both samples armed) has no Unarmed and B has one sample.
+	if A.Unarmed != nil {
+		t.Errorf("A.Unarmed = %+v, want nil", A.Unarmed)
+	}
+	if B.Unarmed == nil || !approxEq(B.Unarmed.Total, 1*D) {
+		t.Errorf("B.Unarmed = %+v, want total %v", B.Unarmed, 1*D)
+	}
+	// Armed + Unarmed time must reconstitute each loc's total.
+	armedB := 0.0
+	if B.Armed != nil {
+		armedB = B.Armed.Total
+	}
+	if !approxEq(armedB+B.Unarmed.Total, B.Total) {
+		t.Errorf("B armed+unarmed = %v, want total %v", armedB+B.Unarmed.Total, B.Total)
+	}
+
 	// Conditioned metrics can never exceed the unconditioned total.
 	if B.Armed != nil && B.Armed.Total > B.Total+1e-9 {
 		t.Errorf("B.Armed.Total %v > B.Total %v", B.Armed.Total, B.Total)

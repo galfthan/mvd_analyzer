@@ -617,9 +617,10 @@
                     <h3>Loc Analysis Metric</h3>
                     <div class="locmetric-row">
                         <label class="locmetric-label">Metric:
-                            <select id="locgraph-metric" title="Weight the loc graph and heatmap by total time, time holding RL/LG, or time with an active quad or pent">
+                            <select id="locgraph-metric" title="Weight the loc graph and heatmap by total time, time holding RL/LG (or not), or time with an active quad or pent">
                                 <option value="all" selected>Full time</option>
                                 <option value="armed">With RL / LG</option>
+                                <option value="unarmed">Without RL / LG</option>
                                 <option value="quad">With Quad</option>
                                 <option value="pent">With Pent</option>
                             </select>
