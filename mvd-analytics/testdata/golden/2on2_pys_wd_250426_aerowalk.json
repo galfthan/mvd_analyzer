@@ -8218,6 +8218,15 @@
   "locGraph": {
     "edges": [
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1
+          },
+          "byTeam": {
+            "pys": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "psy*overon": 1
         },
@@ -8230,6 +8239,16 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 2
+          },
+          "total": 2
+        },
         "byPlayer": {
           "psy*overon": 1,
           "wd.dilbert": 1
@@ -8243,6 +8262,19 @@
         "total": 2
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 17,
+            "wd.cao": 3,
+            "wd.char": 7,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 18,
+            "wd": 10
+          },
+          "total": 28
+        },
         "byPlayer": {
           "psy*overon": 18,
           "wd.cao": 3,
@@ -8259,6 +8291,18 @@
         "total": 32
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 3,
+            "wd.cao": 1,
+            "wd.dilbert": 2
+          },
+          "byTeam": {
+            "pys": 5,
+            "wd": 1
+          },
+          "total": 6
+        },
         "byPlayer": {
           "psy*overon": 3,
           "wd.cao": 2,
@@ -8274,6 +8318,19 @@
         "total": 7
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 10,
+            "wd.cao": 4,
+            "wd.char": 16,
+            "wd.dilbert": 6
+          },
+          "byTeam": {
+            "pys": 16,
+            "wd": 20
+          },
+          "total": 36
+        },
         "byPlayer": {
           "psy*overon": 13,
           "wd.cao": 4,
@@ -8290,6 +8347,19 @@
         "total": 43
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 11,
+            "wd.cao": 2,
+            "wd.char": 4,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 12,
+            "wd": 6
+          },
+          "total": 18
+        },
         "byPlayer": {
           "psy*overon": 12,
           "wd.cao": 4,
@@ -8302,10 +8372,32 @@
         },
         "from": "MH",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "yard",
         "total": 26
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 13,
+            "wd.cao": 6,
+            "wd.char": 3,
+            "wd.dilbert": 11
+          },
+          "byTeam": {
+            "pys": 24,
+            "wd": 9
+          },
+          "total": 33
+        },
         "byPlayer": {
           "psy*overon": 13,
           "wd.cao": 10,
@@ -8318,10 +8410,33 @@
         },
         "from": "Quad",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 3,
+            "wd.char": 2
+          },
+          "byTeam": {
+            "wd": 5
+          },
+          "total": 5
+        },
         "to": "Quad.GA",
         "total": 40
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 4,
+            "wd.cao": 1,
+            "wd.char": 6,
+            "wd.dilbert": 3
+          },
+          "byTeam": {
+            "pys": 7,
+            "wd": 7
+          },
+          "total": 14
+        },
         "byPlayer": {
           "psy*overon": 6,
           "wd.cao": 2,
@@ -8334,10 +8449,33 @@
         },
         "from": "Quad",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 1,
+            "wd": 1
+          },
+          "total": 2
+        },
         "to": "Quad.stairs",
         "total": 20
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.char": 1,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 2,
+            "wd": 1
+          },
+          "total": 3
+        },
         "byPlayer": {
           "psy*overon": 1,
           "wd.char": 1,
@@ -8349,10 +8487,31 @@
         },
         "from": "Quad",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "Quad.up",
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.char": 1,
+            "wd.dilbert": 2
+          },
+          "byTeam": {
+            "pys": 3,
+            "wd": 1
+          },
+          "total": 4
+        },
         "byPlayer": {
           "psy*overon": 1,
           "wd.cao": 2,
@@ -8369,6 +8528,18 @@
         "total": 8
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 8,
+            "wd.char": 2,
+            "wd.dilbert": 4
+          },
+          "byTeam": {
+            "pys": 12,
+            "wd": 2
+          },
+          "total": 14
+        },
         "byPlayer": {
           "psy*overon": 11,
           "wd.cao": 10,
@@ -8385,6 +8556,19 @@
         "total": 31
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 8,
+            "wd.cao": 5,
+            "wd.char": 4,
+            "wd.dilbert": 5
+          },
+          "byTeam": {
+            "pys": 13,
+            "wd": 9
+          },
+          "total": 22
+        },
         "byPlayer": {
           "psy*overon": 10,
           "wd.cao": 11,
@@ -8397,10 +8581,28 @@
         },
         "from": "Quad.GA",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "Quad.ledge",
         "total": 46
       },
       {
+        "armed": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "wd.cao": 1
         },
@@ -8413,6 +8615,15 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "wd.char": 1
         },
@@ -8425,6 +8636,19 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 10,
+            "wd.cao": 2,
+            "wd.char": 5,
+            "wd.dilbert": 3
+          },
+          "byTeam": {
+            "pys": 13,
+            "wd": 7
+          },
+          "total": 20
+        },
         "byPlayer": {
           "psy*overon": 11,
           "wd.cao": 3,
@@ -8437,10 +8661,31 @@
         },
         "from": "Quad.GA",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "YA.stairs",
         "total": 23
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 5,
+            "wd.cao": 2,
+            "wd.char": 2
+          },
+          "byTeam": {
+            "pys": 5,
+            "wd": 4
+          },
+          "total": 9
+        },
         "byPlayer": {
           "psy*overon": 7,
           "wd.cao": 2,
@@ -8456,6 +8701,19 @@
         "total": 11
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.cao": 1,
+            "wd.char": 4,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 2,
+            "wd": 5
+          },
+          "total": 7
+        },
         "byPlayer": {
           "psy*overon": 2,
           "wd.cao": 1,
@@ -8472,6 +8730,19 @@
         "total": 8
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 4,
+            "wd.cao": 2,
+            "wd.char": 2,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 5,
+            "wd": 4
+          },
+          "total": 9
+        },
         "byPlayer": {
           "psy*overon": 4,
           "wd.cao": 5,
@@ -8484,10 +8755,28 @@
         },
         "from": "Quad.ledge",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "air.ledge",
         "total": 14
       },
       {
+        "armed": {
+          "byPlayer": {
+            "wd.char": 3
+          },
+          "byTeam": {
+            "wd": 3
+          },
+          "total": 3
+        },
         "byPlayer": {
           "wd.char": 3
         },
@@ -8500,6 +8789,19 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 10,
+            "wd.cao": 4,
+            "wd.char": 6,
+            "wd.dilbert": 3
+          },
+          "byTeam": {
+            "pys": 13,
+            "wd": 10
+          },
+          "total": 23
+        },
         "byPlayer": {
           "psy*overon": 11,
           "wd.cao": 6,
@@ -8512,10 +8814,32 @@
         },
         "from": "Quad.ledge",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "yard",
         "total": 35
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 2,
+            "wd.cao": 1,
+            "wd.char": 3,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 3,
+            "wd": 4
+          },
+          "total": 7
+        },
         "byPlayer": {
           "psy*overon": 2,
           "wd.cao": 1,
@@ -8532,6 +8856,19 @@
         "total": 9
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 3,
+            "wd.cao": 4,
+            "wd.char": 6,
+            "wd.dilbert": 2
+          },
+          "byTeam": {
+            "pys": 5,
+            "wd": 10
+          },
+          "total": 15
+        },
         "byPlayer": {
           "psy*overon": 5,
           "wd.cao": 4,
@@ -8544,10 +8881,32 @@
         },
         "from": "Quad.stairs",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "Quad.up",
         "total": 17
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 2,
+            "wd.cao": 2,
+            "wd.char": 3,
+            "wd.dilbert": 3
+          },
+          "byTeam": {
+            "pys": 5,
+            "wd": 5
+          },
+          "total": 10
+        },
         "byPlayer": {
           "psy*overon": 2,
           "wd.cao": 2,
@@ -8564,6 +8923,17 @@
         "total": 10
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.char": 2
+          },
+          "byTeam": {
+            "pys": 1,
+            "wd": 2
+          },
+          "total": 3
+        },
         "byPlayer": {
           "psy*overon": 1,
           "wd.char": 2
@@ -8574,10 +8944,32 @@
         },
         "from": "Quad.tele",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "Quad.ledge",
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 4,
+            "wd.cao": 8,
+            "wd.char": 6,
+            "wd.dilbert": 5
+          },
+          "byTeam": {
+            "pys": 9,
+            "wd": 14
+          },
+          "total": 23
+        },
         "byPlayer": {
           "psy*overon": 4,
           "wd.cao": 8,
@@ -8594,6 +8986,19 @@
         "total": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 3,
+            "wd.cao": 2,
+            "wd.char": 3,
+            "wd.dilbert": 5
+          },
+          "byTeam": {
+            "pys": 8,
+            "wd": 5
+          },
+          "total": 13
+        },
         "byPlayer": {
           "psy*overon": 3,
           "wd.cao": 2,
@@ -8606,10 +9011,32 @@
         },
         "from": "Quad.tele",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "air.ledge",
         "total": 13
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 3,
+            "wd.cao": 1,
+            "wd.char": 3,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 4,
+            "wd": 4
+          },
+          "total": 8
+        },
         "byPlayer": {
           "psy*overon": 3,
           "wd.cao": 1,
@@ -8626,6 +9053,18 @@
         "total": 8
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 4,
+            "wd.char": 7,
+            "wd.dilbert": 5
+          },
+          "byTeam": {
+            "pys": 9,
+            "wd": 7
+          },
+          "total": 16
+        },
         "byPlayer": {
           "psy*overon": 7,
           "wd.char": 7,
@@ -8637,10 +9076,31 @@
         },
         "from": "Quad.tele",
         "kind": "teleport",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "low.RL",
         "total": 19
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 5,
+            "wd.char": 1,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 6,
+            "wd": 1
+          },
+          "total": 7
+        },
         "byPlayer": {
           "psy*overon": 5,
           "wd.char": 1,
@@ -8656,6 +9116,19 @@
         "total": 7
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 12,
+            "wd.cao": 8,
+            "wd.char": 7,
+            "wd.dilbert": 19
+          },
+          "byTeam": {
+            "pys": 31,
+            "wd": 15
+          },
+          "total": 46
+        },
         "byPlayer": {
           "psy*overon": 12,
           "wd.cao": 8,
@@ -8672,6 +9145,19 @@
         "total": 51
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 2,
+            "wd.cao": 2,
+            "wd.char": 1,
+            "wd.dilbert": 4
+          },
+          "byTeam": {
+            "pys": 6,
+            "wd": 3
+          },
+          "total": 9
+        },
         "byPlayer": {
           "psy*overon": 2,
           "wd.cao": 2,
@@ -8688,6 +9174,18 @@
         "total": 10
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.cao": 4,
+            "wd.char": 4
+          },
+          "byTeam": {
+            "pys": 1,
+            "wd": 8
+          },
+          "total": 9
+        },
         "byPlayer": {
           "psy*overon": 1,
           "wd.cao": 4,
@@ -8703,6 +9201,19 @@
         "total": 9
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 11,
+            "wd.cao": 2,
+            "wd.char": 7,
+            "wd.dilbert": 4
+          },
+          "byTeam": {
+            "pys": 15,
+            "wd": 9
+          },
+          "total": 24
+        },
         "byPlayer": {
           "psy*overon": 14,
           "wd.cao": 2,
@@ -8715,10 +9226,32 @@
         },
         "from": "Quad.up",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 2
+          },
+          "byTeam": {
+            "wd": 2
+          },
+          "total": 2
+        },
         "to": "Quad.tele",
         "total": 27
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 5,
+            "wd.cao": 9,
+            "wd.char": 4,
+            "wd.dilbert": 5
+          },
+          "byTeam": {
+            "pys": 10,
+            "wd": 13
+          },
+          "total": 23
+        },
         "byPlayer": {
           "psy*overon": 16,
           "wd.cao": 29,
@@ -8731,10 +9264,32 @@
         },
         "from": "Quad.up",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "high.RL",
         "total": 99
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.cao": 6,
+            "wd.char": 10,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 2,
+            "wd": 16
+          },
+          "total": 18
+        },
         "byPlayer": {
           "psy*overon": 11,
           "wd.cao": 11,
@@ -8751,6 +9306,17 @@
         "total": 44
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.char": 1
+          },
+          "byTeam": {
+            "pys": 1,
+            "wd": 1
+          },
+          "total": 2
+        },
         "byPlayer": {
           "psy*overon": 1,
           "wd.char": 1
@@ -8765,6 +9331,15 @@
         "total": 2
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1
+          },
+          "byTeam": {
+            "pys": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "psy*overon": 1
         },
@@ -8777,6 +9352,19 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 5,
+            "wd.cao": 9,
+            "wd.char": 15,
+            "wd.dilbert": 11
+          },
+          "byTeam": {
+            "pys": 16,
+            "wd": 24
+          },
+          "total": 40
+        },
         "byPlayer": {
           "psy*overon": 6,
           "wd.cao": 9,
@@ -8793,6 +9381,18 @@
         "total": 41
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 6,
+            "wd.char": 6,
+            "wd.dilbert": 3
+          },
+          "byTeam": {
+            "pys": 9,
+            "wd": 6
+          },
+          "total": 15
+        },
         "byPlayer": {
           "psy*overon": 6,
           "wd.char": 6,
@@ -8804,10 +9404,32 @@
         },
         "from": "RA.LG",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "air",
         "total": 15
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 5,
+            "wd.cao": 10,
+            "wd.char": 5,
+            "wd.dilbert": 4
+          },
+          "byTeam": {
+            "pys": 9,
+            "wd": 15
+          },
+          "total": 24
+        },
         "byPlayer": {
           "psy*overon": 8,
           "wd.cao": 11,
@@ -8820,10 +9442,31 @@
         },
         "from": "RA.LG",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "high.RL",
         "total": 35
       },
       {
+        "armed": {
+          "byPlayer": {
+            "wd.cao": 6,
+            "wd.char": 10,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 1,
+            "wd": 16
+          },
+          "total": 17
+        },
         "byPlayer": {
           "wd.cao": 6,
           "wd.char": 10,
@@ -8839,6 +9482,19 @@
         "total": 17
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 8,
+            "wd.cao": 10,
+            "wd.char": 15,
+            "wd.dilbert": 9
+          },
+          "byTeam": {
+            "pys": 17,
+            "wd": 25
+          },
+          "total": 42
+        },
         "byPlayer": {
           "psy*overon": 12,
           "wd.cao": 14,
@@ -8851,10 +9507,32 @@
         },
         "from": "RA.stairs",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "RA.LG",
         "total": 59
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 6,
+            "wd.cao": 5,
+            "wd.char": 13,
+            "wd.dilbert": 6
+          },
+          "byTeam": {
+            "pys": 12,
+            "wd": 18
+          },
+          "total": 30
+        },
         "byPlayer": {
           "psy*overon": 11,
           "wd.cao": 6,
@@ -8871,6 +9549,19 @@
         "total": 36
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 15,
+            "wd.cao": 1,
+            "wd.char": 10,
+            "wd.dilbert": 3
+          },
+          "byTeam": {
+            "pys": 18,
+            "wd": 11
+          },
+          "total": 29
+        },
         "byPlayer": {
           "psy*overon": 16,
           "wd.cao": 3,
@@ -8883,10 +9574,32 @@
         },
         "from": "YA",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "MH",
         "total": 36
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 13,
+            "wd.cao": 3,
+            "wd.char": 4,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 14,
+            "wd": 7
+          },
+          "total": 21
+        },
         "byPlayer": {
           "psy*overon": 14,
           "wd.cao": 4,
@@ -8903,6 +9616,16 @@
         "total": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 2,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 3
+          },
+          "total": 3
+        },
         "byPlayer": {
           "psy*overon": 2,
           "wd.dilbert": 1
@@ -8916,6 +9639,18 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 11,
+            "wd.cao": 2,
+            "wd.char": 4
+          },
+          "byTeam": {
+            "pys": 11,
+            "wd": 6
+          },
+          "total": 17
+        },
         "byPlayer": {
           "psy*overon": 12,
           "wd.cao": 3,
@@ -8932,6 +9667,19 @@
         "total": 20
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 11,
+            "wd.cao": 3,
+            "wd.char": 6,
+            "wd.dilbert": 5
+          },
+          "byTeam": {
+            "pys": 16,
+            "wd": 9
+          },
+          "total": 25
+        },
         "byPlayer": {
           "psy*overon": 12,
           "wd.cao": 6,
@@ -8944,10 +9692,31 @@
         },
         "from": "YA.stairs",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "YA",
         "total": 31
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.char": 1,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 2,
+            "wd": 1
+          },
+          "total": 3
+        },
         "byPlayer": {
           "psy*overon": 8,
           "wd.cao": 1,
@@ -8964,6 +9733,18 @@
         "total": 21
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 6,
+            "wd.char": 5,
+            "wd.dilbert": 3
+          },
+          "byTeam": {
+            "pys": 9,
+            "wd": 5
+          },
+          "total": 14
+        },
         "byPlayer": {
           "psy*overon": 10,
           "wd.cao": 5,
@@ -8980,6 +9761,19 @@
         "total": 29
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 3,
+            "wd.cao": 1,
+            "wd.char": 1,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 4,
+            "wd": 2
+          },
+          "total": 6
+        },
         "byPlayer": {
           "psy*overon": 4,
           "wd.cao": 1,
@@ -8996,6 +9790,19 @@
         "total": 8
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 3,
+            "wd.cao": 1,
+            "wd.char": 1,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 4,
+            "wd": 2
+          },
+          "total": 6
+        },
         "byPlayer": {
           "psy*overon": 4,
           "wd.cao": 1,
@@ -9012,6 +9819,18 @@
         "total": 7
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 3,
+            "wd.char": 2,
+            "wd.dilbert": 5
+          },
+          "byTeam": {
+            "pys": 8,
+            "wd": 2
+          },
+          "total": 10
+        },
         "byPlayer": {
           "psy*overon": 4,
           "wd.cao": 3,
@@ -9024,10 +9843,31 @@
         },
         "from": "air.ledge",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "Quad.up",
         "total": 18
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.char": 2,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 2,
+            "wd": 2
+          },
+          "total": 4
+        },
         "byPlayer": {
           "psy*overon": 1,
           "wd.char": 2,
@@ -9043,6 +9883,19 @@
         "total": 4
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 4,
+            "wd.cao": 3,
+            "wd.char": 5,
+            "wd.dilbert": 4
+          },
+          "byTeam": {
+            "pys": 8,
+            "wd": 8
+          },
+          "total": 16
+        },
         "byPlayer": {
           "psy*overon": 6,
           "wd.cao": 4,
@@ -9055,10 +9908,32 @@
         },
         "from": "air.ledge",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "low.RL",
         "total": 21
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 10,
+            "wd.cao": 6,
+            "wd.char": 5,
+            "wd.dilbert": 9
+          },
+          "byTeam": {
+            "pys": 19,
+            "wd": 11
+          },
+          "total": 30
+        },
         "byPlayer": {
           "psy*overon": 10,
           "wd.cao": 9,
@@ -9071,10 +9946,30 @@
         },
         "from": "air.ledge",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "yard",
         "total": 35
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 7,
+            "wd.char": 4
+          },
+          "byTeam": {
+            "pys": 7,
+            "wd": 4
+          },
+          "total": 11
+        },
         "byPlayer": {
           "psy*overon": 7,
           "wd.char": 4
@@ -9089,6 +9984,19 @@
         "total": 11
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 6,
+            "wd.cao": 4,
+            "wd.char": 7,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 7,
+            "wd": 11
+          },
+          "total": 18
+        },
         "byPlayer": {
           "psy*overon": 6,
           "wd.cao": 4,
@@ -9105,6 +10013,18 @@
         "total": 18
       },
       {
+        "armed": {
+          "byPlayer": {
+            "wd.cao": 2,
+            "wd.char": 2,
+            "wd.dilbert": 5
+          },
+          "byTeam": {
+            "pys": 5,
+            "wd": 4
+          },
+          "total": 9
+        },
         "byPlayer": {
           "wd.cao": 2,
           "wd.char": 2,
@@ -9120,6 +10040,19 @@
         "total": 9
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 2,
+            "wd.cao": 6,
+            "wd.char": 3,
+            "wd.dilbert": 6
+          },
+          "byTeam": {
+            "pys": 8,
+            "wd": 9
+          },
+          "total": 17
+        },
         "byPlayer": {
           "psy*overon": 2,
           "wd.cao": 6,
@@ -9136,6 +10069,19 @@
         "total": 17
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 4,
+            "wd.cao": 16,
+            "wd.char": 12,
+            "wd.dilbert": 13
+          },
+          "byTeam": {
+            "pys": 17,
+            "wd": 28
+          },
+          "total": 45
+        },
         "byPlayer": {
           "psy*overon": 4,
           "wd.cao": 16,
@@ -9148,10 +10094,31 @@
         },
         "from": "high.RL",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "RA.LG",
         "total": 45
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 3,
+            "wd.cao": 6,
+            "wd.dilbert": 7
+          },
+          "byTeam": {
+            "pys": 10,
+            "wd": 6
+          },
+          "total": 16
+        },
         "byPlayer": {
           "psy*overon": 3,
           "wd.cao": 6,
@@ -9167,6 +10134,16 @@
         "total": 16
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 2,
+            "wd.dilbert": 2
+          },
+          "byTeam": {
+            "pys": 4
+          },
+          "total": 4
+        },
         "byPlayer": {
           "psy*overon": 2,
           "wd.dilbert": 2
@@ -9180,6 +10157,19 @@
         "total": 4
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 9,
+            "wd.cao": 3,
+            "wd.char": 3,
+            "wd.dilbert": 5
+          },
+          "byTeam": {
+            "pys": 14,
+            "wd": 6
+          },
+          "total": 20
+        },
         "byPlayer": {
           "psy*overon": 9,
           "wd.cao": 3,
@@ -9196,6 +10186,19 @@
         "total": 20
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 12,
+            "wd.cao": 10,
+            "wd.char": 18,
+            "wd.dilbert": 11
+          },
+          "byTeam": {
+            "pys": 23,
+            "wd": 28
+          },
+          "total": 51
+        },
         "byPlayer": {
           "psy*overon": 12,
           "wd.cao": 10,
@@ -9208,10 +10211,32 @@
         },
         "from": "low.RL",
         "kind": "teleport",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "Quad.tele",
         "total": 52
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 8,
+            "wd.cao": 8,
+            "wd.char": 14,
+            "wd.dilbert": 8
+          },
+          "byTeam": {
+            "pys": 16,
+            "wd": 22
+          },
+          "total": 38
+        },
         "byPlayer": {
           "psy*overon": 9,
           "wd.cao": 8,
@@ -9224,10 +10249,32 @@
         },
         "from": "low.RL",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "RA.stairs",
         "total": 39
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 6,
+            "wd.cao": 2,
+            "wd.char": 6,
+            "wd.dilbert": 3
+          },
+          "byTeam": {
+            "pys": 9,
+            "wd": 8
+          },
+          "total": 17
+        },
         "byPlayer": {
           "psy*overon": 7,
           "wd.cao": 2,
@@ -9244,6 +10291,19 @@
         "total": 18
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 8,
+            "wd.cao": 5,
+            "wd.char": 5,
+            "wd.dilbert": 2
+          },
+          "byTeam": {
+            "pys": 10,
+            "wd": 10
+          },
+          "total": 20
+        },
         "byPlayer": {
           "psy*overon": 11,
           "wd.cao": 5,
@@ -9256,10 +10316,31 @@
         },
         "from": "yard",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "MH",
         "total": 31
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1,
+            "wd.char": 2,
+            "wd.dilbert": 1
+          },
+          "byTeam": {
+            "pys": 2,
+            "wd": 2
+          },
+          "total": 4
+        },
         "byPlayer": {
           "psy*overon": 2,
           "wd.char": 2,
@@ -9275,6 +10356,19 @@
         "total": 5
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 20,
+            "wd.cao": 7,
+            "wd.char": 10,
+            "wd.dilbert": 14
+          },
+          "byTeam": {
+            "pys": 34,
+            "wd": 17
+          },
+          "total": 51
+        },
         "byPlayer": {
           "psy*overon": 22,
           "wd.cao": 19,
@@ -9287,10 +10381,30 @@
         },
         "from": "yard",
         "kind": "teleport",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "Quad.up",
         "total": 85
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 2,
+            "wd.cao": 2
+          },
+          "byTeam": {
+            "pys": 2,
+            "wd": 2
+          },
+          "total": 4
+        },
         "byPlayer": {
           "psy*overon": 2,
           "wd.cao": 2,
@@ -9302,12 +10416,34 @@
         },
         "from": "yard",
         "kind": "normal",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1
+          },
+          "byTeam": {
+            "wd": 1
+          },
+          "total": 1
+        },
         "to": "air.ledge",
         "total": 5
       }
     ],
     "locs": [
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 61.965000000000984,
+            "wd.cao": 22.133999999999926,
+            "wd.char": 45.48600000000021,
+            "wd.dilbert": 15.153999999999916
+          },
+          "byTeam": {
+            "pys": 77.1190000000017,
+            "wd": 67.62000000000121
+          },
+          "total": 144.73900000000708
+        },
         "byPlayer": {
           "psy*overon": 66.46000000000137,
           "wd.cao": 25.2109999999999,
@@ -9319,12 +10455,35 @@
           "wd": 75.24200000000171
         },
         "name": "MH",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1.3659999999999994,
+            "wd.char": 1.7159999999999984
+          },
+          "byTeam": {
+            "wd": 3.0819999999999914
+          },
+          "total": 3.0819999999999914
+        },
         "total": 166.23100000000935,
         "x": -660.875,
         "y": -89.75,
         "z": 152
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 38.63600000000005,
+            "wd.cao": 17.058999999999934,
+            "wd.char": 22.307999999999897,
+            "wd.dilbert": 37.28300000000001
+          },
+          "byTeam": {
+            "pys": 75.91900000000155,
+            "wd": 39.36700000000024
+          },
+          "total": 115.28600000000448
+        },
         "byPlayer": {
           "psy*overon": 42.02700000000018,
           "wd.cao": 33.49099999999998,
@@ -9336,12 +10495,38 @@
           "wd": 56.667000000000414
         },
         "name": "Quad",
+        "quad": {
+          "byPlayer": {
+            "psy*overon": 0.5610000000000003,
+            "wd.cao": 5.326999999999985,
+            "wd.char": 6.431999999999991,
+            "wd.dilbert": 0.6370000000000003
+          },
+          "byTeam": {
+            "pys": 1.1979999999999997,
+            "wd": 11.758999999999967
+          },
+          "total": 12.956999999999955
+        },
         "total": 153.72100000000822,
         "x": -702.25,
         "y": -831.625,
         "z": 248
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 30.711999999999982,
+            "wd.cao": 20.174999999999937,
+            "wd.char": 13.426999999999946,
+            "wd.dilbert": 22.98299999999993
+          },
+          "byTeam": {
+            "pys": 53.69500000000052,
+            "wd": 33.60200000000007
+          },
+          "total": 87.29700000000243
+        },
         "byPlayer": {
           "psy*overon": 39.92800000000002,
           "wd.cao": 55.86700000000075,
@@ -9353,12 +10538,35 @@
           "wd": 75.48400000000184
         },
         "name": "Quad.GA",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 4.523999999999987,
+            "wd.char": 1.6069999999999984
+          },
+          "byTeam": {
+            "wd": 6.1309999999999905
+          },
+          "total": 6.1309999999999905
+        },
         "total": 156.9900000000076,
         "x": -208,
         "y": -911.875,
         "z": 248
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 13.010999999999944,
+            "wd.cao": 11.27199999999996,
+            "wd.char": 12.41299999999994,
+            "wd.dilbert": 15.832999999999927
+          },
+          "byTeam": {
+            "pys": 28.843999999999944,
+            "wd": 23.684999999999988
+          },
+          "total": 52.52900000000074
+        },
         "byPlayer": {
           "psy*overon": 16.32699999999995,
           "wd.cao": 18.753999999999888,
@@ -9370,12 +10578,34 @@
           "wd": 33.86800000000001
         },
         "name": "Quad.ledge",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1.3129999999999993
+          },
+          "byTeam": {
+            "wd": 1.3129999999999993
+          },
+          "total": 1.3129999999999993
+        },
         "total": 78.48400000000184,
         "x": -224.125,
         "y": -339.625,
         "z": 248
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 6.463999999999991,
+            "wd.cao": 4.898999999999983,
+            "wd.char": 12.772999999999929,
+            "wd.dilbert": 4.675999999999984
+          },
+          "byTeam": {
+            "pys": 11.139999999999961,
+            "wd": 17.67199999999992
+          },
+          "total": 28.811999999999944
+        },
         "byPlayer": {
           "psy*overon": 8.751999999999974,
           "wd.cao": 6.21799999999998,
@@ -9387,12 +10617,37 @@
           "wd": 18.99099999999992
         },
         "name": "Quad.stairs",
+        "quad": {
+          "byPlayer": {
+            "psy*overon": 2.220999999999997,
+            "wd.char": 1.0450000000000006,
+            "wd.dilbert": 0.9880000000000007
+          },
+          "byTeam": {
+            "pys": 3.2089999999999934,
+            "wd": 1.0450000000000006
+          },
+          "total": 4.253999999999985
+        },
         "total": 35.890000000000185,
         "x": -927.875,
         "y": -541.5,
         "z": 376
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 27.589999999999947,
+            "wd.cao": 12.363999999999953,
+            "wd.char": 38.33400000000007,
+            "wd.dilbert": 18.990999999999946
+          },
+          "byTeam": {
+            "pys": 46.58100000000028,
+            "wd": 50.69800000000075
+          },
+          "total": 97.27900000000346
+        },
         "byPlayer": {
           "psy*overon": 31.642999999999933,
           "wd.cao": 12.363999999999953,
@@ -9404,12 +10659,34 @@
           "wd": 51.713000000000804
         },
         "name": "Quad.tele",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 3.813999999999987
+          },
+          "byTeam": {
+            "wd": 3.813999999999987
+          },
+          "total": 3.813999999999987
+        },
         "total": 102.34700000000352,
         "x": -656.875,
         "y": -98.375,
         "z": 424
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 35.320000000000114,
+            "wd.cao": 48.43900000000043,
+            "wd.char": 57.26400000000051,
+            "wd.dilbert": 39.884000000000036
+          },
+          "byTeam": {
+            "pys": 75.20400000000198,
+            "wd": 105.70300000000358
+          },
+          "total": 180.90700000001058
+        },
         "byPlayer": {
           "psy*overon": 44.45300000000007,
           "wd.cao": 70.23400000000146,
@@ -9421,12 +10698,35 @@
           "wd": 137.90500000000617
         },
         "name": "Quad.up",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1.2049999999999998,
+            "wd.char": 4.539999999999989
+          },
+          "byTeam": {
+            "wd": 5.7449999999999894
+          },
+          "total": 5.7449999999999894
+        },
         "total": 246.74100000001835,
         "x": -651.75,
         "y": -664.125,
         "z": 440
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 1.2549999999999994,
+            "wd.cao": 6.945999999999986,
+            "wd.char": 11.290999999999967,
+            "wd.dilbert": 1.1680000000000004
+          },
+          "byTeam": {
+            "pys": 2.4229999999999934,
+            "wd": 18.236999999999924
+          },
+          "total": 20.659999999999926
+        },
         "byPlayer": {
           "psy*overon": 7.79499999999999,
           "wd.cao": 10.881999999999968,
@@ -9444,6 +10744,19 @@
         "z": 440
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 55.313000000000514,
+            "wd.cao": 138.51400000000623,
+            "wd.char": 104.4450000000039,
+            "wd.dilbert": 91.94900000000283
+          },
+          "byTeam": {
+            "pys": 147.26200000000554,
+            "wd": 242.95900000001868
+          },
+          "total": 390.220999999974
+        },
         "byPlayer": {
           "psy*overon": 66.02300000000118,
           "wd.cao": 142.1260000000065,
@@ -9455,12 +10768,35 @@
           "wd": 249.70300000001913
         },
         "name": "RA.LG",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 4.543999999999984,
+            "wd.char": 1.072
+          },
+          "byTeam": {
+            "wd": 5.615999999999982
+          },
+          "total": 5.615999999999982
+        },
         "total": 421.5769999999669,
         "x": 116.875,
         "y": 277,
         "z": 440
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 13.633999999999931,
+            "wd.cao": 17.40299999999988,
+            "wd.char": 30.752999999999886,
+            "wd.dilbert": 18.097999999999903
+          },
+          "byTeam": {
+            "pys": 31.732000000000063,
+            "wd": 48.15600000000043
+          },
+          "total": 79.88800000000184
+        },
         "byPlayer": {
           "psy*overon": 21.629999999999907,
           "wd.cao": 21.337999999999912,
@@ -9472,12 +10808,34 @@
           "wd": 54.22000000000055
         },
         "name": "RA.stairs",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1.0900000000000003
+          },
+          "byTeam": {
+            "wd": 1.0900000000000003
+          },
+          "total": 1.0900000000000003
+        },
         "total": 99.99900000000358,
         "x": -216.125,
         "y": 474.125,
         "z": 264
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 24.504999999999878,
+            "wd.cao": 6.569999999999984,
+            "wd.char": 14.195999999999934,
+            "wd.dilbert": 5.341999999999985
+          },
+          "byTeam": {
+            "pys": 29.846999999999916,
+            "wd": 20.76599999999988
+          },
+          "total": 50.613000000000355
+        },
         "byPlayer": {
           "psy*overon": 26.310999999999872,
           "wd.cao": 10.298999999999955,
@@ -9489,12 +10847,34 @@
           "wd": 25.328999999999937
         },
         "name": "YA",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 0.6860000000000004
+          },
+          "byTeam": {
+            "wd": 0.6860000000000004
+          },
+          "total": 0.6860000000000004
+        },
         "total": 61.29300000000093,
         "x": -680.5,
         "y": -417.125,
         "z": 152
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 11.206999999999965,
+            "wd.cao": 2.1539999999999964,
+            "wd.char": 5.6659999999999915,
+            "wd.dilbert": 2.949999999999993
+          },
+          "byTeam": {
+            "pys": 14.156999999999936,
+            "wd": 7.819999999999988
+          },
+          "total": 21.976999999999936
+        },
         "byPlayer": {
           "psy*overon": 12.180999999999957,
           "wd.cao": 3.912999999999988,
@@ -9506,12 +10886,34 @@
           "wd": 9.57899999999997
         },
         "name": "YA.stairs",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 0.3660000000000002,
+            "wd.char": 0.9310000000000007
+          },
+          "byTeam": {
+            "wd": 1.2970000000000004
+          },
+          "total": 1.2970000000000004
+        },
         "total": 26.874000000000017,
         "x": -522.25,
         "y": -692.625,
         "z": 200
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 4.365999999999987,
+            "wd.char": 4.964999999999985,
+            "wd.dilbert": 2.648999999999994
+          },
+          "byTeam": {
+            "pys": 7.01499999999999,
+            "wd": 4.964999999999985
+          },
+          "total": 11.979999999999944
+        },
         "byPlayer": {
           "psy*overon": 13.878999999999927,
           "wd.cao": 4.874999999999986,
@@ -9523,12 +10925,34 @@
           "wd": 14.751999999999923
         },
         "name": "air",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 0.5940000000000003
+          },
+          "byTeam": {
+            "wd": 0.5940000000000003
+          },
+          "total": 0.5940000000000003
+        },
         "total": 40.19200000000025,
         "x": 95.375,
         "y": -20.125,
         "z": 248
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 26.650999999999964,
+            "wd.cao": 14.744999999999925,
+            "wd.char": 32.77099999999996,
+            "wd.dilbert": 18.050999999999924
+          },
+          "byTeam": {
+            "pys": 44.70200000000031,
+            "wd": 47.516000000000666
+          },
+          "total": 92.21800000000285
+        },
         "byPlayer": {
           "psy*overon": 32.10399999999992,
           "wd.cao": 24.665999999999986,
@@ -9540,12 +10964,35 @@
           "wd": 62.66600000000094
         },
         "name": "air.ledge",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 2.0139999999999976,
+            "wd.char": 2.1769999999999965
+          },
+          "byTeam": {
+            "wd": 4.190999999999983
+          },
+          "total": 4.190999999999983
+        },
         "total": 117.37200000000435,
         "x": -287.75,
         "y": 196,
         "z": 248
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 29.779999999999905,
+            "wd.cao": 49.57400000000016,
+            "wd.char": 38.91900000000006,
+            "wd.dilbert": 42.79100000000015
+          },
+          "byTeam": {
+            "pys": 72.5710000000016,
+            "wd": 88.49300000000181
+          },
+          "total": 161.06400000000724
+        },
         "byPlayer": {
           "psy*overon": 35.51099999999996,
           "wd.cao": 59.078000000000564,
@@ -9557,12 +11004,34 @@
           "wd": 104.53600000000306
         },
         "name": "high.RL",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 1.6359999999999988
+          },
+          "byTeam": {
+            "wd": 1.6359999999999988
+          },
+          "total": 1.6359999999999988
+        },
         "total": 200.3590000000123,
         "x": -277.625,
         "y": -402.5,
         "z": 440
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 60.8550000000009,
+            "wd.cao": 52.10300000000079,
+            "wd.char": 74.7760000000022,
+            "wd.dilbert": 57.68100000000053
+          },
+          "byTeam": {
+            "pys": 118.53600000000394,
+            "wd": 126.87900000000461
+          },
+          "total": 245.41500000001813
+        },
         "byPlayer": {
           "psy*overon": 85.2350000000026,
           "wd.cao": 64.07500000000121,
@@ -9574,12 +11043,34 @@
           "wd": 147.17000000000667
         },
         "name": "low.RL",
+        "quad": {
+          "byPlayer": {
+            "wd.char": 1.7759999999999987
+          },
+          "byTeam": {
+            "wd": 1.7759999999999987
+          },
+          "total": 1.7759999999999987
+        },
         "total": 304.65100000001013,
         "x": -683.875,
         "y": 511.625,
         "z": 248
       },
       {
+        "armed": {
+          "byPlayer": {
+            "psy*overon": 40.394000000000055,
+            "wd.cao": 21.85799999999993,
+            "wd.char": 13.555999999999925,
+            "wd.dilbert": 15.605999999999918
+          },
+          "byTeam": {
+            "pys": 56.00000000000041,
+            "wd": 35.41400000000004
+          },
+          "total": 91.41400000000297
+        },
         "byPlayer": {
           "psy*overon": 49.77200000000034,
           "wd.cao": 36.63999999999996,
@@ -9591,6 +11082,16 @@
           "wd": 57.19700000000048
         },
         "name": "yard",
+        "quad": {
+          "byPlayer": {
+            "wd.cao": 4.509999999999989,
+            "wd.char": 0.8280000000000005
+          },
+          "byTeam": {
+            "wd": 5.33799999999999
+          },
+          "total": 5.33799999999999
+        },
         "total": 148.14400000000612,
         "x": -205.875,
         "y": -94.625,
@@ -11727,7 +13228,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "streams": {
     "global": {
       "matchEnd": 600040,

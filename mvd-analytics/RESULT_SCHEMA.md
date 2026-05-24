@@ -684,13 +684,24 @@ Defined in `result/locgraph.go`.
 
 ### LocNode
 
-`{ name, x, y, z, total, byPlayer, byTeam }` — total seconds spent at
-each named location, aggregated all-players + per-player + per-team.
+`{ name, x, y, z, total, byPlayer, byTeam, armed?, quad? }` — total
+seconds spent at each named location, aggregated all-players +
+per-player + per-team. `armed` and `quad` are optional `LocWeights`
+(`{ total, byPlayer, byTeam }`, same shape) carrying that breakdown
+restricted to samples where the player held RL or LG (`armed`) or an
+active quad (`quad`); both omitted when no observed sample met the
+condition. They let consumers re-weight the graph by combat posture
+without re-walking streams (schema v12).
 
 ### LocEdge
 
-`{ from, to, kind, total, byPlayer, byTeam }` — directed transitions
-between locs. `kind` = `walk` / `jump` / `telefrag` / `teleport`.
+`{ from, to, kind, total, byPlayer, byTeam, armed?, quad? }` — directed
+transitions between locs. `kind` = `normal` / `teleport`. `armed` and
+`quad` are optional `LocEdgeWeights` (`{ total, byPlayer, byTeam }`, int
+counts) carrying the subset of transitions made while the player held RL
+or LG (`armed`) or an active quad (`quad`) at the destination sample, so
+the loc graph can be drawn as a self-contained movement graph per combat
+posture (schema v12). Omitted when no transition met the condition.
 
 ## ItemsResult (`items`)
 

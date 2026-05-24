@@ -53,8 +53,8 @@
             <button class="sidebar-btn" data-tab="map" title="Map">
                 <span class="sidebar-btn-label">Map</span>
             </button>
-            <button class="sidebar-btn" data-tab="loc-graph" title="Loc Graph">
-                <span class="sidebar-btn-label">Loc Graph</span>
+            <button class="sidebar-btn" data-tab="loc-graph" title="Loc &amp; Regions">
+                <span class="sidebar-btn-label">Loc &amp; Regions</span>
             </button>
             <button class="sidebar-btn" data-tab="keymoments" title="Key Moments">
                 <span class="sidebar-btn-label">Key Moments</span>
@@ -585,11 +585,18 @@
                 </div>
             </div>
 
-            <!-- Loc Graph Tab -->
+            <!-- Loc & Regions Tab -->
             <div id="tab-loc-graph" class="tab-content">
                 <div class="empty-state">Load or search a demo to begin.</div>
                 <div class="panel locgraph-panel">
                     <div class="locgraph-controls">
+                        <label>Metric:
+                            <select id="locgraph-metric" title="Weight locs by total time, time holding RL/LG, or time with an active quad">
+                                <option value="all" selected>Time spent</option>
+                                <option value="armed">With RL / LG</option>
+                                <option value="quad">With Quad</option>
+                            </select>
+                        </label>
                         <label>Filter:
                             <select id="locgraph-filter">
                                 <option value="all" selected>All</option>
@@ -641,8 +648,31 @@
                     <div class="timeline-legend">
                         <span class="legend-item"><span class="legend-color" style="background:#8fb3ff;"></span> Normal edge</span>
                         <span class="legend-item"><span class="legend-color" style="background:#00d9ff;"></span> Teleport edge</span>
-                        <span class="legend-item">Node size = time spent · Edge width = transition count</span>
+                        <span class="legend-item">Node size = occupancy · Edge width = transitions · both for the selected metric</span>
                         <span class="legend-item">Drag nodes · scroll to zoom · click for details</span>
+                    </div>
+                </div>
+
+                <!-- Region Control (definition editor + per-region control matrix) -->
+                <div class="panel" id="region-control-panel" style="display: none;">
+                    <h3>Region Control</h3>
+                    <div class="locheatmap-desc">
+                        Group locs into named regions. Rows = regions, columns = control
+                        states (the team color underlines which columns are which).
+                        Cell color is normalised <em>per region</em> (brightest = that
+                        region's dominant control state, Empty excluded), so compare colors
+                        across a row — not down a column. The printed % is the absolute
+                        match fraction. Click a column header to sort; hover for details.
+                    </div>
+                    <div id="region-config" class="region-config"></div>
+                    <div class="heatmap-legend">
+                        <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
+                    </div>
+                    <div class="heatmap-table-wrap">
+                        <table class="stats-table heatmap-table region-control-table" id="region-control-table">
+                            <thead><tr id="region-control-thead-row"></tr></thead>
+                            <tbody id="region-control-body"></tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -668,29 +698,6 @@
                     </div>
                     <div id="locheatmap-no-data" class="map-no-data" style="display:none">
                         <p>No loc data available for this demo.</p>
-                    </div>
-                </div>
-
-                <!-- Region Control (definition editor + per-region control matrix) -->
-                <div class="panel" id="region-control-panel" style="display: none;">
-                    <h3>Region Control</h3>
-                    <div class="locheatmap-desc">
-                        Group locs into named regions. Rows = regions, columns = control
-                        states (the team color underlines which columns are which).
-                        Cell color is normalised <em>per region</em> (brightest = that
-                        region's dominant control state, Empty excluded), so compare colors
-                        across a row — not down a column. The printed % is the absolute
-                        match fraction. Click a column header to sort; hover for details.
-                    </div>
-                    <div id="region-config" class="region-config"></div>
-                    <div class="heatmap-legend">
-                        <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
-                    </div>
-                    <div class="heatmap-table-wrap">
-                        <table class="stats-table heatmap-table region-control-table" id="region-control-table">
-                            <thead><tr id="region-control-thead-row"></tr></thead>
-                            <tbody id="region-control-body"></tbody>
-                        </table>
                     </div>
                 </div>
             </div>

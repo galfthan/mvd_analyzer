@@ -69,7 +69,7 @@ A slim top bar (wordmark + commit-hash version + GitHub link) sits
 above a Grafana-style frame: a fixed left **sidebar** with one button
 per analysis tab, and a **main pane** that fills the rest of the
 viewport (no width cap). Sidebar order is `Search`, `Summary`,
-`Timeline`, `Chat`, `Map`, `Loc Graph`, `Key Moments`, `Pack Drops`.
+`Timeline`, `Chat`, `Map`, `Loc & Regions`, `Key Moments`, `Pack Drops`.
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
@@ -285,23 +285,33 @@ the sidebar so verifying the event stream against gameplay is
 visual. The panel updates live during playback via the 200 ms
 full-sync tick in `animatePlayback`.
 
-## Loc Graph tab
+## Loc & Regions tab
 
-Three views, all reading `result.locGraph` (loc nodes weighted by
-time-spent, transition edges; per-player and per-team breakdowns baked
-onto every node) plus `demoInfo.{teams,players}` / `mapState.controlStats`
-— no extra analyzer pass:
+(`data-tab="loc-graph"`.) Three views, all reading `result.locGraph` (loc
+nodes weighted by time-spent, transition edges; per-player and per-team
+breakdowns baked onto every node) plus `demoInfo.{teams,players}` /
+`mapState.controlStats` — no extra analyzer pass:
+
+A **Metric** dropdown (`#locgraph-metric`) reweights the loc views by
+combat posture, yielding a **self-contained graph per case** — its own
+nodes *and* edges: *Time spent* (all observed time), *With RL / LG* (the
+`armed` LocWeights / LocEdgeWeights), or *With Quad* (`quad`). It drives
+node sizes (occupancy: `getLocMetric` → `metricWeightsOf` →
+`nodeWeightFor`), edge widths (movement: `metricEdgeWeightsOf` →
+`edgeWeightFor`, edges absent from the case are pruned and locs with no
+presence are dimmed), and the heatmap. Under *With Quad* the heatmap
+table hides (too sparse to tabulate) and only the graph reweights.
 
 - The **movement graph** — a Cytoscape.js node/edge diagram with the
-  filter / edge-mode / layout controls, driven by `initLocGraphView`
-  and `buildOrRefreshCytoscape`.
+  metric / filter / edge-mode / layout controls, driven by
+  `initLocGraphView` and `buildOrRefreshCytoscape`.
 - The **Loc Heatmap** (`buildLocHeatmap`) — rows are locs (busiest
   first); the leading columns are the **teams** (every member's time
   combined), then one column per **player** grouped by team, with a
   separator before the player block. Cell intensity is that column's
-  share of its time in the loc, normalised **per column** to its own
-  busiest loc (sqrt-curved). The team columns are dropped for duels and
-  single-team demos.
+  share of its (metric) time in the loc, normalised **per column** to its
+  own busiest loc (sqrt-curved). The team columns are dropped for duels
+  and single-team demos.
 - **Region Control** (`buildRegionHeatmap`) — the region definition
   editor (`buildRegionConfig`, group locs into named regions; save/load
   JSON) plus the per-region control matrix: rows are regions, columns are

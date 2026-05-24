@@ -506,7 +506,9 @@ function updateUrlState() {
             }
 
             const activeTab = document.querySelector('.sidebar-btn.active')?.dataset.tab;
-            if (activeTab && activeTab !== 'summary') params.set('tab', activeTab);
+            if (activeTab && activeTab !== 'summary') {
+                params.set('tab', TAB_INTERNAL_TO_URL[activeTab] || activeTab);
+            }
 
             if (mapState.currentTime > 0) {
                 params.set('t', Math.round(mapState.currentTime));
@@ -563,10 +565,7 @@ function applyUrlState() {
     }
 
     const tab = params.get('tab');
-    if (tab) {
-        const btn = document.querySelector(`.sidebar-btn[data-tab="${tab}"]`);
-        if (btn) btn.click();
-    }
+    if (tab) switchTab(tab); // resolves the locs-regions / loc-graph alias
 
     updateUrlState();
 }
@@ -601,8 +600,16 @@ function setupFileUpload() {
 
 const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map', 'keymoments'];
 
+// Tab URL aliases. The loc tab's internal data-tab stayed "loc-graph", but
+// the tab is now labelled "Loc & Regions" and the URL prefers the matching
+// "locs-regions" slug. Old "loc-graph" links still resolve; new URLs are
+// written as "locs-regions" (see updateUrlState).
+const TAB_URL_TO_INTERNAL = { 'locs-regions': 'loc-graph' };
+const TAB_INTERNAL_TO_URL = { 'loc-graph': 'locs-regions' };
+function resolveTabName(name) { return TAB_URL_TO_INTERNAL[name] || name; }
+
 function switchTab(name) {
-    const btn = document.querySelector(`.sidebar-btn[data-tab="${name}"]`);
+    const btn = document.querySelector(`.sidebar-btn[data-tab="${resolveTabName(name)}"]`);
     if (btn) btn.click();
 }
 
@@ -7323,6 +7330,8 @@ function setupLocGraphControls() {
     on('locgraph-edge-mode', 'change', buildOrRefreshCytoscape);
     on('locgraph-min-edge', 'change', buildOrRefreshCytoscape);
     on('locgraph-layout', 'change', buildOrRefreshCytoscape);
+    // Metric (all / armed / quad) reweights the graph nodes and the heatmap.
+    on('locgraph-metric', 'change', () => { buildOrRefreshCytoscape(); renderLocHeatmap(); });
     on('locgraph-show-labels', 'change', applyLocGraphStyle);
     on('locgraph-label-size', 'change', applyLocGraphStyle);
     on('locgraph-relayout', 'click', () => runLocGraphLayout(true));
@@ -7337,16 +7346,42 @@ function getLocGraphFilter() {
     return { kind: 'all', key: '' };
 }
 
-function nodeWeightFor(node, filter) {
-    if (filter.kind === 'player') return node.byPlayer?.[filter.key] || 0;
-    if (filter.kind === 'team') return node.byTeam?.[filter.key] || 0;
-    return node.total || 0;
+// 'all' | 'armed' | 'quad' — which time breakdown to weight by.
+function getLocMetric() {
+    const sel = document.getElementById('locgraph-metric');
+    return sel ? sel.value : 'all';
 }
 
-function edgeWeightFor(edge, filter) {
-    if (filter.kind === 'player') return edge.byPlayer?.[filter.key] || 0;
-    if (filter.kind === 'team') return edge.byTeam?.[filter.key] || 0;
-    return edge.total || 0;
+// Resolve a node's weight bundle for the chosen metric. 'all' is the node's
+// own Total/ByPlayer/ByTeam; 'armed'/'quad' read the optional sub-objects
+// (absent when no sample met the condition).
+function metricWeightsOf(node, metric) {
+    if (metric === 'armed') return node.armed || EMPTY_WEIGHTS;
+    if (metric === 'quad') return node.quad || EMPTY_WEIGHTS;
+    return node;
+}
+const EMPTY_WEIGHTS = { total: 0, byPlayer: {}, byTeam: {} };
+
+function nodeWeightFor(node, filter, metric) {
+    const w = metricWeightsOf(node, metric);
+    if (filter.kind === 'player') return w.byPlayer?.[filter.key] || 0;
+    if (filter.kind === 'team') return w.byTeam?.[filter.key] || 0;
+    return w.total || 0;
+}
+
+// Edges carry the same metric conditioning as nodes, so each metric is a
+// self-contained graph (its own nodes + edges).
+function metricEdgeWeightsOf(edge, metric) {
+    if (metric === 'armed') return edge.armed || EMPTY_WEIGHTS;
+    if (metric === 'quad') return edge.quad || EMPTY_WEIGHTS;
+    return edge;
+}
+
+function edgeWeightFor(edge, filter, metric) {
+    const w = metricEdgeWeightsOf(edge, metric);
+    if (filter.kind === 'player') return w.byPlayer?.[filter.key] || 0;
+    if (filter.kind === 'team') return w.byTeam?.[filter.key] || 0;
+    return w.total || 0;
 }
 
 // Build Cytoscape elements from the current graph + filter + edge-mode.
@@ -7356,6 +7391,7 @@ function buildCytoscapeElements() {
     const { graph } = locGraphState;
     if (!graph) return [];
     const filter = getLocGraphFilter();
+    const metric = getLocMetric();
     const edgeModeSel = document.getElementById('locgraph-edge-mode');
     const edgeMode = edgeModeSel ? edgeModeSel.value : 'all';
     const minEdgeSel = document.getElementById('locgraph-min-edge');
@@ -7363,14 +7399,14 @@ function buildCytoscapeElements() {
 
     let maxNodeWeight = 0;
     for (const n of graph.locs) {
-        const w = nodeWeightFor(n, filter);
+        const w = nodeWeightFor(n, filter, metric);
         if (w > maxNodeWeight) maxNodeWeight = w;
     }
     let maxEdgeWeight = 0;
     for (const e of graph.edges) {
         if (edgeMode === 'normal' && e.kind !== 'normal') continue;
         if (edgeMode === 'teleport' && e.kind !== 'teleport') continue;
-        const w = edgeWeightFor(e, filter);
+        const w = edgeWeightFor(e, filter, metric);
         if (w < minEdge) continue;
         if (w > maxEdgeWeight) maxEdgeWeight = w;
     }
@@ -7378,8 +7414,9 @@ function buildCytoscapeElements() {
     const elements = [];
 
     for (const n of graph.locs) {
-        const w = nodeWeightFor(n, filter);
+        const w = nodeWeightFor(n, filter, metric);
         const norm = maxNodeWeight > 0 ? w / maxNodeWeight : 0;
+        const mw = metricWeightsOf(n, metric);
         elements.push({
             group: 'nodes',
             data: {
@@ -7387,13 +7424,13 @@ function buildCytoscapeElements() {
                 name: n.name,
                 weight: w,
                 weightNorm: norm,
-                total: n.total,
-                byPlayer: n.byPlayer,
-                byTeam: n.byTeam || {},
-                // Per-filter dim state: mostly grey out nodes with zero
-                // contribution in non-"all" filters so the subgraph is
-                // visually clear but context is preserved.
-                dim: filter.kind !== 'all' && w === 0
+                total: mw.total || 0,
+                byPlayer: mw.byPlayer || {},
+                byTeam: mw.byTeam || {},
+                // Grey out nodes with zero contribution once a filter or a
+                // non-default metric is active, so each conditioned graph
+                // reads clearly while map context is preserved.
+                dim: w === 0 && (filter.kind !== 'all' || metric !== 'all')
             },
             // Preset/geographic layout reads world coords directly from data.
             // Invert Y so "up" on screen matches "up" in map (QW Y is up).
@@ -7404,10 +7441,11 @@ function buildCytoscapeElements() {
     for (const e of graph.edges) {
         if (edgeMode === 'normal' && e.kind !== 'normal') continue;
         if (edgeMode === 'teleport' && e.kind !== 'teleport') continue;
-        const w = edgeWeightFor(e, filter);
-        if (w === 0) continue; // Prune invisible edges for this filter
+        const w = edgeWeightFor(e, filter, metric);
+        if (w === 0) continue; // Prune edges absent from this filter+metric subgraph
         if (w < minEdge) continue; // UI minimum-edge-count filter
         const norm = maxEdgeWeight > 0 ? w / maxEdgeWeight : 0;
+        const ew = metricEdgeWeightsOf(e, metric);
         elements.push({
             group: 'edges',
             data: {
@@ -7417,9 +7455,9 @@ function buildCytoscapeElements() {
                 weight: w,
                 weightNorm: norm,
                 kind: e.kind,
-                total: e.total,
-                byPlayer: e.byPlayer,
-                byTeam: e.byTeam || {}
+                total: ew.total || 0,
+                byPlayer: ew.byPlayer || {},
+                byTeam: ew.byTeam || {}
             }
         });
     }
@@ -7836,11 +7874,12 @@ function shortName(name, n = 9) {
 // Normalisation (per-column for locs, per-row for regions) is baked into each
 // cell's intensity `i` by the build* functions, so the renderer is policy-free.
 
-// Build the loc matrix: leading team-aggregate columns then one per player
-// grouped by team; rows are locs (busiest first). Intensity is each column's
-// share normalised to its own busiest loc (sqrt-curved to lift small shares).
-// Returns null when there's nothing to show.
-function buildLocHeatmap(result) {
+// Build the loc matrix for `metric` ('all' | 'armed' | 'quad'): leading
+// team-aggregate columns then one per player grouped by team; rows are locs
+// (busiest first by the metric). Intensity is each column's share normalised to
+// its own busiest loc (sqrt-curved to lift small shares). Returns null when
+// there's nothing to show (e.g. nobody ever held a quad).
+function buildLocHeatmap(result, metric) {
     const graph = result && result.locGraph;
     if (!graph || !graph.locs || graph.locs.length === 0) return null;
     const players = (result.demoInfo && result.demoInfo.players) || [];
@@ -7850,17 +7889,21 @@ function buildLocHeatmap(result) {
         return i >= 0 ? i : teams.length; // unknown teams share the trailing color
     };
 
+    // Weights for the chosen metric (node itself for 'all', the armed/quad
+    // sub-object otherwise) drive every time read below.
+    const W = (n) => metricWeightsOf(n, metric);
+
     const playerTotal = new Map();
     for (const node of graph.locs) {
-        for (const [p, t] of Object.entries(node.byPlayer || {})) {
+        for (const [p, t] of Object.entries(W(node).byPlayer || {})) {
             playerTotal.set(p, (playerTotal.get(p) || 0) + t);
         }
     }
 
     const baseLocs = graph.locs
-        .filter(n => n.byPlayer && Object.keys(n.byPlayer).length > 0)
+        .filter(n => W(n).byPlayer && Object.keys(W(n).byPlayer).length > 0)
         .slice()
-        .sort((a, b) => (b.total || 0) - (a.total || 0));
+        .sort((a, b) => (W(b).total || 0) - (W(a).total || 0));
     if (baseLocs.length === 0) return null;
 
     const isDuel = players.length > 0 && players.every(p => p.team === p.name);
@@ -7903,7 +7946,7 @@ function buildLocHeatmap(result) {
     if (columns.length === 0) return null;
 
     // Per-column max share → full intensity at each column's busiest loc.
-    const secOf = (n, c) => c.members.reduce((s, p) => s + (n.byPlayer[p] || 0), 0);
+    const secOf = (n, c) => { const bp = W(n).byPlayer || {}; return c.members.reduce((s, p) => s + (bp[p] || 0), 0); };
     const colMaxFrac = columns.map(c => {
         let m = 0;
         for (const n of baseLocs) {
@@ -7989,7 +8032,11 @@ function buildRegionHeatmap(regions, stats) {
 function renderLocHeatmap() {
     const panel = document.getElementById('locheatmap-panel');
     if (!panel) return;
-    const data = locGraphState.result ? buildLocHeatmap(locGraphState.result) : null;
+    const metric = getLocMetric();
+    // The quad metric is graph-only — too sparse to be a useful table, so the
+    // heatmap panel hides while quad is selected (the graph still reweights).
+    if (metric === 'quad') { panel.style.display = 'none'; return; }
+    const data = locGraphState.result ? buildLocHeatmap(locGraphState.result, metric) : null;
     const noData = document.getElementById('locheatmap-no-data');
     if (!data) {
         const hasGraph = !!(locGraphState.graph && locGraphState.graph.locs && locGraphState.graph.locs.length);

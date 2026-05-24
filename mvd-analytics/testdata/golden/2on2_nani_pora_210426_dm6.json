@@ -5267,6 +5267,19 @@
   "locGraph": {
     "edges": [
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 3,
+            "gLAd": 9,
+            "kippo": 6,
+            "rusti": 6
+          },
+          "byTeam": {
+            "nAnI": 12,
+            "pora": 12
+          },
+          "total": 24
+        },
         "byPlayer": {
           "SS": 3,
           "gLAd": 10,
@@ -5283,6 +5296,18 @@
         "total": 25
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 2,
+            "kippo": 4,
+            "rusti": 3
+          },
+          "byTeam": {
+            "nAnI": 2,
+            "pora": 7
+          },
+          "total": 9
+        },
         "byPlayer": {
           "SS": 2,
           "kippo": 5,
@@ -5298,6 +5323,19 @@
         "total": 10
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 6,
+            "gLAd": 6,
+            "kippo": 4,
+            "rusti": 10
+          },
+          "byTeam": {
+            "nAnI": 12,
+            "pora": 14
+          },
+          "total": 26
+        },
         "byPlayer": {
           "SS": 15,
           "gLAd": 10,
@@ -5314,6 +5352,19 @@
         "total": 66
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 1,
+            "gLAd": 5,
+            "kippo": 3,
+            "rusti": 2
+          },
+          "byTeam": {
+            "nAnI": 6,
+            "pora": 5
+          },
+          "total": 11
+        },
         "byPlayer": {
           "SS": 4,
           "gLAd": 8,
@@ -5330,6 +5381,19 @@
         "total": 31
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 3,
+            "gLAd": 5,
+            "kippo": 6,
+            "rusti": 7
+          },
+          "byTeam": {
+            "nAnI": 8,
+            "pora": 13
+          },
+          "total": 21
+        },
         "byPlayer": {
           "SS": 3,
           "gLAd": 8,
@@ -5362,6 +5426,17 @@
         "total": 17
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 1,
+            "kippo": 1
+          },
+          "byTeam": {
+            "nAnI": 1,
+            "pora": 1
+          },
+          "total": 2
+        },
         "byPlayer": {
           "SS": 1,
           "kippo": 1
@@ -5376,6 +5451,19 @@
         "total": 2
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 2,
+            "gLAd": 1,
+            "kippo": 5,
+            "rusti": 3
+          },
+          "byTeam": {
+            "nAnI": 3,
+            "pora": 8
+          },
+          "total": 11
+        },
         "byPlayer": {
           "SS": 2,
           "gLAd": 1,
@@ -5392,6 +5480,19 @@
         "total": 12
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 2,
+            "gLAd": 1,
+            "kippo": 4,
+            "rusti": 3
+          },
+          "byTeam": {
+            "nAnI": 3,
+            "pora": 7
+          },
+          "total": 10
+        },
         "byPlayer": {
           "SS": 2,
           "gLAd": 1,
@@ -5408,6 +5509,19 @@
         "total": 10
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 4,
+            "gLAd": 7,
+            "kippo": 3,
+            "rusti": 7
+          },
+          "byTeam": {
+            "nAnI": 11,
+            "pora": 10
+          },
+          "total": 21
+        },
         "byPlayer": {
           "SS": 9,
           "gLAd": 9,
@@ -5424,6 +5538,19 @@
         "total": 38
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 6,
+            "gLAd": 5,
+            "kippo": 2,
+            "rusti": 4
+          },
+          "byTeam": {
+            "nAnI": 11,
+            "pora": 6
+          },
+          "total": 17
+        },
         "byPlayer": {
           "SS": 7,
           "gLAd": 8,
@@ -5440,6 +5567,19 @@
         "total": 28
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 9,
+            "gLAd": 10,
+            "kippo": 3,
+            "rusti": 7
+          },
+          "byTeam": {
+            "nAnI": 19,
+            "pora": 10
+          },
+          "total": 29
+        },
         "byPlayer": {
           "SS": 9,
           "gLAd": 11,
@@ -5456,6 +5596,17 @@
         "total": 32
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 1,
+            "kippo": 1
+          },
+          "byTeam": {
+            "nAnI": 1,
+            "pora": 1
+          },
+          "total": 2
+        },
         "byPlayer": {
           "SS": 1,
           "kippo": 2
@@ -5470,6 +5621,19 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 6,
+            "gLAd": 7,
+            "kippo": 4,
+            "rusti": 9
+          },
+          "byTeam": {
+            "nAnI": 13,
+            "pora": 13
+          },
+          "total": 26
+        },
         "byPlayer": {
           "SS": 10,
           "gLAd": 8,
@@ -5486,6 +5650,19 @@
         "total": 37
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 6,
+            "gLAd": 6,
+            "kippo": 6,
+            "rusti": 6
+          },
+          "byTeam": {
+            "nAnI": 12,
+            "pora": 12
+          },
+          "total": 24
+        },
         "byPlayer": {
           "SS": 6,
           "gLAd": 6,
@@ -5502,6 +5679,18 @@
         "total": 25
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 1,
+            "gLAd": 5,
+            "kippo": 6
+          },
+          "byTeam": {
+            "nAnI": 6,
+            "pora": 6
+          },
+          "total": 12
+        },
         "byPlayer": {
           "SS": 1,
           "gLAd": 5,
@@ -5533,6 +5722,19 @@
         "total": 22
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 3,
+            "gLAd": 9,
+            "kippo": 11,
+            "rusti": 6
+          },
+          "byTeam": {
+            "nAnI": 12,
+            "pora": 17
+          },
+          "total": 29
+        },
         "byPlayer": {
           "SS": 3,
           "gLAd": 9,
@@ -5549,6 +5751,19 @@
         "total": 29
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 8,
+            "gLAd": 6,
+            "kippo": 8,
+            "rusti": 13
+          },
+          "byTeam": {
+            "nAnI": 14,
+            "pora": 21
+          },
+          "total": 35
+        },
         "byPlayer": {
           "SS": 8,
           "gLAd": 6,
@@ -5565,6 +5780,18 @@
         "total": 37
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 1,
+            "gLAd": 2,
+            "kippo": 2
+          },
+          "byTeam": {
+            "nAnI": 3,
+            "pora": 2
+          },
+          "total": 5
+        },
         "byPlayer": {
           "SS": 1,
           "gLAd": 2,
@@ -5580,6 +5807,19 @@
         "total": 5
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 17,
+            "gLAd": 6,
+            "kippo": 14,
+            "rusti": 15
+          },
+          "byTeam": {
+            "nAnI": 23,
+            "pora": 29
+          },
+          "total": 52
+        },
         "byPlayer": {
           "SS": 17,
           "gLAd": 6,
@@ -5596,6 +5836,15 @@
         "total": 52
       },
       {
+        "armed": {
+          "byPlayer": {
+            "gLAd": 1
+          },
+          "byTeam": {
+            "nAnI": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "gLAd": 1
         },
@@ -5608,6 +5857,18 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 1,
+            "gLAd": 1,
+            "kippo": 1
+          },
+          "byTeam": {
+            "nAnI": 2,
+            "pora": 1
+          },
+          "total": 3
+        },
         "byPlayer": {
           "SS": 1,
           "gLAd": 1,
@@ -5623,6 +5884,15 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "kippo": 1
+          },
+          "byTeam": {
+            "pora": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "kippo": 1
         },
@@ -5635,6 +5905,19 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 4,
+            "gLAd": 2,
+            "kippo": 2,
+            "rusti": 4
+          },
+          "byTeam": {
+            "nAnI": 6,
+            "pora": 6
+          },
+          "total": 12
+        },
         "byPlayer": {
           "SS": 5,
           "gLAd": 2,
@@ -5651,6 +5934,18 @@
         "total": 13
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 3,
+            "gLAd": 1,
+            "rusti": 1
+          },
+          "byTeam": {
+            "nAnI": 4,
+            "pora": 1
+          },
+          "total": 5
+        },
         "byPlayer": {
           "SS": 3,
           "gLAd": 1,
@@ -5666,6 +5961,19 @@
         "total": 5
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 10,
+            "gLAd": 2,
+            "kippo": 4,
+            "rusti": 9
+          },
+          "byTeam": {
+            "nAnI": 12,
+            "pora": 13
+          },
+          "total": 25
+        },
         "byPlayer": {
           "SS": 10,
           "gLAd": 2,
@@ -5682,6 +5990,17 @@
         "total": 25
       },
       {
+        "armed": {
+          "byPlayer": {
+            "gLAd": 1,
+            "kippo": 4
+          },
+          "byTeam": {
+            "nAnI": 1,
+            "pora": 4
+          },
+          "total": 5
+        },
         "byPlayer": {
           "gLAd": 1,
           "kippo": 4
@@ -5696,6 +6015,19 @@
         "total": 5
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 11,
+            "gLAd": 10,
+            "kippo": 5,
+            "rusti": 12
+          },
+          "byTeam": {
+            "nAnI": 21,
+            "pora": 17
+          },
+          "total": 38
+        },
         "byPlayer": {
           "SS": 11,
           "gLAd": 10,
@@ -5712,6 +6044,19 @@
         "total": 38
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 1,
+            "gLAd": 3,
+            "kippo": 4,
+            "rusti": 3
+          },
+          "byTeam": {
+            "nAnI": 4,
+            "pora": 7
+          },
+          "total": 11
+        },
         "byPlayer": {
           "SS": 1,
           "gLAd": 3,
@@ -5728,6 +6073,16 @@
         "total": 12
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 3,
+            "gLAd": 1
+          },
+          "byTeam": {
+            "nAnI": 4
+          },
+          "total": 4
+        },
         "byPlayer": {
           "SS": 3,
           "gLAd": 1
@@ -5741,6 +6096,19 @@
         "total": 4
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 4,
+            "gLAd": 3,
+            "kippo": 2,
+            "rusti": 4
+          },
+          "byTeam": {
+            "nAnI": 7,
+            "pora": 6
+          },
+          "total": 13
+        },
         "byPlayer": {
           "SS": 4,
           "gLAd": 3,
@@ -5757,6 +6125,16 @@
         "total": 13
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 3,
+            "gLAd": 1
+          },
+          "byTeam": {
+            "nAnI": 4
+          },
+          "total": 4
+        },
         "byPlayer": {
           "SS": 9,
           "gLAd": 3,
@@ -5773,6 +6151,19 @@
         "total": 22
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 7,
+            "gLAd": 6,
+            "kippo": 1,
+            "rusti": 6
+          },
+          "byTeam": {
+            "nAnI": 13,
+            "pora": 7
+          },
+          "total": 20
+        },
         "byPlayer": {
           "SS": 9,
           "gLAd": 6,
@@ -5789,6 +6180,19 @@
         "total": 28
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 9,
+            "gLAd": 6,
+            "kippo": 4,
+            "rusti": 6
+          },
+          "byTeam": {
+            "nAnI": 15,
+            "pora": 10
+          },
+          "total": 25
+        },
         "byPlayer": {
           "SS": 10,
           "gLAd": 6,
@@ -5805,6 +6209,19 @@
         "total": 27
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 3,
+            "gLAd": 4,
+            "kippo": 4,
+            "rusti": 5
+          },
+          "byTeam": {
+            "nAnI": 7,
+            "pora": 9
+          },
+          "total": 16
+        },
         "byPlayer": {
           "SS": 5,
           "gLAd": 4,
@@ -5821,6 +6238,18 @@
         "total": 20
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 2,
+            "gLAd": 1,
+            "kippo": 4
+          },
+          "byTeam": {
+            "nAnI": 3,
+            "pora": 4
+          },
+          "total": 7
+        },
         "byPlayer": {
           "SS": 2,
           "gLAd": 1,
@@ -5836,6 +6265,18 @@
         "total": 7
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 1,
+            "gLAd": 1,
+            "rusti": 1
+          },
+          "byTeam": {
+            "nAnI": 2,
+            "pora": 1
+          },
+          "total": 3
+        },
         "byPlayer": {
           "SS": 1,
           "gLAd": 1,
@@ -5851,6 +6292,19 @@
         "total": 4
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 6,
+            "gLAd": 8,
+            "kippo": 8,
+            "rusti": 3
+          },
+          "byTeam": {
+            "nAnI": 14,
+            "pora": 11
+          },
+          "total": 25
+        },
         "byPlayer": {
           "SS": 6,
           "gLAd": 8,
@@ -5867,6 +6321,15 @@
         "total": 25
       },
       {
+        "armed": {
+          "byPlayer": {
+            "gLAd": 1
+          },
+          "byTeam": {
+            "nAnI": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "gLAd": 1
         },
@@ -5879,6 +6342,19 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 12,
+            "gLAd": 8,
+            "kippo": 4,
+            "rusti": 8
+          },
+          "byTeam": {
+            "nAnI": 20,
+            "pora": 12
+          },
+          "total": 32
+        },
         "byPlayer": {
           "SS": 12,
           "gLAd": 8,
@@ -5895,6 +6371,19 @@
         "total": 32
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 7,
+            "gLAd": 8,
+            "kippo": 6,
+            "rusti": 7
+          },
+          "byTeam": {
+            "nAnI": 15,
+            "pora": 13
+          },
+          "total": 28
+        },
         "byPlayer": {
           "SS": 7,
           "gLAd": 11,
@@ -5911,6 +6400,19 @@
         "total": 35
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 5,
+            "gLAd": 6,
+            "kippo": 8,
+            "rusti": 4
+          },
+          "byTeam": {
+            "nAnI": 11,
+            "pora": 12
+          },
+          "total": 23
+        },
         "byPlayer": {
           "SS": 5,
           "gLAd": 9,
@@ -5927,6 +6429,19 @@
         "total": 30
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 1,
+            "gLAd": 3,
+            "kippo": 2,
+            "rusti": 2
+          },
+          "byTeam": {
+            "nAnI": 4,
+            "pora": 4
+          },
+          "total": 8
+        },
         "byPlayer": {
           "SS": 1,
           "gLAd": 3,
@@ -5945,6 +6460,19 @@
     ],
     "locs": [
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 54.251000000000026,
+            "gLAd": 92.68600000000454,
+            "kippo": 47.66900000000034,
+            "rusti": 51.207000000000434
+          },
+          "byTeam": {
+            "nAnI": 146.93700000001274,
+            "pora": 98.87600000000424
+          },
+          "total": 245.8130000000224
+        },
         "byPlayer": {
           "SS": 62.40899999999972,
           "gLAd": 104.09000000000613,
@@ -5962,6 +6490,19 @@
         "z": 88
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 9.837999999999957,
+            "gLAd": 21.15700000000024,
+            "kippo": 16.71399999999996,
+            "rusti": 23.054000000000176
+          },
+          "byTeam": {
+            "nAnI": 30.99500000000065,
+            "pora": 39.76800000000035
+          },
+          "total": 70.76300000000157
+        },
         "byPlayer": {
           "SS": 11.964999999999936,
           "gLAd": 28.198000000000484,
@@ -5996,6 +6537,19 @@
         "z": 40
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 5.333999999999984,
+            "gLAd": 0.8180000000000005,
+            "kippo": 25.748000000000342,
+            "rusti": 8.448999999999975
+          },
+          "byTeam": {
+            "nAnI": 6.151999999999987,
+            "pora": 34.19700000000051
+          },
+          "total": 40.34900000000041
+        },
         "byPlayer": {
           "SS": 5.333999999999984,
           "gLAd": 0.8180000000000005,
@@ -6013,6 +6567,19 @@
         "z": 40
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 62.88200000000066,
+            "gLAd": 74.05300000000118,
+            "kippo": 47.7350000000001,
+            "rusti": 67.90500000000034
+          },
+          "byTeam": {
+            "nAnI": 136.93500000000833,
+            "pora": 115.64000000000705
+          },
+          "total": 252.5750000000241
+        },
         "byPlayer": {
           "SS": 70.67300000000135,
           "gLAd": 79.38000000000194,
@@ -6030,6 +6597,19 @@
         "z": 256
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 20.300000000000114,
+            "gLAd": 32.94700000000037,
+            "kippo": 16.70400000000004,
+            "rusti": 39.223000000000496
+          },
+          "byTeam": {
+            "nAnI": 53.247000000000476,
+            "pora": 55.92700000000038
+          },
+          "total": 109.17400000000566
+        },
         "byPlayer": {
           "SS": 25.084000000000252,
           "gLAd": 35.77300000000029,
@@ -6047,6 +6627,19 @@
         "z": 168
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 18.616000000000085,
+            "gLAd": 22.91500000000014,
+            "kippo": 28.44400000000036,
+            "rusti": 21.578000000000237
+          },
+          "byTeam": {
+            "nAnI": 41.53100000000033,
+            "pora": 50.02200000000009
+          },
+          "total": 91.55300000000426
+        },
         "byPlayer": {
           "SS": 18.616000000000085,
           "gLAd": 22.91500000000014,
@@ -6081,6 +6674,19 @@
         "z": 256
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 7.7589999999999915,
+            "gLAd": 22.853000000000193,
+            "kippo": 31.88500000000046,
+            "rusti": 6.675999999999984
+          },
+          "byTeam": {
+            "nAnI": 30.61200000000041,
+            "pora": 38.56100000000041
+          },
+          "total": 69.17300000000095
+        },
         "byPlayer": {
           "SS": 7.7589999999999915,
           "gLAd": 23.500000000000227,
@@ -6098,6 +6704,19 @@
         "z": -279.875
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 28.767000000000543,
+            "gLAd": 26.587000000000355,
+            "kippo": 30.510000000000467,
+            "rusti": 55.746000000000315
+          },
+          "byTeam": {
+            "nAnI": 55.35399999999997,
+            "pora": 86.25600000000323
+          },
+          "total": 141.61000000001096
+        },
         "byPlayer": {
           "SS": 41.51100000000038,
           "gLAd": 31.01900000000052,
@@ -6115,6 +6734,18 @@
         "z": 112
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 0.6260000000000003,
+            "gLAd": 3.138999999999989,
+            "kippo": 2.468999999999993
+          },
+          "byTeam": {
+            "nAnI": 3.764999999999986,
+            "pora": 2.468999999999993
+          },
+          "total": 6.233999999999976
+        },
         "byPlayer": {
           "SS": 0.6260000000000003,
           "gLAd": 3.138999999999989,
@@ -6131,6 +6762,19 @@
         "z": 136
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 24.6930000000003,
+            "gLAd": 14.323999999999915,
+            "kippo": 18.27800000000005,
+            "rusti": 32.95500000000041
+          },
+          "byTeam": {
+            "nAnI": 39.01700000000034,
+            "pora": 51.233000000000565
+          },
+          "total": 90.25000000000303
+        },
         "byPlayer": {
           "SS": 25.33800000000031,
           "gLAd": 14.323999999999915,
@@ -6148,6 +6792,19 @@
         "z": 128
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 203.87500000001944,
+            "gLAd": 145.83100000000974,
+            "kippo": 105.51400000000619,
+            "rusti": 156.05400000001387
+          },
+          "byTeam": {
+            "nAnI": 349.7059999999672,
+            "pora": 261.56800000002386
+          },
+          "total": 611.273999999983
+        },
         "byPlayer": {
           "SS": 216.73700000002177,
           "gLAd": 150.8320000000094,
@@ -6165,6 +6822,16 @@
         "z": 168
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 4.468999999999988,
+            "gLAd": 3.6189999999999887
+          },
+          "byTeam": {
+            "nAnI": 8.087999999999964
+          },
+          "total": 8.087999999999964
+        },
         "byPlayer": {
           "SS": 10.43099999999996,
           "gLAd": 5.63799999999998,
@@ -6182,6 +6849,19 @@
         "z": 168
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 45.982000000000205,
+            "gLAd": 32.7810000000005,
+            "kippo": 11.77499999999996,
+            "rusti": 28.134000000000505
+          },
+          "byTeam": {
+            "nAnI": 78.76300000000252,
+            "pora": 39.90900000000045
+          },
+          "total": 118.67200000000815
+        },
         "byPlayer": {
           "SS": 50.91800000000007,
           "gLAd": 34.232000000000504,
@@ -6199,6 +6879,19 @@
         "z": 40
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 41.63200000000047,
+            "gLAd": 51.429000000000656,
+            "kippo": 56.17200000000012,
+            "rusti": 25.000000000000234
+          },
+          "byTeam": {
+            "nAnI": 93.06100000000416,
+            "pora": 81.17200000000231
+          },
+          "total": 174.2330000000162
+        },
         "byPlayer": {
           "SS": 42.75700000000045,
           "gLAd": 53.83600000000057,
@@ -6216,6 +6909,19 @@
         "z": -39.875
       },
       {
+        "armed": {
+          "byPlayer": {
+            "SS": 4.091999999999984,
+            "gLAd": 6.927999999999975,
+            "kippo": 10.472999999999955,
+            "rusti": 6.471999999999986
+          },
+          "byTeam": {
+            "nAnI": 11.019999999999953,
+            "pora": 16.944999999999958
+          },
+          "total": 27.965000000000266
+        },
         "byPlayer": {
           "SS": 4.091999999999984,
           "gLAd": 10.256999999999955,
@@ -9280,7 +9986,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "streams": {
     "global": {
       "matchEnd": 600000,

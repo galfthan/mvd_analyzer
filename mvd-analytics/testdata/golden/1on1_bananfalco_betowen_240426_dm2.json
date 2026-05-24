@@ -2597,6 +2597,17 @@
   "locGraph": {
     "edges": [
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 5,
+            "betowen": 4
+          },
+          "byTeam": {
+            "banan falco": 5,
+            "betowen": 4
+          },
+          "total": 9
+        },
         "byPlayer": {
           "banan falco": 5,
           "betowen": 5
@@ -2611,6 +2622,17 @@
         "total": 10
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 3,
+            "betowen": 1
+          },
+          "byTeam": {
+            "banan falco": 3,
+            "betowen": 1
+          },
+          "total": 4
+        },
         "byPlayer": {
           "banan falco": 3,
           "betowen": 3
@@ -2625,6 +2647,17 @@
         "total": 6
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 9,
+            "betowen": 10
+          },
+          "byTeam": {
+            "banan falco": 9,
+            "betowen": 10
+          },
+          "total": 19
+        },
         "byPlayer": {
           "banan falco": 10,
           "betowen": 12
@@ -2639,6 +2672,17 @@
         "total": 22
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 2,
+            "betowen": 4
+          },
+          "byTeam": {
+            "banan falco": 2,
+            "betowen": 4
+          },
+          "total": 6
+        },
         "byPlayer": {
           "banan falco": 3,
           "betowen": 7
@@ -2653,6 +2697,17 @@
         "total": 10
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 9,
+            "betowen": 7
+          },
+          "byTeam": {
+            "banan falco": 9,
+            "betowen": 7
+          },
+          "total": 16
+        },
         "byPlayer": {
           "banan falco": 11,
           "betowen": 11
@@ -2667,6 +2722,15 @@
         "total": 22
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 1
+          },
+          "byTeam": {
+            "banan falco": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "banan falco": 1
         },
@@ -2679,6 +2743,15 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 1
+          },
+          "byTeam": {
+            "betowen": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "betowen": 2
         },
@@ -2691,6 +2764,17 @@
         "total": 2
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 2,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 2,
+            "betowen": 2
+          },
+          "total": 4
+        },
         "byPlayer": {
           "banan falco": 2,
           "betowen": 2
@@ -2705,6 +2789,17 @@
         "total": 4
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 13,
+            "betowen": 6
+          },
+          "byTeam": {
+            "banan falco": 13,
+            "betowen": 6
+          },
+          "total": 19
+        },
         "byPlayer": {
           "banan falco": 13,
           "betowen": 8
@@ -2731,6 +2826,17 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 6,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 6,
+            "betowen": 2
+          },
+          "total": 8
+        },
         "byPlayer": {
           "banan falco": 8,
           "betowen": 4
@@ -2745,6 +2851,15 @@
         "total": 12
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 1
+          },
+          "byTeam": {
+            "banan falco": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "banan falco": 1
         },
@@ -2757,6 +2872,17 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 12,
+            "betowen": 9
+          },
+          "byTeam": {
+            "banan falco": 12,
+            "betowen": 9
+          },
+          "total": 21
+        },
         "byPlayer": {
           "banan falco": 12,
           "betowen": 12
@@ -2771,6 +2897,15 @@
         "total": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 1
+          },
+          "byTeam": {
+            "betowen": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "betowen": 2
         },
@@ -2783,6 +2918,15 @@
         "total": 2
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 5
+          },
+          "byTeam": {
+            "banan falco": 5
+          },
+          "total": 5
+        },
         "byPlayer": {
           "banan falco": 5,
           "betowen": 1
@@ -2797,6 +2941,15 @@
         "total": 6
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 1
+          },
+          "byTeam": {
+            "betowen": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "betowen": 1
         },
@@ -2809,6 +2962,17 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 2,
+            "betowen": 1
+          },
+          "byTeam": {
+            "banan falco": 2,
+            "betowen": 1
+          },
+          "total": 3
+        },
         "byPlayer": {
           "banan falco": 2,
           "betowen": 1
@@ -2823,6 +2987,15 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 1
+          },
+          "byTeam": {
+            "betowen": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "betowen": 2
         },
@@ -2835,6 +3008,17 @@
         "total": 2
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 5,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 5,
+            "betowen": 2
+          },
+          "total": 7
+        },
         "byPlayer": {
           "banan falco": 5,
           "betowen": 2
@@ -2849,6 +3033,17 @@
         "total": 7
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 7,
+            "betowen": 6
+          },
+          "byTeam": {
+            "banan falco": 7,
+            "betowen": 6
+          },
+          "total": 13
+        },
         "byPlayer": {
           "banan falco": 7,
           "betowen": 6
@@ -2863,6 +3058,15 @@
         "total": 13
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 1
+          },
+          "byTeam": {
+            "betowen": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "betowen": 1
         },
@@ -2875,6 +3079,17 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 3,
+            "betowen": 6
+          },
+          "byTeam": {
+            "banan falco": 3,
+            "betowen": 6
+          },
+          "total": 9
+        },
         "byPlayer": {
           "banan falco": 3,
           "betowen": 6
@@ -2889,6 +3104,15 @@
         "total": 9
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 1
+          },
+          "byTeam": {
+            "banan falco": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "banan falco": 1
         },
@@ -2901,6 +3125,17 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 1,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 1,
+            "betowen": 2
+          },
+          "total": 3
+        },
         "byPlayer": {
           "banan falco": 1,
           "betowen": 2
@@ -2915,6 +3150,17 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 14,
+            "betowen": 7
+          },
+          "byTeam": {
+            "banan falco": 14,
+            "betowen": 7
+          },
+          "total": 21
+        },
         "byPlayer": {
           "banan falco": 14,
           "betowen": 10
@@ -2929,6 +3175,17 @@
         "total": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 9,
+            "betowen": 4
+          },
+          "byTeam": {
+            "banan falco": 9,
+            "betowen": 4
+          },
+          "total": 13
+        },
         "byPlayer": {
           "banan falco": 15,
           "betowen": 4
@@ -2943,6 +3200,17 @@
         "total": 19
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 7,
+            "betowen": 9
+          },
+          "byTeam": {
+            "banan falco": 7,
+            "betowen": 9
+          },
+          "total": 16
+        },
         "byPlayer": {
           "banan falco": 9,
           "betowen": 9
@@ -2957,6 +3225,17 @@
         "total": 18
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 6,
+            "betowen": 1
+          },
+          "byTeam": {
+            "banan falco": 6,
+            "betowen": 1
+          },
+          "total": 7
+        },
         "byPlayer": {
           "banan falco": 7,
           "betowen": 1
@@ -2971,6 +3250,17 @@
         "total": 8
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 10,
+            "betowen": 3
+          },
+          "byTeam": {
+            "banan falco": 10,
+            "betowen": 3
+          },
+          "total": 13
+        },
         "byPlayer": {
           "banan falco": 14,
           "betowen": 3
@@ -2985,6 +3275,17 @@
         "total": 17
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 14,
+            "betowen": 12
+          },
+          "byTeam": {
+            "banan falco": 14,
+            "betowen": 12
+          },
+          "total": 26
+        },
         "byPlayer": {
           "banan falco": 18,
           "betowen": 13
@@ -2999,6 +3300,15 @@
         "total": 31
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 2
+          },
+          "byTeam": {
+            "betowen": 2
+          },
+          "total": 2
+        },
         "byPlayer": {
           "betowen": 2
         },
@@ -3011,6 +3321,17 @@
         "total": 2
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 3,
+            "betowen": 1
+          },
+          "byTeam": {
+            "banan falco": 3,
+            "betowen": 1
+          },
+          "total": 4
+        },
         "byPlayer": {
           "banan falco": 3,
           "betowen": 1
@@ -3025,6 +3346,17 @@
         "total": 4
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 2,
+            "betowen": 1
+          },
+          "byTeam": {
+            "banan falco": 2,
+            "betowen": 1
+          },
+          "total": 3
+        },
         "byPlayer": {
           "banan falco": 2,
           "betowen": 1
@@ -3039,6 +3371,17 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 5,
+            "betowen": 4
+          },
+          "byTeam": {
+            "banan falco": 5,
+            "betowen": 4
+          },
+          "total": 9
+        },
         "byPlayer": {
           "banan falco": 5,
           "betowen": 5
@@ -3053,6 +3396,17 @@
         "total": 10
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 4,
+            "betowen": 5
+          },
+          "byTeam": {
+            "banan falco": 4,
+            "betowen": 5
+          },
+          "total": 9
+        },
         "byPlayer": {
           "banan falco": 5,
           "betowen": 7
@@ -3067,6 +3421,17 @@
         "total": 12
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 5,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 5,
+            "betowen": 2
+          },
+          "total": 7
+        },
         "byPlayer": {
           "banan falco": 5,
           "betowen": 2
@@ -3081,6 +3446,15 @@
         "total": 7
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 3
+          },
+          "byTeam": {
+            "betowen": 3
+          },
+          "total": 3
+        },
         "byPlayer": {
           "betowen": 3
         },
@@ -3093,6 +3467,15 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 1
+          },
+          "byTeam": {
+            "betowen": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "betowen": 1
         },
@@ -3105,6 +3488,15 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 2
+          },
+          "byTeam": {
+            "banan falco": 2
+          },
+          "total": 2
+        },
         "byPlayer": {
           "banan falco": 2
         },
@@ -3117,6 +3509,15 @@
         "total": 2
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 1
+          },
+          "byTeam": {
+            "betowen": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "betowen": 2
         },
@@ -3129,6 +3530,17 @@
         "total": 2
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 2,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 2,
+            "betowen": 2
+          },
+          "total": 4
+        },
         "byPlayer": {
           "banan falco": 2,
           "betowen": 2
@@ -3143,6 +3555,17 @@
         "total": 4
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 4,
+            "betowen": 1
+          },
+          "byTeam": {
+            "banan falco": 4,
+            "betowen": 1
+          },
+          "total": 5
+        },
         "byPlayer": {
           "banan falco": 4,
           "betowen": 1
@@ -3157,6 +3580,17 @@
         "total": 5
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 3,
+            "betowen": 8
+          },
+          "byTeam": {
+            "banan falco": 3,
+            "betowen": 8
+          },
+          "total": 11
+        },
         "byPlayer": {
           "banan falco": 3,
           "betowen": 8
@@ -3171,6 +3605,17 @@
         "total": 11
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 6,
+            "betowen": 6
+          },
+          "byTeam": {
+            "banan falco": 6,
+            "betowen": 6
+          },
+          "total": 12
+        },
         "byPlayer": {
           "banan falco": 6,
           "betowen": 6
@@ -3185,6 +3630,17 @@
         "total": 12
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 13,
+            "betowen": 5
+          },
+          "byTeam": {
+            "banan falco": 13,
+            "betowen": 5
+          },
+          "total": 18
+        },
         "byPlayer": {
           "banan falco": 13,
           "betowen": 5
@@ -3199,6 +3655,17 @@
         "total": 18
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 3,
+            "betowen": 5
+          },
+          "byTeam": {
+            "banan falco": 3,
+            "betowen": 5
+          },
+          "total": 8
+        },
         "byPlayer": {
           "banan falco": 3,
           "betowen": 5
@@ -3213,6 +3680,17 @@
         "total": 8
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 6,
+            "betowen": 4
+          },
+          "byTeam": {
+            "banan falco": 6,
+            "betowen": 4
+          },
+          "total": 10
+        },
         "byPlayer": {
           "banan falco": 6,
           "betowen": 4
@@ -3227,6 +3705,15 @@
         "total": 10
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 6
+          },
+          "byTeam": {
+            "betowen": 6
+          },
+          "total": 6
+        },
         "byPlayer": {
           "betowen": 6
         },
@@ -3239,6 +3726,17 @@
         "total": 6
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 4,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 4,
+            "betowen": 2
+          },
+          "total": 6
+        },
         "byPlayer": {
           "banan falco": 4,
           "betowen": 8
@@ -3253,6 +3751,17 @@
         "total": 12
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 3,
+            "betowen": 5
+          },
+          "byTeam": {
+            "banan falco": 3,
+            "betowen": 5
+          },
+          "total": 8
+        },
         "byPlayer": {
           "banan falco": 3,
           "betowen": 5
@@ -3267,6 +3776,17 @@
         "total": 8
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 4,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 4,
+            "betowen": 2
+          },
+          "total": 6
+        },
         "byPlayer": {
           "banan falco": 4,
           "betowen": 2
@@ -3281,6 +3801,17 @@
         "total": 6
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 10,
+            "betowen": 3
+          },
+          "byTeam": {
+            "banan falco": 10,
+            "betowen": 3
+          },
+          "total": 13
+        },
         "byPlayer": {
           "banan falco": 10,
           "betowen": 3
@@ -3295,6 +3826,17 @@
         "total": 13
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 3,
+            "betowen": 3
+          },
+          "byTeam": {
+            "banan falco": 3,
+            "betowen": 3
+          },
+          "total": 6
+        },
         "byPlayer": {
           "banan falco": 3,
           "betowen": 3
@@ -3309,6 +3851,15 @@
         "total": 6
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 6
+          },
+          "byTeam": {
+            "betowen": 6
+          },
+          "total": 6
+        },
         "byPlayer": {
           "betowen": 6
         },
@@ -3321,6 +3872,17 @@
         "total": 6
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 8,
+            "betowen": 6
+          },
+          "byTeam": {
+            "banan falco": 8,
+            "betowen": 6
+          },
+          "total": 14
+        },
         "byPlayer": {
           "banan falco": 9,
           "betowen": 8
@@ -3335,6 +3897,17 @@
         "total": 17
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 8,
+            "betowen": 5
+          },
+          "byTeam": {
+            "banan falco": 8,
+            "betowen": 5
+          },
+          "total": 13
+        },
         "byPlayer": {
           "banan falco": 9,
           "betowen": 6
@@ -3349,6 +3922,17 @@
         "total": 15
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 1,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 1,
+            "betowen": 2
+          },
+          "total": 3
+        },
         "byPlayer": {
           "banan falco": 1,
           "betowen": 2
@@ -3363,6 +3947,15 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 3
+          },
+          "byTeam": {
+            "betowen": 3
+          },
+          "total": 3
+        },
         "byPlayer": {
           "betowen": 3
         },
@@ -3375,6 +3968,17 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 7,
+            "betowen": 4
+          },
+          "byTeam": {
+            "banan falco": 7,
+            "betowen": 4
+          },
+          "total": 11
+        },
         "byPlayer": {
           "banan falco": 7,
           "betowen": 5
@@ -3389,6 +3993,17 @@
         "total": 12
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 7,
+            "betowen": 1
+          },
+          "byTeam": {
+            "banan falco": 7,
+            "betowen": 1
+          },
+          "total": 8
+        },
         "byPlayer": {
           "banan falco": 7,
           "betowen": 1
@@ -3403,6 +4018,17 @@
         "total": 8
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 8,
+            "betowen": 4
+          },
+          "byTeam": {
+            "banan falco": 8,
+            "betowen": 4
+          },
+          "total": 12
+        },
         "byPlayer": {
           "banan falco": 12,
           "betowen": 4
@@ -3417,6 +4043,17 @@
         "total": 16
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 1,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 1,
+            "betowen": 2
+          },
+          "total": 3
+        },
         "byPlayer": {
           "banan falco": 1,
           "betowen": 2
@@ -3431,6 +4068,17 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 6,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 6,
+            "betowen": 2
+          },
+          "total": 8
+        },
         "byPlayer": {
           "banan falco": 6,
           "betowen": 2
@@ -3445,6 +4093,17 @@
         "total": 8
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 5,
+            "betowen": 7
+          },
+          "byTeam": {
+            "banan falco": 5,
+            "betowen": 7
+          },
+          "total": 12
+        },
         "byPlayer": {
           "banan falco": 11,
           "betowen": 15
@@ -3471,6 +4130,15 @@
         "total": 1
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 1
+          },
+          "byTeam": {
+            "betowen": 1
+          },
+          "total": 1
+        },
         "byPlayer": {
           "betowen": 3
         },
@@ -3483,6 +4151,17 @@
         "total": 3
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 5,
+            "betowen": 6
+          },
+          "byTeam": {
+            "banan falco": 5,
+            "betowen": 6
+          },
+          "total": 11
+        },
         "byPlayer": {
           "banan falco": 11,
           "betowen": 12
@@ -3497,6 +4176,17 @@
         "total": 23
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 6,
+            "betowen": 5
+          },
+          "byTeam": {
+            "banan falco": 6,
+            "betowen": 5
+          },
+          "total": 11
+        },
         "byPlayer": {
           "banan falco": 7,
           "betowen": 9
@@ -3511,6 +4201,17 @@
         "total": 16
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 3,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 3,
+            "betowen": 2
+          },
+          "total": 5
+        },
         "byPlayer": {
           "banan falco": 4,
           "betowen": 3
@@ -3525,6 +4226,15 @@
         "total": 7
       },
       {
+        "armed": {
+          "byPlayer": {
+            "betowen": 2
+          },
+          "byTeam": {
+            "betowen": 2
+          },
+          "total": 2
+        },
         "byPlayer": {
           "betowen": 2
         },
@@ -3537,6 +4247,17 @@
         "total": 2
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 7,
+            "betowen": 7
+          },
+          "byTeam": {
+            "banan falco": 7,
+            "betowen": 7
+          },
+          "total": 14
+        },
         "byPlayer": {
           "banan falco": 8,
           "betowen": 9
@@ -3551,6 +4272,17 @@
         "total": 17
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 2,
+            "betowen": 1
+          },
+          "byTeam": {
+            "banan falco": 2,
+            "betowen": 1
+          },
+          "total": 3
+        },
         "byPlayer": {
           "banan falco": 7,
           "betowen": 5
@@ -3565,6 +4297,17 @@
         "total": 12
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 7,
+            "betowen": 2
+          },
+          "byTeam": {
+            "banan falco": 7,
+            "betowen": 2
+          },
+          "total": 9
+        },
         "byPlayer": {
           "banan falco": 8,
           "betowen": 7
@@ -3581,6 +4324,17 @@
     ],
     "locs": [
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 7.85699999999999,
+            "betowen": 5.4079999999999995
+          },
+          "byTeam": {
+            "banan falco": 7.85699999999999,
+            "betowen": 5.4079999999999995
+          },
+          "total": 13.264999999999954
+        },
         "byPlayer": {
           "banan falco": 7.85699999999999,
           "betowen": 9.913999999999987
@@ -3596,6 +4350,17 @@
         "z": 344
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 29.73400000000022,
+            "betowen": 28.735000000000184
+          },
+          "byTeam": {
+            "banan falco": 29.73400000000022,
+            "betowen": 28.735000000000184
+          },
+          "total": 58.46900000000014
+        },
         "byPlayer": {
           "banan falco": 34.55200000000025,
           "betowen": 41.90400000000024
@@ -3611,6 +4376,17 @@
         "z": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 1.0060000000000002,
+            "betowen": 1.0780000000000003
+          },
+          "byTeam": {
+            "banan falco": 1.0060000000000002,
+            "betowen": 1.0780000000000003
+          },
+          "total": 2.084
+        },
         "byPlayer": {
           "banan falco": 1.0060000000000002,
           "betowen": 1.4669999999999996
@@ -3626,6 +4402,17 @@
         "z": 184
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 20.765000000000043,
+            "betowen": 9.256999999999985
+          },
+          "byTeam": {
+            "banan falco": 20.765000000000043,
+            "betowen": 9.256999999999985
+          },
+          "total": 30.022000000000173
+        },
         "byPlayer": {
           "banan falco": 23.03800000000007,
           "betowen": 12.412999999999961
@@ -3641,6 +4428,17 @@
         "z": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 36.81500000000018,
+            "betowen": 33.27400000000023
+          },
+          "byTeam": {
+            "banan falco": 36.81500000000018,
+            "betowen": 33.27400000000023
+          },
+          "total": 70.08900000000024
+        },
         "byPlayer": {
           "banan falco": 36.81500000000018,
           "betowen": 41.497000000000206
@@ -3656,6 +4454,17 @@
         "z": 104
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 2.0119999999999996,
+            "betowen": 0.8890000000000002
+          },
+          "byTeam": {
+            "banan falco": 2.0119999999999996,
+            "betowen": 0.8890000000000002
+          },
+          "total": 2.901000000000001
+        },
         "byPlayer": {
           "banan falco": 2.0119999999999996,
           "betowen": 1.3570000000000002
@@ -3671,6 +4480,17 @@
         "z": 184
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 35.94200000000026,
+            "betowen": 37.422000000000224
+          },
+          "byTeam": {
+            "banan falco": 35.94200000000026,
+            "betowen": 37.422000000000224
+          },
+          "total": 73.36400000000042
+        },
         "byPlayer": {
           "banan falco": 35.94200000000026,
           "betowen": 37.422000000000224
@@ -3686,6 +4506,17 @@
         "z": 120
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 3.5180000000000025,
+            "betowen": 12.826999999999966
+          },
+          "byTeam": {
+            "banan falco": 3.5180000000000025,
+            "betowen": 12.826999999999966
+          },
+          "total": 16.344999999999953
+        },
         "byPlayer": {
           "banan falco": 3.5180000000000025,
           "betowen": 12.826999999999966
@@ -3701,6 +4532,17 @@
         "z": 200
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 66.05999999999999,
+            "betowen": 41.463000000000115
+          },
+          "byTeam": {
+            "banan falco": 66.05999999999999,
+            "betowen": 41.463000000000115
+          },
+          "total": 107.52300000000166
+        },
         "byPlayer": {
           "banan falco": 72.9250000000003,
           "betowen": 49.20900000000003
@@ -3716,6 +4558,17 @@
         "z": 20
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 17.70699999999996,
+            "betowen": 6.704999999999997
+          },
+          "byTeam": {
+            "banan falco": 17.70699999999996,
+            "betowen": 6.704999999999997
+          },
+          "total": 24.41200000000011
+        },
         "byPlayer": {
           "banan falco": 21.867000000000054,
           "betowen": 6.704999999999997
@@ -3731,6 +4584,17 @@
         "z": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 30.579000000000192,
+            "betowen": 33.53400000000022
+          },
+          "byTeam": {
+            "banan falco": 30.579000000000192,
+            "betowen": 33.53400000000022
+          },
+          "total": 64.11299999999996
+        },
         "byPlayer": {
           "banan falco": 33.761000000000195,
           "betowen": 37.04100000000021
@@ -3746,6 +4610,17 @@
         "z": 200
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 3.4470000000000005,
+            "betowen": 1.9869999999999999
+          },
+          "byTeam": {
+            "banan falco": 3.4470000000000005,
+            "betowen": 1.9869999999999999
+          },
+          "total": 5.434
+        },
         "byPlayer": {
           "banan falco": 3.4470000000000005,
           "betowen": 1.9869999999999999
@@ -3761,6 +4636,17 @@
         "z": 184
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 9.206999999999983,
+            "betowen": 25.36800000000008
+          },
+          "byTeam": {
+            "banan falco": 9.206999999999983,
+            "betowen": 25.36800000000008
+          },
+          "total": 34.575000000000166
+        },
         "byPlayer": {
           "banan falco": 10.064999999999976,
           "betowen": 28.40200000000012
@@ -3776,6 +4662,17 @@
         "z": 344
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 17.311999999999962,
+            "betowen": 7.4549999999999965
+          },
+          "byTeam": {
+            "banan falco": 17.311999999999962,
+            "betowen": 7.4549999999999965
+          },
+          "total": 24.76700000000007
+        },
         "byPlayer": {
           "banan falco": 20.306000000000015,
           "betowen": 9.362999999999985
@@ -3791,6 +4688,17 @@
         "z": 184
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 63.69400000000009,
+            "betowen": 62.97100000000018
+          },
+          "byTeam": {
+            "banan falco": 63.69400000000009,
+            "betowen": 62.97100000000018
+          },
+          "total": 126.66500000000231
+        },
         "byPlayer": {
           "banan falco": 67.78600000000023,
           "betowen": 73.43200000000053
@@ -3806,6 +4714,17 @@
         "z": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 4.365000000000001,
+            "betowen": 17.34799999999996
+          },
+          "byTeam": {
+            "banan falco": 4.365000000000001,
+            "betowen": 17.34799999999996
+          },
+          "total": 21.713000000000054
+        },
         "byPlayer": {
           "banan falco": 4.365000000000001,
           "betowen": 23.933000000000078
@@ -3821,6 +4740,17 @@
         "z": 88
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 10.302999999999974,
+            "betowen": 10.499999999999975
+          },
+          "byTeam": {
+            "banan falco": 10.302999999999974,
+            "betowen": 10.499999999999975
+          },
+          "total": 20.803000000000036
+        },
         "byPlayer": {
           "banan falco": 10.302999999999974,
           "betowen": 10.499999999999975
@@ -3836,6 +4766,17 @@
         "z": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 21.44400000000003,
+            "betowen": 15.114999999999952
+          },
+          "byTeam": {
+            "banan falco": 21.44400000000003,
+            "betowen": 15.114999999999952
+          },
+          "total": 36.559000000000204
+        },
         "byPlayer": {
           "banan falco": 21.44400000000003,
           "betowen": 15.114999999999952
@@ -3851,6 +4792,17 @@
         "z": 120
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 13.37199999999996,
+            "betowen": 24.542000000000098
+          },
+          "byTeam": {
+            "banan falco": 13.37199999999996,
+            "betowen": 24.542000000000098
+          },
+          "total": 37.914000000000215
+        },
         "byPlayer": {
           "banan falco": 15.00799999999995,
           "betowen": 29.78900000000018
@@ -3866,6 +4818,17 @@
         "z": 120
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 15.755999999999954,
+            "betowen": 18.648999999999976
+          },
+          "byTeam": {
+            "banan falco": 15.755999999999954,
+            "betowen": 18.648999999999976
+          },
+          "total": 34.405000000000165
+        },
         "byPlayer": {
           "banan falco": 16.57299999999996,
           "betowen": 21.96000000000004
@@ -3881,6 +4844,17 @@
         "z": 120
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 31.30600000000023,
+            "betowen": 12.066999999999965
+          },
+          "byTeam": {
+            "banan falco": 31.30600000000023,
+            "betowen": 12.066999999999965
+          },
+          "total": 43.37300000000021
+        },
         "byPlayer": {
           "banan falco": 36.078000000000216,
           "betowen": 12.066999999999965
@@ -3896,6 +4870,17 @@
         "z": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 12.808999999999964,
+            "betowen": 6.549999999999995
+          },
+          "byTeam": {
+            "banan falco": 12.808999999999964,
+            "betowen": 6.549999999999995
+          },
+          "total": 19.358999999999995
+        },
         "byPlayer": {
           "banan falco": 12.808999999999964,
           "betowen": 6.823999999999995
@@ -3911,6 +4896,17 @@
         "z": 56
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 14.728999999999946,
+            "betowen": 21.904000000000032
+          },
+          "byTeam": {
+            "banan falco": 14.728999999999946,
+            "betowen": 21.904000000000032
+          },
+          "total": 36.63300000000021
+        },
         "byPlayer": {
           "banan falco": 34.664000000000236,
           "betowen": 55.91400000000016
@@ -3926,6 +4922,17 @@
         "z": -87.875
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 2.65,
+            "betowen": 4.675000000000002
+          },
+          "byTeam": {
+            "banan falco": 2.65,
+            "betowen": 4.675000000000002
+          },
+          "total": 7.324999999999995
+        },
         "byPlayer": {
           "banan falco": 13.285999999999955,
           "betowen": 23.08300000000005
@@ -3941,6 +4948,17 @@
         "z": -71.875
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 12.586999999999964,
+            "betowen": 4.506999999999999
+          },
+          "byTeam": {
+            "banan falco": 12.586999999999964,
+            "betowen": 4.506999999999999
+          },
+          "total": 17.09399999999995
+        },
         "byPlayer": {
           "banan falco": 13.717999999999961,
           "betowen": 8.251999999999994
@@ -3956,6 +4974,17 @@
         "z": 24
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 25.36500000000009,
+            "betowen": 11.948999999999973
+          },
+          "byTeam": {
+            "banan falco": 25.36500000000009,
+            "betowen": 11.948999999999973
+          },
+          "total": 37.31400000000016
+        },
         "byPlayer": {
           "banan falco": 33.3770000000002,
           "betowen": 19.335999999999984
@@ -3971,6 +5000,17 @@
         "z": 352
       },
       {
+        "armed": {
+          "byPlayer": {
+            "banan falco": 12.033999999999972,
+            "betowen": 1.2080000000000002
+          },
+          "byTeam": {
+            "banan falco": 12.033999999999972,
+            "betowen": 1.2080000000000002
+          },
+          "total": 13.241999999999967
+        },
         "byPlayer": {
           "banan falco": 13.462999999999965,
           "betowen": 8.271999999999991
@@ -4433,7 +5473,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "streams": {
     "global": {
       "matchEnd": 599980,
