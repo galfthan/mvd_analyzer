@@ -576,7 +576,19 @@ diff -r /tmp/before /tmp/after
    `sv_forcenick` can set the userinfo name to the login. The analyzer
    resolves display names from KTX demoinfo via `*auth` login join.
 
-3. **Same-tick item insta-regrab**: If an item respawns and is picked up
+3. **Reconnecting players**: When a player disconnects and reconnects
+   mid-match they land on a new wire slot (and userid), and their old
+   slot is often reused. The `identity` analyzer folds the occupancies
+   back into one player — via the KTX `rejoins`/`reenters` prints, then a
+   per-session demoinfo login/name join — so pickups, frags, timeline and
+   the merged per-player stream stay attributed correctly (matching KTX's
+   own ghost-by-netname behaviour). Residual gap: a reconnect on a
+   non-KTX demo with no demoinfo *and* a different name each time has no
+   signal to link the two names and will not unify. See
+   [mvd-reader/MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md) (search "reconnect")
+   and [mvd-analytics/analyzer/identity.md](mvd-analytics/analyzer/identity.md).
+
+4. **Same-tick item insta-regrab**: If an item respawns and is picked up
    again within a single server tick (camped spawn), the wire never
    emits a "visible" transition for that cycle. The items analyzer
    recovers these via two synthesis paths (KTX `//ktx took` hint-driven

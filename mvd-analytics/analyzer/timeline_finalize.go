@@ -41,35 +41,13 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		}
 	}
 
-	// Convert raw frag events to final events with player and team info
+	// Convert raw frag events to final events with player and team info.
+	// Resolve each frag to the identity that held the slot *at frag time*
+	// (resolveAt) so a player's pre-reconnect frags don't get relabelled
+	// with whoever later took their slot.
 	fragEvents := make([]TimelineFragEvent, 0, len(a.rawFrags))
 	for _, raw := range a.rawFrags {
-		// Prefer the demoinfo-resolved name (via slotToPlayer) so the
-		// emitted player name matches what the timeline buckets and the
-		// frontend's demoinfo-keyed Team Status panel expect. Fall back to
-		// the userinfo name only when neither the login join nor the name
-		// join matched this slot to a demoinfo entry.
-		playerName := slotToPlayer[raw.PlayerNum]
-		team := slotToTeam[raw.PlayerNum]
-
-		if playerName == "" {
-			if player := a.ctx.Players[raw.PlayerNum]; player != nil {
-				playerName = player.Name
-				if team == "" {
-					team = player.Team
-				}
-			}
-		}
-		if playerName == "" {
-			if name, ok := a.playerNames[raw.PlayerNum]; ok {
-				playerName = name
-			}
-		}
-
-		// If we still have a name but no team, look it up in DemoInfo by name.
-		if playerName != "" && team == "" {
-			team = names.TeamForName(playerName)
-		}
+		playerName, team := a.resolveAt(raw.PlayerNum, msTime(raw.Time))
 
 		if team != "" {
 			fragEvents = append(fragEvents, TimelineFragEvent{
@@ -82,7 +60,7 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	}
 
 	// Detect powerup pickup events for Key Moments
-	powerupEvents := a.detectPowerupEvents(names, slotToTeam, slotToPlayer)
+	powerupEvents := a.detectPowerupEvents()
 
 	// Count frags during each powerup run
 	for i := range powerupEvents {
@@ -144,13 +122,45 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	}
 	_ = locIndex // used by the regions builder below if regions are configured
 
-	// Build name -> UserID mapping for Hub viewer links
+	// Build name -> UserID mapping for Hub viewer links. Key by the
+	// reconnect-unified identity active on each slot session, and skip
+	// sessions with no recorded play, so a phantom reconnect name (a
+	// vacated slot taken by someone who never played) doesn't leak a
+	// stray userid entry under a name that appears nowhere else.
 	playerUserIDsByName := make(map[string]int)
-	for slot, userID := range a.playerUserIDs {
-		if userID > 0 {
-			name := slotToName[slot]
-			if name != "" {
-				playerUserIDsByName[name] = userID
+	if a.core != nil && len(a.core.Sessions) > 0 {
+		// Iterate slots in order: a player who reconnected appears under
+		// the same name on >1 slot (each with its own userid); keep-first
+		// over a map would pick a nondeterministic userid run to run.
+		sessSlots := make([]int, 0, len(a.core.Sessions))
+		for slot := range a.core.Sessions {
+			sessSlots = append(sessSlots, slot)
+		}
+		sort.Ints(sessSlots)
+		for _, slot := range sessSlots {
+			st := a.playerState[slot]
+			if st == nil {
+				continue
+			}
+			uid := a.playerUserIDs[slot]
+			if uid <= 0 {
+				continue
+			}
+			for _, s := range a.core.Sessions[slot] {
+				if s.Name == "" || !sessionHasPlay(&st.streams, s.StartMs, s.EndMs) {
+					continue
+				}
+				if _, ok := playerUserIDsByName[s.Name]; !ok {
+					playerUserIDsByName[s.Name] = uid
+				}
+			}
+		}
+	} else {
+		for slot, userID := range a.playerUserIDs {
+			if userID > 0 {
+				if name := slotToName[slot]; name != "" {
+					playerUserIDsByName[name] = userID
+				}
 			}
 		}
 	}

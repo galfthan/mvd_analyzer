@@ -178017,9 +178017,6 @@
         "team": "n n"
       },
       {
-        "name": "gnoffa_laggy"
-      },
-      {
         "a": [
           {
             "t": 1961,
@@ -232184,9 +232181,6 @@
         ],
         "ssg": [],
         "team": "1"
-      },
-      {
-        "name": "raket"
       }
     ]
   },
@@ -234178,8 +234172,6 @@
     "matchStartTime": 0,
     "playerUserIDs": {
       "Milton": 11,
-      "gnoffa_laggy": 10,
-      "raket": 12,
       "shazam": 8,
       "squeeze": 14,
       "stepcop": 9

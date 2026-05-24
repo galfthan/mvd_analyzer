@@ -43,5 +43,10 @@
     "gameId": 212423,
     "label": "1on1_bananfalco_betowen_240426_dm2",
     "mode": "1on1"
+  },
+  {
+    "gameId": 216835,
+    "label": "4on4_jah_ahoy_170526_defer_reconnect",
+    "mode": "4on4"
   }
 ]

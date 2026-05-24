@@ -885,6 +885,21 @@ The name divergence problem only exists for authenticated players, and for those
 
 The join `slot.userinfo["*auth"] == demoInfo.players[i].login` maps slot 2 → the `.N3ophyt3.` demoinfo entry unambiguously, without needing frag counts or any other heuristic.
 
+### Reconnect: one human spans multiple slots over time
+
+A `slot → name` map (even a perfect one) is still **one entry per slot**, which breaks when a player disconnects and **reconnects mid-match**. On reconnect mvdsv assigns a *new* slot and a *new* userid, so the human now occupies two slots across the demo's timeline; the slot they vacated is frequently reused by a latecomer or simply stamped with a late `svc_updateuserinfo` name. A consumer that resolves each slot to its *final* occupant therefore relabels the player's pre-reconnect events (pickups, frags, position track) with whoever ended up on that slot — observed on gameId 216835, where "rusti" played the first half on one slot, reconnected onto another, and his vacated slot's final name was a non-playing connector. KTX itself treats the two occupancies as one player via its **ghost** mechanism: on reconnect it restores frags/stats by netname (`ktx/src/client.c:1513-1538`).
+
+The reconnect is visible on the wire as KTX broadcast prints (`G_bprint`, `PRINT_HIGH`, so they arrive as broadcast `PrintEvent`s; the `\220`/`\221` team brackets fold to `[`/`]` and redtext folds to plain under `Q_normalizetext`):
+
+| Event | KTX source | Normalised string |
+|---|---|---|
+| Leave | `client.c:2948`, `bot_commands.c:401` | `<name> left the game with <N> frags` |
+| Rejoin (team) | `client.c:1529` | `<name> [<team>] rejoins the game with <N> frags` |
+| Rejoin (non-team) | `client.c:1536` | `<name> rejoins the game with <N> frags` |
+| Reconnect, ghost expired | `client.c:1550/1555` | `<name> [<team>] reenters the game without stats` |
+
+The frag count on `left … with N` matches the `rejoins … with N` for the same netname (KTX restored exactly that count). To attribute correctly, track per-slot **occupancy sessions** (split on userid change), then fold sessions of the same human into one identity — by the `rejoins`/`reenters` netname, or by joining each session (not just the final slot) to a demoinfo entry via the `*auth`/name rules above — and resolve each event by the identity active **at that event's time**. The analyzer implements this in the `identity` analyser (`mvd-analytics/analyzer/identity.go`).
+
 ---
 
 ## svc_print (8)

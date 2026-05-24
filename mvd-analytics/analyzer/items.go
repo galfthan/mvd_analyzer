@@ -1165,15 +1165,20 @@ func (a *ItemAnalyzer) resolveAttributions(it *itemEntity) {
 		if it.phases[i].TakenAt == 0 {
 			continue
 		}
-		name := a.co.SlotName(pa.slot)
+		// Resolve to the identity that held the slot *when the pickup
+		// happened* (TakenAt), so a player's pre-reconnect pickups don't
+		// get relabelled with whoever later took their old slot.
+		id := a.co.SlotIdentityAt(pa.slot, it.phases[i].TakenAt)
+		name, team := id.Name, id.Team
 		if name == "" {
 			if pa.slot < len(a.ctx.Players) && a.ctx.Players[pa.slot] != nil {
 				name = a.ctx.Players[pa.slot].Name
 			}
 		}
-		team := ""
-		if pa.slot < len(a.ctx.Players) && a.ctx.Players[pa.slot] != nil {
-			team = a.ctx.Players[pa.slot].Team
+		if team == "" {
+			if pa.slot < len(a.ctx.Players) && a.ctx.Players[pa.slot] != nil {
+				team = a.ctx.Players[pa.slot].Team
+			}
 		}
 		it.phases[i].TakenBy = name
 		it.phases[i].Team = team

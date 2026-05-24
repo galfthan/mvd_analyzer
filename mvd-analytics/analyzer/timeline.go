@@ -286,6 +286,37 @@ func (a *TimelineAnalyzer) handleSpawn(e *events.SpawnEvent) {
 	state.isDead = false
 }
 
+// resolveAt resolves a wire slot to its (name, team) at time tMs using
+// the reconnect-aware CoreOutputs session table, with the same fallback
+// chain the timeline has always used: userinfo (ctx.Players), then the
+// last-seen userinfo name (playerNames), then a name→team lookup in the
+// demoinfo NameTable. Centralises what fragEvents / powerups / streaks
+// all need so a player's pre-reconnect events resolve to the player who
+// was actually on the slot then, not the slot's final occupant.
+func (a *TimelineAnalyzer) resolveAt(slot int, tMs int32) (name, team string) {
+	if a.core != nil {
+		id := a.core.SlotIdentityAt(slot, tMs)
+		name, team = id.Name, id.Team
+	}
+	if name == "" {
+		if p := a.ctx.Players[slot]; p != nil {
+			name = p.Name
+			if team == "" {
+				team = p.Team
+			}
+		}
+	}
+	if name == "" {
+		if n, ok := a.playerNames[slot]; ok {
+			name = n
+		}
+	}
+	if name != "" && team == "" && a.core != nil {
+		team = a.core.Names.TeamForName(name)
+	}
+	return name, team
+}
+
 func (a *TimelineAnalyzer) getOrCreatePlayerState(playerNum int) *timelinePlayerState {
 	if s, ok := a.playerState[playerNum]; ok {
 		return s

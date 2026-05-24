@@ -172463,9 +172463,6 @@
         "team": "wd"
       },
       {
-        "name": "psy*vingador"
-      },
-      {
         "a": [
           {
             "t": 2192,
@@ -227093,7 +227090,6 @@
     "matchStartTime": 0,
     "playerUserIDs": {
       "psy*overon": 36,
-      "psy*vingador": 33,
       "wd.cao": 30,
       "wd.char": 32,
       "wd.dilbert": 35

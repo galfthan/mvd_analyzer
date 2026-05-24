@@ -27,9 +27,9 @@ that downstream consumers render, summarise, or feed to an agent.
 - `analyzer/` — the `Analyzer` interface, the read-only event/userinfo
   `Context`, the typed `CoreOutputs` bundle that producer analysers
   populate for downstream consumers, and the `Registry` that drives a
-  run. `NewDefaultRegistry()` wires up nine production analysers split
-  into two phases: **core** (`demoinfo`, `frag` — the producers that
-  fill `CoreOutputs`) finalise first; **derived** (`metadata`, `match`,
+  run. `NewDefaultRegistry()` wires up ten production analysers split
+  into two phases: **core** (`demoinfo`, `identity`, `frag` — the
+  producers that fill `CoreOutputs`) finalise first; **derived** (`metadata`, `match`,
   `messages`, `timeline`, `items`, `backpacks`, `weapon_pickups`)
   finalise after, with `CoreOutputs` already populated. Four default
   result post-processors run last (time normalisation, duel team
@@ -124,7 +124,7 @@ it.
 
 | Slice | Default analysers | Why |
 |---|---|---|
-| **Core** | [`demoinfo`](analyzer/demoinfo.md), [`frag`](analyzer/frag.md) | Implement `CoreProducer`. Everything they emit (`DemoInfo`, `Names`, `Slots`, `FragEntries`) is the canonical input some derived analyser consumes during its own Finalize. |
+| **Core** | [`demoinfo`](analyzer/demoinfo.md), [`identity`](analyzer/identity.md), [`frag`](analyzer/frag.md) | Implement `CoreProducer`. Everything they emit (`DemoInfo`, `Names`, `Slots`, `Sessions`, `FragEntries`) is the canonical input some derived analyser consumes during its own Finalize. |
 | **Derived** | [`metadata`](analyzer/metadata.md), [`match`](analyzer/match.md), [`messages`](analyzer/messages.md), [`timeline`](analyzer/timeline.md), [`items`](analyzer/items.md), [`backpacks`](analyzer/backpacks.md), [`weapon_pickups`](analyzer/weapon_pickups.md) | Either implement `CoreConsumer` (read `co.*`) or are independent peers. They never write to `CoreOutputs`. |
 | **Post-processors** | `normalizeMatchRelativeTimes`, `duelTeamNormalize`, `locGraphPost` | Operate on the assembled `Result` after every Finalize has run. Order matters within the slice (time normalisation must run before locgraph). |
 | **Shelved** | [`tracks`](analyzer/tracks.md) | Code present, not registered. Awaiting a mvd-web consumer. |
@@ -154,16 +154,30 @@ guard. Now the contract is:
 
 ```go
 type CoreOutputs struct {
-    DemoInfo    *DemoInfoResult        // KTX JSON metadata
-    Names       *NameTable             // exact + normalized name → team
-    Slots       map[int]SlotInfo       // per-slot resolved display name + team
-    FragEntries []FragEntry            // canonical frag log
+    DemoInfo    *DemoInfoResult            // KTX JSON metadata
+    Names       *NameTable                 // exact + normalized name → team
+    Slots       map[int]SlotInfo           // per-slot resolved display name + team (final occupant)
+    Sessions    map[int][]ResolvedSession  // per-slot, time-sorted, reconnect-unified occupancies
+    FragEntries []FragEntry                // canonical frag log
 }
 ```
 
 Producers populate fields via `PopulateCore`; consumers read whatever
 they need via the field names directly, or via tiny helpers like
 `co.SlotName(slot)`.
+
+**Reconnect-aware resolution.** `Slots` / `SlotName(slot)` map a wire
+slot to its *final* occupant — wrong when a player disconnects and
+reconnects onto a different slot mid-match and their old slot is reused
+(or stamped with a late userinfo name). The `identity` analyser builds
+`Sessions` (one entry per contiguous slot occupancy, folded into one
+canonical identity across reconnects — KTX `rejoins`/`reenters` prints
+first, then a per-session demoinfo login/name join, then a bare-demo
+name fallback). Any Finalize site that has an event timestamp should
+resolve via `co.SlotIdentityAt(slot, tMs)` rather than `SlotName`, so a
+player's pre-reconnect events stay attributed to them. The streams
+output groups per-slot builders by `ResolvedSession.IdentityKey` to emit
+one merged `PlayerStream` per player.
 
 ## Using mvd-analytics
 

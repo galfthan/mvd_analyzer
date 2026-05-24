@@ -296,56 +296,306 @@ func intToStr(n int) string {
 	return string(digits)
 }
 
-// buildStreamsResult assembles result.Streams from each player's
-// streamBuilder. Walks slots in order so iteration is deterministic.
+// appendSlice appends the entries of src that fall within the half-open
+// window [startMs, endMs) onto b, preserving time order. It is the
+// primitive behind reconnect-aware stream merging: one player's
+// per-slot session fragments are stitched into a single stream by
+// appending each fragment in time order, and a slot shared by two
+// players over time is carved by appending only each player's window.
+//
+// Change streams dedup at the seam (so concatenation keeps the
+// "no two adjacent equal values" invariant); the position track and
+// spawn/death timestamps append verbatim; interval lists are clipped to
+// the window. Callers append fragments in ascending startMs so the
+// merged columns stay globally time-ordered.
+func (b *streamBuilder) appendSlice(src *streamBuilder, startMs, endMs int32) {
+	in := func(t int32) bool { return t >= startMs && t < endMs }
+
+	appendI16 := func(dst *[]changeI16, col []changeI16) {
+		for _, c := range col {
+			if !in(c.t) {
+				continue
+			}
+			if n := len(*dst); n > 0 && (*dst)[n-1].v == c.v {
+				continue
+			}
+			*dst = append(*dst, c)
+		}
+	}
+	appendI16(&b.health, src.health)
+	appendI16(&b.armor, src.armor)
+	appendI16(&b.loc, src.loc)
+	appendI16(&b.shells, src.shells)
+	appendI16(&b.nails, src.nails)
+	appendI16(&b.rockets, src.rockets)
+	appendI16(&b.cells, src.cells)
+
+	for _, c := range src.armorType {
+		if !in(c.t) {
+			continue
+		}
+		if n := len(b.armorType); n > 0 && b.armorType[n-1].v == c.v {
+			continue
+		}
+		b.armorType = append(b.armorType, c)
+	}
+
+	hasLi := len(src.posLi) == len(src.posT)
+	for i, t := range src.posT {
+		if !in(t) {
+			continue
+		}
+		b.posT = append(b.posT, t)
+		b.posX = append(b.posX, src.posX[i])
+		b.posY = append(b.posY, src.posY[i])
+		b.posZ = append(b.posZ, src.posZ[i])
+		if hasLi {
+			b.posLi = append(b.posLi, src.posLi[i])
+		}
+	}
+
+	for _, t := range src.spawns {
+		if in(t) {
+			b.spawns = append(b.spawns, t)
+		}
+	}
+	for _, t := range src.deaths {
+		if in(t) {
+			b.deaths = append(b.deaths, t)
+		}
+	}
+
+	clip := func(dst *intervalState, s intervalState) {
+		for _, r := range s.closed {
+			start, end := r.start, r.end
+			if start < startMs {
+				start = startMs
+			}
+			if end > endMs {
+				end = endMs
+			}
+			if start < end {
+				dst.closed = append(dst.closed, intervalRecord{start: start, end: end})
+			}
+		}
+	}
+	clip(&b.rl, src.rl)
+	clip(&b.lg, src.lg)
+	clip(&b.gl, src.gl)
+	clip(&b.ssg, src.ssg)
+	clip(&b.sng, src.sng)
+	clip(&b.quad, src.quad)
+	clip(&b.pent, src.pent)
+	clip(&b.ring, src.ring)
+}
+
+// fragStart returns the earliest in-window sample time for a fragment,
+// used to order an identity's fragments chronologically across slots.
+// Series are time-sorted, so the first in-window position / spawn /
+// death is the earliest. Falls back to startMs when the window holds no
+// sample (an empty fragment sorts harmlessly).
+func fragStart(b *streamBuilder, startMs, endMs int32) int32 {
+	best := endMs
+	got := false
+	first := func(col []int32) {
+		for _, t := range col {
+			if t >= startMs && t < endMs {
+				if !got || t < best {
+					best = t
+					got = true
+				}
+				break
+			}
+		}
+	}
+	first(b.posT)
+	first(b.spawns)
+	first(b.deaths)
+	if !got {
+		return startMs
+	}
+	return best
+}
+
+// sessionHasPlay reports whether the builder recorded any actual play
+// (a spawn, death, or position sample) inside [startMs, endMs). Used to
+// tell a real occupancy from a phantom one (e.g. a vacated slot taken
+// by someone who never spawned).
+func sessionHasPlay(b *streamBuilder, startMs, endMs int32) bool {
+	in := func(t int32) bool { return t >= startMs && t < endMs }
+	for _, t := range b.spawns {
+		if in(t) {
+			return true
+		}
+	}
+	for _, t := range b.deaths {
+		if in(t) {
+			return true
+		}
+	}
+	for _, t := range b.posT {
+		if in(t) {
+			return true
+		}
+	}
+	return false
+}
+
+// streamFragment is one slot-occupancy window contributing to a player
+// identity's merged stream.
+type streamFragment struct {
+	slot    int
+	startMs int32
+	endMs   int32
+}
+
+// streamGroup accumulates every fragment belonging to one canonical
+// player identity (keyed by ResolvedSession.IdentityKey).
+type streamGroup struct {
+	name    string
+	team    string
+	repSlot int // smallest contributing slot — stable ordering + collision suffix
+	frags   []streamFragment
+}
+
+// buildStreamsResult assembles result.Streams, one PlayerStream per
+// canonical player *identity* rather than per wire slot. A player who
+// reconnected onto a different slot has their per-slot session fragments
+// stitched into a single stream (and a slot reused by two players is
+// carved at the handover), using the identity table on CoreOutputs.
 // matchStart / matchEnd anchor GlobalStream.
 //
-// Disambiguation: if two slots resolve to the same canonical name,
-// the second carries a "#slot" suffix per D12.
+// Disambiguation: if two distinct identities resolve to the same display
+// name, the later one carries a "#slot" suffix (per D12).
 func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToTeam map[int]string, matchStart, matchEnd float64) *result.Streams {
 	if len(a.playerState) == 0 {
 		return nil
 	}
-	// Convert seconds → int32 ms once at this entry; the result schema
-	// stores time in integer ms (schema v8).
 	matchStartMs := msTime(matchStart)
 	matchEndMs := msTime(matchEnd)
-	// Count name occurrences for collision detection.
-	nameCounts := make(map[string]int)
-	for slot := range a.playerState {
-		if name := slotToName[slot]; name != "" {
-			nameCounts[name]++
-		}
-	}
 
-	// Sort slots so iteration order is deterministic across runs.
+	// Close any still-open intervals at match end before partitioning so
+	// the per-slot builders carry complete interval lists; the slice
+	// clip then trims them to each session window.
 	slots := make([]int, 0, len(a.playerState))
 	for slot := range a.playerState {
 		slots = append(slots, slot)
 	}
 	sort.Ints(slots)
+	for _, slot := range slots {
+		if state := a.playerState[slot]; state != nil {
+			state.streams.finalize(matchEndMs)
+		}
+	}
+
+	var sessionsFor func(slot int) []ResolvedSession
+	if a.core != nil {
+		sessionsFor = func(slot int) []ResolvedSession { return a.core.Sessions[slot] }
+	} else {
+		sessionsFor = func(int) []ResolvedSession { return nil }
+	}
+
+	groups := make(map[string]*streamGroup)
+	var order []string // identity keys in first-seen slot order, for determinism
+	add := func(key, name, team string, slot int, startMs, endMs int32) {
+		if name == "" {
+			return
+		}
+		g := groups[key]
+		if g == nil {
+			g = &streamGroup{name: name, team: team, repSlot: slot}
+			groups[key] = g
+			order = append(order, key)
+		}
+		if name != "" {
+			g.name = name
+		}
+		if team != "" {
+			g.team = team
+		}
+		if slot < g.repSlot {
+			g.repSlot = slot
+		}
+		g.frags = append(g.frags, streamFragment{slot: slot, startMs: startMs, endMs: endMs})
+	}
+
+	for _, slot := range slots {
+		if a.playerState[slot] == nil {
+			continue
+		}
+		sessions := sessionsFor(slot)
+		if len(sessions) == 0 {
+			// No identity table (e.g. unit test without the registry, or
+			// an untracked slot): fall back to one stream per slot named
+			// by the demoinfo/userinfo resolution.
+			add("slot:"+intToStr(slot), slotToName[slot], slotToTeam[slot], slot, minInt32, maxInt32)
+			continue
+		}
+		for _, s := range sessions {
+			add(s.IdentityKey, s.Name, s.Team, slot, s.StartMs, s.EndMs)
+		}
+	}
+
+	// Count display names so colliding identities can be suffixed.
+	nameCounts := make(map[string]int)
+	for _, key := range order {
+		nameCounts[groups[key].name]++
+	}
 
 	streams := &result.Streams{
 		Global: result.GlobalStream{MatchStart: matchStartMs, MatchEnd: matchEndMs},
 	}
-	for _, slot := range slots {
-		state := a.playerState[slot]
-		if state == nil {
-			continue
+	// Emit in (repSlot, name) order for deterministic output.
+	sort.SliceStable(order, func(i, j int) bool {
+		gi, gj := groups[order[i]], groups[order[j]]
+		if gi.repSlot != gj.repSlot {
+			return gi.repSlot < gj.repSlot
 		}
-		name := slotToName[slot]
-		if name == "" {
-			continue
+		return gi.name < gj.name
+	})
+	for _, key := range order {
+		g := groups[key]
+		// Order fragments chronologically by their actual earliest in-window
+		// sample, not by session.StartMs — the first session on every slot
+		// is clamped to MinInt32, so two slots' fragments would otherwise be
+		// ordered by slot index and could interleave the second half before
+		// the first.
+		sort.SliceStable(g.frags, func(i, j int) bool {
+			return fragStart(&a.playerState[g.frags[i].slot].streams, g.frags[i].startMs, g.frags[i].endMs) <
+				fragStart(&a.playerState[g.frags[j].slot].streams, g.frags[j].startMs, g.frags[j].endMs)
+		})
+		var merged streamBuilder
+		for _, f := range g.frags {
+			merged.appendSlice(&a.playerState[f.slot].streams, f.startMs, f.endMs)
 		}
-		state.streams.finalize(matchEndMs)
-		uniqName := disambiguatePlayerName(name, slot, nameCounts)
-		ps := state.streams.toPlayerStream(uniqName, slotToTeam[slot])
-		streams.Players = append(streams.Players, ps)
+		if merged.isEmpty() {
+			continue // phantom identity with no recorded play (e.g. a vacated slot's new occupant who never played)
+		}
+		uniqName := disambiguatePlayerName(g.name, g.repSlot, nameCounts)
+		streams.Players = append(streams.Players, merged.toPlayerStream(uniqName, g.team))
 	}
 	if len(streams.Players) == 0 {
 		return nil
 	}
 	return streams
+}
+
+const (
+	minInt32 = int32(-1 << 31)
+	maxInt32 = int32(1<<31 - 1)
+)
+
+// isEmpty reports whether the builder recorded no player activity at
+// all — no vitals, positions, intervals, spawns or deaths. Used to drop
+// phantom identities (a vacated slot taken by someone who never played).
+func (b *streamBuilder) isEmpty() bool {
+	return len(b.health) == 0 && len(b.armor) == 0 && len(b.armorType) == 0 &&
+		len(b.loc) == 0 && len(b.shells) == 0 && len(b.nails) == 0 &&
+		len(b.rockets) == 0 && len(b.cells) == 0 && len(b.posT) == 0 &&
+		len(b.spawns) == 0 && len(b.deaths) == 0 &&
+		len(b.rl.closed) == 0 && len(b.lg.closed) == 0 && len(b.gl.closed) == 0 &&
+		len(b.ssg.closed) == 0 && len(b.sng.closed) == 0 &&
+		len(b.quad.closed) == 0 && len(b.pent.closed) == 0 && len(b.ring.closed) == 0
 }
 
 // resolveLocsAndFilterBlips populates each player's PositionTrack.Li
