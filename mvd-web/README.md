@@ -289,24 +289,8 @@ full-sync tick in `animatePlayback`.
 
 Three views, all reading `result.locGraph` (loc nodes weighted by
 time-spent, transition edges; per-player and per-team breakdowns baked
-onto every node) plus `demoInfo.{teams,players}` — no extra analyzer
-pass:
-
-- The **movement graph** — a Cytoscape.js node/edge diagram with the
-  filter / edge-mode / layout controls, driven by `initLocGraphView`
-  and `buildOrRefreshCytoscape`.
-Two of the three (the Loc Heatmap and Region Control) share one canvas
-matrix renderer — `renderHeatmapMatrix` / `attachHeatmapTooltip` — fed a
-policy-free model (`{ rows:[{name,cells:[{i,p}]}], columns:[{label,team,
-teamIdx,…}], showBand, teamCols, tipHtml }`). Normalisation is baked into
-each cell's intensity `i` (0..1) by the `build*` function, so per-column
-vs per-row scaling lives in the data, not the renderer. Intensity maps
-through the **viridis** colormap (`heatColorRGB` / `HEAT_STOPS`, mirrored
-by the CSS `.heatmap-legend-bar` gradient) — chosen for red/green
-colour-vision-deficiency safety. Team identity is carried by the colored
-band above the columns, using the canonical
-`TEAM_COLORS`-by-`timelineState.teams` mapping shared with the rest of the
-app (see the repo CLAUDE.md "Team colors" convention).
+onto every node) plus `demoInfo.{teams,players}` / `mapState.controlStats`
+— no extra analyzer pass:
 
 - The **movement graph** — a Cytoscape.js node/edge diagram with the
   filter / edge-mode / layout controls, driven by `initLocGraphView`
@@ -314,16 +298,15 @@ app (see the repo CLAUDE.md "Team colors" convention).
 - The **Loc Heatmap** (`buildLocHeatmap`) — rows are locs (busiest
   first); the leading columns are the **teams** (every member's time
   combined), then one column per **player** grouped by team, with a
-  separator between the blocks. Cell intensity is that column's share of
-  its time in the loc, normalised **per column** to its own busiest loc
-  (sqrt-curved); the rounded share-% is stamped in each roomy cell. The
-  team columns / band are dropped for duels and single-team demos.
-- **Region Control** (`buildRegionHeatmap` / `renderRegionHeatmap`) — the
-  region definition editor (`buildRegionConfig`, group locs into named
-  regions; save/load JSON) plus the per-region control matrix: rows are
-  regions, columns are the seven control states (teamA control/weak,
-  contested, cont. weak, empty, teamB weak/control), with the team band
-  marking each team's columns. Moved here from the Map tab; the live
+  separator before the player block. Cell intensity is that column's
+  share of its time in the loc, normalised **per column** to its own
+  busiest loc (sqrt-curved). The team columns are dropped for duels and
+  single-team demos.
+- **Region Control** (`buildRegionHeatmap`) — the region definition
+  editor (`buildRegionConfig`, group locs into named regions; save/load
+  JSON) plus the per-region control matrix: rows are regions, columns are
+  the seven control states (teamA control/weak, contested, cont. weak,
+  empty, teamB weak/control). Moved here from the Map tab; the live
   region *overlay* and *status* still render on the Map. Initialised by
   `initRegionControl` (from `initMapView`) and recomputed through the
   `recomputeRegionControl` WASM bridge on edits (`renderRegionControlFromGo`).
@@ -331,6 +314,23 @@ app (see the repo CLAUDE.md "Team colors" convention).
   state (Empty excluded — it is filler, not a control state, and would
   swamp the scale) so each row spans the full colormap; the printed %
   stays the absolute match fraction.
+
+The two matrices share one renderer, `renderHeatmapTable`, fed a
+policy-free model — `{ rows:[{name,cells:[{i,p}]}], columns:[{label,full,
+team,teamIdx,…}], teamCols, cellTitle }` where `i` is a 0..1 intensity
+(normalisation already baked in by the `build*` function) and `p` the
+printed %. It renders a sortable `.stats-table` (crisp text + free column
+sorting via `makeSortable`, tbody built with the shared `renderTableRows`
+helper) rather than a canvas; each cell is viridis-shaded
+(`heatColorRGB` / `HEAT_STOPS`, mirrored by the CSS `.heatmap-legend-bar`
+gradient — chosen for red/green colour-vision-deficiency safety) with a
+contrast-aware ink and a `data-sort-value`. Team identity rides on the
+canonical `TEAM_COLORS`-by-`timelineState.teams` mapping (see the repo
+CLAUDE.md "Team colors" convention) as a colored underline on the
+relevant column headers. Player column headers show a truncated name with
+the full name on the header `title` — QuakeWorld's in-game short name
+(`cl_fakename`) is a client-side say_team text prefix, not carried in the
+demo stream, so there's no per-player short name to read.
 
 ## Regenerating map geometry
 

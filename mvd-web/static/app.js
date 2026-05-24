@@ -1133,6 +1133,13 @@ function makeSortable(table) {
     allHeaders.forEach(th => {
         // Skip colspan > 1 headers (group headers, not sortable)
         if (th._sortColspan > 1) return;
+        // Bind once per element. Dynamically rebuilt tables (e.g. the loc /
+        // region heatmaps) call makeSortable again after replacing their <th>
+        // nodes; fresh nodes lack the flag and bind, while the load-time
+        // querySelectorAll('.stats-table') pass won't double-bind existing ones
+        // (a second listener would cancel every toggle).
+        if (th._sortBound) return;
+        th._sortBound = true;
 
         const colIdx = th._sortColIdx;
         th.classList.add('sortable');
@@ -2655,8 +2662,8 @@ function resetUIToCleanState() {
     setHTML('map-items-body', '');
     hide('map-items-panel');
     hide('map-no-data');
+    setHTML('region-control-body', '');
     hide('region-control-panel');
-    regionHeatmapHitState.data = null;
     setHTML('region-status-body', '');
     hide('region-status-panel');
     setHTML('region-config', '');
@@ -2670,6 +2677,7 @@ function resetUIToCleanState() {
     locGraphState.result = null;
     setHTML('locgraph-canvas', '');
     hide('locgraph-no-data');
+    setHTML('locheatmap-body', '');
     hide('locheatmap-panel');
 
     // Key moments
@@ -7729,38 +7737,34 @@ function renderLocGraph() {
     } else if (locGraphState.graph) {
         buildOrRefreshCytoscape();
     }
-    renderLocHeatmap();
-    renderRegionHeatmap();
+    // The heatmap / region-control tables are plain HTML built once at load
+    // (initLocGraphView, renderRegionControlFromGo) — unlike the canvas they
+    // don't need a re-render when the tab is revealed, and skipping it keeps
+    // the user's column sort intact across tab switches.
 }
 
-// ─── Loc Heatmap ─────────────────────────────────────────────────────────────
+// ─── Loc Heatmap + Region Control matrices ───────────────────────────────────
 //
-// A single loc-occupancy matrix living in the loc-graph tab. Rows are locs
-// (busiest first); the leading columns are the teams (every member's time
-// combined), then one column per player grouped by team. Each cell's intensity
-// is the share of that column's observed time spent in the loc, normalised to
-// that column's busiest loc so every column reads independently — the question
-// it answers is "where is this player / team", not "who controlled this loc".
-// The rounded share-% is stamped inside roomy cells; full seconds + percentage
-// live in the hover tooltip.
+// Both live in the loc-graph tab and share one renderer (renderHeatmapTable):
+// a sortable .stats-table — rows on the y-axis, one column per series, each
+// cell viridis-shaded by a precomputed intensity with the % printed in it.
+// Using a real table (vs. a canvas) gives crisp text and free column sorting
+// via makeSortable, and reuses the common renderTableRows tbody builder.
 //
-// Cell intensity is mapped through the viridis colormap (heatColorRGB), chosen
-// for red/green colour-vision-deficiency safety. Team identity is carried only
-// by the colored band above each column, which uses the canonical
-// TEAM_COLORS-by-timelineState.teams mapping shared with the Summary /
-// scoreboard / map (see CLAUDE.md "Team colors").
+//   - Loc heatmap: rows = locs (busiest first); columns are the team
+//     aggregates (every member's time combined) then one per player grouped by
+//     team. Intensity = each column's share of its time in the loc, normalised
+//     PER COLUMN to its own busiest loc (sqrt-curved).
+//   - Region control: rows = regions; columns are the seven control states.
+//     Intensity = each state's share, normalised PER ROW to the region's
+//     busiest control state (Empty excluded — see buildRegionHeatmap).
 //
-// All data comes from result.locGraph (per-player time-spent baked onto every
-// node) and result.demoInfo (team grouping) — no extra analyzer pass. It is
-// drawn in one canvas (left gutter = loc names, top band = team bar + rotated
-// column names) so headers stay aligned with cells at any dpr; it reuses
-// setupGraphCanvas / PLOT_BG_COLOR rather than renderSpansTimeline, which is a
-// time-axis renderer and doesn't fit a discrete-column matrix.
-
-const LH_ROW_H = 19;          // per-loc row height (CSS px) — fits an in-cell %
-const LH_LEFT_GUTTER = 110;   // loc-name column width (CSS px)
-const LH_TEAM_BAND = 16;      // team color bar height (CSS px)
-const LH_PLAYER_BAND = 88;    // rotated column-name band height (CSS px)
+// Normalisation is baked into each cell's intensity by the build* functions, so
+// the renderer is policy-free. Team identity rides on the canonical
+// TEAM_COLORS-by-timelineState.teams mapping (see CLAUDE.md "Team colors") as a
+// coloured underline on the relevant column headers. Data comes from
+// result.locGraph + result.demoInfo (locs) and mapState.controlStats (regions)
+// — no extra analyzer pass.
 
 // Sequential colormap stops [t, [r,g,b]] — viridis. Chosen because it is
 // perceptually uniform and safe for red/green colour-vision deficiency (no
@@ -7798,47 +7802,44 @@ function contrastInk(rgb) {
     return lum > 150 ? '#10131f' : '#f0f0f0';
 }
 
-// Last-rendered layout + data for each heatmap canvas's hover tooltip.
-const locHeatmapHitState = { data: null, leftGutter: 0, top: 0, rowH: 0, colW: 0 };
-const regionHeatmapHitState = { data: null, leftGutter: 0, top: 0, rowH: 0, colW: 0 };
-
 // Canonical team order: TEAM_COLORS is indexed by position in
-// timelineState.teams (frag-sorted, set in displayResults) so the band colors
-// match the rest of the app. Fall back to demoInfo order before that runs.
+// timelineState.teams (frag-sorted, set in displayResults) so the header
+// underlines match the rest of the app. Fall back to demoInfo order before
+// that runs.
 function canonicalTeams(result) {
     if (timelineState.teams && timelineState.teams.length) return [...timelineState.teams];
     const dt = result.demoInfo && result.demoInfo.teams;
     return (dt && dt.length) ? [...dt] : [''];
 }
 
-// Clip text to a pixel width, appending an ellipsis when truncated.
-function truncateToWidth(ctx, text, maxW) {
-    text = String(text || '');
-    if (maxW <= 0 || ctx.measureText(text).width <= maxW) return text;
-    let s = text;
-    while (s.length > 1 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
-    return s + '…';
+// Short display label for a long player name; the full name is kept on the
+// column header's title attribute. (QuakeWorld's in-game short name comes from
+// the client-side `cl_fakename` cvar, which is only ever injected as a text
+// prefix on say_team messages — never carried in userinfo — so there is no
+// per-player short name in the demo stream to read.)
+function shortName(name, n = 9) {
+    name = String(name || '');
+    return name.length > n ? name.slice(0, n - 1) + '…' : name;
 }
 
-// ── Generic matrix model ─────────────────────────────────────────────────────
+// ── Shared matrix model ──────────────────────────────────────────────────────
 //
-// Both the loc heatmap and the region-control matrix feed renderHeatmapMatrix
-// the same shape so they share one renderer + tooltip:
+// Both build* functions return the same shape, rendered by renderHeatmapTable:
 //
 //   {
-//     rows:    [{ name, cells: [{ i, p }, ...] }]   // i: 0..1 intensity, p: %|null
-//     columns: [{ label, team, teamIdx, bright }]   // team '' / teamIdx<0 = no band
-//     showBand, teamCols,                            // separator after teamCols cols
-//     tipHtml(col, row, cell) -> string              // tooltip body
+//     rows:    [{ name, cells: [{ i, p }, ...] }]    // i: 0..1 intensity, p: %|null
+//     columns: [{ label, full, team, teamIdx, ... }] // teamIdx<0 = no underline
+//     teamCols,                                       // separator before col teamCols
+//     cellTitle(col, row, ci) -> string               // <td> title text
 //   }
 //
 // Normalisation (per-column for locs, per-row for regions) is baked into each
-// cell's intensity by the build* functions, so the renderer is policy-free.
+// cell's intensity `i` by the build* functions, so the renderer is policy-free.
 
-// Build the combined loc-occupancy matrix: leading team-aggregate columns then
-// one per player grouped by team; rows are locs (busiest first). Intensity is
-// each column's share normalised to its own busiest loc (sqrt-curved to lift
-// small shares). Returns null when there's nothing to show.
+// Build the loc matrix: leading team-aggregate columns then one per player
+// grouped by team; rows are locs (busiest first). Intensity is each column's
+// share normalised to its own busiest loc (sqrt-curved to lift small shares).
+// Returns null when there's nothing to show.
 function buildLocHeatmap(result) {
     const graph = result && result.locGraph;
     if (!graph || !graph.locs || graph.locs.length === 0) return null;
@@ -7866,7 +7867,8 @@ function buildLocHeatmap(result) {
     const hasTeams = !isDuel && teams.length >= 2 && !(teams.length === 1 && teams[0] === '');
 
     // Columns carry `members` so a cell value is uniformly sum(byPlayer[m]);
-    // `kind` ('team' | 'player') drives the tooltip wording.
+    // `kind` ('team' | 'player') drives the title wording. `label` is the short
+    // header text, `full` the untruncated name kept on the header title.
     const columns = [];
     if (hasTeams) {
         for (const t of teams) {
@@ -7874,7 +7876,7 @@ function buildLocHeatmap(result) {
                 .filter(p => (p.team || '') === t && (playerTotal.get(p.name) || 0) > 0)
                 .map(p => p.name);
             const total = members.reduce((s, p) => s + (playerTotal.get(p) || 0), 0);
-            if (total > 0) columns.push({ kind: 'team', label: t, team: t, teamIdx: teamIdxOf(t), bright: true, members, total });
+            if (total > 0) columns.push({ kind: 'team', label: shortName(t), full: t, team: t, teamIdx: teamIdxOf(t), members, total });
         }
     }
     const teamCols = columns.length;
@@ -7888,14 +7890,14 @@ function buildLocHeatmap(result) {
             if ((p.team || '') !== team) continue;
             const total = playerTotal.get(p.name) || 0;
             if (total <= 0) continue;
-            columns.push({ kind: 'player', label: p.name, team, teamIdx: teamIdxOf(team), bright: false, members: [p.name], total });
+            columns.push({ kind: 'player', label: shortName(p.name), full: p.name, team, teamIdx: teamIdxOf(team), members: [p.name], total });
             seen.add(p.name);
         }
     }
     for (const [p, total] of playerTotal) {
         if (seen.has(p) || total <= 0) continue;
         const team = teamOfPlayer.get(p) || '';
-        columns.push({ kind: 'player', label: p, team, teamIdx: teamIdxOf(team), bright: false, members: [p], total });
+        columns.push({ kind: 'player', label: shortName(p), full: p, team, teamIdx: teamIdxOf(team), members: [p], total });
         seen.add(p);
     }
     if (columns.length === 0) return null;
@@ -7925,16 +7927,13 @@ function buildLocHeatmap(result) {
     if (rows.length === 0) return null;
 
     return {
-        rows, columns, teamCols, showBand: hasTeams,
-        tipHtml: (col, row, cell) => {
-            const ci = col.__i;
+        rows, columns, teamCols,
+        cellTitle: (col, row, ci) => {
             const sec = row.secs[ci] || 0;
-            const pct = cell.p != null ? cell.p : 0;
+            const pct = row.cells[ci].p != null ? row.cells[ci].p : 0;
             const suffix = col.kind === 'team' ? 'of team time' : 'of their time';
-            const teamLine = (col.kind === 'player' && col.team && col.team !== col.label) ?
-                `<div>Team: ${escapeHtml(col.team)}</div>` : '';
-            return `<div><strong>${escapeHtml(col.label)}</strong> · <strong>${escapeHtml(row.name)}</strong></div>
-${teamLine}<div>${sec.toFixed(1)}s · ${pct.toFixed(1)}% ${suffix}</div>`;
+            const who = col.full + (col.kind === 'player' && col.team && col.team !== col.full ? ` (${col.team})` : '');
+            return `${who} · ${row.name}: ${sec.toFixed(1)}s · ${pct.toFixed(1)}% ${suffix}`;
         },
     };
 }
@@ -7950,16 +7949,17 @@ function buildRegionHeatmap(regions, stats) {
     const teamA = first.teamA || 'Team A';
     const teamB = first.teamB || 'Team B';
 
-    // Columns: teamA control/weak (red band) | contested/cont.weak/empty
-    // (neutral, no band) | teamB weak/control (blue band).
+    // Columns: teamA control/weak (red underline) | contested/cont.weak/empty
+    // (neutral) | teamB weak/control (blue underline). `label` is the header
+    // text, `full` the title; the team-named columns carry the team identity.
     const columns = [
-        { label: 'control',    tip: `${teamA} control`,      key: 'teamAControl',     team: teamA, teamIdx: 0 },
-        { label: 'weak',       tip: `${teamA} weak control`, key: 'teamAWeakControl', team: teamA, teamIdx: 0 },
-        { label: 'contested',  tip: 'Contested',             key: 'contested',        team: '',    teamIdx: -1 },
-        { label: 'cont. weak', tip: 'Contested (weak)',      key: 'weakContested',    team: '',    teamIdx: -1 },
-        { label: 'empty',      tip: 'Empty',                 key: 'empty',            team: '',    teamIdx: -1, noHeat: true },
-        { label: 'weak',       tip: `${teamB} weak control`, key: 'teamBWeakControl', team: teamB, teamIdx: 1 },
-        { label: 'control',    tip: `${teamB} control`,      key: 'teamBControl',     team: teamB, teamIdx: 1 },
+        { label: teamA,        full: `${teamA} control`,      key: 'teamAControl',     team: teamA, teamIdx: 0 },
+        { label: `${teamA} wk`, full: `${teamA} weak control`, key: 'teamAWeakControl', team: teamA, teamIdx: 0 },
+        { label: 'Cont',       full: 'Contested',             key: 'contested',        team: '',    teamIdx: -1 },
+        { label: 'Cont wk',    full: 'Contested (weak)',      key: 'weakContested',    team: '',    teamIdx: -1 },
+        { label: 'Empty',      full: 'Empty (no players)',    key: 'empty',            team: '',    teamIdx: -1, noHeat: true },
+        { label: `${teamB} wk`, full: `${teamB} weak control`, key: 'teamBWeakControl', team: teamB, teamIdx: 1 },
+        { label: teamB,        full: `${teamB} control`,      key: 'teamBControl',     team: teamB, teamIdx: 1 },
     ];
 
     const rows = [];
@@ -7981,10 +7981,8 @@ function buildRegionHeatmap(regions, stats) {
     if (rows.length === 0) return null;
 
     return {
-        rows, columns, teamCols: 0, showBand: true,
-        tipHtml: (col, row, cell) =>
-            `<div><strong>${escapeHtml(row.name)}</strong> · <strong>${escapeHtml(col.tip)}</strong></div>
-<div>${(cell.p || 0)}% of match</div>`,
+        rows, columns, teamCols: 0,
+        cellTitle: (col, row, ci) => `${row.name} · ${col.full}: ${row.cells[ci].p}% of match`,
     };
 }
 
@@ -7997,178 +7995,63 @@ function renderLocHeatmap() {
         const hasGraph = !!(locGraphState.graph && locGraphState.graph.locs && locGraphState.graph.locs.length);
         panel.style.display = hasGraph ? '' : 'none';
         if (noData) noData.style.display = hasGraph ? 'block' : 'none';
-        locHeatmapHitState.data = null;
         return;
     }
     panel.style.display = '';
     if (noData) noData.style.display = 'none';
-    renderHeatmapMatrix('locheatmap-canvas', data, locHeatmapHitState);
-    attachHeatmapTooltip('locheatmap-canvas', locHeatmapHitState);
+    renderHeatmapTable('locheatmap-table', 'locheatmap-thead-row', 'locheatmap-body', data, 'Loc');
 }
 
 // Re-render the region-control matrix from the stats stashed on mapState.
 // Visibility of the panel itself is owned by initRegionControl.
 function renderRegionHeatmap() {
     const data = buildRegionHeatmap(mapState.controlRegions, mapState.controlStats);
-    if (!data) { regionHeatmapHitState.data = null; return; }
-    renderHeatmapMatrix('region-heatmap-canvas', data, regionHeatmapHitState);
-    attachHeatmapTooltip('region-heatmap-canvas', regionHeatmapHitState);
+    if (!data) return;
+    renderHeatmapTable('region-control-table', 'region-control-thead-row', 'region-control-body', data, 'Region');
 }
 
-function renderHeatmapMatrix(canvasId, data, hitState) {
-    const { rows, columns, showBand, teamCols } = data;
-    const teamBandCss = showBand ? LH_TEAM_BAND : 0;
-    const topCss = teamBandCss + LH_PLAYER_BAND;
-    const cssHeight = topCss + rows.length * LH_ROW_H;
+// Render a matrix data model into a .stats-table: a header row (row-axis label
+// + one team-underlined <th> per column) and a tbody built with the shared
+// renderTableRows helper. Each cell is viridis-shaded by its intensity with the
+// % printed and a data-sort-value, so makeSortable can sort any column. The
+// table renders crisply and persists across tab switches — no canvas resize
+// dance needed.
+function renderHeatmapTable(tableId, theadRowId, tbodyId, data, firstColLabel) {
+    const table = document.getElementById(tableId);
+    const theadRow = document.getElementById(theadRowId);
+    if (!table || !theadRow) return;
+    const { columns, teamCols } = data;
 
-    const setup = setupGraphCanvas(canvasId, cssHeight);
-    if (!setup) return;
-    const { ctx, Wcss, W, dpr } = setup;
-
-    columns.forEach((c, i) => { c.__i = i; }); // index back-ref for tipHtml
-
-    const leftGutter = Math.round(LH_LEFT_GUTTER * dpr);
-    const teamBand = Math.round(teamBandCss * dpr);
-    const top = Math.round(topCss * dpr);
-    const rowH = Math.round(LH_ROW_H * dpr);
-    const gap = Math.max(1, Math.round(dpr));
-    const gridW = W - leftGutter;
-    const colW = columns.length ? gridW / columns.length : gridW;
-    const graphH = top + rows.length * rowH;
-
-    ctx.fillStyle = PLOT_BG_COLOR;
-    ctx.fillRect(0, 0, W, graphH);
-
-    // Cells: intensity 0 stays background; otherwise viridis. When the cell is
-    // roomy and carries a printable %, stamp it in a contrast-aware ink (a
-    // light ink for the uncoloured cells that still show a number, e.g. Empty).
-    const cellFont = `${Math.round(9 * dpr)}px sans-serif`;
-    const minTextW = Math.round(16 * dpr);
-    const minTextH = Math.round(15 * dpr);
-    rows.forEach((row, ri) => {
-        const y = top + ri * rowH;
-        columns.forEach((col, ci) => {
-            const cell = row.cells[ci];
-            const x = leftGutter + ci * colW;
-            const cw = Math.max(1, Math.round(colW) - gap);
-            const rgb = cell.i > 0 ? heatColorRGB(cell.i) : null;
-            ctx.fillStyle = rgb ? `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})` : PLOT_BG_COLOR;
-            ctx.fillRect(Math.round(x), y, cw, rowH - gap);
-
-            if (cell.p == null || cell.p < 0.5 || cw < minTextW || rowH < minTextH) return;
-            const label = `${Math.round(cell.p)}%`;
-            ctx.font = cellFont;
-            if (ctx.measureText(label).width > cw - Math.round(3 * dpr)) return;
-            ctx.fillStyle = rgb ? contrastInk(rgb) : '#cfd6e4';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(label, Math.round(x) + cw / 2, y + (rowH - gap) / 2);
-        });
-    });
-
-    // Row labels in the left gutter, right-aligned.
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-    ctx.font = `${Math.round(11 * dpr)}px sans-serif`;
-    ctx.fillStyle = '#aaa';
-    rows.forEach((row, ri) => {
-        const y = top + ri * rowH + rowH / 2;
-        const label = truncateToWidth(ctx, row.name, leftGutter - Math.round(8 * dpr));
-        ctx.fillText(label, leftGutter - Math.round(6 * dpr), y);
-    });
-
-    // Team color band across each contiguous group of same-team columns.
-    // Neutral columns (team '') leave the band as background.
-    if (teamBand > 0) {
-        let gi = 0;
-        while (gi < columns.length) {
-            let gj = gi;
-            while (gj < columns.length && columns[gj].team === columns[gi].team) gj++;
-            const team = columns[gi].team;
-            if (team !== '' && columns[gi].teamIdx >= 0) {
-                const x1 = leftGutter + gi * colW;
-                const x2 = leftGutter + gj * colW;
-                ctx.fillStyle = TEAM_COLORS[columns[gi].teamIdx % TEAM_COLORS.length];
-                ctx.fillRect(Math.round(x1), 0, Math.max(1, Math.round(x2 - x1) - gap), teamBand - gap);
-                ctx.fillStyle = '#fff';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.font = `${Math.round(10 * dpr)}px sans-serif`;
-                const label = truncateToWidth(ctx, team, (x2 - x1) - 4 * dpr);
-                if (label) ctx.fillText(label, (x1 + x2) / 2, teamBand / 2);
-            }
-            gi = gj;
-        }
-    }
-
-    // Column names, rotated to read bottom-to-top, centered over each column.
-    // After rotate(-90°) the local +x axis points up the screen, so textAlign
-    // 'left' starts each name just above the grid and extends it into the band.
-    ctx.font = `${Math.round(10 * dpr)}px sans-serif`;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
+    const heads = [`<th>${escapeHtml(firstColLabel)}</th>`];
     columns.forEach((col, ci) => {
-        const cx = leftGutter + ci * colW + colW / 2;
-        const yBottom = top - Math.round(4 * dpr);
-        ctx.fillStyle = col.bright ? '#fff' : '#bbb';
-        ctx.save();
-        ctx.translate(cx, yBottom);
-        ctx.rotate(-Math.PI / 2);
-        ctx.fillText(truncateToWidth(ctx, col.label, LH_PLAYER_BAND * dpr - Math.round(8 * dpr)), 0, 0);
-        ctx.restore();
+        const cls = ['heatmap-col'];
+        if (col.kind === 'team') cls.push('heatmap-col-team');
+        if (teamCols && ci === teamCols) cls.push('heatmap-col-sep');
+        const color = col.teamIdx >= 0 ? TEAM_COLORS[col.teamIdx % TEAM_COLORS.length] : '';
+        const style = color ? ` style="border-bottom: 3px solid ${color}"` : '';
+        heads.push(`<th class="${cls.join(' ')}"${style} title="${escapeHtml(col.full || col.label)}">${escapeHtml(col.label)}</th>`);
+    });
+    theadRow.innerHTML = heads.join('');
+
+    renderTableRows(tbodyId, data.rows, (row) => {
+        const tds = [`<td class="heatmap-rowname"><strong>${escapeHtml(row.name)}</strong></td>`];
+        row.cells.forEach((cell, ci) => {
+            const cls = ['heatmap-cell'];
+            if (teamCols && ci === teamCols) cls.push('heatmap-col-sep');
+            if (cell.p == null) { // column not present in this row (e.g. player never here)
+                tds.push(`<td class="${cls.join(' ')}" data-sort-value="-1"></td>`);
+                return;
+            }
+            const rgb = cell.i > 0 ? heatColorRGB(cell.i) : null;
+            const style = rgb ? ` style="background: rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}); color: ${contrastInk(rgb)}"` : '';
+            const title = data.cellTitle ? data.cellTitle(columns[ci], row, ci) : '';
+            const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+            tds.push(`<td class="${cls.join(' ')}"${style} data-sort-value="${cell.p}"${titleAttr}>${Math.round(cell.p)}%</td>`);
+        });
+        return tds.join('');
     });
 
-    // Separator after the leading block (e.g. team aggregates vs players).
-    if (teamCols > 0 && teamCols < columns.length) {
-        const sx = Math.round(leftGutter + teamCols * colW - gap / 2);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.fillRect(sx, 0, Math.max(1, Math.round(dpr)), graphH);
-    }
-
-    // Cache CSS-px layout + data for hit-testing.
-    hitState.data = data;
-    hitState.leftGutter = LH_LEFT_GUTTER;
-    hitState.top = topCss;
-    hitState.rowH = LH_ROW_H;
-    hitState.colW = columns.length ? (Wcss - LH_LEFT_GUTTER) / columns.length : 0;
-}
-
-function attachHeatmapTooltip(canvasId, hitState) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas || canvas._lhTipAttached) return;
-    canvas._lhTipAttached = true;
-
-    const wrapper = canvas.parentElement; // .locheatmap-outer (positioned)
-    const tip = document.createElement('div');
-    tip.className = 'canvas-tooltip';
-    tip.style.display = 'none';
-    wrapper.appendChild(tip);
-
-    canvas.addEventListener('mousemove', (e) => {
-        const s = hitState;
-        const data = s.data;
-        if (!data || !data.rows.length || !data.columns.length || s.colW <= 0) { tip.style.display = 'none'; return; }
-        const rect = canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
-        if (mx < s.leftGutter || my < s.top) { tip.style.display = 'none'; return; }
-        const ci = Math.floor((mx - s.leftGutter) / s.colW);
-        const ri = Math.floor((my - s.top) / s.rowH);
-        if (ci < 0 || ci >= data.columns.length || ri < 0 || ri >= data.rows.length) {
-            tip.style.display = 'none'; return;
-        }
-        const col = data.columns[ci];
-        const row = data.rows[ri];
-        tip.innerHTML = data.tipHtml(col, row, row.cells[ci]);
-        tip.style.display = 'block';
-        const tipW = tip.offsetWidth || 200;
-        const wrapW = wrapper.clientWidth;
-        let left = mx + 12;
-        if (left + tipW > wrapW) left = mx - tipW - 12;
-        tip.style.left = Math.max(0, left) + 'px';
-        tip.style.top = (my + 12) + 'px';
-    });
-    canvas.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+    makeSortable(table);
 }
 
 // ─── Playback Engine ──────────────────────────────────────────────────────

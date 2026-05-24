@@ -653,14 +653,18 @@
                         Rows = locs. The first columns are the teams (all players'
                         time combined), then one column per player grouped by team.
                         Each cell shows the share of that column's time spent in the
-                        loc, normalised to its own busiest loc. The team color sits on
-                        the bar above each group; cell intensity uses the viridis scale.
+                        loc, normalised to its own busiest loc; cell intensity uses
+                        the viridis scale and the team color underlines each header.
+                        Click a column header to sort; hover a cell for exact time.
                     </div>
                     <div class="heatmap-legend">
                         <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
                     </div>
-                    <div class="locheatmap-outer">
-                        <canvas id="locheatmap-canvas"></canvas>
+                    <div class="heatmap-table-wrap">
+                        <table class="stats-table heatmap-table" id="locheatmap-table">
+                            <thead><tr id="locheatmap-thead-row"></tr></thead>
+                            <tbody id="locheatmap-body"></tbody>
+                        </table>
                     </div>
                     <div id="locheatmap-no-data" class="map-no-data" style="display:none">
                         <p>No loc data available for this demo.</p>
@@ -672,18 +676,21 @@
                     <h3>Region Control</h3>
                     <div class="locheatmap-desc">
                         Group locs into named regions. Rows = regions, columns = control
-                        states (the team bands above mark which team's columns are which).
+                        states (the team color underlines which columns are which).
                         Cell color is normalised <em>per region</em> (brightest = that
                         region's dominant control state, Empty excluded), so compare colors
                         across a row — not down a column. The printed % is the absolute
-                        match fraction. Hover for the state name.
+                        match fraction. Click a column header to sort; hover for details.
                     </div>
                     <div id="region-config" class="region-config"></div>
                     <div class="heatmap-legend">
                         <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
                     </div>
-                    <div class="locheatmap-outer">
-                        <canvas id="region-heatmap-canvas"></canvas>
+                    <div class="heatmap-table-wrap">
+                        <table class="stats-table heatmap-table region-control-table" id="region-control-table">
+                            <thead><tr id="region-control-thead-row"></tr></thead>
+                            <tbody id="region-control-body"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
