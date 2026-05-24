@@ -7358,6 +7358,7 @@ function getLocMetric() {
 function metricWeightsOf(node, metric) {
     if (metric === 'armed') return node.armed || EMPTY_WEIGHTS;
     if (metric === 'quad') return node.quad || EMPTY_WEIGHTS;
+    if (metric === 'pent') return node.pent || EMPTY_WEIGHTS;
     return node;
 }
 const EMPTY_WEIGHTS = { total: 0, byPlayer: {}, byTeam: {} };
@@ -7374,6 +7375,7 @@ function nodeWeightFor(node, filter, metric) {
 function metricEdgeWeightsOf(edge, metric) {
     if (metric === 'armed') return edge.armed || EMPTY_WEIGHTS;
     if (metric === 'quad') return edge.quad || EMPTY_WEIGHTS;
+    if (metric === 'pent') return edge.pent || EMPTY_WEIGHTS;
     return edge;
 }
 

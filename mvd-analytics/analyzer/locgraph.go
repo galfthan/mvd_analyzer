@@ -143,6 +143,7 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 		insideRL := makeInside(p.RL)
 		insideLG := makeInside(p.LG)
 		insideQuad := makeInside(p.Quad)
+		insidePent := makeInside(p.Pent)
 		// Per-player cursor: tracks the loc + position of the last
 		// sample we counted. Reset at boundary crossings (death/spawn)
 		// and at gaps in the loc track (Li=0).
@@ -210,13 +211,16 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 			// both node-time and (below) the transition it may trigger.
 			// Evaluate all three predicates (no short-circuit) so each cursor
 			// tracks t independently.
-			rl, lg, quad := insideRL(t), insideLG(t), insideQuad(t)
+			rl, lg, quad, pent := insideRL(t), insideLG(t), insideQuad(t), insidePent(t)
 			armed := rl || lg
 			if armed {
 				addWeight(&node.Armed, p.Name, team, dt)
 			}
 			if quad {
 				addWeight(&node.Quad, p.Name, team, dt)
+			}
+			if pent {
+				addWeight(&node.Pent, p.Name, team, dt)
 			}
 
 			if !havePrev {
@@ -260,6 +264,9 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 				}
 				if quad {
 					addEdgeWeight(&edge.Quad, p.Name, team)
+				}
+				if pent {
+					addEdgeWeight(&edge.Pent, p.Name, team)
 				}
 				curLoc = locName
 			}

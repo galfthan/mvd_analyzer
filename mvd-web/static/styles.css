@@ -1579,7 +1579,7 @@ table tbody tr:hover {
 }
 
 /* Standalone metric selector governing the loc graph + heatmap. */
-.locmetric-panel {
+.locmetric-row {
     display: flex;
     align-items: center;
     gap: 12px;

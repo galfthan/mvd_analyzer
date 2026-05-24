@@ -130,11 +130,12 @@ package result
 //     cached view responses are invalidated.
 //
 // v12:
-//   - LocGraph nodes gain optional Armed and Quad LocWeights: the same
-//     Total / ByPlayer / ByTeam time breakdown restricted to samples
-//     where the player held RL or LG (Armed) or an active Quad (Quad).
-//     Additive and backward-compatible (both omitempty), but the bump
-//     invalidates cached loc-graph responses so consumers pick them up.
+//   - LocGraph nodes and edges gain optional Armed / Quad / Pent weights:
+//     the same Total / ByPlayer / ByTeam time (node) and transition-count
+//     (edge) breakdown restricted to samples where the player held RL or
+//     LG (Armed) or an active Quad / Pent powerup. Additive and
+//     backward-compatible (all omitempty), but the bump invalidates cached
+//     loc-graph responses so consumers pick them up.
 const CurrentSchemaVersion = 12
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each

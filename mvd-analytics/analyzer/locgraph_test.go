@@ -185,6 +185,8 @@ func TestBuildLocGraph_ArmedAndQuadConditioning(t *testing.T) {
 	p1.RL = []result.Interval{{Start: 0, End: 101}}
 	// Quad for [140,1000) ms — covers only the sample at 150.
 	p1.Quad = []result.Interval{{Start: 140, End: 1000}}
+	// Pent for [0,40) ms — covers only the first A sample (ms 0).
+	p1.Pent = []result.Interval{{Start: 0, End: 40}}
 
 	res := &Result{
 		Streams: &result.Streams{
@@ -231,6 +233,14 @@ func TestBuildLocGraph_ArmedAndQuadConditioning(t *testing.T) {
 	}
 	if B.Quad == nil || !approxEq(B.Quad.Total, 1*D) {
 		t.Errorf("B.Quad = %+v, want total %v", B.Quad, 1*D)
+	}
+
+	// Pent: only the first A sample (ms 0) — B never had pent.
+	if A.Pent == nil || !approxEq(A.Pent.Total, 1*D) {
+		t.Errorf("A.Pent = %+v, want total %v", A.Pent, 1*D)
+	}
+	if B.Pent != nil {
+		t.Errorf("B.Pent = %+v, want nil", B.Pent)
 	}
 
 	// Conditioned metrics can never exceed the unconditioned total.

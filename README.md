@@ -413,11 +413,11 @@ longer dropped (PlayerStream.Spawns / Deaths counts rise; LocGraph
 edges, LocTrails durations, RegionControl ticks, and WeaponPickups
 windows shift across the now-present boundaries). Schema v11 makes the
 50 ms bucket view column-major (`view.ColumnarBuckets`) the default
-across web / REST / MCP. Schema v12 adds optional `armed` and `quad`
-weights to each `LocGraph` node (time) *and* edge (transition counts) —
-the same breakdown restricted to samples where the player held RL/LG or
-an active quad — so consumers can render a self-contained loc graph /
-heatmap per combat posture.
+across web / REST / MCP. Schema v12 adds optional `armed`, `quad`
+and `pent` weights to each `LocGraph` node (time) *and* edge (transition
+counts) — the same breakdown restricted to samples where the player held
+RL/LG or an active quad / pent — so consumers can render a self-contained
+loc graph / heatmap per combat posture.
 
 Every breaking change bumps `CurrentSchemaVersion` (currently `12`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.

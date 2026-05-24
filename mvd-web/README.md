@@ -299,12 +299,13 @@ The **Metric** selector (`#locgraph-metric`, its own panel above the graph
 so it clearly governs both loc views but *not* Region Control) reweights
 the loc graph and heatmap by combat posture, yielding a **self-contained
 graph per case** — its own nodes *and* edges: *Full time* (all observed
-time), *With RL / LG* (the `armed` LocWeights / LocEdgeWeights), or *With
-Quad* (`quad`). It drives node sizes (occupancy: `getLocMetric` →
+time), *With RL / LG* (the `armed` LocWeights / LocEdgeWeights), *With
+Quad* (`quad`), or *With Pent* (`pent`). It drives node sizes (occupancy:
+`getLocMetric` →
 `metricWeightsOf` → `nodeWeightFor`), edge widths (movement:
 `metricEdgeWeightsOf` → `edgeWeightFor`, edges absent from the case are
 pruned and locs with no presence dimmed), and the heatmap (which renders
-for every metric, including quad).
+for every metric, including the sparse quad / pent cases).
 
 - The **movement graph** — a Cytoscape.js node/edge diagram with the
   filter / edge-mode / layout controls, driven by `initLocGraphView` and
