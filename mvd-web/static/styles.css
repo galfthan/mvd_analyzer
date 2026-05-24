@@ -1578,6 +1578,23 @@ table tbody tr:hover {
     max-width: 60ch;
 }
 
+/* Standalone metric selector governing the loc graph + heatmap. */
+.locmetric-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.locmetric-label {
+    font-weight: 600;
+}
+
+.locmetric-hint {
+    font-size: 0.75rem;
+    color: #888;
+}
+
 /* Heatmap matrices (loc heatmap + region control) — sortable .stats-table. */
 .heatmap-table-wrap {
     overflow-x: auto;

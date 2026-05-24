@@ -8033,9 +8033,6 @@ function renderLocHeatmap() {
     const panel = document.getElementById('locheatmap-panel');
     if (!panel) return;
     const metric = getLocMetric();
-    // The quad metric is graph-only — too sparse to be a useful table, so the
-    // heatmap panel hides while quad is selected (the graph still reweights).
-    if (metric === 'quad') { panel.style.display = 'none'; return; }
     const data = locGraphState.result ? buildLocHeatmap(locGraphState.result, metric) : null;
     const noData = document.getElementById('locheatmap-no-data');
     if (!data) {

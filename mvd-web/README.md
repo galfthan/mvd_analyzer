@@ -287,24 +287,28 @@ full-sync tick in `animatePlayback`.
 
 ## Loc & Regions tab
 
-(`data-tab="loc-graph"`.) Three views, all reading `result.locGraph` (loc
-nodes weighted by time-spent, transition edges; per-player and per-team
-breakdowns baked onto every node) plus `demoInfo.{teams,players}` /
-`mapState.controlStats` — no extra analyzer pass:
+(`data-tab="loc-graph"`; the URL slug is now `locs-regions`, with
+`loc-graph` still accepted — see the tab-alias note below.) Top to bottom:
+**Region Control**, then a standalone **Metric** selector, then the loc
+**graph** and **heatmap**. All read `result.locGraph` (loc nodes weighted
+by time-spent, transition edges; per-player and per-team breakdowns baked
+onto every node) plus `demoInfo.{teams,players}` / `mapState.controlStats`
+— no extra analyzer pass.
 
-A **Metric** dropdown (`#locgraph-metric`) reweights the loc views by
-combat posture, yielding a **self-contained graph per case** — its own
-nodes *and* edges: *Time spent* (all observed time), *With RL / LG* (the
-`armed` LocWeights / LocEdgeWeights), or *With Quad* (`quad`). It drives
-node sizes (occupancy: `getLocMetric` → `metricWeightsOf` →
-`nodeWeightFor`), edge widths (movement: `metricEdgeWeightsOf` →
-`edgeWeightFor`, edges absent from the case are pruned and locs with no
-presence are dimmed), and the heatmap. Under *With Quad* the heatmap
-table hides (too sparse to tabulate) and only the graph reweights.
+The **Metric** selector (`#locgraph-metric`, its own panel above the graph
+so it clearly governs both loc views but *not* Region Control) reweights
+the loc graph and heatmap by combat posture, yielding a **self-contained
+graph per case** — its own nodes *and* edges: *Full time* (all observed
+time), *With RL / LG* (the `armed` LocWeights / LocEdgeWeights), or *With
+Quad* (`quad`). It drives node sizes (occupancy: `getLocMetric` →
+`metricWeightsOf` → `nodeWeightFor`), edge widths (movement:
+`metricEdgeWeightsOf` → `edgeWeightFor`, edges absent from the case are
+pruned and locs with no presence dimmed), and the heatmap (which renders
+for every metric, including quad).
 
 - The **movement graph** — a Cytoscape.js node/edge diagram with the
-  metric / filter / edge-mode / layout controls, driven by
-  `initLocGraphView` and `buildOrRefreshCytoscape`.
+  filter / edge-mode / layout controls, driven by `initLocGraphView` and
+  `buildOrRefreshCytoscape`.
 - The **Loc Heatmap** (`buildLocHeatmap`) — rows are locs (busiest
   first); the leading columns are the **teams** (every member's time
   combined), then one column per **player** grouped by team, with a
@@ -341,6 +345,13 @@ relevant column headers. Player column headers show a truncated name with
 the full name on the header `title` — QuakeWorld's in-game short name
 (`cl_fakename`) is a client-side say_team text prefix, not carried in the
 demo stream, so there's no per-player short name to read.
+
+**Tab URL alias.** The tab's internal `data-tab` stayed `loc-graph` (so
+JS / CSS selectors are unchanged), but the rename to "Loc & Regions" gave
+it the canonical URL slug `locs-regions`. `switchTab` / `applyUrlState`
+run incoming `?tab` through `resolveTabName` (`locs-regions → loc-graph`)
+and `updateUrlState` writes `locs-regions`, so new links use the new slug
+while old `?tab=loc-graph` links keep resolving.
 
 ## Regenerating map geometry
 

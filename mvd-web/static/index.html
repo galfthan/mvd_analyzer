@@ -588,15 +588,44 @@
             <!-- Loc & Regions Tab -->
             <div id="tab-loc-graph" class="tab-content">
                 <div class="empty-state">Load or search a demo to begin.</div>
+                <!-- Region Control (definition editor + per-region control matrix) -->
+                <div class="panel" id="region-control-panel" style="display: none;">
+                    <h3>Region Control</h3>
+                    <div class="locheatmap-desc">
+                        Group locs into named regions. Rows = regions, columns = control
+                        states (the team color underlines which columns are which).
+                        Cell color is normalised <em>per region</em> (brightest = that
+                        region's dominant control state, Empty excluded), so compare colors
+                        across a row — not down a column. The printed % is the absolute
+                        match fraction. Click a column header to sort; hover for details.
+                    </div>
+                    <div id="region-config" class="region-config"></div>
+                    <div class="heatmap-legend">
+                        <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
+                    </div>
+                    <div class="heatmap-table-wrap">
+                        <table class="stats-table heatmap-table region-control-table" id="region-control-table">
+                            <thead><tr id="region-control-thead-row"></tr></thead>
+                            <tbody id="region-control-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Metric selector — governs the loc graph + heatmap below
+                     (Region Control above is independent of it). -->
+                <div class="panel locmetric-panel">
+                    <label class="locmetric-label">Metric for loc analysis:
+                        <select id="locgraph-metric" title="Weight the loc graph and heatmap by total time, time holding RL/LG, or time with an active quad">
+                            <option value="all" selected>Full time</option>
+                            <option value="armed">With RL / LG</option>
+                            <option value="quad">With Quad</option>
+                        </select>
+                    </label>
+                    <span class="locmetric-hint">Applies to the loc graph and heatmap below.</span>
+                </div>
+
                 <div class="panel locgraph-panel">
                     <div class="locgraph-controls">
-                        <label>Metric:
-                            <select id="locgraph-metric" title="Weight locs by total time, time holding RL/LG, or time with an active quad">
-                                <option value="all" selected>Time spent</option>
-                                <option value="armed">With RL / LG</option>
-                                <option value="quad">With Quad</option>
-                            </select>
-                        </label>
                         <label>Filter:
                             <select id="locgraph-filter">
                                 <option value="all" selected>All</option>
@@ -653,39 +682,17 @@
                     </div>
                 </div>
 
-                <!-- Region Control (definition editor + per-region control matrix) -->
-                <div class="panel" id="region-control-panel" style="display: none;">
-                    <h3>Region Control</h3>
-                    <div class="locheatmap-desc">
-                        Group locs into named regions. Rows = regions, columns = control
-                        states (the team color underlines which columns are which).
-                        Cell color is normalised <em>per region</em> (brightest = that
-                        region's dominant control state, Empty excluded), so compare colors
-                        across a row — not down a column. The printed % is the absolute
-                        match fraction. Click a column header to sort; hover for details.
-                    </div>
-                    <div id="region-config" class="region-config"></div>
-                    <div class="heatmap-legend">
-                        <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
-                    </div>
-                    <div class="heatmap-table-wrap">
-                        <table class="stats-table heatmap-table region-control-table" id="region-control-table">
-                            <thead><tr id="region-control-thead-row"></tr></thead>
-                            <tbody id="region-control-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <!-- Loc Heatmap -->
                 <div class="panel locheatmap-panel" id="locheatmap-panel" style="display: none;">
                     <h3>Loc Heatmap</h3>
                     <div class="locheatmap-desc">
-                        Rows = locs. The first columns are the teams (all players'
-                        time combined), then one column per player grouped by team.
-                        Each cell shows the share of that column's time spent in the
-                        loc, normalised to its own busiest loc; cell intensity uses
-                        the viridis scale and the team color underlines each header.
-                        Click a column header to sort; hover a cell for exact time.
+                        Rows = locs, for the metric selected above. The first columns
+                        are the teams (all members combined), then one column per
+                        player grouped by team. Each cell shows the share of that
+                        column's time spent in the loc, normalised to its own busiest
+                        loc; cell intensity uses the viridis scale and the team color
+                        underlines each header. Click a column header to sort; hover a
+                        cell for exact time.
                     </div>
                     <div class="heatmap-legend">
                         <span>less</span><span class="heatmap-legend-bar"></span><span>more</span>
