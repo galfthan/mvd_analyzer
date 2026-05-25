@@ -900,6 +900,8 @@ The reconnect is visible on the wire as KTX broadcast prints (`G_bprint`, `PRINT
 
 The frag count on `left … with N` matches the `rejoins … with N` for the same netname (KTX restored exactly that count). To attribute correctly, track per-slot **occupancy sessions** (split on userid change), then fold sessions of the same human into one identity — by the `rejoins`/`reenters` netname, or by joining each session (not just the final slot) to a demoinfo entry via the `*auth`/name rules above — and resolve each event by the identity active **at that event's time**. The analyzer implements this in the `identity` analyser (`mvd-analytics/analyzer/identity.go`).
 
+That restore also lands as the new slot's **first `svc_updatefrags`**, carrying the whole `N` (not a `+1`). A consumer that derives running score from per-slot frag *deltas* must **rebase** the slot's baseline to `N` on the handoff and emit no kill for it — otherwise the restore reads as a large delta, any corruption guard that rejects big jumps drops it, and (if that guard also declines to advance the baseline) every later real `+1` keeps reading as a huge delta and is dropped too, freezing the player's score at the pre-reconnect total. The timeline analyser keys this rebase off the userid change (`mvd-analytics/analyzer/timeline.go`, `fragResetPending`).
+
 ---
 
 ## svc_print (8)
