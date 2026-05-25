@@ -62,20 +62,27 @@ type WeaponPickupsAnalyzer struct {
 // each weapon pickup window.
 func (a *WeaponPickupsAnalyzer) UseCoreOutputs(co *CoreOutputs) { a.core = co }
 
-// playerName returns the best display name for a slot. Prefers the
-// CoreOutputs slot table when populated; falls back to the live
-// userinfo entry in ctx.Players. The fallback path keeps unit tests
-// that wire up only ctx.Players (without seeding co.Slots) working.
-func (a *WeaponPickupsAnalyzer) playerName(slot int) string {
-	if name := a.core.SlotName(slot); name != "" {
-		return name
-	}
-	if slot >= 0 && slot < len(a.ctx.Players) {
-		if p := a.ctx.Players[slot]; p != nil {
-			return p.Name
+// identityAt returns the resolved name+team that held a slot at time
+// tMs (integer ms). Prefers the reconnect-aware CoreOutputs session
+// table so a player's pre-reconnect pickups/drops aren't relabelled with
+// whoever later took their slot; falls back to the live userinfo entry
+// in ctx.Players (which keeps unit tests that only wire up ctx.Players
+// working).
+func (a *WeaponPickupsAnalyzer) identityAt(slot int, tMs int32) SlotInfo {
+	id := a.core.SlotIdentityAt(slot, tMs)
+	if id.Name == "" || id.Team == "" {
+		if slot >= 0 && slot < len(a.ctx.Players) {
+			if p := a.ctx.Players[slot]; p != nil {
+				if id.Name == "" {
+					id.Name = p.Name
+				}
+				if id.Team == "" {
+					id.Team = p.Team
+				}
+			}
 		}
 	}
-	return ""
+	return id
 }
 
 type packDrop struct {
@@ -288,7 +295,7 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 		if end == 0 {
 			end = math.Inf(1)
 		}
-		k := pwKey{a.playerName(p.pickerSlot), p.weapon}
+		k := pwKey{a.identityAt(p.pickerSlot, msTime(p.time)).Name, p.weapon}
 		windowsByPW[k] = append(windowsByPW[k], pickupWindow{i, p.time, end})
 	}
 
@@ -327,10 +334,11 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 		}
 		nextDeath := findNextAfter(deathsBySlot[p.pickerSlot], p.time)
 
+		pickerID := a.identityAt(p.pickerSlot, msTime(p.time))
 		entry := WeaponPickup{
 			Time:          msTime(p.time),
-			Player:        a.playerName(p.pickerSlot),
-			Team:          picker.Team,
+			Player:        pickerID.Name,
+			Team:          pickerID.Team,
 			Weapon:        p.weapon,
 			Source:        p.source,
 			HadBefore:     p.hadBefore,
@@ -341,8 +349,9 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 			entry.BackpackEnt = p.backpackEnt
 			entry.DropTime = msTime(p.dropTime)
 			if dropper := a.ctx.Players[p.dropperSlot]; dropper != nil {
-				entry.Dropper = a.playerName(p.dropperSlot)
-				entry.DropperTeam = dropper.Team
+				dropperID := a.identityAt(p.dropperSlot, msTime(p.dropTime))
+				entry.Dropper = dropperID.Name
+				entry.DropperTeam = dropperID.Team
 			}
 		}
 		out = append(out, entry)

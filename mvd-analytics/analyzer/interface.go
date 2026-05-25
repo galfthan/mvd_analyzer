@@ -35,52 +35,83 @@ type SlotDemoInfo struct {
 	Team string // Team from demoinfo
 }
 
+// demoInfoIndex is the precomputed login/name lookup over a demoinfo
+// player list. It backs both the slot-keyed ResolveSlotDemoInfo and the
+// per-session resolution used by the identity analyzer, so the join
+// rules (login first, then unambiguous normalized-name) live in one
+// place.
+type demoInfoIndex struct {
+	byLogin map[string]*DemoInfoPlayer
+	byName  map[string]*DemoInfoPlayer // ambiguous normalized names removed
+}
+
+// newDemoInfoIndex builds the lookup. Returns nil when di is nil so
+// callers can treat "no demoinfo" as "no match" without special-casing.
+func newDemoInfoIndex(di *DemoInfoResult) *demoInfoIndex {
+	if di == nil {
+		return nil
+	}
+	x := &demoInfoIndex{
+		byLogin: make(map[string]*DemoInfoPlayer),
+		byName:  make(map[string]*DemoInfoPlayer),
+	}
+	nameCount := make(map[string]int)
+	for i := range di.Players {
+		p := &di.Players[i]
+		if p.Name == "" {
+			continue
+		}
+		if p.Login != "" {
+			x.byLogin[p.Login] = p
+		}
+		norm := normalizePlayerName(p.Name)
+		nameCount[norm]++
+		if nameCount[norm] == 1 {
+			x.byName[norm] = p
+		} else {
+			delete(x.byName, norm) // ambiguous: same display name on >1 demoinfo entry
+		}
+	}
+	return x
+}
+
+// resolve joins a single (netname, auth) identity to its demoinfo
+// player: login join for authenticated players, then unambiguous
+// normalized-name join. The returned *DemoInfoPlayer lets callers fold
+// distinct sessions that map to the same entry into one identity.
+func (x *demoInfoIndex) resolve(name, auth string) (*DemoInfoPlayer, bool) {
+	if x == nil {
+		return nil, false
+	}
+	if auth != "" {
+		if dp, ok := x.byLogin[auth]; ok {
+			return dp, true
+		}
+	}
+	if dp, ok := x.byName[normalizePlayerName(name)]; ok {
+		return dp, true
+	}
+	return nil, false
+}
+
 // ResolveSlotDemoInfo bridges slot↔demoinfo using login join (for
 // authenticated players) then name join (for unauthenticated players).
 // Returns a map from slot number to the matched demoinfo player's
 // display name and team.
 func (ctx *Context) ResolveSlotDemoInfo() map[int]SlotDemoInfo {
 	out := make(map[int]SlotDemoInfo)
-	if ctx.DemoInfo == nil {
+	idx := newDemoInfoIndex(ctx.DemoInfo)
+	if idx == nil {
 		return out
 	}
-
-	demoByLogin := make(map[string]*DemoInfoPlayer)
-	demoByName := make(map[string]*DemoInfoPlayer)
-	nameCount := make(map[string]int)
-
-	for i := range ctx.DemoInfo.Players {
-		p := &ctx.DemoInfo.Players[i]
-		if p.Name == "" {
-			continue
-		}
-		if p.Login != "" {
-			demoByLogin[p.Login] = p
-		}
-		norm := normalizePlayerName(p.Name)
-		nameCount[norm]++
-		if nameCount[norm] == 1 {
-			demoByName[norm] = p
-		} else {
-			delete(demoByName, norm)
-		}
-	}
-
 	for slot, live := range ctx.Players {
 		if live == nil {
 			continue
 		}
-		if live.Auth != "" {
-			if dp, ok := demoByLogin[live.Auth]; ok {
-				out[slot] = SlotDemoInfo{Name: dp.Name, Team: dp.Team}
-				continue
-			}
-		}
-		if dp, ok := demoByName[normalizePlayerName(live.Name)]; ok {
+		if dp, ok := idx.resolve(live.Name, live.Auth); ok {
 			out[slot] = SlotDemoInfo{Name: dp.Name, Team: dp.Team}
 		}
 	}
-
 	return out
 }
 

@@ -47,7 +47,32 @@ type CoreOutputs struct {
 	// every Finalize site that wants the display name reads
 	// co.Slots[slot].Name instead, and ctx.Players keeps its on-the-wire
 	// userinfo values untouched.
+	//
+	// Slots maps one slot → one *final* occupant, which is wrong when a
+	// player reconnects onto another slot and their old slot is reused
+	// (or stamped with a late userinfo name). Finalize sites that have an
+	// event timestamp should prefer SlotIdentityAt(slot, tMs) instead;
+	// Slots remains for the few callers with no time to key on.
 	Slots map[int]SlotInfo
+
+	// Sessions is the per-slot, time-sorted, identity-resolved occupancy
+	// list produced by the identity analyser. Each ResolvedSession covers
+	// a half-open [StartMs, EndMs) window of a wire slot and carries the
+	// canonical identity (cross-reconnect-unified) that owned the slot
+	// during it. Nil when the identity analyser was not registered.
+	Sessions map[int][]ResolvedSession
+}
+
+// ResolvedSession is one contiguous occupancy of a wire slot, resolved
+// to the canonical (reconnect-unified) player identity. IdentityKey is
+// stable within a single analysis run and equal for every session the
+// same human played, so stream merging can group on it.
+type ResolvedSession struct {
+	StartMs     int32
+	EndMs       int32
+	Name        string
+	Team        string
+	IdentityKey string
 }
 
 // SlotInfo holds the per-slot resolved player name and team that
@@ -66,6 +91,26 @@ func (co *CoreOutputs) SlotName(slot int) string {
 		return ""
 	}
 	return co.Slots[slot].Name
+}
+
+// SlotIdentityAt returns the canonical identity that owned slot at the
+// given time (integer ms). It consults the per-slot session table so
+// events that happened before a reconnect/slot-reuse resolve to the
+// player who was actually there, not the slot's final occupant. Falls
+// back to the final-occupant Slots entry when no session covers tMs
+// (e.g. the identity analyser was not registered, or an out-of-range
+// timestamp).
+func (co *CoreOutputs) SlotIdentityAt(slot int, tMs int32) SlotInfo {
+	if co == nil {
+		return SlotInfo{}
+	}
+	for i := range co.Sessions[slot] {
+		s := co.Sessions[slot][i]
+		if tMs >= s.StartMs && tMs < s.EndMs {
+			return SlotInfo{Name: s.Name, Team: s.Team}
+		}
+	}
+	return co.Slots[slot]
 }
 
 // CoreConsumer is the optional interface for analysers that need

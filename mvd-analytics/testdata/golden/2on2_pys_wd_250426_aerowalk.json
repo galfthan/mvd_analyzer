@@ -2803,7 +2803,7 @@
           "rl": 42,
           "sg": 2
         },
-        "deaths": 50,
+        "deaths": 52,
         "kills": 55
       },
       "wd.cao": {
@@ -2812,7 +2812,7 @@
           "rl": 32,
           "sg": 4
         },
-        "deaths": 52,
+        "deaths": 56,
         "kills": 49
       },
       "wd.char": {
@@ -2820,7 +2820,7 @@
           "lg": 26,
           "rl": 47
         },
-        "deaths": 33,
+        "deaths": 34,
         "kills": 73
       },
       "wd.dilbert": {
@@ -2829,7 +2829,7 @@
           "rl": 22,
           "sg": 1
         },
-        "deaths": 76,
+        "deaths": 79,
         "kills": 25
       }
     },
@@ -172463,9 +172463,6 @@
         "team": "wd"
       },
       {
-        "name": "psy*vingador"
-      },
-      {
         "a": [
           {
             "t": 2192,
@@ -227093,7 +227090,6 @@
     "matchStartTime": 0,
     "playerUserIDs": {
       "psy*overon": 36,
-      "psy*vingador": 33,
       "wd.cao": 30,
       "wd.char": 32,
       "wd.dilbert": 35

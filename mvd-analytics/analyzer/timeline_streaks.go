@@ -6,33 +6,19 @@ import "sort"
 // ranked by number of frags. Each run starts at spawn and ends at death.
 // Effective weapon (ewep) is the weapon with the most kills during the run.
 func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, playerUserIDsByName map[string]int) []FragStreakEvent {
-	resolved := a.ctx.ResolveSlotDemoInfo()
-
-	// Helper: resolve slot to player name
-	slotName := func(slot int) string {
-		if di, ok := resolved[slot]; ok && di.Name != "" {
-			return di.Name
-		}
-		if player := a.ctx.Players[slot]; player != nil {
-			return player.Name
-		}
-		if n, ok := a.playerNames[slot]; ok {
-			return n
-		}
-		return ""
-	}
-
-	// Build per-player sorted spawn and death time lists
+	// Build per-player sorted spawn and death time lists, resolving each
+	// spawn/death to the identity on the slot *at that time* so a streak
+	// that straddles a reconnect stays one run under one player name.
 	spawnsByName := make(map[string][]float64)
 	deathsByName := make(map[string][]float64)
 
 	for _, s := range a.rawSpawns {
-		if name := slotName(s.PlayerNum); name != "" {
+		if name, _ := a.resolveAt(s.PlayerNum, msTime(s.Time)); name != "" {
 			spawnsByName[name] = append(spawnsByName[name], s.Time)
 		}
 	}
 	for _, d := range a.rawDeaths {
-		if name := slotName(d.PlayerNum); name != "" {
+		if name, _ := a.resolveAt(d.PlayerNum, msTime(d.Time)); name != "" {
 			deathsByName[name] = append(deathsByName[name], d.Time)
 		}
 	}

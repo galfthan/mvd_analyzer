@@ -283,6 +283,11 @@ func NewDefaultRegistry() *Registry {
 	// are populated before Frag's Finalize re-evaluates teamkills
 	// against co.Names.
 	r.RegisterCore(NewDemoInfoAnalyzer())
+	// Identity runs right after demoinfo: its PopulateCore reads
+	// ctx.DemoInfo (set by demoinfo's Finalize) to fold reconnect
+	// sessions into canonical identities, and publishes the per-slot
+	// session table the discrete + stream outputs resolve against.
+	r.RegisterCore(NewIdentityAnalyzer())
 	r.RegisterCore(NewFragAnalyzer())
 
 	// Derived: every other analyser. They consume CoreOutputs (via

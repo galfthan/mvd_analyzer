@@ -854,7 +854,21 @@ func (a *ItemAnalyzer) classifyStatDelta(e *events.StatUpdateEvent) {
 		// touch is still counted in KTX's `tooks`. Accept any positive
 		// delta in the small-health range and let the entity-kind
 		// filter at synthesis time disambiguate h15 vs h25.
-		if delta > 0 && delta <= 25 {
+		//
+		// A single box heals at most 25, so a +26..50 jump is two boxes
+		// grabbed in one server frame coalesced into one stat update.
+		// Emit one evidence row per box (a player at 28 HP grabbing two
+		// adjacent h25s reads as +50) so each box attributes to the
+		// gainer through this reliable stat layer instead of falling
+		// through to the distance corroborator and splitting onto a
+		// bystander who merely stood near one of them (gameId 216835).
+		// Cap at +50 / two rows so a megahealth or respawn jump (+100)
+		// can't masquerade as a stack of small healths.
+		switch {
+		case delta > 0 && delta <= 25:
+			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"h15", "h25"})
+		case delta > 25 && delta <= 50:
+			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"h15", "h25"})
 			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"h15", "h25"})
 		}
 	case events.StatArmor:
@@ -1165,15 +1179,20 @@ func (a *ItemAnalyzer) resolveAttributions(it *itemEntity) {
 		if it.phases[i].TakenAt == 0 {
 			continue
 		}
-		name := a.co.SlotName(pa.slot)
+		// Resolve to the identity that held the slot *when the pickup
+		// happened* (TakenAt), so a player's pre-reconnect pickups don't
+		// get relabelled with whoever later took their old slot.
+		id := a.co.SlotIdentityAt(pa.slot, it.phases[i].TakenAt)
+		name, team := id.Name, id.Team
 		if name == "" {
 			if pa.slot < len(a.ctx.Players) && a.ctx.Players[pa.slot] != nil {
 				name = a.ctx.Players[pa.slot].Name
 			}
 		}
-		team := ""
-		if pa.slot < len(a.ctx.Players) && a.ctx.Players[pa.slot] != nil {
-			team = a.ctx.Players[pa.slot].Team
+		if team == "" {
+			if pa.slot < len(a.ctx.Players) && a.ctx.Players[pa.slot] != nil {
+				team = a.ctx.Players[pa.slot].Team
+			}
 		}
 		it.phases[i].TakenBy = name
 		it.phases[i].Team = team

@@ -760,6 +760,8 @@ KTX's authoritative deaths counter (`logfrag(targ, targ)` and friends — see `k
 
 The mvd-reader parser deduplicates across the three signals so consumers see one `DeathEvent`/`SpawnEvent` per real transition; see `mvd-reader/parser/stats.go` (`maybeEmitDeath` / `maybeEmitSpawn`) and `mvd-reader/parser/print.go` (`tryEmitObituaryDeath`, `forceEmitDeath` — obit bypasses dedup so the dtTELE2 deflection corner case is still counted).
 
+Note that signal #3 only names a victim for *victim-prefix* obituaries. Several KTX teamkill lines name only the **attacker** — `"X mows down a teammate"`, `"X checks his glasses"`, `"X loses another friend"`, `"X gets a frag for the other team"`, `"X squished a teammate"` (`ktx/src/client.c:5288-5331`) — so the victim's death is unattributable from the print and must come from signal #1/#2. A per-player death **count** therefore can't be built from obituary parsing alone; derive it from the deduped `DeathEvent` stream (resolved to the player on that slot) and validate against `demoInfo.players[].stats.deaths`. This is what `mvd-analytics`'s frag analyser does.
+
 ---
 
 ## svc_updateuserinfo (40)
@@ -884,6 +886,23 @@ The name divergence problem only exists for authenticated players, and for those
 | KTX demoinfo JSON | `players[i].name` | `.N3ophyt3.` (display netname from `ent->netname`) |
 
 The join `slot.userinfo["*auth"] == demoInfo.players[i].login` maps slot 2 → the `.N3ophyt3.` demoinfo entry unambiguously, without needing frag counts or any other heuristic.
+
+### Reconnect: one human spans multiple slots over time
+
+A `slot → name` map (even a perfect one) is still **one entry per slot**, which breaks when a player disconnects and **reconnects mid-match**. On reconnect mvdsv assigns a *new* slot and a *new* userid, so the human now occupies two slots across the demo's timeline; the slot they vacated is frequently reused by a latecomer or simply stamped with a late `svc_updateuserinfo` name. A consumer that resolves each slot to its *final* occupant therefore relabels the player's pre-reconnect events (pickups, frags, position track) with whoever ended up on that slot — observed on gameId 216835, where "rusti" played the first half on one slot, reconnected onto another, and his vacated slot's final name was a non-playing connector. KTX itself treats the two occupancies as one player via its **ghost** mechanism: on reconnect it restores frags/stats by netname (`ktx/src/client.c:1513-1538`).
+
+The reconnect is visible on the wire as KTX broadcast prints (`G_bprint`, `PRINT_HIGH`, so they arrive as broadcast `PrintEvent`s; the `\220`/`\221` team brackets fold to `[`/`]` and redtext folds to plain under `Q_normalizetext`):
+
+| Event | KTX source | Normalised string |
+|---|---|---|
+| Leave | `client.c:2948`, `bot_commands.c:401` | `<name> left the game with <N> frags` |
+| Rejoin (team) | `client.c:1529` | `<name> [<team>] rejoins the game with <N> frags` |
+| Rejoin (non-team) | `client.c:1536` | `<name> rejoins the game with <N> frags` |
+| Reconnect, ghost expired | `client.c:1550/1555` | `<name> [<team>] reenters the game without stats` |
+
+The frag count on `left … with N` matches the `rejoins … with N` for the same netname (KTX restored exactly that count). To attribute correctly, track per-slot **occupancy sessions** (split on userid change), then fold sessions of the same human into one identity — by the `rejoins`/`reenters` netname, or by joining each session (not just the final slot) to a demoinfo entry via the `*auth`/name rules above — and resolve each event by the identity active **at that event's time**. The analyzer implements this in the `identity` analyser (`mvd-analytics/analyzer/identity.go`).
+
+That restore also lands as the new slot's **first `svc_updatefrags`**, carrying the whole `N` (not a `+1`). A consumer that derives running score from per-slot frag *deltas* must **rebase** the slot's baseline to `N` on the handoff and emit no kill for it — otherwise the restore reads as a large delta, any corruption guard that rejects big jumps drops it, and (if that guard also declines to advance the baseline) every later real `+1` keeps reading as a huge delta and is dropped too, freezing the player's score at the pre-reconnect total. The timeline analyser keys this rebase off the userid change (`mvd-analytics/analyzer/timeline.go`, `fragResetPending`).
 
 ---
 
@@ -2171,7 +2190,7 @@ Baselines seed the "initial" state so items at match start are already "up". Non
 
 2. **Stat-delta-driven (fallback for non-hinted kinds).** For items KTX doesn't hint (small healths, ammo boxes): after every `Taken=true(ent, T)`, schedule a synthesis check at `T + respawnSec[kind]`; if a unique player has stat-delta evidence consistent with the kind near that time *and* their position was within touch radius of the entity origin, record a synthetic pickup. The classifier accepts any positive `STAT_HEALTH` delta in [1, 25] as h15-or-h25 evidence — KTX's `T_Heal` (`ktx/src/items.c:184`) caps health at 100, so a pickup at 80 HP yields a +20 delta but `tooks` still increments. The chain-forward path is disabled for MH because its predicted respawn is rot-dependent.
 
-Both paths terminate cleanly: a wire `Taken=false` cancels any pending schedule (the entity genuinely respawned without being re-grabbed). The mvd-analytics implementation lives in [`mvd-analytics/analyzer/items.go`](../mvd-analytics/analyzer/items.go) (`recordSyntheticTakeFromHint` / `processSyntheticRespawns` / `findSyntheticPicker`); on the project's hub corpus, 8 of 9 demos match KTX's authoritative `demoInfo.players[*].items[*].took` exactly across every hinted kind.
+Both paths terminate cleanly: a wire `Taken=false` cancels any pending schedule (the entity genuinely respawned without being re-grabbed). The mvd-analytics implementation lives in [`mvd-analytics/analyzer/items.go`](../mvd-analytics/analyzer/items.go) (`recordSyntheticTakeFromHint` / `processSyntheticRespawns` / `findSyntheticPicker`); on the project's hub corpus, 9 of 10 demos match KTX's authoritative `demoInfo.players[*].items[*].took` exactly across every hinted kind (the lone residual is two same-magnitude small healths contested in a single frame).
 
 ### Derived events — death and spawn
 

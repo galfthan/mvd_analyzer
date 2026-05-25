@@ -27,6 +27,15 @@ type TimelineAnalyzer struct {
 	playerState     map[int]*timelinePlayerState
 	playerNames     map[int]string // Slot -> player name (from UserInfoEvent)
 	playerUserIDs   map[int]int    // Slot -> UserID (for Hub viewer track param)
+	// slotUserID is the *current* occupant's userid per slot (last valid
+	// wins, unlike playerUserIDs which pins the first). It lets
+	// onUserInfo spot a mid-match handoff so handleFragUpdate can rebase
+	// a reconnecting player's restored frag total — see fragResetPending.
+	slotUserID map[int]int
+	// fragResetPending[slot] means the slot's occupant just changed
+	// mid-match, so the next frag update is a KTX stats restore / initial
+	// scoreboard, not a kill. Consumed (cleared) by handleFragUpdate.
+	fragResetPending map[int]bool
 	rawFrags        []fragEvent    // Raw frag events (player num, time)
 	rawDeaths       []deathEvent   // Raw death events (player num, time)
 	rawSpawns       []deathEvent   // Raw spawn events (reusing deathEvent type)
@@ -111,9 +120,11 @@ type timelinePlayerState struct {
 // NewTimelineAnalyzer creates a new timeline analyzer.
 func NewTimelineAnalyzer() *TimelineAnalyzer {
 	return &TimelineAnalyzer{
-		playerState:   make(map[int]*timelinePlayerState),
-		playerNames:   make(map[int]string),
-		playerUserIDs: make(map[int]int),
+		playerState:      make(map[int]*timelinePlayerState),
+		playerNames:      make(map[int]string),
+		playerUserIDs:    make(map[int]int),
+		slotUserID:       make(map[int]int),
+		fragResetPending: make(map[int]bool),
 	}
 }
 
@@ -163,6 +174,22 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 				a.playerUserIDs[e.Player.Slot] = newUserID
 			}
 			// Otherwise keep existing UserID - first valid value wins
+
+			// Spot a mid-match occupant handoff: when the slot's live
+			// userid changes after match start (a reconnect, or a new
+			// player taking a vacated slot), the next frag update is a KTX
+			// stats restore / initial scoreboard rather than a kill. Flag
+			// it so handleFragUpdate rebases instead of feeding the value
+			// to the corruption guard. Pre-match roster shuffles don't
+			// count (frags are 0 then anyway); userid==0 resends are
+			// ignored so the live id keeps the last valid value.
+			if newUserID > 0 {
+				prev := a.slotUserID[e.Player.Slot]
+				if a.timing.Started && prev != 0 && newUserID != prev {
+					a.fragResetPending[e.Player.Slot] = true
+				}
+				a.slotUserID[e.Player.Slot] = newUserID
+			}
 		}
 	case *events.PlayerPositionEvent:
 		// Track player positions
@@ -186,10 +213,28 @@ func (a *TimelineAnalyzer) handlePositionUpdate(e *events.PlayerPositionEvent) {
 
 func (a *TimelineAnalyzer) handleFragUpdate(e *events.FragUpdateEvent) {
 	state := a.getOrCreatePlayerState(e.PlayerNum)
+	if !a.timing.Started {
+		return
+	}
+
+	// A mid-match occupant change on this wire slot (flagged by onUserInfo)
+	// means this frag value is a KTX stats restore / initial scoreboard for
+	// the new occupant, not a kill. Adopt it as the new baseline and emit
+	// nothing. Without this, a reconnecting player whose frag total KTX
+	// restores onto a new slot (gameId 216835: rusti rejoins onto a vacated
+	// spectator slot with 16 frags) reads as a huge +delta, gets rejected by
+	// the corruption guard below, and — because that guard leaves state.frags
+	// at 0 — every later real +1 keeps reading as a huge delta and is also
+	// rejected, freezing the player's timeline score for the rest of the match.
+	if a.fragResetPending[e.PlayerNum] {
+		a.fragResetPending[e.PlayerNum] = false
+		state.frags = e.Frags
+		return
+	}
 
 	// Track frag changes (both increases and decreases)
 	// Frags increase on kills, decrease on suicides/teamkills
-	if a.timing.Started && e.Frags != state.frags {
+	if e.Frags != state.frags {
 		delta := e.Frags - state.frags
 		// Sanity check: filter unreasonable deltas caused by parsing artifacts
 		// (e.g., misaligned reads producing garbage frag values).
@@ -284,6 +329,37 @@ func (a *TimelineAnalyzer) handleSpawn(e *events.SpawnEvent) {
 	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: e.Time, PlayerNum: e.PlayerNum})
 	state.streams.recordSpawn(e.TimeMs)
 	state.isDead = false
+}
+
+// resolveAt resolves a wire slot to its (name, team) at time tMs using
+// the reconnect-aware CoreOutputs session table, with the same fallback
+// chain the timeline has always used: userinfo (ctx.Players), then the
+// last-seen userinfo name (playerNames), then a name→team lookup in the
+// demoinfo NameTable. Centralises what fragEvents / powerups / streaks
+// all need so a player's pre-reconnect events resolve to the player who
+// was actually on the slot then, not the slot's final occupant.
+func (a *TimelineAnalyzer) resolveAt(slot int, tMs int32) (name, team string) {
+	if a.core != nil {
+		id := a.core.SlotIdentityAt(slot, tMs)
+		name, team = id.Name, id.Team
+	}
+	if name == "" {
+		if p := a.ctx.Players[slot]; p != nil {
+			name = p.Name
+			if team == "" {
+				team = p.Team
+			}
+		}
+	}
+	if name == "" {
+		if n, ok := a.playerNames[slot]; ok {
+			name = n
+		}
+	}
+	if name != "" && team == "" && a.core != nil {
+		team = a.core.Names.TeamForName(name)
+	}
+	return name, team
 }
 
 func (a *TimelineAnalyzer) getOrCreatePlayerState(playerNum int) *timelinePlayerState {

@@ -576,16 +576,40 @@ diff -r /tmp/before /tmp/after
    `sv_forcenick` can set the userinfo name to the login. The analyzer
    resolves display names from KTX demoinfo via `*auth` login join.
 
-3. **Same-tick item insta-regrab**: If an item respawns and is picked up
+3. **Reconnecting players**: When a player disconnects and reconnects
+   mid-match they land on a new wire slot (and userid), and their old
+   slot is often reused. The `identity` analyzer folds the occupancies
+   back into one player — via the KTX `rejoins`/`reenters` prints, then a
+   per-session demoinfo login/name join — so pickups, frags, timeline and
+   the merged per-player stream stay attributed correctly (matching KTX's
+   own ghost-by-netname behaviour). Residual gap: a reconnect on a
+   non-KTX demo with no demoinfo *and* a different name each time has no
+   signal to link the two names and will not unify. See
+   [mvd-reader/MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md) (search "reconnect")
+   and [mvd-analytics/analyzer/identity.md](mvd-analytics/analyzer/identity.md).
+
+4. **Same-tick item insta-regrab**: If an item respawns and is picked up
    again within a single server tick (camped spawn), the wire never
    emits a "visible" transition for that cycle. The items analyzer
    recovers these via two synthesis paths (KTX `//ktx took` hint-driven
    for armors/MH/weapons/powerups; stat-delta + position for small
-   healths and ammo), so per-touch counts now match KTX's authoritative
-   `tooks` on 8 of 9 corpus demos. The remaining residual is bounded
-   to small healths in rare edge cases (damage-in-same-frame). See
+   healths and ammo), so per-touch counts match KTX's authoritative
+   `tooks` across the corpus. Two health boxes grabbed in one frame
+   (a coalesced health jump) attribute to the gainer via per-box stat
+   evidence. The one residual is two *same-magnitude* small healths
+   (e.g. h15 + h15) contested in a single frame, which the health-jump
+   signal can't tell apart. See
    [mvd-reader/MVD_FORMAT.md#item-tracking-via-entity-state](mvd-reader/MVD_FORMAT.md#item-tracking-via-entity-state)
    and [mvd-analytics/analyzer/items.md](mvd-analytics/analyzer/items.md#insta-regrab-synthesis).
+
+5. **Weapon pickups from backpacks (SSG/SNG/GL/NG)**: KTX emits the
+   `//ktx bp` backpack-pickup hint only for RL and LG packs, so
+   `result.WeaponPickups` captures world (spawn) grabs of every weapon
+   but misses super-shotgun / super-nailgun / nailgun / grenade-launcher
+   taken off a dropped pack. Per-weapon totals reconcile with KTX
+   `weapons.<w>.pickups.spawn-taken` but fall short of `total-taken` by
+   the backpack grabs (systemic; RL/LG reconcile fully). See
+   [mvd-analytics/README.md](mvd-analytics/README.md#weapon-pickups).
 
 ## Reference sources
 

@@ -182,7 +182,8 @@ func (a *MessagesAnalyzer) parseChatMessage(msg string, time float64) *MatchEven
 }
 
 // parseObituarySimple does a simplified frag parse for the timeline.
-// Uses the same comprehensive pattern list as frag.go (from KTX sv_mod_frags.h).
+// Uses the same comprehensive pattern list as frag.go (KTX client.c obituaries
+// + mvdsv/src/sv_mod_frags.h fuhquake fragfile).
 func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchEvent {
 
 	// --- Teamkill patterns (must check before kill patterns) ---
@@ -287,7 +288,7 @@ func (a *MessagesAnalyzer) parseObituarySimple(msg string, time float64) *MatchE
 	}
 
 	// --- Victim-first kill patterns (X <pattern> Y) ---
-	// Complete list from KTX sv_mod_frags.h, order matters
+	// Complete list from KTX client.c + mvdsv sv_mod_frags.h, order matters
 	killPatterns := []struct {
 		pattern string
 		weapon  string
