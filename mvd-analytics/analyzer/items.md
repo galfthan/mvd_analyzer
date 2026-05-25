@@ -170,10 +170,13 @@ and the chain has a hard cap of 60 entries per entity.
 The mvd-analytics pickup-invariant test (`pickup_invariant_test.go`)
 compares per-player phase counts against KTX's authoritative
 `demoInfo.players[*].items[*].took` numbers. With both synthesis
-paths enabled the hub corpus has 8 of 9 demos at exact match across
-every hinted kind; the 9th has one h15 pickup attributed to the
-wrong player (a slot flip on ambiguous stat-delta evidence, net zero
-in total count).
+paths enabled the hub corpus has 9 of 10 demos at exact match across
+every hinted kind. The 10th has one h15 pickup attributed to the
+wrong player: two *same-magnitude* small healths (h15 + h15) were
+contested in a single frame, so the health-jump magnitude can't tell
+the two pickers apart (net zero in total count). Two *different*-count
+boxes coalescing into one >25 jump (e.g. two h25s) now attribute
+correctly — see the +26..50 two-row evidence rule above.
 
 Synthesis can be disabled per analyser via `SetSyntheticPickups(false)`
 when wire-only behaviour is needed for comparison.

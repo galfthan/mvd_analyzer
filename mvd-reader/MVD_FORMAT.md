@@ -760,6 +760,8 @@ KTX's authoritative deaths counter (`logfrag(targ, targ)` and friends — see `k
 
 The mvd-reader parser deduplicates across the three signals so consumers see one `DeathEvent`/`SpawnEvent` per real transition; see `mvd-reader/parser/stats.go` (`maybeEmitDeath` / `maybeEmitSpawn`) and `mvd-reader/parser/print.go` (`tryEmitObituaryDeath`, `forceEmitDeath` — obit bypasses dedup so the dtTELE2 deflection corner case is still counted).
 
+Note that signal #3 only names a victim for *victim-prefix* obituaries. Several KTX teamkill lines name only the **attacker** — `"X mows down a teammate"`, `"X checks his glasses"`, `"X loses another friend"`, `"X gets a frag for the other team"`, `"X squished a teammate"` (`ktx/src/client.c:5288-5331`) — so the victim's death is unattributable from the print and must come from signal #1/#2. A per-player death **count** therefore can't be built from obituary parsing alone; derive it from the deduped `DeathEvent` stream (resolved to the player on that slot) and validate against `demoInfo.players[].stats.deaths`. This is what `mvd-analytics`'s frag analyser does.
+
 ---
 
 ## svc_updateuserinfo (40)
@@ -2188,7 +2190,7 @@ Baselines seed the "initial" state so items at match start are already "up". Non
 
 2. **Stat-delta-driven (fallback for non-hinted kinds).** For items KTX doesn't hint (small healths, ammo boxes): after every `Taken=true(ent, T)`, schedule a synthesis check at `T + respawnSec[kind]`; if a unique player has stat-delta evidence consistent with the kind near that time *and* their position was within touch radius of the entity origin, record a synthetic pickup. The classifier accepts any positive `STAT_HEALTH` delta in [1, 25] as h15-or-h25 evidence — KTX's `T_Heal` (`ktx/src/items.c:184`) caps health at 100, so a pickup at 80 HP yields a +20 delta but `tooks` still increments. The chain-forward path is disabled for MH because its predicted respawn is rot-dependent.
 
-Both paths terminate cleanly: a wire `Taken=false` cancels any pending schedule (the entity genuinely respawned without being re-grabbed). The mvd-analytics implementation lives in [`mvd-analytics/analyzer/items.go`](../mvd-analytics/analyzer/items.go) (`recordSyntheticTakeFromHint` / `processSyntheticRespawns` / `findSyntheticPicker`); on the project's hub corpus, 8 of 9 demos match KTX's authoritative `demoInfo.players[*].items[*].took` exactly across every hinted kind.
+Both paths terminate cleanly: a wire `Taken=false` cancels any pending schedule (the entity genuinely respawned without being re-grabbed). The mvd-analytics implementation lives in [`mvd-analytics/analyzer/items.go`](../mvd-analytics/analyzer/items.go) (`recordSyntheticTakeFromHint` / `processSyntheticRespawns` / `findSyntheticPicker`); on the project's hub corpus, 9 of 10 demos match KTX's authoritative `demoInfo.players[*].items[*].took` exactly across every hinted kind (the lone residual is two same-magnitude small healths contested in a single frame).
 
 ### Derived events — death and spawn
 

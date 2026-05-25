@@ -326,7 +326,8 @@ proximity check; covers small healths and ammo). Synthetic phases
 carry `attributionSource = "hint"` or `"synthetic"` internally and
 are validated against KTX's `demoInfo.players[*].items[*].took` by
 [`pickup_invariant_test.go`](analyzer/pickup_invariant_test.go) — the
-hub corpus matches exactly on 8 of 9 demos. See
+hub corpus matches exactly on 9 of 10 demos (the lone residual is two
+same-magnitude small healths contested in one frame). See
 [`analyzer/items.md`](analyzer/items.md#insta-regrab-synthesis) for
 the full algorithm.
 
@@ -439,6 +440,19 @@ type WeaponPickup struct {
     DropTime    float64
 }
 ```
+
+**Known limitation — backpack pickups undercount KTX for SSG/SNG/GL/NG.**
+KTX only emits the `//ktx bp` backpack hint for RL and LG packs
+(ktx/src/items.c:2471); there is no hint for a super-shotgun,
+super-nailgun, nailgun or grenade-launcher taken off a dropped pack.
+World (spawn) pickups of every weapon are captured via `//ktx took`, so
+per-weapon counts reconcile with KTX's `weapons.<w>.pickups.spawn-taken`,
+but they fall short of `total-taken` by exactly the backpack grabs for
+those weapons — systemically across all players (RL/LG reconcile fully).
+Closing this needs either a wider KTX hint or synthesising the SSG/SNG/GL
+backpack pickup from the picker's STAT_ITEMS bit flip at backpack-touch
+time; until then treat SSG/SNG/GL/NG pickup totals as world-pickup counts,
+not total acquisitions.
 
 ## Writing a new analyzer
 
