@@ -1,8 +1,10 @@
 # frag analyser
 
 **Phase:** Core
-**Inputs:** `PrintEvent` (only)
-**Reads from CoreOutputs:** `co.Names` (post-Finalize teamkill recompute)
+**Inputs:** `PrintEvent` (obituaries), `DeathEvent` (death count),
+`IntermissionEvent` (match-end gate)
+**Reads from CoreOutputs:** `co.Names` (post-Finalize teamkill recompute),
+`co.SlotIdentityAt` (death → player resolution)
 **Writes to Result:** `result.Frags` (`*FragResult`)
 **Writes to CoreOutputs:** `co.FragEntries`
 
@@ -12,6 +14,10 @@ Parses every kill/suicide/teamkill obituary print message into a
 structured frag log. The log is the canonical input for downstream
 analytics — timeline (streaks, powerup-frag counts) and weapon_pickups
 (kill-window attribution) both read it via `co.FragEntries`.
+
+Per-player **kills** come from the obituary log (the killer is always
+named). Per-player **deaths** come from the authoritative protocol
+`DeathEvent`, not the obituary — see step 5.
 
 ## How it works
 
@@ -29,21 +35,35 @@ analytics — timeline (streaks, powerup-frag counts) and weapon_pickups
 4. Finalize re-evaluates teamkill status using `co.Names` (built from
    demoinfo). If the live verdict was wrong, the kill counter on the
    relevant `PlayerFrags` is corrected.
+5. **Death counting** is sourced from `DeathEvent`, gated to the match
+   window via an embedded `MatchTimingDetector` (start/end prints +
+   `IntermissionEvent`). Each match-time death is resolved to a player
+   in Finalize via `co.SlotIdentityAt(slot, tMs)` and increments that
+   `PlayerFrags.Deaths`. This is deliberately *not* obituary-derived:
+   KTX bumps `targ->deaths` for every death, but several teamkill
+   obituaries name only the attacker (`"X mows down a teammate"`,
+   `"X checks his glasses"`, …), so the victim is unattributable from
+   the message. The protocol death signal fires for every death
+   regardless of the print, and resolving by identity-at-death-time
+   folds a reconnecting player's deaths across both their slots.
 
 ## Limitations / known issues
 
 - Pattern coverage is exhaustive for stock KTX but custom obituary
   packs from non-KTX server mods will silently produce no frag
-  entries.
+  entries (kills); deaths still count via `DeathEvent`.
 - Generic teammate references ("teammate") are not resolved to a real
   player name — they appear in `Frags[]` with `Killer="teammate"` or
-  `Victim="teammate"` and are excluded from per-player aggregation
-  (see `isGenericPlayer`).
+  `Victim="teammate"` and are excluded from per-player *kill*
+  aggregation (see `isGenericPlayer`). Their **deaths** are still
+  counted via the `DeathEvent` path above.
 - The teamkill recompute path runs **after** demoinfo finalises (Frag
   is registered after DemoInfo in the core slice). If the demoinfo
   block is missing, live verdicts are kept as-is.
 
 ## Reference
 
-- KTX obituary table: `ktx/src/sv_mod_frags.h`, `ktx/src/client.c`
+- KTX obituary strings (authoritative for KTX demos):
+  `ktx/src/client.c` (`ClientObituary`, `Instagib_Obituary`)
+- Generic fuhquake fragfile table (fallback): `mvdsv/src/sv_mod_frags.h`
 - Death types: `ktx/include/deathtype.h`

@@ -48,6 +48,10 @@ var suicideObituaries = []ObituaryPattern{
 	{Marker: " suicides", Weapon: "suicide", Suicide: true},
 
 	{Marker: " discovers blast radius", Weapon: "suicide", Suicide: true},
+	// KTX's catch-all self-kill (ktx/src/client.c:5254). Must precede the
+	// shorter " becomes bored with life" it contains, or that pattern
+	// would match first and leave "… somehow" stuck on the victim name.
+	{Marker: " somehow becomes bored with life", Weapon: "suicide", Suicide: true},
 	{Marker: " becomes bored with life", Weapon: "suicide", Suicide: true},
 
 	{Marker: " tries to put the pin back in", Weapon: "suicide", Suicide: true},

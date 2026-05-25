@@ -45,7 +45,12 @@ and returns at the first hit:
    `StatUpdateEvent` against a per-slot snapshot. The classifier
    recognises:
    - IT_ARMOR1/2/3 bit 0→1 → ga / ya / ra
-   - STAT_HEALTH +15 / +25 → h15 / h25
+   - STAT_HEALTH +1..25 → one h15/h25 evidence row; a +26..50 jump is
+     two boxes grabbed in one frame → **two** rows, so each adjacent
+     box attributes to the gainer instead of letting the second fall
+     to the distance corroborator and split onto a bystander (the
+     gameId 216835 contested-h25 fix). Capped at +50 / two rows so a
+     megahealth or respawn jump can't masquerade as a stack of healths.
    - IT_SUPERHEALTH bit 0→1 → mh
    - IT_SUPERSHOTGUN/NAILGUN/etc bit 0→1 → corresponding weapon
    - STAT_SHELLS/NAILS/ROCKETS/CELLS positive delta → ammo kind
@@ -142,10 +147,15 @@ is somehow missing:
    prediction.
 
 The stat-delta classifier accepts any positive `STAT_HEALTH` delta in
-[1, 25] as h15-or-h25 evidence (resolved by entity kind at synthesis
-time). KTX's `T_Heal` caps health at `max_health` (100), so a pickup
-at 80 HP gives only a `+20` delta even though `tooks` increments —
-exact matching on `+15` / `+25` would miss every partial-cap heal.
+[1, 25] as one h15-or-h25 evidence row (resolved by entity kind at
+synthesis time). KTX's `T_Heal` caps health at `max_health` (100), so a
+pickup at 80 HP gives only a `+20` delta even though `tooks` increments —
+exact matching on `+15` / `+25` would miss every partial-cap heal. A
+`+26..50` delta is two boxes touched in the same server frame (a single
+box heals ≤25), so it mints **two** evidence rows; each adjacent box then
+resolves to the gainer through the stat layer rather than the second one
+falling to distance and landing on a bystander. The `+50` ceiling keeps a
+megahealth or respawn jump from being read as a stack of small healths.
 MH is detected via the IT_SUPERHEALTH bit transition, not the `+100`
 delta, so the cap rule doesn't apply.
 

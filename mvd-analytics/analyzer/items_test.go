@@ -500,3 +500,53 @@ func TestItemAnalyzer_LayeredAttribution_RespawnLoadoutNotMistakenForPickup(t *t
 		t.Errorf("post-spawn loadout must not misattribute; got %q", got)
 	}
 }
+
+// TestItemAnalyzer_ContestedDoubleHealthGoesToGainer reproduces the
+// gameId 216835 contested h25: two adjacent +25 boxes grabbed in one
+// server frame coalesce into a single +50 health jump on the picker.
+// A single capped evidence row would attribute only the first box via
+// the stat layer and let the second fall through to the distance
+// corroborator — handing it to a bystander who merely stood on the
+// boxes while taking damage. The +26..50 jump must mint one evidence
+// row per box so both attribute to the gainer.
+func TestItemAnalyzer_ContestedDoubleHealthGoesToGainer(t *testing.T) {
+	a, ctx := newTestItemAnalyzer()
+	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "bystander", Team: "jah"}
+	ctx.Players[3] = &events.PlayerInfo{Slot: 3, Name: "gainer", Team: "ahoy"}
+	// The bystander stands exactly on the boxes (would win on distance);
+	// the gainer is farther away but is the one whose health rose.
+	a.playerPos[2] = [3]float32{0, 0, 0}
+	a.playerPos[3] = [3]float32{100, 0, 0}
+
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 80, Kind: "h25", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 81, Kind: "h25", Origin: [3]float32{0, 0, 0}, Time: 0})
+
+	// Seed health baselines silently.
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 28, Time: 9.8})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 100, Time: 9.8})
+	// Gainer jumps +50 (both boxes); bystander takes -24 damage (no pickup).
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 78, Time: 10.0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 76, Time: 10.0})
+
+	// Both boxes taken in the same frame.
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 80, Kind: "h25", Taken: true, Time: 10.0})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 81, Kind: "h25", Taken: true, Time: 10.0})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+
+	for _, it := range r.Items.Items {
+		if it.Kind != "h25" {
+			continue
+		}
+		if got := it.Phases[0].TakenBy; got != "gainer" {
+			t.Errorf("h25 ent %d TakenBy = %q, want gainer (the player whose health rose, not the nearer bystander)", it.EntNum, got)
+		}
+	}
+	if a.attrCounts["stat"] != 2 {
+		t.Errorf("stat attributions = %d, want 2 (both boxes via the +50 health jump)", a.attrCounts["stat"])
+	}
+	if a.attrCounts["distance"] != 0 {
+		t.Errorf("distance attributions = %d, want 0 (no box should fall to the distance corroborator)", a.attrCounts["distance"])
+	}
+}

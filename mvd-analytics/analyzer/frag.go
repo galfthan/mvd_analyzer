@@ -10,9 +10,22 @@ import (
 type FragAnalyzer struct {
 	ctx      *Context
 	core     *CoreOutputs
+	timing   MatchTimingDetector
 	frags    []FragEntry
 	byWeapon map[string]int
 	byPlayer map[string]*PlayerFrags
+	// deathSlots are the authoritative match-time deaths (wire slot +
+	// time), collected from the protocol DeathEvent and resolved to a
+	// player identity in Finalize. See the DeathEvent case in OnEvent.
+	deathSlots []slotDeath
+}
+
+// slotDeath is one match-time death pinned to the wire slot that died
+// and the time it happened, so Finalize can resolve it to the
+// reconnect-unified identity holding that slot then.
+type slotDeath struct {
+	slot int
+	tMs  int32
 }
 
 // UseCoreOutputs is part of the CoreConsumer contract — Frag consumes
@@ -42,46 +55,64 @@ func (a *FragAnalyzer) Init(ctx *Context) error {
 }
 
 func (a *FragAnalyzer) OnEvent(event events.Event) error {
-	printEvent, ok := event.(*events.PrintEvent)
-	if !ok {
-		return nil
+	switch e := event.(type) {
+	case *events.PrintEvent:
+		a.timing.OnPrint(e)
+		a.handleObituaryPrint(e)
+	case *events.IntermissionEvent:
+		a.timing.OnIntermission(e.Time)
+	case *events.DeathEvent:
+		// Count authoritative deaths during the match. KTX bumps
+		// targ->deaths for every death (ktx/src/client.c:5124), but
+		// several teamkill obituaries name only the *attacker* — e.g.
+		// "X mows down a teammate", "X checks his glasses" — so the
+		// victim-prefix obituary scan below can never attribute those
+		// deaths to a victim. The protocol DeathEvent (health transition
+		// / DF_DEAD, deduped in the parser) fires for every death
+		// regardless of the message, so it's the authoritative death
+		// signal. Gate it to match time with the same boundary the
+		// timeline uses, and resolve the slot to a player in Finalize via
+		// the reconnect-aware identity table.
+		if a.timing.Started && !a.timing.Ended {
+			a.deathSlots = append(a.deathSlots, slotDeath{slot: e.PlayerNum, tMs: e.TimeMs})
+		}
 	}
+	return nil
+}
 
+// handleObituaryPrint mines a print line for kill / weapon attribution
+// (the frag log + per-killer kills). Victim death counting is NOT done
+// here — see the DeathEvent case in OnEvent for why deaths come from the
+// protocol signal instead.
+func (a *FragAnalyzer) handleObituaryPrint(e *events.PrintEvent) {
 	// Obituary messages are typically at level 1 (PRINT_MEDIUM) in MVD
 	// But we'll check levels 1, 2, and 3 to be safe
-	if printEvent.Level > 3 {
-		return nil
+	if e.Level > 3 {
+		return
 	}
 
-	// Try to parse as a frag
-	frag := a.parseObituary(printEvent.Message, printEvent.Time)
-	if frag != nil {
-		// Skip generic killers/victims that can't be resolved
-		killerIsGeneric := isGenericPlayer(frag.Killer)
-		victimIsGeneric := isGenericPlayer(frag.Victim)
-
-		// Only add to frags list if both parties are identifiable
-		if !killerIsGeneric && !victimIsGeneric {
-			a.frags = append(a.frags, *frag)
-		}
-		a.byWeapon[frag.Weapon]++
-
-		// Update killer stats
-		// Don't count teamkills as kills (teamkiller loses a frag, doesn't gain one)
-		if !frag.IsSuicide && !frag.IsTeamKill && !killerIsGeneric {
-			killer := a.getOrCreatePlayer(frag.Killer)
-			killer.Kills++
-			killer.ByWeapon[frag.Weapon]++
-		}
-
-		// Update victim stats
-		if !victimIsGeneric {
-			victim := a.getOrCreatePlayer(frag.Victim)
-			victim.Deaths++
-		}
+	frag := a.parseObituary(e.Message, e.Time)
+	if frag == nil {
+		return
 	}
 
-	return nil
+	// Skip generic killers/victims that can't be resolved
+	killerIsGeneric := isGenericPlayer(frag.Killer)
+	victimIsGeneric := isGenericPlayer(frag.Victim)
+
+	// Only add to frags list if both parties are identifiable
+	if !killerIsGeneric && !victimIsGeneric {
+		a.frags = append(a.frags, *frag)
+	}
+	a.byWeapon[frag.Weapon]++
+
+	// Update killer stats
+	// Don't count teamkills as kills (teamkiller loses a frag, doesn't gain one)
+	if !frag.IsSuicide && !frag.IsTeamKill && !killerIsGeneric {
+		killer := a.getOrCreatePlayer(frag.Killer)
+		killer.Kills++
+		killer.ByWeapon[frag.Weapon]++
+	}
 }
 
 func (a *FragAnalyzer) Finalize(result *Result) error {
@@ -113,6 +144,17 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 		}
 	}
 
+	// Attribute authoritative match-time deaths to players. Sourced from
+	// the protocol DeathEvent (see OnEvent), resolved to the reconnect-
+	// unified identity that held the slot at death time — so a player's
+	// deaths across a reconnect fold into one name, and teamkill victims
+	// (whose obituary names only the attacker) are still counted.
+	for _, d := range a.deathSlots {
+		if name := a.resolveDeathName(d.slot, d.tMs); name != "" && !isGenericPlayer(name) {
+			a.getOrCreatePlayer(name).Deaths++
+		}
+	}
+
 	result.Frags = &FragResult{
 		TotalFrags: len(a.frags),
 		Frags:      a.frags,
@@ -120,6 +162,23 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 		ByPlayer:   a.byPlayer,
 	}
 	return nil
+}
+
+// resolveDeathName maps a death's wire slot to the canonical player
+// identity active at the death time, falling back to the live userinfo
+// name when no identity / demoinfo entry covers the slot. SlotIdentityAt
+// is nil-safe, so this also works for registries without the identity or
+// demoinfo analysers wired up.
+func (a *FragAnalyzer) resolveDeathName(slot int, tMs int32) string {
+	if name := a.core.SlotIdentityAt(slot, tMs).Name; name != "" {
+		return name
+	}
+	if slot >= 0 && slot < len(a.ctx.Players) {
+		if p := a.ctx.Players[slot]; p != nil {
+			return p.Name
+		}
+	}
+	return ""
 }
 
 func (a *FragAnalyzer) getOrCreatePlayer(name string) *PlayerFrags {
@@ -185,6 +244,9 @@ func (a *FragAnalyzer) checkSuicide(msg string, time float64) *FragEntry {
 		// Rocket Launcher self-damage (from KTX client.c)
 		// These are suicides, counted under "suicide" not "rl" to avoid double-counting
 		{" discovers blast radius", "suicide"},
+		// KTX catch-all self-kill (client.c:5254). Must precede the
+		// shorter " becomes bored with life" substring it contains.
+		{" somehow becomes bored with life", "suicide"},
 		{" becomes bored with life", "suicide"},
 
 		// Grenade Launcher self-damage (counted as "suicide" not "gl")
