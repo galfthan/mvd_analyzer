@@ -4639,7 +4639,7 @@ function setupDebugTab() {
 }
 
 // renderDebugEdges is the tab's render entry point. It lazily fetches the
-// per-player loc residence runs once per demo (the dropdown then re-groups
+// per-player loc residence runs once per demo (the dropdown then re-filters
 // client-side) and renders the table. Called by switchTab's render passes,
 // so it guards against firing the fetch more than once.
 function renderDebugEdges() {
@@ -4662,41 +4662,43 @@ function renderDebugEdges() {
         .finally(() => { debugEdgePending = null; });
 }
 
-// renderDebugEdgesTable groups the cached runs into N-edge passes (N from
-// the dropdown) and renders one row per individual pass. A run of R
-// residences yields R-N passes; each pass spans N+1 residences / N
-// transitions. The first loc column shows the single origin loc for N=1
-// and the full arrow path for N>=2.
+// renderDebugEdgesTable lists individual edge passes, filtered to edges
+// traversed a chosen number of times across the whole match. Each
+// directed (from, to) transition is counted over every player and all
+// time; the dropdown picks a visit count (1, 2, or 3) and only edges
+// hit exactly that many times are shown — so "1" surfaces edges with a
+// single, only traversal (the rare/anomalous ones), and "2"/"3" list
+// all the passes of edges hit exactly twice / three times. Direction is
+// part of the key, so A→B and B→A are independent edges.
 function renderDebugEdgesTable() {
     if (!debugEdgeData) return;
     const body = document.getElementById('debug-edges-body');
     const table = document.getElementById('debug-edges-table');
     const noData = document.getElementById('debug-edges-no-data');
-    const fromTh = document.getElementById('debug-edges-from-th');
     const countEl = document.getElementById('debug-edges-count');
     if (!body) return;
 
-    const n = parseInt(document.getElementById('debug-edges-n')?.value || '1', 10);
-    if (fromTh) fromTh.textContent = (n === 1) ? 'From' : 'Path';
+    const visits = parseInt(document.getElementById('debug-edges-n')?.value || '1', 10);
 
     const hubInfo = currentResult?.hubInfo;
     const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
 
-    const rows = [];
+    // Every single-edge pass, plus a per-edge traversal count.
+    const passes = [];
+    const counts = new Map();
     for (const p of (debugEdgeData.players || [])) {
         for (const run of (p.runs || [])) {
-            for (let j = 0; j + n < run.length; j++) {
-                const seq = run.slice(j, j + n + 1);
-                rows.push({
-                    player: p.name,
-                    t: seq[1].t, // first transition time of the pass
-                    from: seq[0].loc,
-                    to: seq[seq.length - 1].loc,
-                    path: seq.map(s => s.loc).join(' → '),
-                });
+            for (let j = 0; j + 1 < run.length; j++) {
+                const from = run[j].loc, to = run[j + 1].loc;
+                const key = from + '\x00' + to;
+                counts.set(key, (counts.get(key) || 0) + 1);
+                passes.push({ player: p.name, t: run[j + 1].t, from, to, key });
             }
         }
     }
+
+    // Keep only passes whose edge was traversed exactly `visits` times.
+    const rows = passes.filter(p => counts.get(p.key) === visits);
     rows.sort((a, b) => a.t - b.t);
 
     if (rows.length === 0) {
@@ -4710,18 +4712,20 @@ function renderDebugEdgesTable() {
     if (noData) noData.style.display = 'none';
 
     body.innerHTML = rows.map(r => {
-        const firstCell = (n === 1) ? escapeHtml(r.from) : escapeHtml(r.path);
         const hub = buildHubWatchLink(r.player, r.t - DEBUG_HUB_LEAD, hubInfo, playerUserIDs);
         return '<tr>' +
             `<td data-sort-value="${r.t}">${formatDuration(Math.max(0, r.t))}</td>` +
             `<td>${escapeHtml(r.player)}</td>` +
-            `<td>${firstCell}</td>` +
+            `<td>${escapeHtml(r.from)}</td>` +
             `<td>${escapeHtml(r.to)}</td>` +
             `<td>${hub}</td>` +
             '</tr>';
     }).join('');
 
-    if (countEl) countEl.textContent = `${rows.length} passes`;
+    const distinctEdges = new Set(rows.map(r => r.key)).size;
+    if (countEl) {
+        countEl.textContent = `${distinctEdges} edge${distinctEdges === 1 ? '' : 's'} visited exactly ${visits}× (${rows.length} pass${rows.length === 1 ? '' : 'es'})`;
+    }
     if (table) makeSortable(table);
 }
 

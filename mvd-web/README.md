@@ -366,24 +366,24 @@ A hidden developer tab, surfaced only when the page is opened with
 sidebar button, and `switchTab` refuses to activate `?tab=debug`
 otherwise). It is not part of the normal sidebar order.
 
-Its first panel is **Loc Graph Edges**: every individual loc-graph
-edge traversal across the whole match, for all players. The rows come
-from the `getLocEdgePasses` bridge (`view.LocEdgePasses`), which
-re-walks each player's native position track with the same death/spawn
-reset semantics as the loc-graph builder, so the listed transitions
-match `LocGraphResult.Edges` exactly (Full-time metric; teleport
+Its first panel is **Loc Graph Edges**: individual loc-graph edge
+traversals across the whole match, for all players. The rows come from
+the `getLocEdgePasses` bridge (`view.LocEdgePasses`), which re-walks
+each player's native position track with the same death/spawn reset
+semantics as the loc-graph builder, so the transitions match
+`LocGraphResult.Edges` exactly (Full-time metric; teleport
 classification omitted since it only labels edges, never adds or drops
-them). Each direction is a separate row (A→B and B→A are distinct).
+them). Each direction is a separate edge (A→B and B→A are distinct).
 
-The **Edges visited** dropdown (1 / 2 / 3) groups consecutive edges
-into passes: a run of *R* residences yields *R − N* passes, each
-spanning *N* transitions. For N=1 the first column is the single origin
-loc (`From`); for N≥2 it becomes `Path` and shows the full
-`A → B → C` chain so blip sequences (e.g. `RL → MH.low → RL`) are
-visible at a glance. Columns: Time, Player, From/Path, To, Hub. The
-data is fetched once per demo and the dropdown re-groups client-side;
-the Hub link jumps a couple of seconds before the pass's first
-transition so the run-up is visible.
+The **Times visited** dropdown (1 / 2 / 3) filters by traversal count:
+each directed edge is tallied over every player and all time, and only
+edges hit *exactly* that many times are shown. "1" surfaces edges with
+a single, only traversal — the rare/anomalous ones (e.g. a one-off
+wall-bleed blip); "2" and "3" list every pass of edges hit exactly
+twice / three times (so 2 or 3 rows per edge). Columns: Time, Player,
+From, To, Hub. The data is fetched once per demo and the dropdown
+re-filters client-side; the Hub link jumps a couple of seconds before
+the traversal so the run-up is visible.
 
 ## Regenerating map geometry
 

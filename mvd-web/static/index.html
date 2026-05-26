@@ -861,16 +861,18 @@
                 <div class="panel">
                     <h3>Loc Graph Edges</h3>
                     <div class="locheatmap-desc">
-                        Every individual loc-graph edge traversal (all players, full
-                        match time), reconstructed from the native position track with
-                        the same death/spawn resets as the loc graph. Each direction is
-                        a separate row. Choose how many consecutive edges make up a
-                        pass; for 2 and 3 every individual pass is listed. Click a
-                        column header to sort.
+                        Individual loc-graph edge traversals (all players, full match
+                        time), reconstructed from the native position track with the
+                        same death/spawn resets as the loc graph. Each directed edge
+                        (A→B and B→A counted separately) is tallied over the whole
+                        match; pick how many times an edge was visited to show only
+                        edges hit exactly that many times. "1" surfaces edges with a
+                        single, only traversal; "2" and "3" list every pass of edges
+                        hit exactly twice / three times. Click a column header to sort.
                     </div>
                     <div class="locgraph-controls">
-                        <label>Edges visited:
-                            <select id="debug-edges-n" title="Number of consecutive edges per pass">
+                        <label>Times visited:
+                            <select id="debug-edges-n" title="Show only edges traversed exactly this many times across the whole match">
                                 <option value="1" selected>1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -883,7 +885,7 @@
                             <thead><tr>
                                 <th>Time</th>
                                 <th>Player</th>
-                                <th id="debug-edges-from-th">From</th>
+                                <th>From</th>
                                 <th>To</th>
                                 <th>Hub</th>
                             </tr></thead>
