@@ -90,6 +90,20 @@ let analyzeResolve = null;
 let analyzeReject = null;
 let recomputeResolve = null;
 let recomputeReject = null;
+let locEdgePassesResolve = null;
+let locEdgePassesReject = null;
+
+// Debug tab state. debugEnabled is set from the &debug URL flag on load;
+// debugEdgeData caches the per-player loc residence runs for the current
+// demo (fetched lazily when the tab is first opened); debugEdgePending
+// holds the in-flight fetch so the tab's three render passes don't each
+// kick off a query.
+let debugEnabled = false;
+let debugEdgeData = null;
+let debugEdgePending = null;
+// Seconds of lead time the debug-tab hub links jump before the edge's
+// first transition, so the run-up into the pass is visible.
+const DEBUG_HUB_LEAD = 2;
 
 // ─── Load-timing instrumentation ────────────────────────────────────────────
 // Structured per-stage timing for the demo load path, printed to the console
@@ -229,6 +243,18 @@ worker.onmessage = (e) => {
             recomputeResolve = null;
             recomputeReject = null;
         }
+    } else if (e.data.type === 'locEdgePasses_result') {
+        if (locEdgePassesResolve) {
+            locEdgePassesResolve(e.data.json);
+            locEdgePassesResolve = null;
+            locEdgePassesReject = null;
+        }
+    } else if (e.data.type === 'locEdgePasses_error') {
+        if (locEdgePassesReject) {
+            locEdgePassesReject(new Error(e.data.message));
+            locEdgePassesResolve = null;
+            locEdgePassesReject = null;
+        }
     }
 };
 
@@ -322,6 +348,17 @@ function recomputeInWorker(overrideJSON) {
         recomputeResolve = resolve;
         recomputeReject = reject;
         worker.postMessage({ type: 'recomputeRegions', overrideJSON });
+    });
+}
+
+// getLocEdgePassesInWorker round-trips the debug-tab edge query through
+// the WASM bridge living on the worker (same lane rationale as
+// recomputeInWorker). Resolves to the raw JSON string.
+function getLocEdgePassesInWorker(optsJSON) {
+    return new Promise((resolve, reject) => {
+        locEdgePassesResolve = resolve;
+        locEdgePassesReject = reject;
+        worker.postMessage({ type: 'locEdgePasses', optsJSON: optsJSON || '' });
     });
 }
 
@@ -419,6 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFileUpload();
     setupTabs();
     setupSearch();
+    setupDebugTab();
 
     const params = new URLSearchParams(location.search);
     const hubId = params.get('gameId') || params.get('hub');
@@ -609,7 +647,12 @@ const TAB_INTERNAL_TO_URL = { 'loc-graph': 'locs-regions' };
 function resolveTabName(name) { return TAB_URL_TO_INTERNAL[name] || name; }
 
 function switchTab(name) {
-    const btn = document.querySelector(`.sidebar-btn[data-tab="${resolveTabName(name)}"]`);
+    const resolved = resolveTabName(name);
+    // The Debug tab is reachable only when the page was opened with the
+    // &debug URL flag — block both stray ?tab=debug links and programmatic
+    // switches otherwise.
+    if (resolved === 'debug' && !debugEnabled) return;
+    const btn = document.querySelector(`.sidebar-btn[data-tab="${resolved}"]`);
     if (btn) btn.click();
 }
 
@@ -670,6 +713,8 @@ function setupTabs() {
                     renderChatMessages();
                 } else if (tabName === 'loc-graph') {
                     renderLocGraph();
+                } else if (tabName === 'debug') {
+                    renderDebugEdges();
                 }
             };
             renderForTab();
@@ -971,6 +1016,11 @@ function displayResults(result) {
     // between demos with different shapes (e.g. 4on4 → FFA where
     // teams/regions/etc. are absent and would otherwise survive).
     resetUIToCleanState();
+
+    // Drop any cached debug-tab edge data from the previous demo; it is
+    // re-fetched lazily when the Debug tab is next opened.
+    debugEdgeData = null;
+    debugEdgePending = null;
 
     document.body.classList.remove('no-demo');
 
@@ -4572,6 +4622,107 @@ function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
     const from = Math.floor(time + (timelineState.demoOffset || 0));
     const url = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${from}&track=${trackId}`;
     return `<a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">hub</a>`;
+}
+
+// ─── Debug Tab (loc-graph edge passes) ───────────────────────────────────────
+
+// setupDebugTab gates the Debug tab on the &debug URL flag. When present
+// it reveals the sidebar button and wires the "edges visited" dropdown;
+// otherwise the tab stays hidden and switchTab refuses to activate it.
+function setupDebugTab() {
+    debugEnabled = new URLSearchParams(location.search).has('debug');
+    if (!debugEnabled) return;
+    const btn = document.querySelector('.sidebar-btn[data-tab="debug"]');
+    if (btn) btn.style.display = ''; // revert to the stylesheet's flex
+    const sel = document.getElementById('debug-edges-n');
+    if (sel) sel.addEventListener('change', renderDebugEdgesTable);
+}
+
+// renderDebugEdges is the tab's render entry point. It lazily fetches the
+// per-player loc residence runs once per demo (the dropdown then re-groups
+// client-side) and renders the table. Called by switchTab's render passes,
+// so it guards against firing the fetch more than once.
+function renderDebugEdges() {
+    if (!debugEnabled || !currentResult) return;
+    if (debugEdgeData) { renderDebugEdgesTable(); return; }
+    if (debugEdgePending) return; // fetch already in flight; .then renders
+    const countEl = document.getElementById('debug-edges-count');
+    if (countEl) countEl.textContent = 'Loading…';
+    debugEdgePending = getLocEdgePassesInWorker('')
+        .then(json => {
+            const parsed = JSON.parse(json);
+            debugEdgeData = (parsed && !parsed.error && parsed.players) ? parsed : { players: [] };
+            renderDebugEdgesTable();
+        })
+        .catch(err => {
+            debugEdgeData = { players: [] };
+            if (countEl) countEl.textContent = 'Error: ' + (err.message || err);
+            renderDebugEdgesTable();
+        })
+        .finally(() => { debugEdgePending = null; });
+}
+
+// renderDebugEdgesTable groups the cached runs into N-edge passes (N from
+// the dropdown) and renders one row per individual pass. A run of R
+// residences yields R-N passes; each pass spans N+1 residences / N
+// transitions. The first loc column shows the single origin loc for N=1
+// and the full arrow path for N>=2.
+function renderDebugEdgesTable() {
+    if (!debugEdgeData) return;
+    const body = document.getElementById('debug-edges-body');
+    const table = document.getElementById('debug-edges-table');
+    const noData = document.getElementById('debug-edges-no-data');
+    const fromTh = document.getElementById('debug-edges-from-th');
+    const countEl = document.getElementById('debug-edges-count');
+    if (!body) return;
+
+    const n = parseInt(document.getElementById('debug-edges-n')?.value || '1', 10);
+    if (fromTh) fromTh.textContent = (n === 1) ? 'From' : 'Path';
+
+    const hubInfo = currentResult?.hubInfo;
+    const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
+
+    const rows = [];
+    for (const p of (debugEdgeData.players || [])) {
+        for (const run of (p.runs || [])) {
+            for (let j = 0; j + n < run.length; j++) {
+                const seq = run.slice(j, j + n + 1);
+                rows.push({
+                    player: p.name,
+                    t: seq[1].t, // first transition time of the pass
+                    from: seq[0].loc,
+                    to: seq[seq.length - 1].loc,
+                    path: seq.map(s => s.loc).join(' → '),
+                });
+            }
+        }
+    }
+    rows.sort((a, b) => a.t - b.t);
+
+    if (rows.length === 0) {
+        body.innerHTML = '';
+        if (table) table.style.display = 'none';
+        if (noData) noData.style.display = '';
+        if (countEl) countEl.textContent = '';
+        return;
+    }
+    if (table) table.style.display = '';
+    if (noData) noData.style.display = 'none';
+
+    body.innerHTML = rows.map(r => {
+        const firstCell = (n === 1) ? escapeHtml(r.from) : escapeHtml(r.path);
+        const hub = buildHubWatchLink(r.player, r.t - DEBUG_HUB_LEAD, hubInfo, playerUserIDs);
+        return '<tr>' +
+            `<td data-sort-value="${r.t}">${formatDuration(Math.max(0, r.t))}</td>` +
+            `<td>${escapeHtml(r.player)}</td>` +
+            `<td>${firstCell}</td>` +
+            `<td>${escapeHtml(r.to)}</td>` +
+            `<td>${hub}</td>` +
+            '</tr>';
+    }).join('');
+
+    if (countEl) countEl.textContent = `${rows.length} passes`;
+    if (table) makeSortable(table);
 }
 
 // ─── Location Lookup ────────────────────────────────────────────────────────

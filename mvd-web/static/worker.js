@@ -214,5 +214,19 @@ onmessage = function(e) {
         } catch (err) {
             postMessage({ type: 'recompute_error', message: err.message || String(err) });
         }
+    } else if (e.data.type === 'locEdgePasses') {
+        // Debug tab: per-player loc residence runs. Like recomputeRegions,
+        // getLocEdgePasses is a Go export on this worker's self, so the
+        // round-trip has to come through here.
+        if (!wasmReady) {
+            postMessage({ type: 'locEdgePasses_error', message: 'WASM not loaded yet' });
+            return;
+        }
+        try {
+            const jsonStr = getLocEdgePasses(e.data.optsJSON || '');
+            postMessage({ type: 'locEdgePasses_result', json: jsonStr });
+        } catch (err) {
+            postMessage({ type: 'locEdgePasses_error', message: err.message || String(err) });
+        }
     }
 };

@@ -65,6 +65,10 @@
             <button class="sidebar-btn" data-tab="pickups" title="Pickups">
                 <span class="sidebar-btn-label">Pickups</span>
             </button>
+            <!-- Debug tab: hidden unless the page is opened with &debug in the URL. -->
+            <button class="sidebar-btn debug-only" data-tab="debug" title="Debug" style="display:none">
+                <span class="sidebar-btn-label">Debug</span>
+            </button>
         </nav>
 
         <main class="main">
@@ -847,6 +851,48 @@
 
                 <div id="pickups-empty" class="empty-message" style="display: none;">
                     No tracked pickups in this demo.
+                </div>
+            </div>
+
+            <!-- Debug Tab (only reachable with &debug in the URL) -->
+            <div id="tab-debug" class="tab-content">
+                <div class="empty-state">Load or search a demo to begin.</div>
+
+                <div class="panel">
+                    <h3>Loc Graph Edges</h3>
+                    <div class="locheatmap-desc">
+                        Every individual loc-graph edge traversal (all players, full
+                        match time), reconstructed from the native position track with
+                        the same death/spawn resets as the loc graph. Each direction is
+                        a separate row. Choose how many consecutive edges make up a
+                        pass; for 2 and 3 every individual pass is listed. Click a
+                        column header to sort.
+                    </div>
+                    <div class="locgraph-controls">
+                        <label>Edges visited:
+                            <select id="debug-edges-n" title="Number of consecutive edges per pass">
+                                <option value="1" selected>1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                            </select>
+                        </label>
+                        <span id="debug-edges-count" class="locmetric-hint"></span>
+                    </div>
+                    <div class="heatmap-table-wrap">
+                        <table class="stats-table" id="debug-edges-table">
+                            <thead><tr>
+                                <th>Time</th>
+                                <th>Player</th>
+                                <th id="debug-edges-from-th">From</th>
+                                <th>To</th>
+                                <th>Hub</th>
+                            </tr></thead>
+                            <tbody id="debug-edges-body"></tbody>
+                        </table>
+                    </div>
+                    <div id="debug-edges-no-data" class="map-no-data" style="display:none">
+                        <p>No loc edges available for this demo.</p>
+                    </div>
                 </div>
             </div>
 

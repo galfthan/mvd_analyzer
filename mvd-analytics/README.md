@@ -35,18 +35,21 @@ that downstream consumers render, summarise, or feed to an agent.
   result post-processors run last (time normalisation, duel team
   rewrite, locgraph synthesis, region-control classification) — see
   `postprocess.go`.
-- `view/` — **time-parameterised query API** over a finalised
-  `*Result`. Six pure functions (`Buckets`, `Events`, `StreamSlice`,
-  `StateAt`, `LocTrails`, `RegionControl`) read `result.Streams` and
-  produce derived shapes (bucketed timelines, raw stream slices,
-  point-in-time state, loc trails, region-control bucket states) at
-  the caller's chosen window / fields / reducers. Every entry takes
-  at least one time-related option that the caller controls; static
-  derivations (`FragResult`, `LocGraphResult`, `MetadataResult`, …)
-  don't belong here and are served directly from result fields. Used
-  by the CLI's `-view` family of flags and the WASM bridge's
-  `getBuckets` / `getEvents` / `getStreamSlice` / `getStateAt` /
-  `getLocTrails` / `recomputeRegionControl` exports.
+- `view/` — **query API** over a finalised `*Result`. Seven pure
+  functions (`Buckets`, `Events`, `StreamSlice`, `StateAt`,
+  `LocTrails`, `LocEdgePasses`, `RegionControl`) read `result.Streams`
+  and produce derived shapes (bucketed timelines, raw stream slices,
+  point-in-time state, loc trails, per-player loc-edge residence runs,
+  region-control bucket states) at the caller's chosen window / fields
+  / reducers / player filter. `LocEdgePasses` re-walks the position
+  track with the loc graph's death/spawn-reset semantics to recover the
+  individual edge traversals behind the aggregate `LocGraphResult.Edges`
+  (used by the web Debug tab). Static derivations (`FragResult`,
+  `LocGraphResult`, `MetadataResult`, …) don't belong here and are
+  served directly from result fields. Used by the CLI's `-view` family
+  of flags and the WASM bridge's `getBuckets` / `getEvents` /
+  `getStreamSlice` / `getStateAt` / `getLocTrails` /
+  `getLocEdgePasses` / `recomputeRegionControl` exports.
 - `loc/` — `.loc` file parser. For native builds the corpus is embedded
   via `//go:embed data/*.loc` (466 maps today); for WASM builds the host
   provides `fetchLocSync` so only the loc for the current demo is

@@ -257,6 +257,31 @@ func getLocTrails(this js.Value, args []js.Value) interface{} {
 	return string(b)
 }
 
+// getLocEdgePasses returns per-player loc residence runs — the raw
+// material for the debug tab's loc-graph edge table. Mirrors the
+// loc-graph builder's walk (death/spawn resets) so the emitted
+// transitions match the aggregate edges.
+func getLocEdgePasses(this js.Value, args []js.Value) interface{} {
+	if lastResult == nil {
+		return errorJSON("no demo analyzed yet")
+	}
+	var opts view.LocEdgePassesOptions
+	if len(args) >= 1 && args[0].String() != "" {
+		if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
+			return errorJSON("bad options JSON: " + err.Error())
+		}
+	}
+	v, err := view.LocEdgePasses(lastResult, opts)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	return string(b)
+}
+
 // recomputeRegionControl is the JS-callable region recompute hook.
 // Walks result.Streams via view.RegionControl with caller-supplied
 // region overrides (the user edits region definitions in the map
@@ -331,6 +356,7 @@ func main() {
 	js.Global().Set("getStreamSlice", js.FuncOf(getStreamSlice))
 	js.Global().Set("getStateAt", js.FuncOf(getStateAt))
 	js.Global().Set("getLocTrails", js.FuncOf(getLocTrails))
+	js.Global().Set("getLocEdgePasses", js.FuncOf(getLocEdgePasses))
 	js.Global().Set("getAnalysisTimings", js.FuncOf(getAnalysisTimings))
 	js.Global().Set("getDemoInfo", js.FuncOf(getDemoInfo))
 	js.Global().Set("wasmVersion", map[string]interface{}{

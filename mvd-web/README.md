@@ -11,8 +11,9 @@ talks to it through a JS shim.
   `getDefaultBuckets()` (50 ms column-major `ColumnarBuckets` for the
   Timeline/Map panels), `getBuckets(optsJSON)` (row or column via
   `opts.layout`), `getEvents(filterJSON)`, `getStreamSlice(optsJSON)`,
-  `getStateAt(optsJSON)`, `getLocTrails(optsJSON)`, and
-  `recomputeRegionControl(regionsJSON)`. All take a JSON-string argument
+  `getStateAt(optsJSON)`, `getLocTrails(optsJSON)`,
+  `getLocEdgePasses(optsJSON)` (per-player loc-edge residence runs for
+  the Debug tab), and `recomputeRegionControl(regionsJSON)`. All take a JSON-string argument
   (or none for `getDefaultBuckets`) and return a JSON string; under the
   hood they call into `mvd-analytics/view` over the cached `lastResult`.
 - `static/` — the browser frontend.
@@ -357,6 +358,32 @@ it the canonical URL slug `locs-regions`. `switchTab` / `applyUrlState`
 run incoming `?tab` through `resolveTabName` (`locs-regions → loc-graph`)
 and `updateUrlState` writes `locs-regions`, so new links use the new slug
 while old `?tab=loc-graph` links keep resolving.
+
+## Debug tab
+
+A hidden developer tab, surfaced only when the page is opened with
+`&debug` in the URL (`setupDebugTab` reads the flag, reveals the
+sidebar button, and `switchTab` refuses to activate `?tab=debug`
+otherwise). It is not part of the normal sidebar order.
+
+Its first panel is **Loc Graph Edges**: every individual loc-graph
+edge traversal across the whole match, for all players. The rows come
+from the `getLocEdgePasses` bridge (`view.LocEdgePasses`), which
+re-walks each player's native position track with the same death/spawn
+reset semantics as the loc-graph builder, so the listed transitions
+match `LocGraphResult.Edges` exactly (Full-time metric; teleport
+classification omitted since it only labels edges, never adds or drops
+them). Each direction is a separate row (A→B and B→A are distinct).
+
+The **Edges visited** dropdown (1 / 2 / 3) groups consecutive edges
+into passes: a run of *R* residences yields *R − N* passes, each
+spanning *N* transitions. For N=1 the first column is the single origin
+loc (`From`); for N≥2 it becomes `Path` and shows the full
+`A → B → C` chain so blip sequences (e.g. `RL → MH.low → RL`) are
+visible at a glance. Columns: Time, Player, From/Path, To, Hub. The
+data is fetched once per demo and the dropdown re-groups client-side;
+the Hub link jumps a couple of seconds before the pass's first
+transition so the run-up is visible.
 
 ## Regenerating map geometry
 
