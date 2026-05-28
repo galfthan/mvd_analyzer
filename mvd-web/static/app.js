@@ -2642,7 +2642,7 @@ function resetUIToCleanState() {
     // Timeline canvases
     for (const cid of [
         'detail-graph-canvas', 'health-armor-canvas',
-        'frags-canvas', 'score-canvas',
+        'score-canvas', 'weapons-per-player-canvas',
         'powerup-canvas', 'region-control-canvas',
     ]) {
         const c = document.getElementById(cid);
@@ -2795,7 +2795,7 @@ function resetTimelineState() {
         if (el) el.innerHTML = '';
     });
     // Clear canvases
-    for (const cid of ['detail-graph-canvas', 'health-armor-canvas', 'frags-canvas', 'score-canvas']) {
+    for (const cid of ['detail-graph-canvas', 'health-armor-canvas', 'score-canvas']) {
         const c = document.getElementById(cid);
         if (c && c.getContext) {
             const ctx = c.getContext('2d');
@@ -3354,42 +3354,251 @@ function buildHASegments(td) {
     return segs;
 }
 
-// ─── Data preparation: Frags ────────────────────────────────────────────────
+// ─── Per-player drill-downs (health/armor + weapons) ─────────────────────────
+//
+// Both the Team Health/Armor and Weapons panels expand to a per-player view.
+// All series come from the columnar bucket view already on the client
+// (timelineState.bucketView.players[name], read via playerValAt/playerAliveAt)
+// plus timelineState.backpacks for weapon-drop dots — no extra data fetch.
 
-const FRAG_BIN_SIZE = 10; // seconds; fixed so bars stay put when you zoom/pan
-
-function prepFragsData(startTime, endTime, teams) {
-    const fragEvents = timelineState.fragEvents || [];
-    if (teams.length < 2) return { points: [], max: 5 };
-    // Align bins to absolute multiples of FRAG_BIN_SIZE so a given frag
-    // always falls in the same bin regardless of the current view range.
-    const firstBin = Math.floor(startTime / FRAG_BIN_SIZE) * FRAG_BIN_SIZE;
-    const lastBin  = Math.ceil(endTime  / FRAG_BIN_SIZE) * FRAG_BIN_SIZE;
-    const numBins  = Math.max(0, Math.round((lastBin - firstBin) / FRAG_BIN_SIZE));
-    if (numBins === 0) return { points: [], max: 5 };
-    const aFrags = new Float32Array(numBins);
-    const bFrags = new Float32Array(numBins);
-    for (const f of fragEvents) {
-        if (f.time < firstBin || f.time >= lastBin) continue;
-        const bin = Math.floor((f.time - firstBin) / FRAG_BIN_SIZE);
-        if (f.team === teams[0]) aFrags[bin] += (f.delta || 1);
-        else if (f.team === teams[1]) bFrags[bin] += (f.delta || 1);
+// Group the bucket-view players into [teamAPlayers, teamBPlayers] following
+// timelineState.teams order. Team membership mirrors updateTeamStatus: prefer
+// demoInfo.players, fall back to the map's playerSymbols. Players whose team
+// can't be resolved (spectators, mid-game joiners) are dropped.
+function timelinePlayersByTeam() {
+    const teams = timelineState.teams;
+    const view = timelineState.bucketView;
+    const out = [[], []];
+    if (teams.length < 2 || !view || !view.players) return out;
+    const demoPlayers = currentResult?.demoInfo?.players || [];
+    const teamOf = (name) => {
+        const dp = demoPlayers.find(p => p.name === name);
+        if (dp?.team) return dp.team;
+        return mapState.playerSymbols?.[name]?.team;
+    };
+    for (const name of Object.keys(view.players)) {
+        const t = teamOf(name);
+        const ti = t === teams[0] ? 0 : t === teams[1] ? 1 : -1;
+        if (ti < 0) continue;
+        out[ti].push(name);
     }
-    const [rA, gA, bA2] = hexToRgb(TEAM_COLORS[0]);
-    const [rB, gB, bB2] = hexToRgb(TEAM_COLORS[1]);
-    const cA = `rgba(${rA},${gA},${bA2},0.8)`;
-    const cB = `rgba(${rB},${gB},${bB2},0.8)`;
-    let maxVal = 5;
+    out[0].sort();
+    out[1].sort();
+    return out;
+}
+
+// Single-player health+armor stack for the mini chart. Health (green) at the
+// bottom, then armor coloured by its type (RA/YA/GA).
+function buildPlayerHASegments(h, a, at) {
+    const segs = [];
+    if (h > 0) segs.push({ h, color: GRAPH_COLORS.HEALTH });
+    if (a > 0) {
+        const color = at === 'ra' ? GRAPH_COLORS.RA
+                    : at === 'ga' ? GRAPH_COLORS.GA
+                    : GRAPH_COLORS.YA; // ya or unknown
+        segs.push({ h: a, color });
+    }
+    return segs;
+}
+
+function prepPlayerHAData(cp, startTime, endTime) {
+    const view = timelineState.bucketView;
+    const hrDur = timelineState.highResDuration || 0.05;
     const points = [];
-    for (let i = 0; i < numBins; i++) {
-        maxVal = Math.max(maxVal, aFrags[i], bFrags[i]);
-        points.push({
-            t: firstBin + i * FRAG_BIN_SIZE, dt: FRAG_BIN_SIZE,
-            up: [{ h: aFrags[i], color: cA }],
-            down: [{ h: bFrags[i], color: cB }],
-        });
+    if (!view || !view.count || !cp) return points;
+    const idx0 = bucketIndexAtOrAfter(view, startTime);
+    for (let i = idx0; i < view.count; i++) {
+        const bt = bucketTimeSec(view, i);
+        if (bt > endTime) break;
+        // playerValAt returns undefined when the player is dead/absent at this
+        // bucket — emit an empty stack so the chart shows a gap there.
+        const h = playerValAt(cp, 'h', i) || 0;
+        const a = playerValAt(cp, 'a', i) || 0;
+        const at = playerValAt(cp, 'at', i) || '';
+        points.push({ t: bt, dt: hrDur, up: buildPlayerHASegments(h, a, at) });
     }
-    return { points, max: maxVal };
+    return points;
+}
+
+// Compact single-direction stacked renderer for the per-player mini charts.
+// Reuses setupGraphCanvas + the scanline hold-last sampling from
+// renderDivergingGraph, but stacks upward from the baseline only and skips the
+// diverging mirror, zero divider, and x-axis (the team chart above carries it).
+function renderMiniStack(canvasId, { startTime, endTime, points, maxValue, height }) {
+    const setup = setupGraphCanvas(canvasId, height || 44);
+    if (!setup) return;
+    const { ctx, W, H, dpr } = setup;
+    const PAD = Math.round(2 * dpr);
+    const baseY = H - PAD;
+    const usableH = H - 2 * PAD;
+
+    ctx.fillStyle = PLOT_BG_COLOR;
+    ctx.fillRect(0, 0, W, H);
+
+    const duration = endTime - startTime;
+    if (duration <= 0 || !points || points.length === 0 || maxValue <= 0) return;
+
+    let cursor = -1;
+    const sampleAt = (tQuery) => {
+        while (cursor + 1 < points.length && points[cursor + 1].t <= tQuery) cursor++;
+        if (cursor < 0) return null;
+        const pt = points[cursor];
+        if (cursor === points.length - 1) {
+            const endT = pt.t + (pt.dt || 0);
+            if (endT > 0 && tQuery > endT) return null;
+        }
+        return pt;
+    };
+
+    for (let px = 0; px < W; px++) {
+        const tPx = startTime + (px / W) * duration;
+        const pt = sampleAt(tPx);
+        if (!pt || !pt.up) continue;
+        let yAcc = baseY;
+        let yPrev = Math.round(baseY);
+        for (const seg of pt.up) {
+            if (seg.h > 0) {
+                yAcc -= (seg.h / maxValue) * usableH;
+                const yCur = Math.round(yAcc);
+                const segH = yPrev - yCur;
+                if (segH > 0) {
+                    ctx.fillStyle = seg.color;
+                    ctx.fillRect(px, yCur, 1, segH);
+                }
+                yPrev = yCur;
+            }
+        }
+    }
+}
+
+// Render one mini health/armor chart per player under the Team Health/Armor
+// panel. The per-player canvases are built lazily and rebuilt only when the
+// roster changes (signature check); on every view change we just re-render.
+function renderHealthArmorPerPlayer(startTime, endTime) {
+    const container = document.getElementById('ha-per-player');
+    if (!container) return;
+    const teams = timelineState.teams;
+    const view = timelineState.bucketView;
+    if (!view || !view.count || teams.length < 2) { container.innerHTML = ''; return; }
+
+    const grouped = timelinePlayersByTeam();
+    const sig = grouped.map(g => g.join('|')).join('#');
+    if (container._sig !== sig) {
+        container.innerHTML = '';
+        container._cells = [];
+        for (let ti = 0; ti < 2; ti++) {
+            grouped[ti].forEach((name, idx) => {
+                const cid = `ha-pp-${ti}-${idx}`;
+                const cell = document.createElement('div');
+                cell.className = 'per-player-cell';
+                const label = document.createElement('div');
+                label.className = 'per-player-label';
+                label.textContent = name;
+                label.title = name;
+                label.style.color = TEAM_COLORS[ti] || '#ccc';
+                const wrap = document.createElement('div');
+                wrap.className = 'per-player-canvas-wrap';
+                const canvas = document.createElement('canvas');
+                canvas.id = cid;
+                canvas.className = 'timeline-canvas';
+                wrap.appendChild(canvas);
+                cell.appendChild(label);
+                cell.appendChild(wrap);
+                container.appendChild(cell);
+                container._cells.push({ name, cid });
+            });
+        }
+        container._sig = sig;
+    }
+
+    // Shared max across all players (rounded up) so the minis are comparable.
+    let maxVal = 300;
+    const prepped = {};
+    for (const { name } of container._cells) {
+        const pts = prepPlayerHAData(view.players[name], startTime, endTime);
+        prepped[name] = pts;
+        for (const p of pts) {
+            let s = 0;
+            for (const seg of p.up) s += seg.h;
+            if (s > maxVal) maxVal = s;
+        }
+    }
+    for (const { name, cid } of container._cells) {
+        const cv = document.getElementById(cid);
+        if (cv) cv.style.width = ''; // let the cell reflow on resize
+        renderMiniStack(cid, { startTime, endTime, points: prepped[name] || [], maxValue: maxVal, height: 44 });
+    }
+}
+
+// Per-player weapons timeline: one combined row per player coloured by whether
+// they hold RL / LG / both, with weapon-drop events as dots. Reuses
+// renderSpansTimeline (one row per player) with team-coloured labels.
+function prepPlayerWeaponSpans(cp, startTime, endTime) {
+    const view = timelineState.bucketView;
+    const spans = [];
+    if (!view || !view.count || !cp) return spans;
+    const idx0 = bucketIndexAtOrAfter(view, startTime);
+    let curState = null, curStart = startTime;
+    for (let i = idx0; i < view.count; i++) {
+        const bt = bucketTimeSec(view, i);
+        if (bt > endTime) break;
+        let state = null;
+        if (playerAliveAt(cp, i)) {
+            const rl = !!playerValAt(cp, 'rl', i);
+            const lg = !!playerValAt(cp, 'lg', i);
+            if (rl && lg) state = 'rllg';
+            else if (rl) state = 'rl';
+            else if (lg) state = 'lg';
+        }
+        if (state !== curState) {
+            if (curState) spans.push({ start: curStart, end: bt, state: curState });
+            curState = state;
+            curStart = bt;
+        }
+    }
+    if (curState) spans.push({ start: curStart, end: endTime, state: curState });
+    return spans;
+}
+
+function renderWeaponsPerPlayer(startTime, endTime) {
+    const labelsEl = document.getElementById('weapons-per-player-labels');
+    if (!labelsEl) return;
+    const teams = timelineState.teams;
+    const view = timelineState.bucketView;
+    if (!view || !view.count || teams.length < 2) { labelsEl.innerHTML = ''; return; }
+
+    const grouped = timelinePlayersByTeam();
+    const rows = [];
+    const rowPlayers = [];
+    for (let ti = 0; ti < 2; ti++) {
+        for (const name of grouped[ti]) {
+            rows.push({
+                name,
+                color: TEAM_COLORS[ti] || '#ccc',
+                spans: prepPlayerWeaponSpans(view.players[name], startTime, endTime),
+            });
+            rowPlayers.push(name);
+        }
+    }
+    if (rows.length === 0) { labelsEl.innerHTML = ''; return; }
+
+    const dropMarks = [];
+    for (const d of (timelineState.backpacks || [])) {
+        if (d.time < startTime || d.time > endTime) continue;
+        const row = rowPlayers.indexOf(d.player);
+        if (row < 0) continue;
+        const color = d.weapon === 'rl' ? GRAPH_COLORS.RL
+                    : d.weapon === 'lg' ? GRAPH_COLORS.LG
+                    : null;
+        if (!color) continue;
+        dropMarks.push({ row, time: d.time, color });
+    }
+
+    renderSpansTimeline('weapons-per-player-canvas', 'weapons-per-player-labels', {
+        startTime, endTime, rows,
+        stateColors: { rl: GRAPH_COLORS.RL, lg: GRAPH_COLORS.LG, rllg: GRAPH_COLORS.RLLG },
+        dropMarks,
+    });
 }
 
 // ─── Data preparation: Score ────────────────────────────────────────────────
@@ -3652,13 +3861,31 @@ function setupUnifiedTimeline() {
 
     // --- Pan/zoom on every diverging graph + spans timelines ---
     ['detail-graph-canvas', 'powerup-canvas', 'region-control-canvas',
-     'health-armor-canvas', 'frags-canvas', 'score-canvas'].forEach(installGraphPanZoom);
+     'health-armor-canvas', 'score-canvas'].forEach(installGraphPanZoom);
 
     // --- Hover tooltip on weapon-graph drop dots ---
     attachWeaponGraphTooltip();
 
     // --- Hover tooltip on powerup-timeline spans ---
     attachPowerupTimelineTooltip();
+
+    // --- Per-player drill-down toggles: render on first open (and on every
+    // re-open) at the current view range. Subsequent view changes re-render
+    // via updateDetailGraph / updateHealthArmorGraph while the panel is open.
+    const haDet = document.getElementById('ha-per-player-details');
+    if (haDet && !haDet._toggleWired) {
+        haDet._toggleWired = true;
+        haDet.addEventListener('toggle', () => {
+            if (haDet.open) renderHealthArmorPerPlayer(...currentViewRange());
+        });
+    }
+    const wpDet = document.getElementById('weapons-per-player-details');
+    if (wpDet && !wpDet._toggleWired) {
+        wpDet._toggleWired = true;
+        wpDet.addEventListener('toggle', () => {
+            if (wpDet.open) renderWeaponsPerPlayer(...currentViewRange());
+        });
+    }
 
     // --- Window resize: detail-panel canvases are sized in pixels from
     // container.clientWidth, so they don't reflow with the viewport on
@@ -3673,7 +3900,7 @@ function setupUnifiedTimeline() {
 
 const TIMELINE_CANVAS_IDS = [
     'detail-graph-canvas', 'powerup-canvas', 'region-control-canvas',
-    'health-armor-canvas', 'frags-canvas', 'score-canvas',
+    'health-armor-canvas', 'score-canvas', 'weapons-per-player-canvas',
 ];
 
 let _timelineResizeRafId = null;
@@ -3792,7 +4019,6 @@ function updateTimeIndicators() {
         'powerup-time-indicator',
         'region-time-indicator',
         'health-time-indicator',
-        'frags-time-indicator',
         'score-time-indicator'
     ];
 
@@ -3831,13 +4057,14 @@ function updateDetailView() {
         document.getElementById('time-range-label').textContent = '';
     }
 
-    // Update all detail panels (axes are drawn on canvas by the unified renderer)
+    // Update all detail panels (axes are drawn on canvas by the unified
+    // renderer). Order mirrors the DOM: score, health/armor, weapons, then
+    // the optional span timelines.
+    updateScoreTimeline(start, end);
+    updateHealthArmorGraph(start, end);
     updateDetailGraph(start, end);
     updatePowerupTimeline(start, end);
     updateRegionControlTimeline(start, end);
-    updateHealthArmorGraph(start, end);
-    updateFragsGraph(start, end);
-    updateScoreTimeline(start, end);
 }
 
 // ─── Chat Tab ──────────────────────────────────────────────────────────────
@@ -4027,6 +4254,10 @@ function updateDetailGraph(startTime, endTime) {
     weaponGraphHitState.endTime   = endTime;
     weaponGraphHitState.W         = canvas ? canvas.clientWidth : 0;
     weaponGraphHitState.dropMarks = dropMarks;
+
+    if (document.getElementById('weapons-per-player-details')?.open) {
+        renderWeaponsPerPlayer(startTime, endTime);
+    }
 }
 
 // Mousemove tooltip on the weapon-graph canvas: highlights the drop
@@ -4107,20 +4338,10 @@ function updateHealthArmorGraph(startTime, endTime) {
         startTime, endTime, dataPoints: points, maxValue: max,
         yAxisId: 'health-y-axis',
     });
-}
 
-function updateFragsGraph(startTime, endTime) {
-    const teams = timelineState.teams;
-    if (teams.length < 2) return;
-    const { points, max } = prepFragsData(startTime, endTime, teams);
-    const legendA = document.getElementById('legend-frags-team-a');
-    const legendB = document.getElementById('legend-frags-team-b');
-    if (legendA) legendA.textContent = `${teams[0]} ↑`;
-    if (legendB) legendB.textContent = `${teams[1]} ↓`;
-    renderDivergingGraph('frags-canvas', {
-        startTime, endTime, dataPoints: points, maxValue: max,
-        yAxisId: 'frags-y-axis',
-    });
+    if (document.getElementById('ha-per-player-details')?.open) {
+        renderHealthArmorPerPlayer(startTime, endTime);
+    }
 }
 
 function updateScoreTimeline(startTime, endTime) {
@@ -4193,7 +4414,10 @@ function prepRegionControlData(startTime, endTime, teams) {
 // {start, end, state} spans; stateColors maps state strings to fill
 // colors. Used by both the region-control timeline and the powerup
 // timeline so they share one renderer instead of two near-copies.
-function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, stateColors }) {
+// dropMarks (optional): [{row, time, color}] — small dots painted in a
+// row, e.g. weapon-drop events on the per-player weapons timeline. Callers
+// that don't pass it (powerups, region control) render unchanged.
+function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, stateColors, dropMarks }) {
     const labelsEl = document.getElementById(labelsId);
     if (!labelsEl) return;
     const setup = setupGraphCanvas(canvasId, rows.length * RC_ROW_H + RC_AXIS_H);
@@ -4211,6 +4435,7 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
         lab.className = 'region-timeline-label';
         lab.style.height = RC_ROW_H + 'px';
         lab.style.lineHeight = RC_ROW_H + 'px';
+        if (r.color) lab.style.color = r.color;
         lab.textContent = r.name;
         lab.title = r.name;
         labelsEl.appendChild(lab);
@@ -4236,6 +4461,19 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
             ctx.fillRect(x1, y + ROW_PAD, w, ROW_H - 2 * ROW_PAD);
         }
     });
+
+    if (dropMarks && dropMarks.length) {
+        const dotR = 3 * dpr;
+        for (const m of dropMarks) {
+            const x = ((m.time - startTime) / duration) * W;
+            if (x < -dotR || x > W + dotR) continue;
+            const y = m.row * ROW_H + ROW_H / 2;
+            ctx.fillStyle = m.color;
+            ctx.beginPath();
+            ctx.arc(x, y, dotR, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
 
     drawXAxisTicks(ctx, { W, Wcss, dpr, graphH, startTime, endTime });
 }

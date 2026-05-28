@@ -1570,6 +1570,52 @@ table tbody tr:hover {
     bottom: 0;
 }
 
+/* Per-player drill-downs under the Team Health/Armor + Weapons panels */
+.per-player-detail {
+    margin-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 6px;
+}
+
+.per-player-detail > summary {
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #aaa;
+    user-select: none;
+}
+
+.per-player-detail > summary:hover {
+    color: #ddd;
+}
+
+.per-player-detail[open] > summary {
+    margin-bottom: 8px;
+}
+
+/* Health/armor minis: responsive grid of small stacked charts */
+.per-player-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+}
+
+.per-player-cell {
+    min-width: 0;
+}
+
+.per-player-label {
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.per-player-canvas-wrap {
+    position: relative;
+    width: 100%;
+}
+
 /* Loc Heatmap */
 .locheatmap-desc {
     font-size: 0.75rem;
