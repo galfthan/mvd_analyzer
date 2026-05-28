@@ -1592,28 +1592,37 @@ table tbody tr:hover {
     margin-bottom: 8px;
 }
 
-/* Health/armor minis: responsive grid of small stacked charts */
+/* Health/armor minis: full-width rows stacked vertically, matching the
+   per-player weapons layout (label column + full-width canvas). */
 .per-player-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .per-player-cell {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
     min-width: 0;
 }
 
 .per-player-label {
-    font-size: 0.7rem;
+    min-width: 80px;
+    max-width: 80px;
+    font-size: 0.75rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: 2px;
+    text-align: right;
+    padding-right: 6px;
+    align-self: center;
 }
 
 .per-player-canvas-wrap {
     position: relative;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
 }
 
 /* Loc Heatmap */
