@@ -20,6 +20,7 @@ mvd-api version
 |---|---|---|
 | `-addr`        | `:8080`                                 | Listen address |
 | `-cache-dir`   | `$XDG_CACHE_HOME/qw-mvd` or `~/.cache/qw-mvd` | On-disk cache root |
+| `-maps-dir`    | _(empty)_                               | Directory of per-map geometry JSON for `/v1/maps/{map}/geometry`; empty disables that endpoint (ship `dist/maps/` next to the binary to enable) |
 | `-log-format`  | `text`                                  | Access log format: `text` or `json` |
 
 Schema bumps in `mvd-analytics` invalidate the parsed-`Result` tier
@@ -59,6 +60,7 @@ Send `If-None-Match` to get a cheap 304.
 | GET | `/v1/demos/{id}/chat` | `from`, `to`, `players`, `types` | `[]result.MatchEvent` (chat + teamsay only; types defaults to both) |
 | GET | `/v1/demos/{id}/backpacks` | `players`, `weapon` | `[]result.BackpackDrop` (RL/LG drops via `//ktx drop`) |
 | GET | `/v1/demos/{id}/items` | `items`, `players`, `kinds` | `result.ItemsResult` (per-item pickup/respawn timeline) |
+| GET | `/v1/demos/{id}/map-entities` | `types`, `kinds` | `result.MapEntitiesResult` (static map layout: item spawns, spawnpoints, teleporters, buttons) |
 | GET | `/v1/demos/{id}/weapon-pickups` | `players`, `weapon`, `source` | `[]result.WeaponPickup` (kills-before-next-death; joins to backpacks via `backpackEnt`) |
 | GET | `/v1/demos/{id}/buckets` | `windowMs`, `from`, `to`, `players`, `fields`, `reducers`, `includeTeam`, `loc`, `layout` | `view.ColumnarBuckets` (`layout=column`, default) or `view.BucketsView` (`layout=row`) |
 | GET | `/v1/demos/{id}/events` | `from`, `to`, `players`, `types`, `loc` | `view.EventsView` |
@@ -67,6 +69,8 @@ Send `If-None-Match` to get a cheap 304.
 | GET | `/v1/demos/{id}/loc-trails` | `from`, `to`, `players`, `minDwellMs`, `loc` | `view.LocTrailsView` |
 | GET | `/v1/demos/{id}/loc-table` | — | `{ "locTable": []string }` (decoder for `loc=index`; index 0 = "" no-loc) |
 | GET | `/v1/demos/{id}/region-control` | `windowMs` | `result.RegionControlResult` |
+| GET | `/v1/maps/{map}/entities` | `types`, `kinds` | `result.MapEntitiesResult` (static layout by map name, no demo needed) |
+| GET | `/v1/maps/{map}/geometry` | — | `mapgeom.MapRegions` floor-polygon JSON (needs `-maps-dir`; REST-only) |
 
 ### Details → [`API.md`](API.md)
 
@@ -115,7 +119,7 @@ tier 2. There is no automatic eviction; documented as a follow-up
 mvd-api -addr :8080 -cache-dir /tmp/mvd-cache &
 
 curl -s localhost:8080/healthz
-# {"ok":true,"schemaVersion":12}
+# {"ok":true,"schemaVersion":13}
 
 curl -s -X POST localhost:8080/v1/demos/gameId:12345
 # first call:  fromCache:false
