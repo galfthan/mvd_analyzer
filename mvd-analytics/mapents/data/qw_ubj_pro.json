@@ -1,0 +1,23 @@
+{
+ "map": "qw_ubj_pro",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 256,
+   "y": 128,
+   "z": 128
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 256,
+   "y": 80,
+   "z": 128,
+   "targetName": "start"
+  }
+ ]
+}

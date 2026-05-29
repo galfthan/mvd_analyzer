@@ -1,0 +1,94 @@
+{
+ "map": "trix2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": 304,
+   "y": 0,
+   "z": -32
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 304,
+   "y": 0,
+   "z": -32
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 32,
+   "y": -1728,
+   "z": 416,
+   "targetName": "ftele4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 32,
+   "y": -1152,
+   "z": 416,
+   "targetName": "ftele3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 32,
+   "y": -576,
+   "z": 416,
+   "targetName": "ftele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 32,
+   "y": 0,
+   "z": 416,
+   "targetName": "ftele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 304,
+   "y": -1728,
+   "z": -32,
+   "targetName": "tele4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": 304,
+   "y": -1152,
+   "z": -32,
+   "targetName": "tele3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": 304,
+   "y": -576,
+   "z": -32,
+   "targetName": "tele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": 304,
+   "y": 0,
+   "z": -32,
+   "targetName": "tele1"
+  }
+ ]
+}

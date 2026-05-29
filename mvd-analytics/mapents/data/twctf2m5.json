@@ -1,0 +1,1228 @@
+{
+ "map": "twctf2m5",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE INNER BASE",
+   "x": 354,
+   "y": 2742,
+   "z": 168,
+   "loc": "BLUE INNER BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE RL AREA-1",
+   "x": -120,
+   "y": 1352,
+   "z": 192,
+   "loc": "BLUE RL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE RL AREA-2",
+   "x": 1192,
+   "y": 1352,
+   "z": 192,
+   "loc": "BLUE RL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED INNER BASE",
+   "x": 688,
+   "y": -1544,
+   "z": 168,
+   "loc": "RED INNER BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED RL AREA-1",
+   "x": -128,
+   "y": -152,
+   "z": 192,
+   "loc": "RED RL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED RL AREA-2",
+   "x": 1192,
+   "y": -152,
+   "z": 192,
+   "loc": "RED RL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "666 ROOM",
+   "x": 528,
+   "y": 514,
+   "z": 646,
+   "loc": "666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE CORRIDOR TO EYES",
+   "x": 530,
+   "y": 778,
+   "z": 642,
+   "loc": "BLUE CORRIDOR TO EYES"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE OUTER BASE AREA",
+   "x": 528,
+   "y": 2520,
+   "z": 432,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED OUTER BASE AREA",
+   "x": 528,
+   "y": -1248,
+   "z": 432,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE CORRIDOR TO 666",
+   "x": 256,
+   "y": 640,
+   "z": 496,
+   "loc": "BLUE CORRIDOR TO 666"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE INNER BASE-1",
+   "x": 352,
+   "y": 2832,
+   "z": 176,
+   "loc": "BLUE INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE INNER BASE-2",
+   "x": 480,
+   "y": 2624,
+   "z": 416,
+   "loc": "BLUE INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE INNER BASE-3",
+   "x": 552,
+   "y": 2624,
+   "z": 416,
+   "loc": "BLUE INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE INNER BASE-4",
+   "x": 696,
+   "y": 2832,
+   "z": 176,
+   "loc": "BLUE INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE LEFT CORRIDOR TO RL AREA",
+   "x": 792,
+   "y": 1816,
+   "z": 168,
+   "loc": "BLUE LEFT CORRIDOR TO RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE OUTER BASE AREA-1",
+   "x": 88,
+   "y": 2264,
+   "z": 153,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE OUTER BASE AREA-2",
+   "x": 136,
+   "y": 2479,
+   "z": 324,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE OUTER BASE AREA-3",
+   "x": 913,
+   "y": 2479,
+   "z": 322,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE OUTER BASE AREA-4",
+   "x": 936,
+   "y": 2280,
+   "z": 152,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE RL AREA",
+   "x": 528,
+   "y": 1525,
+   "z": 212,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE SIDE WATER ENTRANCE AT CENTRE",
+   "x": 512,
+   "y": 928,
+   "z": -104,
+   "loc": "BLUE SIDE WATER ENTRANCE AT CENTRE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BRIDGE AT CENTRE-1",
+   "x": 136,
+   "y": 640,
+   "z": 135,
+   "loc": "BRIDGE AT CENTRE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BRIDGE AT CENTRE-2",
+   "x": 945,
+   "y": 641,
+   "z": 133,
+   "loc": "BRIDGE AT CENTRE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED CORRIDOR TO EYES",
+   "x": 848,
+   "y": 624,
+   "z": 524,
+   "loc": "RED CORRIDOR TO EYES"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED INNER BASE-1",
+   "x": 355,
+   "y": -1616,
+   "z": 171,
+   "loc": "RED INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED INNER BASE-2",
+   "x": 480,
+   "y": -1416,
+   "z": 416,
+   "loc": "RED INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED INNER BASE-3",
+   "x": 555,
+   "y": -1415,
+   "z": 416,
+   "loc": "RED INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED INNER BASE-4",
+   "x": 688,
+   "y": -1616,
+   "z": 176,
+   "loc": "RED INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED OUTER BASE",
+   "x": 914,
+   "y": -1264,
+   "z": 332,
+   "loc": "RED OUTER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED OUTER BASE AREA-1",
+   "x": 104,
+   "y": -1160,
+   "z": 152,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED OUTER BASE AREA-2",
+   "x": 141,
+   "y": -1265,
+   "z": 333,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED RIGHT CORRIDOR TO RL AREA",
+   "x": 792,
+   "y": -616,
+   "z": 200,
+   "loc": "RED RIGHT CORRIDOR TO RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED RIGHT WIND TUNNEL",
+   "x": 936,
+   "y": -1144,
+   "z": 168,
+   "loc": "RED RIGHT WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED RL AREA",
+   "x": 528,
+   "y": -296,
+   "z": 191,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED SIDE WATER ENTRANCE AT CENTRE",
+   "x": 512,
+   "y": 304,
+   "z": -72,
+   "loc": "RED SIDE WATER ENTRANCE AT CENTRE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "BLUE LG",
+   "x": 1032,
+   "y": 1168,
+   "z": 524,
+   "loc": "BLUE LG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "RED LG",
+   "x": 48,
+   "y": 48,
+   "z": 520,
+   "loc": "RED LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "100 HEALTH IN WATER",
+   "x": 692,
+   "y": 628,
+   "z": -110,
+   "loc": "100 HEALTH IN WATER",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE CORRIDOR TO EYES",
+   "x": 528,
+   "y": 1456,
+   "z": 434,
+   "loc": "BLUE CORRIDOR TO EYES"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE FLAG AREA-1",
+   "x": 416,
+   "y": 3064,
+   "z": 272,
+   "loc": "BLUE FLAG AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE FLAG AREA-2",
+   "x": 648,
+   "y": 3064,
+   "z": 272,
+   "loc": "BLUE FLAG AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE OUTER BASE AREA-1",
+   "x": 496,
+   "y": 2144,
+   "z": 144,
+   "loc": "BLUE OUTER BASE AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE OUTER BASE AREA-2",
+   "x": 544,
+   "y": 2144,
+   "z": 144,
+   "loc": "BLUE OUTER BASE AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED CORRIDOR TO 666",
+   "x": 512,
+   "y": -240,
+   "z": 437,
+   "loc": "RED CORRIDOR TO 666"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED FLAG AREA-1",
+   "x": 397,
+   "y": -1866,
+   "z": 312,
+   "loc": "RED FLAG AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED FLAG AREA-2",
+   "x": 638,
+   "y": -1863,
+   "z": 313,
+   "loc": "RED FLAG AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED OUTER BASE AREA-1",
+   "x": 496,
+   "y": -936,
+   "z": 160,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED OUTER BASE AREA-2",
+   "x": 544,
+   "y": -936,
+   "z": 160,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE CORRIDOR TO EYES",
+   "x": 528,
+   "y": 1824,
+   "z": 432,
+   "loc": "BLUE CORRIDOR TO EYES"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED CORRIDOR TO 666",
+   "x": 528,
+   "y": -613,
+   "z": 432,
+   "loc": "RED CORRIDOR TO 666"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "666 ROOM",
+   "x": 528,
+   "y": 612,
+   "z": 639,
+   "loc": "666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "BLUE Quad AREA",
+   "x": 528,
+   "y": 1536,
+   "z": 535,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "RED Quad AREA",
+   "x": 528,
+   "y": -320,
+   "z": 528,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RED ARMOUR IN WATER",
+   "x": 344,
+   "y": 639,
+   "z": -102,
+   "loc": "RED ARMOUR IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "666 ROOM",
+   "x": 524,
+   "y": 665,
+   "z": 643,
+   "loc": "666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "BLUE RL AREA",
+   "x": 530,
+   "y": 1384,
+   "z": 202,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RED RL AREA",
+   "x": 528,
+   "y": -160,
+   "z": 203,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE INNER BASE",
+   "x": 516,
+   "y": 2618,
+   "z": 416,
+   "loc": "BLUE INNER BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE OUTER BASE AREA-1",
+   "x": 238,
+   "y": 2512,
+   "z": 176,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE OUTER BASE AREA-2",
+   "x": 816,
+   "y": 2512,
+   "z": 200,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE RIGHT CORRIDOR TO RL AREA",
+   "x": 252,
+   "y": 1811,
+   "z": 175,
+   "loc": "BLUE RIGHT CORRIDOR TO RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED INNER BASE",
+   "x": 518,
+   "y": -1415,
+   "z": 416,
+   "loc": "RED INNER BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED LEFT CORRIDOR TO RL AREA",
+   "x": 240,
+   "y": -624,
+   "z": 204,
+   "loc": "RED LEFT CORRIDOR TO RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED OUTER BASE AREA",
+   "x": 208,
+   "y": -1312,
+   "z": 184,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED RIGHT WIND TUNNEL",
+   "x": 816,
+   "y": -1312,
+   "z": 176,
+   "loc": "RED RIGHT WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE INNER BASE",
+   "x": 696,
+   "y": 2752,
+   "z": 193,
+   "loc": "BLUE INNER BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE LEFT WIND TUNNEL",
+   "x": 933,
+   "y": 2320,
+   "z": -16,
+   "loc": "BLUE LEFT WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE OUTER BASE AREA-1",
+   "x": 496,
+   "y": 2192,
+   "z": 160,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE OUTER BASE AREA-2",
+   "x": 544,
+   "y": 2192,
+   "z": 160,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE RIGHT WIND TUNNEL",
+   "x": 96,
+   "y": 2320,
+   "z": -22,
+   "loc": "BLUE RIGHT WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED INNER BASE",
+   "x": 352,
+   "y": -1544,
+   "z": 188,
+   "loc": "RED INNER BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED LEFT WIND TUNNEL",
+   "x": 96,
+   "y": -1136,
+   "z": -27,
+   "loc": "RED LEFT WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED OUTER BASE AREA-1",
+   "x": 496,
+   "y": -976,
+   "z": 176,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED OUTER BASE AREA-2",
+   "x": 544,
+   "y": -976,
+   "z": 176,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED RIGHT WIND TUNNEL",
+   "x": 928,
+   "y": -1136,
+   "z": -19,
+   "loc": "RED RIGHT WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "100 HEALTH IN WATER",
+   "x": 528,
+   "y": 640,
+   "z": -104,
+   "loc": "100 HEALTH IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE INNER BASE",
+   "x": 528,
+   "y": 2704,
+   "z": 400,
+   "loc": "BLUE INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE WATER ENTRANCE NEAR SNG",
+   "x": 528,
+   "y": 2508,
+   "z": -24,
+   "loc": "BLUE WATER ENTRANCE NEAR SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RED INNER BASE",
+   "x": 528,
+   "y": -1488,
+   "z": 400,
+   "loc": "RED INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RED WATER ENTRANCE NEAR SNG",
+   "x": 528,
+   "y": -1291,
+   "z": -22,
+   "loc": "RED WATER ENTRANCE NEAR SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE OUTER BASE AREA-1",
+   "x": 115,
+   "y": 2356,
+   "z": 150,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE OUTER BASE AREA-2",
+   "x": 944,
+   "y": 2352,
+   "z": 148,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE SIDE CENTRAL AREA",
+   "x": 530,
+   "y": 1168,
+   "z": 176,
+   "loc": "BLUE SIDE CENTRAL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED OUTER BASE AREA-1",
+   "x": 111,
+   "y": -1070,
+   "z": 150,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED OUTER BASE AREA-2",
+   "x": 965,
+   "y": -1072,
+   "z": 144,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED SIDE CENTRAL AREA",
+   "x": 528,
+   "y": 64,
+   "z": 176,
+   "loc": "RED SIDE CENTRAL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE INNER BASE",
+   "x": 528,
+   "y": 2816,
+   "z": 192,
+   "loc": "BLUE INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE LEFT CORRIDOR TO RL AREA",
+   "x": 524,
+   "y": 1485,
+   "z": 16,
+   "loc": "BLUE LEFT CORRIDOR TO RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RED INNER BASE",
+   "x": 523,
+   "y": -1600,
+   "z": 187,
+   "loc": "RED INNER BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YELLOW ARMOUR (RED SIDE IN WATER TUNNEL)",
+   "x": 528,
+   "y": -288,
+   "z": 0,
+   "loc": "YELLOW ARMOUR (RED SIDE IN WATER TUNNEL)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "100 HEALTH IN WATER",
+   "x": 527,
+   "y": 643,
+   "z": -73,
+   "loc": "100 HEALTH IN WATER"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE CORRIDOR TO 666",
+   "x": 168,
+   "y": 640,
+   "z": 530,
+   "loc": "BLUE CORRIDOR TO 666"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE FLAG AREA-1",
+   "x": 341,
+   "y": 3079,
+   "z": 462,
+   "loc": "BLUE FLAG AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE FLAG AREA-2",
+   "x": 711,
+   "y": 3078,
+   "z": 462,
+   "loc": "BLUE FLAG AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE INNER BASE-1",
+   "x": 528,
+   "y": 2704,
+   "z": 208,
+   "loc": "BLUE INNER BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE INNER BASE-2",
+   "x": 530,
+   "y": 2656,
+   "z": 172,
+   "loc": "BLUE INNER BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE OUTER BASE AREA-1",
+   "x": 105,
+   "y": 2480,
+   "z": 360,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE OUTER BASE AREA-2",
+   "x": 528,
+   "y": 2240,
+   "z": 180,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE OUTER BASE AREA-3",
+   "x": 528,
+   "y": 2432,
+   "z": 456,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE OUTER BASE AREA-4",
+   "x": 530,
+   "y": 2302,
+   "z": 413,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE OUTER BASE AREA-5",
+   "x": 958,
+   "y": 2480,
+   "z": 364,
+   "loc": "BLUE OUTER BASE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE RIGHT WIND TUNNEL",
+   "x": 147,
+   "y": 2336,
+   "z": -8,
+   "loc": "BLUE RIGHT WIND TUNNEL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE RL AREA",
+   "x": 888,
+   "y": 1352,
+   "z": 240,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE RL AREA (UPPER RAFTERS)",
+   "x": 533,
+   "y": 1328,
+   "z": 440,
+   "loc": "BLUE RL AREA (UPPER RAFTERS)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE SIDE CENTRAL AREA",
+   "x": 208,
+   "y": 1168,
+   "z": 228,
+   "loc": "BLUE SIDE CENTRAL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE WATER ENTRANCE NEAR SNG",
+   "x": 527,
+   "y": 2448,
+   "z": -16,
+   "loc": "BLUE WATER ENTRANCE NEAR SNG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "BRIDGE AT CENTRE",
+   "x": 864,
+   "y": 160,
+   "z": 189,
+   "loc": "BRIDGE AT CENTRE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED CORRIDOR TO EYES",
+   "x": 906,
+   "y": 643,
+   "z": 530,
+   "loc": "RED CORRIDOR TO EYES"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED INNER BASE-1",
+   "x": 352,
+   "y": -1664,
+   "z": 400,
+   "loc": "RED INNER BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED INNER BASE-2",
+   "x": 524,
+   "y": -1456,
+   "z": 167,
+   "loc": "RED INNER BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED INNER BASE-3",
+   "x": 528,
+   "y": -1504,
+   "z": 203,
+   "loc": "RED INNER BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED INNER BASE-4",
+   "x": 704,
+   "y": -1664,
+   "z": 400,
+   "loc": "RED INNER BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED LEFT WIND TUNNEL",
+   "x": 144,
+   "y": -1123,
+   "z": -9,
+   "loc": "RED LEFT WIND TUNNEL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED OUTER BASE",
+   "x": 941,
+   "y": -1264,
+   "z": 384,
+   "loc": "RED OUTER BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED OUTER BASE AREA-1",
+   "x": 99,
+   "y": -1264,
+   "z": 392,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED OUTER BASE AREA-2",
+   "x": 527,
+   "y": -1200,
+   "z": 472,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED OUTER BASE AREA-3",
+   "x": 528,
+   "y": -1016,
+   "z": 162,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED OUTER BASE AREA-4",
+   "x": 532,
+   "y": -1083,
+   "z": 418,
+   "loc": "RED OUTER BASE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED RL AREA",
+   "x": 180,
+   "y": -144,
+   "z": 320,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED RL AREA (UPPER RAFTERS)-1",
+   "x": 527,
+   "y": -96,
+   "z": 536,
+   "loc": "RED RL AREA (UPPER RAFTERS)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED RL AREA (UPPER RAFTERS)-2",
+   "x": 530,
+   "y": -159,
+   "z": 443,
+   "loc": "RED RL AREA (UPPER RAFTERS)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED SIDE CENTRAL AREA",
+   "x": 880,
+   "y": 64,
+   "z": 228,
+   "loc": "RED SIDE CENTRAL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED WATER ENTRANCE NEAR SNG",
+   "x": 530,
+   "y": -1233,
+   "z": -11,
+   "loc": "RED WATER ENTRANCE NEAR SNG"
+  }
+ ]
+}

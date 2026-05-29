@@ -1,0 +1,81 @@
+{
+ "map": "e1m2ga",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "ga",
+   "x": 1648,
+   "y": 936,
+   "z": 784
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 1656,
+   "y": 672,
+   "z": 800
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 1664,
+   "y": 1260,
+   "z": 806
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 1865.07,
+   "y": 1620,
+   "z": 800
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-4",
+   "x": 2064,
+   "y": 1616,
+   "z": 792
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 2296,
+   "y": 672,
+   "z": 800
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 2312,
+   "y": 1280,
+   "z": 800
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 1648,
+   "y": 752,
+   "z": 778,
+   "targetName": "tele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 2112,
+   "y": 1536,
+   "z": 770,
+   "targetName": "tele1"
+  }
+ ]
+}

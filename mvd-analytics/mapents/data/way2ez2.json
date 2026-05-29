@@ -1,0 +1,119 @@
+{
+ "map": "way2ez2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": 2224,
+   "y": -888,
+   "z": -264
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 2280,
+   "y": -884,
+   "z": -264
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 2336,
+   "y": -880,
+   "z": -264
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 2396,
+   "y": -880,
+   "z": -264
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -2312,
+   "y": -88,
+   "z": 600,
+   "targetName": "tele4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -1696,
+   "y": 712,
+   "z": -672,
+   "targetName": "tele6"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -1632,
+   "y": 480,
+   "z": 864,
+   "targetName": "tele5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": -1268,
+   "y": 984,
+   "z": -588,
+   "targetName": "tele7"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": -1152,
+   "y": 1632,
+   "z": -2624,
+   "targetName": "tele9"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": -1088,
+   "y": 1184,
+   "z": -264,
+   "targetName": "tele8"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": -952,
+   "y": 104,
+   "z": 608,
+   "targetName": "tele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": 1408,
+   "y": 104,
+   "z": 576,
+   "targetName": "tele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-9",
+   "x": 2464,
+   "y": -848,
+   "z": -192,
+   "targetName": "tele3"
+  }
+ ]
+}

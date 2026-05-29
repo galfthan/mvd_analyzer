@@ -1,0 +1,78 @@
+{
+ "map": "pyramidair",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 688,
+   "y": 1200,
+   "z": 764
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 688,
+   "y": 2640,
+   "z": 764
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-3",
+   "x": 976,
+   "y": 2160,
+   "z": 672
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 1120,
+   "y": 1920,
+   "z": 672
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 1440,
+   "y": 1600,
+   "z": 672
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 1440,
+   "y": 2240,
+   "z": 672
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 1760,
+   "y": 1920,
+   "z": 672
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 2128,
+   "y": 1200,
+   "z": 764
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": 2128,
+   "y": 2640,
+   "z": 764
+  }
+ ]
+}

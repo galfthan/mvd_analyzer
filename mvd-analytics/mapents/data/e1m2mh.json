@@ -1,0 +1,81 @@
+{
+ "map": "e1m2mh",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25",
+   "x": 176,
+   "y": -376,
+   "z": -72
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -128,
+   "y": -512,
+   "z": -216
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 64,
+   "y": 48,
+   "z": -216
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-3",
+   "x": 192,
+   "y": -880,
+   "z": -152
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 192,
+   "y": -512,
+   "z": -216
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 320,
+   "y": 48,
+   "z": -216
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 528,
+   "y": -512,
+   "z": -216
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -40,
+   "y": -564,
+   "z": -60,
+   "targetName": "t75"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 420,
+   "y": -560,
+   "z": -60,
+   "targetName": "t74"
+  }
+ ]
+}

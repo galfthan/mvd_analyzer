@@ -1,0 +1,192 @@
+{
+ "map": "qw_urj_pro",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "gl",
+   "x": 608,
+   "y": 2560,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl",
+   "x": 1600,
+   "y": -1024,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 1344,
+   "y": -1088,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-10",
+   "x": 1792,
+   "y": -1024,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-11",
+   "x": 1856,
+   "y": -1088,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-12",
+   "x": 1856,
+   "y": -1024,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 1344,
+   "y": -1024,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 1408,
+   "y": -1088,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 1408,
+   "y": -1024,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 1472,
+   "y": -1088,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 1472,
+   "y": -1024,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 1728,
+   "y": -1088,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 1728,
+   "y": -1024,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": 1792,
+   "y": -1088,
+   "z": -448
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 608,
+   "y": 2368,
+   "z": -416,
+   "targetName": "target8"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 1408,
+   "y": 1088,
+   "z": -416,
+   "targetName": "target4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 1600,
+   "y": -976,
+   "z": -448,
+   "targetName": "target1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 1664,
+   "y": 2048,
+   "z": -416,
+   "targetName": "target7"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 1744,
+   "y": 448,
+   "z": -416,
+   "targetName": "target2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": 1792,
+   "y": 448,
+   "z": -416,
+   "targetName": "target3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": 2080,
+   "y": 1408,
+   "z": -448,
+   "targetName": "target5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": 2208,
+   "y": 2112,
+   "z": -416,
+   "targetName": "target6"
+  }
+ ]
+}

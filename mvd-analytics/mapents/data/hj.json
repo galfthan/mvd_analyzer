@@ -1,0 +1,100 @@
+{
+ "map": "hj",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -2176,
+   "y": 3488,
+   "z": 416
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -1952,
+   "y": 3488,
+   "z": 416
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -1728,
+   "y": 3488,
+   "z": 416
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -1504,
+   "y": 3488,
+   "z": 416
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -1280,
+   "y": 3488,
+   "z": 416
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3264,
+   "y": 2624,
+   "z": 36,
+   "targetName": "s1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -2496,
+   "y": 1888,
+   "z": 0,
+   "targetName": "hop"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -2252,
+   "y": 2816,
+   "z": 20,
+   "targetName": "s2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": -1228,
+   "y": 2816,
+   "z": 76,
+   "targetName": "s3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 128,
+   "y": 2356,
+   "z": 4,
+   "targetName": "s4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": 1152,
+   "y": 2368,
+   "z": -352,
+   "targetName": "s5"
+  }
+ ]
+}

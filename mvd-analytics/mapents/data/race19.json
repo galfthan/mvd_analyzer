@@ -1,0 +1,38 @@
+{
+ "map": "race19",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 1576,
+   "y": -4800,
+   "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 1664,
+   "y": -4880,
+   "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-3",
+   "x": 1664,
+   "y": -4800,
+   "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 1752,
+   "y": -4800,
+   "z": 24
+  }
+ ]
+}

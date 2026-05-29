@@ -1,0 +1,1278 @@
+{
+ "map": "ctf2m6",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "blue base",
+   "x": 400,
+   "y": -2960,
+   "z": 280,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "red base",
+   "x": 400,
+   "y": 3056,
+   "z": 280,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "secret area in blue base",
+   "x": 800,
+   "y": -3520,
+   "z": 0,
+   "loc": "secret area in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "secret area in red base",
+   "x": 800,
+   "y": 3616,
+   "z": 0,
+   "loc": "secret area in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "red base-1",
+   "x": 416,
+   "y": 2754,
+   "z": 296,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "red base-2",
+   "x": 592,
+   "y": 2736,
+   "z": 24,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "secret area #2 in blue base-1",
+   "x": 416,
+   "y": -2624,
+   "z": 296,
+   "loc": "secret area #2 in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "secret area #2 in blue base-2",
+   "x": 592,
+   "y": -2608,
+   "z": 24,
+   "loc": "secret area #2 in blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "outside blue base",
+   "x": 1216,
+   "y": -2208,
+   "z": 272,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "outside red base",
+   "x": 1216,
+   "y": 2336,
+   "z": 272,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "big blue corridor",
+   "x": -1272,
+   "y": -2184,
+   "z": 104,
+   "loc": "big blue corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "big red corridor-1",
+   "x": -1272,
+   "y": 2312,
+   "z": 104,
+   "loc": "big red corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "big red corridor-2",
+   "x": -552,
+   "y": 2136,
+   "z": 104,
+   "loc": "big red corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue RL place",
+   "x": 1272,
+   "y": -760,
+   "z": 248,
+   "loc": "blue RL place"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-1",
+   "x": 56,
+   "y": -2696,
+   "z": 8,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-2",
+   "x": 200,
+   "y": -2680,
+   "z": 8,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-3",
+   "x": 248,
+   "y": -2600,
+   "z": 280,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-4",
+   "x": 264,
+   "y": -2680,
+   "z": 8,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "bridge over blue lava",
+   "x": 376,
+   "y": -840,
+   "z": 8,
+   "loc": "bridge over blue lava"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "main bridge into blue base",
+   "x": 1256,
+   "y": -2072,
+   "z": -184,
+   "loc": "main bridge into blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "main bridge into red base-1",
+   "x": 856,
+   "y": 2328,
+   "z": 280,
+   "loc": "main bridge into red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "main bridge into red base-2",
+   "x": 1256,
+   "y": 2200,
+   "z": -184,
+   "loc": "main bridge into red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "middle towers-1",
+   "x": -1016,
+   "y": -648,
+   "z": 8,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "middle towers-2",
+   "x": -1016,
+   "y": 776,
+   "z": 8,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "middle towers-3",
+   "x": -904,
+   "y": -648,
+   "z": 8,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "middle towers-4",
+   "x": -904,
+   "y": 776,
+   "z": 8,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "outside blue base-1",
+   "x": -552,
+   "y": -2008,
+   "z": 104,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "outside blue base-2",
+   "x": 872,
+   "y": -2216,
+   "z": 280,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "outside blue base-3",
+   "x": 1624,
+   "y": -2904,
+   "z": 8,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "outside red base",
+   "x": 1624,
+   "y": 3032,
+   "z": 8,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red RL place",
+   "x": 1272,
+   "y": 888,
+   "z": 248,
+   "loc": "red RL place"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-1",
+   "x": 56,
+   "y": 2792,
+   "z": 8,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-2",
+   "x": 200,
+   "y": 2808,
+   "z": 8,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-3",
+   "x": 248,
+   "y": 2728,
+   "z": 280,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-4",
+   "x": 264,
+   "y": 2808,
+   "z": 8,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red bridge over lava",
+   "x": 376,
+   "y": 968,
+   "z": 8,
+   "loc": "red bridge over lava"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "secret area in blue base",
+   "x": 760,
+   "y": -3544,
+   "z": 280,
+   "loc": "secret area in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "secret area in red base",
+   "x": 760,
+   "y": 3672,
+   "z": 280,
+   "loc": "secret area in red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "middle towers-1",
+   "x": -960,
+   "y": -640,
+   "z": 272,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "middle towers-2",
+   "x": -960,
+   "y": 768,
+   "z": 272,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "outside blue base",
+   "x": 1688,
+   "y": -2056,
+   "z": 280,
+   "loc": "outside blue base",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "outside red base",
+   "x": 1688,
+   "y": 2184,
+   "z": 280,
+   "loc": "outside red base",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "big red corridor-1",
+   "x": -656,
+   "y": 2128,
+   "z": 96,
+   "loc": "big red corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "big red corridor-2",
+   "x": -288,
+   "y": 2784,
+   "z": 0,
+   "loc": "big red corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "blue base-1",
+   "x": 208,
+   "y": -3216,
+   "z": 0,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "blue base-2",
+   "x": 768,
+   "y": -2688,
+   "z": 0,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "bridge over blue lava",
+   "x": -128,
+   "y": -560,
+   "z": 0,
+   "loc": "bridge over blue lava"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "outside blue base-1",
+   "x": -656,
+   "y": -2000,
+   "z": 96,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "outside blue base-2",
+   "x": -288,
+   "y": -2688,
+   "z": 0,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "outside blue base-3",
+   "x": 1616,
+   "y": -2064,
+   "z": 272,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "outside red base",
+   "x": 1616,
+   "y": 2160,
+   "z": 272,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "red base-1",
+   "x": 208,
+   "y": 3312,
+   "z": 0,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "red base-2",
+   "x": 336,
+   "y": 2768,
+   "z": 272,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "red base-3",
+   "x": 768,
+   "y": 2784,
+   "z": 0,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "red bridge over lava",
+   "x": -128,
+   "y": 672,
+   "z": 0,
+   "loc": "red bridge over lava"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "secret area #2 in blue base",
+   "x": 344,
+   "y": -2672,
+   "z": 272,
+   "loc": "secret area #2 in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "secret area in blue base",
+   "x": 800,
+   "y": -3392,
+   "z": 272,
+   "loc": "secret area in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "secret area in red base",
+   "x": 800,
+   "y": 3488,
+   "z": 272,
+   "loc": "secret area in red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "back enterance to blue base",
+   "x": -336,
+   "y": -3200,
+   "z": 272,
+   "loc": "back enterance to blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "outside blue base",
+   "x": 1664,
+   "y": -2912,
+   "z": 272,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "outside red base-1",
+   "x": -336,
+   "y": 3328,
+   "z": 272,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "outside red base-2",
+   "x": 1664,
+   "y": 3040,
+   "z": 272,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "middle towers",
+   "x": -960,
+   "y": 64,
+   "z": -24,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "blue RL place",
+   "x": 1184,
+   "y": -864,
+   "z": 240,
+   "loc": "blue RL place"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "red RL place",
+   "x": 1184,
+   "y": 992,
+   "z": 240,
+   "loc": "red RL place"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "back enterance to blue base",
+   "x": -720,
+   "y": -3696,
+   "z": 304,
+   "loc": "back enterance to blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "back enterance to red base",
+   "x": -720,
+   "y": 3792,
+   "z": 304,
+   "loc": "back enterance to red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "blue base",
+   "x": 400,
+   "y": -3256,
+   "z": 280,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "main bridge into blue base",
+   "x": 1168,
+   "y": -2048,
+   "z": -192,
+   "loc": "main bridge into blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "main bridge into red base",
+   "x": 1168,
+   "y": 2176,
+   "z": -192,
+   "loc": "main bridge into red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "middle towers-1",
+   "x": -1056,
+   "y": 480,
+   "z": 272,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "middle towers-2",
+   "x": -1048,
+   "y": -392,
+   "z": 272,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "red base",
+   "x": 400,
+   "y": 3352,
+   "z": 280,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "secret area in blue base",
+   "x": 736,
+   "y": -3520,
+   "z": 0,
+   "loc": "secret area in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "secret area in red base",
+   "x": 736,
+   "y": 3616,
+   "z": 0,
+   "loc": "secret area in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "back enterance to blue base",
+   "x": -720,
+   "y": -3568,
+   "z": 304,
+   "loc": "back enterance to blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "back enterance to red base",
+   "x": -720,
+   "y": 3664,
+   "z": 304,
+   "loc": "back enterance to red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "big red corridor",
+   "x": -224,
+   "y": 1472,
+   "z": 288,
+   "loc": "big red corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "blue RL place",
+   "x": 1088,
+   "y": -768,
+   "z": 240,
+   "loc": "blue RL place"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "blue base-1",
+   "x": 592,
+   "y": -3216,
+   "z": 0,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "blue base-2",
+   "x": 592,
+   "y": -3184,
+   "z": 272,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "bridge over blue lava",
+   "x": -224,
+   "y": -1344,
+   "z": 288,
+   "loc": "bridge over blue lava"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "middle towers-1",
+   "x": -904,
+   "y": -392,
+   "z": 272,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "middle towers-2",
+   "x": -904,
+   "y": 488,
+   "z": 272,
+   "loc": "middle towers"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside blue base-1",
+   "x": 1328,
+   "y": -2224,
+   "z": 272,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside blue base-2",
+   "x": 1616,
+   "y": -2416,
+   "z": 0,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside blue base-3",
+   "x": 1680,
+   "y": -2128,
+   "z": 112,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside blue base-4",
+   "x": 1680,
+   "y": -2064,
+   "z": 112,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside red base-1",
+   "x": 1328,
+   "y": 2320,
+   "z": 272,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside red base-2",
+   "x": 1616,
+   "y": 2512,
+   "z": 0,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside red base-3",
+   "x": 1680,
+   "y": 2160,
+   "z": 112,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside red base-4",
+   "x": 1680,
+   "y": 2224,
+   "z": 112,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "red RL place",
+   "x": 1088,
+   "y": 864,
+   "z": 240,
+   "loc": "red RL place"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "red base-1",
+   "x": 592,
+   "y": 3312,
+   "z": 0,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "red base-2",
+   "x": 592,
+   "y": 3312,
+   "z": 272,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "red base",
+   "x": 352,
+   "y": 2720,
+   "z": 272,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "secret area #2 in blue base",
+   "x": 360,
+   "y": -2592,
+   "z": 272,
+   "loc": "secret area #2 in blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "back enterance to blue base",
+   "x": -688,
+   "y": -3616,
+   "z": 304,
+   "loc": "back enterance to blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "back enterance to red base",
+   "x": -688,
+   "y": 3744,
+   "z": 304,
+   "loc": "back enterance to red base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "big red corridor",
+   "x": -592,
+   "y": 2048,
+   "z": 120,
+   "loc": "big red corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "outside blue base",
+   "x": -592,
+   "y": -1920,
+   "z": 120,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "big red corridor-1",
+   "x": -1296,
+   "y": 976,
+   "z": 24,
+   "loc": "big red corridor"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "big red corridor-2",
+   "x": -320,
+   "y": 2752,
+   "z": 296,
+   "loc": "big red corridor"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "big red corridor-3",
+   "x": -240,
+   "y": 2320,
+   "z": 120,
+   "loc": "big red corridor"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base",
+   "x": 224,
+   "y": -2624,
+   "z": 24,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "main bridge into blue base",
+   "x": 1744,
+   "y": -1488,
+   "z": 24,
+   "loc": "main bridge into blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "main bridge into red base",
+   "x": 1744,
+   "y": 1616,
+   "z": 24,
+   "loc": "main bridge into red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "middle towers-1",
+   "x": -1296,
+   "y": -848,
+   "z": 24,
+   "loc": "middle towers"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "middle towers-2",
+   "x": -528,
+   "y": 80,
+   "z": 24,
+   "loc": "middle towers"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "middle towers-3",
+   "x": -528,
+   "y": 208,
+   "z": 24,
+   "loc": "middle towers"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "outside blue base-1",
+   "x": -320,
+   "y": -2624,
+   "z": 296,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "outside blue base-2",
+   "x": -256,
+   "y": -2928,
+   "z": 24,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "outside blue base-3",
+   "x": -208,
+   "y": -2224,
+   "z": 120,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "outside blue base-4",
+   "x": 992,
+   "y": -2336,
+   "z": 24,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "outside blue base-5",
+   "x": 1600,
+   "y": -2816,
+   "z": 24,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "outside red base-1",
+   "x": -256,
+   "y": 3056,
+   "z": 24,
+   "loc": "outside red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "outside red base-2",
+   "x": 464,
+   "y": 3952,
+   "z": 24,
+   "loc": "outside red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "outside red base-3",
+   "x": 992,
+   "y": 2464,
+   "z": 24,
+   "loc": "outside red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "outside red base-4",
+   "x": 1600,
+   "y": 2896,
+   "z": 24,
+   "loc": "outside red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base",
+   "x": 224,
+   "y": 2752,
+   "z": 24,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "secret area in blue base",
+   "x": 464,
+   "y": -3840,
+   "z": 24,
+   "loc": "secret area in blue base"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "back enterance to blue base",
+   "x": -496,
+   "y": -3616,
+   "z": 344,
+   "loc": "back enterance to blue base",
+   "targetName": "c2sniper2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "blue RL place",
+   "x": 1184,
+   "y": -720,
+   "z": 280,
+   "loc": "blue RL place",
+   "targetName": "c2sniper"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "outside blue base",
+   "x": -80,
+   "y": -2672,
+   "z": 40,
+   "loc": "outside blue base",
+   "targetName": "c2sniper2ret"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "outside red base",
+   "x": -496,
+   "y": 3744,
+   "z": 344,
+   "loc": "outside red base",
+   "targetName": "c1sniper2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "red RL place",
+   "x": 1184,
+   "y": 848,
+   "z": 280,
+   "loc": "red RL place",
+   "targetName": "c1sniper"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "red base",
+   "x": -80,
+   "y": 2800,
+   "z": 40,
+   "loc": "red base",
+   "targetName": "c1sniper2ret"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "secret teleporter in red base",
+   "x": 1952,
+   "y": 2416,
+   "z": 152,
+   "loc": "secret teleporter in red base",
+   "targetName": "c1sniperret"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "teleporter to RL (blue base)",
+   "x": 1952,
+   "y": -2288,
+   "z": 152,
+   "loc": "teleporter to RL (blue base)",
+   "targetName": "c2sniperret"
+  }
+ ]
+}

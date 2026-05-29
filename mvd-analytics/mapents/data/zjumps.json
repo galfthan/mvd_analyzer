@@ -1,0 +1,40 @@
+{
+ "map": "zjumps",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -3744,
+   "y": 3904,
+   "z": 3904
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-2",
+   "x": -3584,
+   "y": 3904,
+   "z": 3904
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3880,
+   "y": 2720,
+   "z": 3836,
+   "targetName": "end"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -3840,
+   "y": 3936,
+   "z": 3904,
+   "targetName": "start"
+  }
+ ]
+}

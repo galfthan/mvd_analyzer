@@ -1,0 +1,1201 @@
+{
+ "map": "ctf4",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "blue base",
+   "x": 96,
+   "y": 2928,
+   "z": -156,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "red base",
+   "x": 96,
+   "y": -1728,
+   "z": -156,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "blue base-1",
+   "x": -31,
+   "y": 2751,
+   "z": -27,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "blue base-2",
+   "x": 224,
+   "y": 2751,
+   "z": -42,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "corridor at Quad in red base",
+   "x": -32,
+   "y": -1535,
+   "z": -42,
+   "loc": "corridor at Quad in red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "red base",
+   "x": 223,
+   "y": -1535,
+   "z": -27,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "water near blue base",
+   "x": 763,
+   "y": 1124,
+   "z": -608,
+   "loc": "water near blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "water near red base",
+   "x": -571,
+   "y": 92,
+   "z": -608,
+   "loc": "water near red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad corridor in blue base",
+   "x": 360,
+   "y": 2216,
+   "z": -192,
+   "loc": "Quad corridor in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Ring in blue base",
+   "x": -139,
+   "y": 2264,
+   "z": -200,
+   "loc": "Ring in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Ring in red base-1",
+   "x": 279,
+   "y": -1322,
+   "z": -70,
+   "loc": "Ring in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Ring in red base-2",
+   "x": 331,
+   "y": -1048,
+   "z": -200,
+   "loc": "Ring in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-1",
+   "x": -80,
+   "y": 2544,
+   "z": -80,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-2",
+   "x": -16,
+   "y": 3056,
+   "z": -179,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-3",
+   "x": -8,
+   "y": 3112,
+   "z": -168,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-4",
+   "x": 184,
+   "y": 2992,
+   "z": -189,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-5",
+   "x": 184,
+   "y": 3112,
+   "z": -177,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-6",
+   "x": 263,
+   "y": 2536,
+   "z": -72,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "corridor at Quad in red base-1",
+   "x": -168,
+   "y": -1000,
+   "z": -192,
+   "loc": "corridor at Quad in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "corridor at Quad in red base-2",
+   "x": -71,
+   "y": -1320,
+   "z": -72,
+   "loc": "corridor at Quad in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "corridor in blue base-1",
+   "x": -448,
+   "y": 1416,
+   "z": 24,
+   "loc": "corridor in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "corridor in blue base-2",
+   "x": -398,
+   "y": 927,
+   "z": 15,
+   "loc": "corridor in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "corridor in red base",
+   "x": 590,
+   "y": 289,
+   "z": 15,
+   "loc": "corridor in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "outside blue base",
+   "x": 94,
+   "y": 1433,
+   "z": -194,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "outside red base",
+   "x": 98,
+   "y": -217,
+   "z": -194,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-1",
+   "x": 24,
+   "y": -1904,
+   "z": -189,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-2",
+   "x": 27,
+   "y": -1817,
+   "z": -177,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-3",
+   "x": 104,
+   "y": -1896,
+   "z": -168,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-4",
+   "x": 184,
+   "y": -1896,
+   "z": -179,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "sniping place from corridor (red base)",
+   "x": 640,
+   "y": -192,
+   "z": 24,
+   "loc": "sniping place from corridor (red base)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water near blue base",
+   "x": 652,
+   "y": 1244,
+   "z": -192,
+   "loc": "water near blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water near red base",
+   "x": -460,
+   "y": -28,
+   "z": -192,
+   "loc": "water near red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RL at blue base",
+   "x": 96,
+   "y": 2184,
+   "z": 24,
+   "loc": "RL at blue base",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RL in red base",
+   "x": 96,
+   "y": -968,
+   "z": 24,
+   "loc": "RL in red base",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "blue base-1",
+   "x": -24,
+   "y": 2968,
+   "z": -171,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "blue base-2",
+   "x": 32,
+   "y": 2912,
+   "z": -185,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "corridor in blue base",
+   "x": -640,
+   "y": 931,
+   "z": 0,
+   "loc": "corridor in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "corridor in red base",
+   "x": 832,
+   "y": 285,
+   "z": 0,
+   "loc": "corridor in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "red base-1",
+   "x": 176,
+   "y": -1824,
+   "z": -185,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "red base-2",
+   "x": 176,
+   "y": -1776,
+   "z": -171,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water near blue base",
+   "x": 96,
+   "y": 1120,
+   "z": -430,
+   "loc": "water near blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water near red base",
+   "x": 96,
+   "y": 96,
+   "z": -430,
+   "loc": "water near red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "blue base",
+   "x": 1,
+   "y": 2932,
+   "z": -177,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "red base",
+   "x": 191,
+   "y": -1716,
+   "z": -177,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "water near blue base",
+   "x": 360,
+   "y": 1247,
+   "z": -441,
+   "loc": "water near blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "water near red base",
+   "x": -168,
+   "y": -31,
+   "z": -441,
+   "loc": "water near red base"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 967,
+   "y": -505,
+   "z": 850,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad in blue base-1",
+   "x": -775,
+   "y": 1721,
+   "z": 850,
+   "loc": "Quad in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad in blue base-2",
+   "x": 355,
+   "y": 3161,
+   "z": 40,
+   "loc": "Quad in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad in red base",
+   "x": -169,
+   "y": -1948,
+   "z": 40,
+   "loc": "Quad in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA in blue corridor",
+   "x": -698,
+   "y": 1376,
+   "z": 184,
+   "loc": "RA in blue corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA near red base",
+   "x": 890,
+   "y": -160,
+   "z": 184,
+   "loc": "RA near red base"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "Ring in blue base",
+   "x": -368,
+   "y": 2304,
+   "z": -92,
+   "loc": "Ring in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "Ring in red base",
+   "x": 560,
+   "y": -1088,
+   "z": -92,
+   "loc": "Ring in red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL at blue base",
+   "x": 94,
+   "y": 1978,
+   "z": 48,
+   "loc": "RL at blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL in red base",
+   "x": 98,
+   "y": -762,
+   "z": 48,
+   "loc": "RL in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad corridor in blue base",
+   "x": 312,
+   "y": 2544,
+   "z": -88,
+   "loc": "Quad corridor in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Ring in blue base",
+   "x": -160,
+   "y": 2544,
+   "z": -88,
+   "loc": "Ring in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Ring in red base",
+   "x": 312,
+   "y": -1360,
+   "z": -96,
+   "loc": "Ring in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "blue base-1",
+   "x": -16,
+   "y": 2736,
+   "z": -189,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "blue base-2",
+   "x": 208,
+   "y": 2752,
+   "z": -208,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "corridor at Quad in red base",
+   "x": -152,
+   "y": -1360,
+   "z": -96,
+   "loc": "corridor at Quad in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "corridor in blue base",
+   "x": -439,
+   "y": 1253,
+   "z": 27,
+   "loc": "corridor in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "corridor in red base",
+   "x": 631,
+   "y": -37,
+   "z": 27,
+   "loc": "corridor in red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "red base-1",
+   "x": -48,
+   "y": -1536,
+   "z": -208,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "red base-2",
+   "x": 208,
+   "y": -1520,
+   "z": -189,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "water near blue base",
+   "x": 726,
+   "y": 1250,
+   "z": -199,
+   "loc": "water near blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "water near red base",
+   "x": -534,
+   "y": -34,
+   "z": -199,
+   "loc": "water near red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "blue base-1",
+   "x": 48,
+   "y": 3144,
+   "z": -193,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "blue base-2",
+   "x": 104,
+   "y": 3144,
+   "z": -192,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "red base-1",
+   "x": 40,
+   "y": -1960,
+   "z": -159,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "red base-2",
+   "x": 96,
+   "y": -1960,
+   "z": -193,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "blue base",
+   "x": 95,
+   "y": 2754,
+   "z": -198,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "red base",
+   "x": 97,
+   "y": -1538,
+   "z": -198,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "water near blue base",
+   "x": 672,
+   "y": 1376,
+   "z": -620,
+   "loc": "water near blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "water near red base",
+   "x": -480,
+   "y": -160,
+   "z": -620,
+   "loc": "water near red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "blue base",
+   "x": 189,
+   "y": 2932,
+   "z": -190,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "red base",
+   "x": -24,
+   "y": -1720,
+   "z": -190,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "sniping place from corridor (red base)",
+   "x": 528,
+   "y": -464,
+   "z": -185,
+   "loc": "sniping place from corridor (red base)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "sniping place in blue base",
+   "x": -336,
+   "y": 1680,
+   "z": -185,
+   "loc": "sniping place in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "biosuit in blue water",
+   "x": -59,
+   "y": 1245,
+   "z": -441,
+   "loc": "biosuit in blue water"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "biosuit in red water",
+   "x": 251,
+   "y": -29,
+   "z": -441,
+   "loc": "biosuit in red water"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "Quad corridor in blue base",
+   "x": -33,
+   "y": 2713,
+   "z": 306,
+   "loc": "Quad corridor in blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA near red base",
+   "x": 255,
+   "y": -32,
+   "z": -234,
+   "loc": "YA near red base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "biosuit in blue water",
+   "x": -63,
+   "y": 1248,
+   "z": -234,
+   "loc": "biosuit in blue water"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "corridor at Quad in red base",
+   "x": 225,
+   "y": -1497,
+   "z": 306,
+   "loc": "corridor at Quad in red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL at blue base-1",
+   "x": -96,
+   "y": 1984,
+   "z": 43,
+   "loc": "RL at blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL at blue base-2",
+   "x": 270,
+   "y": 1977,
+   "z": 43,
+   "loc": "RL at blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL in red base-1",
+   "x": -78,
+   "y": -761,
+   "z": 43,
+   "loc": "RL in red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL in red base-2",
+   "x": 275,
+   "y": -761,
+   "z": 43,
+   "loc": "RL in red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Ring in blue base",
+   "x": -96,
+   "y": 2304,
+   "z": -176,
+   "loc": "Ring in blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Ring in red base",
+   "x": 288,
+   "y": -1088,
+   "z": -176,
+   "loc": "Ring in red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA near red base-1",
+   "x": 160,
+   "y": 259,
+   "z": -259,
+   "loc": "YA near red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA near red base-2",
+   "x": 417,
+   "y": -27,
+   "z": -189,
+   "loc": "YA near red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-1",
+   "x": -25,
+   "y": 2752,
+   "z": -200,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "blue base-10",
+   "x": 216,
+   "y": 2280,
+   "z": -186,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-2",
+   "x": -21,
+   "y": 2789,
+   "z": -40,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-3",
+   "x": 24,
+   "y": 3005,
+   "z": -200,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-4",
+   "x": 33,
+   "y": 2546,
+   "z": -72,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-5",
+   "x": 92,
+   "y": 2850,
+   "z": -200,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "blue base-6",
+   "x": 101,
+   "y": 2552,
+   "z": -181,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-7",
+   "x": 163,
+   "y": 2540,
+   "z": -72,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-8",
+   "x": 165,
+   "y": 3044,
+   "z": -200,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-9",
+   "x": 209,
+   "y": 2786,
+   "z": -40,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "corridor at Quad in red base-1",
+   "x": -128,
+   "y": -1088,
+   "z": -186,
+   "loc": "corridor at Quad in red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "corridor at Quad in red base-2",
+   "x": 28,
+   "y": -1329,
+   "z": -72,
+   "loc": "corridor at Quad in red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "corridor at Quad in red base-3",
+   "x": 91,
+   "y": -1336,
+   "z": -181,
+   "loc": "corridor at Quad in red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "corridor at Quad in red base-4",
+   "x": 168,
+   "y": -1329,
+   "z": -72,
+   "loc": "corridor at Quad in red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "corridor between red and blue base",
+   "x": 32,
+   "y": 957,
+   "z": -259,
+   "loc": "corridor between red and blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "corridor in blue base-1",
+   "x": -828,
+   "y": 933,
+   "z": 24,
+   "loc": "corridor in blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "corridor in blue base-2",
+   "x": -225,
+   "y": 1243,
+   "z": -189,
+   "loc": "corridor in blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "corridor in red base",
+   "x": 1020,
+   "y": 283,
+   "z": 24,
+   "loc": "corridor in red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "outside blue base",
+   "x": 448,
+   "y": 1627,
+   "z": -186,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "outside red base",
+   "x": -256,
+   "y": -411,
+   "z": -186,
+   "loc": "outside red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-1",
+   "x": -37,
+   "y": -1572,
+   "z": -40,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-2",
+   "x": -24,
+   "y": -1531,
+   "z": -200,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-3",
+   "x": 8,
+   "y": -1807,
+   "z": -200,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-4",
+   "x": 91,
+   "y": -1646,
+   "z": -200,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "red base-5",
+   "x": 101,
+   "y": -1680,
+   "z": -96,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-6",
+   "x": 182,
+   "y": -1850,
+   "z": -200,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-7",
+   "x": 223,
+   "y": -1584,
+   "z": -40,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "sniping place from corridor (red base)",
+   "x": 655,
+   "y": -411,
+   "z": -133,
+   "loc": "sniping place from corridor (red base)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "sniping place in blue base",
+   "x": -463,
+   "y": 1627,
+   "z": -133,
+   "loc": "sniping place in blue base"
+  }
+ ]
+}

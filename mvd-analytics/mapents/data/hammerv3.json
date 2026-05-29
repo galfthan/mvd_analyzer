@@ -1,0 +1,54 @@
+{
+ "map": "hammerv3",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -372,
+   "y": -268,
+   "z": 98
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 0,
+   "y": -270,
+   "z": 160
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 0,
+   "y": 272,
+   "z": 160
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-4",
+   "x": 256,
+   "y": -160,
+   "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 368,
+   "y": 0,
+   "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 376,
+   "y": 272,
+   "z": 98
+  }
+ ]
+}

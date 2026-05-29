@@ -1,0 +1,23 @@
+{
+ "map": "p_freestyle",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn",
+   "x": -872,
+   "y": 0,
+   "z": -64
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": -800,
+   "y": 728,
+   "z": 1808,
+   "targetName": "t1"
+  }
+ ]
+}

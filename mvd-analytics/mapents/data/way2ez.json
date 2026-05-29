@@ -1,0 +1,111 @@
+{
+ "map": "way2ez",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": 0,
+   "y": -80,
+   "z": 144
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 64,
+   "y": -80,
+   "z": 144
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 128,
+   "y": -72,
+   "z": 144
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -1816,
+   "y": 1760,
+   "z": 320,
+   "targetName": "tele5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -1376,
+   "y": 1080,
+   "z": 288,
+   "targetName": "tele4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -1280,
+   "y": 1600,
+   "z": 304,
+   "targetName": "tele6"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": -912,
+   "y": 1720,
+   "z": 312,
+   "targetName": "tele7"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": -800,
+   "y": 2312,
+   "z": 64,
+   "targetName": "tele8"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": -144,
+   "y": 1232,
+   "z": 304,
+   "targetName": "tele3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": -96,
+   "y": -32,
+   "z": 128,
+   "targetName": "tele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": 208,
+   "y": 1248,
+   "z": 128,
+   "targetName": "tele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-9",
+   "x": 672,
+   "y": 2912,
+   "z": 528,
+   "targetName": "tele10"
+  }
+ ]
+}

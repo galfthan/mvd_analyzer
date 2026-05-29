@@ -1,0 +1,158 @@
+{
+ "map": "ztrain",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": -3712,
+   "y": -1056,
+   "z": 896
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3472,
+   "y": -1024,
+   "z": 896,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-10",
+   "x": -192,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_6"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-11",
+   "x": 448,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_7"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-12",
+   "x": 1088,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_8"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-13",
+   "x": 1728,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_9"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-14",
+   "x": 2368,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_10"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-15",
+   "x": 3008,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_11"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-16",
+   "x": 3648,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_12"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -3392,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -3392,
+   "y": 752,
+   "z": -736,
+   "targetName": "1_13"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": -2752,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": -2752,
+   "y": 752,
+   "z": -736,
+   "targetName": "1_14"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": -2112,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": -2112,
+   "y": 752,
+   "z": -736,
+   "targetName": "1_15"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": -1472,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-9",
+   "x": -832,
+   "y": -192,
+   "z": 128,
+   "targetName": "1_5"
+  }
+ ]
+}

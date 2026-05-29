@@ -1,0 +1,40 @@
+{
+ "map": "ztricksrocket",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -3520,
+   "y": 3392,
+   "z": 3136
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-2",
+   "x": -2752,
+   "y": 3328,
+   "z": 3200
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3520,
+   "y": 2048,
+   "z": 3136,
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -3520,
+   "y": 3264,
+   "z": 3136,
+   "targetName": "t1"
+  }
+ ]
+}

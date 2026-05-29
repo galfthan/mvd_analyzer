@@ -1,0 +1,347 @@
+{
+ "map": "messy",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "GA.low",
+   "x": 528,
+   "y": 164,
+   "z": 128,
+   "loc": "GA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "GL.tele",
+   "x": 184,
+   "y": 696,
+   "z": 256,
+   "loc": "GL.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RA.RL",
+   "x": 316,
+   "y": 248,
+   "z": -64,
+   "loc": "RA.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RA.stairs",
+   "x": 100,
+   "y": -616,
+   "z": 128,
+   "loc": "RA.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "YA.LG",
+   "x": 112,
+   "y": -416,
+   "z": 384,
+   "loc": "YA.LG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "YA.RL",
+   "x": 108,
+   "y": -504,
+   "z": 128,
+   "loc": "YA.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": 672,
+   "y": 176,
+   "z": 192,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 364,
+   "y": 24,
+   "z": 384,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GA.low-1",
+   "x": 216,
+   "y": 120,
+   "z": 128,
+   "loc": "GA.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GA.low-2",
+   "x": 216,
+   "y": 160,
+   "z": 128,
+   "loc": "GA.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RA.RL-1",
+   "x": 316,
+   "y": -24,
+   "z": -64,
+   "loc": "RA.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RA.RL-2",
+   "x": 356,
+   "y": -24,
+   "z": -64,
+   "loc": "RA.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RA.stairs",
+   "x": 60,
+   "y": -616,
+   "z": 128,
+   "loc": "RA.stairs",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA.rox",
+   "x": -40,
+   "y": 16,
+   "z": 256,
+   "loc": "YA.rox"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "YA.LG",
+   "x": 96,
+   "y": -432,
+   "z": 384,
+   "loc": "YA.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "GL.MH",
+   "x": 688,
+   "y": 656,
+   "z": 384,
+   "loc": "GL.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": -104,
+   "y": -224,
+   "z": -64,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RA.RL",
+   "x": 376,
+   "y": 128,
+   "z": -64,
+   "loc": "RA.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "YA.RL",
+   "x": -104,
+   "y": -224,
+   "z": 128,
+   "loc": "YA.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GA.low",
+   "x": 528,
+   "y": 124,
+   "z": 128,
+   "loc": "GA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL",
+   "x": 388,
+   "y": 8,
+   "z": 384,
+   "loc": "GL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL.tele",
+   "x": 224,
+   "y": 696,
+   "z": 256,
+   "loc": "GL.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RA.RL",
+   "x": 356,
+   "y": 248,
+   "z": -64,
+   "loc": "RA.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.RL",
+   "x": 148,
+   "y": -504,
+   "z": 128,
+   "loc": "YA.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.rox",
+   "x": -40,
+   "y": -24,
+   "z": 256,
+   "loc": "YA.rox"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": -320,
+   "y": -192,
+   "z": 256,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "GL-1",
+   "x": 608,
+   "y": 320,
+   "z": 408,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL-2",
+   "x": 728,
+   "y": 40,
+   "z": 408,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL.tele",
+   "x": 56,
+   "y": 248,
+   "z": 280,
+   "loc": "GL.tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA",
+   "x": -256,
+   "y": -128,
+   "z": -40,
+   "loc": "RA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.RL",
+   "x": 184,
+   "y": 24,
+   "z": -40,
+   "loc": "RA.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.LG",
+   "x": 32,
+   "y": -480,
+   "z": 408,
+   "loc": "YA.LG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.RL",
+   "x": 32,
+   "y": -480,
+   "z": 152,
+   "loc": "YA.RL"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA",
+   "x": -400,
+   "y": -224,
+   "z": -40,
+   "loc": "RA",
+   "targetName": "giu"
+  }
+ ]
+}

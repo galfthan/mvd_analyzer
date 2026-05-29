@@ -5073,6 +5073,374 @@
       }
     ]
   },
+  "mapEntities": {
+    "entities": [
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "LG",
+        "name": "LG-1",
+        "type": "item",
+        "x": 688,
+        "y": 112,
+        "z": -320
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "LG",
+        "name": "LG-2",
+        "type": "item",
+        "x": 736,
+        "y": 112,
+        "z": -320
+      },
+      {
+        "class": "item_armor1",
+        "kind": "ga",
+        "loc": "GA",
+        "name": "GA",
+        "type": "item",
+        "x": 912,
+        "y": 128,
+        "z": -16
+      },
+      {
+        "class": "weapon_grenadelauncher",
+        "kind": "gl",
+        "loc": "GL",
+        "name": "GL",
+        "type": "item",
+        "x": 528,
+        "y": 48,
+        "z": 48
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "MH",
+        "name": "MH",
+        "type": "item",
+        "x": 16,
+        "y": -48,
+        "z": -304
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "MH.high",
+        "name": "MH.high-1",
+        "type": "item",
+        "x": 16,
+        "y": -176,
+        "z": 48
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "MH.high",
+        "name": "MH.high-2",
+        "type": "item",
+        "x": 16,
+        "y": -112,
+        "z": 48
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "YA.RL",
+        "name": "YA.RL",
+        "type": "item",
+        "x": 784,
+        "y": -624,
+        "z": -240
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "YA.balks",
+        "name": "YA.balks-1",
+        "type": "item",
+        "x": 736,
+        "y": -176,
+        "z": -112
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "YA.balks",
+        "name": "YA.balks-2",
+        "type": "item",
+        "x": 800,
+        "y": -176,
+        "z": -112
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "yard",
+        "name": "yard-1",
+        "type": "item",
+        "x": 400,
+        "y": -288,
+        "z": -368
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "yard",
+        "name": "yard-2",
+        "type": "item",
+        "x": 400,
+        "y": -224,
+        "z": -368
+      },
+      {
+        "class": "weapon_lightning",
+        "kind": "lg",
+        "loc": "LG",
+        "name": "LG",
+        "type": "item",
+        "x": 800,
+        "y": 128,
+        "z": -320
+      },
+      {
+        "class": "item_health",
+        "kind": "mh",
+        "loc": "MH",
+        "name": "MH",
+        "spawnflags": 2,
+        "type": "item",
+        "x": -96,
+        "y": -352,
+        "z": -304
+      },
+      {
+        "class": "item_armorInv",
+        "kind": "ra",
+        "loc": "RA",
+        "name": "RA",
+        "type": "item",
+        "x": 192,
+        "y": 448,
+        "z": -48
+      },
+      {
+        "class": "weapon_rocketlauncher",
+        "kind": "rl",
+        "loc": "YA.RL",
+        "name": "YA.RL",
+        "type": "item",
+        "x": 800,
+        "y": -432,
+        "z": -240
+      },
+      {
+        "class": "weapon_rocketlauncher",
+        "kind": "rl",
+        "loc": "yard.RL",
+        "name": "yard.RL",
+        "type": "item",
+        "x": 192,
+        "y": 448,
+        "z": -304
+      },
+      {
+        "class": "item_rockets",
+        "kind": "rockets",
+        "loc": "GL",
+        "name": "GL",
+        "type": "item",
+        "x": 512,
+        "y": 96,
+        "z": 48
+      },
+      {
+        "class": "item_rockets",
+        "kind": "rockets",
+        "loc": "MH.rox",
+        "name": "MH.rox",
+        "spawnflags": 1,
+        "type": "item",
+        "x": -96,
+        "y": -464,
+        "z": -48
+      },
+      {
+        "class": "item_rockets",
+        "kind": "rockets",
+        "loc": "YA.balks",
+        "name": "YA.balks",
+        "type": "item",
+        "x": 720,
+        "y": -448,
+        "z": -240
+      },
+      {
+        "class": "item_rockets",
+        "kind": "rockets",
+        "loc": "yard.RL",
+        "name": "yard.RL",
+        "type": "item",
+        "x": 176,
+        "y": 512,
+        "z": -304
+      },
+      {
+        "class": "item_shells",
+        "kind": "shells",
+        "loc": "YA.RL",
+        "name": "YA.RL",
+        "type": "item",
+        "x": 792,
+        "y": -232,
+        "z": -240
+      },
+      {
+        "class": "item_shells",
+        "kind": "shells",
+        "loc": "yard.RL",
+        "name": "yard.RL",
+        "type": "item",
+        "x": -48,
+        "y": 240,
+        "z": -304
+      },
+      {
+        "class": "weapon_supershotgun",
+        "kind": "ssg",
+        "loc": "YA.tele",
+        "name": "YA.tele",
+        "type": "item",
+        "x": -288,
+        "y": -528,
+        "z": -272
+      },
+      {
+        "class": "weapon_supershotgun",
+        "kind": "ssg",
+        "loc": "yard",
+        "name": "yard",
+        "type": "item",
+        "x": 384,
+        "y": 128,
+        "z": -304
+      },
+      {
+        "class": "item_armor2",
+        "kind": "ya",
+        "loc": "YA",
+        "name": "YA",
+        "type": "item",
+        "x": 320,
+        "y": -464,
+        "z": -272
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "GA",
+        "name": "GA",
+        "type": "spawn",
+        "x": 1096,
+        "y": 128,
+        "z": -16
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "MH.high",
+        "name": "MH.high",
+        "type": "spawn",
+        "x": 48,
+        "y": 488,
+        "z": 80
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "MH.rox",
+        "name": "MH.rox",
+        "type": "spawn",
+        "x": -80,
+        "y": -456,
+        "z": -16
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "YA",
+        "name": "YA",
+        "type": "spawn",
+        "x": 488,
+        "y": -408,
+        "z": -272
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "YA.RL",
+        "name": "YA.RL",
+        "type": "spawn",
+        "x": 808,
+        "y": -616,
+        "z": -208
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "YA.tele",
+        "name": "YA.tele",
+        "type": "spawn",
+        "x": -328,
+        "y": -440,
+        "z": -240
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "middle",
+        "name": "middle",
+        "type": "spawn",
+        "x": 512,
+        "y": 296,
+        "z": -144
+      },
+      {
+        "class": "info_player_start",
+        "loc": "yard.RL",
+        "name": "yard.RL-1",
+        "type": "spawn",
+        "x": 192,
+        "y": 136,
+        "z": -224
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "yard.RL",
+        "name": "yard.RL-2",
+        "type": "spawn",
+        "x": 304,
+        "y": 640,
+        "z": -176
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "MH.high",
+        "name": "MH.high",
+        "targetName": "tele1",
+        "type": "teleportDst",
+        "x": 40,
+        "y": -336,
+        "z": 128
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "middle",
+        "name": "middle",
+        "targetName": "tele2",
+        "type": "teleportDst",
+        "x": 512,
+        "y": 296,
+        "z": -128
+      }
+    ],
+    "map": "skull"
+  },
   "match": {
     "duration": 599993,
     "endTime": 599993,

@@ -1,0 +1,121 @@
+{
+ "map": "v_kjump",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": 128,
+   "y": -624,
+   "z": 176
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 128,
+   "y": -624,
+   "z": 176
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -1008,
+   "y": 1056,
+   "z": 128,
+   "targetName": "easy01"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-10",
+   "x": 1472,
+   "y": 1008,
+   "z": 112,
+   "targetName": "hard03"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-11",
+   "x": 2080,
+   "y": 640,
+   "z": 96,
+   "targetName": "hard99"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -192,
+   "y": 1104,
+   "z": 320,
+   "targetName": "easy00"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 128,
+   "y": -720,
+   "z": 144,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 128,
+   "y": 144,
+   "z": 112,
+   "targetName": "normal00"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 176,
+   "y": 576,
+   "z": 576,
+   "targetName": "normal01"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": 512,
+   "y": 96,
+   "z": 144,
+   "targetName": "hard00"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": 656,
+   "y": 1456,
+   "z": 128,
+   "targetName": "hard01"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": 1008,
+   "y": 1536,
+   "z": 128,
+   "targetName": "hard02"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-9",
+   "x": 1472,
+   "y": 784,
+   "z": 96,
+   "targetName": "hard04"
+  }
+ ]
+}

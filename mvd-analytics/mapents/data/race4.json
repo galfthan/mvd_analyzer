@@ -1,0 +1,31 @@
+{
+ "map": "race4",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -3040,
+   "y": 2592,
+   "z": 2712
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -2816,
+   "y": 2816,
+   "z": 2712
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": -3040,
+   "y": 3040,
+   "z": 2696,
+   "targetName": "teleport"
+  }
+ ]
+}

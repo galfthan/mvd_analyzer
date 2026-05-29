@@ -1,0 +1,40 @@
+{
+ "map": "emdtr2b",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": -256,
+   "y": -4020,
+   "z": 264
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -216,
+   "y": -4020,
+   "z": 264
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -330,
+   "y": 3744,
+   "z": 136,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -184,
+   "y": -4020,
+   "z": 264,
+   "targetName": "t2"
+  }
+ ]
+}

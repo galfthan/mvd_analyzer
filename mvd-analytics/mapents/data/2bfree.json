@@ -1,0 +1,32 @@
+{
+ "map": "2bfree",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 1456,
+   "y": 1136,
+   "z": 192
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3328,
+   "y": -3328,
+   "z": -3584,
+   "targetName": "finish"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 1456,
+   "y": 1040,
+   "z": 192,
+   "targetName": "start"
+  }
+ ]
+}

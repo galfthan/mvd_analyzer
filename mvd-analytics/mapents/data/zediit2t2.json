@@ -1,0 +1,40 @@
+{
+ "map": "zediit2t2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": -184,
+   "y": -392,
+   "z": 128
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -184,
+   "y": -392,
+   "z": 150
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -184,
+   "y": -392,
+   "z": 150,
+   "targetName": "tele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 384,
+   "y": 1088,
+   "z": 544,
+   "targetName": "tele2"
+  }
+ ]
+}

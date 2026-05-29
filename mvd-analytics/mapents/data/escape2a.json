@@ -1,0 +1,40 @@
+{
+ "map": "escape2a",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -3872,
+   "y": -1808,
+   "z": 3808
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-2",
+   "x": -3860,
+   "y": -1832,
+   "z": 3796
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3840,
+   "y": -1792,
+   "z": 3840,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -3516,
+   "y": -1700,
+   "z": 3952,
+   "targetName": "t2"
+  }
+ ]
+}

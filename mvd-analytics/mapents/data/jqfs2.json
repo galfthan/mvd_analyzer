@@ -1,0 +1,67 @@
+{
+ "map": "jqfs2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": 1424,
+   "y": -112,
+   "z": 216
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 1424,
+   "y": -112,
+   "z": 216
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -1184,
+   "y": 0,
+   "z": 1040,
+   "targetName": "yla2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 0,
+   "y": -704,
+   "z": 144,
+   "targetName": "va"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 0,
+   "y": 0,
+   "z": 144,
+   "targetName": "keski"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 0,
+   "y": 736,
+   "z": 144,
+   "targetName": "oa"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 1248,
+   "y": 0,
+   "z": 1040,
+   "targetName": "yla1"
+  }
+ ]
+}

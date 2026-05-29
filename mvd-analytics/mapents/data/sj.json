@@ -1,0 +1,245 @@
+{
+ "map": "sj",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 536,
+   "y": -100,
+   "z": -160
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-2",
+   "x": 536,
+   "y": -36,
+   "z": -160
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 648,
+   "y": -100,
+   "z": -160
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-4",
+   "x": 648,
+   "y": -36,
+   "z": -160
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -2320,
+   "y": -1064,
+   "z": -144,
+   "targetName": "a8"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-10",
+   "x": -936,
+   "y": -1120,
+   "z": -144,
+   "targetName": "a4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-11",
+   "x": -816,
+   "y": -1120,
+   "z": -144,
+   "targetName": "a4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-12",
+   "x": -696,
+   "y": -1120,
+   "z": -144,
+   "targetName": "a4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-13",
+   "x": -496,
+   "y": 64,
+   "z": -160,
+   "targetName": "a2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-14",
+   "x": -448,
+   "y": 320,
+   "z": -128,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-15",
+   "x": -400,
+   "y": 64,
+   "z": -160,
+   "targetName": "a2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-16",
+   "x": -192,
+   "y": 64,
+   "z": -160,
+   "targetName": "a1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-17",
+   "x": -104,
+   "y": 64,
+   "z": -160,
+   "targetName": "a1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-18",
+   "x": 64,
+   "y": -8,
+   "z": -160,
+   "targetName": "a"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-19",
+   "x": 176,
+   "y": -8,
+   "z": -160,
+   "targetName": "a"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -2200,
+   "y": -1064,
+   "z": -144,
+   "targetName": "a8"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-20",
+   "x": 544,
+   "y": -200,
+   "z": -160,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-21",
+   "x": 544,
+   "y": 48,
+   "z": -160,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-22",
+   "x": 640,
+   "y": 48,
+   "z": -160,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-23",
+   "x": 648,
+   "y": -200,
+   "z": -160,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -2080,
+   "y": -1064,
+   "z": -144,
+   "targetName": "a8"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": -1584,
+   "y": -1070,
+   "z": -144,
+   "targetName": "a5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": -1584,
+   "y": -1010,
+   "z": -144,
+   "targetName": "a5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": -1584,
+   "y": -945,
+   "z": -144,
+   "targetName": "a5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": -1368,
+   "y": -1104,
+   "z": -144,
+   "targetName": "a3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": -1264,
+   "y": -1104,
+   "z": -144,
+   "targetName": "a3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-9",
+   "x": -1152,
+   "y": -1104,
+   "z": -144,
+   "targetName": "a3"
+  }
+ ]
+}

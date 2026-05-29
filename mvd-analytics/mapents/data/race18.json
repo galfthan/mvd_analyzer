@@ -1,0 +1,49 @@
+{
+ "map": "race18",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": -3408,
+   "y": -3256,
+   "z": 1064
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -3408,
+   "y": -3256,
+   "z": 1064
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3584,
+   "y": -3392,
+   "z": 1152,
+   "targetName": "fan3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -3392,
+   "y": -3400,
+   "z": 1152,
+   "targetName": "fan2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -3264,
+   "y": -3392,
+   "z": 1152,
+   "targetName": "fan"
+  }
+ ]
+}

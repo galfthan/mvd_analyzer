@@ -1,0 +1,1395 @@
+{
+ "map": "twctf2m9",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE (CHUTE TO GL)",
+   "x": -408,
+   "y": -960,
+   "z": -352,
+   "loc": "BLUE BASE (CHUTE TO GL)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE (FLAG AREA)",
+   "x": 768,
+   "y": -512,
+   "z": -736,
+   "loc": "BLUE BASE (FLAG AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)-1",
+   "x": -360,
+   "y": -288,
+   "z": -448,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)-2",
+   "x": -112,
+   "y": -552,
+   "z": -544,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)-3",
+   "x": 88,
+   "y": -608,
+   "z": -352,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE (UPPER ENTRANCE LEDGE)",
+   "x": -656,
+   "y": -640,
+   "z": -352,
+   "loc": "BLUE BASE (UPPER ENTRANCE LEDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE (CHUTE TO GL)",
+   "x": -1736,
+   "y": -960,
+   "z": -334,
+   "loc": "RED BASE (CHUTE TO GL)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE (FLAG AREA)",
+   "x": -2912,
+   "y": -512,
+   "z": -718,
+   "loc": "RED BASE (FLAG AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE (LOWER ENTRANCE CORRIDOR)-1",
+   "x": -2032,
+   "y": -552,
+   "z": -526,
+   "loc": "RED BASE (LOWER ENTRANCE CORRIDOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE (LOWER ENTRANCE CORRIDOR)-2",
+   "x": -1806,
+   "y": -272,
+   "z": -430,
+   "loc": "RED BASE (LOWER ENTRANCE CORRIDOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)",
+   "x": -2232,
+   "y": -610,
+   "z": -336,
+   "loc": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE (UPPER ENTRANCE LEDGE)",
+   "x": -1488,
+   "y": -640,
+   "z": -336,
+   "loc": "RED BASE (UPPER ENTRANCE LEDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "BLUE BASE (CHUTE TO GL)",
+   "x": -352,
+   "y": -848,
+   "z": -328,
+   "loc": "BLUE BASE (CHUTE TO GL)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "RED BASE (CHUTE TO GL)",
+   "x": -1792,
+   "y": -848,
+   "z": -328,
+   "loc": "RED BASE (CHUTE TO GL)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE BASE (FLAG AREA)",
+   "x": 792,
+   "y": -264,
+   "z": -720,
+   "loc": "BLUE BASE (FLAG AREA)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE BASE (GROUND FLOOR GL)",
+   "x": -512,
+   "y": -952,
+   "z": -904,
+   "loc": "BLUE BASE (GROUND FLOOR GL)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED BASE (FLAG AREA)",
+   "x": -2936,
+   "y": -264,
+   "z": -720,
+   "loc": "RED BASE (FLAG AREA)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED BASE (GROUND FLOOR GL AREA)",
+   "x": -1632,
+   "y": -952,
+   "z": -904,
+   "loc": "RED BASE (GROUND FLOOR GL AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (CHUTE TO GL)-1",
+   "x": -376,
+   "y": -1312,
+   "z": -432,
+   "loc": "BLUE BASE (CHUTE TO GL)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (CHUTE TO GL)-2",
+   "x": -360,
+   "y": -784,
+   "z": -350,
+   "loc": "BLUE BASE (CHUTE TO GL)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (CHUTE TO GL)-3",
+   "x": -360,
+   "y": -736,
+   "z": -350,
+   "loc": "BLUE BASE (CHUTE TO GL)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (CHUTE TO GL)-4",
+   "x": -264,
+   "y": -1128,
+   "z": -352,
+   "loc": "BLUE BASE (CHUTE TO GL)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (GROUND FLOOR)-1",
+   "x": -176,
+   "y": -824,
+   "z": -928,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (GROUND FLOOR)-2",
+   "x": 32,
+   "y": -1376,
+   "z": -928,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (GROUND FLOOR)-3",
+   "x": 88,
+   "y": -1376,
+   "z": -928,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (GROUND FLOOR)-4",
+   "x": 272,
+   "y": -840,
+   "z": -928,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-1",
+   "x": -176,
+   "y": -1192,
+   "z": -736,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-2",
+   "x": 656,
+   "y": -1136,
+   "z": -544,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-3",
+   "x": 784,
+   "y": -912,
+   "z": -352,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-4",
+   "x": 800,
+   "y": -1280,
+   "z": -336,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-5",
+   "x": 856,
+   "y": -688,
+   "z": -352,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (LOWER ENTRANCE CORRIDOR)",
+   "x": -80,
+   "y": -920,
+   "z": -544,
+   "loc": "BLUE BASE (LOWER ENTRANCE CORRIDOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (RED ARMOUR)-1",
+   "x": 504,
+   "y": -64,
+   "z": -736,
+   "loc": "BLUE BASE (RED ARMOUR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (RED ARMOUR)-2",
+   "x": 560,
+   "y": -64,
+   "z": -736,
+   "loc": "BLUE BASE (RED ARMOUR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)-1",
+   "x": -248,
+   "y": -288,
+   "z": -448,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)-2",
+   "x": 160,
+   "y": -664,
+   "z": -544,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)-3",
+   "x": 160,
+   "y": -552,
+   "z": -544,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (GROUND FLOOR)-1",
+   "x": -2462,
+   "y": -830,
+   "z": -926,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (GROUND FLOOR)-2",
+   "x": -2232,
+   "y": -1376,
+   "z": -928,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (GROUND FLOOR)-3",
+   "x": -2180,
+   "y": -1376,
+   "z": -928,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (GROUND FLOOR)-4",
+   "x": -1968,
+   "y": -824,
+   "z": -926,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (LOWER ENTRANCE CORRIDOR)-1",
+   "x": -2064,
+   "y": -920,
+   "z": -544,
+   "loc": "RED BASE (LOWER ENTRANCE CORRIDOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (LOWER ENTRANCE CORRIDOR)-2",
+   "x": -1910,
+   "y": -272,
+   "z": -448,
+   "loc": "RED BASE (LOWER ENTRANCE CORRIDOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (LOWER ENTRANCE CORRIDOR)-3",
+   "x": -1880,
+   "y": -1128,
+   "z": -352,
+   "loc": "RED BASE (LOWER ENTRANCE CORRIDOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (RED ARMOUR)-1",
+   "x": -2704,
+   "y": -64,
+   "z": -736,
+   "loc": "RED BASE (RED ARMOUR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (RED ARMOUR)-2",
+   "x": -2648,
+   "y": -64,
+   "z": -736,
+   "loc": "RED BASE (RED ARMOUR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)-1",
+   "x": -2956,
+   "y": -1262,
+   "z": -336,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)-2",
+   "x": -2946,
+   "y": -912,
+   "z": -352,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)-3",
+   "x": -2818,
+   "y": -1138,
+   "z": -542,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)-4",
+   "x": -1992,
+   "y": -1204,
+   "z": -732,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)-5",
+   "x": -1768,
+   "y": -1312,
+   "z": -432,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (RL BRIDGE)",
+   "x": -3000,
+   "y": -688,
+   "z": -352,
+   "loc": "RED BASE (RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)-1",
+   "x": -2304,
+   "y": -664,
+   "z": -544,
+   "loc": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)-2",
+   "x": -2304,
+   "y": -552,
+   "z": -542,
+   "loc": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)-3",
+   "x": -1784,
+   "y": -784,
+   "z": -350,
+   "loc": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)-4",
+   "x": -1784,
+   "y": -736,
+   "z": -350,
+   "loc": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG FOUNTAIN AT CENTRE",
+   "x": -1072,
+   "y": -756,
+   "z": -474,
+   "loc": "LG FOUNTAIN AT CENTRE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "BLUE BASE (100 HEALTH AREA)",
+   "x": 576,
+   "y": -1280,
+   "z": -352,
+   "loc": "BLUE BASE (100 HEALTH AREA)",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RED BASE (100 HEALTH AREA)",
+   "x": -2740,
+   "y": -1264,
+   "z": -348,
+   "loc": "RED BASE (100 HEALTH AREA)",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (FLAG AREA)",
+   "x": 768,
+   "y": -704,
+   "z": -736,
+   "loc": "BLUE BASE (FLAG AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (GROUND FLOOR)",
+   "x": 120,
+   "y": -176,
+   "z": -904,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)",
+   "x": 1008,
+   "y": -944,
+   "z": -352,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (RL BRIDGE)",
+   "x": 448,
+   "y": -608,
+   "z": -352,
+   "loc": "BLUE BASE (RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (UPPER ENTRANCE LEDGE)",
+   "x": -656,
+   "y": -560,
+   "z": -352,
+   "loc": "BLUE BASE (UPPER ENTRANCE LEDGE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (FLAG AREA)",
+   "x": -2912,
+   "y": -704,
+   "z": -718,
+   "loc": "RED BASE (FLAG AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (GROUND FLOOR)",
+   "x": -2264,
+   "y": -176,
+   "z": -904,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)",
+   "x": -3152,
+   "y": -944,
+   "z": -334,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (RL BRIDGE)",
+   "x": -2592,
+   "y": -608,
+   "z": -336,
+   "loc": "RED BASE (RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (UPPER ENTRANCE LEDGE)",
+   "x": -1488,
+   "y": -560,
+   "z": -336,
+   "loc": "RED BASE (UPPER ENTRANCE LEDGE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE BASE (GROUND FLOOR)",
+   "x": 344,
+   "y": -1160,
+   "z": -928,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)",
+   "x": -288,
+   "y": -272,
+   "z": -432,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED BASE (GROUND FLOOR)",
+   "x": -2488,
+   "y": -1160,
+   "z": -926,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED BASE (LOWER ENTRANCE CORRIDOR)",
+   "x": -1856,
+   "y": -272,
+   "z": -432,
+   "loc": "RED BASE (LOWER ENTRANCE CORRIDOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "BLUE BASE (GROUND FLOOR GL)",
+   "x": -336,
+   "y": -952,
+   "z": -1000,
+   "loc": "BLUE BASE (GROUND FLOOR GL)"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "RED BASE (GROUND FLOOR GL AREA)",
+   "x": -1808,
+   "y": -952,
+   "z": -1000,
+   "loc": "RED BASE (GROUND FLOOR GL AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "BLUE BASE (QUAD AREA)",
+   "x": 208,
+   "y": -1360,
+   "z": -504,
+   "loc": "BLUE BASE (QUAD AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "RED BASE (QUAD AREA)",
+   "x": -2352,
+   "y": -1360,
+   "z": -504,
+   "loc": "RED BASE (QUAD AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "BLUE BASE (RED ARMOUR)",
+   "x": 552,
+   "y": 0,
+   "z": -712,
+   "loc": "BLUE BASE (RED ARMOUR)"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RED BASE (RED ARMOUR)",
+   "x": -2696,
+   "y": 0,
+   "z": -712,
+   "loc": "RED BASE (RED ARMOUR)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "BLUE BASE (RL BRIDGE)",
+   "x": 520,
+   "y": -592,
+   "z": -344,
+   "loc": "BLUE BASE (RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RED BASE (RL BRIDGE)",
+   "x": -2664,
+   "y": -592,
+   "z": -344,
+   "loc": "RED BASE (RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE (CHUTE TO GL)",
+   "x": -642,
+   "y": -904,
+   "z": -328,
+   "loc": "BLUE BASE (CHUTE TO GL)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE (GROUND FLOOR)",
+   "x": 272,
+   "y": -376,
+   "z": -928,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-1",
+   "x": 120,
+   "y": -1392,
+   "z": -736,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-2",
+   "x": 120,
+   "y": -1344,
+   "z": -736,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE (RL BRIDGE)",
+   "x": 560,
+   "y": -608,
+   "z": -352,
+   "loc": "BLUE BASE (RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)",
+   "x": 272,
+   "y": -376,
+   "z": -544,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE (GROUND FLOOR)",
+   "x": -2434,
+   "y": -376,
+   "z": -910,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)-1",
+   "x": -2264,
+   "y": -1392,
+   "z": -718,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)-2",
+   "x": -2264,
+   "y": -1344,
+   "z": -718,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE (RL BRIDGE)",
+   "x": -2704,
+   "y": -608,
+   "z": -338,
+   "loc": "RED BASE (RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)",
+   "x": -2434,
+   "y": -376,
+   "z": -526,
+   "loc": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE (UPPER ENTRANCE LEDGE)",
+   "x": -1502,
+   "y": -904,
+   "z": -328,
+   "loc": "RED BASE (UPPER ENTRANCE LEDGE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (GROUND FLOOR)-1",
+   "x": -176,
+   "y": -1096,
+   "z": -928,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (GROUND FLOOR)-2",
+   "x": 24,
+   "y": -1176,
+   "z": -928,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-1",
+   "x": 272,
+   "y": -840,
+   "z": -544,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-2",
+   "x": 1008,
+   "y": -784,
+   "z": -352,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (FLAG AREA)",
+   "x": -3152,
+   "y": -784,
+   "z": -334,
+   "loc": "RED BASE (FLAG AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (GROUND FLOOR)",
+   "x": -2184,
+   "y": -1192,
+   "z": -908,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)",
+   "x": -1968,
+   "y": -1098,
+   "z": -910,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)",
+   "x": -2442,
+   "y": -818,
+   "z": -526,
+   "loc": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE BASE (GROUND FLOOR)",
+   "x": 520,
+   "y": -592,
+   "z": -904,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RED BASE (GROUND FLOOR)",
+   "x": -2664,
+   "y": -592,
+   "z": -904,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)",
+   "x": 816,
+   "y": -1296,
+   "z": -528,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)",
+   "x": -2964,
+   "y": -1278,
+   "z": -528,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (CHUTE TO GL)",
+   "x": -528,
+   "y": -1104,
+   "z": -312,
+   "loc": "BLUE BASE (CHUTE TO GL)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (FLAG AREA)-1",
+   "x": 768,
+   "y": -816,
+   "z": -688,
+   "loc": "BLUE BASE (FLAG AREA)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (FLAG AREA)-2",
+   "x": 768,
+   "y": -368,
+   "z": -688,
+   "loc": "BLUE BASE (FLAG AREA)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (GROUND FLOOR)-1",
+   "x": 345,
+   "y": -884,
+   "z": -904,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (GROUND FLOOR)-2",
+   "x": 359,
+   "y": -315,
+   "z": -904,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (GROUND FLOOR)-3",
+   "x": 567,
+   "y": -331,
+   "z": -904,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (GROUND FLOOR)-4",
+   "x": 611,
+   "y": -768,
+   "z": -904,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (GROUND FLOOR)-5",
+   "x": 648,
+   "y": -664,
+   "z": -888,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (GROUND FLOOR)-6",
+   "x": 648,
+   "y": -520,
+   "z": -888,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-1",
+   "x": 448,
+   "y": -1216,
+   "z": -504,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-2",
+   "x": 479,
+   "y": -867,
+   "z": -520,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (LEFT SIDE OF FLAG)-3",
+   "x": 592,
+   "y": -1040,
+   "z": -688,
+   "loc": "BLUE BASE (LEFT SIDE OF FLAG)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (RED ARMOUR)",
+   "x": 608,
+   "y": -192,
+   "z": -688,
+   "loc": "BLUE BASE (RED ARMOUR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)-1",
+   "x": -352,
+   "y": -640,
+   "z": -504,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)-2",
+   "x": -32,
+   "y": -592,
+   "z": -312,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)-3",
+   "x": 304,
+   "y": -592,
+   "z": -504,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)-4",
+   "x": 317,
+   "y": -590,
+   "z": -520,
+   "loc": "BLUE BASE (UPPER ENTRANCE CORRIDOR TO RL)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "OPEN AREA (BLUE SIDE)",
+   "x": -800,
+   "y": -752,
+   "z": -488,
+   "loc": "OPEN AREA (BLUE SIDE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "OPEN AREA (RED SIDE)",
+   "x": -1344,
+   "y": -752,
+   "z": -488,
+   "loc": "OPEN AREA (RED SIDE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (CHUTE TO GL)",
+   "x": -1616,
+   "y": -1104,
+   "z": -312,
+   "loc": "RED BASE (CHUTE TO GL)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (FLAG AREA)-1",
+   "x": -2914,
+   "y": -802,
+   "z": -712,
+   "loc": "RED BASE (FLAG AREA)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (FLAG AREA)-2",
+   "x": -2875,
+   "y": -404,
+   "z": -712,
+   "loc": "RED BASE (FLAG AREA)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (GROUND FLOOR)-1",
+   "x": -2792,
+   "y": -664,
+   "z": -888,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (GROUND FLOOR)-2",
+   "x": -2792,
+   "y": -520,
+   "z": -888,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (GROUND FLOOR)-3",
+   "x": -2768,
+   "y": -428,
+   "z": -904,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (GROUND FLOOR)-4",
+   "x": -2747,
+   "y": -781,
+   "z": -904,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (GROUND FLOOR)-5",
+   "x": -2520,
+   "y": -325,
+   "z": -904,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (GROUND FLOOR)-6",
+   "x": -2495,
+   "y": -891,
+   "z": -904,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (LOWER ENTRANCE CORRIDOR)",
+   "x": -1792,
+   "y": -640,
+   "z": -504,
+   "loc": "RED BASE (LOWER ENTRANCE CORRIDOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (RED ARMOUR)",
+   "x": -2683,
+   "y": -118,
+   "z": -712,
+   "loc": "RED BASE (RED ARMOUR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)-1",
+   "x": -2731,
+   "y": -1072,
+   "z": -712,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (RIGHT SIDE OF FLAG)-2",
+   "x": -2592,
+   "y": -1216,
+   "z": -504,
+   "loc": "RED BASE (RIGHT SIDE OF FLAG)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (RL BRIDGE)-1",
+   "x": -2915,
+   "y": -581,
+   "z": -328,
+   "loc": "RED BASE (RL BRIDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (RL BRIDGE)-2",
+   "x": -2603,
+   "y": -807,
+   "z": -520,
+   "loc": "RED BASE (RL BRIDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)-1",
+   "x": -2448,
+   "y": -592,
+   "z": -504,
+   "loc": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)-2",
+   "x": -2445,
+   "y": -617,
+   "z": -520,
+   "loc": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)-3",
+   "x": -2112,
+   "y": -592,
+   "z": -312,
+   "loc": "RED BASE (UPPER ENTRANCE CORRIDOR TO RL BRIDGE)"
+  }
+ ]
+}

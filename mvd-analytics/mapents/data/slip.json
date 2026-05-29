@@ -1,0 +1,370 @@
+{
+ "map": "slip",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "high",
+   "x": 336,
+   "y": -208,
+   "z": 336,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "low.LG-1",
+   "x": 32,
+   "y": 400,
+   "z": 128,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "low.LG-2",
+   "x": 32,
+   "y": 528,
+   "z": 128,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "Quad",
+   "x": 0,
+   "y": -640,
+   "z": 480,
+   "loc": "Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "low",
+   "x": -320,
+   "y": -32,
+   "z": 32,
+   "loc": "low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "Quad",
+   "x": 160,
+   "y": -412,
+   "z": 576,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA-1",
+   "x": 304,
+   "y": -640,
+   "z": -64,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA-2",
+   "x": 368,
+   "y": -640,
+   "z": -64,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "low",
+   "x": -336,
+   "y": 48,
+   "z": 48,
+   "loc": "low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "stairs.RL-1",
+   "x": -288,
+   "y": 144,
+   "z": 352,
+   "loc": "stairs.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "stairs.RL-2",
+   "x": -224,
+   "y": 144,
+   "z": 352,
+   "loc": "stairs.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "stairs.tele-1",
+   "x": 320,
+   "y": -960,
+   "z": 176,
+   "loc": "stairs.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "stairs.tele-2",
+   "x": 384,
+   "y": -960,
+   "z": 176,
+   "loc": "stairs.tele"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "low.LG",
+   "x": 48,
+   "y": 480,
+   "z": 112,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH",
+   "x": 400,
+   "y": -400,
+   "z": 168,
+   "loc": "MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 368,
+   "y": -640,
+   "z": 512,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "high",
+   "x": 224,
+   "y": 736,
+   "z": 368,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "YA",
+   "x": 128,
+   "y": -576,
+   "z": -96,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "stairs.RL",
+   "x": -416,
+   "y": -512,
+   "z": 224,
+   "loc": "stairs.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad.up",
+   "x": 312,
+   "y": -520,
+   "z": 660,
+   "loc": "Quad.up"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA",
+   "x": 120,
+   "y": -136,
+   "z": -184,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "stairs.tele",
+   "x": 264,
+   "y": -904,
+   "z": 176,
+   "loc": "stairs.tele"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "low",
+   "x": 64,
+   "y": -192,
+   "z": 64,
+   "loc": "low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "high",
+   "x": 288,
+   "y": 384,
+   "z": 384,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "stairs",
+   "x": 608,
+   "y": -672,
+   "z": 64,
+   "loc": "stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 320,
+   "y": -160,
+   "z": -168,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.up",
+   "x": 96,
+   "y": -800,
+   "z": 640,
+   "loc": "Quad.up"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA",
+   "x": 544,
+   "y": -608,
+   "z": -128,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "high-1",
+   "x": 192,
+   "y": 64,
+   "z": 384,
+   "loc": "high"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "high-2",
+   "x": 384,
+   "y": 800,
+   "z": 336,
+   "loc": "high"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "low-1",
+   "x": -320,
+   "y": -192,
+   "z": 32,
+   "loc": "low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "low-2",
+   "x": 672,
+   "y": -160,
+   "z": 32,
+   "loc": "low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "stairs.RL",
+   "x": -352,
+   "y": 160,
+   "z": 352,
+   "loc": "stairs.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "stairs.tele",
+   "x": 160,
+   "y": -928,
+   "z": 160,
+   "loc": "stairs.tele"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad.up",
+   "x": -96,
+   "y": -608,
+   "z": 608,
+   "loc": "Quad.up",
+   "targetName": "teledest_tophigh"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "YA",
+   "x": 320,
+   "y": -448,
+   "z": -256,
+   "loc": "YA",
+   "targetName": "teledest_basement"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "high",
+   "x": 576,
+   "y": 448,
+   "z": 320,
+   "loc": "high",
+   "targetName": "teledest_ra"
+  }
+ ]
+}

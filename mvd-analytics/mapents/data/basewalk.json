@@ -1,0 +1,357 @@
+{
+ "map": "basewalk",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "SSG-1",
+   "x": -402,
+   "y": 168,
+   "z": 362,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "SSG-2",
+   "x": -402,
+   "y": 206,
+   "z": 361,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": 34,
+   "y": -388,
+   "z": 208,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL.ledge",
+   "x": 422,
+   "y": 344,
+   "z": 296,
+   "loc": "GL.ledge"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GA-1",
+   "x": 104,
+   "y": -390,
+   "z": 192,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GA-2",
+   "x": 132,
+   "y": -390,
+   "z": 192,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL-1",
+   "x": 872,
+   "y": 352,
+   "z": 320,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL-2",
+   "x": 914,
+   "y": 352,
+   "z": 320,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.exit",
+   "x": 280,
+   "y": -374,
+   "z": 424,
+   "loc": "RA.exit"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG.ledge",
+   "x": 372,
+   "y": 0,
+   "z": 308,
+   "loc": "LG.ledge"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SSG.stairs-1",
+   "x": 120,
+   "y": 508,
+   "z": 508,
+   "loc": "SSG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SSG.stairs-2",
+   "x": 172,
+   "y": 508,
+   "z": 508,
+   "loc": "SSG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "yard-1",
+   "x": -254,
+   "y": -96,
+   "z": 52,
+   "loc": "yard"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "yard-2",
+   "x": -254,
+   "y": -56,
+   "z": 52,
+   "loc": "yard"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": 456,
+   "y": -812,
+   "z": 25,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RA",
+   "x": 550,
+   "y": -812,
+   "z": 2,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "YA.RL",
+   "x": 186,
+   "y": 184,
+   "z": 512,
+   "loc": "YA.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA-1",
+   "x": 472,
+   "y": -76,
+   "z": 522,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA-2",
+   "x": 474,
+   "y": -118,
+   "z": 522,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rox.ledge",
+   "x": -2,
+   "y": -112,
+   "z": 538,
+   "loc": "rox.ledge"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "GA.lift",
+   "x": -402,
+   "y": -200,
+   "z": 362,
+   "loc": "GA.lift"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "yard",
+   "x": 244,
+   "y": -234,
+   "z": 60,
+   "loc": "yard"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "yard",
+   "x": -238,
+   "y": 2,
+   "z": 52,
+   "loc": "yard"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "SSG",
+   "x": -298,
+   "y": 298,
+   "z": 368,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 886,
+   "y": -295,
+   "z": 528,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": 518,
+   "y": 346,
+   "z": 334,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA",
+   "x": 506,
+   "y": -812,
+   "z": 26,
+   "loc": "RA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.entry",
+   "x": 332,
+   "y": -232,
+   "z": 72,
+   "loc": "RA.entry"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SSG.stairs",
+   "x": -280,
+   "y": 518,
+   "z": 440,
+   "loc": "SSG.stairs"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA",
+   "x": 698,
+   "y": 175,
+   "z": 526,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.RL",
+   "x": 138,
+   "y": 264,
+   "z": 533,
+   "loc": "YA.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "rox.ledge",
+   "x": 0,
+   "y": -382,
+   "z": 554,
+   "loc": "rox.ledge"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "yard-1",
+   "x": -224,
+   "y": -212,
+   "z": 70,
+   "loc": "yard"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "yard-2",
+   "x": 103,
+   "y": 163,
+   "z": 149,
+   "loc": "yard"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL.ledge",
+   "x": 360,
+   "y": 344,
+   "z": 324,
+   "loc": "GL.ledge",
+   "targetName": "teleport1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA.exit",
+   "x": 352,
+   "y": -348,
+   "z": 424,
+   "loc": "RA.exit",
+   "targetName": "tele2"
+  }
+ ]
+}

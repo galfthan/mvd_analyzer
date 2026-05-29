@@ -1,0 +1,91 @@
+{
+ "map": "e1m2gl",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets",
+   "x": -664,
+   "y": -2408,
+   "z": 976,
+   "spawnflags": 1793
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "sng",
+   "x": -648,
+   "y": -2712,
+   "z": 728,
+   "spawnflags": 1792
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -736,
+   "y": -3088,
+   "z": 976
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-2",
+   "x": -704,
+   "y": -2992,
+   "z": 976
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -648,
+   "y": -2472,
+   "z": 970
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -592,
+   "y": -3312,
+   "z": 968
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -96,
+   "y": -3264,
+   "z": 976
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 160,
+   "y": -2992,
+   "z": 946
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 160,
+   "y": -2992,
+   "z": 946
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 30.0694,
+   "y": -2775.2,
+   "z": 874,
+   "targetName": "tele1"
+  }
+ ]
+}

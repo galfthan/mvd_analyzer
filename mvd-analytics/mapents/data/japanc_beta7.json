@@ -1,0 +1,174 @@
+{
+ "map": "japanc_beta7",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-1",
+   "x": -205,
+   "y": -64,
+   "z": -1493
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-10",
+   "x": 83,
+   "y": 64,
+   "z": -1493
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-11",
+   "x": 179,
+   "y": -64,
+   "z": -1493
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-12",
+   "x": 179,
+   "y": 64,
+   "z": -1493
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-2",
+   "x": -205,
+   "y": 64,
+   "z": -1493
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-3",
+   "x": -143,
+   "y": 11,
+   "z": -172
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-4",
+   "x": -109,
+   "y": -64,
+   "z": -1493
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-5",
+   "x": -109,
+   "y": 64,
+   "z": -1493
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-6",
+   "x": -13,
+   "y": -64,
+   "z": -1493
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-7",
+   "x": -13,
+   "y": 64,
+   "z": -1493
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 0,
+   "y": 0,
+   "z": -172
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-9",
+   "x": 83,
+   "y": -64,
+   "z": -1493
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -2868,
+   "y": -268,
+   "z": -332,
+   "targetName": "red_flag"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -1468,
+   "y": 686,
+   "z": -176,
+   "targetName": "red_front"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -1412,
+   "y": -1732,
+   "z": -16,
+   "targetName": "red_garden"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": -448,
+   "y": -112,
+   "z": -1502,
+   "targetName": "red_spawn"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 480,
+   "y": 112,
+   "z": -1502,
+   "targetName": "blue_spawn"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": 1432,
+   "y": 1756,
+   "z": -16,
+   "targetName": "blue_garden"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": 1472,
+   "y": -660,
+   "z": -176,
+   "targetName": "blue_front"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": 2872,
+   "y": 308,
+   "z": -332,
+   "targetName": "blue_flag"
+  }
+ ]
+}

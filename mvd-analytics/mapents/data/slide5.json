@@ -1,0 +1,157 @@
+{
+ "map": "slide5",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-1",
+   "x": -3583,
+   "y": -2094,
+   "z": -587
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-2",
+   "x": -192,
+   "y": -192,
+   "z": 2045
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad",
+   "x": -3604,
+   "y": -1517,
+   "z": -200
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl",
+   "x": -240,
+   "y": -551,
+   "z": 1844
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "sng",
+   "x": 2438,
+   "y": 1204,
+   "z": 2859
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 2238,
+   "y": 3416,
+   "z": 3230
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-10",
+   "x": 2469,
+   "y": 3488,
+   "z": 3233
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-11",
+   "x": 2472,
+   "y": 3416,
+   "z": 3230
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 2241,
+   "y": 3483,
+   "z": 3233
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 2305,
+   "y": 3486,
+   "z": 3224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 2313,
+   "y": 3427,
+   "z": 3236
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 2366,
+   "y": 3413,
+   "z": 3227
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 2366,
+   "y": 3486,
+   "z": 3230
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-7",
+   "x": 2368,
+   "y": 3456,
+   "z": 3232
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 2419,
+   "y": 3483,
+   "z": 3230
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": 2424,
+   "y": 3433,
+   "z": 3230
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 2311,
+   "y": 3388,
+   "z": 3230,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 2430,
+   "y": 3394,
+   "z": 3230,
+   "targetName": "t2"
+  }
+ ]
+}

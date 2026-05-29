@@ -1,0 +1,316 @@
+{
+ "map": "ztndm5",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "YA-1",
+   "x": -200,
+   "y": 776,
+   "z": 64,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "YA-2",
+   "x": -168,
+   "y": 776,
+   "z": 64,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": -112,
+   "y": 256,
+   "z": 288,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 128,
+   "y": 0,
+   "z": 192,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GA",
+   "x": -144,
+   "y": 344,
+   "z": 256,
+   "loc": "GA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GL-1",
+   "x": 264,
+   "y": -120,
+   "z": 192,
+   "loc": "GL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GL-2",
+   "x": 304,
+   "y": -120,
+   "z": 192,
+   "loc": "GL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "YA",
+   "x": -248,
+   "y": 776,
+   "z": 64,
+   "loc": "YA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL",
+   "x": 216,
+   "y": -48,
+   "z": 448,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA.high",
+   "x": 152,
+   "y": 968,
+   "z": 256,
+   "loc": "YA.high"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel",
+   "x": 432,
+   "y": 688,
+   "z": 64,
+   "loc": "tunnel"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "YA",
+   "x": -224,
+   "y": 704,
+   "z": 64,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RA.SNG",
+   "x": 80,
+   "y": 624,
+   "z": 256,
+   "loc": "RA.SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "yard",
+   "x": 144,
+   "y": -32,
+   "z": 32,
+   "loc": "yard"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "yard",
+   "x": 160,
+   "y": -64,
+   "z": 32,
+   "loc": "yard"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": 96,
+   "y": 304,
+   "z": 288,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "YA.RL",
+   "x": -128,
+   "y": 704,
+   "z": 256,
+   "loc": "YA.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "yard.tele",
+   "x": -352,
+   "y": -64,
+   "z": 64,
+   "loc": "yard.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GA.way",
+   "x": 216,
+   "y": -328,
+   "z": 192,
+   "loc": "GA.way"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "GA",
+   "x": -104,
+   "y": 344,
+   "z": 256,
+   "loc": "GA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RA.SNG",
+   "x": 96,
+   "y": 688,
+   "z": 256,
+   "loc": "RA.SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "GA",
+   "x": -240,
+   "y": 240,
+   "z": 256,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": -256,
+   "y": 960,
+   "z": 32,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "GA-1",
+   "x": -432,
+   "y": 352,
+   "z": 288,
+   "loc": "GA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GA-2",
+   "x": -432,
+   "y": 352,
+   "z": 288,
+   "loc": "GA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GA.way",
+   "x": 224,
+   "y": -416,
+   "z": 224,
+   "loc": "GA.way"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA",
+   "x": -416,
+   "y": 608,
+   "z": 96,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.high",
+   "x": 160,
+   "y": 1056,
+   "z": 288,
+   "loc": "YA.high"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "yard",
+   "x": 160,
+   "y": -112,
+   "z": 64,
+   "loc": "yard"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GA.way",
+   "x": -320,
+   "y": -416,
+   "z": 288,
+   "loc": "GA.way",
+   "targetName": "tele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL",
+   "x": 592,
+   "y": -32,
+   "z": 224,
+   "loc": "GL",
+   "targetName": "tele2"
+  }
+ ]
+}

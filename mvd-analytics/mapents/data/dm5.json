@@ -1,0 +1,318 @@
+{
+ "map": "dm5",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "GL.YA-1",
+   "x": -176,
+   "y": -752,
+   "z": 16,
+   "loc": "GL.YA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "GL.YA-2",
+   "x": -176,
+   "y": -704,
+   "z": 16,
+   "loc": "GL.YA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Pent",
+   "x": 680,
+   "y": -120,
+   "z": -32,
+   "loc": "Pent",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 112,
+   "y": -400,
+   "z": 16,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "SNG.path-1",
+   "x": 200,
+   "y": -256,
+   "z": 192,
+   "loc": "SNG.path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "SNG.path-2",
+   "x": 256,
+   "y": -256,
+   "z": 192,
+   "loc": "SNG.path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "high.path-1",
+   "x": 736,
+   "y": 504,
+   "z": 192,
+   "loc": "high.path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "high.path-2",
+   "x": 792,
+   "y": 504,
+   "z": 192,
+   "loc": "high.path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "water",
+   "x": 512,
+   "y": -240,
+   "z": -136,
+   "loc": "water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL",
+   "x": 80,
+   "y": -432,
+   "z": 16,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SNG.path",
+   "x": 1016,
+   "y": -680,
+   "z": 192,
+   "loc": "SNG.path"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.path",
+   "x": -120,
+   "y": 376,
+   "z": 192,
+   "loc": "high.path"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "Pent",
+   "x": 648,
+   "y": -72,
+   "z": -32,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RL",
+   "x": 272,
+   "y": 1000,
+   "z": 96,
+   "loc": "RL",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "NG",
+   "x": 520,
+   "y": 288,
+   "z": -32,
+   "loc": "NG"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SNG",
+   "x": 904,
+   "y": -208,
+   "z": 208,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "NG",
+   "x": 536,
+   "y": 360,
+   "z": -32,
+   "loc": "NG"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Pent",
+   "x": 648,
+   "y": 8,
+   "z": -8,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL",
+   "x": 272,
+   "y": 944,
+   "z": 96,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA",
+   "x": 416,
+   "y": -808,
+   "z": 100,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "SNG",
+   "x": 832,
+   "y": -208,
+   "z": 208,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 656,
+   "y": -320,
+   "z": 96,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": 144,
+   "y": -344,
+   "z": 40,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL.outside",
+   "x": 296,
+   "y": 704,
+   "z": 120,
+   "loc": "RL.outside"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SNG",
+   "x": 880,
+   "y": -256,
+   "z": 216,
+   "loc": "SNG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SNG.path-1",
+   "x": 160,
+   "y": -224,
+   "z": 232,
+   "loc": "SNG.path"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SNG.path-2",
+   "x": 640,
+   "y": -776,
+   "z": 216,
+   "loc": "SNG.path"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "high.path-1",
+   "x": -72,
+   "y": 376,
+   "z": 232,
+   "loc": "high.path"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "high.path-2",
+   "x": 720,
+   "y": 368,
+   "z": 248,
+   "loc": "high.path"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "SNG.path",
+   "x": 1072,
+   "y": -768,
+   "z": 204,
+   "loc": "SNG.path",
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "high.path",
+   "x": 848,
+   "y": 376,
+   "z": 200,
+   "loc": "high.path",
+   "targetName": "t3"
+  }
+ ]
+}

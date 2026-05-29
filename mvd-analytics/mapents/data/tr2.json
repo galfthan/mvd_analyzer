@@ -1,0 +1,94 @@
+{
+ "map": "tr2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": -448,
+   "y": 192,
+   "z": 128
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -384,
+   "y": 128,
+   "z": 128
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -448,
+   "y": 128,
+   "z": 128,
+   "targetName": "begin"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -384,
+   "y": -528,
+   "z": -640,
+   "targetName": "stage_6"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 752,
+   "y": 416,
+   "z": 448,
+   "targetName": "stage_2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 768,
+   "y": -48,
+   "z": -640,
+   "targetName": "stage_5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 1010,
+   "y": 52,
+   "z": -632,
+   "targetName": "stage_4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": 1216,
+   "y": 320,
+   "z": -680,
+   "targetName": "stage_3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": 1416,
+   "y": 400,
+   "z": -708,
+   "targetName": "stage_8"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": 1584,
+   "y": 136,
+   "z": 440,
+   "targetName": "stage_7"
+  }
+ ]
+}

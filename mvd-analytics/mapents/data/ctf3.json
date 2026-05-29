@@ -1,0 +1,963 @@
+{
+ "map": "ctf3",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "blue base-1",
+   "x": 1584,
+   "y": 88,
+   "z": 376,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "blue base-2",
+   "x": 1584,
+   "y": 136,
+   "z": 376,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "red base-1",
+   "x": -1616,
+   "y": -168,
+   "z": 376,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "red base-2",
+   "x": -1616,
+   "y": -120,
+   "z": 376,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "blue base",
+   "x": 1008,
+   "y": 0,
+   "z": 384,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "red base",
+   "x": -1008,
+   "y": 0,
+   "z": 384,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "middle room",
+   "x": -128,
+   "y": 0,
+   "z": 336,
+   "loc": "middle room"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-1",
+   "x": 1232,
+   "y": -288,
+   "z": 96,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-2",
+   "x": 1232,
+   "y": 256,
+   "z": 96,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-3",
+   "x": 1264,
+   "y": 336,
+   "z": 376,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-4",
+   "x": 1296,
+   "y": -288,
+   "z": 96,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "blue base-5",
+   "x": 1296,
+   "y": 256,
+   "z": 96,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "middle room",
+   "x": -240,
+   "y": 160,
+   "z": 0,
+   "loc": "middle room"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-1",
+   "x": -1328,
+   "y": -288,
+   "z": 96,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-2",
+   "x": -1328,
+   "y": 256,
+   "z": 96,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-3",
+   "x": -1264,
+   "y": -288,
+   "z": 96,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "red base-4",
+   "x": -1264,
+   "y": 256,
+   "z": 96,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water corridor near blue base",
+   "x": 912,
+   "y": 64,
+   "z": -256,
+   "loc": "water corridor near blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water tunnel to red base",
+   "x": -944,
+   "y": -96,
+   "z": -256,
+   "loc": "water tunnel to red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "water corridor near blue base",
+   "x": 928,
+   "y": 0,
+   "z": -256,
+   "loc": "water corridor near blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "water tunnel to red base",
+   "x": -928,
+   "y": 0,
+   "z": -256,
+   "loc": "water tunnel to red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "blue base",
+   "x": 1936,
+   "y": -80,
+   "z": 160,
+   "loc": "blue base",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "red base",
+   "x": -1968,
+   "y": 48,
+   "z": 160,
+   "loc": "red base",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "blue base-1",
+   "x": 1264,
+   "y": -368,
+   "z": 376,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "blue base-2",
+   "x": 1616,
+   "y": 592,
+   "z": 376,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "middle room",
+   "x": 224,
+   "y": -192,
+   "z": 0,
+   "loc": "middle room"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "red base",
+   "x": -1648,
+   "y": -624,
+   "z": 376,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water corridor-1",
+   "x": -272,
+   "y": 432,
+   "z": -320,
+   "loc": "water corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water corridor-2",
+   "x": -144,
+   "y": 432,
+   "z": -320,
+   "loc": "water corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water corridor-3",
+   "x": 112,
+   "y": -464,
+   "z": -320,
+   "loc": "water corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water corridor-4",
+   "x": 224,
+   "y": -464,
+   "z": -320,
+   "loc": "water corridor"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "blue base",
+   "x": 1632,
+   "y": -608,
+   "z": 376,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "red base",
+   "x": -1632,
+   "y": 608,
+   "z": 376,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "middle room",
+   "x": 104,
+   "y": 104,
+   "z": -88,
+   "loc": "middle room"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 0,
+   "y": 0,
+   "z": -328,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "water corridor-1",
+   "x": -384,
+   "y": 448,
+   "z": -320,
+   "loc": "water corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "water corridor-2",
+   "x": 384,
+   "y": -448,
+   "z": -320,
+   "loc": "water corridor"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "middle room",
+   "x": 128,
+   "y": 0,
+   "z": 336,
+   "loc": "middle room"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "middle room",
+   "x": 0,
+   "y": 0,
+   "z": 0,
+   "loc": "middle room"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "blue base-1",
+   "x": 1584,
+   "y": -144,
+   "z": 376,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "blue base-2",
+   "x": 1744,
+   "y": -80,
+   "z": 96,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "blue base-3",
+   "x": 1808,
+   "y": -80,
+   "z": 96,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "red base-1",
+   "x": -1840,
+   "y": 48,
+   "z": 96,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "red base-2",
+   "x": -1776,
+   "y": 48,
+   "z": 96,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "red base-3",
+   "x": -1616,
+   "y": 112,
+   "z": 376,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "blue base",
+   "x": 976,
+   "y": 656,
+   "z": 384,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "middle room-1",
+   "x": -256,
+   "y": -192,
+   "z": 0,
+   "loc": "middle room"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "middle room-2",
+   "x": 208,
+   "y": 160,
+   "z": 0,
+   "loc": "middle room"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside blue base",
+   "x": 984,
+   "y": -688,
+   "z": 384,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside red base",
+   "x": -1008,
+   "y": -688,
+   "z": 384,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "red base",
+   "x": -1008,
+   "y": 656,
+   "z": 384,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "Quad",
+   "x": -144,
+   "y": 208,
+   "z": -320,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "blue base",
+   "x": 1632,
+   "y": -352,
+   "z": 112,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "red base",
+   "x": -1632,
+   "y": 352,
+   "z": 112,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "water corridor",
+   "x": 144,
+   "y": -208,
+   "z": -320,
+   "loc": "water corridor"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "blue base-1",
+   "x": 1632,
+   "y": 352,
+   "z": 112,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "blue base-2",
+   "x": 1792,
+   "y": 64,
+   "z": 96,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "red base-1",
+   "x": -1792,
+   "y": -64,
+   "z": 96,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "red base-2",
+   "x": -1632,
+   "y": -352,
+   "z": 112,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "blue base",
+   "x": 1952,
+   "y": 64,
+   "z": 160,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "red base",
+   "x": -1952,
+   "y": -64,
+   "z": 160,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "blue base-1",
+   "x": 1008,
+   "y": 0,
+   "z": 408,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-10",
+   "x": 1632,
+   "y": 608,
+   "z": 400,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-11",
+   "x": 1952,
+   "y": -64,
+   "z": 192,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-12",
+   "x": 1952,
+   "y": 64,
+   "z": 192,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-2",
+   "x": 1280,
+   "y": -352,
+   "z": 400,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "blue base-3",
+   "x": 1280,
+   "y": -352,
+   "z": 408,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-4",
+   "x": 1280,
+   "y": 352,
+   "z": 400,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "blue base-5",
+   "x": 1280,
+   "y": 352,
+   "z": 408,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-6",
+   "x": 1632,
+   "y": -608,
+   "z": 400,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-7",
+   "x": 1632,
+   "y": -352,
+   "z": 128,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-8",
+   "x": 1632,
+   "y": 352,
+   "z": 128,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "blue base-9",
+   "x": 1632,
+   "y": 352,
+   "z": 128,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "middle room-1",
+   "x": -176,
+   "y": 176,
+   "z": 120,
+   "loc": "middle room"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "middle room-2",
+   "x": 0,
+   "y": 0,
+   "z": 8,
+   "loc": "middle room"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "middle room-3",
+   "x": 0,
+   "y": 0,
+   "z": 336,
+   "loc": "middle room"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "middle room-4",
+   "x": 176,
+   "y": -176,
+   "z": 120,
+   "loc": "middle room"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "outside blue base",
+   "x": 536,
+   "y": 0,
+   "z": 120,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "outside red base",
+   "x": -536,
+   "y": 0,
+   "z": 120,
+   "loc": "outside red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-1",
+   "x": -1952,
+   "y": -64,
+   "z": 192,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "red base-10",
+   "x": -1280,
+   "y": -352,
+   "z": 408,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-11",
+   "x": -1280,
+   "y": 352,
+   "z": 400,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "red base-12",
+   "x": -1280,
+   "y": 352,
+   "z": 408,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "red base-13",
+   "x": -1008,
+   "y": 0,
+   "z": 408,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-2",
+   "x": -1952,
+   "y": 64,
+   "z": 192,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-3",
+   "x": -1632,
+   "y": -608,
+   "z": 400,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "red base-4",
+   "x": -1632,
+   "y": -352,
+   "z": 128,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-5",
+   "x": -1632,
+   "y": -352,
+   "z": 128,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-6",
+   "x": -1632,
+   "y": 352,
+   "z": 128,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "red base-7",
+   "x": -1632,
+   "y": 352,
+   "z": 128,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-8",
+   "x": -1632,
+   "y": 608,
+   "z": 400,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-9",
+   "x": -1280,
+   "y": -352,
+   "z": 400,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "water corridor near blue base",
+   "x": 992,
+   "y": 0,
+   "z": -232,
+   "loc": "water corridor near blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "water corridor-1",
+   "x": -96,
+   "y": 448,
+   "z": -296,
+   "loc": "water corridor"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "water corridor-2",
+   "x": 96,
+   "y": -448,
+   "z": -296,
+   "loc": "water corridor"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "water tunnel to red base",
+   "x": -992,
+   "y": 0,
+   "z": -232,
+   "loc": "water tunnel to red base"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "blue base",
+   "x": 1112,
+   "y": 0,
+   "z": 408,
+   "loc": "blue base",
+   "targetName": "tele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "middle room",
+   "x": 0,
+   "y": 0,
+   "z": 8,
+   "loc": "middle room",
+   "targetName": "tele3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "red base",
+   "x": -1112,
+   "y": 0,
+   "z": 408,
+   "loc": "red base",
+   "targetName": "tele2"
+  }
+ ]
+}

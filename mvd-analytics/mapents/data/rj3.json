@@ -1,0 +1,236 @@
+{
+ "map": "rj3",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": -3726,
+   "y": -158,
+   "z": -114
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-2",
+   "x": -3345,
+   "y": -162,
+   "z": -284
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-3",
+   "x": -3208,
+   "y": -160,
+   "z": -280
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-4",
+   "x": 784,
+   "y": -112,
+   "z": 64
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3699,
+   "y": -843,
+   "z": -64,
+   "targetName": "level8_t"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-10",
+   "x": -3696,
+   "y": -984,
+   "z": -64,
+   "targetName": "level8_t4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-11",
+   "x": -3696,
+   "y": -912,
+   "z": -64,
+   "targetName": "level8_t7"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-12",
+   "x": -3696,
+   "y": -912,
+   "z": 40,
+   "targetName": "level8_t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-13",
+   "x": -3273,
+   "y": -163,
+   "z": -338,
+   "targetName": "level1_t"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-14",
+   "x": -2272,
+   "y": -61,
+   "z": 11,
+   "targetName": "level2_t"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-15",
+   "x": -1428,
+   "y": -16,
+   "z": 1864,
+   "targetName": "level3_t"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-16",
+   "x": -1080,
+   "y": -120,
+   "z": -395,
+   "targetName": "level4_t"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-17",
+   "x": -128,
+   "y": -128,
+   "z": -730,
+   "targetName": "level5_t"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-18",
+   "x": 784,
+   "y": -432,
+   "z": 208,
+   "targetName": "level6_t4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-19",
+   "x": 784,
+   "y": -240,
+   "z": 208,
+   "targetName": "level6_t3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -3696,
+   "y": -1456,
+   "z": -64,
+   "targetName": "level8_t12"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-20",
+   "x": 784,
+   "y": -48,
+   "z": 208,
+   "targetName": "level6_t2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-21",
+   "x": 785,
+   "y": 149,
+   "z": 208,
+   "targetName": "level6_t"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-22",
+   "x": 2951,
+   "y": -94,
+   "z": -134,
+   "targetName": "level7_t"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -3696,
+   "y": -1384,
+   "z": -64,
+   "targetName": "level8_t9"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": -3696,
+   "y": -1384,
+   "z": 40,
+   "targetName": "level8_t3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": -3696,
+   "y": -1304,
+   "z": -64,
+   "targetName": "level8_t6"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": -3696,
+   "y": -1216,
+   "z": -64,
+   "targetName": "level8_t11"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": -3696,
+   "y": -1136,
+   "z": -64,
+   "targetName": "level8_t8"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": -3696,
+   "y": -1136,
+   "z": 40,
+   "targetName": "level8_t2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-9",
+   "x": -3696,
+   "y": -1064,
+   "z": -64,
+   "targetName": "level8_t5"
+  }
+ ]
+}

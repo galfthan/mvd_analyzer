@@ -1,0 +1,46 @@
+{
+ "map": "anarena7",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -128,
+   "y": 0,
+   "z": 853.5
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 0,
+   "y": -128,
+   "z": 853.5
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 0,
+   "y": 128,
+   "z": 853.5
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-4",
+   "x": 0,
+   "y": 168,
+   "z": 216
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 128,
+   "y": 0,
+   "z": 853.5
+  }
+ ]
+}

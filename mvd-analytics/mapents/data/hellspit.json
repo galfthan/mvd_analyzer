@@ -1,0 +1,96 @@
+{
+ "map": "hellspit",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -373.93,
+   "y": -659.586,
+   "z": 248
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -338.343,
+   "y": 5.657,
+   "z": 248
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 93.6571,
+   "y": -133.657,
+   "z": 56
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 176,
+   "y": -248,
+   "z": 248
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 432,
+   "y": -480,
+   "z": 248
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 440,
+   "y": -816,
+   "z": 248
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 656,
+   "y": -312,
+   "z": 216
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 680,
+   "y": -952,
+   "z": 216
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-9",
+   "x": 692,
+   "y": -656,
+   "z": 192
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -264,
+   "y": -856,
+   "z": 232,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 160,
+   "y": 32,
+   "z": 264,
+   "targetName": "t2"
+  }
+ ]
+}

@@ -1,0 +1,63 @@
+{
+ "map": "mboxdmm4",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 608,
+   "y": 116,
+   "z": -200
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-2",
+   "x": 864,
+   "y": 736,
+   "z": -432
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 880,
+   "y": 704,
+   "z": -432
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 1040,
+   "y": 272,
+   "z": -464
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 1264,
+   "y": -192,
+   "z": -432
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 1468,
+   "y": 552,
+   "z": -200
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 1032,
+   "y": 272,
+   "z": 144,
+   "targetName": "t_1"
+  }
+ ]
+}

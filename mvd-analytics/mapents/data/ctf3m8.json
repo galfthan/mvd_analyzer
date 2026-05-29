@@ -1,0 +1,678 @@
+{
+ "map": "ctf3m8",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE: BEHIND FLAG/LIFT",
+   "x": 3096,
+   "y": -528,
+   "z": 0,
+   "loc": "BLUE BASE: BEHIND FLAG/LIFT",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE: LOWER ENTRANCE",
+   "x": 1672,
+   "y": -880,
+   "z": 0,
+   "loc": "BLUE BASE: LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE: BEHIND FLAG/LIFT",
+   "x": -1496,
+   "y": -528,
+   "z": 0,
+   "loc": "RED BASE: BEHIND FLAG/LIFT",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE: LOWER ENTRANCE",
+   "x": -72,
+   "y": -880,
+   "z": 0,
+   "loc": "RED BASE: LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE BASE: GRENADE LAUNCHER",
+   "x": 2152,
+   "y": -616,
+   "z": 200,
+   "loc": "BLUE BASE: GRENADE LAUNCHER"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED BASE: GRENADE LAUNCHER",
+   "x": -520,
+   "y": -616,
+   "z": 200,
+   "loc": "RED BASE: GRENADE LAUNCHER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-1",
+   "x": 2368,
+   "y": -832,
+   "z": 0,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-2",
+   "x": 2368,
+   "y": -784,
+   "z": 0,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-3",
+   "x": 2880,
+   "y": -912,
+   "z": 192,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-4",
+   "x": 2928,
+   "y": -912,
+   "z": 192,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: LOWER ENTRANCE-1",
+   "x": 2048,
+   "y": -920,
+   "z": 192,
+   "loc": "BLUE BASE: LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: LOWER ENTRANCE-2",
+   "x": 2048,
+   "y": -872,
+   "z": 192,
+   "loc": "BLUE BASE: LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: LOWER ENTRANCE-3",
+   "x": 2200,
+   "y": -896,
+   "z": 0,
+   "loc": "BLUE BASE: LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: LOWER ENTRANCE-4",
+   "x": 2200,
+   "y": -368,
+   "z": 0,
+   "loc": "BLUE BASE: LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: STAIRS-1",
+   "x": 1672,
+   "y": -568,
+   "z": 192,
+   "loc": "BLUE BASE: STAIRS"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: STAIRS-2",
+   "x": 1672,
+   "y": -520,
+   "z": 192,
+   "loc": "BLUE BASE: STAIRS"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "OUTSIDE BLUE BASE-1",
+   "x": 1344,
+   "y": -176,
+   "z": 0,
+   "loc": "OUTSIDE BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "OUTSIDE BLUE BASE-2",
+   "x": 1392,
+   "y": -176,
+   "z": 0,
+   "loc": "OUTSIDE BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "OUTSIDE RED BASE-1",
+   "x": 208,
+   "y": -176,
+   "z": 0,
+   "loc": "OUTSIDE RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "OUTSIDE RED BASE-2",
+   "x": 256,
+   "y": -176,
+   "z": 0,
+   "loc": "OUTSIDE RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-1",
+   "x": -1328,
+   "y": -912,
+   "z": 192,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-2",
+   "x": -1280,
+   "y": -912,
+   "z": 192,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-3",
+   "x": -768,
+   "y": -832,
+   "z": 0,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-4",
+   "x": -768,
+   "y": -784,
+   "z": 0,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-5",
+   "x": -600,
+   "y": -896,
+   "z": 0,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-6",
+   "x": -600,
+   "y": -368,
+   "z": 0,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: GRENADE LAUNCHER-1",
+   "x": -448,
+   "y": -920,
+   "z": 192,
+   "loc": "RED BASE: GRENADE LAUNCHER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: GRENADE LAUNCHER-2",
+   "x": -448,
+   "y": -872,
+   "z": 192,
+   "loc": "RED BASE: GRENADE LAUNCHER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: STAIRS-1",
+   "x": -72,
+   "y": -568,
+   "z": 192,
+   "loc": "RED BASE: STAIRS"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: STAIRS-2",
+   "x": -72,
+   "y": -520,
+   "z": 192,
+   "loc": "RED BASE: STAIRS"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "BLUE BASE: BEHIND FLAG/LG",
+   "x": 3112,
+   "y": -616,
+   "z": 204,
+   "loc": "BLUE BASE: BEHIND FLAG/LG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "RED BASE: BEHIND FLAG/LG",
+   "x": -1480,
+   "y": -616,
+   "z": 204,
+   "loc": "RED BASE: BEHIND FLAG/LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "BRIDGE/100H",
+   "x": 800,
+   "y": -404,
+   "z": 64,
+   "loc": "BRIDGE/100H",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: BEHIND FLAG/LIFT",
+   "x": 3096,
+   "y": -736,
+   "z": 0,
+   "loc": "BLUE BASE: BEHIND FLAG/LIFT",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: LOWER ENTRANCE-1",
+   "x": 1672,
+   "y": -376,
+   "z": 0,
+   "loc": "BLUE BASE: LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: LOWER ENTRANCE-2",
+   "x": 2152,
+   "y": -896,
+   "z": 0,
+   "loc": "BLUE BASE: LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE",
+   "x": -552,
+   "y": -896,
+   "z": 0,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: BEHIND FLAG/LIFT",
+   "x": -1496,
+   "y": -736,
+   "z": 0,
+   "loc": "RED BASE: BEHIND FLAG/LIFT",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: LOWER ENTRANCE",
+   "x": -72,
+   "y": -376,
+   "z": 0,
+   "loc": "RED BASE: LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE BASE",
+   "x": 2576,
+   "y": -616,
+   "z": 8,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED BASE",
+   "x": -944,
+   "y": -616,
+   "z": 8,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RED ARMOUR LEDGE",
+   "x": 816,
+   "y": -1034,
+   "z": 216,
+   "loc": "RED ARMOUR LEDGE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "BLUE BASE: RL PLATFORM",
+   "x": 1408,
+   "y": -320,
+   "z": 192,
+   "loc": "BLUE BASE: RL PLATFORM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RED BASE: RL PLATFORM",
+   "x": 224,
+   "y": -320,
+   "z": 192,
+   "loc": "RED BASE: RL PLATFORM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE-1",
+   "x": 2368,
+   "y": -736,
+   "z": 208,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE-2",
+   "x": 2368,
+   "y": -432,
+   "z": 0,
+   "loc": "BLUE BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: RL PLATFORM",
+   "x": 1392,
+   "y": -944,
+   "z": 192,
+   "loc": "BLUE BASE: RL PLATFORM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE",
+   "x": -768,
+   "y": -432,
+   "z": 0,
+   "loc": "RED BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: RL PLATFORM",
+   "x": 208,
+   "y": -944,
+   "z": 192,
+   "loc": "RED BASE: RL PLATFORM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: YELLOW ARMOUR",
+   "x": -768,
+   "y": -736,
+   "z": 208,
+   "loc": "RED BASE: YELLOW ARMOUR"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE: LOWER ENTRANCE",
+   "x": 1720,
+   "y": -376,
+   "z": 0,
+   "loc": "BLUE BASE: LOWER ENTRANCE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE: YELLOW ARMOUR",
+   "x": 2368,
+   "y": -672,
+   "z": 208,
+   "loc": "BLUE BASE: YELLOW ARMOUR"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE: LOWER ENTRANCE",
+   "x": -120,
+   "y": -376,
+   "z": 0,
+   "loc": "RED BASE: LOWER ENTRANCE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE: YELLOW ARMOUR",
+   "x": -768,
+   "y": -672,
+   "z": 208,
+   "loc": "RED BASE: YELLOW ARMOUR"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE BASE: STAIRS",
+   "x": 1688,
+   "y": -616,
+   "z": 16,
+   "loc": "BLUE BASE: STAIRS"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RED BASE: STAIRS",
+   "x": -56,
+   "y": -616,
+   "z": 16,
+   "loc": "RED BASE: STAIRS"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE BASE: YELLOW ARMOUR",
+   "x": 2384,
+   "y": -584,
+   "z": 208,
+   "loc": "BLUE BASE: YELLOW ARMOUR"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED BASE: YELLOW ARMOUR",
+   "x": -752,
+   "y": -584,
+   "z": 208,
+   "loc": "RED BASE: YELLOW ARMOUR"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE BASE: YELLOW ARMOUR",
+   "x": 2384,
+   "y": -512,
+   "z": 208,
+   "loc": "BLUE BASE: YELLOW ARMOUR"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RED BASE: YELLOW ARMOUR",
+   "x": -752,
+   "y": -512,
+   "z": 208,
+   "loc": "RED BASE: YELLOW ARMOUR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE",
+   "x": 2512,
+   "y": -816,
+   "z": 24,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE: GRENADE LAUNCHER",
+   "x": 2056,
+   "y": -712,
+   "z": 216,
+   "loc": "BLUE BASE: GRENADE LAUNCHER"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE: RL PLATFORM",
+   "x": 1504,
+   "y": -952,
+   "z": 216,
+   "loc": "BLUE BASE: RL PLATFORM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "BLUE BASE: YELLOW ARMOUR",
+   "x": 2384,
+   "y": -608,
+   "z": 280,
+   "loc": "BLUE BASE: YELLOW ARMOUR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE",
+   "x": -904,
+   "y": -416,
+   "z": 24,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE: GRENADE LAUNCHER",
+   "x": -424,
+   "y": -712,
+   "z": 216,
+   "loc": "RED BASE: GRENADE LAUNCHER"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE: RL PLATFORM",
+   "x": 144,
+   "y": -952,
+   "z": 216,
+   "loc": "RED BASE: RL PLATFORM"
+  }
+ ]
+}

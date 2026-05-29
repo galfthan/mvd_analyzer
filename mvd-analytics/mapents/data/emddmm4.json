@@ -1,0 +1,108 @@
+{
+ "map": "emddmm4",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad",
+   "x": -256,
+   "y": -384,
+   "z": 672
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-1",
+   "x": -736,
+   "y": -768,
+   "z": 672
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-2",
+   "x": 224,
+   "y": 128,
+   "z": 672
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -704,
+   "y": -768,
+   "z": 704
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -704,
+   "y": -192,
+   "z": 512
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -448,
+   "y": -512,
+   "z": 512
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -448,
+   "y": 128,
+   "z": -192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-5",
+   "x": 0,
+   "y": 128,
+   "z": 512
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 256,
+   "y": -704,
+   "z": 704
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -656,
+   "y": -768,
+   "z": 680,
+   "targetName": "r1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -336,
+   "y": -384,
+   "z": 664,
+   "targetName": "q"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 144,
+   "y": 128,
+   "z": 664,
+   "targetName": "r2"
+  }
+ ]
+}

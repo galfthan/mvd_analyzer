@@ -1,0 +1,31 @@
+{
+ "map": "zediit2t1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": 432,
+   "y": -24,
+   "z": 64
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 432,
+   "y": -24,
+   "z": 64
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 592,
+   "y": -256,
+   "z": 128,
+   "targetName": "t1"
+  }
+ ]
+}

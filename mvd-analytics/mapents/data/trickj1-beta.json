@@ -1,0 +1,76 @@
+{
+ "map": "trickj1-beta",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": -2284,
+   "y": -3140,
+   "z": -2274
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -2248,
+   "y": -3140,
+   "z": -2272
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -2262,
+   "y": -3152,
+   "z": -2271,
+   "targetName": "done"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -508,
+   "y": -736,
+   "z": -116,
+   "targetName": "room2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 536,
+   "y": -2096,
+   "z": -1576,
+   "targetName": "room3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 676,
+   "y": -704,
+   "z": 14,
+   "targetName": "leif"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 702,
+   "y": -704,
+   "z": 12,
+   "targetName": "room1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": 739,
+   "y": -747,
+   "z": 20,
+   "targetName": "start"
+  }
+ ]
+}

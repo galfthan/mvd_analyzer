@@ -1,0 +1,46 @@
+{
+ "map": "amphi2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -528,
+   "y": -504,
+   "z": -304
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-2",
+   "x": -504,
+   "y": 512,
+   "z": -304
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -504,
+   "y": 512,
+   "z": -304
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 248,
+   "y": -264,
+   "z": -344
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 552,
+   "y": 448,
+   "z": -304
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "map": "race7",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -2928,
+   "y": -880,
+   "z": 2520
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -2880,
+   "y": -768,
+   "z": 2520
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -2912,
+   "y": -672,
+   "z": 2504,
+   "targetName": "teleport"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 2624,
+   "y": -896,
+   "z": 520,
+   "targetName": "kill"
+  }
+ ]
+}

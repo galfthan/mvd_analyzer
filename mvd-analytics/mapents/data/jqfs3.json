@@ -1,0 +1,64 @@
+{
+ "map": "jqfs3",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -1216,
+   "y": -1216,
+   "z": 1904
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 0,
+   "y": 0,
+   "z": 272
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-3",
+   "x": 0,
+   "y": 0,
+   "z": 288
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 0,
+   "y": 0,
+   "z": 1808
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 1024,
+   "y": -1024,
+   "z": 3200
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -1024,
+   "y": 1024,
+   "z": 3152,
+   "targetName": "yla2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 1024,
+   "y": -1024,
+   "z": 3136,
+   "targetName": "yla1"
+  }
+ ]
+}

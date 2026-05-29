@@ -1,0 +1,58 @@
+{
+ "map": "tr3_b1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": -824,
+   "y": -232,
+   "z": 16
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -716,
+   "y": -240,
+   "z": -36
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3130,
+   "y": -4050,
+   "z": -88,
+   "targetName": "s2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -2988,
+   "y": -464,
+   "z": -168,
+   "targetName": "s3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -2864,
+   "y": -1072,
+   "z": -304,
+   "targetName": "s4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": -792,
+   "y": -304,
+   "z": -96,
+   "targetName": "s1"
+  }
+ ]
+}

@@ -1,0 +1,64 @@
+{
+ "map": "vulcan",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl",
+   "x": 576,
+   "y": -1350,
+   "z": 432
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": 192,
+   "y": 192,
+   "z": 42
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 192,
+   "y": 192,
+   "z": 42
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 512,
+   "y": -512,
+   "z": 42
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 576,
+   "y": -1350,
+   "z": 432
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 1700,
+   "y": -96,
+   "z": 384
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 192,
+   "y": 192,
+   "z": 42,
+   "targetName": "t100"
+  }
+ ]
+}

@@ -1,0 +1,1009 @@
+{
+ "map": "ctf3m6",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE OUTER BASE (GROUND FLOOR)-1",
+   "x": -2912,
+   "y": -1008,
+   "z": 608,
+   "loc": "BLUE OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE OUTER BASE (GROUND FLOOR)-2",
+   "x": -2864,
+   "y": -1008,
+   "z": 608,
+   "loc": "BLUE OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED OUTER BASE (GROUND FLOOR)-1",
+   "x": 2560,
+   "y": -1584,
+   "z": 576,
+   "loc": "RED OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED OUTER BASE (GROUND FLOOR)-2",
+   "x": 2608,
+   "y": -1584,
+   "z": 576,
+   "loc": "RED OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "BLUE BASE (GL AREA)",
+   "x": -3512,
+   "y": -200,
+   "z": 992,
+   "loc": "BLUE BASE (GL AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "RED BASE (GL AREA)",
+   "x": 3256,
+   "y": -2360,
+   "z": 992,
+   "loc": "RED BASE (GL AREA)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE BASE (GL AREA)",
+   "x": -3360,
+   "y": -560,
+   "z": 704,
+   "loc": "BLUE BASE (GL AREA)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED BASE (GL AREA)",
+   "x": 3104,
+   "y": -2016,
+   "z": 712,
+   "loc": "RED BASE (GL AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (GL AREA)",
+   "x": -3536,
+   "y": -88,
+   "z": 976,
+   "loc": "BLUE BASE (GL AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-1",
+   "x": -4040,
+   "y": -528,
+   "z": 920,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-2",
+   "x": -4040,
+   "y": -492,
+   "z": 920,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE OUTER BASE (GROUND FLOOR)-1",
+   "x": -2864,
+   "y": -376,
+   "z": 592,
+   "loc": "BLUE OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE OUTER BASE (GROUND FLOOR)-2",
+   "x": -2816,
+   "y": -376,
+   "z": 592,
+   "loc": "BLUE OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE OUTER BASE (UPPER WALKWAYS)-1",
+   "x": -2144,
+   "y": -1328,
+   "z": 976,
+   "loc": "BLUE OUTER BASE (UPPER WALKWAYS)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE OUTER BASE (UPPER WALKWAYS)-2",
+   "x": -2096,
+   "y": -1328,
+   "z": 976,
+   "loc": "BLUE OUTER BASE (UPPER WALKWAYS)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE RL AREA-1",
+   "x": -1816,
+   "y": -1320,
+   "z": 788,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE RL AREA-2",
+   "x": -1768,
+   "y": -1320,
+   "z": 788,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad AREA-1",
+   "x": -240,
+   "y": -1584,
+   "z": 464,
+   "loc": "Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad AREA-2",
+   "x": -48,
+   "y": -968,
+   "z": 464,
+   "loc": "Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (GL AREA)",
+   "x": 3256,
+   "y": -2496,
+   "z": 976,
+   "loc": "RED BASE (GL AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-1",
+   "x": 3772,
+   "y": -2088,
+   "z": 912,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-2",
+   "x": 3772,
+   "y": -2052,
+   "z": 912,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED OUTER BASE (GROUND FLOOR)-1",
+   "x": 2528,
+   "y": -2216,
+   "z": 592,
+   "loc": "RED OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED OUTER BASE (GROUND FLOOR)-2",
+   "x": 2576,
+   "y": -2216,
+   "z": 592,
+   "loc": "RED OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED OUTER BASE (UPPER WALKWAYS)-1",
+   "x": 1824,
+   "y": -1264,
+   "z": 976,
+   "loc": "RED OUTER BASE (UPPER WALKWAYS)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED OUTER BASE (UPPER WALKWAYS)-2",
+   "x": 1872,
+   "y": -1264,
+   "z": 976,
+   "loc": "RED OUTER BASE (UPPER WALKWAYS)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED RL AREA-1",
+   "x": 1512,
+   "y": -1264,
+   "z": 788,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED RL AREA-2",
+   "x": 1560,
+   "y": -1264,
+   "z": 788,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "BLUE WATER TUNNEL",
+   "x": -2752,
+   "y": -832,
+   "z": 336,
+   "loc": "BLUE WATER TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "RED WATER TUNNEL",
+   "x": 2496,
+   "y": -1728,
+   "z": 336,
+   "loc": "RED WATER TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "BLUE 100 HEALTH",
+   "x": -3024,
+   "y": -848,
+   "z": 352,
+   "loc": "BLUE 100 HEALTH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RED 100 HEALTH",
+   "x": 2768,
+   "y": -1752,
+   "z": 336,
+   "loc": "RED 100 HEALTH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE",
+   "x": -3560,
+   "y": -600,
+   "z": 916,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE OUTER BASE (UPPER WALKWAYS)",
+   "x": -2064,
+   "y": -432,
+   "z": 976,
+   "loc": "BLUE OUTER BASE (UPPER WALKWAYS)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE RL AREA (TELEPORT FROM OUTER BASE)",
+   "x": -1376,
+   "y": -1152,
+   "z": 784,
+   "loc": "BLUE RL AREA (TELEPORT FROM OUTER BASE)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE",
+   "x": 3280,
+   "y": -1992,
+   "z": 912,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED OUTER BASE (UPPER WALKWAYS)",
+   "x": 1808,
+   "y": -2160,
+   "z": 976,
+   "loc": "RED OUTER BASE (UPPER WALKWAYS)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED RL AREA",
+   "x": 1504,
+   "y": -2224,
+   "z": 768,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE RL LEDGE",
+   "x": -1352,
+   "y": -1320,
+   "z": 904,
+   "loc": "BLUE RL LEDGE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED RL LEDGE",
+   "x": 1088,
+   "y": -1240,
+   "z": 904,
+   "loc": "RED RL LEDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad AREA",
+   "x": -128,
+   "y": -1280,
+   "z": 496,
+   "loc": "Quad AREA",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RED ARMOUR ROOM",
+   "x": -40,
+   "y": -1280,
+   "z": 1024,
+   "loc": "RED ARMOUR ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "BLUE EYES ROOM",
+   "x": -3456,
+   "y": -832,
+   "z": 1160,
+   "loc": "BLUE EYES ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "RED EYES ROOM",
+   "x": 3168,
+   "y": -1728,
+   "z": 1160,
+   "loc": "RED EYES ROOM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "BLUE RL",
+   "x": -1632,
+   "y": -832,
+   "z": 920,
+   "loc": "BLUE RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RED RL",
+   "x": 1376,
+   "y": -1728,
+   "z": 920,
+   "loc": "RED RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE (BEHIND FIREPLACE)",
+   "x": -3300,
+   "y": -448,
+   "z": 1120,
+   "loc": "BLUE BASE (BEHIND FIREPLACE)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE FLAG AREA",
+   "x": -4056,
+   "y": 56,
+   "z": 976,
+   "loc": "BLUE FLAG AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE OUTER BASE (10 ROX LEDGE)",
+   "x": -3104,
+   "y": -1168,
+   "z": 928,
+   "loc": "BLUE OUTER BASE (10 ROX LEDGE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE RL AREA",
+   "x": -1760,
+   "y": -368,
+   "z": 784,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE RL AREA (TELEPORT TO RA)",
+   "x": -1376,
+   "y": -544,
+   "z": 784,
+   "loc": "BLUE RL AREA (TELEPORT TO RA)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED ARMOUR ROOM-1",
+   "x": -224,
+   "y": -1168,
+   "z": 1152,
+   "loc": "RED ARMOUR ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED ARMOUR ROOM-2",
+   "x": -48,
+   "y": -1408,
+   "z": 880,
+   "loc": "RED ARMOUR ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE (BEHIND FIREPLACE)",
+   "x": 3012,
+   "y": -2144,
+   "z": 1136,
+   "loc": "RED BASE (BEHIND FIREPLACE)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED FLAG AREA",
+   "x": 3760,
+   "y": -2640,
+   "z": 976,
+   "loc": "RED FLAG AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED OUTER BASE (10 ROX LEDGE)",
+   "x": 2820,
+   "y": -1424,
+   "z": 912,
+   "loc": "RED OUTER BASE (10 ROX LEDGE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED RL AREA (TELEPORT FROM OUTER BASE)",
+   "x": 1088,
+   "y": -1440,
+   "z": 784,
+   "loc": "RED RL AREA (TELEPORT FROM OUTER BASE)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED RL AREA (TELEPORT TO RA)",
+   "x": 1088,
+   "y": -2048,
+   "z": 784,
+   "loc": "RED RL AREA (TELEPORT TO RA)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE RL AREA",
+   "x": -1808,
+   "y": -368,
+   "z": 784,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED RL AREA",
+   "x": 1456,
+   "y": -2224,
+   "z": 784,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE FLAG AREA",
+   "x": -3992,
+   "y": -184,
+   "z": 960,
+   "loc": "BLUE FLAG AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RED BASE",
+   "x": 3736,
+   "y": -2384,
+   "z": 960,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE OUTER BASE (UPPER WALKWAYS)",
+   "x": -2496,
+   "y": -832,
+   "z": 840,
+   "loc": "BLUE OUTER BASE (UPPER WALKWAYS)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED OUTER BASE (UPPER WALKWAYS)",
+   "x": 2240,
+   "y": -1728,
+   "z": 840,
+   "loc": "RED OUTER BASE (UPPER WALKWAYS)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE OUTER BASE (YELLOW ARMOUR)",
+   "x": -3088,
+   "y": -512,
+   "z": 944,
+   "loc": "BLUE OUTER BASE (YELLOW ARMOUR)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RED BASE (YELLOW ARMOUR)",
+   "x": 2836,
+   "y": -2048,
+   "z": 924,
+   "loc": "RED BASE (YELLOW ARMOUR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-1",
+   "x": -3952,
+   "y": -496,
+   "z": 928,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-2",
+   "x": -3952,
+   "y": -400,
+   "z": 928,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE-3",
+   "x": -3776,
+   "y": -288,
+   "z": 928,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-4",
+   "x": -3600,
+   "y": -496,
+   "z": 928,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-5",
+   "x": -3600,
+   "y": -400,
+   "z": 928,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE OUTER BASE (GROUND FLOOR)-1",
+   "x": -2672,
+   "y": -376,
+   "z": 604,
+   "loc": "BLUE OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE OUTER BASE (GROUND FLOOR)-2",
+   "x": -2304,
+   "y": -1056,
+   "z": 608,
+   "loc": "BLUE OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE RL AREA-1",
+   "x": -1856,
+   "y": -1216,
+   "z": 800,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE RL AREA-2",
+   "x": -1856,
+   "y": -448,
+   "z": 800,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "OPEN AREA IN FRONT OF BLUE CASTLE",
+   "x": -720,
+   "y": -496,
+   "z": 480,
+   "loc": "OPEN AREA IN FRONT OF BLUE CASTLE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "OPEN AREA IN FRONT OF RED CASTLE-1",
+   "x": 480,
+   "y": -2096,
+   "z": 480,
+   "loc": "OPEN AREA IN FRONT OF RED CASTLE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "OPEN AREA IN FRONT OF RED CASTLE-2",
+   "x": 512,
+   "y": -2144,
+   "z": 512,
+   "loc": "OPEN AREA IN FRONT OF RED CASTLE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED ARMOUR ROOM",
+   "x": -216,
+   "y": -1280,
+   "z": 1152,
+   "loc": "RED ARMOUR ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-1",
+   "x": 3344,
+   "y": -2168,
+   "z": 928,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-2",
+   "x": 3344,
+   "y": -2088,
+   "z": 928,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE-3",
+   "x": 3520,
+   "y": -2264,
+   "z": 928,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-4",
+   "x": 3712,
+   "y": -2168,
+   "z": 928,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-5",
+   "x": 3712,
+   "y": -2088,
+   "z": 928,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED OUTER BASE (GROUND FLOOR)-1",
+   "x": 2016,
+   "y": -1504,
+   "z": 608,
+   "loc": "RED OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED OUTER BASE (GROUND FLOOR)-2",
+   "x": 2376,
+   "y": -2176,
+   "z": 608,
+   "loc": "RED OUTER BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED OUTER BASE (UPPER WALKWAYS)",
+   "x": 1616,
+   "y": -1344,
+   "z": 800,
+   "loc": "RED OUTER BASE (UPPER WALKWAYS)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED RL AREA",
+   "x": 1616,
+   "y": -2112,
+   "z": 800,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE BASE (BEHIND FIREPLACE)",
+   "x": -3328,
+   "y": -432,
+   "z": 930,
+   "loc": "BLUE BASE (BEHIND FIREPLACE)",
+   "targetName": "blufireplace"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE BASE (FIREPLACE TELEPORT)",
+   "x": -2992,
+   "y": -148,
+   "z": 528,
+   "loc": "BLUE BASE (FIREPLACE TELEPORT)",
+   "targetName": "blu_fire"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE OUTER BASE (UPPER WALKWAYS)",
+   "x": -2040,
+   "y": -832,
+   "z": 1000,
+   "loc": "BLUE OUTER BASE (UPPER WALKWAYS)",
+   "targetName": "inner"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE RL AREA (TELEPORT FROM OUTER BASE)",
+   "x": -1376,
+   "y": -1296,
+   "z": 808,
+   "loc": "BLUE RL AREA (TELEPORT FROM OUTER BASE)",
+   "targetName": "bluramp"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "OPEN AREA IN FRONT OF BLUE CASTLE-1",
+   "x": -1088,
+   "y": -832,
+   "z": 640,
+   "loc": "OPEN AREA IN FRONT OF BLUE CASTLE",
+   "targetName": "blucentre"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "OPEN AREA IN FRONT OF BLUE CASTLE-2",
+   "x": -864,
+   "y": -832,
+   "z": 576,
+   "loc": "OPEN AREA IN FRONT OF BLUE CASTLE",
+   "targetName": "centoblu"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "OPEN AREA IN FRONT OF RED CASTLE-1",
+   "x": 576,
+   "y": -1728,
+   "z": 576,
+   "loc": "OPEN AREA IN FRONT OF RED CASTLE",
+   "targetName": "centored"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "OPEN AREA IN FRONT OF RED CASTLE-2",
+   "x": 832,
+   "y": -1728,
+   "z": 640,
+   "loc": "OPEN AREA IN FRONT OF RED CASTLE",
+   "targetName": "redcentre"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED ARMOUR ROOM-1",
+   "x": -64,
+   "y": -1152,
+   "z": 1152,
+   "loc": "RED ARMOUR ROOM",
+   "targetName": "redout_cen"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED ARMOUR ROOM-2",
+   "x": -32,
+   "y": -1184,
+   "z": 904,
+   "loc": "RED ARMOUR ROOM",
+   "targetName": "bluout_cen"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED BASE (BEHIND FIREPLACE)",
+   "x": 3056,
+   "y": -2128,
+   "z": 936,
+   "loc": "RED BASE (BEHIND FIREPLACE)",
+   "targetName": "redfireplace"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED BASE (FIREPLACE TELEPORT)",
+   "x": 2736,
+   "y": -2412,
+   "z": 530,
+   "loc": "RED BASE (FIREPLACE TELEPORT)",
+   "targetName": "redfire"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED OUTER BASE (UPPER WALKWAYS)",
+   "x": 1776,
+   "y": -1736,
+   "z": 996,
+   "loc": "RED OUTER BASE (UPPER WALKWAYS)",
+   "targetName": "inner2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED RL AREA (TELEPORT FROM OUTER BASE)",
+   "x": 1120,
+   "y": -1264,
+   "z": 804,
+   "loc": "RED RL AREA (TELEPORT FROM OUTER BASE)",
+   "targetName": "red_ramp"
+  }
+ ]
+}

@@ -1,0 +1,135 @@
+{
+ "map": "slide4",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25",
+   "x": -3739,
+   "y": -2675,
+   "z": 609
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl",
+   "x": -32,
+   "y": -3403,
+   "z": 1568
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets",
+   "x": 2176,
+   "y": -3820,
+   "z": 1440,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells",
+   "x": 1963,
+   "y": 3672,
+   "z": 3048
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "ssg",
+   "x": -1814,
+   "y": -3820,
+   "z": 1219
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 3504,
+   "y": 3440,
+   "z": 3744
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 3504,
+   "y": 3648,
+   "z": 3744
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 3584,
+   "y": 3440,
+   "z": 3744
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 3584,
+   "y": 3648,
+   "z": 3744
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 3664,
+   "y": 3440,
+   "z": 3744
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 3664,
+   "y": 3648,
+   "z": 3744
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-7",
+   "x": 3696,
+   "y": 3584,
+   "z": 3744
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3616,
+   "y": -3771,
+   "z": 624,
+   "targetName": "telo1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 3520,
+   "y": 3456,
+   "z": 3744,
+   "targetName": "end2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 3520,
+   "y": 3616,
+   "z": 3744,
+   "targetName": "end1"
+  }
+ ]
+}

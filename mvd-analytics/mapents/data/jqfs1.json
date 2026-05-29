@@ -1,0 +1,49 @@
+{
+ "map": "jqfs1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-1",
+   "x": 840,
+   "y": -832,
+   "z": 232
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 840,
+   "y": -832,
+   "z": 232
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 96,
+   "y": 0,
+   "z": 816,
+   "targetName": "1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 96,
+   "y": 0,
+   "z": 1728,
+   "targetName": "3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 1360,
+   "y": 192,
+   "z": 144,
+   "targetName": "2"
+  }
+ ]
+}

@@ -1,0 +1,405 @@
+{
+ "map": "junction",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG.GA",
+   "x": -672,
+   "y": 32,
+   "z": 0,
+   "loc": "LG.GA"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "lava",
+   "x": 588,
+   "y": 620,
+   "z": 128,
+   "loc": "lava",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GL.up",
+   "x": 192,
+   "y": -544,
+   "z": 128,
+   "loc": "GL.up"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "LG.GA",
+   "x": -664,
+   "y": -16,
+   "z": 0,
+   "loc": "LG.GA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "lava",
+   "x": 752,
+   "y": 208,
+   "z": 130,
+   "loc": "lava"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 64,
+   "y": -304,
+   "z": 0,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GL.up",
+   "x": 736,
+   "y": -40,
+   "z": 192,
+   "loc": "GL.up",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad.SSG",
+   "x": -624,
+   "y": -192,
+   "z": 128,
+   "loc": "Quad.SSG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "water",
+   "x": 74,
+   "y": -720,
+   "z": -96,
+   "loc": "water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL-1",
+   "x": 128,
+   "y": -240,
+   "z": 0,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL-2",
+   "x": 128,
+   "y": -208,
+   "z": 0,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL.up",
+   "x": 736,
+   "y": 8,
+   "z": 192,
+   "loc": "GL.up"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.GA-1",
+   "x": -672,
+   "y": 384,
+   "z": 48,
+   "loc": "LG.GA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.GA-2",
+   "x": -672,
+   "y": 432,
+   "z": 48,
+   "loc": "LG.GA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "lava",
+   "x": -16,
+   "y": 272,
+   "z": 128,
+   "loc": "lava"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": -162,
+   "y": -104,
+   "z": 1,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "Quad",
+   "x": 0,
+   "y": -136,
+   "z": 192,
+   "loc": "Quad",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "GL.up",
+   "x": 736,
+   "y": 56,
+   "z": 192,
+   "loc": "GL.up"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "lava",
+   "x": 800,
+   "y": 192,
+   "z": 128,
+   "loc": "lava"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water",
+   "x": 74,
+   "y": -672,
+   "z": -96,
+   "loc": "water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": -304,
+   "y": -400,
+   "z": 217,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "GL.up",
+   "x": 496,
+   "y": -360,
+   "z": 194,
+   "loc": "GL.up"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "LG.GA",
+   "x": -416,
+   "y": 432,
+   "z": 50,
+   "loc": "LG.GA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL",
+   "x": 376,
+   "y": 56,
+   "z": 64,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad.SSG",
+   "x": -312,
+   "y": 16,
+   "z": 130,
+   "loc": "Quad.SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "lava",
+   "x": 816,
+   "y": 592,
+   "z": 128,
+   "loc": "lava"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "GL",
+   "x": 340,
+   "y": 180,
+   "z": 128,
+   "loc": "GL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "lava",
+   "x": 752,
+   "y": 392,
+   "z": 130,
+   "loc": "lava"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "water",
+   "x": 48,
+   "y": -816,
+   "z": -94,
+   "loc": "water"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Quad.SSG",
+   "x": -608,
+   "y": -128,
+   "z": 128,
+   "loc": "Quad.SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "GL",
+   "x": 568,
+   "y": -416,
+   "z": 0,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "lava.YA",
+   "x": -16,
+   "y": 576,
+   "z": 130,
+   "loc": "lava.YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "GL-1",
+   "x": 32,
+   "y": -496,
+   "z": 28,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL-2",
+   "x": 568,
+   "y": -416,
+   "z": 26,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL.up",
+   "x": 192,
+   "y": -544,
+   "z": 154,
+   "loc": "GL.up"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG",
+   "x": -168,
+   "y": -200,
+   "z": 26,
+   "loc": "LG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG.GA",
+   "x": -732,
+   "y": 416,
+   "z": 154,
+   "loc": "LG.GA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.SSG",
+   "x": -608,
+   "y": -240,
+   "z": 154,
+   "loc": "Quad.SSG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "lava",
+   "x": 752,
+   "y": 208,
+   "z": 154,
+   "loc": "lava"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "lava.YA",
+   "x": -16,
+   "y": 576,
+   "z": 154,
+   "loc": "lava.YA"
+  }
+ ]
+}

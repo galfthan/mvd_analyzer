@@ -1,0 +1,844 @@
+{
+ "map": "gym",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Middle-1",
+   "x": -16,
+   "y": -304,
+   "z": 64,
+   "loc": "Middle"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Middle-2",
+   "x": -16,
+   "y": 280,
+   "z": 64,
+   "loc": "Middle"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Water-1",
+   "x": -160,
+   "y": -200,
+   "z": -240,
+   "loc": "Water"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Water-2",
+   "x": -160,
+   "y": -152,
+   "z": -240,
+   "loc": "Water"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "Blue Water",
+   "x": -480,
+   "y": -176,
+   "z": -256,
+   "loc": "Blue Water"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "Red Water",
+   "x": 480,
+   "y": 176,
+   "z": -256,
+   "loc": "Red Water"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Blue RL-1",
+   "x": -240,
+   "y": -432,
+   "z": 48,
+   "loc": "Blue RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Blue RL-2",
+   "x": -192,
+   "y": -432,
+   "z": 48,
+   "loc": "Blue RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Red RL-1",
+   "x": 160,
+   "y": 408,
+   "z": 48,
+   "loc": "Red RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Red RL-2",
+   "x": 208,
+   "y": 408,
+   "z": 48,
+   "loc": "Red RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Blue Base-1",
+   "x": -48,
+   "y": -848,
+   "z": 320,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Blue Base-2",
+   "x": -48,
+   "y": -752,
+   "z": 192,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Blue Base-3",
+   "x": 16,
+   "y": -848,
+   "z": 320,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Blue Base-4",
+   "x": 16,
+   "y": -752,
+   "z": 192,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Middle-1",
+   "x": -276,
+   "y": -320,
+   "z": 44,
+   "loc": "Middle"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Middle-2",
+   "x": -276,
+   "y": 288,
+   "z": 44,
+   "loc": "Middle"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Middle-3",
+   "x": 248,
+   "y": -320,
+   "z": 44,
+   "loc": "Middle"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Middle-4",
+   "x": 248,
+   "y": 288,
+   "z": 44,
+   "loc": "Middle"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Red Base-1",
+   "x": -48,
+   "y": 726,
+   "z": 192,
+   "loc": "Red Base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Red Base-2",
+   "x": -48,
+   "y": 848,
+   "z": 320,
+   "loc": "Red Base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Red Base-3",
+   "x": 16,
+   "y": 726,
+   "z": 192,
+   "loc": "Red Base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Red Base-4",
+   "x": 16,
+   "y": 848,
+   "z": 320,
+   "loc": "Red Base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "Middle",
+   "x": 0,
+   "y": 0,
+   "z": 40,
+   "loc": "Middle"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "Above Quad",
+   "x": 0,
+   "y": 0,
+   "z": 336,
+   "loc": "Above Quad",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Blue Base-1",
+   "x": 224,
+   "y": -878,
+   "z": 328,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Blue Base-2",
+   "x": 272,
+   "y": -878,
+   "z": 320,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Blue Main Entrance",
+   "x": -448,
+   "y": -184,
+   "z": 204,
+   "loc": "Blue Main Entrance",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Red Base-1",
+   "x": -272,
+   "y": 848,
+   "z": 320,
+   "loc": "Red Base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Red Base-2",
+   "x": -224,
+   "y": 848,
+   "z": 328,
+   "loc": "Red Base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Red Main Entrance-1",
+   "x": 416,
+   "y": 156,
+   "z": 204,
+   "loc": "Red Main Entrance",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Red Main Entrance-2",
+   "x": 886,
+   "y": 654,
+   "z": 204,
+   "loc": "Red Main Entrance",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "Blue Main Entrance",
+   "x": -704,
+   "y": -312,
+   "z": 172,
+   "loc": "Blue Main Entrance"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "Red Main Entrance",
+   "x": 704,
+   "y": 312,
+   "z": 172,
+   "loc": "Red Main Entrance"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 0,
+   "y": 0,
+   "z": 216,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "Water",
+   "x": 0,
+   "y": 0,
+   "z": -216,
+   "loc": "Water"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Blue RL",
+   "x": 0,
+   "y": -464,
+   "z": 32,
+   "loc": "Blue RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Red RL",
+   "x": 0,
+   "y": 456,
+   "z": 32,
+   "loc": "Red RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Blue RL",
+   "x": 192,
+   "y": -486,
+   "z": 64,
+   "loc": "Blue RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Blue Tele Entrance",
+   "x": 904,
+   "y": -680,
+   "z": 204,
+   "loc": "Blue Tele Entrance"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Red RL",
+   "x": -192,
+   "y": 440,
+   "z": 64,
+   "loc": "Red RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Red Tele Entrance",
+   "x": -912,
+   "y": 672,
+   "z": 204,
+   "loc": "Red Tele Entrance"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Water-1",
+   "x": 144,
+   "y": 144,
+   "z": -240,
+   "loc": "Water"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Water-2",
+   "x": 144,
+   "y": 192,
+   "z": -240,
+   "loc": "Water"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Above Quad-1",
+   "x": 0,
+   "y": -56,
+   "z": 352,
+   "loc": "Above Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Above Quad-2",
+   "x": 0,
+   "y": 56,
+   "z": 352,
+   "loc": "Above Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Blue Base-1",
+   "x": -272,
+   "y": -848,
+   "z": 208,
+   "loc": "Blue Base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Blue Base-2",
+   "x": 240,
+   "y": -848,
+   "z": 208,
+   "loc": "Blue Base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Blue Main Entrance",
+   "x": -920,
+   "y": -688,
+   "z": 204,
+   "loc": "Blue Main Entrance",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Red Base-1",
+   "x": -272,
+   "y": 832,
+   "z": 208,
+   "loc": "Red Base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Red Base-2",
+   "x": 240,
+   "y": 832,
+   "z": 208,
+   "loc": "Red Base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "Blue Base",
+   "x": -240,
+   "y": -848,
+   "z": 304,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "Red Base",
+   "x": 240,
+   "y": 848,
+   "z": 304,
+   "loc": "Red Base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Blue Tele Entrance",
+   "x": 880,
+   "y": 8,
+   "z": 28,
+   "loc": "Blue Tele Entrance"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Red Tele Entrance",
+   "x": -880,
+   "y": -8,
+   "z": 28,
+   "loc": "Red Tele Entrance"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "Blue Base",
+   "x": 0,
+   "y": -848,
+   "z": 196,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "Red Base",
+   "x": 0,
+   "y": 848,
+   "z": 196,
+   "loc": "Red Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Base-1",
+   "x": -64,
+   "y": -1008,
+   "z": 360,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Base-2",
+   "x": -64,
+   "y": -944,
+   "z": 360,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Base-3",
+   "x": -64,
+   "y": -848,
+   "z": 344,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Base-4",
+   "x": -64,
+   "y": -752,
+   "z": 216,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Base-5",
+   "x": 64,
+   "y": -1008,
+   "z": 360,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Base-6",
+   "x": 64,
+   "y": -944,
+   "z": 360,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Base-7",
+   "x": 64,
+   "y": -848,
+   "z": 344,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Base-8",
+   "x": 64,
+   "y": -752,
+   "z": 216,
+   "loc": "Blue Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Blue Main Entrance",
+   "x": -832,
+   "y": -168,
+   "z": 216,
+   "loc": "Blue Main Entrance"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Blue RL",
+   "x": -320,
+   "y": -460,
+   "z": 84,
+   "loc": "Blue RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Blue Tele Entrance",
+   "x": 880,
+   "y": -648,
+   "z": 216,
+   "loc": "Blue Tele Entrance"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Middle-1",
+   "x": -240,
+   "y": -288,
+   "z": 72,
+   "loc": "Middle"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Middle-2",
+   "x": -240,
+   "y": 304,
+   "z": 72,
+   "loc": "Middle"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Middle-3",
+   "x": 224,
+   "y": -288,
+   "z": 72,
+   "loc": "Middle"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Middle-4",
+   "x": 264,
+   "y": 304,
+   "z": 72,
+   "loc": "Middle"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "Middle-5",
+   "x": 266,
+   "y": -304,
+   "z": 104,
+   "loc": "Middle"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Base-1",
+   "x": -64,
+   "y": 752,
+   "z": 216,
+   "loc": "Red Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Base-2",
+   "x": -64,
+   "y": 848,
+   "z": 344,
+   "loc": "Red Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Base-3",
+   "x": -64,
+   "y": 944,
+   "z": 360,
+   "loc": "Red Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Base-4",
+   "x": -64,
+   "y": 1008,
+   "z": 360,
+   "loc": "Red Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Base-5",
+   "x": 64,
+   "y": 752,
+   "z": 216,
+   "loc": "Red Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Base-6",
+   "x": 64,
+   "y": 848,
+   "z": 344,
+   "loc": "Red Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Base-7",
+   "x": 64,
+   "y": 944,
+   "z": 360,
+   "loc": "Red Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Base-8",
+   "x": 64,
+   "y": 1008,
+   "z": 360,
+   "loc": "Red Base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Red Main Entrance",
+   "x": 832,
+   "y": 168,
+   "z": 216,
+   "loc": "Red Main Entrance"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Red RL",
+   "x": 320,
+   "y": 456,
+   "z": 84,
+   "loc": "Red RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Red Tele Entrance",
+   "x": -880,
+   "y": 648,
+   "z": 216,
+   "loc": "Red Tele Entrance"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Blue Main Entrance",
+   "x": -880,
+   "y": -168,
+   "z": 216,
+   "loc": "Blue Main Entrance",
+   "targetName": "blue"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Red Main Entrance",
+   "x": 880,
+   "y": 168,
+   "z": 216,
+   "loc": "Red Main Entrance",
+   "targetName": "red"
+  }
+ ]
+}

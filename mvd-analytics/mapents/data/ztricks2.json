@@ -1,0 +1,111 @@
+{
+ "map": "ztricks2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 2432,
+   "y": 3632,
+   "z": 368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 2512,
+   "y": 3632,
+   "z": 368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "spawn-3",
+   "x": 2656,
+   "y": 3632,
+   "z": 368
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3808,
+   "y": 600,
+   "z": 960,
+   "targetName": "start6"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -2816,
+   "y": -1152,
+   "z": 2624,
+   "targetName": "secret"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -1440,
+   "y": 1984,
+   "z": 640,
+   "targetName": "start5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 160,
+   "y": -672,
+   "z": 48,
+   "targetName": "start1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 832,
+   "y": -672,
+   "z": -160,
+   "targetName": "start2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": 1088,
+   "y": 1712,
+   "z": 736,
+   "targetName": "start4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": 2304,
+   "y": -672,
+   "z": -224,
+   "targetName": "start3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-8",
+   "x": 2816,
+   "y": 3632,
+   "z": 496,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-9",
+   "x": 2880,
+   "y": 352,
+   "z": 912,
+   "targetName": "start7"
+  }
+ ]
+}

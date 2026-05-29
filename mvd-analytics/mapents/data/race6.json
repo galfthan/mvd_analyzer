@@ -1,0 +1,32 @@
+{
+ "map": "race6",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": -2848,
+   "y": 0,
+   "z": 2872
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -2976,
+   "y": 160,
+   "z": 2856,
+   "targetName": "teleport"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -608,
+   "y": 608,
+   "z": -1024,
+   "targetName": "kill"
+  }
+ ]
+}
