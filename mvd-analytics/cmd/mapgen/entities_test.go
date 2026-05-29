@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/mapents"
+	"github.com/mvd-analyzer/mvd-analytics/mapgen/bsp"
 )
 
 func TestAssignNames(t *testing.T) {
@@ -36,6 +37,31 @@ func TestAssignNames(t *testing.T) {
 	// "low" should appear exactly twice (the ra item + the teleportDst).
 	if got["low"] != 2 {
 		t.Errorf("name %q count = %d, want 2; names=%v", "low", got["low"], names(ents))
+	}
+}
+
+func TestBrushPlacement(t *testing.T) {
+	models := []bsp.ModelBounds{
+		{Mins: bsp.Vec3{X: 0, Y: 0, Z: 0}, Maxs: bsp.Vec3{X: 0, Y: 0, Z: 0}},     // *0 worldspawn
+		{Mins: bsp.Vec3{X: 10, Y: 20, Z: 0}, Maxs: bsp.Vec3{X: 30, Y: 40, Z: 8}}, // *1
+	}
+	// Valid submodel ref → centre + bounds.
+	e := bsp.Entity{Classname: "trigger_teleport", RawKeys: map[string]string{"model": "*1"}}
+	c, b, ok := brushPlacement(e, models)
+	if !ok {
+		t.Fatal("expected placement for *1")
+	}
+	if c != [3]float32{20, 30, 4} {
+		t.Errorf("centre = %v, want [20 30 4]", c)
+	}
+	if b == nil || b.Min != [3]float32{10, 20, 0} || b.Max != [3]float32{30, 40, 8} {
+		t.Errorf("bounds = %+v, want min[10 20 0] max[30 40 8]", b)
+	}
+	// Missing / non-submodel / out-of-range model → not placed.
+	for _, bad := range []map[string]string{{}, {"model": "maps/x.bsp"}, {"model": "*9"}} {
+		if _, _, ok := brushPlacement(bsp.Entity{RawKeys: bad}, models); ok {
+			t.Errorf("expected no placement for %v", bad)
+		}
 	}
 }
 

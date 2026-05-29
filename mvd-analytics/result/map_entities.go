@@ -33,6 +33,15 @@ type MapEntity struct {
 	Target     string  `json:"target,omitempty"`     // teleportSrc → destination targetname
 	TargetName string  `json:"targetName,omitempty"` // teleportDst → its own targetname
 	Spawnflags int     `json:"spawnflags,omitempty"`
+	Bounds     *Bounds `json:"bounds,omitempty"`     // brush entities: trigger/door volume in world coords
+}
+
+// Bounds is an axis-aligned bounding box (world coords) carried by brush
+// entities (teleportSrc/button/door) so consumers have the volume, not
+// just the centre point in X/Y/Z.
+type Bounds struct {
+	Min [3]float32 `json:"min"`
+	Max [3]float32 `json:"max"`
 }
 
 // Category maps an item Kind to the coarse class used by the

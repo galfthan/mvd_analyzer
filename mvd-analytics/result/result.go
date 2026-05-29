@@ -144,7 +144,14 @@ package result
 //     buttons) with type + location, sourced from the offline-generated
 //     mapents corpus (BSP entity lumps) keyed by map name. Additive
 //     (omitempty); absent when no corpus exists for the map.
-const CurrentSchemaVersion = 13
+//
+// v14:
+//   - MapEntities gains brush entities — teleportSrc (trigger_teleport),
+//     button (func_button), door (func_door) — placed at their BSP
+//     submodel bbox centre with a Bounds (trigger/door volume), plus the
+//     teleport source→destination link via MapEntity.Target ==
+//     teleportDst.TargetName. v13 carried point entities only.
+const CurrentSchemaVersion = 14
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

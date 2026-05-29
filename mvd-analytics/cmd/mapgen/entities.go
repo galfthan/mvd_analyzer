@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 
 	"github.com/mvd-analyzer/mvd-analytics/loc"
 	"github.com/mvd-analyzer/mvd-analytics/mapents"
@@ -25,29 +26,41 @@ func emitEntities(path, name string, finder *loc.Finder, outDir string, verbose 
 	if err != nil {
 		return fmt.Errorf("read entities: %w", err)
 	}
+	// Submodel bboxes place brush entities (button/teleportSrc/door).
+	// Best-effort: on a read error, brush entities just stay unplaced.
+	models, _ := bsp.ReadModelBounds(path)
 
 	out := make([]mapents.MapEntity, 0, len(ents))
-	var skippedBrush int
+	var unplaced int
 	for _, e := range ents {
 		etype, kind, ok := mapents.Classify(e.Classname, e.Spawnflags)
 		if !ok {
-			continue
-		}
-		if !mapents.IsPointEntity(etype) {
-			skippedBrush++
 			continue
 		}
 		me := mapents.MapEntity{
 			Type:       etype,
 			Class:      e.Classname,
 			Kind:       kind,
-			X:          e.Origin[0],
-			Y:          e.Origin[1],
-			Z:          e.Origin[2],
 			Spawnflags: e.Spawnflags,
 		}
-		if etype == mapents.TypeTeleportDst {
+		if mapents.IsPointEntity(etype) {
+			me.X, me.Y, me.Z = e.Origin[0], e.Origin[1], e.Origin[2]
+		} else {
+			// Brush entity: anchor at the submodel bbox centre and carry
+			// the volume as Bounds.
+			c, b, ok := brushPlacement(e, models)
+			if !ok {
+				unplaced++
+				continue
+			}
+			me.X, me.Y, me.Z = c[0], c[1], c[2]
+			me.Bounds = b
+		}
+		switch etype {
+		case mapents.TypeTeleportDst:
 			me.TargetName = e.RawKeys["targetname"]
+		case mapents.TypeTeleportSrc:
+			me.Target = e.RawKeys["target"]
 		}
 		if finder != nil {
 			me.Loc = finder.FindNearest(me.X, me.Y, me.Z)
@@ -70,10 +83,32 @@ func emitEntities(path, name string, finder *loc.Finder, outDir string, verbose 
 	}
 
 	if verbose {
-		fmt.Fprintf(os.Stderr, "  ents %s: entities=%d skipped-brush=%d bytes=%d\n",
-			name, len(out), skippedBrush, len(data))
+		fmt.Fprintf(os.Stderr, "  ents %s: entities=%d unplaced-brush=%d bytes=%d\n",
+			name, len(out), unplaced, len(data))
 	}
 	return nil
+}
+
+// brushPlacement resolves a brush entity's `model "*N"` reference to the
+// Nth submodel's bbox, returning the box centre (anchor point) and the
+// box itself (trigger/door volume), both offset by any entity origin.
+// ok is false when the model key is missing/not a submodel ref or the
+// index is out of range (e.g. models lump unreadable).
+func brushPlacement(e bsp.Entity, models []bsp.ModelBounds) ([3]float32, *mapents.Bounds, bool) {
+	m := e.RawKeys["model"]
+	if len(m) < 2 || m[0] != '*' {
+		return [3]float32{}, nil, false
+	}
+	idx, err := strconv.Atoi(m[1:])
+	if err != nil || idx < 0 || idx >= len(models) {
+		return [3]float32{}, nil, false
+	}
+	mb := models[idx]
+	off := e.Origin
+	min := [3]float32{mb.Mins.X + off[0], mb.Mins.Y + off[1], mb.Mins.Z + off[2]}
+	max := [3]float32{mb.Maxs.X + off[0], mb.Maxs.Y + off[1], mb.Maxs.Z + off[2]}
+	c := [3]float32{(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2}
+	return c, &mapents.Bounds{Min: min, Max: max}, true
 }
 
 // assignNames sets a human label on every entity: its nearest loc name

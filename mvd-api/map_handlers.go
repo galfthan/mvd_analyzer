@@ -109,11 +109,15 @@ func filterMapEntities(in *result.MapEntitiesResult, r *http.Request) *result.Ma
 func corpusToResult(me *mapents.MapEntities) *result.MapEntitiesResult {
 	out := &result.MapEntitiesResult{Map: me.Map, Entities: make([]result.MapEntity, 0, len(me.Entities))}
 	for _, e := range me.Entities {
-		out.Entities = append(out.Entities, result.MapEntity{
+		re := result.MapEntity{
 			Type: e.Type, Class: e.Class, Kind: e.Kind, Name: e.Name,
 			X: e.X, Y: e.Y, Z: e.Z, Loc: e.Loc,
 			Target: e.Target, TargetName: e.TargetName, Spawnflags: e.Spawnflags,
-		})
+		}
+		if e.Bounds != nil {
+			re.Bounds = &result.Bounds{Min: e.Bounds.Min, Max: e.Bounds.Max}
+		}
+		out.Entities = append(out.Entities, re)
 	}
 	return out
 }

@@ -749,12 +749,19 @@ nearest origin.
 | Target | `target` | string (omitempty) | `teleportSrc` → the destination's targetname. |
 | TargetName | `targetName` | string (omitempty) | `teleportDst` → its own targetname (join key for teleport pairs). |
 | Spawnflags | `spawnflags` | int (omitempty) | Raw BSP spawnflags. |
+| Bounds | `bounds` | object (omitempty) | Brush entities only: `{ min:[x,y,z], max:[x,y,z] }` — the trigger/door volume in world coords. |
 
 Classification is grounded in `ktx/src/items.c` spawn functions
-(`item_health` spawnflags `H_ROTTEN=1`/`H_MEGA=2` select h15/mh). Brush
-entities (`teleportSrc`/`button`/`door`) are only present once bmodel
-bbox resolution is generated; point entities (items, spawns,
-`teleportDst`) are always emitted.
+(`item_health` spawnflags `H_ROTTEN=1`/`H_MEGA=2` select h15/mh).
+
+**Point vs brush.** Point entities (items, spawns, `teleportDst`) sit at
+their entity origin. Brush entities (`teleportSrc`, `button`, `door`)
+have no origin — they are placed at their BSP submodel's bbox centre
+(`X/Y/Z`) and carry the box as `bounds` (the trigger/door volume).
+
+**Teleport pairs.** A `teleportSrc` (the trigger you walk into) links to
+its `teleportDst` (where you arrive) by `teleportSrc.target` ==
+`teleportDst.targetName`. Multiple sources may share one destination.
 
 ## Backpacks (`backpacks`)
 
@@ -812,6 +819,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v14 | `MapEntities` gains **brush entities** — `teleportSrc` (`trigger_teleport`), `button` (`func_button`), `door` (`func_door`) — placed at their BSP submodel bbox centre with a `bounds` (trigger/door volume), plus the teleport source→destination link (`teleportSrc.target` == `teleportDst.targetName`). v13 carried point entities (items, spawns, teleport destinations) only. |
 | v13 | New `MapEntities` section: the map's static designed layout (item spawns, player spawnpoints, teleport destinations/sources, buttons) with type + location, from the offline-generated mapents corpus (BSP entity lumps) keyed by map name. Additive (`omitempty`); absent when no corpus exists for the map. |
 | v12 | `LocNode` and `LocEdge` gain optional combat-posture weights — `armed` / `unarmed` / `quad` / `pent` breakdowns (`LocWeights` on nodes, `LocEdgeWeights` on edges) restricted to samples where the player held RL or LG, held neither, or had an active quad / pent. Lets consumers re-weight the loc graph by combat posture without re-walking streams. Field additions only; each weight is omitted when no observed sample met its condition. |
 | v11 | Bucket views gain a **column-major layout** (`view.ColumnarBuckets`): one dense typed array per `(player, field)` over the player's active span, implicit time axis (`time(i) = startMs + i*windowMs`), a `0`/`1` `alive[]` liveness mask, sparse per-field `validFrom`, booleans/alive as `0`/`1`, loc always the raw `li` index. It is the **default** for the web (`getDefaultBuckets`), REST `/buckets`, and MCP `getBuckets`; the row-major `BucketsView` stays available via `layout=row`. The legacy `HighResBucket`/`HighResPlayerData`/`HighResTeamData` shim and `view.ToLegacyHighResBuckets` are removed. The `Result` **structure is unchanged** — this bump versions the outward *view/query* wire surface so API/MCP/web consumers can feature-detect the new default shape and cached view responses (ETag/`X-Schema-Version`) are invalidated. |

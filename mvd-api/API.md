@@ -174,7 +174,7 @@ all endpoints and aren't repeated.
 Warm the cache and resolve the canonical id. Idempotent.
 
 ```jsonc
-{ "demoId": "sha:abc…", "sha256": "abc…", "fromCache": true, "schemaVersion": 13 }
+{ "demoId": "sha:abc…", "sha256": "abc…", "fromCache": true, "schemaVersion": 14 }
 ```
 
 Use `demoId` for subsequent calls to skip the gameId→sha lookup.
@@ -186,7 +186,7 @@ single call to populate a match header and decide which panels to show.
 
 ```jsonc
 {
-  "schemaVersion": 13,
+  "schemaVersion": 14,
   "map": "dm6", "gameDir": "qw",
   "mode": "4on4",            // omitempty
   "duration": 613.4,         // seconds
@@ -256,10 +256,14 @@ sourced from the BSP entity corpus. Shape: `result.MapEntitiesResult` →
 For the per-match pickup timeline use `/items` instead.
 
 ```jsonc
-// ?types=item,teleportDst&kinds=weapon
+// ?types=item,teleportSrc,teleportDst&kinds=weapon
 { "map": "dm6", "entities": [
   { "type": "item", "class": "weapon_rocketlauncher", "kind": "rl",
     "name": "RA", "x": 1216, "y": -64, "z": 24, "loc": "RA" },
+  // brush entity: anchored at bbox centre, carries the trigger volume
+  { "type": "teleportSrc", "class": "trigger_teleport", "name": "GA",
+    "x": 248, "y": -1784, "z": 83, "loc": "GA", "target": "t2",
+    "bounds": { "min": [229,-1807,24], "max": [267,-1761,142] } },
   { "type": "teleportDst", "class": "info_teleport_destination",
     "name": "MH", "x": -512, "y": 480, "z": 24, "loc": "MH",
     "targetName": "t2" }
@@ -268,6 +272,9 @@ For the per-match pickup timeline use `/items` instead.
 
 `types` ∈ `item,spawn,teleportDst,teleportSrc,button,door`; `kinds` is an
 item category (`armor,mega,health,powerup,weapon,ammo`) or a raw kind.
+Brush entities (`teleportSrc`/`button`/`door`) carry a `bounds` volume;
+link a teleporter's entrance to its exit via `teleportSrc.target` ==
+`teleportDst.targetName`.
 
 ### 4.8 `GET /v1/demos/{id}/events`
 
@@ -409,7 +416,7 @@ indices client-side.
 
 - **`/chat`** (`from`, `to`, `players`, `types`) — chat + teamsay only;
   `[]result.MatchEvent`.
-- **`/healthz`** — `{ "ok": true, "schemaVersion": 13 }`.
+- **`/healthz`** — `{ "ok": true, "schemaVersion": 14 }`.
 - **`/v1/version`** — `{ "hash", "tag", "buildDate" }`.
 
 ### 4.16 Per-map static data — `GET /v1/maps/{map}/…`

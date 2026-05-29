@@ -49,7 +49,7 @@ func (a *MapEntitiesAnalyzer) Finalize(result *Result) error {
 		Entities: make([]MapEntity, 0, len(corpus.Entities)),
 	}
 	for _, e := range corpus.Entities {
-		out.Entities = append(out.Entities, MapEntity{
+		me := MapEntity{
 			Type:       e.Type,
 			Class:      e.Class,
 			Kind:       e.Kind,
@@ -61,7 +61,11 @@ func (a *MapEntitiesAnalyzer) Finalize(result *Result) error {
 			Target:     e.Target,
 			TargetName: e.TargetName,
 			Spawnflags: e.Spawnflags,
-		})
+		}
+		if e.Bounds != nil {
+			me.Bounds = &Bounds{Min: e.Bounds.Min, Max: e.Bounds.Max}
+		}
+		out.Entities = append(out.Entities, me)
 	}
 	result.MapEntities = out
 	return nil
