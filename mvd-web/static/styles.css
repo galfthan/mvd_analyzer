@@ -2502,39 +2502,10 @@ th.sortable.sort-desc::after {
     line-height: 1.3;
 }
 
-/* Below-map entity table (learn mode). */
+/* Below-map entity table (learn mode): standard .stats-table styling,
+   expands with the tab (no inner scrollbar). */
 .map-entities-table-wrap {
     margin-top: 12px;
-    max-height: 320px;
-    overflow-y: auto;
-    border: 1px solid #2a2a3a;
-    border-radius: 4px;
-}
-
-.map-entities-list-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
-}
-
-.map-entities-list-table th,
-.map-entities-list-table td {
-    text-align: left;
-    padding: 4px 10px;
-    border-bottom: 1px solid #1e1e2a;
-    color: #ccc;
-}
-
-.map-entities-list-table thead th {
-    position: sticky;
-    top: 0;
-    background: var(--bg-deep);
-    color: #888;
-    font-weight: 600;
-}
-
-.map-entities-list-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.03);
 }
 
 .map-trail-select {

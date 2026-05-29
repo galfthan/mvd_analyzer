@@ -305,12 +305,13 @@ players do. The corpus is fetched in-browser by `fetchMapEntsSync`
 (`worker.js`) from `mapents/<map>.json` (deployed by `make build`); the
 toggle is hidden when no corpus exists for the map.
 
-Below the canvas, a table lists every visible entity — Class
-(cleartext: Armor, Weapon, …), Type (kind: ra, h25, …), Name, Loc, and
-Source. Teleporters collapse to one row per entrance→exit pair, with the
-entrance in **Loc** (where the trigger sits) and the exit it leads to in
-**Source**. The table respects the
-category filters and rebuilds via `buildEntityTable`.
+Below the canvas, a sortable table (standard `.stats-table` style,
+expanding with the tab — no inner scrollbar) lists every visible
+entity — Class (cleartext: Armor, Weapon, …), Type (kind: ra, h25, …),
+Name, Loc, and Destination. Teleporters collapse to one row per
+entrance→exit pair, with the entrance in **Loc** (where the trigger
+sits) and the exit it leads to in **Destination**. The table respects
+the category filters and rebuilds via `buildEntityTable`.
 
 Learn mode is reflected in the URL as `?learn=1` (alongside `tab=map`),
 so a study view is directly link-shareable; `applyUrlState` restores it
