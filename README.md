@@ -129,10 +129,10 @@ make build-all-platforms                    # cross-compile both mvd-api and mvd
 
 #### Tool surface
 
-Seventeen tools — one for discovery, two for cache control + curated
-summary, eight for the high-level Result sections (KTX demoinfo,
-metadata, frags, loc-graph, chat, backpacks, items, weapon-pickups),
-and six for the view query layer:
+Nineteen tools — one for discovery, two for cache control + curated
+summary, the high-level Result-section pass-throughs (KTX demoinfo,
+metadata, frags, loc-graph, chat, backpacks, items, map entities,
+weapon-pickups), and six for the view query layer:
 
 | Tool | Backing |
 |---|---|
@@ -149,6 +149,8 @@ and six for the view query layer:
 | `getChat(demoId, players, from, to, types)` | `mvd-api` `/chat` |
 | `getBackpacks(demoId, players, weapon)` | `mvd-api` `/backpacks` |
 | `getItems(demoId, items, players, kinds)` | `mvd-api` `/items` |
+| `getMapEntities(demoId, types, kinds)` | `mvd-api` `/map-entities` (static map layout) |
+| `getMapEntitiesByMap(map, types, kinds)` | `mvd-api` `/v1/maps/{map}/entities` |
 | `getWeaponPickups(demoId, players, weapon, source)` | `mvd-api` `/weapon-pickups` |
 | **View queries** | |
 | `getBuckets(demoId, windowMs, fields, reducers, layout, …)` | `mvd-api` `/buckets` (default column-major; `layout=row` for the per-bucket shape) |
