@@ -90,16 +90,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-2",
-   "x": -320,
-   "y": 424,
-   "z": 32
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-3",
+   "name": "spawn-2",
    "x": 288,
    "y": -464,
    "z": 28
@@ -107,7 +99,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-4",
+   "name": "spawn-3",
    "x": 432,
    "y": 432,
    "z": 156

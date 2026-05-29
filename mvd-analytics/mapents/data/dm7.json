@@ -442,17 +442,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "house.mid-1",
-   "x": 448,
-   "y": -672,
-   "z": 160,
-   "loc": "house.mid"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "house.mid-2",
+   "name": "house.mid",
    "x": 448,
    "y": -672,
    "z": 160,

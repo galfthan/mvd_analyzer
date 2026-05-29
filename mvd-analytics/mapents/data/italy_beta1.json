@@ -504,19 +504,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "sng-tele-1",
+   "name": "sng-tele",
    "x": -784,
    "y": -992,
    "z": 8,
-   "loc": "sng-tele"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "sng-tele-2",
-   "x": -784,
-   "y": -992,
-   "z": 64,
    "loc": "sng-tele"
   },
   {

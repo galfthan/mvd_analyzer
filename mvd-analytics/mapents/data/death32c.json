@@ -1389,17 +1389,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "2.NG-1",
-   "x": -336,
-   "y": 200,
-   "z": 24,
-   "loc": "2.NG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "2.NG-2",
+   "name": "2.NG-1",
    "x": 88,
    "y": 72,
    "z": 32,
@@ -1408,7 +1399,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "2.NG-3",
+   "name": "2.NG-2",
    "x": 152,
    "y": -224,
    "z": 32,
@@ -1434,17 +1425,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "2.big-1",
-   "x": -776,
-   "y": -1192,
-   "z": 24,
-   "loc": "2.big"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "2.big-2",
+   "name": "2.big",
    "x": -424,
    "y": -1088,
    "z": 136,
@@ -1515,17 +1497,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "4.high.tele-1",
-   "x": 504,
-   "y": 632,
-   "z": 192,
-   "loc": "4.high.tele"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "4.high.tele-2",
+   "name": "4.high.tele",
    "x": 512,
    "y": 744,
    "z": 184,
@@ -1560,17 +1533,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "6.GL-2",
-   "x": 1424,
-   "y": -608,
-   "z": 304,
-   "loc": "6.GL"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "6.GL-3",
+   "name": "6.GL-2",
    "x": 1560,
    "y": -992,
    "z": 304,

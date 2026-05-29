@@ -4,16 +4,8 @@
  "entities": [
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-1",
-   "x": -48,
-   "y": -1328,
-   "z": 2384
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-2",
+   "name": "spawn",
    "x": 32,
    "y": -1328,
    "z": 2448

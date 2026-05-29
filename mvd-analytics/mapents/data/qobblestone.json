@@ -506,15 +506,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RL.platform.hi",
-   "x": 352,
-   "y": -784,
-   "z": 152,
-   "loc": "RL.platform.hi"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "RL.platform.spawn",
    "x": -458,

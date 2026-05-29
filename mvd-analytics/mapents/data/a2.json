@@ -317,15 +317,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "yard.MH",
-   "x": 120,
-   "y": -800,
-   "z": -192,
-   "loc": "yard.MH"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "yard.YA",
    "x": 720,

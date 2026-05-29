@@ -885,15 +885,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "armors.LG",
-   "x": -512,
-   "y": -352,
-   "z": 192,
-   "loc": "armors.LG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "armors.room",
    "x": 776,

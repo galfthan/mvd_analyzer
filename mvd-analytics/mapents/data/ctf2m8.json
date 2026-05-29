@@ -1267,26 +1267,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "BLUE BASE: LAVA JUMP",
-   "x": -1312,
-   "y": -880,
-   "z": -776,
-   "loc": "BLUE BASE: LAVA JUMP"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "BLUE BASE: LOWER Quad AREA-1",
-   "x": -824,
-   "y": 512,
-   "z": -776,
-   "loc": "BLUE BASE: LOWER Quad AREA"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "BLUE BASE: LOWER Quad AREA-2",
+   "name": "BLUE BASE: LOWER Quad AREA",
    "x": -760,
    "y": 560,
    "z": -936,
@@ -1366,17 +1348,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RED BASE: BELOW FLAG-1",
-   "x": -1312,
-   "y": -880,
-   "z": 24,
-   "loc": "RED BASE: BELOW FLAG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team1",
-   "name": "RED BASE: BELOW FLAG-2",
+   "name": "RED BASE: BELOW FLAG-1",
    "x": -1040,
    "y": -496,
    "z": 344,
@@ -1385,7 +1358,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "RED BASE: BELOW FLAG-3",
+   "name": "RED BASE: BELOW FLAG-2",
    "x": -960,
    "y": -776,
    "z": 136,
@@ -1456,17 +1429,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RED BASE: LOWER Quad AREA-1",
-   "x": -824,
-   "y": 512,
-   "z": 24,
-   "loc": "RED BASE: LOWER Quad AREA"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "RED BASE: LOWER Quad AREA-2",
+   "name": "RED BASE: LOWER Quad AREA",
    "x": -760,
    "y": 560,
    "z": -136,

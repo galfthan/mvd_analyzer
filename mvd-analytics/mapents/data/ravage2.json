@@ -402,14 +402,6 @@
    "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "spawn-10",
-   "x": 528,
-   "y": 976,
-   "z": -374
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-11",
    "x": 768,
    "y": 352,
    "z": -374
@@ -417,7 +409,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-12",
+   "name": "spawn-11",
    "x": 846,
    "y": 1136,
    "z": -198
@@ -425,7 +417,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-13",
+   "name": "spawn-12",
    "x": 848,
    "y": 1360,
    "z": -374
@@ -433,7 +425,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-14",
+   "name": "spawn-13",
    "x": 878,
    "y": 656,
    "z": -198
@@ -441,7 +433,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-15",
+   "name": "spawn-14",
    "x": 1088,
    "y": 768,
    "z": -374
@@ -449,7 +441,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-16",
+   "name": "spawn-15",
    "x": 1120,
    "y": 768,
    "z": -646
@@ -480,16 +472,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-5",
-   "x": -80,
-   "y": 816,
-   "z": -230
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-6",
+   "name": "spawn-5",
    "x": -80,
    "y": 1360,
    "z": -310
@@ -497,7 +481,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-7",
+   "name": "spawn-6",
    "x": -48,
    "y": 896,
    "z": -390
@@ -505,7 +489,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-8",
+   "name": "spawn-7",
    "x": 238,
    "y": 334,
    "z": -294
@@ -513,10 +497,18 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-9",
+   "name": "spawn-8",
    "x": 352,
    "y": 768,
    "z": -646
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": 528,
+   "y": 976,
+   "z": -374
   },
   {
    "type": "teleportDst",

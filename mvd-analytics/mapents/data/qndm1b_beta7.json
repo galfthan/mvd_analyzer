@@ -598,16 +598,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "low.lava",
-   "x": 408,
-   "y": -160,
-   "z": -472,
-   "loc": "low.lava",
-   "spawnflags": 2048
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "low.lift",
    "x": -0,

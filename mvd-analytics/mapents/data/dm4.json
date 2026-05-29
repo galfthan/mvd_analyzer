@@ -431,19 +431,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "high.tele-1",
+   "name": "high.tele",
    "x": 272,
    "y": -952,
    "z": 24,
-   "loc": "high.tele"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "high.tele-2",
-   "x": 384,
-   "y": -960,
-   "z": 32,
    "loc": "high.tele"
   },
   {

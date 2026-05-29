@@ -901,15 +901,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "LG",
-   "x": 8,
-   "y": 728,
-   "z": 424,
-   "loc": "LG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "RA.high-1",
    "x": -264,

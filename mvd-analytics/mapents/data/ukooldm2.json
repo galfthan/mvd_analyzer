@@ -281,15 +281,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "ledge",
-   "x": -384,
-   "y": -72,
-   "z": 120,
-   "loc": "ledge"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "teles-1",
    "x": -144,

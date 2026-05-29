@@ -342,17 +342,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "high.path-1",
-   "x": -72,
-   "y": 376,
-   "z": 232,
-   "loc": "high.path"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "high.path-2",
+   "name": "high.path",
    "x": 720,
    "y": 368,
    "z": 248,

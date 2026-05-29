@@ -1582,19 +1582,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "RED BASE (100 HEALTH ROOM)-1",
+   "name": "RED BASE (100 HEALTH ROOM)",
    "x": -2656,
    "y": 0,
    "z": -296,
-   "loc": "RED BASE (100 HEALTH ROOM)"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "RED BASE (100 HEALTH ROOM)-2",
-   "x": -2608,
-   "y": 0,
-   "z": -294,
    "loc": "RED BASE (100 HEALTH ROOM)"
   },
   {

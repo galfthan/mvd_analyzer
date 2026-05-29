@@ -1073,17 +1073,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "middle area-5",
-   "x": 240,
-   "y": 352,
-   "z": 296,
-   "loc": "middle area"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "middle area-6",
+   "name": "middle area-5",
    "x": 240,
    "y": 564,
    "z": 296,

@@ -316,7 +316,7 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
+   "class": "info_player_deathmatch",
    "name": "low.path-1",
    "x": -336,
    "y": 32,
@@ -327,15 +327,6 @@
    "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "low.path-2",
-   "x": -336,
-   "y": 32,
-   "z": 32,
-   "loc": "low.path"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "low.path-3",
    "x": 480,
    "y": 0,
    "z": 24,

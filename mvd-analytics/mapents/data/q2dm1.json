@@ -494,17 +494,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "MH.low-1",
-   "x": 48,
-   "y": -512,
-   "z": -336,
-   "loc": "MH.low"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "MH.low-2",
+   "name": "MH.low-1",
    "x": 256,
    "y": -1264,
    "z": 16,
@@ -513,7 +504,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "MH.low-3",
+   "name": "MH.low-2",
    "x": 320,
    "y": 192,
    "z": -64,
@@ -522,7 +513,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "MH.low-4",
+   "name": "MH.low-3",
    "x": 912,
    "y": -544,
    "z": -304,

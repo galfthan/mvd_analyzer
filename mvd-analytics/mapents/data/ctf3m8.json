@@ -724,15 +724,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "BLUE BASE: YELLOW ARMOUR",
-   "x": 2384,
-   "y": -608,
-   "z": 280,
-   "loc": "BLUE BASE: YELLOW ARMOUR"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team1",
    "name": "RED BASE",
    "x": -904,

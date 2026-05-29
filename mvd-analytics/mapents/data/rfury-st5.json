@@ -232,15 +232,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "bottom",
-   "x": 648,
-   "y": 328,
-   "z": -128,
-   "loc": "bottom"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "lowrl",
    "x": 672,

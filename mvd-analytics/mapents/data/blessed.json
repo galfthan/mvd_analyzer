@@ -334,17 +334,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "YA.tele-1",
-   "x": 792,
-   "y": -448,
-   "z": 120,
-   "loc": "YA.tele"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "YA.tele-2",
+   "name": "YA.tele",
    "x": 1064,
    "y": -344,
    "z": 152,

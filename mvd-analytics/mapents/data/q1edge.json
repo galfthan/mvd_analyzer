@@ -642,17 +642,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "SSG.stairs-1",
-   "x": 1274,
-   "y": 210,
-   "z": 668,
-   "loc": "SSG.stairs"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "SSG.stairs-2",
+   "name": "SSG.stairs",
    "x": 1488,
    "y": -48,
    "z": 664,

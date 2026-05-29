@@ -874,17 +874,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "outside-1",
-   "x": -576,
-   "y": 192,
-   "z": 184,
-   "loc": "outside"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "outside-2",
+   "name": "outside",
    "x": -576,
    "y": 376,
    "z": 176,

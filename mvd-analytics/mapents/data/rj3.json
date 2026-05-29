@@ -4,16 +4,8 @@
  "entities": [
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-1",
-   "x": -3726,
-   "y": -158,
-   "z": -114
-  },
-  {
-   "type": "spawn",
    "class": "info_player_teamspawn",
-   "name": "spawn-2",
+   "name": "spawn-1",
    "x": -3345,
    "y": -162,
    "z": -284
@@ -21,18 +13,10 @@
   {
    "type": "spawn",
    "class": "info_player_teamspawn",
-   "name": "spawn-3",
+   "name": "spawn-2",
    "x": -3208,
    "y": -160,
    "z": -280
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-4",
-   "x": 784,
-   "y": -112,
-   "z": 64
   },
   {
    "type": "teleportDst",

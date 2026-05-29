@@ -1339,17 +1339,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "BLUE BASE-1",
-   "x": -640,
-   "y": 784,
-   "z": -232,
-   "loc": "BLUE BASE"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team2",
-   "name": "BLUE BASE-2",
+   "name": "BLUE BASE-1",
    "x": -624,
    "y": 712,
    "z": -232,
@@ -1358,7 +1349,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "BLUE BASE-3",
+   "name": "BLUE BASE-2",
    "x": -624,
    "y": 832,
    "z": -216,
@@ -1367,7 +1358,7 @@
   {
    "type": "spawn",
    "class": "info_player_team2",
-   "name": "BLUE BASE-4",
+   "name": "BLUE BASE-3",
    "x": -624,
    "y": 920,
    "z": -232,
@@ -1376,7 +1367,7 @@
   {
    "type": "spawn",
    "class": "info_player_team2",
-   "name": "BLUE BASE-5",
+   "name": "BLUE BASE-4",
    "x": -112,
    "y": 760,
    "z": -224,
@@ -1385,7 +1376,7 @@
   {
    "type": "spawn",
    "class": "info_player_team2",
-   "name": "BLUE BASE-6",
+   "name": "BLUE BASE-5",
    "x": -56,
    "y": 944,
    "z": -224,

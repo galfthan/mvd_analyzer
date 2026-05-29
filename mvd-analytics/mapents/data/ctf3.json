@@ -901,17 +901,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "middle room-2",
-   "x": 0,
-   "y": 0,
-   "z": 8,
-   "loc": "middle room"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "middle room-3",
+   "name": "middle room-2",
    "x": 0,
    "y": 0,
    "z": 336,
@@ -920,7 +911,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "middle room-4",
+   "name": "middle room-3",
    "x": 176,
    "y": -176,
    "z": 120,

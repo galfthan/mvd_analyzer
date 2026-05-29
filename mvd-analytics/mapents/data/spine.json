@@ -309,17 +309,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "MH-1",
-   "x": 768,
-   "y": 640,
-   "z": 128,
-   "loc": "MH"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "MH-2",
+   "name": "MH",
    "x": 1104,
    "y": 664,
    "z": 96,

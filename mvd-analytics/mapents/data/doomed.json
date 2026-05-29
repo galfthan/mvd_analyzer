@@ -419,15 +419,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RA.low",
-   "x": 992,
-   "y": -880,
-   "z": 16,
-   "loc": "RA.low"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "RL.tonnel",
    "x": 888,

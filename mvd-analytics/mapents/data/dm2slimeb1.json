@@ -280,32 +280,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
+   "class": "info_player_deathmatch",
    "name": "spawn-1",
-   "x": 1696,
-   "y": -1456,
-   "z": 24
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-10",
-   "x": 2624,
-   "y": -488,
-   "z": 32
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-11",
-   "x": 2704,
-   "y": -2048,
-   "z": 128
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-2",
    "x": 1712,
    "y": -504,
    "z": 24
@@ -313,23 +289,15 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-3",
+   "name": "spawn-2",
    "x": 2048,
    "y": -1352,
    "z": 136
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-4",
-   "x": 2136,
-   "y": -64,
-   "z": 24
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-5",
+   "name": "spawn-3",
    "x": 2176,
    "y": -2176,
    "z": 88
@@ -337,7 +305,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-6",
+   "name": "spawn-4",
    "x": 2248,
    "y": -16,
    "z": -136
@@ -345,7 +313,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-7",
+   "name": "spawn-5",
    "x": 2544,
    "y": -32,
    "z": -64
@@ -353,7 +321,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-8",
+   "name": "spawn-6",
    "x": 2560,
    "y": -192,
    "z": 32
@@ -361,10 +329,26 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-9",
+   "name": "spawn-7",
    "x": 2576,
    "y": -1328,
    "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 2624,
+   "y": -488,
+   "z": 32
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": 2704,
+   "y": -2048,
+   "z": 128
   },
   {
    "type": "teleportDst",

@@ -339,17 +339,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "YA-1",
-   "x": 608,
-   "y": -1296,
-   "z": -480,
-   "loc": "YA"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "YA-2",
+   "name": "YA",
    "x": 608,
    "y": -1296,
    "z": -480,

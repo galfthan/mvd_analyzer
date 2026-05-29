@@ -391,14 +391,6 @@
    "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "spawn-10",
-   "x": 208,
-   "y": -448,
-   "z": 168
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-11",
    "x": 384,
    "y": 384,
    "z": 88
@@ -406,7 +398,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-12",
+   "name": "spawn-11",
    "x": 400,
    "y": -899,
    "z": 208
@@ -469,11 +461,11 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
+   "class": "info_player_deathmatch",
    "name": "spawn-9",
-   "x": 140,
-   "y": 196,
-   "z": 162
+   "x": 208,
+   "y": -448,
+   "z": 168
   },
   {
    "type": "teleportDst",

@@ -2338,48 +2338,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-1",
-   "x": 592,
-   "y": 404,
-   "z": 28
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-2",
-   "x": 592,
-   "y": 404,
-   "z": 28
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-3",
-   "x": 592,
-   "y": 448,
-   "z": 28
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-4",
-   "x": 592,
-   "y": 512,
-   "z": 28
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-5",
-   "x": 592,
-   "y": 564,
-   "z": 28
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-6",
+   "name": "spawn",
    "x": 592,
    "y": 564,
    "z": 28

@@ -318,19 +318,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "yard-1",
+   "name": "yard",
    "x": -224,
    "y": -212,
    "z": 70,
-   "loc": "yard"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "yard-2",
-   "x": 103,
-   "y": 163,
-   "z": 149,
    "loc": "yard"
   },
   {

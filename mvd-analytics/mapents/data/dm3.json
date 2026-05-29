@@ -568,15 +568,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "YA.Quad",
-   "x": 632,
-   "y": -648,
-   "z": 88,
-   "loc": "YA.Quad"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "YA.box",
    "x": 1472,

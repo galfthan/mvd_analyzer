@@ -891,15 +891,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RA.low",
-   "x": -30,
-   "y": -116,
-   "z": 32,
-   "loc": "RA.low"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "RA.stairs",
    "x": 352,

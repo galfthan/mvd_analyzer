@@ -566,15 +566,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "Quad.platform",
-   "x": -224,
-   "y": 0,
-   "z": 24,
-   "loc": "Quad.platform"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "RA.SNG",
    "x": -1000,

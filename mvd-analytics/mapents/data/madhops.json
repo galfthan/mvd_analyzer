@@ -265,18 +265,10 @@
   {
    "type": "spawn",
    "class": "info_player_teamspawn",
-   "name": "spawn-1",
+   "name": "spawn",
    "x": -208,
    "y": 96,
    "z": 144
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-2",
-   "x": 3072,
-   "y": 920,
-   "z": -600
   },
   {
    "type": "teleportDst",

@@ -809,17 +809,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "Middle-4",
-   "x": 0,
-   "y": 0,
-   "z": 60,
-   "loc": "Middle"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team2",
-   "name": "Middle-5",
+   "name": "Middle-4",
    "x": 120,
    "y": -380,
    "z": 208,
@@ -828,7 +819,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "Middle-6",
+   "name": "Middle-5",
    "x": 324,
    "y": -376,
    "z": 208,
@@ -837,7 +828,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "Middle-7",
+   "name": "Middle-6",
    "x": 420,
    "y": 368,
    "z": 40,
@@ -846,7 +837,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "Middle-8",
+   "name": "Middle-7",
    "x": 636,
    "y": -352,
    "z": 224,
@@ -855,7 +846,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "Middle-9",
+   "name": "Middle-8",
    "x": 660,
    "y": 256,
    "z": 40,

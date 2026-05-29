@@ -306,19 +306,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "ladder-1",
+   "name": "ladder",
    "x": 160,
    "y": -496,
    "z": 144,
-   "loc": "ladder"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "ladder-2",
-   "x": 552,
-   "y": -500,
-   "z": 88,
    "loc": "ladder"
   },
   {

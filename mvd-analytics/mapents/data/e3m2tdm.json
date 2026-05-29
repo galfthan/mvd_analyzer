@@ -563,19 +563,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "GL-1",
+   "name": "GL",
    "x": 192,
    "y": 904,
    "z": 24,
-   "loc": "GL"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "GL-2",
-   "x": 192,
-   "y": 1136,
-   "z": 40,
    "loc": "GL"
   },
   {

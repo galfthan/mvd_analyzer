@@ -495,15 +495,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "center-sng",
-   "x": -88,
-   "y": 448,
-   "z": 224,
-   "loc": "center-sng"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "ga-cross",
    "x": -592,

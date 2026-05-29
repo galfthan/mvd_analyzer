@@ -414,19 +414,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "low.LG-1",
+   "name": "low.LG",
    "x": 64,
    "y": 0,
    "z": 156,
-   "loc": "low.LG"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "low.LG-2",
-   "x": 224,
-   "y": 0,
-   "z": 152,
    "loc": "low.LG"
   },
   {

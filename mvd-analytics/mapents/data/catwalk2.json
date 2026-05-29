@@ -378,32 +378,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-5",
-   "x": 256,
-   "y": -352,
-   "z": 96
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start2",
-   "name": "spawn-6",
-   "x": 256,
-   "y": -320,
-   "z": 112
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-7",
-   "x": 256,
-   "y": -288,
-   "z": 112
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-8",
+   "name": "spawn-5",
    "x": 560,
    "y": -352,
    "z": 80

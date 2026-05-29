@@ -920,15 +920,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "LG",
-   "x": 8,
-   "y": 696,
-   "z": 424,
-   "loc": "LG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "Pent.low",
    "x": 616,

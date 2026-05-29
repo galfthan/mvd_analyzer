@@ -1597,82 +1597,26 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
+   "class": "info_player_deathmatch",
    "name": "spawn-10",
-   "x": 384,
-   "y": -536,
-   "z": 376
+   "x": 832,
+   "y": 2400,
+   "z": 136
   },
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "spawn-11",
-   "x": 400,
-   "y": 1072,
-   "z": 24
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-12",
-   "x": 416,
-   "y": -720,
-   "z": 376
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-13",
-   "x": 440,
-   "y": -512,
-   "z": 376
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-14",
-   "x": 464,
-   "y": -696,
-   "z": 376
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-15",
-   "x": 480,
-   "y": -744,
-   "z": 376
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-16",
-   "x": 480,
-   "y": -544,
-   "z": 376
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-17",
-   "x": 480,
-   "y": -488,
-   "z": 376
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-18",
-   "x": 504,
-   "y": -608,
-   "z": 400
+   "x": 864,
+   "y": 2912,
+   "z": -72
   },
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-19",
-   "x": 832,
-   "y": 2400,
+   "name": "spawn-12",
+   "x": 1264,
+   "y": 1392,
    "z": 136
   },
   {
@@ -1682,22 +1626,6 @@
    "x": -976,
    "y": 656,
    "z": 376
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-20",
-   "x": 864,
-   "y": 2912,
-   "z": -72
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-21",
-   "x": 1264,
-   "y": 1392,
-   "z": 136
   },
   {
    "type": "spawn",
@@ -1749,11 +1677,11 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
+   "class": "info_player_deathmatch",
    "name": "spawn-9",
-   "x": 360,
-   "y": -712,
-   "z": 376
+   "x": 400,
+   "y": 1072,
+   "z": 24
   },
   {
    "type": "teleportDst",

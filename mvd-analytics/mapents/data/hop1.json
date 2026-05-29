@@ -17,14 +17,6 @@
    "x": -512,
    "y": 192,
    "z": 320
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-3",
-   "x": -320,
-   "y": 0,
-   "z": 320
   }
  ]
 }

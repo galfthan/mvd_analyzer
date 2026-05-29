@@ -415,15 +415,6 @@
    "y": -840,
    "z": 384,
    "loc": "high.room"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "low",
-   "x": 128,
-   "y": -64,
-   "z": 64,
-   "loc": "low"
   }
  ]
 }

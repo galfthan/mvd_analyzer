@@ -824,17 +824,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "big.high-2",
-   "x": 600,
-   "y": -128,
-   "z": -112,
-   "loc": "big.high"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "big.high-3",
+   "name": "big.high-2",
    "x": 640,
    "y": 0,
    "z": -120,

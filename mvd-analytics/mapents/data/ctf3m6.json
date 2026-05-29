@@ -1075,19 +1075,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "OPEN AREA IN FRONT OF RED CASTLE-1",
+   "name": "OPEN AREA IN FRONT OF RED CASTLE",
    "x": 480,
    "y": -2096,
    "z": 480,
-   "loc": "OPEN AREA IN FRONT OF RED CASTLE"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "OPEN AREA IN FRONT OF RED CASTLE-2",
-   "x": 512,
-   "y": -2144,
-   "z": 512,
    "loc": "OPEN AREA IN FRONT OF RED CASTLE"
   },
   {

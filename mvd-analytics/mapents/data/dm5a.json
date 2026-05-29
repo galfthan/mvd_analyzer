@@ -353,15 +353,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "top.path",
-   "x": -72,
-   "y": 376,
-   "z": 232,
-   "loc": "top.path"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "top.tele",
    "x": 720,

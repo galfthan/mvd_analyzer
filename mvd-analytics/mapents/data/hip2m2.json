@@ -2208,53 +2208,21 @@
    "class": "info_player_deathmatch",
    "name": "spawn-10",
    "x": 160,
-   "y": -880,
-   "z": 760
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-11",
-   "x": 160,
-   "y": -832,
-   "z": 472
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-12",
-   "x": 160,
    "y": -184,
    "z": -120
   },
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-13",
+   "name": "spawn-11",
    "x": 160,
    "y": 752,
    "z": -120
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-14",
-   "x": 208,
-   "y": 752,
-   "z": -120
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-15",
-   "x": 256,
-   "y": 752,
-   "z": -120
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-16",
+   "name": "spawn-12",
    "x": 416,
    "y": -1104,
    "z": 152
@@ -2262,7 +2230,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-17",
+   "name": "spawn-13",
    "x": 624,
    "y": -576,
    "z": 72
@@ -2270,7 +2238,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-18",
+   "name": "spawn-14",
    "x": 872,
    "y": -1280,
    "z": -136
@@ -2278,7 +2246,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-19",
+   "name": "spawn-15",
    "x": 1840,
    "y": -528,
    "z": 248
@@ -2325,27 +2293,27 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
+   "class": "info_player_deathmatch",
    "name": "spawn-7",
-   "x": 64,
-   "y": 752,
-   "z": -120
+   "x": 160,
+   "y": -1232,
+   "z": -88
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
+   "class": "info_player_deathmatch",
    "name": "spawn-8",
-   "x": 112,
-   "y": 752,
-   "z": -120
+   "x": 160,
+   "y": -880,
+   "z": 760
   },
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "spawn-9",
    "x": 160,
-   "y": -1232,
-   "z": -88
+   "y": -832,
+   "z": 472
   },
   {
    "type": "teleportDst",

@@ -502,15 +502,6 @@
    "loc": "mid.SSG"
   },
   {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "mid.tele",
-   "x": -944,
-   "y": -240,
-   "z": 288,
-   "loc": "mid.tele"
-  },
-  {
    "type": "teleportDst",
    "class": "info_teleport_destination",
    "name": "RA",

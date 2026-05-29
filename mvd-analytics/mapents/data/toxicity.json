@@ -407,15 +407,6 @@
    "loc": "low.MEGA.health"
   },
   {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "water",
-   "x": 860,
-   "y": -416,
-   "z": 44,
-   "loc": "water"
-  },
-  {
    "type": "teleportDst",
    "class": "info_teleport_destination",
    "name": "Quad.LG.tele.exit",

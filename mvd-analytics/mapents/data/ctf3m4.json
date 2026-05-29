@@ -1179,17 +1179,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "MIDDLE Quad AREA-1",
-   "x": -272,
-   "y": -224,
-   "z": 328,
-   "loc": "MIDDLE Quad AREA"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "MIDDLE Quad AREA-2",
+   "name": "MIDDLE Quad AREA-1",
    "x": -160,
    "y": -200,
    "z": 318,
@@ -1198,7 +1189,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "MIDDLE Quad AREA-3",
+   "name": "MIDDLE Quad AREA-2",
    "x": -160,
    "y": 288,
    "z": 320,

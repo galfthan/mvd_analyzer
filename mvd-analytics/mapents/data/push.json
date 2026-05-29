@@ -826,16 +826,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-13",
-   "x": -640,
-   "y": 0,
-   "z": 1312
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-14",
+   "name": "spawn-13",
    "x": -480,
    "y": -1360,
    "z": 1312
@@ -843,7 +835,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-15",
+   "name": "spawn-14",
    "x": -480,
    "y": 1360,
    "z": 1312
@@ -851,7 +843,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-16",
+   "name": "spawn-15",
    "x": 0,
    "y": -1040,
    "z": 1664
@@ -859,7 +851,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-17",
+   "name": "spawn-16",
    "x": 0,
    "y": -800,
    "z": 1312
@@ -867,7 +859,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-18",
+   "name": "spawn-17",
    "x": 0,
    "y": 800,
    "z": 1312
@@ -875,10 +867,18 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-19",
+   "name": "spawn-18",
    "x": 0,
    "y": 1040,
    "z": 1664
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-19",
+   "x": 480,
+   "y": -1360,
+   "z": 1312
   },
   {
    "type": "spawn",
@@ -893,21 +893,13 @@
    "class": "info_player_deathmatch",
    "name": "spawn-20",
    "x": 480,
-   "y": -1360,
-   "z": 1312
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-21",
-   "x": 480,
    "y": 1360,
    "z": 1312
   },
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-22",
+   "name": "spawn-21",
    "x": 736,
    "y": -736,
    "z": -352
@@ -915,7 +907,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-23",
+   "name": "spawn-22",
    "x": 736,
    "y": 736,
    "z": -352
@@ -923,7 +915,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-24",
+   "name": "spawn-23",
    "x": 800,
    "y": 0,
    "z": 1312
@@ -931,7 +923,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-25",
+   "name": "spawn-24",
    "x": 1048,
    "y": 0,
    "z": 1664
@@ -939,7 +931,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-26",
+   "name": "spawn-25",
    "x": 1056,
    "y": -2000,
    "z": 1680
@@ -947,7 +939,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-27",
+   "name": "spawn-26",
    "x": 1056,
    "y": -1056,
    "z": 1680
@@ -955,7 +947,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-28",
+   "name": "spawn-27",
    "x": 1056,
    "y": 1056,
    "z": 1680
@@ -963,10 +955,18 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-29",
+   "name": "spawn-28",
    "x": 1056,
    "y": 2000,
    "z": 1680
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-29",
+   "x": 1360,
+   "y": -480,
+   "z": 1312
   },
   {
    "type": "spawn",
@@ -981,21 +981,13 @@
    "class": "info_player_deathmatch",
    "name": "spawn-30",
    "x": 1360,
-   "y": -480,
-   "z": 1312
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-31",
-   "x": 1360,
    "y": 480,
    "z": 1312
   },
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-32",
+   "name": "spawn-31",
    "x": 2000,
    "y": -1056,
    "z": 1680
@@ -1003,7 +995,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-33",
+   "name": "spawn-32",
    "x": 2000,
    "y": 1056,
    "z": 1680

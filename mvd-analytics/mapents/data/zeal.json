@@ -329,15 +329,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "LG",
-   "x": 1208,
-   "y": 1232,
-   "z": 52,
-   "loc": "LG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "LG.stairs",
    "x": 1320,

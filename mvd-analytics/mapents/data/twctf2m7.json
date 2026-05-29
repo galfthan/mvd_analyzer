@@ -1014,17 +1014,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "BLUE BASE-6",
-   "x": 2,
-   "y": -2960,
-   "z": 29,
-   "loc": "BLUE BASE"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team2",
-   "name": "BLUE BASE-7",
+   "name": "BLUE BASE-6",
    "x": 120,
    "y": -2917,
    "z": 32,
@@ -1033,7 +1024,7 @@
   {
    "type": "spawn",
    "class": "info_player_team2",
-   "name": "BLUE BASE-8",
+   "name": "BLUE BASE-7",
    "x": 314,
    "y": -2611,
    "z": 253,

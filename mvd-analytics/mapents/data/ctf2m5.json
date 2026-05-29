@@ -1985,15 +1985,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "BRIDGE",
-   "x": 78,
-   "y": -346,
-   "z": -772,
-   "loc": "BRIDGE"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team1",
    "name": "RED BASE-1",
    "x": -332,

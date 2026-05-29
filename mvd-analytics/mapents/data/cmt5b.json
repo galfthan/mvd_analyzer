@@ -761,15 +761,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RA.pillar",
-   "x": 112,
-   "y": -576,
-   "z": -224,
-   "loc": "RA.pillar"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "YA.high",
    "x": 1216,

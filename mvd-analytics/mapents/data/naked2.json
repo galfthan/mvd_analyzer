@@ -405,17 +405,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "GA.SNG-1",
-   "x": 13,
-   "y": 243,
-   "z": 322,
-   "loc": "GA.SNG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "GA.SNG-2",
+   "name": "GA.SNG",
    "x": 302,
    "y": -84,
    "z": 329,

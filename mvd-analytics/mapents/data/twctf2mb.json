@@ -1444,16 +1444,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-26",
-   "x": -1488,
-   "y": 2520,
-   "z": 400
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-27",
+   "name": "spawn-26",
    "x": -1472,
    "y": -256,
    "z": 416
@@ -1461,18 +1453,26 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-28",
+   "name": "spawn-27",
    "x": -1472,
    "y": 384,
    "z": 416
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
+   "class": "info_player_team2",
+   "name": "spawn-28",
+   "x": -1024,
+   "y": -1080,
+   "z": 512
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
    "name": "spawn-29",
-   "x": -1392,
-   "y": 1568,
-   "z": 464
+   "x": -1024,
+   "y": -256,
+   "z": 416
   },
   {
    "type": "spawn",
@@ -1484,24 +1484,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_team2",
+   "class": "info_player_deathmatch",
    "name": "spawn-30",
-   "x": -1024,
-   "y": -1080,
-   "z": 512
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-31",
-   "x": -1024,
-   "y": -256,
-   "z": 416
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-32",
    "x": -1024,
    "y": 384,
    "z": 416
@@ -1509,7 +1493,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "spawn-33",
+   "name": "spawn-31",
    "x": -1024,
    "y": 1208,
    "z": 520
@@ -1517,7 +1501,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-34",
+   "name": "spawn-32",
    "x": -1008,
    "y": -1080,
    "z": 512
@@ -1525,7 +1509,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-35",
+   "name": "spawn-33",
    "x": -1008,
    "y": 1208,
    "z": 520
@@ -1533,7 +1517,7 @@
   {
    "type": "spawn",
    "class": "info_player_team2",
-   "name": "spawn-36",
+   "name": "spawn-34",
    "x": -1000,
    "y": -688,
    "z": 576
@@ -1541,7 +1525,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "spawn-37",
+   "name": "spawn-35",
    "x": -1000,
    "y": 816,
    "z": 584
@@ -1549,7 +1533,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-38",
+   "name": "spawn-36",
    "x": -984,
    "y": -1472,
    "z": 448
@@ -1557,9 +1541,25 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-39",
+   "name": "spawn-37",
    "x": -984,
    "y": -1472,
+   "z": 712
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-38",
+   "x": -984,
+   "y": -1456,
+   "z": 448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-39",
+   "x": -984,
+   "y": -1456,
    "z": 712
   },
   {
@@ -1572,24 +1572,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_team2",
-   "name": "spawn-40",
-   "x": -984,
-   "y": -1456,
-   "z": 448
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_team2",
-   "name": "spawn-41",
-   "x": -984,
-   "y": -1456,
-   "z": 712
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-42",
+   "name": "spawn-40",
    "x": -984,
    "y": -688,
    "z": 576
@@ -1597,7 +1581,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-43",
+   "name": "spawn-41",
    "x": -984,
    "y": 816,
    "z": 584
@@ -1605,7 +1589,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "spawn-44",
+   "name": "spawn-42",
    "x": -984,
    "y": 1584,
    "z": 720
@@ -1613,7 +1597,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "spawn-45",
+   "name": "spawn-43",
    "x": -984,
    "y": 1592,
    "z": 456
@@ -1621,7 +1605,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-46",
+   "name": "spawn-44",
    "x": -984,
    "y": 1600,
    "z": 456
@@ -1629,7 +1613,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-47",
+   "name": "spawn-45",
    "x": -984,
    "y": 1600,
    "z": 720
@@ -1637,7 +1621,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-48",
+   "name": "spawn-46",
    "x": -960,
    "y": -2424,
    "z": 336
@@ -1645,10 +1629,26 @@
   {
    "type": "spawn",
    "class": "info_player_team2",
-   "name": "spawn-49",
+   "name": "spawn-47",
    "x": -960,
    "y": -2408,
    "z": 336
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-48",
+   "x": -960,
+   "y": -1848,
+   "z": 328
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-49",
+   "x": -960,
+   "y": -1832,
+   "z": 328
   },
   {
    "type": "spawn",
@@ -1660,24 +1660,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_team2",
+   "class": "info_player_deathmatch",
    "name": "spawn-50",
-   "x": -960,
-   "y": -1848,
-   "z": 328
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-51",
-   "x": -960,
-   "y": -1832,
-   "z": 328
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-52",
    "x": -960,
    "y": 1960,
    "z": 336
@@ -1685,7 +1669,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "spawn-53",
+   "name": "spawn-51",
    "x": -960,
    "y": 1976,
    "z": 336
@@ -1693,7 +1677,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "spawn-54",
+   "name": "spawn-52",
    "x": -960,
    "y": 2536,
    "z": 328
@@ -1701,7 +1685,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-55",
+   "name": "spawn-53",
    "x": -960,
    "y": 2552,
    "z": 328
@@ -1709,7 +1693,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-56",
+   "name": "spawn-54",
    "x": -616,
    "y": 872,
    "z": 408

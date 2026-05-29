@@ -798,15 +798,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "Middle-5",
-   "x": 266,
-   "y": -304,
-   "z": 104,
-   "loc": "Middle"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team1",
    "name": "Red Base-1",
    "x": -64,

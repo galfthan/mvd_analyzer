@@ -395,17 +395,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RA.GL-2",
-   "x": 496,
-   "y": -176,
-   "z": 32,
-   "loc": "RA.GL"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "RA.GL-3",
+   "name": "RA.GL-2",
    "x": 1152,
    "y": -48,
    "z": 96,

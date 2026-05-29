@@ -1324,17 +1324,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "red base-5",
-   "x": 101,
-   "y": -1680,
-   "z": -96,
-   "loc": "red base"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team1",
-   "name": "red base-6",
+   "name": "red base-5",
    "x": 182,
    "y": -1850,
    "z": -200,
@@ -1343,7 +1334,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "red base-7",
+   "name": "red base-6",
    "x": 223,
    "y": -1584,
    "z": -40,

@@ -1465,15 +1465,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "BLUE BASE (UNDER FLAG SPOT)",
-   "x": -2152,
-   "y": -624,
-   "z": -216,
-   "loc": "BLUE BASE (UNDER FLAG SPOT)"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team2",
    "name": "BLUE BASE-1",
    "x": -2000,
@@ -1740,15 +1731,6 @@
    "x": 2304,
    "y": 208,
    "z": -232,
-   "loc": "RED BASE"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "RED BASE-7",
-   "x": 2352,
-   "y": -56,
-   "z": -216,
    "loc": "RED BASE"
   },
   {

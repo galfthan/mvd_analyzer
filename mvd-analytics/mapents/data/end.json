@@ -560,51 +560,6 @@
    "loc": "path.top"
   },
   {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "water-1",
-   "x": 0,
-   "y": -104,
-   "z": 16,
-   "loc": "water"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "water-2",
-   "x": 0,
-   "y": 8,
-   "z": 48,
-   "loc": "water"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "water-3",
-   "x": 0,
-   "y": 8,
-   "z": 376,
-   "loc": "water"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "water-4",
-   "x": 0,
-   "y": 104,
-   "z": 16,
-   "loc": "water"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "water-5",
-   "x": 72,
-   "y": 16,
-   "z": 16,
-   "loc": "water"
-  },
-  {
    "type": "teleportDst",
    "class": "info_teleport_destination",
    "name": "RL-1",

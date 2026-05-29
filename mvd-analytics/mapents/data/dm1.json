@@ -404,15 +404,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "SSG",
-   "x": 324,
-   "y": 1156,
-   "z": 24,
-   "loc": "SSG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "YA",
    "x": 104,

@@ -861,15 +861,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "red flag",
-   "x": -2944,
-   "y": 1536,
-   "z": -24,
-   "loc": "red flag"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team1",
    "name": "red flag(room)-1",
    "x": -2272,

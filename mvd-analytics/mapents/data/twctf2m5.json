@@ -1285,15 +1285,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "BRIDGE AT CENTRE",
-   "x": 864,
-   "y": 160,
-   "z": 189,
-   "loc": "BRIDGE AT CENTRE"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "RED CORRIDOR TO EYES",
    "x": 906,

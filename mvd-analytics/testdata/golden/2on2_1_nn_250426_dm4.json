@@ -11384,20 +11384,11 @@
       {
         "class": "info_player_deathmatch",
         "loc": "high.tele",
-        "name": "high.tele-1",
+        "name": "high.tele",
         "type": "spawn",
         "x": 272,
         "y": -952,
         "z": 24
-      },
-      {
-        "class": "info_player_start",
-        "loc": "high.tele",
-        "name": "high.tele-2",
-        "type": "spawn",
-        "x": 384,
-        "y": -960,
-        "z": 32
       },
       {
         "class": "info_teleport_destination",

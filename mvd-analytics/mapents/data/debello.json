@@ -520,15 +520,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "outside.MH",
-   "x": -272,
-   "y": -1088,
-   "z": 40,
-   "loc": "outside.MH"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "outside.entry",
    "x": -384,

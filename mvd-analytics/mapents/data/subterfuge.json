@@ -264,18 +264,9 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "SSG-1",
+   "name": "SSG",
    "x": 224,
    "y": 336,
-   "z": 40,
-   "loc": "SSG"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "SSG-2",
-   "x": 224,
-   "y": 384,
    "z": 40,
    "loc": "SSG"
   },

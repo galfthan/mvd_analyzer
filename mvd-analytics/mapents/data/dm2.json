@@ -823,17 +823,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "NG-1",
-   "x": 2136,
-   "y": -64,
-   "z": 24,
-   "loc": "NG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "NG-2",
+   "name": "NG",
    "x": 2560,
    "y": -192,
    "z": 32,
@@ -856,15 +847,6 @@
    "y": -2048,
    "z": 128,
    "loc": "RA.MH"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "big.button",
-   "x": 1696,
-   "y": -1456,
-   "z": 24,
-   "loc": "big.button"
   },
   {
    "type": "spawn",

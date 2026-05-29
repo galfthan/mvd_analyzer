@@ -476,17 +476,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "Quad.high-1",
-   "x": -128,
-   "y": -3352,
-   "z": 656,
-   "loc": "Quad.high"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "Quad.high-2",
+   "name": "Quad.high",
    "x": 424,
    "y": -3240,
    "z": 616,

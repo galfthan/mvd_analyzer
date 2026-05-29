@@ -5443,18 +5443,9 @@
         "z": -144
       },
       {
-        "class": "info_player_start",
-        "loc": "yard.RL",
-        "name": "yard.RL-1",
-        "type": "spawn",
-        "x": 192,
-        "y": 136,
-        "z": -224
-      },
-      {
         "class": "info_player_deathmatch",
         "loc": "yard.RL",
-        "name": "yard.RL-2",
+        "name": "yard.RL",
         "type": "spawn",
         "x": 304,
         "y": 640,

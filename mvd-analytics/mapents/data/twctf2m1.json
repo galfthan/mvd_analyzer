@@ -1716,15 +1716,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "CENTRE AREA (RED LOWER ENTRANCE)",
-   "x": 365,
-   "y": 243,
-   "z": -168,
-   "loc": "CENTRE AREA (RED LOWER ENTRANCE)"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "CENTRE AREA (UPPER PLATFORM)-1",
    "x": -226,

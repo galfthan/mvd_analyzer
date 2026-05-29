@@ -370,17 +370,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "Quad-1",
-   "x": 368,
-   "y": -408,
-   "z": 24,
-   "loc": "Quad"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "Quad-2",
+   "name": "Quad",
    "x": 560,
    "y": -496,
    "z": 28,

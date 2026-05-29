@@ -210,18 +210,9 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "LG.tele-1",
+   "name": "LG.tele",
    "x": -48,
    "y": -96,
-   "z": 104,
-   "loc": "LG.tele"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "LG.tele-2",
-   "x": 16,
-   "y": -48,
    "z": 104,
    "loc": "LG.tele"
   },

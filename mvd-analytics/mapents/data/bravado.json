@@ -354,17 +354,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
-   "name": "SNG-1",
-   "x": -128,
-   "y": 448,
-   "z": 40,
-   "loc": "SNG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "SNG-2",
+   "name": "SNG",
    "x": 152,
    "y": 240,
    "z": 172,
@@ -372,17 +363,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "YA-1",
-   "x": 832,
-   "y": 448,
-   "z": 120,
-   "loc": "YA"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "YA-2",
+   "name": "YA",
    "x": 840,
    "y": 904,
    "z": 104,

@@ -163,14 +163,6 @@
    "x": -112,
    "y": -352,
    "z": -176
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn",
-   "x": -224,
-   "y": -464,
-   "z": -176
   }
  ]
 }

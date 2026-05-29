@@ -398,17 +398,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "high.SNG-1",
-   "x": 912,
-   "y": -496,
-   "z": -40,
-   "loc": "high.SNG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "high.SNG-2",
+   "name": "high.SNG",
    "x": 944,
    "y": -496,
    "z": -40,

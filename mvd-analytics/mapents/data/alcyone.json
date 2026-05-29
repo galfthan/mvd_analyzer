@@ -317,17 +317,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "LG-3",
-   "x": -212,
-   "y": -644,
-   "z": 44,
-   "loc": "LG"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "LG-4",
+   "name": "LG-3",
    "x": -212,
    "y": -644,
    "z": 44,

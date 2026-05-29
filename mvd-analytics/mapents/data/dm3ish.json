@@ -481,15 +481,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "Quad",
-   "x": 232,
-   "y": -16,
-   "z": 232,
-   "loc": "Quad"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "RA.tunnel",
    "x": -264,

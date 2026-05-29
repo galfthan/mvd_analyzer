@@ -213,14 +213,6 @@
    "z": -32
   },
   {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn",
-   "x": -96,
-   "y": -352,
-   "z": -232
-  },
-  {
    "type": "teleportDst",
    "class": "info_teleport_destination",
    "name": "tele-dst-1",

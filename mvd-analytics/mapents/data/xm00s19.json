@@ -245,24 +245,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-14",
-   "x": 960,
-   "y": 1408,
-   "z": 700
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-15",
-   "x": 1000,
-   "y": 1408,
-   "z": 700
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-16",
+   "name": "spawn-14",
    "x": 1152,
    "y": 256,
    "z": 500
@@ -270,7 +254,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-17",
+   "name": "spawn-15",
    "x": 1152,
    "y": 256,
    "z": 692
@@ -278,7 +262,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-18",
+   "name": "spawn-16",
    "x": 1344,
    "y": 448,
    "z": 500
@@ -286,9 +270,25 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-19",
+   "name": "spawn-17",
    "x": 1344,
    "y": 448,
+   "z": 692
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-18",
+   "x": 1344,
+   "y": 640,
+   "z": 500
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-19",
+   "x": 1344,
+   "y": 640,
    "z": 692
   },
   {
@@ -304,7 +304,7 @@
    "class": "info_player_deathmatch",
    "name": "spawn-20",
    "x": 1344,
-   "y": 640,
+   "y": 832,
    "z": 500
   },
   {
@@ -312,7 +312,7 @@
    "class": "info_player_deathmatch",
    "name": "spawn-21",
    "x": 1344,
-   "y": 640,
+   "y": 832,
    "z": 692
   },
   {
@@ -320,29 +320,13 @@
    "class": "info_player_deathmatch",
    "name": "spawn-22",
    "x": 1344,
-   "y": 832,
-   "z": 500
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-23",
-   "x": 1344,
-   "y": 832,
-   "z": 692
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-24",
-   "x": 1344,
    "y": 1024,
    "z": 500
   },
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-25",
+   "name": "spawn-23",
    "x": 1344,
    "y": 1024,
    "z": 692

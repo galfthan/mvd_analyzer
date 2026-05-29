@@ -778,15 +778,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "BLUE BASE (MAIN CORRIDOR)",
-   "x": -256,
-   "y": 128,
-   "z": 400,
-   "loc": "BLUE BASE (MAIN CORRIDOR)"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team2",
    "name": "BLUE BASE (ON PLATFORM)-1",
    "x": -1280,

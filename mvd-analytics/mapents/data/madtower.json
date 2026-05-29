@@ -665,17 +665,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "Red Flag Level-1",
-   "x": -256,
-   "y": -920,
-   "z": 944,
-   "loc": "Red Flag Level"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team1",
-   "name": "Red Flag Level-2",
+   "name": "Red Flag Level-1",
    "x": -144,
    "y": -416,
    "z": 800,
@@ -684,7 +675,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "Red Flag Level-3",
+   "name": "Red Flag Level-2",
    "x": 0,
    "y": -624,
    "z": 800,
@@ -693,7 +684,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "Red Flag Level-4",
+   "name": "Red Flag Level-3",
    "x": 0,
    "y": -520,
    "z": 808,
@@ -702,7 +693,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "Red Flag Level-5",
+   "name": "Red Flag Level-4",
    "x": 0,
    "y": -232,
    "z": 808,
@@ -711,7 +702,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "Red Flag Level-6",
+   "name": "Red Flag Level-5",
    "x": 16,
    "y": -184,
    "z": 800,
@@ -720,7 +711,7 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "Red Flag Level-7",
+   "name": "Red Flag Level-6",
    "x": 144,
    "y": -416,
    "z": 800,

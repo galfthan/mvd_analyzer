@@ -1336,38 +1336,6 @@
    "z": -352
   },
   {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-1",
-   "x": 16,
-   "y": 32,
-   "z": 24
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-2",
-   "x": 224,
-   "y": -544,
-   "z": 24
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-3",
-   "x": 224,
-   "y": -464,
-   "z": 24
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-4",
-   "x": 416,
-   "y": 32,
-   "z": 24
-  },
-  {
    "type": "teleportDst",
    "class": "info_teleport_destination",
    "name": "tele-dst-1",

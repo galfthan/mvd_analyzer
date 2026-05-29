@@ -1784,64 +1784,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
+   "class": "info_player_deathmatch",
    "name": "spawn-10",
-   "x": 864,
-   "y": -688,
-   "z": -40
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-11",
-   "x": 864,
-   "y": -608,
-   "z": -40
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-12",
-   "x": 944,
-   "y": -688,
-   "z": -40
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-13",
-   "x": 960,
-   "y": -1224,
-   "z": 120
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-14",
-   "x": 960,
-   "y": -624,
-   "z": -24
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-15",
-   "x": 992,
-   "y": -688,
-   "z": -40
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-16",
-   "x": 1056,
-   "y": -608,
-   "z": 184
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-17",
    "x": 1088,
    "y": 574,
    "z": 24
@@ -1849,7 +1793,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-18",
+   "name": "spawn-11",
    "x": 1440,
    "y": 606,
    "z": -424
@@ -1857,10 +1801,34 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-19",
+   "name": "spawn-12",
    "x": 1856,
    "y": -896,
    "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-13",
+   "x": 1936,
+   "y": 624,
+   "z": 40
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-14",
+   "x": 1952,
+   "y": -1504,
+   "z": 152
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-15",
+   "x": 2080,
+   "y": -320,
+   "z": -24
   },
   {
    "type": "spawn",
@@ -1869,30 +1837,6 @@
    "x": -448,
    "y": 1104,
    "z": 8
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-20",
-   "x": 1936,
-   "y": 624,
-   "z": 40
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-21",
-   "x": 1952,
-   "y": -1504,
-   "z": 152
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_deathmatch",
-   "name": "spawn-22",
-   "x": 2080,
-   "y": -320,
-   "z": -24
   },
   {
    "type": "spawn",
@@ -1936,19 +1880,19 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
+   "class": "info_player_deathmatch",
    "name": "spawn-8",
-   "x": 800,
-   "y": -688,
-   "z": -40
+   "x": 960,
+   "y": -1224,
+   "z": 120
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
+   "class": "info_player_deathmatch",
    "name": "spawn-9",
-   "x": 800,
+   "x": 1056,
    "y": -608,
-   "z": -40
+   "z": 184
   },
   {
    "type": "teleportDst",

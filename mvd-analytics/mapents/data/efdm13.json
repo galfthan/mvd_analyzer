@@ -545,19 +545,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "RA tele-1",
+   "name": "RA tele",
    "x": -96,
    "y": -28,
    "z": -120,
-   "loc": "RA tele"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "RA tele-2",
-   "x": 32,
-   "y": -80,
-   "z": 40,
    "loc": "RA tele"
   },
   {

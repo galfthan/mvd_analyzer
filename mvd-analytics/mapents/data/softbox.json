@@ -781,17 +781,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "Middle-3",
-   "x": 16,
-   "y": -432,
-   "z": 248,
-   "loc": "Middle"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "Middle-4",
+   "name": "Middle-3",
    "x": 480,
    "y": 320,
    "z": 60,
@@ -800,7 +791,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "Middle-5",
+   "name": "Middle-4",
    "x": 560,
    "y": 608,
    "z": 236,

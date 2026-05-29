@@ -305,24 +305,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
-   "name": "SNG",
-   "x": -128,
-   "y": 448,
-   "z": 40,
-   "loc": "SNG"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "YA",
-   "x": 832,
-   "y": 448,
-   "z": 120,
-   "loc": "YA"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "holes",
    "x": -16,

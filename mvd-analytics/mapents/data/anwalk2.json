@@ -756,15 +756,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "Pent",
-   "x": 0,
-   "y": -792,
-   "z": 24,
-   "loc": "Pent"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "Quad.door-1",
    "x": -160,

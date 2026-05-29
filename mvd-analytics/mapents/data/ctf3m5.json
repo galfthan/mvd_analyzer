@@ -740,15 +740,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "BLUE BASE (UPPER LEDGE)-3",
-   "x": -1488,
-   "y": -1920,
-   "z": 0,
-   "loc": "BLUE BASE (UPPER LEDGE)"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team2",
    "name": "BLUE BASE-1",
    "x": -1248,
@@ -839,17 +830,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RED BASE (UPPER LEDGE)-1",
-   "x": 112,
-   "y": -416,
-   "z": 0,
-   "loc": "RED BASE (UPPER LEDGE)"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team1",
-   "name": "RED BASE (UPPER LEDGE)-2",
+   "name": "RED BASE (UPPER LEDGE)",
    "x": 448,
    "y": -576,
    "z": -32,

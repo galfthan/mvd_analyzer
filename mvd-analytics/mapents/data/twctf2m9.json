@@ -1255,24 +1255,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "OPEN AREA (BLUE SIDE)",
-   "x": -800,
-   "y": -752,
-   "z": -488,
-   "loc": "OPEN AREA (BLUE SIDE)"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "OPEN AREA (RED SIDE)",
-   "x": -1344,
-   "y": -752,
-   "z": -488,
-   "loc": "OPEN AREA (RED SIDE)"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "RED BASE (CHUTE TO GL)",
    "x": -1616,

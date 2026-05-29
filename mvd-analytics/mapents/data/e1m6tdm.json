@@ -894,24 +894,6 @@
    "loc": "middle.SNG"
   },
   {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "middle.high",
-   "x": -96,
-   "y": 800,
-   "z": 224,
-   "loc": "middle.high"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spikes.up",
-   "x": -24,
-   "y": 888,
-   "z": 32,
-   "loc": "spikes.up"
-  },
-  {
    "type": "teleportDst",
    "class": "info_teleport_destination",
    "name": "GL.MH",

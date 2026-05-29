@@ -393,15 +393,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "low.RAmp",
-   "x": -16,
-   "y": 128,
-   "z": 30,
-   "loc": "low.RAmp"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "low.RL",
    "x": -1088,

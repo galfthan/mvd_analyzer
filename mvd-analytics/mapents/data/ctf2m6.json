@@ -2690,15 +2690,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "middle towers-3",
-   "x": -528,
-   "y": 208,
-   "z": 24,
-   "loc": "middle towers"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team2",
    "name": "outside blue base-1",
    "x": -320,

@@ -1303,17 +1303,8 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "BLUE SKULL MOUTH AREA-1",
+   "name": "BLUE SKULL MOUTH AREA",
    "x": 288,
-   "y": 0,
-   "z": -208,
-   "loc": "BLUE SKULL MOUTH AREA"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "BLUE SKULL MOUTH AREA-2",
-   "x": 432,
    "y": 0,
    "z": -208,
    "loc": "BLUE SKULL MOUTH AREA"

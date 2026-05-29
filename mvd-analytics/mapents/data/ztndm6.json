@@ -511,17 +511,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "mid-1",
-   "x": 400,
-   "y": 192,
-   "z": 32,
-   "loc": "mid"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "mid-2",
+   "name": "mid",
    "x": 432,
    "y": 48,
    "z": 32,

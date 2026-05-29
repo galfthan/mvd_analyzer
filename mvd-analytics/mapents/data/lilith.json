@@ -325,18 +325,9 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "GA-1",
+   "name": "GA",
    "x": 608,
    "y": -720,
-   "z": 440,
-   "loc": "GA"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "GA-2",
-   "x": 624,
-   "y": -656,
    "z": 440,
    "loc": "GA"
   },

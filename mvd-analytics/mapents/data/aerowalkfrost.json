@@ -324,15 +324,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "Quad.tele",
-   "x": -544,
-   "y": -116,
-   "z": 336,
-   "loc": "Quad.tele"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "Quad.up",
    "x": -224,

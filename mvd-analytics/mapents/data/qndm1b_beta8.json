@@ -598,16 +598,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "cellar.lava",
-   "x": 408,
-   "y": -160,
-   "z": -472,
-   "loc": "cellar.lava",
-   "spawnflags": 2048
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "cellar.lift",
    "x": -0,

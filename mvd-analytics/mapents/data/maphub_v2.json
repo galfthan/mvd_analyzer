@@ -611,59 +611,19 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-1",
-   "x": 384,
-   "y": 336,
-   "z": 24
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-2",
-   "x": 464,
-   "y": 320,
-   "z": 24
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-3",
+   "name": "spawn-1",
    "x": 544,
    "y": 272,
    "z": 40
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-4",
-   "x": 544,
-   "y": 288,
-   "z": 32
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "spawn-5",
+   "name": "spawn-2",
    "x": 544,
    "y": 304,
    "z": 40
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-6",
-   "x": 624,
-   "y": 320,
-   "z": 24
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "spawn-7",
-   "x": 704,
-   "y": 336,
-   "z": 24
   },
   {
    "type": "teleportDst",

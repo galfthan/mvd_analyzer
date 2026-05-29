@@ -499,17 +499,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "low-1",
-   "x": -96,
-   "y": 280,
-   "z": -216,
-   "loc": "low"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "low-2",
+   "name": "low",
    "x": -96,
    "y": 280,
    "z": -216,

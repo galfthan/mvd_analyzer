@@ -377,19 +377,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "RA.RL-1",
+   "name": "RA.RL",
    "x": -256,
    "y": -336,
    "z": -40,
-   "loc": "RA.RL"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "RA.RL-2",
-   "x": -96,
-   "y": 32,
-   "z": 8,
    "loc": "RA.RL"
   },
   {

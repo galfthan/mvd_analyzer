@@ -470,19 +470,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "button-1",
+   "name": "button",
    "x": -200,
    "y": -560,
    "z": -88,
-   "loc": "button"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "button-2",
-   "x": 0,
-   "y": -864,
-   "z": -64,
    "loc": "button"
   },
   {

@@ -370,17 +370,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "YA.rox-1",
-   "x": -1110,
-   "y": 54,
-   "z": -872,
-   "loc": "YA.rox"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "YA.rox-2",
+   "name": "YA.rox",
    "x": -1110,
    "y": 55,
    "z": -872,

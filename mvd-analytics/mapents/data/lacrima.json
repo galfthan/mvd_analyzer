@@ -409,18 +409,9 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "SNG-1",
+   "name": "SNG",
    "x": 704,
    "y": 768,
-   "z": -256,
-   "loc": "SNG"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "SNG-2",
-   "x": 704,
-   "y": 784,
    "z": -256,
    "loc": "SNG"
   },

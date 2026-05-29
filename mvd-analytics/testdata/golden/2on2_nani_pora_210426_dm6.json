@@ -7752,15 +7752,6 @@
         "z": 40
       },
       {
-        "class": "info_player_start",
-        "loc": "GL",
-        "name": "GL",
-        "type": "spawn",
-        "x": 760,
-        "y": -1080,
-        "z": 256
-      },
-      {
         "class": "info_player_deathmatch",
         "loc": "GL.hide",
         "name": "GL.hide",

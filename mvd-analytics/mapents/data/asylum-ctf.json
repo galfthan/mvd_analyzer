@@ -597,14 +597,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "spawn-25",
-   "x": 704,
-   "y": -736,
-   "z": -168
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team2",
    "name": "spawn-3",
    "x": -336,

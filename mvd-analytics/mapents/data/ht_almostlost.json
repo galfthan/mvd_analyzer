@@ -571,15 +571,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "catwalk",
-   "x": -2781,
-   "y": -544,
-   "z": 264,
-   "loc": "catwalk"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "high.RA",
    "x": -2280,

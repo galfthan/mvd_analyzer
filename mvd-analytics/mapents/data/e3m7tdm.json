@@ -543,15 +543,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "GA.tele",
-   "x": -1128,
-   "y": -224,
-   "z": -496,
-   "loc": "GA.tele"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "GL",
    "x": -352,

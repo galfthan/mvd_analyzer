@@ -662,17 +662,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "CENTRAL AREA (BLUE SIDE PLATFORM)-1",
-   "x": 720,
-   "y": -528,
-   "z": -96,
-   "loc": "CENTRAL AREA (BLUE SIDE PLATFORM)"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "CENTRAL AREA (BLUE SIDE PLATFORM)-2",
+   "name": "CENTRAL AREA (BLUE SIDE PLATFORM)",
    "x": 1072,
    "y": -496,
    "z": -80,

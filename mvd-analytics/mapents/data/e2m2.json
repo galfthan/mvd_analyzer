@@ -1040,51 +1040,6 @@
    "loc": "YA.MH"
   },
   {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "start-1",
-   "x": -320,
-   "y": -1824,
-   "z": 264,
-   "loc": "start"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "start-2",
-   "x": -256,
-   "y": -1952,
-   "z": 280,
-   "loc": "start"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "start-3",
-   "x": -192,
-   "y": -1808,
-   "z": 264,
-   "loc": "start"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "start-4",
-   "x": -176,
-   "y": -1904,
-   "z": 264,
-   "loc": "start"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "start-5",
-   "x": -128,
-   "y": -1848,
-   "z": 264,
-   "loc": "start"
-  },
-  {
    "type": "teleportDst",
    "class": "info_teleport_destination",
    "name": "RA.below",

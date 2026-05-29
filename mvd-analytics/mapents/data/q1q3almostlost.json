@@ -477,19 +477,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "Quad.GA-1",
+   "name": "Quad.GA",
    "x": -2528,
    "y": 96,
    "z": 344,
-   "loc": "Quad.GA"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "Quad.GA-2",
-   "x": -2269,
-   "y": -544,
-   "z": 264,
    "loc": "Quad.GA"
   },
   {

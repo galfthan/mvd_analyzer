@@ -494,15 +494,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "crossing-rox",
-   "x": 144,
-   "y": 352,
-   "z": 128,
-   "loc": "crossing-rox"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "ga-room",
    "x": -352,

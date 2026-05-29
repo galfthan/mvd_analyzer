@@ -1439,17 +1439,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "BLUE BASE: OUTSIDE LOWER-1",
-   "x": -29,
-   "y": -12,
-   "z": -185,
-   "loc": "BLUE BASE: OUTSIDE LOWER"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "BLUE BASE: OUTSIDE LOWER-2",
+   "name": "BLUE BASE: OUTSIDE LOWER-1",
    "x": 134,
    "y": 179,
    "z": -180,
@@ -1458,7 +1449,7 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "BLUE BASE: OUTSIDE LOWER-3",
+   "name": "BLUE BASE: OUTSIDE LOWER-2",
    "x": 314,
    "y": -146,
    "z": -180,

@@ -498,17 +498,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "octagon-1",
-   "x": -256,
-   "y": -24,
-   "z": 216,
-   "loc": "octagon"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "octagon-2",
+   "name": "octagon",
    "x": -200,
    "y": -24,
    "z": 216,

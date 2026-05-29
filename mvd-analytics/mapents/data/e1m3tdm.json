@@ -811,47 +811,11 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_coop",
-   "name": "GL-1",
-   "x": -880,
-   "y": -1592,
-   "z": 96,
-   "loc": "GL"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "GL-2",
+   "name": "GL",
    "x": -856,
    "y": -1704,
    "z": 100,
-   "loc": "GL"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "GL-3",
-   "x": -816,
-   "y": -1592,
-   "z": 96,
-   "loc": "GL"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "GL-4",
-   "x": -728,
-   "y": -1600,
-   "z": 96,
-   "loc": "GL"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_coop",
-   "name": "GL-5",
-   "x": -640,
-   "y": -1600,
-   "z": 96,
    "loc": "GL"
   },
   {

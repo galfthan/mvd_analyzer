@@ -777,15 +777,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RA.up",
-   "x": -1536,
-   "y": 128,
-   "z": 440,
-   "loc": "RA.up"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "SNG.lift",
    "x": -608,

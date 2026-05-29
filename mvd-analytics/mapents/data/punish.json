@@ -641,15 +641,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RL.stairs",
-   "x": 704,
-   "y": 160,
-   "z": -240,
-   "loc": "RL.stairs"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "YA",
    "x": 256,

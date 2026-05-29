@@ -1068,15 +1068,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "(blue) ramp by main door",
-   "x": 1248,
-   "y": -320,
-   "z": 1046,
-   "loc": "(blue) ramp by main door"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team1",
    "name": "(red base) by Snail gun",
    "x": -1536,

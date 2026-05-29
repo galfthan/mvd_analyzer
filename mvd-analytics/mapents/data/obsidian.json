@@ -572,21 +572,11 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "RL-1",
+   "name": "RL",
    "x": -320,
    "y": -320,
    "z": -488,
    "loc": "RL"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "RL-2",
-   "x": 408,
-   "y": -160,
-   "z": -472,
-   "loc": "RL",
-   "spawnflags": 2048
   },
   {
    "type": "spawn",

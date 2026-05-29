@@ -853,19 +853,10 @@
   {
    "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "RA.high-1",
+   "name": "RA.high",
    "x": -1088,
    "y": -360,
    "z": 24,
-   "loc": "RA.high"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_start",
-   "name": "RA.high-2",
-   "x": -1088,
-   "y": -288,
-   "z": 32,
    "loc": "RA.high"
   },
   {

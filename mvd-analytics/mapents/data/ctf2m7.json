@@ -1594,15 +1594,6 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "OUTSIDE",
-   "x": -712,
-   "y": 392,
-   "z": 184,
-   "loc": "OUTSIDE"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "RED BASE: GRENADE LAUCHER/YA",
    "x": -48,

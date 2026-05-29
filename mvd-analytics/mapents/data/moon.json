@@ -613,17 +613,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "YA.low-1",
-   "x": 456,
-   "y": 8,
-   "z": 88,
-   "loc": "YA.low"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_deathmatch",
-   "name": "YA.low-2",
+   "name": "YA.low",
    "x": 816,
    "y": 112,
    "z": 50,

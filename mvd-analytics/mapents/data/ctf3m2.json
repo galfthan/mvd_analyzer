@@ -1162,15 +1162,6 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "RED BASE-10",
-   "x": -160,
-   "y": -616,
-   "z": -200,
-   "loc": "RED BASE"
-  },
-  {
-   "type": "spawn",
-   "class": "info_player_team1",
    "name": "RED BASE-2",
    "x": -440,
    "y": -592,
@@ -1215,17 +1206,8 @@
   },
   {
    "type": "spawn",
-   "class": "info_player_start",
-   "name": "RED BASE-7",
-   "x": -336,
-   "y": -592,
-   "z": -48,
-   "loc": "RED BASE"
-  },
-  {
-   "type": "spawn",
    "class": "info_player_team1",
-   "name": "RED BASE-8",
+   "name": "RED BASE-7",
    "x": -280,
    "y": -544,
    "z": -200,
@@ -1234,9 +1216,18 @@
   {
    "type": "spawn",
    "class": "info_player_team1",
-   "name": "RED BASE-9",
+   "name": "RED BASE-8",
    "x": -256,
    "y": -688,
+   "z": -200,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-9",
+   "x": -160,
+   "y": -616,
    "z": -200,
    "loc": "RED BASE"
   },
