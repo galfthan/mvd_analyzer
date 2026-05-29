@@ -352,6 +352,50 @@
    "z": -16,
    "loc": "yard.YA",
    "targetName": "uptop"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.mid",
+   "x": 1408,
+   "y": 88,
+   "z": -296,
+   "loc": "RA.mid",
+   "target": "uptop",
+   "bounds": {
+    "min": [
+     1361,
+     81,
+     -351
+    ],
+    "max": [
+     1455,
+     95,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "yard.YA",
+   "x": 672,
+   "y": -664,
+   "z": 24,
+   "loc": "yard.YA",
+   "target": "downunder",
+   "bounds": {
+    "min": [
+     625,
+     -671,
+     -31
+    ],
+    "max": [
+     719,
+     -657,
+     79
+    ]
+   }
   }
  ]
 }

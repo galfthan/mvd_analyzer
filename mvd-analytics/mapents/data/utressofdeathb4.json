@@ -3,6 +3,67 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 168,
+   "y": 8,
+   "z": -404,
+   "bounds": {
+    "min": [
+     137,
+     -23,
+     -479
+    ],
+    "max": [
+     199,
+     39,
+     -329
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 304,
+   "y": -112,
+   "z": -132,
+   "bounds": {
+    "min": [
+     281,
+     -135,
+     -135
+    ],
+    "max": [
+     327,
+     -89,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 332,
+   "y": 8,
+   "z": -500,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     257,
+     -47,
+     -503
+    ],
+    "max": [
+     407,
+     63,
+     -497
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -380,6 +441,48 @@
    "y": 224,
    "z": 256,
    "targetName": "telep"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 572,
+   "y": 96,
+   "z": -768,
+   "target": "pittele",
+   "bounds": {
+    "min": [
+     -303,
+     -647,
+     -775
+    ],
+    "max": [
+     1447,
+     839,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 588,
+   "y": 48,
+   "z": -468,
+   "target": "telep",
+   "bounds": {
+    "min": [
+     449,
+     -87,
+     -479
+    ],
+    "max": [
+     727,
+     183,
+     -457
+    ]
+   }
   }
  ]
 }

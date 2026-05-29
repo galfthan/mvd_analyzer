@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door",
+   "x": 624,
+   "y": -144,
+   "z": 88,
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     577,
+     -159,
+     1
+    ],
+    "max": [
+     671,
+     -129,
+     175
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -410,6 +431,90 @@
    "y": 448,
    "z": 32,
    "targetName": "telenortheast"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -48,
+   "y": -92,
+   "z": 72,
+   "target": "telenortheast",
+   "bounds": {
+    "min": [
+     -79,
+     -95,
+     9
+    ],
+    "max": [
+     -17,
+     -89,
+     135
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -48,
+   "y": -68,
+   "z": 72,
+   "target": "telesoutheast",
+   "bounds": {
+    "min": [
+     -79,
+     -71,
+     9
+    ],
+    "max": [
+     -17,
+     -65,
+     135
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 720,
+   "y": 388,
+   "z": 72,
+   "target": "telenorthwest",
+   "bounds": {
+    "min": [
+     689,
+     385,
+     9
+    ],
+    "max": [
+     751,
+     391,
+     135
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 720,
+   "y": 412,
+   "z": 72,
+   "target": "telesouthwest",
+   "bounds": {
+    "min": [
+     689,
+     409,
+     9
+    ],
+    "max": [
+     751,
+     415,
+     135
+    ]
+   }
   }
  ]
 }

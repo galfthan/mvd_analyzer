@@ -3,6 +3,66 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 448,
+   "y": 0,
+   "z": 168,
+   "bounds": {
+    "min": [
+     445,
+     -15,
+     153
+    ],
+    "max": [
+     451,
+     15,
+     183
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 492,
+   "y": -32,
+   "z": 72,
+   "bounds": {
+    "min": [
+     489,
+     -63,
+     1
+    ],
+    "max": [
+     495,
+     -1,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 492,
+   "y": 32,
+   "z": 72,
+   "bounds": {
+    "min": [
+     489,
+     1,
+     1
+    ],
+    "max": [
+     495,
+     63,
+     143
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",

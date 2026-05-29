@@ -3,6 +3,519 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad.button",
+   "x": 1816,
+   "y": -736,
+   "z": 48,
+   "loc": "Quad.button",
+   "bounds": {
+    "min": [
+     1809,
+     -751,
+     33
+    ],
+    "max": [
+     1823,
+     -721,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA.MH",
+   "x": 2624,
+   "y": -1984,
+   "z": 144,
+   "loc": "RA.MH",
+   "bounds": {
+    "min": [
+     2617,
+     -1999,
+     129
+    ],
+    "max": [
+     2631,
+     -1969,
+     159
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "big-1",
+   "x": 1312,
+   "y": -824,
+   "z": 56,
+   "loc": "big",
+   "bounds": {
+    "min": [
+     1297,
+     -831,
+     41
+    ],
+    "max": [
+     1327,
+     -817,
+     71
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "big-2",
+   "x": 2048,
+   "y": -824,
+   "z": 56,
+   "loc": "big",
+   "bounds": {
+    "min": [
+     2033,
+     -831,
+     41
+    ],
+    "max": [
+     2063,
+     -817,
+     71
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "big.button",
+   "x": 1816,
+   "y": -1504,
+   "z": 48,
+   "loc": "big.button",
+   "bounds": {
+    "min": [
+     1809,
+     -1519,
+     33
+    ],
+    "max": [
+     1823,
+     -1489,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.RL",
+   "x": 2496,
+   "y": -1252,
+   "z": 176,
+   "loc": "low.RL",
+   "bounds": {
+    "min": [
+     2481,
+     -1255,
+     161
+    ],
+    "max": [
+     2511,
+     -1249,
+     191
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.button",
+   "x": 2176,
+   "y": -2376,
+   "z": 112,
+   "loc": "low.button",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     2161,
+     -2383,
+     97
+    ],
+    "max": [
+     2191,
+     -2369,
+     127
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.stairs",
+   "x": 2704,
+   "y": -1928,
+   "z": 144,
+   "loc": "low.stairs",
+   "bounds": {
+    "min": [
+     2689,
+     -1935,
+     129
+    ],
+    "max": [
+     2719,
+     -1921,
+     159
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "tele",
+   "x": 2256,
+   "y": -232,
+   "z": -112,
+   "loc": "tele",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     2241,
+     -239,
+     -127
+    ],
+    "max": [
+     2271,
+     -225,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.button",
+   "x": 1696,
+   "y": -756,
+   "z": -10,
+   "loc": "Quad.button",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     1633,
+     -823,
+     -15
+    ],
+    "max": [
+     1759,
+     -689,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.MH-1",
+   "x": 2256,
+   "y": -1984,
+   "z": 176,
+   "loc": "RA.MH",
+   "bounds": {
+    "min": [
+     2249,
+     -2015,
+     97
+    ],
+    "max": [
+     2263,
+     -1953,
+     255
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.MH-2",
+   "x": 2432,
+   "y": -2128,
+   "z": 80,
+   "loc": "RA.MH",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     2385,
+     -2239,
+     73
+    ],
+    "max": [
+     2479,
+     -2017,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.MH-3",
+   "x": 2944,
+   "y": -2008,
+   "z": 88,
+   "loc": "RA.MH",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     2881,
+     -2079,
+     81
+    ],
+    "max": [
+     3007,
+     -1937,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "big-1",
+   "x": 1176,
+   "y": -928,
+   "z": 56,
+   "loc": "big",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     1113,
+     -1023,
+     1
+    ],
+    "max": [
+     1239,
+     -833,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "big-2",
+   "x": 1544,
+   "y": -1056,
+   "z": -10,
+   "loc": "big",
+   "bounds": {
+    "min": [
+     1393,
+     -1271,
+     -15
+    ],
+    "max": [
+     1695,
+     -841,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "big-3",
+   "x": 1696,
+   "y": -1348,
+   "z": -10,
+   "loc": "big",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     1633,
+     -1407,
+     -15
+    ],
+    "max": [
+     1759,
+     -1289,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "big-4",
+   "x": 1848,
+   "y": -1056,
+   "z": -10,
+   "loc": "big",
+   "bounds": {
+    "min": [
+     1697,
+     -1271,
+     -15
+    ],
+    "max": [
+     1999,
+     -841,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "big-5",
+   "x": 2184,
+   "y": -928,
+   "z": 56,
+   "loc": "big",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     2121,
+     -1023,
+     1
+    ],
+    "max": [
+     2247,
+     -833,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "low.stairs",
+   "x": 2944,
+   "y": -1864,
+   "z": 88,
+   "loc": "low.stairs",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     2881,
+     -1935,
+     81
+    ],
+    "max": [
+     3007,
+     -1793,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "path.lift",
+   "x": 2416,
+   "y": -832,
+   "z": 144,
+   "loc": "path.lift",
+   "bounds": {
+    "min": [
+     2409,
+     -863,
+     97
+    ],
+    "max": [
+     2423,
+     -801,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "secret-1",
+   "x": 2368,
+   "y": -560,
+   "z": 64,
+   "loc": "secret",
+   "bounds": {
+    "min": [
+     2337,
+     -567,
+     33
+    ],
+    "max": [
+     2399,
+     -553,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "secret-2",
+   "x": 2432,
+   "y": -560,
+   "z": 64,
+   "loc": "secret",
+   "bounds": {
+    "min": [
+     2401,
+     -567,
+     33
+    ],
+    "max": [
+     2463,
+     -553,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "tele.YA-1",
+   "x": 2712,
+   "y": -56,
+   "z": -48,
+   "loc": "tele.YA",
+   "bounds": {
+    "min": [
+     2705,
+     -63,
+     -95
+    ],
+    "max": [
+     2719,
+     -49,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "tele.YA-2",
+   "x": 2712,
+   "y": -24,
+   "z": -48,
+   "loc": "tele.YA",
+   "bounds": {
+    "min": [
+     2705,
+     -31,
+     -95
+    ],
+    "max": [
+     2719,
+     -17,
+     -1
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "weapon_grenadelauncher",
    "kind": "gl",
@@ -436,6 +949,94 @@
    "z": 336,
    "loc": "tele.high",
    "targetName": "t7"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.MH",
+   "x": 2432,
+   "y": -2540,
+   "z": 120,
+   "loc": "RA.MH",
+   "target": "t14",
+   "bounds": {
+    "min": [
+     2401,
+     -2551,
+     113
+    ],
+    "max": [
+     2463,
+     -2529,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "big-1",
+   "x": 1312,
+   "y": -1056,
+   "z": 32,
+   "loc": "big",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     1281,
+     -1071,
+     25
+    ],
+    "max": [
+     1343,
+     -1041,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "big-2",
+   "x": 2048,
+   "y": -1048,
+   "z": 32,
+   "loc": "big",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     2017,
+     -1055,
+     25
+    ],
+    "max": [
+     2079,
+     -1041,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele.YA",
+   "x": 2888,
+   "y": -32,
+   "z": -48,
+   "loc": "tele.YA",
+   "target": "t7",
+   "bounds": {
+    "min": [
+     2881,
+     -63,
+     -95
+    ],
+    "max": [
+     2895,
+     -1,
+     -1
+    ]
+   }
   }
  ]
 }

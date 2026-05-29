@@ -392,6 +392,28 @@
    "z": 352,
    "loc": "high.MEGA",
    "targetName": "telehigh"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": -990,
+   "y": 728,
+   "z": 51,
+   "loc": "low.RL",
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     -999,
+     697,
+     31
+    ],
+    "max": [
+     -981,
+     759,
+     71
+    ]
+   }
   }
  ]
 }

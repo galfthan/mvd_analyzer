@@ -276,6 +276,69 @@
    "y": -312,
    "z": -120,
    "targetName": "bottom-room"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -192,
+   "y": -660,
+   "z": 256,
+   "target": "bottom-room",
+   "bounds": {
+    "min": [
+     -255,
+     -679,
+     193
+    ],
+    "max": [
+     -129,
+     -641,
+     319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 28,
+   "y": -656,
+   "z": -64,
+   "target": "rocket-ledge",
+   "bounds": {
+    "min": [
+     -7,
+     -719,
+     -127
+    ],
+    "max": [
+     63,
+     -593,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 488,
+   "y": -280,
+   "z": -64,
+   "target": "upper-rl",
+   "bounds": {
+    "min": [
+     425,
+     -287,
+     -127
+    ],
+    "max": [
+     551,
+     -273,
+     -1
+    ]
+   }
   }
  ]
 }

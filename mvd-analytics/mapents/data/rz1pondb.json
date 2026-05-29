@@ -3,6 +3,46 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -104,
+   "y": -760,
+   "z": -92,
+   "bounds": {
+    "min": [
+     -127,
+     -783,
+     -95
+    ],
+    "max": [
+     -81,
+     -737,
+     -89
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": -104,
+   "y": -768,
+   "z": 160,
+   "bounds": {
+    "min": [
+     -239,
+     -911,
+     65
+    ],
+    "max": [
+     31,
+     -625,
+     255
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "weapon_rocketlauncher",
    "kind": "rl",
@@ -125,6 +165,48 @@
    "y": -432,
    "z": -64,
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 64,
+   "y": -1344,
+   "z": -552,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     1,
+     -1375,
+     -615
+    ],
+    "max": [
+     127,
+     -1313,
+     -489
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 64,
+   "y": 448,
+   "z": -544,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     1,
+     417,
+     -607
+    ],
+    "max": [
+     127,
+     479,
+     -481
+    ]
+   }
   }
  ]
 }

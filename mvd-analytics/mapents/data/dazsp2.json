@@ -3,6 +3,66 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 1508,
+   "y": 64,
+   "z": -384,
+   "bounds": {
+    "min": [
+     1497,
+     -63,
+     -447
+    ],
+    "max": [
+     1519,
+     191,
+     -321
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 2144,
+   "y": -1128,
+   "z": 64,
+   "bounds": {
+    "min": [
+     2113,
+     -1135,
+     1
+    ],
+    "max": [
+     2175,
+     -1121,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 2208,
+   "y": -1128,
+   "z": 64,
+   "bounds": {
+    "min": [
+     2177,
+     -1135,
+     1
+    ],
+    "max": [
+     2239,
+     -1121,
+     127
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_health",
    "kind": "h25",
@@ -177,6 +237,48 @@
    "y": 608,
    "z": -96,
    "targetName": "ogre1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 1536,
+   "y": 960,
+   "z": 16,
+   "target": "ogre1",
+   "bounds": {
+    "min": [
+     1481,
+     905,
+     -63
+    ],
+    "max": [
+     1591,
+     1015,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1728,
+   "y": 960,
+   "z": 16,
+   "target": "hell1",
+   "bounds": {
+    "min": [
+     1673,
+     905,
+     -63
+    ],
+    "max": [
+     1783,
+     1015,
+     95
+    ]
+   }
   }
  ]
 }

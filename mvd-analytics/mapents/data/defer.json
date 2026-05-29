@@ -3,6 +3,111 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.high",
+   "x": 712,
+   "y": 712,
+   "z": 112,
+   "loc": "LG.high",
+   "bounds": {
+    "min": [
+     697,
+     681,
+     49
+    ],
+    "max": [
+     727,
+     743,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent.door-1",
+   "x": 1312,
+   "y": -184,
+   "z": -176,
+   "loc": "Pent.door",
+   "bounds": {
+    "min": [
+     1281,
+     -199,
+     -239
+    ],
+    "max": [
+     1343,
+     -169,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent.door-2",
+   "x": 1376,
+   "y": -184,
+   "z": -176,
+   "loc": "Pent.door",
+   "bounds": {
+    "min": [
+     1345,
+     -199,
+     -239
+    ],
+    "max": [
+     1407,
+     -169,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.door",
+   "x": 712,
+   "y": 648,
+   "z": 112,
+   "loc": "RA.door",
+   "bounds": {
+    "min": [
+     697,
+     617,
+     49
+    ],
+    "max": [
+     727,
+     679,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.low",
+   "x": -18,
+   "y": -278,
+   "z": -244,
+   "loc": "RA.low",
+   "bounds": {
+    "min": [
+     -101,
+     -361,
+     -319
+    ],
+    "max": [
+     65,
+     -195,
+     -169
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -499,6 +604,300 @@
    "z": 44,
    "loc": "Ring.tele",
    "targetName": "rl_tele_high"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent.door-1",
+   "x": 951,
+   "y": -291,
+   "z": -164,
+   "loc": "Pent.door",
+   "target": "pent_tele_exit",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     944,
+     -298,
+     -231
+    ],
+    "max": [
+     958,
+     -284,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent.door-2",
+   "x": 967,
+   "y": -275,
+   "z": -164,
+   "loc": "Pent.door",
+   "target": "pent_tele_exit",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     960,
+     -282,
+     -231
+    ],
+    "max": [
+     974,
+     -268,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent.door-3",
+   "x": 983,
+   "y": -259,
+   "z": -164,
+   "loc": "Pent.door",
+   "target": "pent_tele_exit",
+   "bounds": {
+    "min": [
+     976,
+     -266,
+     -231
+    ],
+    "max": [
+     990,
+     -252,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent.door-4",
+   "x": 999,
+   "y": -243,
+   "z": -164,
+   "loc": "Pent.door",
+   "target": "pent_tele_exit",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     992,
+     -250,
+     -231
+    ],
+    "max": [
+     1006,
+     -236,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent.door-5",
+   "x": 1015,
+   "y": -227,
+   "z": -164,
+   "loc": "Pent.door",
+   "target": "pent_tele_exit",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1008,
+     -234,
+     -231
+    ],
+    "max": [
+     1022,
+     -220,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.low-1",
+   "x": 1268,
+   "y": 1776,
+   "z": -170,
+   "loc": "Quad.low",
+   "target": "quad_tele_exit_high",
+   "bounds": {
+    "min": [
+     1221,
+     1769,
+     -239
+    ],
+    "max": [
+     1315,
+     1783,
+     -101
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.low-2",
+   "x": 1268,
+   "y": 1808,
+   "z": -170,
+   "loc": "Quad.low",
+   "target": "quad_tele_exit_high",
+   "bounds": {
+    "min": [
+     1221,
+     1801,
+     -239
+    ],
+    "max": [
+     1315,
+     1815,
+     -101
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL.tele-1",
+   "x": 2078,
+   "y": 158,
+   "z": -164,
+   "loc": "RL.tele",
+   "target": "rl_tele_high",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2071,
+     151,
+     -235
+    ],
+    "max": [
+     2085,
+     165,
+     -93
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL.tele-2",
+   "x": 2094,
+   "y": 174,
+   "z": -164,
+   "loc": "RL.tele",
+   "target": "rl_tele_high",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2087,
+     167,
+     -235
+    ],
+    "max": [
+     2101,
+     181,
+     -93
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL.tele-3",
+   "x": 2110,
+   "y": 190,
+   "z": -164,
+   "loc": "RL.tele",
+   "target": "rl_tele_high",
+   "bounds": {
+    "min": [
+     2103,
+     183,
+     -235
+    ],
+    "max": [
+     2117,
+     197,
+     -93
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL.tele-4",
+   "x": 2126,
+   "y": 206,
+   "z": -164,
+   "loc": "RL.tele",
+   "target": "rl_tele_high",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2119,
+     199,
+     -235
+    ],
+    "max": [
+     2133,
+     213,
+     -93
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL.tele-5",
+   "x": 2142,
+   "y": 222,
+   "z": -164,
+   "loc": "RL.tele",
+   "target": "rl_tele_high",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2135,
+     215,
+     -235
+    ],
+    "max": [
+     2149,
+     229,
+     -93
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring.tele",
+   "x": 2596,
+   "y": 392,
+   "z": 92,
+   "loc": "Ring.tele",
+   "target": "rl_tele_low",
+   "bounds": {
+    "min": [
+     2545,
+     385,
+     21
+    ],
+    "max": [
+     2647,
+     399,
+     163
+    ]
+   }
   }
  ]
 }

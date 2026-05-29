@@ -422,6 +422,94 @@
    "z": -40,
    "loc": "high.RL",
    "targetName": "up2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 1024,
+   "y": -696,
+   "z": -208,
+   "loc": "RA",
+   "target": "up2",
+   "bounds": {
+    "min": [
+     993,
+     -703,
+     -255
+    ],
+    "max": [
+     1055,
+     -689,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.tele",
+   "x": -128,
+   "y": -24,
+   "z": -16,
+   "loc": "YA.tele",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -159,
+     -31,
+     -63
+    ],
+    "max": [
+     -97,
+     -17,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.RL",
+   "x": 832,
+   "y": -536,
+   "z": -16,
+   "loc": "high.RL",
+   "target": "down2",
+   "bounds": {
+    "min": [
+     801,
+     -543,
+     -63
+    ],
+    "max": [
+     863,
+     -529,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": 160,
+   "y": 8,
+   "z": -208,
+   "loc": "low.RL",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     129,
+     1,
+     -255
+    ],
+    "max": [
+     191,
+     15,
+     -161
+    ]
+   }
   }
  ]
 }

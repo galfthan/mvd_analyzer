@@ -266,6 +266,27 @@
    "y": -112,
    "z": 376,
    "targetName": "info_teleport_destination1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -440,
+   "y": -92,
+   "z": 128,
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     -447,
+     -159,
+     105
+    ],
+    "max": [
+     -433,
+     -25,
+     151
+    ]
+   }
   }
  ]
 }

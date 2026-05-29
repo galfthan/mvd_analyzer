@@ -3,6 +3,128 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 703.5,
+   "y": -1280,
+   "z": -160,
+   "bounds": {
+    "min": [
+     704,
+     -1311,
+     -223
+    ],
+    "max": [
+     703,
+     -1249,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 216,
+   "y": 1024,
+   "z": -304,
+   "bounds": {
+    "min": [
+     161,
+     945,
+     -319
+    ],
+    "max": [
+     271,
+     1103,
+     -289
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 392,
+   "y": -1384,
+   "z": -264,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     369,
+     -1423,
+     -271
+    ],
+    "max": [
+     415,
+     -1345,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 392,
+   "y": -1176,
+   "z": -264,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     369,
+     -1215,
+     -271
+    ],
+    "max": [
+     415,
+     -1137,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 1496,
+   "y": -560,
+   "z": -216,
+   "bounds": {
+    "min": [
+     1457,
+     -575,
+     -319
+    ],
+    "max": [
+     1535,
+     -545,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 1576,
+   "y": -560,
+   "z": -216,
+   "bounds": {
+    "min": [
+     1537,
+     -575,
+     -319
+    ],
+    "max": [
+     1615,
+     -545,
+     -113
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -613,6 +735,48 @@
    "y": -876,
    "z": -316,
    "targetName": "ringtele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -312,
+   "y": 1024,
+   "z": -248,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -319,
+     993,
+     -319
+    ],
+    "max": [
+     -305,
+     1055,
+     -177
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1028,
+   "y": -880,
+   "z": -400,
+   "target": "ringtele",
+   "bounds": {
+    "min": [
+     1021,
+     -911,
+     -447
+    ],
+    "max": [
+     1035,
+     -849,
+     -353
+    ]
+   }
   }
  ]
 }

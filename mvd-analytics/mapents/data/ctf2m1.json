@@ -3,6 +3,364 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad / 666 ROOM (QUAD DOOR BUTTON AREA)",
+   "x": -180,
+   "y": -1728,
+   "z": -200,
+   "loc": "Quad / 666 ROOM (QUAD DOOR BUTTON AREA)",
+   "bounds": {
+    "min": [
+     -183,
+     -1743,
+     -215
+    ],
+    "max": [
+     -177,
+     -1713,
+     -185
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE BASE (100 HEALTH AREA)",
+   "x": -1464,
+   "y": 544,
+   "z": -72,
+   "loc": "BLUE BASE (100 HEALTH AREA)",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1471,
+     513,
+     -127
+    ],
+    "max": [
+     -1457,
+     575,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (GL ENTRANCE)-1",
+   "x": -1582.5,
+   "y": 608,
+   "z": 64,
+   "loc": "BLUE BASE (GL ENTRANCE)",
+   "bounds": {
+    "min": [
+     -1631,
+     593,
+     1
+    ],
+    "max": [
+     -1534,
+     623,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (GL ENTRANCE)-2",
+   "x": -1556.1074,
+   "y": 608,
+   "z": 64,
+   "loc": "BLUE BASE (GL ENTRANCE)",
+   "bounds": {
+    "min": [
+     -1607.2148,
+     593,
+     1
+    ],
+    "max": [
+     -1505,
+     623,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (MAIN ENTRANCE NEAR FLAG)-1",
+   "x": -1582.5,
+   "y": -736,
+   "z": 64,
+   "loc": "BLUE BASE (MAIN ENTRANCE NEAR FLAG)",
+   "bounds": {
+    "min": [
+     -1631,
+     -751,
+     1
+    ],
+    "max": [
+     -1534,
+     -721,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (MAIN ENTRANCE NEAR FLAG)-2",
+   "x": -1556.1074,
+   "y": -736,
+   "z": 64,
+   "loc": "BLUE BASE (MAIN ENTRANCE NEAR FLAG)",
+   "bounds": {
+    "min": [
+     -1607.2148,
+     -751,
+     1
+    ],
+    "max": [
+     -1505,
+     -721,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad / 666 ROOM-1",
+   "x": 160,
+   "y": -1496,
+   "z": -192,
+   "loc": "Quad / 666 ROOM",
+   "bounds": {
+    "min": [
+     129,
+     -1503,
+     -255
+    ],
+    "max": [
+     191,
+     -1489,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad / 666 ROOM-2",
+   "x": 472,
+   "y": -1356,
+   "z": -192,
+   "loc": "Quad / 666 ROOM",
+   "bounds": {
+    "min": [
+     457,
+     -1391,
+     -255
+    ],
+    "max": [
+     487,
+     -1321,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad / 666 ROOM-3",
+   "x": 472,
+   "y": -1300,
+   "z": -192,
+   "loc": "Quad / 666 ROOM",
+   "bounds": {
+    "min": [
+     457,
+     -1335,
+     -255
+    ],
+    "max": [
+     487,
+     -1265,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad ROOM (UPPER LEVEL)-1",
+   "x": -216,
+   "y": -1356,
+   "z": 64,
+   "loc": "Quad ROOM (UPPER LEVEL)",
+   "bounds": {
+    "min": [
+     -231,
+     -1391,
+     1
+    ],
+    "max": [
+     -201,
+     -1321,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad ROOM (UPPER LEVEL)-2",
+   "x": -216,
+   "y": -1300,
+   "z": 64,
+   "loc": "Quad ROOM (UPPER LEVEL)",
+   "bounds": {
+    "min": [
+     -231,
+     -1335,
+     1
+    ],
+    "max": [
+     -201,
+     -1265,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad ROOM (UPPER LEVEL)-3",
+   "x": -192,
+   "y": -1584,
+   "z": -80,
+   "loc": "Quad ROOM (UPPER LEVEL)",
+   "bounds": {
+    "min": [
+     -199,
+     -1615,
+     -127
+    ],
+    "max": [
+     -185,
+     -1553,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (GL ENTRANCE)-1",
+   "x": 1908.1077,
+   "y": 608,
+   "z": -192,
+   "loc": "RED BASE (GL ENTRANCE)",
+   "bounds": {
+    "min": [
+     1857,
+     593,
+     -255
+    ],
+    "max": [
+     1959.2155,
+     623,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (GL ENTRANCE)-2",
+   "x": 1934.5,
+   "y": 608,
+   "z": -192,
+   "loc": "RED BASE (GL ENTRANCE)",
+   "bounds": {
+    "min": [
+     1886,
+     593,
+     -255
+    ],
+    "max": [
+     1983,
+     623,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (MAIN ENTRANCE NEAR FLAG)-1",
+   "x": 1908.1077,
+   "y": -736,
+   "z": -192,
+   "loc": "RED BASE (MAIN ENTRANCE NEAR FLAG)",
+   "bounds": {
+    "min": [
+     1857,
+     -751,
+     -255
+    ],
+    "max": [
+     1959.2155,
+     -721,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (MAIN ENTRANCE NEAR FLAG)-2",
+   "x": 1934.5,
+   "y": -736,
+   "z": -192,
+   "loc": "RED BASE (MAIN ENTRANCE NEAR FLAG)",
+   "bounds": {
+    "min": [
+     1886,
+     -751,
+     -255
+    ],
+    "max": [
+     1983,
+     -721,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (NEAR LG)",
+   "x": 2560,
+   "y": 432,
+   "z": -200,
+   "loc": "RED BASE (NEAR LG)",
+   "bounds": {
+    "min": [
+     2529,
+     401,
+     -255
+    ],
+    "max": [
+     2591,
+     463,
+     -145
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -1575,6 +1933,270 @@
    "z": 24,
    "loc": "RED BASE (UPPER TELEPORT NEAR YA)",
    "targetName": "rt4"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (LOWER TELEPORT NEAR FLAG)",
+   "x": -1952,
+   "y": -872,
+   "z": -192,
+   "loc": "BLUE BASE (LOWER TELEPORT NEAR FLAG)",
+   "target": "bt1",
+   "bounds": {
+    "min": [
+     -1983,
+     -879,
+     -239
+    ],
+    "max": [
+     -1921,
+     -865,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (LOWER TELEPORT NEAR WATER)-1",
+   "x": -1808,
+   "y": -64,
+   "z": -192,
+   "loc": "BLUE BASE (LOWER TELEPORT NEAR WATER)",
+   "target": "bt5",
+   "bounds": {
+    "min": [
+     -1815,
+     -95,
+     -239
+    ],
+    "max": [
+     -1801,
+     -33,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (LOWER TELEPORT NEAR WATER)-2",
+   "x": -1792,
+   "y": -64,
+   "z": -192,
+   "loc": "BLUE BASE (LOWER TELEPORT NEAR WATER)",
+   "target": "bt3",
+   "bounds": {
+    "min": [
+     -1799,
+     -95,
+     -239
+    ],
+    "max": [
+     -1785,
+     -33,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (UPPER TELEPORT ABOVE LG)",
+   "x": -2144,
+   "y": 744,
+   "z": 64,
+   "loc": "BLUE BASE (UPPER TELEPORT ABOVE LG)",
+   "target": "bt4",
+   "bounds": {
+    "min": [
+     -2175,
+     737,
+     17
+    ],
+    "max": [
+     -2113,
+     751,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (UPPER TELEPORT NEAR GL ENTRANCE)",
+   "x": -1304,
+   "y": 192,
+   "z": 72,
+   "loc": "BLUE BASE (UPPER TELEPORT NEAR GL ENTRANCE)",
+   "target": "bt2",
+   "bounds": {
+    "min": [
+     -1311,
+     161,
+     17
+    ],
+    "max": [
+     -1297,
+     223,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad ROOM (LOWER TELEPORT AREA)",
+   "x": 192,
+   "y": -1064,
+   "z": -192,
+   "loc": "Quad ROOM (LOWER TELEPORT AREA)",
+   "target": "rc2",
+   "bounds": {
+    "min": [
+     161,
+     -1071,
+     -239
+    ],
+    "max": [
+     223,
+     -1057,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad ROOM (UPPER TELEPORT AREA)",
+   "x": -120,
+   "y": -2024,
+   "z": 64,
+   "loc": "Quad ROOM (UPPER TELEPORT AREA)",
+   "target": "rc1",
+   "bounds": {
+    "min": [
+     -151,
+     -2031,
+     17
+    ],
+    "max": [
+     -89,
+     -2017,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (LOWER TELEPORT NEAR YA)",
+   "x": 1656,
+   "y": -280,
+   "z": -184,
+   "loc": "RED BASE (LOWER TELEPORT NEAR YA)",
+   "target": "rt2",
+   "bounds": {
+    "min": [
+     1649,
+     -311,
+     -239
+    ],
+    "max": [
+     1663,
+     -249,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (LOWER TELEPORT UNDER YA PLATFORM)",
+   "x": 2112,
+   "y": -672,
+   "z": -200,
+   "loc": "RED BASE (LOWER TELEPORT UNDER YA PLATFORM)",
+   "target": "rt4",
+   "bounds": {
+    "min": [
+     2081,
+     -679,
+     -239
+    ],
+    "max": [
+     2143,
+     -665,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (UPPER LEVEL TELEPORT ABOVE LG)",
+   "x": 2496,
+   "y": 744,
+   "z": 72,
+   "loc": "RED BASE (UPPER LEVEL TELEPORT ABOVE LG)",
+   "target": "rt1",
+   "bounds": {
+    "min": [
+     2465,
+     737,
+     17
+    ],
+    "max": [
+     2527,
+     751,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (UPPER TELEPORT NEAR YA)",
+   "x": 1656,
+   "y": -600,
+   "z": 72,
+   "loc": "RED BASE (UPPER TELEPORT NEAR YA)",
+   "target": "rt3",
+   "bounds": {
+    "min": [
+     1649,
+     -631,
+     17
+    ],
+    "max": [
+     1663,
+     -569,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "WATER AREA (NEAR RED TUNNEL)",
+   "x": 288,
+   "y": 48,
+   "z": -440,
+   "loc": "WATER AREA (NEAR RED TUNNEL)",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     281,
+     17,
+     -495
+    ],
+    "max": [
+     295,
+     79,
+     -385
+    ]
+   }
   }
  ]
 }

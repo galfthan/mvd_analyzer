@@ -750,6 +750,72 @@
    "z": 912,
    "loc": "RL.ledge",
    "targetName": "t2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 240,
+   "y": -528,
+   "z": 520,
+   "loc": "LG",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     208,
+     -540,
+     464
+    ],
+    "max": [
+     272,
+     -516,
+     576
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.low",
+   "x": 832,
+   "y": 1760,
+   "z": 840,
+   "loc": "RA.low",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     800,
+     1748,
+     784
+    ],
+    "max": [
+     864,
+     1772,
+     896
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL.ledge",
+   "x": 1824,
+   "y": -224,
+   "z": 960,
+   "loc": "RL.ledge",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     1792,
+     -236,
+     904
+    ],
+    "max": [
+     1856,
+     -212,
+     1016
+    ]
+   }
   }
  ]
 }

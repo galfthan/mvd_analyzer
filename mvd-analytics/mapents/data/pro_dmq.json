@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": 1120,
+   "y": -960,
+   "z": -660,
+   "bounds": {
+    "min": [
+     1057,
+     -975,
+     -670
+    ],
+    "max": [
+     1183,
+     -945,
+     -650
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": 1120,
+   "y": -958.5,
+   "z": -502,
+   "bounds": {
+    "min": [
+     1057,
+     -971,
+     -507
+    ],
+    "max": [
+     1183,
+     -946,
+     -497
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 1120,
+   "y": -1064,
+   "z": -508,
+   "bounds": {
+    "min": [
+     1057,
+     -1151,
+     -519
+    ],
+    "max": [
+     1183,
+     -977,
+     -497
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 1120,
+   "y": -864,
+   "z": -662,
+   "bounds": {
+    "min": [
+     1057,
+     -943,
+     -677
+    ],
+    "max": [
+     1183,
+     -785,
+     -647
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -410,6 +490,69 @@
    "y": -16,
    "z": -352,
    "targetName": "tele3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 592,
+   "y": -589,
+   "z": -336,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     553,
+     -591,
+     -375
+    ],
+    "max": [
+     631,
+     -587,
+     -297
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1100,
+   "y": -1408,
+   "z": -304,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     1093,
+     -1423,
+     -335
+    ],
+    "max": [
+     1107,
+     -1393,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 1161,
+   "y": -321,
+   "z": -747,
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     1111,
+     -365,
+     -747
+    ],
+    "max": [
+     1211,
+     -277,
+     -747
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -3392,
+   "y": 978,
+   "z": -224,
+   "bounds": {
+    "min": [
+     -3455,
+     929,
+     -239
+    ],
+    "max": [
+     -3329,
+     1027,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -3392,
+   "y": 1004.1086,
+   "z": -224,
+   "bounds": {
+    "min": [
+     -3455,
+     953.21716,
+     -239
+    ],
+    "max": [
+     -3329,
+     1055,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -268.22345,
+   "y": 2368,
+   "z": -224,
+   "bounds": {
+    "min": [
+     -319,
+     2305,
+     -239
+    ],
+    "max": [
+     -217.44693,
+     2431,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": -242,
+   "y": 2368,
+   "z": -224,
+   "bounds": {
+    "min": [
+     -291,
+     2305,
+     -239
+    ],
+    "max": [
+     -193,
+     2431,
+     -209
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_health",
    "kind": "h15",
@@ -390,6 +470,203 @@
    "y": -1504,
    "z": -64,
    "targetName": "piperoom"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1728,
+   "y": 2492,
+   "z": -152,
+   "target": "roomoneb",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1743,
+     2489,
+     -191
+    ],
+    "max": [
+     -1713,
+     2495,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -1404,
+   "y": 1760,
+   "z": -56,
+   "target": "td2",
+   "bounds": {
+    "min": [
+     -1407,
+     1745,
+     -95
+    ],
+    "max": [
+     -1401,
+     1775,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -1404,
+   "y": 2656,
+   "z": -56,
+   "target": "td1",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1407,
+     2641,
+     -95
+    ],
+    "max": [
+     -1401,
+     2671,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -836,
+   "y": 2656,
+   "z": -56,
+   "target": "roomtwo",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -839,
+     2641,
+     -95
+    ],
+    "max": [
+     -833,
+     2671,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 132,
+   "y": 2656,
+   "z": -56,
+   "target": "roomone",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     129,
+     2641,
+     -95
+    ],
+    "max": [
+     135,
+     2671,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 700,
+   "y": 2656,
+   "z": -56,
+   "target": "room3a",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     697,
+     2641,
+     -95
+    ],
+    "max": [
+     703,
+     2671,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": 1156,
+   "y": 2656,
+   "z": -56,
+   "target": "room2out",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1153,
+     2641,
+     -95
+    ],
+    "max": [
+     1159,
+     2671,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-8",
+   "x": 1724,
+   "y": 2656,
+   "z": -56,
+   "target": "piperoom",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1721,
+     2641,
+     -95
+    ],
+    "max": [
+     1727,
+     2671,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-9",
+   "x": 1852,
+   "y": -1504,
+   "z": -56,
+   "target": "room3b",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1849,
+     -1519,
+     -95
+    ],
+    "max": [
+     1855,
+     -1489,
+     -17
+    ]
+   }
   }
  ]
 }

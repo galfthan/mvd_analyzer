@@ -3,6 +3,47 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 608,
+   "y": -1648,
+   "z": -128,
+   "bounds": {
+    "min": [
+     593,
+     -1648,
+     -143
+    ],
+    "max": [
+     623,
+     -1648,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": 608,
+   "y": -1600,
+   "z": -48,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     513,
+     -1663,
+     -159
+    ],
+    "max": [
+     703,
+     -1537,
+     63
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -388,6 +429,48 @@
    "y": 224,
    "z": 192,
    "targetName": "firstteleport"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 1088,
+   "y": -968,
+   "z": -170,
+   "target": "firstteleport",
+   "bounds": {
+    "min": [
+     1077,
+     -1047,
+     -239
+    ],
+    "max": [
+     1099,
+     -889,
+     -101
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1167.5,
+   "y": 224,
+   "z": 214,
+   "target": "secondteleport",
+   "bounds": {
+    "min": [
+     1152,
+     145,
+     145
+    ],
+    "max": [
+     1183,
+     303,
+     283
+    ]
+   }
   }
  ]
 }

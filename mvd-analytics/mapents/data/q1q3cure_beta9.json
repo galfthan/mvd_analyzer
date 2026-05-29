@@ -480,6 +480,48 @@
    "y": -160,
    "z": 392,
    "targetName": "ga"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 32,
+   "y": -579,
+   "z": 100,
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     -7,
+     -582,
+     49
+    ],
+    "max": [
+     71,
+     -576,
+     151
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 953,
+   "y": -740,
+   "z": -62,
+   "target": "ga",
+   "bounds": {
+    "min": [
+     946,
+     -791,
+     -131
+    ],
+    "max": [
+     960,
+     -689,
+     7
+    ]
+   }
   }
  ]
 }

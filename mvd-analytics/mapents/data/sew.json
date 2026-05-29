@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 267.86603,
+   "y": -52,
+   "z": 477.5096,
+   "bounds": {
+    "min": [
+     240.73206,
+     -67,
+     452.01923
+    ],
+    "max": [
+     295,
+     -37,
+     503
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 271.23438,
+   "y": -52,
+   "z": 532.134,
+   "bounds": {
+    "min": [
+     247.46872,
+     -67,
+     505
+    ],
+    "max": [
+     295,
+     -37,
+     559.26794
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 321.3923,
+   "y": -52,
+   "z": 529.39233,
+   "bounds": {
+    "min": [
+     297,
+     -67,
+     505
+    ],
+    "max": [
+     345.7846,
+     -37,
+     553.7846
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 324.13397,
+   "y": -52,
+   "z": 475.86603,
+   "bounds": {
+    "min": [
+     297,
+     -67,
+     448.73206
+    ],
+    "max": [
+     351.26794,
+     -37,
+     503
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -103,6 +183,48 @@
    "y": 658,
    "z": 66,
    "targetName": "telehigh"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -76,
+   "y": -141,
+   "z": 77,
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     -103,
+     -153,
+     42
+    ],
+    "max": [
+     -49,
+     -129,
+     112
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 668,
+   "y": 705,
+   "z": 116,
+   "target": "telecenter",
+   "bounds": {
+    "min": [
+     641,
+     693,
+     81
+    ],
+    "max": [
+     695,
+     717,
+     151
+    ]
+   }
   }
  ]
 }

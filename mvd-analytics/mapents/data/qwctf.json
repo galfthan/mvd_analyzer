@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -1392,
+   "y": 1472,
+   "z": -448,
+   "bounds": {
+    "min": [
+     -1399,
+     1441,
+     -507
+    ],
+    "max": [
+     -1385,
+     1503,
+     -389
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -1392,
+   "y": 1536,
+   "z": -448,
+   "bounds": {
+    "min": [
+     -1399,
+     1505,
+     -507
+    ],
+    "max": [
+     -1385,
+     1567,
+     -389
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 1264,
+   "y": 0,
+   "z": -448,
+   "bounds": {
+    "min": [
+     1257,
+     -31,
+     -507
+    ],
+    "max": [
+     1271,
+     31,
+     -389
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 1264,
+   "y": 64,
+   "z": -448,
+   "bounds": {
+    "min": [
+     1257,
+     33,
+     -507
+    ],
+    "max": [
+     1271,
+     95,
+     -389
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -1110,6 +1190,48 @@
    "y": 976,
    "z": -44,
    "targetName": "mid-red"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -528,
+   "y": 1504,
+   "z": -432,
+   "target": "mid-red",
+   "bounds": {
+    "min": [
+     -535,
+     1457,
+     -511
+    ],
+    "max": [
+     -521,
+     1551,
+     -353
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 400,
+   "y": 32,
+   "z": -432,
+   "target": "mid-blue",
+   "bounds": {
+    "min": [
+     393,
+     -15,
+     -511
+    ],
+    "max": [
+     407,
+     79,
+     -353
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,26 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": 416,
+   "y": 32,
+   "z": -24,
+   "bounds": {
+    "min": [
+     337,
+     -47,
+     -31
+    ],
+    "max": [
+     495,
+     111,
+     -17
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -522,6 +542,69 @@
    "y": -336,
    "z": 96,
    "targetName": "secret tele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 176,
+   "y": -280,
+   "z": 72,
+   "target": "top tele",
+   "bounds": {
+    "min": [
+     161,
+     -327,
+     17
+    ],
+    "max": [
+     191,
+     -233,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 417,
+   "y": -216,
+   "z": -193,
+   "target": "secret tele",
+   "bounds": {
+    "min": [
+     377,
+     -231,
+     -241
+    ],
+    "max": [
+     457,
+     -201,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 783,
+   "y": 32,
+   "z": 111,
+   "target": "top tele",
+   "bounds": {
+    "min": [
+     743,
+     17,
+     63
+    ],
+    "max": [
+     823,
+     47,
+     159
+    ]
+   }
   }
  ]
 }

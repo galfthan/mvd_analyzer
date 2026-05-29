@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -280,
+   "y": -3307,
+   "z": 1000,
+   "bounds": {
+    "min": [
+     -303,
+     -3315,
+     977
+    ],
+    "max": [
+     -257,
+     -3299,
+     1023
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -688,
+   "y": -2808,
+   "z": 680,
+   "bounds": {
+    "min": [
+     -703,
+     -2831,
+     657
+    ],
+    "max": [
+     -673,
+     -2785,
+     703
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -392,
+   "y": -3156,
+   "z": 1032,
+   "bounds": {
+    "min": [
+     -471,
+     -3167,
+     953
+    ],
+    "max": [
+     -313,
+     -3145,
+     1111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -168,
+   "y": -3156,
+   "z": 1032,
+   "bounds": {
+    "min": [
+     -247,
+     -3167,
+     953
+    ],
+    "max": [
+     -89,
+     -3145,
+     1111
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_rockets",
    "kind": "rockets",
@@ -86,6 +166,27 @@
    "y": -2775.2,
    "z": 874,
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -664,
+   "y": -2552,
+   "z": 680,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -783,
+     -2735,
+     673
+    ],
+    "max": [
+     -545,
+     -2369,
+     687
+    ]
+   }
   }
  ]
 }

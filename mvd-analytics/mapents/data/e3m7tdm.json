@@ -3,6 +3,114 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.low",
+   "x": -124,
+   "y": -568,
+   "z": -224,
+   "loc": "GL.low",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     -183,
+     -623,
+     -319
+    ],
+    "max": [
+     -65,
+     -513,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent-1",
+   "x": -936,
+   "y": 1072,
+   "z": 120,
+   "loc": "Pent",
+   "bounds": {
+    "min": [
+     -959,
+     1065,
+     65
+    ],
+    "max": [
+     -913,
+     1079,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent-2",
+   "x": -888,
+   "y": 1072,
+   "z": 120,
+   "loc": "Pent",
+   "bounds": {
+    "min": [
+     -911,
+     1065,
+     65
+    ],
+    "max": [
+     -865,
+     1079,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "fort.low-1",
+   "x": 224,
+   "y": -404,
+   "z": 32,
+   "loc": "fort.low",
+   "spawnflags": 5,
+   "bounds": {
+    "min": [
+     193,
+     -415,
+     1
+    ],
+    "max": [
+     255,
+     -393,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "fort.low-2",
+   "x": 224,
+   "y": -336,
+   "z": -48,
+   "loc": "fort.low",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     193,
+     -383,
+     -79
+    ],
+    "max": [
+     255,
+     -289,
+     -17
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -606,6 +714,270 @@
    "z": -104,
    "loc": "path.low",
    "targetName": "t28"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA.tele",
+   "x": -1128,
+   "y": -304,
+   "z": -440,
+   "loc": "GA.tele",
+   "target": "qtele1",
+   "bounds": {
+    "min": [
+     -1199,
+     -315,
+     -511
+    ],
+    "max": [
+     -1057,
+     -293,
+     -369
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "NG",
+   "x": -608,
+   "y": 392,
+   "z": -376,
+   "loc": "NG",
+   "target": "t5",
+   "bounds": {
+    "min": [
+     -639,
+     385,
+     -407
+    ],
+    "max": [
+     -577,
+     399,
+     -345
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent.tele",
+   "x": -448,
+   "y": 1780,
+   "z": 16,
+   "loc": "Pent.tele",
+   "target": "qtele2",
+   "bounds": {
+    "min": [
+     -479,
+     1769,
+     -47
+    ],
+    "max": [
+     -417,
+     1791,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.MH",
+   "x": 592,
+   "y": 192,
+   "z": -192,
+   "loc": "fort.MH",
+   "target": "t53",
+   "bounds": {
+    "min": [
+     577,
+     161,
+     -255
+    ],
+    "max": [
+     607,
+     223,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.low-1",
+   "x": 148,
+   "y": 672,
+   "z": 32,
+   "loc": "fort.low",
+   "target": "t26",
+   "bounds": {
+    "min": [
+     129,
+     665,
+     25
+    ],
+    "max": [
+     167,
+     679,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.low-2",
+   "x": 280,
+   "y": -800,
+   "z": 56,
+   "loc": "fort.low",
+   "target": "t15",
+   "bounds": {
+    "min": [
+     249,
+     -831,
+     49
+    ],
+    "max": [
+     311,
+     -769,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.low-3",
+   "x": 280,
+   "y": -672,
+   "z": 56,
+   "loc": "fort.low",
+   "target": "t13",
+   "bounds": {
+    "min": [
+     249,
+     -703,
+     49
+    ],
+    "max": [
+     311,
+     -641,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.low-4",
+   "x": 368,
+   "y": -800,
+   "z": 56,
+   "loc": "fort.low",
+   "target": "t16",
+   "bounds": {
+    "min": [
+     337,
+     -831,
+     49
+    ],
+    "max": [
+     399,
+     -769,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.low-5",
+   "x": 368,
+   "y": -672,
+   "z": 56,
+   "loc": "fort.low",
+   "target": "t14",
+   "bounds": {
+    "min": [
+     337,
+     -703,
+     49
+    ],
+    "max": [
+     399,
+     -641,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.low-1",
+   "x": 68,
+   "y": 672,
+   "z": 32,
+   "loc": "path.low",
+   "target": "t26",
+   "bounds": {
+    "min": [
+     49,
+     665,
+     25
+    ],
+    "max": [
+     87,
+     679,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.low-2",
+   "x": 68,
+   "y": 768,
+   "z": 32,
+   "loc": "path.low",
+   "target": "t27",
+   "bounds": {
+    "min": [
+     49,
+     761,
+     25
+    ],
+    "max": [
+     87,
+     775,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.low-3",
+   "x": 148,
+   "y": 768,
+   "z": 32,
+   "loc": "path.low",
+   "target": "t28",
+   "bounds": {
+    "min": [
+     129,
+     761,
+     25
+    ],
+    "max": [
+     167,
+     775,
+     39
+    ]
+   }
   }
  ]
 }

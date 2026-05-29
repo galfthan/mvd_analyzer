@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside.path-1",
+   "x": 1152,
+   "y": -688,
+   "z": 72,
+   "loc": "outside.path",
+   "bounds": {
+    "min": [
+     1121,
+     -703,
+     1
+    ],
+    "max": [
+     1183,
+     -673,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside.path-2",
+   "x": 1216,
+   "y": -688,
+   "z": 72,
+   "loc": "outside.path",
+   "bounds": {
+    "min": [
+     1185,
+     -703,
+     1
+    ],
+    "max": [
+     1247,
+     -673,
+     143
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -512,6 +554,28 @@
    "z": 284,
    "loc": "RA.box",
    "targetName": "tele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG",
+   "x": -606,
+   "y": 448,
+   "z": 376,
+   "loc": "SNG",
+   "target": "tele",
+   "bounds": {
+    "min": [
+     -623,
+     385,
+     321
+    ],
+    "max": [
+     -589,
+     511,
+     431
+    ]
+   }
   }
  ]
 }

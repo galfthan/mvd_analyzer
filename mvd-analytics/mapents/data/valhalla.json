@@ -3,6 +3,113 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "RL / red armour / slime",
+   "x": 320,
+   "y": 318,
+   "z": -112,
+   "loc": "RL / red armour / slime",
+   "bounds": {
+    "min": [
+     305,
+     317,
+     -127
+    ],
+    "max": [
+     335,
+     319,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL / red armour / slime-1",
+   "x": 320,
+   "y": 256,
+   "z": -88,
+   "loc": "RL / red armour / slime",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     273,
+     209,
+     -175
+    ],
+    "max": [
+     367,
+     303,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RL / red armour / slime-2",
+   "x": 640,
+   "y": -200,
+   "z": -256,
+   "loc": "RL / red armour / slime",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     609,
+     -207,
+     -319
+    ],
+    "max": [
+     671,
+     -193,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL / red armour / slime-3",
+   "x": 648,
+   "y": -184,
+   "z": -112,
+   "loc": "RL / red armour / slime",
+   "bounds": {
+    "min": [
+     645,
+     -223,
+     -135
+    ],
+    "max": [
+     651,
+     -145,
+     -89
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL / red armour / slime-4",
+   "x": 648,
+   "y": -72,
+   "z": -112,
+   "loc": "RL / red armour / slime",
+   "bounds": {
+    "min": [
+     645,
+     -111,
+     -135
+    ],
+    "max": [
+     651,
+     -33,
+     -89
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -433,6 +540,50 @@
    "z": 192,
    "loc": "RL / red armour / slime",
    "targetName": "uppsec"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL / red armour / slime-1",
+   "x": 16,
+   "y": -128,
+   "z": -366,
+   "loc": "RL / red armour / slime",
+   "target": "upp1",
+   "bounds": {
+    "min": [
+     1,
+     -191,
+     -415
+    ],
+    "max": [
+     31,
+     -65,
+     -317
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL / red armour / slime-2",
+   "x": 16,
+   "y": -128,
+   "z": -302,
+   "loc": "RL / red armour / slime",
+   "target": "uppsec",
+   "bounds": {
+    "min": [
+     1,
+     -151,
+     -315
+    ],
+    "max": [
+     31,
+     -105,
+     -289
+    ]
+   }
   }
  ]
 }

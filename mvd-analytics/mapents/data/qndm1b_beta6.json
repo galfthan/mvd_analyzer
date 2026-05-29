@@ -3,6 +3,111 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad.door",
+   "x": 352,
+   "y": -64,
+   "z": -232,
+   "loc": "Quad.door",
+   "bounds": {
+    "min": [
+     331,
+     -85,
+     -237
+    ],
+    "max": [
+     373,
+     -43,
+     -227
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.lift",
+   "x": -160,
+   "y": 800,
+   "z": -480,
+   "loc": "low.lift",
+   "bounds": {
+    "min": [
+     -181,
+     723,
+     -485
+    ],
+    "max": [
+     -139,
+     877,
+     -475
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.door",
+   "x": 352,
+   "y": -12,
+   "z": -156,
+   "loc": "Quad.door",
+   "bounds": {
+    "min": [
+     301,
+     -15,
+     -231
+    ],
+    "max": [
+     403,
+     -9,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "lift.exit",
+   "x": -288,
+   "y": 688,
+   "z": -168,
+   "loc": "lift.exit",
+   "bounds": {
+    "min": [
+     -375,
+     685,
+     -239
+    ],
+    "max": [
+     -201,
+     691,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "low.lift",
+   "x": -288,
+   "y": 800,
+   "z": -588,
+   "loc": "low.lift",
+   "bounds": {
+    "min": [
+     -367,
+     721,
+     -703
+    ],
+    "max": [
+     -209,
+     879,
+     -473
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",

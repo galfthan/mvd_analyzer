@@ -3,6 +3,112 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "FISH",
+   "x": 1256,
+   "y": 424,
+   "z": 292,
+   "loc": "FISH",
+   "bounds": {
+    "min": [
+     1233,
+     401,
+     289
+    ],
+    "max": [
+     1279,
+     447,
+     295
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Lift",
+   "x": 352,
+   "y": -572,
+   "z": -112,
+   "loc": "Lift",
+   "bounds": {
+    "min": [
+     337,
+     -575,
+     -127
+    ],
+    "max": [
+     367,
+     -569,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Lift",
+   "x": 352,
+   "y": -512,
+   "z": -8,
+   "loc": "Lift",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     305,
+     -559,
+     -175
+    ],
+    "max": [
+     399,
+     -465,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "MH Door-1",
+   "x": 676,
+   "y": 352,
+   "z": 224,
+   "loc": "MH Door",
+   "bounds": {
+    "min": [
+     649,
+     321,
+     161
+    ],
+    "max": [
+     703,
+     383,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "MH Door-2",
+   "x": 676,
+   "y": 416,
+   "z": 224,
+   "loc": "MH Door",
+   "bounds": {
+    "min": [
+     649,
+     385,
+     161
+    ],
+    "max": [
+     703,
+     447,
+     287
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -569,6 +675,182 @@
    "z": -136,
    "loc": "Tele",
    "targetName": "t2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA tele-1",
+   "x": -120,
+   "y": 0,
+   "z": 64,
+   "loc": "RA tele",
+   "target": "up1",
+   "bounds": {
+    "min": [
+     -127,
+     -47,
+     1
+    ],
+    "max": [
+     -113,
+     47,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA tele-2",
+   "x": 584,
+   "y": 64,
+   "z": 384,
+   "loc": "RA tele",
+   "target": "blarg",
+   "bounds": {
+    "min": [
+     577,
+     17,
+     321
+    ],
+    "max": [
+     591,
+     111,
+     447
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring Tele",
+   "x": -960,
+   "y": 584,
+   "z": -96,
+   "loc": "Ring Tele",
+   "target": "fnord1",
+   "bounds": {
+    "min": [
+     -1007,
+     577,
+     -159
+    ],
+    "max": [
+     -913,
+     591,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Slime pipe",
+   "x": -928,
+   "y": -508,
+   "z": -80,
+   "loc": "Slime pipe",
+   "target": "pentin",
+   "bounds": {
+    "min": [
+     -991,
+     -511,
+     -143
+    ],
+    "max": [
+     -865,
+     -505,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Tele-1",
+   "x": -256,
+   "y": 648,
+   "z": 224,
+   "loc": "Tele",
+   "target": "fnord2",
+   "bounds": {
+    "min": [
+     -303,
+     641,
+     161
+    ],
+    "max": [
+     -209,
+     655,
+     287
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Tele-2",
+   "x": 896,
+   "y": -584,
+   "z": 224,
+   "loc": "Tele",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     849,
+     -591,
+     161
+    ],
+    "max": [
+     943,
+     -577,
+     287
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Tele-3",
+   "x": 1096,
+   "y": 64,
+   "z": -96,
+   "loc": "Tele",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     1089,
+     17,
+     -159
+    ],
+    "max": [
+     1103,
+     111,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Tele-4",
+   "x": 1392,
+   "y": 0,
+   "z": -348,
+   "loc": "Tele",
+   "target": "pentout",
+   "bounds": {
+    "min": [
+     1329,
+     -63,
+     -351
+    ],
+    "max": [
+     1455,
+     63,
+     -345
+    ]
+   }
   }
  ]
 }

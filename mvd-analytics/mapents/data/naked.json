@@ -3,6 +3,302 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad",
+   "x": 1448,
+   "y": 528,
+   "z": -7,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     1425,
+     481,
+     -15
+    ],
+    "max": [
+     1471,
+     575,
+     1
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad.SSG",
+   "x": 1616,
+   "y": 1024,
+   "z": 48,
+   "loc": "Quad.SSG",
+   "bounds": {
+    "min": [
+     1601,
+     1009,
+     33
+    ],
+    "max": [
+     1631,
+     1039,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RAil",
+   "x": 1232,
+   "y": -1024,
+   "z": 448,
+   "loc": "RAil",
+   "bounds": {
+    "min": [
+     1217,
+     -1039,
+     433
+    ],
+    "max": [
+     1247,
+     -1009,
+     463
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RAil.RL",
+   "x": 888,
+   "y": -448,
+   "z": 352,
+   "loc": "RAil.RL",
+   "bounds": {
+    "min": [
+     881,
+     -463,
+     337
+    ],
+    "max": [
+     895,
+     -433,
+     367
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RAil.low",
+   "x": 1232,
+   "y": -1024,
+   "z": 272,
+   "loc": "RAil.low",
+   "bounds": {
+    "min": [
+     1217,
+     -1039,
+     257
+    ],
+    "max": [
+     1247,
+     -1009,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG-1",
+   "x": 980.1073,
+   "y": -84,
+   "z": 464,
+   "loc": "LG",
+   "bounds": {
+    "min": [
+     929,
+     -87,
+     401
+    ],
+    "max": [
+     1031.2146,
+     -81,
+     527
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG-2",
+   "x": 1006.5,
+   "y": -84,
+   "z": 464,
+   "loc": "LG",
+   "bounds": {
+    "min": [
+     958,
+     -87,
+     401
+    ],
+    "max": [
+     1055,
+     -81,
+     527
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.door",
+   "x": 1304,
+   "y": -184,
+   "z": 464,
+   "loc": "LG.door",
+   "bounds": {
+    "min": [
+     1297,
+     -239,
+     401
+    ],
+    "max": [
+     1311,
+     -129,
+     527
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "Quad-1",
+   "x": 1344,
+   "y": 632,
+   "z": 64,
+   "loc": "Quad",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1281,
+     625,
+     1
+    ],
+    "max": [
+     1407,
+     639,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad-2",
+   "x": 1472,
+   "y": 369.5,
+   "z": 64,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     1409,
+     289,
+     1
+    ],
+    "max": [
+     1535,
+     450,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.SSG",
+   "x": 1608,
+   "y": 952,
+   "z": -64,
+   "loc": "Quad.SSG",
+   "bounds": {
+    "min": [
+     1553,
+     897,
+     -143
+    ],
+    "max": [
+     1663,
+     1007,
+     15
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RAil.NG",
+   "x": 1528,
+   "y": -184,
+   "z": 456,
+   "loc": "RAil.NG",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1521,
+     -239,
+     401
+    ],
+    "max": [
+     1535,
+     -129,
+     511
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RAil.RL-1",
+   "x": 764.5,
+   "y": -440,
+   "z": 216,
+   "loc": "RAil.RL",
+   "bounds": {
+    "min": [
+     625,
+     -471,
+     211
+    ],
+    "max": [
+     904,
+     -409,
+     221
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RAil.RL-2",
+   "x": 824,
+   "y": -440,
+   "z": 368,
+   "loc": "RAil.RL",
+   "bounds": {
+    "min": [
+     769,
+     -559,
+     321
+    ],
+    "max": [
+     879,
+     -321,
+     415
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -550,6 +846,28 @@
    "z": 100,
    "loc": "GL",
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA",
+   "x": 1433,
+   "y": -456,
+   "z": -192,
+   "loc": "GA",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     1425,
+     -479,
+     -239
+    ],
+    "max": [
+     1441,
+     -433,
+     -145
+    ]
+   }
   }
  ]
 }

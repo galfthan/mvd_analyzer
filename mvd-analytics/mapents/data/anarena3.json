@@ -3,6 +3,66 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -336,
+   "y": -128,
+   "z": 8,
+   "bounds": {
+    "min": [
+     -383,
+     -175,
+     1
+    ],
+    "max": [
+     -289,
+     -81,
+     15
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 0,
+   "y": -286,
+   "z": 8,
+   "bounds": {
+    "min": [
+     -63,
+     -319,
+     1
+    ],
+    "max": [
+     63,
+     -253,
+     15
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 336,
+   "y": -128,
+   "z": 8,
+   "bounds": {
+    "min": [
+     289,
+     -175,
+     1
+    ],
+    "max": [
+     383,
+     -81,
+     15
+    ]
+   }
+  },
+  {
    "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "spawn-1",

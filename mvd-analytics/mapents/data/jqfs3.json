@@ -59,6 +59,48 @@
    "y": -1024,
    "z": 3136,
    "targetName": "yla1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 0,
+   "y": -1304,
+   "z": -112,
+   "target": "yla2",
+   "bounds": {
+    "min": [
+     -63,
+     -1311,
+     -191
+    ],
+    "max": [
+     63,
+     -1297,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 0,
+   "y": 1304,
+   "z": -112,
+   "target": "yla1",
+   "bounds": {
+    "min": [
+     -63,
+     1297,
+     -191
+    ],
+    "max": [
+     63,
+     1311,
+     -33
+    ]
+   }
   }
  ]
 }

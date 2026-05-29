@@ -3,6 +3,174 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.door-1",
+   "x": -1520,
+   "y": -784,
+   "z": 512,
+   "loc": "Quad.door",
+   "bounds": {
+    "min": [
+     -1527,
+     -815,
+     417
+    ],
+    "max": [
+     -1513,
+     -753,
+     607
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.door-2",
+   "x": -1520,
+   "y": -720,
+   "z": 512,
+   "loc": "Quad.door",
+   "bounds": {
+    "min": [
+     -1527,
+     -751,
+     417
+    ],
+    "max": [
+     -1513,
+     -689,
+     607
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.lift-1",
+   "x": -1064,
+   "y": 576,
+   "z": 512,
+   "loc": "RA.lift",
+   "bounds": {
+    "min": [
+     -1071,
+     545,
+     417
+    ],
+    "max": [
+     -1057,
+     607,
+     607
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.lift-2",
+   "x": -1064,
+   "y": 640,
+   "z": 512,
+   "loc": "RA.lift",
+   "bounds": {
+    "min": [
+     -1071,
+     609,
+     417
+    ],
+    "max": [
+     -1057,
+     671,
+     607
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SSG.room-1",
+   "x": -2192,
+   "y": 56,
+   "z": 512,
+   "loc": "SSG.room",
+   "bounds": {
+    "min": [
+     -2223,
+     49,
+     417
+    ],
+    "max": [
+     -2161,
+     63,
+     607
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SSG.room-2",
+   "x": -2128,
+   "y": 56,
+   "z": 512,
+   "loc": "SSG.room",
+   "bounds": {
+    "min": [
+     -2159,
+     49,
+     417
+    ],
+    "max": [
+     -2097,
+     63,
+     607
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SSG.room-3",
+   "x": -1904,
+   "y": 56,
+   "z": 512,
+   "loc": "SSG.room",
+   "bounds": {
+    "min": [
+     -1935,
+     49,
+     417
+    ],
+    "max": [
+     -1873,
+     63,
+     607
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SSG.room-4",
+   "x": -1840,
+   "y": 56,
+   "z": 512,
+   "loc": "SSG.room",
+   "bounds": {
+    "min": [
+     -1871,
+     49,
+     417
+    ],
+    "max": [
+     -1809,
+     63,
+     607
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -711,6 +879,138 @@
    "z": 80,
    "loc": "YA.up",
    "targetName": "t6"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA",
+   "x": -1216,
+   "y": -1348,
+   "z": 352,
+   "loc": "GA",
+   "target": "t4",
+   "bounds": {
+    "min": [
+     -1247,
+     -1359,
+     305
+    ],
+    "max": [
+     -1185,
+     -1337,
+     399
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL",
+   "x": -1216,
+   "y": -1212,
+   "z": 0,
+   "loc": "GL",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     -1247,
+     -1223,
+     -47
+    ],
+    "max": [
+     -1185,
+     -1201,
+     47
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent",
+   "x": -1444,
+   "y": 608,
+   "z": 48,
+   "loc": "Pent",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -1455,
+     577,
+     1
+    ],
+    "max": [
+     -1433,
+     639,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad",
+   "x": -396,
+   "y": -752,
+   "z": 480,
+   "loc": "Quad",
+   "target": "t6",
+   "bounds": {
+    "min": [
+     -407,
+     -783,
+     433
+    ],
+    "max": [
+     -385,
+     -721,
+     527
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": -1500,
+   "y": 608,
+   "z": 400,
+   "loc": "RA",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -1511,
+     577,
+     353
+    ],
+    "max": [
+     -1489,
+     639,
+     447
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.up",
+   "x": -140,
+   "y": -576,
+   "z": 144,
+   "loc": "YA.up",
+   "target": "t5",
+   "bounds": {
+    "min": [
+     -151,
+     -607,
+     97
+    ],
+    "max": [
+     -129,
+     -545,
+     191
+    ]
+   }
   }
  ]
 }

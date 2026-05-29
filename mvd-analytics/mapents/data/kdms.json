@@ -3,6 +3,169 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -600,
+   "y": 2144,
+   "z": 164,
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -607,
+     2133,
+     145
+    ],
+    "max": [
+     -593,
+     2155,
+     183
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": -448,
+   "y": 1012,
+   "z": 128,
+   "bounds": {
+    "min": [
+     -467,
+     1009,
+     109
+    ],
+    "max": [
+     -429,
+     1015,
+     147
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-3",
+   "x": 94,
+   "y": 1280,
+   "z": 256,
+   "bounds": {
+    "min": [
+     89,
+     1261,
+     237
+    ],
+    "max": [
+     99,
+     1299,
+     275
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -552,
+   "y": 96,
+   "z": -112,
+   "bounds": {
+    "min": [
+     -559,
+     49,
+     -159
+    ],
+    "max": [
+     -545,
+     143,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -448,
+   "y": 1440,
+   "z": 304,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -463,
+     1425,
+     241
+    ],
+    "max": [
+     -433,
+     1455,
+     367
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-3",
+   "x": -448,
+   "y": 2256,
+   "z": 144,
+   "spawnflags": 8,
+   "bounds": {
+    "min": [
+     -511,
+     2241,
+     65
+    ],
+    "max": [
+     -385,
+     2271,
+     223
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 160,
+   "y": 740,
+   "z": -12,
+   "bounds": {
+    "min": [
+     97,
+     673,
+     -15
+    ],
+    "max": [
+     223,
+     807,
+     -9
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 160,
+   "y": 796,
+   "z": -12,
+   "bounds": {
+    "min": [
+     97,
+     729,
+     -15
+    ],
+    "max": [
+     223,
+     863,
+     -9
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

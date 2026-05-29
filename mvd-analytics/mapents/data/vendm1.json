@@ -3,6 +3,49 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.YA",
+   "x": -252,
+   "y": -224,
+   "z": -144,
+   "loc": "low.YA",
+   "bounds": {
+    "min": [
+     -255,
+     -239,
+     -159
+    ],
+    "max": [
+     -249,
+     -209,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "low.YA",
+   "x": -192,
+   "y": -224,
+   "z": -112,
+   "loc": "low.YA",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -239,
+     -271,
+     -207
+    ],
+    "max": [
+     -145,
+     -177,
+     -17
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -386,6 +429,72 @@
    "z": 24,
    "loc": "mid.YA",
    "targetName": "up1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.YA",
+   "x": 128,
+   "y": -440,
+   "z": -128,
+   "loc": "low.YA",
+   "target": "up3",
+   "bounds": {
+    "min": [
+     65,
+     -447,
+     -191
+    ],
+    "max": [
+     191,
+     -433,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.tele",
+   "x": -952,
+   "y": 832,
+   "z": -128,
+   "loc": "low.tele",
+   "target": "up1",
+   "bounds": {
+    "min": [
+     -959,
+     769,
+     -191
+    ],
+    "max": [
+     -945,
+     895,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "mid.tele",
+   "x": 344,
+   "y": 1088,
+   "z": 48,
+   "loc": "mid.tele",
+   "target": "up2",
+   "bounds": {
+    "min": [
+     337,
+     1025,
+     -15
+    ],
+    "max": [
+     351,
+     1151,
+     111
+    ]
+   }
   }
  ]
 }

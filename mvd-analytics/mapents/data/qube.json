@@ -559,6 +559,72 @@
    "z": 130,
    "loc": "Quad.window",
    "targetName": "teleya"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG.tele",
+   "x": 784,
+   "y": -576,
+   "z": -231,
+   "loc": "LG.tele",
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     781,
+     -687,
+     -287
+    ],
+    "max": [
+     787,
+     -465,
+     -175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.tele",
+   "x": -624,
+   "y": -1368,
+   "z": 110,
+   "loc": "YA.tele",
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     -631,
+     -1407,
+     65
+    ],
+    "max": [
+     -617,
+     -1329,
+     155
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water.tele",
+   "x": 498,
+   "y": -1184,
+   "z": -557,
+   "loc": "water.tele",
+   "target": "telelow",
+   "bounds": {
+    "min": [
+     497,
+     -1246,
+     -607
+    ],
+    "max": [
+     499,
+     -1122,
+     -507
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG",
+   "x": 160,
+   "y": 432,
+   "z": -312,
+   "loc": "LG",
+   "bounds": {
+    "min": [
+     125,
+     397,
+     -415
+    ],
+    "max": [
+     195,
+     467,
+     -209
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

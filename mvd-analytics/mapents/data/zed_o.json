@@ -3,6 +3,46 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 480,
+   "y": 604,
+   "z": 176,
+   "bounds": {
+    "min": [
+     465,
+     601,
+     161
+    ],
+    "max": [
+     495,
+     607,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": 480,
+   "y": 544,
+   "z": 40,
+   "bounds": {
+    "min": [
+     433,
+     497,
+     -47
+    ],
+    "max": [
+     527,
+     591,
+     127
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -349,6 +389,111 @@
    "y": 416,
    "z": 314,
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -752,
+   "y": 128,
+   "z": 256,
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     -767,
+     97,
+     241
+    ],
+    "max": [
+     -737,
+     159,
+     271
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -368,
+   "y": 512,
+   "z": 96,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -383,
+     481,
+     81
+    ],
+    "max": [
+     -353,
+     543,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 80,
+   "y": 0,
+   "z": 160,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     65,
+     -31,
+     145
+    ],
+    "max": [
+     95,
+     31,
+     175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 720,
+   "y": -256,
+   "z": 160,
+   "target": "tele4",
+   "bounds": {
+    "min": [
+     705,
+     -287,
+     145
+    ],
+    "max": [
+     735,
+     -225,
+     175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 816,
+   "y": -576,
+   "z": 384,
+   "target": "tele5",
+   "bounds": {
+    "min": [
+     801,
+     -607,
+     369
+    ],
+    "max": [
+     831,
+     -545,
+     399
+    ]
+   }
   }
  ]
 }

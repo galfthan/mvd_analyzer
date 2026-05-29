@@ -3,6 +3,46 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 504,
+   "y": 640,
+   "z": 608,
+   "bounds": {
+    "min": [
+     497,
+     577,
+     545
+    ],
+    "max": [
+     511,
+     703,
+     671
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 768,
+   "y": 32,
+   "z": 132,
+   "bounds": {
+    "min": [
+     737,
+     1,
+     129
+    ],
+    "max": [
+     799,
+     63,
+     135
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -203,6 +243,27 @@
    "y": 36,
    "z": 832,
    "targetName": "dest"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 1472,
+   "y": 688,
+   "z": 296,
+   "target": "dest",
+   "bounds": {
+    "min": [
+     1441,
+     657,
+     273
+    ],
+    "max": [
+     1503,
+     719,
+     319
+    ]
+   }
   }
  ]
 }

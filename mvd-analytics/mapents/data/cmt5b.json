@@ -3,6 +3,92 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA",
+   "x": 703.5,
+   "y": -1280,
+   "z": -160,
+   "loc": "RA",
+   "bounds": {
+    "min": [
+     704,
+     -1311,
+     -223
+    ],
+    "max": [
+     703,
+     -1249,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.tele",
+   "x": 216,
+   "y": 1024,
+   "z": -304,
+   "loc": "Quad.tele",
+   "bounds": {
+    "min": [
+     161,
+     945,
+     -319
+    ],
+    "max": [
+     271,
+     1103,
+     -289
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA",
+   "x": 392,
+   "y": -1176,
+   "z": -264,
+   "loc": "RA",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     369,
+     -1215,
+     -271
+    ],
+    "max": [
+     415,
+     -1137,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.ledge",
+   "x": 392,
+   "y": -1384,
+   "z": -264,
+   "loc": "RA.ledge",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     369,
+     -1423,
+     -271
+    ],
+    "max": [
+     415,
+     -1345,
+     -257
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -709,6 +795,28 @@
    "z": -416,
    "loc": "RA.below",
    "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.tele",
+   "x": -312,
+   "y": 1024,
+   "z": -248,
+   "loc": "Quad.tele",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -319,
+     993,
+     -319
+    ],
+    "max": [
+     -305,
+     1055,
+     -177
+    ]
+   }
   }
  ]
 }

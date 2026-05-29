@@ -3,6 +3,111 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad.door",
+   "x": 352,
+   "y": -52,
+   "z": -220,
+   "loc": "Quad.door",
+   "bounds": {
+    "min": [
+     331,
+     -73,
+     -225
+    ],
+    "max": [
+     373,
+     -31,
+     -215
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "cellar.lift",
+   "x": -160,
+   "y": 800,
+   "z": -480,
+   "loc": "cellar.lift",
+   "bounds": {
+    "min": [
+     -181,
+     723,
+     -485
+    ],
+    "max": [
+     -139,
+     877,
+     -475
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.door",
+   "x": 352,
+   "y": -12,
+   "z": -150,
+   "loc": "Quad.door",
+   "bounds": {
+    "min": [
+     301,
+     -15,
+     -219
+    ],
+    "max": [
+     403,
+     -9,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cellar.lift",
+   "x": -288,
+   "y": 800,
+   "z": -588,
+   "loc": "cellar.lift",
+   "bounds": {
+    "min": [
+     -367,
+     721,
+     -703
+    ],
+    "max": [
+     -209,
+     879,
+     -473
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "lift.exit",
+   "x": -288,
+   "y": 688,
+   "z": -160,
+   "loc": "lift.exit",
+   "bounds": {
+    "min": [
+     -375,
+     685,
+     -239
+    ],
+    "max": [
+     -201,
+     691,
+     -81
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",

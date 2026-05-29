@@ -50,6 +50,27 @@
    "y": -64,
    "z": -1728,
    "targetName": "finish"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -1088,
+   "y": -880,
+   "z": -1976,
+   "target": "finish",
+   "bounds": {
+    "min": [
+     -1279,
+     -1567,
+     -1983
+    ],
+    "max": [
+     -897,
+     -193,
+     -1969
+    ]
+   }
   }
  ]
 }

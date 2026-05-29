@@ -3,6 +3,127 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -368,
+   "y": 1592,
+   "z": 0,
+   "bounds": {
+    "min": [
+     -399,
+     1561,
+     -3
+    ],
+    "max": [
+     -337,
+     1623,
+     3
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": 508,
+   "y": 1256,
+   "z": -104,
+   "bounds": {
+    "min": [
+     505,
+     1233,
+     -127
+    ],
+    "max": [
+     511,
+     1279,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -184,
+   "y": 1416,
+   "z": -10,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -303,
+     1361,
+     -15
+    ],
+    "max": [
+     -65,
+     1471,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 420,
+   "y": 1360,
+   "z": -84,
+   "bounds": {
+    "min": [
+     413,
+     1353,
+     -143
+    ],
+    "max": [
+     427,
+     1367,
+     -25
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 456,
+   "y": 1360,
+   "z": -84,
+   "bounds": {
+    "min": [
+     449,
+     1353,
+     -143
+    ],
+    "max": [
+     463,
+     1367,
+     -25
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-4",
+   "x": 480,
+   "y": 676,
+   "z": 48,
+   "bounds": {
+    "min": [
+     449,
+     669,
+     9
+    ],
+    "max": [
+     511,
+     683,
+     87
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -284,6 +405,27 @@
    "y": 1028,
    "z": 16,
    "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 264,
+   "y": 1600,
+   "z": -88,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     245,
+     1577,
+     -135
+    ],
+    "max": [
+     283,
+     1623,
+     -41
+    ]
+   }
   }
  ]
 }

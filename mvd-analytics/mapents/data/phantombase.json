@@ -3,6 +3,111 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent.low-1",
+   "x": -448,
+   "y": -32,
+   "z": -168,
+   "loc": "Pent.low",
+   "bounds": {
+    "min": [
+     -511,
+     -63,
+     -171
+    ],
+    "max": [
+     -385,
+     -1,
+     -165
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent.low-2",
+   "x": -448,
+   "y": 32,
+   "z": -168,
+   "loc": "Pent.low",
+   "bounds": {
+    "min": [
+     -511,
+     1,
+     -171
+    ],
+    "max": [
+     -385,
+     63,
+     -165
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad-1",
+   "x": -224,
+   "y": -316,
+   "z": 56,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     -231,
+     -343,
+     1
+    ],
+    "max": [
+     -217,
+     -289,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad-2",
+   "x": -224,
+   "y": -260,
+   "z": 56,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     -231,
+     -287,
+     1
+    ],
+    "max": [
+     -217,
+     -233,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.ladder",
+   "x": -76,
+   "y": 0,
+   "z": -320,
+   "loc": "water.ladder",
+   "bounds": {
+    "min": [
+     -85,
+     -31,
+     -359
+    ],
+    "max": [
+     -67,
+     31,
+     -281
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -542,6 +647,72 @@
    "z": -148,
    "loc": "Pent.low",
    "targetName": "phantom_base_by_quaker"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent.tele",
+   "x": -930,
+   "y": 0,
+   "z": -104,
+   "loc": "Pent.tele",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     -931,
+     -27,
+     -143
+    ],
+    "max": [
+     -929,
+     27,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": -1504,
+   "y": -420,
+   "z": 16,
+   "loc": "RA",
+   "target": "phantom_base_by_quaker",
+   "bounds": {
+    "min": [
+     -1535,
+     -423,
+     -23
+    ],
+    "max": [
+     -1473,
+     -417,
+     55
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": 674,
+   "y": -640,
+   "z": -138,
+   "loc": "YA",
+   "target": "march_7_2021",
+   "bounds": {
+    "min": [
+     673,
+     -671,
+     -183
+    ],
+    "max": [
+     675,
+     -609,
+     -93
+    ]
+   }
   }
  ]
 }

@@ -531,6 +531,50 @@
    "z": 240,
    "loc": "RL",
    "targetName": "teleport1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG",
+   "x": -920,
+   "y": 1012,
+   "z": 100,
+   "loc": "SNG",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -959,
+     1001,
+     81
+    ],
+    "max": [
+     -881,
+     1023,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele",
+   "x": -12,
+   "y": 560,
+   "z": 68,
+   "loc": "tele",
+   "target": "teleport1",
+   "bounds": {
+    "min": [
+     -15,
+     529,
+     25
+    ],
+    "max": [
+     -9,
+     591,
+     111
+    ]
+   }
   }
  ]
 }

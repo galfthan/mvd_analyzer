@@ -471,6 +471,72 @@
    "z": -88,
    "loc": "low.GA",
    "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG.tele",
+   "x": 528,
+   "y": 176,
+   "z": -192,
+   "loc": "SNG.tele",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     481,
+     161,
+     -239
+    ],
+    "max": [
+     575,
+     191,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.GA",
+   "x": 824,
+   "y": 1368,
+   "z": 136,
+   "loc": "high.GA",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     769,
+     1345,
+     65
+    ],
+    "max": [
+     879,
+     1391,
+     207
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.GA",
+   "x": 512,
+   "y": -240,
+   "z": -40,
+   "loc": "low.GA",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     449,
+     -255,
+     -79
+    ],
+    "max": [
+     575,
+     -225,
+     -1
+    ]
+   }
   }
  ]
 }

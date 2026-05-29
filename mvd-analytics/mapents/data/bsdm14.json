@@ -3,6 +3,47 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 192,
+   "y": -508,
+   "z": -176,
+   "bounds": {
+    "min": [
+     177,
+     -511,
+     -191
+    ],
+    "max": [
+     207,
+     -505,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": 192,
+   "y": -464,
+   "z": -112,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     129,
+     -511,
+     -223
+    ],
+    "max": [
+     255,
+     -417,
+     -1
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

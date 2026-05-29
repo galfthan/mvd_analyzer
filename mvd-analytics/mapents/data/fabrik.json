@@ -537,6 +537,69 @@
    "y": 64,
    "z": 164,
    "targetName": "telex"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1352,
+   "y": -984,
+   "z": -56,
+   "target": "telemid",
+   "bounds": {
+    "min": [
+     -1363,
+     -1015,
+     -95
+    ],
+    "max": [
+     -1341,
+     -953,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -1168,
+   "y": 1176,
+   "z": 56,
+   "target": "telemid",
+   "bounds": {
+    "min": [
+     -1171,
+     1137,
+     17
+    ],
+    "max": [
+     -1165,
+     1215,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 48,
+   "y": -192,
+   "z": 80,
+   "target": "telex",
+   "bounds": {
+    "min": [
+     45,
+     -223,
+     49
+    ],
+    "max": [
+     51,
+     -161,
+     111
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Ring",
+   "x": -280,
+   "y": 312,
+   "z": 484,
+   "loc": "Ring",
+   "bounds": {
+    "min": [
+     -303,
+     289,
+     481
+    ],
+    "max": [
+     -257,
+     335,
+     487
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -503,6 +524,138 @@
    "z": 24,
    "loc": "SSG.RL",
    "targetName": "low"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": -544,
+   "y": -120,
+   "z": -96,
+   "loc": "LG",
+   "target": "ga",
+   "bounds": {
+    "min": [
+     -591,
+     -127,
+     -143
+    ],
+    "max": [
+     -497,
+     -113,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG.slime",
+   "x": -320,
+   "y": -448,
+   "z": -424,
+   "loc": "LG.slime",
+   "target": "secret",
+   "bounds": {
+    "min": [
+     -383,
+     -511,
+     -431
+    ],
+    "max": [
+     -257,
+     -385,
+     -417
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH",
+   "x": -352,
+   "y": 552,
+   "z": 224,
+   "loc": "MH",
+   "target": "up1",
+   "bounds": {
+    "min": [
+     -399,
+     545,
+     177
+    ],
+    "max": [
+     -305,
+     559,
+     271
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.above",
+   "x": -648,
+   "y": -32,
+   "z": 384,
+   "loc": "RA.above",
+   "target": "ga",
+   "bounds": {
+    "min": [
+     -655,
+     -79,
+     337
+    ],
+    "max": [
+     -641,
+     15,
+     431
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SSG",
+   "x": -1160,
+   "y": 288,
+   "z": 64,
+   "loc": "SSG",
+   "target": "up1",
+   "bounds": {
+    "min": [
+     -1167,
+     241,
+     17
+    ],
+    "max": [
+     -1153,
+     335,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SSG.RL",
+   "x": -408,
+   "y": 864,
+   "z": 64,
+   "loc": "SSG.RL",
+   "target": "mid",
+   "bounds": {
+    "min": [
+     -415,
+     817,
+     17
+    ],
+    "max": [
+     -401,
+     911,
+     111
+    ]
+   }
   }
  ]
 }

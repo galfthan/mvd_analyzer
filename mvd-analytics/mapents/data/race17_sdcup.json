@@ -58,6 +58,27 @@
    "y": -3712,
    "z": 3640,
    "targetName": "start"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -2208,
+   "y": 3448,
+   "z": -272,
+   "target": "start",
+   "bounds": {
+    "min": [
+     -2313.6667,
+     3441,
+     -377.66666
+    ],
+    "max": [
+     -2102.3333,
+     3455,
+     -166.33333
+    ]
+   }
   }
  ]
 }

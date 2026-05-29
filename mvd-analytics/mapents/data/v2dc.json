@@ -297,6 +297,111 @@
    "y": 648,
    "z": 248,
    "targetName": "DalekoDST2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -500,
+   "y": 64,
+   "z": 60,
+   "target": "PryamoVerhu",
+   "bounds": {
+    "min": [
+     -511,
+     17,
+     1
+    ],
+    "max": [
+     -489,
+     111,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -416,
+   "y": -316,
+   "z": 284,
+   "target": "DalekoDST2",
+   "bounds": {
+    "min": [
+     -463,
+     -327,
+     225
+    ],
+    "max": [
+     -369,
+     -305,
+     343
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -308,
+   "y": -224,
+   "z": 124,
+   "target": "PryamoVerhu2",
+   "bounds": {
+    "min": [
+     -319,
+     -271,
+     65
+    ],
+    "max": [
+     -297,
+     -177,
+     183
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 136,
+   "y": 304,
+   "z": 60,
+   "target": "DalekoDST2",
+   "bounds": {
+    "min": [
+     89,
+     289,
+     1
+    ],
+    "max": [
+     183,
+     319,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 256,
+   "y": 692,
+   "z": 284,
+   "target": "PryamoVerhu",
+   "bounds": {
+    "min": [
+     209,
+     681,
+     225
+    ],
+    "max": [
+     303,
+     703,
+     343
+    ]
+   }
   }
  ]
 }

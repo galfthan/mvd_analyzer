@@ -3,6 +3,112 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Ring",
+   "x": 4,
+   "y": -1440,
+   "z": 128,
+   "loc": "Ring",
+   "bounds": {
+    "min": [
+     1,
+     -1463,
+     105
+    ],
+    "max": [
+     7,
+     -1417,
+     151
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "high.LG",
+   "x": 476,
+   "y": -2232,
+   "z": 476,
+   "loc": "high.LG",
+   "bounds": {
+    "min": [
+     448,
+     -2235,
+     448
+    ],
+    "max": [
+     504,
+     -2229,
+     504
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL-1",
+   "x": 616,
+   "y": -1368,
+   "z": 621.5,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     569,
+     -1415,
+     222
+    ],
+    "max": [
+     663,
+     -1321,
+     1021
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL-2",
+   "x": 616,
+   "y": -1368,
+   "z": 647,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     569,
+     -1415,
+     246
+    ],
+    "max": [
+     663,
+     -1321,
+     1048
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Ring",
+   "x": -448,
+   "y": -1184,
+   "z": 96,
+   "loc": "Ring",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -639,
+     -1231,
+     89
+    ],
+    "max": [
+     -257,
+     -1137,
+     103
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -561,6 +667,72 @@
    "z": 263,
    "loc": "RA",
    "targetName": "telemh"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH.tele",
+   "x": 794.125,
+   "y": 140,
+   "z": 196,
+   "loc": "MH.tele",
+   "target": "telemh",
+   "bounds": {
+    "min": [
+     783.125,
+     65,
+     169
+    ],
+    "max": [
+     805.125,
+     215,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL.up",
+   "x": 257.875,
+   "y": -2300,
+   "z": 204,
+   "loc": "RL.up",
+   "target": "telequad",
+   "bounds": {
+    "min": [
+     246.875,
+     -2375,
+     177
+    ],
+    "max": [
+     268.875,
+     -2225,
+     231
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.LG",
+   "x": 484,
+   "y": -1975,
+   "z": 492,
+   "loc": "high.LG",
+   "target": "telerl",
+   "bounds": {
+    "min": [
+     421,
+     -1981,
+     461
+    ],
+    "max": [
+     547,
+     -1969,
+     523
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,92 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "YA",
+   "x": -256,
+   "y": 1204,
+   "z": 48,
+   "loc": "YA",
+   "bounds": {
+    "min": [
+     -271,
+     1193,
+     33
+    ],
+    "max": [
+     -241,
+     1215,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "yard.tele",
+   "x": -676,
+   "y": 192,
+   "z": 112,
+   "loc": "yard.tele",
+   "bounds": {
+    "min": [
+     -687,
+     177,
+     97
+    ],
+    "max": [
+     -665,
+     207,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "YA",
+   "x": -256,
+   "y": 1152,
+   "z": 120,
+   "loc": "YA",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -303,
+     1105,
+     -15
+    ],
+    "max": [
+     -209,
+     1199,
+     255
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "yard.tele",
+   "x": -624,
+   "y": 192.00063,
+   "z": 152,
+   "loc": "yard.tele",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -671,
+     145,
+     49
+    ],
+    "max": [
+     -577,
+     239.00125,
+     255
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -311,6 +397,50 @@
    "z": 224,
    "loc": "GL",
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": -112,
+   "y": 960,
+   "z": 64,
+   "loc": "YA",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -127,
+     913,
+     17
+    ],
+    "max": [
+     -97,
+     1007,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "yard.tele",
+   "x": -320,
+   "y": -144,
+   "z": 128,
+   "loc": "yard.tele",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -367,
+     -159,
+     81
+    ],
+    "max": [
+     -273,
+     -129,
+     175
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,636 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE: 100H",
+   "x": 204,
+   "y": 1336,
+   "z": -800,
+   "loc": "BLUE BASE: 100H",
+   "bounds": {
+    "min": [
+     173,
+     1333,
+     -831
+    ],
+    "max": [
+     235,
+     1339,
+     -769
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE: 100H",
+   "x": -48,
+   "y": -2028,
+   "z": -800,
+   "loc": "RED BASE: 100H",
+   "bounds": {
+    "min": [
+     -79,
+     -2031,
+     -831
+    ],
+    "max": [
+     -17,
+     -2025,
+     -769
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE",
+   "x": 204,
+   "y": 1520,
+   "z": -802,
+   "loc": "BLUE BASE",
+   "bounds": {
+    "min": [
+     13,
+     1509,
+     -843
+    ],
+    "max": [
+     395,
+     1531,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: 100H",
+   "x": 204,
+   "y": 1400,
+   "z": -802,
+   "loc": "BLUE BASE: 100H",
+   "bounds": {
+    "min": [
+     13,
+     1389,
+     -843
+    ],
+    "max": [
+     395,
+     1411,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LEFT DOOR-1",
+   "x": 558,
+   "y": 1424,
+   "z": -598,
+   "loc": "BLUE BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     553,
+     1401,
+     -651
+    ],
+    "max": [
+     563,
+     1447,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LEFT DOOR-2",
+   "x": 558,
+   "y": 1472,
+   "z": -598,
+   "loc": "BLUE BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     553,
+     1449,
+     -651
+    ],
+    "max": [
+     563,
+     1495,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LOWER RA ROOM",
+   "x": 762,
+   "y": 1202,
+   "z": -712,
+   "loc": "BLUE BASE: LOWER RA ROOM",
+   "bounds": {
+    "min": [
+     733,
+     1173,
+     -759
+    ],
+    "max": [
+     791,
+     1231,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MAIN ENTRANCE-1",
+   "x": 186,
+   "y": 818,
+   "z": -712,
+   "loc": "BLUE BASE: MAIN ENTRANCE",
+   "bounds": {
+    "min": [
+     169,
+     813,
+     -759
+    ],
+    "max": [
+     203,
+     823,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MAIN ENTRANCE-2",
+   "x": 222,
+   "y": 818,
+   "z": -712,
+   "loc": "BLUE BASE: MAIN ENTRANCE",
+   "bounds": {
+    "min": [
+     205,
+     813,
+     -759
+    ],
+    "max": [
+     239,
+     823,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MIDDLE DOOR-1",
+   "x": 204,
+   "y": 1424,
+   "z": -802,
+   "loc": "BLUE BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     13,
+     1413,
+     -843
+    ],
+    "max": [
+     395,
+     1435,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MIDDLE DOOR-2",
+   "x": 204,
+   "y": 1448,
+   "z": -802,
+   "loc": "BLUE BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     13,
+     1437,
+     -843
+    ],
+    "max": [
+     395,
+     1459,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MIDDLE DOOR-3",
+   "x": 204,
+   "y": 1472,
+   "z": -802,
+   "loc": "BLUE BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     13,
+     1461,
+     -843
+    ],
+    "max": [
+     395,
+     1483,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MIDDLE DOOR-4",
+   "x": 204,
+   "y": 1496,
+   "z": -802,
+   "loc": "BLUE BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     13,
+     1485,
+     -843
+    ],
+    "max": [
+     395,
+     1507,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: RIGHT DOOR-1",
+   "x": -150,
+   "y": 1424,
+   "z": -598,
+   "loc": "BLUE BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     -155,
+     1401,
+     -651
+    ],
+    "max": [
+     -145,
+     1447,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: RIGHT DOOR-2",
+   "x": -150,
+   "y": 1472,
+   "z": -598,
+   "loc": "BLUE BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     -155,
+     1449,
+     -651
+    ],
+    "max": [
+     -145,
+     1495,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE-1",
+   "x": -48,
+   "y": -2212,
+   "z": -802,
+   "loc": "RED BASE",
+   "bounds": {
+    "min": [
+     -239,
+     -2223,
+     -843
+    ],
+    "max": [
+     143,
+     -2201,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE-2",
+   "x": -48,
+   "y": -2188,
+   "z": -802,
+   "loc": "RED BASE",
+   "bounds": {
+    "min": [
+     -239,
+     -2199,
+     -843
+    ],
+    "max": [
+     143,
+     -2177,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE-3",
+   "x": -48,
+   "y": -2164,
+   "z": -802,
+   "loc": "RED BASE",
+   "bounds": {
+    "min": [
+     -239,
+     -2175,
+     -843
+    ],
+    "max": [
+     143,
+     -2153,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: 100H",
+   "x": -48,
+   "y": -2092,
+   "z": -802,
+   "loc": "RED BASE: 100H",
+   "bounds": {
+    "min": [
+     -239,
+     -2103,
+     -843
+    ],
+    "max": [
+     143,
+     -2081,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: GRENADE LAUNCHER-1",
+   "x": -66,
+   "y": -1510,
+   "z": -712,
+   "loc": "RED BASE: GRENADE LAUNCHER",
+   "bounds": {
+    "min": [
+     -83,
+     -1515,
+     -759
+    ],
+    "max": [
+     -49,
+     -1505,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: GRENADE LAUNCHER-2",
+   "x": -30,
+   "y": -1510,
+   "z": -712,
+   "loc": "RED BASE: GRENADE LAUNCHER",
+   "bounds": {
+    "min": [
+     -47,
+     -1515,
+     -759
+    ],
+    "max": [
+     -13,
+     -1505,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: LEFT DOOR-1",
+   "x": -402,
+   "y": -2164,
+   "z": -598,
+   "loc": "RED BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     -407,
+     -2187,
+     -651
+    ],
+    "max": [
+     -397,
+     -2141,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: LEFT DOOR-2",
+   "x": -402,
+   "y": -2116,
+   "z": -598,
+   "loc": "RED BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     -407,
+     -2139,
+     -651
+    ],
+    "max": [
+     -397,
+     -2093,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: LOWER RA ROOM",
+   "x": -606,
+   "y": -1894,
+   "z": -712,
+   "loc": "RED BASE: LOWER RA ROOM",
+   "bounds": {
+    "min": [
+     -635,
+     -1923,
+     -759
+    ],
+    "max": [
+     -577,
+     -1865,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: MIDDLE DOOR-1",
+   "x": -48,
+   "y": -2140,
+   "z": -802,
+   "loc": "RED BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     -2151,
+     -843
+    ],
+    "max": [
+     143,
+     -2129,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: MIDDLE DOOR-2",
+   "x": -48,
+   "y": -2116,
+   "z": -802,
+   "loc": "RED BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     -2127,
+     -843
+    ],
+    "max": [
+     143,
+     -2105,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: RIGHT DOOR-1",
+   "x": 306,
+   "y": -2164,
+   "z": -598,
+   "loc": "RED BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     301,
+     -2187,
+     -651
+    ],
+    "max": [
+     311,
+     -2141,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: RIGHT DOOR-2",
+   "x": 306,
+   "y": -2116,
+   "z": -598,
+   "loc": "RED BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     301,
+     -2139,
+     -651
+    ],
+    "max": [
+     311,
+     -2093,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED WIND TUNNEL",
+   "x": 1402,
+   "y": -182,
+   "z": -925.5,
+   "loc": "RED WIND TUNNEL",
+   "bounds": {
+    "min": [
+     1397,
+     -217,
+     -954
+    ],
+    "max": [
+     1407,
+     -147,
+     -897
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Ring SECRET",
+   "x": -920,
+   "y": -404,
+   "z": -1132,
+   "loc": "Ring SECRET",
+   "bounds": {
+    "min": [
+     -967,
+     -435,
+     -1195
+    ],
+    "max": [
+     -873,
+     -373,
+     -1069
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -1517,6 +2147,116 @@
    "z": -788,
    "loc": "RL AREA",
    "targetName": "redtele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG/666 ROOM-1",
+   "x": 1568,
+   "y": -1864,
+   "z": -1216,
+   "loc": "LG/666 ROOM",
+   "target": "redtele1",
+   "bounds": {
+    "min": [
+     1541,
+     -1869,
+     -1267
+    ],
+    "max": [
+     1595,
+     -1859,
+     -1165
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG/666 ROOM-2",
+   "x": 1568,
+   "y": -1240,
+   "z": -1216,
+   "loc": "LG/666 ROOM",
+   "target": "bluetele1",
+   "bounds": {
+    "min": [
+     1541,
+     -1245,
+     -1267
+    ],
+    "max": [
+     1595,
+     -1235,
+     -1165
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED WIND TUNNEL",
+   "x": 1483,
+   "y": -182,
+   "z": -925.5,
+   "loc": "RED WIND TUNNEL",
+   "target": "secret",
+   "bounds": {
+    "min": [
+     1481,
+     -217,
+     -954
+    ],
+    "max": [
+     1485,
+     -147,
+     -897
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL AREA-1",
+   "x": -556,
+   "y": -488,
+   "z": -476,
+   "loc": "RL AREA",
+   "target": "redtele1",
+   "bounds": {
+    "min": [
+     -579,
+     -511,
+     -527
+    ],
+    "max": [
+     -533,
+     -465,
+     -425
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL AREA-2",
+   "x": 712,
+   "y": -204,
+   "z": -476,
+   "loc": "RL AREA",
+   "target": "bluetele1",
+   "bounds": {
+    "min": [
+     689,
+     -227,
+     -527
+    ],
+    "max": [
+     735,
+     -181,
+     -425
+    ]
+   }
   }
  ]
 }

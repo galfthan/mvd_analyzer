@@ -546,6 +546,28 @@
    "z": 4,
    "loc": "cellar-pent",
    "targetName": "info_teleport_destination1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "sng-tele",
+   "x": -392,
+   "y": -1486,
+   "z": -126,
+   "loc": "sng-tele",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     -423,
+     -1487,
+     -175
+    ],
+    "max": [
+     -361,
+     -1485,
+     -77
+    ]
+   }
   }
  ]
 }

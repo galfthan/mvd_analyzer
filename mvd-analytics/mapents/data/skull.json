@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA",
+   "x": 192,
+   "y": 448,
+   "z": -56,
+   "loc": "RA",
+   "bounds": {
+    "min": [
+     145,
+     401,
+     -111
+    ],
+    "max": [
+     239,
+     495,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "yard",
+   "x": 464,
+   "y": 128,
+   "z": -272,
+   "loc": "yard",
+   "bounds": {
+    "min": [
+     449,
+     65,
+     -319
+    ],
+    "max": [
+     479,
+     191,
+     -225
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -364,6 +406,50 @@
    "z": -128,
    "loc": "middle",
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.tele",
+   "x": -336,
+   "y": -528,
+   "z": -248,
+   "loc": "YA.tele",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -343,
+     -559,
+     -287
+    ],
+    "max": [
+     -329,
+     -497,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "yard",
+   "x": 192,
+   "y": 144,
+   "z": -344,
+   "loc": "yard",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     161,
+     137,
+     -383
+    ],
+    "max": [
+     223,
+     151,
+     -305
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,26 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": -80,
+   "y": -1008,
+   "z": -128,
+   "bounds": {
+    "min": [
+     -95,
+     -1055,
+     -159
+    ],
+    "max": [
+     -65,
+     -961,
+     -97
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "weapon_grenadelauncher",
    "kind": "gl",
@@ -285,6 +305,48 @@
    "y": -448,
    "z": -296,
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 272,
+   "y": -1116,
+   "z": -112,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     225,
+     -1119,
+     -159
+    ],
+    "max": [
+     319,
+     -1113,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 516,
+   "y": -448,
+   "z": -264,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     513,
+     -495,
+     -319
+    ],
+    "max": [
+     519,
+     -401,
+     -209
+    ]
+   }
   }
  ]
 }

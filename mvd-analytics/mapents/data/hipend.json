@@ -3,6 +3,131 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -24,
+   "y": 968,
+   "z": 224,
+   "bounds": {
+    "min": [
+     -111,
+     881,
+     129
+    ],
+    "max": [
+     63,
+     1055,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 576,
+   "y": 256,
+   "z": 688,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     449,
+     33,
+     673
+    ],
+    "max": [
+     703,
+     479,
+     703
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 704,
+   "y": 128,
+   "z": 688,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     481,
+     1,
+     673
+    ],
+    "max": [
+     927,
+     255,
+     703
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 704,
+   "y": 256,
+   "z": 208,
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     641,
+     193,
+     129
+    ],
+    "max": [
+     767,
+     319,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 704,
+   "y": 384,
+   "z": 688,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     481,
+     257,
+     673
+    ],
+    "max": [
+     927,
+     511,
+     703
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": 832,
+   "y": 256,
+   "z": 688,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     705,
+     33,
+     673
+    ],
+    "max": [
+     959,
+     479,
+     703
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

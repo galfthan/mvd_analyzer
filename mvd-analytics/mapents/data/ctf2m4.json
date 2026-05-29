@@ -3,6 +3,216 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE OUTER BASE AREA",
+   "x": 2650,
+   "y": -1296,
+   "z": 504,
+   "loc": "BLUE OUTER BASE AREA",
+   "bounds": {
+    "min": [
+     2645,
+     -1343,
+     457
+    ],
+    "max": [
+     2655,
+     -1249,
+     551
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED OUTER BASE AREA",
+   "x": -2650,
+   "y": 1296,
+   "z": 503.99945,
+   "loc": "RED OUTER BASE AREA",
+   "bounds": {
+    "min": [
+     -2655,
+     1249,
+     440.9989
+    ],
+    "max": [
+     -2645,
+     1343,
+     567
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE GRATE ROOM-1",
+   "x": 1376,
+   "y": -992,
+   "z": 186,
+   "loc": "BLUE GRATE ROOM",
+   "bounds": {
+    "min": [
+     1329,
+     -1055,
+     185
+    ],
+    "max": [
+     1423,
+     -929,
+     187
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE GRATE ROOM-2",
+   "x": 1376,
+   "y": -960,
+   "z": 182,
+   "loc": "BLUE GRATE ROOM",
+   "bounds": {
+    "min": [
+     1313,
+     -1039,
+     181
+    ],
+    "max": [
+     1439,
+     -881,
+     183
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE GRATE ROOM-3",
+   "x": 1376,
+   "y": -896,
+   "z": 182,
+   "loc": "BLUE GRATE ROOM",
+   "bounds": {
+    "min": [
+     1313,
+     -975,
+     181
+    ],
+    "max": [
+     1439,
+     -817,
+     183
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE GRATE ROOM-4",
+   "x": 1376,
+   "y": -864,
+   "z": 186,
+   "loc": "BLUE GRATE ROOM",
+   "bounds": {
+    "min": [
+     1329,
+     -927,
+     185
+    ],
+    "max": [
+     1423,
+     -801,
+     187
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED GRATE-1",
+   "x": -1376,
+   "y": 864,
+   "z": 186,
+   "loc": "RED GRATE",
+   "bounds": {
+    "min": [
+     -1423,
+     801,
+     185
+    ],
+    "max": [
+     -1329,
+     927,
+     187
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED GRATE-2",
+   "x": -1376,
+   "y": 896,
+   "z": 182,
+   "loc": "RED GRATE",
+   "bounds": {
+    "min": [
+     -1439,
+     817,
+     181
+    ],
+    "max": [
+     -1313,
+     975,
+     183
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED GRATE-3",
+   "x": -1376,
+   "y": 960,
+   "z": 182,
+   "loc": "RED GRATE",
+   "bounds": {
+    "min": [
+     -1439,
+     881,
+     181
+    ],
+    "max": [
+     -1313,
+     1039,
+     183
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED GRATE-4",
+   "x": -1376,
+   "y": 992,
+   "z": 186,
+   "loc": "RED GRATE",
+   "bounds": {
+    "min": [
+     -1423,
+     929,
+     185
+    ],
+    "max": [
+     -1329,
+     1055,
+     187
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

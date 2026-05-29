@@ -3,6 +3,68 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 548,
+   "y": 224,
+   "z": 736,
+   "spawnflags": 8,
+   "bounds": {
+    "min": [
+     545,
+     221,
+     733
+    ],
+    "max": [
+     551,
+     227,
+     739
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 576,
+   "y": 48,
+   "z": 592,
+   "bounds": {
+    "min": [
+     545,
+     41,
+     545
+    ],
+    "max": [
+     607,
+     55,
+     639
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 860,
+   "y": 224,
+   "z": 736,
+   "spawnflags": 8,
+   "bounds": {
+    "min": [
+     857,
+     221,
+     733
+    ],
+    "max": [
+     863,
+     227,
+     739
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -403,6 +465,111 @@
    "y": 360,
    "z": 216,
    "targetName": "info_teleport_destination4"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -128,
+   "y": 346,
+   "z": 432,
+   "target": "info_teleport_destination2",
+   "bounds": {
+    "min": [
+     -151,
+     345,
+     393
+    ],
+    "max": [
+     -105,
+     347,
+     471
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 64,
+   "y": 130,
+   "z": 56,
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     33,
+     129,
+     17
+    ],
+    "max": [
+     95,
+     131,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 704,
+   "y": -126,
+   "z": 56,
+   "target": "info_teleport_destination4",
+   "bounds": {
+    "min": [
+     673,
+     -127,
+     17
+    ],
+    "max": [
+     735,
+     -125,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 704,
+   "y": 386,
+   "z": 248,
+   "target": "info_teleport_destination3",
+   "bounds": {
+    "min": [
+     673,
+     385,
+     209
+    ],
+    "max": [
+     735,
+     387,
+     287
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 844,
+   "y": 224,
+   "z": 608.5,
+   "target": "tele_beast",
+   "bounds": {
+    "min": [
+     841,
+     201,
+     570
+    ],
+    "max": [
+     847,
+     247,
+     647
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,166 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 784,
+   "y": -224,
+   "z": -168,
+   "bounds": {
+    "min": [
+     769,
+     -319,
+     -223
+    ],
+    "max": [
+     799,
+     -129,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 864,
+   "y": 1384,
+   "z": -200,
+   "bounds": {
+    "min": [
+     833,
+     1377,
+     -263
+    ],
+    "max": [
+     895,
+     1391,
+     -137
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 864,
+   "y": 1384,
+   "z": 64,
+   "bounds": {
+    "min": [
+     833,
+     1377,
+     1
+    ],
+    "max": [
+     895,
+     1391,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 896,
+   "y": 64,
+   "z": 360,
+   "bounds": {
+    "min": [
+     833,
+     33,
+     353
+    ],
+    "max": [
+     959,
+     95,
+     367
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 896,
+   "y": 680,
+   "z": 192,
+   "bounds": {
+    "min": [
+     865,
+     673,
+     129
+    ],
+    "max": [
+     927,
+     687,
+     255
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": 928,
+   "y": 1384,
+   "z": -200,
+   "bounds": {
+    "min": [
+     897,
+     1377,
+     -263
+    ],
+    "max": [
+     959,
+     1391,
+     -137
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": 928,
+   "y": 1384,
+   "z": 64,
+   "bounds": {
+    "min": [
+     897,
+     1377,
+     1
+    ],
+    "max": [
+     959,
+     1391,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 1472,
+   "y": -400,
+   "z": -168,
+   "bounds": {
+    "min": [
+     1377,
+     -415,
+     -223
+    ],
+    "max": [
+     1567,
+     -385,
+     -113
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

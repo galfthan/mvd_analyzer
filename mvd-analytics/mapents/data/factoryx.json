@@ -3,6 +3,246 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": 132,
+   "y": -272,
+   "z": 128,
+   "bounds": {
+    "min": [
+     129,
+     -287,
+     113
+    ],
+    "max": [
+     135,
+     -257,
+     143
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": 636,
+   "y": 304,
+   "z": 304,
+   "bounds": {
+    "min": [
+     633,
+     289,
+     289
+    ],
+    "max": [
+     639,
+     319,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -408,
+   "y": 98.5,
+   "z": -208,
+   "bounds": {
+    "min": [
+     -431,
+     49,
+     -271
+    ],
+    "max": [
+     -385,
+     148,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-10",
+   "x": 608,
+   "y": 320,
+   "z": -280,
+   "bounds": {
+    "min": [
+     585,
+     305,
+     -287
+    ],
+    "max": [
+     631,
+     335,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -408,
+   "y": 123.5,
+   "z": -208,
+   "bounds": {
+    "min": [
+     -431,
+     72,
+     -271
+    ],
+    "max": [
+     -385,
+     175,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 112,
+   "y": -272,
+   "z": 76,
+   "bounds": {
+    "min": [
+     105,
+     -295,
+     45
+    ],
+    "max": [
+     119,
+     -249,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 112,
+   "y": 92,
+   "z": -278,
+   "bounds": {
+    "min": [
+     97,
+     81,
+     -283
+    ],
+    "max": [
+     127,
+     103,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 116,
+   "y": 120,
+   "z": -278,
+   "bounds": {
+    "min": [
+     105,
+     105,
+     -283
+    ],
+    "max": [
+     127,
+     135,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": 128,
+   "y": 20,
+   "z": -80,
+   "bounds": {
+    "min": [
+     97,
+     1,
+     -143
+    ],
+    "max": [
+     159,
+     39,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": 140,
+   "y": 88,
+   "z": -278,
+   "bounds": {
+    "min": [
+     129,
+     73,
+     -283
+    ],
+    "max": [
+     151,
+     103,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 144,
+   "y": 116,
+   "z": -278,
+   "bounds": {
+    "min": [
+     129,
+     105,
+     -283
+    ],
+    "max": [
+     159,
+     127,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-9",
+   "x": 608,
+   "y": 288,
+   "z": -280,
+   "bounds": {
+    "min": [
+     585,
+     273,
+     -287
+    ],
+    "max": [
+     631,
+     303,
+     -273
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -460,6 +700,90 @@
    "y": -144,
    "z": -208,
    "targetName": "LOFactory"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -640,
+   "y": -680,
+   "z": -346,
+   "target": "BLUEMEGA",
+   "bounds": {
+    "min": [
+     -703,
+     -687,
+     -387
+    ],
+    "max": [
+     -577,
+     -673,
+     -305
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -56,
+   "y": 320,
+   "z": -16,
+   "target": "LGRA",
+   "bounds": {
+    "min": [
+     -63,
+     273,
+     -79
+    ],
+    "max": [
+     -49,
+     367,
+     47
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 920,
+   "y": -472,
+   "z": 232,
+   "target": "LOFactory",
+   "bounds": {
+    "min": [
+     913,
+     -535,
+     177
+    ],
+    "max": [
+     927,
+     -409,
+     287
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 1012,
+   "y": -144,
+   "z": -132,
+   "target": "HIFactory",
+   "bounds": {
+    "min": [
+     1009,
+     -191,
+     -207
+    ],
+    "max": [
+     1015,
+     -97,
+     -57
+    ]
+   }
   }
  ]
 }

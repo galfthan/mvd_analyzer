@@ -210,6 +210,174 @@
    "y": 0,
    "z": 288,
    "targetName": "east_top"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -608,
+   "y": 0,
+   "z": 236,
+   "target": "west_bottom",
+   "bounds": {
+    "min": [
+     -639,
+     -31,
+     233
+    ],
+    "max": [
+     -577,
+     31,
+     239
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -480,
+   "y": 0,
+   "z": -60,
+   "target": "west_top",
+   "bounds": {
+    "min": [
+     -511,
+     -31,
+     -63
+    ],
+    "max": [
+     -449,
+     31,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 0,
+   "y": -600,
+   "z": 236,
+   "target": "south_bottom",
+   "bounds": {
+    "min": [
+     -31,
+     -631,
+     233
+    ],
+    "max": [
+     31,
+     -569,
+     239
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 0,
+   "y": -480,
+   "z": -52,
+   "target": "south_top",
+   "bounds": {
+    "min": [
+     -31,
+     -511,
+     -55
+    ],
+    "max": [
+     31,
+     -449,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 0,
+   "y": 480,
+   "z": -52,
+   "target": "north_top_receiver",
+   "bounds": {
+    "min": [
+     -31,
+     449,
+     -55
+    ],
+    "max": [
+     31,
+     511,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 0,
+   "y": 600,
+   "z": 236,
+   "target": "north_bottom_receiver",
+   "bounds": {
+    "min": [
+     -31,
+     569,
+     233
+    ],
+    "max": [
+     31,
+     631,
+     239
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": 480,
+   "y": 0,
+   "z": -52,
+   "target": "east_top",
+   "bounds": {
+    "min": [
+     449,
+     -31,
+     -55
+    ],
+    "max": [
+     511,
+     31,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-8",
+   "x": 608,
+   "y": 0,
+   "z": 236,
+   "target": "east_bottom",
+   "bounds": {
+    "min": [
+     577,
+     -31,
+     233
+    ],
+    "max": [
+     639,
+     31,
+     239
+    ]
+   }
   }
  ]
 }

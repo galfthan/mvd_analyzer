@@ -372,6 +372,69 @@
    "y": -984,
    "z": -81,
    "targetName": "fitta"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -661,
+   "y": -325,
+   "z": -127,
+   "target": "fitta",
+   "bounds": {
+    "min": [
+     -664,
+     -349,
+     -176
+    ],
+    "max": [
+     -658,
+     -301,
+     -78
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 318.5,
+   "y": -317.5,
+   "z": -225,
+   "target": "kuk",
+   "bounds": {
+    "min": [
+     283,
+     -353,
+     -225
+    ],
+    "max": [
+     354,
+     -282,
+     -225
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 707.5,
+   "y": -1064,
+   "z": -132.5,
+   "target": "snopp",
+   "bounds": {
+    "min": [
+     684,
+     -1068,
+     -166
+    ],
+    "max": [
+     731,
+     -1060,
+     -99
+    ]
+   }
   }
  ]
 }

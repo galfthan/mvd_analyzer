@@ -3,6 +3,1925 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -130,
+   "y": 480,
+   "z": 12,
+   "bounds": {
+    "min": [
+     -131,
+     473,
+     5
+    ],
+    "max": [
+     -129,
+     487,
+     19
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-10",
+   "x": 920,
+   "y": 2588,
+   "z": 580,
+   "bounds": {
+    "min": [
+     889,
+     2585,
+     549
+    ],
+    "max": [
+     951,
+     2591,
+     611
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-11",
+   "x": 952,
+   "y": 1768,
+   "z": 208,
+   "bounds": {
+    "min": [
+     949,
+     1737,
+     177
+    ],
+    "max": [
+     955,
+     1799,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-12",
+   "x": 1008,
+   "y": 2216,
+   "z": 542,
+   "bounds": {
+    "min": [
+     1001,
+     2209,
+     541
+    ],
+    "max": [
+     1015,
+     2223,
+     543
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-13",
+   "x": 1020,
+   "y": 736,
+   "z": 208,
+   "bounds": {
+    "min": [
+     1017,
+     705,
+     177
+    ],
+    "max": [
+     1023,
+     767,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-14",
+   "x": 1064,
+   "y": 1768,
+   "z": 208,
+   "bounds": {
+    "min": [
+     1061,
+     1737,
+     177
+    ],
+    "max": [
+     1067,
+     1799,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-15",
+   "x": 1096,
+   "y": 2588,
+   "z": 580,
+   "bounds": {
+    "min": [
+     1065,
+     2585,
+     549
+    ],
+    "max": [
+     1127,
+     2591,
+     611
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-16",
+   "x": 1172,
+   "y": 814,
+   "z": 104,
+   "bounds": {
+    "min": [
+     1165,
+     813,
+     97
+    ],
+    "max": [
+     1179,
+     815,
+     111
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-17",
+   "x": 1280,
+   "y": 1768,
+   "z": 208,
+   "bounds": {
+    "min": [
+     1277,
+     1737,
+     177
+    ],
+    "max": [
+     1283,
+     1799,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-18",
+   "x": 1324,
+   "y": 496,
+   "z": 48,
+   "bounds": {
+    "min": [
+     1321,
+     465,
+     17
+    ],
+    "max": [
+     1327,
+     527,
+     79
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-19",
+   "x": 1324,
+   "y": 736,
+   "z": 208,
+   "bounds": {
+    "min": [
+     1321,
+     705,
+     177
+    ],
+    "max": [
+     1327,
+     767,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": -72,
+   "y": 244,
+   "z": 208,
+   "bounds": {
+    "min": [
+     -103,
+     241,
+     177
+    ],
+    "max": [
+     -41,
+     247,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-20",
+   "x": 1380,
+   "y": 1504,
+   "z": 544,
+   "bounds": {
+    "min": [
+     1377,
+     1473,
+     513
+    ],
+    "max": [
+     1383,
+     1535,
+     575
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-21",
+   "x": 1522,
+   "y": 2272,
+   "z": 160,
+   "bounds": {
+    "min": [
+     1521,
+     2265,
+     153
+    ],
+    "max": [
+     1523,
+     2279,
+     167
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-22",
+   "x": 1544,
+   "y": 1668,
+   "z": 544,
+   "bounds": {
+    "min": [
+     1513,
+     1665,
+     513
+    ],
+    "max": [
+     1575,
+     1671,
+     575
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-23",
+   "x": 1888,
+   "y": 1250,
+   "z": 312,
+   "bounds": {
+    "min": [
+     1881,
+     1249,
+     305
+    ],
+    "max": [
+     1895,
+     1251,
+     319
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-24",
+   "x": 1888,
+   "y": 1674,
+   "z": 656,
+   "bounds": {
+    "min": [
+     1881,
+     1673,
+     649
+    ],
+    "max": [
+     1895,
+     1675,
+     663
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-25",
+   "x": 2012,
+   "y": 768,
+   "z": 48,
+   "bounds": {
+    "min": [
+     2009,
+     737,
+     17
+    ],
+    "max": [
+     2015,
+     799,
+     79
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-26",
+   "x": 2068,
+   "y": 2328,
+   "z": 48,
+   "bounds": {
+    "min": [
+     2065,
+     2297,
+     17
+    ],
+    "max": [
+     2071,
+     2359,
+     79
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-27",
+   "x": 2232,
+   "y": 652,
+   "z": 548,
+   "bounds": {
+    "min": [
+     2201,
+     649,
+     517
+    ],
+    "max": [
+     2263,
+     655,
+     579
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-28",
+   "x": 2268,
+   "y": 2222,
+   "z": 340,
+   "bounds": {
+    "min": [
+     2237,
+     2221,
+     309
+    ],
+    "max": [
+     2299,
+     2223,
+     371
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-29",
+   "x": 2324,
+   "y": 1216,
+   "z": 48,
+   "bounds": {
+    "min": [
+     2321,
+     1185,
+     17
+    ],
+    "max": [
+     2327,
+     1247,
+     79
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-3",
+   "x": -72,
+   "y": 716,
+   "z": 208,
+   "bounds": {
+    "min": [
+     -103,
+     713,
+     177
+    ],
+    "max": [
+     -41,
+     719,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-30",
+   "x": 2384,
+   "y": 2438,
+   "z": -112,
+   "bounds": {
+    "min": [
+     2377,
+     2437,
+     -119
+    ],
+    "max": [
+     2391,
+     2439,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-31",
+   "x": 2384,
+   "y": 2714,
+   "z": 544,
+   "bounds": {
+    "min": [
+     2377,
+     2713,
+     537
+    ],
+    "max": [
+     2391,
+     2715,
+     551
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-32",
+   "x": 2384,
+   "y": 2740,
+   "z": 208,
+   "bounds": {
+    "min": [
+     2353,
+     2737,
+     177
+    ],
+    "max": [
+     2415,
+     2743,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-33",
+   "x": 2388,
+   "y": 2108,
+   "z": 940,
+   "bounds": {
+    "min": [
+     2357,
+     2105,
+     909
+    ],
+    "max": [
+     2419,
+     2111,
+     971
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-34",
+   "x": 2388,
+   "y": 2740,
+   "z": 848,
+   "bounds": {
+    "min": [
+     2357,
+     2737,
+     817
+    ],
+    "max": [
+     2419,
+     2743,
+     879
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-35",
+   "x": 2396,
+   "y": 816,
+   "z": 548,
+   "bounds": {
+    "min": [
+     2393,
+     785,
+     517
+    ],
+    "max": [
+     2399,
+     847,
+     579
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-36",
+   "x": 2500,
+   "y": 2222,
+   "z": 340,
+   "bounds": {
+    "min": [
+     2469,
+     2221,
+     309
+    ],
+    "max": [
+     2531,
+     2223,
+     371
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-4",
+   "x": 260,
+   "y": 1556,
+   "z": 208,
+   "bounds": {
+    "min": [
+     257,
+     1525,
+     177
+    ],
+    "max": [
+     263,
+     1587,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-5",
+   "x": 480,
+   "y": 654,
+   "z": 312,
+   "bounds": {
+    "min": [
+     473,
+     653,
+     305
+    ],
+    "max": [
+     487,
+     655,
+     319
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-6",
+   "x": 636,
+   "y": 1192,
+   "z": 48,
+   "bounds": {
+    "min": [
+     633,
+     1161,
+     17
+    ],
+    "max": [
+     639,
+     1223,
+     79
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-7",
+   "x": 692,
+   "y": 736,
+   "z": 208,
+   "bounds": {
+    "min": [
+     689,
+     705,
+     177
+    ],
+    "max": [
+     695,
+     767,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-8",
+   "x": 736,
+   "y": 1772,
+   "z": 208,
+   "bounds": {
+    "min": [
+     733,
+     1741,
+     177
+    ],
+    "max": [
+     739,
+     1803,
+     239
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-9",
+   "x": 844,
+   "y": 706,
+   "z": -20,
+   "bounds": {
+    "min": [
+     837,
+     705,
+     -27
+    ],
+    "max": [
+     851,
+     707,
+     -13
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -8,
+   "y": 452,
+   "z": 80,
+   "bounds": {
+    "min": [
+     -11,
+     425,
+     33
+    ],
+    "max": [
+     -5,
+     479,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-10",
+   "x": 488,
+   "y": 1024,
+   "z": 80,
+   "bounds": {
+    "min": [
+     457,
+     1017,
+     33
+    ],
+    "max": [
+     519,
+     1031,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-11",
+   "x": 520,
+   "y": 1680,
+   "z": 244,
+   "bounds": {
+    "min": [
+     481,
+     1677,
+     161
+    ],
+    "max": [
+     559,
+     1683,
+     327
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-12",
+   "x": 600,
+   "y": 704,
+   "z": 40,
+   "bounds": {
+    "min": [
+     593,
+     681,
+     9
+    ],
+    "max": [
+     607,
+     727,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-13",
+   "x": 600,
+   "y": 792,
+   "z": 40,
+   "bounds": {
+    "min": [
+     593,
+     769,
+     9
+    ],
+    "max": [
+     607,
+     815,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-14",
+   "x": 600,
+   "y": 880,
+   "z": 40,
+   "bounds": {
+    "min": [
+     593,
+     857,
+     9
+    ],
+    "max": [
+     607,
+     903,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-15",
+   "x": 600,
+   "y": 968,
+   "z": 40,
+   "bounds": {
+    "min": [
+     593,
+     945,
+     9
+    ],
+    "max": [
+     607,
+     991,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-16",
+   "x": 644,
+   "y": 480,
+   "z": 84,
+   "bounds": {
+    "min": [
+     641,
+     401,
+     1
+    ],
+    "max": [
+     647,
+     559,
+     167
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-17",
+   "x": 784,
+   "y": 1248,
+   "z": 80,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     737,
+     1201,
+     1
+    ],
+    "max": [
+     831,
+     1295,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-18",
+   "x": 844,
+   "y": 656,
+   "z": 136,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     749,
+     609,
+     113
+    ],
+    "max": [
+     939,
+     703,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-19",
+   "x": 844,
+   "y": 1804,
+   "z": 200,
+   "bounds": {
+    "min": [
+     821,
+     1797,
+     169
+    ],
+    "max": [
+     867,
+     1811,
+     231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -8,
+   "y": 508,
+   "z": 80,
+   "bounds": {
+    "min": [
+     -11,
+     481,
+     33
+    ],
+    "max": [
+     -5,
+     535,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-20",
+   "x": 884,
+   "y": 328,
+   "z": 120,
+   "bounds": {
+    "min": [
+     853,
+     321,
+     73
+    ],
+    "max": [
+     915,
+     335,
+     167
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-21",
+   "x": 892,
+   "y": 328,
+   "z": 210,
+   "bounds": {
+    "min": [
+     885,
+     321,
+     189
+    ],
+    "max": [
+     899,
+     335,
+     231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-22",
+   "x": 900,
+   "y": 328,
+   "z": 80,
+   "bounds": {
+    "min": [
+     869,
+     321,
+     33
+    ],
+    "max": [
+     931,
+     335,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-23",
+   "x": 906,
+   "y": 1472,
+   "z": 80,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     861,
+     1425,
+     1
+    ],
+    "max": [
+     951,
+     1519,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-24",
+   "x": 1008,
+   "y": 2152,
+   "z": 584,
+   "bounds": {
+    "min": [
+     953,
+     2145,
+     553
+    ],
+    "max": [
+     1063,
+     2159,
+     615
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-25",
+   "x": 1008,
+   "y": 2628,
+   "z": 568,
+   "bounds": {
+    "min": [
+     985,
+     2621,
+     537
+    ],
+    "max": [
+     1031,
+     2635,
+     599
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-26",
+   "x": 1116,
+   "y": 328,
+   "z": 120,
+   "bounds": {
+    "min": [
+     1085,
+     321,
+     73
+    ],
+    "max": [
+     1147,
+     335,
+     167
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-27",
+   "x": 1118,
+   "y": 936,
+   "z": 318,
+   "spawnflags": 5,
+   "bounds": {
+    "min": [
+     1047,
+     929,
+     161
+    ],
+    "max": [
+     1189,
+     943,
+     475
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-28",
+   "x": 1118,
+   "y": 1048,
+   "z": 318,
+   "spawnflags": 36,
+   "bounds": {
+    "min": [
+     1047,
+     1041,
+     161
+    ],
+    "max": [
+     1189,
+     1055,
+     475
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-29",
+   "x": 1118,
+   "y": 1160,
+   "z": 318,
+   "spawnflags": 37,
+   "bounds": {
+    "min": [
+     1047,
+     1153,
+     161
+    ],
+    "max": [
+     1189,
+     1167,
+     475
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 360,
+   "y": 704,
+   "z": 40,
+   "bounds": {
+    "min": [
+     353,
+     681,
+     9
+    ],
+    "max": [
+     367,
+     727,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-30",
+   "x": 1124,
+   "y": 328,
+   "z": 210,
+   "bounds": {
+    "min": [
+     1117,
+     321,
+     189
+    ],
+    "max": [
+     1131,
+     335,
+     231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-31",
+   "x": 1132,
+   "y": 328,
+   "z": 80,
+   "bounds": {
+    "min": [
+     1101,
+     321,
+     33
+    ],
+    "max": [
+     1163,
+     335,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-32",
+   "x": 1172,
+   "y": 656,
+   "z": 136,
+   "bounds": {
+    "min": [
+     1077,
+     609,
+     113
+    ],
+    "max": [
+     1267,
+     703,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-33",
+   "x": 1172,
+   "y": 1804,
+   "z": 200,
+   "bounds": {
+    "min": [
+     1149,
+     1797,
+     169
+    ],
+    "max": [
+     1195,
+     1811,
+     231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-34",
+   "x": 1226,
+   "y": 1328,
+   "z": 318,
+   "spawnflags": 37,
+   "bounds": {
+    "min": [
+     1155,
+     1321,
+     161
+    ],
+    "max": [
+     1297,
+     1335,
+     475
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-35",
+   "x": 1226,
+   "y": 1440,
+   "z": 318,
+   "spawnflags": 36,
+   "bounds": {
+    "min": [
+     1155,
+     1433,
+     161
+    ],
+    "max": [
+     1297,
+     1447,
+     475
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-36",
+   "x": 1226,
+   "y": 1552,
+   "z": 318,
+   "spawnflags": 5,
+   "bounds": {
+    "min": [
+     1155,
+     1545,
+     161
+    ],
+    "max": [
+     1297,
+     1559,
+     475
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-37",
+   "x": 1552,
+   "y": 992,
+   "z": 80,
+   "spawnflags": 33,
+   "bounds": {
+    "min": [
+     1545,
+     945,
+     1
+    ],
+    "max": [
+     1559,
+     1039,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-38",
+   "x": 1552,
+   "y": 1328,
+   "z": 80,
+   "spawnflags": 32,
+   "bounds": {
+    "min": [
+     1545,
+     1281,
+     1
+    ],
+    "max": [
+     1559,
+     1375,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-39",
+   "x": 1720,
+   "y": 824,
+   "z": 80,
+   "spawnflags": 32,
+   "bounds": {
+    "min": [
+     1673,
+     817,
+     1
+    ],
+    "max": [
+     1767,
+     831,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 360,
+   "y": 792,
+   "z": 40,
+   "bounds": {
+    "min": [
+     353,
+     769,
+     9
+    ],
+    "max": [
+     367,
+     815,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-40",
+   "x": 1792,
+   "y": 1160,
+   "z": 40,
+   "bounds": {
+    "min": [
+     1785,
+     1121,
+     9
+    ],
+    "max": [
+     1799,
+     1199,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-41",
+   "x": 1832,
+   "y": 824,
+   "z": 80,
+   "spawnflags": 33,
+   "bounds": {
+    "min": [
+     1785,
+     817,
+     1
+    ],
+    "max": [
+     1879,
+     831,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-42",
+   "x": 1832,
+   "y": 1384,
+   "z": 80,
+   "spawnflags": 32,
+   "bounds": {
+    "min": [
+     1785,
+     1377,
+     1
+    ],
+    "max": [
+     1879,
+     1391,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-43",
+   "x": 1888,
+   "y": 692,
+   "z": 40,
+   "bounds": {
+    "min": [
+     1865,
+     685,
+     9
+    ],
+    "max": [
+     1911,
+     699,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-44",
+   "x": 1888,
+   "y": 692,
+   "z": 536,
+   "bounds": {
+    "min": [
+     1865,
+     685,
+     505
+    ],
+    "max": [
+     1911,
+     699,
+     567
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-45",
+   "x": 1888,
+   "y": 1064,
+   "z": 40,
+   "bounds": {
+    "min": [
+     1849,
+     1057,
+     9
+    ],
+    "max": [
+     1927,
+     1071,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-46",
+   "x": 1944,
+   "y": 936,
+   "z": 80,
+   "spawnflags": 33,
+   "bounds": {
+    "min": [
+     1897,
+     929,
+     1
+    ],
+    "max": [
+     1991,
+     943,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-47",
+   "x": 1984,
+   "y": 1160,
+   "z": 40,
+   "bounds": {
+    "min": [
+     1977,
+     1121,
+     9
+    ],
+    "max": [
+     1991,
+     1199,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-48",
+   "x": 2184,
+   "y": 2712,
+   "z": 40,
+   "bounds": {
+    "min": [
+     2145,
+     2681,
+     1
+    ],
+    "max": [
+     2223,
+     2743,
+     79
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-49",
+   "x": 2224,
+   "y": 992,
+   "z": 80,
+   "spawnflags": 33,
+   "bounds": {
+    "min": [
+     2217,
+     945,
+     1
+    ],
+    "max": [
+     2231,
+     1039,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 360,
+   "y": 880,
+   "z": 40,
+   "bounds": {
+    "min": [
+     353,
+     857,
+     9
+    ],
+    "max": [
+     367,
+     903,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-50",
+   "x": 2260,
+   "y": 2224,
+   "z": 120,
+   "bounds": {
+    "min": [
+     2229,
+     2217,
+     73
+    ],
+    "max": [
+     2291,
+     2231,
+     167
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-51",
+   "x": 2268,
+   "y": 2224,
+   "z": 210,
+   "bounds": {
+    "min": [
+     2261,
+     2217,
+     189
+    ],
+    "max": [
+     2275,
+     2231,
+     231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-52",
+   "x": 2276,
+   "y": 2224,
+   "z": 80,
+   "bounds": {
+    "min": [
+     2245,
+     2217,
+     33
+    ],
+    "max": [
+     2307,
+     2231,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-53",
+   "x": 2280,
+   "y": 824,
+   "z": 80,
+   "spawnflags": 32,
+   "bounds": {
+    "min": [
+     2233,
+     817,
+     1
+    ],
+    "max": [
+     2327,
+     831,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-54",
+   "x": 2280,
+   "y": 1496,
+   "z": 80,
+   "spawnflags": 32,
+   "bounds": {
+    "min": [
+     2233,
+     1489,
+     1
+    ],
+    "max": [
+     2327,
+     1503,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-55",
+   "x": 2384,
+   "y": 2584,
+   "z": 1516,
+   "spawnflags": 32,
+   "bounds": {
+    "min": [
+     2321,
+     2521,
+     801
+    ],
+    "max": [
+     2447,
+     2647,
+     2231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-56",
+   "x": 2492,
+   "y": 2224,
+   "z": 120,
+   "bounds": {
+    "min": [
+     2461,
+     2217,
+     73
+    ],
+    "max": [
+     2523,
+     2231,
+     167
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-57",
+   "x": 2500,
+   "y": 2224,
+   "z": 210,
+   "bounds": {
+    "min": [
+     2493,
+     2217,
+     189
+    ],
+    "max": [
+     2507,
+     2231,
+     231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-58",
+   "x": 2508,
+   "y": 2224,
+   "z": 80,
+   "bounds": {
+    "min": [
+     2477,
+     2217,
+     33
+    ],
+    "max": [
+     2539,
+     2231,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-59",
+   "x": 2584,
+   "y": 2712,
+   "z": 40,
+   "bounds": {
+    "min": [
+     2545,
+     2681,
+     1
+    ],
+    "max": [
+     2623,
+     2743,
+     79
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": 360,
+   "y": 968,
+   "z": 40,
+   "bounds": {
+    "min": [
+     353,
+     945,
+     9
+    ],
+    "max": [
+     367,
+     991,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": 440,
+   "y": 1680,
+   "z": 244,
+   "bounds": {
+    "min": [
+     401,
+     1677,
+     161
+    ],
+    "max": [
+     479,
+     1683,
+     327
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 472,
+   "y": 1024,
+   "z": 120,
+   "bounds": {
+    "min": [
+     441,
+     1017,
+     73
+    ],
+    "max": [
+     503,
+     1031,
+     167
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-9",
+   "x": 480,
+   "y": 1024,
+   "z": 210,
+   "bounds": {
+    "min": [
+     473,
+     1017,
+     189
+    ],
+    "max": [
+     487,
+     1031,
+     231
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -644,6 +2563,1560 @@
    "y": 2840,
    "z": 532,
    "targetName": "2rbluefinal"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 80,
+   "y": 2504,
+   "z": 416,
+   "target": "2rblue3r",
+   "bounds": {
+    "min": [
+     17,
+     2441,
+     353
+    ],
+    "max": [
+     143,
+     2567,
+     479
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-10",
+   "x": 622,
+   "y": 792,
+   "z": 64,
+   "target": "2rredplrstart",
+   "bounds": {
+    "min": [
+     621,
+     761,
+     17
+    ],
+    "max": [
+     623,
+     823,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-11",
+   "x": 622,
+   "y": 880,
+   "z": 64,
+   "target": "3rredplrstart",
+   "bounds": {
+    "min": [
+     621,
+     849,
+     17
+    ],
+    "max": [
+     623,
+     911,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-12",
+   "x": 622,
+   "y": 968,
+   "z": 64,
+   "target": "4rredplrstart",
+   "bounds": {
+    "min": [
+     621,
+     937,
+     17
+    ],
+    "max": [
+     623,
+     999,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-13",
+   "x": 706,
+   "y": 160,
+   "z": 64,
+   "target": "0rblueplrstart",
+   "bounds": {
+    "min": [
+     705,
+     129,
+     17
+    ],
+    "max": [
+     707,
+     191,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-14",
+   "x": 844,
+   "y": 1244,
+   "z": 8,
+   "target": "1rleftplrcheckpoint",
+   "bounds": {
+    "min": [
+     689,
+     817,
+     1
+    ],
+    "max": [
+     999,
+     1671,
+     15
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-15",
+   "x": 844,
+   "y": 1830,
+   "z": 224,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     813,
+     1829,
+     177
+    ],
+    "max": [
+     875,
+     1831,
+     271
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-16",
+   "x": 876,
+   "y": 1914,
+   "z": 64,
+   "target": "2rblue2r",
+   "bounds": {
+    "min": [
+     845,
+     1913,
+     17
+    ],
+    "max": [
+     907,
+     1915,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-17",
+   "x": 876,
+   "y": 2518,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     845,
+     2517,
+     17
+    ],
+    "max": [
+     907,
+     2519,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-18",
+   "x": 876,
+   "y": 2602,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     845,
+     2601,
+     17
+    ],
+    "max": [
+     907,
+     2603,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-19",
+   "x": 876,
+   "y": 3206,
+   "z": 64,
+   "target": "2rblue5r",
+   "bounds": {
+    "min": [
+     845,
+     3205,
+     17
+    ],
+    "max": [
+     907,
+     3207,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 80,
+   "y": 2632,
+   "z": 416,
+   "target": "2rblue4r",
+   "bounds": {
+    "min": [
+     17,
+     2569,
+     353
+    ],
+    "max": [
+     143,
+     2695,
+     479
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-20",
+   "x": 964,
+   "y": 1914,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     933,
+     1913,
+     17
+    ],
+    "max": [
+     995,
+     1915,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-21",
+   "x": 964,
+   "y": 2518,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     933,
+     2517,
+     17
+    ],
+    "max": [
+     995,
+     2519,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-22",
+   "x": 964,
+   "y": 2602,
+   "z": 64,
+   "target": "2rblue4r",
+   "bounds": {
+    "min": [
+     933,
+     2601,
+     17
+    ],
+    "max": [
+     995,
+     2603,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-23",
+   "x": 964,
+   "y": 3206,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     933,
+     3205,
+     17
+    ],
+    "max": [
+     995,
+     3207,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-24",
+   "x": 1008,
+   "y": 2178,
+   "z": 608,
+   "target": "3rredplrstart",
+   "bounds": {
+    "min": [
+     977,
+     2177,
+     561
+    ],
+    "max": [
+     1039,
+     2179,
+     655
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-25",
+   "x": 1008,
+   "y": 2190,
+   "z": 64,
+   "target": "0rblueplrstart",
+   "bounds": {
+    "min": [
+     977,
+     2189,
+     17
+    ],
+    "max": [
+     1039,
+     2191,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-26",
+   "x": 1008,
+   "y": 2242,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     977,
+     2241,
+     17
+    ],
+    "max": [
+     1039,
+     2243,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-27",
+   "x": 1008,
+   "y": 2254,
+   "z": 608,
+   "target": "0rredplrstart",
+   "bounds": {
+    "min": [
+     977,
+     2253,
+     561
+    ],
+    "max": [
+     1039,
+     2255,
+     655
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-28",
+   "x": 1008,
+   "y": 2602,
+   "z": 592,
+   "target": "3rblueplrstart",
+   "bounds": {
+    "min": [
+     977,
+     2601,
+     545
+    ],
+    "max": [
+     1039,
+     2603,
+     639
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-29",
+   "x": 1008,
+   "y": 2878,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     977,
+     2877,
+     17
+    ],
+    "max": [
+     1039,
+     2879,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 208,
+   "y": 2504,
+   "z": 416,
+   "target": "2rblue6r",
+   "bounds": {
+    "min": [
+     145,
+     2441,
+     353
+    ],
+    "max": [
+     271,
+     2567,
+     479
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-30",
+   "x": 1008,
+   "y": 2878,
+   "z": 592,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     977,
+     2877,
+     545
+    ],
+    "max": [
+     1039,
+     2879,
+     639
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-31",
+   "x": 1008,
+   "y": 2930,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     977,
+     2929,
+     17
+    ],
+    "max": [
+     1039,
+     2931,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-32",
+   "x": 1052,
+   "y": 1914,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1021,
+     1913,
+     17
+    ],
+    "max": [
+     1083,
+     1915,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-33",
+   "x": 1052,
+   "y": 2518,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1021,
+     2517,
+     17
+    ],
+    "max": [
+     1083,
+     2519,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-34",
+   "x": 1052,
+   "y": 2602,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1021,
+     2601,
+     17
+    ],
+    "max": [
+     1083,
+     2603,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-35",
+   "x": 1052,
+   "y": 3206,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1021,
+     3205,
+     17
+    ],
+    "max": [
+     1083,
+     3207,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-36",
+   "x": 1140,
+   "y": 1914,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1109,
+     1913,
+     17
+    ],
+    "max": [
+     1171,
+     1915,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-37",
+   "x": 1140,
+   "y": 2518,
+   "z": 64,
+   "target": "2rteletrain",
+   "bounds": {
+    "min": [
+     1109,
+     2517,
+     17
+    ],
+    "max": [
+     1171,
+     2519,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-38",
+   "x": 1140,
+   "y": 2602,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1109,
+     2601,
+     17
+    ],
+    "max": [
+     1171,
+     2603,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-39",
+   "x": 1140,
+   "y": 3206,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1109,
+     3205,
+     17
+    ],
+    "max": [
+     1171,
+     3207,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 208,
+   "y": 2632,
+   "z": 416,
+   "target": "2rblue5r",
+   "bounds": {
+    "min": [
+     145,
+     2569,
+     353
+    ],
+    "max": [
+     271,
+     2695,
+     479
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-40",
+   "x": 1172,
+   "y": 1244,
+   "z": 8,
+   "target": "1rrightplrcheckpoint",
+   "bounds": {
+    "min": [
+     1017,
+     817,
+     1
+    ],
+    "max": [
+     1327,
+     1671,
+     15
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-41",
+   "x": 1172,
+   "y": 1830,
+   "z": 224,
+   "target": "2rredplrstart",
+   "bounds": {
+    "min": [
+     1141,
+     1829,
+     177
+    ],
+    "max": [
+     1203,
+     1831,
+     271
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-42",
+   "x": 1310,
+   "y": 160,
+   "z": 64,
+   "target": "0rredplrstart",
+   "bounds": {
+    "min": [
+     1309,
+     129,
+     17
+    ],
+    "max": [
+     1311,
+     191,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-43",
+   "x": 1564,
+   "y": 1914,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1533,
+     1913,
+     17
+    ],
+    "max": [
+     1595,
+     1915,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-44",
+   "x": 1564,
+   "y": 2518,
+   "z": 64,
+   "target": "2rblue8r",
+   "bounds": {
+    "min": [
+     1533,
+     2517,
+     17
+    ],
+    "max": [
+     1595,
+     2519,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-45",
+   "x": 1564,
+   "y": 2602,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1533,
+     2601,
+     17
+    ],
+    "max": [
+     1595,
+     2603,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-46",
+   "x": 1564,
+   "y": 3206,
+   "z": 64,
+   "target": "2rblue6r",
+   "bounds": {
+    "min": [
+     1533,
+     3205,
+     17
+    ],
+    "max": [
+     1595,
+     3207,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-47",
+   "x": 1632,
+   "y": 1160,
+   "z": 472,
+   "target": "3rblueplrstart",
+   "bounds": {
+    "min": [
+     1481,
+     753,
+     465
+    ],
+    "max": [
+     1783,
+     1567,
+     479
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-48",
+   "x": 1652,
+   "y": 1914,
+   "z": 64,
+   "target": "2rbluefinal",
+   "bounds": {
+    "min": [
+     1621,
+     1913,
+     17
+    ],
+    "max": [
+     1683,
+     1915,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-49",
+   "x": 1652,
+   "y": 2518,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1621,
+     2517,
+     17
+    ],
+    "max": [
+     1683,
+     2519,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 338,
+   "y": 704,
+   "z": 64,
+   "target": "1rblueplrstart",
+   "bounds": {
+    "min": [
+     337,
+     673,
+     17
+    ],
+    "max": [
+     339,
+     735,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-50",
+   "x": 1652,
+   "y": 2602,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1621,
+     2601,
+     17
+    ],
+    "max": [
+     1683,
+     2603,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-51",
+   "x": 1652,
+   "y": 3206,
+   "z": 64,
+   "target": "2rblue6r",
+   "bounds": {
+    "min": [
+     1621,
+     3205,
+     17
+    ],
+    "max": [
+     1683,
+     3207,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-52",
+   "x": 1696,
+   "y": 2190,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1665,
+     2189,
+     17
+    ],
+    "max": [
+     1727,
+     2191,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-53",
+   "x": 1696,
+   "y": 2242,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1665,
+     2241,
+     17
+    ],
+    "max": [
+     1727,
+     2243,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-54",
+   "x": 1696,
+   "y": 2878,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1665,
+     2877,
+     17
+    ],
+    "max": [
+     1727,
+     2879,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-55",
+   "x": 1696,
+   "y": 2930,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1665,
+     2929,
+     17
+    ],
+    "max": [
+     1727,
+     2931,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-56",
+   "x": 1740,
+   "y": 1914,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1709,
+     1913,
+     17
+    ],
+    "max": [
+     1771,
+     1915,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-57",
+   "x": 1740,
+   "y": 2518,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1709,
+     2517,
+     17
+    ],
+    "max": [
+     1771,
+     2519,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-58",
+   "x": 1740,
+   "y": 2602,
+   "z": 64,
+   "target": "2rblue7r",
+   "bounds": {
+    "min": [
+     1709,
+     2601,
+     17
+    ],
+    "max": [
+     1771,
+     2603,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-59",
+   "x": 1740,
+   "y": 3206,
+   "z": 64,
+   "target": "2rblue6r",
+   "bounds": {
+    "min": [
+     1709,
+     3205,
+     17
+    ],
+    "max": [
+     1771,
+     3207,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 338,
+   "y": 792,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     337,
+     761,
+     17
+    ],
+    "max": [
+     339,
+     823,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-60",
+   "x": 1828,
+   "y": 1914,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1797,
+     1913,
+     17
+    ],
+    "max": [
+     1859,
+     1915,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-61",
+   "x": 1828,
+   "y": 2518,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1797,
+     2517,
+     17
+    ],
+    "max": [
+     1859,
+     2519,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-62",
+   "x": 1828,
+   "y": 2602,
+   "z": 64,
+   "target": "2rblueplrstart",
+   "bounds": {
+    "min": [
+     1797,
+     2601,
+     17
+    ],
+    "max": [
+     1859,
+     2603,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-63",
+   "x": 1828,
+   "y": 3206,
+   "z": 64,
+   "target": "2rblue6r",
+   "bounds": {
+    "min": [
+     1797,
+     3205,
+     17
+    ],
+    "max": [
+     1859,
+     3207,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-64",
+   "x": 1888,
+   "y": 666,
+   "z": 64,
+   "target": "4rredplrstart",
+   "bounds": {
+    "min": [
+     1857,
+     665,
+     17
+    ],
+    "max": [
+     1919,
+     667,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-65",
+   "x": 1888,
+   "y": 666,
+   "z": 560,
+   "target": "4rblueplrstart",
+   "bounds": {
+    "min": [
+     1857,
+     665,
+     513
+    ],
+    "max": [
+     1919,
+     667,
+     607
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-66",
+   "x": 1888,
+   "y": 904,
+   "z": 472,
+   "target": "3rblueplrstart",
+   "bounds": {
+    "min": [
+     1481,
+     753,
+     465
+    ],
+    "max": [
+     2295,
+     1055,
+     479
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-67",
+   "x": 1888,
+   "y": 1416,
+   "z": 472,
+   "target": "3rblueplrstart",
+   "bounds": {
+    "min": [
+     1481,
+     1265,
+     465
+    ],
+    "max": [
+     2295,
+     1567,
+     479
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-68",
+   "x": 1888,
+   "y": 1654,
+   "z": 64,
+   "target": "0rredplrstart",
+   "bounds": {
+    "min": [
+     1857,
+     1653,
+     17
+    ],
+    "max": [
+     1919,
+     1655,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-69",
+   "x": 1888,
+   "y": 1654,
+   "z": 560,
+   "target": "0rblueplrstart",
+   "bounds": {
+    "min": [
+     1857,
+     1653,
+     513
+    ],
+    "max": [
+     1919,
+     1655,
+     607
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": 338,
+   "y": 880,
+   "z": 64,
+   "target": "3rblueplrstart",
+   "bounds": {
+    "min": [
+     337,
+     849,
+     17
+    ],
+    "max": [
+     339,
+     911,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-70",
+   "x": 2082,
+   "y": 2056,
+   "z": 64,
+   "target": "0rblueplrstart",
+   "bounds": {
+    "min": [
+     2081,
+     2025,
+     17
+    ],
+    "max": [
+     2083,
+     2087,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-71",
+   "x": 2144,
+   "y": 1160,
+   "z": 472,
+   "target": "3rblueplrstart",
+   "bounds": {
+    "min": [
+     1993,
+     753,
+     465
+    ],
+    "max": [
+     2295,
+     1567,
+     479
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-72",
+   "x": 2288,
+   "y": 2122,
+   "z": 864,
+   "target": "0rredplrstart",
+   "bounds": {
+    "min": [
+     2257,
+     2121,
+     817
+    ],
+    "max": [
+     2319,
+     2123,
+     911
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-73",
+   "x": 2480,
+   "y": 2122,
+   "z": 864,
+   "target": "0rblueplrstart",
+   "bounds": {
+    "min": [
+     2449,
+     2121,
+     817
+    ],
+    "max": [
+     2511,
+     2123,
+     911
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-74",
+   "x": 2686,
+   "y": 2056,
+   "z": 64,
+   "target": "0rredplrstart",
+   "bounds": {
+    "min": [
+     2685,
+     2025,
+     17
+    ],
+    "max": [
+     2687,
+     2087,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-8",
+   "x": 338,
+   "y": 968,
+   "z": 64,
+   "target": "4rblueplrstart",
+   "bounds": {
+    "min": [
+     337,
+     937,
+     17
+    ],
+    "max": [
+     339,
+     999,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-9",
+   "x": 622,
+   "y": 704,
+   "z": 64,
+   "target": "1rredplrstart",
+   "bounds": {
+    "min": [
+     621,
+     673,
+     17
+    ],
+    "max": [
+     623,
+     735,
+     111
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "lift",
+   "x": 399,
+   "y": -304,
+   "z": 30.5,
+   "loc": "lift",
+   "bounds": {
+    "min": [
+     339,
+     -380,
+     27
+    ],
+    "max": [
+     459,
+     -228,
+     34
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -442,6 +463,94 @@
    "z": 181,
    "loc": "high.RL",
    "targetName": "2nd_ya"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.tele",
+   "x": -208,
+   "y": -450.5,
+   "z": 288,
+   "loc": "GL.tele",
+   "target": "ra_area",
+   "bounds": {
+    "min": [
+     -271,
+     -450,
+     233
+    ],
+    "max": [
+     -145,
+     -451,
+     343
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 1152,
+   "y": -514.5,
+   "z": 82,
+   "loc": "LG",
+   "target": "2nd_ya",
+   "bounds": {
+    "min": [
+     1089,
+     -514,
+     27
+    ],
+    "max": [
+     1215,
+     -515,
+     137
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "bottom.tele",
+   "x": 1762.5,
+   "y": -408,
+   "z": 18,
+   "loc": "bottom.tele",
+   "target": "gl_area",
+   "bounds": {
+    "min": [
+     1763,
+     -471,
+     -37
+    ],
+    "max": [
+     1762,
+     -345,
+     73
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": 352,
+   "y": 514.5,
+   "z": 82,
+   "loc": "low.RL",
+   "target": "1st_ya",
+   "bounds": {
+    "min": [
+     289,
+     515,
+     27
+    ],
+    "max": [
+     415,
+     514,
+     137
+    ]
+   }
   }
  ]
 }

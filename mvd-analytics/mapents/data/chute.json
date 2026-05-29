@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.GA",
+   "x": 91,
+   "y": 360,
+   "z": 80,
+   "loc": "low.GA",
+   "bounds": {
+    "min": [
+     87,
+     345,
+     65
+    ],
+    "max": [
+     95,
+     375,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad",
+   "x": -132,
+   "y": -480,
+   "z": 213,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     -191,
+     -559,
+     153
+    ],
+    "max": [
+     -73,
+     -401,
+     273
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -335,6 +377,72 @@
    "z": 256,
    "loc": "high.SSG",
    "targetName": "lg-tele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.tele",
+   "x": -312,
+   "y": 135,
+   "z": 196,
+   "loc": "GL.tele",
+   "target": "center-top",
+   "bounds": {
+    "min": [
+     -375,
+     127,
+     129
+    ],
+    "max": [
+     -249,
+     143,
+     263
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH.tele",
+   "x": -312,
+   "y": -311,
+   "z": 388,
+   "loc": "MH.tele",
+   "target": "lowctrlexit",
+   "bounds": {
+    "min": [
+     -383,
+     -319,
+     321
+    ],
+    "max": [
+     -241,
+     -303,
+     455
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG",
+   "x": 264,
+   "y": 591,
+   "z": 132,
+   "loc": "SNG",
+   "target": "lg-tele",
+   "bounds": {
+    "min": [
+     193,
+     583,
+     65
+    ],
+    "max": [
+     335,
+     599,
+     199
+    ]
+   }
   }
  ]
 }

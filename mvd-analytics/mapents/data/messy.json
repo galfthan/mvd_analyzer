@@ -3,6 +3,132 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA.RL",
+   "x": 672,
+   "y": -48,
+   "z": -16,
+   "loc": "RA.RL",
+   "bounds": {
+    "min": [
+     657,
+     -49,
+     -31
+    ],
+    "max": [
+     687,
+     -47,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA.lift",
+   "x": 560,
+   "y": -224,
+   "z": -16,
+   "loc": "RA.lift",
+   "bounds": {
+    "min": [
+     559,
+     -239,
+     -31
+    ],
+    "max": [
+     561,
+     -209,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA.stairs",
+   "x": 544,
+   "y": -528,
+   "z": 176,
+   "loc": "RA.stairs",
+   "bounds": {
+    "min": [
+     543,
+     -543,
+     161
+    ],
+    "max": [
+     545,
+     -513,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.RL",
+   "x": 672,
+   "y": 0,
+   "z": -184,
+   "loc": "RA.RL",
+   "bounds": {
+    "min": [
+     641,
+     -31,
+     -311
+    ],
+    "max": [
+     703,
+     31,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.lift",
+   "x": 512,
+   "y": -224,
+   "z": -152,
+   "loc": "RA.lift",
+   "bounds": {
+    "min": [
+     481,
+     -255,
+     -247
+    ],
+    "max": [
+     543,
+     -193,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.stairs",
+   "x": 512,
+   "y": -528,
+   "z": 8,
+   "loc": "RA.stairs",
+   "bounds": {
+    "min": [
+     481,
+     -559,
+     -119
+    ],
+    "max": [
+     543,
+     -497,
+     135
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -342,6 +468,28 @@
    "z": -40,
    "loc": "RA",
    "targetName": "giu"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.tele",
+   "x": 72,
+   "y": 696,
+   "z": 320,
+   "loc": "GL.tele",
+   "target": "giu",
+   "bounds": {
+    "min": [
+     33,
+     657,
+     273
+    ],
+    "max": [
+     111,
+     735,
+     367
+    ]
+   }
   }
  ]
 }

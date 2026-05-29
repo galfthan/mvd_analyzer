@@ -436,6 +436,69 @@
    "y": -80,
    "z": -80,
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -64,
+   "y": -704,
+   "z": -112,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -95,
+     -735,
+     -175
+    ],
+    "max": [
+     -33,
+     -673,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 416,
+   "y": -320,
+   "z": -48,
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     385,
+     -351,
+     -111
+    ],
+    "max": [
+     447,
+     -289,
+     15
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 1072,
+   "y": 144,
+   "z": -144,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     1041,
+     113,
+     -207
+    ],
+    "max": [
+     1103,
+     175,
+     -81
+    ]
+   }
   }
  ]
 }

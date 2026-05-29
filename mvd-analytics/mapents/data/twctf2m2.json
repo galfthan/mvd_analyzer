@@ -3,6 +3,300 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "(blue base) lower entrance",
+   "x": -160,
+   "y": -1136,
+   "z": 660,
+   "loc": "(blue base) lower entrance",
+   "bounds": {
+    "min": [
+     -183,
+     -1159,
+     657
+    ],
+    "max": [
+     -137,
+     -1113,
+     663
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(blue base) main entrance",
+   "x": 716,
+   "y": -914,
+   "z": 1208,
+   "loc": "(blue base) main entrance",
+   "bounds": {
+    "min": [
+     689,
+     -915,
+     1185
+    ],
+    "max": [
+     743,
+     -913,
+     1231
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(blue base) top entrance",
+   "x": -1278,
+   "y": -48,
+   "z": 1288,
+   "loc": "(blue base) top entrance",
+   "bounds": {
+    "min": [
+     -1279,
+     -79,
+     1257
+    ],
+    "max": [
+     -1277,
+     -17,
+     1319
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(red base) bottom entrance",
+   "x": -160,
+   "y": 1728,
+   "z": 660,
+   "loc": "(red base) bottom entrance",
+   "bounds": {
+    "min": [
+     -183,
+     1705,
+     657
+    ],
+    "max": [
+     -137,
+     1751,
+     663
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(red base) top entrance",
+   "x": -1278,
+   "y": 640,
+   "z": 1288,
+   "loc": "(red base) top entrance",
+   "bounds": {
+    "min": [
+     -1279,
+     609,
+     1257
+    ],
+    "max": [
+     -1277,
+     671,
+     1319
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(red base)main entrance",
+   "x": 716,
+   "y": 1506,
+   "z": 1208,
+   "loc": "(red base)main entrance",
+   "bounds": {
+    "min": [
+     689,
+     1505,
+     1185
+    ],
+    "max": [
+     743,
+     1507,
+     1231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(blue base) water entrance/GL",
+   "x": -688,
+   "y": -32,
+   "z": 1484,
+   "loc": "(blue base) water entrance/GL",
+   "bounds": {
+    "min": [
+     -751,
+     -95,
+     1401
+    ],
+    "max": [
+     -625,
+     31,
+     1567
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(blue) Quad-1",
+   "x": -184,
+   "y": -448,
+   "z": 732,
+   "loc": "(blue) Quad",
+   "bounds": {
+    "min": [
+     -191,
+     -455,
+     657
+    ],
+    "max": [
+     -177,
+     -441,
+     807
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(blue) Quad-2",
+   "x": -136,
+   "y": -448,
+   "z": 732,
+   "loc": "(blue) Quad",
+   "bounds": {
+    "min": [
+     -143,
+     -455,
+     657
+    ],
+    "max": [
+     -129,
+     -441,
+     807
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "(blue) RL",
+   "x": 1496,
+   "y": -1232,
+   "z": 1016,
+   "loc": "(blue) RL",
+   "bounds": {
+    "min": [
+     1489,
+     -1279,
+     961
+    ],
+    "max": [
+     1503,
+     -1185,
+     1071
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(red base) water entrance",
+   "x": -688,
+   "y": 624,
+   "z": 1484,
+   "loc": "(red base) water entrance",
+   "bounds": {
+    "min": [
+     -751,
+     561,
+     1401
+    ],
+    "max": [
+     -625,
+     687,
+     1567
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(red) Quad-1",
+   "x": -184,
+   "y": 1040,
+   "z": 732,
+   "loc": "(red) Quad",
+   "bounds": {
+    "min": [
+     -191,
+     1033,
+     657
+    ],
+    "max": [
+     -177,
+     1047,
+     807
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(red) Quad-2",
+   "x": -136,
+   "y": 1040,
+   "z": 732,
+   "loc": "(red) Quad",
+   "bounds": {
+    "min": [
+     -143,
+     1033,
+     657
+    ],
+    "max": [
+     -129,
+     1047,
+     807
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "(red) RL",
+   "x": 1496,
+   "y": 1824,
+   "z": 1016,
+   "loc": "(red) RL",
+   "bounds": {
+    "min": [
+     1489,
+     1777,
+     961
+    ],
+    "max": [
+     1503,
+     1871,
+     1071
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -1044,6 +1338,270 @@
    "z": 1344,
    "loc": "(red) EYE's",
    "targetName": "jay"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(blue base) main entrance-1",
+   "x": 913,
+   "y": -612,
+   "z": 808,
+   "loc": "(blue base) main entrance",
+   "target": "quad2",
+   "bounds": {
+    "min": [
+     893,
+     -631,
+     761
+    ],
+    "max": [
+     933,
+     -593,
+     855
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(blue base) main entrance-2",
+   "x": 1664,
+   "y": -1232,
+   "z": 1008,
+   "loc": "(blue base) main entrance",
+   "target": "jay2",
+   "bounds": {
+    "min": [
+     1657,
+     -1263,
+     961
+    ],
+    "max": [
+     1671,
+     -1201,
+     1055
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(blue base) top ledge/teleport",
+   "x": -400,
+   "y": -672,
+   "z": 1304,
+   "loc": "(blue base) top ledge/teleport",
+   "target": "rocks2",
+   "bounds": {
+    "min": [
+     -407,
+     -695,
+     1257
+    ],
+    "max": [
+     -393,
+     -649,
+     1351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(blue) Flag",
+   "x": -1762,
+   "y": -672,
+   "z": 1216,
+   "loc": "(blue) Flag",
+   "target": "otherside2",
+   "bounds": {
+    "min": [
+     -1763,
+     -735,
+     1113
+    ],
+    "max": [
+     -1761,
+     -609,
+     1319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(blue) Quad",
+   "x": -160,
+   "y": -396,
+   "z": 724,
+   "loc": "(blue) Quad",
+   "target": "blahugo2",
+   "bounds": {
+    "min": [
+     -183,
+     -399,
+     673
+    ],
+    "max": [
+     -137,
+     -393,
+     775
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(red base) Top ledge/teleport",
+   "x": -400,
+   "y": 1264,
+   "z": 1304,
+   "loc": "(red base) Top ledge/teleport",
+   "target": "rocks",
+   "bounds": {
+    "min": [
+     -407,
+     1241,
+     1257
+    ],
+    "max": [
+     -393,
+     1287,
+     1351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(red base)Flag",
+   "x": -1762,
+   "y": 1264,
+   "z": 1216,
+   "loc": "(red base)Flag",
+   "target": "otherside",
+   "bounds": {
+    "min": [
+     -1763,
+     1201,
+     1113
+    ],
+    "max": [
+     -1761,
+     1327,
+     1319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(red base)main entrance",
+   "x": 913,
+   "y": 1204,
+   "z": 808,
+   "loc": "(red base)main entrance",
+   "target": "quad",
+   "bounds": {
+    "min": [
+     893,
+     1185,
+     761
+    ],
+    "max": [
+     933,
+     1223,
+     855
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(red) Quad",
+   "x": -160,
+   "y": 988,
+   "z": 723.99927,
+   "loc": "(red) Quad",
+   "target": "blahugo",
+   "bounds": {
+    "min": [
+     -183,
+     985,
+     672.9986
+    ],
+    "max": [
+     -137,
+     991,
+     775
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(red) RL",
+   "x": 1664,
+   "y": 1824,
+   "z": 1008,
+   "loc": "(red) RL",
+   "target": "jay",
+   "bounds": {
+    "min": [
+     1657,
+     1793,
+     961
+    ],
+    "max": [
+     1671,
+     1855,
+     1055
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "lower 666",
+   "x": 392,
+   "y": 180,
+   "z": 792,
+   "loc": "lower 666",
+   "target": "toflag2",
+   "bounds": {
+    "min": [
+     369,
+     177,
+     737
+    ],
+    "max": [
+     415,
+     183,
+     847
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "under 666",
+   "x": 392,
+   "y": 412,
+   "z": 792,
+   "loc": "under 666",
+   "target": "toflag",
+   "bounds": {
+    "min": [
+     369,
+     409,
+     737
+    ],
+    "max": [
+     415,
+     415,
+     847
+    ]
+   }
   }
  ]
 }

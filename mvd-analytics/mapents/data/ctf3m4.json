@@ -3,6 +3,132 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE (100 HEALTH ROOM)",
+   "x": -762,
+   "y": -2400,
+   "z": 160,
+   "loc": "BLUE BASE (100 HEALTH ROOM)",
+   "bounds": {
+    "min": [
+     -763,
+     -2415,
+     147
+    ],
+    "max": [
+     -761,
+     -2385,
+     173
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE (CORRIDOR LEADING TO QUAD)",
+   "x": -322,
+   "y": -2210,
+   "z": 186,
+   "loc": "BLUE BASE (CORRIDOR LEADING TO QUAD)",
+   "bounds": {
+    "min": [
+     -323,
+     -2239,
+     157
+    ],
+    "max": [
+     -321,
+     -2181,
+     215
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE (100 HEALTH ROOM)",
+   "x": -762,
+   "y": 2480,
+   "z": 160,
+   "loc": "RED BASE (100 HEALTH ROOM)",
+   "bounds": {
+    "min": [
+     -763,
+     2465,
+     147
+    ],
+    "max": [
+     -761,
+     2495,
+     173
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE (CORRIDOR LEADING TO QUAD)",
+   "x": -322,
+   "y": 2288,
+   "z": 186,
+   "loc": "RED BASE (CORRIDOR LEADING TO QUAD)",
+   "bounds": {
+    "min": [
+     -323,
+     2259,
+     157
+    ],
+    "max": [
+     -321,
+     2317,
+     215
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (100 HEALTH ROOM)",
+   "x": -750,
+   "y": -2400,
+   "z": 88,
+   "loc": "BLUE BASE (100 HEALTH ROOM)",
+   "bounds": {
+    "min": [
+     -759,
+     -2455,
+     33
+    ],
+    "max": [
+     -741,
+     -2345,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (100 HEALTH ROOM)",
+   "x": -750,
+   "y": 2480,
+   "z": 88,
+   "loc": "RED BASE (100 HEALTH ROOM)",
+   "bounds": {
+    "min": [
+     -759,
+     2425,
+     33
+    ],
+    "max": [
+     -741,
+     2535,
+     143
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",

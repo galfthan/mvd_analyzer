@@ -3,6 +3,26 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 544,
+   "y": -40,
+   "z": 192,
+   "bounds": {
+    "min": [
+     513,
+     -47,
+     161
+    ],
+    "max": [
+     575,
+     -33,
+     223
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -528,6 +548,153 @@
    "y": 800,
    "z": 192,
    "targetName": "tele2blue"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -332,
+   "y": 624,
+   "z": 332,
+   "target": "tele2quad",
+   "bounds": {
+    "min": [
+     -335,
+     585,
+     281
+    ],
+    "max": [
+     -329,
+     663,
+     383
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -324,
+   "y": 624,
+   "z": 332,
+   "target": "tele2red",
+   "bounds": {
+    "min": [
+     -327,
+     585,
+     281
+    ],
+    "max": [
+     -321,
+     663,
+     383
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -304,
+   "y": 488,
+   "z": 188,
+   "target": "tele2upper",
+   "bounds": {
+    "min": [
+     -343,
+     481,
+     137
+    ],
+    "max": [
+     -265,
+     495,
+     239
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 648,
+   "y": -480,
+   "z": 332,
+   "target": "tele2blue",
+   "bounds": {
+    "min": [
+     641,
+     -519,
+     281
+    ],
+    "max": [
+     655,
+     -441,
+     383
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 688,
+   "y": 1328,
+   "z": 332,
+   "target": "teleoutquad",
+   "bounds": {
+    "min": [
+     681,
+     1289,
+     281
+    ],
+    "max": [
+     695,
+     1367,
+     383
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 872,
+   "y": 72,
+   "z": 332,
+   "target": "teleoutquad",
+   "bounds": {
+    "min": [
+     833,
+     33,
+     281
+    ],
+    "max": [
+     911,
+     111,
+     383
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": 1792,
+   "y": 744,
+   "z": 188,
+   "target": "tele2lower",
+   "bounds": {
+    "min": [
+     1753,
+     737,
+     137
+    ],
+    "max": [
+     1831,
+     751,
+     239
+    ]
+   }
   }
  ]
 }

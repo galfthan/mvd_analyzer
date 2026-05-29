@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -1208,
+   "y": 48,
+   "z": -144,
+   "bounds": {
+    "min": [
+     -1215,
+     1,
+     -191
+    ],
+    "max": [
+     -1201,
+     95,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -920,
+   "y": 208,
+   "z": -144,
+   "bounds": {
+    "min": [
+     -927,
+     161,
+     -191
+    ],
+    "max": [
+     -913,
+     255,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 1624,
+   "y": 784,
+   "z": -144,
+   "bounds": {
+    "min": [
+     1617,
+     737,
+     -191
+    ],
+    "max": [
+     1631,
+     831,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 1912,
+   "y": 944,
+   "z": -144,
+   "bounds": {
+    "min": [
+     1905,
+     897,
+     -191
+    ],
+    "max": [
+     1919,
+     991,
+     -97
+    ]
+   }
+  },
+  {
    "type": "spawn",
    "class": "info_player_teamspawn",
    "name": "spawn-1",

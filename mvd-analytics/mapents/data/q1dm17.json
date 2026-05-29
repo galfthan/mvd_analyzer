@@ -303,6 +303,69 @@
    "y": 64,
    "z": 324,
    "targetName": "redarmor"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 158.57805,
+   "y": 1057.9435,
+   "z": 392,
+   "target": "redarmor",
+   "bounds": {
+    "min": [
+     124.34426,
+     1023.6983,
+     329
+    ],
+    "max": [
+     192.81184,
+     1092.1887,
+     455
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 158.60016,
+   "y": -929.9214,
+   "z": 392,
+   "target": "redarmor",
+   "bounds": {
+    "min": [
+     124.36636,
+     -964.16656,
+     329
+    ],
+    "max": [
+     192.83394,
+     -895.6762,
+     455
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 272,
+   "y": 64,
+   "z": 1344,
+   "target": "redarmor",
+   "bounds": {
+    "min": [
+     257,
+     17,
+     1281
+    ],
+    "max": [
+     287,
+     111,
+     1407
+    ]
+   }
   }
  ]
 }

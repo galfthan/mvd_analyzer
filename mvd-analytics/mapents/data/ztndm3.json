@@ -501,6 +501,50 @@
    "z": 288,
    "loc": "RA.ledge",
    "targetName": "t2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "middle.MH",
+   "x": -792,
+   "y": 320,
+   "z": 0,
+   "loc": "middle.MH",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -799,
+     289,
+     -63
+    ],
+    "max": [
+     -785,
+     351,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele",
+   "x": -96,
+   "y": -936,
+   "z": -8,
+   "loc": "tele",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -127,
+     -943,
+     -63
+    ],
+    "max": [
+     -65,
+     -929,
+     47
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,111 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA",
+   "x": -164,
+   "y": -832,
+   "z": 304,
+   "loc": "RA",
+   "bounds": {
+    "min": [
+     -167,
+     -847,
+     289
+    ],
+    "max": [
+     -161,
+     -817,
+     319
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Ring.spikes",
+   "x": 576,
+   "y": -160,
+   "z": 172,
+   "loc": "Ring.spikes",
+   "bounds": {
+    "min": [
+     545,
+     -191,
+     169
+    ],
+    "max": [
+     607,
+     -129,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.low",
+   "x": -168,
+   "y": -832,
+   "z": 48,
+   "loc": "RA.low",
+   "bounds": {
+    "min": [
+     -175,
+     -863,
+     1
+    ],
+    "max": [
+     -161,
+     -801,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Ring",
+   "x": 576,
+   "y": 92,
+   "z": -56,
+   "loc": "Ring",
+   "bounds": {
+    "min": [
+     513,
+     -39,
+     -135
+    ],
+    "max": [
+     639,
+     223,
+     23
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Ring.spikes",
+   "x": 576.07556,
+   "y": 336,
+   "z": 224,
+   "loc": "Ring.spikes",
+   "bounds": {
+    "min": [
+     512.98663,
+     225,
+     177
+    ],
+    "max": [
+     639.1645,
+     447,
+     271
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -800,6 +905,324 @@
    "z": 40,
    "loc": "middle",
    "targetName": "t28"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad-1",
+   "x": -1496,
+   "y": -628,
+   "z": 128,
+   "loc": "Quad",
+   "target": "t44",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1535,
+     -679,
+     1
+    ],
+    "max": [
+     -1457,
+     -577,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad-2",
+   "x": -1496,
+   "y": -428,
+   "z": 56,
+   "loc": "Quad",
+   "target": "t32",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1535,
+     -479,
+     -15
+    ],
+    "max": [
+     -1457,
+     -377,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad-3",
+   "x": -1376,
+   "y": -620,
+   "z": 128,
+   "loc": "Quad",
+   "target": "t45",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1431,
+     -663,
+     1
+    ],
+    "max": [
+     -1321,
+     -577,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad-4",
+   "x": -1376,
+   "y": -428,
+   "z": 56,
+   "loc": "Quad",
+   "target": "t31",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1431,
+     -471,
+     -15
+    ],
+    "max": [
+     -1321,
+     -385,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad-5",
+   "x": -1256,
+   "y": -436,
+   "z": 56,
+   "loc": "Quad",
+   "target": "t30",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1295,
+     -487,
+     -15
+    ],
+    "max": [
+     -1217,
+     -385,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.entry-1",
+   "x": -1256,
+   "y": -628,
+   "z": 128,
+   "loc": "Quad.entry",
+   "target": "t46",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1295,
+     -679,
+     1
+    ],
+    "max": [
+     -1217,
+     -577,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.entry-2",
+   "x": -1168,
+   "y": -948,
+   "z": 192,
+   "loc": "Quad.entry",
+   "target": "t69",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1191,
+     -975,
+     145
+    ],
+    "max": [
+     -1145,
+     -921,
+     239
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.entry-3",
+   "x": -1088,
+   "y": -948,
+   "z": 192,
+   "loc": "Quad.entry",
+   "target": "t68",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1111,
+     -975,
+     145
+    ],
+    "max": [
+     -1065,
+     -921,
+     239
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.entry-4",
+   "x": -1008,
+   "y": -948,
+   "z": 192,
+   "loc": "Quad.entry",
+   "target": "t67",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1031,
+     -975,
+     145
+    ],
+    "max": [
+     -985,
+     -921,
+     239
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.entry-5",
+   "x": -404,
+   "y": -536,
+   "z": 296,
+   "loc": "Quad.entry",
+   "target": "t77",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -463,
+     -551,
+     225
+    ],
+    "max": [
+     -345,
+     -521,
+     367
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.tele",
+   "x": -832,
+   "y": 620,
+   "z": 208,
+   "loc": "Quad.tele",
+   "target": "t28",
+   "bounds": {
+    "min": [
+     -863,
+     609,
+     161
+    ],
+    "max": [
+     -801,
+     631,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.low",
+   "x": -260,
+   "y": -832,
+   "z": 48,
+   "loc": "RA.low",
+   "target": "t61",
+   "bounds": {
+    "min": [
+     -263,
+     -863,
+     1
+    ],
+    "max": [
+     -257,
+     -801,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring",
+   "x": 576,
+   "y": 688,
+   "z": 48,
+   "loc": "Ring",
+   "target": "t28",
+   "bounds": {
+    "min": [
+     545,
+     673,
+     1
+    ],
+    "max": [
+     607,
+     703,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.tele",
+   "x": 1788,
+   "y": 400,
+   "z": -64,
+   "loc": "low.tele",
+   "target": "qtele1",
+   "bounds": {
+    "min": [
+     1785,
+     369,
+     -127
+    ],
+    "max": [
+     1791,
+     431,
+     -1
+    ]
+   }
   }
  ]
 }

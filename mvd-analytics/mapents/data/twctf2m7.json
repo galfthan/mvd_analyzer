@@ -3,6 +3,70 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE LG ROOM",
+   "x": -4.5,
+   "y": -3130,
+   "z": 42.5,
+   "loc": "BLUE LG ROOM",
+   "bounds": {
+    "min": [
+     -58,
+     -3136,
+     1
+    ],
+    "max": [
+     49,
+     -3124,
+     84
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "CENTRAL AREA (BELOW WATER)",
+   "x": -3.5,
+   "y": 3,
+   "z": -161,
+   "loc": "CENTRAL AREA (BELOW WATER)",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -78,
+     -50,
+     -164
+    ],
+    "max": [
+     71,
+     56,
+     -158
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE",
+   "x": -4.5,
+   "y": 3142,
+   "z": 42.5,
+   "loc": "RED BASE",
+   "bounds": {
+    "min": [
+     -58,
+     3136,
+     1
+    ],
+    "max": [
+     49,
+     3148,
+     84
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

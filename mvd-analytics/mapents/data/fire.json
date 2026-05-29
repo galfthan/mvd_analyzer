@@ -3,6 +3,126 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -225,
+   "y": 1561,
+   "z": -177,
+   "bounds": {
+    "min": [
+     -240,
+     1560,
+     -192
+    ],
+    "max": [
+     -210,
+     1562,
+     -162
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": -222.5,
+   "y": 1623.5,
+   "z": -388,
+   "bounds": {
+    "min": [
+     -273,
+     1624,
+     -427
+    ],
+    "max": [
+     -172,
+     1623,
+     -349
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-1",
+   "x": -585,
+   "y": -211,
+   "z": -177,
+   "bounds": {
+    "min": [
+     -592,
+     -242,
+     -224
+    ],
+    "max": [
+     -578,
+     -180,
+     -130
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -225,
+   "y": 1521.5,
+   "z": -262,
+   "bounds": {
+    "min": [
+     -256,
+     1485,
+     -266
+    ],
+    "max": [
+     -194,
+     1558,
+     -258
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -221.5,
+   "y": 1272.5,
+   "z": -388,
+   "bounds": {
+    "min": [
+     -253,
+     1262,
+     -427
+    ],
+    "max": [
+     -190,
+     1283,
+     -349
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-4",
+   "x": 100,
+   "y": 14,
+   "z": 200,
+   "bounds": {
+    "min": [
+     69,
+     11,
+     151
+    ],
+    "max": [
+     131,
+     17,
+     249
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -447,6 +567,69 @@
    "y": 796,
    "z": 144,
    "targetName": "Nirvana"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -804.5,
+   "y": 1521,
+   "z": -209,
+   "target": "WoodRoom1",
+   "bounds": {
+    "min": [
+     -805,
+     1490,
+     -256
+    ],
+    "max": [
+     -804,
+     1552,
+     -162
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -579.5,
+   "y": -650,
+   "z": 188,
+   "target": "WaterCorner1",
+   "bounds": {
+    "min": [
+     -580,
+     -681,
+     141
+    ],
+    "max": [
+     -579,
+     -619,
+     235
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 100,
+   "y": 20,
+   "z": 200,
+   "target": "Nirvana",
+   "bounds": {
+    "min": [
+     69,
+     19,
+     151
+    ],
+    "max": [
+     131,
+     21,
+     249
+    ]
+   }
   }
  ]
 }

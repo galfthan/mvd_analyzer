@@ -3,6 +3,218 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE: RED ARMOUR",
+   "x": 632,
+   "y": -1568,
+   "z": 214,
+   "loc": "BLUE BASE: RED ARMOUR",
+   "bounds": {
+    "min": [
+     601,
+     -1599,
+     209
+    ],
+    "max": [
+     663,
+     -1537,
+     219
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE: RL/RA ROOM",
+   "x": 416,
+   "y": -1312,
+   "z": 252,
+   "loc": "BLUE BASE: RL/RA ROOM",
+   "bounds": {
+    "min": [
+     385,
+     -1319,
+     217
+    ],
+    "max": [
+     447,
+     -1305,
+     287
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE: RED ARMOUR",
+   "x": 624,
+   "y": 2336,
+   "z": 240,
+   "loc": "RED BASE: RED ARMOUR",
+   "bounds": {
+    "min": [
+     593,
+     2305,
+     237
+    ],
+    "max": [
+     655,
+     2367,
+     243
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE: RL/RA ROOM",
+   "x": 368,
+   "y": 2264,
+   "z": 330,
+   "loc": "RED BASE: RL/RA ROOM",
+   "bounds": {
+    "min": [
+     361,
+     2257,
+     321
+    ],
+    "max": [
+     375,
+     2271,
+     339
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BELOW BLUE Quad",
+   "x": -74,
+   "y": -184,
+   "z": 139,
+   "loc": "BELOW BLUE Quad",
+   "bounds": {
+    "min": [
+     -111,
+     -191,
+     87
+    ],
+    "max": [
+     -37,
+     -177,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BELOW RED Quad",
+   "x": -74,
+   "y": 952,
+   "z": 139,
+   "loc": "BELOW RED Quad",
+   "bounds": {
+    "min": [
+     -111,
+     945,
+     87
+    ],
+    "max": [
+     -37,
+     959,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE BASE: RL/RA ROOM",
+   "x": 544,
+   "y": -1440,
+   "z": 284,
+   "loc": "BLUE BASE: RL/RA ROOM",
+   "bounds": {
+    "min": [
+     529,
+     -1471,
+     217
+    ],
+    "max": [
+     559,
+     -1409,
+     351
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: SPIKE PILLAR",
+   "x": -1056,
+   "y": -1024,
+   "z": 212,
+   "loc": "BLUE BASE: SPIKE PILLAR",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1067,
+     -1035,
+     161
+    ],
+    "max": [
+     -1045,
+     -1013,
+     263
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED BASE: RED ARMOUR",
+   "x": 552,
+   "y": 2264,
+   "z": 292,
+   "loc": "RED BASE: RED ARMOUR",
+   "bounds": {
+    "min": [
+     545,
+     2225,
+     241
+    ],
+    "max": [
+     559,
+     2303,
+     343
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: SPIKE PILLAR",
+   "x": -1056,
+   "y": 1792,
+   "z": 212,
+   "loc": "RED BASE: SPIKE PILLAR",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1067,
+     1781,
+     161
+    ],
+    "max": [
+     -1045,
+     1803,
+     263
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "weapon_grenadelauncher",
    "kind": "gl",
@@ -1628,6 +1840,229 @@
    "z": 328,
    "loc": "RED BASE: MAIN ENTRANCE",
    "targetName": "t46"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "666 ROOM-1",
+   "x": -1284,
+   "y": -18,
+   "z": 146,
+   "loc": "666 ROOM",
+   "target": "t150",
+   "bounds": {
+    "min": [
+     -1307,
+     -19,
+     113
+    ],
+    "max": [
+     -1261,
+     -17,
+     179
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "666 ROOM-2",
+   "x": -1284,
+   "y": 722,
+   "z": 146,
+   "loc": "666 ROOM",
+   "target": "t45",
+   "bounds": {
+    "min": [
+     -1307,
+     721,
+     113
+    ],
+    "max": [
+     -1261,
+     723,
+     179
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BELOW BLUE BASE: YELLOW ARMOUR",
+   "x": -1084,
+   "y": -1408,
+   "z": 44,
+   "loc": "BELOW BLUE BASE: YELLOW ARMOUR",
+   "target": "t148",
+   "bounds": {
+    "min": [
+     -1087,
+     -1431,
+     9
+    ],
+    "max": [
+     -1081,
+     -1385,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE: MAIN ENTRANCE",
+   "x": -986,
+   "y": -114,
+   "z": 370,
+   "loc": "BLUE BASE: MAIN ENTRANCE",
+   "target": "t150",
+   "bounds": {
+    "min": [
+     -1007,
+     -115,
+     329
+    ],
+    "max": [
+     -965,
+     -113,
+     411
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE: Ring TELEPORT-1",
+   "x": 418,
+   "y": -1792,
+   "z": 456,
+   "loc": "BLUE BASE: Ring TELEPORT",
+   "target": "t150",
+   "bounds": {
+    "min": [
+     417,
+     -1815,
+     413
+    ],
+    "max": [
+     419,
+     -1769,
+     499
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE: Ring TELEPORT-2",
+   "x": 434,
+   "y": -1792,
+   "z": 456,
+   "loc": "BLUE BASE: Ring TELEPORT",
+   "target": "t151",
+   "bounds": {
+    "min": [
+     433,
+     -1815,
+     413
+    ],
+    "max": [
+     435,
+     -1769,
+     499
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE: MAIN ENTRANCE",
+   "x": -984,
+   "y": 884,
+   "z": 366,
+   "loc": "RED BASE: MAIN ENTRANCE",
+   "target": "t45",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1007,
+     881,
+     333
+    ],
+    "max": [
+     -961,
+     887,
+     399
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE: Ring TELEPORT-1",
+   "x": 418,
+   "y": 2560,
+   "z": 460,
+   "loc": "RED BASE: Ring TELEPORT",
+   "target": "t45",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     417,
+     2537,
+     425
+    ],
+    "max": [
+     419,
+     2583,
+     495
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE: Ring TELEPORT-2",
+   "x": 434,
+   "y": 2560,
+   "z": 460,
+   "loc": "RED BASE: Ring TELEPORT",
+   "target": "t46",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     433,
+     2537,
+     425
+    ],
+    "max": [
+     435,
+     2583,
+     495
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE: YELLOW ARMOUR",
+   "x": -1084,
+   "y": 2176,
+   "z": 44,
+   "loc": "RED BASE: YELLOW ARMOUR",
+   "target": "t149",
+   "bounds": {
+    "min": [
+     -1087,
+     2153,
+     9
+    ],
+    "max": [
+     -1081,
+     2199,
+     79
+    ]
+   }
   }
  ]
 }

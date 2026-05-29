@@ -405,6 +405,69 @@
    "y": -616,
    "z": -104,
    "targetName": "ramp"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -548,
+   "y": 1156,
+   "z": -214,
+   "target": "hall",
+   "bounds": {
+    "min": [
+     -551,
+     1129,
+     -255
+    ],
+    "max": [
+     -545,
+     1183,
+     -173
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -244,
+   "y": 844,
+   "z": -88,
+   "target": "hidden",
+   "bounds": {
+    "min": [
+     -291,
+     797,
+     -91
+    ],
+    "max": [
+     -197,
+     891,
+     -85
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -16,
+   "y": 1464,
+   "z": -8,
+   "target": "ramp",
+   "bounds": {
+    "min": [
+     -19,
+     1437,
+     -63
+    ],
+    "max": [
+     -13,
+     1491,
+     47
+    ]
+   }
   }
  ]
 }

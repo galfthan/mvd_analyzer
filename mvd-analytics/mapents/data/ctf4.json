@@ -3,6 +3,176 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "biosuit in blue water",
+   "x": -172,
+   "y": 1000,
+   "z": -432,
+   "loc": "biosuit in blue water",
+   "bounds": {
+    "min": [
+     -175,
+     985,
+     -447
+    ],
+    "max": [
+     -169,
+     1015,
+     -417
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "biosuit in red water",
+   "x": 364,
+   "y": 216,
+   "z": -432,
+   "loc": "biosuit in red water",
+   "bounds": {
+    "min": [
+     361,
+     201,
+     -447
+    ],
+    "max": [
+     367,
+     231,
+     -417
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "corridor in blue base",
+   "x": -240,
+   "y": 884,
+   "z": 0,
+   "loc": "corridor in blue base",
+   "bounds": {
+    "min": [
+     -255,
+     881,
+     -15
+    ],
+    "max": [
+     -225,
+     887,
+     15
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "corridor in red base",
+   "x": 432,
+   "y": 332,
+   "z": 0,
+   "loc": "corridor in red base",
+   "bounds": {
+    "min": [
+     417,
+     329,
+     -15
+    ],
+    "max": [
+     447,
+     335,
+     15
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue base",
+   "x": 96,
+   "y": 2680,
+   "z": -152,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     65,
+     2673,
+     -223
+    ],
+    "max": [
+     127,
+     2687,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor between red and blue base",
+   "x": -120,
+   "y": 928,
+   "z": -264,
+   "loc": "corridor between red and blue base",
+   "spawnflags": 32,
+   "bounds": {
+    "min": [
+     -175,
+     897,
+     -479
+    ],
+    "max": [
+     -65,
+     959,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor in red base",
+   "x": 312,
+   "y": 288,
+   "z": -264,
+   "loc": "corridor in red base",
+   "spawnflags": 32,
+   "bounds": {
+    "min": [
+     257,
+     257,
+     -479
+    ],
+    "max": [
+     367,
+     319,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "red base",
+   "x": 96,
+   "y": -1464,
+   "z": -152,
+   "loc": "red base",
+   "bounds": {
+    "min": [
+     65,
+     -1471,
+     -223
+    ],
+    "max": [
+     127,
+     -1457,
+     -81
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",

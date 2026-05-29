@@ -3,6 +3,46 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-1",
+   "x": -480,
+   "y": -152,
+   "z": 48,
+   "bounds": {
+    "min": [
+     -519,
+     -159,
+     -31
+    ],
+    "max": [
+     -441,
+     -145,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-2",
+   "x": 304,
+   "y": 732,
+   "z": 586,
+   "bounds": {
+    "min": [
+     297,
+     693,
+     521
+    ],
+    "max": [
+     311,
+     771,
+     651
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -479,6 +519,111 @@
    "y": 232,
    "z": 620,
    "targetName": "cage2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -696,
+   "y": 679,
+   "z": 255,
+   "target": "bank",
+   "bounds": {
+    "min": [
+     -703,
+     640,
+     200
+    ],
+    "max": [
+     -689,
+     718,
+     310
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -418,
+   "y": 870,
+   "z": 18,
+   "target": "cage1",
+   "bounds": {
+    "min": [
+     -439,
+     861,
+     -31
+    ],
+    "max": [
+     -397,
+     879,
+     67
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -350,
+   "y": 742,
+   "z": 18,
+   "target": "cage2",
+   "bounds": {
+    "min": [
+     -371,
+     733,
+     -31
+    ],
+    "max": [
+     -329,
+     751,
+     67
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -176,
+   "y": -249,
+   "z": 271,
+   "target": "grate",
+   "bounds": {
+    "min": [
+     -183,
+     -288,
+     216
+    ],
+    "max": [
+     -169,
+     -210,
+     326
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 210,
+   "y": 822,
+   "z": 582,
+   "target": "mainlift",
+   "bounds": {
+    "min": [
+     185,
+     817,
+     537
+    ],
+    "max": [
+     235,
+     827,
+     627
+    ]
+   }
   }
  ]
 }

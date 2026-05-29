@@ -483,6 +483,69 @@
    "y": 608,
    "z": 48,
    "targetName": "quad"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -204,
+   "y": 0,
+   "z": 64,
+   "target": "quad",
+   "bounds": {
+    "min": [
+     -207,
+     -63,
+     1
+    ],
+    "max": [
+     -201,
+     63,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 584,
+   "y": -448,
+   "z": -128,
+   "target": "marmtel1",
+   "bounds": {
+    "min": [
+     577,
+     -479,
+     -159
+    ],
+    "max": [
+     591,
+     -417,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 656,
+   "y": 344,
+   "z": 64,
+   "target": "damage",
+   "bounds": {
+    "min": [
+     609,
+     337,
+     17
+    ],
+    "max": [
+     703,
+     351,
+     111
+    ]
+   }
   }
  ]
 }

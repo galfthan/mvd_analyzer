@@ -3,6 +3,166 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -68,
+   "y": 876,
+   "z": -106,
+   "bounds": {
+    "min": [
+     -131,
+     865,
+     -147
+    ],
+    "max": [
+     -5,
+     887,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -64,
+   "y": -1008,
+   "z": -106,
+   "bounds": {
+    "min": [
+     -127,
+     -1019,
+     -147
+    ],
+    "max": [
+     -1,
+     -997,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -38,
+   "y": -1800,
+   "z": -352,
+   "bounds": {
+    "min": [
+     -71,
+     -1803,
+     -403
+    ],
+    "max": [
+     -5,
+     -1797,
+     -301
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": -34,
+   "y": 1668,
+   "z": -352,
+   "bounds": {
+    "min": [
+     -67,
+     1665,
+     -403
+    ],
+    "max": [
+     -1,
+     1671,
+     -301
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 30,
+   "y": -1800,
+   "z": -352,
+   "bounds": {
+    "min": [
+     -3,
+     -1803,
+     -403
+    ],
+    "max": [
+     63,
+     -1797,
+     -301
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": 34,
+   "y": 1668,
+   "z": -352,
+   "bounds": {
+    "min": [
+     1,
+     1665,
+     -403
+    ],
+    "max": [
+     67,
+     1671,
+     -301
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": 60,
+   "y": 876,
+   "z": -106,
+   "bounds": {
+    "min": [
+     -3,
+     865,
+     -147
+    ],
+    "max": [
+     123,
+     887,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 64,
+   "y": -1008,
+   "z": -106,
+   "bounds": {
+    "min": [
+     1,
+     -1019,
+     -147
+    ],
+    "max": [
+     127,
+     -997,
+     -65
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

@@ -3,6 +3,146 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -936,
+   "y": 92,
+   "z": -80,
+   "bounds": {
+    "min": [
+     -959,
+     89,
+     -103
+    ],
+    "max": [
+     -913,
+     95,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": -544,
+   "y": -154.5,
+   "z": -102,
+   "bounds": {
+    "min": [
+     -575,
+     -156,
+     -139
+    ],
+    "max": [
+     -513,
+     -153,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -944,
+   "y": -189.5,
+   "z": -184,
+   "bounds": {
+    "min": [
+     -991,
+     -346,
+     -223
+    ],
+    "max": [
+     -897,
+     -33,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -544,
+   "y": -248,
+   "z": -8,
+   "bounds": {
+    "min": [
+     -671,
+     -319,
+     -11
+    ],
+    "max": [
+     -417,
+     -177,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -256,
+   "y": -480,
+   "z": 80,
+   "bounds": {
+    "min": [
+     -263,
+     -511,
+     17
+    ],
+    "max": [
+     -249,
+     -449,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": -256,
+   "y": -416,
+   "z": 80,
+   "bounds": {
+    "min": [
+     -263,
+     -447,
+     17
+    ],
+    "max": [
+     -249,
+     -385,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-5",
+   "x": 368,
+   "y": -376,
+   "z": 235,
+   "bounds": {
+    "min": [
+     321,
+     -423,
+     227
+    ],
+    "max": [
+     415,
+     -329,
+     243
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -426,6 +566,27 @@
    "y": -936,
    "z": 124,
    "targetName": "room1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -472,
+   "y": 40,
+   "z": -144,
+   "target": "room1",
+   "bounds": {
+    "min": [
+     -475,
+     1,
+     -207
+    ],
+    "max": [
+     -469,
+     79,
+     -81
+    ]
+   }
   }
  ]
 }

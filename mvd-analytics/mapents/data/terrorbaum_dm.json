@@ -511,6 +511,48 @@
    "y": 231,
    "z": 866,
    "targetName": "fred"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -349,
+   "y": 624.5,
+   "z": 61,
+   "target": "fred",
+   "bounds": {
+    "min": [
+     -380,
+     594,
+     25
+    ],
+    "max": [
+     -318,
+     655,
+     97
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 320,
+   "y": 585,
+   "z": 518,
+   "target": "doug",
+   "bounds": {
+    "min": [
+     289,
+     554,
+     482
+    ],
+    "max": [
+     351,
+     616,
+     554
+    ]
+   }
   }
  ]
 }

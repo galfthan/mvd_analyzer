@@ -3,6 +3,47 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 0,
+   "y": 448,
+   "z": 222,
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -15,
+     433,
+     221
+    ],
+    "max": [
+     15,
+     463,
+     223
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": 0,
+   "y": 448,
+   "z": -72,
+   "bounds": {
+    "min": [
+     -47,
+     401,
+     -79
+    ],
+    "max": [
+     47,
+     495,
+     -65
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -506,6 +547,112 @@
    "y": 2560,
    "z": 2352,
    "targetName": "telekell"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -884,
+   "y": -660,
+   "z": -276,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -935,
+     -711,
+     -351
+    ],
+    "max": [
+     -833,
+     -609,
+     -201
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 0,
+   "y": 448,
+   "z": -104,
+   "target": "telekell",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -47,
+     401,
+     -127
+    ],
+    "max": [
+     47,
+     495,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 0,
+   "y": 552,
+   "z": -344,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -63,
+     545,
+     -415
+    ],
+    "max": [
+     63,
+     559,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 0,
+   "y": 2312,
+   "z": 2008,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -55,
+     2305,
+     1945
+    ],
+    "max": [
+     55,
+     2319,
+     2071
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 884,
+   "y": -660,
+   "z": -276,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     833,
+     -711,
+     -351
+    ],
+    "max": [
+     935,
+     -609,
+     -201
+    ]
+   }
   }
  ]
 }

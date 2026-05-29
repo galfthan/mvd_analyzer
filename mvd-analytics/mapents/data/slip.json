@@ -365,6 +365,94 @@
    "z": 320,
    "loc": "high",
    "targetName": "teledest_ra"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad",
+   "x": -74,
+   "y": -640,
+   "z": 504,
+   "loc": "Quad",
+   "target": "teledest_basement",
+   "bounds": {
+    "min": [
+     -75,
+     -687,
+     449
+    ],
+    "max": [
+     -73,
+     -593,
+     559
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": 320,
+   "y": -490,
+   "z": -200,
+   "loc": "YA",
+   "target": "teledest_tophigh",
+   "bounds": {
+    "min": [
+     273,
+     -491,
+     -255
+    ],
+    "max": [
+     367,
+     -489,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.LG",
+   "x": 586,
+   "y": 384,
+   "z": 120,
+   "loc": "low.LG",
+   "target": "teledest_onewaymid",
+   "bounds": {
+    "min": [
+     585,
+     337,
+     65
+    ],
+    "max": [
+     587,
+     431,
+     175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "stairs.tele",
+   "x": 522,
+   "y": -896,
+   "z": 184,
+   "loc": "stairs.tele",
+   "target": "teledest_ra",
+   "bounds": {
+    "min": [
+     521,
+     -943,
+     129
+    ],
+    "max": [
+     523,
+     -849,
+     239
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,667 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE: LAVA JUMP",
+   "x": -1192,
+   "y": -928,
+   "z": -752,
+   "loc": "BLUE BASE: LAVA JUMP",
+   "bounds": {
+    "min": [
+     -1199,
+     -943,
+     -767
+    ],
+    "max": [
+     -1185,
+     -913,
+     -737
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE: LOWER Quad AREA",
+   "x": -752,
+   "y": 344,
+   "z": -912,
+   "loc": "BLUE BASE: LOWER Quad AREA",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -767,
+     337,
+     -927
+    ],
+    "max": [
+     -737,
+     351,
+     -897
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE: LOWER YA-1",
+   "x": -1696,
+   "y": -248,
+   "z": -744,
+   "loc": "BLUE BASE: LOWER YA",
+   "bounds": {
+    "min": [
+     -1711,
+     -255,
+     -759
+    ],
+    "max": [
+     -1681,
+     -241,
+     -729
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE: LOWER YA-2",
+   "x": -960,
+   "y": -248,
+   "z": -744,
+   "loc": "BLUE BASE: LOWER YA",
+   "bounds": {
+    "min": [
+     -975,
+     -255,
+     -759
+    ],
+    "max": [
+     -945,
+     -241,
+     -729
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE: Quad",
+   "x": -1192,
+   "y": -160,
+   "z": -752,
+   "loc": "BLUE BASE: Quad",
+   "bounds": {
+    "min": [
+     -1199,
+     -175,
+     -767
+    ],
+    "max": [
+     -1185,
+     -145,
+     -737
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE: BELOW Quad",
+   "x": -1192,
+   "y": -160,
+   "z": 48,
+   "loc": "RED BASE: BELOW Quad",
+   "bounds": {
+    "min": [
+     -1199,
+     -175,
+     33
+    ],
+    "max": [
+     -1185,
+     -145,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE: LAVA JUMP",
+   "x": -1192,
+   "y": -928,
+   "z": 48,
+   "loc": "RED BASE: LAVA JUMP",
+   "bounds": {
+    "min": [
+     -1199,
+     -943,
+     33
+    ],
+    "max": [
+     -1185,
+     -913,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE: LOWER Quad AREA",
+   "x": -752,
+   "y": 344,
+   "z": -112,
+   "loc": "RED BASE: LOWER Quad AREA",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -767,
+     337,
+     -127
+    ],
+    "max": [
+     -737,
+     351,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE: LOWER YELLOW ARMOUR-1",
+   "x": -1696,
+   "y": -248,
+   "z": 56,
+   "loc": "RED BASE: LOWER YELLOW ARMOUR",
+   "bounds": {
+    "min": [
+     -1711,
+     -255,
+     41
+    ],
+    "max": [
+     -1681,
+     -241,
+     71
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE: LOWER YELLOW ARMOUR-2",
+   "x": -960,
+   "y": -248,
+   "z": 56,
+   "loc": "RED BASE: LOWER YELLOW ARMOUR",
+   "bounds": {
+    "min": [
+     -975,
+     -255,
+     41
+    ],
+    "max": [
+     -945,
+     -241,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: 666",
+   "x": -160,
+   "y": -1360,
+   "z": -192,
+   "loc": "BLUE BASE: 666",
+   "bounds": {
+    "min": [
+     -191,
+     -1367,
+     -255
+    ],
+    "max": [
+     -129,
+     -1353,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: BELOW FLAG-1",
+   "x": -1464,
+   "y": -480,
+   "z": -810,
+   "loc": "BLUE BASE: BELOW FLAG",
+   "bounds": {
+    "min": [
+     -1615,
+     -695,
+     -815
+    ],
+    "max": [
+     -1313,
+     -265,
+     -805
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: BELOW FLAG-2",
+   "x": -1312,
+   "y": -772,
+   "z": -810,
+   "loc": "BLUE BASE: BELOW FLAG",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -1375,
+     -831,
+     -815
+    ],
+    "max": [
+     -1249,
+     -713,
+     -805
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: BELOW FLAG-3",
+   "x": -1160,
+   "y": -480,
+   "z": -810,
+   "loc": "BLUE BASE: BELOW FLAG",
+   "bounds": {
+    "min": [
+     -1311,
+     -695,
+     -815
+    ],
+    "max": [
+     -1009,
+     -265,
+     -805
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: BELOW Quad",
+   "x": -1312,
+   "y": -180,
+   "z": -810,
+   "loc": "BLUE BASE: BELOW Quad",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -1375,
+     -247,
+     -815
+    ],
+    "max": [
+     -1249,
+     -113,
+     -805
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LIFT/BELOW 666-1",
+   "x": -128,
+   "y": -1280,
+   "z": -656,
+   "loc": "BLUE BASE: LIFT/BELOW 666",
+   "bounds": {
+    "min": [
+     -135,
+     -1311,
+     -719
+    ],
+    "max": [
+     -121,
+     -1249,
+     -593
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LIFT/BELOW 666-2",
+   "x": -128,
+   "y": -1216,
+   "z": -656,
+   "loc": "BLUE BASE: LIFT/BELOW 666",
+   "bounds": {
+    "min": [
+     -135,
+     -1247,
+     -719
+    ],
+    "max": [
+     -121,
+     -1185,
+     -593
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LOWER YA-1",
+   "x": -1832,
+   "y": -352,
+   "z": -744,
+   "loc": "BLUE BASE: LOWER YA",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -1895,
+     -447,
+     -799
+    ],
+    "max": [
+     -1769,
+     -257,
+     -689
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LOWER YA-2",
+   "x": -824,
+   "y": -352,
+   "z": -744,
+   "loc": "BLUE BASE: LOWER YA",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -887,
+     -447,
+     -799
+    ],
+    "max": [
+     -761,
+     -257,
+     -689
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: REAR LIFT",
+   "x": -304,
+   "y": 544,
+   "z": -812,
+   "loc": "BLUE BASE: REAR LIFT",
+   "bounds": {
+    "min": [
+     -311,
+     489,
+     -887
+    ],
+    "max": [
+     -297,
+     599,
+     -737
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: RED ARMOUR-1",
+   "x": -672,
+   "y": 16,
+   "z": -728,
+   "loc": "BLUE BASE: RED ARMOUR",
+   "bounds": {
+    "min": [
+     -703,
+     9,
+     -767
+    ],
+    "max": [
+     -641,
+     23,
+     -689
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: RED ARMOUR-2",
+   "x": -608,
+   "y": 16,
+   "z": -728,
+   "loc": "BLUE BASE: RED ARMOUR",
+   "bounds": {
+    "min": [
+     -639,
+     9,
+     -767
+    ],
+    "max": [
+     -577,
+     23,
+     -689
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "OUTSIDE HIGH SECRET",
+   "x": -304,
+   "y": 544,
+   "z": -12,
+   "loc": "OUTSIDE HIGH SECRET",
+   "bounds": {
+    "min": [
+     -311,
+     489,
+     -87
+    ],
+    "max": [
+     -297,
+     599,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: BELOW FLAG-1",
+   "x": -1464,
+   "y": -480,
+   "z": -10,
+   "loc": "RED BASE: BELOW FLAG",
+   "bounds": {
+    "min": [
+     -1615,
+     -695,
+     -15
+    ],
+    "max": [
+     -1313,
+     -265,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: BELOW FLAG-2",
+   "x": -1312,
+   "y": -772,
+   "z": -10,
+   "loc": "RED BASE: BELOW FLAG",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -1375,
+     -831,
+     -15
+    ],
+    "max": [
+     -1249,
+     -713,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: BELOW FLAG-3",
+   "x": -1160,
+   "y": -480,
+   "z": -10,
+   "loc": "RED BASE: BELOW FLAG",
+   "bounds": {
+    "min": [
+     -1311,
+     -695,
+     -15
+    ],
+    "max": [
+     -1009,
+     -265,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: BELOW Quad",
+   "x": -1312,
+   "y": -180,
+   "z": -10,
+   "loc": "RED BASE: BELOW Quad",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -1375,
+     -247,
+     -15
+    ],
+    "max": [
+     -1249,
+     -113,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: LOWER YELLOW ARMOUR-1",
+   "x": -1832,
+   "y": -352,
+   "z": 56,
+   "loc": "RED BASE: LOWER YELLOW ARMOUR",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -1895,
+     -447,
+     1
+    ],
+    "max": [
+     -1769,
+     -257,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: LOWER YELLOW ARMOUR-2",
+   "x": -824,
+   "y": -352,
+   "z": 56,
+   "loc": "RED BASE: LOWER YELLOW ARMOUR",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -887,
+     -447,
+     1
+    ],
+    "max": [
+     -761,
+     -257,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: RED ARMOUR-1",
+   "x": -672,
+   "y": 16,
+   "z": 72,
+   "loc": "RED BASE: RED ARMOUR",
+   "bounds": {
+    "min": [
+     -703,
+     9,
+     33
+    ],
+    "max": [
+     -641,
+     23,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: RED ARMOUR-2",
+   "x": -608,
+   "y": 16,
+   "z": 72,
+   "loc": "RED BASE: RED ARMOUR",
+   "bounds": {
+    "min": [
+     -639,
+     9,
+     33
+    ],
+    "max": [
+     -577,
+     23,
+     111
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "weapon_grenadelauncher",
    "kind": "gl",
@@ -868,6 +1529,138 @@
    "z": 176,
    "loc": "RED BASE: Quad",
    "targetName": "t40"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE: LOWER TELEPORT",
+   "x": -1360,
+   "y": 480,
+   "z": -912,
+   "loc": "BLUE BASE: LOWER TELEPORT",
+   "target": "t41",
+   "bounds": {
+    "min": [
+     -1375,
+     449,
+     -959
+    ],
+    "max": [
+     -1345,
+     511,
+     -865
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE: LOWER YA-1",
+   "x": -1696,
+   "y": -480,
+   "z": -768,
+   "loc": "BLUE BASE: LOWER YA",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -1727,
+     -495,
+     -775
+    ],
+    "max": [
+     -1665,
+     -465,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE: LOWER YA-2",
+   "x": -960,
+   "y": -472,
+   "z": -768,
+   "loc": "BLUE BASE: LOWER YA",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -991,
+     -479,
+     -775
+    ],
+    "max": [
+     -929,
+     -465,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE: LOWER TELEPORT",
+   "x": -1360,
+   "y": 480,
+   "z": -112,
+   "loc": "RED BASE: LOWER TELEPORT",
+   "target": "t40",
+   "bounds": {
+    "min": [
+     -1375,
+     449,
+     -159
+    ],
+    "max": [
+     -1345,
+     511,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE: LOWER YELLOW ARMOUR-1",
+   "x": -1696,
+   "y": -480,
+   "z": 32,
+   "loc": "RED BASE: LOWER YELLOW ARMOUR",
+   "target": "t32",
+   "bounds": {
+    "min": [
+     -1727,
+     -495,
+     25
+    ],
+    "max": [
+     -1665,
+     -465,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE: LOWER YELLOW ARMOUR-2",
+   "x": -960,
+   "y": -472,
+   "z": 32,
+   "loc": "RED BASE: LOWER YELLOW ARMOUR",
+   "target": "t32",
+   "bounds": {
+    "min": [
+     -991,
+     -479,
+     25
+    ],
+    "max": [
+     -929,
+     -465,
+     39
+    ]
+   }
   }
  ]
 }

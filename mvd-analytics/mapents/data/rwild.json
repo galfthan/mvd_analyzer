@@ -3,6 +3,71 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "GL",
+   "x": -1056,
+   "y": 228,
+   "z": 224,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     -1087,
+     225,
+     193
+    ],
+    "max": [
+     -1025,
+     231,
+     255
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA",
+   "x": -736,
+   "y": 400,
+   "z": 148,
+   "loc": "RA",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -959,
+     353,
+     145
+    ],
+    "max": [
+     -513,
+     447,
+     151
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.below",
+   "x": -688,
+   "y": 64,
+   "z": -64,
+   "loc": "RA.below",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -767,
+     1,
+     -127
+    ],
+    "max": [
+     -609,
+     127,
+     -1
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -389,6 +454,28 @@
    "z": 224,
    "loc": "Quad.RL",
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.low",
+   "x": -960,
+   "y": -1288,
+   "z": -56,
+   "loc": "Quad.low",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -1023,
+     -1295,
+     -127
+    ],
+    "max": [
+     -897,
+     -1281,
+     15
+    ]
+   }
   }
  ]
 }

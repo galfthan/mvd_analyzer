@@ -410,6 +410,72 @@
    "z": 228,
    "loc": "YA",
    "targetName": "teleya"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.RL",
+   "x": -384,
+   "y": -466,
+   "z": 46,
+   "loc": "RA.RL",
+   "target": "telemega",
+   "bounds": {
+    "min": [
+     -413,
+     -467,
+     15
+    ],
+    "max": [
+     -355,
+     -465,
+     77
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SSG",
+   "x": 368,
+   "y": -388,
+   "z": 48,
+   "loc": "SSG",
+   "target": "telemid",
+   "bounds": {
+    "min": [
+     339,
+     -389,
+     17
+    ],
+    "max": [
+     397,
+     -387,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.low",
+   "x": 768,
+   "y": 50,
+   "z": 160,
+   "loc": "YA.low",
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     739,
+     49,
+     145
+    ],
+    "max": [
+     797,
+     51,
+     175
+    ]
+   }
   }
  ]
 }

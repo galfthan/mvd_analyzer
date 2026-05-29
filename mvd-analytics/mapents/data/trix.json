@@ -26,6 +26,27 @@
    "y": 0,
    "z": 432,
    "targetName": "tele675"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 4016,
+   "y": 0,
+   "z": 232,
+   "target": "tele675",
+   "bounds": {
+    "min": [
+     3953,
+     -255,
+     -63
+    ],
+    "max": [
+     4079,
+     255,
+     527
+    ]
+   }
   }
  ]
 }

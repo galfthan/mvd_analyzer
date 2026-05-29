@@ -3,6 +3,239 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BUNKER",
+   "x": 1056,
+   "y": 0,
+   "z": -34,
+   "loc": "BLUE BUNKER",
+   "bounds": {
+    "min": [
+     1025,
+     -31,
+     -39
+    ],
+    "max": [
+     1087,
+     31,
+     -29
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BUNKER",
+   "x": -1056,
+   "y": 0,
+   "z": -34,
+   "loc": "RED BUNKER",
+   "bounds": {
+    "min": [
+     -1087,
+     -31,
+     -39
+    ],
+    "max": [
+     -1025,
+     31,
+     -29
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE BASE",
+   "x": 2504,
+   "y": 0,
+   "z": -280,
+   "loc": "BLUE BASE",
+   "bounds": {
+    "min": [
+     2497,
+     -39,
+     -319
+    ],
+    "max": [
+     2511,
+     39,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (MAIN ENTRANCE)-1",
+   "x": 1312,
+   "y": -32,
+   "z": 138,
+   "loc": "BLUE BASE (MAIN ENTRANCE)",
+   "bounds": {
+    "min": [
+     1305,
+     -63,
+     65
+    ],
+    "max": [
+     1319,
+     -1,
+     211
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (MAIN ENTRANCE)-2",
+   "x": 1312,
+   "y": 32,
+   "z": 138,
+   "loc": "BLUE BASE (MAIN ENTRANCE)",
+   "bounds": {
+    "min": [
+     1305,
+     1,
+     65
+    ],
+    "max": [
+     1319,
+     63,
+     211
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "OPEN AREA (BLUE SIDE)",
+   "x": 940,
+   "y": 0,
+   "z": 2,
+   "loc": "OPEN AREA (BLUE SIDE)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     937,
+     -119,
+     -19
+    ],
+    "max": [
+     943,
+     119,
+     23
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "OPEN AREA (RED SIDE)",
+   "x": -940,
+   "y": 0,
+   "z": 2,
+   "loc": "OPEN AREA (RED SIDE)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -943,
+     -119,
+     -19
+    ],
+    "max": [
+     -937,
+     119,
+     23
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED BASE",
+   "x": -2504,
+   "y": 0,
+   "z": -280,
+   "loc": "RED BASE",
+   "bounds": {
+    "min": [
+     -2511,
+     -39,
+     -319
+    ],
+    "max": [
+     -2497,
+     39,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (MAIN ENTRANCE DOOR)-1",
+   "x": -1312,
+   "y": -32,
+   "z": 138,
+   "loc": "RED BASE (MAIN ENTRANCE DOOR)",
+   "bounds": {
+    "min": [
+     -1319,
+     -63,
+     65
+    ],
+    "max": [
+     -1305,
+     -1,
+     211
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (MAIN ENTRANCE DOOR)-2",
+   "x": -1312,
+   "y": 32,
+   "z": 138,
+   "loc": "RED BASE (MAIN ENTRANCE DOOR)",
+   "bounds": {
+    "min": [
+     -1319,
+     1,
+     65
+    ],
+    "max": [
+     -1305,
+     63,
+     211
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "WATER AREA",
+   "x": 312,
+   "y": 0,
+   "z": -400,
+   "loc": "WATER AREA",
+   "bounds": {
+    "min": [
+     305,
+     -31,
+     -447
+    ],
+    "max": [
+     319,
+     31,
+     -353
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -1592,6 +1825,94 @@
    "z": -56,
    "loc": "WATER ENTRANCE TO HUT",
    "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (100 HEALTH ROOM)",
+   "x": 2690,
+   "y": 0,
+   "z": -256,
+   "loc": "BLUE BASE (100 HEALTH ROOM)",
+   "target": "t5",
+   "bounds": {
+    "min": [
+     2681,
+     -23,
+     -303
+    ],
+    "max": [
+     2699,
+     23,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (TELEPORT LEDGE)",
+   "x": 2624,
+   "y": 0,
+   "z": -72,
+   "loc": "BLUE BASE (TELEPORT LEDGE)",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     2621,
+     -47,
+     -111
+    ],
+    "max": [
+     2627,
+     47,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (100 HEALTH ROOM)",
+   "x": -2690,
+   "y": 0,
+   "z": -256,
+   "loc": "RED BASE (100 HEALTH ROOM)",
+   "target": "t6",
+   "bounds": {
+    "min": [
+     -2699,
+     -23,
+     -303
+    ],
+    "max": [
+     -2681,
+     23,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (TELEPORT LEDGE)",
+   "x": -2624,
+   "y": 0,
+   "z": -72,
+   "loc": "RED BASE (TELEPORT LEDGE)",
+   "target": "t4",
+   "bounds": {
+    "min": [
+     -2627,
+     -47,
+     -111
+    ],
+    "max": [
+     -2621,
+     47,
+     -33
+    ]
+   }
   }
  ]
 }

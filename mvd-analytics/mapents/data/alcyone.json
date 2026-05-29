@@ -408,6 +408,94 @@
    "z": -182,
    "loc": "YA",
    "targetName": "hahhi"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": -288,
+   "y": -112,
+   "z": 154,
+   "loc": "LG",
+   "target": "hahhi",
+   "bounds": {
+    "min": [
+     -291,
+     -163,
+     105
+    ],
+    "max": [
+     -285,
+     -61,
+     203
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH",
+   "x": 173,
+   "y": -829,
+   "z": -272,
+   "loc": "MH",
+   "target": "vonsuxlol",
+   "bounds": {
+    "min": [
+     115,
+     -887,
+     -335
+    ],
+    "max": [
+     231,
+     -771,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.tele",
+   "x": -445,
+   "y": -568,
+   "z": 16,
+   "loc": "RA.tele",
+   "target": "hoi111",
+   "bounds": {
+    "min": [
+     -459,
+     -623,
+     -47
+    ],
+    "max": [
+     -431,
+     -513,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": -64,
+   "y": -16,
+   "z": -128,
+   "loc": "YA",
+   "target": "sex",
+   "bounds": {
+    "min": [
+     -71,
+     -79,
+     -191
+    ],
+    "max": [
+     -57,
+     47,
+     -65
+    ]
+   }
   }
  ]
 }

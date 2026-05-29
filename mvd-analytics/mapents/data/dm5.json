@@ -3,6 +3,70 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "RL.outside",
+   "x": 288,
+   "y": 188,
+   "z": 136,
+   "loc": "RL.outside",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     265,
+     185,
+     113
+    ],
+    "max": [
+     311,
+     191,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.outside-1",
+   "x": 256,
+   "y": 816,
+   "z": 172,
+   "loc": "RL.outside",
+   "bounds": {
+    "min": [
+     225,
+     809,
+     97
+    ],
+    "max": [
+     287,
+     823,
+     247
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.outside-2",
+   "x": 320,
+   "y": 816,
+   "z": 172,
+   "loc": "RL.outside",
+   "bounds": {
+    "min": [
+     289,
+     809,
+     97
+    ],
+    "max": [
+     351,
+     823,
+     247
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -313,6 +377,50 @@
    "z": 200,
    "loc": "high.path",
    "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG.path",
+   "x": 1116,
+   "y": -768,
+   "z": 256,
+   "loc": "SNG.path",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     1101,
+     -791,
+     201
+    ],
+    "max": [
+     1131,
+     -745,
+     311
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.path",
+   "x": 890,
+   "y": 376,
+   "z": 262,
+   "loc": "high.path",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     873,
+     353,
+     213
+    ],
+    "max": [
+     907,
+     399,
+     311
+    ]
+   }
   }
  ]
 }

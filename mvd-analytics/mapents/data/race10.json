@@ -3,6 +3,46 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 2980,
+   "y": -416,
+   "z": -899,
+   "bounds": {
+    "min": [
+     2953,
+     -567,
+     -902
+    ],
+    "max": [
+     3007,
+     -265,
+     -896
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door",
+   "x": 2752,
+   "y": -1492,
+   "z": -832,
+   "bounds": {
+    "min": [
+     2657,
+     -1495,
+     -895
+    ],
+    "max": [
+     2847,
+     -1489,
+     -769
+    ]
+   }
+  },
+  {
    "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "spawn-1",
@@ -44,6 +84,90 @@
    "y": -392,
    "z": 1224,
    "targetName": "secret"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1760,
+   "y": -420,
+   "z": 1296,
+   "target": "grube",
+   "bounds": {
+    "min": [
+     -1823,
+     -423,
+     1217
+    ],
+    "max": [
+     -1697,
+     -417,
+     1375
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1216,
+   "y": 2304,
+   "z": -2368,
+   "target": "finish",
+   "bounds": {
+    "min": [
+     1169,
+     2217,
+     -2455
+    ],
+    "max": [
+     1263,
+     2391,
+     -2281
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 1264,
+   "y": -32,
+   "z": -1512,
+   "target": "grube",
+   "bounds": {
+    "min": [
+     1025,
+     -303,
+     -1519
+    ],
+    "max": [
+     1503,
+     239,
+     -1505
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 2752,
+   "y": -1576,
+   "z": -832,
+   "target": "secret",
+   "bounds": {
+    "min": [
+     2689,
+     -1583,
+     -895
+    ],
+    "max": [
+     2815,
+     -1569,
+     -769
+    ]
+   }
   }
  ]
 }

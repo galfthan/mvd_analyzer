@@ -593,6 +593,28 @@
    "z": 208,
    "loc": "RA",
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele",
+   "x": 1496,
+   "y": -584,
+   "z": -136,
+   "loc": "tele",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     1489,
+     -623,
+     -207
+    ],
+    "max": [
+     1503,
+     -545,
+     -65
+    ]
+   }
   }
  ]
 }

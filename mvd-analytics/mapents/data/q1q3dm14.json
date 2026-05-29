@@ -3,6 +3,166 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -876,
+   "y": -552,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -915,
+     -559,
+     1
+    ],
+    "max": [
+     -837,
+     -545,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -796,
+   "y": -552,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -835,
+     -559,
+     1
+    ],
+    "max": [
+     -757,
+     -545,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -284,
+   "y": -1672,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -291,
+     -1711,
+     1
+    ],
+    "max": [
+     -277,
+     -1633,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": -284,
+   "y": -1592,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -291,
+     -1631,
+     1
+    ],
+    "max": [
+     -277,
+     -1553,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": -284,
+   "y": -1352,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -291,
+     -1391,
+     1
+    ],
+    "max": [
+     -277,
+     -1313,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": -284,
+   "y": -1272,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -291,
+     -1311,
+     1
+    ],
+    "max": [
+     -277,
+     -1233,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": 312,
+   "y": -860,
+   "z": 96,
+   "bounds": {
+    "min": [
+     273,
+     -867,
+     1
+    ],
+    "max": [
+     351,
+     -853,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 392,
+   "y": -860,
+   "z": 96,
+   "bounds": {
+    "min": [
+     353,
+     -867,
+     1
+    ],
+    "max": [
+     431,
+     -853,
+     191
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

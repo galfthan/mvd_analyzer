@@ -3,6 +3,66 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -3455,
+   "y": 3818,
+   "z": 15,
+   "bounds": {
+    "min": [
+     -3455,
+     3763,
+     7
+    ],
+    "max": [
+     -3455,
+     3873,
+     23
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -3364,
+   "y": 3826,
+   "z": -56,
+   "bounds": {
+    "min": [
+     -3453,
+     3815,
+     -127
+    ],
+    "max": [
+     -3275,
+     3837,
+     15
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -3191,
+   "y": 3826,
+   "z": -56,
+   "bounds": {
+    "min": [
+     -3273,
+     3815,
+     -127
+    ],
+    "max": [
+     -3109,
+     3837,
+     15
+    ]
+   }
+  },
+  {
    "type": "spawn",
    "class": "info_player_start",
    "name": "spawn-1",
@@ -53,6 +113,237 @@
    "y": -304,
    "z": -96,
    "targetName": "s1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -3446,
+   "y": 170,
+   "z": -124,
+   "target": "s2",
+   "bounds": {
+    "min": [
+     -3453,
+     -3189,
+     -127
+    ],
+    "max": [
+     -3439,
+     3529,
+     -121
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-10",
+   "x": -502,
+   "y": -408,
+   "z": 64,
+   "target": "s2",
+   "bounds": {
+    "min": [
+     -503,
+     -435,
+     17
+    ],
+    "max": [
+     -501,
+     -381,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-11",
+   "x": -196,
+   "y": -256,
+   "z": -236,
+   "target": "s1",
+   "bounds": {
+    "min": [
+     -879,
+     -455,
+     -239
+    ],
+    "max": [
+     487,
+     -57,
+     -233
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -3281,
+   "y": -7,
+   "z": -250,
+   "target": "s2",
+   "bounds": {
+    "min": [
+     -3455,
+     -4079,
+     -255
+    ],
+    "max": [
+     -3107,
+     4065,
+     -245
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -3274,
+   "y": 3818,
+   "z": -84,
+   "target": "s3",
+   "bounds": {
+    "min": [
+     -3329,
+     3815,
+     -119
+    ],
+    "max": [
+     -3219,
+     3821,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -3274,
+   "y": 3834,
+   "z": -84,
+   "target": "s2",
+   "bounds": {
+    "min": [
+     -3329,
+     3831,
+     -119
+    ],
+    "max": [
+     -3219,
+     3837,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": -3116,
+   "y": 166,
+   "z": -124,
+   "target": "s2",
+   "bounds": {
+    "min": [
+     -3123,
+     -3193,
+     -127
+    ],
+    "max": [
+     -3109,
+     3525,
+     -121
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": -2688,
+   "y": -892,
+   "z": 870,
+   "target": "s1",
+   "bounds": {
+    "min": [
+     -2911,
+     -1115,
+     861
+    ],
+    "max": [
+     -2465,
+     -669,
+     879
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": -2332,
+   "y": -256,
+   "z": -280,
+   "target": "s3",
+   "bounds": {
+    "min": [
+     -3019,
+     -495,
+     -295
+    ],
+    "max": [
+     -1645,
+     -17,
+     -265
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-8",
+   "x": -1658,
+   "y": -464,
+   "z": -148,
+   "target": "s4",
+   "bounds": {
+    "min": [
+     -1659,
+     -491,
+     -195
+    ],
+    "max": [
+     -1657,
+     -437,
+     -101
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-9",
+   "x": -514,
+   "y": -408,
+   "z": 64,
+   "target": "s2",
+   "bounds": {
+    "min": [
+     -515,
+     -435,
+     17
+    ],
+    "max": [
+     -513,
+     -381,
+     111
+    ]
+   }
   }
  ]
 }

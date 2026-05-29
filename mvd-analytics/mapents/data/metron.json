@@ -3,6 +3,106 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -485,
+   "y": 728,
+   "z": 105,
+   "bounds": {
+    "min": [
+     -499,
+     725,
+     91
+    ],
+    "max": [
+     -471,
+     731,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -626,
+   "y": -1140,
+   "z": 160,
+   "bounds": {
+    "min": [
+     -639,
+     -1171,
+     129
+    ],
+    "max": [
+     -613,
+     -1109,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -626,
+   "y": -1139,
+   "z": 225,
+   "bounds": {
+    "min": [
+     -639,
+     -1171,
+     195
+    ],
+    "max": [
+     -613,
+     -1107,
+     255
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -626,
+   "y": -1073,
+   "z": 159,
+   "bounds": {
+    "min": [
+     -639,
+     -1105,
+     129
+    ],
+    "max": [
+     -613,
+     -1041,
+     189
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": -626,
+   "y": -1072,
+   "z": 224,
+   "bounds": {
+    "min": [
+     -639,
+     -1103,
+     193
+    ],
+    "max": [
+     -613,
+     -1041,
+     255
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -397,6 +497,48 @@
    "y": -848,
    "z": 98,
    "targetName": "teleya"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -428,
+   "y": -96,
+   "z": 14,
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     -429,
+     -131,
+     -15
+    ],
+    "max": [
+     -427,
+     -61,
+     43
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 210,
+   "y": -681,
+   "z": 48,
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     209,
+     -715,
+     17
+    ],
+    "max": [
+     211,
+     -647,
+     79
+    ]
+   }
   }
  ]
 }

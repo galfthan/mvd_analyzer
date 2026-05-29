@@ -3,6 +3,176 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "SNG.GA",
+   "x": 448,
+   "y": -508,
+   "z": 48,
+   "loc": "SNG.GA",
+   "bounds": {
+    "min": [
+     433,
+     -511,
+     33
+    ],
+    "max": [
+     463,
+     -505,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "SSG-1",
+   "x": 252,
+   "y": -48,
+   "z": 48,
+   "loc": "SSG",
+   "bounds": {
+    "min": [
+     249,
+     -63,
+     33
+    ],
+    "max": [
+     255,
+     -33,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "SSG-2",
+   "x": 324,
+   "y": -48,
+   "z": 48,
+   "loc": "SSG",
+   "bounds": {
+    "min": [
+     321,
+     -63,
+     33
+    ],
+    "max": [
+     327,
+     -33,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "YA",
+   "x": -380,
+   "y": 128,
+   "z": 48,
+   "loc": "YA",
+   "bounds": {
+    "min": [
+     -383,
+     113,
+     33
+    ],
+    "max": [
+     -377,
+     143,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL",
+   "x": 448,
+   "y": -448,
+   "z": 168,
+   "loc": "GL",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     401,
+     -495,
+     -15
+    ],
+    "max": [
+     495,
+     -401,
+     351
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SSG-1",
+   "x": 288,
+   "y": -176,
+   "z": 64,
+   "loc": "SSG",
+   "bounds": {
+    "min": [
+     273,
+     -223,
+     1
+    ],
+    "max": [
+     303,
+     -129,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SSG-2",
+   "x": 288,
+   "y": -128,
+   "z": 64,
+   "loc": "SSG",
+   "bounds": {
+    "min": [
+     273,
+     -159,
+     1
+    ],
+    "max": [
+     303,
+     -97,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "YA",
+   "x": -320,
+   "y": 128,
+   "z": 168,
+   "loc": "YA",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -367,
+     81,
+     -15
+    ],
+    "max": [
+     -273,
+     175,
+     351
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -395,6 +565,50 @@
    "z": 376,
    "loc": "top.MH",
    "targetName": "up1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL",
+   "x": -111,
+   "y": 96,
+   "z": 224,
+   "loc": "GL",
+   "target": "up1",
+   "bounds": {
+    "min": [
+     -125,
+     65,
+     177
+    ],
+    "max": [
+     -97,
+     127,
+     271
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad",
+   "x": -479,
+   "y": -1248,
+   "z": -104,
+   "loc": "Quad",
+   "target": "mhup",
+   "bounds": {
+    "min": [
+     -493,
+     -1295,
+     -159
+    ],
+    "max": [
+     -465,
+     -1201,
+     -49
+    ]
+   }
   }
  ]
 }

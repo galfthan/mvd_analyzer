@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": -992,
+   "y": -1568,
+   "z": -224,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1119,
+     -1695,
+     -319
+    ],
+    "max": [
+     -865,
+     -1441,
+     -129
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -477,6 +498,27 @@
    "y": -776,
    "z": 64,
    "targetName": "quadtele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -198,
+   "y": -710,
+   "z": -64,
+   "target": "quadtele",
+   "bounds": {
+    "min": [
+     -231,
+     -743,
+     -127
+    ],
+    "max": [
+     -165,
+     -677,
+     -1
+    ]
+   }
   }
  ]
 }

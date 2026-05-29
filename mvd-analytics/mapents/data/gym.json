@@ -3,6 +3,90 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "Blue Base-1",
+   "x": -120,
+   "y": -852,
+   "z": 226,
+   "loc": "Blue Base",
+   "bounds": {
+    "min": [
+     -123,
+     -887,
+     181
+    ],
+    "max": [
+     -117,
+     -817,
+     271
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Blue Base-2",
+   "x": 120,
+   "y": -852,
+   "z": 226,
+   "loc": "Blue Base",
+   "bounds": {
+    "min": [
+     117,
+     -887,
+     181
+    ],
+    "max": [
+     123,
+     -817,
+     271
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Red Base-1",
+   "x": -120,
+   "y": 852,
+   "z": 226,
+   "loc": "Red Base",
+   "bounds": {
+    "min": [
+     -123,
+     817,
+     181
+    ],
+    "max": [
+     -117,
+     887,
+     271
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Red Base-2",
+   "x": 120,
+   "y": 852,
+   "z": 226,
+   "loc": "Red Base",
+   "bounds": {
+    "min": [
+     117,
+     817,
+     181
+    ],
+    "max": [
+     123,
+     887,
+     271
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -839,6 +923,50 @@
    "z": 216,
    "loc": "Red Main Entrance",
    "targetName": "red"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Blue Tele Entrance",
+   "x": 953,
+   "y": 8,
+   "z": 88,
+   "loc": "Blue Tele Entrance",
+   "target": "blue",
+   "bounds": {
+    "min": [
+     949,
+     -31,
+     33
+    ],
+    "max": [
+     957,
+     47,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Red Tele Entrance",
+   "x": -953,
+   "y": -8,
+   "z": 88,
+   "loc": "Red Tele Entrance",
+   "target": "red",
+   "bounds": {
+    "min": [
+     -957,
+     -47,
+     33
+    ],
+    "max": [
+     -949,
+     31,
+     143
+    ]
+   }
   }
  ]
 }

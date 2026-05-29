@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -152,
+   "y": 84,
+   "z": 144,
+   "bounds": {
+    "min": [
+     -153,
+     69,
+     129
+    ],
+    "max": [
+     -151,
+     99,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -560,
+   "y": 112,
+   "z": 240,
+   "bounds": {
+    "min": [
+     -591,
+     105,
+     145
+    ],
+    "max": [
+     -529,
+     119,
+     335
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -496,
+   "y": 112,
+   "z": 240,
+   "bounds": {
+    "min": [
+     -527,
+     105,
+     145
+    ],
+    "max": [
+     -465,
+     119,
+     335
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 126,
+   "y": 90,
+   "z": 73,
+   "bounds": {
+    "min": [
+     87,
+     51,
+     69
+    ],
+    "max": [
+     165,
+     129,
+     77
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -548,6 +628,153 @@
    "y": 210,
    "z": 296,
    "targetName": "cool2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -881.5,
+   "y": 72,
+   "z": -248,
+   "target": "teledest2",
+   "bounds": {
+    "min": [
+     -885,
+     45,
+     -291
+    ],
+    "max": [
+     -878,
+     99,
+     -205
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -690,
+   "y": 1088,
+   "z": -372,
+   "target": "up",
+   "bounds": {
+    "min": [
+     -725,
+     1085,
+     -419
+    ],
+    "max": [
+     -655,
+     1091,
+     -325
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -524,
+   "y": -193,
+   "z": 208,
+   "target": "teledest1",
+   "bounds": {
+    "min": [
+     -555,
+     -193,
+     151
+    ],
+    "max": [
+     -493,
+     -193,
+     265
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -176,
+   "y": 362,
+   "z": 320,
+   "target": "cool2",
+   "bounds": {
+    "min": [
+     -203,
+     357,
+     277
+    ],
+    "max": [
+     -149,
+     367,
+     363
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 100,
+   "y": 1208,
+   "z": 315,
+   "target": "down",
+   "bounds": {
+    "min": [
+     65,
+     1205,
+     277
+    ],
+    "max": [
+     135,
+     1211,
+     353
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 126,
+   "y": 90,
+   "z": 30,
+   "target": "quad",
+   "bounds": {
+    "min": [
+     91,
+     55,
+     29
+    ],
+    "max": [
+     161,
+     125,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": 560,
+   "y": 184,
+   "z": 320,
+   "target": "cool1",
+   "bounds": {
+    "min": [
+     533,
+     179,
+     277
+    ],
+    "max": [
+     587,
+     189,
+     363
+    ]
+   }
   }
  ]
 }

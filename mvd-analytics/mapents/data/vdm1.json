@@ -404,6 +404,116 @@
    "z": -212,
    "loc": "SNG",
    "targetName": "telemid"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA",
+   "x": 731,
+   "y": 216,
+   "z": -407,
+   "loc": "GA",
+   "target": "telemid",
+   "bounds": {
+    "min": [
+     697,
+     215,
+     -449
+    ],
+    "max": [
+     765,
+     217,
+     -365
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": -22.5,
+   "y": 196,
+   "z": -317.5,
+   "loc": "RA",
+   "target": "telera",
+   "bounds": {
+    "min": [
+     -55,
+     194,
+     -353
+    ],
+    "max": [
+     10,
+     198,
+     -282
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG-1",
+   "x": 1084,
+   "y": -423.5,
+   "z": -136.5,
+   "loc": "SNG",
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     1051,
+     -460,
+     -138
+    ],
+    "max": [
+     1117,
+     -387,
+     -135
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG-2",
+   "x": 1084.5,
+   "y": -424,
+   "z": -120.5,
+   "loc": "SNG",
+   "target": "telelow",
+   "bounds": {
+    "min": [
+     1053,
+     -456,
+     -122
+    ],
+    "max": [
+     1116,
+     -392,
+     -119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.tele",
+   "x": 465.5,
+   "y": -1295.5,
+   "z": -321.5,
+   "loc": "YA.tele",
+   "target": "telemh",
+   "bounds": {
+    "min": [
+     460,
+     -1340,
+     -377
+    ],
+    "max": [
+     471,
+     -1251,
+     -266
+    ]
+   }
   }
  ]
 }

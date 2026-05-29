@@ -408,6 +408,48 @@
    "y": 456,
    "z": 592,
    "targetName": "quadroom"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -125.84123,
+   "y": -2273.667,
+   "z": 428,
+   "target": "quadroom",
+   "bounds": {
+    "min": [
+     -211.5,
+     -2359.3337,
+     365
+    ],
+    "max": [
+     -40.18246,
+     -2188,
+     491
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 2562.9214,
+   "y": 726.6049,
+   "z": 712,
+   "target": "waterroom",
+   "bounds": {
+    "min": [
+     2489.1174,
+     652.70984,
+     649
+    ],
+    "max": [
+     2636.7256,
+     800.5,
+     775
+    ]
+   }
   }
  ]
 }

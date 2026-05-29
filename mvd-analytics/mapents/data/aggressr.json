@@ -467,6 +467,94 @@
    "z": -56,
    "loc": "low.GA",
    "targetName": "t7"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 160,
+   "y": -72,
+   "z": 362,
+   "loc": "LG",
+   "target": "t7",
+   "bounds": {
+    "min": [
+     129,
+     -79,
+     313
+    ],
+    "max": [
+     191,
+     -65,
+     411
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": -328,
+   "y": 128,
+   "z": -198,
+   "loc": "RA",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -335,
+     97,
+     -247
+    ],
+    "max": [
+     -321,
+     159,
+     -149
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.GA",
+   "x": 128,
+   "y": 584,
+   "z": 186,
+   "loc": "high.GA",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     97,
+     577,
+     137
+    ],
+    "max": [
+     159,
+     591,
+     235
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.GA",
+   "x": 384,
+   "y": -72,
+   "z": -6,
+   "loc": "low.GA",
+   "target": "t11",
+   "bounds": {
+    "min": [
+     353,
+     -79,
+     -55
+    ],
+    "max": [
+     415,
+     -65,
+     43
+    ]
+   }
   }
  ]
 }

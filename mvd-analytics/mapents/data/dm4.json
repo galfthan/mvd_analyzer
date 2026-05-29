@@ -495,6 +495,116 @@
    "z": -296,
    "loc": "low.tele",
    "targetName": "t2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG.tele",
+   "x": 640,
+   "y": -496,
+   "z": -124,
+   "loc": "LG.tele",
+   "target": "t4",
+   "bounds": {
+    "min": [
+     609,
+     -511,
+     -127
+    ],
+    "max": [
+     671,
+     -481,
+     -121
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.tele",
+   "x": -128,
+   "y": -624,
+   "z": -68,
+   "loc": "Quad.tele",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     -159,
+     -639,
+     -71
+    ],
+    "max": [
+     -97,
+     -609,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 784,
+   "y": -944,
+   "z": -228,
+   "loc": "RA",
+   "target": "t5",
+   "bounds": {
+    "min": [
+     753,
+     -959,
+     -231
+    ],
+    "max": [
+     815,
+     -929,
+     -225
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.tele",
+   "x": 496,
+   "y": -864,
+   "z": 52,
+   "loc": "high.tele",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     481,
+     -895,
+     49
+    ],
+    "max": [
+     511,
+     -833,
+     55
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.tele",
+   "x": 624,
+   "y": 144,
+   "z": -276,
+   "loc": "low.tele",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     593,
+     129,
+     -279
+    ],
+    "max": [
+     655,
+     159,
+     -273
+    ]
+   }
   }
  ]
 }

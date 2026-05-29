@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.bridge",
+   "x": -172,
+   "y": -1124,
+   "z": 400,
+   "loc": "RA.bridge",
+   "bounds": {
+    "min": [
+     -263,
+     -1135,
+     297
+    ],
+    "max": [
+     -81,
+     -1113,
+     503
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -531,6 +552,94 @@
    "z": -64,
    "loc": "RL.ledge",
    "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL",
+   "x": -823,
+   "y": 608,
+   "z": -24,
+   "loc": "GL",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     -838,
+     577,
+     -79
+    ],
+    "max": [
+     -808,
+     639,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.bridge",
+   "x": -160,
+   "y": -1087,
+   "z": 176,
+   "loc": "RA.bridge",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -191,
+     -1102,
+     121
+    ],
+    "max": [
+     -129,
+     -1072,
+     231
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring",
+   "x": -232,
+   "y": -504,
+   "z": 28,
+   "loc": "Ring",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -267,
+     -511,
+     -63
+    ],
+    "max": [
+     -197,
+     -497,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "hole",
+   "x": 312,
+   "y": 48,
+   "z": 100,
+   "loc": "hole",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     249,
+     1,
+     97
+    ],
+    "max": [
+     375,
+     95,
+     103
+    ]
+   }
   }
  ]
 }

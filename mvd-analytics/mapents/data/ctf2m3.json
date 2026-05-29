@@ -3,6 +3,468 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE BASE",
+   "x": -1300,
+   "y": -159,
+   "z": 69.5,
+   "loc": "BLUE BASE",
+   "bounds": {
+    "min": [
+     -1350,
+     -168,
+     22
+    ],
+    "max": [
+     -1250,
+     -150,
+     117
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LEFT DOOR-1",
+   "x": -227.5,
+   "y": 480,
+   "z": 111,
+   "loc": "BLUE BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     457,
+     51
+    ],
+    "max": [
+     -216,
+     503,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LEFT DOOR-2",
+   "x": -227.5,
+   "y": 528,
+   "z": 111,
+   "loc": "BLUE BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     505,
+     51
+    ],
+    "max": [
+     -216,
+     551,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: OUTSIDE LOWER DOOR-1",
+   "x": 501.5,
+   "y": -3.79282,
+   "z": -158,
+   "loc": "BLUE BASE: OUTSIDE LOWER DOOR",
+   "bounds": {
+    "min": [
+     483,
+     -55,
+     -221
+    ],
+    "max": [
+     520,
+     47.41436,
+     -95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: OUTSIDE LOWER DOOR-2",
+   "x": 501.5,
+   "y": 21.199738,
+   "z": -158,
+   "loc": "BLUE BASE: OUTSIDE LOWER DOOR",
+   "bounds": {
+    "min": [
+     483,
+     -28.600525,
+     -221
+    ],
+    "max": [
+     520,
+     71,
+     -95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: OUTSIDE TOP DOOR-1",
+   "x": 501.5,
+   "y": -3.8351479,
+   "z": 114,
+   "loc": "BLUE BASE: OUTSIDE TOP DOOR",
+   "bounds": {
+    "min": [
+     483,
+     -55,
+     51
+    ],
+    "max": [
+     520,
+     47.329704,
+     177
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: OUTSIDE TOP DOOR-2",
+   "x": 501.5,
+   "y": 21.296247,
+   "z": 114,
+   "loc": "BLUE BASE: OUTSIDE TOP DOOR",
+   "bounds": {
+    "min": [
+     483,
+     -28.407505,
+     51
+    ],
+    "max": [
+     520,
+     71,
+     177
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: RIGHT DOOR-1",
+   "x": -227.5,
+   "y": -551,
+   "z": 111,
+   "loc": "BLUE BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     -574,
+     51
+    ],
+    "max": [
+     -216,
+     -528,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: RIGHT DOOR-2",
+   "x": -227.5,
+   "y": -503,
+   "z": 111,
+   "loc": "BLUE BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     -526,
+     51
+    ],
+    "max": [
+     -216,
+     -480,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LAVA: LG/YA DOOR-1",
+   "x": 1245,
+   "y": -710,
+   "z": -161.5,
+   "loc": "LAVA: LG/YA DOOR",
+   "bounds": {
+    "min": [
+     1235,
+     -734,
+     -210
+    ],
+    "max": [
+     1255,
+     -686,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LAVA: LG/YA DOOR-2",
+   "x": 1245,
+   "y": -660.5,
+   "z": -161.5,
+   "loc": "LAVA: LG/YA DOOR",
+   "bounds": {
+    "min": [
+     1235,
+     -684,
+     -210
+    ],
+    "max": [
+     1255,
+     -637,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "LAVA: SNG",
+   "x": 351.5,
+   "y": -685,
+   "z": -142.5,
+   "loc": "LAVA: SNG",
+   "bounds": {
+    "min": [
+     335,
+     -727,
+     -200
+    ],
+    "max": [
+     368,
+     -643,
+     -85
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "LAVA: UPPER AREA",
+   "x": 1244.5,
+   "y": -685,
+   "z": 87,
+   "loc": "LAVA: UPPER AREA",
+   "bounds": {
+    "min": [
+     1228,
+     -727,
+     28
+    ],
+    "max": [
+     1261,
+     -643,
+     146
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED BASE",
+   "x": -1292,
+   "y": -1545,
+   "z": 69.5,
+   "loc": "RED BASE",
+   "bounds": {
+    "min": [
+     -1342,
+     -1554,
+     22
+    ],
+    "max": [
+     -1242,
+     -1536,
+     117
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTER LOWER DOOR-1",
+   "x": 505.5,
+   "y": -1390.0414,
+   "z": -158,
+   "loc": "RED BASE: OUTER LOWER DOOR",
+   "bounds": {
+    "min": [
+     487,
+     -1441,
+     -221
+    ],
+    "max": [
+     524,
+     -1339.0828,
+     -95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTER LOWER DOOR-2",
+   "x": 505.5,
+   "y": -1364.7256,
+   "z": -158,
+   "loc": "RED BASE: OUTER LOWER DOOR",
+   "bounds": {
+    "min": [
+     487,
+     -1414.4512,
+     -221
+    ],
+    "max": [
+     524,
+     -1315,
+     -95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTER TOP DOOR-1",
+   "x": 505.5,
+   "y": -1389.8396,
+   "z": 114,
+   "loc": "RED BASE: OUTER TOP DOOR",
+   "bounds": {
+    "min": [
+     487,
+     -1441,
+     51
+    ],
+    "max": [
+     524,
+     -1338.6792,
+     177
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTER TOP DOOR-2",
+   "x": 505.5,
+   "y": -1364.884,
+   "z": 114,
+   "loc": "RED BASE: OUTER TOP DOOR",
+   "bounds": {
+    "min": [
+     487,
+     -1414.768,
+     51
+    ],
+    "max": [
+     524,
+     -1315,
+     177
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTSIDE LEFT DOOR-1",
+   "x": -222.5,
+   "y": -906,
+   "z": 111,
+   "loc": "RED BASE: OUTSIDE LEFT DOOR",
+   "bounds": {
+    "min": [
+     -234,
+     -929,
+     51
+    ],
+    "max": [
+     -211,
+     -883,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTSIDE LEFT DOOR-2",
+   "x": -222.5,
+   "y": -858,
+   "z": 111,
+   "loc": "RED BASE: OUTSIDE LEFT DOOR",
+   "bounds": {
+    "min": [
+     -234,
+     -881,
+     51
+    ],
+    "max": [
+     -211,
+     -835,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTSIDE RIGHT DOOR",
+   "x": -222.5,
+   "y": -1889,
+   "z": 111,
+   "loc": "RED BASE: OUTSIDE RIGHT DOOR",
+   "bounds": {
+    "min": [
+     -234,
+     -1912,
+     51
+    ],
+    "max": [
+     -211,
+     -1866,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: RIGHT CORRIDOR",
+   "x": -222.5,
+   "y": -1937,
+   "z": 111,
+   "loc": "RED BASE: RIGHT CORRIDOR",
+   "bounds": {
+    "min": [
+     -234,
+     -1960,
+     51
+    ],
+    "max": [
+     -211,
+     -1914,
+     171
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -1256,6 +1718,72 @@
    "z": -162,
    "loc": "LOWER LAVA AREA",
    "targetName": "target3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE: OUTSIDE LOWER DOOR",
+   "x": 626,
+   "y": 11,
+   "z": -271.5,
+   "loc": "BLUE BASE: OUTSIDE LOWER DOOR",
+   "target": "target3",
+   "bounds": {
+    "min": [
+     593,
+     -20,
+     -298
+    ],
+    "max": [
+     659,
+     42,
+     -245
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LAVA: LG/YA DOOR",
+   "x": 1579,
+   "y": -523,
+   "z": -146.5,
+   "loc": "LAVA: LG/YA DOOR",
+   "target": "target4",
+   "bounds": {
+    "min": [
+     1551,
+     -526,
+     -187
+    ],
+    "max": [
+     1607,
+     -520,
+     -106
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED SLIME/RA",
+   "x": 637,
+   "y": -1378,
+   "z": -271.5,
+   "loc": "RED SLIME/RA",
+   "target": "target1",
+   "bounds": {
+    "min": [
+     604,
+     -1409,
+     -298
+    ],
+    "max": [
+     670,
+     -1347,
+     -245
+    ]
+   }
   }
  ]
 }

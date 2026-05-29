@@ -104,6 +104,279 @@
    "y": 1280,
    "z": -448,
    "targetName": "rev"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -2496,
+   "y": -1728,
+   "z": -152,
+   "target": "tele",
+   "bounds": {
+    "min": [
+     -2559,
+     -1791,
+     -159
+    ],
+    "max": [
+     -2433,
+     -1665,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-10",
+   "x": 2560,
+   "y": -864,
+   "z": -536,
+   "target": "rev",
+   "bounds": {
+    "min": [
+     2465,
+     -959,
+     -543
+    ],
+    "max": [
+     2655,
+     -769,
+     -529
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-11",
+   "x": 2560,
+   "y": 256,
+   "z": -736,
+   "target": "2",
+   "bounds": {
+    "min": [
+     1857,
+     -255,
+     -767
+    ],
+    "max": [
+     3263,
+     767,
+     -705
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-12",
+   "x": 2560,
+   "y": 1472,
+   "z": -160,
+   "target": "4",
+   "bounds": {
+    "min": [
+     2369,
+     1217,
+     -191
+    ],
+    "max": [
+     2751,
+     1727,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-13",
+   "x": 2560,
+   "y": 2432,
+   "z": -736,
+   "target": "rev",
+   "bounds": {
+    "min": [
+     1857,
+     1921,
+     -767
+    ],
+    "max": [
+     3263,
+     2943,
+     -705
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -2496,
+   "y": -576,
+   "z": -152,
+   "target": "tele",
+   "bounds": {
+    "min": [
+     -2559,
+     -639,
+     -159
+    ],
+    "max": [
+     -2433,
+     -513,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -1344,
+   "y": -1728,
+   "z": -152,
+   "target": "tele",
+   "bounds": {
+    "min": [
+     -1407,
+     -1791,
+     -159
+    ],
+    "max": [
+     -1281,
+     -1665,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -1344,
+   "y": -576,
+   "z": -152,
+   "target": "tele",
+   "bounds": {
+    "min": [
+     -1407,
+     -639,
+     -159
+    ],
+    "max": [
+     -1281,
+     -513,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": -280,
+   "y": 3200,
+   "z": -140,
+   "target": "6",
+   "bounds": {
+    "min": [
+     -287,
+     3137,
+     -191
+    ],
+    "max": [
+     -273,
+     3263,
+     -89
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 0,
+   "y": -872,
+   "z": -488,
+   "target": "tele",
+   "bounds": {
+    "min": [
+     -511,
+     -3439,
+     -495
+    ],
+    "max": [
+     511,
+     1695,
+     -481
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": 0,
+   "y": 72,
+   "z": -378,
+   "target": "start",
+   "bounds": {
+    "min": [
+     -79,
+     57,
+     -463
+    ],
+    "max": [
+     79,
+     87,
+     -293
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-8",
+   "x": 640,
+   "y": 3200,
+   "z": -120,
+   "target": "5",
+   "bounds": {
+    "min": [
+     577,
+     3137,
+     -127
+    ],
+    "max": [
+     703,
+     3263,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-9",
+   "x": 2560,
+   "y": -2560,
+   "z": -64,
+   "target": "2",
+   "bounds": {
+    "min": [
+     2513,
+     -2607,
+     -127
+    ],
+    "max": [
+     2607,
+     -2513,
+     -1
+    ]
+   }
   }
  ]
 }

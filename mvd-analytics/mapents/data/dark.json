@@ -3,6 +3,66 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": 672,
+   "y": 800,
+   "z": -687.5,
+   "bounds": {
+    "min": [
+     545,
+     785,
+     -687
+    ],
+    "max": [
+     799,
+     815,
+     -688
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": 720,
+   "y": 568,
+   "z": -1524,
+   "bounds": {
+    "min": [
+     657,
+     529,
+     -1527
+    ],
+    "max": [
+     783,
+     607,
+     -1521
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": 722,
+   "y": 505,
+   "z": -1481,
+   "bounds": {
+    "min": [
+     637,
+     499,
+     -1523
+    ],
+    "max": [
+     807,
+     511,
+     -1439
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_health",
    "kind": "h25",
@@ -186,6 +246,90 @@
    "y": 832,
    "z": -912,
    "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 88,
+   "y": 112,
+   "z": -204,
+   "target": "t3",
+   "bounds": {
+    "min": [
+     65,
+     97,
+     -239
+    ],
+    "max": [
+     111,
+     127,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 408,
+   "y": 80,
+   "z": -248,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     385,
+     65,
+     -287
+    ],
+    "max": [
+     431,
+     95,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 726,
+   "y": 142,
+   "z": -1498,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     697,
+     133,
+     -1519
+    ],
+    "max": [
+     755,
+     151,
+     -1477
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 1128,
+   "y": 916,
+   "z": -912,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     1105,
+     905,
+     -943
+    ],
+    "max": [
+     1151,
+     927,
+     -881
+    ]
+   }
   }
  ]
 }

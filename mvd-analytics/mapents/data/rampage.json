@@ -3,6 +3,90 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue open-1",
+   "x": -2036,
+   "y": 144,
+   "z": -332,
+   "loc": "blue open",
+   "bounds": {
+    "min": [
+     -2079,
+     137,
+     -415
+    ],
+    "max": [
+     -1993,
+     151,
+     -249
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue open-2",
+   "x": -1944,
+   "y": 144,
+   "z": -332,
+   "loc": "blue open",
+   "bounds": {
+    "min": [
+     -1991,
+     137,
+     -415
+    ],
+    "max": [
+     -1897,
+     151,
+     -249
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "red open-1",
+   "x": -2040,
+   "y": -856,
+   "z": -332,
+   "loc": "red open",
+   "bounds": {
+    "min": [
+     -2087,
+     -863,
+     -415
+    ],
+    "max": [
+     -1993,
+     -849,
+     -249
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "red open-2",
+   "x": -1948,
+   "y": -856,
+   "z": -332,
+   "loc": "red open",
+   "bounds": {
+    "min": [
+     -1991,
+     -863,
+     -415
+    ],
+    "max": [
+     -1905,
+     -849,
+     -249
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

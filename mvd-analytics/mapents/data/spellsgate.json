@@ -3,6 +3,26 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 107,
+   "y": 24.5,
+   "z": -68.66667,
+   "bounds": {
+    "min": [
+     96,
+     13,
+     -70
+    ],
+    "max": [
+     118,
+     36,
+     -67.333336
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -225,6 +245,27 @@
    "y": 24,
    "z": 352,
    "targetName": "teledest"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 88,
+   "y": 16,
+   "z": -832,
+   "target": "teledest",
+   "bounds": {
+    "min": [
+     -271,
+     -255,
+     -1471
+    ],
+    "max": [
+     447,
+     287,
+     -193
+    ]
+   }
   }
  ]
 }

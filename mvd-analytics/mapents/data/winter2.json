@@ -3,6 +3,67 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -778,
+   "y": -624,
+   "z": 344,
+   "bounds": {
+    "min": [
+     -785,
+     -631,
+     337
+    ],
+    "max": [
+     -771,
+     -617,
+     351
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -1216,
+   "y": 248,
+   "z": 128,
+   "bounds": {
+    "min": [
+     -1263,
+     193,
+     -15
+    ],
+    "max": [
+     -1169,
+     303,
+     271
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-2",
+   "x": -644,
+   "y": -624,
+   "z": 193,
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -655,
+     -687,
+     129
+    ],
+    "max": [
+     -633,
+     -561,
+     257
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -440,6 +501,90 @@
    "y": -1004,
    "z": 279,
    "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -878,
+   "y": -115,
+   "z": 170,
+   "target": "t3",
+   "bounds": {
+    "min": [
+     -885,
+     -145,
+     125
+    ],
+    "max": [
+     -871,
+     -85,
+     215
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -372,
+   "y": -1006,
+   "z": 48,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -469,
+     -1013,
+     5
+    ],
+    "max": [
+     -275,
+     -999,
+     91
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -258.5,
+   "y": -94,
+   "z": 177,
+   "target": "t3",
+   "bounds": {
+    "min": [
+     -335,
+     -101,
+     137
+    ],
+    "max": [
+     -182,
+     -87,
+     217
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 430,
+   "y": -1004,
+   "z": 307,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     423,
+     -1059,
+     266
+    ],
+    "max": [
+     437,
+     -949,
+     348
+    ]
+   }
   }
  ]
 }

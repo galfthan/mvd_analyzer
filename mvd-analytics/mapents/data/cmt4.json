@@ -3,6 +3,91 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "YA",
+   "x": 1008,
+   "y": -1764,
+   "z": -192,
+   "loc": "YA",
+   "bounds": {
+    "min": [
+     977,
+     -1767,
+     -223
+    ],
+    "max": [
+     1039,
+     -1761,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent",
+   "x": 0,
+   "y": -1044,
+   "z": -220,
+   "loc": "Pent",
+   "bounds": {
+    "min": [
+     -63,
+     -1047,
+     -255
+    ],
+    "max": [
+     63,
+     -1041,
+     -185
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent.gate",
+   "x": 32,
+   "y": -1044,
+   "z": -252,
+   "loc": "Pent.gate",
+   "bounds": {
+    "min": [
+     -31,
+     -1047,
+     -287
+    ],
+    "max": [
+     95,
+     -1041,
+     -217
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "YA.MH",
+   "x": 864,
+   "y": -1742,
+   "z": -432,
+   "loc": "YA.MH",
+   "spawnflags": 16,
+   "bounds": {
+    "min": [
+     801,
+     -1753,
+     -479
+    ],
+    "max": [
+     927,
+     -1731,
+     -385
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -802,6 +887,72 @@
    "z": -152,
    "loc": "big.high/box",
    "targetName": "dest1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.MH",
+   "x": -1072,
+   "y": -1124,
+   "z": -408,
+   "loc": "Quad.MH",
+   "target": "dest1",
+   "bounds": {
+    "min": [
+     -1103,
+     -1127,
+     -463
+    ],
+    "max": [
+     -1041,
+     -1121,
+     -353
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": 620,
+   "y": -1856,
+   "z": -184,
+   "loc": "YA",
+   "target": "dest2",
+   "bounds": {
+    "min": [
+     617,
+     -1887,
+     -239
+    ],
+    "max": [
+     623,
+     -1825,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "big.tele",
+   "x": -60,
+   "y": 240,
+   "z": -376,
+   "loc": "big.tele",
+   "target": "dest3",
+   "bounds": {
+    "min": [
+     -63,
+     209,
+     -431
+    ],
+    "max": [
+     -57,
+     271,
+     -321
+    ]
+   }
   }
  ]
 }

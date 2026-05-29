@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "yard",
+   "x": 380,
+   "y": 64,
+   "z": 32,
+   "loc": "yard",
+   "bounds": {
+    "min": [
+     377,
+     33,
+     1
+    ],
+    "max": [
+     383,
+     95,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "yard",
+   "x": -392,
+   "y": 0,
+   "z": 64,
+   "loc": "yard",
+   "bounds": {
+    "min": [
+     -399,
+     -31,
+     1
+    ],
+    "max": [
+     -385,
+     31,
+     127
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -383,6 +425,94 @@
    "z": 8,
    "loc": "yard",
    "targetName": "due"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 320,
+   "y": -1216,
+   "z": 16,
+   "loc": "LG",
+   "target": "tre",
+   "bounds": {
+    "min": [
+     281,
+     -1231,
+     -31
+    ],
+    "max": [
+     359,
+     -1201,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.below",
+   "x": 904,
+   "y": -768,
+   "z": 368,
+   "loc": "Quad.below",
+   "target": "uno",
+   "bounds": {
+    "min": [
+     889,
+     -807,
+     321
+    ],
+    "max": [
+     919,
+     -729,
+     415
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "cross.RL",
+   "x": 968,
+   "y": 544,
+   "z": 304,
+   "loc": "cross.RL",
+   "target": "due",
+   "bounds": {
+    "min": [
+     953,
+     505,
+     257
+    ],
+    "max": [
+     983,
+     583,
+     351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "yard",
+   "x": -404,
+   "y": 0,
+   "z": 64,
+   "loc": "yard",
+   "target": "quad",
+   "bounds": {
+    "min": [
+     -415,
+     -31,
+     1
+    ],
+    "max": [
+     -393,
+     31,
+     127
+    ]
+   }
   }
  ]
 }

@@ -59,6 +59,27 @@
    "y": -512,
    "z": 668,
    "targetName": "telehigh"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 40,
+   "y": -696,
+   "z": 280,
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     -15,
+     -719,
+     257
+    ],
+    "max": [
+     95,
+     -673,
+     303
+    ]
+   }
   }
  ]
 }

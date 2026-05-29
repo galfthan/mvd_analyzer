@@ -3,6 +3,237 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL",
+   "x": 864,
+   "y": -902,
+   "z": 16,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     841,
+     -903,
+     -31
+    ],
+    "max": [
+     887,
+     -901,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent",
+   "x": 26,
+   "y": -936,
+   "z": 52,
+   "loc": "Pent",
+   "bounds": {
+    "min": [
+     1,
+     -939,
+     1
+    ],
+    "max": [
+     51,
+     -933,
+     103
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.door",
+   "x": -26,
+   "y": -936,
+   "z": 52,
+   "loc": "Quad.door",
+   "bounds": {
+    "min": [
+     -51,
+     -939,
+     1
+    ],
+    "max": [
+     -1,
+     -933,
+     103
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Ring",
+   "x": 1524,
+   "y": 192,
+   "z": 24,
+   "loc": "Ring",
+   "bounds": {
+    "min": [
+     1521,
+     169,
+     -23
+    ],
+    "max": [
+     1527,
+     215,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cellar.SNG-1",
+   "x": -32,
+   "y": -8,
+   "z": -240,
+   "loc": "cellar.SNG",
+   "bounds": {
+    "min": [
+     -79,
+     -14,
+     -246
+    ],
+    "max": [
+     15,
+     -2,
+     -234
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cellar.SNG-2",
+   "x": -32,
+   "y": -8,
+   "z": -196,
+   "loc": "cellar.SNG",
+   "bounds": {
+    "min": [
+     -79,
+     -14,
+     -202
+    ],
+    "max": [
+     15,
+     -2,
+     -190
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cellar.SNG-3",
+   "x": -32,
+   "y": -8,
+   "z": -152,
+   "loc": "cellar.SNG",
+   "bounds": {
+    "min": [
+     -79,
+     -14,
+     -158
+    ],
+    "max": [
+     15,
+     -2,
+     -146
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.MH",
+   "x": 1498,
+   "y": -576,
+   "z": 184,
+   "loc": "water.MH",
+   "bounds": {
+    "min": [
+     1497,
+     -599,
+     145
+    ],
+    "max": [
+     1499,
+     -553,
+     223
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.high-1",
+   "x": 1664,
+   "y": -1640,
+   "z": 104,
+   "loc": "water.high",
+   "bounds": {
+    "min": [
+     1601,
+     -1646.5,
+     97.5
+    ],
+    "max": [
+     1727,
+     -1633.5,
+     110.5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.high-2",
+   "x": 1664,
+   "y": -1640,
+   "z": 136,
+   "loc": "water.high",
+   "bounds": {
+    "min": [
+     1601,
+     -1646.5,
+     129.5
+    ],
+    "max": [
+     1727,
+     -1633.5,
+     142.5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.high-3",
+   "x": 1664,
+   "y": -1640,
+   "z": 168,
+   "loc": "water.high",
+   "bounds": {
+    "min": [
+     1601,
+     -1646.5,
+     161.5
+    ],
+    "max": [
+     1727,
+     -1633.5,
+     174.5
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -644,6 +875,138 @@
    "z": 32,
    "loc": "water.high",
    "targetName": "water"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent",
+   "x": 328,
+   "y": -224,
+   "z": 72,
+   "loc": "Pent",
+   "target": "kirche",
+   "bounds": {
+    "min": [
+     320,
+     -255,
+     25
+    ],
+    "max": [
+     336,
+     -193,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 1008,
+   "y": 376,
+   "z": 48,
+   "loc": "RA",
+   "target": "water",
+   "bounds": {
+    "min": [
+     977,
+     368,
+     1
+    ],
+    "max": [
+     1039,
+     384,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "cellar.RL",
+   "x": 364,
+   "y": 560,
+   "z": -200,
+   "loc": "cellar.RL",
+   "target": "red",
+   "bounds": {
+    "min": [
+     361,
+     529,
+     -247
+    ],
+    "max": [
+     367,
+     591,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "cellar.SNG",
+   "x": -32,
+   "y": -116,
+   "z": -176,
+   "loc": "cellar.SNG",
+   "target": "pent",
+   "bounds": {
+    "min": [
+     -63,
+     -119,
+     -223
+    ],
+    "max": [
+     -1,
+     -113,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water.high-1",
+   "x": 1664,
+   "y": -1676,
+   "z": 144,
+   "loc": "water.high",
+   "target": "pent",
+   "bounds": {
+    "min": [
+     1633,
+     -1679,
+     97
+    ],
+    "max": [
+     1695,
+     -1673,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water.high-2",
+   "x": 1972,
+   "y": -1008,
+   "z": 96,
+   "loc": "water.high",
+   "target": "ra-top",
+   "bounds": {
+    "min": [
+     1969,
+     -1039,
+     49
+    ],
+    "max": [
+     1975,
+     -977,
+     143
+    ]
+   }
   }
  ]
 }

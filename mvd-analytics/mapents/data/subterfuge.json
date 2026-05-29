@@ -345,6 +345,94 @@
    "z": 152,
    "loc": "ra-tele-exit",
    "targetName": "info_teleport_destination4"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 728,
+   "y": 80,
+   "z": 192,
+   "loc": "LG",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     721,
+     33,
+     177
+    ],
+    "max": [
+     735,
+     127,
+     207
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "doublehp-path",
+   "x": 520,
+   "y": 0,
+   "z": 384,
+   "loc": "doublehp-path",
+   "target": "info_teleport_destination2",
+   "bounds": {
+    "min": [
+     513,
+     -47,
+     369
+    ],
+    "max": [
+     527,
+     47,
+     399
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low-tele",
+   "x": 584,
+   "y": 336,
+   "z": 0,
+   "loc": "low-tele",
+   "target": "info_teleport_destination3",
+   "bounds": {
+    "min": [
+     577,
+     289,
+     -15
+    ],
+    "max": [
+     591,
+     383,
+     15
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "ra-tele",
+   "x": 352,
+   "y": 896,
+   "z": 64,
+   "loc": "ra-tele",
+   "target": "info_teleport_destination4",
+   "bounds": {
+    "min": [
+     305,
+     881,
+     49
+    ],
+    "max": [
+     399,
+     911,
+     79
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,71 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE BASE (BELOW FLAG)",
+   "x": -1360,
+   "y": 472,
+   "z": 632,
+   "loc": "BLUE BASE (BELOW FLAG)",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1407,
+     465,
+     577
+    ],
+    "max": [
+     -1313,
+     479,
+     687
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "CENTRE AREA (GL PLATFORM)",
+   "x": 0,
+   "y": 296,
+   "z": 372,
+   "loc": "CENTRE AREA (GL PLATFORM)",
+   "bounds": {
+    "min": [
+     -31,
+     289,
+     321
+    ],
+    "max": [
+     31,
+     303,
+     423
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED BASE (BELOW FLAG)",
+   "x": 1360,
+   "y": -472,
+   "z": 632,
+   "loc": "RED BASE (BELOW FLAG)",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1313,
+     -479,
+     577
+    ],
+    "max": [
+     1407,
+     -465,
+     687
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -945,6 +1010,50 @@
    "z": 356,
    "loc": "BRIDGE AT CENTRE",
    "targetName": "rl"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL ROOM IN WATER-1",
+   "x": 322,
+   "y": 114,
+   "z": 0,
+   "loc": "RL ROOM IN WATER",
+   "target": "rl",
+   "bounds": {
+    "min": [
+     309,
+     101,
+     -47
+    ],
+    "max": [
+     335,
+     127,
+     47
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL ROOM IN WATER-2",
+   "x": 338,
+   "y": 98,
+   "z": 0,
+   "loc": "RL ROOM IN WATER",
+   "target": "rl",
+   "bounds": {
+    "min": [
+     325,
+     85,
+     -47
+    ],
+    "max": [
+     351,
+     111,
+     47
+    ]
+   }
   }
  ]
 }

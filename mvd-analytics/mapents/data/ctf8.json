@@ -3,6 +3,90 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Blue Base",
+   "x": -1754,
+   "y": -136,
+   "z": 192,
+   "loc": "Blue Base",
+   "bounds": {
+    "min": [
+     -1755,
+     -199,
+     129
+    ],
+    "max": [
+     -1753,
+     -73,
+     255
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Red Base",
+   "x": 1536,
+   "y": 42,
+   "z": 168,
+   "loc": "Red Base",
+   "bounds": {
+    "min": [
+     1473,
+     41,
+     105
+    ],
+    "max": [
+     1599,
+     43,
+     231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Blue Windtunnel",
+   "x": -1200,
+   "y": 248,
+   "z": 552,
+   "loc": "Blue Windtunnel",
+   "bounds": {
+    "min": [
+     -1311,
+     161,
+     513
+    ],
+    "max": [
+     -1089,
+     335,
+     591
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Red Windtunnel",
+   "x": 1520,
+   "y": 64,
+   "z": 552,
+   "loc": "Red Windtunnel",
+   "bounds": {
+    "min": [
+     1489,
+     -79,
+     513
+    ],
+    "max": [
+     1551,
+     207,
+     591
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

@@ -415,6 +415,94 @@
    "z": 264,
    "loc": "low.RL",
    "targetName": "middle"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.ledge",
+   "x": 24,
+   "y": -112,
+   "z": 56,
+   "loc": "Quad.ledge",
+   "target": "teledest1",
+   "bounds": {
+    "min": [
+     17,
+     -159,
+     1
+    ],
+    "max": [
+     31,
+     -65,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.tele",
+   "x": -659,
+   "y": 88,
+   "z": 456,
+   "loc": "Quad.tele",
+   "target": "middle",
+   "bounds": {
+    "min": [
+     -703,
+     81,
+     401
+    ],
+    "max": [
+     -615,
+     95,
+     511
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "air.ledge",
+   "x": -488,
+   "y": 392,
+   "z": 280,
+   "loc": "air.ledge",
+   "target": "top",
+   "bounds": {
+    "min": [
+     -535,
+     385,
+     225
+    ],
+    "max": [
+     -441,
+     399,
+     335
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "yard",
+   "x": -458,
+   "y": 104,
+   "z": 56,
+   "loc": "yard",
+   "target": "air",
+   "bounds": {
+    "min": [
+     -505,
+     97,
+     1
+    ],
+    "max": [
+     -411,
+     111,
+     111
+    ]
+   }
   }
  ]
 }

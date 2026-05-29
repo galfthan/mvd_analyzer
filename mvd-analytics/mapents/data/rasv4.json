@@ -353,6 +353,69 @@
    "y": -504,
    "z": -8,
    "targetName": "back"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1244,
+   "y": -112,
+   "z": -192,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -1247,
+     -151,
+     -239
+    ],
+    "max": [
+     -1241,
+     -73,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -235,
+   "y": -287,
+   "z": -675,
+   "target": "back",
+   "bounds": {
+    "min": [
+     -306,
+     -291,
+     -756
+    ],
+    "max": [
+     -164,
+     -283,
+     -594
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 464,
+   "y": -458,
+   "z": 16,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     417,
+     -461,
+     -39
+    ],
+    "max": [
+     511,
+     -455,
+     71
+    ]
+   }
   }
  ]
 }

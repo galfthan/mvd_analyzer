@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "LG.lift",
+   "x": 112,
+   "y": -448,
+   "z": 48,
+   "loc": "LG.lift",
+   "bounds": {
+    "min": [
+     97,
+     -455,
+     33
+    ],
+    "max": [
+     127,
+     -441,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.lift",
+   "x": 112,
+   "y": -384,
+   "z": -88,
+   "loc": "LG.lift",
+   "bounds": {
+    "min": [
+     69,
+     -427,
+     -175
+    ],
+    "max": [
+     155,
+     -341,
+     -1
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -523,6 +565,94 @@
    "z": 96,
    "loc": "ammo.SNG",
    "targetName": "tele4"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA.tele",
+   "x": 880,
+   "y": -552,
+   "z": 216,
+   "loc": "GA.tele",
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     817,
+     -559,
+     161
+    ],
+    "max": [
+     943,
+     -545,
+     271
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH.YA",
+   "x": 352,
+   "y": -568,
+   "z": -104,
+   "loc": "MH.YA",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     289,
+     -575,
+     -159
+    ],
+    "max": [
+     415,
+     -561,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.below",
+   "x": -368,
+   "y": -344,
+   "z": -104,
+   "loc": "RA.below",
+   "target": "tele4",
+   "bounds": {
+    "min": [
+     -431,
+     -351,
+     -159
+    ],
+    "max": [
+     -305,
+     -337,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "ammo.SNG",
+   "x": 400,
+   "y": 984,
+   "z": 120,
+   "loc": "ammo.SNG",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     337,
+     977,
+     65
+    ],
+    "max": [
+     463,
+     991,
+     175
+    ]
+   }
   }
  ]
 }

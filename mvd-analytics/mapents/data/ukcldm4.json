@@ -3,6 +3,111 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad switch-1",
+   "x": 0,
+   "y": -1948,
+   "z": 400,
+   "loc": "Quad switch",
+   "bounds": {
+    "min": [
+     -31,
+     -1951,
+     369
+    ],
+    "max": [
+     31,
+     -1945,
+     431
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad switch-2",
+   "x": 0,
+   "y": -1776,
+   "z": 356,
+   "loc": "Quad switch",
+   "bounds": {
+    "min": [
+     -31,
+     -1807,
+     353
+    ],
+    "max": [
+     31,
+     -1745,
+     359
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad switch",
+   "x": 0,
+   "y": -1832,
+   "z": 256,
+   "loc": "Quad switch",
+   "bounds": {
+    "min": [
+     -47,
+     -1919,
+     193
+    ],
+    "max": [
+     47,
+     -1745,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad-1",
+   "x": -20,
+   "y": -1724,
+   "z": 96,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     -31,
+     -1735,
+     33
+    ],
+    "max": [
+     -9,
+     -1713,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad-2",
+   "x": 20,
+   "y": -1724,
+   "z": 96,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     9,
+     -1735,
+     33
+    ],
+    "max": [
+     31,
+     -1713,
+     159
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -1067,6 +1172,94 @@
    "z": 384,
    "loc": "eyes",
    "targetName": "gl"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "+100",
+   "x": 0,
+   "y": 440,
+   "z": 112,
+   "loc": "+100",
+   "target": "rl",
+   "bounds": {
+    "min": [
+     -63,
+     433,
+     33
+    ],
+    "max": [
+     63,
+     447,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad",
+   "x": 440,
+   "y": -1424,
+   "z": 128,
+   "loc": "Quad",
+   "target": "gl",
+   "bounds": {
+    "min": [
+     433,
+     -1487,
+     33
+    ],
+    "max": [
+     447,
+     -1361,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad tele",
+   "x": 472,
+   "y": 0,
+   "z": 448,
+   "loc": "Quad tele",
+   "target": "quad",
+   "bounds": {
+    "min": [
+     465,
+     -63,
+     353
+    ],
+    "max": [
+     479,
+     63,
+     543
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "balcony tele",
+   "x": -688,
+   "y": 1400,
+   "z": 416,
+   "loc": "balcony tele",
+   "target": "mega",
+   "bounds": {
+    "min": [
+     -735,
+     1393,
+     321
+    ],
+    "max": [
+     -641,
+     1407,
+     511
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,46 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-1",
+   "x": 0,
+   "y": -124,
+   "z": 4,
+   "bounds": {
+    "min": [
+     -31,
+     -127,
+     -31
+    ],
+    "max": [
+     31,
+     -121,
+     39
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-2",
+   "x": 0,
+   "y": 764,
+   "z": 4,
+   "bounds": {
+    "min": [
+     -31,
+     761,
+     -31
+    ],
+    "max": [
+     31,
+     767,
+     39
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

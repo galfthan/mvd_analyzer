@@ -398,6 +398,28 @@
    "z": 296,
    "loc": "tele exit",
    "targetName": "tele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele",
+   "x": 408,
+   "y": -423.5,
+   "z": 80,
+   "loc": "tele",
+   "target": "tele",
+   "bounds": {
+    "min": [
+     353,
+     -431,
+     17
+    ],
+    "max": [
+     463,
+     -416,
+     143
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "SNG",
+   "x": 1168,
+   "y": 248,
+   "z": -152,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     1145,
+     241,
+     -175
+    ],
+    "max": [
+     1191,
+     255,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RL",
+   "x": 724,
+   "y": -636,
+   "z": -112,
+   "loc": "RL",
+   "bounds": {
+    "min": [
+     713,
+     -663,
+     -159
+    ],
+    "max": [
+     735,
+     -609,
+     -65
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -651,6 +693,231 @@
    "z": -48,
    "loc": "roof.below",
    "targetName": "t25"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL",
+   "x": 800,
+   "y": -1068,
+   "z": -112,
+   "loc": "RL",
+   "target": "t25",
+   "bounds": {
+    "min": [
+     769,
+     -1079,
+     -159
+    ],
+    "max": [
+     831,
+     -1057,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring",
+   "x": -172,
+   "y": -1280,
+   "z": -240,
+   "loc": "Ring",
+   "target": "t25",
+   "bounds": {
+    "min": [
+     -183,
+     -1311,
+     -287
+    ],
+    "max": [
+     -161,
+     -1249,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG",
+   "x": 1576,
+   "y": -196,
+   "z": 56,
+   "loc": "SNG",
+   "target": "t66",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1553,
+     -247,
+     9
+    ],
+    "max": [
+     1599,
+     -145,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG.GA",
+   "x": 1800,
+   "y": 496,
+   "z": 184,
+   "loc": "SNG.GA",
+   "target": "t66",
+   "bounds": {
+    "min": [
+     1793,
+     465,
+     177
+    ],
+    "max": [
+     1807,
+     527,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA-1",
+   "x": -876,
+   "y": -272,
+   "z": 96,
+   "loc": "YA",
+   "target": "t42",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -903,
+     -319,
+     1
+    ],
+    "max": [
+     -849,
+     -225,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA-2",
+   "x": -872,
+   "y": -148,
+   "z": 96,
+   "loc": "YA",
+   "target": "t43",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -895,
+     -199,
+     1
+    ],
+    "max": [
+     -849,
+     -97,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA-3",
+   "x": -736,
+   "y": -272,
+   "z": 96,
+   "loc": "YA",
+   "target": "t40",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -759,
+     -319,
+     1
+    ],
+    "max": [
+     -713,
+     -225,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA-4",
+   "x": -736,
+   "y": -148,
+   "z": 96,
+   "loc": "YA",
+   "target": "t41",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -759,
+     -199,
+     1
+    ],
+    "max": [
+     -713,
+     -97,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "cave",
+   "x": 64,
+   "y": 388,
+   "z": -208,
+   "loc": "cave",
+   "target": "t5",
+   "bounds": {
+    "min": [
+     33,
+     385,
+     -255
+    ],
+    "max": [
+     95,
+     391,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele",
+   "x": 256,
+   "y": -492,
+   "z": -208,
+   "loc": "tele",
+   "target": "t45",
+   "bounds": {
+    "min": [
+     225,
+     -503,
+     -255
+    ],
+    "max": [
+     287,
+     -481,
+     -161
+    ]
+   }
   }
  ]
 }

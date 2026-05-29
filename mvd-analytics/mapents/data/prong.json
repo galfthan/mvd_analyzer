@@ -3,6 +3,148 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 944,
+   "y": 224,
+   "z": -76,
+   "bounds": {
+    "min": [
+     929,
+     209,
+     -87
+    ],
+    "max": [
+     959,
+     239,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -1212,
+   "y": 156,
+   "z": -108,
+   "bounds": {
+    "min": [
+     -1247,
+     153,
+     -151
+    ],
+    "max": [
+     -1177,
+     159,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -796,
+   "y": 832,
+   "z": -108,
+   "bounds": {
+    "min": [
+     -799,
+     801,
+     -151
+    ],
+    "max": [
+     -793,
+     863,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-3",
+   "x": 888,
+   "y": 792,
+   "z": 248,
+   "spawnflags": 18,
+   "bounds": {
+    "min": [
+     833,
+     785,
+     193
+    ],
+    "max": [
+     943,
+     799,
+     303
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 944,
+   "y": -56,
+   "z": -158,
+   "bounds": {
+    "min": [
+     673,
+     -335,
+     -159
+    ],
+    "max": [
+     1215,
+     223,
+     -157
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 944,
+   "y": 504,
+   "z": -158,
+   "bounds": {
+    "min": [
+     673,
+     225,
+     -159
+    ],
+    "max": [
+     1215,
+     783,
+     -157
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-6",
+   "x": 1220,
+   "y": 224,
+   "z": -88,
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1217,
+     193,
+     -139
+    ],
+    "max": [
+     1223,
+     255,
+     -37
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -693,6 +835,27 @@
    "y": 1032,
    "z": 208,
    "targetName": "secret"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 888,
+   "y": 872,
+   "z": 232,
+   "target": "secret",
+   "bounds": {
+    "min": [
+     841,
+     865,
+     161
+    ],
+    "max": [
+     935,
+     879,
+     303
+    ]
+   }
   }
  ]
 }

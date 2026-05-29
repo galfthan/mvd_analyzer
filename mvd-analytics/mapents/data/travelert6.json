@@ -430,6 +430,48 @@
    "y": 0,
    "z": 308,
    "targetName": "yatele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -52,
+   "y": 822,
+   "z": 152,
+   "target": "teleportern",
+   "bounds": {
+    "min": [
+     -103,
+     737,
+     49
+    ],
+    "max": [
+     -1,
+     907,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 896,
+   "y": -74,
+   "z": 200,
+   "target": "yatele",
+   "bounds": {
+    "min": [
+     841,
+     -79,
+     145
+    ],
+    "max": [
+     951,
+     -69,
+     255
+    ]
+   }
   }
  ]
 }

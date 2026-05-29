@@ -5076,6 +5076,48 @@
   "mapEntities": {
     "entities": [
       {
+        "bounds": {
+          "max": [
+            239,
+            495,
+            -1
+          ],
+          "min": [
+            145,
+            401,
+            -111
+          ]
+        },
+        "class": "func_door",
+        "loc": "RA",
+        "name": "RA",
+        "type": "door",
+        "x": 192,
+        "y": 448,
+        "z": -56
+      },
+      {
+        "bounds": {
+          "max": [
+            479,
+            191,
+            -225
+          ],
+          "min": [
+            449,
+            65,
+            -319
+          ]
+        },
+        "class": "func_door",
+        "loc": "yard",
+        "name": "yard",
+        "type": "door",
+        "x": 464,
+        "y": 128,
+        "z": -272
+      },
+      {
         "class": "item_cells",
         "kind": "cells",
         "loc": "LG",
@@ -5437,6 +5479,50 @@
         "x": 512,
         "y": 296,
         "z": -128
+      },
+      {
+        "bounds": {
+          "max": [
+            -329,
+            -497,
+            -209
+          ],
+          "min": [
+            -343,
+            -559,
+            -287
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "YA.tele",
+        "name": "YA.tele",
+        "target": "tele2",
+        "type": "teleportSrc",
+        "x": -336,
+        "y": -528,
+        "z": -248
+      },
+      {
+        "bounds": {
+          "max": [
+            223,
+            151,
+            -305
+          ],
+          "min": [
+            161,
+            137,
+            -383
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "yard",
+        "name": "yard",
+        "target": "tele1",
+        "type": "teleportSrc",
+        "x": 192,
+        "y": 144,
+        "z": -344
       }
     ],
     "map": "skull"
@@ -5959,7 +6045,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 13,
+  "schemaVersion": 14,
   "streams": {
     "global": {
       "matchEnd": 599993,

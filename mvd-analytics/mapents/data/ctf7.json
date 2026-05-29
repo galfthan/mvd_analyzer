@@ -3,6 +3,386 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "outside blue base-1",
+   "x": 2696,
+   "y": 12,
+   "z": 64,
+   "loc": "outside blue base",
+   "bounds": {
+    "min": [
+     2681,
+     9,
+     49
+    ],
+    "max": [
+     2711,
+     15,
+     79
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "outside blue base-2",
+   "x": 2932,
+   "y": -436,
+   "z": -52,
+   "loc": "outside blue base",
+   "bounds": {
+    "min": [
+     2929,
+     -451,
+     -67
+    ],
+    "max": [
+     2935,
+     -421,
+     -37
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "Quad at blue base",
+   "x": 2028,
+   "y": -436,
+   "z": -60,
+   "loc": "Quad at blue base",
+   "bounds": {
+    "min": [
+     2025,
+     -463,
+     -95
+    ],
+    "max": [
+     2031,
+     -409,
+     -25
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad at red base-1",
+   "x": 2140,
+   "y": -436,
+   "z": -84,
+   "loc": "Quad at red base",
+   "bounds": {
+    "min": [
+     2137,
+     -463,
+     -87
+    ],
+    "max": [
+     2143,
+     -409,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad at red base-2",
+   "x": 2140,
+   "y": -436,
+   "z": -60,
+   "loc": "Quad at red base",
+   "bounds": {
+    "min": [
+     2137,
+     -463,
+     -63
+    ],
+    "max": [
+     2143,
+     -409,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad at red base-3",
+   "x": 2140,
+   "y": -436,
+   "z": -36,
+   "loc": "Quad at red base",
+   "bounds": {
+    "min": [
+     2137,
+     -463,
+     -39
+    ],
+    "max": [
+     2143,
+     -409,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RL room",
+   "x": 2472,
+   "y": -1020,
+   "z": -352,
+   "loc": "RL room",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2441,
+     -1023,
+     -391
+    ],
+    "max": [
+     2503,
+     -1017,
+     -313
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue base-1",
+   "x": 2448,
+   "y": -1808,
+   "z": 88,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     2417,
+     -1811,
+     25
+    ],
+    "max": [
+     2479,
+     -1805,
+     151
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue base-2",
+   "x": 2512,
+   "y": -1808,
+   "z": 88,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     2481,
+     -1811,
+     25
+    ],
+    "max": [
+     2543,
+     -1805,
+     151
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside blue base-1",
+   "x": 2432,
+   "y": -1412,
+   "z": 8,
+   "loc": "outside blue base",
+   "bounds": {
+    "min": [
+     2385,
+     -1413,
+     -71
+    ],
+    "max": [
+     2479,
+     -1411,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside blue base-2",
+   "x": 2528,
+   "y": -1412,
+   "z": 8,
+   "loc": "outside blue base",
+   "bounds": {
+    "min": [
+     2481,
+     -1413,
+     -71
+    ],
+    "max": [
+     2575,
+     -1411,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside red base-1",
+   "x": 2420,
+   "y": -76,
+   "z": -284,
+   "loc": "outside red base",
+   "bounds": {
+    "min": [
+     2353,
+     -151,
+     -287
+    ],
+    "max": [
+     2487,
+     -1,
+     -281
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside red base-2",
+   "x": 2434,
+   "y": 20,
+   "z": -216,
+   "loc": "outside red base",
+   "bounds": {
+    "min": [
+     2385,
+     19,
+     -279
+    ],
+    "max": [
+     2483,
+     21,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside red base-3",
+   "x": 2534,
+   "y": 20,
+   "z": -216,
+   "loc": "outside red base",
+   "bounds": {
+    "min": [
+     2485,
+     19,
+     -279
+    ],
+    "max": [
+     2583,
+     21,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside red base-4",
+   "x": 2556,
+   "y": -76,
+   "z": -284,
+   "loc": "outside red base",
+   "bounds": {
+    "min": [
+     2489,
+     -151,
+     -287
+    ],
+    "max": [
+     2623,
+     -1,
+     -281
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "red base-1",
+   "x": 2448,
+   "y": 408,
+   "z": -120,
+   "loc": "red base",
+   "bounds": {
+    "min": [
+     2417,
+     405,
+     -183
+    ],
+    "max": [
+     2479,
+     411,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "red base-2",
+   "x": 2512,
+   "y": 408,
+   "z": -120,
+   "loc": "red base",
+   "bounds": {
+    "min": [
+     2481,
+     405,
+     -183
+    ],
+    "max": [
+     2543,
+     411,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "secret area at red base",
+   "x": 2472,
+   "y": -1352,
+   "z": -284,
+   "loc": "secret area at red base",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     2441,
+     -1383,
+     -287
+    ],
+    "max": [
+     2503,
+     -1321,
+     -281
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -1039,6 +1419,72 @@
    "z": -72,
    "loc": "outside blue base",
    "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad at blue base",
+   "x": 1948,
+   "y": -436,
+   "z": -64,
+   "loc": "Quad at blue base",
+   "target": "secrect",
+   "bounds": {
+    "min": [
+     1945,
+     -455,
+     -95
+    ],
+    "max": [
+     1951,
+     -417,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "secret area at red base-1",
+   "x": 2164,
+   "y": -1352,
+   "z": -340,
+   "loc": "secret area at red base",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     2161,
+     -1375,
+     -377
+    ],
+    "max": [
+     2167,
+     -1329,
+     -303
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "secret area at red base-2",
+   "x": 2804,
+   "y": -1352,
+   "z": -340,
+   "loc": "secret area at red base",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     2801,
+     -1375,
+     -377
+    ],
+    "max": [
+     2807,
+     -1329,
+     -303
+    ]
+   }
   }
  ]
 }

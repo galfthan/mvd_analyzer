@@ -612,6 +612,50 @@
    "z": 44,
    "loc": "window",
    "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG.tele",
+   "x": -508,
+   "y": -448,
+   "z": 24,
+   "loc": "SNG.tele",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -519,
+     -471,
+     1
+    ],
+    "max": [
+     -497,
+     -425,
+     47
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.box",
+   "x": 1180,
+   "y": -904,
+   "z": 0,
+   "loc": "YA.box",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     1169,
+     -927,
+     -15
+    ],
+    "max": [
+     1191,
+     -881,
+     15
+    ]
+   }
   }
  ]
 }

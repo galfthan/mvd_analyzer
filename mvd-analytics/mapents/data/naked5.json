@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.LG",
+   "x": 824,
+   "y": 384,
+   "z": -312,
+   "loc": "water.LG",
+   "bounds": {
+    "min": [
+     761,
+     353,
+     -367
+    ],
+    "max": [
+     887,
+     415,
+     -257
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -596,6 +617,28 @@
    "z": -224,
    "loc": "GA",
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 824,
+   "y": -498,
+   "z": -258,
+   "loc": "LG",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     789,
+     -507,
+     -299
+    ],
+    "max": [
+     859,
+     -489,
+     -217
+    ]
+   }
   }
  ]
 }

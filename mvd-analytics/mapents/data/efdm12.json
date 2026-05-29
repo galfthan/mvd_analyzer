@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Pent",
+   "x": 608,
+   "y": 1120,
+   "z": 340,
+   "loc": "Pent",
+   "bounds": {
+    "min": [
+     585,
+     1097,
+     337
+    ],
+    "max": [
+     631,
+     1143,
+     343
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -999,6 +1020,138 @@
    "z": 488,
    "loc": "arena.above",
    "targetName": "nw"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.GA-1",
+   "x": 497,
+   "y": -96,
+   "z": -80,
+   "loc": "Quad.GA",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     483,
+     -143,
+     -111
+    ],
+    "max": [
+     511,
+     -49,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.GA-2",
+   "x": 864,
+   "y": -1007,
+   "z": -80,
+   "loc": "Quad.GA",
+   "target": "cc2",
+   "bounds": {
+    "min": [
+     817,
+     -1021,
+     -111
+    ],
+    "max": [
+     911,
+     -993,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.YA",
+   "x": 593,
+   "y": -992,
+   "z": 80,
+   "loc": "Quad.YA",
+   "target": "cc1",
+   "bounds": {
+    "min": [
+     579,
+     -1039,
+     49
+    ],
+    "max": [
+     607,
+     -945,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring",
+   "x": -1024,
+   "y": 48,
+   "z": 224,
+   "loc": "Ring",
+   "target": "vl1",
+   "bounds": {
+    "min": [
+     -1071,
+     33,
+     193
+    ],
+    "max": [
+     -977,
+     63,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "arena.MH",
+   "x": -128,
+   "y": 1584,
+   "z": 80,
+   "loc": "arena.MH",
+   "target": "nw",
+   "bounds": {
+    "min": [
+     -175,
+     1569,
+     49
+    ],
+    "max": [
+     -81,
+     1599,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "arena.above",
+   "x": -480,
+   "y": 816,
+   "z": 528,
+   "loc": "arena.above",
+   "target": "nw2",
+   "bounds": {
+    "min": [
+     -527,
+     801,
+     497
+    ],
+    "max": [
+     -433,
+     831,
+     559
+    ]
+   }
   }
  ]
 }

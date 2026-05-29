@@ -3,6 +3,26 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 768,
+   "y": -108,
+   "z": 192,
+   "bounds": {
+    "min": [
+     737,
+     -111,
+     161
+    ],
+    "max": [
+     799,
+     -105,
+     223
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -508,6 +528,69 @@
    "y": 272,
    "z": 192,
    "targetName": "teledown"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 912,
+   "y": -256,
+   "z": 176,
+   "target": "teleup",
+   "bounds": {
+    "min": [
+     897,
+     -287,
+     129
+    ],
+    "max": [
+     927,
+     -225,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1088,
+   "y": 784,
+   "z": 368,
+   "target": "teledown",
+   "bounds": {
+    "min": [
+     1057,
+     769,
+     321
+    ],
+    "max": [
+     1119,
+     799,
+     415
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 1632,
+   "y": 208,
+   "z": 176,
+   "target": "tele2quad",
+   "bounds": {
+    "min": [
+     1601,
+     193,
+     129
+    ],
+    "max": [
+     1663,
+     223,
+     223
+    ]
+   }
   }
  ]
 }

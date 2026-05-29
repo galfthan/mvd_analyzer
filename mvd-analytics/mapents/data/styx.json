@@ -608,6 +608,50 @@
    "z": 148,
    "loc": "big.high",
    "targetName": "telepentup"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG.tele",
+   "x": 1208,
+   "y": 1504,
+   "z": -120,
+   "loc": "LG.tele",
+   "target": "telepentup",
+   "bounds": {
+    "min": [
+     1169,
+     1489,
+     -135
+    ],
+    "max": [
+     1247,
+     1519,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": -84,
+   "y": 888,
+   "z": -4,
+   "loc": "YA",
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     -95,
+     833,
+     -23
+    ],
+    "max": [
+     -73,
+     943,
+     15
+    ]
+   }
   }
  ]
 }

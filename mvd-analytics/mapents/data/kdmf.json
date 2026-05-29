@@ -3,6 +3,149 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": 0,
+   "y": -448,
+   "z": 284,
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -15,
+     -463,
+     281
+    ],
+    "max": [
+     15,
+     -433,
+     287
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": 0,
+   "y": -96,
+   "z": -176,
+   "bounds": {
+    "min": [
+     -15,
+     -103,
+     -191
+    ],
+    "max": [
+     15,
+     -89,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-1",
+   "x": -32,
+   "y": -528,
+   "z": 208,
+   "spawnflags": 2057,
+   "bounds": {
+    "min": [
+     -63,
+     -543,
+     129
+    ],
+    "max": [
+     -1,
+     -513,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -8,
+   "y": 240,
+   "z": -176,
+   "bounds": {
+    "min": [
+     -63,
+     237,
+     -211
+    ],
+    "max": [
+     47,
+     243,
+     -141
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 0,
+   "y": -136,
+   "z": 384,
+   "bounds": {
+    "min": [
+     -31,
+     -143,
+     321
+    ],
+    "max": [
+     31,
+     -129,
+     447
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 8,
+   "y": 240,
+   "z": -144,
+   "bounds": {
+    "min": [
+     -47,
+     237,
+     -179
+    ],
+    "max": [
+     63,
+     243,
+     -109
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-5",
+   "x": 32,
+   "y": -528,
+   "z": 208,
+   "spawnflags": 2057,
+   "bounds": {
+    "min": [
+     1,
+     -543,
+     129
+    ],
+    "max": [
+     63,
+     -513,
+     287
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -894,6 +1037,92 @@
    "y": 1120,
    "z": 32,
    "targetName": "telekell"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 0,
+   "y": -624,
+   "z": 176,
+   "target": "telekell",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     -31,
+     -639,
+     129
+    ],
+    "max": [
+     31,
+     -609,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 0,
+   "y": 336,
+   "z": -176,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -31,
+     321,
+     -223
+    ],
+    "max": [
+     31,
+     351,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 0,
+   "y": 560,
+   "z": 16,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -31,
+     545,
+     -31
+    ],
+    "max": [
+     31,
+     575,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 0,
+   "y": 1072,
+   "z": 48,
+   "target": "tele2",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -31,
+     1057,
+     1
+    ],
+    "max": [
+     31,
+     1087,
+     95
+    ]
+   }
   }
  ]
 }

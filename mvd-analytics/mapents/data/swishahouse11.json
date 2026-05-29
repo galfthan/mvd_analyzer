@@ -311,6 +311,48 @@
    "y": -808,
    "z": 264,
    "targetName": "smoke"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -16,
+   "y": 240,
+   "z": 64,
+   "target": "boss",
+   "bounds": {
+    "min": [
+     -63,
+     225,
+     33
+    ],
+    "max": [
+     31,
+     255,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 432,
+   "y": -336,
+   "z": 0,
+   "target": "smoke",
+   "bounds": {
+    "min": [
+     385,
+     -351,
+     -31
+    ],
+    "max": [
+     479,
+     -321,
+     31
+    ]
+   }
   }
  ]
 }

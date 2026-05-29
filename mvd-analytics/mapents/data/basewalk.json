@@ -352,6 +352,50 @@
    "z": 424,
    "loc": "RA.exit",
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 502,
+   "y": -886,
+   "z": 38,
+   "loc": "RA",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     457,
+     -887,
+     -11
+    ],
+    "max": [
+     547,
+     -885,
+     87
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "yard.tele",
+   "x": 296,
+   "y": 296.4892,
+   "z": 83,
+   "loc": "yard.tele",
+   "target": "teleport1",
+   "bounds": {
+    "min": [
+     273,
+     272.97836,
+     33
+    ],
+    "max": [
+     319,
+     320,
+     133
+    ]
+   }
   }
  ]
 }

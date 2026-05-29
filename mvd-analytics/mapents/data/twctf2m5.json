@@ -3,6 +3,218 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE CORRIDOR TO EYES",
+   "x": 472,
+   "y": 808,
+   "z": 708,
+   "loc": "BLUE CORRIDOR TO EYES",
+   "bounds": {
+    "min": [
+     457,
+     785,
+     705
+    ],
+    "max": [
+     487,
+     831,
+     711
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED CORRIDOR TO 666",
+   "x": 584,
+   "y": 472,
+   "z": 708,
+   "loc": "RED CORRIDOR TO 666",
+   "bounds": {
+    "min": [
+     569,
+     449,
+     705
+    ],
+    "max": [
+     599,
+     495,
+     711
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "100 HEALTH IN WATER",
+   "x": 734,
+   "y": 640,
+   "z": -92,
+   "loc": "100 HEALTH IN WATER",
+   "bounds": {
+    "min": [
+     733,
+     613,
+     -127
+    ],
+    "max": [
+     735,
+     667,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "666 ROOM-1",
+   "x": 528,
+   "y": 584,
+   "z": 648,
+   "loc": "666 ROOM",
+   "spawnflags": 8,
+   "bounds": {
+    "min": [
+     497,
+     577,
+     593
+    ],
+    "max": [
+     559,
+     591,
+     703
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "666 ROOM-2",
+   "x": 528,
+   "y": 696,
+   "z": 648,
+   "loc": "666 ROOM",
+   "spawnflags": 8,
+   "bounds": {
+    "min": [
+     497,
+     689,
+     593
+    ],
+    "max": [
+     559,
+     703,
+     703
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE INNER BASE-1",
+   "x": 488,
+   "y": 2608,
+   "z": 208,
+   "loc": "BLUE INNER BASE",
+   "bounds": {
+    "min": [
+     449,
+     2593,
+     129
+    ],
+    "max": [
+     527,
+     2623,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE INNER BASE-2",
+   "x": 568,
+   "y": 2608,
+   "z": 208,
+   "loc": "BLUE INNER BASE",
+   "bounds": {
+    "min": [
+     529,
+     2593,
+     129
+    ],
+    "max": [
+     607,
+     2623,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED ARMOUR IN WATER",
+   "x": 314,
+   "y": 640,
+   "z": -92,
+   "loc": "RED ARMOUR IN WATER",
+   "bounds": {
+    "min": [
+     313,
+     613,
+     -127
+    ],
+    "max": [
+     315,
+     667,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED INNER BASE-1",
+   "x": 488,
+   "y": -1392,
+   "z": 208,
+   "loc": "RED INNER BASE",
+   "bounds": {
+    "min": [
+     449,
+     -1407,
+     129
+    ],
+    "max": [
+     527,
+     -1377,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED INNER BASE-2",
+   "x": 568,
+   "y": -1392,
+   "z": 208,
+   "loc": "RED INNER BASE",
+   "bounds": {
+    "min": [
+     529,
+     -1407,
+     129
+    ],
+    "max": [
+     607,
+     -1377,
+     287
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

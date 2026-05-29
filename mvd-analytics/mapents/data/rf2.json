@@ -3,6 +3,50 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "MH",
+   "x": -576,
+   "y": -384,
+   "z": -328,
+   "loc": "MH",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -639,
+     -447,
+     -463
+    ],
+    "max": [
+     -513,
+     -321,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SSG.lift",
+   "x": 576,
+   "y": -64,
+   "z": -320,
+   "loc": "SSG.lift",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     513,
+     -127,
+     -431
+    ],
+    "max": [
+     639,
+     -1,
+     -209
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -402,6 +446,72 @@
    "z": -192,
    "loc": "mid.tele",
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 640,
+   "y": -680,
+   "z": -176,
+   "loc": "LG",
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     609,
+     -687,
+     -223
+    ],
+    "max": [
+     671,
+     -673,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.tele",
+   "x": -104,
+   "y": -768,
+   "z": -400,
+   "loc": "YA.tele",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -111,
+     -799,
+     -447
+    ],
+    "max": [
+     -97,
+     -737,
+     -353
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "mid.tele",
+   "x": -296,
+   "y": 0,
+   "z": -176,
+   "loc": "mid.tele",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -303,
+     -31,
+     -223
+    ],
+    "max": [
+     -289,
+     31,
+     -129
+    ]
+   }
   }
  ]
 }

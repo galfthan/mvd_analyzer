@@ -3,6 +3,286 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -1728,
+   "y": -1148,
+   "z": 32,
+   "bounds": {
+    "min": [
+     -1759,
+     -1151,
+     1
+    ],
+    "max": [
+     -1697,
+     -1145,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": -1720,
+   "y": -2038,
+   "z": -8,
+   "bounds": {
+    "min": [
+     -1743,
+     -2043,
+     -31
+    ],
+    "max": [
+     -1697,
+     -2033,
+     15
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-3",
+   "x": -1596,
+   "y": -1872,
+   "z": 192,
+   "bounds": {
+    "min": [
+     -1599,
+     -1903,
+     161
+    ],
+    "max": [
+     -1593,
+     -1841,
+     223
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-4",
+   "x": -1534,
+   "y": -1216,
+   "z": -8,
+   "bounds": {
+    "min": [
+     -1539,
+     -1239,
+     -31
+    ],
+    "max": [
+     -1529,
+     -1193,
+     15
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-5",
+   "x": -926,
+   "y": -2328,
+   "z": 192,
+   "bounds": {
+    "min": [
+     -931,
+     -2351,
+     169
+    ],
+    "max": [
+     -921,
+     -2305,
+     215
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-6",
+   "x": -224,
+   "y": -2050,
+   "z": 120,
+   "bounds": {
+    "min": [
+     -247,
+     -2055,
+     97
+    ],
+    "max": [
+     -201,
+     -2045,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -1992,
+   "y": -392,
+   "z": 180,
+   "bounds": {
+    "min": [
+     -2031,
+     -447,
+     173
+    ],
+    "max": [
+     -1953,
+     -337,
+     187
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -1591,
+   "y": -1408,
+   "z": -128,
+   "bounds": {
+    "min": [
+     -1597,
+     -1471,
+     -191
+    ],
+    "max": [
+     -1585,
+     -1345,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -1444,
+   "y": -1408,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -1535,
+     -1463,
+     1
+    ],
+    "max": [
+     -1353,
+     -1353,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": -1408,
+   "y": -1640,
+   "z": -12,
+   "bounds": {
+    "min": [
+     -1451,
+     -1647,
+     -95
+    ],
+    "max": [
+     -1365,
+     -1633,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": -1408,
+   "y": -1544,
+   "z": 204,
+   "bounds": {
+    "min": [
+     -1471,
+     -1615,
+     73
+    ],
+    "max": [
+     -1345,
+     -1473,
+     335
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": -1344,
+   "y": -2336,
+   "z": 20,
+   "bounds": {
+    "min": [
+     -1387,
+     -2343,
+     -63
+    ],
+    "max": [
+     -1301,
+     -2329,
+     103
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": -992,
+   "y": -2416,
+   "z": 212,
+   "bounds": {
+    "min": [
+     -1035,
+     -2423,
+     129
+    ],
+    "max": [
+     -949,
+     -2409,
+     295
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": -640,
+   "y": -2336,
+   "z": 20,
+   "bounds": {
+    "min": [
+     -683,
+     -2343,
+     -63
+    ],
+    "max": [
+     -597,
+     -2329,
+     103
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -521,6 +801,27 @@
    "y": -416,
    "z": 336,
    "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -2232,
+   "y": -1216,
+   "z": -72,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -2239,
+     -1247,
+     -103
+    ],
+    "max": [
+     -2225,
+     -1185,
+     -41
+    ]
+   }
   }
  ]
 }

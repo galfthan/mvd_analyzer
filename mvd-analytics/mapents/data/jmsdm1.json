@@ -3,6 +3,166 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -1206.0116,
+   "y": 200.07516,
+   "z": -200,
+   "bounds": {
+    "min": [
+     -1209.0116,
+     185.07515,
+     -215
+    ],
+    "max": [
+     -1203.0116,
+     215.07516,
+     -185
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": -992,
+   "y": 806,
+   "z": -200,
+   "bounds": {
+    "min": [
+     -1007,
+     803,
+     -215
+    ],
+    "max": [
+     -977,
+     809,
+     -185
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-3",
+   "x": 426,
+   "y": -626,
+   "z": 32,
+   "bounds": {
+    "min": [
+     423,
+     -641,
+     17
+    ],
+    "max": [
+     429,
+     -611,
+     47
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -721,
+   "y": -20,
+   "z": -2.5,
+   "bounds": {
+    "min": [
+     -727,
+     -86,
+     -55
+    ],
+    "max": [
+     -715,
+     46,
+     50
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-2",
+   "x": 12,
+   "y": -196,
+   "z": -651.75,
+   "bounds": {
+    "min": [
+     -15,
+     -223,
+     -655
+    ],
+    "max": [
+     39,
+     -169,
+     -648.5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 340,
+   "y": -550,
+   "z": 60,
+   "bounds": {
+    "min": [
+     269,
+     -557,
+     -15
+    ],
+    "max": [
+     411,
+     -543,
+     135
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 788,
+   "y": 48,
+   "z": -568,
+   "bounds": {
+    "min": [
+     753,
+     41,
+     -599
+    ],
+    "max": [
+     823,
+     55,
+     -537
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 1344,
+   "y": -462,
+   "z": -412.05,
+   "bounds": {
+    "min": [
+     1287.6199,
+     -465,
+     -479.1
+    ],
+    "max": [
+     1400.3801,
+     -459,
+     -345
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -506,6 +666,153 @@
    "y": -32,
    "z": 66,
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1168.0117,
+   "y": 200.07513,
+   "z": -235,
+   "target": "quadtele2",
+   "bounds": {
+    "min": [
+     -1199.0117,
+     169.07501,
+     -238
+    ],
+    "max": [
+     -1137.0117,
+     231.07524,
+     -232
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -992,
+   "y": 768,
+   "z": -235,
+   "target": "quadtele1",
+   "bounds": {
+    "min": [
+     -1023,
+     737,
+     -238
+    ],
+    "max": [
+     -961,
+     799,
+     -232
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -837.5,
+   "y": -324,
+   "z": -452,
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     -861,
+     -355,
+     -453
+    ],
+    "max": [
+     -814,
+     -293,
+     -451
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -92,
+   "y": -195.5,
+   "z": -608,
+   "target": "piilotele",
+   "bounds": {
+    "min": [
+     -96,
+     -225,
+     -649
+    ],
+    "max": [
+     -88,
+     -166,
+     -567
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 376,
+   "y": 467,
+   "z": -199,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     335,
+     464,
+     -263
+    ],
+    "max": [
+     417,
+     470,
+     -135
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 376,
+   "y": 475,
+   "z": -199,
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     335,
+     472,
+     -263
+    ],
+    "max": [
+     417,
+     478,
+     -135
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": 1344,
+   "y": -476,
+   "z": -408,
+   "target": "porrastele",
+   "bounds": {
+    "min": [
+     1281,
+     -479,
+     -479
+    ],
+    "max": [
+     1407,
+     -473,
+     -337
+    ]
+   }
   }
  ]
 }

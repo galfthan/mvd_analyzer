@@ -476,6 +476,72 @@
    "z": -128,
    "loc": "cross.ammo",
    "targetName": "tele3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.SNG",
+   "x": 928,
+   "y": 1352,
+   "z": 192,
+   "loc": "Quad.SNG",
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     865,
+     1329,
+     129
+    ],
+    "max": [
+     991,
+     1375,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.RL",
+   "x": 440,
+   "y": 224,
+   "z": -168,
+   "loc": "RA.RL",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     417,
+     161,
+     -223
+    ],
+    "max": [
+     463,
+     287,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.low",
+   "x": -248,
+   "y": 688,
+   "z": -96,
+   "loc": "YA.low",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -271,
+     625,
+     -159
+    ],
+    "max": [
+     -225,
+     751,
+     -33
+    ]
+   }
   }
  ]
 }

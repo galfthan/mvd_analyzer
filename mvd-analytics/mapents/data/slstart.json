@@ -3,6 +3,26 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": 272,
+   "y": -224,
+   "z": 3216,
+   "bounds": {
+    "min": [
+     113,
+     -255,
+     3137
+    ],
+    "max": [
+     431,
+     -193,
+     3295
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "weapon_grenadelauncher",
    "kind": "gl",
@@ -291,6 +311,132 @@
    "y": 64,
    "z": 3552,
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -2928,
+   "y": -360,
+   "z": 1536,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -3007,
+     -367,
+     1409
+    ],
+    "max": [
+     -2849,
+     -353,
+     1663
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -2928,
+   "y": -88,
+   "z": 1536,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -3007,
+     -95,
+     1409
+    ],
+    "max": [
+     -2849,
+     -81,
+     1663
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -696,
+   "y": 96,
+   "z": 3600,
+   "target": "teleskill",
+   "bounds": {
+    "min": [
+     -703,
+     65,
+     3521
+    ],
+    "max": [
+     -689,
+     127,
+     3679
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -608,
+   "y": -632,
+   "z": 3600,
+   "target": "teleskill",
+   "bounds": {
+    "min": [
+     -639,
+     -639,
+     3521
+    ],
+    "max": [
+     -577,
+     -625,
+     3679
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 32,
+   "y": 184,
+   "z": 3600,
+   "target": "teleskill",
+   "bounds": {
+    "min": [
+     1,
+     177,
+     3521
+    ],
+    "max": [
+     63,
+     191,
+     3679
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 120,
+   "y": -544,
+   "z": 3600,
+   "target": "teleskill",
+   "bounds": {
+    "min": [
+     113,
+     -575,
+     3521
+    ],
+    "max": [
+     127,
+     -513,
+     3679
+    ]
+   }
   }
  ]
 }

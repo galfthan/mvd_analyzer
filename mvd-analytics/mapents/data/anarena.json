@@ -93,6 +93,90 @@
    "y": -384,
    "z": 488,
    "targetName": "high1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1004,
+   "y": -384,
+   "z": 56,
+   "target": "high1",
+   "bounds": {
+    "min": [
+     -1007,
+     -447,
+     -15
+    ],
+    "max": [
+     -1001,
+     -321,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -448,
+   "y": -940,
+   "z": 56,
+   "target": "high",
+   "bounds": {
+    "min": [
+     -511,
+     -943,
+     -15
+    ],
+    "max": [
+     -385,
+     -937,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -448,
+   "y": 172,
+   "z": 56,
+   "target": "high2",
+   "bounds": {
+    "min": [
+     -511,
+     169,
+     -15
+    ],
+    "max": [
+     -385,
+     175,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 108,
+   "y": -384,
+   "z": 56,
+   "target": "high3",
+   "bounds": {
+    "min": [
+     105,
+     -447,
+     -15
+    ],
+    "max": [
+     111,
+     -321,
+     127
+    ]
+   }
   }
  ]
 }

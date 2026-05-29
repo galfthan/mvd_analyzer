@@ -59,6 +59,48 @@
    "y": -1312,
    "z": 1504,
    "targetName": "secret1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -3584,
+   "y": -3318,
+   "z": 3888,
+   "target": "secret1",
+   "bounds": {
+    "min": [
+     -3615,
+     -3319,
+     3841
+    ],
+    "max": [
+     -3553,
+     -3317,
+     3935
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -768,
+   "y": 2380,
+   "z": -900,
+   "target": "exit",
+   "bounds": {
+    "min": [
+     -831,
+     2377,
+     -959
+    ],
+    "max": [
+     -705,
+     2383,
+     -841
+    ]
+   }
   }
  ]
 }

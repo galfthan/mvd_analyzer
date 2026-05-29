@@ -436,6 +436,94 @@
    "z": 336,
    "loc": "tele.high",
    "targetName": "t7"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.MH",
+   "x": 2432,
+   "y": -2540,
+   "z": 120,
+   "loc": "RA.MH",
+   "target": "t14",
+   "bounds": {
+    "min": [
+     2401,
+     -2551,
+     113
+    ],
+    "max": [
+     2463,
+     -2529,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "big-1",
+   "x": 1312,
+   "y": -1056,
+   "z": 32,
+   "loc": "big",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     1281,
+     -1071,
+     25
+    ],
+    "max": [
+     1343,
+     -1041,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "big-2",
+   "x": 2048,
+   "y": -1048,
+   "z": 32,
+   "loc": "big",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     2017,
+     -1055,
+     25
+    ],
+    "max": [
+     2079,
+     -1041,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele.YA",
+   "x": 2888,
+   "y": -32,
+   "z": -48,
+   "loc": "tele.YA",
+   "target": "t7",
+   "bounds": {
+    "min": [
+     2881,
+     -63,
+     -95
+    ],
+    "max": [
+     2895,
+     -1,
+     -1
+    ]
+   }
   }
  ]
 }

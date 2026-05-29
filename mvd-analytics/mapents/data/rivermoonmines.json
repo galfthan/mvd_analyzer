@@ -398,6 +398,90 @@
    "y": 576,
    "z": 80,
    "targetName": "LG"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -480,
+   "y": 368,
+   "z": -160,
+   "target": "QUAD",
+   "bounds": {
+    "min": [
+     -511,
+     289,
+     -223
+    ],
+    "max": [
+     -449,
+     447,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -458,
+   "y": -330,
+   "z": -32,
+   "target": "LG",
+   "bounds": {
+    "min": [
+     -511,
+     -383,
+     -127
+    ],
+    "max": [
+     -405,
+     -277,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 448,
+   "y": -288,
+   "z": -64,
+   "target": "RLRA",
+   "bounds": {
+    "min": [
+     429,
+     -307,
+     -127
+    ],
+    "max": [
+     467,
+     -269,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 672,
+   "y": 672,
+   "z": 128,
+   "target": "BELOW",
+   "bounds": {
+    "min": [
+     633,
+     629,
+     65
+    ],
+    "max": [
+     711,
+     715,
+     191
+    ]
+   }
   }
  ]
 }

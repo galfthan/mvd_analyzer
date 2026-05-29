@@ -3,6 +3,479 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "LG",
+   "x": 328,
+   "y": -264,
+   "z": 64,
+   "loc": "LG",
+   "bounds": {
+    "min": [
+     305,
+     -271,
+     41
+    ],
+    "max": [
+     351,
+     -257,
+     87
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "LG.bridge",
+   "x": -8,
+   "y": -264,
+   "z": 64,
+   "loc": "LG.bridge",
+   "bounds": {
+    "min": [
+     -31,
+     -271,
+     41
+    ],
+    "max": [
+     15,
+     -257,
+     87
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA",
+   "x": -56,
+   "y": 282,
+   "z": 152,
+   "loc": "RA",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -79,
+     277,
+     129
+    ],
+    "max": [
+     -33,
+     287,
+     175
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA.below",
+   "x": -196,
+   "y": 320,
+   "z": 32,
+   "loc": "RA.below",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -199,
+     297,
+     9
+    ],
+    "max": [
+     -193,
+     343,
+     55
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "SSG.window",
+   "x": 800,
+   "y": 1248,
+   "z": 90,
+   "loc": "SSG.window",
+   "bounds": {
+    "min": [
+     769,
+     1217,
+     83
+    ],
+    "max": [
+     831,
+     1279,
+     97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.NG-1",
+   "x": 112,
+   "y": -216,
+   "z": 144,
+   "loc": "LG.NG",
+   "bounds": {
+    "min": [
+     65,
+     -223,
+     1
+    ],
+    "max": [
+     159,
+     -209,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.NG-2",
+   "x": 208,
+   "y": -216,
+   "z": 144,
+   "loc": "LG.NG",
+   "bounds": {
+    "min": [
+     161,
+     -223,
+     1
+    ],
+    "max": [
+     255,
+     -209,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.bridge",
+   "x": 160,
+   "y": -420,
+   "z": -24,
+   "loc": "LG.bridge",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     65,
+     -567,
+     -31
+    ],
+    "max": [
+     255,
+     -273,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad",
+   "x": -300,
+   "y": 1076,
+   "z": 104,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     -311,
+     1017,
+     -7
+    ],
+    "max": [
+     -289,
+     1135,
+     215
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA",
+   "x": -92,
+   "y": 376,
+   "z": 168,
+   "loc": "RA",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -167,
+     369,
+     105
+    ],
+    "max": [
+     -17,
+     383,
+     231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.below-1",
+   "x": -498,
+   "y": 230,
+   "z": 12,
+   "loc": "RA.below",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -515,
+     209,
+     -63
+    ],
+    "max": [
+     -481,
+     251,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.below-2",
+   "x": -264,
+   "y": 464,
+   "z": 0,
+   "loc": "RA.below",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -319,
+     393,
+     -63
+    ],
+    "max": [
+     -209,
+     535,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.below-3",
+   "x": -208,
+   "y": 712,
+   "z": 4,
+   "loc": "RA.below",
+   "spawnflags": 2081,
+   "bounds": {
+    "min": [
+     -287,
+     705,
+     -79
+    ],
+    "max": [
+     -129,
+     719,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cross-1",
+   "x": 512,
+   "y": 796,
+   "z": 64,
+   "loc": "cross",
+   "bounds": {
+    "min": [
+     449,
+     793,
+     1
+    ],
+    "max": [
+     575,
+     799,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cross-2",
+   "x": 631,
+   "y": 854,
+   "z": 132,
+   "loc": "cross",
+   "spawnflags": 2056,
+   "bounds": {
+    "min": [
+     623,
+     809,
+     1
+    ],
+    "max": [
+     639,
+     899,
+     263
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cross-3",
+   "x": 631,
+   "y": 942,
+   "z": 132,
+   "loc": "cross",
+   "spawnflags": 2056,
+   "bounds": {
+    "min": [
+     623,
+     901,
+     1
+    ],
+    "max": [
+     639,
+     983,
+     263
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "exit-1",
+   "x": 2112,
+   "y": -234,
+   "z": 264,
+   "loc": "exit",
+   "bounds": {
+    "min": [
+     2105,
+     -287,
+     169
+    ],
+    "max": [
+     2119,
+     -181,
+     359
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "exit-2",
+   "x": 2112,
+   "y": -126,
+   "z": 264,
+   "loc": "exit",
+   "bounds": {
+    "min": [
+     2105,
+     -179,
+     169
+    ],
+    "max": [
+     2119,
+     -73,
+     359
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "exit.lift",
+   "x": 1376,
+   "y": 272,
+   "z": 104,
+   "loc": "exit.lift",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1369,
+     233,
+     57
+    ],
+    "max": [
+     1383,
+     311,
+     151
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.NG",
+   "x": 320,
+   "y": 116,
+   "z": -52,
+   "loc": "water.NG",
+   "bounds": {
+    "min": [
+     289,
+     57,
+     -127
+    ],
+    "max": [
+     351,
+     175,
+     23
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.platform-1",
+   "x": 264,
+   "y": 0,
+   "z": -80,
+   "loc": "water.platform",
+   "bounds": {
+    "min": [
+     261,
+     -23,
+     -127
+    ],
+    "max": [
+     267,
+     23,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.platform-2",
+   "x": 776,
+   "y": 716,
+   "z": -48,
+   "loc": "water.platform",
+   "spawnflags": 33,
+   "bounds": {
+    "min": [
+     665,
+     417,
+     -95
+    ],
+    "max": [
+     887,
+     1015,
+     -1
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -632,6 +1105,28 @@
    "loc": "YA.window",
    "targetName": "t1",
    "spawnflags": 2048
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.MH",
+   "x": -824,
+   "y": 996,
+   "z": 100,
+   "loc": "YA.MH",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -863,
+     985,
+     81
+    ],
+    "max": [
+     -785,
+     1007,
+     119
+    ]
+   }
   }
  ]
 }

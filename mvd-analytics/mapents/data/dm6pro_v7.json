@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door",
+   "x": 72,
+   "y": -16,
+   "z": 2,
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     9,
+     -79,
+     -7
+    ],
+    "max": [
+     135,
+     47,
+     11
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -401,6 +422,90 @@
    "y": -16,
    "z": 52,
    "targetName": "ng_tele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -468,
+   "y": 224,
+   "z": 232,
+   "target": "sideroom_tele",
+   "bounds": {
+    "min": [
+     -491,
+     209,
+     193
+    ],
+    "max": [
+     -445,
+     239,
+     271
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -408,
+   "y": -656,
+   "z": 152,
+   "target": "mh_tele",
+   "bounds": {
+    "min": [
+     -423,
+     -679,
+     113
+    ],
+    "max": [
+     -393,
+     -633,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -192,
+   "y": -16,
+   "z": -248,
+   "target": "ng_tele",
+   "bounds": {
+    "min": [
+     -207,
+     -39,
+     -287
+    ],
+    "max": [
+     -177,
+     7,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 240,
+   "y": -16,
+   "z": 88,
+   "target": "sideroom_tele",
+   "bounds": {
+    "min": [
+     225,
+     -39,
+     49
+    ],
+    "max": [
+     255,
+     7,
+     127
+    ]
+   }
   }
  ]
 }

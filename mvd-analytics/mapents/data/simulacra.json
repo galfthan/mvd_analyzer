@@ -286,6 +286,48 @@
    "y": -544,
    "z": -0,
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -832,
+   "y": 292,
+   "z": -64,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -895,
+     289,
+     -127
+    ],
+    "max": [
+     -769,
+     295,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -96,
+   "y": 4,
+   "z": -224,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -143,
+     1,
+     -287
+    ],
+    "max": [
+     -49,
+     7,
+     -161
+    ]
+   }
   }
  ]
 }

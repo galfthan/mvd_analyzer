@@ -284,6 +284,69 @@
    "y": -1704,
    "z": 200,
    "targetName": "topya"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -192,
+   "y": -680,
+   "z": 256,
+   "target": "bottom_tele1",
+   "bounds": {
+    "min": [
+     -255,
+     -695,
+     193
+    ],
+    "max": [
+     -129,
+     -665,
+     319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 32,
+   "y": -656,
+   "z": -80,
+   "target": "lg1",
+   "bounds": {
+    "min": [
+     1,
+     -719,
+     -127
+    ],
+    "max": [
+     63,
+     -593,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 632,
+   "y": -64,
+   "z": -64,
+   "target": "topya",
+   "bounds": {
+    "min": [
+     617,
+     -127,
+     -127
+    ],
+    "max": [
+     647,
+     -1,
+     -1
+    ]
+   }
   }
  ]
 }

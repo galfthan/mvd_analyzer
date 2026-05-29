@@ -3,6 +3,87 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -1788,
+   "y": -224,
+   "z": -128,
+   "bounds": {
+    "min": [
+     -1791,
+     -239,
+     -143
+    ],
+    "max": [
+     -1785,
+     -209,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -1728,
+   "y": -224,
+   "z": -80,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1775,
+     -271,
+     -191
+    ],
+    "max": [
+     -1681,
+     -177,
+     31
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -576,
+   "y": -832,
+   "z": 112,
+   "bounds": {
+    "min": [
+     -591,
+     -863,
+     33
+    ],
+    "max": [
+     -561,
+     -801,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -576,
+   "y": -768,
+   "z": 112,
+   "bounds": {
+    "min": [
+     -591,
+     -799,
+     33
+    ],
+    "max": [
+     -561,
+     -737,
+     191
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -367,6 +448,111 @@
    "y": 30,
    "z": 56,
    "targetName": "fish4"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1096,
+   "y": 944,
+   "z": 96,
+   "target": "fish3",
+   "bounds": {
+    "min": [
+     -1099,
+     913,
+     49
+    ],
+    "max": [
+     -1093,
+     975,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -992,
+   "y": -753,
+   "z": -336,
+   "target": "fish4",
+   "bounds": {
+    "min": [
+     -1055,
+     -767,
+     -415
+    ],
+    "max": [
+     -929,
+     -739,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -832,
+   "y": -1096,
+   "z": 96,
+   "target": "fish2",
+   "bounds": {
+    "min": [
+     -863,
+     -1099,
+     49
+    ],
+    "max": [
+     -801,
+     -1093,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -160,
+   "y": 536,
+   "z": 96,
+   "target": "fish5",
+   "bounds": {
+    "min": [
+     -191,
+     533,
+     49
+    ],
+    "max": [
+     -129,
+     539,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 520,
+   "y": 32,
+   "z": 96,
+   "target": "fish1",
+   "bounds": {
+    "min": [
+     517,
+     1,
+     49
+    ],
+    "max": [
+     523,
+     63,
+     143
+    ]
+   }
   }
  ]
 }

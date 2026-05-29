@@ -402,6 +402,50 @@
    "z": 148,
    "loc": "SSG",
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 611.5,
+   "y": 400,
+   "z": 72,
+   "loc": "RA",
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     600,
+     345,
+     49
+    ],
+    "max": [
+     623,
+     455,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": -552,
+   "y": 1188,
+   "z": 36,
+   "loc": "low.RL",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -623,
+     1177,
+     25
+    ],
+    "max": [
+     -481,
+     1199,
+     47
+    ]
+   }
   }
  ]
 }

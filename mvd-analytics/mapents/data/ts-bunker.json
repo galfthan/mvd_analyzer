@@ -3,6 +3,46 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 544,
+   "y": -762,
+   "z": -456,
+   "bounds": {
+    "min": [
+     529,
+     -771,
+     -471
+    ],
+    "max": [
+     559,
+     -753,
+     -441
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": 416,
+   "y": -104,
+   "z": -536,
+   "bounds": {
+    "min": [
+     257,
+     -175,
+     -557
+    ],
+    "max": [
+     575,
+     -33,
+     -515
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -401,6 +441,153 @@
    "y": 136,
    "z": -232,
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -302,
+   "y": -888,
+   "z": -490,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -303,
+     -951,
+     -543
+    ],
+    "max": [
+     -301,
+     -825,
+     -437
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -302,
+   "y": -32,
+   "z": -490,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -303,
+     -95,
+     -543
+    ],
+    "max": [
+     -301,
+     31,
+     -437
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 376,
+   "y": -32,
+   "z": -874,
+   "target": "quadtele",
+   "bounds": {
+    "min": [
+     353,
+     -47,
+     -877
+    ],
+    "max": [
+     399,
+     -17,
+     -871
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 416,
+   "y": -72,
+   "z": -874,
+   "target": "quadtele",
+   "bounds": {
+    "min": [
+     353,
+     -95,
+     -877
+    ],
+    "max": [
+     479,
+     -49,
+     -871
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 416,
+   "y": 8,
+   "z": -874,
+   "target": "quadtele",
+   "bounds": {
+    "min": [
+     353,
+     -15,
+     -877
+    ],
+    "max": [
+     479,
+     31,
+     -871
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 456,
+   "y": -32,
+   "z": -874,
+   "target": "quadtele",
+   "bounds": {
+    "min": [
+     433,
+     -47,
+     -877
+    ],
+    "max": [
+     479,
+     -17,
+     -871
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": 690,
+   "y": -272,
+   "z": -842,
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     689,
+     -335,
+     -895
+    ],
+    "max": [
+     691,
+     -209,
+     -789
+    ]
+   }
   }
  ]
 }

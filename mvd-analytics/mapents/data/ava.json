@@ -399,6 +399,50 @@
    "z": 34,
    "loc": "YA",
    "targetName": "teleya"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG",
+   "x": 560,
+   "y": 480,
+   "z": -8,
+   "loc": "SNG",
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     553,
+     449,
+     -47
+    ],
+    "max": [
+     567,
+     511,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.low",
+   "x": -764.2906,
+   "y": -154.68788,
+   "z": -8,
+   "loc": "YA.low",
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     -785.7939,
+     -179.15071,
+     -47
+    ],
+    "max": [
+     -742.7873,
+     -130.22505,
+     31
+    ]
+   }
   }
  ]
 }

@@ -914,6 +914,28 @@
    "z": 232,
    "loc": "LG.bridge",
    "targetName": "qtele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele",
+   "x": 288,
+   "y": -1680,
+   "z": -160,
+   "loc": "tele",
+   "target": "qtele1",
+   "bounds": {
+    "min": [
+     257,
+     -1687,
+     -215
+    ],
+    "max": [
+     319,
+     -1673,
+     -105
+    ]
+   }
   }
  ]
 }

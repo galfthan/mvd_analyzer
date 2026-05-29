@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "SNG.Quad button",
+   "x": -607.5,
+   "y": -877,
+   "z": 341,
+   "loc": "SNG.Quad button",
+   "bounds": {
+    "min": [
+     -608,
+     -890,
+     332
+    ],
+    "max": [
+     -607,
+     -864,
+     350
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.bridge",
+   "x": 483,
+   "y": -62,
+   "z": 352,
+   "loc": "GL.bridge",
+   "bounds": {
+    "min": [
+     476,
+     -107,
+     257
+    ],
+    "max": [
+     490,
+     -17,
+     447
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -392,6 +434,94 @@
    "z": 32,
    "loc": "SSG.teleport",
    "targetName": "tele_dest_low"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA",
+   "x": 939,
+   "y": -384,
+   "z": 124,
+   "loc": "GA",
+   "target": "tele_dest_air",
+   "bounds": {
+    "min": [
+     936,
+     -453,
+     65
+    ],
+    "max": [
+     942,
+     -315,
+     183
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.teleport-1",
+   "x": -501,
+   "y": -1213,
+   "z": 183,
+   "loc": "RA.teleport",
+   "target": "tele_dest_low",
+   "bounds": {
+    "min": [
+     -572,
+     -1214,
+     126
+    ],
+    "max": [
+     -430,
+     -1212,
+     240
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.teleport-2",
+   "x": -246.5,
+   "y": -863.5,
+   "z": 63,
+   "loc": "RA.teleport",
+   "target": "tele_dest_near_ra",
+   "bounds": {
+    "min": [
+     -250,
+     -942,
+     6
+    ],
+    "max": [
+     -243,
+     -785,
+     120
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.RL",
+   "x": 505,
+   "y": -62,
+   "z": 352,
+   "loc": "YA.RL",
+   "target": "quad_dest",
+   "bounds": {
+    "min": [
+     498,
+     -107,
+     257
+    ],
+    "max": [
+     512,
+     -17,
+     447
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,87 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 608,
+   "y": -548,
+   "z": 272,
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     593,
+     -551,
+     257
+    ],
+    "max": [
+     623,
+     -545,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 368,
+   "y": -24,
+   "z": 32,
+   "bounds": {
+    "min": [
+     365,
+     -63,
+     -31
+    ],
+    "max": [
+     371,
+     15,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 368,
+   "y": 56,
+   "z": 32,
+   "bounds": {
+    "min": [
+     365,
+     17,
+     -31
+    ],
+    "max": [
+     371,
+     95,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-3",
+   "x": 608,
+   "y": -808,
+   "z": 64,
+   "bounds": {
+    "min": [
+     561,
+     -815,
+     1
+    ],
+    "max": [
+     655,
+     -801,
+     127
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -406,6 +487,50 @@
    "y": 64,
    "z": -160,
    "targetName": "telekell"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 608,
+   "y": -820,
+   "z": 64,
+   "target": "telekell",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     561,
+     -831,
+     1
+    ],
+    "max": [
+     655,
+     -809,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 608,
+   "y": 92,
+   "z": -128,
+   "target": "telehall",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     561,
+     89,
+     -191
+    ],
+    "max": [
+     655,
+     95,
+     -65
+    ]
+   }
   }
  ]
 }

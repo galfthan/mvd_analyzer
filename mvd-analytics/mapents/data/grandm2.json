@@ -3,6 +3,67 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 444,
+   "y": -384,
+   "z": 64,
+   "bounds": {
+    "min": [
+     441,
+     -415,
+     33
+    ],
+    "max": [
+     447,
+     -353,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-1",
+   "x": -592,
+   "y": -528,
+   "z": -320,
+   "bounds": {
+    "min": [
+     -639,
+     -543,
+     -383
+    ],
+    "max": [
+     -545,
+     -513,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-2",
+   "x": -248,
+   "y": -352,
+   "z": -136,
+   "spawnflags": 12,
+   "bounds": {
+    "min": [
+     -287,
+     -383,
+     -143
+    ],
+    "max": [
+     -209,
+     -321,
+     -129
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -672,6 +733,174 @@
    "y": 232,
    "z": -96,
    "targetName": "far1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -964,
+   "y": -704,
+   "z": -500,
+   "target": "dungeonout",
+   "bounds": {
+    "min": [
+     -991,
+     -767,
+     -511
+    ],
+    "max": [
+     -937,
+     -641,
+     -489
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -380,
+   "y": -352,
+   "z": -216,
+   "target": "secret1",
+   "bounds": {
+    "min": [
+     -383,
+     -391,
+     -255
+    ],
+    "max": [
+     -377,
+     -313,
+     -177
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -356,
+   "y": -280,
+   "z": -72,
+   "target": "dungeon1",
+   "bounds": {
+    "min": [
+     -375,
+     -287,
+     -111
+    ],
+    "max": [
+     -337,
+     -273,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 0,
+   "y": 200,
+   "z": 92,
+   "target": "endtele1",
+   "bounds": {
+    "min": [
+     -39,
+     193,
+     33
+    ],
+    "max": [
+     39,
+     207,
+     151
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 0,
+   "y": 1296,
+   "z": 0,
+   "target": "far1",
+   "bounds": {
+    "min": [
+     -39,
+     1289,
+     -39
+    ],
+    "max": [
+     39,
+     1303,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 396,
+   "y": -960,
+   "z": -268,
+   "target": "entrance1",
+   "bounds": {
+    "min": [
+     393,
+     -983,
+     -311
+    ],
+    "max": [
+     399,
+     -937,
+     -225
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": 916,
+   "y": -960,
+   "z": -268,
+   "target": "entrance2",
+   "bounds": {
+    "min": [
+     913,
+     -983,
+     -311
+    ],
+    "max": [
+     919,
+     -937,
+     -225
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-8",
+   "x": 2036,
+   "y": -280,
+   "z": -488,
+   "target": "water1",
+   "bounds": {
+    "min": [
+     2033,
+     -351,
+     -527
+    ],
+    "max": [
+     2039,
+     -209,
+     -449
+    ]
+   }
   }
  ]
 }

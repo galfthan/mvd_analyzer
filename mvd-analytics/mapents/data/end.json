@@ -3,6 +3,94 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "path-1",
+   "x": -764,
+   "y": 1424,
+   "z": 400,
+   "loc": "path",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -775,
+     1329,
+     49
+    ],
+    "max": [
+     -753,
+     1519,
+     751
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "path-2",
+   "x": -720,
+   "y": 1436,
+   "z": 87.999916,
+   "loc": "path",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -734.2728,
+     1353,
+     73.72705
+    ],
+    "max": [
+     -705.72723,
+     1519,
+     102.27278
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.LG",
+   "x": -416,
+   "y": 0,
+   "z": -40,
+   "loc": "water.LG",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -511,
+     -175,
+     -47
+    ],
+    "max": [
+     -321,
+     175,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.tunnel",
+   "x": -448,
+   "y": -216,
+   "z": -212,
+   "loc": "water.tunnel",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -503,
+     -223,
+     -271
+    ],
+    "max": [
+     -393,
+     -209,
+     -153
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -695,6 +783,470 @@
    "z": 424,
    "loc": "water",
    "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad",
+   "x": -640,
+   "y": 2616,
+   "z": 144,
+   "loc": "Quad",
+   "target": "t67",
+   "bounds": {
+    "min": [
+     -655,
+     2609,
+     121
+    ],
+    "max": [
+     -625,
+     2623,
+     167
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL",
+   "x": -856,
+   "y": 1920,
+   "z": 376,
+   "loc": "RL",
+   "target": "t63",
+   "bounds": {
+    "min": [
+     -863,
+     1913,
+     369
+    ],
+    "max": [
+     -849,
+     1927,
+     383
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-1",
+   "x": -1424,
+   "y": 896,
+   "z": 96,
+   "loc": "path",
+   "target": "t46",
+   "bounds": {
+    "min": [
+     -1463,
+     857,
+     89
+    ],
+    "max": [
+     -1385,
+     935,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-10",
+   "x": -1040,
+   "y": 896,
+   "z": 96,
+   "loc": "path",
+   "target": "t38",
+   "bounds": {
+    "min": [
+     -1079,
+     857,
+     89
+    ],
+    "max": [
+     -1001,
+     935,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-11",
+   "x": -1040,
+   "y": 1040,
+   "z": 96,
+   "loc": "path",
+   "target": "t51",
+   "bounds": {
+    "min": [
+     -1079,
+     1001,
+     89
+    ],
+    "max": [
+     -1001,
+     1079,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-12",
+   "x": -944,
+   "y": 976,
+   "z": 96,
+   "loc": "path",
+   "target": "t41",
+   "bounds": {
+    "min": [
+     -983,
+     937,
+     89
+    ],
+    "max": [
+     -905,
+     1015,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-2",
+   "x": -1424,
+   "y": 1040,
+   "z": 96,
+   "loc": "path",
+   "target": "t47",
+   "bounds": {
+    "min": [
+     -1463,
+     1001,
+     89
+    ],
+    "max": [
+     -1385,
+     1079,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-3",
+   "x": -1328,
+   "y": 816,
+   "z": 96,
+   "loc": "path",
+   "target": "t45",
+   "bounds": {
+    "min": [
+     -1367,
+     777,
+     89
+    ],
+    "max": [
+     -1289,
+     855,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-4",
+   "x": -1328,
+   "y": 976,
+   "z": 96,
+   "loc": "path",
+   "target": "t48",
+   "bounds": {
+    "min": [
+     -1367,
+     937,
+     89
+    ],
+    "max": [
+     -1289,
+     1015,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-5",
+   "x": -1232,
+   "y": 896,
+   "z": 96,
+   "loc": "path",
+   "target": "t44",
+   "bounds": {
+    "min": [
+     -1271,
+     857,
+     89
+    ],
+    "max": [
+     -1193,
+     935,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-6",
+   "x": -1232,
+   "y": 1040,
+   "z": 96,
+   "loc": "path",
+   "target": "t49",
+   "bounds": {
+    "min": [
+     -1271,
+     1001,
+     89
+    ],
+    "max": [
+     -1193,
+     1079,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-7",
+   "x": -1188,
+   "y": 928,
+   "z": 112,
+   "loc": "path",
+   "target": "t63",
+   "bounds": {
+    "min": [
+     -1471,
+     777,
+     105
+    ],
+    "max": [
+     -905,
+     1079,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-8",
+   "x": -1136,
+   "y": 816,
+   "z": 96,
+   "loc": "path",
+   "target": "t43",
+   "bounds": {
+    "min": [
+     -1175,
+     777,
+     89
+    ],
+    "max": [
+     -1097,
+     855,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path-9",
+   "x": -1136,
+   "y": 976,
+   "z": 96,
+   "loc": "path",
+   "target": "t50",
+   "bounds": {
+    "min": [
+     -1175,
+     937,
+     89
+    ],
+    "max": [
+     -1097,
+     1015,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.entry-1",
+   "x": -944,
+   "y": 816,
+   "z": 96,
+   "loc": "path.entry",
+   "target": "t36",
+   "bounds": {
+    "min": [
+     -983,
+     777,
+     89
+    ],
+    "max": [
+     -905,
+     855,
+     103
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.entry-2",
+   "x": -448,
+   "y": 408,
+   "z": 96,
+   "loc": "path.entry",
+   "target": "t70",
+   "bounds": {
+    "min": [
+     -479,
+     401,
+     49
+    ],
+    "max": [
+     -417,
+     415,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.entry-3",
+   "x": -352,
+   "y": 892,
+   "z": 160,
+   "loc": "path.entry",
+   "target": "t63",
+   "bounds": {
+    "min": [
+     -671,
+     537,
+     1
+    ],
+    "max": [
+     -33,
+     1247,
+     319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.top-1",
+   "x": -960,
+   "y": 2672,
+   "z": 268,
+   "loc": "path.top",
+   "target": "t33",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     -967,
+     2641,
+     233
+    ],
+    "max": [
+     -953,
+     2703,
+     303
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.top-2",
+   "x": -960,
+   "y": 2672,
+   "z": 268,
+   "loc": "path.top",
+   "target": "t69",
+   "spawnflags": 1792,
+   "bounds": {
+    "min": [
+     -967,
+     2641,
+     233
+    ],
+    "max": [
+     -953,
+     2703,
+     303
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water",
+   "x": -48,
+   "y": -32,
+   "z": 200,
+   "loc": "water",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -55,
+     -39,
+     193
+    ],
+    "max": [
+     -41,
+     -25,
+     207
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water.tele",
+   "x": -772,
+   "y": 0,
+   "z": 84,
+   "loc": "water.tele",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -783,
+     -71,
+     25
+    ],
+    "max": [
+     -761,
+     71,
+     143
+    ]
+   }
   }
  ]
 }

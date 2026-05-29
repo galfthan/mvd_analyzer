@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-1",
+   "x": -896,
+   "y": 568,
+   "z": 0,
+   "bounds": {
+    "min": [
+     -959,
+     505,
+     -7
+    ],
+    "max": [
+     -833,
+     631,
+     7
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-2",
+   "x": -584,
+   "y": 568,
+   "z": -72,
+   "bounds": {
+    "min": [
+     -591,
+     505,
+     -135
+    ],
+    "max": [
+     -577,
+     631,
+     -9
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -248,
+   "y": -424,
+   "z": 72,
+   "bounds": {
+    "min": [
+     -255,
+     -471,
+     9
+    ],
+    "max": [
+     -241,
+     -377,
+     135
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-4",
+   "x": 204,
+   "y": 348,
+   "z": 72,
+   "bounds": {
+    "min": [
+     197,
+     285,
+     9
+    ],
+    "max": [
+     211,
+     411,
+     135
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",

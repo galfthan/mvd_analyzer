@@ -364,6 +364,69 @@
    "y": -872,
    "z": 288,
    "targetName": "smoke"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -332,
+   "y": -624,
+   "z": 192,
+   "target": "low-control-dest",
+   "bounds": {
+    "min": [
+     -335,
+     -679,
+     161
+    ],
+    "max": [
+     -329,
+     -569,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -96,
+   "y": 304,
+   "z": 56,
+   "target": "boss",
+   "bounds": {
+    "min": [
+     -159,
+     297,
+     25
+    ],
+    "max": [
+     -33,
+     311,
+     87
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 776,
+   "y": -672,
+   "z": -12,
+   "target": "smoke",
+   "bounds": {
+    "min": [
+     769,
+     -751,
+     -87
+    ],
+    "max": [
+     783,
+     -593,
+     63
+    ]
+   }
   }
  ]
 }

@@ -7412,6 +7412,28 @@
   "mapEntities": {
     "entities": [
       {
+        "bounds": {
+          "max": [
+            903,
+            -1017,
+            -69
+          ],
+          "min": [
+            777,
+            -1151,
+            -87
+          ]
+        },
+        "class": "func_door_secret",
+        "loc": "big.hatch",
+        "name": "big.hatch",
+        "spawnflags": 4,
+        "type": "door",
+        "x": 840,
+        "y": -1084,
+        "z": -78
+      },
+      {
         "class": "item_cells",
         "kind": "cells",
         "loc": "GA.cells",
@@ -7803,6 +7825,94 @@
         "x": 1072,
         "y": -1096,
         "z": -32
+      },
+      {
+        "bounds": {
+          "max": [
+            267,
+            -1761,
+            142
+          ],
+          "min": [
+            229,
+            -1807,
+            24
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "GA",
+        "name": "GA",
+        "target": "t2",
+        "type": "teleportSrc",
+        "x": 248,
+        "y": -1784,
+        "z": 83
+      },
+      {
+        "bounds": {
+          "max": [
+            451,
+            -1065,
+            -185
+          ],
+          "min": [
+            413,
+            -1111,
+            -283
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "LG",
+        "name": "LG",
+        "target": "t3",
+        "type": "teleportSrc",
+        "x": 432,
+        "y": -1088,
+        "z": -234
+      },
+      {
+        "bounds": {
+          "max": [
+            223,
+            -829,
+            227
+          ],
+          "min": [
+            177,
+            -867,
+            113
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "MH",
+        "name": "MH",
+        "target": "t1",
+        "type": "teleportSrc",
+        "x": 200,
+        "y": -848,
+        "z": 170
+      },
+      {
+        "bounds": {
+          "max": [
+            1043,
+            -1073,
+            63
+          ],
+          "min": [
+            1005,
+            -1119,
+            -35
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "big",
+        "name": "big",
+        "target": "t1",
+        "type": "teleportSrc",
+        "x": 1024,
+        "y": -1096,
+        "z": 14
       }
     ],
     "map": "dm6"
@@ -10853,7 +10963,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 13,
+  "schemaVersion": 14,
   "streams": {
     "global": {
       "matchEnd": 600000,

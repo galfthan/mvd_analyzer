@@ -3,6 +3,216 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "YA(sng)",
+   "x": -736,
+   "y": 1067,
+   "z": -492,
+   "loc": "YA(sng)",
+   "bounds": {
+    "min": [
+     -755,
+     1054,
+     -519
+    ],
+    "max": [
+     -717,
+     1080,
+     -465
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "blue flag",
+   "x": 1120,
+   "y": 1760,
+   "z": -60,
+   "loc": "blue flag",
+   "bounds": {
+    "min": [
+     1105,
+     1745,
+     -63
+    ],
+    "max": [
+     1135,
+     1775,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "red flag(room)",
+   "x": -2592,
+   "y": 1312,
+   "z": -60,
+   "loc": "red flag(room)",
+   "bounds": {
+    "min": [
+     -2607,
+     1297,
+     -63
+    ],
+    "max": [
+     -2577,
+     1327,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "HOF-1",
+   "x": -2040,
+   "y": 1504,
+   "z": 11,
+   "loc": "HOF",
+   "bounds": {
+    "min": [
+     -2043,
+     1473,
+     -63
+    ],
+    "max": [
+     -2037,
+     1535,
+     85
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "HOF-2",
+   "x": -2040,
+   "y": 1568,
+   "z": 11,
+   "loc": "HOF",
+   "bounds": {
+    "min": [
+     -2043,
+     1537,
+     -63
+    ],
+    "max": [
+     -2037,
+     1599,
+     85
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "HOF-3",
+   "x": 568,
+   "y": 1504,
+   "z": 11,
+   "loc": "HOF",
+   "bounds": {
+    "min": [
+     565,
+     1473,
+     -63
+    ],
+    "max": [
+     571,
+     1535,
+     85
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "HOF-4",
+   "x": 568,
+   "y": 1568,
+   "z": 11,
+   "loc": "HOF",
+   "bounds": {
+    "min": [
+     565,
+     1537,
+     -63
+    ],
+    "max": [
+     571,
+     1599,
+     85
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "YA(sng)",
+   "x": -864,
+   "y": 1384,
+   "z": -10,
+   "loc": "YA(sng)",
+   "bounds": {
+    "min": [
+     -895,
+     1381,
+     -47
+    ],
+    "max": [
+     -833,
+     1387,
+     27
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "blue flag",
+   "x": 968,
+   "y": 1760,
+   "z": 0,
+   "loc": "blue flag",
+   "bounds": {
+    "min": [
+     961,
+     1729,
+     -63
+    ],
+    "max": [
+     975,
+     1791,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "red flag(room)",
+   "x": -2440,
+   "y": 1312,
+   "z": 0,
+   "loc": "red flag(room)",
+   "bounds": {
+    "min": [
+     -2447,
+     1281,
+     -63
+    ],
+    "max": [
+     -2433,
+     1343,
+     63
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -768,6 +978,73 @@
    "z": -56,
    "loc": "red flag(room)",
    "targetName": "team1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL(channel)-1",
+   "x": -892,
+   "y": 1536.3286,
+   "z": 511.53946,
+   "loc": "GL(channel)",
+   "target": "team1",
+   "bounds": {
+    "min": [
+     -895,
+     1487.6571,
+     463
+    ],
+    "max": [
+     -889,
+     1585,
+     560.0789
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL(channel)-2",
+   "x": -580,
+   "y": 1536.3286,
+   "z": 511.53946,
+   "loc": "GL(channel)",
+   "target": "team2",
+   "bounds": {
+    "min": [
+     -583,
+     1487.6571,
+     463
+    ],
+    "max": [
+     -577,
+     1585,
+     560.0789
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA(sng)",
+   "x": -736,
+   "y": 1092,
+   "z": -497,
+   "loc": "YA(sng)",
+   "target": "outdest",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -783,
+     1057,
+     -553
+    ],
+    "max": [
+     -689,
+     1127,
+     -441
+    ]
+   }
   }
  ]
 }

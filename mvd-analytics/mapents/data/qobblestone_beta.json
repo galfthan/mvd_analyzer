@@ -558,6 +558,28 @@
    "z": 48,
    "loc": "Quad.telexit",
    "targetName": "info_teleport_destination1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.low.tele",
+   "x": -1248,
+   "y": -1097,
+   "z": 56,
+   "loc": "RA.low.tele",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     -1275,
+     -1097,
+     9
+    ],
+    "max": [
+     -1221,
+     -1097,
+     103
+    ]
+   }
   }
  ]
 }

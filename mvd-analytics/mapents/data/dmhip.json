@@ -3,6 +3,236 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 486,
+   "y": -1224,
+   "z": 256,
+   "bounds": {
+    "min": [
+     485,
+     -1247,
+     233
+    ],
+    "max": [
+     487,
+     -1201,
+     279
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-1",
+   "x": 72,
+   "y": 304,
+   "z": -186,
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     33,
+     297,
+     -227
+    ],
+    "max": [
+     111,
+     311,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-10",
+   "x": 572,
+   "y": 68,
+   "z": 40,
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     561,
+     33,
+     1
+    ],
+    "max": [
+     583,
+     103,
+     79
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 120,
+   "y": -1272,
+   "z": 172,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     113,
+     -1279,
+     169
+    ],
+    "max": [
+     127,
+     -1265,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 152,
+   "y": -1272,
+   "z": 172,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     145,
+     -1279,
+     169
+    ],
+    "max": [
+     159,
+     -1265,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 184,
+   "y": -1272,
+   "z": 172,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     177,
+     -1279,
+     169
+    ],
+    "max": [
+     191,
+     -1265,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 216,
+   "y": -1272,
+   "z": 172,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     209,
+     -1279,
+     169
+    ],
+    "max": [
+     223,
+     -1265,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": 248,
+   "y": -1272,
+   "z": 172,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     241,
+     -1279,
+     169
+    ],
+    "max": [
+     255,
+     -1265,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": 280,
+   "y": -1272,
+   "z": 172,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     273,
+     -1279,
+     169
+    ],
+    "max": [
+     287,
+     -1265,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 312,
+   "y": -1272,
+   "z": 172,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     305,
+     -1279,
+     169
+    ],
+    "max": [
+     319,
+     -1265,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-9",
+   "x": 344,
+   "y": -1272,
+   "z": 172,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     337,
+     -1279,
+     169
+    ],
+    "max": [
+     351,
+     -1265,
+     175
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

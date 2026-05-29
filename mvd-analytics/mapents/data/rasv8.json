@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door",
+   "x": 392,
+   "y": 456,
+   "z": -40,
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     321,
+     449,
+     -95
+    ],
+    "max": [
+     463,
+     463,
+     15
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -492,6 +513,27 @@
    "y": -136,
    "z": 40,
    "targetName": "2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 392,
+   "y": -720,
+   "z": -208,
+   "target": "2",
+   "bounds": {
+    "min": [
+     321,
+     -727,
+     -255
+    ],
+    "max": [
+     463,
+     -713,
+     -161
+    ]
+   }
   }
  ]
 }

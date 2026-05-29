@@ -3,6 +3,47 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -868,
+   "y": 80,
+   "z": 48,
+   "bounds": {
+    "min": [
+     -871,
+     65,
+     33
+    ],
+    "max": [
+     -865,
+     95,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": -912,
+   "y": 80,
+   "z": 80,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -959,
+     33,
+     1
+    ],
+    "max": [
+     -865,
+     127,
+     159
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -403,6 +444,111 @@
    "y": -160,
    "z": 24,
    "targetName": "flub6"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1472,
+   "y": 712,
+   "z": 48,
+   "target": "flub4",
+   "bounds": {
+    "min": [
+     -1503,
+     705,
+     17
+    ],
+    "max": [
+     -1441,
+     719,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -1120,
+   "y": -328,
+   "z": 48,
+   "target": "flub6",
+   "bounds": {
+    "min": [
+     -1151,
+     -335,
+     17
+    ],
+    "max": [
+     -1089,
+     -321,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -768,
+   "y": 1208,
+   "z": -272,
+   "target": "flub6",
+   "bounds": {
+    "min": [
+     -799,
+     1201,
+     -303
+    ],
+    "max": [
+     -737,
+     1215,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -120,
+   "y": 256,
+   "z": 48,
+   "target": "flub3",
+   "bounds": {
+    "min": [
+     -127,
+     225,
+     17
+    ],
+    "max": [
+     -113,
+     287,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 328,
+   "y": -160,
+   "z": 48,
+   "target": "flub",
+   "bounds": {
+    "min": [
+     321,
+     -191,
+     17
+    ],
+    "max": [
+     335,
+     -129,
+     79
+    ]
+   }
   }
  ]
 }

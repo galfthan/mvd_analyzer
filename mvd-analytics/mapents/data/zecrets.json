@@ -3,6 +3,266 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-1",
+   "x": -24,
+   "y": 80.833664,
+   "z": -280,
+   "bounds": {
+    "min": [
+     -31,
+     49.657314,
+     -415
+    ],
+    "max": [
+     -17,
+     112.01002,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-10",
+   "x": 784.20746,
+   "y": 8,
+   "z": -336,
+   "bounds": {
+    "min": [
+     753.24475,
+     -31,
+     -447
+    ],
+    "max": [
+     815.17017,
+     47,
+     -225
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-11",
+   "x": 792,
+   "y": 632,
+   "z": -352,
+   "bounds": {
+    "min": [
+     785,
+     561,
+     -431
+    ],
+    "max": [
+     799,
+     703,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-12",
+   "x": 1327.8384,
+   "y": 104,
+   "z": -360,
+   "bounds": {
+    "min": [
+     1280.8213,
+     17,
+     -447
+    ],
+    "max": [
+     1374.8553,
+     191,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-13",
+   "x": 1352,
+   "y": 624,
+   "z": -152,
+   "bounds": {
+    "min": [
+     1313,
+     545,
+     -159
+    ],
+    "max": [
+     1391,
+     703,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-2",
+   "x": -8,
+   "y": 136,
+   "z": -304,
+   "bounds": {
+    "min": [
+     -15,
+     113,
+     -399
+    ],
+    "max": [
+     -1,
+     159,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 104,
+   "y": 616,
+   "z": -344,
+   "bounds": {
+    "min": [
+     97,
+     577,
+     -399
+    ],
+    "max": [
+     111,
+     655,
+     -289
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-4",
+   "x": 200,
+   "y": -56,
+   "z": -8,
+   "bounds": {
+    "min": [
+     193,
+     -127,
+     -95
+    ],
+    "max": [
+     207,
+     15,
+     79
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-5",
+   "x": 384,
+   "y": 256,
+   "z": -136,
+   "bounds": {
+    "min": [
+     369,
+     209,
+     -207
+    ],
+    "max": [
+     399,
+     303,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-6",
+   "x": 464,
+   "y": 552,
+   "z": -431.82355,
+   "bounds": {
+    "min": [
+     417,
+     529,
+     -526.8073
+    ],
+    "max": [
+     511,
+     575,
+     -336.83975
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-7",
+   "x": 584,
+   "y": -48,
+   "z": -440,
+   "bounds": {
+    "min": [
+     497,
+     -111,
+     -447
+    ],
+    "max": [
+     671,
+     15,
+     -433
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-8",
+   "x": 584,
+   "y": 288,
+   "z": -328,
+   "bounds": {
+    "min": [
+     513,
+     193,
+     -335
+    ],
+    "max": [
+     655,
+     383,
+     -321
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-9",
+   "x": 584,
+   "y": 392,
+   "z": -424,
+   "bounds": {
+    "min": [
+     545,
+     385,
+     -527
+    ],
+    "max": [
+     623,
+     399,
+     -321
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",

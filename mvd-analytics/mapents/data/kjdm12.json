@@ -3,6 +3,90 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.LG",
+   "x": 448,
+   "y": 188,
+   "z": 192,
+   "loc": "low.LG",
+   "bounds": {
+    "min": [
+     433,
+     185,
+     177
+    ],
+    "max": [
+     463,
+     191,
+     207
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.RL",
+   "x": -572,
+   "y": -960,
+   "z": 184,
+   "loc": "low.RL",
+   "bounds": {
+    "min": [
+     -575,
+     -975,
+     169
+    ],
+    "max": [
+     -569,
+     -945,
+     199
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "low.LG",
+   "x": 448,
+   "y": 128,
+   "z": 40,
+   "loc": "low.LG",
+   "bounds": {
+    "min": [
+     393,
+     73,
+     -47
+    ],
+    "max": [
+     503,
+     183,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "low.RL",
+   "x": -512,
+   "y": -960,
+   "z": 40,
+   "loc": "low.RL",
+   "bounds": {
+    "min": [
+     -567,
+     -1015,
+     -47
+    ],
+    "max": [
+     -457,
+     -905,
+     127
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -373,6 +457,50 @@
    "z": 136,
    "loc": "low.RL",
    "targetName": "tele_bottom"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": -572,
+   "y": -832,
+   "z": 488,
+   "loc": "YA",
+   "target": "tele_bottom",
+   "bounds": {
+    "min": [
+     -575,
+     -871,
+     473
+    ],
+    "max": [
+     -569,
+     -793,
+     503
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": 308,
+   "y": -960,
+   "z": 176,
+   "loc": "low.RL",
+   "target": "tele_top",
+   "bounds": {
+    "min": [
+     305,
+     -1007,
+     161
+    ],
+    "max": [
+     311,
+     -913,
+     191
+    ]
+   }
   }
  ]
 }

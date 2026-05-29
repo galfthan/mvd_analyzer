@@ -3,6 +3,174 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue base",
+   "x": 188,
+   "y": 84,
+   "z": -16,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     129,
+     77,
+     -23
+    ],
+    "max": [
+     247,
+     91,
+     -9
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor to red base",
+   "x": 192,
+   "y": -904,
+   "z": -92,
+   "loc": "corridor to red base",
+   "bounds": {
+    "min": [
+     161,
+     -907,
+     -127
+    ],
+    "max": [
+     223,
+     -901,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor to/from blue base",
+   "x": 192,
+   "y": -280,
+   "z": -92,
+   "loc": "corridor to/from blue base",
+   "bounds": {
+    "min": [
+     161,
+     -283,
+     -127
+    ],
+    "max": [
+     223,
+     -277,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside blue base-1",
+   "x": 160,
+   "y": -264,
+   "z": 56,
+   "loc": "outside blue base",
+   "bounds": {
+    "min": [
+     129,
+     -267,
+     1
+    ],
+    "max": [
+     191,
+     -261,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside blue base-2",
+   "x": 224,
+   "y": -264,
+   "z": 56,
+   "loc": "outside blue base",
+   "bounds": {
+    "min": [
+     193,
+     -267,
+     1
+    ],
+    "max": [
+     255,
+     -261,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside red base-1",
+   "x": 160,
+   "y": -904,
+   "z": 56,
+   "loc": "outside red base",
+   "bounds": {
+    "min": [
+     129,
+     -907,
+     1
+    ],
+    "max": [
+     191,
+     -901,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside red base-2",
+   "x": 224,
+   "y": -904,
+   "z": 56,
+   "loc": "outside red base",
+   "bounds": {
+    "min": [
+     193,
+     -907,
+     1
+    ],
+    "max": [
+     255,
+     -901,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "red base",
+   "x": 188,
+   "y": -1256,
+   "z": -16,
+   "loc": "red base",
+   "bounds": {
+    "min": [
+     129,
+     -1263,
+     -23
+    ],
+    "max": [
+     247,
+     -1249,
+     -9
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "weapon_grenadelauncher",
    "kind": "gl",
@@ -720,6 +888,50 @@
    "z": 32,
    "loc": "outside red base",
    "targetName": "t2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "blue base",
+   "x": 82,
+   "y": 86,
+   "z": -94,
+   "loc": "blue base",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     77,
+     65,
+     -123
+    ],
+    "max": [
+     87,
+     107,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "red base",
+   "x": 302,
+   "y": -1270,
+   "z": -94,
+   "loc": "red base",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     297,
+     -1291,
+     -123
+    ],
+    "max": [
+     307,
+     -1249,
+     -65
+    ]
+   }
   }
  ]
 }

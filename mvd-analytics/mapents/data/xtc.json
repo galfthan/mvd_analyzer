@@ -302,6 +302,28 @@
    "y": -193,
    "z": -104,
    "targetName": "deft1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 374.5,
+   "y": 327,
+   "z": -255,
+   "target": "deft1",
+   "spawnflags": 3,
+   "bounds": {
+    "min": [
+     367,
+     293,
+     -317
+    ],
+    "max": [
+     382,
+     361,
+     -193
+    ]
+   }
   }
  ]
 }

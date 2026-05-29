@@ -302,6 +302,27 @@
    "y": 216,
    "z": 456,
    "targetName": "t_port_1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 704,
+   "y": 708,
+   "z": 162,
+   "target": "t_port_1",
+   "bounds": {
+    "min": [
+     641,
+     705,
+     149
+    ],
+    "max": [
+     767,
+     711,
+     175
+    ]
+   }
   }
  ]
 }

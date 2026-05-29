@@ -565,6 +565,50 @@
    "z": 640,
    "loc": "tower.RL",
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "cemetary.tele",
+   "x": 1076,
+   "y": -2112,
+   "z": 348,
+   "loc": "cemetary.tele",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     1073,
+     -2151,
+     289
+    ],
+    "max": [
+     1079,
+     -2073,
+     407
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tower.RL",
+   "x": 300,
+   "y": -1744,
+   "z": 508,
+   "loc": "tower.RL",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     297,
+     -1799,
+     417
+    ],
+    "max": [
+     303,
+     -1689,
+     599
+    ]
+   }
   }
  ]
 }

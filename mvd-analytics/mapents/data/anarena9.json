@@ -59,6 +59,48 @@
    "y": -358,
    "z": 128,
    "targetName": "exit"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 0,
+   "y": -9,
+   "z": 51,
+   "target": "control",
+   "bounds": {
+    "min": [
+     -37,
+     -9,
+     -9
+    ],
+    "max": [
+     37,
+     -9,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 0,
+   "y": 13,
+   "z": 51,
+   "target": "exit",
+   "bounds": {
+    "min": [
+     -37,
+     13,
+     -9
+    ],
+    "max": [
+     37,
+     13,
+     111
+    ]
+   }
   }
  ]
 }

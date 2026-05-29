@@ -697,6 +697,48 @@
    "y": -894,
    "z": -632,
    "targetName": "ya"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 432,
+   "y": -1836,
+   "z": -492,
+   "target": "ya",
+   "bounds": {
+    "min": [
+     393,
+     -1839,
+     -535
+    ],
+    "max": [
+     471,
+     -1833,
+     -449
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 2098,
+   "y": -897.5,
+   "z": -621.5,
+   "target": "ra",
+   "bounds": {
+    "min": [
+     2097,
+     -936,
+     -667
+    ],
+    "max": [
+     2099,
+     -859,
+     -576
+    ]
+   }
   }
  ]
 }

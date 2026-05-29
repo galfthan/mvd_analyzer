@@ -3,6 +3,166 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -172,
+   "y": 608,
+   "z": -184,
+   "bounds": {
+    "min": [
+     -175,
+     593,
+     -199
+    ],
+    "max": [
+     -169,
+     623,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": 0,
+   "y": -996,
+   "z": 512,
+   "bounds": {
+    "min": [
+     -15,
+     -999,
+     497
+    ],
+    "max": [
+     15,
+     -993,
+     527
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-3",
+   "x": 0,
+   "y": -112,
+   "z": -198,
+   "bounds": {
+    "min": [
+     -15,
+     -127,
+     -199
+    ],
+    "max": [
+     15,
+     -97,
+     -197
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -24,
+   "y": -816,
+   "z": 520,
+   "bounds": {
+    "min": [
+     -31,
+     -823,
+     465
+    ],
+    "max": [
+     -17,
+     -809,
+     575
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -24,
+   "y": 752,
+   "z": -168,
+   "bounds": {
+    "min": [
+     -63,
+     737,
+     -183
+    ],
+    "max": [
+     15,
+     767,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 24,
+   "y": -816,
+   "z": 520,
+   "bounds": {
+    "min": [
+     17,
+     -823,
+     465
+    ],
+    "max": [
+     31,
+     -809,
+     575
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 24,
+   "y": 752,
+   "z": -168,
+   "bounds": {
+    "min": [
+     -15,
+     737,
+     -183
+    ],
+    "max": [
+     63,
+     767,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 80,
+   "y": -912,
+   "z": 544,
+   "bounds": {
+    "min": [
+     65,
+     -991,
+     481
+    ],
+    "max": [
+     95,
+     -833,
+     607
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -346,6 +506,27 @@
    "y": -968,
    "z": 648,
    "targetName": "squeeze"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 0,
+   "y": 692,
+   "z": 192,
+   "target": "squeeze",
+   "bounds": {
+    "min": [
+     -79,
+     681,
+     145
+    ],
+    "max": [
+     79,
+     703,
+     239
+    ]
+   }
   }
  ]
 }

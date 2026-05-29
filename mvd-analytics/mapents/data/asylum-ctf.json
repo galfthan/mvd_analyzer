@@ -685,6 +685,69 @@
    "y": -480,
    "z": 40,
    "targetName": "asylum-02"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -688,
+   "y": 1044,
+   "z": -336,
+   "target": "asylum-02",
+   "bounds": {
+    "min": [
+     -695,
+     1009,
+     -383
+    ],
+    "max": [
+     -681,
+     1079,
+     -289
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 272,
+   "y": -480,
+   "z": 60,
+   "target": "asylum-03",
+   "bounds": {
+    "min": [
+     265,
+     -527,
+     1
+    ],
+    "max": [
+     279,
+     -433,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 672,
+   "y": -348,
+   "z": -392,
+   "target": "asylum-01",
+   "bounds": {
+    "min": [
+     625,
+     -351,
+     -431
+    ],
+    "max": [
+     719,
+     -345,
+     -353
+    ]
+   }
   }
  ]
 }

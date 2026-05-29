@@ -394,6 +394,69 @@
    "y": 824,
    "z": 552,
    "targetName": "destdrop2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 224,
+   "y": -640,
+   "z": -604,
+   "target": "destdrop1",
+   "bounds": {
+    "min": [
+     -959,
+     -1279,
+     -631
+    ],
+    "max": [
+     1407,
+     -1,
+     -577
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 224,
+   "y": 640,
+   "z": -604,
+   "target": "destdrop2",
+   "bounds": {
+    "min": [
+     -959,
+     1,
+     -631
+    ],
+    "max": [
+     1407,
+     1279,
+     -577
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 810,
+   "y": 0,
+   "z": -34,
+   "target": "dest",
+   "bounds": {
+    "min": [
+     765,
+     -115,
+     -95
+    ],
+    "max": [
+     855,
+     115,
+     27
+    ]
+   }
   }
  ]
 }

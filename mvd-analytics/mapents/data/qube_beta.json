@@ -554,6 +554,72 @@
    "z": 8,
    "loc": "Quad.trick",
    "targetName": "telehigh"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG.tele",
+   "x": 932,
+   "y": -600,
+   "z": -231,
+   "loc": "LG.tele",
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     929,
+     -711,
+     -287
+    ],
+    "max": [
+     935,
+     -489,
+     -175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.tele",
+   "x": -624,
+   "y": -1368,
+   "z": 108.5,
+   "loc": "YA.tele",
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     -631,
+     -1399,
+     65
+    ],
+    "max": [
+     -617,
+     -1337,
+     152
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water.MH",
+   "x": 514,
+   "y": -1184,
+   "z": -549.5,
+   "loc": "water.MH",
+   "target": "telelow",
+   "bounds": {
+    "min": [
+     513,
+     -1246,
+     -607
+    ],
+    "max": [
+     515,
+     -1122,
+     -492
+    ]
+   }
   }
  ]
 }

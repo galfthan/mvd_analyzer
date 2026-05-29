@@ -3,6 +3,90 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "air-1",
+   "x": 56,
+   "y": 1430,
+   "z": 12,
+   "loc": "air",
+   "bounds": {
+    "min": [
+     41,
+     1405,
+     -39
+    ],
+    "max": [
+     71,
+     1455,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "air-2",
+   "x": 56,
+   "y": 1456,
+   "z": -14,
+   "loc": "air",
+   "bounds": {
+    "min": [
+     41,
+     1405,
+     -39
+    ],
+    "max": [
+     71,
+     1507,
+     11
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "air-3",
+   "x": 56,
+   "y": 1456,
+   "z": 38,
+   "loc": "air",
+   "bounds": {
+    "min": [
+     41,
+     1405,
+     13
+    ],
+    "max": [
+     71,
+     1507,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "air-4",
+   "x": 56,
+   "y": 1482,
+   "z": 12,
+   "loc": "air",
+   "bounds": {
+    "min": [
+     41,
+     1457,
+     -39
+    ],
+    "max": [
+     71,
+     1507,
+     63
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -602,6 +686,94 @@
    "z": 338,
    "loc": "high.LG",
    "targetName": "teleup"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG.tele",
+   "x": 1241,
+   "y": 368,
+   "z": 24,
+   "loc": "LG.tele",
+   "target": "teleskip",
+   "bounds": {
+    "min": [
+     1159,
+     321,
+     -47
+    ],
+    "max": [
+     1323,
+     415,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.low",
+   "x": 936,
+   "y": 2051,
+   "z": -28,
+   "loc": "RA.low",
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     889,
+     2048,
+     -79
+    ],
+    "max": [
+     983,
+     2054,
+     23
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.GA",
+   "x": 588,
+   "y": 1096,
+   "z": 201,
+   "loc": "high.GA",
+   "target": "teleup",
+   "bounds": {
+    "min": [
+     585,
+     1049,
+     147
+    ],
+    "max": [
+     591,
+     1143,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.LG",
+   "x": 971,
+   "y": 1096,
+   "z": 372,
+   "loc": "high.LG",
+   "target": "telelow",
+   "bounds": {
+    "min": [
+     968,
+     1049,
+     329
+    ],
+    "max": [
+     974,
+     1143,
+     415
+    ]
+   }
   }
  ]
 }

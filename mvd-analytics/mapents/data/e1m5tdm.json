@@ -3,6 +3,176 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "SNG",
+   "x": 368,
+   "y": 2264,
+   "z": 330,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     361,
+     2257,
+     321
+    ],
+    "max": [
+     375,
+     2271,
+     339
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "SNG.YA",
+   "x": 624,
+   "y": 2336,
+   "z": 240,
+   "loc": "SNG.YA",
+   "bounds": {
+    "min": [
+     593,
+     2305,
+     237
+    ],
+    "max": [
+     655,
+     2367,
+     243
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.room",
+   "x": -74,
+   "y": 952,
+   "z": 139,
+   "loc": "GL.room",
+   "bounds": {
+    "min": [
+     -111,
+     945,
+     87
+    ],
+    "max": [
+     -37,
+     959,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "NG.tele",
+   "x": -792,
+   "y": 2160,
+   "z": 214,
+   "loc": "NG.tele",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -831,
+     2097,
+     129
+    ],
+    "max": [
+     -753,
+     2223,
+     299
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.lift",
+   "x": -544,
+   "y": 1632,
+   "z": 136,
+   "loc": "RL.lift",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -631,
+     1593,
+     -47
+    ],
+    "max": [
+     -457,
+     1671,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RL.low",
+   "x": -544,
+   "y": 1776,
+   "z": -204,
+   "loc": "RL.low",
+   "bounds": {
+    "min": [
+     -583,
+     1769,
+     -263
+    ],
+    "max": [
+     -505,
+     1783,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "SNG",
+   "x": 552,
+   "y": 2264,
+   "z": 292,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     545,
+     2225,
+     241
+    ],
+    "max": [
+     559,
+     2303,
+     343
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG.stairs",
+   "x": -232,
+   "y": 2548,
+   "z": 480,
+   "loc": "SNG.stairs",
+   "bounds": {
+    "min": [
+     -239,
+     2473,
+     401
+    ],
+    "max": [
+     -225,
+     2623,
+     559
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -751,6 +921,74 @@
    "z": 328,
    "loc": "Quad",
    "targetName": "t46"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "NG.tele",
+   "x": -960,
+   "y": 2308,
+   "z": 188,
+   "loc": "NG.tele",
+   "target": "t46",
+   "bounds": {
+    "min": [
+     -983,
+     2301,
+     145
+    ],
+    "max": [
+     -937,
+     2315,
+     231
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG.tele-1",
+   "x": 418,
+   "y": 2560,
+   "z": 460,
+   "loc": "SNG.tele",
+   "target": "t46",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     417,
+     2537,
+     425
+    ],
+    "max": [
+     419,
+     2583,
+     495
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG.tele-2",
+   "x": 434,
+   "y": 2560,
+   "z": 460,
+   "loc": "SNG.tele",
+   "target": "t46",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     433,
+     2537,
+     425
+    ],
+    "max": [
+     435,
+     2583,
+     495
+    ]
+   }
   }
  ]
 }

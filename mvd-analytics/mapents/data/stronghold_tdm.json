@@ -3,6 +3,321 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.Quad-1",
+   "x": -36,
+   "y": 584,
+   "z": 452,
+   "loc": "LG.Quad",
+   "bounds": {
+    "min": [
+     -71,
+     577,
+     401
+    ],
+    "max": [
+     -1,
+     591,
+     503
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.Quad-2",
+   "x": 36,
+   "y": 584,
+   "z": 490,
+   "loc": "LG.Quad",
+   "bounds": {
+    "min": [
+     1,
+     577,
+     401
+    ],
+    "max": [
+     71,
+     591,
+     579
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.Quad",
+   "x": 0,
+   "y": -440,
+   "z": 368,
+   "loc": "RA.Quad",
+   "bounds": {
+    "min": [
+     -39,
+     -447,
+     305
+    ],
+    "max": [
+     39,
+     -433,
+     431
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.SNG-1",
+   "x": -600,
+   "y": -1156,
+   "z": 216,
+   "loc": "RA.SNG",
+   "bounds": {
+    "min": [
+     -611,
+     -1191,
+     161
+    ],
+    "max": [
+     -589,
+     -1121,
+     271
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.SNG-2",
+   "x": -600,
+   "y": -1084,
+   "z": 216,
+   "loc": "RA.SNG",
+   "bounds": {
+    "min": [
+     -611,
+     -1119,
+     161
+    ],
+    "max": [
+     -589,
+     -1049,
+     271
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.door-1",
+   "x": -40,
+   "y": -424,
+   "z": 96,
+   "loc": "RA.door",
+   "bounds": {
+    "min": [
+     -79,
+     -431,
+     1
+    ],
+    "max": [
+     -1,
+     -417,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.door-2",
+   "x": 40,
+   "y": -424,
+   "z": 96,
+   "loc": "RA.door",
+   "bounds": {
+    "min": [
+     1,
+     -431,
+     1
+    ],
+    "max": [
+     79,
+     -417,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.high",
+   "x": 440,
+   "y": -1104,
+   "z": 352,
+   "loc": "RA.high",
+   "bounds": {
+    "min": [
+     433,
+     -1151,
+     289
+    ],
+    "max": [
+     447,
+     -1057,
+     415
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "rl-ga.door-1",
+   "x": -424,
+   "y": -40,
+   "z": 124,
+   "loc": "rl-ga.door",
+   "bounds": {
+    "min": [
+     -431,
+     -79,
+     9
+    ],
+    "max": [
+     -417,
+     -1,
+     239
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "rl-ga.door-2",
+   "x": -424,
+   "y": 40,
+   "z": 124,
+   "loc": "rl-ga.door",
+   "bounds": {
+    "min": [
+     -431,
+     1,
+     9
+    ],
+    "max": [
+     -417,
+     79,
+     239
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "rl-ya.Quad",
+   "x": 440,
+   "y": 0,
+   "z": 368,
+   "loc": "rl-ya.Quad",
+   "bounds": {
+    "min": [
+     433,
+     -47,
+     305
+    ],
+    "max": [
+     447,
+     47,
+     431
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "statue.door-1",
+   "x": 424,
+   "y": 760,
+   "z": 204,
+   "loc": "statue.door",
+   "bounds": {
+    "min": [
+     417,
+     721,
+     89
+    ],
+    "max": [
+     431,
+     799,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "statue.door-2",
+   "x": 424,
+   "y": 840,
+   "z": 204,
+   "loc": "statue.door",
+   "bounds": {
+    "min": [
+     417,
+     801,
+     89
+    ],
+    "max": [
+     431,
+     879,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ya-low.door-1",
+   "x": -40,
+   "y": 584,
+   "z": 124,
+   "loc": "ya-low.door",
+   "bounds": {
+    "min": [
+     -79,
+     577,
+     9
+    ],
+    "max": [
+     -1,
+     591,
+     239
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ya-low.door-2",
+   "x": 40,
+   "y": 584,
+   "z": 124,
+   "loc": "ya-low.door",
+   "bounds": {
+    "min": [
+     1,
+     577,
+     9
+    ],
+    "max": [
+     79,
+     591,
+     239
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -734,6 +1049,160 @@
    "z": 80,
    "loc": "ya-low.SNG",
    "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.tele",
+   "x": -648,
+   "y": -292,
+   "z": 152,
+   "loc": "GL.tele",
+   "target": "t21",
+   "bounds": {
+    "min": [
+     -691,
+     -295,
+     81
+    ],
+    "max": [
+     -605,
+     -289,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "mega-bridge.tele-1",
+   "x": 1366.3431,
+   "y": -1360,
+   "z": 228,
+   "loc": "mega-bridge.tele",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     1339.3431,
+     -1387,
+     161
+    ],
+    "max": [
+     1393.3431,
+     -1333,
+     295
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "mega-bridge.tele-2",
+   "x": 1372.3431,
+   "y": -1366,
+   "z": 228,
+   "loc": "mega-bridge.tele",
+   "target": "t5",
+   "bounds": {
+    "min": [
+     1345.3431,
+     -1393,
+     161
+    ],
+    "max": [
+     1399.3431,
+     -1339,
+     295
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "rl-ga.spawn",
+   "x": -1236,
+   "y": 0,
+   "z": 152,
+   "loc": "rl-ga.spawn",
+   "target": "t19",
+   "bounds": {
+    "min": [
+     -1239,
+     -43,
+     81
+    ],
+    "max": [
+     -1233,
+     43,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "rl-ya.tele",
+   "x": 1586,
+   "y": 0,
+   "z": 272,
+   "loc": "rl-ya.tele",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     1585,
+     -79,
+     193
+    ],
+    "max": [
+     1587,
+     79,
+     351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "statue.tele",
+   "x": 453.75,
+   "y": 491.75,
+   "z": 240,
+   "loc": "statue.tele",
+   "target": "t18",
+   "bounds": {
+    "min": [
+     421.8528,
+     459.8528,
+     177
+    ],
+    "max": [
+     485.6472,
+     523.64716,
+     303
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "ya-low.SNG",
+   "x": -4,
+   "y": 1460,
+   "z": 148,
+   "loc": "ya-low.SNG",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -47,
+     1457,
+     81
+    ],
+    "max": [
+     39,
+     1463,
+     215
+    ]
+   }
   }
  ]
 }

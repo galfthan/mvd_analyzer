@@ -561,6 +561,50 @@
    "z": 176,
    "loc": "window",
    "targetName": "toquad"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.box",
+   "x": 384,
+   "y": -592,
+   "z": 136,
+   "loc": "YA.box",
+   "target": "toquad",
+   "bounds": {
+    "min": [
+     377,
+     -639,
+     113
+    ],
+    "max": [
+     391,
+     -545,
+     159
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "boxes.tele",
+   "x": -640,
+   "y": -192,
+   "z": 168,
+   "loc": "boxes.tele",
+   "target": "otherside",
+   "bounds": {
+    "min": [
+     -647,
+     -239,
+     113
+    ],
+    "max": [
+     -633,
+     -145,
+     223
+    ]
+   }
   }
  ]
 }

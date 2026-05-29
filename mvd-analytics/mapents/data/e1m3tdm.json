@@ -3,6 +3,135 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad",
+   "x": 1324,
+   "y": 248,
+   "z": -56,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     1281,
+     241,
+     -151
+    ],
+    "max": [
+     1367,
+     255,
+     39
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.entry",
+   "x": 1412,
+   "y": 248,
+   "z": -56,
+   "loc": "Quad.entry",
+   "bounds": {
+    "min": [
+     1369,
+     241,
+     -151
+    ],
+    "max": [
+     1455,
+     255,
+     39
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.water-1",
+   "x": -1228,
+   "y": -536,
+   "z": -421,
+   "loc": "RL.water",
+   "spawnflags": 5,
+   "bounds": {
+    "min": [
+     -1287,
+     -591,
+     -455
+    ],
+    "max": [
+     -1169,
+     -481,
+     -387
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.water-2",
+   "x": -1228,
+   "y": -536,
+   "z": -387,
+   "loc": "RL.water",
+   "bounds": {
+    "min": [
+     -1287,
+     -591,
+     -387
+    ],
+    "max": [
+     -1169,
+     -481,
+     -387
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.water-3",
+   "x": -892,
+   "y": -72,
+   "z": -437,
+   "loc": "RL.water",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -951,
+     -127,
+     -487
+    ],
+    "max": [
+     -833,
+     -17,
+     -387
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.water-4",
+   "x": -892,
+   "y": -72,
+   "z": -388,
+   "loc": "RL.water",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -951,
+     -127,
+     -389
+    ],
+    "max": [
+     -833,
+     -17,
+     -387
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -819,6 +948,94 @@
    "z": -40,
    "loc": "bridge",
    "targetName": "t150"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL",
+   "x": -724,
+   "y": -1544,
+   "z": 164,
+   "loc": "GL",
+   "target": "t86",
+   "bounds": {
+    "min": [
+     -815,
+     -1551,
+     73
+    ],
+    "max": [
+     -633,
+     -1537,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH",
+   "x": 1348,
+   "y": 1008,
+   "z": 640,
+   "loc": "MH",
+   "target": "t172",
+   "bounds": {
+    "min": [
+     1225,
+     1001,
+     545
+    ],
+    "max": [
+     1471,
+     1015,
+     735
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.YA",
+   "x": 1616,
+   "y": -678,
+   "z": -86,
+   "loc": "Quad.YA",
+   "target": "t141",
+   "bounds": {
+    "min": [
+     1585,
+     -679,
+     -123
+    ],
+    "max": [
+     1647,
+     -677,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.entry",
+   "x": 1774,
+   "y": 120,
+   "z": -86,
+   "loc": "Quad.entry",
+   "target": "t86",
+   "bounds": {
+    "min": [
+     1773,
+     89,
+     -123
+    ],
+    "max": [
+     1775,
+     151,
+     -49
+    ]
+   }
   }
  ]
 }

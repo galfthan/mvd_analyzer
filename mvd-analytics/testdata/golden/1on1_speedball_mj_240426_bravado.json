@@ -6144,6 +6144,50 @@
         "x": 256,
         "y": 1256,
         "z": 164
+      },
+      {
+        "bounds": {
+          "max": [
+            -161,
+            495,
+            111
+          ],
+          "min": [
+            -167,
+            401,
+            1
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "SNG",
+        "name": "SNG",
+        "target": "info_teleport_destination1",
+        "type": "teleportSrc",
+        "x": -164,
+        "y": 448,
+        "z": 56
+      },
+      {
+        "bounds": {
+          "max": [
+            31,
+            1255,
+            111
+          ],
+          "min": [
+            -63,
+            1249,
+            1
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "low RL",
+        "name": "low RL",
+        "target": "info_teleport_destination2",
+        "type": "teleportSrc",
+        "x": -16,
+        "y": 1252,
+        "z": 56
       }
     ],
     "map": "bravado"
@@ -6835,7 +6879,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 13,
+  "schemaVersion": 14,
   "streams": {
     "global": {
       "matchEnd": 600001,

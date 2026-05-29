@@ -3,6 +3,69 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "slime.tele",
+   "x": 584,
+   "y": -2224,
+   "z": 476,
+   "loc": "slime.tele",
+   "bounds": {
+    "min": [
+     581,
+     -2252,
+     448
+    ],
+    "max": [
+     587,
+     -2196,
+     504
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GA.SSG-1",
+   "x": 616,
+   "y": -1368,
+   "z": 601.5,
+   "loc": "GA.SSG",
+   "bounds": {
+    "min": [
+     569,
+     -1415,
+     222
+    ],
+    "max": [
+     663,
+     -1321,
+     981
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GA.SSG-2",
+   "x": 616,
+   "y": -1368,
+   "z": 627,
+   "loc": "GA.SSG",
+   "bounds": {
+    "min": [
+     569,
+     -1415,
+     246
+    ],
+    "max": [
+     663,
+     -1321,
+     1008
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -612,6 +675,50 @@
    "z": 129,
    "loc": "Ring.low",
    "targetName": "telemh"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH.tele",
+   "x": 794.125,
+   "y": 140,
+   "z": 180,
+   "loc": "MH.tele",
+   "target": "telemh",
+   "bounds": {
+    "min": [
+     783.125,
+     65,
+     153
+    ],
+    "max": [
+     805.125,
+     215,
+     207
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "slime.tele",
+   "x": 512,
+   "y": -2428,
+   "z": 496,
+   "loc": "slime.tele",
+   "target": "telerl",
+   "bounds": {
+    "min": [
+     449,
+     -2439,
+     465
+    ],
+    "max": [
+     575,
+     -2417,
+     527
+    ]
+   }
   }
  ]
 }

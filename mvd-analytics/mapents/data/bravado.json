@@ -425,6 +425,50 @@
    "z": 164,
    "loc": "low RL",
    "targetName": "info_teleport_destination2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG",
+   "x": -164,
+   "y": 448,
+   "z": 56,
+   "loc": "SNG",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     -167,
+     401,
+     1
+    ],
+    "max": [
+     -161,
+     495,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low RL",
+   "x": -16,
+   "y": 1252,
+   "z": 56,
+   "loc": "low RL",
+   "target": "info_teleport_destination2",
+   "bounds": {
+    "min": [
+     -63,
+     1249,
+     1
+    ],
+    "max": [
+     31,
+     1255,
+     111
+    ]
+   }
   }
  ]
 }

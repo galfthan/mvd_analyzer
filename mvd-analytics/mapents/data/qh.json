@@ -3,6 +3,186 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -1168,
+   "y": -1604,
+   "z": -376,
+   "bounds": {
+    "min": [
+     -1231,
+     -1607,
+     -479
+    ],
+    "max": [
+     -1105,
+     -1601,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-2",
+   "x": -976,
+   "y": -808,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -1007,
+     -815,
+     1
+    ],
+    "max": [
+     -945,
+     -801,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -944,
+   "y": -952,
+   "z": -424,
+   "bounds": {
+    "min": [
+     -1055,
+     -1087,
+     -431
+    ],
+    "max": [
+     -833,
+     -817,
+     -417
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-4",
+   "x": -912,
+   "y": -808,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -943,
+     -815,
+     1
+    ],
+    "max": [
+     -881,
+     -801,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": -648,
+   "y": -1296,
+   "z": 58,
+   "bounds": {
+    "min": [
+     -655,
+     -1327,
+     5
+    ],
+    "max": [
+     -641,
+     -1265,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": -504,
+   "y": -1128,
+   "z": 64,
+   "bounds": {
+    "min": [
+     -543,
+     -1135,
+     1
+    ],
+    "max": [
+     -465,
+     -1121,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": -336,
+   "y": -1240,
+   "z": 64,
+   "bounds": {
+    "min": [
+     -383,
+     -1247,
+     1
+    ],
+    "max": [
+     -289,
+     -1233,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": -216,
+   "y": -1296,
+   "z": 56,
+   "bounds": {
+    "min": [
+     -223,
+     -1327,
+     1
+    ],
+    "max": [
+     -209,
+     -1265,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-9",
+   "x": 1756,
+   "y": -697,
+   "z": 83,
+   "bounds": {
+    "min": [
+     1753,
+     -751,
+     1
+    ],
+    "max": [
+     1759,
+     -643,
+     165
+    ]
+   }
+  },
+  {
    "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "spawn-1",

@@ -3,6 +3,106 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 816,
+   "y": 640,
+   "z": -448,
+   "bounds": {
+    "min": [
+     801,
+     633,
+     -463
+    ],
+    "max": [
+     831,
+     647,
+     -433
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 1232,
+   "y": 576,
+   "z": -392,
+   "bounds": {
+    "min": [
+     1229,
+     529,
+     -395
+    ],
+    "max": [
+     1235,
+     623,
+     -389
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 1248,
+   "y": 560,
+   "z": -404,
+   "bounds": {
+    "min": [
+     1201,
+     557,
+     -407
+    ],
+    "max": [
+     1295,
+     563,
+     -401
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 1248,
+   "y": 592,
+   "z": -404,
+   "bounds": {
+    "min": [
+     1201,
+     589,
+     -407
+    ],
+    "max": [
+     1295,
+     595,
+     -401
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 1264,
+   "y": 576,
+   "z": -392,
+   "bounds": {
+    "min": [
+     1261,
+     529,
+     -395
+    ],
+    "max": [
+     1267,
+     623,
+     -389
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -345,6 +445,48 @@
    "y": 880,
    "z": -288,
    "targetName": "quad2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -896,
+   "y": 904,
+   "z": -540,
+   "target": "bla1",
+   "bounds": {
+    "min": [
+     -899,
+     877,
+     -583
+    ],
+    "max": [
+     -893,
+     931,
+     -497
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1248,
+   "y": 576,
+   "z": -492,
+   "target": "quad2",
+   "bounds": {
+    "min": [
+     1209,
+     537,
+     -495
+    ],
+    "max": [
+     1287,
+     615,
+     -489
+    ]
+   }
   }
  ]
 }

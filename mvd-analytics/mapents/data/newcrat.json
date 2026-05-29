@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -61.550667,
+   "y": 18.66153,
+   "z": -320,
+   "bounds": {
+    "min": [
+     -162.10133,
+     -25.676939,
+     -383
+    ],
+    "max": [
+     39,
+     63,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 1.2643318,
+   "y": -124.66983,
+   "z": -320,
+   "bounds": {
+    "min": [
+     -31,
+     -189.67299,
+     -383
+    ],
+    "max": [
+     33.528664,
+     -59.666668,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 16,
+   "y": 32,
+   "z": 392,
+   "bounds": {
+    "min": [
+     -111,
+     -95,
+     385
+    ],
+    "max": [
+     143,
+     159,
+     399
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 39.774826,
+   "y": -342.77075,
+   "z": -288,
+   "bounds": {
+    "min": [
+     -15.932755,
+     -441.75348,
+     -383
+    ],
+    "max": [
+     95.48241,
+     -243.78802,
+     -193
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_artifact_envirosuit",
    "kind": "suit",

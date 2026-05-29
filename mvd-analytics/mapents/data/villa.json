@@ -3,6 +3,346 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -160,
+   "y": 806,
+   "z": 352,
+   "bounds": {
+    "min": [
+     -175,
+     805,
+     337
+    ],
+    "max": [
+     -145,
+     807,
+     367
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -169.5,
+   "y": 736,
+   "z": 277,
+   "bounds": {
+    "min": [
+     -197,
+     709,
+     277
+    ],
+    "max": [
+     -142,
+     763,
+     277
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-10",
+   "x": 128,
+   "y": 381,
+   "z": 166,
+   "bounds": {
+    "min": [
+     121,
+     347,
+     101
+    ],
+    "max": [
+     135,
+     415,
+     231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-11",
+   "x": 272,
+   "y": 424,
+   "z": 144,
+   "bounds": {
+    "min": [
+     241,
+     421,
+     97
+    ],
+    "max": [
+     303,
+     427,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-12",
+   "x": 546,
+   "y": -904,
+   "z": 128,
+   "bounds": {
+    "min": [
+     525,
+     -911,
+     65
+    ],
+    "max": [
+     567,
+     -897,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-13",
+   "x": 590,
+   "y": -904,
+   "z": 128,
+   "bounds": {
+    "min": [
+     569,
+     -911,
+     65
+    ],
+    "max": [
+     611,
+     -897,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-14",
+   "x": 664,
+   "y": -1136,
+   "z": 144,
+   "bounds": {
+    "min": [
+     649,
+     -1167,
+     65
+    ],
+    "max": [
+     679,
+     -1105,
+     223
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-15",
+   "x": 664,
+   "y": -1072,
+   "z": 144,
+   "bounds": {
+    "min": [
+     649,
+     -1103,
+     65
+    ],
+    "max": [
+     679,
+     -1041,
+     223
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-16",
+   "x": 945,
+   "y": 32,
+   "z": 212,
+   "bounds": {
+    "min": [
+     929,
+     1,
+     209
+    ],
+    "max": [
+     961,
+     63,
+     215
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -168,
+   "y": 736,
+   "z": 299,
+   "bounds": {
+    "min": [
+     -198,
+     709,
+     297
+    ],
+    "max": [
+     -138,
+     763,
+     301
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -138,
+   "y": 536,
+   "z": 336,
+   "bounds": {
+    "min": [
+     -167,
+     531,
+     273
+    ],
+    "max": [
+     -109,
+     541,
+     399
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": -126,
+   "y": -904,
+   "z": 128,
+   "bounds": {
+    "min": [
+     -147,
+     -911,
+     65
+    ],
+    "max": [
+     -105,
+     -897,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": -82,
+   "y": -904,
+   "z": 128,
+   "bounds": {
+    "min": [
+     -103,
+     -911,
+     65
+    ],
+    "max": [
+     -61,
+     -897,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": -78,
+   "y": 536,
+   "z": 336,
+   "bounds": {
+    "min": [
+     -107,
+     531,
+     273
+    ],
+    "max": [
+     -49,
+     541,
+     399
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": -44,
+   "y": 408,
+   "z": 336,
+   "bounds": {
+    "min": [
+     -75,
+     405,
+     273
+    ],
+    "max": [
+     -13,
+     411,
+     399
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 20,
+   "y": 408,
+   "z": 336,
+   "bounds": {
+    "min": [
+     -11,
+     405,
+     273
+    ],
+    "max": [
+     51,
+     411,
+     399
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-9",
+   "x": 128,
+   "y": 311,
+   "z": 166,
+   "bounds": {
+    "min": [
+     121,
+     277,
+     101
+    ],
+    "max": [
+     135,
+     345,
+     231
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

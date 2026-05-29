@@ -591,6 +591,116 @@
    "z": -304,
    "loc": "low.SNG",
    "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL",
+   "x": 8,
+   "y": -560,
+   "z": 8,
+   "loc": "GL",
+   "target": "t6",
+   "bounds": {
+    "min": [
+     1,
+     -623,
+     -55
+    ],
+    "max": [
+     15,
+     -497,
+     71
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 136,
+   "y": 376,
+   "z": 8,
+   "loc": "LG",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     129,
+     313,
+     -55
+    ],
+    "max": [
+     143,
+     439,
+     71
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.low",
+   "x": 672,
+   "y": 704,
+   "z": -280,
+   "loc": "RA.low",
+   "target": "t4",
+   "bounds": {
+    "min": [
+     665,
+     641,
+     -343
+    ],
+    "max": [
+     679,
+     767,
+     -217
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": -1704,
+   "y": -8,
+   "z": -40,
+   "loc": "YA",
+   "target": "t5",
+   "bounds": {
+    "min": [
+     -1711,
+     -71,
+     -103
+    ],
+    "max": [
+     -1697,
+     55,
+     23
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.SNG",
+   "x": -552,
+   "y": 768,
+   "z": -248,
+   "loc": "low.SNG",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -559,
+     705,
+     -311
+    ],
+    "max": [
+     -545,
+     831,
+     -185
+    ]
+   }
   }
  ]
 }

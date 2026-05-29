@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": -720,
+   "y": 1436,
+   "z": 88,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -734.2727,
+     1353,
+     73.72727
+    ],
+    "max": [
+     -705.7273,
+     1519,
+     102.27273
+    ]
+   }
+  },
+  {
    "type": "spawn",
    "class": "info_player_deathmatch",
    "name": "spawn-1",
@@ -42,6 +63,28 @@
    "y": 2208,
    "z": 56,
    "targetName": "t69"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -960,
+   "y": 2672,
+   "z": 260,
+   "target": "t69",
+   "spawnflags": 1792,
+   "bounds": {
+    "min": [
+     -967,
+     2641,
+     233
+    ],
+    "max": [
+     -953,
+     2703,
+     287
+    ]
+   }
   }
  ]
 }

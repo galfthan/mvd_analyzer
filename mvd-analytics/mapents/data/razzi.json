@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door",
+   "x": -56,
+   "y": 672,
+   "z": 160,
+   "spawnflags": 8,
+   "bounds": {
+    "min": [
+     -63,
+     641,
+     97
+    ],
+    "max": [
+     -49,
+     703,
+     223
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -550,6 +571,90 @@
    "y": 672,
    "z": 56,
    "targetName": "due"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -896,
+   "y": -1016,
+   "z": 320,
+   "target": "due",
+   "bounds": {
+    "min": [
+     -943,
+     -1023,
+     273
+    ],
+    "max": [
+     -849,
+     -1009,
+     367
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -120,
+   "y": 672,
+   "z": 160,
+   "target": "quad",
+   "bounds": {
+    "min": [
+     -127,
+     641,
+     97
+    ],
+    "max": [
+     -113,
+     703,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 120,
+   "y": -240,
+   "z": 56,
+   "target": "armor",
+   "bounds": {
+    "min": [
+     113,
+     -287,
+     1
+    ],
+    "max": [
+     127,
+     -193,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 648,
+   "y": 672,
+   "z": 96,
+   "target": "uno",
+   "bounds": {
+    "min": [
+     641,
+     625,
+     49
+    ],
+    "max": [
+     655,
+     719,
+     143
+    ]
+   }
   }
  ]
 }

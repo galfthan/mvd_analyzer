@@ -408,6 +408,48 @@
    "y": -184,
    "z": 114,
    "targetName": "teleya"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -224,
+   "y": -750,
+   "z": 56,
+   "target": "telepipe",
+   "bounds": {
+    "min": [
+     -255,
+     -765,
+     17
+    ],
+    "max": [
+     -193,
+     -735,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 495.4906,
+   "y": -394.68787,
+   "z": 72,
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     473.98727,
+     -419.1507,
+     33
+    ],
+    "max": [
+     516.9939,
+     -370.22507,
+     111
+    ]
+   }
   }
  ]
 }

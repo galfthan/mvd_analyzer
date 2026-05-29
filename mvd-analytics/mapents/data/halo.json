@@ -370,6 +370,90 @@
    "y": 30,
    "z": 106,
    "targetName": "telered"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -764,
+   "y": 8,
+   "z": 301,
+   "target": "telemid",
+   "bounds": {
+    "min": [
+     -767,
+     -39,
+     261
+    ],
+    "max": [
+     -761,
+     55,
+     341
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -502,
+   "y": -498,
+   "z": 176,
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     -507,
+     -539,
+     161
+    ],
+    "max": [
+     -497,
+     -457,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -468,
+   "y": 137.5,
+   "z": 50,
+   "target": "telemid",
+   "bounds": {
+    "min": [
+     -471,
+     89,
+     9
+    ],
+    "max": [
+     -465,
+     186,
+     91
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 610,
+   "y": -127,
+   "z": 48,
+   "target": "telered",
+   "bounds": {
+    "min": [
+     605,
+     -165,
+     1
+    ],
+    "max": [
+     615,
+     -89,
+     95
+    ]
+   }
   }
  ]
 }

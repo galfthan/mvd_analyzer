@@ -638,6 +638,69 @@
    "y": -224,
    "z": -160,
    "targetName": "yaquad"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -462,
+   "y": -964,
+   "z": 53,
+   "target": "yaquad",
+   "bounds": {
+    "min": [
+     -499,
+     -971,
+     -5
+    ],
+    "max": [
+     -425,
+     -957,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -164,
+   "y": 1986,
+   "z": 76,
+   "target": "raquad",
+   "bounds": {
+    "min": [
+     -171,
+     1949,
+     17
+    ],
+    "max": [
+     -157,
+     2023,
+     135
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 1700,
+   "y": 480,
+   "z": -113,
+   "target": "middle",
+   "bounds": {
+    "min": [
+     1693,
+     443,
+     -171
+    ],
+    "max": [
+     1707,
+     517,
+     -55
+    ]
+   }
   }
  ]
 }

@@ -350,6 +350,28 @@
    "z": 232,
    "loc": "high.path",
    "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.low",
+   "x": 400,
+   "y": 824,
+   "z": -8,
+   "loc": "RA.low",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     369,
+     801,
+     -63
+    ],
+    "max": [
+     431,
+     847,
+     47
+    ]
+   }
   }
  ]
 }

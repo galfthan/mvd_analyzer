@@ -447,6 +447,72 @@
    "z": 258,
    "loc": "YA.ledge",
    "targetName": "telered"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RAmp-1",
+   "x": -376,
+   "y": 52,
+   "z": 48,
+   "loc": "low.RAmp",
+   "target": "telecenter",
+   "bounds": {
+    "min": [
+     -423,
+     49,
+     9
+    ],
+    "max": [
+     -329,
+     55,
+     87
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RAmp-2",
+   "x": -24,
+   "y": 500,
+   "z": 44,
+   "loc": "low.RAmp",
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     -71,
+     497,
+     1
+    ],
+    "max": [
+     23,
+     503,
+     87
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": -488,
+   "y": -724,
+   "z": 46,
+   "loc": "low.RL",
+   "target": "telered",
+   "bounds": {
+    "min": [
+     -535,
+     -727,
+     1
+    ],
+    "max": [
+     -441,
+     -721,
+     91
+    ]
+   }
   }
  ]
 }

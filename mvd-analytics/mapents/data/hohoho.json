@@ -400,6 +400,48 @@
    "y": -128,
    "z": 688,
    "targetName": "jesus"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -128,
+   "y": 416,
+   "z": 48,
+   "target": "treetop",
+   "bounds": {
+    "min": [
+     -143,
+     385,
+     17
+    ],
+    "max": [
+     -113,
+     447,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -128,
+   "y": 608,
+   "z": 48,
+   "target": "jesus",
+   "bounds": {
+    "min": [
+     -143,
+     577,
+     17
+    ],
+    "max": [
+     -113,
+     639,
+     79
+    ]
+   }
   }
  ]
 }

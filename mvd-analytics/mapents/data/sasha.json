@@ -478,6 +478,69 @@
    "y": -248,
    "z": 192,
    "targetName": "QUAD"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -618,
+   "y": -400,
+   "z": 40,
+   "target": "PENT",
+   "bounds": {
+    "min": [
+     -619,
+     -511,
+     -31
+    ],
+    "max": [
+     -617,
+     -289,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -556,
+   "y": -512,
+   "z": 72,
+   "target": "QUAD",
+   "bounds": {
+    "min": [
+     -591,
+     -575,
+     1
+    ],
+    "max": [
+     -521,
+     -449,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 284,
+   "y": -192,
+   "z": 64,
+   "target": "STAR",
+   "bounds": {
+    "min": [
+     257,
+     -287,
+     1
+    ],
+    "max": [
+     311,
+     -97,
+     127
+    ]
+   }
   }
  ]
 }

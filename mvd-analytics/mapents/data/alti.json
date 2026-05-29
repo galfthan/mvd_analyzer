@@ -3,6 +3,166 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 16.5,
+   "y": -952,
+   "z": -343,
+   "bounds": {
+    "min": [
+     1,
+     -975,
+     -373
+    ],
+    "max": [
+     32,
+     -929,
+     -313
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 1343.5,
+   "y": -549,
+   "z": 17,
+   "bounds": {
+    "min": [
+     1340,
+     -579,
+     -40
+    ],
+    "max": [
+     1347,
+     -519,
+     74
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 1344.5,
+   "y": -549,
+   "z": -139,
+   "bounds": {
+    "min": [
+     1341,
+     -579,
+     -193
+    ],
+    "max": [
+     1348,
+     -519,
+     -85
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 1467,
+   "y": -53,
+   "z": -337,
+   "bounds": {
+    "min": [
+     1430,
+     -63,
+     -379
+    ],
+    "max": [
+     1504,
+     -43,
+     -295
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 1467,
+   "y": -51.5,
+   "z": -140,
+   "bounds": {
+    "min": [
+     1430,
+     -60,
+     -191
+    ],
+    "max": [
+     1504,
+     -43,
+     -89
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": 1468,
+   "y": -52.5,
+   "z": 25,
+   "bounds": {
+    "min": [
+     1431,
+     -61,
+     -39
+    ],
+    "max": [
+     1505,
+     -44,
+     89
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-7",
+   "x": 1525,
+   "y": -300.5,
+   "z": -316,
+   "bounds": {
+    "min": [
+     1502,
+     -336,
+     -382
+    ],
+    "max": [
+     1548,
+     -265,
+     -250
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 1868,
+   "y": -824,
+   "z": -320,
+   "bounds": {
+    "min": [
+     1860,
+     -877,
+     -382
+    ],
+    "max": [
+     1876,
+     -771,
+     -258
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

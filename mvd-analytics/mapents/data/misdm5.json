@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "lift",
+   "x": 252,
+   "y": -448,
+   "z": -400,
+   "loc": "lift",
+   "bounds": {
+    "min": [
+     249,
+     -463,
+     -415
+    ],
+    "max": [
+     255,
+     -433,
+     -385
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "lift",
+   "x": 192,
+   "y": -448,
+   "z": -560,
+   "loc": "lift",
+   "bounds": {
+    "min": [
+     129,
+     -511,
+     -671
+    ],
+    "max": [
+     255,
+     -385,
+     -449
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -403,6 +445,72 @@
    "z": -64,
    "loc": "up",
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA cave",
+   "x": -320,
+   "y": -592,
+   "z": -160,
+   "loc": "RA cave",
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     -367,
+     -607,
+     -207
+    ],
+    "max": [
+     -273,
+     -577,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "dn",
+   "x": -224,
+   "y": -128,
+   "z": -384,
+   "loc": "dn",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -239,
+     -175,
+     -431
+    ],
+    "max": [
+     -209,
+     -81,
+     -337
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "up",
+   "x": -64,
+   "y": 656,
+   "z": -32,
+   "loc": "up",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -111,
+     641,
+     -79
+    ],
+    "max": [
+     -17,
+     671,
+     15
+    ]
+   }
   }
  ]
 }

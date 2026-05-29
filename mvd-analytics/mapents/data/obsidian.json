@@ -3,6 +3,111 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad",
+   "x": 352,
+   "y": -52,
+   "z": -220,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     331,
+     -73,
+     -225
+    ],
+    "max": [
+     373,
+     -31,
+     -215
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "lift",
+   "x": -160,
+   "y": 800,
+   "z": -480,
+   "loc": "lift",
+   "bounds": {
+    "min": [
+     -181,
+     723,
+     -485
+    ],
+    "max": [
+     -139,
+     877,
+     -475
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "hall-1",
+   "x": -288,
+   "y": 688,
+   "z": -160,
+   "loc": "hall",
+   "bounds": {
+    "min": [
+     -375,
+     685,
+     -239
+    ],
+    "max": [
+     -201,
+     691,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "hall-2",
+   "x": 352,
+   "y": -12,
+   "z": -150,
+   "loc": "hall",
+   "bounds": {
+    "min": [
+     301,
+     -15,
+     -219
+    ],
+    "max": [
+     403,
+     -9,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "lift",
+   "x": -288,
+   "y": 800,
+   "z": -588,
+   "loc": "lift",
+   "bounds": {
+    "min": [
+     -367,
+     721,
+     -703
+    ],
+    "max": [
+     -209,
+     879,
+     -473
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",

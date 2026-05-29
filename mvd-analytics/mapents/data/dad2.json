@@ -501,6 +501,69 @@
    "y": 128,
    "z": 40,
    "targetName": "ya"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -768,
+   "y": 4,
+   "z": 176,
+   "target": "gl",
+   "bounds": {
+    "min": [
+     -799,
+     -7,
+     129
+    ],
+    "max": [
+     -737,
+     15,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 320,
+   "y": -1028,
+   "z": 48,
+   "target": "ya",
+   "bounds": {
+    "min": [
+     289,
+     -1039,
+     1
+    ],
+    "max": [
+     351,
+     -1017,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 420,
+   "y": 128,
+   "z": 48,
+   "target": "ra",
+   "bounds": {
+    "min": [
+     409,
+     97,
+     1
+    ],
+    "max": [
+     431,
+     159,
+     95
+    ]
+   }
   }
  ]
 }

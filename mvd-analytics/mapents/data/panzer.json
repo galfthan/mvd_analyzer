@@ -418,6 +418,48 @@
    "y": -688,
    "z": 120,
    "targetName": "telemega"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -136,
+   "y": 752,
+   "z": -8,
+   "target": "telecenter",
+   "bounds": {
+    "min": [
+     -143,
+     721,
+     -47
+    ],
+    "max": [
+     -129,
+     783,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 440,
+   "y": -512,
+   "z": 88,
+   "target": "telemega",
+   "bounds": {
+    "min": [
+     433,
+     -543,
+     49
+    ],
+    "max": [
+     447,
+     -481,
+     127
+    ]
+   }
   }
  ]
 }

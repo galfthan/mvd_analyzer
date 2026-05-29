@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (LOWER ENTRANCE)",
+   "x": -576,
+   "y": -784,
+   "z": -484,
+   "loc": "BLUE BASE (LOWER ENTRANCE)",
+   "bounds": {
+    "min": [
+     -587,
+     -831,
+     -551
+    ],
+    "max": [
+     -565,
+     -737,
+     -417
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (LOWER ENTRANCE)",
+   "x": -1568,
+   "y": -784,
+   "z": -484,
+   "loc": "RED BASE (LOWER ENTRANCE)",
+   "bounds": {
+    "min": [
+     -1579,
+     -831,
+     -551
+    ],
+    "max": [
+     -1557,
+     -737,
+     -417
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

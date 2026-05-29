@@ -3,6 +3,321 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA.up",
+   "x": -39.5,
+   "y": -1599.5,
+   "z": 407,
+   "loc": "RA.up",
+   "bounds": {
+    "min": [
+     -47,
+     -1599,
+     399
+    ],
+    "max": [
+     -32,
+     -1600,
+     415
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GA-1",
+   "x": -424,
+   "y": -40,
+   "z": 124,
+   "loc": "GA",
+   "bounds": {
+    "min": [
+     -431,
+     -79,
+     9
+    ],
+    "max": [
+     -417,
+     -1,
+     239
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GA-2",
+   "x": -424,
+   "y": 40,
+   "z": 124,
+   "loc": "GA",
+   "bounds": {
+    "min": [
+     -431,
+     1,
+     9
+    ],
+    "max": [
+     -417,
+     79,
+     239
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG",
+   "x": -36,
+   "y": 584,
+   "z": 452,
+   "loc": "LG",
+   "bounds": {
+    "min": [
+     -71,
+     577,
+     401
+    ],
+    "max": [
+     -1,
+     591,
+     503
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.balcony",
+   "x": 36,
+   "y": 584,
+   "z": 452,
+   "loc": "LG.balcony",
+   "bounds": {
+    "min": [
+     1,
+     577,
+     401
+    ],
+    "max": [
+     71,
+     591,
+     503
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA-1",
+   "x": -40,
+   "y": -424,
+   "z": 96,
+   "loc": "RA",
+   "bounds": {
+    "min": [
+     -79,
+     -431,
+     1
+    ],
+    "max": [
+     -1,
+     -417,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA-2",
+   "x": 40,
+   "y": -424,
+   "z": 96,
+   "loc": "RA",
+   "bounds": {
+    "min": [
+     1,
+     -431,
+     1
+    ],
+    "max": [
+     79,
+     -417,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.Pent",
+   "x": 440,
+   "y": -1104,
+   "z": 352,
+   "loc": "RA.Pent",
+   "bounds": {
+    "min": [
+     433,
+     -1151,
+     289
+    ],
+    "max": [
+     447,
+     -1057,
+     415
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.balcony",
+   "x": 0,
+   "y": -444,
+   "z": 368,
+   "loc": "RA.balcony",
+   "bounds": {
+    "min": [
+     -39,
+     -455,
+     305
+    ],
+    "max": [
+     39,
+     -433,
+     431
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.up",
+   "x": 54,
+   "y": -1610,
+   "z": 353,
+   "loc": "RA.up",
+   "bounds": {
+    "min": [
+     25,
+     -1613,
+     307
+    ],
+    "max": [
+     83,
+     -1607,
+     399
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Ring.MH",
+   "x": 424,
+   "y": 840,
+   "z": 204,
+   "loc": "Ring.MH",
+   "bounds": {
+    "min": [
+     417,
+     801,
+     89
+    ],
+    "max": [
+     431,
+     879,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Ring.RL",
+   "x": 440,
+   "y": 0,
+   "z": 368,
+   "loc": "Ring.RL",
+   "bounds": {
+    "min": [
+     433,
+     -47,
+     305
+    ],
+    "max": [
+     447,
+     47,
+     431
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "YA.low-1",
+   "x": -40,
+   "y": 584,
+   "z": 124,
+   "loc": "YA.low",
+   "bounds": {
+    "min": [
+     -79,
+     577,
+     9
+    ],
+    "max": [
+     -1,
+     591,
+     239
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "YA.low-2",
+   "x": 40,
+   "y": 584,
+   "z": 124,
+   "loc": "YA.low",
+   "bounds": {
+    "min": [
+     1,
+     577,
+     9
+    ],
+    "max": [
+     79,
+     591,
+     239
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "YA.low-3",
+   "x": 424,
+   "y": 760,
+   "z": 204,
+   "loc": "YA.low",
+   "bounds": {
+    "min": [
+     417,
+     721,
+     89
+    ],
+    "max": [
+     431,
+     799,
+     319
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -735,6 +1050,160 @@
    "z": 160,
    "loc": "shrine",
    "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA",
+   "x": -1239,
+   "y": 0,
+   "z": 138,
+   "loc": "GA",
+   "target": "t19",
+   "bounds": {
+    "min": [
+     -1239,
+     -43,
+     85
+    ],
+    "max": [
+     -1239,
+     43,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL",
+   "x": -636.76953,
+   "y": -628.76953,
+   "z": 80,
+   "loc": "GL",
+   "target": "t21",
+   "bounds": {
+    "min": [
+     -669.7107,
+     -661.7107,
+     9
+    ],
+    "max": [
+     -603.8284,
+     -595.8284,
+     151
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent",
+   "x": 1142.7695,
+   "y": -1142.7695,
+   "z": 428,
+   "loc": "Pent",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     1109.8284,
+     -1175.7107,
+     353
+    ],
+    "max": [
+     1175.7107,
+     -1109.8284,
+     503
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent.low",
+   "x": 665.2427,
+   "y": -673.2427,
+   "z": 266,
+   "loc": "Pent.low",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     634.7746,
+     -703.7107,
+     213
+    ],
+    "max": [
+     695.7107,
+     -642.7746,
+     319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring.MH",
+   "x": 452.5,
+   "y": 490.5,
+   "z": 221,
+   "loc": "Ring.MH",
+   "target": "t18",
+   "bounds": {
+    "min": [
+     421.8528,
+     459.8528,
+     177
+    ],
+    "max": [
+     483.1472,
+     521.14716,
+     265
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring.RL",
+   "x": 1586,
+   "y": 0,
+   "z": 272,
+   "loc": "Ring.RL",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     1585,
+     -79,
+     193
+    ],
+    "max": [
+     1587,
+     79,
+     351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "shrine",
+   "x": -1542.5442,
+   "y": 576,
+   "z": 219,
+   "loc": "shrine",
+   "target": "t30",
+   "bounds": {
+    "min": [
+     -1542.0883,
+     533,
+     165
+    ],
+    "max": [
+     -1543,
+     619,
+     273
+    ]
+   }
   }
  ]
 }

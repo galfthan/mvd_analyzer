@@ -433,6 +433,72 @@
    "z": 208,
    "loc": "LG.YA",
    "targetName": "teleya"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": -680,
+   "y": -562,
+   "z": 160,
+   "loc": "LG",
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     -719,
+     -575,
+     113
+    ],
+    "max": [
+     -641,
+     -549,
+     207
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 196,
+   "y": -748,
+   "z": 56,
+   "loc": "RA",
+   "target": "telemid",
+   "bounds": {
+    "min": [
+     153,
+     -755,
+     1
+    ],
+    "max": [
+     239,
+     -741,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": 256,
+   "y": 456,
+   "z": 48,
+   "loc": "low.RL",
+   "target": "teletop",
+   "bounds": {
+    "min": [
+     217,
+     449,
+     1
+    ],
+    "max": [
+     295,
+     463,
+     95
+    ]
+   }
   }
  ]
 }

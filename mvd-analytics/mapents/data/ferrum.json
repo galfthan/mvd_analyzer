@@ -3,6 +3,26 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door",
+   "x": -672,
+   "y": -330.5,
+   "z": 192,
+   "bounds": {
+    "min": [
+     -703,
+     -343,
+     161
+    ],
+    "max": [
+     -641,
+     -318,
+     223
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -489,6 +509,132 @@
    "y": -32,
    "z": 104,
    "targetName": "evil"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1184,
+   "y": -304,
+   "z": 376,
+   "target": "frost",
+   "bounds": {
+    "min": [
+     -1215,
+     -319,
+     369
+    ],
+    "max": [
+     -1153,
+     -289,
+     383
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -1072,
+   "y": 392,
+   "z": 160,
+   "target": "ad",
+   "bounds": {
+    "min": [
+     -1119,
+     385,
+     129
+    ],
+    "max": [
+     -1025,
+     399,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -792,
+   "y": 560,
+   "z": 264,
+   "target": "evil",
+   "bounds": {
+    "min": [
+     -799,
+     529,
+     257
+    ],
+    "max": [
+     -785,
+     591,
+     271
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -744,
+   "y": 1024,
+   "z": 32,
+   "target": "da",
+   "bounds": {
+    "min": [
+     -751,
+     977,
+     1
+    ],
+    "max": [
+     -737,
+     1071,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": -336,
+   "y": 576,
+   "z": 112,
+   "target": "esc",
+   "bounds": {
+    "min": [
+     -351,
+     529,
+     81
+    ],
+    "max": [
+     -321,
+     623,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 720,
+   "y": -32,
+   "z": 120,
+   "target": "war",
+   "bounds": {
+    "min": [
+     705,
+     -63,
+     113
+    ],
+    "max": [
+     735,
+     -1,
+     127
+    ]
+   }
   }
  ]
 }

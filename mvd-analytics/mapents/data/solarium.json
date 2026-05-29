@@ -380,6 +380,69 @@
    "y": -176,
    "z": -48,
    "targetName": "toprl"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -352,
+   "y": 808,
+   "z": -16,
+   "target": "toprl",
+   "bounds": {
+    "min": [
+     -415,
+     801,
+     -95
+    ],
+    "max": [
+     -289,
+     815,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 64,
+   "y": -36,
+   "z": -248,
+   "target": "Lightning",
+   "bounds": {
+    "min": [
+     1,
+     -39,
+     -303
+    ],
+    "max": [
+     127,
+     -33,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 520,
+   "y": 288,
+   "z": -228,
+   "target": "topcorner",
+   "bounds": {
+    "min": [
+     513,
+     225,
+     -295
+    ],
+    "max": [
+     527,
+     351,
+     -161
+    ]
+   }
   }
  ]
 }

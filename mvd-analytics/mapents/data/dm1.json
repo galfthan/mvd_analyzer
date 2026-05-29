@@ -3,6 +3,133 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "GA.mid",
+   "x": 508,
+   "y": 1256,
+   "z": -104,
+   "loc": "GA.mid",
+   "bounds": {
+    "min": [
+     505,
+     1233,
+     -127
+    ],
+    "max": [
+     511,
+     1279,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "YA.button",
+   "x": -368,
+   "y": 1592,
+   "z": 0,
+   "loc": "YA.button",
+   "bounds": {
+    "min": [
+     -399,
+     1561,
+     -3
+    ],
+    "max": [
+     -337,
+     1623,
+     3
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GA.tele-1",
+   "x": 420,
+   "y": 1360,
+   "z": -84,
+   "loc": "GA.tele",
+   "bounds": {
+    "min": [
+     413,
+     1353,
+     -143
+    ],
+    "max": [
+     427,
+     1367,
+     -25
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GA.tele-2",
+   "x": 456,
+   "y": 1360,
+   "z": -84,
+   "loc": "GA.tele",
+   "bounds": {
+    "min": [
+     449,
+     1353,
+     -143
+    ],
+    "max": [
+     463,
+     1367,
+     -25
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "MH",
+   "x": 480,
+   "y": 676,
+   "z": 48,
+   "loc": "MH",
+   "bounds": {
+    "min": [
+     449,
+     669,
+     9
+    ],
+    "max": [
+     511,
+     683,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "YA",
+   "x": -184,
+   "y": 1416,
+   "z": -10,
+   "loc": "YA",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -303,
+     1361,
+     -15
+    ],
+    "max": [
+     -65,
+     1471,
+     -5
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -338,6 +465,28 @@
    "z": 16,
    "loc": "cross",
    "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA.tele",
+   "x": 264,
+   "y": 1600,
+   "z": -88,
+   "loc": "GA.tele",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     245,
+     1577,
+     -135
+    ],
+    "max": [
+     283,
+     1623,
+     -41
+    ]
+   }
   }
  ]
 }

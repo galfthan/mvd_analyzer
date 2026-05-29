@@ -386,6 +386,72 @@
    "z": 344,
    "loc": "pillars.stand",
    "targetName": "info_teleport_destination1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad",
+   "x": -552,
+   "y": 160,
+   "z": 192,
+   "loc": "Quad",
+   "target": "info_teleport_destination5",
+   "bounds": {
+    "min": [
+     -559,
+     97,
+     177
+    ],
+    "max": [
+     -545,
+     223,
+     207
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low",
+   "x": 224,
+   "y": 424,
+   "z": 64,
+   "loc": "low",
+   "target": "info_teleport_destination2",
+   "bounds": {
+    "min": [
+     161,
+     417,
+     49
+    ],
+    "max": [
+     287,
+     431,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": 1048,
+   "y": -512,
+   "z": 16,
+   "loc": "low.RL",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     1041,
+     -575,
+     1
+    ],
+    "max": [
+     1055,
+     -449,
+     31
+    ]
+   }
   }
  ]
 }

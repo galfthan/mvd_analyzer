@@ -3,6 +3,70 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "MH-1",
+   "x": -576,
+   "y": 854,
+   "z": -200,
+   "loc": "MH",
+   "bounds": {
+    "min": [
+     -591,
+     847,
+     -215
+    ],
+    "max": [
+     -561,
+     861,
+     -185
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "MH-2",
+   "x": -552,
+   "y": 856,
+   "z": -160,
+   "loc": "MH",
+   "bounds": {
+    "min": [
+     -671,
+     849,
+     -207
+    ],
+    "max": [
+     -433,
+     863,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "MH",
+   "x": -576,
+   "y": 656,
+   "z": -384,
+   "loc": "MH",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -623,
+     577,
+     -391
+    ],
+    "max": [
+     -529,
+     735,
+     -377
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

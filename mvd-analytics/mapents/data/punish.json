@@ -723,6 +723,94 @@
    "z": -16,
    "loc": "YA.GL",
    "targetName": "tele3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH",
+   "x": 640,
+   "y": 832,
+   "z": -432,
+   "loc": "MH",
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     625,
+     801,
+     -479
+    ],
+    "max": [
+     655,
+     863,
+     -385
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH.Quad",
+   "x": 32,
+   "y": 832,
+   "z": -144,
+   "loc": "MH.Quad",
+   "target": "tele0",
+   "bounds": {
+    "min": [
+     1,
+     817,
+     -191
+    ],
+    "max": [
+     63,
+     847,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL.tele",
+   "x": 1216,
+   "y": 640,
+   "z": -288,
+   "loc": "RL.tele",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     1201,
+     609,
+     -335
+    ],
+    "max": [
+     1231,
+     671,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.tele",
+   "x": 592,
+   "y": 384,
+   "z": 144,
+   "loc": "path.tele",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     561,
+     369,
+     97
+    ],
+    "max": [
+     623,
+     399,
+     191
+    ]
+   }
   }
  ]
 }

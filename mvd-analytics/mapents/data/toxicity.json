@@ -434,6 +434,50 @@
    "z": 43,
    "loc": "tele.YA.exit",
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.LG.tele",
+   "x": 1386,
+   "y": 364,
+   "z": -7,
+   "loc": "Quad.LG.tele",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     1367,
+     341,
+     -85
+    ],
+    "max": [
+     1405,
+     387,
+     71
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "on.YA.tele",
+   "x": 484,
+   "y": -512,
+   "z": -40,
+   "loc": "on.YA.tele",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     466,
+     -533,
+     -117
+    ],
+    "max": [
+     502,
+     -491,
+     37
+    ]
+   }
   }
  ]
 }

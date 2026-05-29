@@ -396,6 +396,72 @@
    "z": 408,
    "loc": "tele.high RL",
    "targetName": "info_teleport_destination3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele.MEGA",
+   "x": -48,
+   "y": 464,
+   "z": 120,
+   "loc": "tele.MEGA",
+   "target": "info_teleport_destination3",
+   "bounds": {
+    "min": [
+     -95,
+     457,
+     105
+    ],
+    "max": [
+     -1,
+     471,
+     135
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele.high RL",
+   "x": 560,
+   "y": -136,
+   "z": 444,
+   "loc": "tele.high RL",
+   "target": "info_teleport_destination2",
+   "bounds": {
+    "min": [
+     513,
+     -143,
+     425
+    ],
+    "max": [
+     607,
+     -129,
+     463
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele.low RL",
+   "x": -664,
+   "y": -280,
+   "z": 184,
+   "loc": "tele.low RL",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     -671,
+     -335,
+     169
+    ],
+    "max": [
+     -657,
+     -225,
+     199
+    ]
+   }
   }
  ]
 }

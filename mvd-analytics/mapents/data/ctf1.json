@@ -3,6 +3,134 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "Quad",
+   "x": 0,
+   "y": 76,
+   "z": 304,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     -23,
+     65,
+     265
+    ],
+    "max": [
+     23,
+     87,
+     343
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "YA in red base",
+   "x": -1352,
+   "y": 844,
+   "z": 536,
+   "loc": "YA in red base",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1375,
+     841,
+     497
+    ],
+    "max": [
+     -1329,
+     847,
+     575
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "blue base-1",
+   "x": 872,
+   "y": 484,
+   "z": 536,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     841,
+     465,
+     497
+    ],
+    "max": [
+     903,
+     503,
+     575
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "blue base-2",
+   "x": 1352,
+   "y": -108,
+   "z": 536,
+   "loc": "blue base",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1329,
+     -111,
+     497
+    ],
+    "max": [
+     1375,
+     -105,
+     575
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "blue base-3",
+   "x": 1444,
+   "y": 328,
+   "z": 536,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     1441,
+     305,
+     497
+    ],
+    "max": [
+     1447,
+     351,
+     575
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "guarding place #2 in red base",
+   "x": -1444,
+   "y": 408,
+   "z": 536,
+   "loc": "guarding place #2 in red base",
+   "bounds": {
+    "min": [
+     -1447,
+     385,
+     497
+    ],
+    "max": [
+     -1441,
+     431,
+     575
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -1006,6 +1134,28 @@
    "z": 296,
    "loc": "middle area",
    "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL under water",
+   "x": -319.5,
+   "y": 271.5,
+   "z": -56,
+   "loc": "RL under water",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -342,
+     249,
+     -103
+    ],
+    "max": [
+     -297,
+     294,
+     -9
+    ]
+   }
   }
  ]
 }

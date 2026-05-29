@@ -3,6 +3,27 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL",
+   "x": -768.5,
+   "y": -444.5,
+   "z": -711.5,
+   "loc": "RL",
+   "bounds": {
+    "min": [
+     -811,
+     -490,
+     -744
+    ],
+    "max": [
+     -726,
+     -399,
+     -679
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -403,6 +424,72 @@
    "z": -934,
    "loc": "YA.SSG",
    "targetName": "tele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.low",
+   "x": -47,
+   "y": 11,
+   "z": -710,
+   "loc": "Quad.low",
+   "target": "tele",
+   "bounds": {
+    "min": [
+     -73,
+     -11,
+     -747
+    ],
+    "max": [
+     -21,
+     33,
+     -673
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": -298,
+   "y": -531,
+   "z": -902.5,
+   "loc": "YA",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -321,
+     -555,
+     -944
+    ],
+    "max": [
+     -275,
+     -507,
+     -861
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.SSG",
+   "x": -1650.5,
+   "y": 64,
+   "z": -889.5,
+   "loc": "YA.SSG",
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     -1654,
+     28,
+     -934
+    ],
+    "max": [
+     -1647,
+     100,
+     -845
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,174 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue base",
+   "x": 1584,
+   "y": 0,
+   "z": 160,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     1577,
+     -39,
+     97
+    ],
+    "max": [
+     1591,
+     39,
+     223
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside blue base-1",
+   "x": 776,
+   "y": -40,
+   "z": 260,
+   "loc": "outside blue base",
+   "bounds": {
+    "min": [
+     769,
+     -79,
+     177
+    ],
+    "max": [
+     783,
+     -1,
+     343
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside blue base-2",
+   "x": 776,
+   "y": 40,
+   "z": 260,
+   "loc": "outside blue base",
+   "bounds": {
+    "min": [
+     769,
+     1,
+     177
+    ],
+    "max": [
+     783,
+     79,
+     343
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside red base-1",
+   "x": -776,
+   "y": -40,
+   "z": 260,
+   "loc": "outside red base",
+   "bounds": {
+    "min": [
+     -783,
+     -79,
+     177
+    ],
+    "max": [
+     -769,
+     -1,
+     343
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside red base-2",
+   "x": -776,
+   "y": 40,
+   "z": 260,
+   "loc": "outside red base",
+   "bounds": {
+    "min": [
+     -783,
+     1,
+     177
+    ],
+    "max": [
+     -769,
+     79,
+     343
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "red base",
+   "x": -1584,
+   "y": 0,
+   "z": 160,
+   "loc": "red base",
+   "bounds": {
+    "min": [
+     -1591,
+     -39,
+     97
+    ],
+    "max": [
+     -1577,
+     39,
+     223
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water corridor-1",
+   "x": -96,
+   "y": -264,
+   "z": -320,
+   "loc": "water corridor",
+   "bounds": {
+    "min": [
+     -127,
+     -271,
+     -367
+    ],
+    "max": [
+     -65,
+     -257,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water corridor-2",
+   "x": 96,
+   "y": 264,
+   "z": -320,
+   "loc": "water corridor",
+   "bounds": {
+    "min": [
+     65,
+     257,
+     -367
+    ],
+    "max": [
+     127,
+     271,
+     -273
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -958,6 +1126,116 @@
    "z": 408,
    "loc": "red base",
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "blue base",
+   "x": 1920,
+   "y": 0,
+   "z": 352,
+   "loc": "blue base",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     1857,
+     -31,
+     345
+    ],
+    "max": [
+     1983,
+     31,
+     359
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "middle room-1",
+   "x": -216,
+   "y": 0,
+   "z": 60,
+   "loc": "middle room",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -239,
+     -31,
+     1
+    ],
+    "max": [
+     -193,
+     31,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "middle room-2",
+   "x": 108,
+   "y": 108,
+   "z": -108,
+   "loc": "middle room",
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     89,
+     89,
+     -111
+    ],
+    "max": [
+     127,
+     127,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "middle room-3",
+   "x": 216,
+   "y": 0,
+   "z": 60,
+   "loc": "middle room",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     193,
+     -31,
+     1
+    ],
+    "max": [
+     239,
+     31,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "red base",
+   "x": -1920,
+   "y": 0,
+   "z": 352,
+   "loc": "red base",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -1983,
+     -31,
+     345
+    ],
+    "max": [
+     -1857,
+     31,
+     359
+    ]
+   }
   }
  ]
 }

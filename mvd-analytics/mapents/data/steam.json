@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "LG.water",
+   "x": 503,
+   "y": -112,
+   "z": -243,
+   "loc": "LG.water",
+   "bounds": {
+    "min": [
+     489,
+     -115,
+     -257
+    ],
+    "max": [
+     517,
+     -109,
+     -229
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL",
+   "x": 0,
+   "y": -362,
+   "z": 64,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     -111,
+     -363,
+     17
+    ],
+    "max": [
+     111,
+     -361,
+     111
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -706,6 +748,72 @@
    "z": 292,
    "loc": "YA.RL",
    "targetName": "teleramp"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA.low",
+   "x": 1180,
+   "y": -456,
+   "z": 50,
+   "loc": "GA.low",
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     1177,
+     -495,
+     31
+    ],
+    "max": [
+     1183,
+     -417,
+     69
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent",
+   "x": 38,
+   "y": 472,
+   "z": 50,
+   "loc": "Pent",
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     35,
+     441,
+     35
+    ],
+    "max": [
+     41,
+     503,
+     65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.SSG",
+   "x": 392,
+   "y": -968,
+   "z": 49,
+   "loc": "YA.SSG",
+   "target": "teleramp",
+   "bounds": {
+    "min": [
+     349,
+     -971,
+     35
+    ],
+    "max": [
+     435,
+     -965,
+     63
+    ]
+   }
   }
  ]
 }

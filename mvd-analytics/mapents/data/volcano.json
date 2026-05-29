@@ -534,6 +534,48 @@
    "y": -624,
    "z": -672,
    "targetName": "packs"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 152,
+   "y": -256,
+   "z": -768,
+   "target": "inside",
+   "bounds": {
+    "min": [
+     145,
+     -303,
+     -799
+    ],
+    "max": [
+     159,
+     -209,
+     -737
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 728,
+   "y": -488,
+   "z": -384,
+   "target": "packs",
+   "bounds": {
+    "min": [
+     721,
+     -527,
+     -415
+    ],
+    "max": [
+     735,
+     -449,
+     -353
+    ]
+   }
   }
  ]
 }

@@ -419,6 +419,50 @@
    "z": 226,
    "loc": "high.GL",
    "targetName": "telehigh"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low",
+   "x": -428,
+   "y": -96,
+   "z": 14,
+   "loc": "low",
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     -429,
+     -131,
+     -15
+    ],
+    "max": [
+     -427,
+     -61,
+     43
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": 210,
+   "y": -681,
+   "z": 48,
+   "loc": "low.RL",
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     209,
+     -715,
+     17
+    ],
+    "max": [
+     211,
+     -647,
+     79
+    ]
+   }
   }
  ]
 }

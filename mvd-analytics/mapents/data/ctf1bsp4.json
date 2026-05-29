@@ -3,6 +3,328 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -2581,
+   "y": 152,
+   "z": -8,
+   "bounds": {
+    "min": [
+     -2587,
+     121,
+     -39
+    ],
+    "max": [
+     -2575,
+     183,
+     23
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-10",
+   "x": 2581,
+   "y": -952,
+   "z": -8,
+   "bounds": {
+    "min": [
+     2575,
+     -983,
+     -39
+    ],
+    "max": [
+     2587,
+     -921,
+     23
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": -2144,
+   "y": -708,
+   "z": -16,
+   "bounds": {
+    "min": [
+     -2151,
+     -711,
+     -31
+    ],
+    "max": [
+     -2137,
+     -705,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-3",
+   "x": -1984,
+   "y": 148,
+   "z": 256,
+   "bounds": {
+    "min": [
+     -1999,
+     129,
+     241
+    ],
+    "max": [
+     -1969,
+     167,
+     271
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-4",
+   "x": -1696,
+   "y": -1024,
+   "z": 192,
+   "bounds": {
+    "min": [
+     -1711,
+     -1039,
+     177
+    ],
+    "max": [
+     -1681,
+     -1009,
+     207
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-5",
+   "x": 0,
+   "y": -1108,
+   "z": 64,
+   "bounds": {
+    "min": [
+     -47,
+     -1111,
+     17
+    ],
+    "max": [
+     47,
+     -1105,
+     111
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-6",
+   "x": 0,
+   "y": 308,
+   "z": 64,
+   "bounds": {
+    "min": [
+     -47,
+     305,
+     17
+    ],
+    "max": [
+     47,
+     311,
+     111
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-7",
+   "x": 1696,
+   "y": 224,
+   "z": 192,
+   "bounds": {
+    "min": [
+     1681,
+     209,
+     177
+    ],
+    "max": [
+     1711,
+     239,
+     207
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-8",
+   "x": 1984,
+   "y": -948,
+   "z": 256,
+   "bounds": {
+    "min": [
+     1969,
+     -967,
+     241
+    ],
+    "max": [
+     1999,
+     -929,
+     271
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-9",
+   "x": 2144,
+   "y": -92,
+   "z": -16,
+   "bounds": {
+    "min": [
+     2137,
+     -95,
+     -31
+    ],
+    "max": [
+     2151,
+     -89,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -2544,
+   "y": 72,
+   "z": -8,
+   "bounds": {
+    "min": [
+     -2575,
+     69,
+     -47
+    ],
+    "max": [
+     -2513,
+     75,
+     31
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -2144,
+   "y": -856,
+   "z": -8,
+   "bounds": {
+    "min": [
+     -2159,
+     -863,
+     -47
+    ],
+    "max": [
+     -2129,
+     -849,
+     31
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 0,
+   "y": -400,
+   "z": -30,
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -31,
+     -479,
+     -31
+    ],
+    "max": [
+     31,
+     -321,
+     -29
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 0,
+   "y": -400,
+   "z": -26,
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -63,
+     -431,
+     -27
+    ],
+    "max": [
+     63,
+     -369,
+     -25
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 2144,
+   "y": 56,
+   "z": -8,
+   "bounds": {
+    "min": [
+     2129,
+     49,
+     -47
+    ],
+    "max": [
+     2159,
+     63,
+     31
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": 2544,
+   "y": -872,
+   "z": -8,
+   "bounds": {
+    "min": [
+     2513,
+     -875,
+     -47
+    ],
+    "max": [
+     2575,
+     -869,
+     31
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

@@ -3,6 +3,134 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA.mid",
+   "x": 406,
+   "y": 0,
+   "z": 208,
+   "loc": "RA.mid",
+   "bounds": {
+    "min": [
+     405,
+     -15,
+     193
+    ],
+    "max": [
+     407,
+     15,
+     223
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "YA.SNG",
+   "x": -1310,
+   "y": 432,
+   "z": 368,
+   "loc": "YA.SNG",
+   "bounds": {
+    "min": [
+     -1311,
+     417,
+     353
+    ],
+    "max": [
+     -1309,
+     447,
+     383
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.RL",
+   "x": -1310,
+   "y": 432,
+   "z": 160,
+   "loc": "low.RL",
+   "bounds": {
+    "min": [
+     -1311,
+     417,
+     145
+    ],
+    "max": [
+     -1309,
+     447,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.mid",
+   "x": 368,
+   "y": 0,
+   "z": 88,
+   "loc": "RA.mid",
+   "bounds": {
+    "min": [
+     329,
+     -39,
+     9
+    ],
+    "max": [
+     407,
+     39,
+     167
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "low.RL",
+   "x": -1266,
+   "y": 256,
+   "z": 172,
+   "loc": "low.RL",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1315,
+     177,
+     121
+    ],
+    "max": [
+     -1217,
+     335,
+     223
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "mid.SSG",
+   "x": -1266,
+   "y": 280,
+   "z": 272,
+   "loc": "mid.SSG",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1315,
+     193,
+     231
+    ],
+    "max": [
+     -1217,
+     367,
+     313
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -431,6 +559,116 @@
    "z": 264,
    "loc": "mid.tele",
    "targetName": "t2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH.tele",
+   "x": -240,
+   "y": -416,
+   "z": 212,
+   "loc": "MH.tele",
+   "target": "p1",
+   "bounds": {
+    "min": [
+     -241,
+     -447,
+     161
+    ],
+    "max": [
+     -239,
+     -385,
+     263
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 0,
+   "y": -576,
+   "z": 112,
+   "loc": "RA",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -31,
+     -591,
+     81
+    ],
+    "max": [
+     31,
+     -561,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.tele",
+   "x": 0,
+   "y": 144,
+   "z": 368,
+   "loc": "high.tele",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     -31,
+     129,
+     337
+    ],
+    "max": [
+     31,
+     159,
+     399
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.tele",
+   "x": -1232,
+   "y": -752,
+   "z": 112,
+   "loc": "low.tele",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -1247,
+     -783,
+     81
+    ],
+    "max": [
+     -1217,
+     -721,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "mid.tele",
+   "x": -928,
+   "y": 144,
+   "z": 288,
+   "loc": "mid.tele",
+   "target": "t4",
+   "bounds": {
+    "min": [
+     -959,
+     129,
+     257
+    ],
+    "max": [
+     -897,
+     159,
+     319
+    ]
+   }
   }
  ]
 }

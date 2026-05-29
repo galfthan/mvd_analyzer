@@ -3,6 +3,111 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button.high",
+   "x": 96,
+   "y": -324,
+   "z": -64,
+   "loc": "button.high",
+   "bounds": {
+    "min": [
+     81,
+     -327,
+     -79
+    ],
+    "max": [
+     111,
+     -321,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.MH",
+   "x": 1132,
+   "y": -1152,
+   "z": -176,
+   "loc": "RA.MH",
+   "bounds": {
+    "min": [
+     1121,
+     -1211,
+     -223
+    ],
+    "max": [
+     1143,
+     -1093,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG.up-1",
+   "x": 608,
+   "y": -1056,
+   "z": 96,
+   "loc": "SNG.up",
+   "bounds": {
+    "min": [
+     593,
+     -1087,
+     33
+    ],
+    "max": [
+     623,
+     -1025,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG.up-2",
+   "x": 608,
+   "y": -992,
+   "z": 96,
+   "loc": "SNG.up",
+   "bounds": {
+    "min": [
+     593,
+     -1023,
+     33
+    ],
+    "max": [
+     623,
+     -961,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "button.RA",
+   "x": 96,
+   "y": -208,
+   "z": -144,
+   "loc": "button.RA",
+   "bounds": {
+    "min": [
+     -95,
+     -319,
+     -159
+    ],
+    "max": [
+     287,
+     -97,
+     -129
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "weapon_grenadelauncher",
    "kind": "gl",
@@ -417,6 +522,50 @@
    "z": 208,
    "loc": "tele.RL",
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG",
+   "x": 28,
+   "y": -1088,
+   "z": 12,
+   "loc": "SNG",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     25,
+     -1135,
+     -31
+    ],
+    "max": [
+     31,
+     -1041,
+     55
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele.YA",
+   "x": 1792,
+   "y": -1628,
+   "z": -240,
+   "loc": "tele.YA",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     1729,
+     -1631,
+     -287
+    ],
+    "max": [
+     1855,
+     -1625,
+     -193
+    ]
+   }
   }
  ]
 }

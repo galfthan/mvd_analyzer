@@ -452,6 +452,90 @@
    "y": -480,
    "z": 0,
    "targetName": "bus"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -80,
+   "y": -480,
+   "z": 48,
+   "target": "lds",
+   "bounds": {
+    "min": [
+     -95,
+     -543,
+     -15
+    ],
+    "max": [
+     -65,
+     -417,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 432,
+   "y": -928,
+   "z": 256,
+   "target": "bus",
+   "bounds": {
+    "min": [
+     417,
+     -991,
+     193
+    ],
+    "max": [
+     447,
+     -865,
+     319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 432,
+   "y": -32,
+   "z": 256,
+   "target": "tus",
+   "bounds": {
+    "min": [
+     417,
+     -95,
+     193
+    ],
+    "max": [
+     447,
+     31,
+     319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 1232,
+   "y": -480,
+   "z": 48,
+   "target": "rds",
+   "bounds": {
+    "min": [
+     1217,
+     -543,
+     -15
+    ],
+    "max": [
+     1247,
+     -417,
+     111
+    ]
+   }
   }
  ]
 }

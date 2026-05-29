@@ -3,6 +3,279 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "SSG",
+   "x": 3436,
+   "y": -412,
+   "z": 336,
+   "loc": "SSG",
+   "bounds": {
+    "min": [
+     3409,
+     -415,
+     313
+    ],
+    "max": [
+     3463,
+     -409,
+     359
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-1",
+   "x": 3308,
+   "y": 136,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3301,
+     97,
+     93
+    ],
+    "max": [
+     3315,
+     175,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-10",
+   "x": 3508,
+   "y": 136,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3501,
+     97,
+     93
+    ],
+    "max": [
+     3515,
+     175,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-11",
+   "x": 3540,
+   "y": 136,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3533,
+     97,
+     93
+    ],
+    "max": [
+     3547,
+     175,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-12",
+   "x": 3572,
+   "y": 136,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3565,
+     97,
+     93
+    ],
+    "max": [
+     3579,
+     175,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-2",
+   "x": 3340,
+   "y": 136,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3333,
+     97,
+     93
+    ],
+    "max": [
+     3347,
+     175,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-3",
+   "x": 3372,
+   "y": 136,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3365,
+     97,
+     93
+    ],
+    "max": [
+     3379,
+     175,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-4",
+   "x": 3420,
+   "y": 152,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3413,
+     65,
+     93
+    ],
+    "max": [
+     3427,
+     239,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-5",
+   "x": 3440,
+   "y": -48,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3393,
+     -55,
+     93
+    ],
+    "max": [
+     3487,
+     -41,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-6",
+   "x": 3440,
+   "y": 0,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3393,
+     -7,
+     93
+    ],
+    "max": [
+     3487,
+     7,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-7",
+   "x": 3440,
+   "y": 48,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3393,
+     41,
+     93
+    ],
+    "max": [
+     3487,
+     55,
+     107
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-8",
+   "x": 3440,
+   "y": 284,
+   "z": 42,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3313,
+     249,
+     -29
+    ],
+    "max": [
+     3567,
+     319,
+     113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo-9",
+   "x": 3460,
+   "y": 152,
+   "z": 100,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     3453,
+     65,
+     93
+    ],
+    "max": [
+     3467,
+     239,
+     107
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -575,6 +848,50 @@
    "z": 224,
    "loc": "SSG",
    "targetName": "leaveroom"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.low",
+   "x": 2008,
+   "y": -1000,
+   "z": 4,
+   "loc": "Quad.low",
+   "target": "tora",
+   "bounds": {
+    "min": [
+     1969,
+     -1011,
+     -27
+    ],
+    "max": [
+     2047,
+     -989,
+     35
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "ammo",
+   "x": 3440,
+   "y": 308,
+   "z": 196,
+   "loc": "ammo",
+   "target": "leaveroom",
+   "bounds": {
+    "min": [
+     3393,
+     297,
+     153
+    ],
+    "max": [
+     3487,
+     319,
+     239
+    ]
+   }
   }
  ]
 }

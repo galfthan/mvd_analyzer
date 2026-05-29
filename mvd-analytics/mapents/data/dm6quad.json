@@ -3,6 +3,28 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "big.hatch",
+   "x": 840,
+   "y": -1084,
+   "z": -78,
+   "loc": "big.hatch",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     777,
+     -1151,
+     -87
+    ],
+    "max": [
+     903,
+     -1017,
+     -69
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -394,6 +416,94 @@
    "z": -32,
    "loc": "big",
    "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA",
+   "x": 248,
+   "y": -1784,
+   "z": 83,
+   "loc": "GA",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     229,
+     -1807,
+     24
+    ],
+    "max": [
+     267,
+     -1761,
+     142
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH.behind",
+   "x": 200,
+   "y": -848,
+   "z": 170,
+   "loc": "MH.behind",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     177,
+     -867,
+     113
+    ],
+    "max": [
+     223,
+     -829,
+     227
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad",
+   "x": 432,
+   "y": -1088,
+   "z": -234,
+   "loc": "Quad",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     413,
+     -1111,
+     -283
+    ],
+    "max": [
+     451,
+     -1065,
+     -185
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "big",
+   "x": 1024,
+   "y": -1096,
+   "z": 14,
+   "loc": "big",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     1005,
+     -1119,
+     -35
+    ],
+    "max": [
+     1043,
+     -1073,
+     63
+    ]
+   }
   }
  ]
 }

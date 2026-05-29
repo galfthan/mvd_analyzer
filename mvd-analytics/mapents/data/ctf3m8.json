@@ -3,6 +3,90 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LOWER ENTRANCE-1",
+   "x": 1340,
+   "y": -628,
+   "z": 64,
+   "loc": "BLUE BASE: LOWER ENTRANCE",
+   "bounds": {
+    "min": [
+     1313,
+     -679,
+     1
+    ],
+    "max": [
+     1367,
+     -577,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LOWER ENTRANCE-2",
+   "x": 1340,
+   "y": -602.6667,
+   "z": 64,
+   "loc": "BLUE BASE: LOWER ENTRANCE",
+   "bounds": {
+    "min": [
+     1313,
+     -652.3334,
+     1
+    ],
+    "max": [
+     1367,
+     -553,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: LOWER ENTRANCE-1",
+   "x": 292,
+   "y": -628,
+   "z": 64,
+   "loc": "RED BASE: LOWER ENTRANCE",
+   "bounds": {
+    "min": [
+     265,
+     -679,
+     1
+    ],
+    "max": [
+     319,
+     -577,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: LOWER ENTRANCE-2",
+   "x": 292,
+   "y": -602.6667,
+   "z": 64,
+   "loc": "RED BASE: LOWER ENTRANCE",
+   "bounds": {
+    "min": [
+     265,
+     -652.3334,
+     1
+    ],
+    "max": [
+     319,
+     -553,
+     127
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

@@ -614,6 +614,138 @@
    "z": 144,
    "loc": "tunnel",
    "targetName": "quad"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 488,
+   "y": 960,
+   "z": 64,
+   "loc": "LG",
+   "target": "ya",
+   "bounds": {
+    "min": [
+     481,
+     929,
+     1
+    ],
+    "max": [
+     495,
+     991,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG.tele",
+   "x": 1298.3431,
+   "y": 1362.3431,
+   "z": -128,
+   "loc": "LG.tele",
+   "target": "tower",
+   "bounds": {
+    "min": [
+     1271.0588,
+     1335.0588,
+     -191
+    ],
+    "max": [
+     1325.6274,
+     1389.6274,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.tele",
+   "x": 0,
+   "y": 808,
+   "z": 352,
+   "loc": "Quad.tele",
+   "target": "back",
+   "bounds": {
+    "min": [
+     -31,
+     801,
+     289
+    ],
+    "max": [
+     31,
+     815,
+     415
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 1152,
+   "y": -744,
+   "z": 192,
+   "loc": "RA",
+   "target": "quad",
+   "bounds": {
+    "min": [
+     1121,
+     -751,
+     129
+    ],
+    "max": [
+     1183,
+     -737,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "cellar.tele",
+   "x": 1440,
+   "y": -680,
+   "z": -128,
+   "loc": "cellar.tele",
+   "target": "ra",
+   "bounds": {
+    "min": [
+     1409,
+     -687,
+     -191
+    ],
+    "max": [
+     1471,
+     -673,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tunnel",
+   "x": -1192,
+   "y": -800,
+   "z": 192,
+   "loc": "tunnel",
+   "target": "red",
+   "bounds": {
+    "min": [
+     -1199,
+     -831,
+     129
+    ],
+    "max": [
+     -1185,
+     -769,
+     255
+    ]
+   }
   }
  ]
 }

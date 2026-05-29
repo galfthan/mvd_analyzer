@@ -482,6 +482,75 @@
    "z": 112,
    "loc": "RL.Quad",
    "targetName": "yatele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.tele",
+   "x": 1664,
+   "y": -576,
+   "z": -160,
+   "loc": "GL.tele",
+   "target": "lgtele",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1657,
+     -607,
+     -207
+    ],
+    "max": [
+     1671,
+     -545,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 1344,
+   "y": -676,
+   "z": -128,
+   "loc": "LG",
+   "target": "downtele",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1281,
+     -679,
+     -191
+    ],
+    "max": [
+     1407,
+     -673,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "window.high",
+   "x": 1736,
+   "y": -1504,
+   "z": -64,
+   "loc": "window.high",
+   "target": "yatele",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1729,
+     -1535,
+     -111
+    ],
+    "max": [
+     1743,
+     -1473,
+     -17
+    ]
+   }
   }
  ]
 }

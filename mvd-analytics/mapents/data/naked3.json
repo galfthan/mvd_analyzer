@@ -3,6 +3,90 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA.below",
+   "x": 288,
+   "y": 0,
+   "z": -208,
+   "loc": "RA.below",
+   "bounds": {
+    "min": [
+     281,
+     -15,
+     -223
+    ],
+    "max": [
+     295,
+     15,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.rl/tele",
+   "x": -320,
+   "y": 80,
+   "z": -48,
+   "loc": "low.rl/tele",
+   "bounds": {
+    "min": [
+     -327,
+     65,
+     -63
+    ],
+    "max": [
+     -313,
+     95,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.below",
+   "x": 232,
+   "y": 0,
+   "z": -336,
+   "loc": "RA.below",
+   "bounds": {
+    "min": [
+     185,
+     -47,
+     -419
+    ],
+    "max": [
+     279,
+     47,
+     -253
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "low.rl/tele",
+   "x": -264,
+   "y": 80,
+   "z": -176,
+   "loc": "low.rl/tele",
+   "bounds": {
+    "min": [
+     -311,
+     33,
+     -259
+    ],
+    "max": [
+     -217,
+     127,
+     -93
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -446,6 +530,94 @@
    "z": -128,
    "loc": "low.rl/tele",
    "targetName": "telly2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA",
+   "x": -1000,
+   "y": -256,
+   "z": 120,
+   "loc": "GA",
+   "target": "telly3",
+   "bounds": {
+    "min": [
+     -1007,
+     -319,
+     65
+    ],
+    "max": [
+     -993,
+     -193,
+     175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.below",
+   "x": 168,
+   "y": -256,
+   "z": -232,
+   "loc": "RA.below",
+   "target": "telly4",
+   "bounds": {
+    "min": [
+     161,
+     -319,
+     -287
+    ],
+    "max": [
+     175,
+     -193,
+     -177
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": 424,
+   "y": -672,
+   "z": -200,
+   "loc": "YA",
+   "target": "telly2",
+   "bounds": {
+    "min": [
+     417,
+     -735,
+     -255
+    ],
+    "max": [
+     431,
+     -609,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.rl/tele",
+   "x": -512,
+   "y": 360,
+   "z": -104,
+   "loc": "low.rl/tele",
+   "target": "telly1",
+   "bounds": {
+    "min": [
+     -575,
+     353,
+     -159
+    ],
+    "max": [
+     -449,
+     367,
+     -49
+    ]
+   }
   }
  ]
 }

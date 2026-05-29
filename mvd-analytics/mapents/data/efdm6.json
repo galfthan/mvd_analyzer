@@ -3,6 +3,88 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -380,
+   "y": -320,
+   "z": 112,
+   "bounds": {
+    "min": [
+     -383,
+     -335,
+     97
+    ],
+    "max": [
+     -377,
+     -305,
+     127
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": -60,
+   "y": 448,
+   "z": -80,
+   "bounds": {
+    "min": [
+     -63,
+     433,
+     -95
+    ],
+    "max": [
+     -57,
+     463,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -320,
+   "y": -320,
+   "z": 152,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -367,
+     -367,
+     49
+    ],
+    "max": [
+     -273,
+     -273,
+     255
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 0,
+   "y": 448,
+   "z": -40,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -47,
+     401,
+     -143
+    ],
+    "max": [
+     47,
+     495,
+     63
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -359,6 +441,69 @@
    "y": 744,
    "z": 24,
    "targetName": "cross2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 271,
+   "y": -320,
+   "z": 112,
+   "target": "cross2",
+   "bounds": {
+    "min": [
+     257,
+     -351,
+     65
+    ],
+    "max": [
+     285,
+     -289,
+     159
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 530,
+   "y": 576,
+   "z": -80,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     513,
+     545,
+     -127
+    ],
+    "max": [
+     547,
+     607,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 768,
+   "y": 783,
+   "z": 48,
+   "target": "cross1",
+   "bounds": {
+    "min": [
+     737,
+     769,
+     1
+    ],
+    "max": [
+     799,
+     797,
+     95
+    ]
+   }
   }
  ]
 }

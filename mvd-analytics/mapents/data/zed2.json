@@ -3,6 +3,71 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Upper Cells",
+   "x": -512,
+   "y": -700,
+   "z": 640,
+   "loc": "Upper Cells",
+   "bounds": {
+    "min": [
+     -559,
+     -703,
+     609
+    ],
+    "max": [
+     -465,
+     -697,
+     671
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Middle Path",
+   "x": 1216,
+   "y": -320,
+   "z": 560,
+   "loc": "Middle Path",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1185,
+     -351,
+     545
+    ],
+    "max": [
+     1247,
+     -289,
+     575
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad",
+   "x": 688,
+   "y": -168,
+   "z": 624,
+   "loc": "Quad",
+   "spawnflags": 3840,
+   "bounds": {
+    "min": [
+     673,
+     -207,
+     577
+    ],
+    "max": [
+     703,
+     -129,
+     671
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -794,6 +859,621 @@
    "z": 764,
    "loc": "YA",
    "targetName": "sp9"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA tele",
+   "x": -224,
+   "y": -304,
+   "z": 160,
+   "loc": "GA tele",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -255,
+     -319,
+     145
+    ],
+    "max": [
+     -193,
+     -289,
+     175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL/pent",
+   "x": -688,
+   "y": 176,
+   "z": 608,
+   "loc": "GL/pent",
+   "target": "tele6662",
+   "bounds": {
+    "min": [
+     -719,
+     161,
+     577
+    ],
+    "max": [
+     -657,
+     191,
+     639
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH",
+   "x": -368,
+   "y": 512,
+   "z": 96,
+   "loc": "MH",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -383,
+     481,
+     81
+    ],
+    "max": [
+     -353,
+     543,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-1",
+   "x": 365,
+   "y": -176,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp8",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     335,
+     -191,
+     -173
+    ],
+    "max": [
+     395,
+     -161,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-10",
+   "x": 447,
+   "y": -464,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp10",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     417,
+     -479,
+     -173
+    ],
+    "max": [
+     477,
+     -449,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-11",
+   "x": 447,
+   "y": -320,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp13",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     417,
+     -335,
+     -173
+    ],
+    "max": [
+     477,
+     -305,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-12",
+   "x": 447,
+   "y": -222,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp17",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     417,
+     -237,
+     -173
+    ],
+    "max": [
+     477,
+     -207,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-13",
+   "x": 447,
+   "y": -176,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp18",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     417,
+     -191,
+     -173
+    ],
+    "max": [
+     477,
+     -161,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-14",
+   "x": 449,
+   "y": -416,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp11",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     419,
+     -431,
+     -173
+    ],
+    "max": [
+     479,
+     -401,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-15",
+   "x": 449,
+   "y": -368,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp12",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     419,
+     -383,
+     -173
+    ],
+    "max": [
+     479,
+     -353,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-16",
+   "x": 547,
+   "y": -498,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp14",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     505,
+     -513,
+     -173
+    ],
+    "max": [
+     589,
+     -483,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-17",
+   "x": 547,
+   "y": -420,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp15",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     505,
+     -435,
+     -173
+    ],
+    "max": [
+     589,
+     -405,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-2",
+   "x": 367,
+   "y": -512,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp1",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     337,
+     -527,
+     -173
+    ],
+    "max": [
+     397,
+     -497,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-3",
+   "x": 367,
+   "y": -464,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp2",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     337,
+     -479,
+     -173
+    ],
+    "max": [
+     397,
+     -449,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-4",
+   "x": 367,
+   "y": -416,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp3",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     337,
+     -431,
+     -173
+    ],
+    "max": [
+     397,
+     -401,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-5",
+   "x": 367,
+   "y": -224,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp7",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     337,
+     -239,
+     -173
+    ],
+    "max": [
+     397,
+     -209,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-6",
+   "x": 369,
+   "y": -368,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp4",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     339,
+     -383,
+     -173
+    ],
+    "max": [
+     399,
+     -353,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-7",
+   "x": 369,
+   "y": -320,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp5",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     339,
+     -335,
+     -173
+    ],
+    "max": [
+     399,
+     -305,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-8",
+   "x": 369,
+   "y": -272,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp6",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     339,
+     -287,
+     -173
+    ],
+    "max": [
+     399,
+     -257,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA Floor-9",
+   "x": 447,
+   "y": -512,
+   "z": -158,
+   "loc": "RA Floor",
+   "target": "sp9",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     417,
+     -527,
+     -173
+    ],
+    "max": [
+     477,
+     -497,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA floor-1",
+   "x": 447,
+   "y": -272,
+   "z": -158,
+   "loc": "RA floor",
+   "target": "sp16",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     417,
+     -287,
+     -173
+    ],
+    "max": [
+     477,
+     -257,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA floor-2",
+   "x": 543,
+   "y": -320,
+   "z": -158,
+   "loc": "RA floor",
+   "target": "sp19",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     513,
+     -335,
+     -173
+    ],
+    "max": [
+     573,
+     -305,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA floor-3",
+   "x": 545,
+   "y": -272,
+   "z": -158,
+   "loc": "RA floor",
+   "target": "sp20",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     515,
+     -287,
+     -173
+    ],
+    "max": [
+     575,
+     -257,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA floor-4",
+   "x": 545,
+   "y": -224,
+   "z": -158,
+   "loc": "RA floor",
+   "target": "sp21",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     515,
+     -239,
+     -173
+    ],
+    "max": [
+     575,
+     -209,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA floor-5",
+   "x": 720,
+   "y": -256,
+   "z": 160,
+   "loc": "RA floor",
+   "target": "tele4",
+   "bounds": {
+    "min": [
+     705,
+     -287,
+     145
+    ],
+    "max": [
+     735,
+     -225,
+     175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SSG tele",
+   "x": 816,
+   "y": -576,
+   "z": 384,
+   "loc": "SSG tele",
+   "target": "tele5",
+   "bounds": {
+    "min": [
+     801,
+     -607,
+     369
+    ],
+    "max": [
+     831,
+     -545,
+     399
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA tele",
+   "x": 768,
+   "y": 528,
+   "z": 544,
+   "loc": "YA tele",
+   "target": "tele666",
+   "bounds": {
+    "min": [
+     737,
+     513,
+     513
+    ],
+    "max": [
+     799,
+     543,
+     575
+    ]
+   }
   }
  ]
 }

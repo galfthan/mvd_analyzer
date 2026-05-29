@@ -3,6 +3,90 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "YA.SNG",
+   "x": 832,
+   "y": -550,
+   "z": 48,
+   "loc": "YA.SNG",
+   "bounds": {
+    "min": [
+     817,
+     -551,
+     33
+    ],
+    "max": [
+     847,
+     -549,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "low.lift",
+   "x": 358,
+   "y": 512,
+   "z": -80,
+   "loc": "low.lift",
+   "bounds": {
+    "min": [
+     357,
+     497,
+     -95
+    ],
+    "max": [
+     359,
+     527,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "YA.SNG",
+   "x": 832,
+   "y": -512,
+   "z": -104,
+   "loc": "YA.SNG",
+   "bounds": {
+    "min": [
+     793,
+     -551,
+     -215
+    ],
+    "max": [
+     871,
+     -473,
+     7
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "low.lift",
+   "x": 320,
+   "y": 512,
+   "z": -232,
+   "loc": "low.lift",
+   "bounds": {
+    "min": [
+     281,
+     473,
+     -343
+    ],
+    "max": [
+     359,
+     551,
+     -121
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -435,6 +519,94 @@
    "z": -136,
    "loc": "low.RL",
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": -864,
+   "y": 0,
+   "z": 144,
+   "loc": "RA",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -879,
+     -47,
+     97
+    ],
+    "max": [
+     -849,
+     47,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": -160,
+   "y": -400,
+   "z": 48,
+   "loc": "YA",
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     -175,
+     -447,
+     1
+    ],
+    "max": [
+     -145,
+     -353,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.LG",
+   "x": -32,
+   "y": 816,
+   "z": -80,
+   "loc": "low.LG",
+   "target": "tele4",
+   "bounds": {
+    "min": [
+     -79,
+     801,
+     -127
+    ],
+    "max": [
+     15,
+     831,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": 1008,
+   "y": 288,
+   "z": -112,
+   "loc": "low.RL",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     993,
+     241,
+     -159
+    ],
+    "max": [
+     1023,
+     335,
+     -65
+    ]
+   }
   }
  ]
 }

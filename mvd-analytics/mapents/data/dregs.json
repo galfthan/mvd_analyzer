@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -576,
+   "y": 144,
+   "z": 192,
+   "bounds": {
+    "min": [
+     -623,
+     137,
+     129
+    ],
+    "max": [
+     -529,
+     151,
+     255
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -256,
+   "y": 1496,
+   "z": 256,
+   "bounds": {
+    "min": [
+     -319,
+     1489,
+     193
+    ],
+    "max": [
+     -193,
+     1503,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -256,
+   "y": 1600,
+   "z": -168,
+   "bounds": {
+    "min": [
+     -319,
+     1537,
+     -175
+    ],
+    "max": [
+     -193,
+     1663,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 16,
+   "y": 1008,
+   "z": -272,
+   "bounds": {
+    "min": [
+     -55,
+     1001,
+     -351
+    ],
+    "max": [
+     87,
+     1015,
+     -193
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -667,6 +747,69 @@
    "y": 1200,
    "z": 112,
    "targetName": "Y"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -384,
+   "y": 1680,
+   "z": -320,
+   "target": "RedLower",
+   "bounds": {
+    "min": [
+     -431,
+     1665,
+     -383
+    ],
+    "max": [
+     -337,
+     1695,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 304,
+   "y": -1440,
+   "z": 272,
+   "target": "Y",
+   "bounds": {
+    "min": [
+     289,
+     -1487,
+     209
+    ],
+    "max": [
+     319,
+     -1393,
+     335
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 304,
+   "y": -1232,
+   "z": 64,
+   "target": "Octogon",
+   "bounds": {
+    "min": [
+     289,
+     -1279,
+     1
+    ],
+    "max": [
+     319,
+     -1185,
+     127
+    ]
+   }
   }
  ]
 }

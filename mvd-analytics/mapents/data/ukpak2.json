@@ -503,6 +503,94 @@
    "z": 8,
    "loc": "yard",
    "targetName": "tele_3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 672,
+   "y": -1150,
+   "z": 64,
+   "loc": "LG",
+   "target": "tele_1",
+   "bounds": {
+    "min": [
+     641,
+     -1151,
+     1
+    ],
+    "max": [
+     703,
+     -1149,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH",
+   "x": 1783.2412,
+   "y": -694.7567,
+   "z": -108,
+   "loc": "MH",
+   "target": "tele_3",
+   "bounds": {
+    "min": [
+     1758.4823,
+     -719.5134,
+     -175
+    ],
+    "max": [
+     1808,
+     -670,
+     -41
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad",
+   "x": 186,
+   "y": -176,
+   "z": 324,
+   "loc": "Quad",
+   "target": "tele_2",
+   "bounds": {
+    "min": [
+     185,
+     -211,
+     257
+    ],
+    "max": [
+     187,
+     -141,
+     391
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": -1440,
+   "y": -258,
+   "z": -136,
+   "loc": "RA",
+   "target": "tele_4",
+   "bounds": {
+    "min": [
+     -1471,
+     -259,
+     -191
+    ],
+    "max": [
+     -1409,
+     -257,
+     -81
+    ]
+   }
   }
  ]
 }

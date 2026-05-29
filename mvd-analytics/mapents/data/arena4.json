@@ -68,6 +68,27 @@
    "y": 0,
    "z": -576,
    "targetName": "arena1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 0,
+   "y": -920,
+   "z": -224,
+   "target": "arena1",
+   "bounds": {
+    "min": [
+     -239,
+     -927,
+     -303
+    ],
+    "max": [
+     239,
+     -913,
+     -145
+    ]
+   }
   }
  ]
 }

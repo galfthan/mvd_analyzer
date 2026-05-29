@@ -3,6 +3,237 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "Pent.button",
+   "x": 171,
+   "y": 1934,
+   "z": -9,
+   "loc": "Pent.button",
+   "bounds": {
+    "min": [
+     165,
+     1933,
+     -17
+    ],
+    "max": [
+     177,
+     1935,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.low.hallway",
+   "x": -352,
+   "y": -58,
+   "z": 68,
+   "loc": "LG.low.hallway",
+   "bounds": {
+    "min": [
+     -359,
+     -111,
+     17
+    ],
+    "max": [
+     -345,
+     -5,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent.cage",
+   "x": -16,
+   "y": 2024,
+   "z": 20,
+   "loc": "Pent.cage",
+   "bounds": {
+    "min": [
+     -95,
+     1945,
+     -39
+    ],
+    "max": [
+     63,
+     2103,
+     79
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "locker.door-1",
+   "x": 736,
+   "y": 684,
+   "z": 68,
+   "loc": "locker.door",
+   "bounds": {
+    "min": [
+     725,
+     649,
+     17
+    ],
+    "max": [
+     747,
+     719,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "locker.door-2",
+   "x": 736,
+   "y": 756,
+   "z": 68,
+   "loc": "locker.door",
+   "bounds": {
+    "min": [
+     725,
+     721,
+     17
+    ],
+    "max": [
+     747,
+     791,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "sub-level.LG",
+   "x": 366,
+   "y": 220,
+   "z": -280,
+   "loc": "sub-level.LG",
+   "bounds": {
+    "min": [
+     353,
+     161,
+     -335
+    ],
+    "max": [
+     379,
+     279,
+     -225
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "sub-level.MEGA-1",
+   "x": -160,
+   "y": -478,
+   "z": -232,
+   "loc": "sub-level.MEGA",
+   "bounds": {
+    "min": [
+     -164,
+     -507,
+     -287
+    ],
+    "max": [
+     -156,
+     -449,
+     -177
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "sub-level.MEGA-2",
+   "x": -160,
+   "y": -418,
+   "z": -232,
+   "loc": "sub-level.MEGA",
+   "bounds": {
+    "min": [
+     -164,
+     -447,
+     -287
+    ],
+    "max": [
+     -156,
+     -389,
+     -177
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "sub-level.MEGA-3",
+   "x": 356,
+   "y": -478,
+   "z": -184,
+   "loc": "sub-level.MEGA",
+   "bounds": {
+    "min": [
+     345,
+     -507,
+     -239
+    ],
+    "max": [
+     367,
+     -449,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "sub-level.MEGA-4",
+   "x": 356,
+   "y": -418,
+   "z": -184,
+   "loc": "sub-level.MEGA",
+   "bounds": {
+    "min": [
+     345,
+     -447,
+     -239
+    ],
+    "max": [
+     367,
+     -389,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "sub-level.quad-tele",
+   "x": -368,
+   "y": 36,
+   "z": -280,
+   "loc": "sub-level.quad-tele",
+   "bounds": {
+    "min": [
+     -373,
+     -23,
+     -335
+    ],
+    "max": [
+     -363,
+     95,
+     -225
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -745,6 +976,94 @@
    "z": 186,
    "loc": "telexit.optimus",
    "targetName": "nuke2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "sub-level.quad-tele",
+   "x": -612,
+   "y": -238,
+   "z": -290,
+   "loc": "sub-level.quad-tele",
+   "target": "quad",
+   "bounds": {
+    "min": [
+     -615,
+     -271,
+     -335
+    ],
+    "max": [
+     -609,
+     -205,
+     -245
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "sub-level.tele",
+   "x": 1124,
+   "y": -434,
+   "z": -190,
+   "loc": "sub-level.tele",
+   "target": "nuke2",
+   "bounds": {
+    "min": [
+     1121,
+     -475,
+     -239
+    ],
+    "max": [
+     1127,
+     -393,
+     -141
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele.LG",
+   "x": -64,
+   "y": -1010,
+   "z": 82.5,
+   "loc": "tele.LG",
+   "target": "nuke3",
+   "bounds": {
+    "min": [
+     -113,
+     -1011,
+     33
+    ],
+    "max": [
+     -15,
+     -1009,
+     132
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele.sub-lvl",
+   "x": 652,
+   "y": -1148,
+   "z": 72,
+   "loc": "tele.sub-lvl",
+   "target": "nuke1",
+   "bounds": {
+    "min": [
+     593,
+     -1151,
+     17
+    ],
+    "max": [
+     711,
+     -1145,
+     127
+    ]
+   }
   }
  ]
 }

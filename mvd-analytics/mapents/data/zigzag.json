@@ -3,6 +3,66 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -226.5,
+   "y": -480,
+   "z": -4,
+   "bounds": {
+    "min": [
+     -256,
+     -511,
+     -11
+    ],
+    "max": [
+     -197,
+     -449,
+     3
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 538.5,
+   "y": -480,
+   "z": -4,
+   "bounds": {
+    "min": [
+     509,
+     -511,
+     -11
+    ],
+    "max": [
+     568,
+     -449,
+     3
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-3",
+   "x": 1012,
+   "y": -476,
+   "z": -24,
+   "bounds": {
+    "min": [
+     1005,
+     -527,
+     -75
+    ],
+    "max": [
+     1019,
+     -425,
+     27
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -335,6 +395,90 @@
    "y": 48,
    "z": -156,
    "targetName": "back_right"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -260,
+   "y": -1160,
+   "z": -128,
+   "target": "front_right",
+   "bounds": {
+    "min": [
+     -299,
+     -1167,
+     -179
+    ],
+    "max": [
+     -221,
+     -1153,
+     -77
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -260,
+   "y": 136,
+   "z": 56,
+   "target": "back_right",
+   "bounds": {
+    "min": [
+     -299,
+     129,
+     5
+    ],
+    "max": [
+     -221,
+     143,
+     107
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 572,
+   "y": -1160,
+   "z": 63,
+   "target": "front_left",
+   "bounds": {
+    "min": [
+     533,
+     -1167,
+     12
+    ],
+    "max": [
+     611,
+     -1153,
+     114
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 572,
+   "y": 136,
+   "z": -128,
+   "target": "back_left",
+   "bounds": {
+    "min": [
+     533,
+     129,
+     -179
+    ],
+    "max": [
+     611,
+     143,
+     -77
+    ]
+   }
   }
  ]
 }

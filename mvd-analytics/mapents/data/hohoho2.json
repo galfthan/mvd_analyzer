@@ -3,6 +3,69 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "GA.low",
+   "x": 360,
+   "y": 136,
+   "z": 116,
+   "loc": "GA.low",
+   "bounds": {
+    "min": [
+     337,
+     121,
+     49
+    ],
+    "max": [
+     383,
+     151,
+     183
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad",
+   "x": 408,
+   "y": 136,
+   "z": 116,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     385,
+     121,
+     49
+    ],
+    "max": [
+     431,
+     151,
+     183
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "YA.high",
+   "x": 1244,
+   "y": -48,
+   "z": 344,
+   "loc": "YA.high",
+   "bounds": {
+    "min": [
+     1241,
+     -111,
+     289
+    ],
+    "max": [
+     1247,
+     15,
+     399
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -565,6 +628,50 @@
    "z": 48,
    "loc": "outdoors.SNG",
    "targetName": "teleoutside"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA.high",
+   "x": 1776,
+   "y": 122,
+   "z": 224,
+   "loc": "GA.high",
+   "target": "teleoutside",
+   "bounds": {
+    "min": [
+     1725,
+     113,
+     209
+    ],
+    "max": [
+     1827,
+     131,
+     239
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "outdoors.SNG",
+   "x": -32,
+   "y": -518,
+   "z": 44,
+   "loc": "outdoors.SNG",
+   "target": "teleinside",
+   "bounds": {
+    "min": [
+     -83,
+     -527,
+     29
+    ],
+    "max": [
+     19,
+     -509,
+     59
+    ]
+   }
   }
  ]
 }

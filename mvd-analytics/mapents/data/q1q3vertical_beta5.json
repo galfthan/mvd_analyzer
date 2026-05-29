@@ -3,6 +3,246 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -300.5,
+   "y": -49,
+   "z": 488,
+   "bounds": {
+    "min": [
+     -306,
+     -80,
+     431
+    ],
+    "max": [
+     -295,
+     -18,
+     545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-10",
+   "x": 211.5,
+   "y": 15,
+   "z": 180,
+   "bounds": {
+    "min": [
+     206,
+     -16,
+     123
+    ],
+    "max": [
+     217,
+     46,
+     237
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-11",
+   "x": 313.5,
+   "y": -49,
+   "z": 488,
+   "bounds": {
+    "min": [
+     308,
+     -80,
+     431
+    ],
+    "max": [
+     319,
+     -18,
+     545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-12",
+   "x": 313.5,
+   "y": 15,
+   "z": 488,
+   "bounds": {
+    "min": [
+     308,
+     -16,
+     431
+    ],
+    "max": [
+     319,
+     46,
+     545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -300.5,
+   "y": 15,
+   "z": 488,
+   "bounds": {
+    "min": [
+     -306,
+     -16,
+     431
+    ],
+    "max": [
+     -295,
+     46,
+     545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -198.5,
+   "y": -49,
+   "z": 180,
+   "bounds": {
+    "min": [
+     -204,
+     -80,
+     123
+    ],
+    "max": [
+     -193,
+     -18,
+     237
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": -198.5,
+   "y": 15,
+   "z": 180,
+   "bounds": {
+    "min": [
+     -204,
+     -16,
+     123
+    ],
+    "max": [
+     -193,
+     46,
+     237
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": -25,
+   "y": -273,
+   "z": 333.5,
+   "bounds": {
+    "min": [
+     -56,
+     -278,
+     277
+    ],
+    "max": [
+     6,
+     -268,
+     390
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": -24,
+   "y": -222,
+   "z": 180,
+   "bounds": {
+    "min": [
+     -55,
+     -227,
+     123
+    ],
+    "max": [
+     7,
+     -217,
+     237
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": 39,
+   "y": -273,
+   "z": 333.5,
+   "bounds": {
+    "min": [
+     8,
+     -278,
+     277
+    ],
+    "max": [
+     70,
+     -268,
+     390
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 40,
+   "y": -222,
+   "z": 180,
+   "bounds": {
+    "min": [
+     9,
+     -227,
+     123
+    ],
+    "max": [
+     71,
+     -217,
+     237
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-9",
+   "x": 211.5,
+   "y": -49,
+   "z": 180,
+   "bounds": {
+    "min": [
+     206,
+     -80,
+     123
+    ],
+    "max": [
+     217,
+     -18,
+     237
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -506,6 +746,69 @@
    "y": 464,
    "z": 434,
    "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -441.5,
+   "y": 388,
+   "z": 191,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -499,
+     386,
+     135
+    ],
+    "max": [
+     -384,
+     390,
+     247
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 7.5,
+   "y": 156,
+   "z": 184,
+   "target": "telecenter",
+   "bounds": {
+    "min": [
+     -50,
+     154,
+     128
+    ],
+    "max": [
+     65,
+     158,
+     240
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 454.5,
+   "y": 388,
+   "z": 191,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     397,
+     386,
+     135
+    ],
+    "max": [
+     512,
+     390,
+     247
+    ]
+   }
   }
  ]
 }

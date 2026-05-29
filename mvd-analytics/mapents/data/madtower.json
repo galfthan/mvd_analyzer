@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad Level-1",
+   "x": 0,
+   "y": -720,
+   "z": 576,
+   "loc": "Quad Level",
+   "bounds": {
+    "min": [
+     -63,
+     -727,
+     513
+    ],
+    "max": [
+     63,
+     -713,
+     639
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad Level-2",
+   "x": 0,
+   "y": -48,
+   "z": 576,
+   "loc": "Quad Level",
+   "bounds": {
+    "min": [
+     -63,
+     -55,
+     513
+    ],
+    "max": [
+     63,
+     -41,
+     639
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -721,6 +763,50 @@
    "z": 1192,
    "loc": "Top Level",
    "targetName": "bottomtele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Blue Flag Level",
+   "x": 4,
+   "y": -380,
+   "z": 212,
+   "loc": "Blue Flag Level",
+   "target": "bottomtele",
+   "bounds": {
+    "min": [
+     -87,
+     -471,
+     209
+    ],
+    "max": [
+     95,
+     -289,
+     215
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Top Level",
+   "x": 4,
+   "y": -380,
+   "z": 1268,
+   "loc": "Top Level",
+   "target": "toptele",
+   "bounds": {
+    "min": [
+     -87,
+     -471,
+     1265
+    ],
+    "max": [
+     95,
+     -289,
+     1271
+    ]
+   }
   }
  ]
 }

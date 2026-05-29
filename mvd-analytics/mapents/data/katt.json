@@ -469,6 +469,72 @@
    "z": 368,
    "loc": "center.MEGA",
    "targetName": "teledrop"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA",
+   "x": -100,
+   "y": -1008,
+   "z": 128,
+   "loc": "YA",
+   "target": "telemid",
+   "bounds": {
+    "min": [
+     -103,
+     -1063,
+     113
+    ],
+    "max": [
+     -97,
+     -953,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "center",
+   "x": 444,
+   "y": 12,
+   "z": 48,
+   "loc": "center",
+   "target": "teledrop",
+   "bounds": {
+    "min": [
+     385,
+     9,
+     33
+    ],
+    "max": [
+     503,
+     15,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "center.RL",
+   "x": 184,
+   "y": 476,
+   "z": 128,
+   "loc": "center.RL",
+   "target": "teleup",
+   "bounds": {
+    "min": [
+     129,
+     473,
+     113
+    ],
+    "max": [
+     239,
+     479,
+     143
+    ]
+   }
   }
  ]
 }

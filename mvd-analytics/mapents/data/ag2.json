@@ -3,6 +3,86 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 435.2569,
+   "y": 0,
+   "z": 64,
+   "bounds": {
+    "min": [
+     385,
+     -7,
+     1
+    ],
+    "max": [
+     485.51376,
+     7,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 462.36377,
+   "y": 0,
+   "z": 64,
+   "bounds": {
+    "min": [
+     413.7275,
+     -7,
+     1
+    ],
+    "max": [
+     511,
+     7,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 947.25684,
+   "y": 0,
+   "z": 64,
+   "bounds": {
+    "min": [
+     897,
+     -7,
+     1
+    ],
+    "max": [
+     997.51373,
+     7,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 974.3635,
+   "y": 0,
+   "z": 64,
+   "bounds": {
+    "min": [
+     925.7271,
+     -7,
+     1
+    ],
+    "max": [
+     1023,
+     7,
+     127
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -616,6 +696,27 @@
    "y": 160,
    "z": -480,
    "targetName": "telefrag"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 696,
+   "y": 230,
+   "z": -256,
+   "target": "telefrag",
+   "bounds": {
+    "min": [
+     641,
+     229,
+     -311
+    ],
+    "max": [
+     751,
+     231,
+     -201
+    ]
+   }
   }
  ]
 }

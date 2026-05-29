@@ -1022,6 +1022,116 @@
    "z": -24,
    "loc": "slayer.room",
    "targetName": "dest3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad-1",
+   "x": -1440,
+   "y": -776,
+   "z": 240,
+   "loc": "Quad",
+   "target": "dest2",
+   "bounds": {
+    "min": [
+     -1527,
+     -783,
+     161
+    ],
+    "max": [
+     -1353,
+     -769,
+     319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad-2",
+   "x": -1440,
+   "y": -24,
+   "z": 240,
+   "loc": "Quad",
+   "target": "dest3",
+   "bounds": {
+    "min": [
+     -1527,
+     -31,
+     161
+    ],
+    "max": [
+     -1353,
+     -17,
+     319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.tele",
+   "x": -754,
+   "y": -684,
+   "z": 352,
+   "loc": "RA.tele",
+   "target": "dest4",
+   "bounds": {
+    "min": [
+     -759,
+     -739,
+     289
+    ],
+    "max": [
+     -749,
+     -629,
+     415
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "armors.lift",
+   "x": 852,
+   "y": -928,
+   "z": 256,
+   "loc": "armors.lift",
+   "target": "dest1",
+   "bounds": {
+    "min": [
+     841,
+     -983,
+     193
+    ],
+    "max": [
+     863,
+     -873,
+     319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "central.SNG",
+   "x": -264,
+   "y": -2156,
+   "z": -160,
+   "loc": "central.SNG",
+   "target": "dest5",
+   "bounds": {
+    "min": [
+     -319,
+     -2167,
+     -223
+    ],
+    "max": [
+     -209,
+     -2145,
+     -97
+    ]
+   }
   }
  ]
 }

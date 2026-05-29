@@ -285,6 +285,50 @@
    "z": 24,
    "loc": "raramp",
    "targetName": "info_teleport_destination2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "armorslow-1",
+   "x": 528,
+   "y": 40,
+   "z": -100,
+   "loc": "armorslow",
+   "target": "info_teleport_destination2",
+   "bounds": {
+    "min": [
+     465,
+     33,
+     -167
+    ],
+    "max": [
+     591,
+     47,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "armorslow-2",
+   "x": 832,
+   "y": 216,
+   "z": -100,
+   "loc": "armorslow",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     825,
+     153,
+     -167
+    ],
+    "max": [
+     839,
+     279,
+     -33
+    ]
+   }
   }
  ]
 }

@@ -3,6 +3,111 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "GL",
+   "x": -768,
+   "y": 792,
+   "z": 48,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     -783,
+     785,
+     33
+    ],
+    "max": [
+     -753,
+     799,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "LG",
+   "x": 512,
+   "y": 120,
+   "z": -80,
+   "loc": "LG",
+   "bounds": {
+    "min": [
+     497,
+     113,
+     -95
+    ],
+    "max": [
+     527,
+     127,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad.lift-1",
+   "x": -184,
+   "y": -512,
+   "z": -208,
+   "loc": "Quad.lift",
+   "bounds": {
+    "min": [
+     -191,
+     -527,
+     -223
+    ],
+    "max": [
+     -177,
+     -497,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad.lift-2",
+   "x": 352,
+   "y": 736,
+   "z": 164,
+   "loc": "Quad.lift",
+   "bounds": {
+    "min": [
+     321,
+     705,
+     161
+    ],
+    "max": [
+     383,
+     767,
+     167
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "high.RL",
+   "x": -448,
+   "y": -824,
+   "z": 16,
+   "loc": "high.RL",
+   "bounds": {
+    "min": [
+     -463,
+     -831,
+     1
+    ],
+    "max": [
+     -433,
+     -817,
+     31
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -335,6 +440,50 @@
    "z": 8,
    "loc": "high.RL",
    "targetName": "slope"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.tele",
+   "x": -1048,
+   "y": 256,
+   "z": -96,
+   "loc": "GL.tele",
+   "target": "slope2",
+   "bounds": {
+    "min": [
+     -1063,
+     193,
+     -143
+    ],
+    "max": [
+     -1033,
+     319,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.tele",
+   "x": 8,
+   "y": 512,
+   "z": -400,
+   "loc": "low.tele",
+   "target": "slope",
+   "bounds": {
+    "min": [
+     -7,
+     449,
+     -447
+    ],
+    "max": [
+     23,
+     575,
+     -353
+    ]
+   }
   }
  ]
 }

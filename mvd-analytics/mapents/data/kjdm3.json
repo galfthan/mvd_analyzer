@@ -288,6 +288,28 @@
    "z": 376,
    "loc": "YA",
    "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG.tele",
+   "x": -52,
+   "y": -152,
+   "z": 148,
+   "loc": "LG.tele",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -95,
+     -159,
+     97
+    ],
+    "max": [
+     -9,
+     -145,
+     199
+    ]
+   }
   }
  ]
 }

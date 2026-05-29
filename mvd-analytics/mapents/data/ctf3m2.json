@@ -3,6 +3,300 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE (100 HEALTH AREA)",
+   "x": 2736,
+   "y": 180,
+   "z": 36,
+   "loc": "BLUE BASE (100 HEALTH AREA)",
+   "bounds": {
+    "min": [
+     2725,
+     177,
+     33
+    ],
+    "max": [
+     2747,
+     183,
+     39
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE (100 HEALTH AREA)",
+   "x": 280,
+   "y": 220,
+   "z": 36,
+   "loc": "RED BASE (100 HEALTH AREA)",
+   "bounds": {
+    "min": [
+     269,
+     217,
+     33
+    ],
+    "max": [
+     291,
+     223,
+     39
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (100 HEALTH AREA)-1",
+   "x": 2440,
+   "y": 184,
+   "z": 68,
+   "loc": "BLUE BASE (100 HEALTH AREA)",
+   "bounds": {
+    "min": [
+     2433,
+     157,
+     17
+    ],
+    "max": [
+     2447,
+     211,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (100 HEALTH AREA)-2",
+   "x": 2440,
+   "y": 240,
+   "z": 68,
+   "loc": "BLUE BASE (100 HEALTH AREA)",
+   "bounds": {
+    "min": [
+     2433,
+     213,
+     17
+    ],
+    "max": [
+     2447,
+     267,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE GL AREA-1",
+   "x": 2060,
+   "y": 1142,
+   "z": -210,
+   "loc": "BLUE GL AREA",
+   "bounds": {
+    "min": [
+     2033,
+     1133,
+     -271
+    ],
+    "max": [
+     2087,
+     1151,
+     -149
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE GL AREA-2",
+   "x": 2116,
+   "y": 1142,
+   "z": -210,
+   "loc": "BLUE GL AREA",
+   "bounds": {
+    "min": [
+     2089,
+     1133,
+     -271
+    ],
+    "max": [
+     2143,
+     1151,
+     -149
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "DOORWAY TO BASE OF LIFT (BLUE SIDE)-1",
+   "x": 2346,
+   "y": -244,
+   "z": -220,
+   "loc": "DOORWAY TO BASE OF LIFT (BLUE SIDE)",
+   "bounds": {
+    "min": [
+     2321,
+     -251,
+     -271
+    ],
+    "max": [
+     2371,
+     -237,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "DOORWAY TO BASE OF LIFT (BLUE SIDE)-2",
+   "x": 2398,
+   "y": -244,
+   "z": -220,
+   "loc": "DOORWAY TO BASE OF LIFT (BLUE SIDE)",
+   "bounds": {
+    "min": [
+     2373,
+     -251,
+     -271
+    ],
+    "max": [
+     2423,
+     -237,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "DOORWAY TO BASE OF LIFT (RED SIDE)-1",
+   "x": 618,
+   "y": 644,
+   "z": -220,
+   "loc": "DOORWAY TO BASE OF LIFT (RED SIDE)",
+   "bounds": {
+    "min": [
+     593,
+     637,
+     -271
+    ],
+    "max": [
+     643,
+     651,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "DOORWAY TO BASE OF LIFT (RED SIDE)-2",
+   "x": 670,
+   "y": 644,
+   "z": -220,
+   "loc": "DOORWAY TO BASE OF LIFT (RED SIDE)",
+   "bounds": {
+    "min": [
+     645,
+     637,
+     -271
+    ],
+    "max": [
+     695,
+     651,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (100 HEALTH AREA)-1",
+   "x": 576,
+   "y": 160,
+   "z": 68,
+   "loc": "RED BASE (100 HEALTH AREA)",
+   "bounds": {
+    "min": [
+     569,
+     133,
+     17
+    ],
+    "max": [
+     583,
+     187,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (100 HEALTH AREA)-2",
+   "x": 576,
+   "y": 216,
+   "z": 68,
+   "loc": "RED BASE (100 HEALTH AREA)",
+   "bounds": {
+    "min": [
+     569,
+     189,
+     17
+    ],
+    "max": [
+     583,
+     243,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED GL AREA-1",
+   "x": 900,
+   "y": -742,
+   "z": -210,
+   "loc": "RED GL AREA",
+   "bounds": {
+    "min": [
+     873,
+     -751,
+     -271
+    ],
+    "max": [
+     927,
+     -733,
+     -149
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED GL AREA-2",
+   "x": 956,
+   "y": -742,
+   "z": -210,
+   "loc": "RED GL AREA",
+   "bounds": {
+    "min": [
+     929,
+     -751,
+     -271
+    ],
+    "max": [
+     983,
+     -733,
+     -149
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",

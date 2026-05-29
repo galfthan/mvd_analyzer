@@ -3,6 +3,166 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -1392,
+   "y": -1664,
+   "z": -58,
+   "bounds": {
+    "min": [
+     -1407,
+     -1679,
+     -61
+    ],
+    "max": [
+     -1377,
+     -1649,
+     -55
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": -1392,
+   "y": 1664,
+   "z": -58,
+   "bounds": {
+    "min": [
+     -1407,
+     1649,
+     -61
+    ],
+    "max": [
+     -1377,
+     1679,
+     -55
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-1",
+   "x": -2200,
+   "y": -1136,
+   "z": 106,
+   "bounds": {
+    "min": [
+     -2203,
+     -1167,
+     53
+    ],
+    "max": [
+     -2197,
+     -1105,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-2",
+   "x": -2200,
+   "y": 1136,
+   "z": 106,
+   "bounds": {
+    "min": [
+     -2203,
+     1105,
+     53
+    ],
+    "max": [
+     -2197,
+     1167,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-3",
+   "x": -1672,
+   "y": -1136,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -1675,
+     -1167,
+     49
+    ],
+    "max": [
+     -1669,
+     -1105,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "door-4",
+   "x": -1672,
+   "y": 1136,
+   "z": 96,
+   "bounds": {
+    "min": [
+     -1675,
+     1105,
+     49
+    ],
+    "max": [
+     -1669,
+     1167,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": -1584,
+   "y": -1664,
+   "z": -104,
+   "bounds": {
+    "min": [
+     -1671,
+     -1719,
+     -119
+    ],
+    "max": [
+     -1497,
+     -1609,
+     -89
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": -1584,
+   "y": 1661.5,
+   "z": -104,
+   "bounds": {
+    "min": [
+     -1671,
+     1604,
+     -119
+    ],
+    "max": [
+     -1497,
+     1719,
+     -89
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -996,6 +1156,27 @@
    "y": 0,
    "z": 320,
    "targetName": "red_armor"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 616,
+   "y": 0,
+   "z": -344,
+   "target": "red_armor",
+   "bounds": {
+    "min": [
+     609,
+     -47,
+     -399
+    ],
+    "max": [
+     623,
+     47,
+     -289
+    ]
+   }
   }
  ]
 }

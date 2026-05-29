@@ -3,6 +3,48 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "GL",
+   "x": 160,
+   "y": -52,
+   "z": 640,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     129,
+     -63,
+     609
+    ],
+    "max": [
+     191,
+     -41,
+     671
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Ring",
+   "x": 16,
+   "y": -160,
+   "z": -64,
+   "loc": "Ring",
+   "bounds": {
+    "min": [
+     -191,
+     -255,
+     -79
+    ],
+    "max": [
+     223,
+     -65,
+     -49
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -411,6 +453,161 @@
    "z": -38,
    "loc": "Ring",
    "targetName": "keep"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA",
+   "x": 664,
+   "y": -720,
+   "z": 472,
+   "loc": "GA",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     657,
+     -751,
+     449
+    ],
+    "max": [
+     671,
+     -689,
+     495
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL",
+   "x": 160,
+   "y": -160,
+   "z": 824,
+   "loc": "GL",
+   "target": "keep",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     49,
+     -223,
+     817
+    ],
+    "max": [
+     271,
+     -97,
+     831
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH.low",
+   "x": -160,
+   "y": -638,
+   "z": 304,
+   "loc": "MH.low",
+   "target": "launch1",
+   "bounds": {
+    "min": [
+     -191,
+     -651,
+     257
+    ],
+    "max": [
+     -129,
+     -625,
+     351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.low",
+   "x": 480,
+   "y": 318,
+   "z": 305,
+   "loc": "Quad.low",
+   "target": "launch2",
+   "bounds": {
+    "min": [
+     449,
+     305,
+     259
+    ],
+    "max": [
+     511,
+     331,
+     351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 932,
+   "y": -932,
+   "z": 320,
+   "loc": "RA",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     905,
+     -959,
+     305
+    ],
+    "max": [
+     959,
+     -905,
+     335
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring",
+   "x": 232,
+   "y": -160,
+   "z": -8,
+   "loc": "Ring",
+   "target": "out",
+   "bounds": {
+    "min": [
+     225,
+     -191,
+     -47
+    ],
+    "max": [
+     239,
+     -129,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": -160,
+   "y": 376,
+   "z": 312,
+   "loc": "low.RL",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -191,
+     369,
+     289
+    ],
+    "max": [
+     -129,
+     383,
+     335
+    ]
+   }
   }
  ]
 }

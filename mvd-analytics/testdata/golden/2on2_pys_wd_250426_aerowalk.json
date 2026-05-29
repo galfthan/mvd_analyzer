@@ -12238,6 +12238,94 @@
         "x": -456,
         "y": 64,
         "z": 40
+      },
+      {
+        "bounds": {
+          "max": [
+            31,
+            -65,
+            111
+          ],
+          "min": [
+            17,
+            -159,
+            1
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "Quad.ledge",
+        "name": "Quad.ledge",
+        "target": "teledest1",
+        "type": "teleportSrc",
+        "x": 24,
+        "y": -112,
+        "z": 56
+      },
+      {
+        "bounds": {
+          "max": [
+            -615,
+            95,
+            511
+          ],
+          "min": [
+            -703,
+            81,
+            401
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "Quad.tele",
+        "name": "Quad.tele",
+        "target": "middle",
+        "type": "teleportSrc",
+        "x": -659,
+        "y": 88,
+        "z": 456
+      },
+      {
+        "bounds": {
+          "max": [
+            -441,
+            399,
+            335
+          ],
+          "min": [
+            -535,
+            385,
+            225
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "air.ledge",
+        "name": "air.ledge",
+        "target": "top",
+        "type": "teleportSrc",
+        "x": -488,
+        "y": 392,
+        "z": 280
+      },
+      {
+        "bounds": {
+          "max": [
+            -411,
+            111,
+            111
+          ],
+          "min": [
+            -505,
+            97,
+            1
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "yard",
+        "name": "yard",
+        "target": "air",
+        "type": "teleportSrc",
+        "x": -458,
+        "y": 104,
+        "z": 56
       }
     ],
     "map": "aerowalk"
@@ -14371,7 +14459,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 13,
+  "schemaVersion": 14,
   "streams": {
     "global": {
       "matchEnd": 600040,

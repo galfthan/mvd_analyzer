@@ -723,6 +723,48 @@
    "y": 32,
    "z": -440,
    "targetName": "lava"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1784,
+   "y": 128,
+   "z": -264,
+   "target": "lava",
+   "bounds": {
+    "min": [
+     -1871,
+     89,
+     -335
+    ],
+    "max": [
+     -1697,
+     167,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -1472,
+   "y": -48,
+   "z": -432,
+   "target": "out",
+   "bounds": {
+    "min": [
+     -1503,
+     -55,
+     -479
+    ],
+    "max": [
+     -1441,
+     -41,
+     -385
+    ]
+   }
   }
  ]
 }

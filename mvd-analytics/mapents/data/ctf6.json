@@ -3,6 +3,510 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "wind tunnel in blue base",
+   "x": -1046.5,
+   "y": 248,
+   "z": -307,
+   "loc": "wind tunnel in blue base",
+   "bounds": {
+    "min": [
+     -1052,
+     225,
+     -330
+    ],
+    "max": [
+     -1041,
+     271,
+     -284
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL-1",
+   "x": -1878,
+   "y": 16,
+   "z": -249,
+   "loc": "RL",
+   "bounds": {
+    "min": [
+     -1904,
+     12,
+     -253
+    ],
+    "max": [
+     -1852,
+     20,
+     -245
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL-2",
+   "x": -1846,
+   "y": 16,
+   "z": -249,
+   "loc": "RL",
+   "bounds": {
+    "min": [
+     -1850,
+     12,
+     -307
+    ],
+    "max": [
+     -1842,
+     20,
+     -191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL-3",
+   "x": -1813,
+   "y": 16,
+   "z": -249,
+   "loc": "RL",
+   "bounds": {
+    "min": [
+     -1840,
+     12,
+     -253
+    ],
+    "max": [
+     -1786,
+     20,
+     -245
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL-4",
+   "x": -1536,
+   "y": 355.5,
+   "z": -325,
+   "loc": "RL",
+   "bounds": {
+    "min": [
+     -1567,
+     353,
+     -374
+    ],
+    "max": [
+     -1505,
+     358,
+     -276
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL-5",
+   "x": -1472,
+   "y": 355.5,
+   "z": -325,
+   "loc": "RL",
+   "bounds": {
+    "min": [
+     -1503,
+     353,
+     -374
+    ],
+    "max": [
+     -1441,
+     358,
+     -276
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue base-1",
+   "x": -714,
+   "y": -757,
+   "z": -269.5,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     -719,
+     -839,
+     -342
+    ],
+    "max": [
+     -709,
+     -675,
+     -197
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue base-2",
+   "x": -714,
+   "y": -725.5,
+   "z": -269.5,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     -719,
+     -797,
+     -342
+    ],
+    "max": [
+     -709,
+     -654,
+     -197
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue base-3",
+   "x": 435,
+   "y": -44.5,
+   "z": -261,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     430,
+     -323,
+     -334
+    ],
+    "max": [
+     440,
+     234,
+     -188
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue base-4",
+   "x": 435,
+   "y": -44,
+   "z": -261,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     430,
+     -351,
+     -334
+    ],
+    "max": [
+     440,
+     263,
+     -188
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "bridge outside blue base-1",
+   "x": -1195.5,
+   "y": 356,
+   "z": -307.5,
+   "loc": "bridge outside blue base",
+   "bounds": {
+    "min": [
+     -1267,
+     351,
+     -380
+    ],
+    "max": [
+     -1124,
+     361,
+     -235
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "bridge outside blue base-2",
+   "x": -1164,
+   "y": 356,
+   "z": -307.5,
+   "loc": "bridge outside blue base",
+   "bounds": {
+    "min": [
+     -1246,
+     351,
+     -380
+    ],
+    "max": [
+     -1082,
+     361,
+     -235
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "bridge over lava in red base-1",
+   "x": -1600,
+   "y": 1227,
+   "z": -1152.5,
+   "loc": "bridge over lava in red base",
+   "bounds": {
+    "min": [
+     -1605,
+     1145,
+     -1225
+    ],
+    "max": [
+     -1595,
+     1309,
+     -1080
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "bridge over lava in red base-2",
+   "x": -1600,
+   "y": 1258.5,
+   "z": -1152.5,
+   "loc": "bridge over lava in red base",
+   "bounds": {
+    "min": [
+     -1605,
+     1187,
+     -1225
+    ],
+    "max": [
+     -1595,
+     1330,
+     -1080
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor outside red base-1",
+   "x": -2083,
+   "y": -303.5,
+   "z": -374,
+   "loc": "corridor outside red base",
+   "bounds": {
+    "min": [
+     -2114,
+     -307,
+     -437
+    ],
+    "max": [
+     -2052,
+     -300,
+     -311
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor outside red base-2",
+   "x": -2019,
+   "y": -303.5,
+   "z": -374,
+   "loc": "corridor outside red base",
+   "bounds": {
+    "min": [
+     -2050,
+     -307,
+     -437
+    ],
+    "max": [
+     -1988,
+     -300,
+     -311
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor outside red base-3",
+   "x": -1876.5,
+   "y": -304,
+   "z": -249,
+   "loc": "corridor outside red base",
+   "bounds": {
+    "min": [
+     -1901,
+     -308,
+     -253
+    ],
+    "max": [
+     -1852,
+     -300,
+     -245
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor outside red base-4",
+   "x": -1846,
+   "y": -304,
+   "z": -249,
+   "loc": "corridor outside red base",
+   "bounds": {
+    "min": [
+     -1850,
+     -308,
+     -307
+    ],
+    "max": [
+     -1842,
+     -300,
+     -191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor outside red base-5",
+   "x": -1813,
+   "y": -304,
+   "z": -249,
+   "loc": "corridor outside red base",
+   "bounds": {
+    "min": [
+     -1840,
+     -308,
+     -253
+    ],
+    "max": [
+     -1786,
+     -300,
+     -245
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor outside red base-6",
+   "x": -1463.5,
+   "y": 18,
+   "z": -307.5,
+   "loc": "corridor outside red base",
+   "bounds": {
+    "min": [
+     -1535,
+     13,
+     -380
+    ],
+    "max": [
+     -1392,
+     23,
+     -235
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor outside red base-7",
+   "x": -1432,
+   "y": 18,
+   "z": -307.5,
+   "loc": "corridor outside red base",
+   "bounds": {
+    "min": [
+     -1514,
+     13,
+     -380
+    ],
+    "max": [
+     -1350,
+     23,
+     -235
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "red base",
+   "x": -1078.5,
+   "y": 355,
+   "z": -1108,
+   "loc": "red base",
+   "bounds": {
+    "min": [
+     -1085,
+     255,
+     -1177
+    ],
+    "max": [
+     -1072,
+     455,
+     -1039
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water-1",
+   "x": -1610,
+   "y": -543,
+   "z": -1154.5,
+   "loc": "water",
+   "bounds": {
+    "min": [
+     -1615,
+     -625,
+     -1227
+    ],
+    "max": [
+     -1605,
+     -461,
+     -1082
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water-2",
+   "x": -1610,
+   "y": -511.5,
+   "z": -1154.5,
+   "loc": "water",
+   "bounds": {
+    "min": [
+     -1615,
+     -583,
+     -1227
+    ],
+    "max": [
+     -1605,
+     -440,
+     -1082
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -1046,6 +1550,138 @@
    "z": -583,
    "loc": "wind tunnel in red base",
    "targetName": "target7"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL",
+   "x": -1991,
+   "y": 437,
+   "z": -331,
+   "loc": "RL",
+   "target": "target10",
+   "bounds": {
+    "min": [
+     -1992,
+     414,
+     -376
+    ],
+    "max": [
+     -1990,
+     460,
+     -286
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "bridge outside blue base",
+   "x": -1505,
+   "y": 496,
+   "z": -324.5,
+   "loc": "bridge outside blue base",
+   "target": "target5",
+   "bounds": {
+    "min": [
+     -1528,
+     495,
+     -360
+    ],
+    "max": [
+     -1482,
+     497,
+     -289
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "bridge over lava in red base",
+   "x": -1091,
+   "y": 1237,
+   "z": -1153,
+   "loc": "bridge over lava in red base",
+   "target": "target9",
+   "bounds": {
+    "min": [
+     -1092,
+     1214,
+     -1206
+    ],
+    "max": [
+     -1090,
+     1260,
+     -1100
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water",
+   "x": -1090,
+   "y": -535,
+   "z": -1153,
+   "loc": "water",
+   "target": "target7",
+   "bounds": {
+    "min": [
+     -1091,
+     -558,
+     -1206
+    ],
+    "max": [
+     -1089,
+     -512,
+     -1100
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "wind tunnel in red base-1",
+   "x": -2735,
+   "y": 227,
+   "z": -557,
+   "loc": "wind tunnel in red base",
+   "target": "target1",
+   "bounds": {
+    "min": [
+     -2736,
+     204,
+     -610
+    ],
+    "max": [
+     -2734,
+     250,
+     -504
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "wind tunnel in red base-2",
+   "x": -2158,
+   "y": 229,
+   "z": -557,
+   "loc": "wind tunnel in red base",
+   "target": "target3",
+   "bounds": {
+    "min": [
+     -2159,
+     206,
+     -610
+    ],
+    "max": [
+     -2157,
+     252,
+     -504
+    ]
+   }
   }
  ]
 }

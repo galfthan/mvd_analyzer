@@ -394,6 +394,94 @@
    "z": -232,
    "loc": "low.RL",
    "targetName": "down2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 832,
+   "y": -536,
+   "z": -16,
+   "loc": "LG",
+   "target": "down2",
+   "bounds": {
+    "min": [
+     801,
+     -543,
+     -63
+    ],
+    "max": [
+     863,
+     -529,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 472,
+   "y": -1344,
+   "z": -208,
+   "loc": "RA",
+   "target": "up1",
+   "bounds": {
+    "min": [
+     465,
+     -1375,
+     -255
+    ],
+    "max": [
+     479,
+     -1313,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG",
+   "x": -128,
+   "y": -24,
+   "z": -16,
+   "loc": "SNG",
+   "target": "down1",
+   "bounds": {
+    "min": [
+     -159,
+     -31,
+     -63
+    ],
+    "max": [
+     -97,
+     -17,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": -136,
+   "y": -256,
+   "z": -208,
+   "loc": "low.RL",
+   "target": "up2",
+   "bounds": {
+    "min": [
+     -143,
+     -287,
+     -255
+    ],
+    "max": [
+     -129,
+     -225,
+     -161
+    ]
+   }
   }
  ]
 }

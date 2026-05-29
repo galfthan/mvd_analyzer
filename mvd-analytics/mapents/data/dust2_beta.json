@@ -578,6 +578,72 @@
    "z": 162,
    "loc": "water.up",
    "targetName": "tele3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "10.rox",
+   "x": -1128,
+   "y": -1032,
+   "z": 192,
+   "loc": "10.rox",
+   "target": "tele3",
+   "bounds": {
+    "min": [
+     -1183,
+     -1039,
+     129
+    ],
+    "max": [
+     -1073,
+     -1025,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SSG.RL.hi",
+   "x": -1504,
+   "y": 792,
+   "z": 208,
+   "loc": "SSG.RL.hi",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -1599,
+     785,
+     129
+    ],
+    "max": [
+     -1409,
+     799,
+     287
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "mid/cross.tele",
+   "x": -1536,
+   "y": 152,
+   "z": 184,
+   "loc": "mid/cross.tele",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -1631,
+     145,
+     129
+    ],
+    "max": [
+     -1441,
+     159,
+     239
+    ]
+   }
   }
  ]
 }

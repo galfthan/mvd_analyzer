@@ -341,6 +341,90 @@
    "y": 480,
    "z": 360,
    "targetName": "t14"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -976,
+   "y": -648,
+   "z": 184,
+   "target": "t15",
+   "bounds": {
+    "min": [
+     -1071,
+     -655,
+     121
+    ],
+    "max": [
+     -881,
+     -641,
+     247
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -616,
+   "y": 80,
+   "z": 144,
+   "target": "t14",
+   "bounds": {
+    "min": [
+     -623,
+     -15,
+     81
+    ],
+    "max": [
+     -609,
+     175,
+     207
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -216,
+   "y": 480,
+   "z": 400,
+   "target": "t13",
+   "bounds": {
+    "min": [
+     -223,
+     385,
+     337
+    ],
+    "max": [
+     -209,
+     575,
+     463
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -168,
+   "y": -488,
+   "z": 80,
+   "target": "t666",
+   "bounds": {
+    "min": [
+     -175,
+     -583,
+     17
+    ],
+    "max": [
+     -161,
+     -393,
+     143
+    ]
+   }
   }
  ]
 }

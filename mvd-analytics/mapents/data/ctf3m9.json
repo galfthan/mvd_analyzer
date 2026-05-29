@@ -3,6 +3,132 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "CENTRAL AREA (QUAD TELEPORT PLATFORM)",
+   "x": 1191,
+   "y": -832,
+   "z": 32,
+   "loc": "CENTRAL AREA (QUAD TELEPORT PLATFORM)",
+   "bounds": {
+    "min": [
+     1185,
+     -847,
+     17
+    ],
+    "max": [
+     1197,
+     -817,
+     47
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "CENTRAL AREA ABOVE WATER",
+   "x": 569,
+   "y": -832,
+   "z": 32,
+   "loc": "CENTRAL AREA ABOVE WATER",
+   "bounds": {
+    "min": [
+     563,
+     -847,
+     17
+    ],
+    "max": [
+     575,
+     -817,
+     47
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (MAIN ENTRANCE DOOR)-1",
+   "x": -28.743122,
+   "y": 640,
+   "z": 64,
+   "loc": "BLUE BASE (MAIN ENTRANCE DOOR)",
+   "bounds": {
+    "min": [
+     -79,
+     625,
+     1
+    ],
+    "max": [
+     21.513756,
+     655,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (MAIN ENTRANCE DOOR)-2",
+   "x": -1.6363411,
+   "y": 640,
+   "z": 64,
+   "loc": "BLUE BASE (MAIN ENTRANCE DOOR)",
+   "bounds": {
+    "min": [
+     -50.272682,
+     625,
+     1
+    ],
+    "max": [
+     47,
+     655,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (MAIN ENTRANCE DOOR)-1",
+   "x": 1763.2568,
+   "y": -2304,
+   "z": 64,
+   "loc": "RED BASE (MAIN ENTRANCE DOOR)",
+   "bounds": {
+    "min": [
+     1713,
+     -2319,
+     1
+    ],
+    "max": [
+     1813.5138,
+     -2289,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (MAIN ENTRANCE DOOR)-2",
+   "x": 1790.3633,
+   "y": -2304,
+   "z": 64,
+   "loc": "RED BASE (MAIN ENTRANCE DOOR)",
+   "bounds": {
+    "min": [
+     1741.7267,
+     -2319,
+     1
+    ],
+    "max": [
+     1839,
+     -2289,
+     127
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -683,6 +809,139 @@
    "z": -128,
    "loc": "RED BASE (RL TELEPORT / WATER ENTRANCE)",
    "targetName": "red2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (RL ROOM)",
+   "x": 352,
+   "y": -176,
+   "z": 144,
+   "loc": "BLUE BASE (RL ROOM)",
+   "target": "blue2",
+   "bounds": {
+    "min": [
+     305,
+     -223,
+     113
+    ],
+    "max": [
+     399,
+     -129,
+     175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (RL TELEPORT / WATER ENTRANCE)",
+   "x": -296,
+   "y": 528,
+   "z": -112,
+   "loc": "BLUE BASE (RL TELEPORT / WATER ENTRANCE)",
+   "target": "blue",
+   "bounds": {
+    "min": [
+     -299,
+     457,
+     -143
+    ],
+    "max": [
+     -293,
+     599,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE OUTER BASE AREA",
+   "x": -3072,
+   "y": -1280,
+   "z": -500,
+   "loc": "BLUE OUTER BASE AREA",
+   "target": "quad3",
+   "bounds": {
+    "min": [
+     -3119,
+     -1327,
+     -503
+    ],
+    "max": [
+     -3025,
+     -1233,
+     -497
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "CENTRAL AREA (QUAD TELEPORT PLATFORM)",
+   "x": 880,
+   "y": -832,
+   "z": -72,
+   "loc": "CENTRAL AREA (QUAD TELEPORT PLATFORM)",
+   "target": "quad2",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     857,
+     -855,
+     -111
+    ],
+    "max": [
+     903,
+     -809,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (RL ROOM)",
+   "x": 1408,
+   "y": -1488,
+   "z": 144,
+   "loc": "RED BASE (RL ROOM)",
+   "target": "red2",
+   "bounds": {
+    "min": [
+     1361,
+     -1535,
+     113
+    ],
+    "max": [
+     1455,
+     -1441,
+     175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (RL TELEPORT / WATER ENTRANCE)",
+   "x": 2056,
+   "y": -2192,
+   "z": -112,
+   "loc": "RED BASE (RL TELEPORT / WATER ENTRANCE)",
+   "target": "red",
+   "bounds": {
+    "min": [
+     2053,
+     -2263,
+     -143
+    ],
+    "max": [
+     2059,
+     -2121,
+     -81
+    ]
+   }
   }
  ]
 }

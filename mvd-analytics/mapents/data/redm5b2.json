@@ -3,6 +3,67 @@
  "version": 1,
  "entities": [
   {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 288,
+   "y": 188,
+   "z": 136,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     265,
+     185,
+     113
+    ],
+    "max": [
+     311,
+     191,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 256,
+   "y": 816,
+   "z": 172,
+   "bounds": {
+    "min": [
+     225,
+     809,
+     97
+    ],
+    "max": [
+     287,
+     823,
+     247
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 320,
+   "y": 816,
+   "z": 172,
+   "bounds": {
+    "min": [
+     289,
+     809,
+     97
+    ],
+    "max": [
+     351,
+     823,
+     247
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_armor1",
    "kind": "ga",
@@ -327,6 +388,48 @@
    "y": -768,
    "z": 204,
    "targetName": "t2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 890,
+   "y": 376,
+   "z": 262,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     873,
+     353,
+     213
+    ],
+    "max": [
+     907,
+     399,
+     311
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1116,
+   "y": -768,
+   "z": 256,
+   "target": "t3",
+   "bounds": {
+    "min": [
+     1101,
+     -791,
+     201
+    ],
+    "max": [
+     1131,
+     -745,
+     311
+    ]
+   }
   }
  ]
 }

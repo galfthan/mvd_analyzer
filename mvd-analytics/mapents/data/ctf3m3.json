@@ -3,6 +3,449 @@
  "version": 1,
  "entities": [
   {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE BASE",
+   "x": -56,
+   "y": 1000,
+   "z": -208,
+   "loc": "BLUE BASE",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -103,
+     993,
+     -255
+    ],
+    "max": [
+     -9,
+     1007,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (LEFT ENTRANCE)-1",
+   "x": -392,
+   "y": 368,
+   "z": -176,
+   "loc": "BLUE BASE (LEFT ENTRANCE)",
+   "bounds": {
+    "min": [
+     -399,
+     337,
+     -239
+    ],
+    "max": [
+     -385,
+     399,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (LEFT ENTRANCE)-2",
+   "x": -392,
+   "y": 432,
+   "z": -176,
+   "loc": "BLUE BASE (LEFT ENTRANCE)",
+   "bounds": {
+    "min": [
+     -399,
+     401,
+     -239
+    ],
+    "max": [
+     -385,
+     463,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (RIGHT ENTRANCE)-1",
+   "x": -392,
+   "y": 1232,
+   "z": -176,
+   "loc": "BLUE BASE (RIGHT ENTRANCE)",
+   "bounds": {
+    "min": [
+     -399,
+     1201,
+     -239
+    ],
+    "max": [
+     -385,
+     1263,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (RIGHT ENTRANCE)-2",
+   "x": -392,
+   "y": 1296,
+   "z": -176,
+   "loc": "BLUE BASE (RIGHT ENTRANCE)",
+   "bounds": {
+    "min": [
+     -399,
+     1265,
+     -239
+    ],
+    "max": [
+     -385,
+     1327,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE ROOM FACING Quad",
+   "x": 1328,
+   "y": -16,
+   "z": -168,
+   "loc": "BLUE ROOM FACING Quad",
+   "bounds": {
+    "min": [
+     1281,
+     -19,
+     -231
+    ],
+    "max": [
+     1375,
+     -13,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE SIDE (LOWER RAMP TO QUAD)",
+   "x": 904,
+   "y": 832,
+   "z": -384,
+   "loc": "BLUE SIDE (LOWER RAMP TO QUAD)",
+   "bounds": {
+    "min": [
+     901,
+     769,
+     -447
+    ],
+    "max": [
+     907,
+     895,
+     -321
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE SIDE (UPPER RAMP TO QUAD)-1",
+   "x": 904,
+   "y": 668,
+   "z": -168,
+   "loc": "BLUE SIDE (UPPER RAMP TO QUAD)",
+   "bounds": {
+    "min": [
+     901,
+     617,
+     -231
+    ],
+    "max": [
+     907,
+     719,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE SIDE (UPPER RAMP TO QUAD)-2",
+   "x": 904,
+   "y": 693.5,
+   "z": -168,
+   "loc": "BLUE SIDE (UPPER RAMP TO QUAD)",
+   "bounds": {
+    "min": [
+     901,
+     644,
+     -231
+    ],
+    "max": [
+     907,
+     743,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE SIDE (UPPER RAMP TO RED ARMOUR)-1",
+   "x": 904,
+   "y": 970.5,
+   "z": -168,
+   "loc": "BLUE SIDE (UPPER RAMP TO RED ARMOUR)",
+   "bounds": {
+    "min": [
+     901,
+     921,
+     -231
+    ],
+    "max": [
+     907,
+     1020,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE SIDE (UPPER RAMP TO RED ARMOUR)-2",
+   "x": 904,
+   "y": 996,
+   "z": -168,
+   "loc": "BLUE SIDE (UPPER RAMP TO RED ARMOUR)",
+   "bounds": {
+    "min": [
+     901,
+     945,
+     -231
+    ],
+    "max": [
+     907,
+     1047,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (LEFT ENTRANCE)-1",
+   "x": -392,
+   "y": -1328,
+   "z": -176,
+   "loc": "RED BASE (LEFT ENTRANCE)",
+   "bounds": {
+    "min": [
+     -399,
+     -1359,
+     -239
+    ],
+    "max": [
+     -385,
+     -1297,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (LEFT ENTRANCE)-2",
+   "x": -392,
+   "y": -1264,
+   "z": -176,
+   "loc": "RED BASE (LEFT ENTRANCE)",
+   "bounds": {
+    "min": [
+     -399,
+     -1295,
+     -239
+    ],
+    "max": [
+     -385,
+     -1233,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (RIGHT ENTRANCE)-1",
+   "x": -392,
+   "y": -464,
+   "z": -176,
+   "loc": "RED BASE (RIGHT ENTRANCE)",
+   "bounds": {
+    "min": [
+     -399,
+     -495,
+     -239
+    ],
+    "max": [
+     -385,
+     -433,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (RIGHT ENTRANCE)-2",
+   "x": -392,
+   "y": -400,
+   "z": -176,
+   "loc": "RED BASE (RIGHT ENTRANCE)",
+   "bounds": {
+    "min": [
+     -399,
+     -431,
+     -239
+    ],
+    "max": [
+     -385,
+     -369,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED BASE (RL ROOM)",
+   "x": -56,
+   "y": -696,
+   "z": -208,
+   "loc": "RED BASE (RL ROOM)",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -103,
+     -703,
+     -255
+    ],
+    "max": [
+     -9,
+     -689,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED LOWER RAMP TO Quad",
+   "x": 904,
+   "y": -864,
+   "z": -384,
+   "loc": "RED LOWER RAMP TO Quad",
+   "bounds": {
+    "min": [
+     901,
+     -927,
+     -447
+    ],
+    "max": [
+     907,
+     -801,
+     -321
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED OUTER BASE (UPPER RAMP TO RED ARMOUR)-1",
+   "x": 904,
+   "y": -1028,
+   "z": -168,
+   "loc": "RED OUTER BASE (UPPER RAMP TO RED ARMOUR)",
+   "bounds": {
+    "min": [
+     901,
+     -1079,
+     -231
+    ],
+    "max": [
+     907,
+     -977,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED OUTER BASE (UPPER RAMP TO RED ARMOUR)-2",
+   "x": 904,
+   "y": -1002.5,
+   "z": -168,
+   "loc": "RED OUTER BASE (UPPER RAMP TO RED ARMOUR)",
+   "bounds": {
+    "min": [
+     901,
+     -1052,
+     -231
+    ],
+    "max": [
+     907,
+     -953,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED SIDE (UPPER RAMP TO QUAD)-1",
+   "x": 904,
+   "y": -725.5,
+   "z": -168,
+   "loc": "RED SIDE (UPPER RAMP TO QUAD)",
+   "bounds": {
+    "min": [
+     901,
+     -775,
+     -231
+    ],
+    "max": [
+     907,
+     -676,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED SIDE (UPPER RAMP TO QUAD)-2",
+   "x": 904,
+   "y": -700,
+   "z": -168,
+   "loc": "RED SIDE (UPPER RAMP TO QUAD)",
+   "bounds": {
+    "min": [
+     901,
+     -751,
+     -231
+    ],
+    "max": [
+     907,
+     -649,
+     -105
+    ]
+   }
+  },
+  {
    "type": "item",
    "class": "item_cells",
    "kind": "cells",
@@ -1102,6 +1545,50 @@
    "z": -248,
    "loc": "RAMP ABOVE THE Quad",
    "targetName": "tele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE CORRIDOR FROM RED ARMOUR",
+   "x": 1568,
+   "y": 592,
+   "z": -336,
+   "loc": "BLUE CORRIDOR FROM RED ARMOUR",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     1545,
+     569,
+     -367
+    ],
+    "max": [
+     1591,
+     615,
+     -305
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED CORRIDOR FROM RED ARMOUR",
+   "x": 1568,
+   "y": -624,
+   "z": -336,
+   "loc": "RED CORRIDOR FROM RED ARMOUR",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     1545,
+     -647,
+     -367
+    ],
+    "max": [
+     1591,
+     -601,
+     -305
+    ]
+   }
   }
  ]
 }
