@@ -171,10 +171,14 @@ func entitiesLumpBytes(data []byte) ([]byte, error) {
 	if len(data) < 4+numLumps*8 {
 		return nil, fmt.Errorf("bsp/entities: file too short (%d bytes)", len(data))
 	}
-	// Reject formats we don't support for the geometry side too.
+	// The entities lump (lump 0) sits at the same header offset in Q1
+	// (v29), HL/GoldSrc (v30), and the BSP2/2PSB variants — all use a
+	// version word followed by a 15-entry lump directory — so the entity
+	// text is extractable from all of them even though the geometry
+	// parser only handles Q1.
 	magic := string(data[:4])
 	version := int32(binary.LittleEndian.Uint32(data[0:4]))
-	if magic != "BSP2" && magic != "2PSB" && version != Q1BSPVersion {
+	if magic != "BSP2" && magic != "2PSB" && version != Q1BSPVersion && version != HLBSPVersion {
 		if magic == "IBSP" {
 			return nil, fmt.Errorf("bsp/entities: IBSP format not supported")
 		}
