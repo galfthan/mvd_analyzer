@@ -2453,6 +2453,90 @@ th.sortable.sort-desc::after {
     color: var(--accent-cyan);
 }
 
+/* "Learn map" toggle — highlighted when the static study view is active. */
+.map-track-controls button.map-learn-toggle.active {
+    border-color: var(--accent-cyan);
+    color: var(--bg-deep);
+    background: var(--accent-cyan);
+}
+
+/* Learn-map sidebar: category filter checklist. */
+.map-entities-panel {
+    margin-bottom: 12px;
+}
+
+.map-entity-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.map-entity-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.map-entity-filter input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.map-entity-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.map-entity-hint {
+    margin: 8px 0 0;
+    font-size: 0.75rem;
+    color: #777;
+    line-height: 1.3;
+}
+
+/* Below-map entity table (learn mode). */
+.map-entities-table-wrap {
+    margin-top: 12px;
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid #2a2a3a;
+    border-radius: 4px;
+}
+
+.map-entities-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.map-entities-list-table th,
+.map-entities-list-table td {
+    text-align: left;
+    padding: 4px 10px;
+    border-bottom: 1px solid #1e1e2a;
+    color: #ccc;
+}
+
+.map-entities-list-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-deep);
+    color: #888;
+    font-weight: 600;
+}
+
+.map-entities-list-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
 .map-trail-select {
     background: var(--bg-deep);
     border: 1px solid #666;

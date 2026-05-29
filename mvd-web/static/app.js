@@ -510,6 +510,10 @@ function updateUrlState() {
                 params.set('tab', TAB_INTERNAL_TO_URL[activeTab] || activeTab);
             }
 
+            if (mapState.learnMode) {
+                params.set('learn', '1');
+            }
+
             if (mapState.currentTime > 0) {
                 params.set('t', Math.round(mapState.currentTime));
             }
@@ -566,6 +570,12 @@ function applyUrlState() {
 
     const tab = params.get('tab');
     if (tab) switchTab(tab); // resolves the locs-regions / loc-graph alias
+
+    // Deep-link into the map's "learn" study view (only if this map has a
+    // static entity corpus to show).
+    if (params.get('learn') === '1' && mapState.mapEntities && mapState.mapEntities.length > 0) {
+        setLearnMode(true);
+    }
 
     updateUrlState();
 }
@@ -5045,7 +5055,16 @@ let mapState = {
     lastRenderedBucket: null, // Skip redundant redraws
     renderDirty: false,       // Force redraw on track toggle/reset/etc
     followPlayer: null,       // Name of the player the camera re-centers on each frame, or null
-    fullscreen: false         // True while the map panel is in fullscreen (set by fullscreenchange)
+    fullscreen: false,        // True while the map panel is in fullscreen (set by fullscreenchange)
+    // "Learn map" mode: a static study view that hides players and shows
+    // the map's designed entity layout (result.mapEntities) instead.
+    learnMode: false,
+    mapEntities: [],          // result.mapEntities.entities for the current demo
+    teleportArrows: [],       // precomputed {sx,sy,dx,dy} entrance→exit world-coord pairs
+    entityFilters: {          // per-category visibility in learn mode
+        weapon: true, armor: true, health: true, ammo: true, powerup: true,
+        teleporter: true, spawn: false, button: false, door: false
+    }
 };
 
 // (PLAYER_SYMBOLS, BADGE_DEFS and ARMOR_COLORS now live with the rest of
@@ -5120,6 +5139,22 @@ function initMapView(result) {
     mapState.locTable = (timeline && timeline.locTable) ? timeline.locTable : [''];
     mapState.locationGroups = null; // Clear cached groups for new demo
     mapState.mapGeometry = null;    // Reset BSP-derived geometry for new demo
+
+    // Static map-entity corpus (result.mapEntities) for the "learn map" view.
+    mapState.mapEntities = (result.mapEntities && Array.isArray(result.mapEntities.entities))
+        ? result.mapEntities.entities : [];
+    buildTeleportArrows();
+    // Fresh demo always starts in live mode; only offer learn mode when the
+    // map has a static entity corpus.
+    mapState.learnMode = false;
+    const entPanel = document.getElementById('map-entities-panel');
+    if (entPanel) entPanel.style.display = 'none';
+    const learnBtn = document.getElementById('map-learn-toggle');
+    if (learnBtn) {
+        learnBtn.style.display = mapState.mapEntities.length > 0 ? '' : 'none';
+        learnBtn.classList.remove('active');
+        learnBtn.textContent = 'Learn map';
+    }
 
     // Fire-and-forget: try to load pre-generated BSP-derived map geometry.
     // If present, switch from convex-hull blobs to real floor polygons.
@@ -6347,6 +6382,13 @@ function renderMap(time) {
     // crisp at any zoom level.
     drawLocationLayer(ctx);
 
+    // Learn-map mode: static entity study view — keep the floor/loc base,
+    // draw the designed entity layout, and skip all player/time-based layers.
+    if (mapState.learnMode) {
+        drawMapEntities(ctx);
+        return;
+    }
+
     // Draw region control overlay (colored by controlling team)
     if (mapState.controlRegions && mapState.regionToGroups) {
         const controlStates = getRegionControlAtTime(time);
@@ -6633,6 +6675,238 @@ function drawSinglePlayer(ctx, data, symbolInfo, iconScale, zRange, zSpan) {
     if (badges.length > 0) {
         drawBadgesAroundCenter(ctx, badges, pos.x, pos.y, orbitRadius, badgeRadius);
     }
+}
+
+// ─── Learn-map entity overlay ───────────────────────────────────────────────
+//
+// Static study view (mapState.learnMode): draws result.mapEntities — the
+// map's designed item spawns, spawnpoints, teleporters and buttons — instead
+// of players, with per-category toggles (mapState.entityFilters) and arrows
+// linking each teleport entrance to its exit. Reuses worldToCanvas so markers
+// land exactly where players do.
+
+// Item kind → filter category.
+const ITEM_KIND_CATEGORY = {
+    rl: 'weapon', lg: 'weapon', gl: 'weapon', ssg: 'weapon', sng: 'weapon', ng: 'weapon',
+    ra: 'armor', ya: 'armor', ga: 'armor',
+    mh: 'health', h25: 'health', h15: 'health',
+    shells: 'ammo', nails: 'ammo', rockets: 'ammo', cells: 'ammo',
+    quad: 'powerup', pent: 'powerup', ring: 'powerup', suit: 'powerup',
+};
+
+// Item markers reuse the playback palette plus the kinds it omits (ammo,
+// small health, suit). Structural entities get their own glyphs.
+const LEARN_ITEM_STYLES = Object.assign({}, ITEM_MARKER_STYLES, {
+    h25:     { fill: '#000', outline: 'rgb(0, 200, 83)',  label: 'H'  },
+    h15:     { fill: '#000', outline: '#6f8f6f',          label: 'h'  },
+    shells:  { fill: '#000', outline: '#b0a070',          label: 'sh' },
+    nails:   { fill: '#000', outline: '#8090a0',          label: 'nl' },
+    rockets: { fill: '#000', outline: 'rgb(255,107,107)', label: 'rk' },
+    cells:   { fill: '#000', outline: 'rgb(0,217,255)',   label: 'cl' },
+    suit:    { fill: '#000', outline: '#00e676',          label: 'ES' },
+});
+
+const TELEPORT_COLOR = '#b388ff';
+
+const STRUCTURAL_STYLES = {
+    spawn:       { fill: '#15151f',       outline: '#888',         label: 'S' },
+    teleportSrc: { fill: '#1a0a2a',       outline: TELEPORT_COLOR, label: 'T' },
+    teleportDst: { fill: TELEPORT_COLOR,  outline: TELEPORT_COLOR, label: '', circle: true },
+    button:      { fill: '#000',          outline: '#ff9800',      label: 'B' },
+    door:        { fill: '#000',          outline: '#a1887f',      label: 'D' },
+};
+
+function entityCategory(e) {
+    if (e.type === 'item') return ITEM_KIND_CATEGORY[e.kind] || 'item';
+    if (e.type === 'teleportSrc' || e.type === 'teleportDst') return 'teleporter';
+    return e.type; // 'spawn' | 'button' | 'door'
+}
+
+// buildTeleportArrows pairs each entrance (teleportSrc.target) with its exit
+// (teleportDst.targetName), storing world-coord endpoints for the arrows.
+function buildTeleportArrows() {
+    mapState.teleportArrows = [];
+    const dstByName = {};
+    for (const e of mapState.mapEntities) {
+        if (e.type === 'teleportDst' && e.targetName) dstByName[e.targetName] = e;
+    }
+    for (const e of mapState.mapEntities) {
+        if (e.type !== 'teleportSrc' || !e.target) continue;
+        const dst = dstByName[e.target];
+        if (!dst) continue;
+        mapState.teleportArrows.push({ sx: e.x, sy: e.y, dx: dst.x, dy: dst.y });
+    }
+}
+
+function drawMapEntities(ctx) {
+    const entities = mapState.mapEntities;
+    if (!entities || entities.length === 0) return;
+    const f = mapState.entityFilters;
+    const iconScale = mapIconScale();
+    const size = ITEM_MARKER_SIZE * iconScale;
+    const half = size / 2;
+    const fontPx = Math.round(10 * iconScale);
+
+    // Connection arrows first, beneath the markers.
+    if (f.teleporter && mapState.teleportArrows.length > 0) {
+        ctx.save();
+        ctx.strokeStyle = TELEPORT_COLOR;
+        ctx.fillStyle = TELEPORT_COLOR;
+        ctx.globalAlpha = 0.55;
+        ctx.lineWidth = Math.max(1, 1.5 * iconScale);
+        for (const a of mapState.teleportArrows) {
+            const s = worldToCanvasNew(a.sx, a.sy);
+            const d = worldToCanvasNew(a.dx, a.dy);
+            drawArrow(ctx, s.x, s.y, d.x, d.y, 8 * iconScale);
+        }
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // Lower decks first so higher floors draw on top.
+    const sorted = entities.slice().sort((a, b) => (a.z || 0) - (b.z || 0));
+    for (const e of sorted) {
+        if (!f[entityCategory(e)]) continue;
+        const style = e.type === 'item' ? LEARN_ITEM_STYLES[e.kind] : STRUCTURAL_STYLES[e.type];
+        if (style) drawEntityMarker(ctx, e, style, size, half, fontPx);
+    }
+    ctx.restore();
+}
+
+function drawEntityMarker(ctx, e, style, size, half, fontPx) {
+    const pos = worldToCanvas(e.x, e.y);
+    if (style.circle) {
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, half, 0, Math.PI * 2);
+        ctx.fillStyle = style.fill;
+        ctx.fill();
+        if (style.outline) { ctx.strokeStyle = style.outline; ctx.lineWidth = 1.5; ctx.stroke(); }
+    } else {
+        const x = Math.round(pos.x - half);
+        const y = Math.round(pos.y - half);
+        ctx.fillStyle = style.fill;
+        ctx.fillRect(x, y, size, size);
+        if (style.outline) {
+            ctx.strokeStyle = style.outline;
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
+        }
+    }
+    if (style.label) {
+        ctx.font = `bold ${fontPx}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.fillStyle = style.textColor || style.outline || '#fff';
+        ctx.fillText(style.label, pos.x, pos.y + 1);
+    }
+}
+
+// drawArrow draws a line with an arrowhead at the (x2,y2) end.
+function drawArrow(ctx, x1, y1, x2, y2, headLen) {
+    const ang = Math.atan2(y2 - y1, x2 - x1);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headLen * Math.cos(ang - Math.PI / 6), y2 - headLen * Math.sin(ang - Math.PI / 6));
+    ctx.lineTo(x2 - headLen * Math.cos(ang + Math.PI / 6), y2 - headLen * Math.sin(ang + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+}
+
+// setLearnMode swaps the map between live playback and the static
+// entity-study view, swapping the sidebar panels accordingly.
+function setLearnMode(on) {
+    if (on === mapState.learnMode) return;
+    mapState.learnMode = on;
+    const swapIds = ['map-legend', 'map-items-panel', 'region-status-panel'];
+    const entPanel = document.getElementById('map-entities-panel');
+    if (on) {
+        mapState._preLearnDisplay = {};
+        for (const id of swapIds) {
+            const el = document.getElementById(id);
+            if (el) { mapState._preLearnDisplay[id] = el.style.display; el.style.display = 'none'; }
+        }
+        if (entPanel) entPanel.style.display = '';
+    } else {
+        const prev = mapState._preLearnDisplay || {};
+        for (const id of swapIds) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = prev[id] || '';
+        }
+        if (entPanel) entPanel.style.display = 'none';
+    }
+    const btn = document.getElementById('map-learn-toggle');
+    if (btn) { btn.classList.toggle('active', on); btn.textContent = on ? 'Exit learn' : 'Learn map'; }
+    const tableWrap = document.getElementById('map-entities-table-wrap');
+    if (tableWrap) tableWrap.style.display = on ? '' : 'none';
+    if (on) buildEntityTable();
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
+    updateUrlState(); // reflect ?learn=1 for deep-linking
+}
+
+// Cleartext class labels for the entity table.
+const ENTITY_CLASS_LABEL = {
+    weapon: 'Weapon', armor: 'Armor', health: 'Health', ammo: 'Ammo',
+    powerup: 'Powerup', teleporter: 'Teleporter', spawn: 'Spawn',
+    button: 'Button', door: 'Door',
+};
+
+// buildEntityTable fills the below-map table with every visible entity
+// (respecting the category filters). Teleporters are collapsed to one row
+// per entrance→exit pair: Loc is the exit, Source is the entrance.
+function buildEntityTable() {
+    const tbody = document.getElementById('map-entities-table-body');
+    if (!tbody) return;
+    const f = mapState.entityFilters;
+    const ents = mapState.mapEntities || [];
+    const rows = [];
+
+    for (const e of ents) {
+        if (e.type === 'teleportSrc' || e.type === 'teleportDst') continue;
+        const cat = entityCategory(e);
+        if (!f[cat]) continue;
+        rows.push({
+            cls: ENTITY_CLASS_LABEL[cat] || cat,
+            type: e.type === 'item' ? (e.kind || '') : '',
+            name: e.name || '', loc: e.loc || '', source: '',
+        });
+    }
+
+    if (f.teleporter) {
+        const dstByName = {};
+        for (const e of ents) {
+            if (e.type === 'teleportDst' && e.targetName) dstByName[e.targetName] = e;
+        }
+        const pairedDst = new Set();
+        for (const e of ents) {
+            if (e.type !== 'teleportSrc') continue;
+            const dst = e.target ? dstByName[e.target] : null;
+            if (dst) pairedDst.add(dst);
+            // Loc = entrance (where the trigger sits); Source = exit it leads to.
+            rows.push({
+                cls: 'Teleporter', type: '', name: e.name || '',
+                loc: e.loc || '', source: dst ? (dst.loc || '') : '',
+            });
+        }
+        for (const e of ents) { // exits with no matching entrance
+            if (e.type === 'teleportDst' && !pairedDst.has(e)) {
+                rows.push({ cls: 'Teleporter', type: '', name: e.name || '', loc: '', source: e.loc || '' });
+            }
+        }
+    }
+
+    rows.sort((a, b) =>
+        a.cls.localeCompare(b.cls) || a.type.localeCompare(b.type) || a.name.localeCompare(b.name));
+
+    tbody.innerHTML = rows.map(r =>
+        `<tr><td>${escapeHtml(r.cls)}</td><td>${escapeHtml(r.type)}</td>` +
+        `<td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.loc)}</td>` +
+        `<td>${escapeHtml(r.source)}</td></tr>`
+    ).join('');
 }
 
 // ─── Map Items Panel (sidebar list) ────────────────────────────────────────
@@ -6971,6 +7245,19 @@ function setupMapTrailControls() {
     if (fsBtn) {
         fsBtn.addEventListener('click', () => { toggleMapFullscreen(); });
     }
+
+    const learnBtn = document.getElementById('map-learn-toggle');
+    if (learnBtn) {
+        learnBtn.addEventListener('click', () => setLearnMode(!mapState.learnMode));
+    }
+    document.querySelectorAll('.map-entity-cb').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            mapState.entityFilters[e.target.dataset.cat] = e.target.checked;
+            if (mapState.learnMode) buildEntityTable();
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        });
+    });
 
     // React to fullscreen changes regardless of who triggered them (button,
     // Escape key, browser UI). Only one listener is needed for the page.
