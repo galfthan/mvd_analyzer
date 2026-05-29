@@ -29,6 +29,11 @@ func TestClassify(t *testing.T) {
 		// Structural.
 		{"info_player_deathmatch", 0, TypeSpawn, "", true},
 		{"info_player_team1", 0, TypeSpawn, "", true},
+		{"info_player_teamspawn", 0, TypeSpawn, "", true},
+		// SP / coop starts are NOT deathmatch spawnpoints.
+		{"info_player_start", 0, "", "", false},
+		{"info_player_start2", 0, "", "", false},
+		{"info_player_coop", 0, "", "", false},
 		{"info_teleport_destination", 0, TypeTeleportDst, "", true},
 		{"trigger_teleport", 0, TypeTeleportSrc, "", true},
 		{"func_button", 0, TypeButton, "", true},

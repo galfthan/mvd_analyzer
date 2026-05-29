@@ -14,10 +14,15 @@ func Classify(classname string, spawnflags int) (etype, kind string, ok bool) {
 		return TypeItem, k, true
 	}
 	switch classname {
-	case "info_player_deathmatch", "info_player_start", "info_player_start2",
+	// Deathmatch / team spawn points only. info_player_start(2) and
+	// info_player_coop are the singleplayer / coop starts — present in
+	// nearly every id map but NOT where QuakeWorld deathmatch spawns
+	// players — so they are deliberately not counted as DM spawnpoints
+	// (they would show as a phantom extra spawn, e.g. dm3's YA.Quad).
+	case "info_player_deathmatch",
 		"info_player_team1", "info_player_team2",
 		"info_player_team1_deathmatch", "info_player_team2_deathmatch",
-		"info_player_teamspawn", "info_player_coop":
+		"info_player_teamspawn":
 		return TypeSpawn, "", true
 	case "info_teleport_destination":
 		return TypeTeleportDst, "", true
