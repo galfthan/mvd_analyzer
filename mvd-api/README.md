@@ -37,8 +37,8 @@ All paths under the base URL (default `http://localhost:8080`). The
   (mostly for bookmarking warm cache entries)
 
 Successful 2xx responses set `Cache-Control: public, max-age=86400,
-immutable`, `X-Schema-Version: 10`, `X-Cache: HIT|WARM|MISS`, and
-`ETag: "<sha>-v10"`. Send `If-None-Match` to get a cheap 304.
+immutable`, `X-Schema-Version: 12`, `X-Cache: HIT|WARM|MISS`, and
+`ETag: "<sha>-v12"`. Send `If-None-Match` to get a cheap 304.
 
 | Method | Path | Query params | 200 body |
 |---|---|---|---|
@@ -102,7 +102,7 @@ Two API-specific shapes are documented inline below.
   "demoId":        "sha:abc...",      // canonical id for subsequent calls
   "sha256":        "abc...",
   "fromCache":     true,              // false on first call for an uncached demo
-  "schemaVersion": 10
+  "schemaVersion": 12
 }
 ```
 
@@ -122,7 +122,7 @@ round-trip.
 
 ```jsonc
 {
-  "schemaVersion": 10,
+  "schemaVersion": 12,
   "filePath":      "abc....mvd.gz",
   "map":           "dm6",
   "gameDir":       "qw",
@@ -207,7 +207,7 @@ tier 2. There is no automatic eviction; documented as a follow-up
 mvd-api -addr :8080 -cache-dir /tmp/mvd-cache &
 
 curl -s localhost:8080/healthz
-# {"ok":true,"schemaVersion":10}
+# {"ok":true,"schemaVersion":12}
 
 curl -s -X POST localhost:8080/v1/demos/gameId:12345
 # first call:  fromCache:false

@@ -16,7 +16,7 @@ analyzer are also covered there.
 
 | Field | JSON key | Type | Intent |
 |---|---|---|---|
-| SchemaVersion | `schemaVersion` | int | Identifies JSON schema shape; bump on every breaking change. Currently **10**. |
+| SchemaVersion | `schemaVersion` | int | Identifies JSON schema shape; bump on every breaking change. Current value lives at `result/result.go:CurrentSchemaVersion`. |
 | FilePath | `filePath` | string | Source path / display label of the analyzed demo. |
 | Match | `match` | *MatchResult | Match summary: map, game dir, duration, players, teams. |
 | Frags | `frags` | *FragResult | Total / per-player / per-weapon frag breakdown plus chronological frag list. |
@@ -43,9 +43,9 @@ Defined in `result/match.go`.
 |---|---|---|---|
 | Map | `map` | string | Map basename (e.g., `dm2`, `schloss`). |
 | GameDir | `gameDir` | string | Game directory (`qw`, `fortress`, custom). |
-| Duration | `duration` | float64 | Match length in seconds (parser-derived). Read this for "how long was the match". |
-| StartTime | `startTime` | float64 | Match-relative start (always 0 after the time-normalisation post-process). |
-| EndTime | `endTime` | float64 | Match-relative end (equal to Duration in match-relative coords). |
+| Duration | `duration` | int32 | Match length in milliseconds (parser-derived). Read this for "how long was the match". |
+| StartTime | `startTime` | int32 | Match-relative start in ms (always 0 after the time-normalisation post-process). |
+| EndTime | `endTime` | int32 | Match-relative end in ms (equal to Duration in match-relative coords). |
 | Players | `players` | []PlayerStat | Lightweight scoreboard view. |
 | Teams | `teams` | []TeamStat | Team standings (omitted in FFA). |
 
@@ -84,7 +84,7 @@ Defined in `result/frag.go`.
 
 | Field | JSON key | Type |
 |---|---|---|
-| Time | `time` | float64 |
+| Time | `time` | int32 (match-relative ms) |
 | Killer | `killer` | string |
 | Victim | `victim` | string |
 | Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `ax`) |
@@ -111,7 +111,7 @@ Defined in `result/messages.go`.
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| Time | `time` | float64 | Demo time. |
+| Time | `time` | int32 | Match-relative ms. |
 | Type | `type` | string | `"frag"`, `"chat"`, `"teamsay"`. |
 | Player | `player` | string | Sender / killer. |
 | Team | `team` | string | Sender's team. |
@@ -149,16 +149,15 @@ field is documented inline.
 
 Defined in `result/timeline.go`.
 
-At schema v7 the parse-time `HighResBuckets` and `HighResDuration`
-fields are gone. Bucketed data is produced on demand by
-`mvd-analytics/view.Buckets` (any window size, any reducer set; see
-[Streams](#streams-streams) and [Query API](#query-api)). The wire
-format here only carries the event-shaped derived results.
+This section carries only the event-shaped derived results. Bucketed
+data is produced on demand by `mvd-analytics/view.Buckets` (any window
+size, any reducer set; see [Streams](#streams-streams) and
+[Query API](#query-api)), not baked into the parse-time result.
 
 | Field | JSON key | Type |
 |---|---|---|
-| MatchStartTime | `matchStartTime` | float64 (always 0 after post-process) |
-| DemoOffset | `demoOffset` | float64 (warmup seconds before match start) |
+| MatchStartTime | `matchStartTime` | int32 ms (always 0 after post-process) |
+| DemoOffset | `demoOffset` | int32 ms (warmup before match start) |
 | FragEvents | `fragEvents` | []TimelineFragEvent |
 | PowerupEvents | `powerupEvents` | []PowerupEvent |
 | FragStreaks | `fragStreaks` | []FragStreakEvent |
@@ -167,11 +166,9 @@ format here only carries the event-shaped derived results.
 | PlayerUserIDs | `playerUserIDs` | map[string]int (name → Hub viewer UserID) |
 | RegionControl | `regionControl` | *RegionControlResult |
 
-The legacy `HighResBucket` / `HighResPlayerData` / `HighResTeamData`
-shim shapes (and `view.ToLegacyHighResBuckets`) were removed once the
-web frontend moved to the columnar layout. Bucketed data is now served
-only as `view.BucketsView` (row) or `view.ColumnarBuckets` (column) —
-see [Query API → Buckets](#buckets). Each player's per-bucket data is a
+Bucketed data is served as `view.BucketsView` (row) or
+`view.ColumnarBuckets` (column) — see
+[Query API → Buckets](#buckets). Each player's per-bucket data is a
 `map[string]any` keyed by the [field vocabulary](#field-vocabulary)
 (row) or one dense array per field (column).
 
@@ -202,9 +199,9 @@ kills during the streak.
 
 ### RegionControlResult (`regionControl`)
 
-At schema v7 the parse-time `bucketStates` field is no longer baked
-into the result. Stats remain (match-aggregate percentages). For
-per-bucket region states at any resolution, call
+The parse-time output carries only `stats` (match-aggregate
+percentages); `bucketStates` is not baked in. For per-bucket region
+states at any resolution, call
 `view.RegionControl(opts)` (Go) or `recomputeRegionControl(regionsJSON)`
 (WASM bridge); both derive the bucket states on demand from
 `result.Streams`.
@@ -248,7 +245,7 @@ per-map regions at analysis time, before the result is cached.
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
 | Name | `name` | string | |
-| Locs | `locs` | []string | **Authoritative logical membership.** A player is "in" the region iff their resolved loc name is here. (added in v6) |
+| Locs | `locs` | []string | **Authoritative logical membership.** A player is "in" the region iff their resolved loc name is here. |
 | Points | `points` | []MapLocation | Rendering anchors. Geometry only — the classifier ignores them. |
 | CentroidX | `centroidX` | float32 | Label placement anchor. |
 | CentroidY | `centroidY` | float32 | |
@@ -287,7 +284,7 @@ fraction of team A's presence in QUAD came from sailorman".
 
 ## Streams (`streams`)
 
-Added in v7. Defined in `result/streams.go`. Streams is the canonical
+Defined in `result/streams.go`. Streams is the canonical
 event-rate storage for every per-player field. Each
 `PlayerStream` records every change to a tracked field at the rate it
 actually changed; aggregated views (50 ms / 1 s buckets, point-in-time
@@ -315,13 +312,13 @@ state, loc trails) are computed on demand from this storage by the
 | Name | `name` | string | Canonical player name (D12: collisions in same match get a `#slotIndex` suffix). |
 | Team | `team` | string (omitempty) | Team label (post-duel-normalise: per-player synthetic team). |
 | Position | `pos` | *PositionTrack (omitempty) | Native-rate position track. Omitted from default JSON unless `-include positions` (CLI) or equivalent is set. |
-| Health / Armor | `h` / `a` | []ChangeI16 | Vital change streams. Health caps at 250, Armor at 200; v7 uses int16 since v6's int8 was too narrow. |
+| Health / Armor | `h` / `a` | []ChangeI16 | Vital change streams. Health caps at 250, Armor at 200; int16 holds the range. |
 | ArmorType | `at` | []ChangeStr | `"ga"` / `"ya"` / `"ra"` / `""` transitions. |
-| Loc | `li` | []ChangeI16 | Index into `TimelineAnalysisResult.LocTable`. Smoothed by the same blip filter v6 used. |
+| Loc | `li` | []ChangeI16 | Index into `TimelineAnalysisResult.LocTable`. Smoothed by the blip filter. |
 | RL / LG / GL / SSG / SNG | `rl` / `lg` / `gl` / `ssg` / `sng` | []Interval | Half-open `[Start, End)` periods the weapon was held. |
 | Quad / Pent / Ring | `q` / `pe` / `r` | []Interval | Same shape as weapons. |
 | Shells / Nails / Rockets / Cells | `sh` / `nl` / `rk` / `cl` | []ChangeI16 | Ammo change streams. |
-| Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds (schema v8). |
+| Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds. |
 
 ### ChangeI16 / ChangeStr / Interval
 
@@ -332,8 +329,7 @@ Interval  = { "s": int32, "e": int32 }   // half-open [s, e)
 ```
 
 `t` / `s` / `e` are **integer milliseconds** since the stream's time
-origin (schema v8 — changed from `float64` seconds; see PositionTrack
-for the unit rationale).
+origin (see PositionTrack for the unit rationale).
 
 ### PositionTrack
 
@@ -343,9 +339,9 @@ Columnar to compress JSON. Indices align across the four arrays.
 PositionTrack = { "t": [int32...], "x": [int32...], "y": [int32...], "z": [int32...] }
 ```
 
-`t` is **integer milliseconds** since the stream's time origin
-(schema v8 — changed from `float32` seconds). The MVD wire format
-delivers a 1-byte ms delta per message; storing the cumulative value
+`t` is **integer milliseconds** since the stream's time origin. The
+MVD wire format delivers a 1-byte ms delta per message; storing the
+cumulative value
 as `int32` keeps it exact across the persistence boundary. Consumers
 reading the JSON as seconds must scale by `* 0.001`. Range is ±24.8
 days, ample for matches that run minutes to hours; values can go
@@ -354,7 +350,7 @@ negative for pre-match warmup samples after time normalisation.
 `x` / `y` / `z` are `int32` (not `int16`) because Quake maps can
 exceed ±32 768 in any axis.
 
-### Schema v8: all times are int32 milliseconds
+### Time units: all times are int32 milliseconds
 
 Every timestamped field in this schema — `PositionTrack.T`,
 `PlayerStream.Spawns/Deaths`, `ChangeI16.T` / `ChangeStr.T`,
@@ -366,8 +362,8 @@ Every timestamped field in this schema — `PositionTrack.T`,
 `FragEntry.Time`, `BackpackDrop.Time`,
 `WeaponPickup.Time/NextDeathTime/DropTime`,
 `ItemPhase.AvailableFrom/TakenAt/RespawnAt` —
-is stored as `int32` integer milliseconds. JSON keys are unchanged;
-external consumers reading these as seconds must scale by `* 0.001`.
+is stored as `int32` integer milliseconds. External consumers that
+want seconds must scale by `* 0.001`.
 The view-layer query API (`view.Buckets`, `view.Events`,
 `view.StreamSlice.StartTime/EndTime`, `view.StateAt.Time`) still
 takes and returns `float64` seconds at its public surface, so any
@@ -476,8 +472,8 @@ aggregation (`min`, `max`, `mean`, `dominant`, etc.).
 | `nl` | Nails | `[]ChangeI16` | `first` |
 | `rk` | Rockets | `[]ChangeI16` | `first` |
 | `cl` | Cells | `[]ChangeI16` | `first` |
-| `sp` | Spawn timestamps | `[]float64` | `any` |
-| `d` | Death timestamps | `[]float64` | `any` |
+| `sp` | Spawn timestamps | `[]int32` | `any` |
+| `d` | Death timestamps | `[]int32` | `any` |
 
 `sp` / `d` stay on `any` because they need a bool ("did this event
 happen during the bucket?"); `first` would return a timestamp.
@@ -692,7 +688,7 @@ breakdown restricted to samples where the player held RL or LG (`armed`),
 held neither (`unarmed`, the complement of `armed`), or had an active
 quad / pent powerup; omitted when no observed sample met the condition.
 They let consumers re-weight the graph by combat posture without
-re-walking streams (schema v12).
+re-walking streams.
 
 ### LocEdge
 
@@ -703,7 +699,7 @@ re-walking streams (schema v12).
 transitions made while the player held RL or LG (`armed`), held neither
 (`unarmed`), or had an active quad / pent at the destination sample, so
 the loc graph can be drawn as a self-contained movement graph per combat
-posture (schema v12). Omitted when no transition met the condition.
+posture. Omitted when no transition met the condition.
 
 ## ItemsResult (`items`)
 
@@ -734,8 +730,7 @@ stay listed as zero-kill entries so denial labelling still works).
 - `weaponPickups[i].backpackEnt` ↔ `backpacks[j].entNum` —
   drop-to-pickup join, `source=="backpack"` only.
 - `streams.players[].li[].v` → `timelineAnalysis.locTable[i]` —
-  resolve player loc name. (Same key joins were on `highResBuckets[].p[name].li`
-  in v6.)
+  resolve player loc name.
 - `controlRegion.locs[]` ↔ `locTable[]` — region membership.
 - `playerUserIDs[name]` → Hub viewer track parameter.
 - `match.players[].name` ↔ `frags.byPlayer[]` ↔
@@ -766,12 +761,16 @@ duplication exists, the canonical fix lives on the other side.
 
 ## Schema versioning history
 
+The field tables above describe the **current** schema. This table
+records what each bump changed, for consumers migrating across versions.
+
 | Version | Changes |
 |---|---|
+| v12 | `LocNode` and `LocEdge` gain optional combat-posture weights — `armed` / `unarmed` / `quad` / `pent` breakdowns (`LocWeights` on nodes, `LocEdgeWeights` on edges) restricted to samples where the player held RL or LG, held neither, or had an active quad / pent. Lets consumers re-weight the loc graph by combat posture without re-walking streams. Field additions only; each weight is omitted when no observed sample met its condition. |
 | v11 | Bucket views gain a **column-major layout** (`view.ColumnarBuckets`): one dense typed array per `(player, field)` over the player's active span, implicit time axis (`time(i) = startMs + i*windowMs`), a `0`/`1` `alive[]` liveness mask, sparse per-field `validFrom`, booleans/alive as `0`/`1`, loc always the raw `li` index. It is the **default** for the web (`getDefaultBuckets`), REST `/buckets`, and MCP `getBuckets`; the row-major `BucketsView` stays available via `layout=row`. The legacy `HighResBucket`/`HighResPlayerData`/`HighResTeamData` shim and `view.ToLegacyHighResBuckets` are removed. The `Result` **structure is unchanged** — this bump versions the outward *view/query* wire surface so API/MCP/web consumers can feature-detect the new default shape and cached view responses (ETag/`X-Schema-Version`) are invalidated. |
 | v10 | DeathEvent / SpawnEvent now derive primarily from the `DF_DEAD` bit in `svc_playerinfo` (broadcast every frame for every player) instead of relying solely on `STAT_HEALTH` crossings (directed at the active POV via `dem_stats`). The stat-based detector still runs and is deduplicated against the new signal — whichever fires first wins. Deaths whose `dem_stats` block was addressed to a different player slot are now captured; `PlayerStream.Spawns`/`Deaths` counts go up for affected demos. Downstream `LocGraph` edges (some spurious `teleport` edges across previously-missed deaths disappear), `LocTrails`, `RegionControl`, `WeaponPickups` (kills-before-next-death windows), and streak boundaries shift accordingly. Field shapes are unchanged. |
 | v9 | Loc attribution gains visibility awareness via `mvd-analytics/locvis` (V6: Euclidean primary + PVS-veto). When a per-map BSP is available the analyzer rejects loc-points outside the player's potentially-visible-set, eliminating the brief "wall-bleed" phantom visits V1 produced. Field shapes unchanged: only the contents of `PlayerStream.Loc` (`li`) and everything derived (LocTrails, LocGraph edges, RegionControl) shift for maps with a BSP. Maps without a BSP fall back to V1 — bit-identical to v8 for those. Background: [`experiments/locattr/V2b-V6-HANDOFF.md`](../experiments/locattr/V2b-V6-HANDOFF.md). |
-| v8 | All timestamped result fields migrate from `float64` seconds to `int32` milliseconds — `PositionTrack.T`, `PlayerStream.Spawns`/`Deaths`. JSON keys unchanged; consumers reading as seconds must scale by 1/1000. Eliminates the float-precision drift that produced spurious teleport edges in locgraph when a respawn boundary and a position sample shared the same wire timestamp. Other timestamped fields (ChangeI16.T, Interval.Start/End, MatchEvent.Time, frag/powerup event times) stay float64 seconds. |
+| v8 | All timestamped result fields migrate from `float64` seconds / `float32` seconds to `int32` milliseconds — every `T`/`Time`/`Start`/`End`/`Duration`/`AvailableFrom`/`TakenAt`/`RespawnAt`/`NextDeathTime`/`DropTime` field across the schema (`PositionTrack.T`, `PlayerStream.Spawns`/`Deaths`, `ChangeI16.T`/`ChangeStr.T`, `Interval.Start`/`End`, `GlobalStream.MatchStart`/`End`, `MatchResult.Duration`/`StartTime`/`EndTime`, `TimelineAnalysisResult.MatchStartTime`/`DemoOffset`, frag/powerup/streak/message/frag-entry/backpack/weapon-pickup/item-phase times). JSON keys unchanged; consumers reading as seconds must scale by 1/1000. The view-layer query API still takes and returns `float64` seconds at its public surface. Eliminates the float-precision drift that produced spurious teleport edges in locgraph when a respawn boundary and a position sample shared the same wire timestamp. |
 | v7 | `Streams` added as the canonical event-rate storage (per-player change streams + intervals + native-rate position track with parallel `Li` column). `TimelineAnalysisResult.HighResBuckets` and `HighResDuration` removed; bucketed views are now produced on demand by `mvd-analytics/view.Buckets`. `RegionControlResult.BucketStates` removed from the parse-time output (still produced by `view.RegionControl` at the requested resolution). Health / Armor change streams use int16 (Quake values reach 250). `BuildLocGraph` and the region-control classifier (then `analyzer.ComputeRegionControl`, since folded into `view.RegionControl` as the sixth view function) walk `Streams` natively — no bucket intermediate. Default reducer policy is "first-sample-of-bucket" (point-sampling at bucket start; bucket N == state at t = N × windowMs). Bucket grid is anchored at match-relative t = 0; v6 anchored at the wall-clock 50 ms grid post-shifted by `−matchStart`, so the new grid is offset by up to one sample-interval from main's. Discrete event analytics (frags, items, weapon pickups, scoreboard) are byte-identical with v6; locgraph and region-control percentages drift slightly because of the native-rate sampling cadence (~13 ms between position samples vs v6's 50 ms grid). |
 | v6 | HighResPlayerData adds `gl`, `sh`, `nl`. HighResTeamData adds `gl`. MatchEvent adds `messageClean`. ControlRegion adds `locs`. RegionControlResult adds `teamA`/`teamB`/`bucketStates`/`stats` + new `RegionStats`. Top-level `duration` removed (use `match.duration`). MatchResult.PlayerStat drops dead `kills`/`deaths`. |
 | v5 | WeaponPickups added — slot-weapon acquisitions with kills-before-next-death effectiveness. Backpack pickups carry `backpackEnt` joining to `backpacks[].entNum`. |
@@ -781,4 +780,4 @@ duplication exists, the canonical fix lives on the other side.
 bump when a change breaks consumers of the outward data — either the
 `Result` structure **or** the on-demand view/query wire surface
 (`/buckets`, `/events`, `/state-at`, …) served identically via
-WASM/CLI/API/MCP — and update this table in the same commit.
+WASM/CLI/API/MCP — and add a row above in the same commit.
