@@ -168,31 +168,35 @@ func readEntitiesLump(path string) ([]byte, error) {
 }
 
 func entitiesLumpBytes(data []byte) ([]byte, error) {
+	return lumpBytes(data, lumpEntities)
+}
+
+// lumpBytes returns the raw bytes of a lump by index. The lump directory
+// (version word + 15 entries) has the same layout in Q1 (v29),
+// HL/GoldSrc (v30), and the BSP2/2PSB variants, so the entities lump and
+// the fixed-width models lump are extractable from all of them even
+// though the full geometry parser only handles Q1.
+func lumpBytes(data []byte, lumpIndex int) ([]byte, error) {
 	if len(data) < 4+numLumps*8 {
-		return nil, fmt.Errorf("bsp/entities: file too short (%d bytes)", len(data))
+		return nil, fmt.Errorf("bsp: file too short (%d bytes)", len(data))
 	}
-	// The entities lump (lump 0) sits at the same header offset in Q1
-	// (v29), HL/GoldSrc (v30), and the BSP2/2PSB variants — all use a
-	// version word followed by a 15-entry lump directory — so the entity
-	// text is extractable from all of them even though the geometry
-	// parser only handles Q1.
 	magic := string(data[:4])
 	version := int32(binary.LittleEndian.Uint32(data[0:4]))
 	if magic != "BSP2" && magic != "2PSB" && version != Q1BSPVersion && version != HLBSPVersion {
 		if magic == "IBSP" {
-			return nil, fmt.Errorf("bsp/entities: IBSP format not supported")
+			return nil, fmt.Errorf("bsp: IBSP format not supported")
 		}
-		return nil, fmt.Errorf("bsp/entities: unsupported version %d", version)
+		return nil, fmt.Errorf("bsp: unsupported version %d", version)
 	}
-	base := 4 + lumpEntities*8
+	base := 4 + lumpIndex*8
 	offset := int32(binary.LittleEndian.Uint32(data[base : base+4]))
 	length := int32(binary.LittleEndian.Uint32(data[base+4 : base+8]))
 	if offset < 0 || length < 0 {
-		return nil, fmt.Errorf("bsp/entities: lump has negative offset/length")
+		return nil, fmt.Errorf("bsp: lump %d has negative offset/length", lumpIndex)
 	}
 	end := int64(offset) + int64(length)
 	if end > int64(len(data)) {
-		return nil, fmt.Errorf("bsp/entities: lump extends past EOF")
+		return nil, fmt.Errorf("bsp: lump %d extends past EOF", lumpIndex)
 	}
 	return data[offset:end], nil
 }
