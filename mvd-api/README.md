@@ -28,6 +28,11 @@ re-downloading from the hub.
 
 ## REST endpoints
 
+> **Building a frontend or tool?** [`API.md`](API.md) is the detailed
+> HTTP reference — per-endpoint parameters, response semantics, units
+> (the seconds-vs-milliseconds gotcha), caching, and task recipes. The
+> table below is just the quick index.
+
 All paths under the base URL (default `http://localhost:8080`). The
 `{id}` segment is one of:
 
@@ -37,8 +42,9 @@ All paths under the base URL (default `http://localhost:8080`). The
   (mostly for bookmarking warm cache entries)
 
 Successful 2xx responses set `Cache-Control: public, max-age=86400,
-immutable`, `X-Schema-Version: 10`, `X-Cache: HIT|WARM|MISS`, and
-`ETag: "<sha>-v10"`. Send `If-None-Match` to get a cheap 304.
+immutable`, `X-Schema-Version: <n>`, `X-Cache: HIT|WARM|MISS`, and
+`ETag: "<sha>-v<n>"` (where `<n>` is the current `CurrentSchemaVersion`).
+Send `If-None-Match` to get a cheap 304.
 
 | Method | Path | Query params | 200 body |
 |---|---|---|---|
@@ -62,122 +68,24 @@ immutable`, `X-Schema-Version: 10`, `X-Cache: HIT|WARM|MISS`, and
 | GET | `/v1/demos/{id}/loc-table` | — | `{ "locTable": []string }` (decoder for `loc=index`; index 0 = "" no-loc) |
 | GET | `/v1/demos/{id}/region-control` | `windowMs` | `result.RegionControlResult` |
 
-### Query conventions
+### Details → [`API.md`](API.md)
 
-- `players`, `fields`, `types`: comma-separated; URL-decode once.
-- `reducers`: comma-separated `field=name` pairs (e.g. `h=min,a=last`).
-- Times are match-relative seconds (float). `windowMs` is integer.
-- `loc`: `name` (default) returns resolved loc names; `index` returns
-  raw `LocTable` indices for index-based math. Fetch the decoder from
-  `/loc-table`. Honoured by `buckets`, `events`, `stream-slice`,
-  `state-at`, `loc-trails`.
-- `layout` (`/buckets` only): `column` (default) is the compact
-  column-major `ColumnarBuckets` (one array per `(player, field)`,
-  `time(i) = startMs + i*windowMs`, booleans as `0`/`1`, loc always the
-  raw `li` index); `row` is the bucket-major `BucketsView` (one
-  self-describing object per bucket). Column is far smaller for
-  series/trend reads; use `state-at` for point-in-time snapshots. See
-  RESULT_SCHEMA.md for the `ColumnarBuckets` shape.
-- Empty defaults match the view function defaults — see
+The full HTTP reference lives in [`API.md`](API.md):
+
+- **Query conventions** — `players`/`fields`/`types` lists, `reducers`,
+  `loc=name|index`, `layout=column|row`, defaults.
+- **Units** — the seconds-vs-milliseconds split (view envelopes are
+  seconds; raw stream entries and the columnar grid are int32 ms).
+- **Response shapes** — per-endpoint, cross-linked to
   [`mvd-analytics/RESULT_SCHEMA.md`](../mvd-analytics/RESULT_SCHEMA.md)
-  for the field-code vocabulary and the reducer registry.
-
-### Response shapes
-
-The view-shaped endpoints (`/buckets`, `/events`, `/stream-slice`,
-`/state-at`, `/loc-trails`, `/region-control`) return the
-corresponding Go types from
-[`mvd-analytics/view`](../mvd-analytics/view) — see RESULT_SCHEMA.md
-for `BucketsView`, `EventsView`, `StreamSliceView`, `StateAtView`,
-`LocTrailsView`, and `result.RegionControlResult`. They're produced
-identically whether reached via the WASM bridge, the CLI, or this
-REST surface.
-
-Two API-specific shapes are documented inline below.
-
-#### `loadDemo` — `POST /v1/demos/{id}`
-
-```jsonc
-{
-  "demoId":        "sha:abc...",      // canonical id for subsequent calls
-  "sha256":        "abc...",
-  "fromCache":     true,              // false on first call for an uncached demo
-  "schemaVersion": 10
-}
-```
-
-Idempotent. Slow only on cold demos (the hub fetch + parse). Warm
-cache returns sub-millisecond.
-
-#### `getOverview` — `GET /v1/demos/{id}/overview`
-
-Curated summary cheap enough to call as a first step after
-`loadDemo`. Composed in
-[`overview.go`](overview.go) from `result.Match`, `result.Frags`,
-`result.Metadata.MatchSettings`,
-`result.TimelineAnalysis.{FragStreaks,PowerupEvents,LocTable,RegionControl}`,
-and `result.Errors` — no new analytics, just a shape that surfaces
-"what was this match" (and whether the analysis is degraded) in one
-round-trip.
-
-```jsonc
-{
-  "schemaVersion": 10,
-  "filePath":      "abc....mvd.gz",
-  "map":           "dm6",
-  "gameDir":       "qw",
-  "mode":          "4on4",                          // omitempty
-  "matchtag":      "qwsl",                          // omitempty
-  "duration":      613.4,                           // seconds, parser-derived
-  "matchStart":    0,                               // match-relative seconds
-  "matchEnd":      613.4,
-  "teams": [                                        // omitempty, sorted by frags desc
-    { "name": "Die",   "frags": 89 },
-    { "name": "okkis", "frags": 76 }
-  ],
-  "players": [                                      // sorted by frags desc
-    { "name": "bps",    "team": "Die",   "frags": 35 },
-    { "name": "valla",  "team": "okkis", "frags": 30 }
-    // ...
-  ],
-  "topStreaks": [                                   // omitempty, ≤ 5, sorted by length desc
-    { "player": "bps",    "team": "Die",   "weapon": "rl", "length": 7, "start": 234.1, "duration": 18.3 }
-    // ...
-  ],
-  "topPowerups": [                                  // omitempty, ≤ 5, sorted by frags desc
-    { "player": "milton", "team": "Die",   "type":   "quad", "start": 412.0, "duration": 29.7, "frags": 5 }
-    // ...
-  ],
-  "locCount":         47,                           // len(TimelineAnalysis.LocTable)
-  "hasRegionControl": true,                         // true if /region-control will succeed
-  "playerUserIDs":    { "bps": 123, "valla": 456 }, // omitempty — for hub.quakeworld.nu/games/<gameId>?track=<userId>
-  "errors": [ "itemAnalyzer: respawn before pickup" ] // omitempty — analyzer non-fatal errors; non-empty ⇒ degraded result
-}
-```
-
-The top-streaks / top-powerups arrays are capped at 5 each — for the
-full lists, walk `TimelineAnalysisResult.FragStreaks` /
-`PowerupEvents` via the standard view surface.
-
-### Error envelope (4xx, 5xx)
-
-```json
-{ "error": { "code": "demo_not_found", "message": "gameId 0" } }
-```
-
-Stable codes:
-
-- `400 invalid_demo_id` — malformed `{id}` or query param
-- `400 invalid_param` — view-layer rejection (unknown field, bad reducer)
-- `400 missing_param` — required param missing (e.g. `time` on state-at)
-- `404 demo_not_found` — hub has no row for this gameId
-- `422 region_control_unavailable` — demo has no region-control layout
-- `422 demoinfo_unavailable` — demo has no KTX demoinfo block (non-KTX server or aborted match)
-- `422 metadata_unavailable` — demo has no metadata (no fullserverinfo / no countdown centerprint)
-- `422 frags_unavailable` — demo has no frag log
-- `422 locgraph_unavailable` — demo has no loc graph (probably no position track)
-- `502 hub_upstream` — network / 5xx from hub
-- `500 internal` / `500 panic` — unexpected
+  (the authoritative source for `BucketsView`, `EventsView`,
+  `StreamSliceView`, `StateAtView`, `LocTrailsView`,
+  `result.RegionControlResult`, the field vocabulary, and the reducer
+  registry). View shapes are produced identically via the WASM bridge,
+  CLI, or this REST surface.
+- **Error envelope + stable codes** — the `{ "error": { code, message } }`
+  shape and every `4xx`/`5xx` code.
+- **Recipes** — common frontend features → the call that backs them.
 
 ## Authentication
 
@@ -207,7 +115,7 @@ tier 2. There is no automatic eviction; documented as a follow-up
 mvd-api -addr :8080 -cache-dir /tmp/mvd-cache &
 
 curl -s localhost:8080/healthz
-# {"ok":true,"schemaVersion":10}
+# {"ok":true,"schemaVersion":12}
 
 curl -s -X POST localhost:8080/v1/demos/gameId:12345
 # first call:  fromCache:false
