@@ -165,4 +165,5 @@ Build everything: `make build`
 Serve the web UI: `make serve`
 Run all tests: `make test`
 Regenerate map geometry: `go run ./mvd-analytics/cmd/mapgen -bsp-dir /path/to/bsps -verbose`
+Regenerate map-entity corpus (committed, embedded): `go run ./mvd-analytics/cmd/mapgen -bsp-dir /path/to/bsps -out-dir "" -entities-out mvd-analytics/mapents/data -verbose`
 Analyze one demo: `go run ./mvd-analytics/cmd/qw-analyze -format json demos/X.mvd.gz | jq`

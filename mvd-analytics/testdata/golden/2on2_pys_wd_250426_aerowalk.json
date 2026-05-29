@@ -11813,6 +11813,435 @@
       }
     ]
   },
+  "mapEntities": {
+    "entities": [
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "RA.LG",
+        "name": "RA.LG-1",
+        "type": "item",
+        "x": 128,
+        "y": 208,
+        "z": 464
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "RA.LG",
+        "name": "RA.LG-2",
+        "type": "item",
+        "x": 128,
+        "y": 336,
+        "z": 464
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "air.ledge",
+        "name": "air.ledge-1",
+        "type": "item",
+        "x": -336,
+        "y": 176,
+        "z": 256
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "air.ledge",
+        "name": "air.ledge-2",
+        "type": "item",
+        "x": -264,
+        "y": 176,
+        "z": 256
+      },
+      {
+        "class": "item_armor1",
+        "kind": "ga",
+        "loc": "Quad.GA",
+        "name": "Quad.GA",
+        "type": "item",
+        "x": -242,
+        "y": -864,
+        "z": 248
+      },
+      {
+        "class": "item_armor1",
+        "kind": "ga",
+        "loc": "low.RL",
+        "name": "low.RL",
+        "type": "item",
+        "x": -488,
+        "y": 624,
+        "z": 264
+      },
+      {
+        "class": "weapon_grenadelauncher",
+        "kind": "gl",
+        "loc": "Quad",
+        "name": "Quad",
+        "type": "item",
+        "x": -688,
+        "y": -832,
+        "z": 248
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "Quad.ledge",
+        "name": "Quad.ledge",
+        "type": "item",
+        "x": -272,
+        "y": -384,
+        "z": 256
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "Quad.tele",
+        "name": "Quad.tele-1",
+        "type": "item",
+        "x": -656,
+        "y": -256,
+        "z": 432
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "Quad.tele",
+        "name": "Quad.tele-2",
+        "type": "item",
+        "x": -656,
+        "y": -208,
+        "z": 432
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "RA.LG",
+        "name": "RA.LG-1",
+        "type": "item",
+        "x": 296,
+        "y": -132,
+        "z": 448
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "RA.LG",
+        "name": "RA.LG-2",
+        "type": "item",
+        "x": 296,
+        "y": -68,
+        "z": 448
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "low.RL",
+        "name": "low.RL",
+        "type": "item",
+        "x": -488,
+        "y": 482,
+        "z": 272
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "yard",
+        "name": "yard-1",
+        "type": "item",
+        "x": -346,
+        "y": 56,
+        "z": 30
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "yard",
+        "name": "yard-2",
+        "type": "item",
+        "x": -296,
+        "y": 56,
+        "z": 30
+      },
+      {
+        "class": "weapon_lightning",
+        "kind": "lg",
+        "loc": "RA.LG",
+        "name": "RA.LG",
+        "type": "item",
+        "x": 128,
+        "y": 272,
+        "z": 448
+      },
+      {
+        "class": "item_health",
+        "kind": "mh",
+        "loc": "MH",
+        "name": "MH",
+        "spawnflags": 2,
+        "type": "item",
+        "x": -688,
+        "y": -96,
+        "z": 160
+      },
+      {
+        "class": "item_spikes",
+        "kind": "nails",
+        "loc": "Quad.up",
+        "name": "Quad.up",
+        "type": "item",
+        "x": -260,
+        "y": -632,
+        "z": 424
+      },
+      {
+        "class": "item_spikes",
+        "kind": "nails",
+        "loc": "air",
+        "name": "air-1",
+        "type": "item",
+        "x": 88,
+        "y": 104,
+        "z": 256
+      },
+      {
+        "class": "item_spikes",
+        "kind": "nails",
+        "loc": "air",
+        "name": "air-2",
+        "type": "item",
+        "x": 152,
+        "y": 104,
+        "z": 256
+      },
+      {
+        "class": "item_spikes",
+        "kind": "nails",
+        "loc": "high.RL",
+        "name": "high.RL",
+        "type": "item",
+        "x": -260,
+        "y": -592,
+        "z": 424
+      },
+      {
+        "class": "item_armorInv",
+        "kind": "ra",
+        "loc": "RA",
+        "name": "RA",
+        "type": "item",
+        "x": -320,
+        "y": 480,
+        "z": 448
+      },
+      {
+        "class": "weapon_rocketlauncher",
+        "kind": "rl",
+        "loc": "high.RL",
+        "name": "high.RL",
+        "type": "item",
+        "x": -272,
+        "y": -416,
+        "z": 432
+      },
+      {
+        "class": "weapon_rocketlauncher",
+        "kind": "rl",
+        "loc": "low.RL",
+        "name": "low.RL",
+        "type": "item",
+        "x": -688,
+        "y": 496,
+        "z": 248
+      },
+      {
+        "class": "item_rockets",
+        "kind": "rockets",
+        "loc": "Quad.GA",
+        "name": "Quad.GA",
+        "type": "item",
+        "x": -384,
+        "y": -864,
+        "z": 256
+      },
+      {
+        "class": "item_rockets",
+        "kind": "rockets",
+        "loc": "high.RL",
+        "name": "high.RL",
+        "type": "item",
+        "x": -48,
+        "y": -320,
+        "z": 432
+      },
+      {
+        "class": "item_rockets",
+        "kind": "rockets",
+        "loc": "yard",
+        "name": "yard-1",
+        "type": "item",
+        "x": -544,
+        "y": -48,
+        "z": 32
+      },
+      {
+        "class": "item_rockets",
+        "kind": "rockets",
+        "loc": "yard",
+        "name": "yard-2",
+        "type": "item",
+        "x": -544,
+        "y": 0,
+        "z": 32
+      },
+      {
+        "class": "weapon_supernailgun",
+        "kind": "sng",
+        "loc": "Quad.tele",
+        "name": "Quad.tele",
+        "type": "item",
+        "x": -656,
+        "y": -96,
+        "z": 432
+      },
+      {
+        "class": "weapon_supernailgun",
+        "kind": "sng",
+        "loc": "yard",
+        "name": "yard",
+        "type": "item",
+        "x": -192,
+        "y": -96,
+        "z": 16
+      },
+      {
+        "class": "item_armor2",
+        "kind": "ya",
+        "loc": "YA",
+        "name": "YA",
+        "type": "item",
+        "x": -672,
+        "y": -496,
+        "z": 160
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "Quad.GA",
+        "name": "Quad.GA",
+        "type": "spawn",
+        "x": -224,
+        "y": -720,
+        "z": 256
+      },
+      {
+        "class": "info_player_start",
+        "loc": "Quad.tele",
+        "name": "Quad.tele",
+        "type": "spawn",
+        "x": -544,
+        "y": -116,
+        "z": 336
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "Quad.up",
+        "name": "Quad.up",
+        "type": "spawn",
+        "x": -224,
+        "y": -704,
+        "z": 456
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "RA",
+        "name": "RA",
+        "type": "spawn",
+        "x": -320,
+        "y": 480,
+        "z": 456
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "air",
+        "name": "air",
+        "type": "spawn",
+        "x": 160,
+        "y": 128,
+        "z": 256
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "low.RL",
+        "name": "low.RL",
+        "type": "spawn",
+        "x": -488,
+        "y": 624,
+        "z": 264
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "yard",
+        "name": "yard",
+        "type": "spawn",
+        "x": -272,
+        "y": 24,
+        "z": 40
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "Quad.ledge",
+        "name": "Quad.ledge",
+        "targetName": "teledest1",
+        "type": "teleportDst",
+        "x": -22,
+        "y": -290,
+        "z": 264
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "Quad.tele",
+        "name": "Quad.tele",
+        "targetName": "top",
+        "type": "teleportDst",
+        "x": -656,
+        "y": 56,
+        "z": 440
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "Quad.up",
+        "name": "Quad.up",
+        "targetName": "air",
+        "type": "teleportDst",
+        "x": -380,
+        "y": -864,
+        "z": 520
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "low.RL",
+        "name": "low.RL",
+        "targetName": "middle",
+        "type": "teleportDst",
+        "x": -488,
+        "y": 424,
+        "z": 264
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "yard",
+        "name": "yard",
+        "targetName": "bottom",
+        "type": "teleportDst",
+        "x": -456,
+        "y": 64,
+        "z": 40
+      }
+    ],
+    "map": "aerowalk"
+  },
   "match": {
     "duration": 600040,
     "endTime": 600040,
@@ -13942,7 +14371,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "streams": {
     "global": {
       "matchEnd": 600040,

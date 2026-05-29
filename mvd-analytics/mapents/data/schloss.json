@@ -1,0 +1,570 @@
+{
+ "map": "schloss",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "yard",
+   "x": 368,
+   "y": -2944,
+   "z": 232,
+   "loc": "yard"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad.high-1",
+   "x": 40,
+   "y": -3256,
+   "z": 584,
+   "loc": "Quad.high",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad.high-2",
+   "x": 96,
+   "y": -3256,
+   "z": 584,
+   "loc": "Quad.high",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad.high-3",
+   "x": 152,
+   "y": -3256,
+   "z": 584,
+   "loc": "Quad.high",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "cemetary",
+   "x": 696,
+   "y": -3296,
+   "z": 160,
+   "loc": "cemetary",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "tower.RL-1",
+   "x": -80,
+   "y": -2016,
+   "z": 416,
+   "loc": "tower.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "tower.RL-2",
+   "x": -32,
+   "y": -2016,
+   "z": 416,
+   "loc": "tower.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad",
+   "x": -280,
+   "y": -3216,
+   "z": 424,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.low-1",
+   "x": -392,
+   "y": -2640,
+   "z": 296,
+   "loc": "Quad.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.low-2",
+   "x": -392,
+   "y": -2584,
+   "z": 296,
+   "loc": "Quad.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.cellar-1",
+   "x": 496,
+   "y": -2872,
+   "z": 72,
+   "loc": "RA.cellar"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.cellar-2",
+   "x": 544,
+   "y": -2872,
+   "z": 72,
+   "loc": "RA.cellar"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "cathedral.YA-1",
+   "x": 24,
+   "y": -3480,
+   "z": 584,
+   "loc": "cathedral.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "cathedral.YA-2",
+   "x": 56,
+   "y": -3432,
+   "z": 584,
+   "loc": "cathedral.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "cemetary",
+   "x": 1360,
+   "y": -3056,
+   "z": 168,
+   "loc": "cemetary"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "cemetary",
+   "x": 1352,
+   "y": -2564,
+   "z": 168,
+   "loc": "cemetary",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "yard",
+   "x": 80,
+   "y": -2688,
+   "z": 232,
+   "loc": "yard",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad-1",
+   "x": 272,
+   "y": -3048,
+   "z": 424,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad-2",
+   "x": 320,
+   "y": -3048,
+   "z": 424,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad.low-1",
+   "x": -392,
+   "y": -2904,
+   "z": 296,
+   "loc": "Quad.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad.low-2",
+   "x": -392,
+   "y": -2848,
+   "z": 296,
+   "loc": "Quad.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RA.low-1",
+   "x": 744,
+   "y": -2512,
+   "z": 168,
+   "loc": "RA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RA.low-2",
+   "x": 824,
+   "y": -2512,
+   "z": 168,
+   "loc": "RA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "cemetary-1",
+   "x": 1192,
+   "y": -2288,
+   "z": 160,
+   "loc": "cemetary",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "cemetary-2",
+   "x": 1264,
+   "y": -2288,
+   "z": 160,
+   "loc": "cemetary",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "yard.Pent",
+   "x": 352,
+   "y": -2152,
+   "z": 264,
+   "loc": "yard.Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": -216,
+   "y": -3344,
+   "z": 456,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": 800,
+   "y": -2752,
+   "z": 424,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "cemetary.Ring",
+   "x": 1328,
+   "y": -2680,
+   "z": 360,
+   "loc": "cemetary.Ring"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "cathedral",
+   "x": 352,
+   "y": -3712,
+   "z": 392,
+   "loc": "cathedral"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "tower.RL",
+   "x": -328,
+   "y": -1720,
+   "z": 488,
+   "loc": "tower.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad.high",
+   "x": -264,
+   "y": -3144,
+   "z": 584,
+   "loc": "Quad.high",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RA.cellar",
+   "x": 784,
+   "y": -2872,
+   "z": 72,
+   "loc": "RA.cellar"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "cathedral.SSG",
+   "x": 1080,
+   "y": -3426,
+   "z": 392,
+   "loc": "cathedral.SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "cemetary.tele",
+   "x": 1096,
+   "y": -2048,
+   "z": 296,
+   "loc": "cemetary.tele",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad",
+   "x": 368,
+   "y": -3048,
+   "z": 424,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad.low",
+   "x": -392,
+   "y": -2792,
+   "z": 296,
+   "loc": "Quad.low"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "cathedral.SSG",
+   "x": 944,
+   "y": -3536,
+   "z": 392,
+   "loc": "cathedral.SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "cemetary",
+   "x": 1016,
+   "y": -3032,
+   "z": 168,
+   "loc": "cemetary"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "tower.RL",
+   "x": 240,
+   "y": -1904,
+   "z": 488,
+   "loc": "tower.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RA.low",
+   "x": 800,
+   "y": -2496,
+   "z": 168,
+   "loc": "RA.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "cathedral.SSG",
+   "x": 864,
+   "y": -3520,
+   "z": 392,
+   "loc": "cathedral.SSG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "yard.tunnel",
+   "x": 16,
+   "y": -2432,
+   "z": 232,
+   "loc": "yard.tunnel"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "cathedral.YA",
+   "x": 352,
+   "y": -3920,
+   "z": 608,
+   "loc": "cathedral.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "tower",
+   "x": -72,
+   "y": -2264,
+   "z": 608,
+   "loc": "tower"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad",
+   "x": 456,
+   "y": -3032,
+   "z": 456,
+   "loc": "Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "Quad.high-1",
+   "x": -128,
+   "y": -3352,
+   "z": 656,
+   "loc": "Quad.high"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.high-2",
+   "x": 424,
+   "y": -3240,
+   "z": 616,
+   "loc": "Quad.high"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.low",
+   "x": -248,
+   "y": -2360,
+   "z": 328,
+   "loc": "Quad.low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cathedral.SSG",
+   "x": 968,
+   "y": -3416,
+   "z": 424,
+   "loc": "cathedral.SSG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cemetary",
+   "x": 696,
+   "y": -3184,
+   "z": 200,
+   "loc": "cemetary"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cemetary.tele",
+   "x": 1168,
+   "y": -1984,
+   "z": 328,
+   "loc": "cemetary.tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "tower.RL",
+   "x": -240,
+   "y": -2184,
+   "z": 456,
+   "loc": "tower.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "tower.entry",
+   "x": 136,
+   "y": -2472,
+   "z": 456,
+   "loc": "tower.entry"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "cemetary.tele",
+   "x": 1168,
+   "y": -1984,
+   "z": 448,
+   "loc": "cemetary.tele",
+   "targetName": "tele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tower.RL",
+   "x": 264,
+   "y": -1888,
+   "z": 640,
+   "loc": "tower.RL",
+   "targetName": "tele1"
+  }
+ ]
+}

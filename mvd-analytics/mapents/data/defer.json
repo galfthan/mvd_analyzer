@@ -1,0 +1,504 @@
+{
+ "map": "defer",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Pent.water",
+   "x": 1520,
+   "y": -752,
+   "z": -416,
+   "loc": "Pent.water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "Pent",
+   "x": 1290,
+   "y": -782,
+   "z": -240,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "Quad.low",
+   "x": 1436,
+   "y": 1520,
+   "z": -240,
+   "loc": "Quad.low"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "RL",
+   "x": 2596,
+   "y": 60,
+   "z": -240,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 560,
+   "y": -88,
+   "z": 64,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Pent.tele",
+   "x": 456,
+   "y": -232,
+   "z": -208,
+   "loc": "Pent.tele",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad",
+   "x": 1148,
+   "y": 1984,
+   "z": 64,
+   "loc": "Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RA",
+   "x": -262,
+   "y": 518,
+   "z": -32,
+   "loc": "RA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL.tele",
+   "x": 2372,
+   "y": 172,
+   "z": -240,
+   "loc": "RL.tele",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL",
+   "x": 929,
+   "y": -331,
+   "z": 64,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Pent.tele",
+   "x": 456,
+   "y": -288,
+   "z": -208,
+   "loc": "Pent.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad",
+   "x": 1148,
+   "y": 2032,
+   "z": 64,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL.tele",
+   "x": 2372,
+   "y": 220,
+   "z": -240,
+   "loc": "RL.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Ring.lift-1",
+   "x": 1792,
+   "y": 896,
+   "z": -176,
+   "loc": "Ring.lift"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Ring.lift-2",
+   "x": 1840,
+   "y": 896,
+   "z": -176,
+   "loc": "Ring.lift"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": 1344,
+   "y": 664,
+   "z": -72,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "Pent.MH",
+   "x": 1284,
+   "y": -1206,
+   "z": -192,
+   "loc": "Pent.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "LG",
+   "x": 1484,
+   "y": -16,
+   "z": -208,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad.entry",
+   "x": 1664,
+   "y": 1476,
+   "z": 16,
+   "loc": "Quad.entry"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad.low",
+   "x": 888,
+   "y": 1132,
+   "z": -208,
+   "loc": "Quad.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RA.low",
+   "x": 416,
+   "y": 32,
+   "z": -176,
+   "loc": "RA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Pent",
+   "x": 1486,
+   "y": -978,
+   "z": -216,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 1108,
+   "y": 1808,
+   "z": 24,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": 86,
+   "y": 70,
+   "z": -32,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "Ring",
+   "x": 1608,
+   "y": 664,
+   "z": 120,
+   "loc": "Ring"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL",
+   "x": 2600,
+   "y": -496,
+   "z": -272,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL.rox",
+   "x": 1388,
+   "y": -24,
+   "z": 96,
+   "loc": "GL.rox"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Pent.water",
+   "x": 1228,
+   "y": -1036,
+   "z": -416,
+   "loc": "Pent.water"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad",
+   "x": 852,
+   "y": 1592,
+   "z": 16,
+   "loc": "Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RL",
+   "x": 2296,
+   "y": -180,
+   "z": -192,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "LG",
+   "x": 1484,
+   "y": -88,
+   "z": -208,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad.entry",
+   "x": 1908,
+   "y": 1196,
+   "z": 16,
+   "loc": "Quad.entry"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RA.low",
+   "x": 231,
+   "y": -320,
+   "z": -96,
+   "loc": "RA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RL.tele",
+   "x": 2000,
+   "y": -42,
+   "z": -240,
+   "loc": "RL.tele"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "Quad.low",
+   "x": 716,
+   "y": 1584,
+   "z": -208,
+   "loc": "Quad.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Pent.SSG",
+   "x": 1698,
+   "y": -792,
+   "z": -192,
+   "loc": "Pent.SSG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Ring.high",
+   "x": 1832,
+   "y": 888,
+   "z": 16,
+   "loc": "Ring.high"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL.rox",
+   "x": 796,
+   "y": 140,
+   "z": 88,
+   "loc": "GL.rox"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Pent.MH",
+   "x": 814,
+   "y": -838,
+   "z": -168,
+   "loc": "Pent.MH"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad",
+   "x": 872,
+   "y": 1348,
+   "z": 40,
+   "loc": "Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.low",
+   "x": 1468,
+   "y": 1168,
+   "z": -184,
+   "loc": "Quad.low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_start",
+   "name": "RA",
+   "x": 12,
+   "y": 69,
+   "z": -8,
+   "loc": "RA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.low",
+   "x": 500,
+   "y": 436,
+   "z": -152,
+   "loc": "RA.low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL",
+   "x": 1850,
+   "y": -350,
+   "z": -168,
+   "loc": "RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Ring.lift",
+   "x": 1832,
+   "y": 408,
+   "z": -152,
+   "loc": "Ring.lift"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Ring.tele",
+   "x": 2600,
+   "y": 668,
+   "z": 40,
+   "loc": "Ring.tele"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL",
+   "x": 620.657,
+   "y": -466.344,
+   "z": 92,
+   "loc": "GL",
+   "targetName": "pent_tele_exit"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad.high",
+   "x": 1240,
+   "y": 1184,
+   "z": 236,
+   "loc": "Quad.high",
+   "targetName": "quad_tele_exit_high"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RL.tele",
+   "x": 2160,
+   "y": 144,
+   "z": -212,
+   "loc": "RL.tele",
+   "targetName": "rl_tele_low"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Ring.tele",
+   "x": 2596.04,
+   "y": 463.862,
+   "z": 44,
+   "loc": "Ring.tele",
+   "targetName": "rl_tele_high"
+  }
+ ]
+}

@@ -137,15 +137,23 @@ package result
 //     active Quad / Pent powerup. Additive and backward-compatible (all
 //     omitempty), but the bump invalidates cached loc-graph responses so
 //     consumers pick them up.
-const CurrentSchemaVersion = 12
+//
+// v13:
+//   - New MapEntities section: the map's static designed layout (item
+//     spawns, player spawnpoints, teleport destinations/sources,
+//     buttons) with type + location, sourced from the offline-generated
+//     mapents corpus (BSP entity lumps) keyed by map name. Additive
+//     (omitempty); absent when no corpus exists for the map.
+const CurrentSchemaVersion = 13
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
 // mean no analyzer contributed that section (for example, because the
 // source lacked the necessary events).
 //
-// Match length: read MatchResult.Duration (float seconds, parser-derived)
-// or DemoInfoResult.Duration (integer seconds, KTX-authoritative).
+// Match length: read MatchResult.Duration (int32 milliseconds,
+// parser-derived) or DemoInfoResult.Duration (integer seconds,
+// KTX-authoritative).
 type Result struct {
 	SchemaVersion    int                     `json:"schemaVersion"`
 	FilePath         string                  `json:"filePath"`
@@ -157,6 +165,7 @@ type Result struct {
 	Metadata         *MetadataResult         `json:"metadata,omitempty"`
 	LocGraph         *LocGraphResult         `json:"locGraph,omitempty"`
 	Items            *ItemsResult            `json:"items,omitempty"`
+	MapEntities      *MapEntitiesResult      `json:"mapEntities,omitempty"`
 	Backpacks        []BackpackDrop          `json:"backpacks,omitempty"`
 	WeaponPickups    []WeaponPickup          `json:"weaponPickups,omitempty"`
 	Streams          *Streams                `json:"streams,omitempty"`

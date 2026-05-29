@@ -184,6 +184,8 @@ type (
 	ItemsResult            = result.ItemsResult
 	ItemTimeline           = result.ItemTimeline
 	ItemPhase              = result.ItemPhase
+	MapEntitiesResult      = result.MapEntitiesResult
+	MapEntity              = result.MapEntity
 	BackpackDrop           = result.BackpackDrop
 	WeaponPickup           = result.WeaponPickup
 )

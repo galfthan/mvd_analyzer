@@ -125,7 +125,7 @@ it.
 | Slice | Default analysers | Why |
 |---|---|---|
 | **Core** | [`demoinfo`](analyzer/demoinfo.md), [`identity`](analyzer/identity.md), [`frag`](analyzer/frag.md) | Implement `CoreProducer`. Everything they emit (`DemoInfo`, `Names`, `Slots`, `Sessions`, `FragEntries`) is the canonical input some derived analyser consumes during its own Finalize. |
-| **Derived** | [`metadata`](analyzer/metadata.md), [`match`](analyzer/match.md), [`messages`](analyzer/messages.md), [`timeline`](analyzer/timeline.md), [`items`](analyzer/items.md), [`backpacks`](analyzer/backpacks.md), [`weapon_pickups`](analyzer/weapon_pickups.md) | Either implement `CoreConsumer` (read `co.*`) or are independent peers. They never write to `CoreOutputs`. |
+| **Derived** | [`metadata`](analyzer/metadata.md), [`match`](analyzer/match.md), [`messages`](analyzer/messages.md), [`timeline`](analyzer/timeline.md), [`items`](analyzer/items.md), `map_entities`, [`backpacks`](analyzer/backpacks.md), [`weapon_pickups`](analyzer/weapon_pickups.md) | Either implement `CoreConsumer` (read `co.*`) or are independent peers. They never write to `CoreOutputs`. `map_entities` loads the static `mapents` corpus by map name. |
 | **Post-processors** | `normalizeMatchRelativeTimes`, `duelTeamNormalize`, `locGraphPost` | Operate on the assembled `Result` after every Finalize has run. Order matters within the slice (time normalisation must run before locgraph). |
 | **Shelved** | [`tracks`](analyzer/tracks.md) | Code present, not registered. Awaiting a mvd-web consumer. |
 
@@ -242,6 +242,7 @@ type Result struct {
     Metadata         *MetadataResult          // serverinfo + match settings
     LocGraph         *LocGraphResult          // loc-to-loc movement graph
     Items            *ItemsResult             // per-item pickup / respawn timeline (all MVD sources)
+    MapEntities      *MapEntitiesResult       // static map layout from the BSP entity corpus (mapents)
     Backpacks        []BackpackDrop           // RL/LG backpack drops (from KTX //ktx drop hint)
     WeaponPickups    []WeaponPickup           // slot-weapon pickups + kills-before-next-death metric
     Errors           []string
