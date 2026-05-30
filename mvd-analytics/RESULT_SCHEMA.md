@@ -160,6 +160,7 @@ format here only carries the event-shaped derived results.
 | MatchStartTime | `matchStartTime` | float64 (always 0 after post-process) |
 | DemoOffset | `demoOffset` | float64 (warmup seconds before match start) |
 | FragEvents | `fragEvents` | []TimelineFragEvent |
+| DeathEvents | `deathEvents` | []TimelineDeathEvent |
 | PowerupEvents | `powerupEvents` | []PowerupEvent |
 | FragStreaks | `fragStreaks` | []FragStreakEvent |
 | LocationData | `locationData` | []MapLocation (loc anchor points) |
@@ -181,6 +182,18 @@ see [Query API → Buckets](#buckets). Each player's per-bucket data is a
 `-1` suicide / teamkill, `+2` for the rare gib double-frag KTX edge).
 Reconstruct the killer ↔ victim relationship from `FragResult.Frags[]`
 or `MessagesResult.Events[type=frag]` by matching `time`.
+
+### TimelineDeathEvent
+
+`{ time, player, team }`. One record per death, sourced from the
+authoritative protocol DeathEvent and gated to match time exactly like
+`fragEvents` — every death counts once (enemy kill, suicide, world, or
+being teamkilled), so a player's death count here matches their
+scoreboard deaths and KTX efficiency `frags / (frags + deaths)`
+(`ktx/src/statsTables.c` `calculateEfficiency`). Unlike `frags.frags`,
+this does not drop teamkill victims whose obituary names only the
+attacker. Parallel to `fragEvents` for the Timeline tab's per-player
+frags-up / deaths-down drill-down.
 
 ### PowerupEvent
 
@@ -754,6 +767,7 @@ Pick the shape that matches your consumer:
 | Frag list | `frags.frags[]` | `messages.events[type=frag]` | …you want kill-classification flags (`isSuicide`, `isTeamKill`). |
 | Frag list | `messages.events[type=frag]` | `frags.frags[]` | …you want the obit text for display. |
 | Score timeline | `timelineAnalysis.fragEvents` | `frags.frags[]` | …you only need delta over time (no killer/victim). |
+| Per-player deaths | `timelineAnalysis.deathEvents` | `frags.byPlayer[].deaths` | …you need per-death timing (not just totals); counts every death, no teamkill-victim drops. |
 | Per-player stats | `match.players[]` | `demoInfo.players[]` | …you only need name/team/frags. |
 | Per-player stats | `demoInfo.players[]` | `match.players[]` | …you need accuracy / damage / pickups (KTX demos only). |
 | Match length | `match.duration` | `demoInfo.duration` | …you want the parser-derived float. |

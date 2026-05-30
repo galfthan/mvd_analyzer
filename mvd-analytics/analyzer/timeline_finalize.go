@@ -59,6 +59,23 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		}
 	}
 
+	// Convert raw deaths to per-player death events for the frags/deaths
+	// drill-down. Same authoritative protocol DeathEvent source and same
+	// at-death-time identity resolution / team-gating as fragEvents, so a
+	// player's death count here matches their scoreboard deaths (and thus
+	// KTX efficiency = frags/(frags+deaths)).
+	deathEvents := make([]TimelineDeathEvent, 0, len(a.rawDeaths))
+	for _, raw := range a.rawDeaths {
+		playerName, team := a.resolveAt(raw.PlayerNum, msTime(raw.Time))
+		if team != "" {
+			deathEvents = append(deathEvents, TimelineDeathEvent{
+				Time:   msTime(raw.Time),
+				Player: playerName,
+				Team:   team,
+			})
+		}
+	}
+
 	// Detect powerup pickup events for Key Moments
 	powerupEvents := a.detectPowerupEvents()
 
@@ -175,6 +192,7 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	result.TimelineAnalysis = &TimelineAnalysisResult{
 		MatchStartTime: msTime(a.timing.StartTime),
 		FragEvents:     fragEvents,
+		DeathEvents:    deathEvents,
 		PowerupEvents:  powerupEvents,
 		FragStreaks:    fragStreaks,
 		LocationData:   locationData,

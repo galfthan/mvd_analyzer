@@ -1625,6 +1625,26 @@ table tbody tr:hover {
     min-width: 0;
 }
 
+/* Frags/deaths drill-down: a two-line label (name + frags/deaths · eff%)
+   needs a touch more width and wrapping than the single-line minis above. */
+#frags-per-player .per-player-label {
+    min-width: 104px;
+    max-width: 104px;
+    white-space: normal;
+    line-height: 1.15;
+}
+
+#frags-per-player .fd-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#frags-per-player .fd-stat {
+    font-size: 0.68rem;
+    color: #999;
+}
+
 /* Loc Heatmap */
 .locheatmap-desc {
     font-size: 0.75rem;

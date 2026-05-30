@@ -6406,7 +6406,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "streams": {
     "global": {
       "matchEnd": 600001,
@@ -101737,6 +101737,303 @@
     ]
   },
   "timelineAnalysis": {
+    "deathEvents": [
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 51831
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 60663
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 75591
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 78222
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 88118
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 91781
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 97833
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 100682
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 109222
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 115093
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 123976
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 175821
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 189003
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 191763
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 205134
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 209270
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 213498
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 221966
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 231070
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 241648
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 255876
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 256720
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 290071
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 301612
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 307910
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 313929
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 317955
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 339756
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 345275
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 359294
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 365476
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 371502
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 380549
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 383029
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 393035
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 406801
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 410139
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 413719
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 417888
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 427009
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 448049
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 453890
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 455214
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 457972
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 464361
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 500245
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 504219
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 507657
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 509635
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 519402
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 534571
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 543805
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 556260
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 568179
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 575546
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 581789
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 584296
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 595413
+      },
+      {
+        "player": "mj",
+        "team": "mj",
+        "time": 603049
+      }
+    ],
     "demoOffset": 10091,
     "fragEvents": [
       {

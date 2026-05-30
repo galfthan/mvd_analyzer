@@ -5591,7 +5591,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "streams": {
     "global": {
       "matchEnd": 599993,
@@ -106636,6 +106636,173 @@
     ]
   },
   "timelineAnalysis": {
+    "deathEvents": [
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 50571
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 50678
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 78693
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 78693
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 87927
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 107219
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 140804
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 160050
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 185972
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 198985
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 216312
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 230130
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 255779
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 282594
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 319152
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 321609
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 325454
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 338373
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 377346
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 382463
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 406397
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 415787
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 437722
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 456683
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 463969
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 497127
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 508332
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 523058
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 536916
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 554554
+      },
+      {
+        "player": "42",
+        "team": "42",
+        "time": 554632
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 594112
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "AHemlocksLie",
+        "time": 600759
+      }
+    ],
     "demoOffset": 10104,
     "fragEvents": [
       {

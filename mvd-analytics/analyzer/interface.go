@@ -171,6 +171,7 @@ type (
 	RegionStats            = result.RegionStats
 	MapLocation            = result.MapLocation
 	TimelineFragEvent      = result.TimelineFragEvent
+	TimelineDeathEvent     = result.TimelineDeathEvent
 	PowerupEvent           = result.PowerupEvent
 	FragStreakEvent        = result.FragStreakEvent
 	MetadataResult         = result.MetadataResult

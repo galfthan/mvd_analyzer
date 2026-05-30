@@ -137,7 +137,15 @@ package result
 //     active Quad / Pent powerup. Additive and backward-compatible (all
 //     omitempty), but the bump invalidates cached loc-graph responses so
 //     consumers pick them up.
-const CurrentSchemaVersion = 12
+//
+// v13:
+//   - TimelineAnalysis gains DeathEvents: a per-player death stream
+//     ({time, player, team}) parallel to FragEvents, sourced from the
+//     authoritative protocol DeathEvent (every death counts once), for
+//     the Timeline tab's per-player frags/deaths drill-down and KTX-style
+//     efficiency = frags/(frags+deaths). Additive and omitempty, but the
+//     bump invalidates cached timeline responses so consumers pick it up.
+const CurrentSchemaVersion = 13
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

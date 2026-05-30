@@ -2776,6 +2776,7 @@ function resetTimelineState() {
     timelineState.highResDuration = 0.05;
     timelineState.events = [];
     timelineState.fragEvents = [];
+    timelineState.deathEvents = [];
     timelineState.duration = 0;
     timelineState.matchStartTime = 0;
     timelineState.demoOffset = 0;
@@ -2835,6 +2836,7 @@ function displayTimelineAnalysis(result) {
     timelineState.duration = (result.match?.duration || 600000) * 0.001;
     timelineState.events = (result.messages?.events || []).map(e => ({ ...e, time: e.time * 0.001 }));
     timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.time * 0.001 })); // Frag events from stat tracking
+    timelineState.deathEvents = (timeline?.deathEvents || []).map(d => ({ ...d, time: d.time * 0.001 })); // Per-player deaths (every death) for the frags/deaths drill-down
     timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.time * 0.001 })); // RL/LG drops from KTX hint
     timelineState.powerupEvents = (timeline?.powerupEvents || []).map(ev => ({ // per-run records: player, team, frags, duration
         ...ev,
@@ -3530,6 +3532,209 @@ function renderHealthArmorPerPlayer(startTime, endTime) {
     }
 }
 
+// ─── Per-player frags / deaths drill-down ───────────────────────────────────
+//
+// One compact diverging chart per player under the Score Timeline: cumulative
+// net frags stack up, cumulative deaths stack down. Net frags is the same
+// per-player delta the team Score Timeline sums, so a team's frag curves
+// reconcile with the overall graph above; deaths count every death (enemy,
+// self, world, teamkilled) to match KTX player->deaths and its efficiency
+// definition frags/(frags+deaths) (ktx/src/statsTables.c calculateEfficiency).
+
+// Darken a team hex toward black so the deaths half reads as a muted mirror of
+// the team-coloured frags half (position above/below the divider already
+// separates them; the shade keeps team identity).
+function dimColor(hex) {
+    const [r, g, b] = hexToRgb(hex);
+    return `rgb(${Math.round(r * 0.55)},${Math.round(g * 0.55)},${Math.round(b * 0.55)})`;
+}
+
+// Build sampled diverging points for one player plus the window-end frag/death
+// totals (for the efficiency label). Mirrors prepScoreData: carry the running
+// totals from match start so the window's left edge shows the cumulative score.
+function prepPlayerFragDeathData(name, startTime, endTime, upColor, downColor) {
+    const fe = timelineState.fragEvents || [];
+    const de = timelineState.deathEvents || [];
+
+    let frags = 0, deaths = 0;
+    for (const f of fe) {
+        if (f.time >= startTime) break;
+        if (f.player === name) frags += (f.delta || 1);
+    }
+    for (const d of de) {
+        if (d.time >= startTime) break;
+        if (d.player === name) deaths += 1;
+    }
+
+    // Merge this player's in-window frag and death events by time, then
+    // accumulate into a step series.
+    const evs = [];
+    for (const f of fe) {
+        if (f.time < startTime) continue;
+        if (f.time > endTime) break;
+        if (f.player === name) evs.push({ time: f.time, df: (f.delta || 1), dd: 0 });
+    }
+    for (const d of de) {
+        if (d.time < startTime) continue;
+        if (d.time > endTime) break;
+        if (d.player === name) evs.push({ time: d.time, df: 0, dd: 1 });
+    }
+    evs.sort((a, b) => a.time - b.time);
+
+    const stepAt = [{ time: startTime, frags, deaths }];
+    let cf = frags, cd = deaths;
+    for (const e of evs) {
+        cf += e.df; cd += e.dd;
+        stepAt.push({ time: e.time, frags: cf, deaths: cd });
+    }
+    stepAt.push({ time: endTime, frags: cf, deaths: cd });
+
+    const duration = endTime - startTime;
+    const sampleRate = Math.max(0.5, duration / 400);
+    let maxVal = 1;
+    const points = [];
+    let si = 0;
+    for (let t = startTime; t < endTime; t += sampleRate) {
+        while (si + 1 < stepAt.length && stepAt[si + 1].time <= t) si++;
+        const fv = stepAt[si].frags;
+        const dv = stepAt[si].deaths;
+        maxVal = Math.max(maxVal, fv, dv);
+        points.push({
+            t, dt: sampleRate,
+            // Net frags can dip below zero early (suicides before kills); show
+            // nothing on the up side there rather than mixing it with deaths.
+            up: fv > 0 ? [{ h: fv, color: upColor }] : [],
+            down: dv > 0 ? [{ h: dv, color: downColor }] : [],
+        });
+    }
+    return { points, max: maxVal, frags: cf, deaths: cd };
+}
+
+// Compact diverging renderer for the per-player frags/deaths minis: net frags
+// stack up from the center, deaths stack down, sharing maxValue. Mirrors
+// renderMiniStack's scanline sampling, mirrored across a faint center divider.
+function renderMiniDiverging(canvasId, { startTime, endTime, points, maxValue, height }) {
+    const setup = setupGraphCanvas(canvasId, height || 44);
+    if (!setup) return;
+    const { ctx, W, H, dpr } = setup;
+    const PAD = Math.round(2 * dpr);
+    const midY = Math.round(H / 2);
+    const halfH = (H - 2 * PAD) / 2;
+
+    ctx.fillStyle = PLOT_BG_COLOR;
+    ctx.fillRect(0, 0, W, H);
+
+    const duration = endTime - startTime;
+    if (duration > 0 && points && points.length && maxValue > 0) {
+        let cursor = -1;
+        const sampleAt = (tQuery) => {
+            while (cursor + 1 < points.length && points[cursor + 1].t <= tQuery) cursor++;
+            if (cursor < 0) return null;
+            const pt = points[cursor];
+            if (cursor === points.length - 1) {
+                const endT = pt.t + (pt.dt || 0);
+                if (endT > 0 && tQuery > endT) return null;
+            }
+            return pt;
+        };
+        for (let px = 0; px < W; px++) {
+            const tPx = startTime + (px / W) * duration;
+            const pt = sampleAt(tPx);
+            if (!pt) continue;
+            // Up (net frags, above center).
+            let yAcc = midY, yPrev = midY;
+            if (pt.up) for (const seg of pt.up) {
+                if (seg.h > 0) {
+                    yAcc -= (seg.h / maxValue) * halfH;
+                    const yCur = Math.round(yAcc);
+                    const segH = yPrev - yCur;
+                    if (segH > 0) { ctx.fillStyle = seg.color; ctx.fillRect(px, yCur, 1, segH); }
+                    yPrev = yCur;
+                }
+            }
+            // Down (deaths, below center).
+            yAcc = midY; yPrev = midY;
+            if (pt.down) for (const seg of pt.down) {
+                if (seg.h > 0) {
+                    yAcc += (seg.h / maxValue) * halfH;
+                    const yCur = Math.round(yAcc);
+                    const segH = yCur - yPrev;
+                    if (segH > 0) { ctx.fillStyle = seg.color; ctx.fillRect(px, yPrev, 1, segH); }
+                    yPrev = yCur;
+                }
+            }
+        }
+    }
+
+    // Center divider.
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.fillRect(0, midY, W, Math.max(1, Math.round(dpr)));
+}
+
+// Render one mini frags/deaths chart per player under the Score Timeline panel.
+// Built lazily, rebuilt only when the roster changes (signature check); every
+// view change re-renders with a shared max for cross-player comparability.
+function renderFragsPerPlayer(startTime, endTime) {
+    const container = document.getElementById('frags-per-player');
+    if (!container) return;
+    const teams = timelineState.teams;
+    const view = timelineState.bucketView;
+    if (!view || !view.count || teams.length < 2) { container.innerHTML = ''; return; }
+
+    const grouped = timelinePlayersByTeam();
+    const sig = grouped.map(g => g.join('|')).join('#');
+    if (container._sig !== sig) {
+        container.innerHTML = '';
+        container._cells = [];
+        for (let ti = 0; ti < 2; ti++) {
+            grouped[ti].forEach((name, idx) => {
+                const cid = `fd-pp-${ti}-${idx}`;
+                const cell = document.createElement('div');
+                cell.className = 'per-player-cell';
+                const label = document.createElement('div');
+                label.className = 'per-player-label fd-label';
+                label.style.color = TEAM_COLORS[ti] || '#ccc';
+                const nameEl = document.createElement('div');
+                nameEl.className = 'fd-name';
+                nameEl.textContent = name;
+                nameEl.title = name;
+                const statEl = document.createElement('div');
+                statEl.className = 'fd-stat';
+                label.appendChild(nameEl);
+                label.appendChild(statEl);
+                const wrap = document.createElement('div');
+                wrap.className = 'per-player-canvas-wrap';
+                const canvas = document.createElement('canvas');
+                canvas.id = cid;
+                canvas.className = 'timeline-canvas';
+                wrap.appendChild(canvas);
+                cell.appendChild(label);
+                cell.appendChild(wrap);
+                container.appendChild(cell);
+                container._cells.push({ name, cid, ti, statEl });
+            });
+        }
+        container._sig = sig;
+    }
+
+    // Shared max across all players so rows are visually comparable.
+    let maxVal = 1;
+    const prepped = {};
+    for (const { name, ti } of container._cells) {
+        const upColor = TEAM_COLORS[ti] || '#ccc';
+        prepped[name] = prepPlayerFragDeathData(name, startTime, endTime, upColor, dimColor(upColor));
+        if (prepped[name].max > maxVal) maxVal = prepped[name].max;
+    }
+    for (const { name, cid, statEl } of container._cells) {
+        const d = prepped[name];
+        const eff = d.frags > 0 ? Math.round((d.frags / (d.frags + d.deaths)) * 100) : 0;
+        if (statEl) statEl.textContent = `${d.frags}/${d.deaths} · ${eff}%`;
+        const cv = document.getElementById(cid);
+        if (cv) cv.style.width = '';
+        renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: maxVal, height: 44 });
+    }
+}
+
 // Per-player weapons timeline: one combined row per player coloured by whether
 // they hold RL / LG / both, with weapon-drop events as dots. Reuses
 // renderSpansTimeline (one row per player) with team-coloured labels.
@@ -3884,6 +4089,13 @@ function setupUnifiedTimeline() {
         wpDet._toggleWired = true;
         wpDet.addEventListener('toggle', () => {
             if (wpDet.open) renderWeaponsPerPlayer(...currentViewRange());
+        });
+    }
+    const fpDet = document.getElementById('frags-per-player-details');
+    if (fpDet && !fpDet._toggleWired) {
+        fpDet._toggleWired = true;
+        fpDet.addEventListener('toggle', () => {
+            if (fpDet.open) renderFragsPerPlayer(...currentViewRange());
         });
     }
 
@@ -4356,6 +4568,10 @@ function updateScoreTimeline(startTime, endTime) {
         startTime, endTime, dataPoints: points, maxValue: max,
         yAxisId: 'score-y-axis', yTopLabel: `+${max}`, yBottomLabel: `-${max}`,
     });
+
+    if (document.getElementById('frags-per-player-details')?.open) {
+        renderFragsPerPlayer(startTime, endTime);
+    }
 }
 
 // ─── Region Control Timeline ────────────────────────────────────────────────
