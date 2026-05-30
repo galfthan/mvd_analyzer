@@ -129,9 +129,9 @@ make build-all-platforms                    # cross-compile both mvd-api and mvd
 
 #### Tool surface
 
-Nineteen tools — one for discovery, two for cache control + curated
+Twenty-one tools — one for discovery, two for cache control + curated
 summary, the high-level Result-section pass-throughs (KTX demoinfo,
-metadata, frags, loc-graph, chat, backpacks, items, map entities,
+metadata, frags, damage, loc-graph, chat, backpacks, items, map entities,
 weapon-pickups), and six for the view query layer:
 
 | Tool | Backing |
@@ -145,6 +145,7 @@ weapon-pickups), and six for the view query layer:
 | `getDemoInfo(demoId)` | `mvd-api` `/demoinfo` (KTX scoreboard) |
 | `getMetadata(demoId)` | `mvd-api` `/metadata` (server cvars + match settings) |
 | `getFrags(demoId, players, weapon)` | `mvd-api` `/frags` (aggregates + full kill log) |
+| `getDamage(demoId, players, weapon)` | `mvd-api` `/damage` (per-hit log + matrix + EWep buckets + scoreboard cross-check) |
 | `getLocGraph(demoId)` | `mvd-api` `/loc-graph` (per-map loc adjacency) |
 | `getChat(demoId, players, from, to, types)` | `mvd-api` `/chat` |
 | `getBackpacks(demoId, players, weapon)` | `mvd-api` `/backpacks` |
@@ -381,6 +382,9 @@ Defined in [`mvd-analytics/result`](mvd-analytics/result/result.go). `Result` is
 a JSON-serializable struct with sub-results from every analyzer that ran:
 match, frags, messages, demoinfo, timeline analysis, metadata, locgraph,
 items (per-item pickup / respawn timeline — works on any MVD source),
+damage (per-hit damage log + aggregates — attacker→victim matrix,
+per-weapon, given/taken, and the EWep victim-weapon buckets — from the
+KTX `mvdhidden_dmgdone` stream, with a scoreboard cross-check),
 backpacks (RL/LG drops attributed to the dropping player via KTX's
 `//ktx drop` hint), and weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
@@ -612,6 +616,17 @@ diff -r /tmp/before /tmp/after
    `weapons.<w>.pickups.spawn-taken` but fall short of `total-taken` by
    the backpack grabs (systemic; RL/LG reconcile fully). See
    [mvd-analytics/README.md](mvd-analytics/README.md#weapon-pickups).
+
+6. **Damage is unbound (overkill)**: `result.Damage` is reconstructed
+   from the KTX `mvdhidden_dmgdone` stream, which reports the **full** hit
+   including overkill, capped only at 9999 (a telefrag reports 9999). KTX's
+   end-of-match scoreboard (`demoInfo.players[].dmg`) instead bounds each
+   hit to the victim's remaining health, so the reconstructed totals run
+   higher — most on killing blows and telefrags. The `damage.scoreboard`
+   cross-check surfaces both side by side; the divergence is expected, not
+   a defect. Available only on KTX demos with the MVD-hidden extension; the
+   `EWep` victim-weapon buckets additionally depend on reconstructing each
+   victim's inventory from `STAT_ITEMS` updates.
 
 ## Reference sources
 

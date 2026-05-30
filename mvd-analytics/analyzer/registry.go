@@ -301,6 +301,7 @@ func NewDefaultRegistry() *Registry {
 	ta.SetBlipThresholdMs(r.Config.LocGraph.BlipThresholdMs)
 	r.RegisterDerived(ta)
 	r.RegisterDerived(NewItemAnalyzer())
+	r.RegisterDerived(NewDamageAnalyzer())
 	r.RegisterDerived(NewMapEntitiesAnalyzer())
 	r.RegisterDerived(NewBackpackAnalyzer())
 	r.RegisterDerived(NewWeaponPickupsAnalyzer())

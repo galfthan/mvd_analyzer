@@ -2081,6 +2081,8725 @@
       "weapon": "rl"
     }
   ],
+  "damage": {
+    "byPlayer": {
+      "Milton": {
+        "byWeapon": {
+          "lg": 4200,
+          "rl": 7789,
+          "sg": 204,
+          "ssg": 20
+        },
+        "enemyVsBoth": 2672,
+        "enemyVsLg": 2275,
+        "enemyVsMid": 240,
+        "enemyVsRl": 5124,
+        "enemyVsSg": 1902,
+        "ewep": 10071,
+        "given": 12213,
+        "givenSelf": 682,
+        "givenTeam": 343,
+        "taken": 10564,
+        "takenEnv": 170
+      },
+      "shazam": {
+        "byWeapon": {
+          "gl": 210,
+          "lg": 4050,
+          "rl": 4956,
+          "sg": 332,
+          "ssg": 92
+        },
+        "enemyVsBoth": 3342,
+        "enemyVsLg": 1380,
+        "enemyVsMid": 98,
+        "enemyVsRl": 2791,
+        "enemyVsSg": 2029,
+        "ewep": 7513,
+        "given": 9640,
+        "givenSelf": 531,
+        "givenTeam": 132,
+        "taken": 10199,
+        "takenEnv": 5
+      },
+      "squeeze": {
+        "byWeapon": {
+          "lg": 5550,
+          "rl": 2611,
+          "sg": 272,
+          "ssg": 244
+        },
+        "enemyVsBoth": 2326,
+        "enemyVsLg": 1487,
+        "enemyVsMid": 461,
+        "enemyVsRl": 2160,
+        "enemyVsSg": 2243,
+        "ewep": 5973,
+        "given": 8677,
+        "givenSelf": 583,
+        "givenTeam": 293,
+        "taken": 9940,
+        "takenEnv": 5
+      },
+      "stepcop": {
+        "byWeapon": {
+          "lg": 3390,
+          "rl": 4942,
+          "sg": 404,
+          "ssg": 52
+        },
+        "enemyVsBoth": 2988,
+        "enemyVsLg": 1912,
+        "enemyVsMid": 307,
+        "enemyVsRl": 2814,
+        "enemyVsSg": 767,
+        "ewep": 7714,
+        "given": 8788,
+        "givenSelf": 670,
+        "givenTeam": 354,
+        "taken": 12398,
+        "takenEnv": 15
+      }
+    },
+    "byWeapon": {
+      "gl": 210,
+      "lg": 17190,
+      "rl": 20298,
+      "sg": 1212,
+      "ssg": 408
+    },
+    "events": [
+      {
+        "attacker": "shazam",
+        "damage": 4,
+        "time": 2742,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 3242,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 3353,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 3437,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 3743,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 12,
+        "time": 3762,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 3847,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 20,
+        "time": 4937,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 70,
+        "isSplash": true,
+        "time": 5234,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 8,
+        "time": 7401,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 52,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 7701,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 8,
+        "time": 8041,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 8255,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 8351,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 8548,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 59,
+        "isSplash": true,
+        "time": 8701,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 8743,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 9054,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 9398,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 9911,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 10107,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 10416,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 10603,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "world",
+        "damage": 5,
+        "isEnv": true,
+        "time": 11172,
+        "victim": "Milton",
+        "weapon": "fall"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 12416,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 13312,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 13403,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 13497,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 96,
+        "isSplash": true,
+        "time": 13583,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 13935,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 24,
+        "time": 15167,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 62,
+        "isSplash": true,
+        "time": 15679,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 12,
+        "time": 16481,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 18914,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 19012,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 19026,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 19117,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 19117,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 19221,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 19312,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 19416,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 19507,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 19608,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 19809,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 19984,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 23,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 19984,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 16,
+        "time": 20894,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 87,
+        "isSplash": true,
+        "time": 21034,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 65,
+        "isSplash": true,
+        "time": 24730,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 48,
+        "isSplash": true,
+        "time": 25142,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 25639,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 28338,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 28721,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 28930,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 29026,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 45,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 33816,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 22,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 34089,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 81,
+        "isSplash": true,
+        "time": 35137,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 42,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 35137,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 35414,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 48,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 36691,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 36870,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 36958,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 67,
+        "isSplash": true,
+        "time": 40761,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 96,
+        "isSplash": true,
+        "time": 41699,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 42184,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 42288,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 74,
+        "isSplash": true,
+        "time": 42416,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 42485,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 42927,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 44722,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 44831,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 45024,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 12,
+        "time": 45081,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 45127,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 46371,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 47,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 46371,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 90,
+        "isSplash": true,
+        "time": 47325,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 20,
+        "time": 47935,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 49146,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 104,
+        "isSplash": true,
+        "time": 51234,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 56198,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 56302,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 56403,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 56496,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 81,
+        "isSplash": true,
+        "time": 59864,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 16,
+        "time": 60237,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 78,
+        "isSplash": true,
+        "time": 60730,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 41,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 60730,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 85,
+        "isSplash": true,
+        "time": 60818,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 61704,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 75,
+        "isSplash": true,
+        "time": 61951,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 24,
+        "time": 62468,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 56,
+        "time": 62598,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 24,
+        "time": 62657,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 62702,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 62819,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "world",
+        "damage": 10,
+        "isEnv": true,
+        "time": 64250,
+        "victim": "Milton",
+        "weapon": "lava"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 65299,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 65367,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 65397,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 65555,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 65601,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 65793,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 65899,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 69046,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 69108,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 33,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 69108,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 75,
+        "isSplash": true,
+        "time": 70081,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 67,
+        "isSplash": true,
+        "time": 71618,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 74267,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 74361,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 69,
+        "isSplash": true,
+        "time": 74533,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 24,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 74533,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 75055,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 79386,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 79520,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 79575,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 79678,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 82003,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 82107,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 82209,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 82304,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 85,
+        "isSplash": true,
+        "time": 82618,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 81,
+        "isSplash": true,
+        "time": 84182,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 84955,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 85068,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 85165,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 85263,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 12,
+        "time": 86910,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 88207,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 88289,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 88345,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 88403,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 88449,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 88555,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 88650,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 88754,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 88951,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 89055,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 89146,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 52,
+        "isSplash": true,
+        "time": 89801,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 90092,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 90189,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 24,
+        "isTeam": true,
+        "time": 90262,
+        "victim": "stepcop",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 4,
+        "time": 91065,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 4,
+        "time": 91731,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 93441,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 93527,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 93627,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 97,
+        "isSplash": true,
+        "time": 93704,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 94234,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 94328,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 94431,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 27,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 94431,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 90,
+        "isSplash": true,
+        "time": 94431,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 37,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 95806,
+        "victim": "stepcop",
+        "weapon": "gl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 76,
+        "isSplash": true,
+        "time": 97776,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 63,
+        "isSplash": true,
+        "time": 98510,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 98510,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 98757,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 98849,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "world",
+        "damage": 5,
+        "isEnv": true,
+        "time": 99838,
+        "victim": "stepcop",
+        "weapon": "fall"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 93,
+        "isSplash": true,
+        "time": 99889,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 68,
+        "isSplash": true,
+        "time": 99889,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 12,
+        "time": 102663,
+        "victim": "stepcop",
+        "victimWep": "mid",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 49,
+        "isSplash": true,
+        "time": 103364,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 8,
+        "time": 103676,
+        "victim": "squeeze",
+        "victimWep": "mid",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 73,
+        "isSplash": true,
+        "time": 104085,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 16,
+        "time": 104235,
+        "victim": "stepcop",
+        "victimWep": "mid",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 56,
+        "time": 104997,
+        "victim": "stepcop",
+        "victimWep": "mid",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 44,
+        "time": 105345,
+        "victim": "squeeze",
+        "victimWep": "mid",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 56,
+        "time": 105769,
+        "victim": "stepcop",
+        "victimWep": "mid",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 106884,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 108786,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 108890,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 108977,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 109080,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 89,
+        "isSplash": true,
+        "time": 110734,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "isTeam": true,
+        "time": 112494,
+        "victim": "squeeze",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "isTeam": true,
+        "time": 112591,
+        "victim": "squeeze",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 112609,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "isTeam": true,
+        "time": 112691,
+        "victim": "squeeze",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 113968,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 63,
+        "isSplash": true,
+        "time": 114389,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 114494,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 114594,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 115299,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 115400,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 115489,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 115596,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 48,
+        "isSplash": true,
+        "time": 115596,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 115897,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 116084,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 116192,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 87,
+        "isSplash": true,
+        "time": 116483,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 116512,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 116588,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 70,
+        "isSplash": true,
+        "time": 117045,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 117288,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 117390,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 118314,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 118401,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 118690,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 90,
+        "isSplash": true,
+        "time": 119029,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 40,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 119029,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 20,
+        "time": 119695,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 52,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 120016,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 50,
+        "isSplash": true,
+        "time": 122910,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 51,
+        "isSplash": true,
+        "time": 123679,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 55,
+        "isSplash": true,
+        "time": 124109,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 82,
+        "isSplash": true,
+        "time": 125417,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 58,
+        "isSplash": true,
+        "time": 126722,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 91,
+        "isSplash": true,
+        "time": 129003,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 131812,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 110,
+        "time": 132025,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 60,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 132025,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 109,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 132743,
+        "victim": "squeeze",
+        "weapon": "gl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 132756,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 8,
+        "time": 134598,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 135461,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 135548,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 135652,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 135760,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 89,
+        "isSplash": true,
+        "time": 139068,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 139876,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 142403,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 144715,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 144915,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 145097,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 145097,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 145198,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 145214,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 16,
+        "time": 145233,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 145302,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 145318,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 145392,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 145405,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 145497,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 145510,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 145613,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 145715,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 145715,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 146071,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 146159,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 110,
+        "time": 146353,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 37,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 146353,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 146776,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 147066,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 147066,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 4,
+        "time": 148937,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 149110,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 149201,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 149301,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 4,
+        "time": 149483,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 149617,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 93,
+        "isSplash": true,
+        "time": 151002,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 153110,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 153196,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 153300,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 55,
+        "isSplash": true,
+        "time": 153315,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 57,
+        "isSplash": true,
+        "time": 153315,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 74,
+        "isSplash": true,
+        "time": 153378,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 12,
+        "time": 153663,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 154002,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 154392,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 158404,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 90,
+        "isSplash": true,
+        "time": 158574,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 24,
+        "isTeam": true,
+        "time": 159406,
+        "victim": "squeeze",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 57,
+        "isSplash": true,
+        "time": 159496,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 59,
+        "isSplash": true,
+        "time": 159496,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 160846,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 160956,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 161041,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 161274,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 49,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 161873,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 62,
+        "isSplash": true,
+        "time": 162457,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 101,
+        "isSplash": true,
+        "time": 163027,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 29,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 165410,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 75,
+        "isSplash": true,
+        "time": 165410,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 74,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 165886,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 65,
+        "isSplash": true,
+        "time": 165886,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 165985,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 166288,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 166288,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 166389,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 166587,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 166781,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 79,
+        "isSplash": true,
+        "time": 167803,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 63,
+        "isSplash": true,
+        "time": 167803,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 168471,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 168581,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 105,
+        "isSplash": true,
+        "time": 168596,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 39,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 168596,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 169366,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 169663,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 24,
+        "time": 170110,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 170277,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 87,
+        "isSplash": true,
+        "time": 170277,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 20,
+        "time": 171535,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 28,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 171970,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 172250,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 172357,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 16,
+        "time": 172552,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 172944,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 4,
+        "time": 173062,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 51,
+        "isSplash": true,
+        "time": 173092,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 12,
+        "time": 173561,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 173666,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 177859,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 177963,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 178221,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 178263,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 178306,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 178715,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 180837,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 181747,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 181845,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 182871,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "time": 187357,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 188708,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 188818,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 188914,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 189014,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 189110,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 189194,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 103,
+        "isSplash": true,
+        "time": 189391,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 190962,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 191054,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 191304,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 191458,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 191500,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 192071,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 24,
+        "time": 193067,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 193106,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 80,
+        "isSplash": true,
+        "time": 193207,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 193495,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 193568,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 193707,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 194107,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 194210,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 24,
+        "time": 195858,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 195950,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 196248,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 12,
+        "time": 196357,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 196748,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 197042,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 24,
+        "time": 199250,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 24,
+        "time": 199832,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 31,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 200096,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 64,
+        "isSplash": true,
+        "time": 200096,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 44,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 201541,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 202480,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 202581,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "time": 202581,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 94,
+        "isSplash": true,
+        "time": 207152,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 65,
+        "isSplash": true,
+        "time": 207248,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 75,
+        "isSplash": true,
+        "time": 207956,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 110,
+        "time": 208481,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 52,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 208481,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 38,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 208623,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "world",
+        "damage": 5,
+        "isEnv": true,
+        "time": 208651,
+        "victim": "shazam",
+        "weapon": "fall"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 70,
+        "isSplash": true,
+        "time": 211845,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 51,
+        "isSplash": true,
+        "time": 211917,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 212210,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 213729,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 214040,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 90,
+        "isSplash": true,
+        "time": 216360,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 217443,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 217547,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 217649,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 217754,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 221560,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 222027,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 222054,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 222159,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 222248,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 92,
+        "isSplash": true,
+        "time": 222610,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 49,
+        "isSplash": true,
+        "time": 222610,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 223099,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 84,
+        "isSplash": true,
+        "time": 223458,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 223976,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 50,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 226354,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 226743,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 226962,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 227053,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 227365,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 53,
+        "isSplash": true,
+        "time": 230416,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 230950,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 231353,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 63,
+        "isSplash": true,
+        "time": 231444,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 231444,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 231547,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 231651,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 231938,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 232243,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 63,
+        "isSplash": true,
+        "time": 232541,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 49,
+        "isSplash": true,
+        "time": 233055,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 57,
+        "isSplash": true,
+        "time": 233326,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 83,
+        "isSplash": true,
+        "time": 233832,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 22,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 233832,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 20,
+        "time": 233871,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 4,
+        "time": 234412,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 234830,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 24,
+        "time": 234930,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 54,
+        "isSplash": true,
+        "time": 235008,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 54,
+        "isSplash": true,
+        "time": 235886,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 24,
+        "time": 236049,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 236183,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 236274,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 236379,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 236470,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 83,
+        "isSplash": true,
+        "time": 237989,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 238040,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 238137,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 54,
+        "isSplash": true,
+        "time": 238511,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 55,
+        "isSplash": true,
+        "time": 238649,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 16,
+        "time": 238690,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 16,
+        "time": 240887,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 41,
+        "isSplash": true,
+        "time": 241337,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 16,
+        "time": 241417,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 12,
+        "time": 241936,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 44,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 242196,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 4,
+        "time": 242457,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 63,
+        "isSplash": true,
+        "time": 242470,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 242830,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 242930,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "time": 245055,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 74,
+        "isSplash": true,
+        "time": 245923,
+        "victim": "squeeze",
+        "victimWep": "mid",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 55,
+        "isSplash": true,
+        "time": 245990,
+        "victim": "squeeze",
+        "victimWep": "mid",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 44,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 247899,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 250133,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "time": 250208,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 250875,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 250943,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 21,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 250943,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 251092,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 251436,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 93,
+        "isSplash": true,
+        "time": 251556,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 8,
+        "time": 253118,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 254749,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 254851,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 254958,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 255042,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 255522,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 255625,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 87,
+        "isSplash": true,
+        "time": 255901,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 256456,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 16,
+        "time": 257211,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 43,
+        "isSplash": true,
+        "time": 257391,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 12,
+        "time": 257707,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 257871,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 257979,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 20,
+        "time": 258664,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 73,
+        "isSplash": true,
+        "time": 258707,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 260636,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 260889,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 260964,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 44,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 261923,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 263651,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 266041,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 266249,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 266339,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 266339,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 266547,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 47,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 266547,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 76,
+        "isSplash": true,
+        "time": 267693,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 86,
+        "isSplash": true,
+        "time": 268444,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 269324,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 27,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 269324,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 269664,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 269769,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 269873,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 20,
+        "time": 271496,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 271846,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 272159,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 272456,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 272547,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 275963,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 276068,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 276179,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 46,
+        "isSplash": true,
+        "time": 276352,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 16,
+        "time": 277470,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "world",
+        "damage": 5,
+        "isEnv": true,
+        "time": 277504,
+        "victim": "Milton",
+        "weapon": "fall"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 277903,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 8,
+        "time": 277976,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 278105,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 278196,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 278302,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 80,
+        "isSplash": true,
+        "time": 280872,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 281417,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 68,
+        "isSplash": true,
+        "time": 283763,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 79,
+        "isSplash": true,
+        "time": 284736,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 286336,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "time": 286386,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 286548,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 286754,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 287036,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 43,
+        "isSplash": true,
+        "time": 287507,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 24,
+        "time": 288042,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 288183,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 288391,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 288482,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 288592,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 57,
+        "isSplash": true,
+        "time": 289859,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 44,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 290386,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 290500,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 290580,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 69,
+        "isSplash": true,
+        "time": 293862,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 21,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 294473,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 92,
+        "isSplash": true,
+        "time": 294473,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 44,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 297365,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 50,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 301166,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 306157,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 306821,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 72,
+        "isSplash": true,
+        "time": 307106,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 106,
+        "isSplash": true,
+        "time": 307492,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "gl"
+      },
+      {
+        "attacker": "world",
+        "damage": 10,
+        "isEnv": true,
+        "time": 307664,
+        "victim": "Milton",
+        "weapon": "lava"
+      },
+      {
+        "attacker": "world",
+        "damage": 10,
+        "isEnv": true,
+        "time": 307664,
+        "victim": "Milton",
+        "weapon": "lava"
+      },
+      {
+        "attacker": "world",
+        "damage": 30,
+        "isEnv": true,
+        "time": 307873,
+        "victim": "Milton",
+        "weapon": "lava"
+      },
+      {
+        "attacker": "world",
+        "damage": 30,
+        "isEnv": true,
+        "time": 308092,
+        "victim": "Milton",
+        "weapon": "lava"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 63,
+        "isSplash": true,
+        "time": 308146,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "gl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 40,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 308217,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 51,
+        "isSplash": true,
+        "time": 309469,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 309860,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 309951,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 310042,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 310146,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 310242,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 310448,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 310613,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 310729,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 62,
+        "isSplash": true,
+        "time": 311567,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 312403,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 313120,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 313235,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 24,
+        "time": 313314,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 313332,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 313430,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 317729,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 317845,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 317936,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 318040,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 53,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 318975,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 319109,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 8,
+        "time": 320417,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 42,
+        "isSplash": true,
+        "time": 321196,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 62,
+        "isSplash": true,
+        "time": 323002,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 76,
+        "isSplash": true,
+        "time": 323133,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 323924,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 50,
+        "isSplash": true,
+        "time": 323938,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 52,
+        "isSplash": true,
+        "time": 325000,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 325885,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 325977,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 326080,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 326181,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 326686,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 328423,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 110,
+        "time": 329389,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 330564,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 330652,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 330772,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 330860,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 331572,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 331858,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 97,
+        "isSplash": true,
+        "time": 332167,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 79,
+        "isSplash": true,
+        "time": 332260,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 93,
+        "isSplash": true,
+        "time": 332661,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 91,
+        "isSplash": true,
+        "time": 333873,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 334415,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 49,
+        "isSplash": true,
+        "time": 337288,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 4,
+        "time": 338653,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 8,
+        "time": 339167,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 339327,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 339613,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 339716,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 339832,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 46,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 340388,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 341871,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 341975,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 342067,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 342468,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 24,
+        "time": 342599,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 343014,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 343119,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 8,
+        "time": 343159,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 343221,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 343252,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 94,
+        "isSplash": true,
+        "time": 343521,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 344171,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 344171,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 344292,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 346585,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 16,
+        "time": 346690,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 28,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 347971,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 349145,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 86,
+        "isSplash": true,
+        "time": 350879,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 352260,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 352545,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 352664,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 352743,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 353547,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 353652,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 353742,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 353844,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 105,
+        "isSplash": true,
+        "time": 355040,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 50,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 355389,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 355732,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 24,
+        "time": 356027,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 358436,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 358522,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 358728,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 358921,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 358949,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 359029,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 359326,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 359534,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 359560,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 359635,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 359635,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 359756,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 359872,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 362053,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 362139,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 362236,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 16,
+        "time": 362402,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 362470,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 362571,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 362741,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 362754,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 12,
+        "time": 363133,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 363267,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 58,
+        "isSplash": true,
+        "time": 365780,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 70,
+        "isSplash": true,
+        "time": 366077,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 84,
+        "isSplash": true,
+        "time": 366651,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 28,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 366651,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 368528,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 43,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 371229,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 371873,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 371973,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 372068,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 37,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 372951,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 374561,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 374574,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 374664,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 374764,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 374792,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 374860,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 376120,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "world",
+        "damage": 5,
+        "isEnv": true,
+        "time": 376133,
+        "victim": "stepcop",
+        "weapon": "fall"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 377038,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 68,
+        "isSplash": true,
+        "time": 377204,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 25,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 377783,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 94,
+        "isSplash": true,
+        "time": 377831,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 24,
+        "time": 379377,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 379653,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 379752,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 379860,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 379944,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 383298,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 383501,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 383587,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 383703,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "world",
+        "damage": 10,
+        "isEnv": true,
+        "time": 384264,
+        "victim": "Milton",
+        "weapon": "lava"
+      },
+      {
+        "attacker": "world",
+        "damage": 10,
+        "isEnv": true,
+        "time": 384279,
+        "victim": "Milton",
+        "weapon": "lava"
+      },
+      {
+        "attacker": "world",
+        "damage": 30,
+        "isEnv": true,
+        "time": 384494,
+        "victim": "Milton",
+        "weapon": "lava"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 91,
+        "isSplash": true,
+        "time": 387891,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 58,
+        "isSplash": true,
+        "time": 388483,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 388665,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 42,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 391457,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 45,
+        "isSplash": true,
+        "time": 394543,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 396834,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 397130,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 397221,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 46,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 397236,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 397691,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 397793,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 397889,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 398291,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 49,
+        "isSplash": true,
+        "time": 398650,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 8,
+        "time": 399806,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 20,
+        "time": 400310,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 45,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 400591,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 401209,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 401327,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 12,
+        "time": 402678,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 76,
+        "isSplash": true,
+        "time": 403094,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 8,
+        "time": 403184,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 403249,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 26,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 403288,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 403341,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 12,
+        "time": 405263,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 406016,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 46,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 406254,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 406320,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 110,
+        "time": 406579,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 45,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 406579,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 406820,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 407016,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 407122,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 409795,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 409855,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 409885,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 410098,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 410191,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 410457,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 410548,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 411092,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 411195,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 411591,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 412440,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 415503,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 415795,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 415885,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 415989,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 416600,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 416806,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 416873,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 416887,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 416964,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 418418,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 24,
+        "time": 418452,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 418694,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 418789,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 418900,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 24,
+        "time": 418965,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 418999,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 44,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 421076,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 421819,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 421907,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 422010,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 16,
+        "time": 422068,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 422115,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 45,
+        "isSplash": true,
+        "time": 422616,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 423347,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 96,
+        "isSplash": true,
+        "time": 423390,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 423447,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 423912,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 423957,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 424054,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 97,
+        "isSplash": true,
+        "time": 424094,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 424094,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 424107,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 424221,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 94,
+        "isSplash": true,
+        "time": 425094,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 85,
+        "isSplash": true,
+        "time": 426828,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 12,
+        "time": 427222,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 427514,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 427723,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 20,
+        "time": 427723,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 46,
+        "isSplash": true,
+        "time": 427923,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 428024,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 428249,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 44,
+        "isSplash": true,
+        "time": 428912,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 62,
+        "isSplash": true,
+        "time": 429378,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 20,
+        "time": 429767,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 430180,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 430197,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 430288,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 20,
+        "time": 430288,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 430388,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 431223,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 431431,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 431517,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 431624,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 12,
+        "time": 432871,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 432989,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 4,
+        "time": 433109,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 433180,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 433278,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 4,
+        "time": 433364,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 433379,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 433470,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 110,
+        "time": 435205,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 12,
+        "time": 436286,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 436318,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 78,
+        "isSplash": true,
+        "time": 438292,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 439694,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 45,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 441585,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 442067,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 16,
+        "time": 442113,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 442264,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 442361,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 442444,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "time": 443102,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 83,
+        "isSplash": true,
+        "time": 447106,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 447546,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 77,
+        "isSplash": true,
+        "time": 447860,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 41,
+        "isSplash": true,
+        "time": 447893,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 42,
+        "isSplash": true,
+        "time": 449556,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 97,
+        "isSplash": true,
+        "time": 450374,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "isTeam": true,
+        "time": 451104,
+        "victim": "Milton",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "time": 451119,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 84,
+        "isSplash": true,
+        "time": 451119,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 454314,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 454413,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 454514,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 455114,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 8,
+        "time": 457340,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 459754,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 459849,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 60,
+        "isSplash": true,
+        "time": 462899,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 24,
+        "time": 463377,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 41,
+        "isSplash": true,
+        "time": 463613,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "gl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 24,
+        "time": 463821,
+        "victim": "squeeze",
+        "victimWep": "mid",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 464052,
+        "victim": "squeeze",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 464250,
+        "victim": "squeeze",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 464340,
+        "victim": "squeeze",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 469694,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 88,
+        "isSplash": true,
+        "time": 469709,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 73,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 469709,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 470390,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 470892,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 23,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 473639,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 89,
+        "isSplash": true,
+        "time": 473639,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 110,
+        "time": 473773,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 53,
+        "isSplash": true,
+        "time": 474663,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 66,
+        "isSplash": true,
+        "time": 475793,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 46,
+        "isSplash": true,
+        "time": 476581,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 477665,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 75,
+        "isSplash": true,
+        "time": 477904,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 92,
+        "isSplash": true,
+        "time": 478459,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 479084,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 49,
+        "isSplash": true,
+        "time": 479269,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 58,
+        "isSplash": true,
+        "time": 479767,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 480117,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 480306,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 480397,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 481548,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 44,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 482078,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 482237,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 482483,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 29,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 482795,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 50,
+        "isSplash": true,
+        "time": 482795,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "time": 483194,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 29,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 483194,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 484405,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 484594,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 484702,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 485347,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 20,
+        "time": 485659,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 485834,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 485834,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 47,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 486013,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 488000,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 488084,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 488185,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "world",
+        "damage": 10,
+        "isEnv": true,
+        "time": 488760,
+        "victim": "Milton",
+        "weapon": "lava"
+      },
+      {
+        "attacker": "world",
+        "damage": 10,
+        "isEnv": true,
+        "time": 488775,
+        "victim": "Milton",
+        "weapon": "lava"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 488789,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 23,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 488789,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 491262,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 24,
+        "time": 494585,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 494903,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 495110,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 4,
+        "time": 495110,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 67,
+        "isSplash": true,
+        "time": 495457,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 77,
+        "isSplash": true,
+        "time": 496229,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 20,
+        "time": 497873,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 499003,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 100,
+        "isSplash": true,
+        "time": 499429,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 27,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 499591,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 88,
+        "isSplash": true,
+        "time": 501624,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 502987,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 503041,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 75,
+        "isSplash": true,
+        "time": 506480,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 507229,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 507259,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 507653,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 507751,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 507847,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 508029,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 508146,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 508259,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 508333,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 508363,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 508614,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 508822,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 81,
+        "isSplash": true,
+        "time": 509397,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 509624,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 70,
+        "isSplash": true,
+        "time": 510116,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 511821,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 511905,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 511987,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 512016,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 514291,
+        "victim": "Milton",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 514393,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 514600,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 514899,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 516055,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 516145,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "world",
+        "damage": 5,
+        "isEnv": true,
+        "time": 516145,
+        "victim": "stepcop",
+        "weapon": "fall"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 516249,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 56,
+        "isSplash": true,
+        "time": 517533,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 47,
+        "isSplash": true,
+        "time": 517727,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 110,
+        "isTeam": true,
+        "time": 518393,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 99,
+        "isSplash": true,
+        "time": 519848,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 57,
+        "isSplash": true,
+        "time": 520691,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "time": 522696,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 524437,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 524535,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 524630,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 524730,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 526325,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 526623,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 527029,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 41,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 527197,
+        "victim": "squeeze",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 46,
+        "isSplash": true,
+        "time": 528831,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 63,
+        "isSplash": true,
+        "time": 529625,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 531236,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 531249,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 30,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 531249,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 531346,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "time": 532013,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 56,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 532013,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 26,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 532107,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "isTeam": true,
+        "time": 534262,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 43,
+        "isSplash": true,
+        "time": 535654,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 61,
+        "isSplash": true,
+        "time": 536423,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 63,
+        "isSplash": true,
+        "isTeam": true,
+        "time": 537265,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 538034,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 538125,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 538328,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "isTeam": true,
+        "time": 539263,
+        "victim": "stepcop",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 24,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 539946,
+        "victim": "stepcop",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 540054,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 540145,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 540247,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 540363,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 24,
+        "time": 541316,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 541391,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 40,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 541391,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 56,
+        "isSplash": true,
+        "time": 544141,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 56,
+        "isSplash": true,
+        "time": 544896,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 66,
+        "isSplash": true,
+        "time": 547042,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 110,
+        "time": 547530,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 550034,
+        "victim": "shazam",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 25,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 550034,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "world",
+        "damage": 5,
+        "isEnv": true,
+        "time": 551285,
+        "victim": "squeeze",
+        "weapon": "fall"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 551462,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 552195,
+        "victim": "Milton",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 41,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 552195,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 43,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 554834,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 555857,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 86,
+        "isSplash": true,
+        "time": 556159,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 556250,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 556848,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 556956,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 557041,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 20,
+        "time": 558118,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 558548,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 24,
+        "time": 558631,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 558662,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 77,
+        "isSplash": true,
+        "time": 559098,
+        "victim": "squeeze",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 561120,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 561431,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 60,
+        "isSplash": true,
+        "time": 561590,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 92,
+        "isSplash": true,
+        "time": 561862,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 562098,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 562306,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 562396,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 562500,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 562600,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 563002,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 563162,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 563506,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 563584,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 564319,
+        "victim": "squeeze",
+        "victimWep": "lg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 564319,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 565831,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 565912,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "isTeam": true,
+        "time": 566124,
+        "victim": "stepcop",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 566211,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 566974,
+        "victim": "Milton",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 110,
+        "time": 568653,
+        "victim": "squeeze",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 42,
+        "isSplash": true,
+        "time": 575221,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 110,
+        "time": 577273,
+        "victim": "squeeze",
+        "victimWep": "mid",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 100,
+        "isSplash": true,
+        "time": 578457,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 578665,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 579000,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 579081,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 579156,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 579184,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 30,
+        "time": 579260,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 579288,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 74,
+        "isSplash": true,
+        "time": 579301,
+        "victim": "stepcop",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "time": 579380,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 57,
+        "isSplash": true,
+        "time": 579874,
+        "victim": "shazam",
+        "victimWep": "both",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 580078,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 66,
+        "isSplash": true,
+        "time": 580078,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 581111,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 581211,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 581540,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 581639,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 582679,
+        "victim": "stepcop",
+        "victimWep": "sg",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 28,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 582679,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 583334,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 16,
+        "time": 583406,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "ssg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 583433,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 583535,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 583730,
+        "victim": "shazam",
+        "victimWep": "mid",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 38,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 583900,
+        "victim": "Milton",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 72,
+        "isSplash": true,
+        "time": 585861,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 68,
+        "isSplash": true,
+        "time": 588947,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 79,
+        "isSplash": true,
+        "time": 589320,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 42,
+        "isSplash": true,
+        "time": 589519,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 30,
+        "isSelf": true,
+        "isSplash": true,
+        "time": 589718,
+        "victim": "shazam",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 90,
+        "isSplash": true,
+        "time": 589780,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 97,
+        "isSplash": true,
+        "time": 590259,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 592952,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 593028,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 593140,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 593249,
+        "victim": "stepcop",
+        "victimWep": "lg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 594220,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 595628,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "shazam",
+        "damage": 24,
+        "time": 595642,
+        "victim": "squeeze",
+        "victimWep": "both",
+        "weapon": "sg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 596017,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 596120,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "stepcop",
+        "damage": 47,
+        "isSplash": true,
+        "time": 596150,
+        "victim": "Milton",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 596227,
+        "victim": "shazam",
+        "victimWep": "sg",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 597013,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 597110,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 597210,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 98,
+        "isSplash": true,
+        "time": 597223,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "rl"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 597600,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 597714,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 597903,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "squeeze",
+        "damage": 30,
+        "time": 598103,
+        "victim": "stepcop",
+        "victimWep": "rl",
+        "weapon": "lg"
+      },
+      {
+        "attacker": "Milton",
+        "damage": 110,
+        "time": 598973,
+        "victim": "shazam",
+        "victimWep": "rl",
+        "weapon": "rl"
+      }
+    ],
+    "matrix": [
+      {
+        "attacker": "Milton",
+        "byWeapon": {
+          "lg": 1860,
+          "rl": 3355,
+          "sg": 156
+        },
+        "damage": 5371,
+        "victim": "shazam"
+      },
+      {
+        "attacker": "Milton",
+        "byWeapon": {
+          "lg": 2340,
+          "rl": 4434,
+          "sg": 48,
+          "ssg": 20
+        },
+        "damage": 6842,
+        "victim": "stepcop"
+      },
+      {
+        "attacker": "shazam",
+        "byWeapon": {
+          "gl": 41,
+          "lg": 2280,
+          "rl": 2513,
+          "sg": 76,
+          "ssg": 48
+        },
+        "damage": 4958,
+        "victim": "Milton"
+      },
+      {
+        "attacker": "shazam",
+        "byWeapon": {
+          "gl": 169,
+          "lg": 1770,
+          "rl": 2443,
+          "sg": 256,
+          "ssg": 44
+        },
+        "damage": 4682,
+        "victim": "squeeze"
+      },
+      {
+        "attacker": "squeeze",
+        "byWeapon": {
+          "lg": 2400,
+          "rl": 1258,
+          "sg": 200,
+          "ssg": 80
+        },
+        "damage": 3938,
+        "victim": "shazam"
+      },
+      {
+        "attacker": "squeeze",
+        "byWeapon": {
+          "lg": 3150,
+          "rl": 1353,
+          "sg": 72,
+          "ssg": 164
+        },
+        "damage": 4739,
+        "victim": "stepcop"
+      },
+      {
+        "attacker": "stepcop",
+        "byWeapon": {
+          "lg": 1770,
+          "rl": 2423,
+          "sg": 268
+        },
+        "damage": 4461,
+        "victim": "Milton"
+      },
+      {
+        "attacker": "stepcop",
+        "byWeapon": {
+          "lg": 1620,
+          "rl": 2519,
+          "sg": 136,
+          "ssg": 52
+        },
+        "damage": 4327,
+        "victim": "squeeze"
+      }
+    ],
+    "scoreboard": {
+      "byPlayer": {
+        "Milton": {
+          "scoreEwep": 8507,
+          "scoreGiven": 10294,
+          "scoreTaken": 8129,
+          "streamEwep": 10071,
+          "streamGiven": 12213,
+          "streamTaken": 10564
+        },
+        "shazam": {
+          "scoreEwep": 6639,
+          "scoreGiven": 8422,
+          "scoreTaken": 7804,
+          "streamEwep": 7513,
+          "streamGiven": 9640,
+          "streamTaken": 10199
+        },
+        "squeeze": {
+          "scoreEwep": 5187,
+          "scoreGiven": 7497,
+          "scoreTaken": 7902,
+          "streamEwep": 5973,
+          "streamGiven": 8677,
+          "streamTaken": 9940
+        },
+        "stepcop": {
+          "scoreEwep": 6698,
+          "scoreGiven": 7609,
+          "scoreTaken": 9987,
+          "streamEwep": 7714,
+          "streamGiven": 8788,
+          "streamTaken": 12398
+        }
+      }
+    },
+    "totalDamage": 43101
+  },
   "demoInfo": {
     "date": "2026-04-25 13:17:15 +0200",
     "demo": "2on2_1_vs_n_n[dm4]20260425-1307.mvd",
@@ -16400,7 +25119,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 14,
+  "schemaVersion": 15,
   "streams": {
     "global": {
       "matchEnd": 600050,

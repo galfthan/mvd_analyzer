@@ -26,6 +26,7 @@ analyzer are also covered there.
 | Metadata | `metadata` | *MetadataResult | Server cvars (fullserverinfo) + parsed match-settings centerprint. |
 | LocGraph | `locGraph` | *LocGraphResult | Loc-to-loc movement graph (nodes + transitions). |
 | Items | `items` | *ItemsResult | Per-entity pickup / respawn timeline (per match). |
+| Damage | `damage` | *DamageResult | Per-hit damage log + aggregates (matrix, per-weapon, given/taken, EWep victim-weapon buckets) from the KTX `mvdhidden_dmgdone` stream, with a KTX-scoreboard cross-check. |
 | MapEntities | `mapEntities` | *MapEntitiesResult | Static designed map layout (item spawns, spawnpoints, teleporters, buttons) from the BSP entity corpus. |
 | Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops from KTX `//ktx drop` hint. |
 | WeaponPickups | `weaponPickups` | []WeaponPickup | Slot-weapon acquisitions with kills-before-next-death effectiveness. |
@@ -99,6 +100,95 @@ Defined in `result/frag.go`.
 | Kills | `kills` | int |
 | Deaths | `deaths` | int |
 | ByWeapon | `byWeapon` | map[string]int |
+
+## DamageResult (`damage`)
+
+Defined in `result/damage.go`. Reconstructed from the KTX
+`mvdhidden_dmgdone` stream (see `mvd-reader/MVD_FORMAT.md`). Present only
+when the demo carries that stream (KTX with MVD-hidden extensions).
+
+**Unbound vs bounded.** All amounts are **unbound** — the full hit
+including overkill, capped only at 9999 (a telefrag reports 9999). KTX's
+end-of-match scoreboard (`demoInfo.players[].dmg`) instead bounds each
+hit to the victim's remaining health. So these figures run higher than
+the scoreboard, most on killing blows and telefrags. The `scoreboard`
+sub-object surfaces both side by side; the divergence is expected.
+
+Per-player and matrix aggregates count **match-time** hits only (KTX
+scoreboard parity); the `events` log keeps every hit (incl. warmup), each
+with the match-relative `time` so consumers can window it.
+
+| Field | JSON key | Type |
+|---|---|---|
+| TotalDamage | `totalDamage` | int (match-time, all sources) |
+| Events | `events` | []DamageEntry (chronological) |
+| ByWeapon | `byWeapon` | map[string]int (enemy damage by attacker weapon) |
+| ByPlayer | `byPlayer` | map[string]*PlayerDamage |
+| Matrix | `matrix` | []DamagePair (attacker→victim totals) |
+| Scoreboard | `scoreboard` | *DamageReconciliation (omitempty) |
+
+### DamageEntry
+
+| Field | JSON key | Type |
+|---|---|---|
+| Time | `time` | int32 (match-relative ms) |
+| Attacker | `attacker` | string (`world` for environmental / non-player inflictor) |
+| Victim | `victim` | string |
+| Weapon | `weapon` | string (attacker weapon `rl`/`lg`/…, or env category `fall`/`lava`/…) |
+| Damage | `damage` | int (unbound) |
+| IsSplash | `isSplash` | bool (omitempty) |
+| IsEnv | `isEnv` | bool (omitempty — world/environmental) |
+| IsSelf | `isSelf` | bool (omitempty — attacker == victim) |
+| IsTeam | `isTeam` | bool (omitempty — same team, not self) |
+| VictimWep | `victimWep` | string (omitempty — victim's class at hit: `sg`/`mid`/`lg`/`rl`/`both`; set only on enemy hits) |
+
+### PlayerDamage
+
+`Given` counts enemy damage only; `Taken` counts **all** sources (enemy +
+team + self + env), so it runs above the KTX `dmg.taken` (which is
+enemy+env). The `EnemyVs*` buckets partition `Given` by the **victim's**
+held weapons at hit time — KTX "ewep" semantics, keyed on the *target's*
+inventory, not the attacker's weapon. Mutually exclusive, priority
+RL+LG > RL > LG > mid > sg (NG counts as shotgun-tier). `ewep` is the
+sum of the LG/RL/both buckets = damage dealt to enemies holding RL or LG.
+
+| Field | JSON key | Type |
+|---|---|---|
+| Given | `given` | int (to enemies) |
+| Taken | `taken` | int (all sources) |
+| GivenTeam | `givenTeam` | int |
+| GivenSelf | `givenSelf` | int |
+| TakenEnv | `takenEnv` | int |
+| ByWeapon | `byWeapon` | map[string]int (enemy given, by attacker weapon) |
+| EnemyVsSG | `enemyVsSg` | int (victim held shotgun-tier only) |
+| EnemyVsMid | `enemyVsMid` | int (victim held ssg/sng/gl) |
+| EnemyVsLG | `enemyVsLg` | int (victim held LG, not RL) |
+| EnemyVsRL | `enemyVsRl` | int (victim held RL, not LG) |
+| EnemyVsBoth | `enemyVsBoth` | int (victim held both RL and LG) |
+| EWep | `ewep` | int (= enemyVsLg + enemyVsRl + enemyVsBoth) |
+
+### DamagePair
+
+| Field | JSON key | Type |
+|---|---|---|
+| Attacker | `attacker` | string |
+| Victim | `victim` | string |
+| Damage | `damage` | int |
+| ByWeapon | `byWeapon` | map[string]int (attacker weapon → damage to this victim) |
+
+### DamageReconciliation / DamageDelta
+
+Diagnostic cross-check vs the KTX scoreboard (`demoInfo.players[].dmg`).
+Keyed by player name. `scoreEwep` is the KTX `enemy-weapons` field.
+
+| Field (DamageDelta) | JSON key | Type |
+|---|---|---|
+| StreamGiven | `streamGiven` | int |
+| ScoreGiven | `scoreGiven` | int |
+| StreamTaken | `streamTaken` | int |
+| ScoreTaken | `scoreTaken` | int |
+| StreamEWep | `streamEwep` | int |
+| ScoreEWep | `scoreEwep` | int |
 
 ## MessagesResult (`messages`)
 
@@ -819,6 +909,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v15 | New `Damage` section: per-hit damage log + aggregates (attacker→victim `matrix`, per-weapon, given/taken, and the **EWep** victim-weapon buckets `enemyVsSg/Mid/Lg/Rl/Both` where `ewep=lg+rl+both`) reconstructed from the KTX `mvdhidden_dmgdone` stream, plus a `scoreboard` cross-check vs `demoInfo.players[].dmg`. Amounts are unbound (include overkill). Also a Layer-1 change: world/environmental damage-taken (lava/fall/trigger) is now emitted with an `Attacker == -1` "world" sentinel rather than dropped. Additive (`omitempty`); absent when the demo lacks the KTX hidden-damage stream. |
 | v14 | `MapEntities` gains **brush entities** — `teleportSrc` (`trigger_teleport`), `button` (`func_button`), `door` (`func_door`) — placed at their BSP submodel bbox centre with a `bounds` (trigger/door volume), plus the teleport source→destination link (`teleportSrc.target` == `teleportDst.targetName`). v13 carried point entities (items, spawns, teleport destinations) only. |
 | v13 | New `MapEntities` section: the map's static designed layout (item spawns, player spawnpoints, teleport destinations/sources, buttons) with type + location, from the offline-generated mapents corpus (BSP entity lumps) keyed by map name. Additive (`omitempty`); absent when no corpus exists for the map. |
 | v12 | `LocNode` and `LocEdge` gain optional combat-posture weights — `armed` / `unarmed` / `quad` / `pent` breakdowns (`LocWeights` on nodes, `LocEdgeWeights` on edges) restricted to samples where the player held RL or LG, held neither, or had an active quad / pent. Lets consumers re-weight the loc graph by combat posture without re-walking streams. Field additions only; each weight is omitted when no observed sample met its condition. |

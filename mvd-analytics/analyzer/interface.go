@@ -184,6 +184,12 @@ type (
 	ItemsResult            = result.ItemsResult
 	ItemTimeline           = result.ItemTimeline
 	ItemPhase              = result.ItemPhase
+	DamageResult           = result.DamageResult
+	DamageEntry            = result.DamageEntry
+	PlayerDamage           = result.PlayerDamage
+	DamagePair             = result.DamagePair
+	DamageReconciliation   = result.DamageReconciliation
+	DamageDelta            = result.DamageDelta
 	MapEntitiesResult      = result.MapEntitiesResult
 	MapEntity              = result.MapEntity
 	Bounds                 = result.Bounds

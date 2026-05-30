@@ -151,7 +151,11 @@ package result
 //     submodel bbox centre with a Bounds (trigger/door volume), plus the
 //     teleport source→destination link via MapEntity.Target ==
 //     teleportDst.TargetName. v13 carried point entities only.
-const CurrentSchemaVersion = 14
+//   - v15: add Damage (DamageResult) — per-hit damage log + aggregates
+//     (matrix, per-weapon, given/taken, EWep victim-weapon buckets) derived
+//     from the KTX mvdhidden_dmgdone stream, with a cross-check against the
+//     KTX scoreboard (demoInfo.players[].dmg).
+const CurrentSchemaVersion = 15
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -172,6 +176,7 @@ type Result struct {
 	Metadata         *MetadataResult         `json:"metadata,omitempty"`
 	LocGraph         *LocGraphResult         `json:"locGraph,omitempty"`
 	Items            *ItemsResult            `json:"items,omitempty"`
+	Damage           *DamageResult           `json:"damage,omitempty"`
 	MapEntities      *MapEntitiesResult      `json:"mapEntities,omitempty"`
 	Backpacks        []BackpackDrop          `json:"backpacks,omitempty"`
 	WeaponPickups    []WeaponPickup          `json:"weaponPickups,omitempty"`

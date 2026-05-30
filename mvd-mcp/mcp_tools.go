@@ -66,6 +66,14 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 	})
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getDamage",
+		Description: "Per-hit damage aggregates + log, reconstructed from the KTX damage stream. totalDamage + byWeapon (enemy damage per attacker weapon) + byPlayer (per player: given (to enemies), taken (all sources), givenTeam, givenSelf, takenEnv, byWeapon, and the EWep victim-weapon buckets enemyVsSg/enemyVsMid/enemyVsLg/enemyVsRl/enemyVsBoth where ewep=lg+rl+both = damage to enemies holding RL/LG) + matrix (attacker->victim totals) + scoreboard (stream vs KTX-scoreboard cross-check). NOTE: damage is UNBOUND (includes overkill; a telefrag reports 9999), so totals run higher than the KTX scoreboard which is bounded to victim health. Optional players= / weapon= filters. Use this instead of aggregating getEvents(types:['damage']); use getEvents(types:['damage']) for the raw time-ordered per-hit log.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetDamageInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetDamage(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getLocGraph",
 		Description: "Per-map adjacency graph of named locations: which locs are reachable from which, with edge weights derived from per-player loc-to-loc transitions. Useful for movement-pattern reasoning ('what's adjacent to RA?').",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetLocGraphInput) (*mcp.CallToolResult, any, error) {

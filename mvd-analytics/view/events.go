@@ -131,6 +131,41 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			})
 		}
 	}
+	if want["damage"] && r.Damage != nil {
+		for _, d := range r.Damage.Events {
+			ts := msToSec(d.Time)
+			if !inWindow(ts, filter.StartTime, end) {
+				continue
+			}
+			// A player filter matches damage they dealt OR received.
+			if !pf.accepts(d.Attacker) && !pf.accepts(d.Victim) {
+				continue
+			}
+			detail := map[string]any{
+				"victim": d.Victim,
+				"damage": d.Damage,
+				"weapon": d.Weapon,
+			}
+			if d.IsSplash {
+				detail["isSplash"] = true
+			}
+			if d.IsEnv {
+				detail["isEnv"] = true
+			}
+			if d.IsSelf {
+				detail["isSelf"] = true
+			}
+			if d.IsTeam {
+				detail["isTeam"] = true
+			}
+			if d.VictimWep != "" {
+				detail["victimWep"] = d.VictimWep
+			}
+			events = append(events, TaggedEvent{
+				T: ts, Type: "damage", Player: d.Attacker, Detail: detail,
+			})
+		}
+	}
 	if want["chat"] && r.Messages != nil {
 		for _, msg := range r.Messages.Events {
 			ts := msToSec(msg.Time)

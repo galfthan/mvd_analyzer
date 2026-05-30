@@ -87,3 +87,51 @@ func TestEventsTimeOrdered(t *testing.T) {
 		last = e.T
 	}
 }
+
+func TestEventsDamageOptIn(t *testing.T) {
+	r := &result.Result{
+		Streams: &result.Streams{Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000}},
+		Damage: &result.DamageResult{
+			Events: []result.DamageEntry{
+				{Time: 2000, Attacker: "killer", Victim: "target", Weapon: "rl", Damage: 89, VictimWep: "rl"},
+			},
+		},
+	}
+
+	// Not in the default set.
+	def, err := Events(r, EventsFilter{})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	for _, e := range def.Events {
+		if e.Type == "damage" {
+			t.Fatalf("default Events should not include damage, got %+v", e)
+		}
+	}
+
+	// Opt-in surfaces it with the expected Detail shape.
+	v, err := Events(r, EventsFilter{Types: []string{"damage"}})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	if len(v.Events) != 1 {
+		t.Fatalf("damage events = %d, want 1", len(v.Events))
+	}
+	e := v.Events[0]
+	if e.Type != "damage" || e.Player != "killer" || e.T != 2.0 {
+		t.Errorf("event = %+v, want damage/killer/2.0", e)
+	}
+	if e.Detail["victim"] != "target" || e.Detail["damage"] != 89 ||
+		e.Detail["weapon"] != "rl" || e.Detail["victimWep"] != "rl" {
+		t.Errorf("detail = %v", e.Detail)
+	}
+
+	// A player filter matches damage they received, not just dealt.
+	vv, err := Events(r, EventsFilter{Types: []string{"damage"}, Players: []string{"target"}})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	if len(vv.Events) != 1 {
+		t.Fatalf("victim-filtered damage events = %d, want 1", len(vv.Events))
+	}
+}
