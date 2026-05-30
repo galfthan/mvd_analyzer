@@ -46,6 +46,17 @@ named). Per-player **deaths** come from the authoritative protocol
    the message. The protocol death signal fires for every death
    regardless of the print, and resolving by identity-at-death-time
    folds a reconnecting player's deaths across both their slots.
+6. **Killer-named teamkill recovery** (`recoverTeamkills`). Obituaries
+   like `"X loses another friend"` / `"X checks his glasses"` name only
+   the attacker, so they're stashed during parse (`genericTeamkills`)
+   rather than dropped. In Finalize each is counted against the killer
+   (`PlayerFrags.TeamKills`, matching KTX `tk`) and its victim is
+   recovered by pairing it with the `DeathEvent` it caused — a death at
+   ~the same time (`teamkillMatchWindowMs`, observed Δ0) whose victim
+   resolves to a teammate of the killer and isn't already explained by a
+   named-victim frag. Recovered teamkills rejoin `Frags[]` as complete
+   killer↔victim pairs, then the log is re-sorted by time. Deaths are
+   untouched (already counted in step 5).
 
 ## Limitations / known issues
 
@@ -56,7 +67,12 @@ named). Per-player **deaths** come from the authoritative protocol
   player name — they appear in `Frags[]` with `Killer="teammate"` or
   `Victim="teammate"` and are excluded from per-player *kill*
   aggregation (see `isGenericPlayer`). Their **deaths** are still
-  counted via the `DeathEvent` path above.
+  counted via the `DeathEvent` path above. Killer-named teamkills are
+  recovered (step 6); *victim-named* ones (`"X was telefragged by his
+  teammate"`) are **not** — the killer is unrecoverable from the
+  obituary, so `TeamKills` undercounts where those occur and the victim's
+  death stays out of `Frags[]`. Recovering them needs a third signal
+  (telefrag co-location, or the teamkiller's −1 frag delta).
 - The teamkill recompute path runs **after** demoinfo finalises (Frag
   is registered after DemoInfo in the core slice). If the demoinfo
   block is missing, live verdicts are kept as-is.

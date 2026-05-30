@@ -422,9 +422,14 @@ posture. Schema v13 adds `timelineAnalysis.deathEvents`: a per-player
 death stream (`{time, player, team}`) parallel to `fragEvents`, sourced
 from the authoritative protocol DeathEvent (every death counts once), so
 the Timeline tab can draw per-player frags-up / deaths-down charts and
-KTX-style efficiency (`frags / (frags + deaths)`).
+KTX-style efficiency (`frags / (frags + deaths)`). Schema v14 adds
+`frags.byPlayer[].teamkills` (KTX "tk") and recovers killer-named teamkill
+victims — obituaries that name only the attacker ("X loses another
+friend") get their victim filled in by matching the coincident
+`DeathEvent` on the killer's team, so those teamkills re-enter
+`frags.frags` as complete killer↔victim pairs.
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `13`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `14`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).

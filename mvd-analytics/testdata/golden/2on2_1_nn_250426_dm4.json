@@ -2809,7 +2809,8 @@
           "rl": 41
         },
         "deaths": 52,
-        "kills": 76
+        "kills": 76,
+        "teamkills": 2
       },
       "shazam": {
         "byWeapon": {
@@ -2827,7 +2828,8 @@
           "ssg": 2
         },
         "deaths": 50,
-        "kills": 57
+        "kills": 57,
+        "teamkills": 1
       },
       "stepcop": {
         "byWeapon": {
@@ -2836,7 +2838,8 @@
           "sg": 1
         },
         "deaths": 72,
-        "kills": 46
+        "kills": 46,
+        "teamkills": 2
       }
     },
     "byWeapon": {
@@ -3092,6 +3095,13 @@
         "weapon": "rl"
       },
       {
+        "isTeamKill": true,
+        "killer": "Milton",
+        "time": 112691,
+        "victim": "squeeze",
+        "weapon": "teamkill"
+      },
+      {
         "killer": "squeeze",
         "time": 116588,
         "victim": "stepcop",
@@ -3133,6 +3143,13 @@
         "time": 132025,
         "victim": "stepcop",
         "weapon": "rl"
+      },
+      {
+        "isTeamKill": true,
+        "killer": "Milton",
+        "time": 132743,
+        "victim": "squeeze",
+        "weapon": "teamkill"
       },
       {
         "killer": "shazam",
@@ -3326,6 +3343,14 @@
         "time": 202581,
         "victim": "squeeze",
         "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "isTeamKill": true,
+        "killer": "squeeze",
+        "time": 208481,
+        "victim": "Milton",
+        "weapon": "teamkill"
       },
       {
         "killer": "stepcop",
@@ -4094,6 +4119,20 @@
         "weapon": "lg"
       },
       {
+        "isTeamKill": true,
+        "killer": "stepcop",
+        "time": 532013,
+        "victim": "shazam",
+        "weapon": "teamkill"
+      },
+      {
+        "isTeamKill": true,
+        "killer": "stepcop",
+        "time": 534262,
+        "victim": "shazam",
+        "weapon": "teamkill"
+      },
+      {
         "killer": "shazam",
         "time": 538328,
         "victim": "squeeze",
@@ -4282,7 +4321,7 @@
         "weapon": "rl"
       }
     ],
-    "totalFrags": 237
+    "totalFrags": 242
   },
   "items": {
     "items": [
@@ -15800,7 +15839,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 13,
+  "schemaVersion": 14,
   "streams": {
     "global": {
       "matchEnd": 600050,

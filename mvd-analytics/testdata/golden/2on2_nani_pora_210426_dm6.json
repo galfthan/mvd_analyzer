@@ -1577,7 +1577,8 @@
           "sg": 1
         },
         "deaths": 31,
-        "kills": 34
+        "kills": 34,
+        "teamkills": 1
       },
       "gLAd": {
         "byWeapon": {
@@ -1588,7 +1589,8 @@
           "sng": 1
         },
         "deaths": 13,
-        "kills": 36
+        "kills": 36,
+        "teamkills": 2
       },
       "kippo": {
         "byWeapon": {
@@ -1604,7 +1606,8 @@
           "rl": 12
         },
         "deaths": 29,
-        "kills": 18
+        "kills": 18,
+        "teamkills": 2
       }
     },
     "byWeapon": {
@@ -1637,6 +1640,13 @@
         "weapon": "rl"
       },
       {
+        "isTeamKill": true,
+        "killer": "rusti",
+        "time": 14856,
+        "victim": "kippo",
+        "weapon": "teamkill"
+      },
+      {
         "killer": "kippo",
         "time": 15050,
         "victim": "SS",
@@ -1653,6 +1663,13 @@
         "time": 29362,
         "victim": "kippo",
         "weapon": "rl"
+      },
+      {
+        "isTeamKill": true,
+        "killer": "rusti",
+        "time": 34142,
+        "victim": "kippo",
+        "weapon": "teamkill"
       },
       {
         "killer": "rusti",
@@ -1702,6 +1719,14 @@
         "time": 101878,
         "victim": "rusti",
         "weapon": "lg"
+      },
+      {
+        "isSuicide": true,
+        "isTeamKill": true,
+        "killer": "gLAd",
+        "time": 111964,
+        "victim": "SS",
+        "weapon": "teamkill"
       },
       {
         "killer": "kippo",
@@ -1840,6 +1865,13 @@
         "time": 210494,
         "victim": "kippo",
         "weapon": "lg"
+      },
+      {
+        "isTeamKill": true,
+        "killer": "gLAd",
+        "time": 211813,
+        "victim": "SS",
+        "weapon": "teamkill"
       },
       {
         "killer": "gLAd",
@@ -2121,6 +2153,13 @@
         "weapon": "lg"
       },
       {
+        "isTeamKill": true,
+        "killer": "SS",
+        "time": 466202,
+        "victim": "gLAd",
+        "weapon": "teamkill"
+      },
+      {
         "killer": "SS",
         "time": 469128,
         "victim": "kippo",
@@ -2301,7 +2340,7 @@
         "weapon": "lg"
       }
     ],
-    "totalFrags": 113
+    "totalFrags": 118
   },
   "items": {
     "items": [
@@ -10455,7 +10494,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 13,
+  "schemaVersion": 14,
   "streams": {
     "global": {
       "matchEnd": 600000,

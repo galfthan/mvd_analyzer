@@ -91,12 +91,21 @@ Defined in `result/frag.go`.
 | IsSuicide | `isSuicide` | bool (omitempty) |
 | IsTeamKill | `isTeamKill` | bool (omitempty) |
 
+Includes **killer-named teamkills** ("X loses another friend", "X checks
+his glasses", …) recovered at schema v14: their obituary names only the
+attacker, so the victim is filled in by matching the coincident
+authoritative `DeathEvent` on the killer's team (`time` aligns to the ms).
+*Victim-named* teamkills ("X was telefragged by his teammate") are still
+absent here — the killer is unrecoverable from the obituary alone (see
+`MessagesResult.Events[type=frag]` to read them).
+
 ### PlayerFrags
 
 | Field | JSON key | Type |
 |---|---|---|
 | Kills | `kills` | int |
 | Deaths | `deaths` | int |
+| TeamKills | `teamkills` | int (omitempty) — KTX "tk"; killer-named teamkills only (v14) |
 | ByWeapon | `byWeapon` | map[string]int |
 
 ## MessagesResult (`messages`)

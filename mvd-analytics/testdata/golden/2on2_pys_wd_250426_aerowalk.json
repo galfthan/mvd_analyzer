@@ -2804,7 +2804,8 @@
           "sg": 2
         },
         "deaths": 52,
-        "kills": 55
+        "kills": 55,
+        "teamkills": 3
       },
       "wd.cao": {
         "byWeapon": {
@@ -2813,7 +2814,8 @@
           "sg": 4
         },
         "deaths": 56,
-        "kills": 49
+        "kills": 49,
+        "teamkills": 1
       },
       "wd.char": {
         "byWeapon": {
@@ -2821,7 +2823,8 @@
           "rl": 47
         },
         "deaths": 34,
-        "kills": 73
+        "kills": 73,
+        "teamkills": 4
       },
       "wd.dilbert": {
         "byWeapon": {
@@ -2830,7 +2833,8 @@
           "sg": 1
         },
         "deaths": 79,
-        "kills": 25
+        "kills": 25,
+        "teamkills": 2
       }
     },
     "byWeapon": {
@@ -2864,6 +2868,14 @@
         "time": 11945,
         "victim": "psy*overon",
         "weapon": "lg"
+      },
+      {
+        "isSuicide": true,
+        "isTeamKill": true,
+        "killer": "wd.char",
+        "time": 13248,
+        "victim": "wd.cao",
+        "weapon": "teamkill"
       },
       {
         "killer": "wd.cao",
@@ -3156,6 +3168,13 @@
         "weapon": "rl"
       },
       {
+        "isTeamKill": true,
+        "killer": "wd.dilbert",
+        "time": 128685,
+        "victim": "psy*overon",
+        "weapon": "teamkill"
+      },
+      {
         "killer": "wd.cao",
         "time": 129479,
         "victim": "wd.dilbert",
@@ -3355,6 +3374,13 @@
         "weapon": "rl"
       },
       {
+        "isTeamKill": true,
+        "killer": "psy*overon",
+        "time": 234910,
+        "victim": "wd.dilbert",
+        "weapon": "teamkill"
+      },
+      {
         "killer": "wd.char",
         "time": 236026,
         "victim": "psy*overon",
@@ -3365,6 +3391,13 @@
         "time": 240247,
         "victim": "wd.dilbert",
         "weapon": "rl"
+      },
+      {
+        "isTeamKill": true,
+        "killer": "wd.char",
+        "time": 240545,
+        "victim": "wd.cao",
+        "weapon": "teamkill"
       },
       {
         "killer": "wd.cao",
@@ -3676,6 +3709,14 @@
         "weapon": "rl"
       },
       {
+        "isSuicide": true,
+        "isTeamKill": true,
+        "killer": "wd.char",
+        "time": 364303,
+        "victim": "wd.cao",
+        "weapon": "teamkill"
+      },
+      {
         "killer": "wd.cao",
         "time": 367297,
         "victim": "psy*overon",
@@ -3754,6 +3795,13 @@
         "weapon": "rl"
       },
       {
+        "isTeamKill": true,
+        "killer": "wd.cao",
+        "time": 396713,
+        "victim": "wd.char",
+        "weapon": "teamkill"
+      },
+      {
         "killer": "wd.char",
         "time": 401531,
         "victim": "wd.dilbert",
@@ -3778,6 +3826,13 @@
         "weapon": "rl"
       },
       {
+        "isTeamKill": true,
+        "killer": "wd.char",
+        "time": 415155,
+        "victim": "wd.cao",
+        "weapon": "teamkill"
+      },
+      {
         "killer": "psy*overon",
         "time": 417208,
         "victim": "wd.cao",
@@ -3788,6 +3843,13 @@
         "time": 423083,
         "victim": "wd.cao",
         "weapon": "rl"
+      },
+      {
+        "isTeamKill": true,
+        "killer": "psy*overon",
+        "time": 427791,
+        "victim": "wd.dilbert",
+        "weapon": "teamkill"
       },
       {
         "killer": "wd.char",
@@ -4038,6 +4100,13 @@
         "weapon": "lg"
       },
       {
+        "isTeamKill": true,
+        "killer": "wd.dilbert",
+        "time": 553790,
+        "victim": "psy*overon",
+        "weapon": "teamkill"
+      },
+      {
         "isSuicide": true,
         "killer": "wd.dilbert",
         "time": 555939,
@@ -4067,6 +4136,13 @@
         "time": 567111,
         "victim": "wd.dilbert",
         "weapon": "rl"
+      },
+      {
+        "isTeamKill": true,
+        "killer": "psy*overon",
+        "time": 568699,
+        "victim": "wd.dilbert",
+        "weapon": "teamkill"
       },
       {
         "killer": "wd.char",
@@ -4117,7 +4193,7 @@
         "weapon": "lg"
       }
     ],
-    "totalFrags": 211
+    "totalFrags": 221
   },
   "items": {
     "items": [
@@ -13942,7 +14018,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 13,
+  "schemaVersion": 14,
   "streams": {
     "global": {
       "matchEnd": 600040,

@@ -1,10 +1,18 @@
 package analyzer
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
+
+// teamkillMatchWindowMs bounds how far a killer-named teamkill obituary
+// may sit from the authoritative DeathEvent it caused when recovering the
+// victim. Obituary print and DF_DEAD transition share the demo clock and
+// land on the same frame in practice (observed Δ0); the small window only
+// guards against clock jitter.
+const teamkillMatchWindowMs int32 = 256
 
 // FragAnalyzer detects frags from print messages
 type FragAnalyzer struct {
@@ -18,6 +26,12 @@ type FragAnalyzer struct {
 	// time), collected from the protocol DeathEvent and resolved to a
 	// player identity in Finalize. See the DeathEvent case in OnEvent.
 	deathSlots []slotDeath
+	// genericTeamkills are killer-named teamkill obituaries ("X loses
+	// another friend", "X checks his glasses", ...) whose victim is the
+	// generic "teammate" and so were dropped from frags. Finalize counts
+	// them against the killer and recovers the victim by matching the
+	// coincident DeathEvent on the killer's team.
+	genericTeamkills []FragEntry
 }
 
 // slotDeath is one match-time death pinned to the wire slot that died
@@ -103,6 +117,10 @@ func (a *FragAnalyzer) handleObituaryPrint(e *events.PrintEvent) {
 	// Only add to frags list if both parties are identifiable
 	if !killerIsGeneric && !victimIsGeneric {
 		a.frags = append(a.frags, *frag)
+	} else if frag.IsTeamKill && !killerIsGeneric && victimIsGeneric {
+		// Killer-named teamkill: attacker known, victim generic. Stash for
+		// Finalize to count + recover the victim from the DeathEvent.
+		a.genericTeamkills = append(a.genericTeamkills, *frag)
 	}
 	a.byWeapon[frag.Weapon]++
 
@@ -155,6 +173,8 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 		}
 	}
 
+	a.recoverTeamkills()
+
 	result.Frags = &FragResult{
 		TotalFrags: len(a.frags),
 		Frags:      a.frags,
@@ -162,6 +182,86 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 		ByPlayer:   a.byPlayer,
 	}
 	return nil
+}
+
+// recoverTeamkills counts each killer-named teamkill against its killer
+// and recovers the victim by pairing the obituary with the authoritative
+// DeathEvent it caused — a death at ~the same time whose victim resolves
+// to a teammate of the killer. Recovered teamkills (now a complete
+// killer↔victim pair) rejoin the frag log. Death totals are untouched:
+// the death was already counted in the deathSlots loop above.
+//
+// A death is only eligible if it isn't already explained by a named-victim
+// frag, so a teamkill can't steal a regular kill's death; each death is
+// consumed at most once. Resolution needs core (team table), so this is a
+// no-op without it — the count is then simply not recovered.
+func (a *FragAnalyzer) recoverTeamkills() {
+	if a.core == nil || len(a.genericTeamkills) == 0 {
+		return
+	}
+
+	// Pre-resolve every death once and mark those already claimed by a
+	// named-victim frag at ~the same time.
+	type rd struct {
+		name string
+		tMs  int32
+	}
+	resolved := make([]rd, len(a.deathSlots))
+	claimed := make([]bool, len(a.deathSlots))
+	for i, d := range a.deathSlots {
+		name := a.resolveDeathName(d.slot, d.tMs)
+		resolved[i] = rd{name: name, tMs: d.tMs}
+		if name == "" {
+			continue
+		}
+		for _, f := range a.frags {
+			if f.Victim == name && absI32(f.Time-d.tMs) <= teamkillMatchWindowMs {
+				claimed[i] = true
+				break
+			}
+		}
+	}
+
+	for _, tk := range a.genericTeamkills {
+		a.getOrCreatePlayer(tk.Killer).TeamKills++
+		killerTeam := a.core.Names.TeamForName(tk.Killer)
+
+		best, bestGap := -1, teamkillMatchWindowMs+1
+		for i := range resolved {
+			if claimed[i] || resolved[i].name == "" ||
+				resolved[i].name == tk.Killer || isGenericPlayer(resolved[i].name) {
+				continue
+			}
+			// Require same team when both teams resolve; stay lenient when
+			// the victim's team is unknown.
+			if killerTeam != "" {
+				if vt := a.core.Names.TeamForName(resolved[i].name); vt != "" && vt != killerTeam {
+					continue
+				}
+			}
+			if gap := absI32(resolved[i].tMs - tk.Time); gap < bestGap {
+				bestGap, best = gap, i
+			}
+		}
+		if best >= 0 {
+			claimed[best] = true
+			entry := tk
+			entry.Victim = resolved[best].name
+			a.frags = append(a.frags, entry)
+		}
+	}
+
+	// Appended teamkills break the time ordering consumers assume (score
+	// timeline, binary search); restore it. Stable so equal-time entries
+	// keep their relative order.
+	sort.SliceStable(a.frags, func(i, j int) bool { return a.frags[i].Time < a.frags[j].Time })
+}
+
+func absI32(x int32) int32 {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 // resolveDeathName maps a death's wire slot to the canonical player

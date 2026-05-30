@@ -145,7 +145,16 @@ package result
 //     the Timeline tab's per-player frags/deaths drill-down and KTX-style
 //     efficiency = frags/(frags+deaths). Additive and omitempty, but the
 //     bump invalidates cached timeline responses so consumers pick it up.
-const CurrentSchemaVersion = 13
+//
+// v14:
+//   - PlayerFrags gains TeamKills (KTX "tk"): killer-named teamkill
+//     obituaries ("X loses another friend", "X checks his glasses") are now
+//     counted against the killer, and their victims recovered by matching
+//     the coincident authoritative DeathEvent on the killer's team — so the
+//     recovered teamkills also re-enter Frags.Frags as complete
+//     killer↔victim pairs (previously dropped). Additive, but the bump
+//     invalidates cached frag responses so consumers pick it up.
+const CurrentSchemaVersion = 14
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
