@@ -1,0 +1,48 @@
+{
+ "map": "midair3",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad",
+   "x": 464,
+   "y": 4,
+   "z": 560
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring",
+   "x": -464,
+   "y": 8,
+   "z": 564
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 0,
+   "y": 0,
+   "z": 672
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 6,
+   "y": -334,
+   "z": 40
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 6,
+   "y": 331,
+   "z": 40
+  }
+ ]
+}

@@ -1,0 +1,46 @@
+{
+ "map": "schlossdmm4",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 112,
+   "y": -2016,
+   "z": 616
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 216,
+   "y": -1496,
+   "z": 777
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 352,
+   "y": -2384,
+   "z": 712
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 944,
+   "y": -1280,
+   "z": 856
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 1071,
+   "y": -2337,
+   "z": 904
+  }
+ ]
+}

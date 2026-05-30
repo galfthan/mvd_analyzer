@@ -1,0 +1,506 @@
+{
+ "map": "pkeg",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "YA.tele",
+   "x": -224,
+   "y": -176,
+   "z": -48,
+   "loc": "YA.tele",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-1",
+   "x": 48,
+   "y": -848,
+   "z": -416,
+   "loc": "cells"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-2",
+   "x": 88,
+   "y": -888,
+   "z": -416,
+   "loc": "cells"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-3",
+   "x": 128,
+   "y": -928,
+   "z": -416,
+   "loc": "cells"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "high.RL",
+   "x": 384,
+   "y": -1168,
+   "z": -32,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": -576,
+   "y": -384,
+   "z": -288,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 640,
+   "y": -256,
+   "z": -32,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GL",
+   "x": 656,
+   "y": -480,
+   "z": -48,
+   "loc": "GL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "SNG-1",
+   "x": 400,
+   "y": -688,
+   "z": -240,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "SNG-2",
+   "x": 464,
+   "y": -624,
+   "z": -240,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "cells-1",
+   "x": -112,
+   "y": -1392,
+   "z": -416,
+   "loc": "cells",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "cells-2",
+   "x": -64,
+   "y": -1392,
+   "z": -416,
+   "loc": "cells",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL",
+   "x": 656,
+   "y": -416,
+   "z": -48,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG",
+   "x": -624,
+   "y": -544,
+   "z": -288,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SNG",
+   "x": 400,
+   "y": -624,
+   "z": -176,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA",
+   "x": 144,
+   "y": -496,
+   "z": -48,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": -544,
+   "y": -1056,
+   "z": -288,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH",
+   "x": -128,
+   "y": -1024,
+   "z": 32,
+   "loc": "MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SNG-1",
+   "x": 496,
+   "y": -1104,
+   "z": -288,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SNG-2",
+   "x": 768,
+   "y": -1104,
+   "z": -288,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 416,
+   "y": -672,
+   "z": -24,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": 992,
+   "y": -1312,
+   "z": -240,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "high.RL",
+   "x": 816,
+   "y": -1136,
+   "z": -48,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "low.RL",
+   "x": 160,
+   "y": -256,
+   "z": -256,
+   "loc": "low.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "SNG",
+   "x": 464,
+   "y": -672,
+   "z": -240,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.tele",
+   "x": -224,
+   "y": -112,
+   "z": -48,
+   "loc": "YA.tele"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "SNG",
+   "x": 640,
+   "y": -960,
+   "z": -304,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "SSG",
+   "x": 608,
+   "y": -256,
+   "z": -240,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 160,
+   "y": -624,
+   "z": 32,
+   "loc": "YA",
+   "spawnflags": 2
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GA",
+   "x": -328,
+   "y": -248,
+   "z": -288,
+   "loc": "GA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL-1",
+   "x": 300,
+   "y": -84,
+   "z": -24,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL-2",
+   "x": 576,
+   "y": -320,
+   "z": -32,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SNG",
+   "x": 416,
+   "y": -608,
+   "z": -216,
+   "loc": "SNG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA",
+   "x": -56,
+   "y": -776,
+   "z": 32,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cells",
+   "x": -160,
+   "y": -1376,
+   "z": -416,
+   "loc": "cells"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "high.RL",
+   "x": 384,
+   "y": -960,
+   "z": -32,
+   "loc": "high.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "low.RL",
+   "x": 224,
+   "y": -608,
+   "z": -216,
+   "loc": "low.RL"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA",
+   "x": 1024,
+   "y": -736,
+   "z": -224,
+   "loc": "RA",
+   "targetName": "down2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "YA.tele",
+   "x": -128,
+   "y": -64,
+   "z": -32,
+   "loc": "YA.tele",
+   "targetName": "tele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "cells",
+   "x": -352,
+   "y": -1376,
+   "z": -416,
+   "loc": "cells",
+   "targetName": "tele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "high.RL",
+   "x": 832,
+   "y": -568,
+   "z": -40,
+   "loc": "high.RL",
+   "targetName": "up2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 1024,
+   "y": -696,
+   "z": -208,
+   "loc": "RA",
+   "target": "up2",
+   "bounds": {
+    "min": [
+     993,
+     -703,
+     -255
+    ],
+    "max": [
+     1055,
+     -689,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.tele",
+   "x": -128,
+   "y": -24,
+   "z": -16,
+   "loc": "YA.tele",
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -159,
+     -31,
+     -63
+    ],
+    "max": [
+     -97,
+     -17,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.RL",
+   "x": 832,
+   "y": -536,
+   "z": -16,
+   "loc": "high.RL",
+   "target": "down2",
+   "bounds": {
+    "min": [
+     801,
+     -543,
+     -63
+    ],
+    "max": [
+     863,
+     -529,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": 160,
+   "y": 8,
+   "z": -208,
+   "loc": "low.RL",
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     129,
+     1,
+     -255
+    ],
+    "max": [
+     191,
+     15,
+     -161
+    ]
+   }
+  }
+ ]
+}

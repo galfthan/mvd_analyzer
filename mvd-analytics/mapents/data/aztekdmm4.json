@@ -1,0 +1,85 @@
+{
+ "map": "aztekdmm4",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "ga",
+   "x": 586,
+   "y": -508,
+   "z": 450
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 56,
+   "y": -512,
+   "z": 252
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 600,
+   "y": -880,
+   "z": 348
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 600,
+   "y": -128,
+   "z": 348
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 1008,
+   "y": -512,
+   "z": 482
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 1024,
+   "y": -512,
+   "z": 666
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 1080,
+   "y": -512,
+   "z": 668,
+   "targetName": "telehigh"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 40,
+   "y": -696,
+   "z": 280,
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     -15,
+     -719,
+     257
+    ],
+    "max": [
+     95,
+     -673,
+     303
+    ]
+   }
+  }
+ ]
+}

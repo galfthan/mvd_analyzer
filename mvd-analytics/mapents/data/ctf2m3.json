@@ -1,0 +1,1780 @@
+{
+ "map": "ctf2m3",
+ "version": 1,
+ "entities": [
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE BASE",
+   "x": -1300,
+   "y": -159,
+   "z": 69.5,
+   "loc": "BLUE BASE",
+   "bounds": {
+    "min": [
+     -1350,
+     -168,
+     22
+    ],
+    "max": [
+     -1250,
+     -150,
+     117
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LEFT DOOR-1",
+   "x": -227.5,
+   "y": 480,
+   "z": 111,
+   "loc": "BLUE BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     457,
+     51
+    ],
+    "max": [
+     -216,
+     503,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LEFT DOOR-2",
+   "x": -227.5,
+   "y": 528,
+   "z": 111,
+   "loc": "BLUE BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     505,
+     51
+    ],
+    "max": [
+     -216,
+     551,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: OUTSIDE LOWER DOOR-1",
+   "x": 501.5,
+   "y": -3.79282,
+   "z": -158,
+   "loc": "BLUE BASE: OUTSIDE LOWER DOOR",
+   "bounds": {
+    "min": [
+     483,
+     -55,
+     -221
+    ],
+    "max": [
+     520,
+     47.41436,
+     -95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: OUTSIDE LOWER DOOR-2",
+   "x": 501.5,
+   "y": 21.199738,
+   "z": -158,
+   "loc": "BLUE BASE: OUTSIDE LOWER DOOR",
+   "bounds": {
+    "min": [
+     483,
+     -28.600525,
+     -221
+    ],
+    "max": [
+     520,
+     71,
+     -95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: OUTSIDE TOP DOOR-1",
+   "x": 501.5,
+   "y": -3.8351479,
+   "z": 114,
+   "loc": "BLUE BASE: OUTSIDE TOP DOOR",
+   "bounds": {
+    "min": [
+     483,
+     -55,
+     51
+    ],
+    "max": [
+     520,
+     47.329704,
+     177
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: OUTSIDE TOP DOOR-2",
+   "x": 501.5,
+   "y": 21.296247,
+   "z": 114,
+   "loc": "BLUE BASE: OUTSIDE TOP DOOR",
+   "bounds": {
+    "min": [
+     483,
+     -28.407505,
+     51
+    ],
+    "max": [
+     520,
+     71,
+     177
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: RIGHT DOOR-1",
+   "x": -227.5,
+   "y": -551,
+   "z": 111,
+   "loc": "BLUE BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     -574,
+     51
+    ],
+    "max": [
+     -216,
+     -528,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: RIGHT DOOR-2",
+   "x": -227.5,
+   "y": -503,
+   "z": 111,
+   "loc": "BLUE BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     -526,
+     51
+    ],
+    "max": [
+     -216,
+     -480,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LAVA: LG/YA DOOR-1",
+   "x": 1245,
+   "y": -710,
+   "z": -161.5,
+   "loc": "LAVA: LG/YA DOOR",
+   "bounds": {
+    "min": [
+     1235,
+     -734,
+     -210
+    ],
+    "max": [
+     1255,
+     -686,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LAVA: LG/YA DOOR-2",
+   "x": 1245,
+   "y": -660.5,
+   "z": -161.5,
+   "loc": "LAVA: LG/YA DOOR",
+   "bounds": {
+    "min": [
+     1235,
+     -684,
+     -210
+    ],
+    "max": [
+     1255,
+     -637,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "LAVA: SNG",
+   "x": 351.5,
+   "y": -685,
+   "z": -142.5,
+   "loc": "LAVA: SNG",
+   "bounds": {
+    "min": [
+     335,
+     -727,
+     -200
+    ],
+    "max": [
+     368,
+     -643,
+     -85
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "LAVA: UPPER AREA",
+   "x": 1244.5,
+   "y": -685,
+   "z": 87,
+   "loc": "LAVA: UPPER AREA",
+   "bounds": {
+    "min": [
+     1228,
+     -727,
+     28
+    ],
+    "max": [
+     1261,
+     -643,
+     146
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED BASE",
+   "x": -1292,
+   "y": -1545,
+   "z": 69.5,
+   "loc": "RED BASE",
+   "bounds": {
+    "min": [
+     -1342,
+     -1554,
+     22
+    ],
+    "max": [
+     -1242,
+     -1536,
+     117
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTER LOWER DOOR-1",
+   "x": 505.5,
+   "y": -1390.0414,
+   "z": -158,
+   "loc": "RED BASE: OUTER LOWER DOOR",
+   "bounds": {
+    "min": [
+     487,
+     -1441,
+     -221
+    ],
+    "max": [
+     524,
+     -1339.0828,
+     -95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTER LOWER DOOR-2",
+   "x": 505.5,
+   "y": -1364.7256,
+   "z": -158,
+   "loc": "RED BASE: OUTER LOWER DOOR",
+   "bounds": {
+    "min": [
+     487,
+     -1414.4512,
+     -221
+    ],
+    "max": [
+     524,
+     -1315,
+     -95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTER TOP DOOR-1",
+   "x": 505.5,
+   "y": -1389.8396,
+   "z": 114,
+   "loc": "RED BASE: OUTER TOP DOOR",
+   "bounds": {
+    "min": [
+     487,
+     -1441,
+     51
+    ],
+    "max": [
+     524,
+     -1338.6792,
+     177
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTER TOP DOOR-2",
+   "x": 505.5,
+   "y": -1364.884,
+   "z": 114,
+   "loc": "RED BASE: OUTER TOP DOOR",
+   "bounds": {
+    "min": [
+     487,
+     -1414.768,
+     51
+    ],
+    "max": [
+     524,
+     -1315,
+     177
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTSIDE LEFT DOOR-1",
+   "x": -222.5,
+   "y": -906,
+   "z": 111,
+   "loc": "RED BASE: OUTSIDE LEFT DOOR",
+   "bounds": {
+    "min": [
+     -234,
+     -929,
+     51
+    ],
+    "max": [
+     -211,
+     -883,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTSIDE LEFT DOOR-2",
+   "x": -222.5,
+   "y": -858,
+   "z": 111,
+   "loc": "RED BASE: OUTSIDE LEFT DOOR",
+   "bounds": {
+    "min": [
+     -234,
+     -881,
+     51
+    ],
+    "max": [
+     -211,
+     -835,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: OUTSIDE RIGHT DOOR",
+   "x": -222.5,
+   "y": -1889,
+   "z": 111,
+   "loc": "RED BASE: OUTSIDE RIGHT DOOR",
+   "bounds": {
+    "min": [
+     -234,
+     -1912,
+     51
+    ],
+    "max": [
+     -211,
+     -1866,
+     171
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: RIGHT CORRIDOR",
+   "x": -222.5,
+   "y": -1937,
+   "z": 111,
+   "loc": "RED BASE: RIGHT CORRIDOR",
+   "bounds": {
+    "min": [
+     -234,
+     -1960,
+     51
+    ],
+    "max": [
+     -211,
+     -1914,
+     171
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE: OUTSIDE LOWER",
+   "x": 252,
+   "y": -300,
+   "z": -210,
+   "loc": "BLUE BASE: OUTSIDE LOWER"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE: OUTSIDE RIGHT DOOR",
+   "x": -238,
+   "y": -238,
+   "z": 65,
+   "loc": "BLUE BASE: OUTSIDE RIGHT DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LAVA: LG/YA DOOR",
+   "x": 1592,
+   "y": -723,
+   "z": -187,
+   "loc": "LAVA: LG/YA DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE",
+   "x": -233,
+   "y": -1621,
+   "z": 65,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE: OUTSIDE LOW AREA",
+   "x": 383,
+   "y": -1619,
+   "z": -210,
+   "loc": "RED BASE: OUTSIDE LOW AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "BLUE BASE: OUTSIDE LOWER",
+   "x": 121,
+   "y": 5,
+   "z": -205,
+   "loc": "BLUE BASE: OUTSIDE LOWER"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "RED BASE: OUTSIDE LOW AREA",
+   "x": 122,
+   "y": -1378,
+   "z": -205,
+   "loc": "RED BASE: OUTSIDE LOW AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE BASE: GL",
+   "x": -383,
+   "y": 9,
+   "z": 29,
+   "loc": "BLUE BASE: GL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "LAVA: GL",
+   "x": 1363,
+   "y": -757,
+   "z": 43,
+   "loc": "LAVA: GL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED BASE: GL",
+   "x": -379,
+   "y": -1375,
+   "z": 27,
+   "loc": "RED BASE: GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-1",
+   "x": -1374,
+   "y": -70,
+   "z": 33,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-2",
+   "x": -1246,
+   "y": -133,
+   "z": 33,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: GL-1",
+   "x": -410,
+   "y": -124,
+   "z": 30,
+   "loc": "BLUE BASE: GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: GL-2",
+   "x": -408,
+   "y": 109,
+   "z": 30,
+   "loc": "BLUE BASE: GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: OUTSIDE LOWER-1",
+   "x": 59,
+   "y": 271,
+   "z": -206,
+   "loc": "BLUE BASE: OUTSIDE LOWER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: OUTSIDE LOWER-2",
+   "x": 196,
+   "y": -63,
+   "z": -206,
+   "loc": "BLUE BASE: OUTSIDE LOWER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: RL ROOM",
+   "x": -1428,
+   "y": -333,
+   "z": 34,
+   "loc": "BLUE BASE: RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: WATER TRAP-1",
+   "x": -935,
+   "y": -115,
+   "z": -46,
+   "loc": "BLUE BASE: WATER TRAP"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: WATER TRAP-2",
+   "x": -935,
+   "y": -11,
+   "z": -46,
+   "loc": "BLUE BASE: WATER TRAP"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: WATER TRAP-3",
+   "x": -932,
+   "y": 97,
+   "z": -46,
+   "loc": "BLUE BASE: WATER TRAP"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: WINDTUNNEL-1",
+   "x": -237,
+   "y": 117,
+   "z": 56,
+   "loc": "BLUE BASE: WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: WINDTUNNEL-2",
+   "x": -163,
+   "y": 117,
+   "z": 56,
+   "loc": "BLUE BASE: WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE LOW ENTRANCE",
+   "x": 815,
+   "y": 33,
+   "z": -185,
+   "loc": "BLUE LOW ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE TOP ENTRANCE",
+   "x": 814,
+   "y": 33,
+   "z": 43,
+   "loc": "BLUE TOP ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LAVA: GL",
+   "x": 1353,
+   "y": -670,
+   "z": 40,
+   "loc": "LAVA: GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LAVA: LG/YA DOOR",
+   "x": 1535,
+   "y": -574,
+   "z": -190,
+   "loc": "LAVA: LG/YA DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LAVA: SNG",
+   "x": 214,
+   "y": -798,
+   "z": -183,
+   "loc": "LAVA: SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LAVA: UPPER AREA",
+   "x": 1177,
+   "y": -856,
+   "z": 35,
+   "loc": "LAVA: UPPER AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-1",
+   "x": -1368,
+   "y": -1447,
+   "z": 33,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-2",
+   "x": -1236,
+   "y": -1521,
+   "z": 33,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-3",
+   "x": -393,
+   "y": -1511,
+   "z": 28,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-4",
+   "x": -391,
+   "y": -1278,
+   "z": 28,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-5",
+   "x": -244,
+   "y": -1269,
+   "z": 56,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: OUTSIDE LOW AREA-1",
+   "x": 33,
+   "y": -1171,
+   "z": -206,
+   "loc": "RED BASE: OUTSIDE LOW AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: OUTSIDE LOW AREA-2",
+   "x": 170,
+   "y": -1480,
+   "z": -206,
+   "loc": "RED BASE: OUTSIDE LOW AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: OUTSIDE LOW AREA-3",
+   "x": 393,
+   "y": -923,
+   "z": -191,
+   "loc": "RED BASE: OUTSIDE LOW AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: RL ROOM",
+   "x": -1434,
+   "y": -1719,
+   "z": 34,
+   "loc": "RED BASE: RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: WATER TRAP-1",
+   "x": -931,
+   "y": -1497,
+   "z": -46,
+   "loc": "RED BASE: WATER TRAP"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: WATER TRAP-2",
+   "x": -931,
+   "y": -1393,
+   "z": -46,
+   "loc": "RED BASE: WATER TRAP"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: WATER TRAP-3",
+   "x": -928,
+   "y": -1285,
+   "z": -46,
+   "loc": "RED BASE: WATER TRAP"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: WIND TUNNEL",
+   "x": -170,
+   "y": -1269,
+   "z": 56,
+   "loc": "RED BASE: WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED SLIME/RA",
+   "x": 829,
+   "y": -1397,
+   "z": -185,
+   "loc": "RED SLIME/RA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED TOP ENTRANCE",
+   "x": 828,
+   "y": -1397,
+   "z": 43,
+   "loc": "RED TOP ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LAVA: LG/YA",
+   "x": 950,
+   "y": -684,
+   "z": -191,
+   "loc": "LAVA: LG/YA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: LEFT DOOR",
+   "x": -94,
+   "y": 552,
+   "z": 61,
+   "loc": "BLUE BASE: LEFT DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: OUTSIDE LOWER",
+   "x": 363,
+   "y": 184,
+   "z": -208,
+   "loc": "BLUE BASE: OUTSIDE LOWER"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: RL ROOM",
+   "x": -1293,
+   "y": -340,
+   "z": 31,
+   "loc": "BLUE BASE: RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE SLIME/RA-1",
+   "x": 771,
+   "y": 43,
+   "z": -290,
+   "loc": "BLUE SLIME/RA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE SLIME/RA-2",
+   "x": 820,
+   "y": 43,
+   "z": -290,
+   "loc": "BLUE SLIME/RA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "LAVA: SNG",
+   "x": 217,
+   "y": -719,
+   "z": -189,
+   "loc": "LAVA: SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "LAVA: UPPER AREA",
+   "x": 1181,
+   "y": -478,
+   "z": 42,
+   "loc": "LAVA: UPPER AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "LOWER LAVA AREA-1",
+   "x": 810,
+   "y": -548,
+   "z": -191,
+   "loc": "LOWER LAVA AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "LOWER LAVA AREA-2",
+   "x": 812,
+   "y": -847,
+   "z": -191,
+   "loc": "LOWER LAVA AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: OUTSIDE LEFT DOOR",
+   "x": -86,
+   "y": -829,
+   "z": 61,
+   "loc": "RED BASE: OUTSIDE LEFT DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: OUTSIDE LOW AREA",
+   "x": 104,
+   "y": -1753,
+   "z": -208,
+   "loc": "RED BASE: OUTSIDE LOW AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: RL ROOM",
+   "x": -1307,
+   "y": -1723,
+   "z": 31,
+   "loc": "RED BASE: RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE BASE: RIGHT DOOR",
+   "x": -86,
+   "y": -592,
+   "z": 64,
+   "loc": "BLUE BASE: RIGHT DOOR"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED BASE: OUTSIDE RIGHT DOOR",
+   "x": -78,
+   "y": -1973,
+   "z": 64,
+   "loc": "RED BASE: OUTSIDE RIGHT DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "LAVA: Quad",
+   "x": 803,
+   "y": -684,
+   "z": 199,
+   "loc": "LAVA: Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "BLUE SLIME/RA",
+   "x": 797,
+   "y": -173,
+   "z": -290,
+   "loc": "BLUE SLIME/RA"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RED SLIME/RA",
+   "x": 806,
+   "y": -1202,
+   "z": -288,
+   "loc": "RED SLIME/RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "BLUE BASE: RL ROOM",
+   "x": -1196,
+   "y": -270,
+   "z": 37,
+   "loc": "BLUE BASE: RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RED BASE: RL ROOM",
+   "x": -1185,
+   "y": -1661,
+   "z": 37,
+   "loc": "RED BASE: RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: OUTSIDE LOWER",
+   "x": -196,
+   "y": 229,
+   "z": -199,
+   "loc": "BLUE BASE: OUTSIDE LOWER"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: RIGHT CORRIDOR",
+   "x": -604,
+   "y": -564,
+   "z": 64,
+   "loc": "BLUE BASE: RIGHT CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: RL ROOM-1",
+   "x": -1411,
+   "y": -264,
+   "z": 33,
+   "loc": "BLUE BASE: RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: RL ROOM-2",
+   "x": -1354,
+   "y": -327,
+   "z": 33,
+   "loc": "BLUE BASE: RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: WINDTUNNEL",
+   "x": -164,
+   "y": -122,
+   "z": 60,
+   "loc": "BLUE BASE: WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "LAVA: GL",
+   "x": 1362,
+   "y": -598,
+   "z": 40,
+   "loc": "LAVA: GL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: RIGHT CORRIDOR",
+   "x": -597,
+   "y": -1940,
+   "z": 64,
+   "loc": "RED BASE: RIGHT CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: RL ROOM-1",
+   "x": -1420,
+   "y": -1639,
+   "z": 33,
+   "loc": "RED BASE: RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: RL ROOM-2",
+   "x": -1364,
+   "y": -1717,
+   "z": 33,
+   "loc": "RED BASE: RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: WIND TUNNEL-1",
+   "x": -209,
+   "y": -1602,
+   "z": -209,
+   "loc": "RED BASE: WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: WIND TUNNEL-2",
+   "x": -163,
+   "y": -1505,
+   "z": 60,
+   "loc": "RED BASE: WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED SLIME/RA-1",
+   "x": 815,
+   "y": -1427,
+   "z": -292,
+   "loc": "RED SLIME/RA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED SLIME/RA-2",
+   "x": 859,
+   "y": -1427,
+   "z": -292,
+   "loc": "RED SLIME/RA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE",
+   "x": -933,
+   "y": 113,
+   "z": 101,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE: LEFT CORRIDOR",
+   "x": -616,
+   "y": 517,
+   "z": 66,
+   "loc": "BLUE BASE: LEFT CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE: WINDTUNNEL",
+   "x": -180,
+   "y": -137,
+   "z": -213,
+   "loc": "BLUE BASE: WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "LOWER LAVA AREA",
+   "x": 464,
+   "y": -489,
+   "z": -187,
+   "loc": "LOWER LAVA AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE",
+   "x": -926,
+   "y": -1273,
+   "z": 101,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE: LEFT CORRIDOR",
+   "x": -605,
+   "y": -872,
+   "z": 66,
+   "loc": "RED BASE: LEFT CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE: OUTSIDE LOW AREA",
+   "x": -142,
+   "y": -1195,
+   "z": -213,
+   "loc": "RED BASE: OUTSIDE LOW AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "LAVA: SNG",
+   "x": 254,
+   "y": -601,
+   "z": -185,
+   "loc": "LAVA: SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE BASE",
+   "x": -915,
+   "y": -103,
+   "z": 106,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE BASE: OUTSIDE LOWER",
+   "x": 127,
+   "y": -356,
+   "z": -201,
+   "loc": "BLUE BASE: OUTSIDE LOWER"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE BASE: OUTSIDE RIGHT DOOR",
+   "x": -221,
+   "y": -158,
+   "z": 75,
+   "loc": "BLUE BASE: OUTSIDE RIGHT DOOR"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED BASE-1",
+   "x": -916,
+   "y": -1491,
+   "z": 105,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED BASE-2",
+   "x": -208,
+   "y": -1546,
+   "z": 75,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED BASE: OUTSIDE LOW AREA",
+   "x": 157,
+   "y": -1028,
+   "z": -201,
+   "loc": "RED BASE: OUTSIDE LOW AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "LAVA: LG/YA",
+   "x": 1023,
+   "y": -685,
+   "z": -182,
+   "loc": "LAVA: LG/YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-1",
+   "x": -1339,
+   "y": -98,
+   "z": 54,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-2",
+   "x": -1339,
+   "y": -17,
+   "z": 54,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-3",
+   "x": -1246,
+   "y": 21,
+   "z": 54,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE-4",
+   "x": -589,
+   "y": 12,
+   "z": 54,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-5",
+   "x": -497,
+   "y": 103,
+   "z": 54,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE: GL-1",
+   "x": -499,
+   "y": -85,
+   "z": 54,
+   "loc": "BLUE BASE: GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE: GL-2",
+   "x": -499,
+   "y": 13,
+   "z": 54,
+   "loc": "BLUE BASE: GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE: OUTSIDE LOWER-1",
+   "x": 134,
+   "y": 179,
+   "z": -180,
+   "loc": "BLUE BASE: OUTSIDE LOWER"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE: OUTSIDE LOWER-2",
+   "x": 314,
+   "y": -146,
+   "z": -180,
+   "loc": "BLUE BASE: OUTSIDE LOWER"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE: OUTSIDE UPPER-1",
+   "x": -48,
+   "y": 4,
+   "z": 85,
+   "loc": "BLUE BASE: OUTSIDE UPPER"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE: OUTSIDE UPPER-2",
+   "x": 221,
+   "y": 14,
+   "z": 53,
+   "loc": "BLUE BASE: OUTSIDE UPPER"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE: WATER TRAP-1",
+   "x": -1036,
+   "y": 10,
+   "z": 8,
+   "loc": "BLUE BASE: WATER TRAP"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE: WATER TRAP-2",
+   "x": -807,
+   "y": 9,
+   "z": 8,
+   "loc": "BLUE BASE: WATER TRAP"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE LOW ENTRANCE",
+   "x": 798,
+   "y": -138,
+   "z": -166,
+   "loc": "BLUE LOW ENTRANCE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE TOP ENTRANCE",
+   "x": 798,
+   "y": -126,
+   "z": 73,
+   "loc": "BLUE TOP ENTRANCE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LAVA: UPPER AREA-1",
+   "x": 981,
+   "y": -875,
+   "z": 67,
+   "loc": "LAVA: UPPER AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LAVA: UPPER AREA-2",
+   "x": 1160,
+   "y": -526,
+   "z": 63,
+   "loc": "LAVA: UPPER AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LOWER LAVA AREA-1",
+   "x": 444,
+   "y": -872,
+   "z": -166,
+   "loc": "LOWER LAVA AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LOWER LAVA AREA-2",
+   "x": 607,
+   "y": -486,
+   "z": -166,
+   "loc": "LOWER LAVA AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-1",
+   "x": -1328,
+   "y": -1472,
+   "z": 55,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-2",
+   "x": -1325,
+   "y": -1388,
+   "z": 55,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-3",
+   "x": -1229,
+   "y": -1348,
+   "z": 54,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE-4",
+   "x": -591,
+   "y": -1378,
+   "z": 58,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-5",
+   "x": -500,
+   "y": -1479,
+   "z": 55,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-6",
+   "x": -500,
+   "y": -1380,
+   "z": 55,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-7",
+   "x": -498,
+   "y": -1277,
+   "z": 55,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE: OUTSIDE LOW AREA-1",
+   "x": 138,
+   "y": -1242,
+   "z": -180,
+   "loc": "RED BASE: OUTSIDE LOW AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE: OUTSIDE LOW AREA-2",
+   "x": 305,
+   "y": -1548,
+   "z": -180,
+   "loc": "RED BASE: OUTSIDE LOW AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE: OUTSIDE UPPER AREA-1",
+   "x": -43,
+   "y": -1376,
+   "z": 85,
+   "loc": "RED BASE: OUTSIDE UPPER AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE: OUTSIDE UPPER AREA-2",
+   "x": 158,
+   "y": -1376,
+   "z": 53,
+   "loc": "RED BASE: OUTSIDE UPPER AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE: WATER TRAP-1",
+   "x": -1018,
+   "y": -1382,
+   "z": 3,
+   "loc": "RED BASE: WATER TRAP"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE: WATER TRAP-2",
+   "x": -804,
+   "y": -1384,
+   "z": 5,
+   "loc": "RED BASE: WATER TRAP"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED LOW ENTRANCE",
+   "x": 805,
+   "y": -1234,
+   "z": -166,
+   "loc": "RED LOW ENTRANCE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED TOP ENTRANCE",
+   "x": 805,
+   "y": -1222,
+   "z": 70,
+   "loc": "RED TOP ENTRANCE"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "LAVA: Quad",
+   "x": 801,
+   "y": -830,
+   "z": 212,
+   "loc": "LAVA: Quad",
+   "targetName": "target4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "LAVA: UPPER AREA",
+   "x": 1184,
+   "y": -900,
+   "z": 68,
+   "loc": "LAVA: UPPER AREA",
+   "targetName": "target1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "LOWER LAVA AREA",
+   "x": 418,
+   "y": -477,
+   "z": -162,
+   "loc": "LOWER LAVA AREA",
+   "targetName": "target3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE: OUTSIDE LOWER DOOR",
+   "x": 626,
+   "y": 11,
+   "z": -271.5,
+   "loc": "BLUE BASE: OUTSIDE LOWER DOOR",
+   "target": "target3",
+   "bounds": {
+    "min": [
+     593,
+     -20,
+     -298
+    ],
+    "max": [
+     659,
+     42,
+     -245
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LAVA: LG/YA DOOR",
+   "x": 1579,
+   "y": -523,
+   "z": -146.5,
+   "loc": "LAVA: LG/YA DOOR",
+   "target": "target4",
+   "bounds": {
+    "min": [
+     1551,
+     -526,
+     -187
+    ],
+    "max": [
+     1607,
+     -520,
+     -106
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED SLIME/RA",
+   "x": 637,
+   "y": -1378,
+   "z": -271.5,
+   "loc": "RED SLIME/RA",
+   "target": "target1",
+   "bounds": {
+    "min": [
+     604,
+     -1409,
+     -298
+    ],
+    "max": [
+     670,
+     -1347,
+     -245
+    ]
+   }
+  }
+ ]
+}

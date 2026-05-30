@@ -545,6 +545,21 @@
                             <div class="map-legend" id="map-legend">
                                 <h4>Players</h4>
                             </div>
+                            <div id="map-entities-panel" class="map-entities-panel" style="display: none;">
+                                <h4>Map entities</h4>
+                                <div class="map-entity-filters">
+                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="weapon" checked><span class="map-entity-swatch" style="background:#ff6b6b"></span>Weapons</label>
+                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="armor" checked><span class="map-entity-swatch" style="background:#ffc107"></span>Armor</label>
+                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="health" checked><span class="map-entity-swatch" style="background:#00c853"></span>Health</label>
+                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="ammo" checked><span class="map-entity-swatch" style="background:#b0a070"></span>Ammo</label>
+                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="powerup" checked><span class="map-entity-swatch" style="background:#2196f3"></span>Powerups</label>
+                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="teleporter" checked><span class="map-entity-swatch" style="background:#b388ff"></span>Teleporters</label>
+                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="spawn"><span class="map-entity-swatch" style="background:#888"></span>Spawns</label>
+                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="button"><span class="map-entity-swatch" style="background:#ff9800"></span>Buttons</label>
+                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="door"><span class="map-entity-swatch" style="background:#a1887f"></span>Doors</label>
+                                </div>
+                                <p class="map-entity-hint">Static map layout. Arrows link teleport entrance → exit.</p>
+                            </div>
                             <div class="map-sidebar-row">
                                 <div id="map-items-panel" class="map-items-panel" style="display: none;">
                                     <h4>Items</h4>
@@ -560,6 +575,8 @@
                         </div>
                     </div>
                     <div class="map-track-controls">
+                        <button id="map-learn-toggle" class="map-learn-toggle" title="Study the map's item & teleporter layout" style="display: none;">Learn map</button>
+                        <span class="map-track-sep" aria-hidden="true"></span>
                         <span class="map-trail-label">Trails:</span>
                         <button id="map-trails-all">All</button>
                         <button id="map-trails-none">None</button>
@@ -581,6 +598,14 @@
                         <select id="map-follow" class="map-trail-select"></select>
                         <button id="map-reset-view" title="Reset pan / zoom">Reset view</button>
                         <button id="map-fullscreen" title="Toggle fullscreen">Fullscreen</button>
+                    </div>
+                    <div id="map-entities-table-wrap" class="map-entities-table-wrap" style="display: none;">
+                        <table class="stats-table">
+                            <thead>
+                                <tr><th>Class</th><th>Type</th><th>Name</th><th>Loc</th><th>Destination</th></tr>
+                            </thead>
+                            <tbody id="map-entities-table-body"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>

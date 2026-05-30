@@ -1,0 +1,1003 @@
+{
+ "map": "anwalk2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL",
+   "x": 864,
+   "y": -902,
+   "z": 16,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     841,
+     -903,
+     -31
+    ],
+    "max": [
+     887,
+     -901,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent",
+   "x": 26,
+   "y": -936,
+   "z": 52,
+   "loc": "Pent",
+   "bounds": {
+    "min": [
+     1,
+     -939,
+     1
+    ],
+    "max": [
+     51,
+     -933,
+     103
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.door",
+   "x": -26,
+   "y": -936,
+   "z": 52,
+   "loc": "Quad.door",
+   "bounds": {
+    "min": [
+     -51,
+     -939,
+     1
+    ],
+    "max": [
+     -1,
+     -933,
+     103
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Ring",
+   "x": 1524,
+   "y": 192,
+   "z": 24,
+   "loc": "Ring",
+   "bounds": {
+    "min": [
+     1521,
+     169,
+     -23
+    ],
+    "max": [
+     1527,
+     215,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cellar.SNG-1",
+   "x": -32,
+   "y": -8,
+   "z": -240,
+   "loc": "cellar.SNG",
+   "bounds": {
+    "min": [
+     -79,
+     -14,
+     -246
+    ],
+    "max": [
+     15,
+     -2,
+     -234
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cellar.SNG-2",
+   "x": -32,
+   "y": -8,
+   "z": -196,
+   "loc": "cellar.SNG",
+   "bounds": {
+    "min": [
+     -79,
+     -14,
+     -202
+    ],
+    "max": [
+     15,
+     -2,
+     -190
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cellar.SNG-3",
+   "x": -32,
+   "y": -8,
+   "z": -152,
+   "loc": "cellar.SNG",
+   "bounds": {
+    "min": [
+     -79,
+     -14,
+     -158
+    ],
+    "max": [
+     15,
+     -2,
+     -146
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.MH",
+   "x": 1498,
+   "y": -576,
+   "z": 184,
+   "loc": "water.MH",
+   "bounds": {
+    "min": [
+     1497,
+     -599,
+     145
+    ],
+    "max": [
+     1499,
+     -553,
+     223
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.high-1",
+   "x": 1664,
+   "y": -1640,
+   "z": 104,
+   "loc": "water.high",
+   "bounds": {
+    "min": [
+     1601,
+     -1646.5,
+     97.5
+    ],
+    "max": [
+     1727,
+     -1633.5,
+     110.5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.high-2",
+   "x": 1664,
+   "y": -1640,
+   "z": 136,
+   "loc": "water.high",
+   "bounds": {
+    "min": [
+     1601,
+     -1646.5,
+     129.5
+    ],
+    "max": [
+     1727,
+     -1633.5,
+     142.5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.high-3",
+   "x": 1664,
+   "y": -1640,
+   "z": 168,
+   "loc": "water.high",
+   "bounds": {
+    "min": [
+     1601,
+     -1646.5,
+     161.5
+    ],
+    "max": [
+     1727,
+     -1633.5,
+     174.5
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Quad.door",
+   "x": -176,
+   "y": -1072,
+   "z": 0,
+   "loc": "Quad.door"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cellar.SNG",
+   "x": 40,
+   "y": 8,
+   "z": -256,
+   "loc": "cellar.SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "water.ammo",
+   "x": 1824,
+   "y": -264,
+   "z": -80,
+   "loc": "water.ammo",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 1056,
+   "y": -592,
+   "z": -64,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Pent",
+   "x": 136,
+   "y": -624,
+   "z": 0,
+   "loc": "Pent",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad-1",
+   "x": 368,
+   "y": -488,
+   "z": -64,
+   "loc": "Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad-2",
+   "x": 368,
+   "y": -440,
+   "z": -64,
+   "loc": "Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RA.up",
+   "x": 1168,
+   "y": 16,
+   "z": 80,
+   "loc": "RA.up",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Ring",
+   "x": 1248,
+   "y": 336,
+   "z": 56,
+   "loc": "Ring",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "cellar.RL",
+   "x": 368,
+   "y": 544,
+   "z": -480,
+   "loc": "cellar.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "cellar.SNG",
+   "x": -144,
+   "y": 192,
+   "z": -256,
+   "loc": "cellar.SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "water.jetty",
+   "x": 1576,
+   "y": -784,
+   "z": -84,
+   "loc": "water.jetty",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Pent",
+   "x": 144,
+   "y": -816,
+   "z": 112,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.door",
+   "x": 336,
+   "y": -1136,
+   "z": 0,
+   "loc": "Quad.door"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "cellar.RL",
+   "x": 800,
+   "y": 544,
+   "z": -480,
+   "loc": "cellar.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "cellar.SNG",
+   "x": -144,
+   "y": 16,
+   "z": -256,
+   "loc": "cellar.SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water.ammo",
+   "x": 1560,
+   "y": -424,
+   "z": -80,
+   "loc": "water.ammo"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "water",
+   "x": 1328,
+   "y": -1312,
+   "z": -192,
+   "loc": "water"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "GL.MH",
+   "x": 1048,
+   "y": -976,
+   "z": 48,
+   "loc": "GL.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "Pent.YA",
+   "x": -16,
+   "y": -16,
+   "z": 246,
+   "loc": "Pent.YA",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "water.MH",
+   "x": 1344,
+   "y": -392,
+   "z": 144,
+   "loc": "water.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad.door",
+   "x": 400,
+   "y": -1392,
+   "z": 0,
+   "loc": "Quad.door"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Ring",
+   "x": 1248,
+   "y": 80,
+   "z": -64,
+   "loc": "Ring"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "cellar.RL-1",
+   "x": 776,
+   "y": 216,
+   "z": -272,
+   "loc": "cellar.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "cellar.RL-2",
+   "x": 824,
+   "y": 216,
+   "z": -272,
+   "loc": "cellar.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water",
+   "x": 1008,
+   "y": -1184,
+   "z": -192,
+   "loc": "water"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water.MH-1",
+   "x": 1440,
+   "y": -400,
+   "z": 144,
+   "loc": "water.MH"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water.MH-2",
+   "x": 1440,
+   "y": -360,
+   "z": 144,
+   "loc": "water.MH"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water.ammo",
+   "x": 1824,
+   "y": -400,
+   "z": -80,
+   "loc": "water.ammo"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Pent",
+   "x": 0,
+   "y": 0,
+   "z": 80,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 576,
+   "y": -608,
+   "z": 24,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": 1008,
+   "y": 144,
+   "z": -24,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "Ring",
+   "x": 1408,
+   "y": 384,
+   "z": 40,
+   "loc": "Ring"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "cellar.RL",
+   "x": 600,
+   "y": 344,
+   "z": -494,
+   "loc": "cellar.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL",
+   "x": 1496,
+   "y": -744,
+   "z": -64,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad",
+   "x": 728,
+   "y": -1384,
+   "z": 0,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "cellar.SNG",
+   "x": 96,
+   "y": 8,
+   "z": -256,
+   "loc": "cellar.SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "water.ammo",
+   "x": 1824,
+   "y": -136,
+   "z": -80,
+   "loc": "water.ammo"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "water.jetty",
+   "x": 984,
+   "y": -1488,
+   "z": -88,
+   "loc": "water.jetty"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad",
+   "x": 688,
+   "y": -784,
+   "z": -64,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RA",
+   "x": 1168,
+   "y": 272,
+   "z": -24,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RA.entry",
+   "x": 1456,
+   "y": -264,
+   "z": -64,
+   "loc": "RA.entry"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "cellar.MH",
+   "x": 96,
+   "y": -168,
+   "z": -254,
+   "loc": "cellar.MH"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "cellar.RL",
+   "x": 368,
+   "y": 120,
+   "z": -480,
+   "loc": "cellar.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "water",
+   "x": 1696,
+   "y": -1328,
+   "z": -192,
+   "loc": "water"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "water.MH",
+   "x": 1440,
+   "y": -440,
+   "z": 144,
+   "loc": "water.MH"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "water.high",
+   "x": 1888,
+   "y": -1024,
+   "z": 32,
+   "loc": "water.high"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "cellar.SNG",
+   "x": 64,
+   "y": 128,
+   "z": -256,
+   "loc": "cellar.SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Quad.door",
+   "x": 0,
+   "y": -1152,
+   "z": -8,
+   "loc": "Quad.door"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "cellar.MH",
+   "x": -368,
+   "y": -240,
+   "z": -254,
+   "loc": "cellar.MH"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": 1504,
+   "y": -800,
+   "z": -40,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.door-1",
+   "x": -160,
+   "y": -1376,
+   "z": 24,
+   "loc": "Quad.door"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.door-2",
+   "x": 160,
+   "y": -1376,
+   "z": 24,
+   "loc": "Quad.door"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.entry",
+   "x": 1440,
+   "y": -160,
+   "z": -40,
+   "loc": "RA.entry"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cellar.MH",
+   "x": -528,
+   "y": -400,
+   "z": -230,
+   "loc": "cellar.MH"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cellar.RL",
+   "x": 528,
+   "y": 560,
+   "z": -456,
+   "loc": "cellar.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cellar.SNG",
+   "x": -128,
+   "y": 128,
+   "z": -230,
+   "loc": "cellar.SNG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "water.high",
+   "x": 1872,
+   "y": -1568,
+   "z": 104,
+   "loc": "water.high"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Pent",
+   "x": 224,
+   "y": -224,
+   "z": 0,
+   "loc": "Pent",
+   "targetName": "pent"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Pent.YA",
+   "x": 0,
+   "y": -754,
+   "z": 312,
+   "loc": "Pent.YA",
+   "targetName": "kirche"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA",
+   "x": 1008,
+   "y": 296,
+   "z": -24,
+   "loc": "RA",
+   "targetName": "red"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA.up",
+   "x": 840,
+   "y": 416,
+   "z": 88,
+   "loc": "RA.up",
+   "targetName": "ra-top"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "water.high",
+   "x": 1888,
+   "y": -1008,
+   "z": 32,
+   "loc": "water.high",
+   "targetName": "water"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent",
+   "x": 328,
+   "y": -224,
+   "z": 72,
+   "loc": "Pent",
+   "target": "kirche",
+   "bounds": {
+    "min": [
+     320,
+     -255,
+     25
+    ],
+    "max": [
+     336,
+     -193,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA",
+   "x": 1008,
+   "y": 376,
+   "z": 48,
+   "loc": "RA",
+   "target": "water",
+   "bounds": {
+    "min": [
+     977,
+     368,
+     1
+    ],
+    "max": [
+     1039,
+     384,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "cellar.RL",
+   "x": 364,
+   "y": 560,
+   "z": -200,
+   "loc": "cellar.RL",
+   "target": "red",
+   "bounds": {
+    "min": [
+     361,
+     529,
+     -247
+    ],
+    "max": [
+     367,
+     591,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "cellar.SNG",
+   "x": -32,
+   "y": -116,
+   "z": -176,
+   "loc": "cellar.SNG",
+   "target": "pent",
+   "bounds": {
+    "min": [
+     -63,
+     -119,
+     -223
+    ],
+    "max": [
+     -1,
+     -113,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water.high-1",
+   "x": 1664,
+   "y": -1676,
+   "z": 144,
+   "loc": "water.high",
+   "target": "pent",
+   "bounds": {
+    "min": [
+     1633,
+     -1679,
+     97
+    ],
+    "max": [
+     1695,
+     -1673,
+     191
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water.high-2",
+   "x": 1972,
+   "y": -1008,
+   "z": 96,
+   "loc": "water.high",
+   "target": "ra-top",
+   "bounds": {
+    "min": [
+     1969,
+     -1039,
+     49
+    ],
+    "max": [
+     1975,
+     -977,
+     143
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,636 @@
+{
+ "map": "cmt2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.bridge",
+   "x": -172,
+   "y": -1124,
+   "z": 400,
+   "loc": "RA.bridge",
+   "bounds": {
+    "min": [
+     -263,
+     -1135,
+     297
+    ],
+    "max": [
+     -81,
+     -1113,
+     503
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Quad",
+   "x": -696,
+   "y": 472,
+   "z": 224,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Ring",
+   "x": -432,
+   "y": -56,
+   "z": 0,
+   "loc": "Ring"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "octagon",
+   "x": 80,
+   "y": -240,
+   "z": 240,
+   "loc": "octagon"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA.stairs",
+   "x": 864,
+   "y": -984,
+   "z": 96,
+   "loc": "GA.stairs"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": -1168,
+   "y": 592,
+   "z": 0,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GA.high",
+   "x": 688,
+   "y": -608,
+   "z": 0,
+   "loc": "GA.high",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GL",
+   "x": -1112,
+   "y": 696,
+   "z": -32,
+   "loc": "GL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad.stairs",
+   "x": -1240,
+   "y": -56,
+   "z": 72,
+   "loc": "Quad.stairs",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad",
+   "x": -1104,
+   "y": 664,
+   "z": 192,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.entry",
+   "x": 504,
+   "y": -1288,
+   "z": 160,
+   "loc": "RA.entry"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Ring",
+   "x": -440,
+   "y": -416,
+   "z": -16,
+   "loc": "Ring"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA-1",
+   "x": -1416,
+   "y": -576,
+   "z": -56,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA-2",
+   "x": -1328,
+   "y": -752,
+   "z": -80,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "hole",
+   "x": 432,
+   "y": 352,
+   "z": 176,
+   "loc": "hole"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "pool.stairs",
+   "x": -240,
+   "y": -864,
+   "z": 88,
+   "loc": "pool.stairs"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": -192,
+   "y": -1680,
+   "z": 16,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "YA.MH",
+   "x": -1344,
+   "y": -992,
+   "z": 80,
+   "loc": "YA.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "cross.MH",
+   "x": 336,
+   "y": -295,
+   "z": 192,
+   "loc": "cross.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "GA.low",
+   "x": 600,
+   "y": -800,
+   "z": -16,
+   "loc": "GA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RL.ledge",
+   "x": 424,
+   "y": 328,
+   "z": 4,
+   "loc": "RL.ledge",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Ring",
+   "x": 24,
+   "y": -440,
+   "z": -16,
+   "loc": "Ring",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "YA",
+   "x": -1336,
+   "y": -240,
+   "z": -64,
+   "loc": "YA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "YA.MH",
+   "x": -1600,
+   "y": -1024,
+   "z": 88,
+   "loc": "YA.MH",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "hole",
+   "x": 632,
+   "y": 128,
+   "z": 200,
+   "loc": "hole",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "pool",
+   "x": 200,
+   "y": -832,
+   "z": -16,
+   "loc": "pool",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "NG",
+   "x": -928,
+   "y": -240,
+   "z": -40,
+   "loc": "NG"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": -692,
+   "y": 700,
+   "z": 240,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": -192,
+   "y": -1552,
+   "z": 152,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "Ring",
+   "x": -220,
+   "y": -244,
+   "z": 20,
+   "loc": "Ring"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL",
+   "x": 312,
+   "y": 40,
+   "z": -48,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GA.low",
+   "x": 864,
+   "y": -624,
+   "z": 48,
+   "loc": "GA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.up",
+   "x": -1520,
+   "y": -496,
+   "z": 104,
+   "loc": "YA.up"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "octagon",
+   "x": -512,
+   "y": -240,
+   "z": 256,
+   "loc": "octagon"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "water.RA",
+   "x": -160,
+   "y": -1424,
+   "z": -160,
+   "loc": "water.RA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Ring",
+   "x": 16,
+   "y": -64,
+   "z": 0,
+   "loc": "Ring"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "YA",
+   "x": -1400,
+   "y": -224,
+   "z": -48,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "hole",
+   "x": 632,
+   "y": 32,
+   "z": 168,
+   "loc": "hole"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Quad",
+   "x": -1104,
+   "y": 496,
+   "z": 248,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": -1432,
+   "y": -456,
+   "z": -48,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GA.high",
+   "x": 664,
+   "y": -656,
+   "z": 0,
+   "loc": "GA.high"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": -1040,
+   "y": 608,
+   "z": -48,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad-1",
+   "x": -1104,
+   "y": 592,
+   "z": 200,
+   "loc": "Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad-2",
+   "x": -680,
+   "y": 528,
+   "z": 192,
+   "loc": "Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.bridge",
+   "x": -160,
+   "y": -1208,
+   "z": 140,
+   "loc": "RA.bridge"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA",
+   "x": -1304,
+   "y": -568,
+   "z": -88,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.MH",
+   "x": -1488,
+   "y": -1008,
+   "z": 80,
+   "loc": "YA.MH"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "hole",
+   "x": 608,
+   "y": 376,
+   "z": 176,
+   "loc": "hole"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "octagon",
+   "x": -200,
+   "y": -24,
+   "z": 216,
+   "loc": "octagon"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "pool",
+   "x": 328,
+   "y": -816,
+   "z": -16,
+   "loc": "pool"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL",
+   "x": -864,
+   "y": 616,
+   "z": -80,
+   "loc": "GL",
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "LG",
+   "x": -192,
+   "y": -1832,
+   "z": -16,
+   "loc": "LG",
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RL.ledge",
+   "x": 280,
+   "y": 345,
+   "z": -64,
+   "loc": "RL.ledge",
+   "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL",
+   "x": -823,
+   "y": 608,
+   "z": -24,
+   "loc": "GL",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     -838,
+     577,
+     -79
+    ],
+    "max": [
+     -808,
+     639,
+     31
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.bridge",
+   "x": -160,
+   "y": -1087,
+   "z": 176,
+   "loc": "RA.bridge",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -191,
+     -1102,
+     121
+    ],
+    "max": [
+     -129,
+     -1072,
+     231
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring",
+   "x": -232,
+   "y": -504,
+   "z": 28,
+   "loc": "Ring",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -267,
+     -511,
+     -63
+    ],
+    "max": [
+     -197,
+     -497,
+     119
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "hole",
+   "x": 312,
+   "y": 48,
+   "z": 100,
+   "loc": "hole",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     249,
+     1,
+     97
+    ],
+    "max": [
+     375,
+     95,
+     103
+    ]
+   }
+  }
+ ]
+}

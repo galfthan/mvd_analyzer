@@ -1,0 +1,618 @@
+{
+ "map": "obsidian",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad",
+   "x": 352,
+   "y": -52,
+   "z": -220,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     331,
+     -73,
+     -225
+    ],
+    "max": [
+     373,
+     -31,
+     -215
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "lift",
+   "x": -160,
+   "y": 800,
+   "z": -480,
+   "loc": "lift",
+   "bounds": {
+    "min": [
+     -181,
+     723,
+     -485
+    ],
+    "max": [
+     -139,
+     877,
+     -475
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "hall-1",
+   "x": -288,
+   "y": 688,
+   "z": -160,
+   "loc": "hall",
+   "bounds": {
+    "min": [
+     -375,
+     685,
+     -239
+    ],
+    "max": [
+     -201,
+     691,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "hall-2",
+   "x": 352,
+   "y": -12,
+   "z": -150,
+   "loc": "hall",
+   "bounds": {
+    "min": [
+     301,
+     -15,
+     -219
+    ],
+    "max": [
+     403,
+     -9,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "lift",
+   "x": -288,
+   "y": 800,
+   "z": -588,
+   "loc": "lift",
+   "bounds": {
+    "min": [
+     -367,
+     721,
+     -703
+    ],
+    "max": [
+     -209,
+     879,
+     -473
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "cross",
+   "x": -776,
+   "y": -64,
+   "z": -96,
+   "loc": "cross"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 816,
+   "y": 16,
+   "z": -64,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "MH.low-1",
+   "x": 656,
+   "y": -1072,
+   "z": -208,
+   "loc": "MH.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "MH.low-2",
+   "x": 656,
+   "y": -944,
+   "z": -208,
+   "loc": "MH.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad.beside",
+   "x": 656,
+   "y": 208,
+   "z": -256,
+   "loc": "Quad.beside",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL",
+   "x": -368,
+   "y": 48,
+   "z": -516,
+   "loc": "RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Ring",
+   "x": -112,
+   "y": -356,
+   "z": -40,
+   "loc": "Ring",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "YA-1",
+   "x": 80,
+   "y": 464,
+   "z": -64,
+   "loc": "YA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "YA-2",
+   "x": 784,
+   "y": 464,
+   "z": -36,
+   "loc": "YA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "cross",
+   "x": -912,
+   "y": -80,
+   "z": -96,
+   "loc": "cross",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "lift",
+   "x": 136,
+   "y": 384,
+   "z": -416,
+   "loc": "lift",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL",
+   "x": 912,
+   "y": -368,
+   "z": -16,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad",
+   "x": 560,
+   "y": -144,
+   "z": -172,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.beside",
+   "x": 592,
+   "y": 208,
+   "z": -256,
+   "loc": "Quad.beside"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL",
+   "x": 336,
+   "y": 40,
+   "z": -496,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Ring.balcony",
+   "x": 272,
+   "y": -368,
+   "z": -16,
+   "loc": "Ring.balcony"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "cross",
+   "x": -448,
+   "y": -272,
+   "z": -88,
+   "loc": "cross"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "hall",
+   "x": 336,
+   "y": 528,
+   "z": -220,
+   "loc": "hall"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "lift-1",
+   "x": -368,
+   "y": 272,
+   "z": -480,
+   "loc": "lift"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "lift-2",
+   "x": -304,
+   "y": 784,
+   "z": -240,
+   "loc": "lift"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water",
+   "x": -704,
+   "y": -208,
+   "z": -336,
+   "loc": "water"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH",
+   "x": 240,
+   "y": -880,
+   "z": -128,
+   "loc": "MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.high",
+   "x": -112,
+   "y": -1312,
+   "z": -36,
+   "loc": "MH.high",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad.beside",
+   "x": 592,
+   "y": 336,
+   "z": -256,
+   "loc": "Quad.beside"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "YA",
+   "x": 776,
+   "y": 520,
+   "z": -36,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "hall",
+   "x": 272,
+   "y": 280,
+   "z": -256,
+   "loc": "hall",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "lift",
+   "x": -368,
+   "y": 336,
+   "z": -480,
+   "loc": "lift"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 256,
+   "y": -192,
+   "z": -192,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "Ring",
+   "x": -248,
+   "y": -632,
+   "z": 24,
+   "loc": "Ring"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL",
+   "x": 352,
+   "y": -384,
+   "z": -464,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL.rox",
+   "x": 720,
+   "y": -688,
+   "z": -40,
+   "loc": "GL.rox",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH",
+   "x": 152,
+   "y": -936,
+   "z": -128,
+   "loc": "MH"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad.beside",
+   "x": 656,
+   "y": 336,
+   "z": -256,
+   "loc": "Quad.beside"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Ring.balcony-1",
+   "x": 240,
+   "y": -544,
+   "z": -16,
+   "loc": "Ring.balcony"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Ring.balcony-2",
+   "x": 288,
+   "y": -496,
+   "z": -16,
+   "loc": "Ring.balcony"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "hall",
+   "x": 400,
+   "y": 280,
+   "z": -256,
+   "loc": "hall",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "lift",
+   "x": -368,
+   "y": 400,
+   "z": -480,
+   "loc": "lift",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "MH.low",
+   "x": 672,
+   "y": -992,
+   "z": -208,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "hall",
+   "x": -0,
+   "y": 544,
+   "z": -220,
+   "loc": "hall"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "YA.SSG",
+   "x": 72,
+   "y": -72,
+   "z": -36,
+   "loc": "YA.SSG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "lift",
+   "x": -160,
+   "y": 800,
+   "z": -474,
+   "loc": "lift"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 352,
+   "y": 96,
+   "z": -64,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": 896,
+   "y": -64,
+   "z": -40,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "MH.low",
+   "x": 288,
+   "y": -864,
+   "z": -204,
+   "loc": "MH.low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.beside",
+   "x": 800,
+   "y": 128,
+   "z": -232,
+   "loc": "Quad.beside"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL",
+   "x": -320,
+   "y": -320,
+   "z": -488,
+   "loc": "RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA",
+   "x": 352,
+   "y": 640,
+   "z": -40,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cross",
+   "x": -624,
+   "y": -496,
+   "z": -100,
+   "loc": "cross"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "hall",
+   "x": -624,
+   "y": 560,
+   "z": -232,
+   "loc": "hall"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "lift",
+   "x": -0,
+   "y": 832,
+   "z": -456,
+   "loc": "lift"
+  }
+ ]
+}

@@ -1,0 +1,116 @@
+{
+ "map": "race6",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": -2848,
+   "y": 0,
+   "z": 2872
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -2976,
+   "y": 160,
+   "z": 2856,
+   "targetName": "teleport"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -608,
+   "y": 608,
+   "z": -1024,
+   "targetName": "kill"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 0,
+   "y": 0,
+   "z": -1312,
+   "target": "kill",
+   "bounds": {
+    "min": [
+     -959,
+     -959,
+     -1343
+    ],
+    "max": [
+     959,
+     959,
+     -1281
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 0,
+   "y": 0,
+   "z": -160,
+   "target": "kill",
+   "bounds": {
+    "min": [
+     -959,
+     -959,
+     -191
+    ],
+    "max": [
+     959,
+     959,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 0,
+   "y": 0,
+   "z": 1824,
+   "target": "kill",
+   "bounds": {
+    "min": [
+     -959,
+     -959,
+     1793
+    ],
+    "max": [
+     959,
+     959,
+     1855
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 0,
+   "y": 1020,
+   "z": -928,
+   "target": "teleport",
+   "bounds": {
+    "min": [
+     -95,
+     1017,
+     -1023
+    ],
+    "max": [
+     95,
+     1023,
+     -833
+    ]
+   }
+  }
+ ]
+}

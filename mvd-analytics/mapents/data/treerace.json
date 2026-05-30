@@ -1,0 +1,104 @@
+{
+ "map": "treerace",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-1",
+   "x": -154,
+   "y": -992,
+   "z": 192
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-2",
+   "x": 274,
+   "y": -992,
+   "z": 192
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-3",
+   "x": 274,
+   "y": -872,
+   "z": 168
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl",
+   "x": 90,
+   "y": 2372,
+   "z": 3504
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -73,
+   "y": 2626,
+   "z": 3556
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -47,
+   "y": 2529,
+   "z": 3554
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 219,
+   "y": 2518,
+   "z": 3592
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 251,
+   "y": 2630,
+   "z": 3592
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 134,
+   "y": 2589,
+   "z": 3611,
+   "targetName": "target1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 1232.5,
+   "y": -1770.5,
+   "z": -2476,
+   "target": "target1",
+   "bounds": {
+    "min": [
+     1209,
+     -1824,
+     -2559
+    ],
+    "max": [
+     1256,
+     -1717,
+     -2393
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,1598 @@
+{
+ "map": "twctf2m2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(blue base) lower entrance",
+   "x": -160,
+   "y": -1136,
+   "z": 660,
+   "loc": "(blue base) lower entrance",
+   "bounds": {
+    "min": [
+     -183,
+     -1159,
+     657
+    ],
+    "max": [
+     -137,
+     -1113,
+     663
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(blue base) main entrance",
+   "x": 716,
+   "y": -914,
+   "z": 1208,
+   "loc": "(blue base) main entrance",
+   "bounds": {
+    "min": [
+     689,
+     -915,
+     1185
+    ],
+    "max": [
+     743,
+     -913,
+     1231
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(blue base) top entrance",
+   "x": -1278,
+   "y": -48,
+   "z": 1288,
+   "loc": "(blue base) top entrance",
+   "bounds": {
+    "min": [
+     -1279,
+     -79,
+     1257
+    ],
+    "max": [
+     -1277,
+     -17,
+     1319
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(red base) bottom entrance",
+   "x": -160,
+   "y": 1728,
+   "z": 660,
+   "loc": "(red base) bottom entrance",
+   "bounds": {
+    "min": [
+     -183,
+     1705,
+     657
+    ],
+    "max": [
+     -137,
+     1751,
+     663
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(red base) top entrance",
+   "x": -1278,
+   "y": 640,
+   "z": 1288,
+   "loc": "(red base) top entrance",
+   "bounds": {
+    "min": [
+     -1279,
+     609,
+     1257
+    ],
+    "max": [
+     -1277,
+     671,
+     1319
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "(red base)main entrance",
+   "x": 716,
+   "y": 1506,
+   "z": 1208,
+   "loc": "(red base)main entrance",
+   "bounds": {
+    "min": [
+     689,
+     1505,
+     1185
+    ],
+    "max": [
+     743,
+     1507,
+     1231
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(blue base) water entrance/GL",
+   "x": -688,
+   "y": -32,
+   "z": 1484,
+   "loc": "(blue base) water entrance/GL",
+   "bounds": {
+    "min": [
+     -751,
+     -95,
+     1401
+    ],
+    "max": [
+     -625,
+     31,
+     1567
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(blue) Quad-1",
+   "x": -184,
+   "y": -448,
+   "z": 732,
+   "loc": "(blue) Quad",
+   "bounds": {
+    "min": [
+     -191,
+     -455,
+     657
+    ],
+    "max": [
+     -177,
+     -441,
+     807
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(blue) Quad-2",
+   "x": -136,
+   "y": -448,
+   "z": 732,
+   "loc": "(blue) Quad",
+   "bounds": {
+    "min": [
+     -143,
+     -455,
+     657
+    ],
+    "max": [
+     -129,
+     -441,
+     807
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "(blue) RL",
+   "x": 1496,
+   "y": -1232,
+   "z": 1016,
+   "loc": "(blue) RL",
+   "bounds": {
+    "min": [
+     1489,
+     -1279,
+     961
+    ],
+    "max": [
+     1503,
+     -1185,
+     1071
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(red base) water entrance",
+   "x": -688,
+   "y": 624,
+   "z": 1484,
+   "loc": "(red base) water entrance",
+   "bounds": {
+    "min": [
+     -751,
+     561,
+     1401
+    ],
+    "max": [
+     -625,
+     687,
+     1567
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(red) Quad-1",
+   "x": -184,
+   "y": 1040,
+   "z": 732,
+   "loc": "(red) Quad",
+   "bounds": {
+    "min": [
+     -191,
+     1033,
+     657
+    ],
+    "max": [
+     -177,
+     1047,
+     807
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "(red) Quad-2",
+   "x": -136,
+   "y": 1040,
+   "z": 732,
+   "loc": "(red) Quad",
+   "bounds": {
+    "min": [
+     -143,
+     1033,
+     657
+    ],
+    "max": [
+     -129,
+     1047,
+     807
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "(red) RL",
+   "x": 1496,
+   "y": 1824,
+   "z": 1016,
+   "loc": "(red) RL",
+   "bounds": {
+    "min": [
+     1489,
+     1777,
+     961
+    ],
+    "max": [
+     1503,
+     1871,
+     1071
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "(blue) EyE's",
+   "x": 584,
+   "y": -664,
+   "z": 1336,
+   "loc": "(blue) EyE's",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "(blue) LG/100H",
+   "x": 160,
+   "y": -48,
+   "z": 744,
+   "loc": "(blue) LG/100H",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "(red) EYE's",
+   "x": 584,
+   "y": 1232,
+   "z": 1336,
+   "loc": "(red) EYE's",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "(red) LG/1ooH",
+   "x": 168,
+   "y": 608,
+   "z": 744,
+   "loc": "(red) LG/1ooH",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "(blue) EyE's",
+   "x": 1040,
+   "y": -960,
+   "z": 1440,
+   "loc": "(blue) EyE's"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "(red) EYE's",
+   "x": 1040,
+   "y": 1560,
+   "z": 1440,
+   "loc": "(red) EYE's"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "(blue base) water entrance/GL",
+   "x": -688,
+   "y": -32,
+   "z": 1232,
+   "loc": "(blue base) water entrance/GL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "(red base) water entrance",
+   "x": -688,
+   "y": 624,
+   "z": 1232,
+   "loc": "(red base) water entrance"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "(blue base) s'shot gun",
+   "x": -1576,
+   "y": -296,
+   "z": 1096,
+   "loc": "(blue base) s'shot gun",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "(blue) Flag",
+   "x": -1576,
+   "y": -1008,
+   "z": 1096,
+   "loc": "(blue) Flag",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "(red base)Flag-1",
+   "x": -1576,
+   "y": 888,
+   "z": 1096,
+   "loc": "(red base)Flag",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "(red base)Flag-2",
+   "x": -1576,
+   "y": 1600,
+   "z": 1096,
+   "loc": "(red base)Flag",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(blue base) main entrance-1",
+   "x": 616,
+   "y": -640,
+   "z": 984,
+   "loc": "(blue base) main entrance"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(blue base) main entrance-2",
+   "x": 744,
+   "y": -752,
+   "z": 672,
+   "loc": "(blue base) main entrance"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(blue base) main entrance-3",
+   "x": 1464,
+   "y": -664,
+   "z": 984,
+   "loc": "(blue base) main entrance"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(blue base) top ledge/teleport",
+   "x": -568,
+   "y": -920,
+   "z": 1248,
+   "loc": "(blue base) top ledge/teleport"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(blue) Flag-1",
+   "x": -1632,
+   "y": -1008,
+   "z": 1096,
+   "loc": "(blue) Flag"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(blue) Flag-2",
+   "x": -1632,
+   "y": -296,
+   "z": 1096,
+   "loc": "(blue) Flag"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(red base) Top ledge/teleport",
+   "x": -568,
+   "y": 1512,
+   "z": 1248,
+   "loc": "(red base) Top ledge/teleport"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(red base)Flag-1",
+   "x": -1632,
+   "y": 888,
+   "z": 1096,
+   "loc": "(red base)Flag"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(red base)Flag-2",
+   "x": -1632,
+   "y": 1600,
+   "z": 1096,
+   "loc": "(red base)Flag"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(red base)main entrance-1",
+   "x": 600,
+   "y": 1192,
+   "z": 984,
+   "loc": "(red base)main entrance"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(red base)main entrance-2",
+   "x": 744,
+   "y": 1320,
+   "z": 672,
+   "loc": "(red base)main entrance"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "(red base)main entrance-3",
+   "x": 1464,
+   "y": 1176,
+   "z": 984,
+   "loc": "(red base)main entrance"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "(blue) LG/100H",
+   "x": 104,
+   "y": -32,
+   "z": 728,
+   "loc": "(blue) LG/100H"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "(red) LG/1ooH",
+   "x": 104,
+   "y": 624,
+   "z": 728,
+   "loc": "(red) LG/1ooH"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "(blue base) main entrance",
+   "x": 1560,
+   "y": -1248,
+   "z": 976,
+   "loc": "(blue base) main entrance",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "(blue) LG/100H",
+   "x": -256,
+   "y": -64,
+   "z": 608,
+   "loc": "(blue) LG/100H",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "(red) LG/1ooH",
+   "x": -256,
+   "y": 616,
+   "z": 608,
+   "loc": "(red) LG/1ooH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "(red) RL",
+   "x": 1560,
+   "y": 1808,
+   "z": 976,
+   "loc": "(red) RL",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "(blue base) snail gun-1",
+   "x": -1280,
+   "y": -1025,
+   "z": 952,
+   "loc": "(blue base) snail gun",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "(blue base) snail gun-2",
+   "x": -1280,
+   "y": -936,
+   "z": 953,
+   "loc": "(blue base) snail gun",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "(red base) by Snail gun-1",
+   "x": -1280,
+   "y": 920,
+   "z": 952,
+   "loc": "(red base) by Snail gun",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "(red base) by Snail gun-2",
+   "x": -1280,
+   "y": 1009,
+   "z": 953,
+   "loc": "(red base) by Snail gun",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "(blue) ramp by main door",
+   "x": 1040,
+   "y": -408,
+   "z": 968,
+   "loc": "(blue) ramp by main door"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "(red) ramp by main door",
+   "x": 1040,
+   "y": 1011,
+   "z": 968,
+   "loc": "(red) ramp by main door"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "top ledge/666",
+   "x": 616,
+   "y": 288,
+   "z": 1344,
+   "loc": "top ledge/666"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "(blue) Quad",
+   "x": 176,
+   "y": -512,
+   "z": 808,
+   "loc": "(blue) Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "(red) Quad",
+   "x": 176,
+   "y": 1104,
+   "z": 808,
+   "loc": "(red) Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "Red armour",
+   "x": 1464,
+   "y": 288,
+   "z": 1344,
+   "loc": "Red armour"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "(blue) EyE's",
+   "x": 1040,
+   "y": -760,
+   "z": 1624,
+   "loc": "(blue) EyE's",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "(red) EYE's",
+   "x": 1040,
+   "y": 1352,
+   "z": 1624,
+   "loc": "(red) EYE's",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "(blue) RL",
+   "x": 908,
+   "y": -1320,
+   "z": 968,
+   "loc": "(blue) RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "(red) RL",
+   "x": 908,
+   "y": 1912,
+   "z": 968,
+   "loc": "(red) RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "(blue base) on floor by rox",
+   "x": -422,
+   "y": -332,
+   "z": 1016,
+   "loc": "(blue base) on floor by rox"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "(blue) RL",
+   "x": 648,
+   "y": -1016,
+   "z": 1184,
+   "loc": "(blue) RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "(blue) Yello armour",
+   "x": -1096,
+   "y": -680,
+   "z": 1480,
+   "loc": "(blue) Yello armour",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "(red base) by Rox",
+   "x": -422,
+   "y": 924,
+   "z": 1016,
+   "loc": "(red base) by Rox"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "(red base)yellow armour",
+   "x": -1080,
+   "y": 1256,
+   "z": 1480,
+   "loc": "(red base)yellow armour",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "(red) RL",
+   "x": 648,
+   "y": 1608,
+   "z": 1184,
+   "loc": "(red) RL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "(blue base) s'shot gun-1",
+   "x": -1280,
+   "y": -416,
+   "z": 952,
+   "loc": "(blue base) s'shot gun"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "(blue base) s'shot gun-2",
+   "x": -1280,
+   "y": -328,
+   "z": 952,
+   "loc": "(blue base) s'shot gun",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "(blue) ramp by main door",
+   "x": 584,
+   "y": -428,
+   "z": 1336,
+   "loc": "(blue) ramp by main door",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "(red base) by S'shot gun-1",
+   "x": -1280,
+   "y": 1512,
+   "z": 952,
+   "loc": "(red base) by S'shot gun"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "(red base) by S'shot gun-2",
+   "x": -1280,
+   "y": 1600,
+   "z": 952,
+   "loc": "(red base) by S'shot gun",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "top ledge/666",
+   "x": 584,
+   "y": 984,
+   "z": 1336,
+   "loc": "top ledge/666",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "(blue base) snail gun",
+   "x": -1208,
+   "y": -976,
+   "z": 936,
+   "loc": "(blue base) snail gun"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "(red base) by Snail gun",
+   "x": -1208,
+   "y": 969,
+   "z": 936,
+   "loc": "(red base) by Snail gun"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "(blue base) s'shot gun",
+   "x": -1208,
+   "y": -368,
+   "z": 936,
+   "loc": "(blue base) s'shot gun"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "(red base) by S'shot gun",
+   "x": -1208,
+   "y": 1560,
+   "z": 936,
+   "loc": "(red base) by S'shot gun"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "(blue) Yello armour",
+   "x": -1192,
+   "y": -660,
+   "z": 1256,
+   "loc": "(blue) Yello armour"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "(red base)yellow armour",
+   "x": -1192,
+   "y": 1252,
+   "z": 1256,
+   "loc": "(red base)yellow armour"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(blue base) main entrance",
+   "x": 572,
+   "y": -944,
+   "z": 1192,
+   "loc": "(blue base) main entrance"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "(blue base) s'shot gun",
+   "x": -1520,
+   "y": -374,
+   "z": 1104,
+   "loc": "(blue base) s'shot gun"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "(blue base) snail gun",
+   "x": -1520,
+   "y": -1011,
+   "z": 1104,
+   "loc": "(blue base) snail gun"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(blue base) top entrance",
+   "x": -876,
+   "y": -284,
+   "z": 1260,
+   "loc": "(blue base) top entrance"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(blue) EyE's-1",
+   "x": 1464,
+   "y": -1128,
+   "z": 1360,
+   "loc": "(blue) EyE's"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(blue) EyE's-2",
+   "x": 1536,
+   "y": -704,
+   "z": 1344,
+   "loc": "(blue) EyE's"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "(blue) Flag-1",
+   "x": -1576,
+   "y": -792,
+   "z": 1104,
+   "loc": "(blue) Flag"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "(blue) Flag-2",
+   "x": -1576,
+   "y": -537,
+   "z": 1104,
+   "loc": "(blue) Flag"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "(blue) Flag-3",
+   "x": -1504,
+   "y": -622,
+   "z": 1104,
+   "loc": "(blue) Flag"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "(blue) Flag-4",
+   "x": -1448,
+   "y": -743,
+   "z": 1104,
+   "loc": "(blue) Flag"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(blue) Quad",
+   "x": 536,
+   "y": -704,
+   "z": 992,
+   "loc": "(blue) Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(blue) RL",
+   "x": 604,
+   "y": -1376,
+   "z": 992,
+   "loc": "(blue) RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "(blue) Yello armour-1",
+   "x": -1440,
+   "y": -409,
+   "z": 1256,
+   "loc": "(blue) Yello armour"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "(blue) Yello armour-2",
+   "x": -1400,
+   "y": -920,
+   "z": 1256,
+   "loc": "(blue) Yello armour"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "(red base) by Snail gun",
+   "x": -1536,
+   "y": 925,
+   "z": 1104,
+   "loc": "(red base) by Snail gun"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(red base) top entrance",
+   "x": -876,
+   "y": 876,
+   "z": 1260,
+   "loc": "(red base) top entrance"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "(red base)Flag-1",
+   "x": -1576,
+   "y": 1152,
+   "z": 1104,
+   "loc": "(red base)Flag"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "(red base)Flag-2",
+   "x": -1576,
+   "y": 1392,
+   "z": 1104,
+   "loc": "(red base)Flag"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "(red base)Flag-3",
+   "x": -1520,
+   "y": 1552,
+   "z": 1104,
+   "loc": "(red base)Flag"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "(red base)Flag-4",
+   "x": -1496,
+   "y": 1216,
+   "z": 1104,
+   "loc": "(red base)Flag"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "(red base)Flag-5",
+   "x": -1488,
+   "y": 1349,
+   "z": 1104,
+   "loc": "(red base)Flag"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "(red base)Flag-6",
+   "x": -1448,
+   "y": 1512,
+   "z": 1256,
+   "loc": "(red base)Flag"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(red base)main entrance",
+   "x": 536,
+   "y": 1296,
+   "z": 992,
+   "loc": "(red base)main entrance"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(red) EYE's-1",
+   "x": 1464,
+   "y": 1720,
+   "z": 1360,
+   "loc": "(red) EYE's"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(red) EYE's-2",
+   "x": 1536,
+   "y": 1304,
+   "z": 1344,
+   "loc": "(red) EYE's"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(red) RL-1",
+   "x": 572,
+   "y": 1536,
+   "z": 1192,
+   "loc": "(red) RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "(red) RL-2",
+   "x": 604,
+   "y": 1968,
+   "z": 992,
+   "loc": "(red) RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "lower 666-1",
+   "x": 784,
+   "y": 240,
+   "z": 752,
+   "loc": "lower 666"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "lower 666-2",
+   "x": 784,
+   "y": 352,
+   "z": 752,
+   "loc": "lower 666"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "yellow armour",
+   "x": -1432,
+   "y": 1018,
+   "z": 1256,
+   "loc": "yellow armour"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(blue base) hole above flag",
+   "x": -1736,
+   "y": -672,
+   "z": 1492,
+   "loc": "(blue base) hole above flag",
+   "targetName": "rocks2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(blue base) top ledge/teleport-1",
+   "x": -876,
+   "y": -1076,
+   "z": 1260,
+   "loc": "(blue base) top ledge/teleport",
+   "targetName": "otherside2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(blue base) top ledge/teleport-2",
+   "x": -656,
+   "y": -672,
+   "z": 1488,
+   "loc": "(blue base) top ledge/teleport",
+   "targetName": "blahugo2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(blue base) water entrance/GL",
+   "x": -408,
+   "y": 216,
+   "z": 1260,
+   "loc": "(blue base) water entrance/GL",
+   "targetName": "toflag2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(blue) EyE's-1",
+   "x": 1040,
+   "y": -880,
+   "z": 1612,
+   "loc": "(blue) EyE's",
+   "targetName": "quad2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(blue) EyE's-2",
+   "x": 1480,
+   "y": -488,
+   "z": 1344,
+   "loc": "(blue) EyE's",
+   "targetName": "jay2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(red base) Top ledge/teleport",
+   "x": -656,
+   "y": 1264,
+   "z": 1488,
+   "loc": "(red base) Top ledge/teleport",
+   "targetName": "blahugo"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(red base) by S'shot gun",
+   "x": -876,
+   "y": 1668,
+   "z": 1260,
+   "loc": "(red base) by S'shot gun",
+   "targetName": "otherside"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(red base) hole above flag",
+   "x": -1736,
+   "y": 1264,
+   "z": 1492,
+   "loc": "(red base) hole above flag",
+   "targetName": "rocks"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(red base) water entrance",
+   "x": -408,
+   "y": 376,
+   "z": 1260,
+   "loc": "(red base) water entrance",
+   "targetName": "toflag"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(red) EYE's-1",
+   "x": 1040,
+   "y": 1472,
+   "z": 1612,
+   "loc": "(red) EYE's",
+   "targetName": "quad"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "(red) EYE's-2",
+   "x": 1480,
+   "y": 1072,
+   "z": 1344,
+   "loc": "(red) EYE's",
+   "targetName": "jay"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(blue base) main entrance-1",
+   "x": 913,
+   "y": -612,
+   "z": 808,
+   "loc": "(blue base) main entrance",
+   "target": "quad2",
+   "bounds": {
+    "min": [
+     893,
+     -631,
+     761
+    ],
+    "max": [
+     933,
+     -593,
+     855
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(blue base) main entrance-2",
+   "x": 1664,
+   "y": -1232,
+   "z": 1008,
+   "loc": "(blue base) main entrance",
+   "target": "jay2",
+   "bounds": {
+    "min": [
+     1657,
+     -1263,
+     961
+    ],
+    "max": [
+     1671,
+     -1201,
+     1055
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(blue base) top ledge/teleport",
+   "x": -400,
+   "y": -672,
+   "z": 1304,
+   "loc": "(blue base) top ledge/teleport",
+   "target": "rocks2",
+   "bounds": {
+    "min": [
+     -407,
+     -695,
+     1257
+    ],
+    "max": [
+     -393,
+     -649,
+     1351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(blue) Flag",
+   "x": -1762,
+   "y": -672,
+   "z": 1216,
+   "loc": "(blue) Flag",
+   "target": "otherside2",
+   "bounds": {
+    "min": [
+     -1763,
+     -735,
+     1113
+    ],
+    "max": [
+     -1761,
+     -609,
+     1319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(blue) Quad",
+   "x": -160,
+   "y": -396,
+   "z": 724,
+   "loc": "(blue) Quad",
+   "target": "blahugo2",
+   "bounds": {
+    "min": [
+     -183,
+     -399,
+     673
+    ],
+    "max": [
+     -137,
+     -393,
+     775
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(red base) Top ledge/teleport",
+   "x": -400,
+   "y": 1264,
+   "z": 1304,
+   "loc": "(red base) Top ledge/teleport",
+   "target": "rocks",
+   "bounds": {
+    "min": [
+     -407,
+     1241,
+     1257
+    ],
+    "max": [
+     -393,
+     1287,
+     1351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(red base)Flag",
+   "x": -1762,
+   "y": 1264,
+   "z": 1216,
+   "loc": "(red base)Flag",
+   "target": "otherside",
+   "bounds": {
+    "min": [
+     -1763,
+     1201,
+     1113
+    ],
+    "max": [
+     -1761,
+     1327,
+     1319
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(red base)main entrance",
+   "x": 913,
+   "y": 1204,
+   "z": 808,
+   "loc": "(red base)main entrance",
+   "target": "quad",
+   "bounds": {
+    "min": [
+     893,
+     1185,
+     761
+    ],
+    "max": [
+     933,
+     1223,
+     855
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(red) Quad",
+   "x": -160,
+   "y": 988,
+   "z": 723.99927,
+   "loc": "(red) Quad",
+   "target": "blahugo",
+   "bounds": {
+    "min": [
+     -183,
+     985,
+     672.9986
+    ],
+    "max": [
+     -137,
+     991,
+     775
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "(red) RL",
+   "x": 1664,
+   "y": 1824,
+   "z": 1008,
+   "loc": "(red) RL",
+   "target": "jay",
+   "bounds": {
+    "min": [
+     1657,
+     1793,
+     961
+    ],
+    "max": [
+     1671,
+     1855,
+     1055
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "lower 666",
+   "x": 392,
+   "y": 180,
+   "z": 792,
+   "loc": "lower 666",
+   "target": "toflag2",
+   "bounds": {
+    "min": [
+     369,
+     177,
+     737
+    ],
+    "max": [
+     415,
+     183,
+     847
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "under 666",
+   "x": 392,
+   "y": 412,
+   "z": 792,
+   "loc": "under 666",
+   "target": "toflag",
+   "bounds": {
+    "min": [
+     369,
+     409,
+     737
+    ],
+    "max": [
+     415,
+     415,
+     847
+    ]
+   }
+  }
+ ]
+}

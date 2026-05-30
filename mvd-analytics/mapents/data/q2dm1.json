@@ -1,0 +1,523 @@
+{
+ "map": "q2dm1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "MH.low-1",
+   "x": -704,
+   "y": -456,
+   "z": 112,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "MH.low-2",
+   "x": -544,
+   "y": -328,
+   "z": 112,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL.stairs",
+   "x": -288,
+   "y": -112,
+   "z": 224,
+   "loc": "GL.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL.stairs",
+   "x": -496,
+   "y": 176,
+   "z": 208,
+   "loc": "GL.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.YA-1",
+   "x": 32,
+   "y": 176,
+   "z": 112,
+   "loc": "MH.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.YA-2",
+   "x": 80,
+   "y": 176,
+   "z": 112,
+   "loc": "MH.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.YA-3",
+   "x": 144,
+   "y": 176,
+   "z": 112,
+   "loc": "MH.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.low-1",
+   "x": -240,
+   "y": -352,
+   "z": -528,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.low-2",
+   "x": -176,
+   "y": -352,
+   "z": -528,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.low-3",
+   "x": 192,
+   "y": -128,
+   "z": -96,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.low-4",
+   "x": 224,
+   "y": 288,
+   "z": -80,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.low-5",
+   "x": 240,
+   "y": -128,
+   "z": -96,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.low-6",
+   "x": 272,
+   "y": 288,
+   "z": -80,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.low-7",
+   "x": 640,
+   "y": -112,
+   "z": -352,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.low-8",
+   "x": 704,
+   "y": -112,
+   "z": -352,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.low-9",
+   "x": 912,
+   "y": -128,
+   "z": -208,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SSG.tunnel",
+   "x": -224,
+   "y": 320,
+   "z": -384,
+   "loc": "SSG.tunnel"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "water.mid",
+   "x": 768,
+   "y": 32,
+   "z": -704,
+   "loc": "water.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH.low",
+   "x": 560,
+   "y": -1008,
+   "z": 112,
+   "loc": "MH.low",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.low-1",
+   "x": -320,
+   "y": -176,
+   "z": 80,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.low-2",
+   "x": -240,
+   "y": -928,
+   "z": 0,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.low-3",
+   "x": -176,
+   "y": -848,
+   "z": 0,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.low-4",
+   "x": -16,
+   "y": -352,
+   "z": -528,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.low-5",
+   "x": 64,
+   "y": -224,
+   "z": -336,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.low-6",
+   "x": 320,
+   "y": 32,
+   "z": -224,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.low-7",
+   "x": 320,
+   "y": 80,
+   "z": -224,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "MH.SNG",
+   "x": -304,
+   "y": 64,
+   "z": -304,
+   "loc": "MH.SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "MH.low-1",
+   "x": -80,
+   "y": -336,
+   "z": -512,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "MH.low-2",
+   "x": 16,
+   "y": -192,
+   "z": -352,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "MH.low",
+   "x": 144,
+   "y": -832,
+   "z": 120,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "MH",
+   "x": 688,
+   "y": 144,
+   "z": 96,
+   "loc": "MH"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "YArd",
+   "x": 336,
+   "y": 304,
+   "z": -368,
+   "loc": "YArd"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH.low-1",
+   "x": -704,
+   "y": -400,
+   "z": 128,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH.low-2",
+   "x": -704,
+   "y": -336,
+   "z": 128,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH.low-3",
+   "x": 80,
+   "y": 48,
+   "z": -240,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH.low-4",
+   "x": 624,
+   "y": -1056,
+   "z": 112,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH.low-5",
+   "x": 912,
+   "y": -64,
+   "z": -208,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH.low-6",
+   "x": 912,
+   "y": -16,
+   "z": -208,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YArd-1",
+   "x": 320,
+   "y": 256,
+   "z": -368,
+   "loc": "YArd"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YArd-2",
+   "x": 320,
+   "y": 320,
+   "z": -368,
+   "loc": "YArd"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "MH.low-1",
+   "x": -544,
+   "y": -272,
+   "z": 128,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "MH.low-2",
+   "x": -544,
+   "y": -208,
+   "z": 128,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "MH.low-3",
+   "x": 64,
+   "y": 16,
+   "z": -80,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "MH.low-4",
+   "x": 112,
+   "y": 32,
+   "z": -80,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "MH.low-1",
+   "x": -400,
+   "y": -160,
+   "z": 96,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "MH.low-2",
+   "x": -240,
+   "y": -848,
+   "z": -16,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "MH.low",
+   "x": 80,
+   "y": -16,
+   "z": -80,
+   "loc": "MH.low"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "GL.stairs",
+   "x": -432,
+   "y": 176,
+   "z": 224,
+   "loc": "GL.stairs"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "MH.SNG",
+   "x": -80,
+   "y": 176,
+   "z": -208,
+   "loc": "MH.SNG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "MH.low-1",
+   "x": 256,
+   "y": -1264,
+   "z": 16,
+   "loc": "MH.low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "MH.low-2",
+   "x": 320,
+   "y": 192,
+   "z": -64,
+   "loc": "MH.low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "MH.low-3",
+   "x": 912,
+   "y": -544,
+   "z": -304,
+   "loc": "MH.low"
+  }
+ ]
+}

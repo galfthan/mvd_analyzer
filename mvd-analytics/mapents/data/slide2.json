@@ -1,0 +1,266 @@
+{
+ "map": "slide2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-1",
+   "x": -1600,
+   "y": -128,
+   "z": 1455
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-2",
+   "x": -1536,
+   "y": -128,
+   "z": 1449
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-3",
+   "x": 1984,
+   "y": -2816,
+   "z": 1281
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-4",
+   "x": 2048,
+   "y": -2816,
+   "z": 1276
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-5",
+   "x": 2304,
+   "y": 768,
+   "z": 2241
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-6",
+   "x": 2368,
+   "y": 768,
+   "z": 2241
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl",
+   "x": -1536,
+   "y": 128,
+   "z": 1464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-1",
+   "x": -1340,
+   "y": 1155,
+   "z": 1468
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-2",
+   "x": 2240,
+   "y": 704,
+   "z": 2376
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya",
+   "x": 2176,
+   "y": 704,
+   "z": 2368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -1728,
+   "y": 2592,
+   "z": 2752
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-10",
+   "x": -1472,
+   "y": 2688,
+   "z": 2752
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -1728,
+   "y": 2688,
+   "z": 2752
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -1664,
+   "y": 2592,
+   "z": 2752
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -1664,
+   "y": 2688,
+   "z": 2752
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -1600,
+   "y": 2592,
+   "z": 2752
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": -1600,
+   "y": 2688,
+   "z": 2752
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": -1536,
+   "y": 2592,
+   "z": 2752
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": -1536,
+   "y": 2688,
+   "z": 2752
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": -1472,
+   "y": 2592,
+   "z": 2752
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -1728,
+   "y": 2400,
+   "z": 2752,
+   "targetName": "tdest1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -1600,
+   "y": 2496,
+   "z": 2752,
+   "targetName": "tdest3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -1472,
+   "y": 2400,
+   "z": 2752,
+   "targetName": "tdest2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 1152,
+   "y": -448,
+   "z": 928,
+   "target": "tdest1",
+   "bounds": {
+    "min": [
+     1121,
+     -479,
+     897
+    ],
+    "max": [
+     1183,
+     -417,
+     959
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1344,
+   "y": -192,
+   "z": 928,
+   "target": "tdest2",
+   "bounds": {
+    "min": [
+     1313,
+     -223,
+     897
+    ],
+    "max": [
+     1375,
+     -161,
+     959
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 2616,
+   "y": 704,
+   "z": 2240,
+   "target": "tdest3",
+   "bounds": {
+    "min": [
+     2609,
+     641,
+     2177
+    ],
+    "max": [
+     2623,
+     767,
+     2303
+    ]
+   }
+  }
+ ]
+}

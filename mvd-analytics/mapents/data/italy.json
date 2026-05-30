@@ -1,0 +1,564 @@
+{
+ "map": "italy",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": -160,
+   "y": 40,
+   "z": 128,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 792,
+   "y": 1088,
+   "z": 120,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "cellar-ssg",
+   "x": -616,
+   "y": 2120,
+   "z": -16,
+   "loc": "cellar-ssg",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "crossing-gl",
+   "x": 888,
+   "y": 384,
+   "z": 8,
+   "loc": "crossing-gl",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "ga-room-1",
+   "x": -192,
+   "y": 552,
+   "z": 128,
+   "loc": "ga-room",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "ga-room-2",
+   "x": -192,
+   "y": 592,
+   "z": 128,
+   "loc": "ga-room",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "sng-tele(hp)",
+   "x": -712,
+   "y": -624,
+   "z": 8,
+   "loc": "sng-tele(hp)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "ya-hp-1",
+   "x": 240,
+   "y": 1808,
+   "z": 160,
+   "loc": "ya-hp",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "ya-hp-2",
+   "x": 272,
+   "y": 1808,
+   "z": 160,
+   "loc": "ya-hp",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "ya-low",
+   "x": 768,
+   "y": 1440,
+   "z": 160,
+   "loc": "ya-low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad",
+   "x": 144,
+   "y": -120,
+   "z": 8,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL",
+   "x": -944,
+   "y": 976,
+   "z": 8,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "cellar-ssg",
+   "x": -672,
+   "y": 2120,
+   "z": -16,
+   "loc": "cellar-ssg"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "crossing",
+   "x": -96,
+   "y": 736,
+   "z": -32,
+   "loc": "crossing"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "sng-tele",
+   "x": -160,
+   "y": -680,
+   "z": 8,
+   "loc": "sng-tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "sng-tele(hp)",
+   "x": -664,
+   "y": -624,
+   "z": 8,
+   "loc": "sng-tele(hp)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "cellar-mega",
+   "x": -192,
+   "y": 1600,
+   "z": -16,
+   "loc": "cellar-mega",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "sng-tele(mega)",
+   "x": -752,
+   "y": -912,
+   "z": -16,
+   "loc": "sng-tele(mega)",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "cellar-mega",
+   "x": -200,
+   "y": 1440,
+   "z": -16,
+   "loc": "cellar-mega",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "rl-way-1",
+   "x": -288,
+   "y": 800,
+   "z": -32,
+   "loc": "rl-way"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "rl-way-2",
+   "x": -224,
+   "y": 800,
+   "z": -32,
+   "loc": "rl-way"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "sng-tele-1",
+   "x": -336,
+   "y": -1104,
+   "z": -88,
+   "loc": "sng-tele"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "sng-tele-2",
+   "x": -336,
+   "y": -1056,
+   "z": -88,
+   "loc": "sng-tele"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "ya-low-1",
+   "x": 432,
+   "y": 1768,
+   "z": 160,
+   "loc": "ya-low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "ya-low-2",
+   "x": 472,
+   "y": 1768,
+   "z": 160,
+   "loc": "ya-low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "ya-low-3",
+   "x": 512,
+   "y": 1768,
+   "z": 160,
+   "loc": "ya-low"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "cellar-pent",
+   "x": -392,
+   "y": 2168,
+   "z": 8,
+   "loc": "cellar-pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-above",
+   "x": 568,
+   "y": -400,
+   "z": 32,
+   "loc": "quad-above"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL",
+   "x": -1024,
+   "y": 288,
+   "z": 8,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "cellar-rox",
+   "x": -408,
+   "y": 1992,
+   "z": -16,
+   "loc": "cellar-rox",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "crossing-rox",
+   "x": 104,
+   "y": 340,
+   "z": 8,
+   "loc": "crossing-rox"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "sng-tele(rox)",
+   "x": 40,
+   "y": -640,
+   "z": 8,
+   "loc": "sng-tele(rox)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "cellar-ssg",
+   "x": -576,
+   "y": 2352,
+   "z": -16,
+   "loc": "cellar-ssg"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "crossing",
+   "x": 376,
+   "y": 776,
+   "z": -32,
+   "loc": "crossing"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "ga-low",
+   "x": -152,
+   "y": -120,
+   "z": 8,
+   "loc": "ga-low"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "sng-tele(hp)-1",
+   "x": -712,
+   "y": -376,
+   "z": 8,
+   "loc": "sng-tele(hp)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "sng-tele(hp)-2",
+   "x": -712,
+   "y": -336,
+   "z": 8,
+   "loc": "sng-tele(hp)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "sng-ya",
+   "x": -544,
+   "y": 1424,
+   "z": -16,
+   "loc": "sng-ya",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "ya-low",
+   "x": 112,
+   "y": 1600,
+   "z": 160,
+   "loc": "ya-low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "sng-tele",
+   "x": -392,
+   "y": -992,
+   "z": -88,
+   "loc": "sng-tele"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "sng-ya",
+   "x": -192,
+   "y": 1568,
+   "z": 160,
+   "loc": "sng-ya"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "cellar-ssg",
+   "x": -748,
+   "y": 2336,
+   "z": -16,
+   "loc": "cellar-ssg"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "quad-above",
+   "x": 576,
+   "y": -208,
+   "z": 8,
+   "loc": "quad-above"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 400,
+   "y": 1648,
+   "z": 304,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": 832,
+   "y": 936,
+   "z": 120,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad",
+   "x": 896,
+   "y": -648,
+   "z": 32,
+   "loc": "Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL",
+   "x": -1088,
+   "y": 88,
+   "z": 32,
+   "loc": "RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cellar-pent",
+   "x": -248,
+   "y": 2336,
+   "z": 8,
+   "loc": "cellar-pent"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "ga-room",
+   "x": -352,
+   "y": 424,
+   "z": 152,
+   "loc": "ga-room"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "sng-tele",
+   "x": -784,
+   "y": -992,
+   "z": 8,
+   "loc": "sng-tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "sng-ya",
+   "x": -200,
+   "y": 1832,
+   "z": 184,
+   "loc": "sng-ya"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "ya-low",
+   "x": 500,
+   "y": 1436,
+   "z": 184,
+   "loc": "ya-low"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "cellar-pent",
+   "x": -32,
+   "y": 2168,
+   "z": 4,
+   "loc": "cellar-pent",
+   "targetName": "info_teleport_destination1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "sng-tele",
+   "x": -392,
+   "y": -1486,
+   "z": -126,
+   "loc": "sng-tele",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     -423,
+     -1487,
+     -175
+    ],
+    "max": [
+     -361,
+     -1485,
+     -77
+    ]
+   }
+  }
+ ]
+}

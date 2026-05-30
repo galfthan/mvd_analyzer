@@ -1,0 +1,2244 @@
+{
+ "map": "twctf2m1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE (GROUND FLOOR)",
+   "x": -2660,
+   "y": -560,
+   "z": -120,
+   "loc": "BLUE BASE (GROUND FLOOR)",
+   "bounds": {
+    "min": [
+     -2663,
+     -575,
+     -135
+    ],
+    "max": [
+     -2657,
+     -545,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE (LOWER CORRIDOR APPROACH)",
+   "x": -1596,
+   "y": -880,
+   "z": -120,
+   "loc": "BLUE BASE (LOWER CORRIDOR APPROACH)",
+   "bounds": {
+    "min": [
+     -1599,
+     -895,
+     -135
+    ],
+    "max": [
+     -1593,
+     -865,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE (LOWER CORRIDOR ENTRANCE)",
+   "x": -1600,
+   "y": -500,
+   "z": -56,
+   "loc": "BLUE BASE (LOWER CORRIDOR ENTRANCE)",
+   "bounds": {
+    "min": [
+     -1615,
+     -503,
+     -71
+    ],
+    "max": [
+     -1585,
+     -497,
+     -41
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE (SNG ROOM)",
+   "x": -1600,
+   "y": 500,
+   "z": -56,
+   "loc": "BLUE BASE (SNG ROOM)",
+   "bounds": {
+    "min": [
+     -1615,
+     497,
+     -71
+    ],
+    "max": [
+     -1585,
+     503,
+     -41
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "CENTRE AREA (BLUE LOWER ENTRANCE)",
+   "x": -700,
+   "y": 0,
+   "z": -56,
+   "loc": "CENTRE AREA (BLUE LOWER ENTRANCE)",
+   "bounds": {
+    "min": [
+     -703,
+     -15,
+     -71
+    ],
+    "max": [
+     -697,
+     15,
+     -41
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "CENTRE AREA (RED LOWER ENTRANCE)",
+   "x": 700,
+   "y": 0,
+   "z": -56,
+   "loc": "CENTRE AREA (RED LOWER ENTRANCE)",
+   "bounds": {
+    "min": [
+     697,
+     -15,
+     -71
+    ],
+    "max": [
+     703,
+     15,
+     -41
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE (GROUND FLOOR)",
+   "x": 2660,
+   "y": 560,
+   "z": -120,
+   "loc": "RED BASE (GROUND FLOOR)",
+   "bounds": {
+    "min": [
+     2657,
+     545,
+     -135
+    ],
+    "max": [
+     2663,
+     575,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE (LOWER CORRIDOR APPROACH)",
+   "x": 1596,
+   "y": 880,
+   "z": -120,
+   "loc": "RED BASE (LOWER CORRIDOR APPROACH)",
+   "bounds": {
+    "min": [
+     1593,
+     865,
+     -135
+    ],
+    "max": [
+     1599,
+     895,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE (LOWER ENTRANCE)",
+   "x": 1600,
+   "y": 500,
+   "z": -56,
+   "loc": "RED BASE (LOWER ENTRANCE)",
+   "bounds": {
+    "min": [
+     1585,
+     497,
+     -71
+    ],
+    "max": [
+     1615,
+     503,
+     -41
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE (SNG ROOM)",
+   "x": 1600,
+   "y": -500,
+   "z": -56,
+   "loc": "RED BASE (SNG ROOM)",
+   "bounds": {
+    "min": [
+     1585,
+     -503,
+     -71
+    ],
+    "max": [
+     1615,
+     -497,
+     -41
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (GROUND FLOOR)-1",
+   "x": -2608,
+   "y": -560,
+   "z": -304,
+   "loc": "BLUE BASE (GROUND FLOOR)",
+   "bounds": {
+    "min": [
+     -2655,
+     -607,
+     -439
+    ],
+    "max": [
+     -2561,
+     -513,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (GROUND FLOOR)-2",
+   "x": -2550,
+   "y": -560,
+   "z": -136,
+   "loc": "BLUE BASE (GROUND FLOOR)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -2555,
+     -607,
+     -175
+    ],
+    "max": [
+     -2545,
+     -513,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (GROUND FLOOR)-3",
+   "x": -1706,
+   "y": -880,
+   "z": -136,
+   "loc": "BLUE BASE (GROUND FLOOR)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1711,
+     -927,
+     -175
+    ],
+    "max": [
+     -1701,
+     -833,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (GROUND FLOOR)-4",
+   "x": -1648,
+   "y": -880,
+   "z": -304,
+   "loc": "BLUE BASE (GROUND FLOOR)",
+   "bounds": {
+    "min": [
+     -1695,
+     -927,
+     -439
+    ],
+    "max": [
+     -1601,
+     -833,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (LOWER CORRIDOR ENTRANCE)-1",
+   "x": -1600,
+   "y": -448,
+   "z": -200,
+   "loc": "BLUE BASE (LOWER CORRIDOR ENTRANCE)",
+   "bounds": {
+    "min": [
+     -1647,
+     -495,
+     -295
+    ],
+    "max": [
+     -1553,
+     -401,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (LOWER CORRIDOR ENTRANCE)-2",
+   "x": -1600,
+   "y": -392,
+   "z": -72,
+   "loc": "BLUE BASE (LOWER CORRIDOR ENTRANCE)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1647,
+     -397,
+     -111
+    ],
+    "max": [
+     -1553,
+     -387,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (SNG ROOM)-1",
+   "x": -1600,
+   "y": 392,
+   "z": -72,
+   "loc": "BLUE BASE (SNG ROOM)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1647,
+     387,
+     -111
+    ],
+    "max": [
+     -1553,
+     397,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (SNG ROOM)-2",
+   "x": -1600,
+   "y": 448,
+   "z": -200,
+   "loc": "BLUE BASE (SNG ROOM)",
+   "bounds": {
+    "min": [
+     -1647,
+     401,
+     -295
+    ],
+    "max": [
+     -1553,
+     495,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (SNG ROOM)-3",
+   "x": -1464,
+   "y": 0,
+   "z": -12,
+   "loc": "BLUE BASE (SNG ROOM)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1567,
+     -151,
+     -63
+    ],
+    "max": [
+     -1361,
+     151,
+     39
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE SIDE (SNG ROOM)",
+   "x": -810,
+   "y": 0,
+   "z": -72,
+   "loc": "BLUE SIDE (SNG ROOM)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -815,
+     -47,
+     -111
+    ],
+    "max": [
+     -805,
+     47,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "CENTRE AREA (BLUE LOWER ENTRANCE)",
+   "x": -752,
+   "y": 0,
+   "z": -200,
+   "loc": "CENTRE AREA (BLUE LOWER ENTRANCE)",
+   "bounds": {
+    "min": [
+     -799,
+     -47,
+     -295
+    ],
+    "max": [
+     -705,
+     47,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "CENTRE AREA (RED LOWER ENTRANCE)-1",
+   "x": 752,
+   "y": 0,
+   "z": -200,
+   "loc": "CENTRE AREA (RED LOWER ENTRANCE)",
+   "bounds": {
+    "min": [
+     705,
+     -47,
+     -295
+    ],
+    "max": [
+     799,
+     47,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "CENTRE AREA (RED LOWER ENTRANCE)-2",
+   "x": 810,
+   "y": 0,
+   "z": -72,
+   "loc": "CENTRE AREA (RED LOWER ENTRANCE)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     805,
+     -47,
+     -111
+    ],
+    "max": [
+     815,
+     47,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (GROUND FLOOR)-1",
+   "x": 1648,
+   "y": 880,
+   "z": -304,
+   "loc": "RED BASE (GROUND FLOOR)",
+   "bounds": {
+    "min": [
+     1601,
+     833,
+     -439
+    ],
+    "max": [
+     1695,
+     927,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (GROUND FLOOR)-2",
+   "x": 1706,
+   "y": 880,
+   "z": -136,
+   "loc": "RED BASE (GROUND FLOOR)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     1701,
+     833,
+     -175
+    ],
+    "max": [
+     1711,
+     927,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (GROUND FLOOR)-3",
+   "x": 2550,
+   "y": 560,
+   "z": -136,
+   "loc": "RED BASE (GROUND FLOOR)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     2545,
+     513,
+     -175
+    ],
+    "max": [
+     2555,
+     607,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (GROUND FLOOR)-4",
+   "x": 2608,
+   "y": 560,
+   "z": -304,
+   "loc": "RED BASE (GROUND FLOOR)",
+   "bounds": {
+    "min": [
+     2561,
+     513,
+     -439
+    ],
+    "max": [
+     2655,
+     607,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (LOWER ENTRANCE)",
+   "x": 1600,
+   "y": 448,
+   "z": -200,
+   "loc": "RED BASE (LOWER ENTRANCE)",
+   "bounds": {
+    "min": [
+     1553,
+     401,
+     -295
+    ],
+    "max": [
+     1647,
+     495,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (SNG ROOM)-1",
+   "x": 1600,
+   "y": -448,
+   "z": -200,
+   "loc": "RED BASE (SNG ROOM)",
+   "bounds": {
+    "min": [
+     1553,
+     -495,
+     -295
+    ],
+    "max": [
+     1647,
+     -401,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (SNG ROOM)-2",
+   "x": 1600,
+   "y": -392,
+   "z": -72,
+   "loc": "RED BASE (SNG ROOM)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     1553,
+     -397,
+     -111
+    ],
+    "max": [
+     1647,
+     -387,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (SNG ROOM)-3",
+   "x": 1600,
+   "y": 392,
+   "z": -72,
+   "loc": "RED BASE (SNG ROOM)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     1553,
+     387,
+     -111
+    ],
+    "max": [
+     1647,
+     397,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (UPPER CORRIDOR APPROACH)",
+   "x": 1464,
+   "y": 0,
+   "z": -12,
+   "loc": "RED BASE (UPPER CORRIDOR APPROACH)",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     1361,
+     -151,
+     -63
+    ],
+    "max": [
+     1567,
+     151,
+     39
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "CENTRE AREA (GROUND FLOOR)",
+   "x": -310,
+   "y": 313,
+   "z": -192,
+   "loc": "CENTRE AREA (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE SLIME PLATFORM",
+   "x": -864,
+   "y": -831,
+   "z": 44,
+   "loc": "BLUE SLIME PLATFORM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED PLATFORM ABOVE SLIME",
+   "x": 864,
+   "y": 831,
+   "z": 44,
+   "loc": "RED PLATFORM ABOVE SLIME"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (GROUND FLOOR)-1",
+   "x": -2468,
+   "y": -848,
+   "z": -176,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (GROUND FLOOR)-2",
+   "x": -2468,
+   "y": -763,
+   "z": -176,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (GROUND FLOOR)-3",
+   "x": -1808,
+   "y": -795,
+   "z": -176,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (GROUND FLOOR)-4",
+   "x": -1808,
+   "y": -738,
+   "z": -176,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (SNG ROOM)-1",
+   "x": -1618,
+   "y": -267,
+   "z": -112,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (SNG ROOM)-2",
+   "x": -1618,
+   "y": 236,
+   "z": -112,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (UPPER LEDGE)",
+   "x": -1856,
+   "y": -894,
+   "z": 96,
+   "loc": "BLUE BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE ROUTE NEAR SLIME-1",
+   "x": -1304,
+   "y": -533,
+   "z": -72,
+   "loc": "BLUE ROUTE NEAR SLIME"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE ROUTE NEAR SLIME-2",
+   "x": -74,
+   "y": -592,
+   "z": 60,
+   "loc": "BLUE ROUTE NEAR SLIME"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE SIDE (SNG ROOM)-1",
+   "x": -888,
+   "y": -268,
+   "z": 80,
+   "loc": "BLUE SIDE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE SIDE (SNG ROOM)-2",
+   "x": -888,
+   "y": 235,
+   "z": 80,
+   "loc": "BLUE SIDE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE SLIME PLATFORM",
+   "x": -464,
+   "y": -1048,
+   "z": 44,
+   "loc": "BLUE SLIME PLATFORM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "CENTRE AREA (GROUND FLOOR)-1",
+   "x": 275,
+   "y": -362,
+   "z": -192,
+   "loc": "CENTRE AREA (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "CENTRE AREA (GROUND FLOOR)-2",
+   "x": 329,
+   "y": -309,
+   "z": -192,
+   "loc": "CENTRE AREA (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (GROUND FLOOR)-1",
+   "x": 1808,
+   "y": 706,
+   "z": -176,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (GROUND FLOOR)-2",
+   "x": 1808,
+   "y": 763,
+   "z": -176,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (GROUND FLOOR)-3",
+   "x": 2452,
+   "y": 743,
+   "z": -176,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (GROUND FLOOR)-4",
+   "x": 2452,
+   "y": 828,
+   "z": -176,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (SNG ROOM)-1",
+   "x": 860,
+   "y": -267,
+   "z": 80,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (SNG ROOM)-2",
+   "x": 860,
+   "y": 236,
+   "z": 80,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (SNG ROOM)-3",
+   "x": 1586,
+   "y": -246,
+   "z": -112,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (SNG ROOM)-4",
+   "x": 1600,
+   "y": 232,
+   "z": -112,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (UPPER LEDGE)",
+   "x": 1830,
+   "y": 859,
+   "z": 96,
+   "loc": "RED BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED PLATFORM ABOVE SLIME",
+   "x": 432,
+   "y": 1012,
+   "z": 44,
+   "loc": "RED PLATFORM ABOVE SLIME"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED ROUTE NEAR SLIME-1",
+   "x": 58,
+   "y": 577,
+   "z": 60,
+   "loc": "RED ROUTE NEAR SLIME"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED ROUTE NEAR SLIME-2",
+   "x": 1264,
+   "y": 517,
+   "z": -72,
+   "loc": "RED ROUTE NEAR SLIME"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "BLUE SLIME",
+   "x": -681,
+   "y": -879,
+   "z": -104,
+   "loc": "BLUE SLIME",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RED SLIME",
+   "x": 650,
+   "y": 848,
+   "z": -104,
+   "loc": "RED SLIME",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (GROUND FLOOR)",
+   "x": -2268,
+   "y": -581,
+   "z": -176,
+   "loc": "BLUE BASE (GROUND FLOOR)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (SNG ROOM)-1",
+   "x": -1388,
+   "y": -53,
+   "z": 80,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (SNG ROOM)-2",
+   "x": -1388,
+   "y": 29,
+   "z": 80,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (UPPER LEDGE)-1",
+   "x": -1852,
+   "y": -766,
+   "z": 96,
+   "loc": "BLUE BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (UPPER LEDGE)-2",
+   "x": -1852,
+   "y": -705,
+   "z": 96,
+   "loc": "BLUE BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE ROUTE NEAR SLIME",
+   "x": -1301,
+   "y": -592,
+   "z": -72,
+   "loc": "BLUE ROUTE NEAR SLIME",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "CENTRE AREA (UPPER PLATFORM)-1",
+   "x": -236,
+   "y": 97,
+   "z": 60,
+   "loc": "CENTRE AREA (UPPER PLATFORM)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "CENTRE AREA (UPPER PLATFORM)-2",
+   "x": 213,
+   "y": -124,
+   "z": 60,
+   "loc": "CENTRE AREA (UPPER PLATFORM)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (GROUND FLOOR)",
+   "x": 2244,
+   "y": 557,
+   "z": -176,
+   "loc": "RED BASE (GROUND FLOOR)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (SNG ROOM)-1",
+   "x": 1388,
+   "y": -53,
+   "z": 80,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (SNG ROOM)-2",
+   "x": 1388,
+   "y": 29,
+   "z": 80,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (UPPER LEDGE)-1",
+   "x": 1836,
+   "y": 684,
+   "z": 96,
+   "loc": "RED BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (UPPER LEDGE)-2",
+   "x": 1836,
+   "y": 745,
+   "z": 96,
+   "loc": "RED BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED ROUTE NEAR SLIME",
+   "x": 1261,
+   "y": 576,
+   "z": -72,
+   "loc": "RED ROUTE NEAR SLIME",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE BASE (GROUND FLOOR)",
+   "x": -2000,
+   "y": -566,
+   "z": -176,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED BASE (GROUND FLOOR)",
+   "x": 2000,
+   "y": 566,
+   "z": -176,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "BLUE BASE (SNG ROOM)",
+   "x": -1280,
+   "y": 0,
+   "z": -20,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "RED BASE (SNG ROOM)",
+   "x": 1280,
+   "y": 0,
+   "z": -20,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "CENTRE AREA (GROUND FLOOR)",
+   "x": 0,
+   "y": 0,
+   "z": -272,
+   "loc": "CENTRE AREA (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE (LOWER CORRIDOR APPROACH)",
+   "x": -1278,
+   "y": -930,
+   "z": -260,
+   "loc": "BLUE BASE (LOWER CORRIDOR APPROACH)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE ROUTE NEAR SLIME",
+   "x": -1394,
+   "y": -256,
+   "z": -112,
+   "loc": "BLUE ROUTE NEAR SLIME",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "CENTRE AREA (GROUND FLOOR)",
+   "x": 0,
+   "y": -422,
+   "z": -176,
+   "loc": "CENTRE AREA (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE (SNG ROOM)",
+   "x": 1378,
+   "y": -246,
+   "z": -112,
+   "loc": "RED BASE (SNG ROOM)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED LOWER SLIME AREA",
+   "x": 1278,
+   "y": 936,
+   "z": -260,
+   "loc": "RED LOWER SLIME AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (GROUND FLOOR)",
+   "x": -2012,
+   "y": -884,
+   "z": -176,
+   "loc": "BLUE BASE (GROUND FLOOR)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (SNG ROOM)-1",
+   "x": -1613,
+   "y": -256,
+   "z": 80,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (SNG ROOM)-2",
+   "x": -1613,
+   "y": 232,
+   "z": 80,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (UPPER YA LEDGE)-1",
+   "x": -2428,
+   "y": -766,
+   "z": 96,
+   "loc": "BLUE BASE (UPPER YA LEDGE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (UPPER YA LEDGE)-2",
+   "x": -2428,
+   "y": -705,
+   "z": 96,
+   "loc": "BLUE BASE (UPPER YA LEDGE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE SLIME",
+   "x": -574,
+   "y": -949,
+   "z": -104,
+   "loc": "BLUE SLIME",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "CENTRE AREA (BLUE UPPER ENTRANCE)",
+   "x": -12,
+   "y": -589,
+   "z": 60,
+   "loc": "CENTRE AREA (BLUE UPPER ENTRANCE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "CENTRE AREA (GROUND FLOOR)-1",
+   "x": -324,
+   "y": -324,
+   "z": -192,
+   "loc": "CENTRE AREA (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "CENTRE AREA (GROUND FLOOR)-2",
+   "x": 303,
+   "y": 301,
+   "z": -192,
+   "loc": "CENTRE AREA (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "CENTRE AREA (RED UPPER ENTRANCE)",
+   "x": -4,
+   "y": 574,
+   "z": 60,
+   "loc": "CENTRE AREA (RED UPPER ENTRANCE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (GROUND FLOOR)",
+   "x": 1988,
+   "y": 864,
+   "z": -176,
+   "loc": "RED BASE (GROUND FLOOR)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (SNG ROOM)-1",
+   "x": 1600,
+   "y": -256,
+   "z": 80,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (SNG ROOM)-2",
+   "x": 1600,
+   "y": 232,
+   "z": 80,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (YA LEDGE)-1",
+   "x": 2412,
+   "y": 681,
+   "z": 96,
+   "loc": "RED BASE (YA LEDGE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (YA LEDGE)-2",
+   "x": 2412,
+   "y": 742,
+   "z": 96,
+   "loc": "RED BASE (YA LEDGE)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED SLIME",
+   "x": 550,
+   "y": 937,
+   "z": -104,
+   "loc": "RED SLIME",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE BASE (SNG ROOM)",
+   "x": -1376,
+   "y": 0,
+   "z": 80,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RED BASE (SNG ROOM)",
+   "x": 1376,
+   "y": 0,
+   "z": 80,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE BASE (GROUND FLOOR)",
+   "x": -2256,
+   "y": -874,
+   "z": -176,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED BASE (GROUND FLOOR)",
+   "x": 2256,
+   "y": 874,
+   "z": -176,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "BLUE SLIME PLATFORM",
+   "x": -664,
+   "y": -891,
+   "z": 64,
+   "loc": "BLUE SLIME PLATFORM"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "RED SLIME PLATFORM",
+   "x": 664,
+   "y": 891,
+   "z": 64,
+   "loc": "RED SLIME PLATFORM"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE BASE (SNG ROOM)",
+   "x": -1234,
+   "y": 253,
+   "z": -112,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE BASE (UPPER YA LEDGE)",
+   "x": -2418,
+   "y": -842,
+   "z": 96,
+   "loc": "BLUE BASE (UPPER YA LEDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RED BASE (YA LEDGE)",
+   "x": 2418,
+   "y": 842,
+   "z": 96,
+   "loc": "RED BASE (YA LEDGE)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RED ROUTE NEAR SLIME",
+   "x": 1234,
+   "y": 253,
+   "z": -112,
+   "loc": "RED ROUTE NEAR SLIME"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (GROUND FLOOR)-1",
+   "x": -2344,
+   "y": -718,
+   "z": -152,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (GROUND FLOOR)-2",
+   "x": -2208,
+   "y": -872,
+   "z": -152,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (GROUND FLOOR)-3",
+   "x": -2208,
+   "y": -568,
+   "z": -152,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (GROUND FLOOR)-4",
+   "x": -2040,
+   "y": -872,
+   "z": -152,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (GROUND FLOOR)-5",
+   "x": -2040,
+   "y": -568,
+   "z": -152,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (GROUND FLOOR)-6",
+   "x": -1912,
+   "y": -728,
+   "z": -152,
+   "loc": "BLUE BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (LOWER CORRIDOR APPROACH)",
+   "x": -1224,
+   "y": -1144,
+   "z": -48,
+   "loc": "BLUE BASE (LOWER CORRIDOR APPROACH)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (SNG ROOM)-1",
+   "x": -1604,
+   "y": -184,
+   "z": 104,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (SNG ROOM)-2",
+   "x": -1604,
+   "y": 184,
+   "z": 104,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (SNG ROOM)-3",
+   "x": -1603,
+   "y": -250,
+   "z": -88,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE (SNG ROOM)-4",
+   "x": -1603,
+   "y": 214,
+   "z": 104,
+   "loc": "BLUE BASE (SNG ROOM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (UPPER LEDGE)-1",
+   "x": -1840,
+   "y": -885,
+   "z": 120,
+   "loc": "BLUE BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (UPPER LEDGE)-2",
+   "x": -1840,
+   "y": -718,
+   "z": 120,
+   "loc": "BLUE BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (UPPER LEDGE)-3",
+   "x": -1840,
+   "y": -550,
+   "z": 120,
+   "loc": "BLUE BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (UPPER YA LEDGE)-1",
+   "x": -2416,
+   "y": -885,
+   "z": 120,
+   "loc": "BLUE BASE (UPPER YA LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (UPPER YA LEDGE)-2",
+   "x": -2416,
+   "y": -718,
+   "z": 120,
+   "loc": "BLUE BASE (UPPER YA LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE (UPPER YA LEDGE)-3",
+   "x": -2416,
+   "y": -550,
+   "z": 120,
+   "loc": "BLUE BASE (UPPER YA LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE ROUTE NEAR SLIME",
+   "x": -1272,
+   "y": -560,
+   "z": -48,
+   "loc": "BLUE ROUTE NEAR SLIME"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE SIDE (SNG ROOM)",
+   "x": -875,
+   "y": -198,
+   "z": 104,
+   "loc": "BLUE SIDE (SNG ROOM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE SLIME PLATFORM",
+   "x": -448,
+   "y": -1000,
+   "z": 68,
+   "loc": "BLUE SLIME PLATFORM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "CENTRE AREA (GROUND FLOOR)-1",
+   "x": -266,
+   "y": -261,
+   "z": -168,
+   "loc": "CENTRE AREA (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "CENTRE AREA (GROUND FLOOR)-2",
+   "x": 270,
+   "y": 275,
+   "z": -168,
+   "loc": "CENTRE AREA (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "CENTRE AREA (UPPER PLATFORM)-1",
+   "x": -226,
+   "y": 27,
+   "z": 84,
+   "loc": "CENTRE AREA (UPPER PLATFORM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "CENTRE AREA (UPPER PLATFORM)-2",
+   "x": 222,
+   "y": -29,
+   "z": 84,
+   "loc": "CENTRE AREA (UPPER PLATFORM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (GROUND FLOOR)-1",
+   "x": 1910,
+   "y": 724,
+   "z": -152,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (GROUND FLOOR)-2",
+   "x": 2024,
+   "y": 568,
+   "z": -152,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (GROUND FLOOR)-3",
+   "x": 2024,
+   "y": 872,
+   "z": -152,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (GROUND FLOOR)-4",
+   "x": 2224,
+   "y": 568,
+   "z": -152,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (GROUND FLOOR)-5",
+   "x": 2224,
+   "y": 872,
+   "z": -152,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (GROUND FLOOR)-6",
+   "x": 2344,
+   "y": 724,
+   "z": -152,
+   "loc": "RED BASE (GROUND FLOOR)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (LOWER CORRIDOR APPROACH)",
+   "x": 1224,
+   "y": 1142,
+   "z": -48,
+   "loc": "RED BASE (LOWER CORRIDOR APPROACH)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (SNG ROOM)-1",
+   "x": 877,
+   "y": 206,
+   "z": 104,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (SNG ROOM)-2",
+   "x": 1605,
+   "y": -190,
+   "z": 104,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE (SNG ROOM)-3",
+   "x": 1605,
+   "y": 254,
+   "z": -88,
+   "loc": "RED BASE (SNG ROOM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (UPPER LEDGE)-1",
+   "x": 1840,
+   "y": 550,
+   "z": 120,
+   "loc": "RED BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (UPPER LEDGE)-2",
+   "x": 1840,
+   "y": 725,
+   "z": 120,
+   "loc": "RED BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (UPPER LEDGE)-3",
+   "x": 1840,
+   "y": 885,
+   "z": 120,
+   "loc": "RED BASE (UPPER LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (YA LEDGE)-1",
+   "x": 2416,
+   "y": 550,
+   "z": 120,
+   "loc": "RED BASE (YA LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (YA LEDGE)-2",
+   "x": 2416,
+   "y": 725,
+   "z": 120,
+   "loc": "RED BASE (YA LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (YA LEDGE)-3",
+   "x": 2416,
+   "y": 885,
+   "z": 120,
+   "loc": "RED BASE (YA LEDGE)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED PLATFORM ABOVE SLIME",
+   "x": 448,
+   "y": 1008,
+   "z": 68,
+   "loc": "RED PLATFORM ABOVE SLIME"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED ROUTE NEAR SLIME",
+   "x": 1256,
+   "y": 560,
+   "z": -48,
+   "loc": "RED ROUTE NEAR SLIME"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE BASE (SNG ROOM)-1",
+   "x": -1527,
+   "y": 0,
+   "z": -40,
+   "loc": "BLUE BASE (SNG ROOM)",
+   "targetName": "b_p1_7"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE BASE (SNG ROOM)-2",
+   "x": -1151,
+   "y": 0,
+   "z": -40,
+   "loc": "BLUE BASE (SNG ROOM)",
+   "targetName": "b_p1_9"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "CENTRE AREA (GROUND FLOOR)",
+   "x": 0,
+   "y": 0,
+   "z": -76,
+   "loc": "CENTRE AREA (GROUND FLOOR)",
+   "targetName": "b_p1_10"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "CENTRE AREA (UPPER PLATFORM)-1",
+   "x": -224,
+   "y": 0,
+   "z": 84,
+   "loc": "CENTRE AREA (UPPER PLATFORM)",
+   "targetName": "target3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "CENTRE AREA (UPPER PLATFORM)-2",
+   "x": 224,
+   "y": 0,
+   "z": 84,
+   "loc": "CENTRE AREA (UPPER PLATFORM)",
+   "targetName": "target5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED BASE (SNG ROOM)",
+   "x": 1151,
+   "y": 0,
+   "z": -40,
+   "loc": "RED BASE (SNG ROOM)",
+   "targetName": "r_p1_9"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED BASE (UPPER CORRIDOR APPROACH)",
+   "x": 1527,
+   "y": 0,
+   "z": -40,
+   "loc": "RED BASE (UPPER CORRIDOR APPROACH)",
+   "targetName": "r_p1_7"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (SNG ROOM)",
+   "x": -1064,
+   "y": 0,
+   "z": -6,
+   "loc": "BLUE BASE (SNG ROOM)",
+   "target": "b_p1_10",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1095,
+     -31,
+     -51
+    ],
+    "max": [
+     -1033,
+     31,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE LOWER SLIME (TELEPORT TO DEATH)",
+   "x": -1070,
+   "y": -926,
+   "z": -156,
+   "loc": "BLUE LOWER SLIME (TELEPORT TO DEATH)",
+   "target": "b_p1_7",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1099,
+     -955,
+     -159
+    ],
+    "max": [
+     -1041,
+     -897,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE LOWER SLIME (TELEPORT TO EYES)",
+   "x": -1070,
+   "y": -726,
+   "z": -156,
+   "loc": "BLUE LOWER SLIME (TELEPORT TO EYES)",
+   "target": "r_p1_9",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1099,
+     -755,
+     -159
+    ],
+    "max": [
+     -1041,
+     -697,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE SLIME (TELEPORT TO CENTRE)",
+   "x": -962,
+   "y": -726,
+   "z": -4,
+   "loc": "BLUE SLIME (TELEPORT TO CENTRE)",
+   "target": "b_p1_10",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -991,
+     -755,
+     -7
+    ],
+    "max": [
+     -933,
+     -697,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE SLIME (TELEPORT TO QUAD)",
+   "x": -962,
+   "y": -926,
+   "z": -4,
+   "loc": "BLUE SLIME (TELEPORT TO QUAD)",
+   "target": "b_p1_9",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -991,
+     -955,
+     -7
+    ],
+    "max": [
+     -933,
+     -897,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "CENTRE AREA (GROUND FLOOR)-1",
+   "x": -192,
+   "y": 0,
+   "z": -218,
+   "loc": "CENTRE AREA (GROUND FLOOR)",
+   "target": "target3",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -207,
+     -31,
+     -255
+    ],
+    "max": [
+     -177,
+     31,
+     -181
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "CENTRE AREA (GROUND FLOOR)-2",
+   "x": 192,
+   "y": 0,
+   "z": -218,
+   "loc": "CENTRE AREA (GROUND FLOOR)",
+   "target": "target5",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     177,
+     -31,
+     -255
+    ],
+    "max": [
+     207,
+     31,
+     -181
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (SNG ROOM)",
+   "x": 1064,
+   "y": 0,
+   "z": -6,
+   "loc": "RED BASE (SNG ROOM)",
+   "target": "b_p1_10",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1033,
+     -31,
+     -51
+    ],
+    "max": [
+     1095,
+     31,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED LOWER SLIME (TELEPORT TO CENTRE)",
+   "x": 1070,
+   "y": 726,
+   "z": -156,
+   "loc": "RED LOWER SLIME (TELEPORT TO CENTRE)",
+   "target": "b_p1_10",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1041,
+     697,
+     -159
+    ],
+    "max": [
+     1099,
+     755,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED LOWER SLIME (TELEPORT TO QUAD)",
+   "x": 1070,
+   "y": 926,
+   "z": -156,
+   "loc": "RED LOWER SLIME (TELEPORT TO QUAD)",
+   "target": "b_p1_9",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1041,
+     897,
+     -159
+    ],
+    "max": [
+     1099,
+     955,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED SLIME (TELEPORT TO DEATH)",
+   "x": 962,
+   "y": 926,
+   "z": -4,
+   "loc": "RED SLIME (TELEPORT TO DEATH)",
+   "target": "r_p1_7",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     933,
+     897,
+     -7
+    ],
+    "max": [
+     991,
+     955,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED SLIME (TELEPORT TO EYES)",
+   "x": 962,
+   "y": 726,
+   "z": -4,
+   "loc": "RED SLIME (TELEPORT TO EYES)",
+   "target": "r_p1_9",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     933,
+     697,
+     -7
+    ],
+    "max": [
+     991,
+     755,
+     -1
+    ]
+   }
+  }
+ ]
+}

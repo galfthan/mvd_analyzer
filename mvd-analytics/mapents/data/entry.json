@@ -1,0 +1,107 @@
+{
+ "map": "entry",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya",
+   "x": 0,
+   "y": -128,
+   "z": 8
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -212,
+   "y": 84,
+   "z": 44
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -208,
+   "y": -336,
+   "z": 44
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 220,
+   "y": -344,
+   "z": 40
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 220,
+   "y": 88,
+   "z": 40
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 0,
+   "y": -452,
+   "z": 16,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 0,
+   "y": 196,
+   "z": 16,
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 0,
+   "y": -496,
+   "z": 56,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -31,
+     -511,
+     49
+    ],
+    "max": [
+     31,
+     -481,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 0,
+   "y": 240,
+   "z": 56,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -31,
+     225,
+     49
+    ],
+    "max": [
+     31,
+     255,
+     63
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,44 @@
+{
+ "map": "trix",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 384,
+   "y": 0,
+   "z": 0
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 0,
+   "y": 0,
+   "z": 432,
+   "targetName": "tele675"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 4016,
+   "y": 0,
+   "z": 232,
+   "target": "tele675",
+   "bounds": {
+    "min": [
+     3953,
+     -255,
+     -63
+    ],
+    "max": [
+     4079,
+     255,
+     527
+    ]
+   }
+  }
+ ]
+}

@@ -285,6 +285,39 @@ the sidebar so verifying the event stream against gameplay is
 visual. The panel updates live during playback via the 200 ms
 full-sync tick in `animatePlayback`.
 
+## Map-tab "Learn map" mode
+
+When the result contains a `mapEntities` field (the static per-map
+layout from the embedded corpus — see
+[`mvd-analytics/RESULT_SCHEMA.md`](../mvd-analytics/RESULT_SCHEMA.md#mapentitiesresult-mapentities)),
+the map controls show a **Learn map** toggle. It switches the canvas to
+a static study view: players, trails and time-based overlays are
+hidden, the floor/loc base is kept, and the map's designed entities are
+drawn — item spawns, player spawnpoints, teleporters and buttons.
+
+A sidebar checklist toggles categories (Weapons, Armor, Health, Ammo,
+Powerups, Teleporters, Spawns, Buttons, Doors); spawns/buttons/doors
+start off to reduce clutter. Teleporters draw an arrow from each
+entrance to its exit (paired by `teleportSrc.target` ==
+`teleportDst.targetName`). Entities reuse the same `worldToCanvas`
+transform and item palette as playback, so they sit exactly where
+players do. The corpus is fetched in-browser by `fetchMapEntsSync`
+(`worker.js`) from `mapents/<map>.json` (deployed by `make build`); the
+toggle is hidden when no corpus exists for the map.
+
+Below the canvas, a sortable table (standard `.stats-table` style,
+expanding with the tab — no inner scrollbar) lists every visible
+entity — Class (cleartext: Armor, Weapon, …), Type (kind: ra, h25, …),
+Name, Loc, and Destination. Teleporters collapse to one row per
+entrance→exit pair, with the entrance in **Loc** (where the trigger
+sits) and the exit it leads to in **Destination**. The table respects
+the category filters and rebuilds via `buildEntityTable`.
+
+Learn mode is reflected in the URL as `?learn=1` (alongside `tab=map`),
+so a study view is directly link-shareable; `applyUrlState` restores it
+on load when the map has a corpus. Code: `drawMapEntities` /
+`setLearnMode` / `buildEntityTable` in `app.js`.
+
 ## Locs & Regions tab
 
 (`data-tab="loc-graph"`; the URL slug is now `locs-regions`, with

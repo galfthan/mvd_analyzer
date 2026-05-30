@@ -1,0 +1,928 @@
+{
+ "map": "ctf2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "blue base",
+   "x": 188,
+   "y": 84,
+   "z": -16,
+   "loc": "blue base",
+   "bounds": {
+    "min": [
+     129,
+     77,
+     -23
+    ],
+    "max": [
+     247,
+     91,
+     -9
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor to red base",
+   "x": 192,
+   "y": -904,
+   "z": -92,
+   "loc": "corridor to red base",
+   "bounds": {
+    "min": [
+     161,
+     -907,
+     -127
+    ],
+    "max": [
+     223,
+     -901,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "corridor to/from blue base",
+   "x": 192,
+   "y": -280,
+   "z": -92,
+   "loc": "corridor to/from blue base",
+   "bounds": {
+    "min": [
+     161,
+     -283,
+     -127
+    ],
+    "max": [
+     223,
+     -277,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside blue base-1",
+   "x": 160,
+   "y": -264,
+   "z": 56,
+   "loc": "outside blue base",
+   "bounds": {
+    "min": [
+     129,
+     -267,
+     1
+    ],
+    "max": [
+     191,
+     -261,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside blue base-2",
+   "x": 224,
+   "y": -264,
+   "z": 56,
+   "loc": "outside blue base",
+   "bounds": {
+    "min": [
+     193,
+     -267,
+     1
+    ],
+    "max": [
+     255,
+     -261,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside red base-1",
+   "x": 160,
+   "y": -904,
+   "z": 56,
+   "loc": "outside red base",
+   "bounds": {
+    "min": [
+     129,
+     -907,
+     1
+    ],
+    "max": [
+     191,
+     -901,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "outside red base-2",
+   "x": 224,
+   "y": -904,
+   "z": 56,
+   "loc": "outside red base",
+   "bounds": {
+    "min": [
+     193,
+     -907,
+     1
+    ],
+    "max": [
+     255,
+     -901,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "red base",
+   "x": 188,
+   "y": -1256,
+   "z": -16,
+   "loc": "red base",
+   "bounds": {
+    "min": [
+     129,
+     -1263,
+     -23
+    ],
+    "max": [
+     247,
+     -1249,
+     -9
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "main hall",
+   "x": 192,
+   "y": -584,
+   "z": -248,
+   "loc": "main hall"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-1",
+   "x": -264,
+   "y": -1032,
+   "z": -136,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-10",
+   "x": 568,
+   "y": -184,
+   "z": 8,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-11",
+   "x": 616,
+   "y": -1024,
+   "z": -136,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-12",
+   "x": 616,
+   "y": -184,
+   "z": -136,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-2",
+   "x": -264,
+   "y": -184,
+   "z": -136,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-3",
+   "x": -216,
+   "y": -1016,
+   "z": 8,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-4",
+   "x": -216,
+   "y": -960,
+   "z": 8,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-5",
+   "x": -216,
+   "y": -248,
+   "z": 8,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-6",
+   "x": -216,
+   "y": -184,
+   "z": 8,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-7",
+   "x": 568,
+   "y": -1016,
+   "z": 8,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-8",
+   "x": 568,
+   "y": -960,
+   "z": 8,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long corridor to/from red base-9",
+   "x": 568,
+   "y": -248,
+   "z": 8,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "blue base-1",
+   "x": 144,
+   "y": -64,
+   "z": 16,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "blue base-2",
+   "x": 208,
+   "y": -64,
+   "z": 16,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "corridor to red base",
+   "x": 144,
+   "y": -1136,
+   "z": 16,
+   "loc": "corridor to red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "outside blue base-1",
+   "x": 144,
+   "y": -392,
+   "z": 16,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "outside blue base-2",
+   "x": 192,
+   "y": -392,
+   "z": 16,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "outside red base-1",
+   "x": 144,
+   "y": -792,
+   "z": 16,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "outside red base-2",
+   "x": 192,
+   "y": -792,
+   "z": 16,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "red base",
+   "x": 208,
+   "y": -1136,
+   "z": 16,
+   "loc": "red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "long corridor to/from red base",
+   "x": -232,
+   "y": -592,
+   "z": -136,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "blue base-1",
+   "x": 8,
+   "y": 120,
+   "z": 200,
+   "loc": "blue base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "blue base-2",
+   "x": 344,
+   "y": 120,
+   "z": 200,
+   "loc": "blue base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "long corridor to/from red base-1",
+   "x": -216,
+   "y": -968,
+   "z": 152,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "long corridor to/from red base-2",
+   "x": -216,
+   "y": -184,
+   "z": 152,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "long corridor to/from red base-3",
+   "x": 568,
+   "y": -968,
+   "z": 152,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "long corridor to/from red base-4",
+   "x": 568,
+   "y": -184,
+   "z": 152,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "red base-1",
+   "x": 8,
+   "y": -1320,
+   "z": 200,
+   "loc": "red base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "red base-2",
+   "x": 344,
+   "y": -1320,
+   "z": 200,
+   "loc": "red base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "blue base-1",
+   "x": 8,
+   "y": 24,
+   "z": 16,
+   "loc": "blue base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "blue base-2",
+   "x": 344,
+   "y": 24,
+   "z": 16,
+   "loc": "blue base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "corridor to red base",
+   "x": 8,
+   "y": -1232,
+   "z": 16,
+   "loc": "corridor to red base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside blue base",
+   "x": 352,
+   "y": -480,
+   "z": 184,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "outside red base",
+   "x": 352,
+   "y": -704,
+   "z": 206,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "red base",
+   "x": 344,
+   "y": -1232,
+   "z": 16,
+   "loc": "red base",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "blue base",
+   "x": 192,
+   "y": -80,
+   "z": 16,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "corridor to red base",
+   "x": 192,
+   "y": -1088,
+   "z": 16,
+   "loc": "corridor to red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "long corridor to/from red base",
+   "x": 616,
+   "y": -592,
+   "z": -136,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "outside blue base",
+   "x": 252,
+   "y": -536,
+   "z": 216,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "outside red base",
+   "x": 252,
+   "y": -624,
+   "z": 216,
+   "loc": "outside red base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "blue base",
+   "x": 192,
+   "y": -48,
+   "z": 16,
+   "loc": "blue base"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "red base",
+   "x": 192,
+   "y": -1152,
+   "z": 16,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-1",
+   "x": 16,
+   "y": 72,
+   "z": 200,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-2",
+   "x": 24,
+   "y": -24,
+   "z": 28,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-3",
+   "x": 72,
+   "y": 112,
+   "z": 28,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-4",
+   "x": 160,
+   "y": -8,
+   "z": -100,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "blue base-5",
+   "x": 192,
+   "y": 112,
+   "z": 32,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-6",
+   "x": 208,
+   "y": 88,
+   "z": -100,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-7",
+   "x": 280,
+   "y": 112,
+   "z": 8,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-8",
+   "x": 328,
+   "y": -24,
+   "z": 8,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "blue base-9",
+   "x": 336,
+   "y": 72,
+   "z": 200,
+   "loc": "blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "corridor to red base-1",
+   "x": 24,
+   "y": -1184,
+   "z": 28,
+   "loc": "corridor to red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "corridor to red base-2",
+   "x": 80,
+   "y": -864,
+   "z": -224,
+   "loc": "corridor to red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "corridor to red base-3",
+   "x": 152,
+   "y": -1208,
+   "z": -120,
+   "loc": "corridor to red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "corridor to red base-4",
+   "x": 304,
+   "y": -864,
+   "z": -224,
+   "loc": "corridor to red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "corridor to/from blue base-1",
+   "x": 80,
+   "y": -320,
+   "z": -224,
+   "loc": "corridor to/from blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "corridor to/from blue base-2",
+   "x": 304,
+   "y": -320,
+   "z": -224,
+   "loc": "corridor to/from blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "long corridor to/from red base-1",
+   "x": -80,
+   "y": -864,
+   "z": 32,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "long corridor to/from red base-2",
+   "x": -80,
+   "y": -320,
+   "z": 32,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "long corridor to/from red base-3",
+   "x": -72,
+   "y": -672,
+   "z": 32,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "long corridor to/from red base-4",
+   "x": 464,
+   "y": -672,
+   "z": 32,
+   "loc": "long corridor to/from red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "outside blue base",
+   "x": 256,
+   "y": -472,
+   "z": 208,
+   "loc": "outside blue base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "outside red base",
+   "x": 256,
+   "y": -680,
+   "z": 208,
+   "loc": "outside red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-1",
+   "x": 16,
+   "y": -1280,
+   "z": 216,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-2",
+   "x": 72,
+   "y": -1320,
+   "z": 32,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "red base-3",
+   "x": 192,
+   "y": -1280,
+   "z": 32,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-4",
+   "x": 208,
+   "y": -1304,
+   "z": -120,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-5",
+   "x": 280,
+   "y": -1320,
+   "z": 32,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-6",
+   "x": 336,
+   "y": -1280,
+   "z": 216,
+   "loc": "red base"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "red base-7",
+   "x": 336,
+   "y": -1184,
+   "z": 8,
+   "loc": "red base"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "long corridor to/from red base",
+   "x": -12,
+   "y": -336,
+   "z": 32,
+   "loc": "long corridor to/from red base",
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "outside red base",
+   "x": -12,
+   "y": -840,
+   "z": 32,
+   "loc": "outside red base",
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "blue base",
+   "x": 82,
+   "y": 86,
+   "z": -94,
+   "loc": "blue base",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     77,
+     65,
+     -123
+    ],
+    "max": [
+     87,
+     107,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "red base",
+   "x": 302,
+   "y": -1270,
+   "z": -94,
+   "loc": "red base",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     297,
+     -1291,
+     -123
+    ],
+    "max": [
+     307,
+     -1249,
+     -65
+    ]
+   }
+  }
+ ]
+}

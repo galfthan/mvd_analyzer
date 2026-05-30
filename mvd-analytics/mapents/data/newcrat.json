@@ -1,0 +1,191 @@
+{
+ "map": "newcrat",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -61.550667,
+   "y": 18.66153,
+   "z": -320,
+   "bounds": {
+    "min": [
+     -162.10133,
+     -25.676939,
+     -383
+    ],
+    "max": [
+     39,
+     63,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 1.2643318,
+   "y": -124.66983,
+   "z": -320,
+   "bounds": {
+    "min": [
+     -31,
+     -189.67299,
+     -383
+    ],
+    "max": [
+     33.528664,
+     -59.666668,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 16,
+   "y": 32,
+   "z": 392,
+   "bounds": {
+    "min": [
+     -111,
+     -95,
+     385
+    ],
+    "max": [
+     143,
+     159,
+     399
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 39.774826,
+   "y": -342.77075,
+   "z": -288,
+   "bounds": {
+    "min": [
+     -15.932755,
+     -441.75348,
+     -383
+    ],
+    "max": [
+     95.48241,
+     -243.78802,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "suit",
+   "x": 752,
+   "y": 32,
+   "z": -360
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -552,
+   "y": 232,
+   "z": -104
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-10",
+   "x": 376,
+   "y": 184,
+   "z": -200
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-11",
+   "x": 560,
+   "y": 232,
+   "z": -104
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-12",
+   "x": 568,
+   "y": -240,
+   "z": -104
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -248,
+   "y": 288,
+   "z": -200
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -236,
+   "y": -564,
+   "z": -104
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -236,
+   "y": 560,
+   "z": -104
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -216,
+   "y": -272,
+   "z": -136
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 0,
+   "y": 0,
+   "z": -230
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 136,
+   "y": -352,
+   "z": -168
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 232,
+   "y": 560,
+   "z": -104
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": 240,
+   "y": -568,
+   "z": -104
+  }
+ ]
+}

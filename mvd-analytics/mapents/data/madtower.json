@@ -1,0 +1,803 @@
+{
+ "map": "madtower",
+ "version": 1,
+ "entities": [
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad Level-1",
+   "x": 0,
+   "y": -720,
+   "z": 576,
+   "loc": "Quad Level",
+   "bounds": {
+    "min": [
+     -63,
+     -727,
+     513
+    ],
+    "max": [
+     63,
+     -713,
+     639
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad Level-2",
+   "x": 0,
+   "y": -48,
+   "z": 576,
+   "loc": "Quad Level",
+   "bounds": {
+    "min": [
+     -63,
+     -55,
+     513
+    ],
+    "max": [
+     63,
+     -41,
+     639
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Blue Flag Level-1",
+   "x": -32,
+   "y": -624,
+   "z": 280,
+   "loc": "Blue Flag Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Blue Flag Level-2",
+   "x": 32,
+   "y": -144,
+   "z": 280,
+   "loc": "Blue Flag Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Blue Flag Level-3",
+   "x": 264,
+   "y": -80,
+   "z": 32,
+   "loc": "Blue Flag Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Bottom Level",
+   "x": -280,
+   "y": -680,
+   "z": 32,
+   "loc": "Bottom Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Red Flag Level-1",
+   "x": -32,
+   "y": -624,
+   "z": 784,
+   "loc": "Red Flag Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Red Flag Level-2",
+   "x": 32,
+   "y": -144,
+   "z": 784,
+   "loc": "Red Flag Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Top Level-1",
+   "x": -288,
+   "y": -680,
+   "z": 1056,
+   "loc": "Top Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Top Level-2",
+   "x": 272,
+   "y": -80,
+   "z": 1056,
+   "loc": "Top Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "Bottom Level",
+   "x": -8,
+   "y": -688,
+   "z": 32,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "Top Level",
+   "x": 0,
+   "y": -688,
+   "z": 1064,
+   "loc": "Top Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "Bottom Level",
+   "x": 144,
+   "y": -384,
+   "z": 8,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "Top Level",
+   "x": 152,
+   "y": -384,
+   "z": 1040,
+   "loc": "Top Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Blue Flag Level-1",
+   "x": -240,
+   "y": -624,
+   "z": 256,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Blue Flag Level-2",
+   "x": -240,
+   "y": -560,
+   "z": 256,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Blue Flag Level-3",
+   "x": -240,
+   "y": -208,
+   "z": 256,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Blue Flag Level-4",
+   "x": -240,
+   "y": -144,
+   "z": 256,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Blue Flag Level-5",
+   "x": 240,
+   "y": -624,
+   "z": 256,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Blue Flag Level-6",
+   "x": 240,
+   "y": -144,
+   "z": 256,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Bottom Level-1",
+   "x": -560,
+   "y": -944,
+   "z": 8,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Bottom Level-2",
+   "x": -560,
+   "y": 176,
+   "z": 8,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Bottom Level-3",
+   "x": 560,
+   "y": 176,
+   "z": 8,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad Level",
+   "x": 560,
+   "y": -944,
+   "z": 8,
+   "loc": "Quad Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Red Flag Level-1",
+   "x": -240,
+   "y": -624,
+   "z": 768,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Red Flag Level-2",
+   "x": -240,
+   "y": -144,
+   "z": 768,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Red Flag Level-3",
+   "x": 240,
+   "y": -624,
+   "z": 768,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Red Flag Level-4",
+   "x": 240,
+   "y": -560,
+   "z": 768,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Red Flag Level-5",
+   "x": 240,
+   "y": -208,
+   "z": 768,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Red Flag Level-6",
+   "x": 240,
+   "y": -144,
+   "z": 768,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "Bottom Level",
+   "x": -160,
+   "y": -384,
+   "z": 16,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "Top Level",
+   "x": -152,
+   "y": -384,
+   "z": 1048,
+   "loc": "Top Level"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "Blue Flag Level",
+   "x": 536,
+   "y": -376,
+   "z": 40,
+   "loc": "Blue Flag Level",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad Level",
+   "x": 0,
+   "y": -384,
+   "z": 552,
+   "loc": "Quad Level"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "Bottom Level",
+   "x": -8,
+   "y": -384,
+   "z": 24,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "Top Level",
+   "x": 0,
+   "y": -384,
+   "z": 1056,
+   "loc": "Top Level"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "Blue Flag Level",
+   "x": -552,
+   "y": -384,
+   "z": 40,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Blue Flag Level",
+   "x": -296,
+   "y": -384,
+   "z": 16,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Bottom Level",
+   "x": 312,
+   "y": -384,
+   "z": 24,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Top Level-1",
+   "x": -304,
+   "y": -384,
+   "z": 1040,
+   "loc": "Top Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Top Level-2",
+   "x": 304,
+   "y": -384,
+   "z": 1040,
+   "loc": "Top Level"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Blue Flag Level-1",
+   "x": -96,
+   "y": -144,
+   "z": 280,
+   "loc": "Blue Flag Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Blue Flag Level-2",
+   "x": 96,
+   "y": -624,
+   "z": 280,
+   "loc": "Blue Flag Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Bottom Level-1",
+   "x": -280,
+   "y": -80,
+   "z": 32,
+   "loc": "Bottom Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Bottom Level-2",
+   "x": 272,
+   "y": -688,
+   "z": 32,
+   "loc": "Bottom Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Red Flag Level-1",
+   "x": -280,
+   "y": -80,
+   "z": 1056,
+   "loc": "Red Flag Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Red Flag Level-2",
+   "x": -96,
+   "y": -144,
+   "z": 784,
+   "loc": "Red Flag Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Red Flag Level-3",
+   "x": 96,
+   "y": -624,
+   "z": 784,
+   "loc": "Red Flag Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Top Level",
+   "x": 272,
+   "y": -688,
+   "z": 1064,
+   "loc": "Top Level",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "Blue Flag Level",
+   "x": 240,
+   "y": -280,
+   "z": 272,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "Red Flag Level",
+   "x": -240,
+   "y": -280,
+   "z": 800,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Blue Flag Level",
+   "x": 240,
+   "y": -488,
+   "z": 272,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Red Flag Level",
+   "x": -240,
+   "y": -488,
+   "z": 800,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "Bottom Level",
+   "x": -8,
+   "y": -80,
+   "z": 32,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "Top Level",
+   "x": 0,
+   "y": -80,
+   "z": 1064,
+   "loc": "Top Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Flag Level-1",
+   "x": -144,
+   "y": -424,
+   "z": 296,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Blue Flag Level-2",
+   "x": 0,
+   "y": -624,
+   "z": 296,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Flag Level-3",
+   "x": 0,
+   "y": -528,
+   "z": 304,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Flag Level-4",
+   "x": 0,
+   "y": -240,
+   "z": 304,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Blue Flag Level-5",
+   "x": 16,
+   "y": -184,
+   "z": 296,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "Blue Flag Level-6",
+   "x": 144,
+   "y": -424,
+   "z": 296,
+   "loc": "Blue Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Bottom Level-1",
+   "x": -8,
+   "y": -872,
+   "z": 48,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Bottom Level-2",
+   "x": 24,
+   "y": 64,
+   "z": 48,
+   "loc": "Bottom Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Flag Level-1",
+   "x": -144,
+   "y": -416,
+   "z": 800,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Red Flag Level-2",
+   "x": 0,
+   "y": -624,
+   "z": 800,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Flag Level-3",
+   "x": 0,
+   "y": -520,
+   "z": 808,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Flag Level-4",
+   "x": 0,
+   "y": -232,
+   "z": 808,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Red Flag Level-5",
+   "x": 16,
+   "y": -184,
+   "z": 800,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "Red Flag Level-6",
+   "x": 144,
+   "y": -416,
+   "z": 800,
+   "loc": "Red Flag Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Top Level-1",
+   "x": -48,
+   "y": -184,
+   "z": 1056,
+   "loc": "Top Level"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Top Level-2",
+   "x": 64,
+   "y": -624,
+   "z": 1056,
+   "loc": "Top Level"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Bottom Level",
+   "x": 0,
+   "y": -384,
+   "z": 128,
+   "loc": "Bottom Level",
+   "targetName": "toptele"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Top Level",
+   "x": 0,
+   "y": -376,
+   "z": 1192,
+   "loc": "Top Level",
+   "targetName": "bottomtele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Blue Flag Level",
+   "x": 4,
+   "y": -380,
+   "z": 212,
+   "loc": "Blue Flag Level",
+   "target": "bottomtele",
+   "bounds": {
+    "min": [
+     -87,
+     -471,
+     209
+    ],
+    "max": [
+     95,
+     -289,
+     215
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Top Level",
+   "x": 4,
+   "y": -380,
+   "z": 1268,
+   "loc": "Top Level",
+   "target": "toptele",
+   "bounds": {
+    "min": [
+     -87,
+     -471,
+     1265
+    ],
+    "max": [
+     95,
+     -289,
+     1271
+    ]
+   }
+  }
+ ]
+}

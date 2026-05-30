@@ -1,0 +1,87 @@
+{
+ "map": "elav8",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl",
+   "x": -1640,
+   "y": -1848,
+   "z": -1232
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -2384,
+   "y": 64,
+   "z": -996
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -2384,
+   "y": 112,
+   "z": -996
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -2384,
+   "y": 160,
+   "z": -996
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -2336,
+   "y": 64,
+   "z": -996
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -2336,
+   "y": 112,
+   "z": -996
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": -2336,
+   "y": 160,
+   "z": -996
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": -2288,
+   "y": 64,
+   "z": -996
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": -2288,
+   "y": 112,
+   "z": -996
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": -2288,
+   "y": 160,
+   "z": -996
+  }
+ ]
+}

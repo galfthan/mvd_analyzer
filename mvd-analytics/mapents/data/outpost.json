@@ -1,0 +1,38 @@
+{
+ "map": "outpost",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -224,
+   "y": -220,
+   "z": 52
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -220,
+   "y": 224,
+   "z": 52
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 224,
+   "y": -224,
+   "z": 52
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 224,
+   "y": 224,
+   "z": 52
+  }
+ ]
+}

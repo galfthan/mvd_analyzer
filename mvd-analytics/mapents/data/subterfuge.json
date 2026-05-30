@@ -1,0 +1,429 @@
+{
+ "map": "subterfuge",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG-1",
+   "x": 592,
+   "y": 264,
+   "z": 144,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG-2",
+   "x": 592,
+   "y": 312,
+   "z": 144,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "low-tele-exit",
+   "x": -304,
+   "y": -336,
+   "z": 336,
+   "loc": "low-tele-exit"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": 960,
+   "y": 80,
+   "z": 144,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": -352,
+   "y": -368,
+   "z": 144,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GA",
+   "x": 800,
+   "y": 64,
+   "z": 144,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "doublehp-path-1",
+   "x": 128,
+   "y": 16,
+   "z": 336,
+   "loc": "doublehp-path"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "doublehp-path-2",
+   "x": 176,
+   "y": 16,
+   "z": 336,
+   "loc": "doublehp-path"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "low-tele",
+   "x": 440,
+   "y": 208,
+   "z": 16,
+   "loc": "low-tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "ra-tele",
+   "x": 336,
+   "y": 752,
+   "z": 16,
+   "loc": "ra-tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "ra-tele-exit",
+   "x": 800,
+   "y": 496,
+   "z": 128,
+   "loc": "ra-tele-exit"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "ya-rockets",
+   "x": 144,
+   "y": -48,
+   "z": 144,
+   "loc": "ya-rockets"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "ya-top-stairs",
+   "x": -384,
+   "y": 120,
+   "z": 240,
+   "loc": "ya-top-stairs"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": 624,
+   "y": 104,
+   "z": 144,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MEGA",
+   "x": 336,
+   "y": -336,
+   "z": 16,
+   "loc": "MEGA",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": 352,
+   "y": 592,
+   "z": 208,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "high-rl",
+   "x": 8,
+   "y": 696,
+   "z": 240,
+   "loc": "high-rl"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "low-rl",
+   "x": 816,
+   "y": -208,
+   "z": 96,
+   "loc": "low-rl"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MEGA",
+   "x": 528,
+   "y": -224,
+   "z": 16,
+   "loc": "MEGA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "low-tele",
+   "x": 440,
+   "y": 432,
+   "z": 16,
+   "loc": "low-tele"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "ya-rockets",
+   "x": -80,
+   "y": 16,
+   "z": 152,
+   "loc": "ya-rockets"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "ya-top-stairs",
+   "x": -48,
+   "y": -16,
+   "z": 336,
+   "loc": "ya-top-stairs"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "SSG",
+   "x": 352,
+   "y": 336,
+   "z": 16,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 32,
+   "y": -368,
+   "z": 144,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GA",
+   "x": 992,
+   "y": 80,
+   "z": 168,
+   "loc": "GA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA",
+   "x": 352,
+   "y": 544,
+   "z": 232,
+   "loc": "RA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SSG",
+   "x": 224,
+   "y": 336,
+   "z": 40,
+   "loc": "SSG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "low-tele-exit",
+   "x": -288,
+   "y": -384,
+   "z": 360,
+   "loc": "low-tele-exit"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "ra-tele",
+   "x": 480,
+   "y": 768,
+   "z": 56,
+   "loc": "ra-tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "ya-rockets",
+   "x": -192,
+   "y": 32,
+   "z": 168,
+   "loc": "ya-rockets"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GA",
+   "x": 760,
+   "y": 80,
+   "z": 152,
+   "loc": "GA",
+   "targetName": "info_teleport_destination2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "doublehp-path",
+   "x": 488,
+   "y": 0,
+   "z": 344,
+   "loc": "doublehp-path",
+   "targetName": "info_teleport_destination1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "low-tele-exit",
+   "x": -48,
+   "y": -392,
+   "z": 344,
+   "loc": "low-tele-exit",
+   "targetName": "info_teleport_destination3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "ra-tele-exit",
+   "x": 816,
+   "y": 776,
+   "z": 152,
+   "loc": "ra-tele-exit",
+   "targetName": "info_teleport_destination4"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 728,
+   "y": 80,
+   "z": 192,
+   "loc": "LG",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     721,
+     33,
+     177
+    ],
+    "max": [
+     735,
+     127,
+     207
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "doublehp-path",
+   "x": 520,
+   "y": 0,
+   "z": 384,
+   "loc": "doublehp-path",
+   "target": "info_teleport_destination2",
+   "bounds": {
+    "min": [
+     513,
+     -47,
+     369
+    ],
+    "max": [
+     527,
+     47,
+     399
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low-tele",
+   "x": 584,
+   "y": 336,
+   "z": 0,
+   "loc": "low-tele",
+   "target": "info_teleport_destination3",
+   "bounds": {
+    "min": [
+     577,
+     289,
+     -15
+    ],
+    "max": [
+     591,
+     383,
+     15
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "ra-tele",
+   "x": 352,
+   "y": 896,
+   "z": 64,
+   "loc": "ra-tele",
+   "target": "info_teleport_destination4",
+   "bounds": {
+    "min": [
+     305,
+     881,
+     49
+    ],
+    "max": [
+     399,
+     911,
+     79
+    ]
+   }
+  }
+ ]
+}

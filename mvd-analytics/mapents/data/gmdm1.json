@@ -1,0 +1,550 @@
+{
+ "map": "gmdm1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "GL.stairs",
+   "x": 504,
+   "y": -264,
+   "z": 1072,
+   "loc": "GL.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG",
+   "x": 256,
+   "y": 288,
+   "z": 1160,
+   "loc": "LG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "high.RL-1",
+   "x": 1880,
+   "y": 296,
+   "z": 1248,
+   "loc": "high.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "high.RL-2",
+   "x": 1928,
+   "y": 296,
+   "z": 1256,
+   "loc": "high.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "platform.YA",
+   "x": 1568,
+   "y": 864,
+   "z": 936,
+   "loc": "platform.YA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GL",
+   "x": 464,
+   "y": 272,
+   "z": 1168,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 528,
+   "y": 400,
+   "z": 1168,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL",
+   "x": 400,
+   "y": 432,
+   "z": 1160,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL.stairs",
+   "x": 744,
+   "y": -264,
+   "z": 1072,
+   "loc": "GL.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG",
+   "x": 16,
+   "y": 400,
+   "z": 1160,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH",
+   "x": 1616,
+   "y": 464,
+   "z": 1360,
+   "loc": "MH"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.below",
+   "x": 1488,
+   "y": 208,
+   "z": 1176,
+   "loc": "MH.below"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.path",
+   "x": -56,
+   "y": 824,
+   "z": 1352,
+   "loc": "RA.path"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SNG",
+   "x": 1016,
+   "y": 888,
+   "z": 1352,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA.tele",
+   "x": 1904,
+   "y": 208,
+   "z": 792,
+   "loc": "YA.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "slime.Suit",
+   "x": 752,
+   "y": 192,
+   "z": 584,
+   "loc": "slime.Suit"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": -208,
+   "y": 336,
+   "z": 1176,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH",
+   "x": 1192,
+   "y": 296,
+   "z": 1360,
+   "loc": "MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "GL.stairs",
+   "x": 560,
+   "y": -264,
+   "z": 1072,
+   "loc": "GL.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SNG",
+   "x": 824,
+   "y": 968,
+   "z": 1352,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "low.RL",
+   "x": 560,
+   "y": 960,
+   "z": 784,
+   "loc": "low.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 1088,
+   "y": 1440,
+   "z": 680,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": -208,
+   "y": 336,
+   "z": 1360,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "slime.Ring",
+   "x": 1344,
+   "y": 640,
+   "z": 608,
+   "loc": "slime.Ring"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "high.RL",
+   "x": 2224,
+   "y": 640,
+   "z": 1272,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "low.RL",
+   "x": 736,
+   "y": 640,
+   "z": 784,
+   "loc": "low.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL.stairs",
+   "x": 688,
+   "y": -264,
+   "z": 1072,
+   "loc": "GL.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RA.path",
+   "x": -40,
+   "y": 520,
+   "z": 1368,
+   "loc": "RA.path"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.tele",
+   "x": 1904,
+   "y": 288,
+   "z": 792,
+   "loc": "YA.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "platform.RL",
+   "x": 1136,
+   "y": 864,
+   "z": 936,
+   "loc": "platform.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "MH.below-1",
+   "x": 1304,
+   "y": 0,
+   "z": 1168,
+   "loc": "MH.below"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "MH.below-2",
+   "x": 1352,
+   "y": 0,
+   "z": 1168,
+   "loc": "MH.below"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "SNG",
+   "x": 768,
+   "y": 944,
+   "z": 1360,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "MH",
+   "x": 1424,
+   "y": 432,
+   "z": 1360,
+   "loc": "MH"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "slime.Suit",
+   "x": 640,
+   "y": 48,
+   "z": 816,
+   "loc": "slime.Suit"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "slime.YA",
+   "x": 2144,
+   "y": 640,
+   "z": 816,
+   "loc": "slime.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 1920,
+   "y": 640,
+   "z": 784,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL.stairs-1",
+   "x": 640,
+   "y": -224,
+   "z": 1128,
+   "loc": "GL.stairs"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL.stairs-2",
+   "x": 944,
+   "y": 96,
+   "z": 1224,
+   "loc": "GL.stairs"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL.tele",
+   "x": 320,
+   "y": 832,
+   "z": 1224,
+   "loc": "GL.tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "MH",
+   "x": 1680,
+   "y": 440,
+   "z": 1416,
+   "loc": "MH"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SNG",
+   "x": 1088,
+   "y": 640,
+   "z": 1416,
+   "loc": "SNG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.tele",
+   "x": 1920,
+   "y": 160,
+   "z": 816,
+   "loc": "YA.tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "platform.RL",
+   "x": 1024,
+   "y": 640,
+   "z": 1000,
+   "loc": "platform.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "platform.YA",
+   "x": 1504,
+   "y": 640,
+   "z": 1016,
+   "loc": "platform.YA"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL.tele",
+   "x": 384,
+   "y": 896,
+   "z": 1200,
+   "loc": "GL.tele",
+   "targetName": "t266"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "YA.tele",
+   "x": 1920,
+   "y": 336,
+   "z": 808,
+   "loc": "YA.tele",
+   "targetName": "t267"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "ramp.stand",
+   "x": 1512,
+   "y": 1184,
+   "z": 1136,
+   "loc": "ramp.stand",
+   "targetName": "t241"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.tele",
+   "x": 384,
+   "y": 940,
+   "z": 1216,
+   "loc": "GL.tele",
+   "target": "t267",
+   "bounds": {
+    "min": [
+     321,
+     929,
+     1153
+    ],
+    "max": [
+     447,
+     951,
+     1279
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad",
+   "x": 1088,
+   "y": 1540,
+   "z": 704,
+   "loc": "Quad",
+   "target": "t241",
+   "bounds": {
+    "min": [
+     993,
+     1529,
+     641
+    ],
+    "max": [
+     1183,
+     1551,
+     767
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.tele",
+   "x": 1920,
+   "y": 116,
+   "z": 832,
+   "loc": "YA.tele",
+   "target": "t266",
+   "bounds": {
+    "min": [
+     1857,
+     105,
+     769
+    ],
+    "max": [
+     1983,
+     127,
+     895
+    ]
+   }
+  }
+ ]
+}

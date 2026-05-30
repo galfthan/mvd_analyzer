@@ -1,0 +1,518 @@
+{
+ "map": "pocket",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "SNG.Quad button",
+   "x": -607.5,
+   "y": -877,
+   "z": 341,
+   "loc": "SNG.Quad button",
+   "bounds": {
+    "min": [
+     -608,
+     -890,
+     332
+    ],
+    "max": [
+     -607,
+     -864,
+     350
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.bridge",
+   "x": 483,
+   "y": -62,
+   "z": 352,
+   "loc": "GL.bridge",
+   "bounds": {
+    "min": [
+     476,
+     -107,
+     257
+    ],
+    "max": [
+     490,
+     -17,
+     447
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "SSG.teleport",
+   "x": 45,
+   "y": -742,
+   "z": 51,
+   "loc": "SSG.teleport"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "ammo ledge",
+   "x": 288,
+   "y": -608,
+   "z": 277,
+   "loc": "ammo ledge",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": 592,
+   "y": -384,
+   "z": 46,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL.bridge",
+   "x": 137,
+   "y": -189,
+   "z": 272,
+   "loc": "GL.bridge"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "LG.back hall-1",
+   "x": -317,
+   "y": 108,
+   "z": 40,
+   "loc": "LG.back hall",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "LG.back hall-2",
+   "x": -261,
+   "y": 108,
+   "z": 40,
+   "loc": "LG.back hall",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "SSG.teleport",
+   "x": -6,
+   "y": -880,
+   "z": 4,
+   "loc": "SSG.teleport",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.teleport-1",
+   "x": -516,
+   "y": -1148,
+   "z": 124,
+   "loc": "RA.teleport"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.teleport-2",
+   "x": -207,
+   "y": -880,
+   "z": 4,
+   "loc": "RA.teleport"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA-1",
+   "x": 72,
+   "y": 776,
+   "z": 292,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA-2",
+   "x": 288,
+   "y": 776,
+   "z": 256,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": -273,
+   "y": -460,
+   "z": 32,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH",
+   "x": 249,
+   "y": 104,
+   "z": 96,
+   "loc": "MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "GA",
+   "x": 848,
+   "y": -400,
+   "z": 75,
+   "loc": "GA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "YA",
+   "x": 107,
+   "y": 338,
+   "z": 239,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "back stairs.RL",
+   "x": -697,
+   "y": -84,
+   "z": 176,
+   "loc": "back stairs.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 27,
+   "y": -476,
+   "z": 628,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": -769,
+   "y": -724,
+   "z": 290,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "YA.RL",
+   "x": 483,
+   "y": 224,
+   "z": 236,
+   "loc": "YA.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "back stairs.RL",
+   "x": -696,
+   "y": 84,
+   "z": 176,
+   "loc": "back stairs.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "LG",
+   "x": -174,
+   "y": -442,
+   "z": 43,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RA.room",
+   "x": -399,
+   "y": -753,
+   "z": 210,
+   "loc": "RA.room"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "lower lava",
+   "x": 397,
+   "y": -392,
+   "z": 68,
+   "loc": "lower lava"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "LG.back hall",
+   "x": -278,
+   "y": -221,
+   "z": 45,
+   "loc": "LG.back hall",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RA.room",
+   "x": -404,
+   "y": -688,
+   "z": 208,
+   "loc": "RA.room"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "YA.RL",
+   "x": 702,
+   "y": 511,
+   "z": 203,
+   "loc": "YA.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "SNG.Quad button",
+   "x": -495,
+   "y": -880,
+   "z": 308,
+   "loc": "SNG.Quad button"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "SSG.teleport",
+   "x": 381,
+   "y": -718,
+   "z": 8,
+   "loc": "SSG.teleport"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 72,
+   "y": 540,
+   "z": 297,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GA",
+   "x": 720,
+   "y": -616,
+   "z": 90,
+   "loc": "GA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG.back hall",
+   "x": -194,
+   "y": 118,
+   "z": 71,
+   "loc": "LG.back hall"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.teleport",
+   "x": -401,
+   "y": -1073,
+   "z": 157,
+   "loc": "RA.teleport"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.RL",
+   "x": 549,
+   "y": 799,
+   "z": 254,
+   "loc": "YA.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "lower lava",
+   "x": 38,
+   "y": -320,
+   "z": 54,
+   "loc": "lower lava"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL.bridge",
+   "x": 341,
+   "y": -316,
+   "z": 320,
+   "loc": "GL.bridge",
+   "targetName": "tele_dest_air"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad",
+   "x": -1,
+   "y": -508,
+   "z": 622,
+   "loc": "Quad",
+   "targetName": "quad_dest"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "SNG.Quad button",
+   "x": -249,
+   "y": -864,
+   "z": 329,
+   "loc": "SNG.Quad button",
+   "targetName": "tele_dest_near_ra"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "SSG.teleport",
+   "x": -92,
+   "y": -864,
+   "z": 32,
+   "loc": "SSG.teleport",
+   "targetName": "tele_dest_low"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA",
+   "x": 939,
+   "y": -384,
+   "z": 124,
+   "loc": "GA",
+   "target": "tele_dest_air",
+   "bounds": {
+    "min": [
+     936,
+     -453,
+     65
+    ],
+    "max": [
+     942,
+     -315,
+     183
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.teleport-1",
+   "x": -501,
+   "y": -1213,
+   "z": 183,
+   "loc": "RA.teleport",
+   "target": "tele_dest_low",
+   "bounds": {
+    "min": [
+     -572,
+     -1214,
+     126
+    ],
+    "max": [
+     -430,
+     -1212,
+     240
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.teleport-2",
+   "x": -246.5,
+   "y": -863.5,
+   "z": 63,
+   "loc": "RA.teleport",
+   "target": "tele_dest_near_ra",
+   "bounds": {
+    "min": [
+     -250,
+     -942,
+     6
+    ],
+    "max": [
+     -243,
+     -785,
+     120
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.RL",
+   "x": 505,
+   "y": -62,
+   "z": 352,
+   "loc": "YA.RL",
+   "target": "quad_dest",
+   "bounds": {
+    "min": [
+     498,
+     -107,
+     257
+    ],
+    "max": [
+     512,
+     -17,
+     447
+    ]
+   }
+  }
+ ]
+}

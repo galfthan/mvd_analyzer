@@ -1,0 +1,128 @@
+{
+ "map": "dm3hill",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -64,
+   "y": -112,
+   "z": -208
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 208,
+   "y": 520,
+   "z": -208
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 360,
+   "y": -384,
+   "z": -176
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 368,
+   "y": 520,
+   "z": -208
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -64,
+   "y": -112,
+   "z": -224,
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 360,
+   "y": -384,
+   "z": -176,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 708,
+   "y": 176,
+   "z": -464,
+   "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -72,
+   "y": 52,
+   "z": -408,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -95,
+     41,
+     -431
+    ],
+    "max": [
+     -49,
+     63,
+     -385
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 360,
+   "y": -420,
+   "z": -160,
+   "target": "t3",
+   "bounds": {
+    "min": [
+     337,
+     -431,
+     -183
+    ],
+    "max": [
+     383,
+     -409,
+     -137
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 730,
+   "y": 176,
+   "z": -424,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     729,
+     137,
+     -447
+    ],
+    "max": [
+     731,
+     215,
+     -401
+    ]
+   }
+  }
+ ]
+}

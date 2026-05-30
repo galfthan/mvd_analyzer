@@ -2453,6 +2453,61 @@ th.sortable.sort-desc::after {
     color: var(--accent-cyan);
 }
 
+/* "Learn map" toggle — highlighted when the static study view is active. */
+.map-track-controls button.map-learn-toggle.active {
+    border-color: var(--accent-cyan);
+    color: var(--bg-deep);
+    background: var(--accent-cyan);
+}
+
+/* Learn-map sidebar: category filter checklist. */
+.map-entities-panel {
+    margin-bottom: 12px;
+}
+
+.map-entity-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.map-entity-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.map-entity-filter input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.map-entity-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.map-entity-hint {
+    margin: 8px 0 0;
+    font-size: 0.75rem;
+    color: #777;
+    line-height: 1.3;
+}
+
+/* Below-map entity table (learn mode): standard .stats-table styling,
+   expands with the tab (no inner scrollbar). */
+.map-entities-table-wrap {
+    margin-top: 12px;
+}
+
 .map-trail-select {
     background: var(--bg-deep);
     border: 1px solid #666;

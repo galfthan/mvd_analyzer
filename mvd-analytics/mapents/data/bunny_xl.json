@@ -1,0 +1,14 @@
+{
+ "map": "bunny_xl",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 32,
+   "y": 1632,
+   "z": 64
+  }
+ ]
+}

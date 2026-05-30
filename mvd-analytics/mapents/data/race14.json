@@ -1,0 +1,30 @@
+{
+ "map": "race14",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -5584,
+   "y": -768,
+   "z": 2696
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -5568,
+   "y": -528,
+   "z": 2696
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -5536,
+   "y": -448,
+   "z": 2696
+  }
+ ]
+}

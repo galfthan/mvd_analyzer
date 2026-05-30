@@ -1,0 +1,44 @@
+{
+ "map": "jqdf1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 8,
+   "y": 0,
+   "z": 32
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 32,
+   "y": -64,
+   "z": 16,
+   "targetName": "tele"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 1872,
+   "y": 712,
+   "z": -148.5,
+   "target": "tele",
+   "bounds": {
+    "min": [
+     -238,
+     -976,
+     -159
+    ],
+    "max": [
+     3982,
+     2400,
+     -138
+    ]
+   }
+  }
+ ]
+}

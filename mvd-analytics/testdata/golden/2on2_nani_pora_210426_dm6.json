@@ -7409,6 +7409,505 @@
       }
     ]
   },
+  "mapEntities": {
+    "entities": [
+      {
+        "bounds": {
+          "max": [
+            903,
+            -1017,
+            -69
+          ],
+          "min": [
+            777,
+            -1151,
+            -87
+          ]
+        },
+        "class": "func_door_secret",
+        "loc": "big.hatch",
+        "name": "big.hatch",
+        "spawnflags": 4,
+        "type": "door",
+        "x": 840,
+        "y": -1084,
+        "z": -78
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "GA.cells",
+        "name": "GA.cells-1",
+        "type": "item",
+        "x": 472,
+        "y": -1400,
+        "z": 232
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "GA.cells",
+        "name": "GA.cells-2",
+        "type": "item",
+        "x": 472,
+        "y": -1352,
+        "z": 232
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "LG",
+        "name": "LG-1",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 600,
+        "y": -1064,
+        "z": -296
+      },
+      {
+        "class": "item_cells",
+        "kind": "cells",
+        "loc": "LG",
+        "name": "LG-2",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 656,
+        "y": -1064,
+        "z": -296
+      },
+      {
+        "class": "item_armor1",
+        "kind": "ga",
+        "loc": "GA",
+        "name": "GA",
+        "type": "item",
+        "x": 56,
+        "y": -2008,
+        "z": 64
+      },
+      {
+        "class": "weapon_grenadelauncher",
+        "kind": "gl",
+        "loc": "GL",
+        "name": "GL",
+        "type": "item",
+        "x": 1224,
+        "y": -1088,
+        "z": 232
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "GA",
+        "name": "GA-1",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 232,
+        "y": -1912,
+        "z": 16
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "GA",
+        "name": "GA-2",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 304,
+        "y": -1944,
+        "z": 16
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "GL",
+        "name": "GL-1",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 928,
+        "y": -864,
+        "z": 232
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "GL",
+        "name": "GL-2",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 984,
+        "y": -864,
+        "z": 232
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "RA.tunnel",
+        "name": "RA.tunnel-1",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 1048,
+        "y": -568,
+        "z": 16
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "RA.tunnel",
+        "name": "RA.tunnel-2",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 1048,
+        "y": -520,
+        "z": 16
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "big",
+        "name": "big-1",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 872,
+        "y": -960,
+        "z": -64
+      },
+      {
+        "class": "item_health",
+        "kind": "h15",
+        "loc": "big",
+        "name": "big-2",
+        "spawnflags": 1,
+        "type": "item",
+        "x": 920,
+        "y": -1008,
+        "z": -64
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "GA.cells",
+        "name": "GA.cells",
+        "type": "item",
+        "x": 408,
+        "y": -1064,
+        "z": 232
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "GL.below",
+        "name": "GL.below",
+        "type": "item",
+        "x": 1696,
+        "y": -1160,
+        "z": 16
+      },
+      {
+        "class": "item_health",
+        "kind": "h25",
+        "loc": "RA",
+        "name": "RA",
+        "type": "item",
+        "x": 1224,
+        "y": -608,
+        "z": 144
+      },
+      {
+        "class": "weapon_lightning",
+        "kind": "lg",
+        "loc": "LG",
+        "name": "LG",
+        "type": "item",
+        "x": 760,
+        "y": -1080,
+        "z": -296
+      },
+      {
+        "class": "item_health",
+        "kind": "mh",
+        "loc": "MH",
+        "name": "MH",
+        "spawnflags": 2,
+        "type": "item",
+        "x": 192,
+        "y": -1264,
+        "z": 88
+      },
+      {
+        "class": "weapon_nailgun",
+        "kind": "ng",
+        "loc": "big",
+        "name": "big",
+        "type": "item",
+        "x": 1224,
+        "y": -1088,
+        "z": -64
+      },
+      {
+        "class": "item_armorInv",
+        "kind": "ra",
+        "loc": "RA",
+        "name": "RA",
+        "type": "item",
+        "x": 1736,
+        "y": -344,
+        "z": 144
+      },
+      {
+        "class": "item_artifact_invisibility",
+        "kind": "ring",
+        "loc": "LG",
+        "name": "LG",
+        "type": "item",
+        "x": 512,
+        "y": -1088,
+        "z": -272
+      },
+      {
+        "class": "weapon_rocketlauncher",
+        "kind": "rl",
+        "loc": "MH",
+        "name": "MH",
+        "type": "item",
+        "x": 200,
+        "y": -1112,
+        "z": 88
+      },
+      {
+        "class": "weapon_rocketlauncher",
+        "kind": "rl",
+        "loc": "RA",
+        "name": "RA",
+        "type": "item",
+        "x": 1512,
+        "y": -432,
+        "z": 36
+      },
+      {
+        "class": "item_rockets",
+        "kind": "rockets",
+        "loc": "GA",
+        "name": "GA",
+        "type": "item",
+        "x": 264,
+        "y": -1632,
+        "z": 36
+      },
+      {
+        "class": "item_shells",
+        "kind": "shells",
+        "loc": "GL.RA",
+        "name": "GL.RA",
+        "type": "item",
+        "x": 1736,
+        "y": -1112,
+        "z": 144
+      },
+      {
+        "class": "weapon_supernailgun",
+        "kind": "sng",
+        "loc": "GA",
+        "name": "GA",
+        "type": "item",
+        "x": 424,
+        "y": -2008,
+        "z": 144
+      },
+      {
+        "class": "weapon_supershotgun",
+        "kind": "ssg",
+        "loc": "RA",
+        "name": "RA",
+        "type": "item",
+        "x": 1392,
+        "y": -584,
+        "z": 16
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "GA.cells",
+        "name": "GA.cells-1",
+        "type": "spawn",
+        "x": 408,
+        "y": -1088,
+        "z": 256
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "GA.cells",
+        "name": "GA.cells-2",
+        "type": "spawn",
+        "x": 456,
+        "y": -1504,
+        "z": 256
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "GA.hide",
+        "name": "GA.hide",
+        "type": "spawn",
+        "x": 232,
+        "y": -1512,
+        "z": 40
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "GL.hide",
+        "name": "GL.hide",
+        "type": "spawn",
+        "x": 896,
+        "y": -1464,
+        "z": 256
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "MH",
+        "name": "MH",
+        "type": "spawn",
+        "x": 0,
+        "y": -1088,
+        "z": 264
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "RA.behind",
+        "name": "RA.behind",
+        "type": "spawn",
+        "x": 1892,
+        "y": -160,
+        "z": 168
+      },
+      {
+        "class": "info_player_deathmatch",
+        "loc": "RA.tunnel",
+        "name": "RA.tunnel",
+        "type": "spawn",
+        "x": 1016,
+        "y": -416,
+        "z": 40
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "GA",
+        "name": "GA",
+        "targetName": "t1",
+        "type": "teleportDst",
+        "x": 308,
+        "y": -1788,
+        "z": 44
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "MH",
+        "name": "MH",
+        "targetName": "t2",
+        "type": "teleportDst",
+        "x": 200,
+        "y": -892,
+        "z": 119
+      },
+      {
+        "class": "info_teleport_destination",
+        "loc": "big",
+        "name": "big",
+        "targetName": "t3",
+        "type": "teleportDst",
+        "x": 1072,
+        "y": -1096,
+        "z": -32
+      },
+      {
+        "bounds": {
+          "max": [
+            267,
+            -1761,
+            142
+          ],
+          "min": [
+            229,
+            -1807,
+            24
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "GA",
+        "name": "GA",
+        "target": "t2",
+        "type": "teleportSrc",
+        "x": 248,
+        "y": -1784,
+        "z": 83
+      },
+      {
+        "bounds": {
+          "max": [
+            451,
+            -1065,
+            -185
+          ],
+          "min": [
+            413,
+            -1111,
+            -283
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "LG",
+        "name": "LG",
+        "target": "t3",
+        "type": "teleportSrc",
+        "x": 432,
+        "y": -1088,
+        "z": -234
+      },
+      {
+        "bounds": {
+          "max": [
+            223,
+            -829,
+            227
+          ],
+          "min": [
+            177,
+            -867,
+            113
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "MH",
+        "name": "MH",
+        "target": "t1",
+        "type": "teleportSrc",
+        "x": 200,
+        "y": -848,
+        "z": 170
+      },
+      {
+        "bounds": {
+          "max": [
+            1043,
+            -1073,
+            63
+          ],
+          "min": [
+            1005,
+            -1119,
+            -35
+          ]
+        },
+        "class": "trigger_teleport",
+        "loc": "big",
+        "name": "big",
+        "target": "t1",
+        "type": "teleportSrc",
+        "x": 1024,
+        "y": -1096,
+        "z": 14
+      }
+    ],
+    "map": "dm6"
+  },
   "match": {
     "duration": 600000,
     "endTime": 600000,
@@ -10455,7 +10954,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 12,
+  "schemaVersion": 14,
   "streams": {
     "global": {
       "matchEnd": 600000,

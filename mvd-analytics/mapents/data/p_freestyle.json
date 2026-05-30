@@ -1,0 +1,36 @@
+{
+ "map": "p_freestyle",
+ "version": 1,
+ "entities": [
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": -800,
+   "y": 728,
+   "z": 1808,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -864,
+   "y": 1240,
+   "z": -100,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -879,
+     1225,
+     -107
+    ],
+    "max": [
+     -849,
+     1255,
+     -93
+    ]
+   }
+  }
+ ]
+}

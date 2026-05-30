@@ -174,7 +174,7 @@ all endpoints and aren't repeated.
 Warm the cache and resolve the canonical id. Idempotent.
 
 ```jsonc
-{ "demoId": "sha:abc…", "sha256": "abc…", "fromCache": true, "schemaVersion": 12 }
+{ "demoId": "sha:abc…", "sha256": "abc…", "fromCache": true, "schemaVersion": 14 }
 ```
 
 Use `demoId` for subsequent calls to skip the gameId→sha lookup.
@@ -186,7 +186,7 @@ single call to populate a match header and decide which panels to show.
 
 ```jsonc
 {
-  "schemaVersion": 12,
+  "schemaVersion": 14,
   "map": "dm6", "gameDir": "qw",
   "mode": "4on4",            // omitempty
   "duration": 613.4,         // seconds
@@ -245,6 +245,36 @@ KTX-hint-derived item analytics:
 
 Shapes in
 [RESULT_SCHEMA.md §Items / Backpacks / WeaponPickups](../mvd-analytics/RESULT_SCHEMA.md#itemsresult-items).
+
+### 4.7b `GET /v1/demos/{id}/map-entities`
+
+Params: `types`, `kinds`. The map's **static designed layout** — item
+spawns, player spawnpoints, teleport destinations/sources, buttons —
+with type + location. Per-map (identical for every demo on the map),
+sourced from the BSP entity corpus. Shape: `result.MapEntitiesResult` →
+[RESULT_SCHEMA.md §MapEntitiesResult](../mvd-analytics/RESULT_SCHEMA.md#mapentitiesresult-mapentities).
+For the per-match pickup timeline use `/items` instead.
+
+```jsonc
+// ?types=item,teleportSrc,teleportDst&kinds=weapon
+{ "map": "dm6", "entities": [
+  { "type": "item", "class": "weapon_rocketlauncher", "kind": "rl",
+    "name": "RA", "x": 1216, "y": -64, "z": 24, "loc": "RA" },
+  // brush entity: anchored at bbox centre, carries the trigger volume
+  { "type": "teleportSrc", "class": "trigger_teleport", "name": "GA",
+    "x": 248, "y": -1784, "z": 83, "loc": "GA", "target": "t2",
+    "bounds": { "min": [229,-1807,24], "max": [267,-1761,142] } },
+  { "type": "teleportDst", "class": "info_teleport_destination",
+    "name": "MH", "x": -512, "y": 480, "z": 24, "loc": "MH",
+    "targetName": "t2" }
+] }
+```
+
+`types` ∈ `item,spawn,teleportDst,teleportSrc,button,door`; `kinds` is an
+item category (`armor,mega,health,powerup,weapon,ammo`) or a raw kind.
+Brush entities (`teleportSrc`/`button`/`door`) carry a `bounds` volume;
+link a teleporter's entrance to its exit via `teleportSrc.target` ==
+`teleportDst.targetName`.
 
 ### 4.8 `GET /v1/demos/{id}/events`
 
@@ -386,8 +416,24 @@ indices client-side.
 
 - **`/chat`** (`from`, `to`, `players`, `types`) — chat + teamsay only;
   `[]result.MatchEvent`.
-- **`/healthz`** — `{ "ok": true, "schemaVersion": 12 }`.
+- **`/healthz`** — `{ "ok": true, "schemaVersion": 14 }`.
 - **`/v1/version`** — `{ "hash", "tag", "buildDate" }`.
+
+### 4.16 Per-map static data — `GET /v1/maps/{map}/…`
+
+Per-map data addressed by map name directly (no demo needed) — handy for
+UIs that have a map name from `/overview` or a match listing.
+
+- **`GET /v1/maps/{map}/entities`** (`types`, `kinds`) — the same static
+  layout as `/demos/{id}/map-entities`, read from the embedded corpus.
+  `{ map, entities: [...] }`. Aliases are resolved (`phantombase` →
+  `phantoma`). `404 map_unavailable` when no corpus exists.
+- **`GET /v1/maps/{map}/geometry`** — streams the per-map floor-polygon
+  geometry JSON (`mapgeom.MapRegions`: `{ map, version, bounds, locs:[{
+  name, z, tris:[…] }] }`) for renderers. Served from the server's
+  `-maps-dir`; `404 map_unavailable` when unset or the map is missing.
+  **REST-only — not an MCP tool** (the payload is large, up to tens of
+  MB). Immutable cache + ETag; send `If-None-Match` for a 304.
 
 ---
 
@@ -412,6 +458,9 @@ Common frontend features → the call that backs them.
   read `stats.QUAD.byPlayer`.
 - **Loc heatmap / movement graph** → `GET /loc-graph` (aggregate) or
   `/loc-trails` (per-player sequence with dwell).
+- **Draw the map (items, spawns, teleporters as overlays)** → `GET /v1/maps/{map}/entities`
+  (or `/demos/{id}/map-entities`); add `GET /v1/maps/{map}/geometry` for
+  floor polygons to render underneath.
 - **Weapon effectiveness** → `GET /demoinfo` (KTX accuracy/damage) or
   `/weapon-pickups` (kills-before-next-death).
 

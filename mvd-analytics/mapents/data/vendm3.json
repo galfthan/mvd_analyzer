@@ -1,0 +1,652 @@
+{
+ "map": "vendm3",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Ring",
+   "x": -280,
+   "y": 312,
+   "z": 484,
+   "loc": "Ring",
+   "bounds": {
+    "min": [
+     -303,
+     289,
+     481
+    ],
+    "max": [
+     -257,
+     335,
+     487
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG",
+   "x": -536,
+   "y": -624,
+   "z": -144,
+   "loc": "LG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "MH",
+   "x": -920,
+   "y": -48,
+   "z": 176,
+   "loc": "MH"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "SSG",
+   "x": -528,
+   "y": 232,
+   "z": 16,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "LG",
+   "x": -96,
+   "y": -608,
+   "z": -112,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "MH",
+   "x": -1280,
+   "y": 320,
+   "z": 272,
+   "loc": "MH"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "SSG.RL",
+   "x": -608,
+   "y": 1056,
+   "z": 216,
+   "loc": "SSG.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RA.above",
+   "x": -480,
+   "y": 400,
+   "z": 336,
+   "loc": "RA.above"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "top.GL",
+   "x": 336,
+   "y": 544,
+   "z": 176,
+   "loc": "top.GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "LG-1",
+   "x": -136,
+   "y": -304,
+   "z": -144,
+   "loc": "LG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "LG-2",
+   "x": -88,
+   "y": -304,
+   "z": -144,
+   "loc": "LG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RA.below",
+   "x": 338,
+   "y": 536,
+   "z": -144,
+   "loc": "RA.below",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "SNG",
+   "x": -368,
+   "y": -48,
+   "z": 176,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.above",
+   "x": -336,
+   "y": -48,
+   "z": 336,
+   "loc": "RA.above"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SNG",
+   "x": -368,
+   "y": 0,
+   "z": 176,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SSG-1",
+   "x": -392,
+   "y": 656,
+   "z": 16,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SSG-2",
+   "x": -344,
+   "y": 656,
+   "z": 16,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": -320,
+   "y": -448,
+   "z": -112,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH",
+   "x": -1088,
+   "y": 304,
+   "z": 168,
+   "loc": "MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RA.below-1",
+   "x": -240,
+   "y": 184,
+   "z": -144,
+   "loc": "RA.below",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RA.below-2",
+   "x": -240,
+   "y": 232,
+   "z": -144,
+   "loc": "RA.below",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SNG-1",
+   "x": -200,
+   "y": -368,
+   "z": 176,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SNG-2",
+   "x": -152,
+   "y": -368,
+   "z": 176,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": 64,
+   "y": 224,
+   "z": 32,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "Ring",
+   "x": -144,
+   "y": 224,
+   "z": 552,
+   "loc": "Ring"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RA.below",
+   "x": 560,
+   "y": 224,
+   "z": -144,
+   "loc": "RA.below"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "SSG.RL",
+   "x": -608,
+   "y": 864,
+   "z": 16,
+   "loc": "SSG.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "LG",
+   "x": -840,
+   "y": -520,
+   "z": -144,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH",
+   "x": -1192,
+   "y": 600,
+   "z": 176,
+   "loc": "MH"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RA.above",
+   "x": -328,
+   "y": 472,
+   "z": 336,
+   "loc": "RA.above"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "SSG.RL",
+   "x": -904,
+   "y": 888,
+   "z": 16,
+   "loc": "SSG.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "SSG",
+   "x": -1008,
+   "y": 304,
+   "z": 16,
+   "loc": "SSG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "SNG",
+   "x": -496,
+   "y": -160,
+   "z": 208,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "SSG",
+   "x": -368,
+   "y": 64,
+   "z": 80,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "SSG",
+   "x": -704,
+   "y": 320,
+   "z": 16,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "top.YA",
+   "x": 336,
+   "y": -96,
+   "z": 176,
+   "loc": "top.YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG",
+   "x": -96,
+   "y": -608,
+   "z": -120,
+   "loc": "LG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "MH",
+   "x": -1280,
+   "y": 320,
+   "z": 264,
+   "loc": "MH"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.below-1",
+   "x": 32,
+   "y": 608,
+   "z": -120,
+   "loc": "RA.below"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.below-2",
+   "x": 704,
+   "y": 224,
+   "z": -104,
+   "loc": "RA.below"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SNG",
+   "x": -496,
+   "y": -160,
+   "z": 200,
+   "loc": "SNG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SSG",
+   "x": -368,
+   "y": 64,
+   "z": 40,
+   "loc": "SSG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SSG.RL",
+   "x": -608,
+   "y": 1056,
+   "z": 208,
+   "loc": "SSG.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "top.YA",
+   "x": 440,
+   "y": 128,
+   "z": 200,
+   "loc": "top.YA"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "LG",
+   "x": -544,
+   "y": -152,
+   "z": -136,
+   "loc": "LG",
+   "targetName": "down1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "MH",
+   "x": -352,
+   "y": 520,
+   "z": 184,
+   "loc": "MH",
+   "targetName": "mid"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA.above",
+   "x": -616,
+   "y": -32,
+   "z": 344,
+   "loc": "RA.above",
+   "targetName": "up1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Ring",
+   "x": -296,
+   "y": 120,
+   "z": 504,
+   "loc": "Ring",
+   "targetName": "secret"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "SNG",
+   "x": -520,
+   "y": -160,
+   "z": 184,
+   "loc": "SNG",
+   "targetName": "ga"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "SSG.RL",
+   "x": -440,
+   "y": 864,
+   "z": 24,
+   "loc": "SSG.RL",
+   "targetName": "low"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": -544,
+   "y": -120,
+   "z": -96,
+   "loc": "LG",
+   "target": "ga",
+   "bounds": {
+    "min": [
+     -591,
+     -127,
+     -143
+    ],
+    "max": [
+     -497,
+     -113,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG.slime",
+   "x": -320,
+   "y": -448,
+   "z": -424,
+   "loc": "LG.slime",
+   "target": "secret",
+   "bounds": {
+    "min": [
+     -383,
+     -511,
+     -431
+    ],
+    "max": [
+     -257,
+     -385,
+     -417
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MH",
+   "x": -352,
+   "y": 552,
+   "z": 224,
+   "loc": "MH",
+   "target": "up1",
+   "bounds": {
+    "min": [
+     -399,
+     545,
+     177
+    ],
+    "max": [
+     -305,
+     559,
+     271
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.above",
+   "x": -648,
+   "y": -32,
+   "z": 384,
+   "loc": "RA.above",
+   "target": "ga",
+   "bounds": {
+    "min": [
+     -655,
+     -79,
+     337
+    ],
+    "max": [
+     -641,
+     15,
+     431
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SSG",
+   "x": -1160,
+   "y": 288,
+   "z": 64,
+   "loc": "SSG",
+   "target": "up1",
+   "bounds": {
+    "min": [
+     -1167,
+     241,
+     17
+    ],
+    "max": [
+     -1153,
+     335,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SSG.RL",
+   "x": -408,
+   "y": 864,
+   "z": 64,
+   "loc": "SSG.RL",
+   "target": "mid",
+   "bounds": {
+    "min": [
+     -415,
+     817,
+     17
+    ],
+    "max": [
+     -401,
+     911,
+     111
+    ]
+   }
+  }
+ ]
+}

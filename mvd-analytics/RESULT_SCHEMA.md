@@ -25,7 +25,8 @@ analyzer are also covered there.
 | TimelineAnalysis | `timelineAnalysis` | *TimelineAnalysisResult | High-res state buckets, key-moment events, region control. |
 | Metadata | `metadata` | *MetadataResult | Server cvars (fullserverinfo) + parsed match-settings centerprint. |
 | LocGraph | `locGraph` | *LocGraphResult | Loc-to-loc movement graph (nodes + transitions). |
-| Items | `items` | *ItemsResult | Per-entity pickup / respawn timeline. |
+| Items | `items` | *ItemsResult | Per-entity pickup / respawn timeline (per match). |
+| MapEntities | `mapEntities` | *MapEntitiesResult | Static designed map layout (item spawns, spawnpoints, teleporters, buttons) from the BSP entity corpus. |
 | Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops from KTX `//ktx drop` hint. |
 | WeaponPickups | `weaponPickups` | []WeaponPickup | Slot-weapon acquisitions with kills-before-next-death effectiveness. |
 | Errors | `errors` | []string | Non-fatal parse / analysis errors (omitted when empty). |
@@ -703,12 +704,64 @@ posture. Omitted when no transition met the condition.
 
 ## ItemsResult (`items`)
 
-Defined in `result/items.go`. KTX-only (uses `//ktx took|timer|drop`
-hints).
+Defined in `result/items.go`. The item **spawn list, kind, and
+location** are derived from the MVD entity stream (model-classified
+baselines) and are present on **any** demo — KTX or not. The pickup
+`phases` (taken/respawn transitions) come from entity-visibility
+changes; KTX `//ktx took|timer|drop` hints only refine **attribution**
+(`takenBy`/`team`) and MH respawn timing. Non-KTX demos still get the
+full item layout and pickup timeline, just without picker names.
 
 `{ items: []ItemTimeline }`. Each `ItemTimeline` has
 `{ name, kind, entNum, x, y, z, loc, phases: []ItemPhase }`.
 `ItemPhase` is `{ availableFrom, takenAt, takenBy, team, respawnAt }`.
+
+For the map's **designed** static layout (all spawns + teleporters /
+spawnpoints / buttons, independent of what happened this match), see
+[MapEntitiesResult](#mapentitiesresult-mapentities).
+
+## MapEntitiesResult (`mapEntities`)
+
+Defined in `result/map_entities.go`. The map's **static, designed
+layout** — item spawns, player spawnpoints, teleport
+destinations/sources, and buttons — each with a type and a location.
+Sourced from the offline-generated **mapents corpus** (BSP entity lumps,
+`mvd-analytics/mapents/data/<map>.json`, produced by `cmd/mapgen`),
+keyed by map name. It is therefore **identical for every demo on a
+given map** and independent of what happened in the match. Absent when
+no corpus exists for the map.
+
+This is the map's *designed* layout. For the per-match pickup timeline —
+which items actually spawned, who took each, when it respawned — see
+[ItemsResult](#itemsresult-items). The two can be joined by `kind` +
+nearest origin.
+
+`{ map, entities: []MapEntity }`. Each `MapEntity`:
+
+| Field | JSON key | Type | Notes |
+|---|---|---|---|
+| Type | `type` | string | `item` / `spawn` / `teleportDst` / `teleportSrc` / `button` / `door`. |
+| Class | `class` | string | Raw BSP classname (`weapon_rocketlauncher`, `info_player_deathmatch`, …). |
+| Kind | `kind` | string (omitempty) | Items only; same vocabulary as `ItemTimeline.Kind` (`rl`,`lg`,`ra`,`mh`,`quad`,…). |
+| Name | `name` | string | Loc-based label, disambiguated with `-1`/`-2` within each `(type, kind, loc)` group; falls back to kind/type when no loc file exists. |
+| X / Y / Z | `x`/`y`/`z` | float32 | Position. Entity origin for point entities; bmodel bbox centre for brush entities (teleportSrc/button/door). |
+| Loc | `loc` | string (omitempty) | Nearest named loc, when a loc file exists for the map. |
+| Target | `target` | string (omitempty) | `teleportSrc` → the destination's targetname. |
+| TargetName | `targetName` | string (omitempty) | `teleportDst` → its own targetname (join key for teleport pairs). |
+| Spawnflags | `spawnflags` | int (omitempty) | Raw BSP spawnflags. |
+| Bounds | `bounds` | object (omitempty) | Brush entities only: `{ min:[x,y,z], max:[x,y,z] }` — the trigger/door volume in world coords. |
+
+Classification is grounded in `ktx/src/items.c` spawn functions
+(`item_health` spawnflags `H_ROTTEN=1`/`H_MEGA=2` select h15/mh).
+
+**Point vs brush.** Point entities (items, spawns, `teleportDst`) sit at
+their entity origin. Brush entities (`teleportSrc`, `button`, `door`)
+have no origin — they are placed at their BSP submodel's bbox centre
+(`X/Y/Z`) and carry the box as `bounds` (the trigger/door volume).
+
+**Teleport pairs.** A `teleportSrc` (the trigger you walk into) links to
+its `teleportDst` (where you arrive) by `teleportSrc.target` ==
+`teleportDst.targetName`. Multiple sources may share one destination.
 
 ## Backpacks (`backpacks`)
 
@@ -766,6 +819,8 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v14 | `MapEntities` gains **brush entities** — `teleportSrc` (`trigger_teleport`), `button` (`func_button`), `door` (`func_door`) — placed at their BSP submodel bbox centre with a `bounds` (trigger/door volume), plus the teleport source→destination link (`teleportSrc.target` == `teleportDst.targetName`). v13 carried point entities (items, spawns, teleport destinations) only. |
+| v13 | New `MapEntities` section: the map's static designed layout (item spawns, player spawnpoints, teleport destinations/sources, buttons) with type + location, from the offline-generated mapents corpus (BSP entity lumps) keyed by map name. Additive (`omitempty`); absent when no corpus exists for the map. |
 | v12 | `LocNode` and `LocEdge` gain optional combat-posture weights — `armed` / `unarmed` / `quad` / `pent` breakdowns (`LocWeights` on nodes, `LocEdgeWeights` on edges) restricted to samples where the player held RL or LG, held neither, or had an active quad / pent. Lets consumers re-weight the loc graph by combat posture without re-walking streams. Field additions only; each weight is omitted when no observed sample met its condition. |
 | v11 | Bucket views gain a **column-major layout** (`view.ColumnarBuckets`): one dense typed array per `(player, field)` over the player's active span, implicit time axis (`time(i) = startMs + i*windowMs`), a `0`/`1` `alive[]` liveness mask, sparse per-field `validFrom`, booleans/alive as `0`/`1`, loc always the raw `li` index. It is the **default** for the web (`getDefaultBuckets`), REST `/buckets`, and MCP `getBuckets`; the row-major `BucketsView` stays available via `layout=row`. The legacy `HighResBucket`/`HighResPlayerData`/`HighResTeamData` shim and `view.ToLegacyHighResBuckets` are removed. The `Result` **structure is unchanged** — this bump versions the outward *view/query* wire surface so API/MCP/web consumers can feature-detect the new default shape and cached view responses (ETag/`X-Schema-Version`) are invalidated. |
 | v10 | DeathEvent / SpawnEvent now derive primarily from the `DF_DEAD` bit in `svc_playerinfo` (broadcast every frame for every player) instead of relying solely on `STAT_HEALTH` crossings (directed at the active POV via `dem_stats`). The stat-based detector still runs and is deduplicated against the new signal — whichever fires first wins. Deaths whose `dem_stats` block was addressed to a different player slot are now captured; `PlayerStream.Spawns`/`Deaths` counts go up for affected demos. Downstream `LocGraph` edges (some spurious `teleport` edges across previously-missed deaths disappear), `LocTrails`, `RegionControl`, `WeaponPickups` (kills-before-next-death windows), and streak boundaries shift accordingly. Field shapes are unchanged. |

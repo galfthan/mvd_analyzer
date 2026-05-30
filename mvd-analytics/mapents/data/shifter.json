@@ -1,0 +1,448 @@
+{
+ "map": "shifter",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "MH.cells-1",
+   "x": 672,
+   "y": 512,
+   "z": 336,
+   "loc": "MH.cells"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "MH.cells-2",
+   "x": 704,
+   "y": 480,
+   "z": 336,
+   "loc": "MH.cells"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "low.LG-1",
+   "x": 208,
+   "y": -400,
+   "z": -32,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "low.LG-2",
+   "x": 272,
+   "y": -464,
+   "z": -32,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GL",
+   "x": -208,
+   "y": -240,
+   "z": 336,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "MH.below",
+   "x": 416,
+   "y": 608,
+   "z": 144,
+   "loc": "MH.below"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "pillars.GA",
+   "x": 752,
+   "y": -224,
+   "z": 144,
+   "loc": "pillars.GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 296,
+   "y": -224,
+   "z": 336,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad",
+   "x": 400,
+   "y": -192,
+   "z": 144,
+   "loc": "Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "pillars.GA",
+   "x": 448,
+   "y": -192,
+   "z": 144,
+   "loc": "pillars.GA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL",
+   "x": -272,
+   "y": 8,
+   "z": 336,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.below",
+   "x": 848,
+   "y": 592,
+   "z": 240,
+   "loc": "MH.below"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA",
+   "x": -112,
+   "y": 528,
+   "z": 80,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "low-1",
+   "x": 400,
+   "y": 144,
+   "z": 16,
+   "loc": "low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "low-2",
+   "x": 400,
+   "y": 192,
+   "z": 16,
+   "loc": "low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "pillars.GL-1",
+   "x": 408,
+   "y": -816,
+   "z": 336,
+   "loc": "pillars.GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "pillars.GL-2",
+   "x": 456,
+   "y": -816,
+   "z": 336,
+   "loc": "pillars.GL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "low.LG",
+   "x": 256,
+   "y": -416,
+   "z": -32,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH",
+   "x": 888,
+   "y": 152,
+   "z": 336,
+   "loc": "MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 40,
+   "y": -24,
+   "z": 168,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": -224,
+   "y": 672,
+   "z": 112,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "high.RL",
+   "x": 384,
+   "y": 512,
+   "z": 336,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "low.RL",
+   "x": 784,
+   "y": -440,
+   "z": -32,
+   "loc": "low.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH.below",
+   "x": 528,
+   "y": 152,
+   "z": 144,
+   "loc": "MH.below"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "low",
+   "x": 112,
+   "y": 304,
+   "z": 16,
+   "loc": "low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "pillars-1",
+   "x": 952,
+   "y": -760,
+   "z": 208,
+   "loc": "pillars"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "pillars-2",
+   "x": 984,
+   "y": -728,
+   "z": 208,
+   "loc": "pillars"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "low.RL",
+   "x": 784,
+   "y": -256,
+   "z": -32,
+   "loc": "low.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": -208,
+   "y": -240,
+   "z": 360,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "MH.below",
+   "x": 960,
+   "y": 656,
+   "z": 264,
+   "loc": "MH.below"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA",
+   "x": -480,
+   "y": 560,
+   "z": 136,
+   "loc": "RA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "low",
+   "x": 384,
+   "y": 320,
+   "z": 40,
+   "loc": "low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "low.RL",
+   "x": 792,
+   "y": -608,
+   "z": -8,
+   "loc": "low.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "pillars",
+   "x": 632,
+   "y": -864,
+   "z": 232,
+   "loc": "pillars"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "pillars.GA",
+   "x": 1056,
+   "y": -160,
+   "z": 168,
+   "loc": "pillars.GA"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "high.RL",
+   "x": 384,
+   "y": 776,
+   "z": 344,
+   "loc": "high.RL",
+   "targetName": "info_teleport_destination2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "pillars.GL",
+   "x": 32,
+   "y": -752,
+   "z": 344,
+   "loc": "pillars.GL",
+   "targetName": "info_teleport_destination5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "pillars.stand",
+   "x": 608,
+   "y": -384,
+   "z": 344,
+   "loc": "pillars.stand",
+   "targetName": "info_teleport_destination1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad",
+   "x": -552,
+   "y": 160,
+   "z": 192,
+   "loc": "Quad",
+   "target": "info_teleport_destination5",
+   "bounds": {
+    "min": [
+     -559,
+     97,
+     177
+    ],
+    "max": [
+     -545,
+     223,
+     207
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low",
+   "x": 224,
+   "y": 424,
+   "z": 64,
+   "loc": "low",
+   "target": "info_teleport_destination2",
+   "bounds": {
+    "min": [
+     161,
+     417,
+     49
+    ],
+    "max": [
+     287,
+     431,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.RL",
+   "x": 1048,
+   "y": -512,
+   "z": 16,
+   "loc": "low.RL",
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     1041,
+     -575,
+     1
+    ],
+    "max": [
+     1055,
+     -449,
+     31
+    ]
+   }
+  }
+ ]
+}

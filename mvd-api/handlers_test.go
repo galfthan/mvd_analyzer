@@ -120,8 +120,13 @@ func stubResult() *result.Result {
 
 func newTestServer(t *testing.T, store demoStore) *httptest.Server {
 	t.Helper()
+	return newTestServerMaps(t, store, "")
+}
+
+func newTestServerMaps(t *testing.T, store demoStore, mapsDir string) *httptest.Server {
+	t.Helper()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return httptest.NewServer(newRouter(store, logger))
+	return httptest.NewServer(newRouter(store, logger, mapsDir))
 }
 
 // --- /healthz, /v1/version ---

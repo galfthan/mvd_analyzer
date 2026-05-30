@@ -1,0 +1,76 @@
+{
+ "map": "race17_sdcup",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 3456,
+   "y": -3776,
+   "z": 3640
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 3456,
+   "y": -3712,
+   "z": 3640
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 3456,
+   "y": -3648,
+   "z": 3640
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 3456,
+   "y": -3584,
+   "z": 3640
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 3680,
+   "y": -3904,
+   "z": 3640
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 3776,
+   "y": -3712,
+   "z": 3640,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -2208,
+   "y": 3448,
+   "z": -272,
+   "target": "start",
+   "bounds": {
+    "min": [
+     -2313.6667,
+     3441,
+     -377.66666
+    ],
+    "max": [
+     -2102.3333,
+     3455,
+     -166.33333
+    ]
+   }
+  }
+ ]
+}
