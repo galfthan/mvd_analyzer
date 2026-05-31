@@ -3725,10 +3725,22 @@ function renderFragsPerPlayer(startTime, endTime) {
         prepped[name] = prepPlayerFragDeathData(name, startTime, endTime, upColor, dimColor(upColor));
         if (prepped[name].max > maxVal) maxVal = prepped[name].max;
     }
+    const byPlayer = currentResult?.frags?.byPlayer || {};
     for (const { name, cid, statEl } of container._cells) {
         const d = prepped[name];
-        const eff = d.frags > 0 ? Math.round((d.frags / (d.frags + d.deaths)) * 100) : 0;
-        if (statEl) statEl.textContent = `${d.frags}/${d.deaths} · ${eff}%`;
+        // Efficiency label: whole-match kills/(kills+deaths) — the same
+        // kills-based "efficiency" hub.quakeworld.nu shows in basic stats,
+        // not the in-game frags-based scoreboard efficiency. Sourced from
+        // our authoritative byPlayer totals (enemy kills + DeathEvent
+        // deaths), so it's stable across zoom while the diverging bars
+        // (net frags up / deaths down) stay windowed.
+        const bp = byPlayer[name] || {};
+        const k = bp.kills || 0, dth = bp.deaths || 0;
+        const eff = (k + dth) > 0 ? Math.round((k / (k + dth)) * 100) : 0;
+        if (statEl) {
+            statEl.textContent = `${k}/${dth} · ${eff}%`;
+            statEl.title = `${k} kills / ${dth} deaths · ${eff}% efficiency (whole match)`;
+        }
         const cv = document.getElementById(cid);
         if (cv) cv.style.width = '';
         renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: maxVal, height: 44 });
