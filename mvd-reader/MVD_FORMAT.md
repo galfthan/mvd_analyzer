@@ -1532,6 +1532,17 @@ still prints its own suicide obituary ("X fell to his death", "X cratered")
 and produces a `DeathEvent`. Don't treat `stats.suicides` as the count of a
 player's self-inflicted deaths.
 
+> **KTX version.** Both quirks above (dtTELE2 deflect-kill and world-dealt
+> `suicides`) were verified against KTX **`MOD_VERSION` 1.47-dev** — git
+> `1.46-52-g8eddb65` (commit `8eddb65`, 2026-04-07), `src/client.c`
+> `ClientObituary`. The worked-example demo (gameId 211840) ran KTX
+> `1.47-dev-qwc`. These are bugs in that version's counter bookkeeping and
+> **may be fixed in newer KTX** — re-check `ClientObituary` (the
+> `attacker->kills` / `attacker->suicides` block ~line 5130, the dtTELE2
+> early return ~5141, and the fall `T_Damage(self, world, world, …)` ~4428)
+> against the KTX version that recorded the demo before assuming the
+> divergence still holds.
+
 ### Damage Attribution Classification
 
 Death types are classified by who receives credit for the damage:
