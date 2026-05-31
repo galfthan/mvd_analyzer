@@ -2840,9 +2840,7 @@
     "byWeapon": {
       "lg": 52,
       "rl": 143,
-      "sg": 7,
-      "suicide": 9,
-      "teamkill": 10
+      "sg": 7
     },
     "frags": [
       {
@@ -2870,7 +2868,6 @@
         "weapon": "lg"
       },
       {
-        "isSuicide": true,
         "isTeamKill": true,
         "killer": "wd.char",
         "time": 13248,
@@ -3008,7 +3005,7 @@
         "killer": "wd.cao",
         "time": 57778,
         "victim": "wd.cao",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "wd.char",
@@ -3075,7 +3072,7 @@
         "killer": "wd.cao",
         "time": 81547,
         "victim": "wd.cao",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "wd.char",
@@ -3353,7 +3350,7 @@
         "killer": "wd.cao",
         "time": 218461,
         "victim": "wd.cao",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "psy*overon",
@@ -3410,7 +3407,7 @@
         "killer": "wd.cao",
         "time": 243295,
         "victim": "wd.cao",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "wd.char",
@@ -3429,14 +3426,14 @@
         "killer": "psy*overon",
         "time": 253126,
         "victim": "psy*overon",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "isSuicide": true,
         "killer": "psy*overon",
         "time": 255303,
         "victim": "psy*overon",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "wd.dilbert",
@@ -3709,7 +3706,6 @@
         "weapon": "rl"
       },
       {
-        "isSuicide": true,
         "isTeamKill": true,
         "killer": "wd.char",
         "time": 364303,
@@ -3976,7 +3972,7 @@
         "killer": "wd.dilbert",
         "time": 487324,
         "victim": "wd.dilbert",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "wd.cao",
@@ -4019,7 +4015,7 @@
         "killer": "wd.cao",
         "time": 509492,
         "victim": "wd.cao",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "wd.char",
@@ -4111,7 +4107,7 @@
         "killer": "wd.dilbert",
         "time": 555939,
         "victim": "wd.dilbert",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "psy*overon",
@@ -14018,7 +14014,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 14,
+  "schemaVersion": 15,
   "streams": {
     "global": {
       "matchEnd": 600040,

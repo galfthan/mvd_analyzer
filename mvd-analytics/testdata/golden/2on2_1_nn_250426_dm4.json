@@ -2843,13 +2843,10 @@
       }
     },
     "byWeapon": {
-      "lava": 2,
       "lg": 119,
       "rl": 104,
       "sg": 2,
-      "ssg": 2,
-      "suicide": 8,
-      "teamkill": 5
+      "ssg": 2
     },
     "frags": [
       {
@@ -3044,7 +3041,7 @@
         "killer": "stepcop",
         "time": 95806,
         "victim": "stepcop",
-        "weapon": "suicide"
+        "weapon": "gl"
       },
       {
         "killer": "shazam",
@@ -3124,7 +3121,7 @@
         "killer": "Milton",
         "time": 119029,
         "victim": "Milton",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "shazam",
@@ -3186,7 +3183,7 @@
         "killer": "squeeze",
         "time": 146353,
         "victim": "squeeze",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "Milton",
@@ -3345,7 +3342,6 @@
         "weapon": "rl"
       },
       {
-        "isSuicide": true,
         "isTeamKill": true,
         "killer": "squeeze",
         "time": 208481,
@@ -3741,7 +3737,7 @@
         "killer": "Milton",
         "time": 366651,
         "victim": "Milton",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "squeeze",
@@ -3815,7 +3811,7 @@
         "killer": "stepcop",
         "time": 403288,
         "victim": "stepcop",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "squeeze",
@@ -4050,7 +4046,7 @@
         "killer": "shazam",
         "time": 499591,
         "victim": "shazam",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "Milton",
@@ -4143,7 +4139,7 @@
         "killer": "stepcop",
         "time": 539946,
         "victim": "stepcop",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "shazam",
@@ -4252,7 +4248,7 @@
         "killer": "shazam",
         "time": 580078,
         "victim": "shazam",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "shazam",
@@ -15839,7 +15835,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 14,
+  "schemaVersion": 15,
   "streams": {
     "global": {
       "matchEnd": 600050,

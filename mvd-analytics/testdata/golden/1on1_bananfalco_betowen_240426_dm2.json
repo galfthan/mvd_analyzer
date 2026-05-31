@@ -597,11 +597,9 @@
       }
     },
     "byWeapon": {
-      "lava": 2,
       "rl": 26,
       "sg": 2,
-      "ssg": 1,
-      "suicide": 4
+      "ssg": 1
     },
     "frags": [
       {
@@ -725,14 +723,14 @@
         "killer": "banan falco",
         "time": 387632,
         "victim": "banan falco",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "isSuicide": true,
         "killer": "banan falco",
         "time": 411819,
         "victim": "banan falco",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "betowen",
@@ -775,7 +773,7 @@
         "killer": "banan falco",
         "time": 494515,
         "victim": "banan falco",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "banan falco",
@@ -788,7 +786,7 @@
         "killer": "betowen",
         "time": 519878,
         "victim": "betowen",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "banan falco",
@@ -6053,7 +6051,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 14,
+  "schemaVersion": 15,
   "streams": {
     "global": {
       "matchEnd": 599980,

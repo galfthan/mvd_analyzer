@@ -158,7 +158,18 @@ package result
 //     self-telefrags as frag events (one frag event per death). Additive,
 //     but the bump invalidates cached frag responses so consumers pick it
 //     up.
-const CurrentSchemaVersion = 14
+//
+// v15:
+//   - Self-kill weapon labels in Frags.Frags are no longer flattened to
+//     "suicide": only the /kill console command ("X suicides", −2 frags)
+//     keeps weapon "suicide"; weapon self-detonations now carry their real
+//     weapon (rl/gl/lg) with IsSuicide set, matching the messages stream.
+//   - Frags.ByWeapon is now enemy kills only (suicides/teamkills excluded),
+//     so self-detonations under their real weapon don't inflate kills.
+//   - Recovered teamkills no longer carry a stale IsSuicide flag (the "X
+//     gets a frag for the other team" case). Bump invalidates cached frag
+//     responses so consumers pick up the relabeled weapons.
+const CurrentSchemaVersion = 15
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

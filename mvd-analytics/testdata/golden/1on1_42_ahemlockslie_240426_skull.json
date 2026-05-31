@@ -649,8 +649,7 @@
     },
     "byWeapon": {
       "lg": 12,
-      "rl": 19,
-      "suicide": 2
+      "rl": 19
     },
     "frags": [
       {
@@ -676,7 +675,7 @@
         "killer": "42",
         "time": 68589,
         "victim": "42",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "AHemlocksLie",
@@ -803,7 +802,7 @@
         "killer": "AHemlocksLie",
         "time": 453865,
         "victim": "AHemlocksLie",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "42",
@@ -5591,7 +5590,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 14,
+  "schemaVersion": 15,
   "streams": {
     "global": {
       "matchEnd": 599993,

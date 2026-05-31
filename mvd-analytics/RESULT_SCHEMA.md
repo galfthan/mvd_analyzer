@@ -77,7 +77,7 @@ Defined in `result/frag.go`.
 |---|---|---|
 | TotalFrags | `totalFrags` | int |
 | Frags | `frags` | []FragEntry |
-| ByWeapon | `byWeapon` | map[string]int |
+| ByWeapon | `byWeapon` | map[string]int — **enemy kills only** (v15; suicides/teamkills excluded) |
 | ByPlayer | `byPlayer` | map[string]*PlayerFrags |
 
 ### FragEntry
@@ -87,9 +87,16 @@ Defined in `result/frag.go`.
 | Time | `time` | float64 |
 | Killer | `killer` | string |
 | Victim | `victim` | string |
-| Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `ax`) |
+| Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `ax`, `tele`, env: `lava`/`fall`/`water`/`slime`/`world`/`squish`) |
 | IsSuicide | `isSuicide` | bool (omitempty) |
 | IsTeamKill | `isTeamKill` | bool (omitempty) |
+
+At schema v15, a self-kill carries the **weapon/cause that produced it**
+(`rl`/`gl`/`lg` for weapon self-detonations, env labels for lava/fall/etc.)
+with `isSuicide` set; only the `/kill` console command (KTX "X suicides",
+−2 frags) keeps weapon `suicide`. So a real `/kill` is distinguishable
+from a weapon self-detonation, and recovered teamkills never carry a stale
+`isSuicide` (killer ≠ victim).
 
 Includes **teamkills** recovered at schema v14, both kinds whose obituary
 names only one party. *Killer-named* ("X loses another friend") fill in

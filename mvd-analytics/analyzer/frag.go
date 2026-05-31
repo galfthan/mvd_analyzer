@@ -132,7 +132,13 @@ func (a *FragAnalyzer) handleObituaryPrint(e *events.PrintEvent) {
 		// the post-processor to recover the killer (position + frag-delta).
 		a.victimNamedTeamkills = append(a.victimNamedTeamkills, *frag)
 	}
-	a.byWeapon[frag.Weapon]++
+
+	// Global per-weapon tally is enemy kills only — exclude suicides and
+	// teamkills so a weapon self-detonation (now under its real weapon,
+	// rl/gl/lg) doesn't inflate that weapon's kills.
+	if !frag.IsSuicide && !frag.IsTeamKill {
+		a.byWeapon[frag.Weapon]++
+	}
 
 	// Update killer stats
 	// Don't count teamkills as kills (teamkiller loses a frag, doesn't gain one)
@@ -257,6 +263,10 @@ func (a *FragAnalyzer) recoverTeamkills() {
 			claimed[best] = true
 			entry := tk
 			entry.Victim = resolved[best].name
+			// "X gets a frag for the other team" sets IsSuicide on the
+			// killer-self frag-log convention; once we know the real victim
+			// it's a teamkill, not a suicide (killer != victim).
+			entry.IsSuicide = false
 			a.frags = append(a.frags, entry)
 		}
 	}
@@ -348,27 +358,31 @@ func (a *FragAnalyzer) checkSuicide(msg string, time float64) *FragEntry {
 		pattern string
 		weapon  string
 	}{
-		// Suicide command
+		// The /kill console command (dtSUICIDE, −2 frags). "suicide" is
+		// reserved for this — every other self-kill keeps the weapon/cause
+		// that produced it (with IsSuicide set), so consumers can tell a
+		// real /kill from a weapon self-detonation. IsSuicide already keeps
+		// these out of per-weapon *kill* counts (see handleObituaryPrint).
 		{" suicides", "suicide"},
 
 		// Rocket Launcher self-damage (from KTX client.c)
-		// These are suicides, counted under "suicide" not "rl" to avoid double-counting
-		{" discovers blast radius", "suicide"},
-		// KTX catch-all self-kill (client.c:5254). Must precede the
-		// shorter " becomes bored with life" substring it contains.
+		{" discovers blast radius", "rl"},
+		// KTX catch-all self-kill of unknown cause (client.c:5254). Must
+		// precede the shorter " becomes bored with life" substring it
+		// contains; cause unknown, so it stays "suicide".
 		{" somehow becomes bored with life", "suicide"},
-		{" becomes bored with life", "suicide"},
+		{" becomes bored with life", "rl"},
 
-		// Grenade Launcher self-damage (counted as "suicide" not "gl")
-		{" tries to put the pin back in", "suicide"},
+		// Grenade Launcher self-damage
+		{" tries to put the pin back in", "gl"},
 
-		// Lightning Gun discharge self-damage (counted as "suicide" not "lg")
-		{" electrocutes himself", "suicide"},
-		{" electrocutes herself", "suicide"},
-		{" heats up the water", "suicide"},
-		{" discharges into the water", "suicide"},
-		{" discharges into the slime", "suicide"},
-		{" discharges into the lava", "suicide"},
+		// Lightning Gun discharge self-damage
+		{" electrocutes himself", "lg"},
+		{" electrocutes herself", "lg"},
+		{" heats up the water", "lg"},
+		{" discharges into the water", "lg"},
+		{" discharges into the slime", "lg"},
+		{" discharges into the lava", "lg"},
 
 		// Water drowning (from KTX client.c)
 		{" sleeps with the fishes", "water"},

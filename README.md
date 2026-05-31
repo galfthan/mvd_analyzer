@@ -431,7 +431,7 @@ by his teammate") fill in the killer by combining position co-location
 with the teamkiller's −1 frag-delta. Across the test corpus this brings
 per-player teamkills to an exact match with KTX's authoritative `tk`.
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `14`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `15`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).

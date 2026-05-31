@@ -28,7 +28,12 @@ named). Per-player **deaths** come from the authoritative protocol
    and special cases (rockets-from-N pattern).
 2. Successful parses produce a `FragEntry{Time, Killer, Victim,
    Weapon, IsSuicide, IsTeamKill}`. Killer/victim names are the raw
-   server-printed names (display names, not auth names).
+   server-printed names (display names, not auth names). A self-kill
+   carries the weapon/cause that produced it (`rl`/`gl`/`lg`, or an env
+   label) with `IsSuicide` set; only the `/kill` command ("X suicides",
+   −2 frags) keeps weapon `suicide`. The global `ByWeapon` tally counts
+   enemy kills only (`IsSuicide`/`IsTeamKill` excluded), so a self-kill
+   under its real weapon doesn't inflate that weapon's kills.
 3. Live teamkill detection during OnEvent uses `ctx.Players[slot].Team`
    — this can miss when the userinfo name on the wire differs from the
    displayed netname (KTX auth-override case).

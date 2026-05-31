@@ -1615,9 +1615,7 @@
       "lg": 42,
       "rl": 60,
       "sg": 3,
-      "sng": 1,
-      "suicide": 5,
-      "teamkill": 5
+      "sng": 1
     },
     "frags": [
       {
@@ -1625,7 +1623,7 @@
         "killer": "gLAd",
         "time": 6523,
         "victim": "gLAd",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "SS",
@@ -1682,7 +1680,7 @@
         "killer": "SS",
         "time": 45606,
         "victim": "SS",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "SS",
@@ -1721,7 +1719,6 @@
         "weapon": "lg"
       },
       {
-        "isSuicide": true,
         "isTeamKill": true,
         "killer": "gLAd",
         "time": 111964,
@@ -1902,7 +1899,7 @@
         "killer": "SS",
         "time": 247290,
         "victim": "SS",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "gLAd",
@@ -1945,7 +1942,7 @@
         "killer": "kippo",
         "time": 285903,
         "victim": "kippo",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "rusti",
@@ -2060,7 +2057,7 @@
         "killer": "kippo",
         "time": 363592,
         "victim": "kippo",
-        "weapon": "suicide"
+        "weapon": "rl"
       },
       {
         "killer": "SS",
@@ -10494,7 +10491,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 14,
+  "schemaVersion": 15,
   "streams": {
     "global": {
       "matchEnd": 600000,
