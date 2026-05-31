@@ -1494,6 +1494,44 @@ Consequences for a parser:
 - `dtTELE3` ("X was telefragged by Y's Satan's power", a 666-holder Y
   telefragging X) is the symmetric case and likewise returns before scoring.
 
+### World-dealt deaths — the `suicides` stat lands on `world`
+
+A sibling of the dtTELE2 quirk, in the *same* counter block: KTX bumps the
+**`suicides` counter on `attacker`, not on the victim** (*source: KTX
+`src/client.c:5130–5133`*):
+
+```c
+else if ((targ == attacker) || (attacker->ct != ctPlayer)) {
+    attacker->suicides += 1;     // attacker's counter, not targ's
+}
+```
+
+For a normal self-kill (`/kill`, blowing yourself up with your own rocket
+or grenade) the attacker **is** the victim (`targ == attacker`), so it lands
+correctly. But environmental deaths are inflicted by the **`world`** entity,
+e.g. fall damage (*`src/client.c:4428`*):
+
+```c
+self->deathtype = dtFALL;
+T_Damage(self, world, world, 5);   // inflictor = world, attacker = world
+```
+
+Here `targ == attacker` is false and `attacker->ct != ctPlayer` is true, so
+`world->suicides += 1` runs — the victim's `suicides` stat is **never
+touched**. The same applies to other world-dealt damage (`trigger_hurt`, and
+any death whose `T_Damage` attacker is `world`).
+
+What stays correct: the victim's `deaths` (`targ->deaths += 1`) and frag
+score (`targ->s.v.frags -= 1` in the non-player-attacker branch,
+`src/client.c:5608`). Only the **`suicides` counter** is lost to `world`.
+
+Consequence for a parser: demoinfo `stats.suicides` undercounts a player's
+self-deaths by the number of world-dealt deaths (falls, trigger_hurt, …)
+they suffered. The obituary stream is the complete record — every such death
+still prints its own suicide obituary ("X fell to his death", "X cratered")
+and produces a `DeathEvent`. Don't treat `stats.suicides` as the count of a
+player's self-inflicted deaths.
+
 ### Damage Attribution Classification
 
 Death types are classified by who receives credit for the damage:
