@@ -1452,6 +1452,48 @@ The `deathtype` field in damage events and obituaries identifies the weapon or c
 | 27 | `DT_SUICIDE` | Suicide (/kill) | "suicides" |
 | 28 | `DT_UNKNOWN` | Unknown | - |
 
+### Pentagram-deflect telefrag (dtTELE2) — a kill that doesn't score
+
+`dtTELE2` is the "Satan's power deflects X's telefrag" case: a player tries
+to telefrag someone holding **666 health (pentagram / invulnerability)**, the
+telefrag is deflected, and the *attacker* (telefragger) dies instead. This
+produces a three-way divergence in KTX's own books that you must account for
+when reconciling kill counts (*source: KTX `src/client.c:5124–5161`*):
+
+```c
+} else if (attacker->ct == ctPlayer) {
+    attacker->kills += 1;          // the 666-holder's kills counter IS bumped
+}
+if (dtTELE2 == targ->deathtype) {
+    G_bprint(... "Satan's power deflects %s's telefrag", victimname);
+    targ->s.v.frags -= 1;          // the dead telefragger loses a frag
+    logfrag(targ, targ);           // the frag LOG books it as the victim's SUICIDE
+    return;                        // returns BEFORE the 666-holder's s.v.frags += 1
+}
+```
+
+So one deflect leaves three inconsistent records, all from KTX:
+
+| record | sees the deflect as the holder's kill? |
+|---|---|
+| `player->kills` (demoinfo `stats.kills`) | **yes** — bumped at the top |
+| `s.v.frags` (demoinfo `stats.frags`, the scoreboard) | **no** — the `return` skips scoring |
+| frag log / per-weapon `kills` (`logfrag`) | **no** — booked as the victim's self-telefrag |
+
+Consequences for a parser:
+- The obituary text names **only the dead telefragger** ("Satan's power
+  deflects sailorman's telefrag") — there is **no way to attribute the kill to
+  the 666-holder from the print alone**. Reconstructing it requires the
+  powerup state (who held pentagram) at that time; the holder is co-located
+  with the victim by construction (the victim spawned onto them).
+- Therefore obituary-derived and frag-score-derived kill counts will sit
+  **one below** demoinfo `stats.kills` for each deflect the holder absorbed.
+  This is **not a parse miss** — it is KTX crediting a kill that deliberately
+  does not score. `stats.frags` and the per-weapon totals agree with the
+  lower (obituary-derived) count; only the headline `stats.kills` is higher.
+- `dtTELE3` ("X was telefragged by Y's Satan's power", a 666-holder Y
+  telefragging X) is the symmetric case and likewise returns before scoring.
+
 ### Damage Attribution Classification
 
 Death types are classified by who receives credit for the damage:

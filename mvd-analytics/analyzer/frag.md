@@ -82,6 +82,18 @@ named). Per-player **deaths** come from the authoritative protocol
 - The teamkill recompute path runs **after** demoinfo finalises (Frag
   is registered after DemoInfo in the core slice). If the demoinfo
   block is missing, live verdicts are kept as-is.
+- **Pentagram-deflect kills are invisible here.** When an enemy telefrags
+  a player holding 666 (pentagram), KTX deflects it — the telefragger
+  dies and the obituary reads `"Satan's power deflects X's telefrag"`
+  (parsed as X's self-telefrag suicide). KTX bumps the 666-holder's
+  `player->kills` but **not** their frag score, and its frag log books
+  the death as the victim's suicide. So our obituary kill count (and
+  `frags.frags`, and `byPlayer.kills`) sits **one below** demoinfo
+  `stats.kills` for each deflect a player absorbed — by design, not a
+  miss: `stats.frags` and the per-weapon totals agree with our lower
+  count. Attributing it would need the powerup state (pent holder) at the
+  deflect time. See `mvd-reader/MVD_FORMAT.md` → "Pentagram-deflect
+  telefrag (dtTELE2)".
 
 ## Reference
 
