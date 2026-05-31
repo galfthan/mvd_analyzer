@@ -310,6 +310,9 @@ func NewDefaultRegistry() *Registry {
 	// rewrite next so per-player team labels are stable; locgraph and
 	// regionControl last because they consume both rewritten teams
 	// and normalised time anchors.
+	// Runs before the match-relative shift so obituary times, Streams
+	// positions, and FragEvents share one (demo-relative) clock.
+	r.RegisterPostProcessor(recoverTelefragTeamkills)
 	r.RegisterPostProcessor(normalizeMatchRelativeTimes)
 	r.RegisterPostProcessor(duelTeamNormalize)
 	r.RegisterPostProcessor(locGraphPost)

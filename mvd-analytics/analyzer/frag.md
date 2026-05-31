@@ -67,12 +67,13 @@ named). Per-player **deaths** come from the authoritative protocol
   player name — they appear in `Frags[]` with `Killer="teammate"` or
   `Victim="teammate"` and are excluded from per-player *kill*
   aggregation (see `isGenericPlayer`). Their **deaths** are still
-  counted via the `DeathEvent` path above. Killer-named teamkills are
-  recovered (step 6); *victim-named* ones (`"X was telefragged by his
-  teammate"`) are **not** — the killer is unrecoverable from the
-  obituary, so `TeamKills` undercounts where those occur and the victim's
-  death stays out of `Frags[]`. Recovering them needs a third signal
-  (telefrag co-location, or the teamkiller's −1 frag delta).
+  counted via the `DeathEvent` path above. Killer-named teamkills recover
+  the victim (step 6); *victim-named* ones (`"X was telefragged by his
+  teammate"`) recover the killer in the `recoverTelefragTeamkills`
+  post-processor — it combines position co-location (the killer is on the
+  victim, within ~a player hull) with the teamkiller's −1 frag-delta,
+  requiring the two to agree so a lone alias can't misattribute. A few
+  may stay unattributed when the position/score evidence is ambiguous.
 - The teamkill recompute path runs **after** demoinfo finalises (Frag
   is registered after DemoInfo in the core slice). If the demoinfo
   block is missing, live verdicts are kept as-is.

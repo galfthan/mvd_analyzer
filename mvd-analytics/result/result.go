@@ -147,13 +147,17 @@ package result
 //     bump invalidates cached timeline responses so consumers pick it up.
 //
 // v14:
-//   - PlayerFrags gains TeamKills (KTX "tk"): killer-named teamkill
-//     obituaries ("X loses another friend", "X checks his glasses") are now
-//     counted against the killer, and their victims recovered by matching
-//     the coincident authoritative DeathEvent on the killer's team — so the
-//     recovered teamkills also re-enter Frags.Frags as complete
-//     killer↔victim pairs (previously dropped). Additive, but the bump
-//     invalidates cached frag responses so consumers pick it up.
+//   - PlayerFrags gains TeamKills (KTX "tk") and teamkills re-enter
+//     Frags.Frags as complete killer↔victim pairs (previously dropped
+//     because the obituary names only one party). Killer-named teamkills
+//     ("X loses another friend") recover the victim by matching the
+//     coincident authoritative DeathEvent on the killer's team;
+//     victim-named ones ("X was telefragged by his teammate") recover the
+//     killer by combining position co-location with the teamkiller's −1
+//     frag-delta. The messages stream also now tags Satan's-power-deflect
+//     self-telefrags as frag events (one frag event per death). Additive,
+//     but the bump invalidates cached frag responses so consumers pick it
+//     up.
 const CurrentSchemaVersion = 14
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each

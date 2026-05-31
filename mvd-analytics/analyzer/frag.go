@@ -32,6 +32,11 @@ type FragAnalyzer struct {
 	// them against the killer and recovers the victim by matching the
 	// coincident DeathEvent on the killer's team.
 	genericTeamkills []FragEntry
+	// victimNamedTeamkills are the mirror case ("X was telefragged by his
+	// teammate") — victim known, killer generic. Exposed via CoreOutputs so
+	// the recoverTelefragTeamkills post-processor can recover the killer
+	// from position co-location + the teamkiller's frag-penalty.
+	victimNamedTeamkills []FragEntry
 }
 
 // slotDeath is one match-time death pinned to the wire slot that died
@@ -51,6 +56,7 @@ func (a *FragAnalyzer) UseCoreOutputs(co *CoreOutputs) { a.core = co }
 // (timeline, weapon_pickups) via CoreOutputs.FragEntries.
 func (a *FragAnalyzer) PopulateCore(co *CoreOutputs) {
 	co.FragEntries = a.frags
+	co.VictimNamedTeamkills = a.victimNamedTeamkills
 }
 
 // NewFragAnalyzer creates a new frag analyzer
@@ -121,6 +127,10 @@ func (a *FragAnalyzer) handleObituaryPrint(e *events.PrintEvent) {
 		// Killer-named teamkill: attacker known, victim generic. Stash for
 		// Finalize to count + recover the victim from the DeathEvent.
 		a.genericTeamkills = append(a.genericTeamkills, *frag)
+	} else if frag.IsTeamKill && killerIsGeneric && !victimIsGeneric {
+		// Victim-named teamkill: victim known, attacker generic. Stash for
+		// the post-processor to recover the killer (position + frag-delta).
+		a.victimNamedTeamkills = append(a.victimNamedTeamkills, *frag)
 	}
 	a.byWeapon[frag.Weapon]++
 
@@ -554,17 +564,7 @@ func (a *FragAnalyzer) checkKill(msg string, time float64) *FragEntry {
 // checkSatanDeflect handles the "Satan's power deflects X's telefrag"
 // obit — see KTX ktx/src/client.c:5141.
 func (a *FragAnalyzer) checkSatanDeflect(msg string, time float64) *FragEntry {
-	const prefix = "Satan's power deflects "
-	const suffix = "'s telefrag"
-	if !strings.HasPrefix(msg, prefix) {
-		return nil
-	}
-	rest := msg[len(prefix):]
-	end := strings.Index(rest, suffix)
-	if end <= 0 {
-		return nil
-	}
-	victim := strings.TrimSpace(rest[:end])
+	victim := satanDeflectVictim(msg)
 	if victim == "" {
 		return nil
 	}
@@ -575,6 +575,25 @@ func (a *FragAnalyzer) checkSatanDeflect(msg string, time float64) *FragEntry {
 		Weapon:    "tele",
 		IsSuicide: true,
 	}
+}
+
+// satanDeflectVictim returns the dying player's name for a dtTELE2
+// "Satan's power deflects X's telefrag" obituary (a self-telefrag booked
+// as a suicide, ktx/src/client.c:5141), or "" if msg isn't that form. The
+// victim sits between a fixed prefix and suffix (infix), so prefix-based
+// suicide scans miss it. Shared by the messages analyzer.
+func satanDeflectVictim(msg string) string {
+	const prefix = "Satan's power deflects "
+	const suffix = "'s telefrag"
+	if !strings.HasPrefix(msg, prefix) {
+		return ""
+	}
+	rest := msg[len(prefix):]
+	end := strings.Index(rest, suffix)
+	if end <= 0 {
+		return ""
+	}
+	return strings.TrimSpace(rest[:end])
 }
 
 // checkTeamKill checks for team kill patterns

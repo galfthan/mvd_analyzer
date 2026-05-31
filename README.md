@@ -423,11 +423,13 @@ death stream (`{time, player, team}`) parallel to `fragEvents`, sourced
 from the authoritative protocol DeathEvent (every death counts once), so
 the Timeline tab can draw per-player frags-up / deaths-down charts and
 KTX-style efficiency (`frags / (frags + deaths)`). Schema v14 adds
-`frags.byPlayer[].teamkills` (KTX "tk") and recovers killer-named teamkill
-victims — obituaries that name only the attacker ("X loses another
-friend") get their victim filled in by matching the coincident
-`DeathEvent` on the killer's team, so those teamkills re-enter
-`frags.frags` as complete killer↔victim pairs.
+`frags.byPlayer[].teamkills` (KTX "tk") and recovers teamkills whose
+obituary names only one party, so they re-enter `frags.frags` as complete
+killer↔victim pairs: killer-named ("X loses another friend") fill in the
+victim from the coincident `DeathEvent`; victim-named ("X was telefragged
+by his teammate") fill in the killer by combining position co-location
+with the teamkiller's −1 frag-delta. Across the test corpus this brings
+per-player teamkills to an exact match with KTX's authoritative `tk`.
 
 Every breaking change bumps `CurrentSchemaVersion` (currently `14`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.

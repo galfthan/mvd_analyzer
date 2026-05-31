@@ -91,13 +91,15 @@ Defined in `result/frag.go`.
 | IsSuicide | `isSuicide` | bool (omitempty) |
 | IsTeamKill | `isTeamKill` | bool (omitempty) |
 
-Includes **killer-named teamkills** ("X loses another friend", "X checks
-his glasses", …) recovered at schema v14: their obituary names only the
-attacker, so the victim is filled in by matching the coincident
-authoritative `DeathEvent` on the killer's team (`time` aligns to the ms).
-*Victim-named* teamkills ("X was telefragged by his teammate") are still
-absent here — the killer is unrecoverable from the obituary alone (see
-`MessagesResult.Events[type=frag]` to read them).
+Includes **teamkills** recovered at schema v14, both kinds whose obituary
+names only one party. *Killer-named* ("X loses another friend") fill in
+the victim by matching the coincident authoritative `DeathEvent` on the
+killer's team. *Victim-named* ("X was telefragged by his teammate") fill
+in the killer by combining position co-location with the teamkiller's −1
+frag-delta (the two signals must agree, so a rare alias can't
+misattribute) — these recover only when the position/score evidence is
+unambiguous; a few may stay unattributed (readable from
+`MessagesResult.Events[type=frag]`).
 
 ### PlayerFrags
 
