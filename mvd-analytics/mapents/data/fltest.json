@@ -1,0 +1,14 @@
+{
+ "map": "fltest",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 0,
+   "y": 768,
+   "z": 0
+  }
+ ]
+}

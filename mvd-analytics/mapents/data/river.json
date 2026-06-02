@@ -1,0 +1,174 @@
+{
+ "map": "river",
+ "version": 1,
+ "entities": [
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -1208,
+   "y": 48,
+   "z": -144,
+   "bounds": {
+    "min": [
+     -1215,
+     1,
+     -191
+    ],
+    "max": [
+     -1201,
+     95,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -920,
+   "y": 208,
+   "z": -144,
+   "bounds": {
+    "min": [
+     -927,
+     161,
+     -191
+    ],
+    "max": [
+     -913,
+     255,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 1624,
+   "y": 784,
+   "z": -144,
+   "bounds": {
+    "min": [
+     1617,
+     737,
+     -191
+    ],
+    "max": [
+     1631,
+     831,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 1912,
+   "y": 944,
+   "z": -144,
+   "bounds": {
+    "min": [
+     1905,
+     897,
+     -191
+    ],
+    "max": [
+     1919,
+     991,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-1",
+   "x": -1440,
+   "y": -96,
+   "z": -152
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-10",
+   "x": 2080,
+   "y": 1088,
+   "z": -152
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-11",
+   "x": 2144,
+   "y": 1088,
+   "z": -152
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-2",
+   "x": -1376,
+   "y": -96,
+   "z": -152
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-3",
+   "x": -1328,
+   "y": 768,
+   "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-4",
+   "x": -1312,
+   "y": -96,
+   "z": -152
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-5",
+   "x": -1216,
+   "y": 672,
+   "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-6",
+   "x": 1920,
+   "y": 320,
+   "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-7",
+   "x": 2016,
+   "y": 1088,
+   "z": -152
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-8",
+   "x": 2032,
+   "y": 224,
+   "z": 24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-9",
+   "x": 2080,
+   "y": 928,
+   "z": -152
+  }
+ ]
+}

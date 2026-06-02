@@ -1,0 +1,152 @@
+{
+ "map": "q1q3thunderstruck",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells",
+   "x": -50,
+   "y": -657,
+   "z": -88,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "gl",
+   "x": -40,
+   "y": 528,
+   "z": -88
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-1",
+   "x": -608,
+   "y": -192,
+   "z": -408,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-2",
+   "x": -512,
+   "y": -192,
+   "z": -408,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-3",
+   "x": -416,
+   "y": -192,
+   "z": -408,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-1",
+   "x": 640,
+   "y": 288,
+   "z": -216
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-2",
+   "x": 640,
+   "y": 512,
+   "z": -216
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "lg",
+   "x": -992,
+   "y": 16,
+   "z": -408
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "mh",
+   "x": -776,
+   "y": -40,
+   "z": 0,
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl",
+   "x": 608,
+   "y": -16,
+   "z": -88
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets",
+   "x": -992,
+   "y": 136,
+   "z": -152,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya",
+   "x": 424,
+   "y": -484,
+   "z": -88
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -984,
+   "y": -280,
+   "z": -384
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -800,
+   "y": -672,
+   "z": -64
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -96,
+   "y": 608,
+   "z": -64
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 840,
+   "y": 712,
+   "z": -149
+  }
+ ]
+}

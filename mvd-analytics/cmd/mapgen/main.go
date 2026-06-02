@@ -1,14 +1,21 @@
 // mapgen is a developer tool that parses Quake 1 BSP files and writes
-// per-loc walkable-floor polygon JSON under internal/web/static/maps/.
+// two kinds of per-map JSON:
 //
-// The viewer fetches these JSONs at map-init time and, if present,
-// renders real floor geometry instead of the loc-based convex-hull blob.
-// Missing files fall back silently to the existing rendering.
+//   - -out-dir: per-loc walkable-floor polygon geometry (the viewer
+//     renders real floor geometry instead of the loc convex-hull blob).
+//   - -entities-out: the static map-entity corpus (mapents) — item
+//     spawns, player spawnpoints, teleport destinations/sources, buttons
+//     — classified from the BSP entity lump and named by nearest loc.
+//
+// Either output is optional; set the flags for what you want. Missing
+// files degrade silently downstream.
 //
 // Usage (developer machine — point at your own local Quake install):
 //
 //	go build ./cmd/mapgen
-//	./mapgen -bsp-dir ~/quake/id1/maps -verbose
+//	./mapgen -bsp-dir ~/quake/id1/maps -verbose                 # geometry (default out-dir)
+//	./mapgen -bsp-dir ~/quake/id1/maps -out-dir "" \
+//	    -entities-out mvd-analytics/mapents/data -verbose        # entity corpus only
 //	./mapgen -bsp-dir /path/to/maps -map dm2 -verbose
 //
 // This tool is NOT part of CI and is not run during normal builds; only
@@ -32,11 +39,18 @@ import (
 
 func main() {
 	bspDir := flag.String("bsp-dir", "", "directory containing .bsp files (required)")
-	outDir := flag.String("out-dir", "internal/web/static/maps", "output directory for geometry JSON")
+	outDir := flag.String("out-dir", "internal/web/static/maps", "output directory for geometry JSON; empty to skip geometry")
+	entitiesOut := flag.String("entities-out", "", "output directory for per-map entity JSON (mapents corpus); empty to skip entities")
 	locDir := flag.String("loc-dir", "internal/web/static/locs", "directory containing .loc files")
 	mapFilter := flag.String("map", "", "process only the BSP whose basename (no extension) matches")
 	verbose := flag.Bool("verbose", false, "print per-map progress and stats")
 	flag.Parse()
+
+	if *outDir == "" && *entitiesOut == "" {
+		fmt.Fprintln(os.Stderr, "mapgen: nothing to do — set -out-dir and/or -entities-out")
+		flag.Usage()
+		os.Exit(2)
+	}
 
 	loc.SetLocDir(*locDir)
 
@@ -56,9 +70,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := os.MkdirAll(*outDir, 0o755); err != nil {
-		fmt.Fprintf(os.Stderr, "mapgen: create out-dir: %v\n", err)
-		os.Exit(1)
+	for _, dir := range []string{*outDir, *entitiesOut} {
+		if dir == "" {
+			continue
+		}
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			fmt.Fprintf(os.Stderr, "mapgen: create output dir %s: %v\n", dir, err)
+			os.Exit(1)
+		}
 	}
 
 	bspPaths, err := findBSPs(*bspDir)
@@ -79,7 +98,7 @@ func main() {
 			continue
 		}
 
-		if err := processOne(path, name, *outDir, *verbose); err != nil {
+		if err := processOne(path, name, *outDir, *entitiesOut, *verbose); err != nil {
 			fmt.Fprintf(os.Stderr, "  fail %s: %v\n", name, err)
 			failed++
 			continue
@@ -110,18 +129,32 @@ func findBSPs(root string) ([]string, error) {
 	return out, err
 }
 
-func processOne(path, name, outDir string, verbose bool) error {
-	// Loc file is optional: without it, Build() routes every floor
-	// face into the unnamed backdrop bucket and the viewer renders it
-	// as a neutral underlay beneath any loc-based region highlighting.
+func processOne(path, name, outDir, entitiesOut string, verbose bool) error {
+	// Loc file is optional: without it, geometry routes every floor face
+	// into the unnamed backdrop bucket and entities fall back to
+	// kind/type names instead of loc names.
 	finder, locErr := loc.LoadForMap(name)
 	if locErr != nil {
 		finder = nil
 		if verbose {
-			fmt.Fprintf(os.Stderr, "  note %s: no loc file, emitting unnamed geometry only\n", name)
+			fmt.Fprintf(os.Stderr, "  note %s: no loc file, emitting unnamed data only\n", name)
 		}
 	}
 
+	if outDir != "" {
+		if err := emitGeometry(path, name, finder, outDir, verbose); err != nil {
+			return err
+		}
+	}
+	if entitiesOut != "" {
+		if err := emitEntities(path, name, finder, entitiesOut, verbose); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func emitGeometry(path, name string, finder *loc.Finder, outDir string, verbose bool) error {
 	parsed, err := bsp.Parse(path)
 	if err != nil {
 		return fmt.Errorf("parse bsp: %w", err)

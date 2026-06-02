@@ -1,0 +1,149 @@
+{
+ "map": "subslide",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -1856,
+   "y": -384,
+   "z": 2304
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -1792,
+   "y": -384,
+   "z": 2304
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -1792,
+   "y": -320,
+   "z": 2304
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -1792,
+   "y": -256,
+   "z": 2304
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -1920,
+   "y": -320,
+   "z": 2304,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -1184,
+   "y": 544,
+   "z": 1824,
+   "targetName": "tele_2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 384,
+   "y": -304,
+   "z": 2048,
+   "targetName": "tele_1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -1952,
+   "y": -32,
+   "z": 484,
+   "target": "tele_1",
+   "bounds": {
+    "min": [
+     -1983,
+     -63,
+     457
+    ],
+    "max": [
+     -1921,
+     -1,
+     511
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -1760,
+   "y": 800,
+   "z": 484,
+   "target": "tele_2",
+   "bounds": {
+    "min": [
+     -1791,
+     769,
+     457
+    ],
+    "max": [
+     -1729,
+     831,
+     511
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": -1184,
+   "y": 1568,
+   "z": 576,
+   "target": "start",
+   "bounds": {
+    "min": [
+     -1215,
+     1537,
+     545
+    ],
+    "max": [
+     -1153,
+     1599,
+     607
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": -1184,
+   "y": 1888,
+   "z": 576,
+   "target": "start",
+   "bounds": {
+    "min": [
+     -1215,
+     1857,
+     545
+    ],
+    "max": [
+     -1153,
+     1919,
+     607
+    ]
+   }
+  }
+ ]
+}

@@ -98,6 +98,22 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 	})
 
 	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getMapEntities",
+		Description: "The map's static designed layout (NOT this match) — every item spawn, player spawnpoint, teleport destination/source, and button — returned as {map, entities:[...]}. Each entity has a type (item/spawn/teleportDst/teleportSrc/button/door), raw BSP class, a loc-based name, world position XYZ, nearest loc, and (for items) a kind token. Sourced from the BSP entity corpus, identical for every demo on the map. Use getItems for the per-match pickup timeline instead. Filters (case-insensitive): types= and kinds= (category or raw kind).",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetMapEntitiesInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetMapEntities(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "getMapEntitiesByMap",
+		Description: "Same static map layout as getMapEntities, but addressed by map name directly (e.g. 'dm6') with no demo needed. Returns {map, entities:[...]}. Filters: types=, kinds=.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetMapEntitiesByMapInput) (*mcp.CallToolResult, any, error) {
+		out, err := b.GetMapEntitiesByMap(ctx, in)
+		return toolResult(out, err)
+	})
+
+	mcp.AddTool(s, &mcp.Tool{
 		Name:        "getWeaponPickups",
 		Description: "Slot-weapon acquisitions (world spawners + RL/LG backpacks) with kills-before-next-death effectiveness. Returns {pickups:[...]} where each pickup carries time, player, weapon, source ('world'/'backpack'), kills earned, next death time. Backpack pickups also carry the dropper and the joining ent number.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetWeaponPickupsInput) (*mcp.CallToolResult, any, error) {

@@ -1,0 +1,74 @@
+{
+ "map": "2bfree",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 1456,
+   "y": 1136,
+   "z": 192
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3328,
+   "y": -3328,
+   "z": -3584,
+   "targetName": "finish"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 1456,
+   "y": 1040,
+   "z": 192,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 796,
+   "y": 768,
+   "z": 36,
+   "target": "start",
+   "bounds": {
+    "min": [
+     121,
+     89,
+     33
+    ],
+    "max": [
+     1471,
+     1447,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1312,
+   "y": 24,
+   "z": 640,
+   "target": "finish",
+   "bounds": {
+    "min": [
+     1249,
+     17,
+     577
+    ],
+    "max": [
+     1375,
+     31,
+     703
+    ]
+   }
+  }
+ ]
+}

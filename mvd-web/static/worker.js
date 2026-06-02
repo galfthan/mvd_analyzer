@@ -70,6 +70,28 @@ self.fetchBspSync = function(mapName) {
     return null;
 };
 
+// Synchronous map-entity-corpus fetcher exposed to the WASM module. The
+// Go side calls this from mvd-analytics/mapents/loader_wasm.go to pull
+// the small per-map entity JSON (static map layout: item spawns,
+// spawnpoints, teleporters, buttons). Returns null on 404 / missing
+// file, which leaves the Result's mapEntities section absent — never a
+// hard error. Corpus is deployed to dist/mapents/ by `make build`.
+self.fetchMapEntsSync = function(mapName) {
+    if (!mapName) return null;
+    try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'mapents/' + mapName + '.json', false);
+        xhr.responseType = 'arraybuffer';
+        xhr.send(null);
+        if (xhr.status === 200 && xhr.response) {
+            return new Uint8Array(xhr.response);
+        }
+    } catch (e) {
+        // 404 / network / CORS — null leaves mapEntities absent.
+    }
+    return null;
+};
+
 // logWorkerTimings prints the worker-side breakdown: the total WASM
 // analyze wall time, the Go per-phase split, and the synchronous loc/bsp
 // fetches (which are included in the wall time). Subtract loc+bsp fetch

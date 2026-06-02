@@ -1,0 +1,98 @@
+{
+ "map": "race12",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -3808,
+   "y": -2336,
+   "z": 3800
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -3744,
+   "y": -2336,
+   "z": 3800
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -3680,
+   "y": -2336,
+   "z": 3800
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -3616,
+   "y": -2336,
+   "z": 3800
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -3552,
+   "y": -2336,
+   "z": 3784,
+   "targetName": "exit"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -2056,
+   "y": -1312,
+   "z": 1504,
+   "targetName": "secret1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -3584,
+   "y": -3318,
+   "z": 3888,
+   "target": "secret1",
+   "bounds": {
+    "min": [
+     -3615,
+     -3319,
+     3841
+    ],
+    "max": [
+     -3553,
+     -3317,
+     3935
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -768,
+   "y": 2380,
+   "z": -900,
+   "target": "exit",
+   "bounds": {
+    "min": [
+     -831,
+     2377,
+     -959
+    ],
+    "max": [
+     -705,
+     2383,
+     -841
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,847 @@
+{
+ "map": "efdm13",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "FISH",
+   "x": 1256,
+   "y": 424,
+   "z": 292,
+   "loc": "FISH",
+   "bounds": {
+    "min": [
+     1233,
+     401,
+     289
+    ],
+    "max": [
+     1279,
+     447,
+     295
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Lift",
+   "x": 352,
+   "y": -572,
+   "z": -112,
+   "loc": "Lift",
+   "bounds": {
+    "min": [
+     337,
+     -575,
+     -127
+    ],
+    "max": [
+     367,
+     -569,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Lift",
+   "x": 352,
+   "y": -512,
+   "z": -8,
+   "loc": "Lift",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     305,
+     -559,
+     -175
+    ],
+    "max": [
+     399,
+     -465,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "MH Door-1",
+   "x": 676,
+   "y": 352,
+   "z": 224,
+   "loc": "MH Door",
+   "bounds": {
+    "min": [
+     649,
+     321,
+     161
+    ],
+    "max": [
+     703,
+     383,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "MH Door-2",
+   "x": 676,
+   "y": 416,
+   "z": 224,
+   "loc": "MH Door",
+   "bounds": {
+    "min": [
+     649,
+     385,
+     161
+    ],
+    "max": [
+     703,
+     447,
+     287
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG ladder",
+   "x": -352,
+   "y": -480,
+   "z": 176,
+   "loc": "LG ladder",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Middle path-1",
+   "x": -272,
+   "y": 272,
+   "z": 16,
+   "loc": "Middle path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Middle path-2",
+   "x": -208,
+   "y": 208,
+   "z": 16,
+   "loc": "Middle path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Tele-1",
+   "x": 976,
+   "y": -560,
+   "z": 176,
+   "loc": "Tele",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Tele-2",
+   "x": 976,
+   "y": -496,
+   "z": 176,
+   "loc": "Tele",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": 544,
+   "y": 224,
+   "z": -128,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "Toxic GA",
+   "x": -1184,
+   "y": 160,
+   "z": -80,
+   "loc": "Toxic GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL air",
+   "x": -352,
+   "y": 160,
+   "z": 192,
+   "loc": "GL air"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL window",
+   "x": 928,
+   "y": -128,
+   "z": 208,
+   "loc": "GL window"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Middle path-1",
+   "x": -304,
+   "y": -432,
+   "z": 16,
+   "loc": "Middle path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Middle path-2",
+   "x": -240,
+   "y": -432,
+   "z": 16,
+   "loc": "Middle path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RA area",
+   "x": 304,
+   "y": 208,
+   "z": 176,
+   "loc": "RA area",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Ring area-1",
+   "x": -1200,
+   "y": 464,
+   "z": -144,
+   "loc": "Ring area",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Ring area-2",
+   "x": -1200,
+   "y": 528,
+   "z": -144,
+   "loc": "Ring area",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Ring area-3",
+   "x": -1136,
+   "y": 528,
+   "z": -144,
+   "loc": "Ring area",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Pent Area",
+   "x": 1408,
+   "y": -352,
+   "z": 0,
+   "loc": "Pent Area"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA area",
+   "x": 368,
+   "y": 208,
+   "z": 176,
+   "loc": "RA area"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SSG hall",
+   "x": -448,
+   "y": -240,
+   "z": -144,
+   "loc": "SSG hall"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA Platform-1",
+   "x": 912,
+   "y": 464,
+   "z": 16,
+   "loc": "YA Platform"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA Platform-2",
+   "x": 976,
+   "y": 464,
+   "z": 16,
+   "loc": "YA Platform"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": 160,
+   "y": -352,
+   "z": 368,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH",
+   "x": 400,
+   "y": 464,
+   "z": 208,
+   "loc": "MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Pent",
+   "x": 1376,
+   "y": 288,
+   "z": -56,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 480,
+   "y": 64,
+   "z": -88,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": -128,
+   "y": -128,
+   "z": 240,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "Ring",
+   "x": -960,
+   "y": 608,
+   "z": 72,
+   "loc": "Ring"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL",
+   "x": 832,
+   "y": 512,
+   "z": -160,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Toxic RL",
+   "x": -992,
+   "y": -32,
+   "z": -32,
+   "loc": "Toxic RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Middle path",
+   "x": -200,
+   "y": 280,
+   "z": 16,
+   "loc": "Middle path"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RA tele-1",
+   "x": 16,
+   "y": -16,
+   "z": 48,
+   "loc": "RA tele",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RA tele-2",
+   "x": 16,
+   "y": 0,
+   "z": 48,
+   "loc": "RA tele",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RL area",
+   "x": 792,
+   "y": -168,
+   "z": -144,
+   "loc": "RL area"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Upper path",
+   "x": 88,
+   "y": 472,
+   "z": 176,
+   "loc": "Upper path"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Window",
+   "x": 1080,
+   "y": -48,
+   "z": 176,
+   "loc": "Window"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Lift",
+   "x": 208,
+   "y": -368,
+   "z": -144,
+   "loc": "Lift",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "SSG hall",
+   "x": -96,
+   "y": -32,
+   "z": -152,
+   "loc": "SSG hall"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "SSG/YA",
+   "x": 1152,
+   "y": 512,
+   "z": 168,
+   "loc": "SSG/YA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Upper path",
+   "x": 64,
+   "y": 576,
+   "z": 16,
+   "loc": "Upper path"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "BIO",
+   "x": 352,
+   "y": -96,
+   "z": 216,
+   "loc": "BIO"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 1152,
+   "y": 384,
+   "z": 32,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA air",
+   "x": -800,
+   "y": 160,
+   "z": -120,
+   "loc": "YA air"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Middle path",
+   "x": 32,
+   "y": -464,
+   "z": 68,
+   "loc": "Middle path"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA tele",
+   "x": -96,
+   "y": -28,
+   "z": -120,
+   "loc": "RA tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL area",
+   "x": 576,
+   "y": -160,
+   "z": 8,
+   "loc": "RL area"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SSG/YA",
+   "x": 1152,
+   "y": 528,
+   "z": 200,
+   "loc": "SSG/YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Slime pipe",
+   "x": -928,
+   "y": -288,
+   "z": 72,
+   "loc": "Slime pipe"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Upper path",
+   "x": 64,
+   "y": 592,
+   "z": 40,
+   "loc": "Upper path"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Pent Area",
+   "x": 1376,
+   "y": 608,
+   "z": -28,
+   "loc": "Pent Area",
+   "targetName": "pentin"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA tele-1",
+   "x": -88,
+   "y": 0,
+   "z": 24,
+   "loc": "RA tele",
+   "targetName": "blarg"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA tele-2",
+   "x": 552,
+   "y": 64,
+   "z": 344,
+   "loc": "RA tele",
+   "targetName": "up1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Ring Tele",
+   "x": -960,
+   "y": 552,
+   "z": -136,
+   "loc": "Ring Tele",
+   "targetName": "fnord2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Slime pipe",
+   "x": -928,
+   "y": -480,
+   "z": -92,
+   "loc": "Slime pipe",
+   "targetName": "pentout"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Tele-1",
+   "x": -256,
+   "y": 616,
+   "z": 184,
+   "loc": "Tele",
+   "targetName": "fnord1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Tele-2",
+   "x": 896,
+   "y": -552,
+   "z": 184,
+   "loc": "Tele",
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Tele-3",
+   "x": 1064,
+   "y": 64,
+   "z": -136,
+   "loc": "Tele",
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA tele-1",
+   "x": -120,
+   "y": 0,
+   "z": 64,
+   "loc": "RA tele",
+   "target": "up1",
+   "bounds": {
+    "min": [
+     -127,
+     -47,
+     1
+    ],
+    "max": [
+     -113,
+     47,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA tele-2",
+   "x": 584,
+   "y": 64,
+   "z": 384,
+   "loc": "RA tele",
+   "target": "blarg",
+   "bounds": {
+    "min": [
+     577,
+     17,
+     321
+    ],
+    "max": [
+     591,
+     111,
+     447
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Ring Tele",
+   "x": -960,
+   "y": 584,
+   "z": -96,
+   "loc": "Ring Tele",
+   "target": "fnord1",
+   "bounds": {
+    "min": [
+     -1007,
+     577,
+     -159
+    ],
+    "max": [
+     -913,
+     591,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Slime pipe",
+   "x": -928,
+   "y": -508,
+   "z": -80,
+   "loc": "Slime pipe",
+   "target": "pentin",
+   "bounds": {
+    "min": [
+     -991,
+     -511,
+     -143
+    ],
+    "max": [
+     -865,
+     -505,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Tele-1",
+   "x": -256,
+   "y": 648,
+   "z": 224,
+   "loc": "Tele",
+   "target": "fnord2",
+   "bounds": {
+    "min": [
+     -303,
+     641,
+     161
+    ],
+    "max": [
+     -209,
+     655,
+     287
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Tele-2",
+   "x": 896,
+   "y": -584,
+   "z": 224,
+   "loc": "Tele",
+   "target": "t2",
+   "bounds": {
+    "min": [
+     849,
+     -591,
+     161
+    ],
+    "max": [
+     943,
+     -577,
+     287
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Tele-3",
+   "x": 1096,
+   "y": 64,
+   "z": -96,
+   "loc": "Tele",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     1089,
+     17,
+     -159
+    ],
+    "max": [
+     1103,
+     111,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Tele-4",
+   "x": 1392,
+   "y": 0,
+   "z": -348,
+   "loc": "Tele",
+   "target": "pentout",
+   "bounds": {
+    "min": [
+     1329,
+     -63,
+     -351
+    ],
+    "max": [
+     1455,
+     63,
+     -345
+    ]
+   }
+  }
+ ]
+}

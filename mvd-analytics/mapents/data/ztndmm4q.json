@@ -1,0 +1,47 @@
+{
+ "map": "ztndmm4q",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra",
+   "x": -168,
+   "y": 824,
+   "z": 352
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -640,
+   "y": 448,
+   "z": 284
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -320,
+   "y": 576,
+   "z": 224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -128,
+   "y": 112,
+   "z": 288
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 48,
+   "y": 544,
+   "z": 32
+  }
+ ]
+}

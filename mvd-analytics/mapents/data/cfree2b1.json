@@ -1,0 +1,14 @@
+{
+ "map": "cfree2b1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 852,
+   "y": 2767,
+   "z": -164
+  }
+ ]
+}

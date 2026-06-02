@@ -1,0 +1,316 @@
+{
+ "map": "ff_shutdown2beta",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": -1115.707,
+   "y": -3088,
+   "z": -539,
+   "bounds": {
+    "min": [
+     -1119.6569,
+     -3091.9497,
+     -551
+    ],
+    "max": [
+     -1111.7573,
+     -3084.0503,
+     -527
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": 419.2929,
+   "y": 3087.293,
+   "z": -539,
+   "bounds": {
+    "min": [
+     415.2929,
+     3083.293,
+     -551
+    ],
+    "max": [
+     423.2929,
+     3091.293,
+     -527
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -1100,
+   "y": -1776,
+   "z": -516,
+   "bounds": {
+    "min": [
+     -1103,
+     -1839,
+     -579
+    ],
+    "max": [
+     -1097,
+     -1713,
+     -453
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -364,
+   "y": 2768,
+   "z": -260,
+   "bounds": {
+    "min": [
+     -367,
+     2705,
+     -323
+    ],
+    "max": [
+     -361,
+     2831,
+     -197
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": -332,
+   "y": -2768,
+   "z": -260,
+   "bounds": {
+    "min": [
+     -335,
+     -2831,
+     -323
+    ],
+    "max": [
+     -329,
+     -2705,
+     -197
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 404,
+   "y": 1776,
+   "z": -516,
+   "bounds": {
+    "min": [
+     401,
+     1713,
+     -579
+    ],
+    "max": [
+     407,
+     1839,
+     -453
+    ]
+   }
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-1",
+   "x": -1520,
+   "y": -1476,
+   "z": -228
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-10",
+   "x": -892,
+   "y": -1408,
+   "z": -224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-11",
+   "x": 196,
+   "y": 1408,
+   "z": -224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-12",
+   "x": 196,
+   "y": 1488,
+   "z": -224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-13",
+   "x": 248,
+   "y": 1444,
+   "z": -224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-14",
+   "x": 304,
+   "y": 1408,
+   "z": -224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-15",
+   "x": 304,
+   "y": 1488,
+   "z": -224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-16",
+   "x": 716,
+   "y": 1400,
+   "z": -228
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-17",
+   "x": 716,
+   "y": 1476,
+   "z": -228
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-18",
+   "x": 768,
+   "y": 1432,
+   "z": -228
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-19",
+   "x": 824,
+   "y": 1396,
+   "z": -228
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-2",
+   "x": -1520,
+   "y": -1396,
+   "z": -228
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-20",
+   "x": 824,
+   "y": 1476,
+   "z": -228
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-3",
+   "x": -1464,
+   "y": -1432,
+   "z": -228
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-4",
+   "x": -1412,
+   "y": -1476,
+   "z": -228
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-5",
+   "x": -1412,
+   "y": -1400,
+   "z": -228
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-6",
+   "x": -1000,
+   "y": -1488,
+   "z": -224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-7",
+   "x": -1000,
+   "y": -1408,
+   "z": -224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-8",
+   "x": -944,
+   "y": -1444,
+   "z": -224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-9",
+   "x": -892,
+   "y": -1488,
+   "z": -224
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": -2236,
+   "y": 270,
+   "z": 3053,
+   "targetName": "ztp"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -2204,
+   "y": 274,
+   "z": -3915,
+   "target": "ztp",
+   "bounds": {
+    "min": [
+     -2387,
+     63,
+     -3978
+    ],
+    "max": [
+     -2021,
+     485,
+     -3852
+    ]
+   }
+  }
+ ]
+}

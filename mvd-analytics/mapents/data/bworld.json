@@ -1,0 +1,588 @@
+{
+ "map": "bworld",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 768,
+   "y": -108,
+   "z": 192,
+   "bounds": {
+    "min": [
+     737,
+     -111,
+     161
+    ],
+    "max": [
+     799,
+     -105,
+     223
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-1",
+   "x": 432,
+   "y": -256,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-2",
+   "x": 432,
+   "y": -224,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-3",
+   "x": 976,
+   "y": 688,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-4",
+   "x": 1008,
+   "y": 688,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-5",
+   "x": 1232,
+   "y": 576,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-6",
+   "x": 1232,
+   "y": 608,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-7",
+   "x": 1872,
+   "y": 784,
+   "z": 176
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-8",
+   "x": 1872,
+   "y": 816,
+   "z": 176
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "ga",
+   "x": 1072,
+   "y": -416,
+   "z": 384
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "gl",
+   "x": 976,
+   "y": 960,
+   "z": 192
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-1",
+   "x": 608,
+   "y": -176,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-2",
+   "x": 640,
+   "y": -176,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-3",
+   "x": 816,
+   "y": 240,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-4",
+   "x": 1488,
+   "y": 816,
+   "z": 176
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-5",
+   "x": 1520,
+   "y": 816,
+   "z": 176
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "lg",
+   "x": 640,
+   "y": -256,
+   "z": 192
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "mh",
+   "x": 1296,
+   "y": 496,
+   "z": 192,
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-1",
+   "x": 944,
+   "y": -528,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-2",
+   "x": 976,
+   "y": -528,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-3",
+   "x": 1072,
+   "y": 400,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-4",
+   "x": 1104,
+   "y": 400,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-5",
+   "x": 1232,
+   "y": 544,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-6",
+   "x": 1488,
+   "y": 16,
+   "z": 176
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-7",
+   "x": 1488,
+   "y": 48,
+   "z": 176
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-8",
+   "x": 1488,
+   "y": 80,
+   "z": 176
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "ng",
+   "x": 1632,
+   "y": -48,
+   "z": 192
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad",
+   "x": 576,
+   "y": 784,
+   "z": 384
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra",
+   "x": 1328,
+   "y": 64,
+   "z": 192
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-1",
+   "x": 576,
+   "y": 288,
+   "z": 384
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-2",
+   "x": 1632,
+   "y": 560,
+   "z": 192
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-1",
+   "x": 704,
+   "y": 1072,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-2",
+   "x": 736,
+   "y": 1072,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-3",
+   "x": 816,
+   "y": 320,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-4",
+   "x": 912,
+   "y": -528,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-5",
+   "x": 1744,
+   "y": -208,
+   "z": 176
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-6",
+   "x": 1744,
+   "y": -176,
+   "z": 176
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-7",
+   "x": 1872,
+   "y": 752,
+   "z": 176
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-1",
+   "x": 432,
+   "y": -288,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-2",
+   "x": 816,
+   "y": 288,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-3",
+   "x": 944,
+   "y": 688,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-4",
+   "x": 1136,
+   "y": 400,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-5",
+   "x": 1200,
+   "y": 1072,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-6",
+   "x": 1232,
+   "y": 1072,
+   "z": 160
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "sng",
+   "x": 496,
+   "y": -464,
+   "z": 384
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "ssg",
+   "x": 576,
+   "y": 64,
+   "z": 192
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya-1",
+   "x": 1088,
+   "y": 336,
+   "z": 384
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya-2",
+   "x": 1968,
+   "y": 560,
+   "z": 192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 464,
+   "y": -496,
+   "z": 160
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 608,
+   "y": -176,
+   "z": 368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 736,
+   "y": 832,
+   "z": 176
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 800,
+   "y": 688,
+   "z": 368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 1216,
+   "y": 288,
+   "z": 176
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 1520,
+   "y": 560,
+   "z": 176
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 464,
+   "y": -176,
+   "z": 384,
+   "targetName": "teleup"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 1088,
+   "y": 720,
+   "z": 368,
+   "targetName": "tele2quad"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 1632,
+   "y": 272,
+   "z": 192,
+   "targetName": "teledown"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 912,
+   "y": -256,
+   "z": 176,
+   "target": "teleup",
+   "bounds": {
+    "min": [
+     897,
+     -287,
+     129
+    ],
+    "max": [
+     927,
+     -225,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1088,
+   "y": 784,
+   "z": 368,
+   "target": "teledown",
+   "bounds": {
+    "min": [
+     1057,
+     769,
+     321
+    ],
+    "max": [
+     1119,
+     799,
+     415
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 1632,
+   "y": 208,
+   "z": 176,
+   "target": "tele2quad",
+   "bounds": {
+    "min": [
+     1601,
+     193,
+     129
+    ],
+    "max": [
+     1663,
+     223,
+     223
+    ]
+   }
+  }
+ ]
+}

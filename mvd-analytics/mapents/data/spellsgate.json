@@ -1,0 +1,263 @@
+{
+ "map": "spellsgate",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 107,
+   "y": 24.5,
+   "z": -68.66667,
+   "bounds": {
+    "min": [
+     96,
+     13,
+     -70
+    ],
+    "max": [
+     118,
+     36,
+     -67.333336
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "ga",
+   "x": 664,
+   "y": -592,
+   "z": 36
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "gl",
+   "x": 619,
+   "y": 246,
+   "z": -110
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-1",
+   "x": -316,
+   "y": -460,
+   "z": -80
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-2",
+   "x": 600,
+   "y": -224,
+   "z": -108
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-3",
+   "x": 648,
+   "y": 561,
+   "z": 32
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-4",
+   "x": 648,
+   "y": 612,
+   "z": 32
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "mh",
+   "x": 816,
+   "y": 8,
+   "z": 320,
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails",
+   "x": -308,
+   "y": 484,
+   "z": -80
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra",
+   "x": 616,
+   "y": 24,
+   "z": -96
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl",
+   "x": 128,
+   "y": 24,
+   "z": -44
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets",
+   "x": -484,
+   "y": -564,
+   "z": -80
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "sng",
+   "x": -240,
+   "y": 24,
+   "z": -0
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "ssg",
+   "x": 446,
+   "y": 22,
+   "z": 38
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya",
+   "x": -480,
+   "y": 600,
+   "z": -79
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -425,
+   "y": 24,
+   "z": 28
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-10",
+   "x": 816,
+   "y": 24,
+   "z": -68
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -370,
+   "y": -456,
+   "z": -52
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -366,
+   "y": 568,
+   "z": -52
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -136,
+   "y": 578,
+   "z": 60
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -121,
+   "y": -540,
+   "z": 60
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 531,
+   "y": 141,
+   "z": -68
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 562,
+   "y": 24,
+   "z": 60
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 622,
+   "y": -541,
+   "z": 60
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": 650,
+   "y": 598,
+   "z": 60
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 1144,
+   "y": 24,
+   "z": 352,
+   "targetName": "teledest"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 88,
+   "y": 16,
+   "z": -832,
+   "target": "teledest",
+   "bounds": {
+    "min": [
+     -271,
+     -255,
+     -1471
+    ],
+    "max": [
+     447,
+     287,
+     -193
+    ]
+   }
+  }
+ ]
+}

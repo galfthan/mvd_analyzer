@@ -1,0 +1,104 @@
+{
+ "map": "hd1a",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 0,
+   "y": -768,
+   "z": 2432
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -1408,
+   "y": -2432,
+   "z": 2208,
+   "targetName": "liukutele"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -568,
+   "y": 0,
+   "z": 3496,
+   "targetName": "ylatele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 576,
+   "y": 0,
+   "z": 3496,
+   "targetName": "ylatele2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -12,
+   "y": 0,
+   "z": 776,
+   "target": "ylatele1",
+   "bounds": {
+    "min": [
+     -15,
+     -95,
+     657
+    ],
+    "max": [
+     -9,
+     95,
+     895
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 0,
+   "y": -532,
+   "z": 2448,
+   "target": "liukutele",
+   "bounds": {
+    "min": [
+     -63,
+     -535,
+     2321
+    ],
+    "max": [
+     63,
+     -529,
+     2575
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 12,
+   "y": 0,
+   "z": 776,
+   "target": "ylatele2",
+   "bounds": {
+    "min": [
+     9,
+     -95,
+     657
+    ],
+    "max": [
+     15,
+     95,
+     895
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,2184 @@
+{
+ "map": "ctf2m1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad / 666 ROOM (QUAD DOOR BUTTON AREA)",
+   "x": -180,
+   "y": -1728,
+   "z": -200,
+   "loc": "Quad / 666 ROOM (QUAD DOOR BUTTON AREA)",
+   "bounds": {
+    "min": [
+     -183,
+     -1743,
+     -215
+    ],
+    "max": [
+     -177,
+     -1713,
+     -185
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE BASE (100 HEALTH AREA)",
+   "x": -1464,
+   "y": 544,
+   "z": -72,
+   "loc": "BLUE BASE (100 HEALTH AREA)",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1471,
+     513,
+     -127
+    ],
+    "max": [
+     -1457,
+     575,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (GL ENTRANCE)-1",
+   "x": -1582.5,
+   "y": 608,
+   "z": 64,
+   "loc": "BLUE BASE (GL ENTRANCE)",
+   "bounds": {
+    "min": [
+     -1631,
+     593,
+     1
+    ],
+    "max": [
+     -1534,
+     623,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (GL ENTRANCE)-2",
+   "x": -1556.1074,
+   "y": 608,
+   "z": 64,
+   "loc": "BLUE BASE (GL ENTRANCE)",
+   "bounds": {
+    "min": [
+     -1607.2148,
+     593,
+     1
+    ],
+    "max": [
+     -1505,
+     623,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (MAIN ENTRANCE NEAR FLAG)-1",
+   "x": -1582.5,
+   "y": -736,
+   "z": 64,
+   "loc": "BLUE BASE (MAIN ENTRANCE NEAR FLAG)",
+   "bounds": {
+    "min": [
+     -1631,
+     -751,
+     1
+    ],
+    "max": [
+     -1534,
+     -721,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE (MAIN ENTRANCE NEAR FLAG)-2",
+   "x": -1556.1074,
+   "y": -736,
+   "z": 64,
+   "loc": "BLUE BASE (MAIN ENTRANCE NEAR FLAG)",
+   "bounds": {
+    "min": [
+     -1607.2148,
+     -751,
+     1
+    ],
+    "max": [
+     -1505,
+     -721,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad / 666 ROOM-1",
+   "x": 160,
+   "y": -1496,
+   "z": -192,
+   "loc": "Quad / 666 ROOM",
+   "bounds": {
+    "min": [
+     129,
+     -1503,
+     -255
+    ],
+    "max": [
+     191,
+     -1489,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad / 666 ROOM-2",
+   "x": 472,
+   "y": -1356,
+   "z": -192,
+   "loc": "Quad / 666 ROOM",
+   "bounds": {
+    "min": [
+     457,
+     -1391,
+     -255
+    ],
+    "max": [
+     487,
+     -1321,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad / 666 ROOM-3",
+   "x": 472,
+   "y": -1300,
+   "z": -192,
+   "loc": "Quad / 666 ROOM",
+   "bounds": {
+    "min": [
+     457,
+     -1335,
+     -255
+    ],
+    "max": [
+     487,
+     -1265,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad ROOM (UPPER LEVEL)-1",
+   "x": -216,
+   "y": -1356,
+   "z": 64,
+   "loc": "Quad ROOM (UPPER LEVEL)",
+   "bounds": {
+    "min": [
+     -231,
+     -1391,
+     1
+    ],
+    "max": [
+     -201,
+     -1321,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad ROOM (UPPER LEVEL)-2",
+   "x": -216,
+   "y": -1300,
+   "z": 64,
+   "loc": "Quad ROOM (UPPER LEVEL)",
+   "bounds": {
+    "min": [
+     -231,
+     -1335,
+     1
+    ],
+    "max": [
+     -201,
+     -1265,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad ROOM (UPPER LEVEL)-3",
+   "x": -192,
+   "y": -1584,
+   "z": -80,
+   "loc": "Quad ROOM (UPPER LEVEL)",
+   "bounds": {
+    "min": [
+     -199,
+     -1615,
+     -127
+    ],
+    "max": [
+     -185,
+     -1553,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (GL ENTRANCE)-1",
+   "x": 1908.1077,
+   "y": 608,
+   "z": -192,
+   "loc": "RED BASE (GL ENTRANCE)",
+   "bounds": {
+    "min": [
+     1857,
+     593,
+     -255
+    ],
+    "max": [
+     1959.2155,
+     623,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (GL ENTRANCE)-2",
+   "x": 1934.5,
+   "y": 608,
+   "z": -192,
+   "loc": "RED BASE (GL ENTRANCE)",
+   "bounds": {
+    "min": [
+     1886,
+     593,
+     -255
+    ],
+    "max": [
+     1983,
+     623,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (MAIN ENTRANCE NEAR FLAG)-1",
+   "x": 1908.1077,
+   "y": -736,
+   "z": -192,
+   "loc": "RED BASE (MAIN ENTRANCE NEAR FLAG)",
+   "bounds": {
+    "min": [
+     1857,
+     -751,
+     -255
+    ],
+    "max": [
+     1959.2155,
+     -721,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (MAIN ENTRANCE NEAR FLAG)-2",
+   "x": 1934.5,
+   "y": -736,
+   "z": -192,
+   "loc": "RED BASE (MAIN ENTRANCE NEAR FLAG)",
+   "bounds": {
+    "min": [
+     1886,
+     -751,
+     -255
+    ],
+    "max": [
+     1983,
+     -721,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE (NEAR LG)",
+   "x": 2560,
+   "y": 432,
+   "z": -200,
+   "loc": "RED BASE (NEAR LG)",
+   "bounds": {
+    "min": [
+     2529,
+     401,
+     -255
+    ],
+    "max": [
+     2591,
+     463,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE",
+   "x": -1712,
+   "y": 24,
+   "z": -208,
+   "loc": "BLUE BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE (NEAR LG)-1",
+   "x": -2088,
+   "y": 344,
+   "z": -104,
+   "loc": "BLUE BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE BASE (NEAR LG)-2",
+   "x": -2088,
+   "y": 384,
+   "z": -104,
+   "loc": "BLUE BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE CORRIDOR NEAR GL AREA",
+   "x": -1520,
+   "y": 992,
+   "z": 40,
+   "loc": "BLUE CORRIDOR NEAR GL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Quad ROOM (LOWER TELEPORT AREA)",
+   "x": -48,
+   "y": -1200,
+   "z": -344,
+   "loc": "Quad ROOM (LOWER TELEPORT AREA)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED ARMOUR AREA",
+   "x": 176,
+   "y": -800,
+   "z": -220,
+   "loc": "RED ARMOUR AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE (NEAR LG)-1",
+   "x": 2544,
+   "y": 128,
+   "z": -200,
+   "loc": "RED BASE (NEAR LG)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE (NEAR LG)-2",
+   "x": 2544,
+   "y": 392,
+   "z": -104,
+   "loc": "RED BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED BASE (NEAR LG)-3",
+   "x": 2544,
+   "y": 456,
+   "z": -104,
+   "loc": "RED BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED CORRIDOR FROM CENTRE (NOT GL)",
+   "x": 960,
+   "y": -224,
+   "z": -72,
+   "loc": "RED CORRIDOR FROM CENTRE (NOT GL)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "WATER AREA-1",
+   "x": 408,
+   "y": -312,
+   "z": -576,
+   "loc": "WATER AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "WATER AREA-2",
+   "x": 408,
+   "y": -208,
+   "z": -576,
+   "loc": "WATER AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "BLUE CORRIDOR NEAR GL AREA",
+   "x": -584,
+   "y": 672,
+   "z": -88,
+   "loc": "BLUE CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "RED CORRIDOR NEAR GL AREA",
+   "x": 1384,
+   "y": 952,
+   "z": -224,
+   "loc": "RED CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE GL AREA",
+   "x": -856,
+   "y": 1248,
+   "z": -112,
+   "loc": "BLUE GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL AT BRIDGES IN CENTRE",
+   "x": 428,
+   "y": -64,
+   "z": -99,
+   "loc": "GL AT BRIDGES IN CENTRE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED GL AREA",
+   "x": 1216,
+   "y": 592,
+   "z": -248,
+   "loc": "RED GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE (BASE OF LIFT)-1",
+   "x": -1552,
+   "y": -592,
+   "z": -240,
+   "loc": "BLUE BASE (BASE OF LIFT)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE (BASE OF LIFT)-2",
+   "x": -1552,
+   "y": -520,
+   "z": -240,
+   "loc": "BLUE BASE (BASE OF LIFT)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE (LEDGE OVERLOOKING WATER)-1",
+   "x": -1536,
+   "y": -32,
+   "z": -104,
+   "loc": "BLUE BASE (LEDGE OVERLOOKING WATER)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE (LEDGE OVERLOOKING WATER)-2",
+   "x": -1536,
+   "y": 16,
+   "z": -104,
+   "loc": "BLUE BASE (LEDGE OVERLOOKING WATER)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE CORRIDOR NEAR GL AREA-1",
+   "x": -624,
+   "y": 392,
+   "z": -112,
+   "loc": "BLUE CORRIDOR NEAR GL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE CORRIDOR NEAR GL AREA-2",
+   "x": -624,
+   "y": 440,
+   "z": -112,
+   "loc": "BLUE CORRIDOR NEAR GL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE (YA PLATFORM)-1",
+   "x": 2040,
+   "y": -232,
+   "z": -96,
+   "loc": "RED BASE (YA PLATFORM)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE (YA PLATFORM)-2",
+   "x": 2152,
+   "y": -232,
+   "z": -96,
+   "loc": "RED BASE (YA PLATFORM)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE-1",
+   "x": 2224,
+   "y": -656,
+   "z": -232,
+   "loc": "RED BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE-2",
+   "x": 2224,
+   "y": -592,
+   "z": -232,
+   "loc": "RED BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED CORRIDOR NEAR GL AREA-1",
+   "x": 1280,
+   "y": 1024,
+   "z": -256,
+   "loc": "RED CORRIDOR NEAR GL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED CORRIDOR NEAR GL AREA-2",
+   "x": 1328,
+   "y": 1024,
+   "z": -256,
+   "loc": "RED CORRIDOR NEAR GL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE",
+   "x": -1848,
+   "y": -152,
+   "z": -240,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (LOWER TELEPORT NEAR WATER)",
+   "x": -1848,
+   "y": -8,
+   "z": -240,
+   "loc": "BLUE BASE (LOWER TELEPORT NEAR WATER)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (NEAR LG)-1",
+   "x": -2224,
+   "y": 392,
+   "z": -120,
+   "loc": "BLUE BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (NEAR LG)-2",
+   "x": -2224,
+   "y": 440,
+   "z": -120,
+   "loc": "BLUE BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE (NEAR LG)-3",
+   "x": -2224,
+   "y": 488,
+   "z": -120,
+   "loc": "BLUE BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE GL AREA-1",
+   "x": -872,
+   "y": 1088,
+   "z": -112,
+   "loc": "BLUE GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE GL AREA-2",
+   "x": -872,
+   "y": 1128,
+   "z": -112,
+   "loc": "BLUE GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad / 666 ROOM (QUAD DOOR BUTTON AREA)-1",
+   "x": -56,
+   "y": -1856,
+   "z": -240,
+   "loc": "Quad / 666 ROOM (QUAD DOOR BUTTON AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad / 666 ROOM (QUAD DOOR BUTTON AREA)-2",
+   "x": -8,
+   "y": -1856,
+   "z": -240,
+   "loc": "Quad / 666 ROOM (QUAD DOOR BUTTON AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad / 666 ROOM-1",
+   "x": 328,
+   "y": -1856,
+   "z": -240,
+   "loc": "Quad / 666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad / 666 ROOM-2",
+   "x": 376,
+   "y": -1856,
+   "z": -240,
+   "loc": "Quad / 666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (NEAR LG)-1",
+   "x": 2416,
+   "y": 120,
+   "z": -88,
+   "loc": "RED BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (NEAR LG)-2",
+   "x": 2416,
+   "y": 176,
+   "z": -88,
+   "loc": "RED BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (NEAR LG)-3",
+   "x": 2416,
+   "y": 224,
+   "z": -88,
+   "loc": "RED BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (UPPER PLATFORM NEAR YA)-1",
+   "x": 1952,
+   "y": -320,
+   "z": 32,
+   "loc": "RED BASE (UPPER PLATFORM NEAR YA)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE (UPPER PLATFORM NEAR YA)-2",
+   "x": 1952,
+   "y": -272,
+   "z": 32,
+   "loc": "RED BASE (UPPER PLATFORM NEAR YA)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED GL AREA-1",
+   "x": 1088,
+   "y": 576,
+   "z": -248,
+   "loc": "RED GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED GL AREA-2",
+   "x": 1088,
+   "y": 624,
+   "z": -248,
+   "loc": "RED GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "BLUE BASE (NEAR LG)",
+   "x": -2112,
+   "y": 464,
+   "z": -120,
+   "loc": "BLUE BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "RED BASE (NEAR LG)",
+   "x": 2496,
+   "y": 512,
+   "z": -120,
+   "loc": "RED BASE (NEAR LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "BLUE BASE (100 HEALTH AREA)",
+   "x": -1440,
+   "y": 480,
+   "z": -96,
+   "loc": "BLUE BASE (100 HEALTH AREA)",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RED BASE (NEAR LG)",
+   "x": 2616,
+   "y": 416,
+   "z": -224,
+   "loc": "RED BASE (NEAR LG)",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (BASE OF LIFT)",
+   "x": -1520,
+   "y": -680,
+   "z": -224,
+   "loc": "BLUE BASE (BASE OF LIFT)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (LEDGE OVERLOOKING WATER)",
+   "x": -1552,
+   "y": -160,
+   "z": -88,
+   "loc": "BLUE BASE (LEDGE OVERLOOKING WATER)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE (YELLOW ARMOUR AREA)",
+   "x": -1768,
+   "y": 528,
+   "z": -224,
+   "loc": "BLUE BASE (YELLOW ARMOUR AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE-1",
+   "x": -1728,
+   "y": 120,
+   "z": -216,
+   "loc": "BLUE BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE-2",
+   "x": -1512,
+   "y": -116,
+   "z": 40,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE-3",
+   "x": -1512,
+   "y": -48,
+   "z": 40,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE CORRIDOR FROM CENTRE (NOT GL)",
+   "x": -752,
+   "y": -480,
+   "z": -80,
+   "loc": "BLUE CORRIDOR FROM CENTRE (NOT GL)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE CORRIDOR LEADING FROM Quad ROOM",
+   "x": -1632,
+   "y": -1056,
+   "z": 28,
+   "loc": "BLUE CORRIDOR LEADING FROM Quad ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE CORRIDOR NEAR GL AREA",
+   "x": -1312,
+   "y": 1240,
+   "z": 40,
+   "loc": "BLUE CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (UPPER LEVEL NEAR SNG)-1",
+   "x": 1840,
+   "y": 472,
+   "z": 32,
+   "loc": "RED BASE (UPPER LEVEL NEAR SNG)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (UPPER LEVEL NEAR SNG)-2",
+   "x": 1840,
+   "y": 528,
+   "z": 32,
+   "loc": "RED BASE (UPPER LEVEL NEAR SNG)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (UPPER PLATFORM NEAR YA)",
+   "x": 1840,
+   "y": -336,
+   "z": 32,
+   "loc": "RED BASE (UPPER PLATFORM NEAR YA)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE (YA PLATFORM)",
+   "x": 2160,
+   "y": -216,
+   "z": -196,
+   "loc": "RED BASE (YA PLATFORM)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED CORRIDOR FROM CENTRE (NOT GL)",
+   "x": 1200,
+   "y": -488,
+   "z": -80,
+   "loc": "RED CORRIDOR FROM CENTRE (NOT GL)"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED CORRIDOR NEAR GL AREA",
+   "x": 1968,
+   "y": 976,
+   "z": -200,
+   "loc": "RED CORRIDOR NEAR GL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE CORRIDOR NEAR GL AREA",
+   "x": -753,
+   "y": 1240,
+   "z": 64,
+   "loc": "BLUE CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED CORRIDOR NEAR GL AREA",
+   "x": 1103,
+   "y": 1245,
+   "z": -223,
+   "loc": "RED CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Quad ROOM (UPPER LEVEL)",
+   "x": -296,
+   "y": -1584,
+   "z": -80,
+   "loc": "Quad ROOM (UPPER LEVEL)",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad / 666 ROOM",
+   "x": 160,
+   "y": -1584,
+   "z": -208,
+   "loc": "Quad / 666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RED ARMOUR AREA",
+   "x": 256,
+   "y": -680,
+   "z": -220,
+   "loc": "RED ARMOUR AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Quad / 666 ROOM",
+   "x": 392,
+   "y": -1584,
+   "z": -112,
+   "loc": "Quad / 666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL ROOM IN WATER",
+   "x": 112,
+   "y": 48,
+   "z": -496,
+   "loc": "RL ROOM IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "10 ROX AT BRIDGES IN CENTRE",
+   "x": -80,
+   "y": -64,
+   "z": -84,
+   "loc": "10 ROX AT BRIDGES IN CENTRE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE",
+   "x": -2112,
+   "y": -272,
+   "z": -216,
+   "loc": "BLUE BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE (UPPER LEVEL ABOVE LG)",
+   "x": -2208,
+   "y": 96,
+   "z": 24,
+   "loc": "BLUE BASE (UPPER LEVEL ABOVE LG)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE GL AREA",
+   "x": -768,
+   "y": 1256,
+   "z": -96,
+   "loc": "BLUE GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad ROOM UPPER LEVEL",
+   "x": 288,
+   "y": -1728,
+   "z": 31,
+   "loc": "Quad ROOM UPPER LEVEL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED ARMOUR AREA",
+   "x": 272,
+   "y": -800,
+   "z": -215,
+   "loc": "RED ARMOUR AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE (UNDER FLAG SPOT)",
+   "x": 2544,
+   "y": -656,
+   "z": -217,
+   "loc": "RED BASE (UNDER FLAG SPOT)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE (UPPER LEVEL NEAR SNG)",
+   "x": 1840,
+   "y": 64,
+   "z": 32,
+   "loc": "RED BASE (UPPER LEVEL NEAR SNG)"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED GL AREA",
+   "x": 1104,
+   "y": 752,
+   "z": -232,
+   "loc": "RED GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RL ROOM IN WATER-1",
+   "x": 272,
+   "y": -112,
+   "z": -464,
+   "loc": "RL ROOM IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RL ROOM IN WATER-2",
+   "x": 272,
+   "y": -48,
+   "z": -464,
+   "loc": "RL ROOM IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (NEAR LG)",
+   "x": -2208,
+   "y": 512,
+   "z": -224,
+   "loc": "BLUE BASE (NEAR LG)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (UNDER FLAG SPOT)-1",
+   "x": -2224,
+   "y": -680,
+   "z": -224,
+   "loc": "BLUE BASE (UNDER FLAG SPOT)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (UNDER FLAG SPOT)-2",
+   "x": -2224,
+   "y": -616,
+   "z": -224,
+   "loc": "BLUE BASE (UNDER FLAG SPOT)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE (UPPER LEVEL)",
+   "x": -1920,
+   "y": 120,
+   "z": 24,
+   "loc": "BLUE BASE (UPPER LEVEL)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE CORRIDOR FROM Quad ROOM",
+   "x": -1040,
+   "y": -1408,
+   "z": 24,
+   "loc": "BLUE CORRIDOR FROM Quad ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE CORRIDOR NEAR GL AREA",
+   "x": -800,
+   "y": 80,
+   "z": -88,
+   "loc": "BLUE CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BRIDGE AT CENTRE",
+   "x": 264,
+   "y": -336,
+   "z": -80,
+   "loc": "BRIDGE AT CENTRE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BRIDGE AT CENTRE (WITH TELEPORT PAD)",
+   "x": 112,
+   "y": 200,
+   "z": -80,
+   "loc": "BRIDGE AT CENTRE (WITH TELEPORT PAD)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad ROOM UPPER LEVEL-1",
+   "x": 248,
+   "y": -1424,
+   "z": 32,
+   "loc": "Quad ROOM UPPER LEVEL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad ROOM UPPER LEVEL-2",
+   "x": 304,
+   "y": -1424,
+   "z": 32,
+   "loc": "Quad ROOM UPPER LEVEL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (UPPER PLATFORM NEAR YA)",
+   "x": 1840,
+   "y": -272,
+   "z": 32,
+   "loc": "RED BASE (UPPER PLATFORM NEAR YA)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (YA PLATFORM)-1",
+   "x": 2064,
+   "y": -560,
+   "z": -80,
+   "loc": "RED BASE (YA PLATFORM)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (YA PLATFORM)-2",
+   "x": 2064,
+   "y": -216,
+   "z": -216,
+   "loc": "RED BASE (YA PLATFORM)",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE (YA PLATFORM)-3",
+   "x": 2128,
+   "y": -560,
+   "z": -80,
+   "loc": "RED BASE (YA PLATFORM)"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED CORRIDOR FROM Quad ROOM",
+   "x": 944,
+   "y": -1280,
+   "z": -232,
+   "loc": "RED CORRIDOR FROM Quad ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED CORRIDOR NEAR GL AREA",
+   "x": 952,
+   "y": 200,
+   "z": -84,
+   "loc": "RED CORRIDOR NEAR GL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE BASE (100 HEALTH AREA)",
+   "x": -1536,
+   "y": 448,
+   "z": -240,
+   "loc": "BLUE BASE (100 HEALTH AREA)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RED BASE (UPPER LEVEL NEAR SNG)",
+   "x": 1920,
+   "y": 544,
+   "z": 16,
+   "loc": "RED BASE (UPPER LEVEL NEAR SNG)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE BASE (UNDER FLAG SPOT)",
+   "x": -2112,
+   "y": -576,
+   "z": -232,
+   "loc": "BLUE BASE (UNDER FLAG SPOT)"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Quad ROOM UPPER LEVEL",
+   "x": 320,
+   "y": -1471,
+   "z": 16,
+   "loc": "Quad ROOM UPPER LEVEL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED BASE (YA PLATFORM)",
+   "x": 2112,
+   "y": -632,
+   "z": -96,
+   "loc": "RED BASE (YA PLATFORM)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE BASE (YELLOW ARMOUR AREA)",
+   "x": -1856,
+   "y": 640,
+   "z": -96,
+   "loc": "BLUE BASE (YELLOW ARMOUR AREA)"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RED BASE (YA PLATFORM)",
+   "x": 2112,
+   "y": -224,
+   "z": -72,
+   "loc": "RED BASE (YA PLATFORM)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-1",
+   "x": -2000,
+   "y": -576,
+   "z": -232,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-2",
+   "x": -2000,
+   "y": -496,
+   "z": -232,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-3",
+   "x": -2000,
+   "y": -400,
+   "z": -232,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-4",
+   "x": -1920,
+   "y": -576,
+   "z": -232,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-5",
+   "x": -1920,
+   "y": -496,
+   "z": -232,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-6",
+   "x": -1920,
+   "y": -400,
+   "z": -232,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-7",
+   "x": -1808,
+   "y": -576,
+   "z": -232,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-8",
+   "x": -1808,
+   "y": -496,
+   "z": -232,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-9",
+   "x": -1808,
+   "y": -400,
+   "z": -232,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE CORRIDOR FROM CENTRE (NOT GL)",
+   "x": -800,
+   "y": -272,
+   "z": -88,
+   "loc": "BLUE CORRIDOR FROM CENTRE (NOT GL)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE CORRIDOR LEADING FROM Quad ROOM",
+   "x": -1568,
+   "y": -1328,
+   "z": 24,
+   "loc": "BLUE CORRIDOR LEADING FROM Quad ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE CORRIDOR NEAR GL AREA-1",
+   "x": -1568,
+   "y": 1200,
+   "z": 24,
+   "loc": "BLUE CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE CORRIDOR NEAR GL AREA-2",
+   "x": -800,
+   "y": 144,
+   "z": -88,
+   "loc": "BLUE CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE CORRIDOR NEAR GL AREA-3",
+   "x": -800,
+   "y": 1200,
+   "z": 24,
+   "loc": "BLUE CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BRIDGE AT CENTRE",
+   "x": 16,
+   "y": -304,
+   "z": -88,
+   "loc": "BRIDGE AT CENTRE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BRIDGE AT CENTRE (WITH TELEPORT PAD)",
+   "x": 368,
+   "y": 112,
+   "z": -88,
+   "loc": "BRIDGE AT CENTRE (WITH TELEPORT PAD)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL AT BRIDGES IN CENTRE-1",
+   "x": 428,
+   "y": -112,
+   "z": -80,
+   "loc": "GL AT BRIDGES IN CENTRE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL AT BRIDGES IN CENTRE-2",
+   "x": 428,
+   "y": -12,
+   "z": -80,
+   "loc": "GL AT BRIDGES IN CENTRE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad / 666 ROOM-1",
+   "x": -128,
+   "y": -1280,
+   "z": -232,
+   "loc": "Quad / 666 ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad / 666 ROOM-2",
+   "x": 408,
+   "y": -1584,
+   "z": -232,
+   "loc": "Quad / 666 ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad ROOM UPPER LEVEL",
+   "x": 376,
+   "y": -1728,
+   "z": 24,
+   "loc": "Quad ROOM UPPER LEVEL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED ARMOUR AREA",
+   "x": 192,
+   "y": -736,
+   "z": -232,
+   "loc": "RED ARMOUR AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (NEAR LG)-1",
+   "x": 2304,
+   "y": 304,
+   "z": -232,
+   "loc": "RED BASE (NEAR LG)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE (NEAR LG)-2",
+   "x": 2304,
+   "y": 400,
+   "z": -232,
+   "loc": "RED BASE (NEAR LG)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-1",
+   "x": 2176,
+   "y": 128,
+   "z": -232,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-2",
+   "x": 2176,
+   "y": 208,
+   "z": -232,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-3",
+   "x": 2176,
+   "y": 304,
+   "z": -232,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-4",
+   "x": 2176,
+   "y": 400,
+   "z": -232,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-5",
+   "x": 2304,
+   "y": 128,
+   "z": -232,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-6",
+   "x": 2304,
+   "y": 208,
+   "z": -232,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED CORRIDOR FROM CENTRE (NOT GL)",
+   "x": 1152,
+   "y": -272,
+   "z": -88,
+   "loc": "RED CORRIDOR FROM CENTRE (NOT GL)"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED CORRIDOR LEADING FROM Quad ROOM",
+   "x": 1920,
+   "y": -1328,
+   "z": -232,
+   "loc": "RED CORRIDOR LEADING FROM Quad ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED CORRIDOR NEAR GL AREA-1",
+   "x": 1152,
+   "y": 144,
+   "z": -88,
+   "loc": "RED CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED CORRIDOR NEAR GL AREA-2",
+   "x": 1152,
+   "y": 1200,
+   "z": -232,
+   "loc": "RED CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED CORRIDOR NEAR GL AREA-3",
+   "x": 1920,
+   "y": 1200,
+   "z": -232,
+   "loc": "RED CORRIDOR NEAR GL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL ROOM IN WATER",
+   "x": 192,
+   "y": 72,
+   "z": -488,
+   "loc": "RL ROOM IN WATER"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "WATER AREA (NEAR BLUE TUNNEL)",
+   "x": -72,
+   "y": -476,
+   "z": -576,
+   "loc": "WATER AREA (NEAR BLUE TUNNEL)"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE BASE (LEDGE OVERLOOKING WATER)",
+   "x": -1624,
+   "y": -64,
+   "z": -80,
+   "loc": "BLUE BASE (LEDGE OVERLOOKING WATER)",
+   "targetName": "bt5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE BASE (LOWER TELEPORT NEAR FLAG)",
+   "x": -1952,
+   "y": -832,
+   "z": -232,
+   "loc": "BLUE BASE (LOWER TELEPORT NEAR FLAG)",
+   "targetName": "bt2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE BASE (LOWER TELEPORT NEAR WATER)",
+   "x": -1752,
+   "y": -64,
+   "z": -232,
+   "loc": "BLUE BASE (LOWER TELEPORT NEAR WATER)",
+   "targetName": "bt4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE BASE (UPPER TELEPORT ABOVE LG)",
+   "x": -2144,
+   "y": 704,
+   "z": 24,
+   "loc": "BLUE BASE (UPPER TELEPORT ABOVE LG)",
+   "targetName": "bt3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE BASE (UPPER TELEPORT NEAR GL ENTRANCE)",
+   "x": -1344,
+   "y": 192,
+   "z": 24,
+   "loc": "BLUE BASE (UPPER TELEPORT NEAR GL ENTRANCE)",
+   "targetName": "bt1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BRIDGE AT CENTRE (WITH TELEPORT PAD)",
+   "x": 192,
+   "y": 128,
+   "z": -80,
+   "loc": "BRIDGE AT CENTRE (WITH TELEPORT PAD)",
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad ROOM (LOWER TELEPORT AREA)",
+   "x": 192,
+   "y": -1104,
+   "z": -232,
+   "loc": "Quad ROOM (LOWER TELEPORT AREA)",
+   "targetName": "rc1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad ROOM (UPPER TELEPORT AREA)",
+   "x": -120,
+   "y": -1984,
+   "z": 24,
+   "loc": "Quad ROOM (UPPER TELEPORT AREA)",
+   "targetName": "rc2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED BASE (LOWER TELEPORT NEAR YA)",
+   "x": 1696,
+   "y": -280,
+   "z": -232,
+   "loc": "RED BASE (LOWER TELEPORT NEAR YA)",
+   "targetName": "rt1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED BASE (LOWER TELEPORT UNDER YA PLATFORM)",
+   "x": 2112,
+   "y": -632,
+   "z": -232,
+   "loc": "RED BASE (LOWER TELEPORT UNDER YA PLATFORM)",
+   "targetName": "rt3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED BASE (UPPER LEVEL TELEPORT ABOVE LG)",
+   "x": 2496,
+   "y": 704,
+   "z": 24,
+   "loc": "RED BASE (UPPER LEVEL TELEPORT ABOVE LG)",
+   "targetName": "rt2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED BASE (UPPER TELEPORT NEAR YA)",
+   "x": 1696,
+   "y": -600,
+   "z": 24,
+   "loc": "RED BASE (UPPER TELEPORT NEAR YA)",
+   "targetName": "rt4"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (LOWER TELEPORT NEAR FLAG)",
+   "x": -1952,
+   "y": -872,
+   "z": -192,
+   "loc": "BLUE BASE (LOWER TELEPORT NEAR FLAG)",
+   "target": "bt1",
+   "bounds": {
+    "min": [
+     -1983,
+     -879,
+     -239
+    ],
+    "max": [
+     -1921,
+     -865,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (LOWER TELEPORT NEAR WATER)-1",
+   "x": -1808,
+   "y": -64,
+   "z": -192,
+   "loc": "BLUE BASE (LOWER TELEPORT NEAR WATER)",
+   "target": "bt5",
+   "bounds": {
+    "min": [
+     -1815,
+     -95,
+     -239
+    ],
+    "max": [
+     -1801,
+     -33,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (LOWER TELEPORT NEAR WATER)-2",
+   "x": -1792,
+   "y": -64,
+   "z": -192,
+   "loc": "BLUE BASE (LOWER TELEPORT NEAR WATER)",
+   "target": "bt3",
+   "bounds": {
+    "min": [
+     -1799,
+     -95,
+     -239
+    ],
+    "max": [
+     -1785,
+     -33,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (UPPER TELEPORT ABOVE LG)",
+   "x": -2144,
+   "y": 744,
+   "z": 64,
+   "loc": "BLUE BASE (UPPER TELEPORT ABOVE LG)",
+   "target": "bt4",
+   "bounds": {
+    "min": [
+     -2175,
+     737,
+     17
+    ],
+    "max": [
+     -2113,
+     751,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE (UPPER TELEPORT NEAR GL ENTRANCE)",
+   "x": -1304,
+   "y": 192,
+   "z": 72,
+   "loc": "BLUE BASE (UPPER TELEPORT NEAR GL ENTRANCE)",
+   "target": "bt2",
+   "bounds": {
+    "min": [
+     -1311,
+     161,
+     17
+    ],
+    "max": [
+     -1297,
+     223,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad ROOM (LOWER TELEPORT AREA)",
+   "x": 192,
+   "y": -1064,
+   "z": -192,
+   "loc": "Quad ROOM (LOWER TELEPORT AREA)",
+   "target": "rc2",
+   "bounds": {
+    "min": [
+     161,
+     -1071,
+     -239
+    ],
+    "max": [
+     223,
+     -1057,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad ROOM (UPPER TELEPORT AREA)",
+   "x": -120,
+   "y": -2024,
+   "z": 64,
+   "loc": "Quad ROOM (UPPER TELEPORT AREA)",
+   "target": "rc1",
+   "bounds": {
+    "min": [
+     -151,
+     -2031,
+     17
+    ],
+    "max": [
+     -89,
+     -2017,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (LOWER TELEPORT NEAR YA)",
+   "x": 1656,
+   "y": -280,
+   "z": -184,
+   "loc": "RED BASE (LOWER TELEPORT NEAR YA)",
+   "target": "rt2",
+   "bounds": {
+    "min": [
+     1649,
+     -311,
+     -239
+    ],
+    "max": [
+     1663,
+     -249,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (LOWER TELEPORT UNDER YA PLATFORM)",
+   "x": 2112,
+   "y": -672,
+   "z": -200,
+   "loc": "RED BASE (LOWER TELEPORT UNDER YA PLATFORM)",
+   "target": "rt4",
+   "bounds": {
+    "min": [
+     2081,
+     -679,
+     -239
+    ],
+    "max": [
+     2143,
+     -665,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (UPPER LEVEL TELEPORT ABOVE LG)",
+   "x": 2496,
+   "y": 744,
+   "z": 72,
+   "loc": "RED BASE (UPPER LEVEL TELEPORT ABOVE LG)",
+   "target": "rt1",
+   "bounds": {
+    "min": [
+     2465,
+     737,
+     17
+    ],
+    "max": [
+     2527,
+     751,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE (UPPER TELEPORT NEAR YA)",
+   "x": 1656,
+   "y": -600,
+   "z": 72,
+   "loc": "RED BASE (UPPER TELEPORT NEAR YA)",
+   "target": "rt3",
+   "bounds": {
+    "min": [
+     1649,
+     -631,
+     17
+    ],
+    "max": [
+     1663,
+     -569,
+     127
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "WATER AREA (NEAR RED TUNNEL)",
+   "x": 288,
+   "y": 48,
+   "z": -440,
+   "loc": "WATER AREA (NEAR RED TUNNEL)",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     281,
+     17,
+     -495
+    ],
+    "max": [
+     295,
+     79,
+     -385
+    ]
+   }
+  }
+ ]
+}

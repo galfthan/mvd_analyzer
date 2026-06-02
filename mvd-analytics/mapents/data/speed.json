@@ -1,0 +1,14 @@
+{
+ "map": "speed",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": -3184,
+   "y": -3280,
+   "z": -16
+  }
+ ]
+}

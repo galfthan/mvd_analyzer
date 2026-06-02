@@ -1,0 +1,54 @@
+{
+ "map": "dmm4_8",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -384,
+   "y": 576,
+   "z": 64
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -64,
+   "y": -64,
+   "z": 64
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 256,
+   "y": -192,
+   "z": 64
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 448,
+   "y": 608,
+   "z": 64
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 512,
+   "y": -96,
+   "z": 64
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 672,
+   "y": 288,
+   "z": 64
+  }
+ ]
+}

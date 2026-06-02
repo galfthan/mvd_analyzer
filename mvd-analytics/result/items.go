@@ -2,8 +2,12 @@ package result
 
 // ItemsResult is the per-match pickup-item timeline — which items are
 // on the map, who picked each one when, and when each becomes
-// available again. Driven by the KTX-only `//ktx took|timer|drop`
-// demo-only stuffcmds (ktx/src/items.c). Absent on non-KTX demos.
+// available again. The item spawn list, kind, and location are derived
+// from the MVD entity stream (model-classified baselines, see
+// mvd-reader's ItemSpawnEvent) and are present on any demo. KTX
+// `//ktx took|timer|drop` stuffcmds (ktx/src/items.c) only refine
+// attribution (TakenBy/Team) and MH respawn timing — they are not
+// required for the layout or the pickup timeline.
 type ItemsResult struct {
 	Items []ItemTimeline `json:"items"`
 }

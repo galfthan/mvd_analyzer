@@ -7,14 +7,15 @@ import (
 
 // server bundles the per-request dependencies.
 type server struct {
-	store  demoStore
-	logger *slog.Logger
+	store   demoStore
+	logger  *slog.Logger
+	mapsDir string // directory of per-map geometry JSON; "" disables /geometry
 }
 
 // newRouter returns an http.Handler with every endpoint registered.
 // Logging + panic recovery wrap the mux.
-func newRouter(store demoStore, logger *slog.Logger) http.Handler {
-	s := &server{store: store, logger: logger}
+func newRouter(store demoStore, logger *slog.Logger, mapsDir string) http.Handler {
+	s := &server{store: store, logger: logger, mapsDir: mapsDir}
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /healthz", s.handleHealth)
@@ -29,6 +30,7 @@ func newRouter(store demoStore, logger *slog.Logger) http.Handler {
 	mux.HandleFunc("GET /v1/demos/{id}/chat", s.handleChat)
 	mux.HandleFunc("GET /v1/demos/{id}/backpacks", s.handleBackpacks)
 	mux.HandleFunc("GET /v1/demos/{id}/items", s.handleItems)
+	mux.HandleFunc("GET /v1/demos/{id}/map-entities", s.handleMapEntities)
 	mux.HandleFunc("GET /v1/demos/{id}/weapon-pickups", s.handleWeaponPickups)
 	mux.HandleFunc("GET /v1/demos/{id}/buckets", s.handleBuckets)
 	mux.HandleFunc("GET /v1/demos/{id}/events", s.handleEvents)
@@ -37,6 +39,10 @@ func newRouter(store demoStore, logger *slog.Logger) http.Handler {
 	mux.HandleFunc("GET /v1/demos/{id}/loc-trails", s.handleLocTrails)
 	mux.HandleFunc("GET /v1/demos/{id}/loc-table", s.handleLocTable)
 	mux.HandleFunc("GET /v1/demos/{id}/region-control", s.handleRegionControl)
+
+	// Per-map static data (no demo needed).
+	mux.HandleFunc("GET /v1/maps/{map}/entities", s.handleMapEntitiesByMap)
+	mux.HandleFunc("GET /v1/maps/{map}/geometry", s.handleMapGeometry)
 
 	return recoverMiddleware(logger, accessLogMiddleware(logger, mux))
 }

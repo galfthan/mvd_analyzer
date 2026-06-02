@@ -1,0 +1,974 @@
+{
+ "map": "e3m7tdm",
+ "version": 1,
+ "entities": [
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.low",
+   "x": -124,
+   "y": -568,
+   "z": -224,
+   "loc": "GL.low",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     -183,
+     -623,
+     -319
+    ],
+    "max": [
+     -65,
+     -513,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent-1",
+   "x": -936,
+   "y": 1072,
+   "z": 120,
+   "loc": "Pent",
+   "bounds": {
+    "min": [
+     -959,
+     1065,
+     65
+    ],
+    "max": [
+     -913,
+     1079,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent-2",
+   "x": -888,
+   "y": 1072,
+   "z": 120,
+   "loc": "Pent",
+   "bounds": {
+    "min": [
+     -911,
+     1065,
+     65
+    ],
+    "max": [
+     -865,
+     1079,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "fort.low-1",
+   "x": 224,
+   "y": -404,
+   "z": 32,
+   "loc": "fort.low",
+   "spawnflags": 5,
+   "bounds": {
+    "min": [
+     193,
+     -415,
+     1
+    ],
+    "max": [
+     255,
+     -393,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "fort.low-2",
+   "x": 224,
+   "y": -336,
+   "z": -48,
+   "loc": "fort.low",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     193,
+     -383,
+     -79
+    ],
+    "max": [
+     255,
+     -289,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": -1056,
+   "y": -600,
+   "z": -368,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": -416,
+   "y": -928,
+   "z": 0,
+   "loc": "GL",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GL.low-1",
+   "x": -176,
+   "y": -456,
+   "z": -120,
+   "loc": "GL.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GL.low-2",
+   "x": -136,
+   "y": -456,
+   "z": -120,
+   "loc": "GL.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Pent.Quad",
+   "x": -944,
+   "y": 1008,
+   "z": -64,
+   "loc": "Pent.Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "fort.low",
+   "x": 280,
+   "y": 168,
+   "z": 0,
+   "loc": "fort.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "path.low",
+   "x": -144,
+   "y": 288,
+   "z": -104,
+   "loc": "path.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GA.low-1",
+   "x": -808,
+   "y": -304,
+   "z": -528,
+   "loc": "GA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GA.low-2",
+   "x": -808,
+   "y": -272,
+   "z": -528,
+   "loc": "GA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "NG.above-1",
+   "x": -528,
+   "y": -104,
+   "z": -128,
+   "loc": "NG.above"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "NG.above-2",
+   "x": -488,
+   "y": -104,
+   "z": -128,
+   "loc": "NG.above"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Pent.Quad",
+   "x": -896,
+   "y": 1008,
+   "z": -64,
+   "loc": "Pent.Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA",
+   "x": -880,
+   "y": 808,
+   "z": -64,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "fort.low-1",
+   "x": -8,
+   "y": 232,
+   "z": 0,
+   "loc": "fort.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "fort.low-2",
+   "x": 48,
+   "y": 272,
+   "z": 0,
+   "loc": "fort.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "path-1",
+   "x": -760,
+   "y": 232,
+   "z": 16,
+   "loc": "path"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "path-2",
+   "x": -624,
+   "y": 256,
+   "z": 16,
+   "loc": "path"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "path.low",
+   "x": -144,
+   "y": 224,
+   "z": -104,
+   "loc": "path.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "Pent.YA",
+   "x": -1400,
+   "y": 1464,
+   "z": -120,
+   "loc": "Pent.YA",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "fort.MH",
+   "x": 528,
+   "y": 176,
+   "z": -256,
+   "loc": "fort.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "NG",
+   "x": -760,
+   "y": -16,
+   "z": -368,
+   "loc": "NG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Pent",
+   "x": -992,
+   "y": 992,
+   "z": 64,
+   "loc": "Pent",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RA",
+   "x": -880,
+   "y": 624,
+   "z": 16,
+   "loc": "RA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "fort.low",
+   "x": 456,
+   "y": -184,
+   "z": 144,
+   "loc": "fort.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "path.low",
+   "x": -464,
+   "y": 256,
+   "z": -104,
+   "loc": "path.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "NG",
+   "x": -640,
+   "y": -16,
+   "z": -368,
+   "loc": "NG",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Pent",
+   "x": -1032,
+   "y": 1008,
+   "z": 88,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Pent.Quad",
+   "x": -552,
+   "y": 1136,
+   "z": -32,
+   "loc": "Pent.Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "fort.low",
+   "x": 224,
+   "y": -456,
+   "z": 24,
+   "loc": "fort.low"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": -960,
+   "y": 848,
+   "z": -64,
+   "loc": "RA",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "GA.low",
+   "x": -848,
+   "y": -480,
+   "z": -496,
+   "loc": "GA.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Pent.RL",
+   "x": -920,
+   "y": 1360,
+   "z": 112,
+   "loc": "Pent.RL",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "fort.low",
+   "x": 448,
+   "y": -256,
+   "z": 144,
+   "loc": "fort.low",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL",
+   "x": -192,
+   "y": -808,
+   "z": 0,
+   "loc": "GL",
+   "spawnflags": 1793
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "NG",
+   "x": -672,
+   "y": -224,
+   "z": -368,
+   "loc": "NG",
+   "spawnflags": 1025
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "fort",
+   "x": 456,
+   "y": -368,
+   "z": 144,
+   "loc": "fort",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "fort",
+   "x": 496,
+   "y": -272,
+   "z": 144,
+   "loc": "fort",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "GA",
+   "x": -1072,
+   "y": -752,
+   "z": -368,
+   "loc": "GA",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "Pent.YA",
+   "x": -1384,
+   "y": 1624,
+   "z": -120,
+   "loc": "Pent.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "fort.low",
+   "x": 400,
+   "y": 48,
+   "z": 0,
+   "loc": "fort.low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GA",
+   "x": -1040,
+   "y": -496,
+   "z": -320,
+   "loc": "GA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": -352,
+   "y": -928,
+   "z": 24,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Pent.YA",
+   "x": -1120,
+   "y": 1432,
+   "z": -40,
+   "loc": "Pent.YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA",
+   "x": -720,
+   "y": 528,
+   "z": 24,
+   "loc": "RA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "fort.low-1",
+   "x": -176,
+   "y": -232,
+   "z": 32,
+   "loc": "fort.low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "fort.low-2",
+   "x": 208,
+   "y": 56,
+   "z": 32,
+   "loc": "fort.low"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GA.tele",
+   "x": -1128,
+   "y": -264,
+   "z": -488,
+   "loc": "GA.tele",
+   "targetName": "qtele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL-1",
+   "x": -288,
+   "y": -656,
+   "z": 80,
+   "loc": "GL",
+   "targetName": "t15"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL-2",
+   "x": -288,
+   "y": -480,
+   "z": 80,
+   "loc": "GL",
+   "targetName": "t16"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL-3",
+   "x": -88,
+   "y": -480,
+   "z": 80,
+   "loc": "GL",
+   "targetName": "t14"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL-4",
+   "x": -40,
+   "y": -632,
+   "z": 80,
+   "loc": "GL",
+   "targetName": "t13"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "NG.above",
+   "x": -376,
+   "y": -240,
+   "z": -112,
+   "loc": "NG.above",
+   "targetName": "t5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Pent.tele",
+   "x": -448,
+   "y": 1696,
+   "z": -32,
+   "loc": "Pent.tele",
+   "targetName": "qtele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "fort.low-1",
+   "x": 64,
+   "y": 272,
+   "z": 8,
+   "loc": "fort.low",
+   "targetName": "t24"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "fort.low-2",
+   "x": 208,
+   "y": 200,
+   "z": 16,
+   "loc": "fort.low",
+   "targetName": "t53"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "path-1",
+   "x": -424,
+   "y": 272,
+   "z": 8,
+   "loc": "path",
+   "targetName": "t26"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "path-2",
+   "x": -272,
+   "y": 104,
+   "z": 8,
+   "loc": "path",
+   "targetName": "t27"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "path.low",
+   "x": -256,
+   "y": 512,
+   "z": -104,
+   "loc": "path.low",
+   "targetName": "t28"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA.tele",
+   "x": -1128,
+   "y": -304,
+   "z": -440,
+   "loc": "GA.tele",
+   "target": "qtele1",
+   "bounds": {
+    "min": [
+     -1199,
+     -315,
+     -511
+    ],
+    "max": [
+     -1057,
+     -293,
+     -369
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "NG",
+   "x": -608,
+   "y": 392,
+   "z": -376,
+   "loc": "NG",
+   "target": "t5",
+   "bounds": {
+    "min": [
+     -639,
+     385,
+     -407
+    ],
+    "max": [
+     -577,
+     399,
+     -345
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent.tele",
+   "x": -448,
+   "y": 1780,
+   "z": 16,
+   "loc": "Pent.tele",
+   "target": "qtele2",
+   "bounds": {
+    "min": [
+     -479,
+     1769,
+     -47
+    ],
+    "max": [
+     -417,
+     1791,
+     79
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.MH",
+   "x": 592,
+   "y": 192,
+   "z": -192,
+   "loc": "fort.MH",
+   "target": "t53",
+   "bounds": {
+    "min": [
+     577,
+     161,
+     -255
+    ],
+    "max": [
+     607,
+     223,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.low-1",
+   "x": 148,
+   "y": 672,
+   "z": 32,
+   "loc": "fort.low",
+   "target": "t26",
+   "bounds": {
+    "min": [
+     129,
+     665,
+     25
+    ],
+    "max": [
+     167,
+     679,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.low-2",
+   "x": 280,
+   "y": -800,
+   "z": 56,
+   "loc": "fort.low",
+   "target": "t15",
+   "bounds": {
+    "min": [
+     249,
+     -831,
+     49
+    ],
+    "max": [
+     311,
+     -769,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.low-3",
+   "x": 280,
+   "y": -672,
+   "z": 56,
+   "loc": "fort.low",
+   "target": "t13",
+   "bounds": {
+    "min": [
+     249,
+     -703,
+     49
+    ],
+    "max": [
+     311,
+     -641,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.low-4",
+   "x": 368,
+   "y": -800,
+   "z": 56,
+   "loc": "fort.low",
+   "target": "t16",
+   "bounds": {
+    "min": [
+     337,
+     -831,
+     49
+    ],
+    "max": [
+     399,
+     -769,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.low-5",
+   "x": 368,
+   "y": -672,
+   "z": 56,
+   "loc": "fort.low",
+   "target": "t14",
+   "bounds": {
+    "min": [
+     337,
+     -703,
+     49
+    ],
+    "max": [
+     399,
+     -641,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.low-1",
+   "x": 68,
+   "y": 672,
+   "z": 32,
+   "loc": "path.low",
+   "target": "t26",
+   "bounds": {
+    "min": [
+     49,
+     665,
+     25
+    ],
+    "max": [
+     87,
+     679,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.low-2",
+   "x": 68,
+   "y": 768,
+   "z": 32,
+   "loc": "path.low",
+   "target": "t27",
+   "bounds": {
+    "min": [
+     49,
+     761,
+     25
+    ],
+    "max": [
+     87,
+     775,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.low-3",
+   "x": 148,
+   "y": 768,
+   "z": 32,
+   "loc": "path.low",
+   "target": "t28",
+   "bounds": {
+    "min": [
+     129,
+     761,
+     25
+    ],
+    "max": [
+     167,
+     775,
+     39
+    ]
+   }
+  }
+ ]
+}

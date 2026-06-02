@@ -1,0 +1,509 @@
+{
+ "map": "ultrav",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "yard",
+   "x": 380,
+   "y": 64,
+   "z": 32,
+   "loc": "yard",
+   "bounds": {
+    "min": [
+     377,
+     33,
+     1
+    ],
+    "max": [
+     383,
+     95,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "yard",
+   "x": -392,
+   "y": 0,
+   "z": 64,
+   "loc": "yard",
+   "bounds": {
+    "min": [
+     -399,
+     -31,
+     1
+    ],
+    "max": [
+     -385,
+     31,
+     127
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG-1",
+   "x": 112,
+   "y": -920,
+   "z": -64,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG-2",
+   "x": 112,
+   "y": -880,
+   "z": -64,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Quad.below",
+   "x": 680,
+   "y": -568,
+   "z": 288,
+   "loc": "Quad.below"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cross.RL",
+   "x": 760,
+   "y": 368,
+   "z": 224,
+   "loc": "cross.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "yard.RL",
+   "x": -432,
+   "y": 120,
+   "z": 192,
+   "loc": "yard.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "yard.YA",
+   "x": -432,
+   "y": -168,
+   "z": 256,
+   "loc": "yard.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GL",
+   "x": 144,
+   "y": 64,
+   "z": 320,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 32,
+   "y": 40,
+   "z": 328,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad.below-1",
+   "x": 124,
+   "y": -496,
+   "z": 256,
+   "loc": "Quad.below",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad.below-2",
+   "x": 164,
+   "y": -496,
+   "z": 256,
+   "loc": "Quad.below",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "cross",
+   "x": -88,
+   "y": 688,
+   "z": 192,
+   "loc": "cross",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "cross.RL-1",
+   "x": 764,
+   "y": 688,
+   "z": 224,
+   "loc": "cross.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "cross.RL-2",
+   "x": 804,
+   "y": 688,
+   "z": 224,
+   "loc": "cross.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "yard-1",
+   "x": 264,
+   "y": 28,
+   "z": 0,
+   "loc": "yard",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "yard-2",
+   "x": 264,
+   "y": 68,
+   "z": 0,
+   "loc": "yard",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": 320,
+   "y": -768,
+   "z": -32,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 608,
+   "y": -768,
+   "z": 632,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Quad.below",
+   "x": 608,
+   "y": -912,
+   "z": 288,
+   "loc": "Quad.below"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "cross.RL",
+   "x": 752,
+   "y": 544,
+   "z": 224,
+   "loc": "cross.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "yard.RL",
+   "x": -320,
+   "y": 304,
+   "z": 192,
+   "loc": "yard.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad.below",
+   "x": 640,
+   "y": -568,
+   "z": 288,
+   "loc": "Quad.below"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "cross.RL",
+   "x": 800,
+   "y": 368,
+   "z": 224,
+   "loc": "cross.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "yard.RL-1",
+   "x": -432,
+   "y": 160,
+   "z": 192,
+   "loc": "yard.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "yard.RL-2",
+   "x": 16,
+   "y": 72,
+   "z": 328,
+   "loc": "yard.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "yard.YA",
+   "x": -432,
+   "y": -128,
+   "z": 256,
+   "loc": "yard.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "LG.YA",
+   "x": 528,
+   "y": -880,
+   "z": -64,
+   "loc": "LG.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "yard.YA",
+   "x": -288,
+   "y": -176,
+   "z": 256,
+   "loc": "yard.YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": 208,
+   "y": 64,
+   "z": 344,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG",
+   "x": 320,
+   "y": -1072,
+   "z": -40,
+   "loc": "LG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.below",
+   "x": 432,
+   "y": -928,
+   "z": 312,
+   "loc": "Quad.below"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cross",
+   "x": -224,
+   "y": 672,
+   "z": 216,
+   "loc": "cross"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "cross.RL",
+   "x": 736,
+   "y": 672,
+   "z": 248,
+   "loc": "cross.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "yard.YA",
+   "x": -224,
+   "y": -544,
+   "z": 280,
+   "loc": "yard.YA"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL",
+   "x": 216,
+   "y": 304,
+   "z": 328,
+   "loc": "GL",
+   "targetName": "tre"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "LG",
+   "x": 456,
+   "y": -1080,
+   "z": -56,
+   "loc": "LG",
+   "targetName": "uno"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad",
+   "x": 736,
+   "y": -768,
+   "z": 648,
+   "loc": "Quad",
+   "targetName": "quad"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "yard",
+   "x": 280,
+   "y": 232,
+   "z": 8,
+   "loc": "yard",
+   "targetName": "due"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 320,
+   "y": -1216,
+   "z": 16,
+   "loc": "LG",
+   "target": "tre",
+   "bounds": {
+    "min": [
+     281,
+     -1231,
+     -31
+    ],
+    "max": [
+     359,
+     -1201,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.below",
+   "x": 904,
+   "y": -768,
+   "z": 368,
+   "loc": "Quad.below",
+   "target": "uno",
+   "bounds": {
+    "min": [
+     889,
+     -807,
+     321
+    ],
+    "max": [
+     919,
+     -729,
+     415
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "cross.RL",
+   "x": 968,
+   "y": 544,
+   "z": 304,
+   "loc": "cross.RL",
+   "target": "due",
+   "bounds": {
+    "min": [
+     953,
+     505,
+     257
+    ],
+    "max": [
+     983,
+     583,
+     351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "yard",
+   "x": -404,
+   "y": 0,
+   "z": 64,
+   "loc": "yard",
+   "target": "quad",
+   "bounds": {
+    "min": [
+     -415,
+     -31,
+     1
+    ],
+    "max": [
+     -393,
+     31,
+     127
+    ]
+   }
+  }
+ ]
+}

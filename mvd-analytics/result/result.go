@@ -139,6 +139,20 @@ package result
 //     consumers pick them up.
 //
 // v13:
+//   - New MapEntities section: the map's static designed layout (item
+//     spawns, player spawnpoints, teleport destinations/sources,
+//     buttons) with type + location, sourced from the offline-generated
+//     mapents corpus (BSP entity lumps) keyed by map name. Additive
+//     (omitempty); absent when no corpus exists for the map.
+//
+// v14:
+//   - MapEntities gains brush entities — teleportSrc (trigger_teleport),
+//     button (func_button), door (func_door) — placed at their BSP
+//     submodel bbox centre with a Bounds (trigger/door volume), plus the
+//     teleport source→destination link via MapEntity.Target ==
+//     teleportDst.TargetName. v13 carried point entities only.
+//
+// v15:
 //   - TimelineAnalysis gains DeathEvents: a per-player death stream
 //     ({time, player, team}) parallel to FragEvents, sourced from the
 //     authoritative protocol DeathEvent (every death counts once), for
@@ -146,7 +160,7 @@ package result
 //     efficiency = frags/(frags+deaths). Additive and omitempty, but the
 //     bump invalidates cached timeline responses so consumers pick it up.
 //
-// v14:
+// v16:
 //   - PlayerFrags gains TeamKills (KTX "tk") and teamkills re-enter
 //     Frags.Frags as complete killer↔victim pairs (previously dropped
 //     because the obituary names only one party). Killer-named teamkills
@@ -159,7 +173,7 @@ package result
 //     but the bump invalidates cached frag responses so consumers pick it
 //     up.
 //
-// v15:
+// v17:
 //   - Self-kill weapon labels in Frags.Frags are no longer flattened to
 //     "suicide": only the /kill console command ("X suicides", −2 frags)
 //     keeps weapon "suicide"; weapon self-detonations now carry their real
@@ -170,7 +184,7 @@ package result
 //     gets a frag for the other team" case). Bump invalidates cached frag
 //     responses so consumers pick up the relabeled weapons.
 //
-// v16:
+// v18:
 //   - TimelineAnalysis gains KillEvents: a per-player enemy-kill stream
 //     ({time, player, team}) keyed on the killer, parallel to DeathEvents,
 //     sourced from the canonical frag log (FragEntries) and filtered to
@@ -179,15 +193,16 @@ package result
 //     +/- that reconciles with byPlayer.kills and kills-based efficiency.
 //     Additive and omitempty, but the bump invalidates cached timeline
 //     responses so consumers pick it up.
-const CurrentSchemaVersion = 16
+const CurrentSchemaVersion = 18
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
 // mean no analyzer contributed that section (for example, because the
 // source lacked the necessary events).
 //
-// Match length: read MatchResult.Duration (float seconds, parser-derived)
-// or DemoInfoResult.Duration (integer seconds, KTX-authoritative).
+// Match length: read MatchResult.Duration (int32 milliseconds,
+// parser-derived) or DemoInfoResult.Duration (integer seconds,
+// KTX-authoritative).
 type Result struct {
 	SchemaVersion    int                     `json:"schemaVersion"`
 	FilePath         string                  `json:"filePath"`
@@ -199,6 +214,7 @@ type Result struct {
 	Metadata         *MetadataResult         `json:"metadata,omitempty"`
 	LocGraph         *LocGraphResult         `json:"locGraph,omitempty"`
 	Items            *ItemsResult            `json:"items,omitempty"`
+	MapEntities      *MapEntitiesResult      `json:"mapEntities,omitempty"`
 	Backpacks        []BackpackDrop          `json:"backpacks,omitempty"`
 	WeaponPickups    []WeaponPickup          `json:"weaponPickups,omitempty"`
 	Streams          *Streams                `json:"streams,omitempty"`

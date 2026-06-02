@@ -1,0 +1,38 @@
+{
+ "map": "yogic",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -3531,
+   "y": -895,
+   "z": -3298
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -3510,
+   "y": -833,
+   "z": -3298
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -3462,
+   "y": -831,
+   "z": -3298
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -3404,
+   "y": -833,
+   "z": -3298
+  }
+ ]
+}

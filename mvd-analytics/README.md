@@ -125,7 +125,7 @@ it.
 | Slice | Default analysers | Why |
 |---|---|---|
 | **Core** | [`demoinfo`](analyzer/demoinfo.md), [`identity`](analyzer/identity.md), [`frag`](analyzer/frag.md) | Implement `CoreProducer`. Everything they emit (`DemoInfo`, `Names`, `Slots`, `Sessions`, `FragEntries`) is the canonical input some derived analyser consumes during its own Finalize. |
-| **Derived** | [`metadata`](analyzer/metadata.md), [`match`](analyzer/match.md), [`messages`](analyzer/messages.md), [`timeline`](analyzer/timeline.md), [`items`](analyzer/items.md), [`backpacks`](analyzer/backpacks.md), [`weapon_pickups`](analyzer/weapon_pickups.md) | Either implement `CoreConsumer` (read `co.*`) or are independent peers. They never write to `CoreOutputs`. |
+| **Derived** | [`metadata`](analyzer/metadata.md), [`match`](analyzer/match.md), [`messages`](analyzer/messages.md), [`timeline`](analyzer/timeline.md), [`items`](analyzer/items.md), `map_entities`, [`backpacks`](analyzer/backpacks.md), [`weapon_pickups`](analyzer/weapon_pickups.md) | Either implement `CoreConsumer` (read `co.*`) or are independent peers. They never write to `CoreOutputs`. `map_entities` loads the static `mapents` corpus by map name. |
 | **Post-processors** | `recoverTelefragTeamkills`, `normalizeMatchRelativeTimes`, `duelTeamNormalize`, `locGraphPost`, `regionControlPost` | Operate on the assembled `Result` after every Finalize has run. Order matters within the slice (telefrag recovery runs before time normalisation so positions/frag-events/obituaries share the demo-relative clock; time normalisation must run before locgraph). |
 | **Shelved** | [`tracks`](analyzer/tracks.md) | Code present, not registered. Awaiting a mvd-web consumer. |
 
@@ -242,6 +242,7 @@ type Result struct {
     Metadata         *MetadataResult          // serverinfo + match settings
     LocGraph         *LocGraphResult          // loc-to-loc movement graph
     Items            *ItemsResult             // per-item pickup / respawn timeline (all MVD sources)
+    MapEntities      *MapEntitiesResult       // static map layout from the BSP entity corpus (mapents)
     Backpacks        []BackpackDrop           // RL/LG backpack drops (from KTX //ktx drop hint)
     WeaponPickups    []WeaponPickup           // slot-weapon pickups + kills-before-next-death metric
     Errors           []string
@@ -250,7 +251,7 @@ type Result struct {
 
 Each sub-type is defined in its own file under `result/`. The JSON shape
 is the wire contract with every consumer; breaking changes bump
-`CurrentSchemaVersion` (currently `16`). For "how long was the match"
+`CurrentSchemaVersion` (currently `18`). For "how long was the match"
 read `Match.Duration` (float, parser-derived) or `DemoInfo.Duration`
 (integer, KTX-authoritative); the legacy top-level `duration` was
 removed in v6.

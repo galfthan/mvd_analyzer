@@ -1,0 +1,1562 @@
+{
+ "map": "e3m7",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "GL",
+   "x": -610,
+   "y": -928,
+   "z": 48,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     -615,
+     -947,
+     29
+    ],
+    "max": [
+     -605,
+     -909,
+     67
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "NG",
+   "x": -348,
+   "y": -240,
+   "z": -308,
+   "loc": "NG",
+   "bounds": {
+    "min": [
+     -351,
+     -259,
+     -327
+    ],
+    "max": [
+     -345,
+     -221,
+     -289
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "end.YA-1",
+   "x": -1168,
+   "y": 1648,
+   "z": 212,
+   "loc": "end.YA",
+   "bounds": {
+    "min": [
+     -1183,
+     1633,
+     201
+    ],
+    "max": [
+     -1153,
+     1663,
+     223
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "end.YA-2",
+   "x": -1120,
+   "y": 1666,
+   "z": 0,
+   "loc": "end.YA",
+   "bounds": {
+    "min": [
+     -1139,
+     1661,
+     -19
+    ],
+    "max": [
+     -1101,
+     1671,
+     19
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "fort.RL",
+   "x": 580,
+   "y": -256,
+   "z": 204,
+   "loc": "fort.RL",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     577,
+     -275,
+     185
+    ],
+    "max": [
+     583,
+     -237,
+     223
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "fort.lift",
+   "x": 176,
+   "y": 340,
+   "z": 48,
+   "loc": "fort.lift",
+   "bounds": {
+    "min": [
+     161,
+     337,
+     33
+    ],
+    "max": [
+     191,
+     343,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "path.box",
+   "x": -288,
+   "y": 272,
+   "z": -200,
+   "loc": "path.box",
+   "bounds": {
+    "min": [
+     -311,
+     249,
+     -207
+    ],
+    "max": [
+     -265,
+     295,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "path.low-1",
+   "x": -256,
+   "y": 644,
+   "z": 96,
+   "loc": "path.low",
+   "bounds": {
+    "min": [
+     -275,
+     641,
+     77
+    ],
+    "max": [
+     -237,
+     647,
+     115
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "path.low-2",
+   "x": -204,
+   "y": 272,
+   "z": -160,
+   "loc": "path.low",
+   "bounds": {
+    "min": [
+     -207,
+     249,
+     -183
+    ],
+    "max": [
+     -201,
+     295,
+     -137
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GA",
+   "x": -720,
+   "y": -496,
+   "z": -304,
+   "loc": "GA",
+   "bounds": {
+    "min": [
+     -727,
+     -543,
+     -367
+    ],
+    "max": [
+     -713,
+     -449,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL-1",
+   "x": -208,
+   "y": -928,
+   "z": -96,
+   "loc": "GL",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -287,
+     -975,
+     -191
+    ],
+    "max": [
+     -129,
+     -881,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL-2",
+   "x": -208,
+   "y": -928,
+   "z": -8,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     -287,
+     -975,
+     -15
+    ],
+    "max": [
+     -129,
+     -881,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.entry",
+   "x": -176,
+   "y": -336,
+   "z": 64,
+   "loc": "GL.entry",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -223,
+     -343,
+     1
+    ],
+    "max": [
+     -129,
+     -329,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.low",
+   "x": -124,
+   "y": -568,
+   "z": -224,
+   "loc": "GL.low",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     -183,
+     -623,
+     -319
+    ],
+    "max": [
+     -65,
+     -513,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "NG",
+   "x": -640,
+   "y": -88,
+   "z": -312,
+   "loc": "NG",
+   "bounds": {
+    "min": [
+     -687,
+     -95,
+     -367
+    ],
+    "max": [
+     -593,
+     -81,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "NG.above",
+   "x": -400,
+   "y": -568,
+   "z": -84,
+   "loc": "NG.above",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     -407,
+     -623,
+     -95
+    ],
+    "max": [
+     -393,
+     -513,
+     -73
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent-1",
+   "x": -936,
+   "y": 1072,
+   "z": 120,
+   "loc": "Pent",
+   "bounds": {
+    "min": [
+     -959,
+     1065,
+     65
+    ],
+    "max": [
+     -913,
+     1079,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent-2",
+   "x": -888,
+   "y": 1072,
+   "z": 120,
+   "loc": "Pent",
+   "bounds": {
+    "min": [
+     -911,
+     1065,
+     65
+    ],
+    "max": [
+     -865,
+     1079,
+     175
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "end.Ring-1",
+   "x": -720,
+   "y": 1072,
+   "z": 0,
+   "loc": "end.Ring",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -767,
+     1057,
+     -63
+    ],
+    "max": [
+     -673,
+     1087,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "end.Ring-2",
+   "x": -592,
+   "y": 1280,
+   "z": 0,
+   "loc": "end.Ring",
+   "bounds": {
+    "min": [
+     -599,
+     1217,
+     -63
+    ],
+    "max": [
+     -585,
+     1343,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "end.YA-1",
+   "x": -1200,
+   "y": 1588,
+   "z": -96,
+   "loc": "end.YA",
+   "bounds": {
+    "min": [
+     -1215,
+     1537,
+     -127
+    ],
+    "max": [
+     -1185,
+     1639,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "end.YA-2",
+   "x": -1200,
+   "y": 1588,
+   "z": -16,
+   "loc": "end.YA",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -1215,
+     1537,
+     -63
+    ],
+    "max": [
+     -1185,
+     1639,
+     31
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "end.YA-3",
+   "x": -1168,
+   "y": 1588,
+   "z": -96,
+   "loc": "end.YA",
+   "bounds": {
+    "min": [
+     -1183,
+     1537,
+     -127
+    ],
+    "max": [
+     -1153,
+     1639,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "end.YA-4",
+   "x": -1136,
+   "y": 1588,
+   "z": -96,
+   "loc": "end.YA",
+   "bounds": {
+    "min": [
+     -1151,
+     1537,
+     -127
+    ],
+    "max": [
+     -1121,
+     1639,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "fort.Quad-1",
+   "x": 224,
+   "y": -404,
+   "z": 32,
+   "loc": "fort.Quad",
+   "spawnflags": 5,
+   "bounds": {
+    "min": [
+     193,
+     -415,
+     1
+    ],
+    "max": [
+     255,
+     -393,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "fort.Quad-2",
+   "x": 224,
+   "y": -336,
+   "z": -48,
+   "loc": "fort.Quad",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     193,
+     -383,
+     -79
+    ],
+    "max": [
+     255,
+     -289,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "fort.lift-1",
+   "x": 112,
+   "y": 272,
+   "z": 56,
+   "loc": "fort.lift",
+   "spawnflags": 2080,
+   "bounds": {
+    "min": [
+     105,
+     225,
+     1
+    ],
+    "max": [
+     119,
+     319,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "fort.lift-2",
+   "x": 176,
+   "y": 340,
+   "z": 48,
+   "loc": "fort.lift",
+   "bounds": {
+    "min": [
+     161,
+     321,
+     33
+    ],
+    "max": [
+     191,
+     359,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "fort.low",
+   "x": 48,
+   "y": -16,
+   "z": -48,
+   "loc": "fort.low",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1,
+     -31,
+     -95
+    ],
+    "max": [
+     95,
+     -1,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "path-1",
+   "x": -536,
+   "y": 272,
+   "z": 56,
+   "loc": "path",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -543,
+     225,
+     1
+    ],
+    "max": [
+     -529,
+     319,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "path-2",
+   "x": -272,
+   "y": 272,
+   "z": -8,
+   "loc": "path",
+   "bounds": {
+    "min": [
+     -319,
+     241,
+     -11
+    ],
+    "max": [
+     -225,
+     303,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": -1056,
+   "y": -600,
+   "z": -368,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": -416,
+   "y": -928,
+   "z": 0,
+   "loc": "GL",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GL.low-1",
+   "x": -304,
+   "y": -456,
+   "z": -120,
+   "loc": "GL.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GL.low-2",
+   "x": -264,
+   "y": -456,
+   "z": -120,
+   "loc": "GL.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "end.Ring",
+   "x": -688,
+   "y": 1184,
+   "z": -64,
+   "loc": "end.Ring",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "fort.lift",
+   "x": 280,
+   "y": 168,
+   "z": 0,
+   "loc": "fort.lift",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "path.low",
+   "x": -144,
+   "y": 288,
+   "z": -104,
+   "loc": "path.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GA.low-1",
+   "x": -808,
+   "y": -304,
+   "z": -528,
+   "loc": "GA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GA.low-2",
+   "x": -808,
+   "y": -272,
+   "z": -528,
+   "loc": "GA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "NG.above-1",
+   "x": -528,
+   "y": -104,
+   "z": -128,
+   "loc": "NG.above"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "NG.above-2",
+   "x": -488,
+   "y": -104,
+   "z": -128,
+   "loc": "NG.above"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA",
+   "x": -880,
+   "y": 808,
+   "z": -64,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.entry",
+   "x": -760,
+   "y": 232,
+   "z": 16,
+   "loc": "RA.entry"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "end.Ring",
+   "x": -688,
+   "y": 1120,
+   "z": -64,
+   "loc": "end.Ring"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "fort.lift-1",
+   "x": -8,
+   "y": 232,
+   "z": 0,
+   "loc": "fort.lift"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "fort.lift-2",
+   "x": 48,
+   "y": 272,
+   "z": 0,
+   "loc": "fort.lift"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "path",
+   "x": -624,
+   "y": 256,
+   "z": 16,
+   "loc": "path"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "path.low",
+   "x": -144,
+   "y": 224,
+   "z": -104,
+   "loc": "path.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "end.YA",
+   "x": -1400,
+   "y": 1464,
+   "z": -120,
+   "loc": "end.YA",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "fort.MH",
+   "x": 528,
+   "y": 176,
+   "z": -256,
+   "loc": "fort.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "NG",
+   "x": -760,
+   "y": -16,
+   "z": -368,
+   "loc": "NG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Pent",
+   "x": -992,
+   "y": 992,
+   "z": 64,
+   "loc": "Pent",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RA",
+   "x": -880,
+   "y": 624,
+   "z": 16,
+   "loc": "RA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "fort.RL",
+   "x": 456,
+   "y": -184,
+   "z": 144,
+   "loc": "fort.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "path.low",
+   "x": -464,
+   "y": 256,
+   "z": -104,
+   "loc": "path.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "NG",
+   "x": -640,
+   "y": -16,
+   "z": -368,
+   "loc": "NG",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Pent",
+   "x": -1032,
+   "y": 1008,
+   "z": 88,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "end.YA",
+   "x": -1384,
+   "y": 1552,
+   "z": -96,
+   "loc": "end.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "fort.Quad",
+   "x": 224,
+   "y": -456,
+   "z": 24,
+   "loc": "fort.Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": -960,
+   "y": 848,
+   "z": -64,
+   "loc": "RA",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "end.Ring",
+   "x": -464,
+   "y": 1616,
+   "z": -40,
+   "loc": "end.Ring",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "end.RL",
+   "x": -920,
+   "y": 1360,
+   "z": 112,
+   "loc": "end.RL",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "fort.RL",
+   "x": 448,
+   "y": -256,
+   "z": 144,
+   "loc": "fort.RL",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GA.lift",
+   "x": -872,
+   "y": -648,
+   "z": -528,
+   "loc": "GA.lift"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL",
+   "x": -192,
+   "y": -808,
+   "z": 0,
+   "loc": "GL",
+   "spawnflags": 1793
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "NG",
+   "x": -672,
+   "y": -224,
+   "z": -368,
+   "loc": "NG",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "fort.RL",
+   "x": 456,
+   "y": -368,
+   "z": 144,
+   "loc": "fort.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "fort.RL",
+   "x": 496,
+   "y": -272,
+   "z": 144,
+   "loc": "fort.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "GA",
+   "x": -1072,
+   "y": -752,
+   "z": -368,
+   "loc": "GA",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "end.YA",
+   "x": -1384,
+   "y": 1624,
+   "z": -120,
+   "loc": "end.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "fort.low",
+   "x": 400,
+   "y": 48,
+   "z": 0,
+   "loc": "fort.low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GA",
+   "x": -1040,
+   "y": -496,
+   "z": -320,
+   "loc": "GA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": -352,
+   "y": -928,
+   "z": 24,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL.entry",
+   "x": -176,
+   "y": -232,
+   "z": 32,
+   "loc": "GL.entry"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.entry",
+   "x": -720,
+   "y": 528,
+   "z": 24,
+   "loc": "RA.entry"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "end.YA",
+   "x": -1120,
+   "y": 1432,
+   "z": -40,
+   "loc": "end.YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "fort.low",
+   "x": 208,
+   "y": 56,
+   "z": 32,
+   "loc": "fort.low"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GA.start",
+   "x": -1128,
+   "y": -120,
+   "z": -464,
+   "loc": "GA.start",
+   "targetName": "t54"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL-1",
+   "x": -288,
+   "y": -656,
+   "z": 80,
+   "loc": "GL",
+   "targetName": "t15"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL-2",
+   "x": -88,
+   "y": -480,
+   "z": 80,
+   "loc": "GL",
+   "targetName": "t14"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL-3",
+   "x": -40,
+   "y": -632,
+   "z": 80,
+   "loc": "GL",
+   "targetName": "t13"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL.entry",
+   "x": -288,
+   "y": -480,
+   "z": 80,
+   "loc": "GL.entry",
+   "targetName": "t16"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "NG.above",
+   "x": -320,
+   "y": -240,
+   "z": -112,
+   "loc": "NG.above",
+   "targetName": "t5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "end.Ring",
+   "x": -456,
+   "y": 1656,
+   "z": 16,
+   "loc": "end.Ring",
+   "targetName": "t55"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "fort.lift-1",
+   "x": 64,
+   "y": 272,
+   "z": 8,
+   "loc": "fort.lift",
+   "targetName": "t24"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "fort.lift-2",
+   "x": 208,
+   "y": 200,
+   "z": 16,
+   "loc": "fort.lift",
+   "targetName": "t53"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "path-1",
+   "x": -424,
+   "y": 272,
+   "z": 8,
+   "loc": "path",
+   "targetName": "t26"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "path-2",
+   "x": -272,
+   "y": 104,
+   "z": 8,
+   "loc": "path",
+   "targetName": "t27"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "path.low",
+   "x": -256,
+   "y": 512,
+   "z": -104,
+   "loc": "path.low",
+   "targetName": "t28"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GA.start",
+   "x": -1128,
+   "y": -308,
+   "z": -420,
+   "loc": "GA.start",
+   "target": "t54",
+   "bounds": {
+    "min": [
+     -1143,
+     -311,
+     -439
+    ],
+    "max": [
+     -1113,
+     -305,
+     -401
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL",
+   "x": 280,
+   "y": -800,
+   "z": 56,
+   "loc": "GL",
+   "target": "t15",
+   "bounds": {
+    "min": [
+     249,
+     -831,
+     49
+    ],
+    "max": [
+     311,
+     -769,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "NG.tele",
+   "x": -608,
+   "y": 392,
+   "z": -376,
+   "loc": "NG.tele",
+   "target": "t5",
+   "bounds": {
+    "min": [
+     -639,
+     385,
+     -407
+    ],
+    "max": [
+     -577,
+     399,
+     -345
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "end.Ring",
+   "x": -452,
+   "y": 1788,
+   "z": 128,
+   "loc": "end.Ring",
+   "target": "t55",
+   "bounds": {
+    "min": [
+     -471,
+     1785,
+     121
+    ],
+    "max": [
+     -433,
+     1791,
+     135
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.MH",
+   "x": 592,
+   "y": 192,
+   "z": -192,
+   "loc": "fort.MH",
+   "target": "t53",
+   "bounds": {
+    "min": [
+     577,
+     161,
+     -255
+    ],
+    "max": [
+     607,
+     223,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.Quad-1",
+   "x": 280,
+   "y": -672,
+   "z": 56,
+   "loc": "fort.Quad",
+   "target": "t13",
+   "bounds": {
+    "min": [
+     249,
+     -703,
+     49
+    ],
+    "max": [
+     311,
+     -641,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.Quad-2",
+   "x": 368,
+   "y": -800,
+   "z": 56,
+   "loc": "fort.Quad",
+   "target": "t16",
+   "bounds": {
+    "min": [
+     337,
+     -831,
+     49
+    ],
+    "max": [
+     399,
+     -769,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.Quad-3",
+   "x": 368,
+   "y": -672,
+   "z": 56,
+   "loc": "fort.Quad",
+   "target": "t14",
+   "bounds": {
+    "min": [
+     337,
+     -703,
+     49
+    ],
+    "max": [
+     399,
+     -641,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.lift-1",
+   "x": 68,
+   "y": 672,
+   "z": 32,
+   "loc": "fort.lift",
+   "target": "t26",
+   "bounds": {
+    "min": [
+     49,
+     665,
+     25
+    ],
+    "max": [
+     87,
+     679,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.lift-2",
+   "x": 68,
+   "y": 768,
+   "z": 32,
+   "loc": "fort.lift",
+   "target": "t27",
+   "bounds": {
+    "min": [
+     49,
+     761,
+     25
+    ],
+    "max": [
+     87,
+     775,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.lift-3",
+   "x": 148,
+   "y": 672,
+   "z": 32,
+   "loc": "fort.lift",
+   "target": "t26",
+   "bounds": {
+    "min": [
+     129,
+     665,
+     25
+    ],
+    "max": [
+     167,
+     679,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "fort.lift-4",
+   "x": 148,
+   "y": 768,
+   "z": 32,
+   "loc": "fort.lift",
+   "target": "t28",
+   "bounds": {
+    "min": [
+     129,
+     761,
+     25
+    ],
+    "max": [
+     167,
+     775,
+     39
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.box",
+   "x": -272,
+   "y": 272,
+   "z": -172,
+   "loc": "path.box",
+   "target": "t24",
+   "bounds": {
+    "min": [
+     -351,
+     161,
+     -183
+    ],
+    "max": [
+     -193,
+     383,
+     -161
+    ]
+   }
+  }
+ ]
+}

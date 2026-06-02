@@ -1,0 +1,68 @@
+{
+ "map": "dmm4_5",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 128,
+   "y": 0,
+   "z": 2240
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 320,
+   "y": -192,
+   "z": 1728
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 320,
+   "y": 160,
+   "z": 992
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 512,
+   "y": 0,
+   "z": 256
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 320,
+   "y": 0,
+   "z": 2880,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 320.00006,
+   "y": 0,
+   "z": -329.9228,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     38.48221,
+     -271.61203,
+     -344.9228
+    ],
+    "max": [
+     601.5179,
+     271.61203,
+     -314.9228
+    ]
+   }
+  }
+ ]
+}

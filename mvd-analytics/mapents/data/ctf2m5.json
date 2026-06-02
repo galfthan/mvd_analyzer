@@ -1,0 +1,2253 @@
+{
+ "map": "ctf2m5",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "BLUE BASE: 100H",
+   "x": 204,
+   "y": 1336,
+   "z": -800,
+   "loc": "BLUE BASE: 100H",
+   "bounds": {
+    "min": [
+     173,
+     1333,
+     -831
+    ],
+    "max": [
+     235,
+     1339,
+     -769
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RED BASE: 100H",
+   "x": -48,
+   "y": -2028,
+   "z": -800,
+   "loc": "RED BASE: 100H",
+   "bounds": {
+    "min": [
+     -79,
+     -2031,
+     -831
+    ],
+    "max": [
+     -17,
+     -2025,
+     -769
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE",
+   "x": 204,
+   "y": 1520,
+   "z": -802,
+   "loc": "BLUE BASE",
+   "bounds": {
+    "min": [
+     13,
+     1509,
+     -843
+    ],
+    "max": [
+     395,
+     1531,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: 100H",
+   "x": 204,
+   "y": 1400,
+   "z": -802,
+   "loc": "BLUE BASE: 100H",
+   "bounds": {
+    "min": [
+     13,
+     1389,
+     -843
+    ],
+    "max": [
+     395,
+     1411,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LEFT DOOR-1",
+   "x": 558,
+   "y": 1424,
+   "z": -598,
+   "loc": "BLUE BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     553,
+     1401,
+     -651
+    ],
+    "max": [
+     563,
+     1447,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LEFT DOOR-2",
+   "x": 558,
+   "y": 1472,
+   "z": -598,
+   "loc": "BLUE BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     553,
+     1449,
+     -651
+    ],
+    "max": [
+     563,
+     1495,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: LOWER RA ROOM",
+   "x": 762,
+   "y": 1202,
+   "z": -712,
+   "loc": "BLUE BASE: LOWER RA ROOM",
+   "bounds": {
+    "min": [
+     733,
+     1173,
+     -759
+    ],
+    "max": [
+     791,
+     1231,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MAIN ENTRANCE-1",
+   "x": 186,
+   "y": 818,
+   "z": -712,
+   "loc": "BLUE BASE: MAIN ENTRANCE",
+   "bounds": {
+    "min": [
+     169,
+     813,
+     -759
+    ],
+    "max": [
+     203,
+     823,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MAIN ENTRANCE-2",
+   "x": 222,
+   "y": 818,
+   "z": -712,
+   "loc": "BLUE BASE: MAIN ENTRANCE",
+   "bounds": {
+    "min": [
+     205,
+     813,
+     -759
+    ],
+    "max": [
+     239,
+     823,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MIDDLE DOOR-1",
+   "x": 204,
+   "y": 1424,
+   "z": -802,
+   "loc": "BLUE BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     13,
+     1413,
+     -843
+    ],
+    "max": [
+     395,
+     1435,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MIDDLE DOOR-2",
+   "x": 204,
+   "y": 1448,
+   "z": -802,
+   "loc": "BLUE BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     13,
+     1437,
+     -843
+    ],
+    "max": [
+     395,
+     1459,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MIDDLE DOOR-3",
+   "x": 204,
+   "y": 1472,
+   "z": -802,
+   "loc": "BLUE BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     13,
+     1461,
+     -843
+    ],
+    "max": [
+     395,
+     1483,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: MIDDLE DOOR-4",
+   "x": 204,
+   "y": 1496,
+   "z": -802,
+   "loc": "BLUE BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     13,
+     1485,
+     -843
+    ],
+    "max": [
+     395,
+     1507,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: RIGHT DOOR-1",
+   "x": -150,
+   "y": 1424,
+   "z": -598,
+   "loc": "BLUE BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     -155,
+     1401,
+     -651
+    ],
+    "max": [
+     -145,
+     1447,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE BASE: RIGHT DOOR-2",
+   "x": -150,
+   "y": 1472,
+   "z": -598,
+   "loc": "BLUE BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     -155,
+     1449,
+     -651
+    ],
+    "max": [
+     -145,
+     1495,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE-1",
+   "x": -48,
+   "y": -2212,
+   "z": -802,
+   "loc": "RED BASE",
+   "bounds": {
+    "min": [
+     -239,
+     -2223,
+     -843
+    ],
+    "max": [
+     143,
+     -2201,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE-2",
+   "x": -48,
+   "y": -2188,
+   "z": -802,
+   "loc": "RED BASE",
+   "bounds": {
+    "min": [
+     -239,
+     -2199,
+     -843
+    ],
+    "max": [
+     143,
+     -2177,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE-3",
+   "x": -48,
+   "y": -2164,
+   "z": -802,
+   "loc": "RED BASE",
+   "bounds": {
+    "min": [
+     -239,
+     -2175,
+     -843
+    ],
+    "max": [
+     143,
+     -2153,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: 100H",
+   "x": -48,
+   "y": -2092,
+   "z": -802,
+   "loc": "RED BASE: 100H",
+   "bounds": {
+    "min": [
+     -239,
+     -2103,
+     -843
+    ],
+    "max": [
+     143,
+     -2081,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: GRENADE LAUNCHER-1",
+   "x": -66,
+   "y": -1510,
+   "z": -712,
+   "loc": "RED BASE: GRENADE LAUNCHER",
+   "bounds": {
+    "min": [
+     -83,
+     -1515,
+     -759
+    ],
+    "max": [
+     -49,
+     -1505,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: GRENADE LAUNCHER-2",
+   "x": -30,
+   "y": -1510,
+   "z": -712,
+   "loc": "RED BASE: GRENADE LAUNCHER",
+   "bounds": {
+    "min": [
+     -47,
+     -1515,
+     -759
+    ],
+    "max": [
+     -13,
+     -1505,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: LEFT DOOR-1",
+   "x": -402,
+   "y": -2164,
+   "z": -598,
+   "loc": "RED BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     -407,
+     -2187,
+     -651
+    ],
+    "max": [
+     -397,
+     -2141,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: LEFT DOOR-2",
+   "x": -402,
+   "y": -2116,
+   "z": -598,
+   "loc": "RED BASE: LEFT DOOR",
+   "bounds": {
+    "min": [
+     -407,
+     -2139,
+     -651
+    ],
+    "max": [
+     -397,
+     -2093,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: LOWER RA ROOM",
+   "x": -606,
+   "y": -1894,
+   "z": -712,
+   "loc": "RED BASE: LOWER RA ROOM",
+   "bounds": {
+    "min": [
+     -635,
+     -1923,
+     -759
+    ],
+    "max": [
+     -577,
+     -1865,
+     -665
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: MIDDLE DOOR-1",
+   "x": -48,
+   "y": -2140,
+   "z": -802,
+   "loc": "RED BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     -2151,
+     -843
+    ],
+    "max": [
+     143,
+     -2129,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: MIDDLE DOOR-2",
+   "x": -48,
+   "y": -2116,
+   "z": -802,
+   "loc": "RED BASE: MIDDLE DOOR",
+   "bounds": {
+    "min": [
+     -239,
+     -2127,
+     -843
+    ],
+    "max": [
+     143,
+     -2105,
+     -761
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: RIGHT DOOR-1",
+   "x": 306,
+   "y": -2164,
+   "z": -598,
+   "loc": "RED BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     301,
+     -2187,
+     -651
+    ],
+    "max": [
+     311,
+     -2141,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED BASE: RIGHT DOOR-2",
+   "x": 306,
+   "y": -2116,
+   "z": -598,
+   "loc": "RED BASE: RIGHT DOOR",
+   "bounds": {
+    "min": [
+     301,
+     -2139,
+     -651
+    ],
+    "max": [
+     311,
+     -2093,
+     -545
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED WIND TUNNEL",
+   "x": 1402,
+   "y": -182,
+   "z": -925.5,
+   "loc": "RED WIND TUNNEL",
+   "bounds": {
+    "min": [
+     1397,
+     -217,
+     -954
+    ],
+    "max": [
+     1407,
+     -147,
+     -897
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Ring SECRET",
+   "x": -920,
+   "y": -404,
+   "z": -1132,
+   "loc": "Ring SECRET",
+   "bounds": {
+    "min": [
+     -967,
+     -435,
+     -1195
+    ],
+    "max": [
+     -873,
+     -373,
+     -1069
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG/666 ROOM-1",
+   "x": 1360,
+   "y": -1604,
+   "z": -1284,
+   "loc": "LG/666 ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG/666 ROOM-2",
+   "x": 1360,
+   "y": -1524,
+   "z": -1284,
+   "loc": "LG/666 ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG/666 ROOM-3",
+   "x": 1752,
+   "y": -1604,
+   "z": -1284,
+   "loc": "LG/666 ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG/666 ROOM-4",
+   "x": 1752,
+   "y": -1524,
+   "z": -1284,
+   "loc": "LG/666 ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "OVER BRIDGE/RL-1",
+   "x": -136,
+   "y": -428,
+   "z": -388,
+   "loc": "OVER BRIDGE/RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "OVER BRIDGE/RL-2",
+   "x": -104,
+   "y": -488,
+   "z": -388,
+   "loc": "OVER BRIDGE/RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "OVER BRIDGE/RL-3",
+   "x": 236,
+   "y": -228,
+   "z": -388,
+   "loc": "OVER BRIDGE/RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "OVER BRIDGE/RL-4",
+   "x": 268,
+   "y": -288,
+   "z": -388,
+   "loc": "OVER BRIDGE/RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "WATER",
+   "x": 304,
+   "y": -364,
+   "z": -1276,
+   "loc": "WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "WATER",
+   "x": 78,
+   "y": -346,
+   "z": -1282,
+   "loc": "WATER"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED BASE: GRENADE LAUNCHER",
+   "x": -48,
+   "y": -1468,
+   "z": -532,
+   "loc": "RED BASE: GRENADE LAUNCHER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE-1",
+   "x": 20,
+   "y": 1688,
+   "z": -760,
+   "loc": "BLUE BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE-2",
+   "x": 356,
+   "y": 1688,
+   "z": -760,
+   "loc": "BLUE BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE: 100H-1",
+   "x": 164,
+   "y": 1148,
+   "z": -760,
+   "loc": "BLUE BASE: 100H",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE: 100H-2",
+   "x": 212,
+   "y": 1148,
+   "z": -760,
+   "loc": "BLUE BASE: 100H",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE: OUTSIDE",
+   "x": 236,
+   "y": 208,
+   "z": -820,
+   "loc": "BLUE BASE: OUTSIDE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE: OVER MAIN ENTRANCE-1",
+   "x": 124,
+   "y": 1036,
+   "z": -532,
+   "loc": "BLUE BASE: OVER MAIN ENTRANCE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE: OVER MAIN ENTRANCE-2",
+   "x": 252,
+   "y": 1036,
+   "z": -532,
+   "loc": "BLUE BASE: OVER MAIN ENTRANCE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE BASE: UPPER RA ROOM",
+   "x": 600,
+   "y": 824,
+   "z": -532,
+   "loc": "BLUE BASE: UPPER RA ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE WIND TUNNEL",
+   "x": -1176,
+   "y": -632,
+   "z": -1196,
+   "loc": "BLUE WIND TUNNEL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "ENTRANCE TO LG/666 ROOM",
+   "x": 1300,
+   "y": -92,
+   "z": -1196,
+   "loc": "ENTRANCE TO LG/666 ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE-1",
+   "x": -232,
+   "y": -2412,
+   "z": -760,
+   "loc": "RED BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE-2",
+   "x": 104,
+   "y": -2412,
+   "z": -760,
+   "loc": "RED BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE: 100H-1",
+   "x": -88,
+   "y": -1872,
+   "z": -760,
+   "loc": "RED BASE: 100H",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE: 100H-2",
+   "x": -40,
+   "y": -1872,
+   "z": -760,
+   "loc": "RED BASE: 100H",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE: OUTSIDE",
+   "x": -112,
+   "y": -932,
+   "z": -820,
+   "loc": "RED BASE: OUTSIDE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE: OVER MAIN ENTRANCE-1",
+   "x": -128,
+   "y": -1760,
+   "z": -532,
+   "loc": "RED BASE: OVER MAIN ENTRANCE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE: OVER MAIN ENTRANCE-2",
+   "x": 0,
+   "y": -1760,
+   "z": -532,
+   "loc": "RED BASE: OVER MAIN ENTRANCE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED BASE: UPPER RA ROOM",
+   "x": -476,
+   "y": -1548,
+   "z": -532,
+   "loc": "RED BASE: UPPER RA ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-1",
+   "x": 28,
+   "y": 1732,
+   "z": -760,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-2",
+   "x": 348,
+   "y": 1732,
+   "z": -760,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: LEFT DOOR",
+   "x": 760,
+   "y": 1460,
+   "z": -652,
+   "loc": "BLUE BASE: LEFT DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: LOWER RA ROOM",
+   "x": 736,
+   "y": 1064,
+   "z": -760,
+   "loc": "BLUE BASE: LOWER RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: SNG-1",
+   "x": 124,
+   "y": 760,
+   "z": -532,
+   "loc": "BLUE BASE: SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE: SNG-2",
+   "x": 252,
+   "y": 760,
+   "z": -532,
+   "loc": "BLUE BASE: SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE WIND TUNNEL",
+   "x": -1224,
+   "y": -632,
+   "z": -1196,
+   "loc": "BLUE WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BRIDGE-1",
+   "x": -480,
+   "y": 40,
+   "z": -820,
+   "loc": "BRIDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BRIDGE-2",
+   "x": -16,
+   "y": -148,
+   "z": -820,
+   "loc": "BRIDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BRIDGE-3",
+   "x": 140,
+   "y": -576,
+   "z": -820,
+   "loc": "BRIDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG/666 ROOM-1",
+   "x": 1537,
+   "y": -1748,
+   "z": -1284,
+   "loc": "LG/666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG/666 ROOM-2",
+   "x": 1552,
+   "y": -1408,
+   "z": -1284,
+   "loc": "LG/666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "OVER BRIDGE/RL-1",
+   "x": -36,
+   "y": -416,
+   "z": -388,
+   "loc": "OVER BRIDGE/RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "OVER BRIDGE/RL-2",
+   "x": 160,
+   "y": -308,
+   "z": -388,
+   "loc": "OVER BRIDGE/RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-1",
+   "x": -224,
+   "y": -2456,
+   "z": -760,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-2",
+   "x": 96,
+   "y": -2456,
+   "z": -760,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: GRENADE LAUNCHER-1",
+   "x": -128,
+   "y": -1484,
+   "z": -532,
+   "loc": "RED BASE: GRENADE LAUNCHER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: GRENADE LAUNCHER-2",
+   "x": 0,
+   "y": -1484,
+   "z": -532,
+   "loc": "RED BASE: GRENADE LAUNCHER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: LEFT DOOR",
+   "x": -636,
+   "y": -2184,
+   "z": -636,
+   "loc": "RED BASE: LEFT DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE: LOWER RA ROOM",
+   "x": -612,
+   "y": -1788,
+   "z": -760,
+   "loc": "RED BASE: LOWER RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED WIND TUNNEL",
+   "x": 1348,
+   "y": -92,
+   "z": -1196,
+   "loc": "RED WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL AREA-1",
+   "x": -472,
+   "y": -444,
+   "z": -540,
+   "loc": "RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL AREA-2",
+   "x": -424,
+   "y": -444,
+   "z": -540,
+   "loc": "RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL AREA-3",
+   "x": 548,
+   "y": -280,
+   "z": -556,
+   "loc": "RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL AREA-4",
+   "x": 596,
+   "y": -280,
+   "z": -556,
+   "loc": "RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL AREA-5",
+   "x": 604,
+   "y": -764,
+   "z": -820,
+   "loc": "RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG/666 ROOM",
+   "x": 1376,
+   "y": -1552,
+   "z": -1032,
+   "loc": "LG/666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "BLUE BASE: 100H",
+   "x": 188,
+   "y": 1232,
+   "z": -844,
+   "loc": "BLUE BASE: 100H",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RED BASE: 100H",
+   "x": -64,
+   "y": -1956,
+   "z": -844,
+   "loc": "RED BASE: 100H",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: BELOW Quad-1",
+   "x": -540,
+   "y": 1472,
+   "z": -652,
+   "loc": "BLUE BASE: BELOW Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: BELOW Quad-2",
+   "x": -216,
+   "y": 1004,
+   "z": -760,
+   "loc": "BLUE BASE: BELOW Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: BELOW Quad-3",
+   "x": -216,
+   "y": 1004,
+   "z": -532,
+   "loc": "BLUE BASE: BELOW Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: MIDDLE DOOR-1",
+   "x": 144,
+   "y": 1424,
+   "z": -760,
+   "loc": "BLUE BASE: MIDDLE DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: MIDDLE DOOR-2",
+   "x": 240,
+   "y": 1424,
+   "z": -760,
+   "loc": "BLUE BASE: MIDDLE DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: OUTSIDE-1",
+   "x": 380,
+   "y": 244,
+   "z": -592,
+   "loc": "BLUE BASE: OUTSIDE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE: OUTSIDE-2",
+   "x": 404,
+   "y": 296,
+   "z": -592,
+   "loc": "BLUE BASE: OUTSIDE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE FLAG-1",
+   "x": 108,
+   "y": 1976,
+   "z": -700,
+   "loc": "BLUE FLAG"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE FLAG-2",
+   "x": 276,
+   "y": 1976,
+   "z": -700,
+   "loc": "BLUE FLAG"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "ENTRANCE TO LG/666 ROOM",
+   "x": 924,
+   "y": -92,
+   "z": -1196,
+   "loc": "ENTRANCE TO LG/666 ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: LOWER RA ROOM",
+   "x": -532,
+   "y": -1624,
+   "z": -736,
+   "loc": "RED BASE: LOWER RA ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: OUTSIDE-1",
+   "x": 220,
+   "y": -968,
+   "z": -800,
+   "loc": "RED BASE: OUTSIDE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: OUTSIDE-2",
+   "x": 296,
+   "y": -1112,
+   "z": -820,
+   "loc": "RED BASE: OUTSIDE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: Quad-1",
+   "x": 408,
+   "y": -1824,
+   "z": -208,
+   "loc": "RED BASE: Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: Quad-2",
+   "x": 504,
+   "y": -1824,
+   "z": -208,
+   "loc": "RED BASE: Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: Quad-3",
+   "x": 600,
+   "y": -1824,
+   "z": -208,
+   "loc": "RED BASE: Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE: SPIRAL STAIRS",
+   "x": -540,
+   "y": -2292,
+   "z": -516,
+   "loc": "RED BASE: SPIRAL STAIRS"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED WIND TUNNEL",
+   "x": 1168,
+   "y": -308,
+   "z": -1196,
+   "loc": "RED WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RL AREA",
+   "x": 508,
+   "y": -276,
+   "z": -556,
+   "loc": "RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "WATER",
+   "x": 116,
+   "y": -484,
+   "z": -1276,
+   "loc": "WATER"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE BASE",
+   "x": 204,
+   "y": 1616,
+   "z": -760,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "LG/666 ROOM",
+   "x": 1760,
+   "y": -1552,
+   "z": -1014,
+   "loc": "LG/666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "BLUE BASE: Quad",
+   "x": -264,
+   "y": 1120,
+   "z": -208,
+   "loc": "BLUE BASE: Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "RED BASE: Quad",
+   "x": 420,
+   "y": -2072,
+   "z": -208,
+   "loc": "RED BASE: Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "BLUE BASE: LOWER RA ROOM",
+   "x": 620,
+   "y": 912,
+   "z": -736,
+   "loc": "BLUE BASE: LOWER RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RED BASE: LOWER RA ROOM",
+   "x": -464,
+   "y": -1536,
+   "z": -736,
+   "loc": "RED BASE: LOWER RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "BLUE WIND TUNNEL",
+   "x": -936,
+   "y": -334,
+   "z": -1156,
+   "loc": "BLUE WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL AREA",
+   "x": 78,
+   "y": -346,
+   "z": -520,
+   "loc": "RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: 100H-1",
+   "x": 92,
+   "y": 1240,
+   "z": -844,
+   "loc": "BLUE BASE: 100H"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: 100H-2",
+   "x": 300,
+   "y": 1240,
+   "z": -844,
+   "loc": "BLUE BASE: 100H"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: LOWER RA ROOM",
+   "x": 604,
+   "y": 828,
+   "z": -736,
+   "loc": "BLUE BASE: LOWER RA ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: OUTSIDE",
+   "x": -80,
+   "y": 260,
+   "z": -820,
+   "loc": "BLUE BASE: OUTSIDE"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: Quad-1",
+   "x": -464,
+   "y": 1372,
+   "z": -232,
+   "loc": "BLUE BASE: Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: Quad-2",
+   "x": -368,
+   "y": 1372,
+   "z": -232,
+   "loc": "BLUE BASE: Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: Quad-3",
+   "x": -272,
+   "y": 1372,
+   "z": -232,
+   "loc": "BLUE BASE: Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE: SPIRAL STAIRS",
+   "x": 672,
+   "y": 1576,
+   "z": -532,
+   "loc": "BLUE BASE: SPIRAL STAIRS"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: 100H-1",
+   "x": -160,
+   "y": -1948,
+   "z": -844,
+   "loc": "RED BASE: 100H"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: 100H-2",
+   "x": 48,
+   "y": -1948,
+   "z": -844,
+   "loc": "RED BASE: 100H"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: BELOW Quad",
+   "x": 672,
+   "y": -2180,
+   "z": -652,
+   "loc": "RED BASE: BELOW Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: LOWER RA ROOM",
+   "x": -480,
+   "y": -1696,
+   "z": -760,
+   "loc": "RED BASE: LOWER RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: MAIN ENTRANCE",
+   "x": -56,
+   "y": -1752,
+   "z": -652,
+   "loc": "RED BASE: MAIN ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: OUTSIDE-1",
+   "x": -264,
+   "y": -1004,
+   "z": -592,
+   "loc": "RED BASE: OUTSIDE"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE: OUTSIDE-2",
+   "x": -240,
+   "y": -952,
+   "z": -592,
+   "loc": "RED BASE: OUTSIDE"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RL AREA",
+   "x": -376,
+   "y": -436,
+   "z": -540,
+   "loc": "RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Ring SECRET",
+   "x": -784,
+   "y": -628,
+   "z": -1196,
+   "loc": "Ring SECRET",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "WATER",
+   "x": 16,
+   "y": -224,
+   "z": -1276,
+   "loc": "WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE: LOWER RA ROOM",
+   "x": 604,
+   "y": 984,
+   "z": -760,
+   "loc": "BLUE BASE: LOWER RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE: MAIN ENTRANCE",
+   "x": 192,
+   "y": 1040,
+   "z": -652,
+   "loc": "BLUE BASE: MAIN ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE: OUTSIDE",
+   "x": -164,
+   "y": 396,
+   "z": -820,
+   "loc": "BLUE BASE: OUTSIDE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE: Quad",
+   "x": -468,
+   "y": 1108,
+   "z": -208,
+   "loc": "BLUE BASE: Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE WIND TUNNEL",
+   "x": -1036,
+   "y": -408,
+   "z": -1196,
+   "loc": "BLUE WIND TUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE: BELOW Quad-1",
+   "x": 348,
+   "y": -1720,
+   "z": -760,
+   "loc": "RED BASE: BELOW Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE: BELOW Quad-2",
+   "x": 348,
+   "y": -1720,
+   "z": -532,
+   "loc": "RED BASE: BELOW Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE: MIDDLE DOOR-1",
+   "x": -108,
+   "y": -2140,
+   "z": -760,
+   "loc": "RED BASE: MIDDLE DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE: MIDDLE DOOR-2",
+   "x": -12,
+   "y": -2140,
+   "z": -760,
+   "loc": "RED BASE: MIDDLE DOOR"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED FLAG-1",
+   "x": -144,
+   "y": -2692,
+   "z": -700,
+   "loc": "RED FLAG"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED FLAG-2",
+   "x": 24,
+   "y": -2692,
+   "z": -700,
+   "loc": "RED FLAG"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Ring SECRET",
+   "x": -824,
+   "y": -632,
+   "z": -1196,
+   "loc": "Ring SECRET"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "WATER",
+   "x": -172,
+   "y": -352,
+   "z": -1276,
+   "loc": "WATER"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE BASE: SNG",
+   "x": 204,
+   "y": 776,
+   "z": -532,
+   "loc": "BLUE BASE: SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED BASE",
+   "x": -48,
+   "y": -2308,
+   "z": -760,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE BASE: YA SECRET",
+   "x": -596,
+   "y": 1368,
+   "z": -588,
+   "loc": "BLUE BASE: YA SECRET"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RED BASE: YA SECRET",
+   "x": 752,
+   "y": -1824,
+   "z": -588,
+   "loc": "RED BASE: YA SECRET"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-1",
+   "x": -80,
+   "y": 1728,
+   "z": -676,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-2",
+   "x": 36,
+   "y": 1616,
+   "z": -736,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-3",
+   "x": 372,
+   "y": 1616,
+   "z": -736,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-4",
+   "x": 428,
+   "y": 1848,
+   "z": -676,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-5",
+   "x": 488,
+   "y": 1728,
+   "z": -676,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE: BELOW Quad",
+   "x": -524,
+   "y": 1020,
+   "z": -736,
+   "loc": "BLUE BASE: BELOW Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE: LOWER RA ROOM",
+   "x": 728,
+   "y": 1020,
+   "z": -736,
+   "loc": "BLUE BASE: LOWER RA ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE: OUTSIDE",
+   "x": 308,
+   "y": 268,
+   "z": -796,
+   "loc": "BLUE BASE: OUTSIDE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BASE: SNG",
+   "x": 400,
+   "y": 768,
+   "z": -508,
+   "loc": "BLUE BASE: SNG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE FLAG-1",
+   "x": -20,
+   "y": 1848,
+   "z": -676,
+   "loc": "BLUE FLAG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE FLAG-2",
+   "x": 140,
+   "y": 1912,
+   "z": -676,
+   "loc": "BLUE FLAG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE FLAG-3",
+   "x": 268,
+   "y": 1912,
+   "z": -676,
+   "loc": "BLUE FLAG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-1",
+   "x": -332,
+   "y": -2420,
+   "z": -676,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-2",
+   "x": -272,
+   "y": -2540,
+   "z": -676,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-3",
+   "x": -216,
+   "y": -2308,
+   "z": -736,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-4",
+   "x": 120,
+   "y": -2308,
+   "z": -736,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-5",
+   "x": 176,
+   "y": -2540,
+   "z": -676,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-6",
+   "x": 236,
+   "y": -2420,
+   "z": -676,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE: BELOW Quad",
+   "x": 680,
+   "y": -1712,
+   "z": -736,
+   "loc": "RED BASE: BELOW Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE: GRENADE LAUNCHER",
+   "x": -244,
+   "y": -1460,
+   "z": -508,
+   "loc": "RED BASE: GRENADE LAUNCHER"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE: LOWER RA ROOM",
+   "x": -572,
+   "y": -1712,
+   "z": -736,
+   "loc": "RED BASE: LOWER RA ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BASE: OUTSIDE",
+   "x": -152,
+   "y": -960,
+   "z": -796,
+   "loc": "RED BASE: OUTSIDE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED FLAG-1",
+   "x": -112,
+   "y": -2604,
+   "z": -676,
+   "loc": "RED FLAG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED FLAG-2",
+   "x": 16,
+   "y": -2604,
+   "z": -676,
+   "loc": "RED FLAG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL AREA-1",
+   "x": -608,
+   "y": -624,
+   "z": -532,
+   "loc": "RL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL AREA-2",
+   "x": 764,
+   "y": -68,
+   "z": -532,
+   "loc": "RL AREA"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "LG/666 ROOM",
+   "x": 1568,
+   "y": -1552,
+   "z": -1250,
+   "loc": "LG/666 ROOM",
+   "targetName": "secret"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RL AREA-1",
+   "x": -408,
+   "y": -136,
+   "z": -788,
+   "loc": "RL AREA",
+   "targetName": "bluetele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RL AREA-2",
+   "x": 564,
+   "y": -556,
+   "z": -788,
+   "loc": "RL AREA",
+   "targetName": "redtele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG/666 ROOM-1",
+   "x": 1568,
+   "y": -1864,
+   "z": -1216,
+   "loc": "LG/666 ROOM",
+   "target": "redtele1",
+   "bounds": {
+    "min": [
+     1541,
+     -1869,
+     -1267
+    ],
+    "max": [
+     1595,
+     -1859,
+     -1165
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG/666 ROOM-2",
+   "x": 1568,
+   "y": -1240,
+   "z": -1216,
+   "loc": "LG/666 ROOM",
+   "target": "bluetele1",
+   "bounds": {
+    "min": [
+     1541,
+     -1245,
+     -1267
+    ],
+    "max": [
+     1595,
+     -1235,
+     -1165
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED WIND TUNNEL",
+   "x": 1483,
+   "y": -182,
+   "z": -925.5,
+   "loc": "RED WIND TUNNEL",
+   "target": "secret",
+   "bounds": {
+    "min": [
+     1481,
+     -217,
+     -954
+    ],
+    "max": [
+     1485,
+     -147,
+     -897
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL AREA-1",
+   "x": -556,
+   "y": -488,
+   "z": -476,
+   "loc": "RL AREA",
+   "target": "redtele1",
+   "bounds": {
+    "min": [
+     -579,
+     -511,
+     -527
+    ],
+    "max": [
+     -533,
+     -465,
+     -425
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL AREA-2",
+   "x": 712,
+   "y": -204,
+   "z": -476,
+   "loc": "RL AREA",
+   "target": "bluetele1",
+   "bounds": {
+    "min": [
+     689,
+     -227,
+     -527
+    ],
+    "max": [
+     735,
+     -181,
+     -425
+    ]
+   }
+  }
+ ]
+}

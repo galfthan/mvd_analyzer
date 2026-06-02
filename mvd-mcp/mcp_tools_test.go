@@ -78,6 +78,12 @@ func (f *fakeBackend) GetBackpacks(_ context.Context, _ GetBackpacksInput) (any,
 func (f *fakeBackend) GetItems(_ context.Context, _ GetItemsInput) (any, error) {
 	return map[string]any{"items": []any{}}, nil
 }
+func (f *fakeBackend) GetMapEntities(_ context.Context, _ GetMapEntitiesInput) (any, error) {
+	return map[string]any{"entities": []any{}}, nil
+}
+func (f *fakeBackend) GetMapEntitiesByMap(_ context.Context, _ GetMapEntitiesByMapInput) (any, error) {
+	return map[string]any{"entities": []any{}}, nil
+}
 func (f *fakeBackend) GetWeaponPickups(_ context.Context, _ GetWeaponPickupsInput) (any, error) {
 	return []any{}, nil
 }
@@ -151,7 +157,7 @@ func TestMCP_ListTools(t *testing.T) {
 		"searchGames", "loadDemo",
 		"getOverview", "getDemoInfo", "getMetadata", "getFrags",
 		"getLocGraph", "getChat",
-		"getBackpacks", "getItems", "getWeaponPickups",
+		"getBackpacks", "getItems", "getMapEntities", "getMapEntitiesByMap", "getWeaponPickups",
 		"getBuckets", "getEvents", "getStreamSlice", "getStateAt",
 		"getLocTrails", "getLocTable", "getRegionControl",
 	}

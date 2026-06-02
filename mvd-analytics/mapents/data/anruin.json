@@ -1,0 +1,248 @@
+{
+ "map": "anruin",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": -130,
+   "y": 194,
+   "z": 512,
+   "bounds": {
+    "min": [
+     -151,
+     173,
+     489
+    ],
+    "max": [
+     -109,
+     215,
+     535
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -704,
+   "y": 64,
+   "z": 78,
+   "bounds": {
+    "min": [
+     -767,
+     1,
+     -7
+    ],
+    "max": [
+     -641,
+     127,
+     163
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -704,
+   "y": 768,
+   "z": 78,
+   "bounds": {
+    "min": [
+     -767,
+     705,
+     -7
+    ],
+    "max": [
+     -641,
+     831,
+     163
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 0,
+   "y": 64,
+   "z": 432,
+   "bounds": {
+    "min": [
+     -63,
+     1,
+     289
+    ],
+    "max": [
+     63,
+     127,
+     575
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 0,
+   "y": 64,
+   "z": 572,
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     -175,
+     -111,
+     569
+    ],
+    "max": [
+     175,
+     239,
+     575
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 0,
+   "y": 768,
+   "z": 78,
+   "bounds": {
+    "min": [
+     -63,
+     705,
+     -7
+    ],
+    "max": [
+     63,
+     831,
+     163
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra",
+   "x": 96,
+   "y": -32,
+   "z": 448
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya-1",
+   "x": -784,
+   "y": -48,
+   "z": 448
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya-2",
+   "x": 72,
+   "y": 880,
+   "z": 448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -800,
+   "y": -17,
+   "z": 184
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -784,
+   "y": 848,
+   "z": 184
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -704,
+   "y": 416,
+   "z": 328
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -351,
+   "y": 63,
+   "z": 328
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -351,
+   "y": 769,
+   "z": 328
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 2,
+   "y": 418,
+   "z": 328
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 80,
+   "y": -16,
+   "z": 328
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 96,
+   "y": 864,
+   "z": 184
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": -798,
+   "y": 856,
+   "z": 616,
+   "targetName": "high"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": -352,
+   "y": 416,
+   "z": 156,
+   "target": "high",
+   "bounds": {
+    "min": [
+     -383,
+     385,
+     153
+    ],
+    "max": [
+     -321,
+     447,
+     159
+    ]
+   }
+  }
+ ]
+}

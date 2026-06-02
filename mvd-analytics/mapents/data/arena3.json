@@ -1,0 +1,73 @@
+{
+ "map": "arena3",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -352,
+   "y": 16,
+   "z": -660
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -154.4,
+   "y": -374.9,
+   "z": -620
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 230.3,
+   "y": -384.7,
+   "z": -640
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 321,
+   "y": 159.3,
+   "z": -620
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 767,
+   "y": -127.4,
+   "z": -625
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -373,
+   "y": -209,
+   "z": -513,
+   "targetName": "tele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 213,
+   "y": -320,
+   "z": -512,
+   "targetName": "tele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 800,
+   "y": -203,
+   "z": -512,
+   "targetName": "tele1"
+  }
+ ]
+}

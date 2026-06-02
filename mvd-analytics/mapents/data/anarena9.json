@@ -1,0 +1,98 @@
+{
+ "map": "anarena9",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -400,
+   "y": -296,
+   "z": 152
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -264,
+   "y": 260,
+   "z": 40
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 224,
+   "y": -232,
+   "z": 40
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 384,
+   "y": 296,
+   "z": 152
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -346,
+   "y": 366,
+   "z": 128,
+   "targetName": "control"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 346,
+   "y": -358,
+   "z": 128,
+   "targetName": "exit"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 0,
+   "y": -9,
+   "z": 51,
+   "target": "control",
+   "bounds": {
+    "min": [
+     -37,
+     -9,
+     -9
+    ],
+    "max": [
+     37,
+     -9,
+     111
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 0,
+   "y": 13,
+   "z": 51,
+   "target": "exit",
+   "bounds": {
+    "min": [
+     -37,
+     13,
+     -9
+    ],
+    "max": [
+     37,
+     13,
+     111
+    ]
+   }
+  }
+ ]
+}

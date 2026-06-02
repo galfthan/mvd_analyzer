@@ -1,0 +1,22 @@
+{
+ "map": "boostjump",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -96,
+   "y": -2156,
+   "z": -756
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 628,
+   "y": -2144,
+   "z": -748
+  }
+ ]
+}

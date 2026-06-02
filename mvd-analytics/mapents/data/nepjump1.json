@@ -1,0 +1,182 @@
+{
+ "map": "nepjump1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-1",
+   "x": 549,
+   "y": 1048,
+   "z": 64,
+   "bounds": {
+    "min": [
+     547,
+     1025,
+     41
+    ],
+    "max": [
+     551,
+     1071,
+     87
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button-2",
+   "x": 1077,
+   "y": 744,
+   "z": 63,
+   "bounds": {
+    "min": [
+     1075,
+     721,
+     40
+    ],
+    "max": [
+     1079,
+     767,
+     86
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 1248,
+   "y": 944,
+   "z": -400,
+   "bounds": {
+    "min": [
+     1201,
+     897,
+     -543
+    ],
+    "max": [
+     1295,
+     991,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 1488,
+   "y": 528,
+   "z": -408,
+   "bounds": {
+    "min": [
+     1441,
+     481,
+     -559
+    ],
+    "max": [
+     1535,
+     575,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -144,
+   "y": -528,
+   "z": 48
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -144,
+   "y": -464,
+   "z": 48
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 48,
+   "y": -464,
+   "z": 48
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": -48,
+   "y": -528,
+   "z": 32,
+   "targetName": "deathteletarget"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -48,
+   "y": 0,
+   "z": -208,
+   "target": "deathteletarget",
+   "bounds": {
+    "min": [
+     -367,
+     -319,
+     -223
+    ],
+    "max": [
+     271,
+     319,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -48,
+   "y": 704,
+   "z": -208,
+   "target": "deathteletarget",
+   "bounds": {
+    "min": [
+     -239,
+     321,
+     -223
+    ],
+    "max": [
+     143,
+     1087,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 872,
+   "y": 864,
+   "z": -208,
+   "target": "deathteletarget",
+   "bounds": {
+    "min": [
+     145,
+     641,
+     -223
+    ],
+    "max": [
+     1599,
+     1087,
+     -193
+    ]
+   }
+  }
+ ]
+}

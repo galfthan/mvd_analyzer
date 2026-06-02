@@ -25,6 +25,11 @@ import (
 // Q1BSPVersion is the classic Quake 1 BSP file version.
 const Q1BSPVersion = 29
 
+// HLBSPVersion is the HL/GoldSrc BSP version. A handful of QW maps ship
+// in this format; its entities lump shares Q1's header layout, so the
+// entity reader accepts it (the geometry parser does not).
+const HLBSPVersion = 30
+
 // Parse reads a Quake 1 BSP v29 file from the given path and returns the
 // decoded lumps we care about.
 func Parse(path string) (*BSP, error) {

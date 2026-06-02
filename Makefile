@@ -16,6 +16,7 @@ MCP_MAIN   := ./mvd-mcp
 DIST_DIR   := dist
 STATIC_DIR := mvd-web/static
 LOC_DATA   := mvd-analytics/loc/data
+MAPENTS_DATA := mvd-analytics/mapents/data
 BSP_DIR    := bsps
 GIT_HASH   := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 GIT_TAG    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
@@ -43,6 +44,8 @@ build:
 	@cp -r $(STATIC_DIR)/maps $(DIST_DIR)/
 	@echo "Copying loc corpus from $(LOC_DATA)..."
 	@mkdir -p $(DIST_DIR)/locs && cp $(LOC_DATA)/*.loc $(DIST_DIR)/locs/
+	@echo "Copying map-entity corpus from $(MAPENTS_DATA)..."
+	@mkdir -p $(DIST_DIR)/mapents && cp $(MAPENTS_DATA)/*.json $(DIST_DIR)/mapents/
 	@if [ -d $(BSP_DIR) ] && ls $(BSP_DIR)/*.bsp >/dev/null 2>&1; then \
 		echo "Copying BSPs from $(BSP_DIR)/ for WASM visibility filter..."; \
 		mkdir -p $(DIST_DIR)/bsps && cp $(BSP_DIR)/*.bsp $(DIST_DIR)/bsps/; \

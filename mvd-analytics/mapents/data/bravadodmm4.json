@@ -1,0 +1,107 @@
+{
+ "map": "bravadodmm4",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 112,
+   "y": 1048,
+   "z": 732
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 736,
+   "y": 1192,
+   "z": 730
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 992,
+   "y": 1464,
+   "z": 472
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 1024,
+   "y": 1008,
+   "z": 600
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 88,
+   "y": 1048,
+   "z": 744,
+   "targetName": "info_teleport_destination1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 304,
+   "y": 1040,
+   "z": 728,
+   "targetName": "telehigh"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 1008,
+   "y": 1824,
+   "z": 596,
+   "targetName": "info_teleport_destination2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 588,
+   "y": 1016,
+   "z": 488,
+   "target": "info_teleport_destination1",
+   "bounds": {
+    "min": [
+     585,
+     969,
+     433
+    ],
+    "max": [
+     591,
+     1063,
+     543
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 736,
+   "y": 1820,
+   "z": 488,
+   "target": "info_teleport_destination2",
+   "bounds": {
+    "min": [
+     689,
+     1817,
+     433
+    ],
+    "max": [
+     783,
+     1823,
+     543
+    ]
+   }
+  }
+ ]
+}
