@@ -11,6 +11,7 @@ type TimelineAnalysisResult struct {
 	DemoOffset     int32                `json:"demoOffset,omitempty"`    // Milliseconds from demo start to match start (for Hub viewer links)
 	FragEvents     []TimelineFragEvent  `json:"fragEvents,omitempty"`    // Frag events for score timeline
 	DeathEvents    []TimelineDeathEvent `json:"deathEvents,omitempty"`   // Per-player deaths for the frags/deaths drill-down
+	KillEvents     []TimelineKillEvent  `json:"killEvents,omitempty"`    // Per-player enemy kills for the frags/deaths drill-down
 	PowerupEvents  []PowerupEvent       `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
 	FragStreaks    []FragStreakEvent    `json:"fragStreaks,omitempty"`   // Top longest frag streaks for Key Moments
 	LocationData   []MapLocation        `json:"locationData,omitempty"`  // Location points from .loc file for map view
@@ -119,6 +120,20 @@ type TimelineFragEvent struct {
 type TimelineDeathEvent struct {
 	Time   int32  `json:"time"`
 	Player string `json:"player"` // Player name who died
+	Team   string `json:"team"`
+}
+
+// TimelineKillEvent represents a single enemy kill pinned to the player
+// who got it (the killer), for the per-player frags/deaths drill-down.
+// Sourced from the same canonical frag log (FragEntries) that
+// frags.byPlayer[name].kills is counted from, filtered to real enemy
+// kills (suicides and teamkills excluded). A player's cumulative
+// killEvents therefore reconciles exactly with byPlayer.kills and with
+// the kills-based efficiency = kills/(kills+deaths). Time is integer
+// milliseconds (schema v8).
+type TimelineKillEvent struct {
+	Time   int32  `json:"time"`
+	Player string `json:"player"` // Player name who got the kill (killer)
 	Team   string `json:"team"`
 }
 

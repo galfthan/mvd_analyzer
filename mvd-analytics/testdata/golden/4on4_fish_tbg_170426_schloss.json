@@ -34058,7 +34058,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 15,
+  "schemaVersion": 16,
   "streams": {
     "global": {
       "matchEnd": 1200017,
@@ -833749,6 +833749,2148 @@
         "playerUserID": 15,
         "team": "'\u003e\u003c\u003e",
         "time": 301190
+      }
+    ],
+    "killEvents": [
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 12430
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 13326
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 14352
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 21703
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 23124
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 26489
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 29744
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 30911
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 34838
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 36859
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 38992
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 41274
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 41274
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 42464
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 45475
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 47110
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 50059
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 57285
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 60852
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 61842
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 65740
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 66824
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 71913
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 73263
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 73431
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 77571
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 78950
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 83930
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 85257
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 91883
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 96539
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 101624
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 102078
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 108402
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 113281
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 117454
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 118949
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 122573
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 124305
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 130099
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 131908
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 132930
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 133098
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 133969
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 136209
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 137978
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 138229
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 141196
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 146112
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 148902
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 152913
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 157074
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 160495
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 163150
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 167184
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 173749
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 176653
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 180994
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 182285
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 184741
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 188390
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 190252
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 194308
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 196742
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 199728
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 202459
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 207733
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 208158
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 210326
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 211522
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 213561
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 219717
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 224183
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 227940
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 229352
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 236630
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 237832
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 246279
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 249101
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 250329
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 251014
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 251070
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 252588
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 254845
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 256360
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 259053
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 261354
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 263268
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 263866
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 265164
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 268354
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 269490
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 270256
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 273283
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 274810
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 276375
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 278516
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 279053
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 281322
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 282036
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 283446
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 291671
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 294847
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 295300
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 298341
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 302068
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 306229
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 306229
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 307517
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 310011
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 310011
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 310407
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 311323
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 314232
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 314972
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 321647
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 322481
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 327689
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 328000
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 329265
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 337796
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 340831
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 345055
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 347499
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 349107
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 350277
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 356665
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 365368
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 366770
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 367146
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 369278
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 370415
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 375244
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 379089
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 380071
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 384546
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 385037
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 391958
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 392384
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 393234
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 395253
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 396270
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 397075
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 398254
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 403087
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 413634
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 414277
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 416109
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 417221
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 418413
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 426803
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 430987
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 433314
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 435519
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 437457
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 437584
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 440890
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 442375
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 445049
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 445063
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 448076
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 450169
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 462021
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 470956
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 473298
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 482193
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 485904
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 487813
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 490761
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 493000
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 493637
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 495208
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 497492
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 498609
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 498961
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 501476
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 506336
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 513573
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 514753
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 518346
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 525625
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 530795
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 533754
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 536048
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 538294
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 538623
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 543087
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 545351
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 546572
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 549957
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 550944
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 553190
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 553697
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 553710
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 559510
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 561182
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 563079
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 567130
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 567216
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 571078
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 572482
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 572542
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 574204
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 575398
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 578181
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 579662
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 585687
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 586282
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 587932
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 591714
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 593633
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 594153
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 599529
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 610685
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 611523
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 612732
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 613662
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 615026
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 615080
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 628714
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 638155
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 638660
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 641792
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 642499
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 646324
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 654478
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 657875
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 659244
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 660051
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 664649
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 665928
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 673720
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 675953
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 678196
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 679064
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 679667
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 682409
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 684544
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 686164
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 688768
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 689636
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 692479
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 694245
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 697245
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 700625
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 701287
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 701453
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 705051
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 707798
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 709929
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 712246
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 716012
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 719804
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 723785
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 725207
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 728103
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 729571
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 732993
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 733454
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 734138
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 736201
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 739024
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 742779
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 743428
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 745285
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 749315
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 749596
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 749980
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 752804
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 758850
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 762260
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 766244
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 775584
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 779401
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 782388
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 785047
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 786203
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 786595
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 787653
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 792280
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 797009
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 800051
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 801751
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 803957
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 808819
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 809142
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 811635
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 818902
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 819286
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 822156
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 834287
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 838232
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 840482
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 842248
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 846204
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 849767
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 851220
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 853507
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 855532
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 857798
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 861711
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 865479
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 871365
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 871568
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 872180
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 877336
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 877882
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 878271
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 880273
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 882959
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 883846
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 888132
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 891079
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 902691
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 904972
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 907172
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 910196
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 911422
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 911682
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 913067
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 916308
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 920757
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 921860
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 928836
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 929528
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 931544
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 935769
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 938219
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 940791
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 949300
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 952648
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 954216
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 956830
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 957248
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 957905
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 968544
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 979440
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 983937
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 985976
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 988037
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 988779
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 992894
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 995703
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 997261
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 999073
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1000318
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 1001404
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1004505
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 1004686
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1005488
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1006099
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1006532
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1011110
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1012601
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1016836
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1018410
+      },
+      {
+        "player": "DobeZz",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1021083
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1023940
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1024868
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1036433
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1038408
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1038833
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1042072
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1042419
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1046014
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1046438
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1051846
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 1054118
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 1058379
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1058725
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1061966
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1064213
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1065486
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1067721
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1069021
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1069021
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1070642
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1071150
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1071150
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1074997
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1081228
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1083583
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 1083643
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 1089292
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1089791
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1092166
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1095396
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 1096345
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1098492
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1099202
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1099258
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1101357
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1104176
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1109729
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1111955
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1119539
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1119968
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1121679
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1122111
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1122562
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1124965
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1127212
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1129098
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1134786
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1138920
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1141565
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1146971
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1150804
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1154426
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 1159694
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1160850
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1162387
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1166845
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1168119
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1176903
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 1183306
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1185410
+      },
+      {
+        "player": "paniagua",
+        "team": "'tbg",
+        "time": 1186618
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1187413
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1189861
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1189888
+      },
+      {
+        "player": "nexus",
+        "team": "'tbg",
+        "time": 1194945
+      },
+      {
+        "player": "anni",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1195047
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1197683
+      },
+      {
+        "player": ".N3ophyt3.",
+        "team": "'tbg",
+        "time": 1203763
+      },
+      {
+        "player": "ocoini",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1205209
+      },
+      {
+        "player": "biggz",
+        "team": "'tbg",
+        "time": 1208270
+      },
+      {
+        "player": "gore",
+        "team": "'\u003e\u003c\u003e",
+        "time": 1209969
       }
     ],
     "locTable": [

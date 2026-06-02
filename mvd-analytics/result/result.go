@@ -90,15 +90,15 @@ package result
 // v10:
 //   - DeathEvent / SpawnEvent gain two new signal sources beyond the
 //     v9 StatHealth-crossing detector:
-//       1. The DF_DEAD bit in svc_playerinfo (broadcast every frame
-//          for every player), captured in mvd-reader/parser/position.go.
-//       2. Victim-prefix and infix obituary prints (rocketed by,
-//          telefragged by, "Satan's power deflects X's telefrag", the
-//          CRMod-added "disembowled" / "shish-kebabed" / etc. set,
-//          KTX's k_spawnicide variants) matched in
-//          mvd-reader/parser/obituary.go and consumed in parsePrint,
-//          gated on a parser-internal match-started flag so warmup
-//          obits cannot pre-seed dedup state.
+//     1. The DF_DEAD bit in svc_playerinfo (broadcast every frame
+//     for every player), captured in mvd-reader/parser/position.go.
+//     2. Victim-prefix and infix obituary prints (rocketed by,
+//     telefragged by, "Satan's power deflects X's telefrag", the
+//     CRMod-added "disembowled" / "shish-kebabed" / etc. set,
+//     KTX's k_spawnicide variants) matched in
+//     mvd-reader/parser/obituary.go and consumed in parsePrint,
+//     gated on a parser-internal match-started flag so warmup
+//     obits cannot pre-seed dedup state.
 //     The first two sources flow through maybeEmitDeath /
 //     maybeEmitSpawn which dedupe against each other. The obit path
 //     uses forceEmitDeath instead, bypassing dedup, because KTX's
@@ -169,7 +169,17 @@ package result
 //   - Recovered teamkills no longer carry a stale IsSuicide flag (the "X
 //     gets a frag for the other team" case). Bump invalidates cached frag
 //     responses so consumers pick up the relabeled weapons.
-const CurrentSchemaVersion = 15
+//
+// v16:
+//   - TimelineAnalysis gains KillEvents: a per-player enemy-kill stream
+//     ({time, player, team}) keyed on the killer, parallel to DeathEvents,
+//     sourced from the canonical frag log (FragEntries) and filtered to
+//     real enemy kills (suicides/teamkills excluded). Lets the Timeline
+//     tab's per-player drill-down plot an exact cumulative kills−deaths
+//     +/- that reconciles with byPlayer.kills and kills-based efficiency.
+//     Additive and omitempty, but the bump invalidates cached timeline
+//     responses so consumers pick it up.
+const CurrentSchemaVersion = 16
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

@@ -6051,7 +6051,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 15,
+  "schemaVersion": 16,
   "streams": {
     "global": {
       "matchEnd": 599980,
@@ -47666,6 +47666,153 @@
         "playerUserID": 37,
         "team": "betowen",
         "time": 531045
+      }
+    ],
+    "killEvents": [
+      {
+        "player": "betowen",
+        "team": "red",
+        "time": 36130
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 49377
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 56259
+      },
+      {
+        "player": "betowen",
+        "team": "red",
+        "time": 65052
+      },
+      {
+        "player": "betowen",
+        "team": "red",
+        "time": 70182
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 75922
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 91221
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 95674
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 110792
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 133064
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 143687
+      },
+      {
+        "player": "betowen",
+        "team": "red",
+        "time": 213181
+      },
+      {
+        "player": "betowen",
+        "team": "red",
+        "time": 255686
+      },
+      {
+        "player": "betowen",
+        "team": "red",
+        "time": 348634
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 362697
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 384840
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 390203
+      },
+      {
+        "player": "betowen",
+        "team": "red",
+        "time": 425710
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 427567
+      },
+      {
+        "player": "betowen",
+        "team": "red",
+        "time": 440048
+      },
+      {
+        "player": "betowen",
+        "team": "red",
+        "time": 482579
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 482657
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 504801
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 524592
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 536825
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 540475
+      },
+      {
+        "player": "betowen",
+        "team": "red",
+        "time": 553669
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 556890
+      },
+      {
+        "player": "banan falco",
+        "team": "coop",
+        "time": 605844
       }
     ],
     "locTable": [

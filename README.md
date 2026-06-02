@@ -430,8 +430,16 @@ victim from the coincident `DeathEvent`; victim-named ("X was telefragged
 by his teammate") fill in the killer by combining position co-location
 with the teamkiller's −1 frag-delta. Across the test corpus this brings
 per-player teamkills to an exact match with KTX's authoritative `tk`.
+Schema v16 adds `timelineAnalysis.killEvents`: a per-player enemy-kill
+stream (`{time, player, team}`) keyed on the killer, parallel to
+`deathEvents` and sourced from the canonical frag log (suicides/teamkills
+excluded), so the Timeline tab's per-player drill-down plots an exact
+cumulative kills − deaths +/- that reconciles with `frags.byPlayer[].kills`
+and the kills-based efficiency. (Team is best-effort and ungated, unlike
+`deathEvents`, so a player's curve survives POV demos with an incomplete
+name↔team join — the consumer groups by player name.)
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `15`).
+Every breaking change bumps `CurrentSchemaVersion` (currently `16`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).

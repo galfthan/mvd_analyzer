@@ -179,6 +179,7 @@ format here only carries the event-shaped derived results.
 | DemoOffset | `demoOffset` | float64 (warmup seconds before match start) |
 | FragEvents | `fragEvents` | []TimelineFragEvent |
 | DeathEvents | `deathEvents` | []TimelineDeathEvent |
+| KillEvents | `killEvents` | []TimelineKillEvent |
 | PowerupEvents | `powerupEvents` | []PowerupEvent |
 | FragStreaks | `fragStreaks` | []FragStreakEvent |
 | LocationData | `locationData` | []MapLocation (loc anchor points) |
@@ -210,8 +211,23 @@ being teamkilled), so a player's death count here matches their
 scoreboard deaths and KTX efficiency `frags / (frags + deaths)`
 (`ktx/src/statsTables.c` `calculateEfficiency`). Unlike `frags.frags`,
 this does not drop teamkill victims whose obituary names only the
-attacker. Parallel to `fragEvents` for the Timeline tab's per-player
-frags-up / deaths-down drill-down.
+attacker. Pairs with `killEvents` for the Timeline tab's per-player
++/- (cumulative kills − deaths) drill-down.
+
+### TimelineKillEvent
+
+`{ time, player, team }`. One record per enemy kill, keyed on the
+**killer**, sourced from the canonical frag log (`FragResult.Frags[]` /
+`CoreOutputs.FragEntries`) filtered to real enemy kills (suicides and
+teamkills excluded). A player's cumulative `killEvents` reconciles
+exactly with `frags.byPlayer[].kills` and thus the kills-based
+efficiency `kills / (kills + deaths)`. Parallel to `deathEvents`; the
+Timeline per-player drill-down plots `killEvents − deathEvents` as a
+windowed +/- area. `team` is best-effort via the name table and — unlike
+`deathEvents` — is **not** gated to non-empty: `byPlayer.kills` isn't
+either, so gating would silently drop a player's whole kill curve in POV
+demos with an incomplete name↔team join (the consumer groups by player
+name and ignores `team`).
 
 ### PowerupEvent
 
@@ -786,6 +802,7 @@ Pick the shape that matches your consumer:
 | Frag list | `messages.events[type=frag]` | `frags.frags[]` | …you want the obit text for display. |
 | Score timeline | `timelineAnalysis.fragEvents` | `frags.frags[]` | …you only need delta over time (no killer/victim). |
 | Per-player deaths | `timelineAnalysis.deathEvents` | `frags.byPlayer[].deaths` | …you need per-death timing (not just totals); counts every death, no teamkill-victim drops. |
+| Per-player kills | `timelineAnalysis.killEvents` | `frags.byPlayer[].kills` | …you need per-kill timing keyed on the killer (enemy kills only); cumulative count reconciles with `byPlayer.kills`. |
 | Per-player stats | `match.players[]` | `demoInfo.players[]` | …you only need name/team/frags. |
 | Per-player stats | `demoInfo.players[]` | `match.players[]` | …you need accuracy / damage / pickups (KTX demos only). |
 | Match length | `match.duration` | `demoInfo.duration` | …you want the parser-derived float. |

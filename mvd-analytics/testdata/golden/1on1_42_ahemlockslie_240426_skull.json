@@ -5590,7 +5590,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 15,
+  "schemaVersion": 16,
   "streams": {
     "global": {
       "matchEnd": 599993,
@@ -107091,6 +107091,163 @@
         "playerUserID": 20,
         "team": "AHemlocksLie",
         "time": 397141
+      }
+    ],
+    "killEvents": [
+      {
+        "player": "42",
+        "team": "red",
+        "time": 50571
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "time": 50678
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 78693
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "time": 87927
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "time": 107219
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 140804
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 160050
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "time": 185972
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "time": 198985
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 216312
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "time": 230130
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 255779
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 282594
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 319152
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 321609
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 325454
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 338373
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "time": 377346
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "time": 382463
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 406397
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "time": 415787
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 437722
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 456683
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 497127
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 508332
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 523058
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 536916
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 554554
+      },
+      {
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "time": 554632
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 594112
+      },
+      {
+        "player": "42",
+        "team": "red",
+        "time": 600759
       }
     ],
     "locTable": [
