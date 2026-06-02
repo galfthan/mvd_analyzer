@@ -3483,7 +3483,16 @@ function renderHealthArmorPerPlayer(startTime, endTime) {
     if (!container) return;
     const teams = timelineState.teams;
     const view = timelineState.bucketView;
-    if (!view || !view.count || teams.length < 2) { container.innerHTML = ''; return; }
+    if (!view || !view.count || teams.length < 2) {
+        // Clearing the DOM must invalidate the rebuild cache too: otherwise a
+        // later render with the same roster signature skips the rebuild and
+        // iterates now-detached _cells, rendering nothing. This bit when a new
+        // demo's buckets arrive deferred (the first render runs view-less).
+        container.innerHTML = '';
+        container._sig = null;
+        container._cells = [];
+        return;
+    }
 
     const grouped = timelinePlayersByTeam();
     const sig = grouped.map(g => g.join('|')).join('#');
@@ -3680,15 +3689,27 @@ function renderMiniDiverging(canvasId, { startTime, endTime, points, maxValue, h
     ctx.fillRect(0, midY, W, Math.max(1, Math.round(dpr)));
 }
 
-// Render one mini frags/deaths chart per player under the Score Timeline panel.
-// Built lazily, rebuilt only when the roster changes (signature check); every
-// view change re-renders with a shared max for cross-player comparability.
+// Render one mini +/- chart per player under the Score Timeline panel. Built
+// lazily, rebuilt only when the roster changes (signature check). Each row is
+// scaled by its OWN |net| max (0 stays centred) so a player whose plus/minus
+// swings little still fills the row instead of collapsing to a few pixels next
+// to a high-swing team-mate. The labels track the playhead via
+// updateFragsPerPlayerStats.
 function renderFragsPerPlayer(startTime, endTime) {
     const container = document.getElementById('frags-per-player');
     if (!container) return;
     const teams = timelineState.teams;
     const view = timelineState.bucketView;
-    if (!view || !view.count || teams.length < 2) { container.innerHTML = ''; return; }
+    if (!view || !view.count || teams.length < 2) {
+        // Clearing the DOM must invalidate the rebuild cache too: otherwise a
+        // later render with the same roster signature skips the rebuild and
+        // iterates now-detached _cells, rendering nothing. This bit when a new
+        // demo's buckets arrive deferred (the first render runs view-less).
+        container.innerHTML = '';
+        container._sig = null;
+        container._cells = [];
+        return;
+    }
 
     const grouped = timelinePlayersByTeam();
     const sig = grouped.map(g => g.join('|')).join('#');
@@ -3731,35 +3752,36 @@ function renderFragsPerPlayer(startTime, endTime) {
         container._sig = sig;
     }
 
-    // Shared max across all players so rows are visually comparable.
-    let maxVal = 1;
-    const prepped = {};
-    for (const { name, ti } of container._cells) {
+    for (const { name, ti, cid } of container._cells) {
         const upColor = TEAM_COLORS[ti] || '#ccc';
-        prepped[name] = prepPlayerFragDeathData(name, startTime, endTime, upColor, dimColor(upColor));
-        if (prepped[name].max > maxVal) maxVal = prepped[name].max;
-    }
-    const byPlayer = currentResult?.frags?.byPlayer || {};
-    for (const { name, cid, statEl } of container._cells) {
-        const d = prepped[name];
-        // Efficiency label: whole-match kills/(kills+deaths) — the same
-        // kills-based "efficiency" hub.quakeworld.nu shows in basic stats,
-        // not the in-game frags-based scoreboard efficiency. Sourced from
-        // our authoritative byPlayer totals (enemy kills + DeathEvent
-        // deaths), so it's stable across zoom while the +/- area (cumulative
-        // kills − deaths) stays windowed.
-        const bp = byPlayer[name] || {};
-        const k = bp.kills || 0, dth = bp.deaths || 0;
-        const eff = (k + dth) > 0 ? Math.round((k / (k + dth)) * 100) : 0;
-        if (statEl) {
-            statEl.textContent = `${k}/${dth} · ${eff}%`;
-            statEl.title = `${k} kills / ${dth} deaths · ${eff}% efficiency (whole match)`;
-        }
+        const d = prepPlayerFragDeathData(name, startTime, endTime, upColor, dimColor(upColor));
         const cv = document.getElementById(cid);
         if (cv) cv.style.width = '';
-        renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: maxVal, height: 44 });
+        // Per-player max (symmetric about 0): each row uses its full height.
+        renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: d.max, height: 44 });
     }
+    updateFragsPerPlayerStats();
     renderSharedTimeAxis(container, startTime, endTime);
+}
+
+// Update the per-player frags/deaths labels to the cumulative kills / deaths
+// and efficiency AT the current playback time (not whole-match totals), so the
+// numbers track the playhead as it moves / scrubs. Counts the kill and death
+// event streams in one pass each; no-op when the drill-down isn't built.
+function updateFragsPerPlayerStats() {
+    const container = document.getElementById('frags-per-player');
+    if (!container || !container._cells || !container._cells.length) return;
+    const t = mapState.currentTime;
+    const kc = {}, dc = {};
+    for (const e of (timelineState.killEvents || [])) if (e.time <= t) kc[e.player] = (kc[e.player] || 0) + 1;
+    for (const e of (timelineState.deathEvents || [])) if (e.time <= t) dc[e.player] = (dc[e.player] || 0) + 1;
+    for (const { name, statEl } of container._cells) {
+        if (!statEl) continue;
+        const k = kc[name] || 0, d = dc[name] || 0;
+        const eff = (k + d) > 0 ? Math.round((k / (k + d)) * 100) : 0;
+        statEl.textContent = `${k}/${d} · ${eff}%`;
+        statEl.title = `${k} kills / ${d} deaths · ${eff}% efficiency at ${formatDuration(t)}`;
+    }
 }
 
 // Per-player weapons timeline: one combined row per player coloured by whether
@@ -4385,6 +4407,9 @@ function updateTimeIndicators() {
     document.querySelectorAll('.pp-time-indicator').forEach(el => {
         el.style.left = `${pct}%`;
     });
+
+    // Per-player frags/deaths labels read the cumulative score at the playhead.
+    updateFragsPerPlayerStats();
 
     // Update team status table
     updateTeamStatus();
