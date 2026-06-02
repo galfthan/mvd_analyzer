@@ -1246,9 +1246,32 @@ function displayTeams(teams) {
     });
 }
 
+// Per-player suicides counted from our frag log (every self / world-dealt
+// death prints a suicide obituary), keyed by victim. KTX demoinfo
+// stats.suicides books world-dealt deaths (falls, trigger_hurt) on the `world`
+// entity instead of the victim, so it undercounts; the frag log is the
+// complete record. See MVD_FORMAT.md "World-dealt deaths". Returns null when no
+// frag log is present so callers can fall back to demoinfo.
+function suicidesFromFragLog() {
+    const log = currentResult?.frags?.frags;
+    if (!log) return null;
+    const out = {};
+    for (const f of log) if (f.isSuicide) out[f.victim] = (out[f.victim] || 0) + 1;
+    return out;
+}
+
 function displayPlayerStats(players) {
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
+    // Prefer our analysis counts over KTX demoinfo: frags.byPlayer fixes
+    // stats.kills + the per-weapon kills (both over-count pentagram-deflect
+    // telefrags / dtTELE2 and reset after a reconnect), and the frag log fixes
+    // stats.suicides (drops world-dealt deaths). Deaths agree with KTX but we
+    // read ours so kills/deaths/efficiency share one source, and byWeapon is
+    // enemy kills only so RL+LG+… reconciles with the total. Fall back to
+    // demoinfo per name when a player doesn't join. See MVD_FORMAT.md.
+    const byPlayer = currentResult?.frags?.byPlayer || {};
+    const suicidesMap = suicidesFromFragLog();
 
     // Show the handicap column only when at least one player on this demo
     // has a non-default handicap. KTX omits the JSON field entirely when the
@@ -1260,10 +1283,12 @@ function displayPlayerStats(players) {
     });
 
     renderTableRows('scoreboard-body', sorted, player => {
-        const kills = player.stats?.kills || 0;
-        const deaths = player.stats?.deaths || 0;
-        const rlKills = player.weapons?.rl?.kills?.enemy || 0;
-        const lgKills = player.weapons?.lg?.kills?.enemy || 0;
+        const bp = byPlayer[player.name];
+        const kills = bp ? bp.kills : (player.stats?.kills || 0);
+        const deaths = bp ? bp.deaths : (player.stats?.deaths || 0);
+        const suicides = suicidesMap ? (suicidesMap[player.name] || 0) : (player.stats?.suicides || 0);
+        const rlKills = bp ? (bp.byWeapon?.rl || 0) : (player.weapons?.rl?.kills?.enemy || 0);
+        const lgKills = bp ? (bp.byWeapon?.lg || 0) : (player.weapons?.lg?.kills?.enemy || 0);
         const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
         // Bot badge: render the skill level inline when present, since bots
         // in a match are rare enough that seeing "BOT 10" at a glance is
@@ -1288,7 +1313,7 @@ function displayPlayerStats(players) {
             <td>${lgKills}</td>
             <td>${deaths}</td>
             <td>${player.stats?.tk || 0}</td>
-            <td>${player.stats?.suicides || 0}</td>
+            <td>${suicides}</td>
             <td>${player.dmg?.given || 0}</td>
             <td>${player.dmg?.taken || 0}</td>
             <td>${player.dmg?.['enemy-weapons'] ?? 0}</td>
@@ -1596,16 +1621,24 @@ function displayPlayerStatsTeams(players) {
     const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
     const teamOrder = getTeamOrder(sorted);
     const groups = groupByTeam(sorted);
+    // Same accurate-count sourcing as displayPlayerStats so the team totals
+    // reconcile with the per-player rows. See MVD_FORMAT.md.
+    const byPlayer = currentResult?.frags?.byPlayer || {};
+    const suicidesMap = suicidesFromFragLog();
+    const killsOf = p => (byPlayer[p.name] ? byPlayer[p.name].kills : (p.stats?.kills || 0));
+    const deathsOf = p => (byPlayer[p.name] ? byPlayer[p.name].deaths : (p.stats?.deaths || 0));
+    const suicidesOf = p => (suicidesMap ? (suicidesMap[p.name] || 0) : (p.stats?.suicides || 0));
+    const wKillsOf = (p, w) => (byPlayer[p.name] ? (byPlayer[p.name].byWeapon?.[w] || 0) : (p.weapons?.[w]?.kills?.enemy || 0));
 
     renderTableRows('player-stats-team-body', teamOrder, team => {
         const members = groups[team] || [];
         const frags = members.reduce((s, p) => s + (p.stats?.frags || 0), 0);
-        const kills = members.reduce((s, p) => s + (p.stats?.kills || 0), 0);
-        const rlKills = members.reduce((s, p) => s + (p.weapons?.rl?.kills?.enemy || 0), 0);
-        const lgKills = members.reduce((s, p) => s + (p.weapons?.lg?.kills?.enemy || 0), 0);
-        const deaths = members.reduce((s, p) => s + (p.stats?.deaths || 0), 0);
+        const kills = members.reduce((s, p) => s + killsOf(p), 0);
+        const rlKills = members.reduce((s, p) => s + wKillsOf(p, 'rl'), 0);
+        const lgKills = members.reduce((s, p) => s + wKillsOf(p, 'lg'), 0);
+        const deaths = members.reduce((s, p) => s + deathsOf(p), 0);
         const tk = members.reduce((s, p) => s + (p.stats?.tk || 0), 0);
-        const suicides = members.reduce((s, p) => s + (p.stats?.suicides || 0), 0);
+        const suicides = members.reduce((s, p) => s + suicidesOf(p), 0);
         const dmgGiven = members.reduce((s, p) => s + (p.dmg?.given || 0), 0);
         const dmgTaken = members.reduce((s, p) => s + (p.dmg?.taken || 0), 0);
         const ewep = members.reduce((s, p) => s + (p.dmg?.['enemy-weapons'] ?? 0), 0);
