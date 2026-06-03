@@ -215,8 +215,8 @@ being teamkilled), so a player's death count here matches their
 scoreboard deaths and KTX efficiency `frags / (frags + deaths)`
 (`ktx/src/statsTables.c` `calculateEfficiency`). Unlike `frags.frags`,
 this does not drop teamkill victims whose obituary names only the
-attacker. Pairs with `killEvents` for the Timeline tab's per-player
-+/- (cumulative kills − deaths) drill-down.
+attacker. Feeds the Timeline tab's per-player +/- drill-down (cumulative
+net `fragEvents` − `deathEvents`, the KTX frags-based view).
 
 ### TimelineKillEvent
 
@@ -224,10 +224,11 @@ attacker. Pairs with `killEvents` for the Timeline tab's per-player
 **killer**, sourced from the canonical frag log (`FragResult.Frags[]` /
 `CoreOutputs.FragEntries`) filtered to real enemy kills (suicides and
 teamkills excluded). A player's cumulative `killEvents` reconciles
-exactly with `frags.byPlayer[].kills` and thus the kills-based
-efficiency `kills / (kills + deaths)`. Parallel to `deathEvents`; the
-Timeline per-player drill-down plots `killEvents − deathEvents` as a
-windowed +/- area. `team` is best-effort via the name table and — unlike
+exactly with `frags.byPlayer[].kills` (the gross-kill count), for
+kills-based analysis. Parallel to `deathEvents`. (The Timeline per-player
++/- drill-down plots the **frags-based** `fragEvents − deathEvents` to
+match KTX's `frags / (frags + deaths)` efficiency, not this stream.)
+`team` is best-effort via the name table and — unlike
 `deathEvents` — is **not** gated to non-empty: `byPlayer.kills` isn't
 either, so gating would silently drop a player's whole kill curve in POV
 demos with an incomplete name↔team join (the consumer groups by player
