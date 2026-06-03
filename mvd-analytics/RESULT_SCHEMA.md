@@ -56,12 +56,18 @@ Defined in `result/match.go`.
 |---|---|---|---|
 | Name | `name` | string | Display name. |
 | Team | `team` | string | Team name. |
-| Frags | `frags` | int | Canonical QW frag count (`kills − teamkills − suicides`). |
+| Frags | `frags` | int | Canonical QW net score (from the `svc_updatefrags` scoreboard). |
+| Kills | `kills` | int | Gross kills, frag-log-corrected (v19). Supersedes KTX demoinfo `stats.kills` (which over-counts pentagram-deflect telefrags); `0` when the demo had no frag log. |
+| Deaths | `deaths` | int | Deaths, frag-log-corrected (v19). `0` when the demo had no frag log. |
+| Suicides | `suicides` | int | Self-inflicted deaths, frag-log-corrected (v19). Counts every `IsSuicide` frag entry (incl. fall / lava / squish / drown), which KTX demoinfo `stats.suicides` undercounts — world-dealt deaths bump the world entity's counter, not the victim's (`ktx/src/client.c:5132`). `0` when the demo had no frag log. |
 
 `MatchResult` is the non-KTX-fallback view: it works on any MVD source.
-For richer per-player stats (kills/deaths/accuracy/damage) read
-`Frags.ByPlayer` (parser-derived) or `DemoInfo.Players[].Stats`
-(KTX-authoritative).
+`Frags`/`Kills`/`Deaths` are the **corrected scoreboard** — net frags from
+the scoreboard stream, kills/deaths from the frag log, both independent of
+the sometimes-wrong KTX demoinfo (which over-counts pentagram-deflect
+telefrags and resets after a reconnect). For per-weapon kills, accuracy, or
+damage read `Frags.ByPlayer` (parser-derived) or `DemoInfo.Players[].Stats`
+(KTX-authoritative, verbatim).
 
 ### TeamStat
 
@@ -868,6 +874,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v19 | `MatchResult.PlayerStat` gains `kills`, `deaths` and `suicides` — the frag-log-corrected counts, making `match.players` a complete corrected scoreboard rather than just the net frag tally. They supersede the KTX demoinfo `stats`, which credit several self / positional deaths to the wrong entity: pentagram-deflect telefrags (`dtTELE2`) inflate the deflector's kills, and world-dealt suicides (fall / lava / squish / drown) bump the world entity's counter instead of the victim's (`ktx/src/client.c:5132`), so demoinfo undercounts suicides. `0` when the demo carried no frag log. Filled by the `scoreboardStatsPost` post-processor (kills/deaths from `Frags.ByPlayer` joined on the final display name; suicides counted from the `IsSuicide` frag entries). The API `/overview` player rows surface the same `kills`/`deaths`/`suicides`, so non-web consumers get the correction the web Summary already applied. Field additions only. |
 | v18 | `TimelineAnalysis` gains `KillEvents`: a per-player enemy-kill stream (`{time, player, team}`) keyed on the killer, parallel to `DeathEvents`, from the canonical frag log filtered to real enemy kills (suicides/teamkills excluded). Cumulative `killEvents` per player reconciles with `frags.byPlayer[].kills` and the kills-based efficiency; the Timeline per-player drill-down plots `killEvents − deathEvents` as a windowed +/-. `team` is best-effort and, unlike `deathEvents`, ungated. Additive (`omitempty`). |
 | v17 | Self-kill weapon labels in `Frags.Frags` are no longer flattened to `suicide`: only the `/kill` console command (KTX "X suicides", −2 frags) keeps weapon `suicide`; weapon self-detonations carry their real weapon (`rl`/`gl`/`lg`) with `isSuicide` set. `Frags.ByWeapon` is now enemy kills only (suicides/teamkills excluded). Recovered teamkills no longer carry a stale `isSuicide`. |
 | v16 | `PlayerFrags` gains `teamkills` (KTX "tk"), and teamkills whose obituary names only one party re-enter `Frags.Frags` as complete killer↔victim pairs (killer-named recover the victim from the coincident `DeathEvent`; victim-named recover the killer via position co-location + the teamkiller's −1 frag-delta). Brings per-player teamkills to an exact match with KTX's `tk`. |

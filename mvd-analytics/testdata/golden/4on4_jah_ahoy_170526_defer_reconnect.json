@@ -18976,43 +18976,67 @@
     "map": "Coup de Fer",
     "players": [
       {
+        "deaths": 59,
         "frags": 32,
+        "kills": 38,
         "name": "biggz",
+        "suicides": 3,
         "team": "jah"
       },
       {
+        "deaths": 44,
         "frags": 44,
+        "kills": 48,
         "name": "gandi",
+        "suicides": 2,
         "team": "jah"
       },
       {
+        "deaths": 50,
         "frags": 44,
+        "kills": 46,
         "name": "rusti",
+        "suicides": 1,
         "team": "jah"
       },
       {
+        "deaths": 56,
         "frags": 31,
+        "kills": 32,
         "name": "[nW].Veggie",
+        "suicides": 1,
         "team": "ahoy"
       },
       {
+        "deaths": 46,
         "frags": 73,
+        "kills": 78,
         "name": "sailorman",
+        "suicides": 2,
         "team": "ahoy"
       },
       {
+        "deaths": 53,
         "frags": 48,
+        "kills": 51,
         "name": "nexus",
+        "suicides": 0,
         "team": "ahoy"
       },
       {
+        "deaths": 48,
         "frags": 36,
+        "kills": 37,
         "name": "ocoini",
+        "suicides": 1,
         "team": "ahoy"
       },
       {
+        "deaths": 58,
         "frags": 60,
+        "kills": 61,
         "name": "paniagua",
+        "suicides": 0,
         "team": "jah"
       }
     ],
@@ -29833,7 +29857,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 18,
+  "schemaVersion": 19,
   "streams": {
     "global": {
       "matchEnd": 1200101,

@@ -1271,15 +1271,18 @@ function suicidesFromFragLog() {
 }
 
 function displayPlayerStats(players) {
-    const sorted = [...players].sort((a, b) => (b.stats?.frags || 0) - (a.stats?.frags || 0));
+    // Corrected scoreboard from match.players (schema v19): frags is the
+    // svc_updatefrags net score, kills/deaths the frag-log counts — all
+    // independent of the KTX demoinfo stats, which over-count pentagram-deflect
+    // telefrags / dtTELE2 and reset after a reconnect. Per-weapon RL/LG kills
+    // still come from frags.byPlayer.byWeapon; suicides from the frag log. Fall
+    // back to demoinfo per name when a player isn't in match.players (0 frags /
+    // didn't join). See RESULT_SCHEMA.md and MVD_FORMAT.md.
+    const matchByName = {};
+    for (const mp of (currentResult?.match?.players || [])) matchByName[mp.name] = mp;
+    const fragsOf = p => (matchByName[p.name]?.frags ?? p.stats?.frags ?? 0);
+    const sorted = [...players].sort((a, b) => fragsOf(b) - fragsOf(a));
     const teamOrder = getTeamOrder(sorted);
-    // Prefer our analysis counts over KTX demoinfo: frags.byPlayer fixes
-    // stats.kills + the per-weapon kills (both over-count pentagram-deflect
-    // telefrags / dtTELE2 and reset after a reconnect), and the frag log fixes
-    // stats.suicides (drops world-dealt deaths). Deaths agree with KTX but we
-    // read ours so kills/deaths/efficiency share one source, and byWeapon is
-    // enemy kills only so RL+LG+… reconciles with the total. Fall back to
-    // demoinfo per name when a player doesn't join. See MVD_FORMAT.md.
     const byPlayer = currentResult?.frags?.byPlayer || {};
     const suicidesMap = suicidesFromFragLog();
 
@@ -1294,9 +1297,11 @@ function displayPlayerStats(players) {
 
     renderTableRows('scoreboard-body', sorted, player => {
         const bp = byPlayer[player.name];
-        const kills = bp ? bp.kills : (player.stats?.kills || 0);
-        const deaths = bp ? bp.deaths : (player.stats?.deaths || 0);
-        const suicides = suicidesMap ? (suicidesMap[player.name] || 0) : (player.stats?.suicides || 0);
+        const mp = matchByName[player.name];
+        const frags = mp ? mp.frags : (player.stats?.frags || 0);
+        const kills = mp ? mp.kills : (bp ? bp.kills : (player.stats?.kills || 0));
+        const deaths = mp ? mp.deaths : (bp ? bp.deaths : (player.stats?.deaths || 0));
+        const suicides = mp ? mp.suicides : (suicidesMap ? (suicidesMap[player.name] || 0) : (player.stats?.suicides || 0));
         const rlKills = bp ? (bp.byWeapon?.rl || 0) : (player.weapons?.rl?.kills?.enemy || 0);
         const lgKills = bp ? (bp.byWeapon?.lg || 0) : (player.weapons?.lg?.kills?.enemy || 0);
         const efficiency = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) : '0.0';
@@ -1316,7 +1321,7 @@ function displayPlayerStats(players) {
             <td>${escapeHtml(player.name)}${botBadge}</td>
             <td>${escapeHtml(player.team || '')}</td>
             ${handicapCell}
-            <td>${player.stats?.frags || 0}</td>
+            <td>${frags}</td>
             <td>${efficiency}%</td>
             <td>${kills}</td>
             <td>${rlKills}</td>

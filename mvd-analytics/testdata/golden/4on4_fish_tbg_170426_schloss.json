@@ -19679,43 +19679,67 @@
     "map": "Schloss Adler",
     "players": [
       {
+        "deaths": 81,
         "frags": 25,
+        "kills": 27,
         "name": "gore",
+        "suicides": 0,
         "team": "'\u003e\u003c\u003e"
       },
       {
+        "deaths": 41,
         "frags": 59,
+        "kills": 63,
         "name": "paniagua",
+        "suicides": 0,
         "team": "'tbg"
       },
       {
+        "deaths": 92,
         "frags": 45,
+        "kills": 47,
         "name": "ocoini",
+        "suicides": 2,
         "team": "'\u003e\u003c\u003e"
       },
       {
+        "deaths": 68,
         "frags": 24,
+        "kills": 27,
         "name": "DobeZz",
+        "suicides": 1,
         "team": "'\u003e\u003c\u003e"
       },
       {
+        "deaths": 31,
         "frags": 66,
+        "kills": 75,
         "name": "nexus",
+        "suicides": 1,
         "team": "'tbg"
       },
       {
+        "deaths": 58,
         "frags": 35,
+        "kills": 40,
         "name": "anni",
+        "suicides": 1,
         "team": "'\u003e\u003c\u003e"
       },
       {
+        "deaths": 39,
         "frags": 74,
+        "kills": 79,
         "name": ".N3ophyt3.",
+        "suicides": 1,
         "team": "'tbg"
       },
       {
+        "deaths": 51,
         "frags": 67,
+        "kills": 70,
         "name": "biggz",
+        "suicides": 1,
         "team": "'tbg"
       }
     ],
@@ -34662,7 +34686,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 18,
+  "schemaVersion": 19,
   "streams": {
     "global": {
       "matchEnd": 1200017,

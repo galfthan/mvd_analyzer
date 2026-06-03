@@ -16823,38 +16823,59 @@
     "map": "Obsidian",
     "players": [
       {
+        "deaths": 65,
         "frags": 44,
+        "kills": 53,
         "name": "ocoini",
+        "suicides": 5,
         "team": "ahoy"
       },
       {
+        "deaths": 66,
         "frags": 68,
+        "kills": 74,
         "name": "ThundeR",
+        "suicides": 1,
         "team": "BhB"
       },
       {
+        "deaths": 63,
         "frags": 30,
+        "kills": 31,
         "name": "KreatoR",
+        "suicides": 1,
         "team": "BhB"
       },
       {
+        "deaths": 53,
         "frags": 74,
+        "kills": 81,
         "name": "sailorman",
+        "suicides": 2,
         "team": "ahoy"
       },
       {
+        "deaths": 67,
         "frags": 47,
+        "kills": 52,
         "name": "rghst",
+        "suicides": 2,
         "team": "BhB"
       },
       {
+        "deaths": 57,
         "frags": 67,
+        "kills": 74,
         "name": "nexus",
+        "suicides": 1,
         "team": "ahoy"
       },
       {
+        "deaths": 49,
         "frags": 39,
+        "kills": 41,
         "name": "[nW].Veggie",
+        "suicides": 1,
         "team": "ahoy"
       }
     ],
@@ -31955,7 +31976,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 18,
+  "schemaVersion": 19,
   "streams": {
     "global": {
       "matchEnd": 1200128,

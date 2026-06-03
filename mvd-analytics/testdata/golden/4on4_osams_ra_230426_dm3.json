@@ -21045,43 +21045,67 @@
     "map": "The Abandoned Base",
     "players": [
       {
+        "deaths": 52,
         "frags": 49,
+        "kills": 56,
         "name": "nlk",
+        "suicides": 3,
         "team": ".ra."
       },
       {
+        "deaths": 53,
         "frags": 28,
+        "kills": 31,
         "name": "[cmd] witka",
+        "suicides": 1,
         "team": ".ra."
       },
       {
+        "deaths": 30,
         "frags": 50,
+        "kills": 56,
         "name": "sCorp",
+        "suicides": 1,
         "team": ".ra."
       },
       {
+        "deaths": 57,
         "frags": 43,
+        "kills": 45,
         "name": "clox",
+        "suicides": 1,
         "team": "oSaMs"
       },
       {
+        "deaths": 52,
         "frags": 42,
+        "kills": 45,
         "name": "lakso",
+        "suicides": 1,
         "team": "oSaMs"
       },
       {
+        "deaths": 43,
         "frags": 51,
+        "kills": 54,
         "name": "doberman",
+        "suicides": 0,
         "team": ".ra."
       },
       {
+        "deaths": 47,
         "frags": 34,
+        "kills": 35,
         "name": "apa",
+        "suicides": 0,
         "team": "oSaMs"
       },
       {
+        "deaths": 49,
         "frags": 32,
+        "kills": 34,
         "name": "marksuzu",
+        "suicides": 0,
         "team": "oSaMs"
       }
     ],
@@ -33184,7 +33208,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 18,
+  "schemaVersion": 19,
   "streams": {
     "global": {
       "matchEnd": 1200059,
