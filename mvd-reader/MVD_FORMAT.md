@@ -3195,7 +3195,7 @@ The hidden message system (`MVD_PEXT1_HIDDEN_MESSAGES`, bit 5 = 0x20) was added 
 - **0x0001 - usercmd**: Player input commands
 - **0x0003 - demoinfo**: Embedded JSON metadata (match info, player stats)
 - **0x0007 - dmgdone**: Damage events with attacker, victim, weapon, and amount
-- **0x000B - demo_start_timestamp_ms** *(2026, qwprot PR #17)*: ULEB128 varint-encoded unix-millisecond timestamp captured at demo start, for synchronising voice recordings / stream overlays with the demo timeline.
+- **0x000B - demo_start_timestamp_ms** *(2026, qwprot PR #17)*: ULEB128 varint-encoded unix-millisecond timestamp captured at demo start, for synchronising voice recordings / stream overlays with the demo timeline. The decoder emits the value faithfully, but **not every 0x000B block is a valid timestamp**: some 2026 demos carry a 1–2 byte block here that decodes to a tiny non-timestamp value (61, 11701 observed; those demos also carry a correct whole-second `epoch` serverinfo cvar). Consumers must range-check before treating it as a wall clock — `mvd-analytics` does this and falls back to `epoch` (see `demoStartUnixMs` in RESULT_SCHEMA.md).
 
 ### Damage Tracking Evolution
 

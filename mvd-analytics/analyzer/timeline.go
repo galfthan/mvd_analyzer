@@ -22,11 +22,11 @@ import (
 //   - timeline_streaks.go    spawn-to-death frag streak detection
 //   - timeline_regions.go    map region control auto-detection + custom defs
 type TimelineAnalyzer struct {
-	ctx             *Context
-	core            *CoreOutputs
-	playerState     map[int]*timelinePlayerState
-	playerNames     map[int]string // Slot -> player name (from UserInfoEvent)
-	playerUserIDs   map[int]int    // Slot -> UserID (for Hub viewer track param)
+	ctx           *Context
+	core          *CoreOutputs
+	playerState   map[int]*timelinePlayerState
+	playerNames   map[int]string // Slot -> player name (from UserInfoEvent)
+	playerUserIDs map[int]int    // Slot -> UserID (for Hub viewer track param)
 	// slotUserID is the *current* occupant's userid per slot (last valid
 	// wins, unlike playerUserIDs which pins the first). It lets
 	// onUserInfo spot a mid-match handoff so handleFragUpdate can rebase
@@ -36,13 +36,20 @@ type TimelineAnalyzer struct {
 	// mid-match, so the next frag update is a KTX stats restore / initial
 	// scoreboard, not a kill. Consumed (cleared) by handleFragUpdate.
 	fragResetPending map[int]bool
-	rawFrags        []fragEvent    // Raw frag events (player num, time)
-	rawDeaths       []deathEvent   // Raw death events (player num, time)
-	rawSpawns       []deathEvent   // Raw spawn events (reusing deathEvent type)
-	timing          MatchTimingDetector
-	locFinder       *locvis.Finder             // Visibility-aware loc finder for map (nil if no .loc file)
-	blipThresholdMs int                        // Per-player loc smoothing threshold, 0 disables
-	regionsOverride []config.MapRegionOverride // Optional caller-supplied region defs (e.g. CLI -regions). When non-nil, overrides config.RegionsForMap.
+	rawFrags         []fragEvent  // Raw frag events (player num, time)
+	rawDeaths        []deathEvent // Raw death events (player num, time)
+	rawSpawns        []deathEvent // Raw spawn events (reusing deathEvent type)
+	timing           MatchTimingDetector
+	// demoStartUnixMs is the wall-clock (Unix epoch ms) at demo open,
+	// captured from the mvdhidden 0x000B block. demoStartFromHidden records
+	// that the millisecond-accurate source was present, so Finalize can set
+	// the accuracy and the epoch-cvar fallback (in deriveDemoStartAnchor)
+	// knows not to overwrite it.
+	demoStartUnixMs     int64
+	demoStartFromHidden bool
+	locFinder           *locvis.Finder             // Visibility-aware loc finder for map (nil if no .loc file)
+	blipThresholdMs     int                        // Per-player loc smoothing threshold, 0 disables
+	regionsOverride     []config.MapRegionOverride // Optional caller-supplied region defs (e.g. CLI -regions). When non-nil, overrides config.RegionsForMap.
 }
 
 // UseCoreOutputs is part of the CoreConsumer contract — Timeline
@@ -194,6 +201,23 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 	case *events.PlayerPositionEvent:
 		// Track player positions
 		a.handlePositionUpdate(e)
+	case *events.DemoStartTimestampEvent:
+		// mvdhidden 0x000B: server wall-clock (Unix epoch ms) at demo open,
+		// the millisecond-accurate anchor for the demo timeline. Keep the
+		// first one we see; the block is written once near demo start.
+		//
+		// Some 2026 demos carry a 0x000B block whose 1–2 byte payload is
+		// NOT a Unix-ms timestamp (values like 61 / 11701 observed in corpus
+		// games 211805 and 212545, both of which also carry a correct
+		// whole-second `epoch` cvar). Decoded as a wall clock those land in
+		// 1970, and a consumer cannot tell them apart from a real anchor — so
+		// accept the block only when it falls in a plausible epoch-ms window;
+		// otherwise leave the anchor to the `epoch` fallback in
+		// deriveDemoStartAnchor.
+		if !a.demoStartFromHidden && plausibleDemoStartUnixMs(e.UnixMs) {
+			a.demoStartUnixMs = e.UnixMs
+			a.demoStartFromHidden = true
+		}
 	}
 	return nil
 }

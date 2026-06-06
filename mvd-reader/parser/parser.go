@@ -116,9 +116,9 @@ type Parser struct {
 	// svc_playerinfo for this slot yet" so the first sample doesn't
 	// fabricate a DeathEvent for a player who joined the demo already
 	// dead (no prior alive state to transition from).
-	playerDead       [mvd.MaxClients]bool
-	playerDeadKnown  [mvd.MaxClients]bool
-	playerSeenInfo   [mvd.MaxClients]bool
+	playerDead      [mvd.MaxClients]bool
+	playerDeadKnown [mvd.MaxClients]bool
+	playerSeenInfo  [mvd.MaxClients]bool
 	// matchStarted flips on the first svc_print whose text matches one
 	// of the canonical match-start phrases (see matchStartedFromPrint).
 	// It gates the obituary-derived DeathEvent path in
@@ -129,12 +129,12 @@ type Parser struct {
 	// the still-to-arrive stat-based DeathEvent. Gating obit emission
 	// on this flag keeps warmup obits silent and lets the dedup state
 	// flow normally once the match is live.
-	matchStarted    bool
-	handlers        []Handler
-	floatCoords     bool
-	fteExtensions   uint32 // FTE protocol extension flags
-	diagnosticMode  bool
-	warnings        []Warning
+	matchStarted   bool
+	handlers       []Handler
+	floatCoords    bool
+	fteExtensions  uint32 // FTE protocol extension flags
+	diagnosticMode bool
+	warnings       []Warning
 
 	// Entity state tracking — fills from svc_modellist, svc_spawnbaseline,
 	// and svc_packetentities / svc_deltapacketentities so the parser
@@ -620,13 +620,9 @@ func (p *Parser) parseHiddenDemoStart(r *mvd.BufferReader, time float64, dataLen
 	}
 
 	// Read the whole block so the reader stays aligned for the next block.
-	body := make([]byte, dataLen)
-	for i := 0; i < dataLen; i++ {
-		b, err := r.ReadByte()
-		if err != nil {
-			return err
-		}
-		body[i] = b
+	body, err := r.ReadBytes(dataLen)
+	if err != nil {
+		return err
 	}
 
 	return p.emit(&DemoStartTimestampEvent{UnixMs: int64(decodeULEB128(body)), Time: time})
@@ -994,12 +990,12 @@ func skipDeltaPacketEntities(r *mvd.BufferReader, floatCoords bool, fteExt uint3
 
 // Entity update flag bits (from protocol.h)
 const (
-	uOrigin1     = 1 << 9
-	uOrigin2     = 1 << 10
-	uOrigin3     = 1 << 11
-	uAngle2      = 1 << 12
-	uFrame       = 1 << 13
-	uMoreBits    = 1 << 15
+	uOrigin1  = 1 << 9
+	uOrigin2  = 1 << 10
+	uOrigin3  = 1 << 11
+	uAngle2   = 1 << 12
+	uFrame    = 1 << 13
+	uMoreBits = 1 << 15
 	// Low byte flags (read if uMoreBits set)
 	uAngle1      = 1 << 0
 	uAngle3      = 1 << 1
@@ -1009,9 +1005,9 @@ const (
 	uEffects     = 1 << 5
 	uFTEEvenMore = 1 << 7
 	// FTE morebits flags
-	uFTETrans    = 1 << 1
-	uFTEModelDbl = 1 << 3
-	uFTEYetMore  = 1 << 7
+	uFTETrans     = 1 << 1
+	uFTEModelDbl  = 1 << 3
+	uFTEYetMore   = 1 << 7
 	uFTEColourMod = 1 << 10 // bit 2 of second byte (after shift by 8)
 )
 

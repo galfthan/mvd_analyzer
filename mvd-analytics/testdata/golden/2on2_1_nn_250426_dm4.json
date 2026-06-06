@@ -25163,7 +25163,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 20,
+  "schemaVersion": 21,
   "streams": {
     "global": {
       "matchEnd": 600050,
@@ -242761,6 +242761,8 @@
       }
     ],
     "demoOffset": 10160,
+    "demoStartAccuracyMs": 1000,
+    "demoStartUnixMs": 1777115225000,
     "fragEvents": [
       {
         "delta": 1,

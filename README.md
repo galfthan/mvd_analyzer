@@ -468,7 +468,18 @@ and per-player given/taken totals, the **EWep** victim-weapon buckets
 kills (telefrags, stomps) are surfaced separately and kept out of every
 damage figure.
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `20`).
+Schema v21 adds a wall-clock anchor to `timelineAnalysis`:
+`demoStartUnixMs` (server clock, Unix epoch ms, at demo open) and
+`demoStartAccuracyMs` (its resolution — `1` from the millisecond mvdhidden
+`0x000B` block, `1000` from the whole-second serverinfo `epoch` cvar). Since
+every other time in the result is match-relative, this lets a consumer
+project any game time onto real-world time —
+`wallClockMs = demoStartUnixMs + demoOffset + gameMs` — for syncing external
+data such as voice tracks or stream overlays. Both fields are omitted when
+the demo carries no usable wall-clock source; implausible `0x000B` payloads
+(some demos emit a non-timestamp block there) fall back to `epoch`.
+
+Every breaking change bumps `CurrentSchemaVersion` (currently `21`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).
@@ -673,6 +684,18 @@ diff -r /tmp/before /tmp/after
    Available only on KTX demos with the MVD-hidden extension; the `EWep`
    victim-weapon buckets additionally depend on reconstructing each
    victim's inventory from `STAT_ITEMS` updates.
+
+7. **Wall-clock anchor resolution / availability**: `timelineAnalysis`'s
+   `demoStartUnixMs` is millisecond-accurate (`demoStartAccuracyMs = 1`)
+   only when the demo carries the mvdhidden `0x000B` block; otherwise it
+   degrades to the whole-second serverinfo `epoch` cvar
+   (`demoStartAccuracyMs = 1000`), and is absent entirely when neither is
+   present (e.g. non-KTX or pre-2026 demos). It anchors **demo open**, not
+   match start — consumers add `demoOffset` to reach the match. Some 2026
+   demos emit a `0x000B` block that is not a timestamp at all (a 1–2 byte
+   non-wall-clock value); those are range-checked out and fall back to
+   `epoch`. See [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) and
+   [mvd-reader/MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md#hidden-message-types).
 
 ## Reference sources
 

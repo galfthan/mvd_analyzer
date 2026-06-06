@@ -230,6 +230,15 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		PlayerUserIDs:  playerUserIDsByName,
 	}
 
+	// Wall-clock anchor for the demo timeline. The mvdhidden 0x000B block is
+	// the millisecond-accurate source; when it is absent, deriveDemoStartAnchor
+	// fills these from the whole-second serverinfo `epoch` cvar in
+	// post-processing (it has access to the assembled Metadata there).
+	if a.demoStartFromHidden {
+		result.TimelineAnalysis.DemoStartUnixMs = a.demoStartUnixMs
+		result.TimelineAnalysis.DemoStartAccuracyMs = 1
+	}
+
 	matchEnd := a.timing.EndTime
 	if matchEnd == 0 {
 		// Fall back to latest position sample if timing didn't observe

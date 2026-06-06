@@ -54,6 +54,12 @@ func (e *DemoInfoEvent) EventTime() float64   { return e.Time }
 // cvar and is the preferred anchor for synchronising external data (voice
 // recordings, stream overlays) to the demo timeline. Absent on demos recorded
 // before mvdsv added the block. Time is the demo-relative time of the block.
+//
+// UnixMs is the faithful ULEB128 decode of the block body; it is NOT
+// guaranteed to be a plausible wall clock. Some 2026 demos carry a 0x000B
+// block whose 1–2 byte payload is not a timestamp at all (values like 61 or
+// 11701 — those demos also carry a correct `epoch` cvar). Consumers that
+// treat UnixMs as a wall clock should range-check it before trusting it.
 type DemoStartTimestampEvent struct {
 	UnixMs int64   // Unix epoch milliseconds at demo open (wall clock)
 	Time   float64 // demo-relative time of the block (≈ 0)

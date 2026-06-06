@@ -218,7 +218,17 @@ package result
 //     Layer-1 change: world/environmental damage-taken is emitted with an
 //     Attacker == -1 "world" sentinel rather than dropped. Additive
 //     (omitempty); absent when the demo lacks the KTX hidden-damage stream.
-const CurrentSchemaVersion = 20
+//
+// v21:
+//   - TimelineAnalysis gains a wall-clock anchor for the demo timeline:
+//     demoStartUnixMs (server clock, Unix epoch ms, at demo open / t=0)
+//     plus demoStartAccuracyMs (its resolution: 1 from the mvdhidden
+//     0x000B millisecond block, 1000 from the whole-second serverinfo
+//     `epoch` cvar). With the existing demoOffset, a consumer maps any
+//     match-relative game time to wall clock for syncing external data
+//     (voice, stream overlays). Additive (omitempty); absent when the
+//     demo carries no wall-clock source.
+const CurrentSchemaVersion = 21
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

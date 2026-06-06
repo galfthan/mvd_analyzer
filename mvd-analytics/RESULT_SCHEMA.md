@@ -309,6 +309,8 @@ size, any reducer set; see [Streams](#streams-streams) and
 |---|---|---|
 | MatchStartTime | `matchStartTime` | int32 ms (always 0 after post-process) |
 | DemoOffset | `demoOffset` | int32 ms (warmup before match start) |
+| DemoStartUnixMs | `demoStartUnixMs` | int64 ms, omitempty (wall clock at demo open; see below) |
+| DemoStartAccuracyMs | `demoStartAccuracyMs` | int32, omitempty (resolution of `demoStartUnixMs`: 1 or 1000) |
 | FragEvents | `fragEvents` | []TimelineFragEvent |
 | DeathEvents | `deathEvents` | []TimelineDeathEvent |
 | KillEvents | `killEvents` | []TimelineKillEvent |
@@ -318,6 +320,25 @@ size, any reducer set; see [Streams](#streams-streams) and
 | LocTable | `locTable` | []string (interned loc names; index 0 = ""). `Streams.Players[].Loc[].V` indexes into this. |
 | PlayerUserIDs | `playerUserIDs` | map[string]int (name → Hub viewer UserID) |
 | RegionControl | `regionControl` | *RegionControlResult |
+
+**Wall-clock anchor (`demoStartUnixMs` / `demoStartAccuracyMs`).** All
+other times in the result are match-relative (`t=0` is match start).
+These two fields let a consumer project any match-relative game time `g`
+(ms) onto a real-world wall clock for syncing external data (voice
+tracks, stream overlays):
+
+```
+wallClockMs = demoStartUnixMs + demoOffset + g      (±demoStartAccuracyMs)
+```
+
+`demoStartUnixMs` is the server's clock (Unix epoch ms) at **demo open**
+(demo `t=0`, ≈ countdown start — not match start; `demoOffset` bridges
+the two). `demoStartAccuracyMs` is its resolution: `1` when sourced from
+the millisecond [mvdhidden 0x000B block](../mvd-reader/MVD_FORMAT.md#hidden-message-types),
+`1000` when derived from the whole-second serverinfo `epoch` cvar. Both
+fields are omitted when the demo carries no usable wall-clock source.
+Implausible 0x000B payloads (some demos emit a non-timestamp block here)
+are rejected in favour of the `epoch` fallback.
 
 Bucketed data is served as `view.BucketsView` (row) or
 `view.ColumnarBuckets` (column) — see

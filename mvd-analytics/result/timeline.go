@@ -7,17 +7,30 @@ package result
 // HighResBuckets and HighResDuration were deleted at schema v7;
 // bucketed data is now produced on demand by qwanalytics/view.Buckets.
 type TimelineAnalysisResult struct {
-	MatchStartTime int32                `json:"matchStartTime"`          // When match actually started (after warmup), in ms
-	DemoOffset     int32                `json:"demoOffset,omitempty"`    // Milliseconds from demo start to match start (for Hub viewer links)
-	FragEvents     []TimelineFragEvent  `json:"fragEvents,omitempty"`    // Frag events for score timeline
-	DeathEvents    []TimelineDeathEvent `json:"deathEvents,omitempty"`   // Per-player deaths for the frags/deaths drill-down
-	KillEvents     []TimelineKillEvent  `json:"killEvents,omitempty"`    // Per-player enemy kills for the frags/deaths drill-down
-	PowerupEvents  []PowerupEvent       `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
-	FragStreaks    []FragStreakEvent    `json:"fragStreaks,omitempty"`   // Top longest frag streaks for Key Moments
-	LocationData   []MapLocation        `json:"locationData,omitempty"`  // Location points from .loc file for map view
-	LocTable       []string             `json:"locTable,omitempty"`      // Interned loc names; index 0 is "" sentinel.
-	PlayerUserIDs  map[string]int       `json:"playerUserIDs,omitempty"` // Player name -> UserID for Hub viewer links
-	RegionControl  *RegionControlResult `json:"regionControl,omitempty"` // Region control stats
+	MatchStartTime int32 `json:"matchStartTime"`       // When match actually started (after warmup), in ms
+	DemoOffset     int32 `json:"demoOffset,omitempty"` // Milliseconds from demo start to match start (for Hub viewer links)
+	// DemoStartUnixMs anchors the demo timeline to wall-clock time: it is
+	// the server's clock (Unix epoch milliseconds) at demo open (demo t=0,
+	// ≈ countdown start — not match start). Combined with DemoOffset, a
+	// consumer maps any match-relative game time g (ms) to wall clock:
+	//   wallClockMs = DemoStartUnixMs + DemoOffset + g   (±DemoStartAccuracyMs)
+	// Intended for synchronising external data (voice tracks, stream
+	// overlays). Absent when no wall-clock source is present in the demo.
+	DemoStartUnixMs int64 `json:"demoStartUnixMs,omitempty"`
+	// DemoStartAccuracyMs is the resolution of DemoStartUnixMs: 1 when it
+	// came from the mvdhidden 0x000B millisecond block, 1000 when derived
+	// from the whole-second serverinfo `epoch` cvar. Absent (0) when there
+	// is no wall-clock source.
+	DemoStartAccuracyMs int32                `json:"demoStartAccuracyMs,omitempty"`
+	FragEvents          []TimelineFragEvent  `json:"fragEvents,omitempty"`    // Frag events for score timeline
+	DeathEvents         []TimelineDeathEvent `json:"deathEvents,omitempty"`   // Per-player deaths for the frags/deaths drill-down
+	KillEvents          []TimelineKillEvent  `json:"killEvents,omitempty"`    // Per-player enemy kills for the frags/deaths drill-down
+	PowerupEvents       []PowerupEvent       `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
+	FragStreaks         []FragStreakEvent    `json:"fragStreaks,omitempty"`   // Top longest frag streaks for Key Moments
+	LocationData        []MapLocation        `json:"locationData,omitempty"`  // Location points from .loc file for map view
+	LocTable            []string             `json:"locTable,omitempty"`      // Interned loc names; index 0 is "" sentinel.
+	PlayerUserIDs       map[string]int       `json:"playerUserIDs,omitempty"` // Player name -> UserID for Hub viewer links
+	RegionControl       *RegionControlResult `json:"regionControl,omitempty"` // Region control stats
 }
 
 // ControlRegion represents a named area on the map for control tracking.

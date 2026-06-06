@@ -1,6 +1,9 @@
 package analyzer
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
 )
@@ -275,6 +278,55 @@ func shiftAndFilterPosition(pt *result.PositionTrack, matchStartMs int32) {
 	for i := range pt.T {
 		pt.T[i] -= matchStartMs
 	}
+}
+
+// deriveDemoStartAnchor fills the demo-open wall-clock anchor
+// (TimelineAnalysis.DemoStartUnixMs / DemoStartAccuracyMs) from the
+// whole-second serverinfo `epoch` cvar when the millisecond-accurate
+// mvdhidden 0x000B block was not present. TimelineAnalyzer.Finalize
+// already set both fields (accuracy 1) when 0x000B was seen; this runs
+// only as the fallback, so a non-zero accuracy means "leave it alone".
+//
+// `epoch` is the server clock in whole Unix seconds at demo open — the
+// same instant 0x000B carries to the millisecond. It lives in
+// result.Metadata.ServerInfo, which is why this is a post-processor:
+// MetadataAnalyzer.Finalize has run by now. The anchor is demo-open, so
+// it is independent of the match-relative time shift and does not need
+// to run before/after normalizeMatchRelativeTimes.
+func deriveDemoStartAnchor(res *Result, _ *CoreOutputs) {
+	ta := res.TimelineAnalysis
+	if ta == nil || ta.DemoStartAccuracyMs != 0 {
+		return // no timeline, or 0x000B already supplied a finer anchor
+	}
+	if res.Metadata == nil || res.Metadata.ServerInfo == nil {
+		return
+	}
+	epoch, ok := res.Metadata.ServerInfo["epoch"]
+	if !ok {
+		return
+	}
+	secs, err := strconv.ParseInt(strings.TrimSpace(epoch), 10, 64)
+	if err != nil || !plausibleDemoStartUnixMs(secs*1000) {
+		return
+	}
+	ta.DemoStartUnixMs = secs * 1000
+	ta.DemoStartAccuracyMs = 1000
+}
+
+// Plausible wall-clock window for a demo-open anchor, in Unix epoch
+// milliseconds: [2000-01-01, 2100-01-01). QuakeWorld demos carrying a
+// wall-clock source are 2026+, so this generous window accepts every real
+// value while rejecting the non-timestamp 0x000B payloads some demos carry
+// (e.g. 61, 11701 — see the DemoStartTimestampEvent handling in timeline.go).
+const (
+	minDemoStartUnixMs = 946684800000  // 2000-01-01T00:00:00Z
+	maxDemoStartUnixMs = 4102444800000 // 2100-01-01T00:00:00Z
+)
+
+// plausibleDemoStartUnixMs reports whether v could be a real demo-open
+// wall clock rather than a garbage / non-timestamp value.
+func plausibleDemoStartUnixMs(v int64) bool {
+	return v >= minDemoStartUnixMs && v < maxDemoStartUnixMs
 }
 
 // duelTeamNormalize is the post-processor wrapper around
