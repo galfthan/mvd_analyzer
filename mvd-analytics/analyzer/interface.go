@@ -173,6 +173,7 @@ type (
 	TimelineFragEvent      = result.TimelineFragEvent
 	TimelineDeathEvent     = result.TimelineDeathEvent
 	TimelineKillEvent      = result.TimelineKillEvent
+	TimelinePause          = result.TimelinePause
 	PowerupEvent           = result.PowerupEvent
 	FragStreakEvent        = result.FragStreakEvent
 	MetadataResult         = result.MetadataResult

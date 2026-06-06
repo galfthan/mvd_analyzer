@@ -47,6 +47,12 @@ type TimelineAnalyzer struct {
 	// knows not to overwrite it.
 	demoStartUnixMs     int64
 	demoStartFromHidden bool
+	// rawPauses collects every mvdhidden 0x000A paused_duration sample
+	// (demo-relative time + real wall-clock ms for that idle frame), in
+	// arrival order. Finalize coalesces contiguous runs into per-pause
+	// segments (TimelineAnalysis.Pauses). Captured unconditionally — pauses
+	// during the countdown matter for the wall-clock mapping too.
+	rawPauses []pauseSample
 	locFinder           *locvis.Finder             // Visibility-aware loc finder for map (nil if no .loc file)
 	blipThresholdMs     int                        // Per-player loc smoothing threshold, 0 disables
 	regionsOverride     []config.MapRegionOverride // Optional caller-supplied region defs (e.g. CLI -regions). When non-nil, overrides config.RegionsForMap.
@@ -97,6 +103,15 @@ type fragEvent struct {
 type deathEvent struct {
 	Time      float64
 	PlayerNum int
+}
+
+// pauseSample is one mvdhidden 0x000A paused_duration block: the demo-relative
+// (game) time of the idle frame and the real wall-clock ms it spanned. The
+// game clock is frozen across a pause, so all samples of one pause share a
+// Time; Finalize sums DurationMs over each contiguous run.
+type pauseSample struct {
+	Time       float64
+	DurationMs int
 }
 
 // timelinePlayerState tracks current state for a single player as the
@@ -218,6 +233,11 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 			a.demoStartUnixMs = e.UnixMs
 			a.demoStartFromHidden = true
 		}
+	case *events.PausedDurationEvent:
+		// mvdhidden 0x000A: one real-ms sample per idle frame while the game
+		// clock is paused. Collect raw; Finalize coalesces into per-pause
+		// segments. See pauseSample.
+		a.rawPauses = append(a.rawPauses, pauseSample{Time: e.Time, DurationMs: e.DurationMs})
 	}
 	return nil
 }

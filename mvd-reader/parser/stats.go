@@ -68,6 +68,28 @@ type DemoStartTimestampEvent struct {
 func (e *DemoStartTimestampEvent) EventType() EventType { return EventDemoStartTimestamp }
 func (e *DemoStartTimestampEvent) EventTime() float64   { return e.Time }
 
+// PausedDurationEvent carries one mvdhidden_paused_duration sample (0x000A):
+// the real wall-clock milliseconds that elapsed across a single demo idle frame
+// while the server game clock was paused. mvdsv emits one block per idle frame
+// during a pause (sv_demo.c SV_MVDWritePausedTimeToStreams, value from
+// sv_send.c:1411, clamped 0–255), so all blocks of one pause share the same
+// (frozen) demo Time; summing DurationMs over a contiguous run yields the real
+// length of that pause. This is the only in-file signal of how much wall-clock
+// time a pause consumed — the demo time-delta bytes are 0 while paused — so it
+// is what lets a consumer map a paused demo's game time back to a real clock.
+//
+// Note: mvdsv writes this block WITHOUT the standard 4-byte
+// mvdhidden_block_header_t length prefix the other hidden blocks carry (the
+// dem_multiple payload is a bare type_id + byte), so the parser decodes it via a
+// dedicated path rather than the normal length-prefixed block loop.
+type PausedDurationEvent struct {
+	DurationMs int     // real wall-clock ms elapsed during this paused idle frame (0–255)
+	Time       float64 // demo-relative (game) time of the block; frozen across a pause
+}
+
+func (e *PausedDurationEvent) EventType() EventType { return EventPausedDuration }
+func (e *PausedDurationEvent) EventTime() float64   { return e.Time }
+
 // DeathEvent is emitted when a player transitions from alive to dead.
 // Two protocol-level signals feed this:
 //   - StatHealth crossing >0 → ≤0 (this file). Reliable for the player

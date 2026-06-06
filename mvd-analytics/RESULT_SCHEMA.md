@@ -311,6 +311,7 @@ size, any reducer set; see [Streams](#streams-streams) and
 | DemoOffset | `demoOffset` | int32 ms (warmup before match start) |
 | DemoStartUnixMs | `demoStartUnixMs` | int64 ms, omitempty (wall clock at demo open; see below) |
 | DemoStartAccuracyMs | `demoStartAccuracyMs` | int32, omitempty (resolution of `demoStartUnixMs`: 1 or 1000) |
+| Pauses | `pauses` | []TimelinePause, omitempty (per-pause wall-clock segments; see below) |
 | FragEvents | `fragEvents` | []TimelineFragEvent |
 | DeathEvents | `deathEvents` | []TimelineDeathEvent |
 | KillEvents | `killEvents` | []TimelineKillEvent |
@@ -328,7 +329,8 @@ These two fields let a consumer project any match-relative game time `g`
 tracks, stream overlays):
 
 ```
-wallClockMs = demoStartUnixMs + demoOffset + g      (±demoStartAccuracyMs)
+wallClockMs = demoStartUnixMs + demoOffset + g + P(g)   (±demoStartAccuracyMs)
+P(g)        = Σ pauses[i].durationMs  for  pauses[i].atMs <= g
 ```
 
 `demoStartUnixMs` is the server's clock (Unix epoch ms) at **demo open**
@@ -340,11 +342,34 @@ fields are omitted when the demo carries no usable wall-clock source.
 Implausible 0x000B payloads (some demos emit a non-timestamp block here)
 are rejected in favour of the `epoch` fallback.
 
+The `P(g)` term accounts for **pauses**: the game clock freezes during a
+pause while wall-clock time keeps running, so without it the mapping
+drifts by the total pause time on any paused demo. It is `0` (and may be
+dropped) when `pauses` is empty.
+
+**Pauses (`pauses[]`).** Each entry is a `TimelinePause`
+`{ atMs, durationMs }`: `atMs` is the match-relative game time the clock
+froze at (negative if the pause happened during the countdown), and
+`durationMs` is the real wall-clock time the pause consumed. They are
+recovered from the [mvdhidden 0x000A `paused_duration`
+blocks](../mvd-reader/MVD_FORMAT.md#hidden-message-types) mvdsv embeds
+once per idle frame while paused (summed per pause). Omitted when the
+demo has no pauses or was recorded by a server that does not embed the
+block. Listed in `atMs` order — fold them into the wall-clock mapping via
+`P(g)` above.
+
 Bucketed data is served as `view.BucketsView` (row) or
 `view.ColumnarBuckets` (column) — see
 [Query API → Buckets](#buckets). Each player's per-bucket data is a
 `map[string]any` keyed by the [field vocabulary](#field-vocabulary)
 (row) or one dense array per field (column).
+
+### TimelinePause
+
+`{ atMs, durationMs }`. One game pause as a flat segment in the
+game-time→wall-clock mapping (see the wall-clock anchor above). `atMs` is
+match-relative game time (ms); `durationMs` is the real wall-clock time
+the pause lasted, summed from the per-idle-frame mvdhidden 0x000A samples.
 
 ### TimelineFragEvent
 

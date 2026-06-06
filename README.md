@@ -346,9 +346,11 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 `CenterPrintEvent`, `ServerInfoEvent`, `DeathEvent`, `SpawnEvent`,
 `ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`,
 `ItemPickupHintEvent`, `BackpackPickupHintEvent`,
-`ItemPickupPrintEvent`, `BackpackPickupPrintEvent`. Domain types
-carried by events — `ServerData`, `PlayerInfo`, `PlayerState`,
-`Stats` — are source-agnostic.
+`ItemPickupPrintEvent`, `BackpackPickupPrintEvent`,
+`DemoStartTimestampEvent` (mvdhidden `0x000B` wall-clock anchor),
+`PausedDurationEvent` (mvdhidden `0x000A` per-frame pause duration).
+Domain types carried by events — `ServerData`, `PlayerInfo`,
+`PlayerState`, `Stats` — are source-agnostic.
 
 `DeathEvent` / `SpawnEvent` are derived events the parser synthesises
 from `StatHealth` edges so analytics never has to reconstruct
@@ -479,7 +481,18 @@ data such as voice tracks or stream overlays. Both fields are omitted when
 the demo carries no usable wall-clock source; implausible `0x000B` payloads
 (some demos emit a non-timestamp block there) fall back to `epoch`.
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `21`).
+Schema v22 completes the wall-clock mapping for **paused** demos:
+`timelineAnalysis.pauses[]` lists each pause as `{ atMs, durationMs }`. The
+game clock freezes during a pause while wall-clock time runs on, so the v21
+formula drifts by the total pause time; the corrected mapping folds the
+pauses in —
+`wallClockMs = demoStartUnixMs + demoOffset + gameMs + Σ durationMs (atMs ≤ gameMs)`.
+The durations are recovered from the mvdhidden `0x000A` `paused_duration`
+blocks mvdsv embeds once per paused idle frame (the parser handles their
+non-standard, length-header-less framing). Omitted when the demo has no
+pauses.
+
+Every breaking change bumps `CurrentSchemaVersion` (currently `22`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).
@@ -696,6 +709,13 @@ diff -r /tmp/before /tmp/after
    non-wall-clock value); those are range-checked out and fall back to
    `epoch`. See [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) and
    [mvd-reader/MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md#hidden-message-types).
+   For **paused** demos the wall-clock mapping also needs `pauses[]`
+   (schema v22): the durations come from the mvdhidden `0x000A`
+   `paused_duration` block, which only current production mvdsv embeds in
+   the .mvd (older servers wrote it to QTV streams only) and which is
+   written with non-standard framing (no inner block-length header) — both
+   are handled, but a demo from a server that doesn't embed it has no
+   per-pause signal, so its wall-clock mapping drifts by the pause time.
 
 ## Reference sources
 

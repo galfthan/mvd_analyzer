@@ -48,6 +48,12 @@ func normalizeMatchRelativeTimes(res *Result, _ *CoreOutputs) {
 			ta.FragStreaks[i].Time -= matchStartMs
 			ta.FragStreaks[i].EndTime -= matchStartMs
 		}
+		// Rebase pause anchors to match time. AtMs only — DurationMs is a span,
+		// not a timestamp. Pauses during the countdown go negative; keep them,
+		// they still consume wall time the mapping must account for.
+		for i := range ta.Pauses {
+			ta.Pauses[i].AtMs -= matchStartMs
+		}
 		ta.DemoOffset = matchStartMs
 		ta.MatchStartTime = 0
 	}

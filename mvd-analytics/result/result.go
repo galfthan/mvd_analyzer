@@ -228,7 +228,18 @@ package result
 //     match-relative game time to wall clock for syncing external data
 //     (voice, stream overlays). Additive (omitempty); absent when the
 //     demo carries no wall-clock source.
-const CurrentSchemaVersion = 21
+//
+// v22:
+//   - TimelineAnalysis gains pauses[]: per-pause {atMs, durationMs} segments
+//     recovered from the mvdhidden 0x000A (paused_duration) blocks mvdsv
+//     embeds once per idle frame while paused. The game clock freezes during
+//     a pause, so the v21 wall-clock formula drifted by the total pause time
+//     on paused demos; folding Σ durationMs for atMs <= g into the mapping
+//     fixes it. The parser now decodes 0x000A (it omits the standard hidden
+//     block-length header — a bare type_id+byte — so it is read via a
+//     dedicated path). Additive (omitempty); absent when the demo has no
+//     pauses or was recorded by a server that does not embed the block.
+const CurrentSchemaVersion = 22
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
