@@ -25163,9 +25163,12 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 22,
+  "schemaVersion": 23,
   "streams": {
     "global": {
+      "demoOffset": 10160,
+      "demoStartAccuracyMs": 1000,
+      "demoStartUnixMs": 1777115225000,
       "matchEnd": 600050,
       "matchStart": 0
     },
@@ -242760,9 +242763,6 @@
         "time": 598973
       }
     ],
-    "demoOffset": 10160,
-    "demoStartAccuracyMs": 1000,
-    "demoStartUnixMs": 1777115225000,
     "fragEvents": [
       {
         "delta": 1,
@@ -245883,7 +245883,6 @@
         "z": 24
       }
     ],
-    "matchStartTime": 0,
     "playerUserIDs": {
       "Milton": 11,
       "shazam": 8,

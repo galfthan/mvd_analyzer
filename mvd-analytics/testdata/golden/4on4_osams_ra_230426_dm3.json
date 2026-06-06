@@ -52777,9 +52777,12 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 22,
+  "schemaVersion": 23,
   "streams": {
     "global": {
+      "demoOffset": 10326,
+      "demoStartAccuracyMs": 1000,
+      "demoStartUnixMs": 1776971845000,
       "matchEnd": 1200059,
       "matchStart": 0
     },
@@ -839885,9 +839888,6 @@
         "time": 1199019
       }
     ],
-    "demoOffset": 10326,
-    "demoStartAccuracyMs": 1000,
-    "demoStartUnixMs": 1776971845000,
     "fragEvents": [
       {
         "delta": 1,
@@ -845941,7 +845941,6 @@
         "z": -24
       }
     ],
-    "matchStartTime": 0,
     "playerUserIDs": {
       "[cmd] witka": 2,
       "apa": 7,

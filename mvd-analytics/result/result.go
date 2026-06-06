@@ -239,7 +239,19 @@ package result
 //     block-length header — a bare type_id+byte — so it is read via a
 //     dedicated path). Additive (omitempty); absent when the demo has no
 //     pauses or was recorded by a server that does not embed the block.
-const CurrentSchemaVersion = 22
+//
+// v23:
+//   - Move the wall-clock/timing anchor from timelineAnalysis to
+//     streams.global (breaking move, not additive): demoOffset,
+//     demoStartUnixMs, demoStartAccuracyMs, pauses now live there next to
+//     matchStart/matchEnd (the match window they time). The redundant
+//     timelineAnalysis.matchStartTime (always 0, duplicated by
+//     streams.global.matchStart) is dropped. timelineAnalysis keeps its
+//     event-shaped data + map metadata, including locTable. The /overview
+//     REST endpoint gains a `timing` block exposing the wall-clock anchor to
+//     REST/MCP consumers (previously only the in-process WASM build could
+//     read it).
+const CurrentSchemaVersion = 23
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

@@ -25,9 +25,13 @@ import (
 // All time fields are integer milliseconds at schema v8; the shift is
 // a single int32 subtraction per value.
 func normalizeMatchRelativeTimes(res *Result, _ *CoreOutputs) {
+	// The match-start shift is carried, pre-normalize, on
+	// Streams.Global.MatchStart (the demo-relative match start the analyzer
+	// recorded). Schema v23 dropped the duplicate timelineAnalysis.matchStartTime
+	// that previously held it.
 	matchStartMs := int32(0)
-	if res.TimelineAnalysis != nil {
-		matchStartMs = res.TimelineAnalysis.MatchStartTime
+	if res.Streams != nil {
+		matchStartMs = res.Streams.Global.MatchStart
 	}
 	if matchStartMs <= 0 {
 		return
@@ -48,23 +52,24 @@ func normalizeMatchRelativeTimes(res *Result, _ *CoreOutputs) {
 			ta.FragStreaks[i].Time -= matchStartMs
 			ta.FragStreaks[i].EndTime -= matchStartMs
 		}
-		// Rebase pause anchors to match time. AtMs only — DurationMs is a span,
-		// not a timestamp. Pauses during the countdown go negative; keep them,
-		// they still consume wall time the mapping must account for.
-		for i := range ta.Pauses {
-			ta.Pauses[i].AtMs -= matchStartMs
-		}
-		ta.DemoOffset = matchStartMs
-		ta.MatchStartTime = 0
 	}
 
 	// Shift every per-player stream's timestamps and drop warmup
-	// entries. The match-window anchors on Streams.Global also rebase.
+	// entries. The match-window + wall-clock anchors on Streams.Global also rebase.
 	if streams := res.Streams; streams != nil {
 		streams.Global.MatchStart -= matchStartMs
 		streams.Global.MatchEnd -= matchStartMs
 		if streams.Global.MatchStart < 0 {
 			streams.Global.MatchStart = 0
+		}
+		// Record the demo→match offset and rebase pause anchors to match time.
+		// AtMs only — DurationMs is a span, not a timestamp. Pauses during the
+		// countdown go negative; keep them, they still consume wall time the
+		// mapping must account for. DemoStartUnixMs is NOT shifted (it anchors
+		// demo open, not match start).
+		streams.Global.DemoOffset = matchStartMs
+		for i := range streams.Global.Pauses {
+			streams.Global.Pauses[i].AtMs -= matchStartMs
 		}
 		for pi := range streams.Players {
 			p := &streams.Players[pi]
@@ -287,7 +292,7 @@ func shiftAndFilterPosition(pt *result.PositionTrack, matchStartMs int32) {
 }
 
 // deriveDemoStartAnchor fills the demo-open wall-clock anchor
-// (TimelineAnalysis.DemoStartUnixMs / DemoStartAccuracyMs) from the
+// (Streams.Global.DemoStartUnixMs / DemoStartAccuracyMs) from the
 // whole-second serverinfo `epoch` cvar when the millisecond-accurate
 // mvdhidden 0x000B block was not present. TimelineAnalyzer.Finalize
 // already set both fields (accuracy 1) when 0x000B was seen; this runs
@@ -298,11 +303,11 @@ func shiftAndFilterPosition(pt *result.PositionTrack, matchStartMs int32) {
 // result.Metadata.ServerInfo, which is why this is a post-processor:
 // MetadataAnalyzer.Finalize has run by now. The anchor is demo-open, so
 // it is independent of the match-relative time shift and does not need
-// to run before/after normalizeMatchRelativeTimes.
+// to run before/after normalizeMatchRelativeTimes. (Schema v23 moved the
+// anchor from TimelineAnalysis to Streams.Global.)
 func deriveDemoStartAnchor(res *Result, _ *CoreOutputs) {
-	ta := res.TimelineAnalysis
-	if ta == nil || ta.DemoStartAccuracyMs != 0 {
-		return // no timeline, or 0x000B already supplied a finer anchor
+	if res.Streams == nil || res.Streams.Global.DemoStartAccuracyMs != 0 {
+		return // no streams, or 0x000B already supplied a finer anchor
 	}
 	if res.Metadata == nil || res.Metadata.ServerInfo == nil {
 		return
@@ -315,8 +320,8 @@ func deriveDemoStartAnchor(res *Result, _ *CoreOutputs) {
 	if err != nil || !plausibleDemoStartUnixMs(secs*1000) {
 		return
 	}
-	ta.DemoStartUnixMs = secs * 1000
-	ta.DemoStartAccuracyMs = 1000
+	res.Streams.Global.DemoStartUnixMs = secs * 1000
+	res.Streams.Global.DemoStartAccuracyMs = 1000
 }
 
 // Plausible wall-clock window for a demo-open anchor, in Unix epoch

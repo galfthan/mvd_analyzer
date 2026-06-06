@@ -26,51 +26,51 @@ func TestPlausibleDemoStartUnixMs(t *testing.T) {
 }
 
 // TestDeriveDemoStartAnchor exercises the wall-clock anchor fallback:
-// TimelineAnalyzer.Finalize sets DemoStartUnixMs/AccuracyMs=1 from the
-// mvdhidden 0x000B block; deriveDemoStartAnchor only fills in the
+// TimelineAnalyzer.Finalize sets Streams.Global.DemoStartUnixMs/AccuracyMs=1
+// from the mvdhidden 0x000B block; deriveDemoStartAnchor only fills in the
 // whole-second serverinfo `epoch` cvar when 0x000B was absent, and never
-// overwrites the finer source.
+// overwrites the finer source. (Schema v23 moved the anchor to Streams.Global.)
 func TestDeriveDemoStartAnchor(t *testing.T) {
 	const epochSecs = 1780260653 // 2026-05-31T20:50:53Z, whole seconds
 
 	tests := []struct {
 		name         string
-		ta           *TimelineAnalysisResult
+		streams      *Streams
 		serverInfo   map[string]string
 		wantUnixMs   int64
 		wantAccuracy int32
 	}{
 		{
-			name:         "no timeline is a no-op",
-			ta:           nil,
+			name:         "no streams is a no-op",
+			streams:      nil,
 			serverInfo:   map[string]string{"epoch": "1780260653"},
 			wantUnixMs:   0,
 			wantAccuracy: 0,
 		},
 		{
 			name:         "0x000B already set — epoch must not overwrite",
-			ta:           &TimelineAnalysisResult{DemoStartUnixMs: 1780260653484, DemoStartAccuracyMs: 1},
+			streams:      &Streams{Global: GlobalStream{DemoStartUnixMs: 1780260653484, DemoStartAccuracyMs: 1}},
 			serverInfo:   map[string]string{"epoch": "1780260653"},
 			wantUnixMs:   1780260653484,
 			wantAccuracy: 1,
 		},
 		{
 			name:         "epoch fallback when 0x000B absent",
-			ta:           &TimelineAnalysisResult{},
+			streams:      &Streams{},
 			serverInfo:   map[string]string{"epoch": "1780260653"},
 			wantUnixMs:   epochSecs * 1000,
 			wantAccuracy: 1000,
 		},
 		{
 			name:         "no epoch and no 0x000B — anchor stays absent",
-			ta:           &TimelineAnalysisResult{},
+			streams:      &Streams{},
 			serverInfo:   map[string]string{"maxfps": "77"},
 			wantUnixMs:   0,
 			wantAccuracy: 0,
 		},
 		{
 			name:         "garbage epoch is ignored",
-			ta:           &TimelineAnalysisResult{},
+			streams:      &Streams{},
 			serverInfo:   map[string]string{"epoch": "not-a-number"},
 			wantUnixMs:   0,
 			wantAccuracy: 0,
@@ -79,20 +79,20 @@ func TestDeriveDemoStartAnchor(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			res := &Result{TimelineAnalysis: tc.ta}
+			res := &Result{Streams: tc.streams}
 			if tc.serverInfo != nil {
 				res.Metadata = &MetadataResult{ServerInfo: tc.serverInfo}
 			}
 			deriveDemoStartAnchor(res, nil)
 
-			if tc.ta == nil {
+			if tc.streams == nil {
 				return // nothing to assert beyond "did not panic"
 			}
-			if tc.ta.DemoStartUnixMs != tc.wantUnixMs {
-				t.Errorf("DemoStartUnixMs = %d, want %d", tc.ta.DemoStartUnixMs, tc.wantUnixMs)
+			if tc.streams.Global.DemoStartUnixMs != tc.wantUnixMs {
+				t.Errorf("DemoStartUnixMs = %d, want %d", tc.streams.Global.DemoStartUnixMs, tc.wantUnixMs)
 			}
-			if tc.ta.DemoStartAccuracyMs != tc.wantAccuracy {
-				t.Errorf("DemoStartAccuracyMs = %d, want %d", tc.ta.DemoStartAccuracyMs, tc.wantAccuracy)
+			if tc.streams.Global.DemoStartAccuracyMs != tc.wantAccuracy {
+				t.Errorf("DemoStartAccuracyMs = %d, want %d", tc.streams.Global.DemoStartAccuracyMs, tc.wantAccuracy)
 			}
 		})
 	}

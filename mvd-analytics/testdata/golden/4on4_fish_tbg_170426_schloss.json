@@ -57853,9 +57853,12 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 22,
+  "schemaVersion": 23,
   "streams": {
     "global": {
+      "demoOffset": 10092,
+      "demoStartAccuracyMs": 1000,
+      "demoStartUnixMs": 1776455578000,
       "matchEnd": 1200017,
       "matchStart": 0
     },
@@ -854873,9 +854876,6 @@
         "time": 1199877
       }
     ],
-    "demoOffset": 10092,
-    "demoStartAccuracyMs": 1000,
-    "demoStartUnixMs": 1776455578000,
     "fragEvents": [
       {
         "delta": 1,
@@ -860784,7 +860784,6 @@
         "z": 346
       }
     ],
-    "matchStartTime": 0,
     "playerUserIDs": {
       ".N3ophyt3.": 13,
       "DobeZz": 15,

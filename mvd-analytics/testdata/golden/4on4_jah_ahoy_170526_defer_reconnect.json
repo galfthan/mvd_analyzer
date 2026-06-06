@@ -51504,9 +51504,12 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 22,
+  "schemaVersion": 23,
   "streams": {
     "global": {
+      "demoOffset": 10248,
+      "demoStartAccuracyMs": 1000,
+      "demoStartUnixMs": 1779049935000,
       "matchEnd": 1200101,
       "matchStart": 0
     },
@@ -377324,9 +377327,6 @@
         "time": 1198361
       }
     ],
-    "demoOffset": 10248,
-    "demoStartAccuracyMs": 1000,
-    "demoStartUnixMs": 1779049935000,
     "fragEvents": [
       {
         "delta": 1,
@@ -387285,7 +387285,6 @@
         "z": -152
       }
     ],
-    "matchStartTime": 0,
     "playerUserIDs": {
       "[nW].Veggie": 3,
       "biggz": 93,

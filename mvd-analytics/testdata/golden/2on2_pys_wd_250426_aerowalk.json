@@ -22002,9 +22002,12 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 22,
+  "schemaVersion": 23,
   "streams": {
     "global": {
+      "demoOffset": 10104,
+      "demoStartAccuracyMs": 1000,
+      "demoStartUnixMs": 1777094578000,
       "matchEnd": 600040,
       "matchStart": 0
     },
@@ -234435,9 +234438,6 @@
         "time": 593793
       }
     ],
-    "demoOffset": 10104,
-    "demoStartAccuracyMs": 1000,
-    "demoStartUnixMs": 1777094578000,
     "fragEvents": [
       {
         "delta": 1,
@@ -237268,7 +237268,6 @@
         "z": 248
       }
     ],
-    "matchStartTime": 0,
     "playerUserIDs": {
       "psy*overon": 36,
       "wd.cao": 30,

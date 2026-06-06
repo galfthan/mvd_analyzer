@@ -470,29 +470,29 @@ and per-player given/taken totals, the **EWep** victim-weapon buckets
 kills (telefrags, stomps) are surfaced separately and kept out of every
 damage figure.
 
-Schema v21 adds a wall-clock anchor to `timelineAnalysis`:
-`demoStartUnixMs` (server clock, Unix epoch ms, at demo open) and
-`demoStartAccuracyMs` (its resolution — `1` from the millisecond mvdhidden
-`0x000B` block, `1000` from the whole-second serverinfo `epoch` cvar). Since
-every other time in the result is match-relative, this lets a consumer
-project any game time onto real-world time —
-`wallClockMs = demoStartUnixMs + demoOffset + gameMs` — for syncing external
-data such as voice tracks or stream overlays. Both fields are omitted when
-the demo carries no usable wall-clock source; implausible `0x000B` payloads
-(some demos emit a non-timestamp block there) fall back to `epoch`.
+`streams.global` carries a wall-clock anchor so a consumer can project any
+match-relative game time onto real-world time (for syncing voice tracks /
+stream overlays): `demoStartUnixMs` (server clock, Unix epoch ms, at demo
+open), `demoStartAccuracyMs` (its resolution — `1` from the millisecond
+mvdhidden `0x000B` block, `1000` from the whole-second serverinfo `epoch`
+cvar), `demoOffset` (demo-open → match-start), and `pauses[]`
+(`{ atMs, durationMs }` per pause). The game clock freezes during a pause
+while wall-clock time runs on, so pauses must be folded in:
 
-Schema v22 completes the wall-clock mapping for **paused** demos:
-`timelineAnalysis.pauses[]` lists each pause as `{ atMs, durationMs }`. The
-game clock freezes during a pause while wall-clock time runs on, so the v21
-formula drifts by the total pause time; the corrected mapping folds the
-pauses in —
-`wallClockMs = demoStartUnixMs + demoOffset + gameMs + Σ durationMs (atMs ≤ gameMs)`.
-The durations are recovered from the mvdhidden `0x000A` `paused_duration`
-blocks mvdsv embeds once per paused idle frame (the parser handles their
-non-standard, length-header-less framing). Omitted when the demo has no
-pauses.
+```
+wallClockMs = demoStartUnixMs + demoOffset + gameMs + Σ durationMs (atMs ≤ gameMs)
+```
 
-Every breaking change bumps `CurrentSchemaVersion` (currently `22`).
+The pause durations come from the mvdhidden `0x000A` `paused_duration` blocks
+mvdsv embeds once per paused idle frame (the parser handles their
+non-standard, length-header-less framing; QW-Group/mvdsv PR #210 adds the
+canonical framing, also supported). Anchor fields are omitted when the demo
+carries no wall-clock source; implausible `0x000B` payloads fall back to
+`epoch`. (Introduced in v21–v22 on `timelineAnalysis`; **moved to
+`streams.global` and exposed via the REST `/overview` `timing` block in
+v23**, alongside `matchStart`/`matchEnd`.)
+
+Every breaking change bumps `CurrentSchemaVersion` (currently `23`).
 Consumers can pin or feature-detect by reading `result.schemaVersion`.
 The full per-field reference lives in
 [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).
@@ -698,7 +698,7 @@ diff -r /tmp/before /tmp/after
    victim-weapon buckets additionally depend on reconstructing each
    victim's inventory from `STAT_ITEMS` updates.
 
-7. **Wall-clock anchor resolution / availability**: `timelineAnalysis`'s
+7. **Wall-clock anchor resolution / availability**: `streams.global`'s
    `demoStartUnixMs` is millisecond-accurate (`demoStartAccuracyMs = 1`)
    only when the demo carries the mvdhidden `0x000B` block; otherwise it
    degrades to the whole-second serverinfo `epoch` cvar
@@ -709,8 +709,8 @@ diff -r /tmp/before /tmp/after
    non-wall-clock value); those are range-checked out and fall back to
    `epoch`. See [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) and
    [mvd-reader/MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md#hidden-message-types).
-   For **paused** demos the wall-clock mapping also needs `pauses[]`
-   (schema v22): the durations come from the mvdhidden `0x000A`
+   For **paused** demos the wall-clock mapping also needs
+   `streams.global.pauses[]`: the durations come from the mvdhidden `0x000A`
    `paused_duration` block, which only current production mvdsv embeds in
    the .mvd (older servers wrote it to QTV streams only) and which is
    written with non-standard framing (no inner block-length header) — both

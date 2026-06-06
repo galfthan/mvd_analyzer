@@ -197,6 +197,8 @@ type (
 	MapEntitiesResult      = result.MapEntitiesResult
 	MapEntity              = result.MapEntity
 	Bounds                 = result.Bounds
+	Streams                = result.Streams
+	GlobalStream           = result.GlobalStream
 	BackpackDrop           = result.BackpackDrop
 	WeaponPickup           = result.WeaponPickup
 )

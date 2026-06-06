@@ -55340,9 +55340,12 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 22,
+  "schemaVersion": 23,
   "streams": {
     "global": {
+      "demoOffset": 10452,
+      "demoStartAccuracyMs": 1000,
+      "demoStartUnixMs": 1777064590000,
       "matchEnd": 1200128,
       "matchStart": 0
     },
@@ -375282,9 +375285,6 @@
         "time": 1199753
       }
     ],
-    "demoOffset": 10452,
-    "demoStartAccuracyMs": 1000,
-    "demoStartUnixMs": 1777064590000,
     "fragEvents": [
       {
         "delta": 1,
@@ -383313,7 +383313,6 @@
         "z": 24
       }
     ],
-    "matchStartTime": 0,
     "playerUserIDs": {
       "Doomie": 32,
       "KreatoR": 26,

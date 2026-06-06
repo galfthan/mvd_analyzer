@@ -9819,9 +9819,10 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 22,
+  "schemaVersion": 23,
   "streams": {
     "global": {
+      "demoOffset": 10286,
       "matchEnd": 599980,
       "matchStart": 0
     },
@@ -51137,7 +51138,6 @@
         "time": 595558
       }
     ],
-    "demoOffset": 10286,
     "fragEvents": [
       {
         "delta": 1,
@@ -52767,7 +52767,6 @@
         "z": 8
       }
     ],
-    "matchStartTime": 0,
     "playerUserIDs": {
       "banan falco": 39,
       "betowen": 37
