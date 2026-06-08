@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/mvd-analyzer/mvd-analytics/locvis"
+	"github.com/mvd-analyzer/mvd-analytics/mapclip"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -16,6 +17,15 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	if a.locFinder == nil && a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
 		if finder, err := locvis.LoadForMap(a.core.DemoInfo.Map); err == nil {
 			a.locFinder = finder
+		}
+	}
+
+	// Load the worldspawn clip hull for floor-height traces. Missing
+	// corpus (no BSP for the map, or an HL/Q2 format we don't parse)
+	// leaves clipHull nil → the PositionTrack.H column stays absent.
+	if a.clipHull == nil && a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
+		if hull, err := mapclip.LoadForMap(a.core.DemoInfo.Map); err == nil {
+			a.clipHull = hull
 		}
 	}
 
@@ -161,6 +171,12 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// resulting sparse Loc change stream into each player's stream
 	// builder. Returns the ordered locTable we'll ship in Result.
 	locTable, locIndex := a.resolveLocsAndFilterBlips()
+
+	// Trace each player's height above the floor beneath them at every
+	// native-rate position sample (schema v24). Runs per-slot before the
+	// reconnect merge, same as the loc pass above; no-op when no clip
+	// hull is loaded for the map.
+	a.resolveFloorHeights()
 	// Drop the table entirely if only the sentinel slot exists — JSON
 	// omitempty will then skip the field on the wire.
 	if len(locTable) <= 1 {

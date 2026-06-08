@@ -544,6 +544,8 @@ mvd-analyzer/
     loc/                   .loc parser + embedded corpus (466 maps)
     hubfetch/              Resolve + download from hub.quakeworld.nu (used by mvd-api)
     mapgen/                Quake 1 BSP reader + floor-face extraction
+    mapbsp/                Shared best-effort BSP-bytes loader (locvis + mapclip)
+    mapclip/               Worldspawn player clip hull + downward floor trace (pos.h)
     diagnostic/            Opt-in bulk validation harness
     cmd/mapgen/            Developer tool: BSP → per-loc floor-polygon JSON
     cmd/qw-analyze/        Offline CLI: demo → json|md|events
@@ -716,6 +718,22 @@ diff -r /tmp/before /tmp/after
    written with non-standard framing (no inner block-length header) — both
    are handled, but a demo from a server that doesn't embed it has no
    per-pause signal, so its wall-clock mapping drifts by the pause time.
+
+8. **Floor height excludes moving platforms**: the per-sample height
+   above the floor (`streams.players[].pos.h`, schema v24) is traced
+   through the map's *worldspawn* player clip hull only, so a player
+   standing on a moving brush model — the dm2 RA/quad lift, a func_door,
+   a func_train — measures against the static floor *beneath* the
+   platform (or gets the `NoFloor` sentinel over a void), making them
+   look airborne while riding it. Tracking platform poses needs the demo
+   entity stream and is out of scope for now. The hull comes from the
+   map's BSP via the same best-effort provisioning as the
+   visibility-aware loc filter, so the `h` column is absent for any map
+   whose BSP isn't deployed (and for the handful of HL/Quake 2-format
+   maps the BSP parser rejects). Static suspended geometry players *can*
+   stand on (e.g. schloss's chandelier-height brushwork) is part of
+   worldspawn and handled correctly. See
+   [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) (`PositionTrack.h`).
 
 ## Reference sources
 

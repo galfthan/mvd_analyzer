@@ -556,10 +556,16 @@ origin (see PositionTrack for the unit rationale).
 
 ### PositionTrack
 
-Columnar to compress JSON. Indices align across the four arrays.
+Columnar to compress JSON. Indices align across all arrays. `t`/`x`/`y`/`z`
+are always present; `li` and `h` are optional (`omitempty`) per-sample
+columns populated during analysis when their inputs are available.
 
 ```
-PositionTrack = { "t": [int32...], "x": [int32...], "y": [int32...], "z": [int32...] }
+PositionTrack = {
+  "t": [int32...], "x": [int32...], "y": [int32...], "z": [int32...],
+  "li": [int16...],   // optional: loc index per sample
+  "h":  [int32...]    // optional: height above floor per sample
+}
 ```
 
 `t` is **integer milliseconds** since the stream's time origin. The
@@ -572,6 +578,31 @@ negative for pre-match warmup samples after time normalisation.
 
 `x` / `y` / `z` are `int32` (not `int16`) because Quake maps can
 exceed ±32 768 in any axis.
+
+`li` (when present) is the resolved loc-name index for each sample —
+indexes into `TimelineAnalysisResult.LocTable`, `0` = "no loc",
+smoothed by the blip filter. Same length as `t`. Absent when no `.loc`
+corpus is loaded for the map. (Distinct from `PlayerStream.Loc`, which
+is the *sparse* change-stream view of the same data.)
+
+`h` (when present, schema v24) is the **player's height above the floor
+directly beneath them** at each sample — how far the feet are above the
+highest solid world surface at or below the player origin, from a
+straight-down trace through the map's worldspawn player clip hull
+(parsed from the map's BSP `CLIPNODES` at analyze time; see
+`mvd-analytics/mapclip`). Same length as `t`. It reads **~0 when
+grounded** and grows positive during a jump or airborne hit (airgib), so
+a consumer flags those directly with no coordinate arithmetic — test
+`|h|` small rather than `== 0`, since slopes and the trace epsilon leave
+a unit or two of slack. (The absolute floor surface, if needed, is
+`z[i] - 24 - h[i]` — the player origin rides 24 units above the floor.)
+The sentinel `-2147483648` (`result.NoFloor`) marks a sample with **no
+floor to measure from** — over a void / bottomless pit, on a *moving*
+brush model the worldspawn hull excludes (e.g. the dm2 RA/quad lift,
+doors), or at the zero origin. Absent entirely when no BSP is
+provisioned for the map (same best-effort BSP source as the
+visibility-aware loc filter), so floor height and PVS-veto loc
+attribution light up together.
 
 ### Time units: all times are int32 milliseconds
 
@@ -1043,6 +1074,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v24 | `PositionTrack` gains an `h` column: the player's height above the floor directly beneath them at each native-rate sample (feet above the nearest solid surface below), from a straight-down trace through the map's worldspawn player clip hull (parsed from BSP `CLIPNODES` at analyze time by the new `mvd-analytics/mapclip` package; BSPs come from the same best-effort source as the visibility-aware loc filter via the shared `mvd-analytics/mapbsp` loader). Reads ~0 grounded and grows during a jump / airborne hit (airgib); absolute floor is `z − 24 − h` if needed. Sentinel `-2147483648` (`result.NoFloor`) marks samples with no floor to measure from (void/pit, or a moving brush model such as the dm2 lift, which the worldspawn-only hull excludes). Additive (`omitempty`); absent when no BSP is provisioned for the map. |
 | v20 | New `Damage` section: per-hit damage log + aggregates (attacker→victim `matrix`, per-weapon, given/taken, and the **EWep** victim-weapon buckets `enemyVsSg/Mid/Lg/Rl/Both` where `ewep=lg+rl+both`) reconstructed from the KTX `mvdhidden_dmgdone` stream, plus a `scoreboard` cross-check vs `demoInfo.players[].dmg`. Amounts are unbound (include overkill). **Positional kills** — telefrags (deathtype `tele`, the 9999 instakill sentinel) and stomps (deathtype `stomp`) — are excluded from all damage figures and surfaced separately as `damage.telefrags`/`damage.stomps` + `PlayerDamage.telefrags`/`.stomps` + the opt-in `telefrag`/`stomp` events. Also a Layer-1 change: world/environmental damage-taken (lava/fall/trigger) is now emitted with an `Attacker == -1` "world" sentinel rather than dropped. Additive (`omitempty`); absent when the demo lacks the KTX hidden-damage stream. |
 | v19 | `MatchResult.PlayerStat` gains `kills`, `deaths` and `suicides` — the frag-log-corrected counts, making `match.players` a complete corrected scoreboard rather than just the net frag tally. They supersede the KTX demoinfo `stats`, which credit several self / positional deaths to the wrong entity: pentagram-deflect telefrags (`dtTELE2`) inflate the deflector's kills, and world-dealt suicides (fall / lava / squish / drown) bump the world entity's counter instead of the victim's (`ktx/src/client.c:5132`), so demoinfo undercounts suicides. `0` when the demo carried no frag log. Filled by the `scoreboardStatsPost` post-processor (kills/deaths from `Frags.ByPlayer` joined on the final display name; suicides counted from the `IsSuicide` frag entries). The API `/overview` player rows surface the same `kills`/`deaths`/`suicides`, so non-web consumers get the correction the web Summary already applied. Field additions only. |
 | v18 | `TimelineAnalysis` gains `KillEvents`: a per-player enemy-kill stream (`{time, player, team}`) keyed on the killer, parallel to `DeathEvents`, from the canonical frag log filtered to real enemy kills (suicides/teamkills excluded). Cumulative `killEvents` per player reconciles with `frags.byPlayer[].kills` and the kills-based efficiency; the Timeline per-player drill-down plots `killEvents − deathEvents` as a windowed +/-. `team` is best-effort and, unlike `deathEvents`, ungated. Additive (`omitempty`). |

@@ -251,7 +251,23 @@ package result
 //     REST endpoint gains a `timing` block exposing the wall-clock anchor to
 //     REST/MCP consumers (previously only the in-process WASM build could
 //     read it).
-const CurrentSchemaVersion = 23
+//
+// v24:
+//   - PositionTrack gains an H column: the player's height above the
+//     floor directly beneath them at each native-rate sample (feet above
+//     the nearest solid surface below), from a straight-down trace
+//     through the map's worldspawn player clip hull. The hull is parsed
+//     from the map's BSP CLIPNODES at analyze time by the new mapclip
+//     package, with BSP bytes from the same best-effort source as the
+//     visibility-aware loc filter (the shared mapbsp loader) — no
+//     generated corpus. H reads ~0 when grounded and grows during a jump
+//     / airborne hit (airgib), so consumers flag those directly; the
+//     absolute floor is Z - 24 - H if needed. Sentinel result.NoFloor
+//     marks samples with no floor to measure from (void/pit, or a moving
+//     brush model such as the dm2 lift, which the worldspawn-only hull
+//     excludes). Additive (omitempty); absent when no BSP is provisioned
+//     for the map.
+const CurrentSchemaVersion = 24
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

@@ -54,12 +54,19 @@ that downstream consumers render, summarise, or feed to an agent.
   provides `fetchLocSync` so only the loc for the current demo is
   downloaded.
 - `mapgen/` — the Quake 1 BSP reader (`bsp/`) and floor-face extractor
-  (`mapgeom/`) used by the mapgen developer tool. Not part of the
-  runtime pipeline — it generates static per-map JSON ahead of time.
-  The BSP entities-lump decoder (`bsp/entities.go`) is available for
-  callers that want static map-item data, though the item analyzer
-  itself derives item state purely from the demo now and requires no
-  map preprocessing.
+  (`mapgeom/`) used by the mapgen developer tool. The geometry/entity
+  extraction is not part of the runtime pipeline — it generates static
+  per-map JSON ahead of time — but `bsp/` itself *is* used at runtime by
+  `mapclip` to read the `CLIPNODES` collision hull. The BSP
+  entities-lump decoder (`bsp/entities.go`) is available for callers
+  that want static map-item data, though the item analyzer itself
+  derives item state purely from the demo now and requires no map
+  preprocessing.
+- `mapbsp/` — the single best-effort source of raw per-map BSP bytes at
+  analyze time (native dir lookup / WASM `fetchBspSync`), shared by
+  `locvis` (visibility) and `mapclip` (floor height).
+- `mapclip/` — worldspawn player clip hull + downward floor trace that
+  fills `PositionTrack.H`. See "Floor height" below.
 - `diagnostic/` — opt-in integration harness that runs a demo corpus
   through the parser in warning-collection mode and runs data-quality
   checks on the analysis result.
@@ -581,11 +588,41 @@ run.
 The BSP parser is in [`bspvis/`](bspvis/) (Q1 v29 / 2PSB / BSP2,
 ~1000 LOC, no cgo). It is intentionally separate from
 [`mapgen/bsp/`](mapgen/bsp/) — that package reads the geometry lumps
-(vertices, edges, faces, models) for the floor-polygon `mapgen` tool;
-bspvis reads the visibility lumps (planes, nodes, leaves, visdata).
+(vertices, edges, faces, models) for the floor-polygon `mapgen` tool
+*and the `CLIPNODES` collision hull for `mapclip`*; bspvis reads the
+visibility lumps (planes, nodes, leaves, visdata).
+
+Both BSP consumers pull their bytes from one place,
+[`mapbsp.LoadBytes`](mapbsp/) (native: `SetBspDir` / `$MVDA_BSP_DIR` /
+`./bsps`; WASM: host `fetchBspSync`), so a deployment provisions BSPs
+once and both features light up — or degrade — together.
 
 Background and validated case study:
 [`experiments/locattr/V2b-V6-HANDOFF.md`](../experiments/locattr/V2b-V6-HANDOFF.md).
+
+## Floor height (`mapclip`)
+
+The per-sample height of each player above the floor beneath them —
+`PositionTrack.H` (`pos.h`, schema v24) — is produced by
+[`mapclip`](mapclip/). At finalize the timeline analyzer loads the map's
+worldspawn **player clip hull** (hull 1) straight from the BSP
+`CLIPNODES` lump via `mapclip.LoadForMap` (same `mapbsp` byte source as
+`locvis`), then traces straight down from every native-rate position
+through it, reproducing the server's `PM_CategorizePosition` floor test
+(`mvdsv/src/cmodel.c` `RecursiveHullTrace`). Because it traces the
+collision hull — the rendering geometry inflated by the 32×32×56 player
+box — the floor is width-aware, multi-level, and slope-correct, with no
+edge artifacts.
+
+`h` reads ~0 when grounded and grows during a jump or airborne hit
+(airgib); the player-feet offset (24) is folded in so the value is 0 on
+the ground without the consumer knowing the hull dimensions (the
+absolute floor, if wanted, is `z − 24 − h`). `result.NoFloor` marks
+samples with no floor to measure from: over a void/pit, or on a moving
+brush model the worldspawn hull excludes (the dm2 RA/quad lift, doors,
+trains — tracking those needs the demo entity stream and is out of
+scope). There is no generated corpus to keep in sync; a map update is
+just a new `.bsp`.
 
 ## Running tests
 

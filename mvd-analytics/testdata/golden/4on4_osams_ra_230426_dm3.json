@@ -52777,7 +52777,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 23,
+  "schemaVersion": 24,
   "streams": {
     "global": {
       "demoOffset": 10326,

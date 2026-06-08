@@ -240,6 +240,9 @@ func (b *streamBuilder) toPlayerStream(name, team string) result.PlayerStream {
 		if len(b.posLi) == len(b.posT) {
 			pos.Li = append([]int16(nil), b.posLi...)
 		}
+		if len(b.posH) == len(b.posT) {
+			pos.H = append([]int32(nil), b.posH...)
+		}
 		ps.Position = pos
 	}
 	if len(b.spawns) > 0 {
@@ -341,6 +344,7 @@ func (b *streamBuilder) appendSlice(src *streamBuilder, startMs, endMs int32) {
 	}
 
 	hasLi := len(src.posLi) == len(src.posT)
+	hasH := len(src.posH) == len(src.posT)
 	for i, t := range src.posT {
 		if !in(t) {
 			continue
@@ -351,6 +355,9 @@ func (b *streamBuilder) appendSlice(src *streamBuilder, startMs, endMs int32) {
 		b.posZ = append(b.posZ, src.posZ[i])
 		if hasLi {
 			b.posLi = append(b.posLi, src.posLi[i])
+		}
+		if hasH {
+			b.posH = append(b.posH, src.posH[i])
 		}
 	}
 
@@ -690,6 +697,49 @@ func (a *TimelineAnalyzer) resolveLocsAndFilterBlips() (locTable []string, locIn
 		}
 	}
 	return locTable, locIndex
+}
+
+// resolveFloorHeights populates each player's PositionTrack.H column —
+// the feet-above-floor height — by tracing straight down through the
+// map's worldspawn player clip hull at every native-rate sample (schema
+// v24). Runs per-slot before the reconnect merge — the same staging as
+// resolveLocsAndFilterBlips — so appendSlice carries posH alongside
+// posLi into the merged stream.
+//
+// No-op when no clip hull is loaded for the map (no provisioned BSP, or
+// a format we can't parse): posH stays nil and the H column is absent.
+// Samples at the zero origin, over a void/pit, or on a moving brush
+// model excluded from the worldspawn hull (the dm2 lift) get the
+// result.NoFloor sentinel rather than a fabricated value.
+func (a *TimelineAnalyzer) resolveFloorHeights() {
+	if a.clipHull == nil {
+		return
+	}
+	slots := make([]int, 0, len(a.playerState))
+	for slot := range a.playerState {
+		slots = append(slots, slot)
+	}
+	sort.Ints(slots)
+
+	for _, slot := range slots {
+		b := &a.playerState[slot].streams
+		if len(b.posT) == 0 {
+			continue
+		}
+		b.posH = make([]int32, len(b.posT))
+		for i := range b.posT {
+			x, y, z := float32(b.posX[i]), float32(b.posY[i]), float32(b.posZ[i])
+			if x == 0 && y == 0 && z == 0 {
+				b.posH[i] = result.NoFloor
+				continue
+			}
+			if h, ok := a.clipHull.HeightAboveFloor(x, y, z); ok {
+				b.posH[i] = int32(math.Round(float64(h)))
+			} else {
+				b.posH[i] = result.NoFloor
+			}
+		}
+	}
 }
 
 // mergeBoundaries returns a sorted list of timestamps where the blip
