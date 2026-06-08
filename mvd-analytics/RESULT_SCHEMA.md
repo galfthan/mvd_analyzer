@@ -379,24 +379,26 @@ kills during the streak.
 ### AirgibEvent
 
 `{ time, attacker, attackerTeam, attackerUserID, victim, victimTeam,
-victimUserID, height, loc, damage, splash, lethal }`. One record per
+victimUserID, height, loc, damage, lethal }`. One record per direct
 enemy rocket hit landed on an airborne victim (an "airgib"). `height` is
 the victim's feet above the floor at the hit (`PositionTrack.H` units);
-`loc` is the victim's loc there. `splash` distinguishes a splash hit
-from a direct rocket; `lethal` is whether the hit killed (a matching
-rocket frag near the hit — a highlight heuristic, see below).
+`loc` is the victim's loc there. `lethal` is whether the hit killed (a
+matching rocket frag near the hit — a highlight heuristic, see below).
+`attackerUserID` is the one to track for the Hub viewer link (shooter
+perspective).
 
 Derived by a post-processor (schema v25) from `Damage.Events` (the
 per-hit log), the streams' `PositionTrack.H` column, the frag log, and
-the loc table. A hit qualifies when `weapon == "rl"`, the attacker is an
-enemy (not self / teammate / world), and the victim's height at the hit
-is ≥ 96 units (≈ two player models). The list is capped at the top 20 by
-`height` descending; the web view re-sorts client-side. **Empty when the
-map has no clip hull** (no `PositionTrack.H` to read — same BSP
-provisioning as the visibility-aware loc filter). The `lethal` window
-can over-attribute on a rare back-to-back double-rocket exchange (two
-rockets, same attacker→victim, within the window) — fine for a
-highlight, not an exact killing-blow flag.
+the loc table. A hit qualifies when `weapon == "rl"` and it is a **direct
+hit** (`isSplash` false), the attacker is an enemy (not self / teammate /
+world), and the victim's height at the hit is ≥ 96 units (≈ two player
+models). The list is capped at the top 20 by `height` descending; the web
+view re-sorts client-side. **Empty when the map has no clip hull** (no
+`PositionTrack.H` to read — same BSP provisioning as the
+visibility-aware loc filter). The `lethal` window can over-attribute on a
+rare back-to-back double-rocket exchange (two rockets, same
+attacker→victim, within the window) — fine for a highlight, not an exact
+killing-blow flag.
 
 ### MapLocation
 
@@ -1097,7 +1099,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
-| v25 | `TimelineAnalysis` gains `airgibs[]` (`AirgibEvent`): the top airborne rocket hits for Key Moments — each enemy rocket hit whose victim was ≥ 96 units above the floor, annotated with attacker/victim (name, team, userid), hit time, victim loc and height, raw damage, splash-vs-direct, and lethality (a matching rocket frag near the hit). Derived by a post-processor from `Damage.Events` + the streams' `PositionTrack.H` column + the frag log; capped at top 20 sorted by height descending. Additive (`omitempty`); empty when the map has no clip hull (no `H` column). |
+| v25 | `TimelineAnalysis` gains `airgibs[]` (`AirgibEvent`): the top airborne rocket hits for Key Moments — each direct enemy rocket hit (splash excluded) whose victim was ≥ 96 units above the floor, annotated with attacker/victim (name, team, userid), hit time, victim loc and height, raw damage, and lethality (a matching rocket frag near the hit). Derived by a post-processor from `Damage.Events` + the streams' `PositionTrack.H` column + the frag log; capped at top 20 sorted by height descending. Additive (`omitempty`); empty when the map has no clip hull (no `H` column). |
 | v24 | `PositionTrack` gains an `h` column: the player's height above the floor directly beneath them at each native-rate sample (feet above the nearest solid surface below), from a straight-down trace through the map's worldspawn player clip hull (parsed from BSP `CLIPNODES` at analyze time by the new `mvd-analytics/mapclip` package; BSPs come from the same best-effort source as the visibility-aware loc filter via the shared `mvd-analytics/mapbsp` loader). Reads ~0 grounded and grows during a jump / airborne hit (airgib); absolute floor is `z − 24 − h` if needed. Sentinel `-2147483648` (`result.NoFloor`) marks samples with no floor to measure from (void/pit, or a moving brush model such as the dm2 lift, which the worldspawn-only hull excludes). Additive (`omitempty`); absent when no BSP is provisioned for the map. |
 | v20 | New `Damage` section: per-hit damage log + aggregates (attacker→victim `matrix`, per-weapon, given/taken, and the **EWep** victim-weapon buckets `enemyVsSg/Mid/Lg/Rl/Both` where `ewep=lg+rl+both`) reconstructed from the KTX `mvdhidden_dmgdone` stream, plus a `scoreboard` cross-check vs `demoInfo.players[].dmg`. Amounts are unbound (include overkill). **Positional kills** — telefrags (deathtype `tele`, the 9999 instakill sentinel) and stomps (deathtype `stomp`) — are excluded from all damage figures and surfaced separately as `damage.telefrags`/`damage.stomps` + `PlayerDamage.telefrags`/`.stomps` + the opt-in `telefrag`/`stomp` events. Also a Layer-1 change: world/environmental damage-taken (lava/fall/trigger) is now emitted with an `Attacker == -1` "world" sentinel rather than dropped. Additive (`omitempty`); absent when the demo lacks the KTX hidden-damage stream. |
 | v19 | `MatchResult.PlayerStat` gains `kills`, `deaths` and `suicides` — the frag-log-corrected counts, making `match.players` a complete corrected scoreboard rather than just the net frag tally. They supersede the KTX demoinfo `stats`, which credit several self / positional deaths to the wrong entity: pentagram-deflect telefrags (`dtTELE2`) inflate the deflector's kills, and world-dealt suicides (fall / lava / squish / drown) bump the world entity's counter instead of the victim's (`ktx/src/client.c:5132`), so demoinfo undercounts suicides. `0` when the demo carried no frag log. Filled by the `scoreboardStatsPost` post-processor (kills/deaths from `Frags.ByPlayer` joined on the final display name; suicides counted from the `IsSuicide` frag entries). The API `/overview` player rows surface the same `kills`/`deaths`/`suicides`, so non-web consumers get the correction the web Summary already applied. Field additions only. |

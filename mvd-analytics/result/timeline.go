@@ -29,25 +29,25 @@ type TimelineAnalysisResult struct {
 // populated). The analyzer emits the top airgibTopN sorted by Height
 // descending; the web view re-sorts client-side.
 //
-// "Airgib" here is any enemy rocket hit (direct or splash) whose victim
-// was at least airgibMinHeightUnits above the floor — self / teammate /
-// environmental hits are excluded. Lethal records whether the hit killed:
-// a matching rocket frag (same attacker→victim) within a short window of
-// the hit. On the rare back-to-back double-rocket exchange this window
-// can attribute lethality to the airborne hit when a later rocket landed
-// the kill; it is a highlight heuristic, not an exact killing-blow flag.
+// "Airgib" here is a DIRECT enemy rocket hit (the rocket model striking
+// the player — splash/radius hits are excluded) whose victim was at least
+// airgibMinHeightUnits above the floor; self / teammate / environmental
+// hits are excluded too. Lethal records whether the hit killed: a matching
+// rocket frag (same attacker→victim) within a short window of the hit. On
+// the rare back-to-back double-rocket exchange this window can attribute
+// lethality to the airborne hit when a later rocket landed the kill; it is
+// a highlight heuristic, not an exact killing-blow flag.
 type AirgibEvent struct {
 	Time           int32  `json:"time"`                     // hit time, match-relative ms
 	Attacker       string `json:"attacker"`                 // resolved name of the rocketeer
 	AttackerTeam   string `json:"attackerTeam,omitempty"`   //
-	AttackerUserID int    `json:"attackerUserID,omitempty"` // for Hub viewer links
+	AttackerUserID int    `json:"attackerUserID,omitempty"` // for Hub viewer links (shooter perspective)
 	Victim         string `json:"victim"`                   // resolved name of the airborne victim
 	VictimTeam     string `json:"victimTeam,omitempty"`     //
-	VictimUserID   int    `json:"victimUserID,omitempty"`   // for Hub viewer links
+	VictimUserID   int    `json:"victimUserID,omitempty"`   //
 	Height         int32  `json:"height"`                   // victim feet above floor at the hit (units)
 	Loc            string `json:"loc,omitempty"`            // victim's loc at the hit
 	Damage         int    `json:"damage"`                   // raw rocket damage (unbound, incl. overkill)
-	Splash         bool   `json:"splash,omitempty"`         // splash vs direct rocket
 	Lethal         bool   `json:"lethal,omitempty"`         // the hit killed the victim (matching rocket frag)
 }
 

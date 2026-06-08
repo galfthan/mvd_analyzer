@@ -1964,7 +1964,7 @@ function renderAirgibs() {
             const demoOff = timelineState.demoOffset || 0;
             const fromTime = Math.max(0, Math.floor(a.timeSec + demoOff) - 5);
             const toTime = Math.floor(a.timeSec + demoOff) + 3;
-            const trackId = a.victimUserID || a.attackerUserID || 0;
+            const trackId = a.attackerUserID || 0; // shooter perspective
             const viewerUrl = `https://hub.quakeworld.nu/games/?gameId=${hubInfo.gameId}&from=${fromTime}&to=${toTime}&track=${trackId}`;
             watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
         }

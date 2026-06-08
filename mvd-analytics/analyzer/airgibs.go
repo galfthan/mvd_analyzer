@@ -80,9 +80,10 @@ func airgibsPost(res *Result, co *CoreOutputs) {
 
 	var events []result.AirgibEvent
 	for _, d := range res.Damage.Events {
-		// Enemy rockets only — self / teammate / environmental hits aren't
-		// airgibs.
-		if d.Weapon != "rl" || d.IsSelf || d.IsTeam || d.IsEnv {
+		// Direct enemy rockets only — a rocket model striking the player.
+		// Splash (radius) damage is excluded, as are self / teammate /
+		// environmental hits.
+		if d.Weapon != "rl" || d.IsSplash || d.IsSelf || d.IsTeam || d.IsEnv {
 			continue
 		}
 		vs := streamByName[d.Victim]
@@ -112,7 +113,6 @@ func airgibsPost(res *Result, co *CoreOutputs) {
 			Height:         h,
 			Loc:            loc,
 			Damage:         d.Damage,
-			Splash:         d.IsSplash,
 			Lethal:         airgibLethal(rlFrags, d),
 		})
 	}

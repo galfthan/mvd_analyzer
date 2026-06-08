@@ -270,11 +270,11 @@ package result
 //
 // v25:
 //   - TimelineAnalysis gains airgibs[]: the top airborne rocket hits
-//     (AirgibEvent) for Key Moments — each enemy rocket hit whose victim
-//     was >= 96 units above the floor (≈ two player models), annotated
-//     with attacker/victim (name, team, userid), the hit time, the
-//     victim's loc and height, raw damage, splash vs direct, and whether
-//     it was lethal (a matching rocket frag near the hit). Derived by a
+//     (AirgibEvent) for Key Moments — each DIRECT enemy rocket hit (splash
+//     excluded) whose victim was >= 96 units above the floor (≈ two player
+//     models), annotated with attacker/victim (name, team, userid), the
+//     hit time, the victim's loc and height, raw damage, and whether it
+//     was lethal (a matching rocket frag near the hit). Derived by a
 //     post-processor from result.Damage (per-hit log) + the streams'
 //     PositionTrack.H column + the frag log; capped and sorted by height
 //     descending. Additive (omitempty); empty when the map has no clip
