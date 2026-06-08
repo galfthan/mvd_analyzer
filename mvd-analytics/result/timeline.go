@@ -15,10 +15,40 @@ type TimelineAnalysisResult struct {
 	KillEvents    []TimelineKillEvent  `json:"killEvents,omitempty"`    // Per-player enemy kills for the frags/deaths drill-down
 	PowerupEvents []PowerupEvent       `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
 	FragStreaks   []FragStreakEvent    `json:"fragStreaks,omitempty"`   // Top longest frag streaks for Key Moments
+	Airgibs       []AirgibEvent        `json:"airgibs,omitempty"`       // Top airborne rocket hits (airgibs) for Key Moments
 	LocationData  []MapLocation        `json:"locationData,omitempty"`  // Location points from .loc file for map view
 	LocTable      []string             `json:"locTable,omitempty"`      // Interned loc names; index 0 is "" sentinel.
 	PlayerUserIDs map[string]int       `json:"playerUserIDs,omitempty"` // Player name -> UserID for Hub viewer links
 	RegionControl *RegionControlResult `json:"regionControl,omitempty"` // Region control stats
+}
+
+// AirgibEvent is one enemy rocket hit landed on an airborne victim — an
+// "airgib" — surfaced in Key Moments (schema v25). Height is the victim's
+// feet above the floor at the moment of the hit (PositionTrack.H), so the
+// list is meaningful only on maps with a provisioned BSP (where H is
+// populated). The analyzer emits the top airgibTopN sorted by Height
+// descending; the web view re-sorts client-side.
+//
+// "Airgib" here is any enemy rocket hit (direct or splash) whose victim
+// was at least airgibMinHeightUnits above the floor — self / teammate /
+// environmental hits are excluded. Lethal records whether the hit killed:
+// a matching rocket frag (same attacker→victim) within a short window of
+// the hit. On the rare back-to-back double-rocket exchange this window
+// can attribute lethality to the airborne hit when a later rocket landed
+// the kill; it is a highlight heuristic, not an exact killing-blow flag.
+type AirgibEvent struct {
+	Time           int32  `json:"time"`                     // hit time, match-relative ms
+	Attacker       string `json:"attacker"`                 // resolved name of the rocketeer
+	AttackerTeam   string `json:"attackerTeam,omitempty"`   //
+	AttackerUserID int    `json:"attackerUserID,omitempty"` // for Hub viewer links
+	Victim         string `json:"victim"`                   // resolved name of the airborne victim
+	VictimTeam     string `json:"victimTeam,omitempty"`     //
+	VictimUserID   int    `json:"victimUserID,omitempty"`   // for Hub viewer links
+	Height         int32  `json:"height"`                   // victim feet above floor at the hit (units)
+	Loc            string `json:"loc,omitempty"`            // victim's loc at the hit
+	Damage         int    `json:"damage"`                   // raw rocket damage (unbound, incl. overkill)
+	Splash         bool   `json:"splash,omitempty"`         // splash vs direct rocket
+	Lethal         bool   `json:"lethal,omitempty"`         // the hit killed the victim (matching rocket frag)
 }
 
 // ControlRegion represents a named area on the map for control tracking.

@@ -267,7 +267,19 @@ package result
 //     brush model such as the dm2 lift, which the worldspawn-only hull
 //     excludes). Additive (omitempty); absent when no BSP is provisioned
 //     for the map.
-const CurrentSchemaVersion = 24
+//
+// v25:
+//   - TimelineAnalysis gains airgibs[]: the top airborne rocket hits
+//     (AirgibEvent) for Key Moments — each enemy rocket hit whose victim
+//     was >= 96 units above the floor (≈ two player models), annotated
+//     with attacker/victim (name, team, userid), the hit time, the
+//     victim's loc and height, raw damage, splash vs direct, and whether
+//     it was lethal (a matching rocket frag near the hit). Derived by a
+//     post-processor from result.Damage (per-hit log) + the streams'
+//     PositionTrack.H column + the frag log; capped and sorted by height
+//     descending. Additive (omitempty); empty when the map has no clip
+//     hull (no H column) so no airborne height can be computed.
+const CurrentSchemaVersion = 25
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
