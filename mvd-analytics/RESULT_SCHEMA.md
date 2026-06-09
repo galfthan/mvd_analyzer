@@ -611,12 +611,19 @@ corpus is loaded for the map. (Distinct from `PlayerStream.Loc`, which
 is the *sparse* change-stream view of the same data.)
 
 `h` (when present, schema v24) is the **player's height above the floor
-directly beneath them** at each sample — how far the feet are above the
-highest solid world surface at or below the player origin, from a
-straight-down trace through the map's worldspawn player clip hull
-(parsed from the map's BSP `CLIPNODES` at analyze time; see
-`mvd-analytics/mapclip`). Same length as `t`. It reads **~0 when
-grounded** and grows positive during a jump or airborne hit (airgib), so
+beneath them** at each sample — how far the feet are above the highest
+solid world surface at or below the player, from straight-down traces
+through the map's worldspawn player clip hull (parsed from the map's BSP
+`CLIPNODES` at analyze time; see `mvd-analytics/mapclip`). Same length as
+`t`. **Since schema v26** it is measured over the player's bounding-box
+footprint, not just the origin column: the highest floor under a 3×3 grid
+of columns sampled ±8 around the origin wins (an effective ~48-wide
+footprint on the already-±16-box-inflated hull), so a player skimming a
+ledge / well rim — origin momentarily over the pit while the box overhangs
+the rim — reads the **near** floor, not the distant one far below (this is
+what removed bogus high airgibs at spots like anwalked RA's well rim). It
+reads **~0 when grounded** and grows positive during a jump or airborne
+hit (airgib), so
 a consumer flags those directly with no coordinate arithmetic — test
 `|h|` small rather than `== 0`, since slopes and the trace epsilon leave
 a unit or two of slack. (The absolute floor surface, if needed, is
@@ -1099,6 +1106,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v26 | `PositionTrack.H` is now measured over the player's **bounding-box footprint** instead of the single origin column: the height is taken to the highest floor found under a 3×3 grid of columns sampled ±8 around the origin (`mapclip.HeightAboveFloorBox`) — an effective ~48-wide footprint on the already-±16-box-inflated hull. A player skimming a ledge / well rim — origin momentarily over the pit while the box overhangs the rim — now reads the near floor (small `h`) rather than plunging to the distant floor far below. Same shape and units; only values near ledges change, which also removes the bogus high airgibs those samples produced (e.g. anwalked RA's well rim logged a 553-unit airgib that was really a rim skim). |
 | v25 | `TimelineAnalysis` gains `airgibs[]` (`AirgibEvent`): the top airborne rocket hits for Key Moments — each direct enemy rocket hit (splash excluded) whose victim was ≥ 96 units above the floor, annotated with attacker/victim (name, team, userid), hit time, victim loc and height, raw damage, and lethality (a matching rocket frag near the hit). Derived by a post-processor from `Damage.Events` + the streams' `PositionTrack.H` column + the frag log; capped at top 20 sorted by height descending. Additive (`omitempty`); empty when the map has no clip hull (no `H` column). |
 | v24 | `PositionTrack` gains an `h` column: the player's height above the floor directly beneath them at each native-rate sample (feet above the nearest solid surface below), from a straight-down trace through the map's worldspawn player clip hull (parsed from BSP `CLIPNODES` at analyze time by the new `mvd-analytics/mapclip` package; BSPs come from the same best-effort source as the visibility-aware loc filter via the shared `mvd-analytics/mapbsp` loader). Reads ~0 grounded and grows during a jump / airborne hit (airgib); absolute floor is `z − 24 − h` if needed. Sentinel `-2147483648` (`result.NoFloor`) marks samples with no floor to measure from (void/pit, or a moving brush model such as the dm2 lift, which the worldspawn-only hull excludes). Additive (`omitempty`); absent when no BSP is provisioned for the map. |
 | v20 | New `Damage` section: per-hit damage log + aggregates (attacker→victim `matrix`, per-weapon, given/taken, and the **EWep** victim-weapon buckets `enemyVsSg/Mid/Lg/Rl/Both` where `ewep=lg+rl+both`) reconstructed from the KTX `mvdhidden_dmgdone` stream, plus a `scoreboard` cross-check vs `demoInfo.players[].dmg`. Amounts are unbound (include overkill). **Positional kills** — telefrags (deathtype `tele`, the 9999 instakill sentinel) and stomps (deathtype `stomp`) — are excluded from all damage figures and surfaced separately as `damage.telefrags`/`damage.stomps` + `PlayerDamage.telefrags`/`.stomps` + the opt-in `telefrag`/`stomp` events. Also a Layer-1 change: world/environmental damage-taken (lava/fall/trigger) is now emitted with an `Attacker == -1` "world" sentinel rather than dropped. Additive (`omitempty`); absent when the demo lacks the KTX hidden-damage stream. |

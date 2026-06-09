@@ -732,7 +732,10 @@ diff -r /tmp/before /tmp/after
    whose BSP isn't deployed (and for the handful of HL/Quake 2-format
    maps the BSP parser rejects). Static suspended geometry players *can*
    stand on (e.g. schloss's chandelier-height brushwork) is part of
-   worldspawn and handled correctly. See
+   worldspawn and handled correctly. Since schema v26 the height is
+   measured over the player's bounding-box footprint, so a player skimming
+   a ledge or well rim — origin over the pit, box overhanging the rim —
+   reads the near floor rather than the distant one far below. See
    [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) (`PositionTrack.h`).
 
 ## Reference sources

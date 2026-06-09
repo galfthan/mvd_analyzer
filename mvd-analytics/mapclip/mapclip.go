@@ -43,6 +43,16 @@ const (
 	// playerFeetOffset.
 	playerFeetOffset = 24.0
 
+	// footprintMargin is how far from the origin HeightAboveFloorBox
+	// samples floor columns. The traced hull is already the world inflated
+	// by the ±16 player box (cmodel.c:673), so the point trace at the
+	// origin alone is the true 32-wide box; this margin only adds a small
+	// safety band on top. At 8 the effective reach is as if the box were
+	// 48 wide (16 true + 8 margin per side) — enough to keep a player
+	// skimming a ledge / well rim a few units past the box edge attached
+	// to the rim, without over-reaching to unrelated geometry.
+	footprintMargin = 8.0
+
 	// distEpsilon matches DIST_EPSILON in mvdsv/src/cmodel.c:212 — the
 	// 1/32-unit nudge that keeps the impact point just off the plane.
 	distEpsilon = 0.03125
@@ -95,6 +105,53 @@ func (h *Hull) HeightAboveFloor(x, y, z float32) (float32, bool) {
 	}
 	return (z - playerFeetOffset) - floorZ, true
 }
+
+// HeightAboveFloorBox is the footprint-aware companion to
+// HeightAboveFloor: instead of the single origin column it measures the
+// player's feet above the *highest* floor found under the player's
+// footprint, sampling a 3×3 grid of columns at ±footprintMargin in X/Y.
+// The bool is false only when no column finds a floor (the whole
+// footprint is over a void / moving brush model).
+//
+// Why the box and not just the origin: a player skimming the rim of a
+// well or the lip of a ledge has their origin momentarily over the pit —
+// a single straight-down trace there plunges to the distant floor far
+// below and reads a huge height — while the box itself still overhangs
+// the near rim. Standing on something the box overlaps is what the eye
+// (and the server's ground check) sees, so the near floor is the honest
+// answer. Taking the highest of the sampled columns picks that near rim.
+//
+// Note on reach: the traced hull is already the world inflated by the
+// ±16 player box, so the centre column alone is the true 32-wide box;
+// the ±footprintMargin ring only adds a small safety band (effective
+// reach ~48 wide at margin 8) so a rim skim a few units past the box
+// edge still attaches to the rim. Columns only ever see surfaces at or
+// below z (the trace runs downward from z), so the result is never
+// pulled up by geometry above the player.
+func (h *Hull) HeightAboveFloorBox(x, y, z float32) (float32, bool) {
+	best := float32(0)
+	any := false
+	for _, dx := range footprintOffsets {
+		for _, dy := range footprintOffsets {
+			floorZ, ok := h.FloorBelow(x+dx, y+dy, z)
+			if !ok {
+				continue
+			}
+			if !any || floorZ > best {
+				best = floorZ
+				any = true
+			}
+		}
+	}
+	if !any {
+		return 0, false
+	}
+	return (z - playerFeetOffset) - best, true
+}
+
+// footprintOffsets are the X/Y sample offsets HeightAboveFloorBox walks —
+// the centre and a ring at ±footprintMargin (a 3×3 grid).
+var footprintOffsets = [3]float32{-footprintMargin, 0, footprintMargin}
 
 // FloorBelow returns the Z of the floor surface directly beneath the
 // point (x, y, z) — the highest solid hull surface at or below it — and

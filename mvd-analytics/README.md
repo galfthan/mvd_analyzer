@@ -614,6 +614,18 @@ collision hull — the rendering geometry inflated by the 32×32×56 player
 box — the floor is width-aware, multi-level, and slope-correct, with no
 edge artifacts.
 
+Since schema v26 the height is **footprint-aware** (`HeightAboveFloorBox`):
+rather than the single origin column, it traces a 3×3 grid of columns
+sampled ±8 around the origin and keeps the **highest** floor any of them
+finds. The hull is already inflated by the ±16 box, so the centre column
+alone is the true 32-wide box; the ±8 ring only adds a small safety band
+(effective reach ~48 wide). A player skimming a ledge or well rim has their origin briefly
+over the pit while the box overhangs the rim — a single-column trace there
+plunges to the floor far below and reads a huge height; the footprint
+query finds the near rim and reads small. (This is what stopped the well
+rim of anwalked's RA from logging a 553-unit "airgib" that was really a
+rim skim.) The single-column primitive remains as `HeightAboveFloor`.
+
 `h` reads ~0 when grounded and grows during a jump or airborne hit
 (airgib); the player-feet offset (24) is folded in so the value is 0 on
 the ground without the consumer knowing the hull dimensions (the

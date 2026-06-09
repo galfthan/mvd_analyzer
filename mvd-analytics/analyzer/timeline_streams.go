@@ -733,7 +733,7 @@ func (a *TimelineAnalyzer) resolveFloorHeights() {
 				b.posH[i] = result.NoFloor
 				continue
 			}
-			if h, ok := a.clipHull.HeightAboveFloor(x, y, z); ok {
+			if h, ok := a.clipHull.HeightAboveFloorBox(x, y, z); ok {
 				b.posH[i] = int32(math.Round(float64(h)))
 			} else {
 				b.posH[i] = result.NoFloor

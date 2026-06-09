@@ -73,6 +73,73 @@ func TestFloorBelow_NoFloorOverVoid(t *testing.T) {
 	}
 }
 
+// rimWellHull builds a two-region hull split by the X=0 plane: the back
+// half (X<0) is a rim with its floor at Z=0 (clip plane Z=24); the front
+// half (X>=0) is a deep well with its floor at Z=-400 (clip plane
+// Z=-376). A player whose origin sits just inside the well but within a
+// box-width of the rim is the well-rim-skim case from anwalked RA.
+func rimWellHull(t *testing.T) *Hull {
+	t.Helper()
+	h, err := Build(&bsp.BSP{
+		Planes: []bsp.Plane{
+			{Normal: bsp.Vec3{X: 1}, Dist: 0, Type: 0},    // 0: X=0 split
+			{Normal: bsp.Vec3{Z: 1}, Dist: -376, Type: 2}, // 1: well floor (Z=-400)
+			{Normal: bsp.Vec3{Z: 1}, Dist: 24, Type: 2},   // 2: rim floor (Z=0)
+		},
+		Models: []bsp.Model{{Mins: bsp.Vec3{Z: -500}, HeadNodes: [4]int32{0, 0, 0, 0}}},
+		ClipNodes: []bsp.ClipNode{
+			{PlaneNum: 0, Children: [2]int32{1, 2}},                       // 0: X>=0 → well, X<0 → rim
+			{PlaneNum: 1, Children: [2]int32{contentsEmpty, contentsSolid}}, // 1: well
+			{PlaneNum: 2, Children: [2]int32{contentsEmpty, contentsSolid}}, // 2: rim
+		},
+	})
+	if err != nil {
+		t.Fatalf("build rim/well hull: %v", err)
+	}
+	return h
+}
+
+// TestHeightAboveFloorBox_RimSkim is the regression for the well-rim
+// false airgib: a player skimming the rim of a well has their origin
+// momentarily over the pit, so the single-column HeightAboveFloor plunges
+// to the distant well floor and reads a huge height, while the
+// footprint-aware HeightAboveFloorBox still finds the near rim under the
+// overhanging box and reads small. Mirrors anwalked RA, where the
+// single-point trace logged a bogus 553-unit airgib.
+func TestHeightAboveFloorBox_RimSkim(t *testing.T) {
+	h := rimWellHull(t)
+
+	// Origin just inside the well (within footprintMargin of the X=0 rim
+	// edge), feet 9 above the rim plane: z = playerFeetOffset + 9 = 33.
+	const y, z = 0, float32(playerFeetOffset) + 9
+	x := float32(footprintMargin) / 2
+
+	// Single column drops through the well opening to the floor at Z=-400.
+	single, ok := h.HeightAboveFloor(x, y, z)
+	if !ok || single < 350 {
+		t.Fatalf("single-column height = (%v,%v), want a large well-floor height", single, ok)
+	}
+
+	// Footprint query catches the rim (Z=0) under the overhanging box →
+	// the player reads ~9 above the rim, not ~409 above the well floor.
+	box, ok := h.HeightAboveFloorBox(x, y, z)
+	if !ok {
+		t.Fatalf("box height found no floor")
+	}
+	if math.Abs(float64(box-9)) > 0.5 {
+		t.Errorf("box height = %v, want ≈9 (above the rim)", box)
+	}
+
+	// Far enough into the well that the whole footprint is over the pit:
+	// no rim to catch, so box and single agree on the well-floor height.
+	farX := float32(footprintMargin) + 16
+	bFar, okb := h.HeightAboveFloorBox(farX, 0, z)
+	sFar, oks := h.HeightAboveFloor(farX, 0, z)
+	if !okb || !oks || math.Abs(float64(bFar-sFar)) > 0.5 {
+		t.Errorf("far-over-well: box=%v single=%v, want equal (no rim in footprint)", bFar, sFar)
+	}
+}
+
 // TestLoadForMap_FromBSP checks the runtime path: point the shared
 // mapbsp loader at the vendored maps/ tree and build dm2's hull straight
 // from its .bsp. Skips when maps/ is absent (CI has no BSPs — floor then

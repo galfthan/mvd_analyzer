@@ -124,14 +124,21 @@ type GlobalStream struct {
 // view.Buckets — read this column directly instead of deriving locs
 // from x/y/z separately.
 //
-// H is the player's height above the floor directly beneath them at each
-// sample — how far the feet are above the highest solid world surface at
-// or below the player origin, from a straight-down trace through the
-// map's worldspawn player clip hull (mapclip, schema v24). It reads ~0
-// when grounded and grows positive during a jump or airborne hit
-// (airgib), so a consumer can flag those without any coordinate
-// arithmetic. (The absolute floor surface, if needed, is Z[i] - 24 - H[i]
-// — the player origin rides 24 units above the floor its feet rest on.)
+// H is the player's height above the floor beneath them at each sample —
+// how far the feet are above the highest solid world surface at or below
+// the player, from straight-down traces through the map's worldspawn
+// player clip hull (mapclip, schema v24). Since v26 it is measured over
+// the player's bounding-box footprint, not just the origin column: the
+// highest floor found under a 3x3 grid of columns sampled ±8 around the
+// origin wins (an effective ~48-wide footprint on the already-±16-box-
+// inflated hull), so a player skimming a ledge / well rim — origin
+// momentarily
+// over the pit while the box overhangs the rim — reads the near floor
+// rather than the distant one far below. It reads ~0 when grounded and
+// grows positive during a jump or airborne hit (airgib), so a consumer
+// can flag those without any coordinate arithmetic. (The absolute floor
+// surface, if needed, is Z[i] - 24 - H[i] — the player origin rides 24
+// units above the floor its feet rest on.)
 // Sentinel NoFloor marks samples with no floor to measure from — over a
 // void/pit, or on a moving brush model (the dm2 lift, doors) which the
 // worldspawn-only hull does not include — and samples at the zero

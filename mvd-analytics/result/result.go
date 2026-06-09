@@ -279,7 +279,21 @@ package result
 //     PositionTrack.H column + the frag log; capped and sorted by height
 //     descending. Additive (omitempty); empty when the map has no clip
 //     hull (no H column) so no airborne height can be computed.
-const CurrentSchemaVersion = 25
+//
+// v26:
+//   - PositionTrack.H is now measured over the player's bounding-box
+//     footprint, not just the origin column: the height is taken to the
+//     highest floor found under a 3x3 grid of columns sampled ±8 around
+//     the origin (mapclip HeightAboveFloorBox). On the already-±16-box-
+//     inflated hull that is an effective ~48-wide footprint — the true
+//     box plus a small safety band. A player skimming a ledge
+//     / well rim — origin momentarily over the pit while the box overhangs
+//     the rim — now reads the near floor (small H) instead of plunging to
+//     the distant floor far below. Same shape and units; only values near
+//     ledges change, which also removes the bogus high airgibs those
+//     samples produced (e.g. anwalked RA's well rim logged a 553-unit
+//     airgib that was really a rim skim).
+const CurrentSchemaVersion = 26
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
