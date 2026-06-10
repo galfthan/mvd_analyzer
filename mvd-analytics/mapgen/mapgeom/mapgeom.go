@@ -6,8 +6,9 @@
 // assigned to the nearest loc by plain 3D Euclidean distance, matching
 // ezQuake's TP_LocationName exactly (see
 // ezquake-source/src/teamplay_locfiles.c). Faces are fan-triangulated
-// and emitted as flat float32 triangle lists that the frontend can
-// render with a trivial ctx.beginPath/moveTo/lineTo/fill loop.
+// and emitted as flat float32 triangle lists (x,y,z per vertex — 9
+// floats per triangle since version 2) that the frontend can project
+// and render with a trivial ctx.beginPath/moveTo/lineTo/fill loop.
 //
 // Faces that cannot be matched to a named loc (because no loc file is
 // loaded, the loc list is empty, or the nearest loc's normalized name
@@ -68,14 +69,22 @@ type Bounds struct {
 	MaxY float32 `json:"maxY"`
 }
 
-// LocRegion is the per-loc output record. Tris is a flat list of XY
-// pairs in world units, 6 floats per triangle. Name is the normalized
-// loc key (matching the JS side's processLocationGroups keying).
+// LocRegion is the per-loc output record. Tris is a flat list of XYZ
+// vertices in world units, 9 floats per triangle (version 2; version 1
+// emitted XY-only, 6 floats per triangle). Z is the median floor height
+// across the region's faces — a region-level hint kept for consumers
+// that don't need per-vertex height. Name is the normalized loc key
+// (matching the JS side's processLocationGroups keying).
 type LocRegion struct {
 	Name string    `json:"name"`
 	Z    float32   `json:"z"`
 	Tris []float32 `json:"tris"`
 }
+
+// GeometryVersion is written to MapRegions.Version. Version 2 carries
+// per-vertex Z in Tris (9 floats/triangle) so the viewer can render the
+// floor plan in 3D; version 1 files were XY-only (6 floats/triangle).
+const GeometryVersion = 2
 
 // MapRegions is the JSON output root.
 type MapRegions struct {
@@ -104,7 +113,7 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 
 	result := &MapRegions{
 		Map:     mapName,
-		Version: 1,
+		Version: GeometryVersion,
 	}
 
 	if b == nil || len(b.Models) == 0 {
@@ -129,8 +138,8 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 	}
 
 	type keptFace struct {
-		ring [][2]float32 // XY only (Z kept separately)
-		z    float32
+		ring []bsp.Vec3 // full XYZ vertices
+		z    float32    // centroid Z (used for the region median-Z hint)
 	}
 
 	// Group keptFaces by normalized loc name.
@@ -209,11 +218,7 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 		}
 		stats.FacesKept++
 
-		ring2D := make([][2]float32, len(ring3D))
-		for i, p := range ring3D {
-			ring2D[i] = [2]float32{p.X, p.Y}
-		}
-		groups[key] = append(groups[key], keptFace{ring: ring2D, z: cz})
+		groups[key] = append(groups[key], keptFace{ring: ring3D, z: cz})
 	}
 
 	// Produce stable output: sort named loc keys alphabetically, then
@@ -255,27 +260,27 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 				b := f.ring[i]
 				c := f.ring[i+1]
 				tris = append(tris,
-					a[0], a[1],
-					b[0], b[1],
-					c[0], c[1],
+					a.X, a.Y, a.Z,
+					b.X, b.Y, b.Z,
+					c.X, c.Y, c.Z,
 				)
 				if !hasBounds {
-					bounds.MinX, bounds.MaxX = a[0], a[0]
-					bounds.MinY, bounds.MaxY = a[1], a[1]
+					bounds.MinX, bounds.MaxX = a.X, a.X
+					bounds.MinY, bounds.MaxY = a.Y, a.Y
 					hasBounds = true
 				}
-				for _, p := range [3][2]float32{a, b, c} {
-					if p[0] < bounds.MinX {
-						bounds.MinX = p[0]
+				for _, p := range [3]bsp.Vec3{a, b, c} {
+					if p.X < bounds.MinX {
+						bounds.MinX = p.X
 					}
-					if p[0] > bounds.MaxX {
-						bounds.MaxX = p[0]
+					if p.X > bounds.MaxX {
+						bounds.MaxX = p.X
 					}
-					if p[1] < bounds.MinY {
-						bounds.MinY = p[1]
+					if p.Y < bounds.MinY {
+						bounds.MinY = p.Y
 					}
-					if p[1] > bounds.MaxY {
-						bounds.MaxY = p[1]
+					if p.Y > bounds.MaxY {
+						bounds.MaxY = p.Y
 					}
 				}
 				stats.Triangles++

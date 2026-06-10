@@ -72,7 +72,9 @@ that downstream consumers render, summarise, or feed to an agent.
   checks on the analysis result.
 - `cmd/mapgen/` — developer tool: reads BSP + loc files, writes per-loc
   floor-polygon JSON for the web viewer
-  (`mvd-web/static/maps/<name>.json`).
+  (`mvd-web/static/maps/<name>.json`). Geometry version 2: triangles
+  carry per-vertex x,y,z (9 floats each) so the map tab can render the
+  floor plan in 3D.
 - `cmd/qw-analyze/` — CLI consumer. `qw-analyze demo.mvd` produces Result
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.

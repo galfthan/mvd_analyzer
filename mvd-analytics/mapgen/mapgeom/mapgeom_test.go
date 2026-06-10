@@ -97,9 +97,15 @@ func TestBuild_AssignsFacesToCorrectLoc(t *testing.T) {
 	if rl.Z != 128 {
 		t.Errorf("RL.Z = %v, want 128", rl.Z)
 	}
-	// A quad fan-triangulates into 2 triangles → 12 float32s.
-	if len(rl.Tris) != 12 {
-		t.Errorf("RL.Tris len = %d, want 12", len(rl.Tris))
+	// A quad fan-triangulates into 2 triangles → 2 × 9 = 18 float32s.
+	if len(rl.Tris) != 18 {
+		t.Errorf("RL.Tris len = %d, want 18", len(rl.Tris))
+	}
+	// Every vertex of the high quad carries its own Z (version 2).
+	for i := 2; i < len(rl.Tris); i += 3 {
+		if rl.Tris[i] != 128 {
+			t.Errorf("RL.Tris[%d] (vertex z) = %v, want 128", i, rl.Tris[i])
+		}
 	}
 
 	start, ok := byName["start"]
@@ -164,9 +170,9 @@ func TestBuild_NoFinderEmitsUnnamedBackdrop(t *testing.T) {
 	if regions.Locs[0].Name != UnnamedRegionKey {
 		t.Errorf("region name = %q, want UnnamedRegionKey", regions.Locs[0].Name)
 	}
-	// Both quads → 2 faces × 2 triangles × 6 floats = 24 floats.
-	if len(regions.Locs[0].Tris) != 24 {
-		t.Errorf("unnamed.Tris len = %d, want 24", len(regions.Locs[0].Tris))
+	// Both quads → 2 faces × 2 triangles × 9 floats = 36 floats.
+	if len(regions.Locs[0].Tris) != 36 {
+		t.Errorf("unnamed.Tris len = %d, want 36", len(regions.Locs[0].Tris))
 	}
 	if regions.Bounds.MinX != 0 || regions.Bounds.MaxX != 64 {
 		t.Errorf("bounds X = (%v,%v), want (0,64)", regions.Bounds.MinX, regions.Bounds.MaxX)
@@ -245,10 +251,10 @@ func TestBuild_DropsCeilingAboveFloor(t *testing.T) {
 	if len(regions.Locs) != 1 {
 		t.Fatalf("regions.Locs len = %d, want 1", len(regions.Locs))
 	}
-	// Floor (z=0) and platform (z=128) kept → 2 quads × 2 tris × 6
-	// floats = 24.
-	if got := len(regions.Locs[0].Tris); got != 24 {
-		t.Errorf("room.Tris len = %d, want 24 (ceiling should be dropped)", got)
+	// Floor (z=0) and platform (z=128) kept → 2 quads × 2 tris × 9
+	// floats = 36.
+	if got := len(regions.Locs[0].Tris); got != 36 {
+		t.Errorf("room.Tris len = %d, want 36 (ceiling should be dropped)", got)
 	}
 }
 
@@ -282,9 +288,9 @@ func TestBuild_MultiLevelRegionKeepsAllFloors(t *testing.T) {
 	if len(regions.Locs) != 1 {
 		t.Fatalf("regions.Locs len = %d, want 1 (single region 'lifts')", len(regions.Locs))
 	}
-	// Both quads → 2 faces × 2 triangles × 6 floats = 24 floats.
-	if got := len(regions.Locs[0].Tris); got != 24 {
-		t.Errorf("lifts.Tris len = %d, want 24", got)
+	// Both quads → 2 faces × 2 triangles × 9 floats = 36 floats.
+	if got := len(regions.Locs[0].Tris); got != 36 {
+		t.Errorf("lifts.Tris len = %d, want 36", got)
 	}
 }
 

@@ -26,7 +26,8 @@ talks to it through a JS shim.
     XHR is still allowed inside Web Workers.
   - `wasm_exec.js` — Go runtime glue, copied from the Go toolchain at
     build time.
-  - `maps/` — pre-generated per-map floor polygon JSON. Committed; the
+  - `maps/` — pre-generated per-map floor polygon JSON (version 2:
+    per-vertex x,y,z — drives the map tab's 3D view). Committed; the
     frontend fetches `maps/<basename>.json` at demo load.
   - `probe.html` — tiny dev page used to probe runtime features.
 
@@ -291,6 +292,36 @@ the sidebar so verifying the event stream against gameplay is
 visual. The panel updates live during playback via the 200 ms
 full-sync tick in `animatePlayback`.
 
+## Map-tab 3D view
+
+The map starts in the classic top-down 2D view and can be rotated into
+3D: the **3D** button tilts the camera to a default oblique view, and
+right-drag (or Ctrl/Cmd+drag) rotates freely — horizontal motion spins
+the map (yaw), vertical motion tilts it (pitch, clamped between 20° and
+top-down). **Reset view** and double-click return to top-down. Left-drag
+pan and wheel zoom-about-cursor work at any rotation, as does
+click-to-follow (rotating does not drop follow mode; panning does).
+
+Everything is drawn through one orbit-camera orthographic projection
+(`projectWorld` in `app.js`): floor geometry uses the per-vertex heights
+in the version-2 map JSON, so each floor renders at its real level, and
+player tracks, player symbols, items, death/drop markers, loc labels and
+the region-control / occupancy overlays all project through the same
+transform. At exact top-down the projection degenerates to the old 2D
+transform — the default view is pixel-identical to the previous 2D map,
+and the painter's sort (projected camera depth) degenerates to the old
+z-sort. Floor fills stay semi-transparent, so tilted views read as a
+see-through architectural model rather than occluding solids; opaque
+markers (players, items, entities) are depth-sorted per frame.
+
+Version-1 geometry files (e.g. a stale browser cache) are upgraded on
+load by `normalizeMapGeometry`, which flattens each region to its median
+z — top-down looks identical, 3D shows flat-per-region floors. The
+height-based player-symbol size scaling (higher = up to 25% larger) is a
+2D-only cue and is disabled while the camera is tilted. Camera state
+lives in `_wtc` (`yaw`, `pitch`, orbit center `cx/cy/zMid`); rotation
+goes through `setMapCamera`.
+
 ## Map-tab "Learn map" mode
 
 When the result contains a `mapEntities` field (the static per-map
@@ -401,9 +432,12 @@ while old `?tab=loc-graph` links keep resolving.
 
 Per-map floor polygon JSON under `static/maps/` is produced by the
 `mapgen` developer tool, which reads Quake 1 BSPs from an off-repo
-working directory. See
-[mvd-analytics/README.md](../mvd-analytics/README.md#mapgen) and the
-[top-level README](../README.md#map-geometry) for the workflow.
+working directory. Current files are geometry version 2 (9 floats per
+triangle — x,y,z per vertex); the frontend still accepts version-1
+files (6 floats, XY only) by flattening each region to its median z.
+See
+[mvd-analytics/README.md](../mvd-analytics/README.md) (the `cmd/mapgen`
+entry) and `CLAUDE.md`'s quick reference for the workflow.
 
 ## Module boundary
 

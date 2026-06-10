@@ -2611,6 +2611,13 @@ th.sortable.sort-desc::after {
     background: var(--accent-cyan);
 }
 
+/* "3D" toggle — highlighted while the map camera is tilted off top-down. */
+.map-track-controls button#map-3d-toggle.active {
+    border-color: var(--accent-cyan);
+    color: var(--bg-deep);
+    background: var(--accent-cyan);
+}
+
 /* Learn-map sidebar: category filter checklist. */
 .map-entities-panel {
     margin-bottom: 12px;

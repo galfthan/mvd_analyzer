@@ -5542,16 +5542,19 @@ function processLocationGroups(locations) {
         groups[normalizedName].points.push({ x: loc.x, y: loc.y, z: loc.z });
     }
 
-    // Calculate centroid for each group
+    // Calculate centroid for each group. z rides along so labels project to
+    // the group's actual floor height in the 3D view.
     for (const group of Object.values(groups)) {
-        let sumX = 0, sumY = 0;
+        let sumX = 0, sumY = 0, sumZ = 0;
         for (const p of group.points) {
             sumX += p.x;
             sumY += p.y;
+            sumZ += p.z || 0;
         }
         group.centroid = {
             x: sumX / group.points.length,
-            y: sumY / group.points.length
+            y: sumY / group.points.length,
+            z: sumZ / group.points.length
         };
     }
 
@@ -5569,7 +5572,7 @@ function processLocationGroups(locations) {
         }
         for (const group of Object.values(groups)) {
             const g = geomByName[group.name];
-            group.tris = g && Array.isArray(g.tris) && g.tris.length >= 6 ? g.tris : null;
+            group.tris = g && Array.isArray(g.tris) && g.tris.length >= 9 ? g.tris : null;
         }
     }
 
@@ -5588,22 +5591,23 @@ function drawLocationRegionFromGeometry(ctx, group, worldToCanvasFunc) {
     drawTriangleListFill(ctx, group.tris, group.color.fill, worldToCanvasFunc);
 }
 
-// Fill a flat triangle list (6 numbers per triangle) with the given style.
-// Shared by loc-group fills and the unnamed backdrop underlay. All triangles
-// are added to a single path and filled once so this stays fast when called
-// every frame with thousands of tris. Uses the non-allocating worldToCanvas
-// variant (shared _tmpPt) — safe because each point's x/y is consumed by
-// ctx.moveTo/lineTo before the next call overwrites the buffer.
+// Fill a flat triangle list (9 numbers per triangle — x,y,z per vertex)
+// with the given style. Shared by loc-group fills and the unnamed backdrop
+// underlay. All triangles are added to a single path and filled once so this
+// stays fast when called every frame with thousands of tris. Uses the
+// non-allocating worldToCanvas variant (shared _tmpPt) — safe because each
+// point's x/y is consumed by ctx.moveTo/lineTo before the next call
+// overwrites the buffer.
 function drawTriangleListFill(ctx, tris, fillStyle, worldToCanvasFunc) {
-    if (!tris || tris.length < 6) return;
+    if (!tris || tris.length < 9) return;
     ctx.fillStyle = fillStyle;
     ctx.beginPath();
-    for (let i = 0; i + 5 < tris.length; i += 6) {
-        let p = worldToCanvasFunc(tris[i],     tris[i + 1]);
+    for (let i = 0; i + 8 < tris.length; i += 9) {
+        let p = worldToCanvasFunc(tris[i],     tris[i + 1], tris[i + 2]);
         ctx.moveTo(p.x, p.y);
-        p = worldToCanvasFunc(tris[i + 2], tris[i + 3]);
+        p = worldToCanvasFunc(tris[i + 3], tris[i + 4], tris[i + 5]);
         ctx.lineTo(p.x, p.y);
-        p = worldToCanvasFunc(tris[i + 4], tris[i + 5]);
+        p = worldToCanvasFunc(tris[i + 6], tris[i + 7], tris[i + 8]);
         ctx.lineTo(p.x, p.y);
         ctx.closePath();
     }
@@ -5612,30 +5616,31 @@ function drawTriangleListFill(ctx, tris, fillStyle, worldToCanvasFunc) {
 
 // Compute boundary edges of a triangle soup: edges that belong to exactly one
 // triangle are on the outline; edges shared by two triangles are interior and
-// cancel. Returns a flat Float array of world-space segment endpoints
-// (x1,y1,x2,y2, ...). Cached on the group for reuse.
+// cancel. Edge identity includes z so two floors stacked at the same XY don't
+// cancel each other's boundaries. Returns a flat Float array of world-space
+// segment endpoints (x1,y1,z1,x2,y2,z2, ...). Cached on the group for reuse.
 function computeRegionOutline(group) {
     if (group.outline !== undefined) return group.outline;
     const tris = group.tris;
-    if (!tris || tris.length < 6) {
+    if (!tris || tris.length < 9) {
         group.outline = null;
         return null;
     }
     const edgeCount = new Map();
-    const keyFor = (x1, y1, x2, y2) => {
+    const keyFor = (x1, y1, z1, x2, y2, z2) => {
         // Canonical order so (a,b) and (b,a) hash equally.
-        if (x1 < x2 || (x1 === x2 && y1 <= y2)) {
-            return x1 + ',' + y1 + '|' + x2 + ',' + y2;
+        if (x1 < x2 || (x1 === x2 && (y1 < y2 || (y1 === y2 && z1 <= z2)))) {
+            return x1 + ',' + y1 + ',' + z1 + '|' + x2 + ',' + y2 + ',' + z2;
         }
-        return x2 + ',' + y2 + '|' + x1 + ',' + y1;
+        return x2 + ',' + y2 + ',' + z2 + '|' + x1 + ',' + y1 + ',' + z1;
     };
-    for (let i = 0; i + 5 < tris.length; i += 6) {
-        const ax = tris[i],     ay = tris[i + 1];
-        const bx = tris[i + 2], by = tris[i + 3];
-        const cx = tris[i + 4], cy = tris[i + 5];
-        const e1 = keyFor(ax, ay, bx, by);
-        const e2 = keyFor(bx, by, cx, cy);
-        const e3 = keyFor(cx, cy, ax, ay);
+    for (let i = 0; i + 8 < tris.length; i += 9) {
+        const ax = tris[i],     ay = tris[i + 1], az = tris[i + 2];
+        const bx = tris[i + 3], by = tris[i + 4], bz = tris[i + 5];
+        const cx = tris[i + 6], cy = tris[i + 7], cz = tris[i + 8];
+        const e1 = keyFor(ax, ay, az, bx, by, bz);
+        const e2 = keyFor(bx, by, bz, cx, cy, cz);
+        const e3 = keyFor(cx, cy, cz, ax, ay, az);
         edgeCount.set(e1, (edgeCount.get(e1) || 0) + 1);
         edgeCount.set(e2, (edgeCount.get(e2) || 0) + 1);
         edgeCount.set(e3, (edgeCount.get(e3) || 0) + 1);
@@ -5644,9 +5649,9 @@ function computeRegionOutline(group) {
     for (const [key, count] of edgeCount) {
         if (count !== 1) continue;
         const [p1, p2] = key.split('|');
-        const [x1, y1] = p1.split(',').map(Number);
-        const [x2, y2] = p2.split(',').map(Number);
-        outline.push(x1, y1, x2, y2);
+        const [x1, y1, z1] = p1.split(',').map(Number);
+        const [x2, y2, z2] = p2.split(',').map(Number);
+        outline.push(x1, y1, z1, x2, y2, z2);
     }
     group.outline = outline;
     return outline;
@@ -5655,13 +5660,13 @@ function computeRegionOutline(group) {
 // Stroke the outline of a location region as a set of boundary line segments.
 function drawLocationRegionOutline(ctx, group, worldToCanvasFunc, strokeStyle, lineWidth) {
     const outline = computeRegionOutline(group);
-    if (!outline || outline.length < 4) return;
+    if (!outline || outline.length < 6) return;
     ctx.strokeStyle = strokeStyle;
     ctx.lineWidth = lineWidth;
     ctx.beginPath();
-    for (let i = 0; i + 3 < outline.length; i += 4) {
-        const a = worldToCanvasFunc(outline[i],     outline[i + 1]);
-        const b = worldToCanvasFunc(outline[i + 2], outline[i + 3]);
+    for (let i = 0; i + 5 < outline.length; i += 6) {
+        const a = worldToCanvasFunc(outline[i],     outline[i + 1], outline[i + 2]);
+        const b = worldToCanvasFunc(outline[i + 3], outline[i + 4], outline[i + 5]);
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
     }
@@ -5705,7 +5710,7 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
     // Brighter outline pass.
     for (const name of occupied) {
         const group = groupsByName[name];
-        if (!group || !group.tris || group.tris.length < 6) continue;
+        if (!group || !group.tris || group.tris.length < 9) continue;
         drawLocationRegionOutline(ctx, group, worldToCanvasNew, 'rgba(220, 220, 220, 0.7)', 1);
     }
 
@@ -5717,7 +5722,7 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
     for (const name of occupied) {
         const group = groupsByName[name];
         if (!group) continue;
-        const pos = worldToCanvasNew(group.centroid.x, group.centroid.y);
+        const pos = worldToCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
         // Soft shadow so the label stays legible against any underlying tint.
         ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
         ctx.fillText(group.name, pos.x + 1, pos.y + 1);
@@ -5835,7 +5840,7 @@ let mapState = {
     animationFrameId: null,
     lastRenderTime: 0,
     trailDuration: 10,          // Current trail window in seconds
-    fullTrails: {},             // playerName -> [{x, y, t, teamIdx, tp}] — pre-computed from all buckets
+    fullTrails: {},             // playerName -> [{wx, wy, wz, t, teamIdx, tp}] — pre-computed from all buckets
     trailStartTimes: {},        // playerName -> time when trail tracking started (for extending forward)
     enabledPlayers: {},         // playerName -> boolean — per-player trail toggle
     teams: [],
@@ -5912,6 +5917,30 @@ function markMapDirty() {
     mapState.renderDirty = true;
 }
 
+// normalizeMapGeometry: upgrade a fetched geometry JSON to the version-2
+// shape in place. Version 2 (mapgen ≥ schema bump) emits 9 floats per
+// triangle (x,y,z per vertex); version 1 files emitted 6 (XY only). Old
+// files — e.g. a stale browser cache — are expanded by flattening every
+// vertex to the region's median z, which reproduces the v1 look exactly
+// at top-down and gives a usable (if flat-per-region) 3D view.
+function normalizeMapGeometry(geom) {
+    if (geom.version >= 2) return;
+    for (const l of geom.locs) {
+        if (!l || !Array.isArray(l.tris)) continue;
+        const t6 = l.tris;
+        const z = l.z || 0;
+        const t9 = new Array((t6.length / 6) * 9);
+        let j = 0;
+        for (let i = 0; i + 5 < t6.length; i += 6) {
+            t9[j++] = t6[i];     t9[j++] = t6[i + 1]; t9[j++] = z;
+            t9[j++] = t6[i + 2]; t9[j++] = t6[i + 3]; t9[j++] = z;
+            t9[j++] = t6[i + 4]; t9[j++] = t6[i + 5]; t9[j++] = z;
+        }
+        l.tris = t9;
+    }
+    geom.version = 2;
+}
+
 function initMapView(result) {
     if (!result.timelineAnalysis) return;
 
@@ -5957,6 +5986,7 @@ function initMapView(result) {
             .then(geom => {
                 console.log(`[mvd-timing] map geometry fetch (async): ${(performance.now() - tGeom).toFixed(1)} ms`);
                 if (!geom || !Array.isArray(geom.locs) || geom.locs.length === 0) return;
+                normalizeMapGeometry(geom);
                 // The unnamed backdrop bucket (name === "") is drawn as a
                 // neutral underlay by drawLocationLayer; cache its triangle
                 // list separately so it isn't confused with loc groups keyed
@@ -5987,10 +6017,16 @@ function initMapView(result) {
     // Calculate bounds from locations and player positions
     calculateMapBounds(result);
 
-    // Size canvas and recompute transform. A fresh demo load resets user pan/zoom.
+    // Size canvas and recompute transform. A fresh demo load resets user
+    // pan/zoom and the 3D camera back to the top-down (2D) view.
     _wtc.panX = 0;
     _wtc.panY = 0;
     _wtc.zoomK = 1;
+    _wtc.yaw = 0;
+    _wtc.pitch = MAP_PITCH_MAX;
+    refreshMapCameraTrig();
+    const btn3d = document.getElementById('map-3d-toggle');
+    if (btn3d) btn3d.classList.remove('active');
     mapState.followPlayer = null;
     resizeMapCanvas();
 
@@ -6028,6 +6064,7 @@ function initMapView(result) {
         t:      d.time * 0.001,
         wx:     d.origin?.[0] || 0,
         wy:     d.origin?.[1] || 0,
+        wz:     d.origin?.[2] || 0,
         weapon: d.weapon,
     }));
 
@@ -6035,6 +6072,11 @@ function initMapView(result) {
     // scaling in renderMap (players higher up on the map render up to 25%
     // larger than those on the lowest level).
     mapState.zRange = computeMapZRange(mapState.locations);
+
+    // Orbit-camera reference height: tilting pivots about the map's vertical
+    // middle so high and low floors fan out symmetrically around the screen
+    // position they had at top-down.
+    _wtc.zMid = (mapState.zRange.lo + mapState.zRange.hi) / 2;
 
     // Populate the Follow-player dropdown with current players.
     rebuildFollowSelect();
@@ -6452,8 +6494,53 @@ function calculateMapBounds(result) {
 // Precomputed transform parameters — call updateWorldToCanvasTransform() when bounds/canvas change.
 // panX/panY/zoomK carry user-applied pan and zoom on top of the fit-to-canvas base. They persist
 // across transform recomputes (e.g. canvas resize, geometry reload) so the user's view survives.
+//
+// yaw/pitch are the 3D orbit camera angles. pitch = π/2 is exact top-down —
+// the projection then degenerates to the classic 2D transform (screen x = x,
+// screen y = y, depth = z), so the default view is identical to the old 2D
+// map. Lowering pitch tilts the camera; yaw spins the map about its center.
+// cx/cy/zMid are the world-space orbit center (XY map center, mid height).
+// sinYaw..cosPitch are cached trig — refreshMapCameraTrig() keeps them in
+// sync whenever yaw/pitch change.
 let _wtc = { scale: 1, offsetX: 0, offsetY: 0, minX: 0, minY: 0, canvasH: 0,
-             panX: 0, panY: 0, zoomK: 1 };
+             panX: 0, panY: 0, zoomK: 1,
+             yaw: 0, pitch: Math.PI / 2,
+             cx: 0, cy: 0, zMid: 0,
+             sinYaw: 0, cosYaw: 1, sinPitch: 1, cosPitch: 0 };
+
+// Camera pitch limits: π/2 is top-down (the 2D view); the lower clamp keeps
+// the view from going so flat that floors collapse into unreadable slivers
+// (and keeps sinPitch comfortably away from 0 for the zoom-anchor inverse).
+const MAP_PITCH_MAX = Math.PI / 2;
+const MAP_PITCH_MIN = 20 * Math.PI / 180;
+
+// Pitch applied by the "3D" toggle button — tilted enough that floors at
+// different heights separate clearly, while the layout stays recognizable.
+const MAP_3D_DEFAULT_PITCH = 55 * Math.PI / 180;
+
+// mapIs3D: true while the camera is rotated off the exact top-down view.
+function mapIs3D() {
+    return _wtc.pitch < MAP_PITCH_MAX - 1e-6 || Math.abs(_wtc.yaw) > 1e-6;
+}
+
+function refreshMapCameraTrig() {
+    _wtc.sinYaw = Math.sin(_wtc.yaw);
+    _wtc.cosYaw = Math.cos(_wtc.yaw);
+    _wtc.sinPitch = Math.sin(_wtc.pitch);
+    _wtc.cosPitch = Math.cos(_wtc.pitch);
+}
+
+// setMapCamera: clamp + apply orbit angles, sync the 3D toggle button, and
+// redraw. The single entry point for every rotation source (button, drag).
+function setMapCamera(yaw, pitch) {
+    _wtc.yaw = yaw;
+    _wtc.pitch = Math.min(MAP_PITCH_MAX, Math.max(MAP_PITCH_MIN, pitch));
+    refreshMapCameraTrig();
+    const btn = document.getElementById('map-3d-toggle');
+    if (btn) btn.classList.toggle('active', mapIs3D());
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
+}
 
 // Canvas width used for non-fullscreen rendering. Fullscreen reads the container bbox instead.
 const MAP_CANVAS_BASE_WIDTH = 850;
@@ -6507,7 +6594,11 @@ function updateWorldToCanvasTransform() {
     _wtc.minX = minX;
     _wtc.minY = minY;
     _wtc.canvasH = cssH;
-    // panX, panY, zoomK intentionally preserved across recomputes.
+    // Orbit center: the XY map center. zMid is set separately (initMapView)
+    // from the map's loc height range.
+    _wtc.cx = (minX + maxX) / 2;
+    _wtc.cy = (minY + maxY) / 2;
+    // panX, panY, zoomK, yaw, pitch intentionally preserved across recomputes.
 }
 
 function resetMapView() {
@@ -6518,35 +6609,61 @@ function resetMapView() {
         mapState.followPlayer = null;
         syncFollowSelectUI();
     }
-    mapState.renderDirty = true;
-    renderMap(mapState.currentTime);
+    // Back to the top-down 2D view (also syncs the 3D button and redraws).
+    setMapCamera(0, MAP_PITCH_MAX);
 }
 
 // Reusable point to avoid GC — only use for immediate consumption, not storage
-const _tmpPt = { x: 0, y: 0 };
+const _tmpPt = { x: 0, y: 0, depth: 0 };
 
-function worldToCanvas(x, y) {
-    const sx = _wtc.scale * _wtc.zoomK;
-    _tmpPt.x = _wtc.offsetX + (x - _wtc.minX) * sx + _wtc.panX;
-    _tmpPt.y = _wtc.canvasH - _wtc.offsetY - (y - _wtc.minY) * sx + _wtc.panY;
-    return _tmpPt;
+// projectWorld: orbit-camera orthographic projection of a world-space point.
+// The point is rotated about the map center by yaw (about the world Z axis),
+// then tilted by pitch, and the result is pushed through the same
+// fit/zoom/pan linear map the 2D view used. At pitch=π/2, yaw=0 this is
+// exactly the old 2D transform (x→x, y→y) and depth degenerates to z, so the
+// pre-existing z-sort semantics carry over unchanged.
+//
+// `depth` is camera closeness — bigger means nearer the viewer — used by the
+// painter's sort for players / items / entities.
+function projectWorld(x, y, z, out) {
+    const w = _wtc;
+    const dx = x - w.cx, dy = y - w.cy, dz = (z || 0) - w.zMid;
+    const xr = dx * w.cosYaw - dy * w.sinYaw;
+    const yr = dx * w.sinYaw + dy * w.cosYaw;
+    const u = w.cx + xr;
+    const v = w.cy + yr * w.sinPitch + dz * w.cosPitch;
+    const sx = w.scale * w.zoomK;
+    out.x = w.offsetX + (u - w.minX) * sx + w.panX;
+    out.y = w.canvasH - w.offsetY - (v - w.minY) * sx + w.panY;
+    out.depth = dz * w.sinPitch - yr * w.cosPitch;
+    return out;
+}
+
+function worldToCanvas(x, y, z) {
+    return projectWorld(x, y, z, _tmpPt);
 }
 
 // Allocating version for cases where result is stored (e.g., tracks, caching)
-function worldToCanvasNew(x, y) {
-    const sx = _wtc.scale * _wtc.zoomK;
-    return {
-        x: _wtc.offsetX + (x - _wtc.minX) * sx + _wtc.panX,
-        y: _wtc.canvasH - _wtc.offsetY - (y - _wtc.minY) * sx + _wtc.panY
-    };
+function worldToCanvasNew(x, y, z) {
+    return projectWorld(x, y, z, { x: 0, y: 0, depth: 0 });
 }
 
-// Inverse of worldToCanvas — canvas pixel to world coord. Needed for zoom-about-cursor and hit-testing.
-function canvasToWorld(cx, cy) {
-    const sx = _wtc.scale * _wtc.zoomK;
+// Inverse of worldToCanvas — canvas pixel to world coord. Needed for
+// zoom-about-cursor and hit-testing. A single screen point maps to a world
+// *ray* under the orbit camera, so the inverse is taken on the horizontal
+// plane z = zPlane (default: the orbit center height). At top-down this is
+// the exact 2D inverse regardless of zPlane.
+function canvasToWorld(cx, cy, zPlane) {
+    const w = _wtc;
+    const sx = w.scale * w.zoomK;
+    const u = w.minX + (cx - w.offsetX - w.panX) / sx;
+    const v = w.minY + (w.canvasH - w.offsetY + w.panY - cy) / sx;
+    const xr = u - w.cx;
+    const dz = (zPlane === undefined ? w.zMid : zPlane) - w.zMid;
+    const yr = (v - w.cy - dz * w.cosPitch) / w.sinPitch;
     return {
-        x: _wtc.minX + (cx - _wtc.offsetX - _wtc.panX) / sx,
-        y: _wtc.minY + (_wtc.canvasH - _wtc.offsetY + _wtc.panY - cy) / sx
+        x: w.cx + xr * w.cosYaw + yr * w.sinYaw,
+        y: w.cy - xr * w.sinYaw + yr * w.cosYaw
     };
 }
 
@@ -6948,14 +7065,14 @@ function buildPlayerRegionIcon(player) {
 function drawLocationLayer(ctx) {
     const groups = mapState.locationGroups || [];
     const backdropTris = mapState.mapGeometry && mapState.mapGeometry.backdropTris;
-    if (groups.length === 0 && (!backdropTris || backdropTris.length < 6)) return;
+    if (groups.length === 0 && (!backdropTris || backdropTris.length < 9)) return;
 
-    if (backdropTris && backdropTris.length >= 6) {
+    if (backdropTris && backdropTris.length >= 9) {
         drawTriangleListFill(ctx, backdropTris, 'rgba(70, 80, 110, 0.35)', worldToCanvas);
     }
 
     for (const group of groups) {
-        if (group.tris && group.tris.length >= 6) {
+        if (group.tris && group.tris.length >= 9) {
             drawLocationRegionFromGeometry(ctx, group, worldToCanvas);
         }
     }
@@ -6965,7 +7082,7 @@ function drawLocationLayer(ctx) {
     // drawLocationRegionOutline needs the allocating worldToCanvasNew because
     // it holds both endpoints of an edge simultaneously.
     for (const group of groups) {
-        if (group.tris && group.tris.length >= 6) {
+        if (group.tris && group.tris.length >= 9) {
             drawLocationRegionOutline(ctx, group, worldToCanvasNew, 'rgba(180, 180, 180, 0.5)', 1);
         }
     }
@@ -6975,7 +7092,7 @@ function drawLocationLayer(ctx) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const group of groups) {
-        const pos = worldToCanvasNew(group.centroid.x, group.centroid.y);
+        const pos = worldToCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
         ctx.fillStyle = group.color.text;
         ctx.fillText(group.name, pos.x, pos.y);
     }
@@ -6993,8 +7110,8 @@ function mapIconScale() {
 }
 
 // Pre-compute full trails for all players from high-res bucket data.
-// Stores world-space (wx, wy) positions — drawTracks converts to canvas via
-// worldToCanvas at draw time so trails follow user pan/zoom.
+// Stores world-space (wx, wy, wz) positions — drawTracks converts to canvas
+// via worldToCanvas at draw time so trails follow user pan/zoom/rotation.
 function precomputeFullTrails() {
     mapState.fullTrails = {};
     // Sorted-by-time list of death frames in world space, used by renderMap
@@ -7015,13 +7132,14 @@ function precomputeFullTrails() {
         const cp = view.players[name];
         const symbolInfo = mapState.playerSymbols[name];
         if (!symbolInfo) continue;
-        const xs = cp.x, ys = cp.y, ds = cp.d, sps = cp.sp;
+        const xs = cp.x, ys = cp.y, zs = cp.z, ds = cp.d, sps = cp.sp;
         if (!xs || !ys) continue;
 
         let lastWorld = null;
         for (let rel = 0; rel < cp.n; rel++) {
             if (!cp.alive[rel]) continue;
             const x = xs[rel], y = ys[rel];
+            const z = zs ? zs[rel] : 0;
             if (x === 0 && y === 0) continue;
 
             const i = cp.first + rel;
@@ -7038,7 +7156,7 @@ function precomputeFullTrails() {
             // teamIdx is captured so the X is painted in the dead player's
             // own team color rather than a generic red.
             if (isDeath) {
-                mapState.deathEvents.push({ t, wx: x, wy: y, teamIdx: symbolInfo.teamIdx });
+                mapState.deathEvents.push({ t, wx: x, wy: y, wz: z, teamIdx: symbolInfo.teamIdx });
             }
 
             // Always include death/spawn markers regardless of distance.
@@ -7053,7 +7171,7 @@ function precomputeFullTrails() {
             const isTeleport = !isDeath && !isSpawn && lastWorld && (Math.abs(x - lastWorld.x) > MAX_MOVE_PER_BUCKET || Math.abs(y - lastWorld.y) > MAX_MOVE_PER_BUCKET);
 
             lastWorld = { x, y };
-            track.push({ wx: x, wy: y, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
+            track.push({ wx: x, wy: y, wz: z, t, teamIdx: symbolInfo.teamIdx, tp: isTeleport, death: isDeath, spawn: isSpawn });
         }
     }
 
@@ -7151,7 +7269,7 @@ function renderMap(time) {
         if (fp && !(fp.x === 0 && fp.y === 0)) {
             _wtc.panX = 0;
             _wtc.panY = 0;
-            const pos = worldToCanvas(fp.x, fp.y);
+            const pos = worldToCanvas(fp.x, fp.y, fp.z);
             _wtc.panX = cssW / 2 - pos.x;
             _wtc.panY = cssH / 2 - pos.y;
         }
@@ -7214,7 +7332,7 @@ function renderMap(time) {
             const dt = time - e.t;
             if (dt < 0 || dt > DEATH_X_DURATION) continue;
             const alpha = 1 - dt / DEATH_X_DURATION;
-            const pos = worldToCanvasNew(e.wx, e.wy);
+            const pos = worldToCanvasNew(e.wx, e.wy, e.wz);
             drawDeathX(ctx, pos.x, pos.y, e.teamIdx, alpha);
         }
     }
@@ -7228,7 +7346,7 @@ function renderMap(time) {
             const dt = time - e.t;
             if (dt < 0 || dt > DEATH_X_DURATION) continue;
             const alpha = 1 - dt / DEATH_X_DURATION;
-            const pos = worldToCanvasNew(e.wx, e.wy);
+            const pos = worldToCanvasNew(e.wx, e.wy, e.wz);
             drawDropD(ctx, pos.x, pos.y, e.weapon, alpha);
         }
     }
@@ -7360,18 +7478,27 @@ const ITEM_Z_TOP_THRESHOLD = 48;
 function drawItemsAndPlayersZSorted(ctx, time, playerData) {
     const iconScale = mapIconScale();
     const zRange = mapState.zRange || { lo: 0, hi: 0 };
-    const zSpan = zRange.hi - zRange.lo;
+    // Height-based symbol size scaling is a 2D-only cue: once the camera is
+    // tilted, height is directly visible, and size differences would read as
+    // distance instead.
+    const zSpan = mapIs3D() ? 0 : (zRange.hi - zRange.lo);
 
+    // Sort key is projected camera depth (closeness), which degenerates to
+    // plain z at top-down — preserving the old sort exactly — and stays
+    // correct under any rotation. The item bias is applied along the same
+    // axis (z contributes sinPitch to depth) so the "player standing on a
+    // pickup wins the tie" rule keeps working when tilted.
     const drawables = [];
     const items = currentResult?.items?.items;
     if (items && items.length > 0) {
         for (const item of items) {
             const style = ITEM_MARKER_STYLES[item.kind];
             if (!style) continue;
+            const pos = worldToCanvasNew(item.x, item.y, item.z);
             drawables.push({
                 kind: 'i',
-                sortZ: (item.z || 0) - ITEM_Z_TOP_THRESHOLD,
-                item, style
+                sortDepth: pos.depth - ITEM_Z_TOP_THRESHOLD * _wtc.sinPitch,
+                pos, item, style
             });
         }
     }
@@ -7380,16 +7507,17 @@ function drawItemsAndPlayersZSorted(ctx, time, playerData) {
             if (data.x === 0 && data.y === 0) continue;
             const symbolInfo = mapState.playerSymbols[name];
             if (!symbolInfo) continue;
+            const pos = worldToCanvasNew(data.x, data.y, data.z);
             drawables.push({
                 kind: 'p',
-                sortZ: data.z || 0,
-                data, symbolInfo
+                sortDepth: pos.depth,
+                pos, data, symbolInfo
             });
         }
     }
     if (drawables.length === 0) return;
 
-    drawables.sort((a, b) => a.sortZ - b.sortZ);
+    drawables.sort((a, b) => a.sortDepth - b.sortDepth);
 
     const itemSize = ITEM_MARKER_SIZE * iconScale;
     const itemHalf = itemSize / 2;
@@ -7402,10 +7530,10 @@ function drawItemsAndPlayersZSorted(ctx, time, playerData) {
     for (const d of drawables) {
         if (d.kind === 'i') {
             drawSingleMapItem(ctx, time, d.item, d.style,
-                              itemSize, itemHalf, itemFontPx);
+                              itemSize, itemHalf, itemFontPx, d.pos);
         } else {
             drawSinglePlayer(ctx, d.data, d.symbolInfo,
-                             iconScale, zRange, zSpan);
+                             iconScale, zRange, zSpan, d.pos);
         }
     }
 
@@ -7413,8 +7541,7 @@ function drawItemsAndPlayersZSorted(ctx, time, playerData) {
     ctx.restore();
 }
 
-function drawSingleMapItem(ctx, time, item, style, size, half, fontPx) {
-    const pos = worldToCanvas(item.x, item.y);
+function drawSingleMapItem(ctx, time, item, style, size, half, fontPx, pos) {
     const up = isItemUp(item, time);
     ctx.globalAlpha = up ? 1.0 : ITEM_DIM_ALPHA;
 
@@ -7438,9 +7565,7 @@ function drawSingleMapItem(ctx, time, item, style, size, half, fontPx) {
     ctx.globalAlpha = 1.0;
 }
 
-function drawSinglePlayer(ctx, data, symbolInfo, iconScale, zRange, zSpan) {
-    const pos = worldToCanvas(data.x, data.y);
-
+function drawSinglePlayer(ctx, data, symbolInfo, iconScale, zRange, zSpan, pos) {
     // Per-player z-based size scale: players near the top of the map
     // (98th percentile z) render 25% larger than those near the bottom
     // (2nd percentile), linearly interpolated. Applied on top of the
@@ -7523,7 +7648,7 @@ function buildTeleportArrows() {
         if (e.type !== 'teleportSrc' || !e.target) continue;
         const dst = dstByName[e.target];
         if (!dst) continue;
-        mapState.teleportArrows.push({ sx: e.x, sy: e.y, dx: dst.x, dy: dst.y });
+        mapState.teleportArrows.push({ sx: e.x, sy: e.y, sz: e.z, dx: dst.x, dy: dst.y, dz: dst.z });
     }
 }
 
@@ -7544,8 +7669,8 @@ function drawMapEntities(ctx) {
         ctx.globalAlpha = 0.55;
         ctx.lineWidth = Math.max(1, 1.5 * iconScale);
         for (const a of mapState.teleportArrows) {
-            const s = worldToCanvasNew(a.sx, a.sy);
-            const d = worldToCanvasNew(a.dx, a.dy);
+            const s = worldToCanvasNew(a.sx, a.sy, a.sz);
+            const d = worldToCanvasNew(a.dx, a.dy, a.dz);
             drawArrow(ctx, s.x, s.y, d.x, d.y, 8 * iconScale);
         }
         ctx.restore();
@@ -7554,18 +7679,20 @@ function drawMapEntities(ctx) {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    // Lower decks first so higher floors draw on top.
-    const sorted = entities.slice().sort((a, b) => (a.z || 0) - (b.z || 0));
-    for (const e of sorted) {
+    // Farther-from-camera first so nearer markers draw on top (degenerates
+    // to lower-decks-first at top-down).
+    const sorted = entities
+        .map(e => ({ e, pos: worldToCanvasNew(e.x, e.y, e.z) }))
+        .sort((a, b) => a.pos.depth - b.pos.depth);
+    for (const { e, pos } of sorted) {
         if (!f[entityCategory(e)]) continue;
         const style = e.type === 'item' ? LEARN_ITEM_STYLES[e.kind] : STRUCTURAL_STYLES[e.type];
-        if (style) drawEntityMarker(ctx, e, style, size, half, fontPx);
+        if (style) drawEntityMarker(ctx, e, style, size, half, fontPx, pos);
     }
     ctx.restore();
 }
 
-function drawEntityMarker(ctx, e, style, size, half, fontPx) {
-    const pos = worldToCanvas(e.x, e.y);
+function drawEntityMarker(ctx, e, style, size, half, fontPx, pos) {
     if (style.circle) {
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, half, 0, Math.PI * 2);
@@ -7842,7 +7969,7 @@ function drawTracks(ctx, time) {
         const cpts = new Array(endIdx - startIdx + 1);
         for (let i = startIdx; i <= endIdx; i++) {
             const pt = points[i];
-            const c = worldToCanvasNew(pt.wx, pt.wy);
+            const c = worldToCanvasNew(pt.wx, pt.wy, pt.wz);
             cpts[i - startIdx] = { x: c.x, y: c.y, spawn: pt.spawn, death: pt.death, tp: pt.tp };
         }
 
@@ -8025,6 +8152,16 @@ function setupMapTrailControls() {
         });
     }
 
+    const btn3d = document.getElementById('map-3d-toggle');
+    if (btn3d) {
+        btn3d.addEventListener('click', () => {
+            // Toggle between top-down (2D) and the default tilted 3D view.
+            // Yaw resets either way so the map keeps its familiar orientation;
+            // free rotation is available via right-drag / Ctrl+drag.
+            setMapCamera(0, mapIs3D() ? MAP_PITCH_MAX : MAP_3D_DEFAULT_PITCH);
+        });
+    }
+
     const resetViewBtn = document.getElementById('map-reset-view');
     if (resetViewBtn) {
         resetViewBtn.addEventListener('click', () => { resetMapView(); });
@@ -8057,10 +8194,13 @@ function setupMapTrailControls() {
     }
 }
 
-// installMapInteraction adds pan / zoom / click handlers to the map canvas.
-// Pan: left-drag. Zoom: mouse wheel (centered on cursor). Click (no drag):
-// dispatched through handleMapCanvasClick — used by follow-player to toggle
-// follow on a player symbol. Double-click resets the view.
+// installMapInteraction adds pan / zoom / rotate / click handlers to the map
+// canvas. Pan: left-drag. Rotate (3D orbit): right-drag or Ctrl/Cmd+left-drag
+// — horizontal motion spins the map (yaw), vertical motion tilts it (pitch,
+// clamped between MAP_PITCH_MIN and top-down). Zoom: mouse wheel (centered
+// on cursor). Click (no drag): dispatched through handleMapCanvasClick —
+// used by follow-player to toggle follow on a player symbol. Double-click
+// resets the view (including rotation).
 function installMapInteraction(canvas) {
     if (!canvas || canvas.__mapInteractionInstalled) return;
     canvas.__mapInteractionInstalled = true;
@@ -8068,10 +8208,13 @@ function installMapInteraction(canvas) {
     const CLICK_MAX_MOTION_PX = 5;
     const ZOOM_MIN = 0.5;
     const ZOOM_MAX = 12;
+    const ORBIT_YAW_PER_PX = 0.008;   // rad of yaw per horizontal pixel
+    const ORBIT_PITCH_PER_PX = 0.005; // rad of pitch per vertical pixel
 
     const drag = {
         active: false,
         button: -1,
+        mode: 'pan', // 'pan' | 'orbit'
         startX: 0, startY: 0,
         lastX: 0, lastY: 0,
         moved: false,
@@ -8089,15 +8232,20 @@ function installMapInteraction(canvas) {
     }
 
     canvas.addEventListener('mousedown', (ev) => {
-        if (ev.button !== 0) return;
+        if (ev.button !== 0 && ev.button !== 2) return;
         const p = canvasPointFromEvent(ev);
         drag.active = true;
         drag.button = ev.button;
+        drag.mode = (ev.button === 2 || ev.ctrlKey || ev.metaKey) ? 'orbit' : 'pan';
         drag.startX = drag.lastX = p.x;
         drag.startY = drag.lastY = p.y;
         drag.moved = false;
         ev.preventDefault();
     });
+
+    // Right-drag is the orbit gesture — keep the browser context menu off
+    // the canvas so it doesn't swallow the mouseup.
+    canvas.addEventListener('contextmenu', (ev) => ev.preventDefault());
 
     window.addEventListener('mousemove', (ev) => {
         if (!drag.active) return;
@@ -8112,8 +8260,10 @@ function installMapInteraction(canvas) {
             if (Math.abs(totalDx) > CLICK_MAX_MOTION_PX ||
                 Math.abs(totalDy) > CLICK_MAX_MOTION_PX) {
                 drag.moved = true;
-                // Starting a pan drops follow-mode so the user isn't fighting the camera.
-                if (mapState.followPlayer) {
+                // Starting a pan drops follow-mode so the user isn't fighting
+                // the camera. Orbiting keeps it — rotation composes fine with
+                // the per-frame follow re-center.
+                if (drag.mode === 'pan' && mapState.followPlayer) {
                     mapState.followPlayer = null;
                     syncFollowSelectUI();
                 }
@@ -8121,16 +8271,23 @@ function installMapInteraction(canvas) {
             }
         }
         if (drag.moved) {
-            _wtc.panX += dx;
-            _wtc.panY += dy;
-            mapState.renderDirty = true;
-            renderMap(mapState.currentTime);
+            if (drag.mode === 'orbit') {
+                // Horizontal drag spins, vertical drag tilts (up = tilt
+                // further toward horizontal, down = back toward top-down).
+                setMapCamera(_wtc.yaw + dx * ORBIT_YAW_PER_PX,
+                             _wtc.pitch + dy * ORBIT_PITCH_PER_PX);
+            } else {
+                _wtc.panX += dx;
+                _wtc.panY += dy;
+                mapState.renderDirty = true;
+                renderMap(mapState.currentTime);
+            }
         }
     });
 
     window.addEventListener('mouseup', (ev) => {
         if (!drag.active) return;
-        const wasClick = !drag.moved;
+        const wasClick = !drag.moved && drag.button === 0;
         drag.active = false;
         drag.button = -1;
         canvas.style.cursor = '';
@@ -8150,12 +8307,18 @@ function installMapInteraction(canvas) {
         if (newZoom === _wtc.zoomK) return;
         _wtc.zoomK = newZoom;
         // Adjust pan so the world point under the cursor stays anchored.
-        // Follow-mode intentionally survives zoom — renderMap's follow step
-        // will re-center on the tracked player using the new zoom level, so
-        // zoom becomes "zoom in on the player" rather than dropping follow.
-        const sx = _wtc.scale * _wtc.zoomK;
-        _wtc.panX = p.x - _wtc.offsetX - (worldBefore.x - _wtc.minX) * sx;
-        _wtc.panY = p.y - _wtc.canvasH + _wtc.offsetY + (worldBefore.y - _wtc.minY) * sx;
+        // canvasToWorld inverted on the zMid plane, so re-projecting that
+        // point (at zMid) with zeroed pan gives exactly the offset needed —
+        // valid at any camera rotation, identical to the old algebra at
+        // top-down. Follow-mode intentionally survives zoom — renderMap's
+        // follow step will re-center on the tracked player using the new
+        // zoom level, so zoom becomes "zoom in on the player" rather than
+        // dropping follow.
+        _wtc.panX = 0;
+        _wtc.panY = 0;
+        const pp = worldToCanvasNew(worldBefore.x, worldBefore.y, _wtc.zMid);
+        _wtc.panX = p.x - pp.x;
+        _wtc.panY = p.y - pp.y;
         mapState.renderDirty = true;
         renderMap(mapState.currentTime);
     }, { passive: false });
@@ -8191,7 +8354,7 @@ function hitTestPlayerSymbol(cx, cy, time) {
     let bestD2 = FOLLOW_HIT_RADIUS_PX * FOLLOW_HIT_RADIUS_PX;
     for (const [name, data] of Object.entries(bucket.p)) {
         if (data.x === 0 && data.y === 0) continue;
-        const pos = worldToCanvas(data.x, data.y);
+        const pos = worldToCanvas(data.x, data.y, data.z);
         const dx = pos.x - cx;
         const dy = pos.y - cy;
         const d2 = dx * dx + dy * dy;
