@@ -5582,15 +5582,6 @@ function processLocationGroups(locations) {
     return Object.values(groups);
 }
 
-// Draw a location region from a pre-generated BSP-derived triangle list.
-// tris is a flat Float array: 6 numbers per triangle (x1,y1,x2,y2,x3,y3).
-// Groups with no tris (map JSON absent or loc unmatched) simply don't
-// render — the legacy convex-hull fallback was removed now that mapgen
-// output is the only source of region shapes.
-function drawLocationRegionFromGeometry(ctx, group, worldToCanvasFunc) {
-    drawTriangleListFill(ctx, group.tris, group.color.fill, worldToCanvasFunc);
-}
-
 // Fill a flat triangle list (9 numbers per triangle — x,y,z per vertex)
 // with the given style. Shared by loc-group fills and the unnamed backdrop
 // underlay. All triangles are added to a single path and filled once so this
@@ -5678,6 +5669,114 @@ function drawLocationRegionOutline(ctx, group, worldToCanvasFunc, strokeStyle, l
 // silently no-op. Used by the region-control overlay.
 function fillLocationRegion(ctx, group, fillColor, worldToCanvasFunc) {
     drawTriangleListFill(ctx, group.tris, fillColor, worldToCanvasFunc);
+}
+
+// scaleRgbaAlpha: multiply the alpha of an 'rgba(r, g, b, a)' string by k,
+// clamped to cap. All map fill/stroke styles are rgba strings, so this is
+// how the focus tiers brighten/fade them without a parallel color table.
+function scaleRgbaAlpha(rgba, k, cap) {
+    return rgba.replace(/rgba\(([^,]+),([^,]+),([^,]+),([^)]+)\)/,
+        (m, r, g, b, a) => {
+            let na = parseFloat(a) * k;
+            if (cap !== undefined && na > cap) na = cap;
+            if (na > 1) na = 1;
+            return `rgba(${r},${g},${b},${na})`;
+        });
+}
+
+// ─── Region focus mode ──────────────────────────────────────────────────────
+//
+// Clicking a loc region (on empty floor, not a player symbol) focuses it:
+// the region and its XY-neighbors render solid and saturated while
+// everything else fades to a faint outline, so a zoomed-in fight area stays
+// readable. Click the same region, empty space, Escape, or Reset view to
+// clear. Focus also becomes the orbit-drag pivot (currentOrbitPivot).
+
+// Two named regions are "neighbors" when their world-XY bounding boxes are
+// within this many units of touching — roughly one corridor width.
+const FOCUS_NEIGHBOR_MARGIN = 160;
+
+// focusTier: null when no focus is active; otherwise which styling tier the
+// named group falls into.
+function focusTier(name) {
+    if (!mapState.focusGroupName) return null;
+    if (name === mapState.focusGroupName) return 'focus';
+    if (mapState.focusNeighbors && mapState.focusNeighbors.has(name)) return 'near';
+    return 'far';
+}
+
+// World-XY bbox of a group's floor triangles, cached on the group (geometry
+// is static per demo).
+function groupWorldBBox(group) {
+    if (group._wbbox) return group._wbbox;
+    const tris = group.tris;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (let i = 0; i + 8 < tris.length; i += 9) {
+        for (let v = 0; v < 9; v += 3) {
+            const x = tris[i + v], y = tris[i + v + 1];
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+    }
+    group._wbbox = { minX, maxX, minY, maxY };
+    return group._wbbox;
+}
+
+function setFocusGroup(name) {
+    mapState.focusGroupName = null;
+    mapState.focusNeighbors = null;
+    const focus = name ? mapState.locationGroupByName?.[name] : null;
+    if (focus && focus.tris && focus.tris.length >= 9) {
+        mapState.focusGroupName = name;
+        const fb = groupWorldBBox(focus);
+        const nb = new Set();
+        for (const g of mapState.locationGroups || []) {
+            if (g === focus || !g.tris || g.tris.length < 9) continue;
+            const gb = groupWorldBBox(g);
+            const gapX = Math.max(gb.minX - fb.maxX, fb.minX - gb.maxX);
+            const gapY = Math.max(gb.minY - fb.maxY, fb.minY - gb.maxY);
+            if (Math.max(gapX, gapY) <= FOCUS_NEIGHBOR_MARGIN) nb.add(g.name);
+        }
+        mapState.focusNeighbors = nb;
+    }
+    mapState.renderDirty = true;
+    renderMap(mapState.currentTime);
+}
+
+function pointInTriangle(px, py, a, b, c) {
+    const d1 = (px - b.x) * (a.y - b.y) - (a.x - b.x) * (py - b.y);
+    const d2 = (px - c.x) * (b.y - c.y) - (b.x - c.x) * (py - c.y);
+    const d3 = (px - a.x) * (c.y - a.y) - (c.x - a.x) * (py - a.y);
+    const hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    const hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+    return !(hasNeg && hasPos);
+}
+
+// pickLocGroupAt: which named loc region is under the canvas point. Tests
+// every projected floor triangle; among hits the one nearest the camera
+// wins, so clicking a spot where two floors stack resolves to the visible
+// (upper, under the current rotation) one. One-off per click — no caching.
+function pickLocGroupAt(cx, cy) {
+    let bestName = null;
+    let bestDepth = -Infinity;
+    for (const group of mapState.locationGroups || []) {
+        const tris = group.tris;
+        if (!tris || tris.length < 9) continue;
+        for (let i = 0; i + 8 < tris.length; i += 9) {
+            const a = worldToCanvasNew(tris[i],     tris[i + 1], tris[i + 2]);
+            const b = worldToCanvasNew(tris[i + 3], tris[i + 4], tris[i + 5]);
+            const c = worldToCanvasNew(tris[i + 6], tris[i + 7], tris[i + 8]);
+            if (!pointInTriangle(cx, cy, a, b, c)) continue;
+            const depth = Math.max(a.depth, b.depth, c.depth);
+            if (depth > bestDepth) {
+                bestDepth = depth;
+                bestName = group.name;
+            }
+        }
+    }
+    return bestName;
 }
 
 // Compute the set of loc-group names currently occupied by at least one
@@ -5816,7 +5915,12 @@ function drawRegionControlOverlay(ctx, controlStates) {
         const color = hexToRgba(hex, finalAlpha);
 
         for (const group of groups) {
-            fillLocationRegion(ctx, group, color, worldToCanvasNew);
+            // Region focus: tint outside the focus neighborhood fades with
+            // the base fills so the focused area keeps visual priority.
+            const tint = focusTier(group.name) === 'far'
+                ? scaleRgbaAlpha(color, 0.3)
+                : color;
+            fillLocationRegion(ctx, group, tint, worldToCanvasNew);
         }
     }
 }
@@ -5853,8 +5957,11 @@ let mapState = {
     // "Learn map" mode: a static study view that hides players and shows
     // the map's designed entity layout (result.mapEntities) instead.
     learnMode: false,
+    focusGroupName: null,     // normalized loc-group name under region focus, or null
+    focusNeighbors: null,     // Set of group names adjacent to the focused one
+    solidMode: false,         // opt-in occluding 3D model (needs walls in geometry v3)
     mapEntities: [],          // result.mapEntities.entities for the current demo
-    teleportArrows: [],       // precomputed {sx,sy,dx,dy} entrance→exit world-coord pairs
+    teleportArrows: [],       // precomputed {sx,sy,sz,dx,dy,dz} entrance→exit world-coord pairs
     entityFilters: {          // per-category visibility in learn mode
         weapon: true, armor: true, health: true, ammo: true, powerup: true,
         teleporter: true, spawn: false, button: false, door: false
@@ -5957,6 +6064,12 @@ function initMapView(result) {
     mapState.locTable = (timeline && timeline.locTable) ? timeline.locTable : [''];
     mapState.locationGroups = null; // Clear cached groups for new demo
     mapState.mapGeometry = null;    // Reset BSP-derived geometry for new demo
+    mapState.focusGroupName = null; // Region focus doesn't survive demo switch
+    mapState.focusNeighbors = null;
+    mapState._solidEntries = null;  // Solid-model caches are per-geometry
+    mapState._solidCanvasKey = null;
+    const solidBtnInit = document.getElementById('map-solid-toggle');
+    if (solidBtnInit) solidBtnInit.style.display = 'none'; // shown again if v3 geometry arrives
 
     // Static map-entity corpus (result.mapEntities) for the "learn map" view.
     mapState.mapEntities = (result.mapEntities && Array.isArray(result.mapEntities.entities))
@@ -5994,6 +6107,13 @@ function initMapView(result) {
                 const backdrop = geom.locs.find(l => l && l.name === '');
                 geom.backdropTris = backdrop && Array.isArray(backdrop.tris) ? backdrop.tris : null;
                 mapState.mapGeometry = geom;
+                // The Solid (occluding model) toggle needs wall geometry —
+                // only version-3 files carry it.
+                const solidBtn = document.getElementById('map-solid-toggle');
+                if (solidBtn) {
+                    solidBtn.style.display =
+                        (Array.isArray(geom.walls) && geom.walls.length >= 9) ? '' : 'none';
+                }
                 // Rebuild groups with tris attached, then refresh region->group
                 // references so the control overlay doesn't keep pointing at
                 // the pre-fetch (tris-less) group objects.
@@ -6075,8 +6195,10 @@ function initMapView(result) {
 
     // Orbit-camera reference height: tilting pivots about the map's vertical
     // middle so high and low floors fan out symmetrically around the screen
-    // position they had at top-down.
+    // position they had at top-down. The default is remembered so Reset view
+    // can undo orbit-drag re-centering.
     _wtc.zMid = (mapState.zRange.lo + mapState.zRange.hi) / 2;
+    _wtc.zMidDefault = _wtc.zMid;
 
     // Populate the Follow-player dropdown with current players.
     rebuildFollowSelect();
@@ -6508,11 +6630,18 @@ let _wtc = { scale: 1, offsetX: 0, offsetY: 0, minX: 0, minY: 0, canvasH: 0,
              cx: 0, cy: 0, zMid: 0,
              sinYaw: 0, cosYaw: 1, sinPitch: 1, cosPitch: 0 };
 
-// Camera pitch limits: π/2 is top-down (the 2D view); the lower clamp keeps
-// the view from going so flat that floors collapse into unreadable slivers
-// (and keeps sinPitch comfortably away from 0 for the zoom-anchor inverse).
+// Camera pitch limits: π/2 is top-down (the 2D view); 0 is a true side
+// elevation (looking along the horizon). Nothing in the render path divides
+// by sinPitch anymore — the zoom anchor works in view space and
+// canvasToWorld guards its inverse — so the full range is allowed.
 const MAP_PITCH_MAX = Math.PI / 2;
-const MAP_PITCH_MIN = 20 * Math.PI / 180;
+const MAP_PITCH_MIN = 0;
+
+// Yaw lightly snaps to the four cardinal directions when within this margin,
+// so "look straight along x / y" is easy to hit by hand. The orbit drag uses
+// absolute deltas from the drag start, so dragging through a snap point
+// escapes it naturally.
+const MAP_YAW_SNAP = 2 * Math.PI / 180;
 
 // Pitch applied by the "3D" toggle button — tilted enough that floors at
 // different heights separate clearly, while the layout stays recognizable.
@@ -6530,9 +6659,17 @@ function refreshMapCameraTrig() {
     _wtc.cosPitch = Math.cos(_wtc.pitch);
 }
 
-// setMapCamera: clamp + apply orbit angles, sync the 3D toggle button, and
-// redraw. The single entry point for every rotation source (button, drag).
+// setMapCamera: normalize + snap + clamp the orbit angles, sync the 3D
+// toggle button, and redraw. The single entry point for every rotation
+// source (button, drag).
 function setMapCamera(yaw, pitch) {
+    // Normalize yaw to (-π, π] so the numbers stay sane over long sessions.
+    const TWO_PI = 2 * Math.PI;
+    yaw = ((yaw % TWO_PI) + TWO_PI) % TWO_PI;
+    if (yaw > Math.PI) yaw -= TWO_PI;
+    // Light cardinal snap (0 / ±90° / 180°).
+    const snap = Math.round(yaw / (Math.PI / 2)) * (Math.PI / 2);
+    if (Math.abs(yaw - snap) < MAP_YAW_SNAP) yaw = snap;
     _wtc.yaw = yaw;
     _wtc.pitch = Math.min(MAP_PITCH_MAX, Math.max(MAP_PITCH_MIN, pitch));
     refreshMapCameraTrig();
@@ -6540,6 +6677,41 @@ function setMapCamera(yaw, pitch) {
     if (btn) btn.classList.toggle('active', mapIs3D());
     mapState.renderDirty = true;
     renderMap(mapState.currentTime);
+}
+
+// setOrbitCenter: move the orbit pivot to a new world point without any
+// visible jump — the new center is projected under the old and new
+// parameters and the pan difference is folded in, so the view only changes
+// on the *next* rotation, which then pivots about the new point.
+function setOrbitCenter(wx, wy, wz) {
+    const p0 = worldToCanvasNew(wx, wy, wz);
+    _wtc.cx = wx;
+    _wtc.cy = wy;
+    _wtc.zMid = wz;
+    const p1 = worldToCanvasNew(wx, wy, wz);
+    _wtc.panX += p0.x - p1.x;
+    _wtc.panY += p0.y - p1.y;
+}
+
+// currentOrbitPivot: where an orbit drag should pivot. Follow mode pivots on
+// the tracked player; a focused region pivots on its centroid (at its real
+// floor height, so pitch changes don't swing a high floor across the
+// screen); otherwise the world point currently at canvas center — so
+// "pan/zoom to a place, then rotate" orbits where you're looking.
+function currentOrbitPivot() {
+    if (mapState.followPlayer) {
+        const bucket = findBucketAtTime(mapState.currentTime);
+        const fp = bucket && bucket.p ? bucket.p[mapState.followPlayer] : null;
+        if (fp && !(fp.x === 0 && fp.y === 0)) {
+            return { x: fp.x, y: fp.y, z: fp.z || 0 };
+        }
+    }
+    if (mapState.focusGroupName && mapState.locationGroupByName) {
+        const g = mapState.locationGroupByName[mapState.focusGroupName];
+        if (g) return { x: g.centroid.x, y: g.centroid.y, z: g.centroid.z };
+    }
+    const c = canvasToWorld((mapState.canvasCssW || 0) / 2, (mapState.canvasCssH || 0) / 2);
+    return { x: c.x, y: c.y, z: _wtc.zMid };
 }
 
 // Canvas width used for non-fullscreen rendering. Fullscreen reads the container bbox instead.
@@ -6609,6 +6781,11 @@ function resetMapView() {
         mapState.followPlayer = null;
         syncFollowSelectUI();
     }
+    if (mapState.focusGroupName) setFocusGroup(null);
+    // Restore the default orbit pivot (map center / mid height) — orbit
+    // drags may have re-centered it.
+    updateWorldToCanvasTransform();
+    _wtc.zMid = _wtc.zMidDefault || 0;
     // Back to the top-down 2D view (also syncs the 3D button and redraws).
     setMapCamera(0, MAP_PITCH_MAX);
 }
@@ -6648,19 +6825,33 @@ function worldToCanvasNew(x, y, z) {
     return projectWorld(x, y, z, { x: 0, y: 0, depth: 0 });
 }
 
-// Inverse of worldToCanvas — canvas pixel to world coord. Needed for
-// zoom-about-cursor and hit-testing. A single screen point maps to a world
-// *ray* under the orbit camera, so the inverse is taken on the horizontal
-// plane z = zPlane (default: the orbit center height). At top-down this is
-// the exact 2D inverse regardless of zPlane.
-function canvasToWorld(cx, cy, zPlane) {
+// canvasToView: invert only the linear screen part of the projection —
+// canvas pixel to the rotated view-plane coordinate (u, v) that projectWorld
+// feeds into the fit/zoom/pan map. Well-defined at any pitch (no division by
+// sinPitch), which is what makes the zoom anchor below safe all the way down
+// to a horizontal camera.
+function canvasToView(cx, cy) {
     const w = _wtc;
     const sx = w.scale * w.zoomK;
-    const u = w.minX + (cx - w.offsetX - w.panX) / sx;
-    const v = w.minY + (w.canvasH - w.offsetY + w.panY - cy) / sx;
+    return {
+        u: w.minX + (cx - w.offsetX - w.panX) / sx,
+        v: w.minY + (w.canvasH - w.offsetY + w.panY - cy) / sx
+    };
+}
+
+// Inverse of worldToCanvas — canvas pixel to world coord. Needed for the
+// orbit-pivot pick and hit-testing. A single screen point maps to a world
+// *ray* under the orbit camera, so the inverse is taken on the horizontal
+// plane z = zPlane (default: the orbit center height). At top-down this is
+// the exact 2D inverse regardless of zPlane. Near pitch 0 that plane is
+// edge-on and the true inverse blows up — sinPitch is floored so callers
+// get a finite (if approximate) point instead of NaN.
+function canvasToWorld(cx, cy, zPlane) {
+    const w = _wtc;
+    const { u, v } = canvasToView(cx, cy);
     const xr = u - w.cx;
     const dz = (zPlane === undefined ? w.zMid : zPlane) - w.zMid;
-    const yr = (v - w.cy - dz * w.cosPitch) / w.sinPitch;
+    const yr = (v - w.cy - dz * w.cosPitch) / Math.max(w.sinPitch, 0.05);
     return {
         x: w.cx + xr * w.cosYaw + yr * w.sinYaw,
         y: w.cy - xr * w.sinYaw + yr * w.cosYaw
@@ -7062,18 +7253,253 @@ function buildPlayerRegionIcon(player) {
 // worldToCanvas so everything follows user pan / zoom and stays crisp. No
 // bitmap cache — at typical loc counts (~30 regions) this is a handful of
 // batched path fills / strokes per frame, trivially cheap.
+// Focus-tier styling: how a group's base fill / outline / label react to the
+// active focus. No focus → base styles untouched.
+function tierFill(group, tier) {
+    const base = group.color.fill;
+    if (tier === 'focus') return scaleRgbaAlpha(base, 6, 0.5);
+    if (tier === 'near')  return scaleRgbaAlpha(base, 3.5, 0.32);
+    if (tier === 'far')   return scaleRgbaAlpha(base, 0.3);
+    return base;
+}
+
+// ─── Solid 3D model (opt-in occluding render) ───────────────────────────────
+//
+// When geometry v3 walls are present, the "Solid" toggle replaces the
+// translucent floor underlay with an occluding model: every floor and wall
+// triangle is painter-sorted by projected camera depth and drawn near-opaque
+// with per-face Lambert shading, so upper floors genuinely hide lower ones
+// and the map reads as an architectural model. Players / items / overlays
+// still draw on top (seeing the action through walls is the point of an
+// analysis view). The sorted pass renders into an offscreen canvas keyed by
+// the full camera state, so steady playback just blits — only rotation /
+// pan / zoom / focus changes re-render the model.
+
+// Fixed light for face shading — high, slightly off-axis so walls facing
+// different directions separate tonally.
+const SOLID_LIGHT = (() => {
+    const l = [0.35, 0.25, 0.9];
+    const n = Math.hypot(l[0], l[1], l[2]);
+    return [l[0] / n, l[1] / n, l[2] / n];
+})();
+
+function parseRgbPrefix(rgba) {
+    const m = /rgba?\(([^,]+),([^,]+),([^,]+)/.exec(rgba);
+    return m ? [parseFloat(m[1]), parseFloat(m[2]), parseFloat(m[3])] : [170, 170, 190];
+}
+
+// mapSolidEntries: per-triangle render list for the solid model (floors from
+// the loc groups + backdrop, walls from geometry v3), with centroid and
+// pre-shaded fill styles. Built lazily, cached per (geometry, groups) pair.
+function mapSolidEntries() {
+    const geom = mapState.mapGeometry;
+    if (!geom || !Array.isArray(geom.walls) || geom.walls.length < 9) return null;
+    const groups = mapState.locationGroups;
+    if (!groups || groups.length === 0) return null;
+    let se = mapState._solidEntries;
+    if (se && se.geom === geom && se.groups === groups) return se;
+
+    const fillCache = new Map();
+    const styledFill = (base, shade) => {
+        // Quantize the shade so neighboring faces share fill strings — the
+        // painter pass batches consecutive same-style triangles into one path.
+        const q = Math.round(shade * 12) / 12;
+        const key = base[0] + ',' + base[1] + ',' + base[2] + '|' + q;
+        let s = fillCache.get(key);
+        if (!s) {
+            s = `rgba(${Math.round(base[0] * q)}, ${Math.round(base[1] * q)}, ${Math.round(base[2] * q)}, 0.96)`;
+            fillCache.set(key, s);
+        }
+        return s;
+    };
+
+    const entries = [];
+    const pushTris = (tris, name, base) => {
+        for (let i = 0; i + 8 < tris.length; i += 9) {
+            const ax = tris[i],     ay = tris[i + 1], az = tris[i + 2];
+            const bx = tris[i + 3], by = tris[i + 4], bz = tris[i + 5];
+            const cx = tris[i + 6], cy = tris[i + 7], cz = tris[i + 8];
+            // Face normal via cross product; abs(dot) so backfaces (visible
+            // under rotation — BSP normals point out of the solid) shade
+            // like frontfaces instead of going black.
+            const ux = bx - ax, uy = by - ay, uz = bz - az;
+            const vx = cx - ax, vy = cy - ay, vz = cz - az;
+            let nx = uy * vz - uz * vy;
+            let ny = uz * vx - ux * vz;
+            let nz = ux * vy - uy * vx;
+            const nl = Math.hypot(nx, ny, nz);
+            let shade = 0.7;
+            if (nl > 0) {
+                const dot = (nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2]) / nl;
+                shade = 0.45 + 0.55 * Math.abs(dot);
+            }
+            const fill = styledFill(base, shade);
+            entries.push({
+                tris, off: i,
+                cx: (ax + bx + cx) / 3,
+                cy: (ay + by + cy) / 3,
+                cz: (az + bz + cz) / 3,
+                name,
+                fill,
+                fillFaded: scaleRgbaAlpha(fill, 0.25),
+                depth: 0,
+            });
+        }
+    };
+
+    const NEUTRAL_FLOOR = [95, 105, 135];
+    const WALL_BASE = [58, 63, 85];
+    const backdropTris = geom.backdropTris;
+    if (backdropTris && backdropTris.length >= 9) {
+        pushTris(backdropTris, null, NEUTRAL_FLOOR);
+    }
+    for (const group of groups) {
+        if (!group.tris || group.tris.length < 9) continue;
+        // Blend the loc hue toward the neutral floor tone so the solid model
+        // keeps region identity without turning garish at full opacity.
+        const rgb = parseRgbPrefix(group.color.fill);
+        const base = [
+            (rgb[0] + NEUTRAL_FLOOR[0]) / 2,
+            (rgb[1] + NEUTRAL_FLOOR[1]) / 2,
+            (rgb[2] + NEUTRAL_FLOOR[2]) / 2,
+        ];
+        pushTris(group.tris, group.name, base);
+    }
+    pushTris(geom.walls, null, WALL_BASE);
+
+    se = { geom, groups, entries, sortedFor: null };
+    mapState._solidEntries = se;
+    return se;
+}
+
+// renderSolidEntries: painter-sort by projected centroid depth (cached per
+// camera angle — the order only depends on yaw/pitch) and draw, batching
+// consecutive same-fill triangles into a single path.
+function renderSolidEntries(ctx, se) {
+    const w = _wtc;
+    const camKey = w.yaw + '|' + w.pitch;
+    if (se.sortedFor !== camKey) {
+        for (const e of se.entries) {
+            const dx = e.cx - w.cx, dy = e.cy - w.cy, dz = e.cz - w.zMid;
+            const yr = dx * w.sinYaw + dy * w.cosYaw;
+            e.depth = dz * w.sinPitch - yr * w.cosPitch;
+        }
+        se.entries.sort((a, b) => a.depth - b.depth);
+        se.sortedFor = camKey;
+    }
+    const focused = !!mapState.focusGroupName;
+    let curFill = null;
+    let open = false;
+    for (const e of se.entries) {
+        const fill = (focused && focusTier(e.name) === 'far') ? e.fillFaded : e.fill;
+        if (fill !== curFill) {
+            if (open) ctx.fill();
+            ctx.fillStyle = fill;
+            ctx.beginPath();
+            curFill = fill;
+            open = true;
+        }
+        const t = e.tris, i = e.off;
+        let p = worldToCanvas(t[i], t[i + 1], t[i + 2]);
+        ctx.moveTo(p.x, p.y);
+        p = worldToCanvas(t[i + 3], t[i + 4], t[i + 5]);
+        ctx.lineTo(p.x, p.y);
+        p = worldToCanvas(t[i + 6], t[i + 7], t[i + 8]);
+        ctx.lineTo(p.x, p.y);
+        ctx.closePath();
+    }
+    if (open) ctx.fill();
+}
+
+// drawSolidWorld: blit the cached solid model, re-rendering the offscreen
+// canvas only when any projection input changed.
+function drawSolidWorld(ctx) {
+    const se = mapSolidEntries();
+    if (!se) return;
+    const canvas = mapState.canvas;
+    const dpr = mapState.dpr || 1;
+    const key = [
+        _wtc.yaw, _wtc.pitch, _wtc.zoomK, _wtc.panX, _wtc.panY,
+        _wtc.scale, _wtc.offsetX, _wtc.offsetY,
+        _wtc.cx, _wtc.cy, _wtc.zMid,
+        mapState.focusGroupName, canvas.width, canvas.height, dpr,
+        se.entries.length,
+    ].join('|');
+    let cache = mapState._solidCanvas;
+    if (!cache) cache = mapState._solidCanvas = document.createElement('canvas');
+    if (mapState._solidCanvasKey !== key) {
+        cache.width = canvas.width;   // also clears
+        cache.height = canvas.height;
+        const cctx = cache.getContext('2d');
+        cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        renderSolidEntries(cctx, se);
+        mapState._solidCanvasKey = key;
+    }
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(cache, 0, 0);
+    ctx.restore();
+}
+
+// Depth of the dark "skirt" hung from each region's outline edges when the
+// camera is tilted — roughly one step height. Turns flat floor outlines into
+// slabs so relative floor height reads at a glance.
+const SKIRT_DEPTH = 24;
+const SKIRT_FILL = 'rgba(8, 10, 22, 0.55)';
+
+function drawRegionSkirt(ctx, group, fillStyle) {
+    const outline = computeRegionOutline(group);
+    if (!outline || outline.length < 6) return;
+    ctx.fillStyle = fillStyle;
+    ctx.beginPath();
+    for (let i = 0; i + 5 < outline.length; i += 6) {
+        const a  = worldToCanvasNew(outline[i],     outline[i + 1], outline[i + 2]);
+        const b  = worldToCanvasNew(outline[i + 3], outline[i + 4], outline[i + 5]);
+        const b2 = worldToCanvasNew(outline[i + 3], outline[i + 4], outline[i + 5] - SKIRT_DEPTH);
+        const a2 = worldToCanvasNew(outline[i],     outline[i + 1], outline[i + 2] - SKIRT_DEPTH);
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.lineTo(b2.x, b2.y);
+        ctx.lineTo(a2.x, a2.y);
+        ctx.closePath();
+    }
+    ctx.fill();
+}
+
 function drawLocationLayer(ctx) {
     const groups = mapState.locationGroups || [];
     const backdropTris = mapState.mapGeometry && mapState.mapGeometry.backdropTris;
     if (groups.length === 0 && (!backdropTris || backdropTris.length < 9)) return;
 
-    if (backdropTris && backdropTris.length >= 9) {
-        drawTriangleListFill(ctx, backdropTris, 'rgba(70, 80, 110, 0.35)', worldToCanvas);
-    }
+    const focused = !!mapState.focusGroupName;
+    const tilted = mapIs3D();
+    const solid = mapState.solidMode && mapSolidEntries();
 
-    for (const group of groups) {
-        if (group.tris && group.tris.length >= 9) {
-            drawLocationRegionFromGeometry(ctx, group, worldToCanvas);
+    if (solid) {
+        drawSolidWorld(ctx);
+    } else {
+        if (backdropTris && backdropTris.length >= 9) {
+            drawTriangleListFill(ctx, backdropTris,
+                focused ? 'rgba(70, 80, 110, 0.14)' : 'rgba(70, 80, 110, 0.35)',
+                worldToCanvas);
+        }
+
+        for (const group of groups) {
+            if (group.tris && group.tris.length >= 9) {
+                drawTriangleListFill(ctx, group.tris,
+                    tierFill(group, focusTier(group.name)), worldToCanvas);
+            }
+        }
+
+        // Skirts: only meaningful when tilted (at top-down the extruded quads
+        // project to zero area), and superseded by real walls in solid mode.
+        if (tilted) {
+            for (const group of groups) {
+                if (!group.tris || group.tris.length < 9) continue;
+                const tier = focusTier(group.name);
+                drawRegionSkirt(ctx, group,
+                    tier === 'far' ? scaleRgbaAlpha(SKIRT_FILL, 0.3) : SKIRT_FILL);
+            }
         }
     }
 
@@ -7082,9 +7508,14 @@ function drawLocationLayer(ctx) {
     // drawLocationRegionOutline needs the allocating worldToCanvasNew because
     // it holds both endpoints of an edge simultaneously.
     for (const group of groups) {
-        if (group.tris && group.tris.length >= 9) {
-            drawLocationRegionOutline(ctx, group, worldToCanvasNew, 'rgba(180, 180, 180, 0.5)', 1);
-        }
+        if (!group.tris || group.tris.length < 9) continue;
+        const tier = focusTier(group.name);
+        let stroke = 'rgba(180, 180, 180, 0.5)';
+        let width = 1;
+        if (tier === 'focus')    { stroke = 'rgba(255, 255, 255, 0.85)'; width = 1.5; }
+        else if (tier === 'far') { stroke = 'rgba(180, 180, 180, 0.15)'; }
+        else if (solid)          { stroke = 'rgba(180, 180, 180, 0.3)'; }
+        drawLocationRegionOutline(ctx, group, worldToCanvasNew, stroke, width);
     }
 
     const labelPx = Math.round(12 * mapIconScale());
@@ -7092,8 +7523,11 @@ function drawLocationLayer(ctx) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const group of groups) {
+        const tier = focusTier(group.name);
         const pos = worldToCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
-        ctx.fillStyle = group.color.text;
+        ctx.fillStyle = tier === 'far'
+            ? scaleRgbaAlpha(group.color.text, 0.35)
+            : group.color.text;
         ctx.fillText(group.name, pos.x, pos.y);
     }
 }
@@ -8162,6 +8596,16 @@ function setupMapTrailControls() {
         });
     }
 
+    const solidBtn = document.getElementById('map-solid-toggle');
+    if (solidBtn) {
+        solidBtn.addEventListener('click', () => {
+            mapState.solidMode = !mapState.solidMode;
+            solidBtn.classList.toggle('active', mapState.solidMode);
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        });
+    }
+
     const resetViewBtn = document.getElementById('map-reset-view');
     if (resetViewBtn) {
         resetViewBtn.addEventListener('click', () => { resetMapView(); });
@@ -8190,6 +8634,11 @@ function setupMapTrailControls() {
     if (!setupMapTrailControls.__fsListenerAttached) {
         document.addEventListener('fullscreenchange', onMapFullscreenChange);
         window.addEventListener('resize', onMapWindowResize);
+        // Escape clears region focus (no-op otherwise, so it doesn't fight
+        // other Escape behaviours like exiting fullscreen).
+        document.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape' && mapState.focusGroupName) setFocusGroup(null);
+        });
         setupMapTrailControls.__fsListenerAttached = true;
     }
 }
@@ -8217,6 +8666,7 @@ function installMapInteraction(canvas) {
         mode: 'pan', // 'pan' | 'orbit'
         startX: 0, startY: 0,
         lastX: 0, lastY: 0,
+        yaw0: 0, pitch0: 0, // camera angles at orbit-drag start
         moved: false,
     };
 
@@ -8240,6 +8690,16 @@ function installMapInteraction(canvas) {
         drag.startX = drag.lastX = p.x;
         drag.startY = drag.lastY = p.y;
         drag.moved = false;
+        if (drag.mode === 'orbit') {
+            // Re-center the orbit on what the user is looking at (followed
+            // player > focused region > view center) and capture the start
+            // angles — the drag applies absolute deltas from these so the
+            // cardinal yaw snap can be dragged through.
+            const pv = currentOrbitPivot();
+            setOrbitCenter(pv.x, pv.y, pv.z);
+            drag.yaw0 = _wtc.yaw;
+            drag.pitch0 = _wtc.pitch;
+        }
         ev.preventDefault();
     });
 
@@ -8274,8 +8734,10 @@ function installMapInteraction(canvas) {
             if (drag.mode === 'orbit') {
                 // Horizontal drag spins, vertical drag tilts (up = tilt
                 // further toward horizontal, down = back toward top-down).
-                setMapCamera(_wtc.yaw + dx * ORBIT_YAW_PER_PX,
-                             _wtc.pitch + dy * ORBIT_PITCH_PER_PX);
+                // Absolute from the drag-start angles, not incremental, so
+                // the yaw snap in setMapCamera can't capture the drag.
+                setMapCamera(drag.yaw0 + (p.x - drag.startX) * ORBIT_YAW_PER_PX,
+                             drag.pitch0 + (p.y - drag.startY) * ORBIT_PITCH_PER_PX);
             } else {
                 _wtc.panX += dx;
                 _wtc.panY += dy;
@@ -8300,25 +8762,23 @@ function installMapInteraction(canvas) {
     canvas.addEventListener('wheel', (ev) => {
         ev.preventDefault();
         const p = canvasPointFromEvent(ev);
-        const worldBefore = canvasToWorld(p.x, p.y);
+        // Anchor the zoom in *view space*: the (u, v) under the cursor is
+        // found by inverting only the linear screen map (rotation plays no
+        // part), so this is exact at any pitch — including a fully
+        // horizontal camera, where a world-plane inverse would be singular.
+        const vb = canvasToView(p.x, p.y);
         let newZoom = _wtc.zoomK * Math.exp(-ev.deltaY * 0.0015);
         if (newZoom < ZOOM_MIN) newZoom = ZOOM_MIN;
         if (newZoom > ZOOM_MAX) newZoom = ZOOM_MAX;
         if (newZoom === _wtc.zoomK) return;
         _wtc.zoomK = newZoom;
-        // Adjust pan so the world point under the cursor stays anchored.
-        // canvasToWorld inverted on the zMid plane, so re-projecting that
-        // point (at zMid) with zeroed pan gives exactly the offset needed —
-        // valid at any camera rotation, identical to the old algebra at
-        // top-down. Follow-mode intentionally survives zoom — renderMap's
-        // follow step will re-center on the tracked player using the new
-        // zoom level, so zoom becomes "zoom in on the player" rather than
-        // dropping follow.
-        _wtc.panX = 0;
-        _wtc.panY = 0;
-        const pp = worldToCanvasNew(worldBefore.x, worldBefore.y, _wtc.zMid);
-        _wtc.panX = p.x - pp.x;
-        _wtc.panY = p.y - pp.y;
+        // Re-solve pan so the same (u, v) lands back under the cursor.
+        // Follow-mode intentionally survives zoom — renderMap's follow step
+        // will re-center on the tracked player using the new zoom level, so
+        // zoom becomes "zoom in on the player" rather than dropping follow.
+        const sx = _wtc.scale * _wtc.zoomK;
+        _wtc.panX = p.x - _wtc.offsetX - (vb.u - _wtc.minX) * sx;
+        _wtc.panY = p.y - _wtc.canvasH + _wtc.offsetY + (vb.v - _wtc.minY) * sx;
         mapState.renderDirty = true;
         renderMap(mapState.currentTime);
     }, { passive: false });
@@ -8331,12 +8791,20 @@ function installMapInteraction(canvas) {
     canvas.style.cursor = 'grab';
 }
 
-// Dispatched from installMapInteraction on a true click (no drag). Used for
-// player-symbol hit-testing to toggle follow-player mode.
+// Dispatched from installMapInteraction on a true click (no drag). Player
+// symbols win (toggle follow); otherwise the click picks a loc region for
+// focus mode — same region or empty space clears it.
 function handleMapCanvasClick(cx, cy) {
     const hit = hitTestPlayerSymbol(cx, cy, mapState.currentTime);
     if (hit) {
         setFollowPlayer(mapState.followPlayer === hit ? null : hit);
+        return;
+    }
+    const region = pickLocGroupAt(cx, cy);
+    if (region && region !== mapState.focusGroupName) {
+        setFocusGroup(region);
+    } else if (mapState.focusGroupName) {
+        setFocusGroup(null);
     }
 }
 

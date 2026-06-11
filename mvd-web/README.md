@@ -297,10 +297,46 @@ full-sync tick in `animatePlayback`.
 The map starts in the classic top-down 2D view and can be rotated into
 3D: the **3D** button tilts the camera to a default oblique view, and
 right-drag (or Ctrl/Cmd+drag) rotates freely — horizontal motion spins
-the map (yaw), vertical motion tilts it (pitch, clamped between 20° and
-top-down). **Reset view** and double-click return to top-down. Left-drag
-pan and wheel zoom-about-cursor work at any rotation, as does
-click-to-follow (rotating does not drop follow mode; panning does).
+the map (yaw), vertical motion tilts it (pitch, from top-down all the
+way to a horizontal side elevation at 0°). Yaw lightly snaps to the
+four cardinal directions (±2°) so "look straight along x / y" is easy
+to hit; the snap can be dragged through (the drag applies absolute
+deltas from its start). **Reset view** and double-click return to
+top-down. Left-drag pan and wheel zoom-about-cursor work at any
+rotation (the zoom anchor is solved in view space, so it stays exact
+even at pitch 0), as does click-to-follow (rotating does not drop
+follow mode; panning does).
+
+Each orbit drag pivots about what you're looking at: the followed
+player if follow mode is on, else the focused region's centroid (at its
+real floor height), else the world point currently at canvas center —
+so "pan/zoom to a place, then rotate" orbits that place. The pivot swap
+is pan-compensated (`setOrbitCenter`), so the view never jumps; Reset
+view restores the default pivot (map center, mid height).
+
+**Region focus** — clicking a loc region (on floor, not on a player
+symbol) focuses it: the region and its XY-neighbors (bounding boxes
+within ~160 units) render brighter and more solid while everything
+else — fills, outlines, labels, region-control tint — fades to a faint
+sketch. Click the same region, click empty space, press Escape, or
+Reset view to clear. Code: `setFocusGroup` / `pickLocGroupAt` /
+`focusTier`.
+
+**Skirts** — when tilted (and not in Solid mode), each region's outline
+edges are extruded ~24 units downward as dark quads, turning flat floor
+outlines into slabs so relative floor height reads at a glance.
+
+**Solid mode** — for maps whose geometry JSON is version 3 (carries
+wall triangles), a **Solid** toggle appears: floors and walls are
+painter-sorted by projected camera depth and drawn near-opaque with
+per-face Lambert shading, so upper floors genuinely occlude lower ones
+and the map reads as an architectural model. Players, items and
+overlays still draw on top — seeing the action through walls is the
+point. The sorted model renders into an offscreen canvas keyed by the
+full camera state; steady playback just blits it (~1 ms), only
+rotation/pan/zoom/focus changes re-render (~35 ms on dm3's ~6k
+triangles). Code: `mapSolidEntries` / `renderSolidEntries` /
+`drawSolidWorld`.
 
 Everything is drawn through one orbit-camera orthographic projection
 (`projectWorld` in `app.js`): floor geometry uses the per-vertex heights
@@ -316,7 +352,8 @@ markers (players, items, entities) are depth-sorted per frame.
 
 Version-1 geometry files (e.g. a stale browser cache) are upgraded on
 load by `normalizeMapGeometry`, which flattens each region to its median
-z — top-down looks identical, 3D shows flat-per-region floors. The
+z — top-down looks identical, 3D shows flat-per-region floors.
+Version-2 files work fully except Solid mode (no walls). The
 height-based player-symbol size scaling (higher = up to 25% larger) is a
 2D-only cue and is disabled while the camera is tilted. Camera state
 lives in `_wtc` (`yaw`, `pitch`, orbit center `cx/cy/zMid`); rotation
@@ -433,8 +470,10 @@ while old `?tab=loc-graph` links keep resolving.
 Per-map floor polygon JSON under `static/maps/` is produced by the
 `mapgen` developer tool, which reads Quake 1 BSPs from an off-repo
 working directory. Current files are geometry version 2 (9 floats per
-triangle — x,y,z per vertex); the frontend still accepts version-1
-files (6 floats, XY only) by flattening each region to its median z.
+triangle — x,y,z per vertex); a few test maps (schloss, dm3, dm2, e1m2)
+are version 3, which adds a top-level `walls` triangle list for the map
+tab's Solid mode. The frontend accepts all three versions (v1 — 6
+floats, XY only — is flattened to each region's median z on load).
 See
 [mvd-analytics/README.md](../mvd-analytics/README.md) (the `cmd/mapgen`
 entry) and `CLAUDE.md`'s quick reference for the workflow.

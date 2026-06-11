@@ -1,8 +1,11 @@
 // Package mapgeom turns a parsed Quake 1 BSP into per-loc walkable-floor
-// polygon sets suitable for the viewer's mini-map.
+// polygon sets (plus a flat wall-triangle list) suitable for the
+// viewer's mini-map and its 3D modes.
 //
-// The extractor only keeps faces whose plane normal points "up enough"
-// to be treated as a floor (Z >= floorNormalZ). Each floor face is then
+// Faces whose plane normal points "up enough" (Z >= floorNormalZ) are
+// floors; vertical-ish faces (|Z| < floorNormalZ) are emitted into the
+// top-level Walls list for the viewer's occluding "solid" render;
+// downward faces (ceiling undersides) are skipped. Each floor face is then
 // assigned to the nearest loc by plain 3D Euclidean distance, matching
 // ezQuake's TP_LocationName exactly (see
 // ezquake-source/src/teamplay_locfiles.c). Faces are fan-triangulated
@@ -84,14 +87,20 @@ type LocRegion struct {
 // GeometryVersion is written to MapRegions.Version. Version 2 carries
 // per-vertex Z in Tris (9 floats/triangle) so the viewer can render the
 // floor plan in 3D; version 1 files were XY-only (6 floats/triangle).
-const GeometryVersion = 2
+// Version 3 adds the optional Walls list (vertical faces, same 9-float
+// triangle layout) used by the viewer's occluding "solid" 3D mode.
+const GeometryVersion = 3
 
-// MapRegions is the JSON output root.
+// MapRegions is the JSON output root. Walls is a flat triangle list (9
+// floats per triangle, like LocRegion.Tris) of the map's vertical faces —
+// not split per loc because walls only serve occlusion/shape, never loc
+// identity. Empty for pre-v3 files.
 type MapRegions struct {
 	Map     string      `json:"map"`
 	Version int         `json:"version"`
 	Bounds  Bounds      `json:"bounds"`
 	Locs    []LocRegion `json:"locs"`
+	Walls   []float32   `json:"walls,omitempty"`
 }
 
 
@@ -102,8 +111,10 @@ type Stats struct {
 	FacesDropped int // ring assembly or geometry drops (not Z-reject)
 	FacesUnnamed int // kept but routed into the unnamed backdrop bucket
 	FacesCeiling int // kept-but-filtered-as-ceiling-detail
+	WallsKept    int // vertical faces emitted into MapRegions.Walls
 	Locs         int
 	Triangles    int
+	WallTris     int
 }
 
 // Build extracts floor geometry from bsp, assigns each floor face to the
@@ -145,11 +156,12 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 	// Group keptFaces by normalized loc name.
 	groups := make(map[string][]keptFace)
 
+	var walls []float32
+
 	for faceIdx := firstFace; faceIdx < endFace; faceIdx++ {
 		stats.FacesTotal++
 		face := b.Faces[faceIdx]
 
-		// Reject faces whose plane is not upward-facing enough.
 		if int(face.PlaneID) >= len(b.Planes) {
 			continue
 		}
@@ -158,7 +170,12 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 		if face.Side == 1 {
 			normal = negate(normal)
 		}
-		if normal.Z < floorNormalZ {
+		// Classify by normal: upward-facing enough → floor; vertical-ish
+		// → wall (kept for the viewer's occluding 3D mode); downward →
+		// ceiling underside, never visible from the analysis camera.
+		isFloor := normal.Z >= floorNormalZ
+		isWall := !isFloor && normal.Z > -floorNormalZ
+		if !isFloor && !isWall {
 			continue
 		}
 
@@ -203,7 +220,9 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 			// they're almost certainly unreachable roof/ceiling
 			// detail. Project the face up by playerOriginAboveFloor
 			// so we compare loc Z to loc Z (loc points record player
-			// origin = floor + 24).
+			// origin = floor + 24). Walls share the cap (with the same
+			// +24, kept for consistency): it trims skybox rims and
+			// roof parapets the same way it trims roof floors.
 			if cz+playerOriginAboveFloor-locPoints[bestIdx].Z > ceilingMaxAboveLoc {
 				stats.FacesCeiling++
 				continue
@@ -211,6 +230,20 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 			if k := NormalizeLocationName(locPoints[bestIdx].Name); k != "" {
 				key = k
 			}
+		}
+
+		if isWall {
+			stats.WallsKept++
+			for i := 1; i+1 < len(ring3D); i++ {
+				a, bb, c := ring3D[0], ring3D[i], ring3D[i+1]
+				walls = append(walls,
+					a.X, a.Y, a.Z,
+					bb.X, bb.Y, bb.Z,
+					c.X, c.Y, c.Z,
+				)
+				stats.WallTris++
+			}
+			continue
 		}
 
 		if key == UnnamedRegionKey {
@@ -297,6 +330,10 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 		})
 	}
 	stats.Locs = len(result.Locs)
+
+	// Walls intentionally don't contribute to Bounds — outer-shell walls
+	// would pad the fit-to-canvas view beyond the playable floor area.
+	result.Walls = walls
 
 	if hasBounds {
 		result.Bounds = bounds

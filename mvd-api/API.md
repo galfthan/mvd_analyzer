@@ -517,10 +517,12 @@ UIs that have a map name from `/overview` or a match listing.
   `phantoma`). `404 map_unavailable` when no corpus exists.
 - **`GET /v1/maps/{map}/geometry`** — streams the per-map floor-polygon
   geometry JSON (`mapgeom.MapRegions`: `{ map, version, bounds, locs:[{
-  name, z, tris:[…] }] }`) for renderers. `tris` is a flat float list,
-  9 per triangle (x,y,z per vertex) since `version` 2; version-1 files
-  carried 6 (XY only, with the region-median `z` as the only height
-  hint). Served from the server's
+  name, z, tris:[…] }], walls?:[…] }`) for renderers. `tris` is a flat
+  float list, 9 per triangle (x,y,z per vertex) since `version` 2;
+  version-1 files carried 6 (XY only, with the region-median `z` as the
+  only height hint). `version` 3 adds the optional top-level `walls`
+  (same 9-float triangle layout, vertical faces) for occluding 3D
+  renders. Served from the server's
   `-maps-dir`; `404 map_unavailable` when unset or the map is missing.
   **REST-only — not an MCP tool** (the payload is large, up to tens of
   MB). Immutable cache + ETag; send `If-None-Match` for a 304.

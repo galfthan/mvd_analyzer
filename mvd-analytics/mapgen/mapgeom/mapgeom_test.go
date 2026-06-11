@@ -321,8 +321,16 @@ func TestBuild_RejectsNonFloorFaces(t *testing.T) {
 	finder := loc.NewFinder("test", []loc.Location{
 		{X: 0, Y: 32, Z: 32, Name: "wall"},
 	})
-	_, stats := Build("test", b, finder)
+	regions, stats := Build("test", b, finder)
 	if stats.FacesKept != 0 {
-		t.Errorf("FacesKept = %d, want 0 (vertical face)", stats.FacesKept)
+		t.Errorf("FacesKept = %d, want 0 (vertical face is not a floor)", stats.FacesKept)
+	}
+	// The vertical face is emitted as wall geometry instead (version 3):
+	// one quad → 2 triangles × 9 floats.
+	if stats.WallsKept != 1 {
+		t.Errorf("WallsKept = %d, want 1", stats.WallsKept)
+	}
+	if got := len(regions.Walls); got != 18 {
+		t.Errorf("Walls len = %d, want 18", got)
 	}
 }

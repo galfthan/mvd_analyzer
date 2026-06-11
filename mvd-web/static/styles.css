@@ -2611,8 +2611,10 @@ th.sortable.sort-desc::after {
     background: var(--accent-cyan);
 }
 
-/* "3D" toggle — highlighted while the map camera is tilted off top-down. */
-.map-track-controls button#map-3d-toggle.active {
+/* "3D" / "Solid" toggles — highlighted while active (camera tilted off
+   top-down / occluding model on). */
+.map-track-controls button#map-3d-toggle.active,
+.map-track-controls button#map-solid-toggle.active {
     border-color: var(--accent-cyan);
     color: var(--bg-deep);
     background: var(--accent-cyan);
