@@ -6068,6 +6068,7 @@ function initMapView(result) {
     mapState.focusNeighbors = null;
     mapState._solidEntries = null;  // Solid-model caches are per-geometry
     mapState._solidCanvasKey = null;
+    mapState._floorZCache = null;   // floor-anchor lookups are per-geometry too
     const solidBtnInit = document.getElementById('map-solid-toggle');
     if (solidBtnInit) solidBtnInit.style.display = 'none'; // shown again if v3 geometry arrives
 
@@ -6107,6 +6108,9 @@ function initMapView(result) {
                 const backdrop = geom.locs.find(l => l && l.name === '');
                 geom.backdropTris = backdrop && Array.isArray(backdrop.tris) ? backdrop.tris : null;
                 mapState.mapGeometry = geom;
+                // Anchor-stem floor lookups memoised against the previous
+                // (geometry-less) state are stale now.
+                mapState._floorZCache = null;
                 // The Solid (occluding model) toggle needs wall geometry —
                 // only version-3 files carry it.
                 const solidBtn = document.getElementById('map-solid-toggle');
@@ -7897,6 +7901,90 @@ function itemStatus(item, time) {
     return { up: false, secsToRespawn: (respawnAt - timeMs) * 0.001, pending: false };
 }
 
+// ─── Player → floor anchor stems (3D views) ─────────────────────────────────
+//
+// When the camera is tilted, each player symbol gets a thin vertical stem
+// down to the floor surface beneath it, ending in a small ground dot. The
+// stem visually anchors the symbol to its floor (a tilted projection
+// otherwise leaves symbols floating ambiguously between decks), and its
+// length doubles as an air-height cue for jumps and falls.
+
+// A standing player's origin sits this far above the floor (mins.z = -24 in
+// standard Quake 1).
+const PLAYER_ORIGIN_ABOVE_FLOOR = 24;
+// Slack added when searching for the supporting floor, so interpolation
+// noise on ramps / step edges doesn't make the search miss the surface the
+// player is actually standing on.
+const FLOOR_SNAP_TOLERANCE = 4;
+
+// floorZUnder: highest floor surface at world (x, y) with z <= zMax, or null
+// when no loaded floor triangle covers that point. Scans the named groups +
+// backdrop with a cheap bbox reject; z on the face is interpolated
+// barycentrically so sloped floors anchor correctly. Walls are not floors
+// and are never scanned.
+function floorZUnder(x, y, zMax) {
+    const geom = mapState.mapGeometry;
+    if (!geom) return null;
+    let best = null;
+    const scan = (tris) => {
+        if (!tris) return;
+        for (let i = 0; i + 8 < tris.length; i += 9) {
+            const ax = tris[i],     ay = tris[i + 1];
+            const bx = tris[i + 3], by = tris[i + 4];
+            const cx = tris[i + 6], cy = tris[i + 7];
+            if (x < ax && x < bx && x < cx) continue;
+            if (x > ax && x > bx && x > cx) continue;
+            if (y < ay && y < by && y < cy) continue;
+            if (y > ay && y > by && y > cy) continue;
+            const denom = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy);
+            if (denom === 0) continue;
+            const w1 = ((by - cy) * (x - cx) + (cx - bx) * (y - cy)) / denom;
+            if (w1 < 0 || w1 > 1) continue;
+            const w2 = ((cy - ay) * (x - cx) + (ax - cx) * (y - cy)) / denom;
+            if (w2 < 0 || w1 + w2 > 1) continue;
+            const z = w1 * tris[i + 2] + w2 * tris[i + 5]
+                    + (1 - w1 - w2) * tris[i + 8];
+            if (z <= zMax && (best === null || z > best)) best = z;
+        }
+    };
+    scan(geom.backdropTris);
+    for (const group of mapState.locationGroups || []) scan(group.tris);
+    return best;
+}
+
+// playerFloorZ: memoised floorZUnder per player — a paused timeline or a
+// rotation drag re-renders with unchanged positions, so the triangle scan
+// runs only when the player actually moved.
+function playerFloorZ(name, x, y, z) {
+    let cache = mapState._floorZCache;
+    if (!cache) cache = mapState._floorZCache = new Map();
+    const e = cache.get(name);
+    if (e && e.x === x && e.y === y && e.z === z) return e.floorZ;
+    const floorZ = floorZUnder(x, y, z - PLAYER_ORIGIN_ABOVE_FLOOR + FLOOR_SNAP_TOLERANCE);
+    cache.set(name, { x, y, z, floorZ });
+    return floorZ;
+}
+
+function drawPlayerFloorStem(ctx, name, data, symbolInfo, pos) {
+    const z = data.z || 0;
+    const floorZ = playerFloorZ(name, data.x, data.y, z);
+    // No covering floor (off-geometry, over void): fall back to standing
+    // height so every player still gets a consistent anchor "leg".
+    const bottomZ = floorZ !== null ? floorZ : z - PLAYER_ORIGIN_ABOVE_FLOOR;
+    const bot = worldToCanvasNew(data.x, data.y, bottomZ);
+    const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
+    ctx.strokeStyle = hexToRgba(teamHex, 0.55);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    ctx.lineTo(bot.x, bot.y);
+    ctx.stroke();
+    ctx.fillStyle = hexToRgba(teamHex, 0.7);
+    ctx.beginPath();
+    ctx.arc(bot.x, bot.y, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+}
+
 // Items are biased this much below their real z when sorting against
 // players, so a player standing at the same floor as an item (same z)
 // draws on top. An item only occludes a player when its z exceeds the
@@ -7945,7 +8033,7 @@ function drawItemsAndPlayersZSorted(ctx, time, playerData) {
             drawables.push({
                 kind: 'p',
                 sortDepth: pos.depth,
-                pos, data, symbolInfo
+                pos, name, data, symbolInfo
             });
         }
     }
@@ -7956,6 +8044,7 @@ function drawItemsAndPlayersZSorted(ctx, time, playerData) {
     const itemSize = ITEM_MARKER_SIZE * iconScale;
     const itemHalf = itemSize / 2;
     const itemFontPx = Math.round(10 * iconScale);
+    const tilted = mapIs3D();
 
     ctx.save();
     ctx.textAlign = 'center';
@@ -7966,6 +8055,11 @@ function drawItemsAndPlayersZSorted(ctx, time, playerData) {
             drawSingleMapItem(ctx, time, d.item, d.style,
                               itemSize, itemHalf, itemFontPx, d.pos);
         } else {
+            // Floor anchor stem under the symbol — tilted views only (at
+            // top-down it projects to a point).
+            if (tilted) {
+                drawPlayerFloorStem(ctx, d.name, d.data, d.symbolInfo, d.pos);
+            }
             drawSinglePlayer(ctx, d.data, d.symbolInfo,
                              iconScale, zRange, zSpan, d.pos);
         }

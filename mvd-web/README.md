@@ -322,6 +322,13 @@ sketch. Click the same region, click empty space, press Escape, or
 Reset view to clear. Code: `setFocusGroup` / `pickLocGroupAt` /
 `focusTier`.
 
+**Floor anchor stems** — in any tilted view, each player symbol hangs a
+thin team-colored stem down to the floor surface beneath it (barycentric
+z on the covering floor triangle, so ramps anchor correctly), ending in
+a small ground dot. The stem ties the symbol to its floor and its length
+shows air height during jumps and falls. Lookups are memoised per player
+position (`playerFloorZ`), so paused/rotating frames don't re-scan.
+
 **Skirts** — when tilted (and not in Solid mode), each region's outline
 edges are extruded ~24 units downward as dark quads, turning flat floor
 outlines into slabs so relative floor height reads at a glance.
