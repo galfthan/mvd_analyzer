@@ -5609,15 +5609,20 @@ function drawTriangleListFill(ctx, tris, fillStyle, worldToCanvasFunc) {
 // triangle are on the outline; edges shared by two triangles are interior and
 // cancel. Edge identity includes z so two floors stacked at the same XY don't
 // cancel each other's boundaries. Returns a flat Float array of world-space
-// segment endpoints (x1,y1,z1,x2,y2,z2, ...). Cached on the group for reuse.
+// segment endpoints (x1,y1,z1,x2,y2,z2, ...). Also caches, aligned per edge,
+// the outward horizontal normal (2 floats, pointing away from the region
+// interior — derived from the owning triangle's centroid) in
+// group.outlineNormals; drawRegionSkirt uses it to backface-cull skirt
+// quads. Cached on the group for reuse.
 function computeRegionOutline(group) {
     if (group.outline !== undefined) return group.outline;
     const tris = group.tris;
     if (!tris || tris.length < 9) {
         group.outline = null;
+        group.outlineNormals = null;
         return null;
     }
-    const edgeCount = new Map();
+    const edgeInfo = new Map();
     const keyFor = (x1, y1, z1, x2, y2, z2) => {
         // Canonical order so (a,b) and (b,a) hash equally.
         if (x1 < x2 || (x1 === x2 && (y1 < y2 || (y1 === y2 && z1 <= z2)))) {
@@ -5625,26 +5630,44 @@ function computeRegionOutline(group) {
         }
         return x2 + ',' + y2 + ',' + z2 + '|' + x1 + ',' + y1 + ',' + z1;
     };
+    const bump = (key, tcx, tcy) => {
+        const info = edgeInfo.get(key);
+        if (info) info.count++;
+        else edgeInfo.set(key, { count: 1, tcx, tcy });
+    };
     for (let i = 0; i + 8 < tris.length; i += 9) {
         const ax = tris[i],     ay = tris[i + 1], az = tris[i + 2];
         const bx = tris[i + 3], by = tris[i + 4], bz = tris[i + 5];
         const cx = tris[i + 6], cy = tris[i + 7], cz = tris[i + 8];
-        const e1 = keyFor(ax, ay, az, bx, by, bz);
-        const e2 = keyFor(bx, by, bz, cx, cy, cz);
-        const e3 = keyFor(cx, cy, cz, ax, ay, az);
-        edgeCount.set(e1, (edgeCount.get(e1) || 0) + 1);
-        edgeCount.set(e2, (edgeCount.get(e2) || 0) + 1);
-        edgeCount.set(e3, (edgeCount.get(e3) || 0) + 1);
+        // XY centroid of the owning triangle marks the interior side of
+        // each of its edges.
+        const tcx = (ax + bx + cx) / 3;
+        const tcy = (ay + by + cy) / 3;
+        bump(keyFor(ax, ay, az, bx, by, bz), tcx, tcy);
+        bump(keyFor(bx, by, bz, cx, cy, cz), tcx, tcy);
+        bump(keyFor(cx, cy, cz, ax, ay, az), tcx, tcy);
     }
     const outline = [];
-    for (const [key, count] of edgeCount) {
-        if (count !== 1) continue;
+    const normals = [];
+    for (const [key, info] of edgeInfo) {
+        if (info.count !== 1) continue;
         const [p1, p2] = key.split('|');
         const [x1, y1, z1] = p1.split(',').map(Number);
         const [x2, y2, z2] = p2.split(',').map(Number);
         outline.push(x1, y1, z1, x2, y2, z2);
+        // Edge perpendicular in XY, signed to point away from the interior.
+        let nx = y2 - y1;
+        let ny = x1 - x2;
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        if (nx * (info.tcx - mx) + ny * (info.tcy - my) > 0) {
+            nx = -nx;
+            ny = -ny;
+        }
+        normals.push(nx, ny);
     }
     group.outline = outline;
+    group.outlineNormals = normals;
     return outline;
 }
 
@@ -7454,9 +7477,19 @@ const SKIRT_FILL = 'rgba(8, 10, 22, 0.55)';
 function drawRegionSkirt(ctx, group, fillStyle) {
     const outline = computeRegionOutline(group);
     if (!outline || outline.length < 6) return;
+    const normals = group.outlineNormals;
+    // Horizontal toward-camera direction (the depth gradient in world XY is
+    // ∝ (-sinYaw, -cosYaw) for any pitch < 90°). Skirt quads on edges whose
+    // outward normal points away from the camera are the *inside* of the
+    // slab — drawing them paints a dark rim over the floor's far edge and
+    // makes the surface read as a sunken pit, so they're culled. A real
+    // raised slab only ever shows its camera-facing sides.
+    const vx = -_wtc.sinYaw;
+    const vy = -_wtc.cosYaw;
     ctx.fillStyle = fillStyle;
     ctx.beginPath();
-    for (let i = 0; i + 5 < outline.length; i += 6) {
+    for (let i = 0, e = 0; i + 5 < outline.length; i += 6, e += 2) {
+        if (normals[e] * vx + normals[e + 1] * vy <= 0) continue;
         const a  = worldToCanvasNew(outline[i],     outline[i + 1], outline[i + 2]);
         const b  = worldToCanvasNew(outline[i + 3], outline[i + 4], outline[i + 5]);
         const b2 = worldToCanvasNew(outline[i + 3], outline[i + 4], outline[i + 5] - SKIRT_DEPTH);
