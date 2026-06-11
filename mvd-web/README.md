@@ -399,6 +399,37 @@ so a study view is directly link-shareable; `applyUrlState` restores it
 on load when the map has a corpus. Code: `drawMapEntities` /
 `setLearnMode` / `buildEntityTable` in `app.js`.
 
+## Map geometry edit mode (`?edit=1`)
+
+A hidden cleanup tool for the committed geometry corpus, enabled by
+adding `edit=1` to the URL. A toolbar appears under the map controls
+and canvas clicks switch from follow/focus to triangle selection:
+
+- **Select** — click highlights the connected coplanar *patch* under
+  the cursor (≈ the original BSP face, merging same-plane neighbours);
+  a dropdown switches to single-triangle mode. Shift-click adds/toggles.
+  Hovered triangles get a live outline. In Solid mode wall triangles
+  are selectable too.
+- **Delete / Undo** — `Del` removes the selection (e.g. stray roof or
+  out-of-bounds detail the extractor kept); `Ctrl+Z` undoes. Undo
+  snapshots are whole-array references — deletion replaces arrays,
+  never mutates — so the stack is cheap and exact.
+- **Export JSON** — downloads the current geometry as a version-3 file
+  (per-vertex tris + walls, coordinates rounded to 2 decimals),
+  drop-in compatible with `mvd-web/static/maps/<map>.json`.
+- **Regenerate** — re-runs the mapgen extraction *in the browser*
+  against the server-hosted BSP (`bsps/<map>.bsp`, the core-map set
+  fetched by `make bsps`), with tunable thresholds: floor slope
+  (`floorNormalZ`, 0.7 ≈ 45°), roof cap (`ceilingMaxAboveLoc`), and
+  standing-origin height. The WASM export `generateMapGeometry`
+  (cmd/wasm) parses the BSP via the same `fetchBspSync` host callback
+  the locvis filter uses and calls `mapgeom.BuildParams`; the result
+  replaces the live geometry, ready for further editing and export.
+
+Code: the `editState` section in `app.js` (`pickEditTriAt`,
+`expandPatch`, `editDeleteSelection`, `exportEditedGeometry`,
+`regenerateGeometryFromBsp`).
+
 ## Locs & Regions tab
 
 (`data-tab="loc-graph"`; the URL slug is now `locs-regions`, with

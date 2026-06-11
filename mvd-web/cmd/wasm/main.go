@@ -10,6 +10,9 @@ import (
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
 	"github.com/mvd-analyzer/mvd-analytics/config"
+	"github.com/mvd-analyzer/mvd-analytics/loc"
+	"github.com/mvd-analyzer/mvd-analytics/mapgen/bsp"
+	"github.com/mvd-analyzer/mvd-analytics/mapgen/mapgeom"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
 	"github.com/mvd-analyzer/mvd-reader/mvdfile"
@@ -310,6 +313,82 @@ func recomputeRegionControl(this js.Value, args []js.Value) interface{} {
 	return string(b)
 }
 
+// generateMapGeometry re-runs the mapgen floor/wall extraction in the
+// browser against a server-hosted BSP, with caller-tunable thresholds —
+// the geometry edit mode's "Regenerate" button. The argument is a JSON
+// string: {"map": "dm3", "floorNormalZ": 0.7, "ceilingMaxAboveLoc": 128,
+// "playerOriginAboveFloor": 24} (threshold fields optional; zero/omitted
+// means the mapgen default). The BSP comes from the host's fetchBspSync
+// (worker.js, same loader the locvis filter uses — only maps deployed
+// under bsps/ are available); the loc corpus comes from fetchLocSync via
+// loc.LoadForMap, and is optional like in the CLI tool. Returns
+// {"geometry": <mapgeom.MapRegions>, "stats": <mapgeom.Stats>} or an
+// error envelope.
+func generateMapGeometry(this js.Value, args []js.Value) interface{} {
+	if len(args) < 1 {
+		return errorJSON("missing options argument")
+	}
+	var opts struct {
+		Map string `json:"map"`
+		mapgeom.Params
+	}
+	if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
+		return errorJSON("bad options JSON: " + err.Error())
+	}
+	mapName := loc.NormalizeMapName(opts.Map)
+	if mapName == "" {
+		return errorJSON("missing map name")
+	}
+
+	data := fetchBspBytes(mapName)
+	if data == nil {
+		return errorJSON("no BSP on server for map " + mapName + " (bsps/" + mapName + ".bsp)")
+	}
+	parsed, err := bsp.ParseBytes(data)
+	if err != nil {
+		return errorJSON("parse bsp: " + err.Error())
+	}
+
+	// Loc file optional, mirroring cmd/mapgen: without it every floor
+	// face lands in the unnamed backdrop bucket.
+	finder, err := loc.LoadForMap(mapName)
+	if err != nil {
+		finder = nil
+	}
+
+	regions, stats := mapgeom.BuildParams(mapName, parsed, finder, opts.Params)
+	b, err := json.Marshal(map[string]interface{}{
+		"geometry": regions,
+		"stats":    stats,
+	})
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	return string(b)
+}
+
+// fetchBspBytes pulls a raw BSP through the host-installed fetchBspSync
+// (worker.js). Mirrors mvd-analytics/locvis/loader_wasm.go.
+func fetchBspBytes(normalizedMap string) []byte {
+	fn := js.Global().Get("fetchBspSync")
+	if fn.IsUndefined() || fn.Type() != js.TypeFunction {
+		return nil
+	}
+	res := fn.Invoke(normalizedMap)
+	if res.IsNull() || res.IsUndefined() || res.Type() != js.TypeObject {
+		return nil
+	}
+	length := res.Length()
+	if length <= 0 {
+		return nil
+	}
+	data := make([]byte, length)
+	if n := js.CopyBytesToGo(data, res); n != length {
+		return nil
+	}
+	return data
+}
+
 func errorJSON(msg string) string {
 	b, _ := json.Marshal(map[string]string{"error": msg})
 	return string(b)
@@ -333,6 +412,7 @@ func main() {
 	js.Global().Set("getLocTrails", js.FuncOf(getLocTrails))
 	js.Global().Set("getAnalysisTimings", js.FuncOf(getAnalysisTimings))
 	js.Global().Set("getDemoInfo", js.FuncOf(getDemoInfo))
+	js.Global().Set("generateMapGeometry", js.FuncOf(generateMapGeometry))
 	js.Global().Set("wasmVersion", map[string]interface{}{
 		"hash": GitHash,
 		"tag":  GitTag,

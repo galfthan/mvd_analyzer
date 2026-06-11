@@ -75,7 +75,10 @@ that downstream consumers render, summarise, or feed to an agent.
   (`mvd-web/static/maps/<name>.json`). Geometry version 3: triangles
   carry per-vertex x,y,z (9 floats each) so the map tab can render the
   floor plan in 3D, plus a top-level `walls` triangle list (vertical
-  faces) for the viewer's occluding "solid" mode.
+  faces) for the viewer's occluding "solid" mode. Extraction thresholds
+  (floor slope, roof cap, origin height) are tunable via
+  `mapgeom.Params` / `BuildParams` — used by the web viewer's geometry
+  edit mode, which re-runs the extraction in WASM.
 - `cmd/qw-analyze/` — CLI consumer. `qw-analyze demo.mvd` produces Result
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.

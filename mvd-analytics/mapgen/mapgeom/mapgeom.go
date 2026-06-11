@@ -55,6 +55,47 @@ const (
 	ceilingMaxAboveLoc float32 = 128.0
 )
 
+// Params are the tunable extraction thresholds. The zero value of any
+// field means "use the package default" (see the constants above), so
+// callers — e.g. the viewer's geometry edit mode, which feeds these
+// from form inputs over the WASM bridge — can set only what they want
+// to override.
+type Params struct {
+	// FloorNormalZ: minimum plane-normal Z for a face to count as
+	// floor; faces with |normal Z| below it are walls. 0.7 ≈ 45°.
+	FloorNormalZ float32 `json:"floorNormalZ,omitempty"`
+	// CeilingMaxAboveLoc: drop faces whose centroid sits more than
+	// this far above their 3D-nearest loc point (roof/ceiling cap).
+	CeilingMaxAboveLoc float32 `json:"ceilingMaxAboveLoc,omitempty"`
+	// PlayerOriginAboveFloor: standing-player origin height used to
+	// put face Z and loc Z in the same frame for the ceiling cap.
+	PlayerOriginAboveFloor float32 `json:"playerOriginAboveFloor,omitempty"`
+}
+
+// DefaultParams returns the thresholds the committed corpus is built with.
+func DefaultParams() Params {
+	return Params{
+		FloorNormalZ:           floorNormalZ,
+		CeilingMaxAboveLoc:     ceilingMaxAboveLoc,
+		PlayerOriginAboveFloor: playerOriginAboveFloor,
+	}
+}
+
+// withDefaults fills zero-valued fields with the package defaults.
+func (p Params) withDefaults() Params {
+	d := DefaultParams()
+	if p.FloorNormalZ == 0 {
+		p.FloorNormalZ = d.FloorNormalZ
+	}
+	if p.CeilingMaxAboveLoc == 0 {
+		p.CeilingMaxAboveLoc = d.CeilingMaxAboveLoc
+	}
+	if p.PlayerOriginAboveFloor == 0 {
+		p.PlayerOriginAboveFloor = d.PlayerOriginAboveFloor
+	}
+	return p
+}
+
 // UnnamedRegionKey is the reserved bucket name for floor faces that
 // could not be assigned to a named loc. It is the empty string so it
 // cannot collide with any NormalizeLocationName output (which returns
@@ -117,9 +158,17 @@ type Stats struct {
 	WallTris     int
 }
 
-// Build extracts floor geometry from bsp, assigns each floor face to the
-// nearest loc in finder, and groups them into per-loc triangle lists.
+// Build extracts floor geometry from bsp with the default thresholds,
+// assigns each floor face to the nearest loc in finder, and groups them
+// into per-loc triangle lists.
 func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) {
+	return BuildParams(mapName, b, finder, DefaultParams())
+}
+
+// BuildParams is Build with caller-supplied thresholds (zero fields fall
+// back to the defaults).
+func BuildParams(mapName string, b *bsp.BSP, finder *loc.Finder, params Params) (*MapRegions, Stats) {
+	p := params.withDefaults()
 	var stats Stats
 
 	result := &MapRegions{
@@ -173,8 +222,8 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 		// Classify by normal: upward-facing enough → floor; vertical-ish
 		// → wall (kept for the viewer's occluding 3D mode); downward →
 		// ceiling underside, never visible from the analysis camera.
-		isFloor := normal.Z >= floorNormalZ
-		isWall := !isFloor && normal.Z > -floorNormalZ
+		isFloor := normal.Z >= p.FloorNormalZ
+		isWall := !isFloor && normal.Z > -p.FloorNormalZ
 		if !isFloor && !isWall {
 			continue
 		}
@@ -223,7 +272,7 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 			// origin = floor + 24). Walls share the cap (with the same
 			// +24, kept for consistency): it trims skybox rims and
 			// roof parapets the same way it trims roof floors.
-			if cz+playerOriginAboveFloor-locPoints[bestIdx].Z > ceilingMaxAboveLoc {
+			if cz+p.PlayerOriginAboveFloor-locPoints[bestIdx].Z > p.CeilingMaxAboveLoc {
 				stats.FacesCeiling++
 				continue
 			}

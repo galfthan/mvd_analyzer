@@ -334,3 +334,66 @@ func TestBuild_RejectsNonFloorFaces(t *testing.T) {
 		t.Errorf("Walls len = %d, want 18", got)
 	}
 }
+
+func TestBuildParams_StricterSlopeRejectsRamp(t *testing.T) {
+	// A 40°-from-horizontal ramp (normal Z ≈ 0.766) is a floor at the
+	// default threshold (0.7) but becomes a wall when the caller
+	// tightens FloorNormalZ above it.
+	b := &bsp.BSP{
+		Version: 29,
+		Planes: []bsp.Plane{
+			{Normal: bsp.Vec3{X: 0.643, Y: 0, Z: 0.766}, Type: 2},
+		},
+		Vertices: []bsp.Vec3{
+			{X: 0, Y: 0, Z: 0},
+			{X: 64, Y: 0, Z: 54},
+			{X: 64, Y: 64, Z: 54},
+			{X: 0, Y: 64, Z: 0},
+		},
+		Edges: []bsp.Edge{
+			{V: [2]uint32{0, 0}},
+			{V: [2]uint32{0, 1}},
+			{V: [2]uint32{1, 2}},
+			{V: [2]uint32{2, 3}},
+			{V: [2]uint32{3, 0}},
+		},
+		Surfedges: []int32{1, 2, 3, 4},
+		Faces:     []bsp.Face{{PlaneID: 0, FirstEdge: 0, NumEdges: 4}},
+		Models:    []bsp.Model{{FirstFace: 0, NumFaces: 1}},
+	}
+	finder := loc.NewFinder("test", []loc.Location{
+		{X: 32, Y: 32, Z: 51, Name: "ramp"},
+	})
+
+	_, defStats := Build("test", b, finder)
+	if defStats.FacesKept != 1 || defStats.WallsKept != 0 {
+		t.Errorf("default params: FacesKept=%d WallsKept=%d, want 1/0",
+			defStats.FacesKept, defStats.WallsKept)
+	}
+
+	_, strict := BuildParams("test", b, finder, Params{FloorNormalZ: 0.8})
+	if strict.FacesKept != 0 || strict.WallsKept != 1 {
+		t.Errorf("FloorNormalZ=0.8: FacesKept=%d WallsKept=%d, want 0/1 (ramp reclassified as wall)",
+			strict.FacesKept, strict.WallsKept)
+	}
+}
+
+func TestBuildParams_RoofCapTunable(t *testing.T) {
+	// Stacked trio: floor z=0, platform z=128 (at the default cap),
+	// ceiling z=384. Lowering CeilingMaxAboveLoc to 100 also drops the
+	// platform; raising it to 400 keeps all three.
+	b := buildStackedTrioBSP()
+	finder := loc.NewFinder("test", []loc.Location{
+		{X: 32, Y: 32, Z: 24, Name: "room"},
+	})
+
+	_, low := BuildParams("test", b, finder, Params{CeilingMaxAboveLoc: 100})
+	if low.FacesKept != 1 || low.FacesCeiling != 2 {
+		t.Errorf("cap=100: FacesKept=%d FacesCeiling=%d, want 1/2", low.FacesKept, low.FacesCeiling)
+	}
+
+	_, high := BuildParams("test", b, finder, Params{CeilingMaxAboveLoc: 400})
+	if high.FacesKept != 3 || high.FacesCeiling != 0 {
+		t.Errorf("cap=400: FacesKept=%d FacesCeiling=%d, want 3/0", high.FacesKept, high.FacesCeiling)
+	}
+}
