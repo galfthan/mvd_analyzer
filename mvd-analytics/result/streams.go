@@ -142,20 +142,51 @@ type GlobalStream struct {
 // coordinate arithmetic. (The absolute floor surface, if needed, is
 // Z[i] - 24 - H[i] — the player origin rides 24 units above the floor
 // its feet rest on.)
+// Since v28 liquids participate too: a player in liquid (Lq level >= 1)
+// reads H = 0 by definition, and a player airborne above water / slime
+// / lava measures down to the liquid surface when it is the highest
+// support beneath them (bspvis.LiquidSurfaceBelow).
 // Sentinel NoFloor marks samples with no floor to measure from — over a
 // void/pit, an embedded origin, or the zero origin. Populated only when
 // a clip hull is loaded for the map (a provisioned BSP); otherwise the
 // column is nil/absent (omitempty). Same length as T when present.
 // Grounded samples are ~0 with a unit or two of slack from slopes and
 // the trace epsilon, so test |H| small rather than == 0.
+// Lq is the player's liquid state per sample (schema v28), computed by
+// mirroring the engine's PM_CategorizePosition waterlevel probes
+// against the map's render BSP (bspvis.WaterLevel): 0 = dry, else
+// (type << 2) | level with level 1–3 (feet / waist / eyes submerged)
+// and type LqWater/LqSlime/LqLava — so water reads 5/6/7, slime
+// 9/10/11, lava 13/14/15. Decode with LqLevel / LqType. Samples with
+// Lq level >= 1 have H = 0 by definition (the liquid surface is the
+// support); when a player is airborne ABOVE liquid, H measures down to
+// the liquid surface if it is the highest support under them.
+// Populated only when the map's BSP is provisioned (same source as H);
+// same length as T when present.
 type PositionTrack struct {
 	T  []int32 `json:"t"` // milliseconds since the stream's time origin
 	X  []int32 `json:"x"`
 	Y  []int32 `json:"y"`
 	Z  []int32 `json:"z"`
 	Li []int16 `json:"li,omitempty"`
-	H  []int32 `json:"h,omitempty"` // height above the floor beneath the player; NoFloor = none
+	H  []int32 `json:"h,omitempty"`  // height above the floor beneath the player; NoFloor = none
+	Lq []int8  `json:"lq,omitempty"` // liquid state: 0 dry, else (type<<2)|level
 }
+
+// Lq liquid-type codes (the high bits of a PositionTrack.Lq value).
+const (
+	LqWater int8 = 1
+	LqSlime int8 = 2
+	LqLava  int8 = 3
+)
+
+// LqLevel extracts the submersion level (0 none, 1 feet, 2 waist,
+// 3 eyes) from a PositionTrack.Lq value.
+func LqLevel(v int8) int { return int(v & 3) }
+
+// LqType extracts the liquid type (LqWater/LqSlime/LqLava, 0 when dry)
+// from a PositionTrack.Lq value.
+func LqType(v int8) int { return int(v >> 2) }
 
 // NoFloor is the sentinel in PositionTrack.H for a sample with no floor
 // beneath it (over a void/pit, or an embedded/zero origin) — the height

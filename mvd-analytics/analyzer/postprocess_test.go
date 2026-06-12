@@ -19,6 +19,7 @@ func TestShiftAndFilterPosition_TrimsAllColumns(t *testing.T) {
 		Z:  []int32{11, 22, 33, 44},
 		Li: []int16{5, 6, 7, 8},
 		H:  []int32{50, 60, result.NoFloor, 80},
+		Lq: []int8{0, 5, 7, 0},
 	}
 	shiftAndFilterPosition(pt, 300)
 
@@ -28,14 +29,14 @@ func TestShiftAndFilterPosition_TrimsAllColumns(t *testing.T) {
 	}
 	for name, got := range map[string]int{
 		"X": len(pt.X), "Y": len(pt.Y), "Z": len(pt.Z),
-		"Li": len(pt.Li), "H": len(pt.H),
+		"Li": len(pt.Li), "H": len(pt.H), "Lq": len(pt.Lq),
 	} {
 		if got != len(pt.T) {
 			t.Errorf("len(%s) = %d, want %d (aligned with T)", name, got, len(pt.T))
 		}
 	}
-	if pt.X[0] != 3 || pt.Li[0] != 7 || pt.H[0] != result.NoFloor || pt.H[1] != 80 {
-		t.Errorf("columns misaligned after trim: X=%v Li=%v H=%v", pt.X, pt.Li, pt.H)
+	if pt.X[0] != 3 || pt.Li[0] != 7 || pt.H[0] != result.NoFloor || pt.H[1] != 80 || pt.Lq[0] != 7 {
+		t.Errorf("columns misaligned after trim: X=%v Li=%v H=%v Lq=%v", pt.X, pt.Li, pt.H, pt.Lq)
 	}
 }
 
@@ -52,7 +53,7 @@ func TestShiftAndFilterPosition_AbsentOptionalColumns(t *testing.T) {
 	if len(pt.T) != 1 || pt.T[0] != 0 {
 		t.Fatalf("T = %v, want [0]", pt.T)
 	}
-	if pt.Li != nil || pt.H != nil {
-		t.Errorf("optional columns materialized: Li=%v H=%v", pt.Li, pt.H)
+	if pt.Li != nil || pt.H != nil || pt.Lq != nil {
+		t.Errorf("optional columns materialized: Li=%v H=%v Lq=%v", pt.Li, pt.H, pt.Lq)
 	}
 }

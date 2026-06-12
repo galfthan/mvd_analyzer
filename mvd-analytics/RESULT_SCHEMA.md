@@ -589,7 +589,8 @@ columns populated during analysis when their inputs are available.
 PositionTrack = {
   "t": [int32...], "x": [int32...], "y": [int32...], "z": [int32...],
   "li": [int16...],   // optional: loc index per sample
-  "h":  [int32...]    // optional: height above floor per sample
+  "h":  [int32...],   // optional: height above floor per sample
+  "lq": [int8...]     // optional: liquid state per sample
 }
 ```
 
@@ -632,12 +633,30 @@ a consumer flags those directly with no coordinate arithmetic — test
 `|h|` small rather than `== 0`, since slopes and the trace epsilon leave
 a unit or two of slack. (The absolute floor surface, if needed, is
 `z[i] - 24 - h[i]` — the player origin rides 24 units above the floor.)
+**Since schema v28** liquids participate: a sample in liquid (`lq`
+level ≥ 1) reads `h = 0` by definition — the liquid surface is the
+support, so swimmers don't read as airborne over the pool bottom — and
+a dry sample airborne above water/slime/lava measures down to the
+**liquid surface** when it is the highest support beneath the player.
 The sentinel `-2147483648` (`result.NoFloor`) marks a sample with **no
 floor to measure from** — over a void / bottomless pit, an embedded
 origin, or the zero origin. Absent entirely when no BSP is
 provisioned for the map (same best-effort BSP source as the
 visibility-aware loc filter), so floor height and PVS-veto loc
 attribution light up together.
+
+`lq` (when present, schema v28) is the **per-sample liquid state**,
+computed by mirroring the engine's `PM_CategorizePosition` waterlevel
+probes (feet z−23, waist z+4, eyes z+22) against the map's render BSP:
+`0` = dry, otherwise `(type << 2) | level` with level 1–3
+(feet/waist/eyes submerged) and type 1 water / 2 slime / 3 lava — so
+water reads 5/6/7, slime 9/10/11, lava 13/14/15. Decode with `lq & 3`
+(level) and `lq >> 2` (type); Go consumers use `result.LqLevel` /
+`result.LqType` and the `result.LqWater/LqSlime/LqLava` constants.
+Same length as `t`; absent when no BSP is provisioned. (One deliberate
+deviation from the engine predicate: `CONTENTS_SKY` does **not** count
+as liquid — the physics treats sky like water for drag, but a
+void-faller reported as swimming would mislead consumers.)
 
 ### Time units: all times are int32 milliseconds
 
@@ -1109,6 +1128,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v28 | `PositionTrack` gains an `lq` column: per-sample **liquid state**, packed `(type << 2) \| level` — level 1–3 (feet/waist/eyes submerged, mirroring the engine's `PM_CategorizePosition` probes at z−23 / z+4 / z+22 against the map's render BSP), type 1 water / 2 slime / 3 lava (water 5/6/7, slime 9/10/11, lava 13/14/15; `0` = dry). Decode with `lq & 3` (level) and `lq >> 2` (type). `h` interacts with liquids: a sample in liquid (level ≥ 1) reads `h = 0` by definition, and a dry sample airborne above liquid measures down to the **liquid surface** when it is the highest support beneath the player. Additive (`omitempty`); absent when no BSP is provisioned for the map. |
 | v27 | `PositionTrack.H` now stands players on **moving brush-model entities** (lifts, doors, trains): the parser surfaces `"*N"` submodel entities as `MoverSpawn`/`MoverState` events and the floor trace runs over the worldspawn hull **plus** each mover's submodel clip hull posed at its demo-streamed origin for the sample's time (`mapclip.HeightAboveFloorBoxScene`) — the highest floor wins. A player riding the dm2 RA lift reads ~0 instead of the height to the shaft floor, which also removes the false airgib entries rocket hits on lift riders produced (dm2 `path.lift`/`Quad.button`). `NoFloor` narrows accordingly: "on a moving brush model" disappears as a cause, leaving void/pit, embedded and zero origins. Same shape and units; only values over movers change. |
 | v26 | `PositionTrack.H` is now measured over the player's **bounding-box footprint** instead of the single origin column: the height is taken to the highest floor found under a 3×3 grid of columns sampled ±8 around the origin (`mapclip.HeightAboveFloorBox`) — an effective ~48-wide footprint on the already-±16-box-inflated hull. A player skimming a ledge / well rim — origin momentarily over the pit while the box overhangs the rim — now reads the near floor (small `h`) rather than plunging to the distant floor far below. Same shape and units; only values near ledges change, which also removes the bogus high airgibs those samples produced (e.g. anwalked RA's well rim logged a 553-unit airgib that was really a rim skim). |
 | v25 | `TimelineAnalysis` gains `airgibs[]` (`AirgibEvent`): the top airborne rocket hits for Key Moments — each direct enemy rocket hit (splash excluded) whose victim was ≥ 96 units above the floor, annotated with attacker/victim (name, team, userid), hit time, victim loc and height, raw damage, and lethality (a matching rocket frag near the hit). Derived by a post-processor from `Damage.Events` + the streams' `PositionTrack.H` column + the frag log; capped at top 20 sorted by height descending. Additive (`omitempty`); empty when the map has no clip hull (no `H` column). |

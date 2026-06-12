@@ -263,7 +263,7 @@ func sampleStreams(m map[string]interface{}) {
 		if pos, ok := p["pos"].(map[string]interface{}); ok {
 			ts, _ := pos["t"].([]interface{})
 			keepIdx := indicesInWindows(ts, windows)
-			for _, key := range []string{"t", "x", "y", "z", "li", "h"} {
+			for _, key := range []string{"t", "x", "y", "z", "li", "h", "lq"} {
 				if arr, ok := pos[key].([]interface{}); ok {
 					pos[key] = pickByIndex(arr, keepIdx)
 				}

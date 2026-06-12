@@ -3,6 +3,7 @@ package analyzer
 import (
 	"testing"
 
+	"github.com/mvd-analyzer/mvd-analytics/bspvis"
 	"github.com/mvd-analyzer/mvd-analytics/mapclip"
 	"github.com/mvd-analyzer/mvd-analytics/mapgen/bsp"
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -152,6 +153,82 @@ func TestResolveFloorHeights_StandsOnMover(t *testing.T) {
 	}
 	if want := int32(125 - 24 + 400); h[3] != want {
 		t.Errorf("lift invisible: H = %d, want %d (shaft floor)", h[3], want)
+	}
+}
+
+// Liquid rules (schema v28): a pool with its water surface at Z=0 and
+// the pool bottom at Z=-200 (clip plane Z=-176). Submerged samples get
+// the packed Lq state and H=0 by definition; a dry sample airborne
+// above the water measures to the surface, not the pool bottom.
+func TestResolveFloorHeights_Liquids(t *testing.T) {
+	// Render BSP: empty above Z=0, water 0..-200, solid below.
+	visBSP := &bspvis.BSP{
+		Planes: []bspvis.Plane{
+			{Normal: bspvis.Vec3{Z: 1}, Dist: 0},
+			{Normal: bspvis.Vec3{Z: 1}, Dist: -200},
+		},
+		Nodes: []bspvis.Node{
+			{PlaneID: 0, Children: [2]int32{-2, 1}},
+			{PlaneID: 1, Children: [2]int32{-3, -4}},
+		},
+		Leaves: []bspvis.Leaf{
+			{Contents: bspvis.ContentsSolid},
+			{Contents: bspvis.ContentsEmpty},
+			{Contents: bspvis.ContentsWater},
+			{Contents: bspvis.ContentsSolid},
+		},
+		Models: []bspvis.Model{{Mins: bspvis.Vec3{Z: -200}, HeadNodes: [4]int32{0, 0, 0, 0}}},
+	}
+	// Clip hull: the pool bottom as the only solid floor (surface -200).
+	clipHull, err := mapclip.Build(&bsp.BSP{
+		Planes:    []bsp.Plane{{Normal: bsp.Vec3{Z: 1}, Dist: -176, Type: 2}},
+		Models:    []bsp.Model{{Mins: bsp.Vec3{Z: -300}, HeadNodes: [4]int32{0, 0, 0, 0}}},
+		ClipNodes: []bsp.ClipNode{{PlaneNum: 0, Children: [2]int32{-1, -2}}},
+	})
+	if err != nil {
+		t.Fatalf("build clip hull: %v", err)
+	}
+
+	a := NewTimelineAnalyzer()
+	a.clipHull = clipHull
+	a.visBSP = visBSP
+	st := &timelinePlayerState{}
+	st.streams.recordPosition(0, 0, 0, 100)   // airborne above the water
+	st.streams.recordPosition(100, 0, 0, 20)  // wading: feet wet (z-23), waist dry
+	st.streams.recordPosition(200, 0, 0, -50) // fully submerged
+	a.playerState[0] = st
+
+	a.resolveFloorHeights()
+
+	h, lq := st.streams.posH, st.streams.posLq
+	if len(h) != 3 || len(lq) != 3 {
+		t.Fatalf("posH/posLq lens = %d/%d, want 3/3", len(h), len(lq))
+	}
+	// Airborne: the water surface (0) beats the pool bottom (-200) as
+	// support → H = 100 - 24 - 0 = 76, and the sample is dry.
+	if lq[0] != 0 || h[0] != 76 {
+		t.Errorf("airborne sample: lq=%d h=%d, want lq=0 h=76", lq[0], h[0])
+	}
+	// Wading: feet-deep water (level 1) → (LqWater<<2)|1 = 5, H = 0.
+	if lq[1] != 5 || h[1] != 0 {
+		t.Errorf("wading sample: lq=%d h=%d, want lq=5 h=0", lq[1], h[1])
+	}
+	// Submerged: eyes-deep (level 3) → (LqWater<<2)|3 = 7, H = 0 — not
+	// the height above the pool bottom.
+	if lq[2] != 7 || h[2] != 0 {
+		t.Errorf("submerged sample: lq=%d h=%d, want lq=7 h=0", lq[2], h[2])
+	}
+
+	// With only the render BSP (no clip hull), Lq still populates and
+	// H stays absent.
+	a2 := NewTimelineAnalyzer()
+	a2.visBSP = visBSP
+	st2 := &timelinePlayerState{}
+	st2.streams.recordPosition(0, 0, 0, -50)
+	a2.playerState[0] = st2
+	a2.resolveFloorHeights()
+	if st2.streams.posH != nil || len(st2.streams.posLq) != 1 || st2.streams.posLq[0] != 7 {
+		t.Errorf("vis-only: posH=%v posLq=%v, want nil/[7]", st2.streams.posH, st2.streams.posLq)
 	}
 }
 

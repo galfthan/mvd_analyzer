@@ -3,7 +3,9 @@ package analyzer
 import (
 	"sort"
 
+	"github.com/mvd-analyzer/mvd-analytics/bspvis"
 	"github.com/mvd-analyzer/mvd-analytics/locvis"
+	"github.com/mvd-analyzer/mvd-analytics/mapbsp"
 	"github.com/mvd-analyzer/mvd-analytics/mapclip"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
@@ -30,6 +32,19 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		if hull, moverHulls, err := mapclip.LoadForMapWithMovers(a.core.DemoInfo.Map, a.moverSubModels()); err == nil {
 			a.clipHull = hull
 			a.moverHulls = moverHulls
+		}
+	}
+
+	// Load the hull-0 render BSP for the liquid-state column and
+	// liquid-surface heights (schema v28). Loaded directly from mapbsp
+	// rather than through locFinder: locvis requires the .loc corpus and
+	// is nil on maps that have a BSP but no locs, which would silently
+	// lose liquid data exactly where it's available.
+	if a.visBSP == nil && a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
+		if data := mapbsp.LoadBytes(a.core.DemoInfo.Map); data != nil {
+			if vb, err := bspvis.LoadBytes(data); err == nil {
+				a.visBSP = vb
+			}
 		}
 	}
 

@@ -307,7 +307,22 @@ package result
 //     "lifts"). NoFloor accordingly narrows: "on a moving brush model"
 //     disappears as a cause, leaving void/pit, embedded and zero
 //     origins. Same shape and units; only values over movers change.
-const CurrentSchemaVersion = 27
+//
+// v28:
+//   - PositionTrack gains an Lq column: per-sample liquid state, packed
+//     (type << 2) | level — level 1-3 (feet/waist/eyes submerged,
+//     mirroring the engine's PM_CategorizePosition probes against the
+//     map's render BSP), type LqWater/LqSlime/LqLava (water 5/6/7,
+//     slime 9/10/11, lava 13/14/15; 0 = dry). Decode with
+//     result.LqLevel / result.LqType. Additive (omitempty); absent when
+//     no BSP is provisioned.
+//   - H interacts with liquids: a sample in liquid (Lq level >= 1)
+//     reads H = 0 by definition (the surface is the support — swimmers
+//     in the dm3 pool no longer read as airborne over the pool bottom),
+//     and a dry sample airborne above water/slime/lava measures down to
+//     the liquid surface when it is the highest support beneath the
+//     player (bspvis.LiquidSurfaceBelow).
+const CurrentSchemaVersion = 28
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

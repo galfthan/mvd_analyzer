@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"github.com/mvd-analyzer/mvd-analytics/bspvis"
 	"github.com/mvd-analyzer/mvd-analytics/config"
 	"github.com/mvd-analyzer/mvd-analytics/locvis"
 	"github.com/mvd-analyzer/mvd-analytics/mapclip"
@@ -56,6 +57,7 @@ type TimelineAnalyzer struct {
 	rawPauses []pauseSample
 	locFinder           *locvis.Finder             // Visibility-aware loc finder for map (nil if no .loc file)
 	clipHull            *mapclip.Hull              // Worldspawn player clip hull for floor-height traces (nil if no clip corpus for map)
+	visBSP              *bspvis.BSP                // Hull-0 render BSP for liquid state / liquid-surface queries (nil if no BSP for map)
 	blipThresholdMs     int                        // Per-player loc smoothing threshold, 0 disables
 	regionsOverride     []config.MapRegionOverride // Optional caller-supplied region defs (e.g. CLI -regions). When non-nil, overrides config.RegionsForMap.
 	// movers is each inline brush-model entity's wire-state timeline

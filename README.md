@@ -733,8 +733,13 @@ diff -r /tmp/before /tmp/after
    the distant one far below. Since schema v27 the trace scene also
    poses every moving brush-model entity (the dm2 RA/quad lift,
    func_door, func_train) at its demo-streamed origin, so riders read
-   ~0 instead of the static floor beneath the platform. Remaining
-   caveat: func_illusionary is traced like any other inline brush model
+   ~0 instead of the static floor beneath the platform. Since schema
+   v28 liquids participate as well: a per-sample liquid-state column
+   (`pos.lq`, water/slime/lava × feet/waist/eyes) mirrors the engine's
+   `PM_CategorizePosition`, submerged samples read `h = 0` by
+   definition, and a jump over water measures to the water surface
+   rather than the floor beneath it. Remaining caveat:
+   func_illusionary is traced like any other inline brush model
    (the same approximation the client's prediction makes in
    `CL_SetSolidEntities`), so a player passing through one can briefly
    read it as a floor. See

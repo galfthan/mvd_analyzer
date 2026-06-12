@@ -289,6 +289,9 @@ func shiftAndFilterPosition(pt *result.PositionTrack, matchStartMs int32) {
 		if len(pt.H) == oldLen {
 			pt.H = pt.H[keepFrom:]
 		}
+		if len(pt.Lq) == oldLen {
+			pt.Lq = pt.Lq[keepFrom:]
+		}
 	}
 	for i := range pt.T {
 		pt.T[i] -= matchStartMs

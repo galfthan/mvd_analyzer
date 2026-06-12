@@ -644,6 +644,15 @@ samples with no floor to measure from: over a void/pit, or an
 embedded/zero origin. There is no generated corpus to keep in sync; a
 map update is just a new `.bsp`.
 
+Since schema v28 the same pass also classifies each sample's **liquid
+state** into `PositionTrack.Lq` (`pos.lq`, packed `(type<<2)|level`) by
+mirroring the engine's `PM_CategorizePosition` probes against the
+render BSP (`bspvis.WaterLevel`), and liquids participate in `h`: a
+submerged sample (level ≥ 1) reads `h = 0` by definition, and a dry
+sample airborne above water/slime/lava measures down to the liquid
+surface (`bspvis.LiquidSurfaceBelow`) when it is the highest support.
+See [RESULT_SCHEMA.md](RESULT_SCHEMA.md) for the `lq` vocabulary.
+
 ## Running tests
 
 ```bash

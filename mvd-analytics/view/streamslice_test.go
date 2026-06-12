@@ -103,6 +103,7 @@ func TestStreamSlicePositionOptionalColumns(t *testing.T) {
 			Z:  []int32{0, 0, 0, 0, 0},
 			Li: []int16{1, 2, 3, 4, 5},
 			H:  []int32{0, 10, result.NoFloor, 30, 40},
+			Lq: []int8{0, 0, 5, 6, 7},
 		},
 	})
 	v, err := StreamSlice(r, StreamSliceOptions{
@@ -117,15 +118,18 @@ func TestStreamSlicePositionOptionalColumns(t *testing.T) {
 	if pos == nil {
 		t.Fatalf("Position nil")
 	}
-	if len(pos.Li) != len(pos.T) || len(pos.H) != len(pos.T) {
-		t.Fatalf("optional columns not aligned: t=%d li=%d h=%d",
-			len(pos.T), len(pos.Li), len(pos.H))
+	if len(pos.Li) != len(pos.T) || len(pos.H) != len(pos.T) || len(pos.Lq) != len(pos.T) {
+		t.Fatalf("optional columns not aligned: t=%d li=%d h=%d lq=%d",
+			len(pos.T), len(pos.Li), len(pos.H), len(pos.Lq))
 	}
 	if pos.Li[0] != 3 || pos.Li[1] != 4 {
 		t.Errorf("pos.Li = %v, want [3, 4]", pos.Li)
 	}
 	if pos.H[0] != result.NoFloor || pos.H[1] != 30 {
 		t.Errorf("pos.H = %v, want [NoFloor, 30]", pos.H)
+	}
+	if pos.Lq[0] != 5 || pos.Lq[1] != 6 {
+		t.Errorf("pos.Lq = %v, want [5, 6]", pos.Lq)
 	}
 
 	// Without Li/H on the source, the slice must not materialize them.
@@ -147,7 +151,7 @@ func TestStreamSlicePositionOptionalColumns(t *testing.T) {
 		t.Fatalf("StreamSlice: %v", err)
 	}
 	pos2 := v2.Players[0].Position
-	if pos2 == nil || pos2.Li != nil || pos2.H != nil {
+	if pos2 == nil || pos2.Li != nil || pos2.H != nil || pos2.Lq != nil {
 		t.Errorf("optional columns materialized on bare track: %+v", pos2)
 	}
 }

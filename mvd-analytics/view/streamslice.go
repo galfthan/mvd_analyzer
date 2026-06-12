@@ -318,6 +318,7 @@ func slicePosition(pt *result.PositionTrack, start, end float64) *result.Positio
 	// full result carries for the same samples.
 	hasLi := len(pt.Li) == len(pt.T)
 	hasH := len(pt.H) == len(pt.T)
+	hasLq := len(pt.Lq) == len(pt.T)
 	out := &result.PositionTrack{}
 	for i := range pt.T {
 		t := pt.T[i]
@@ -336,6 +337,9 @@ func slicePosition(pt *result.PositionTrack, start, end float64) *result.Positio
 		}
 		if hasH {
 			out.H = append(out.H, pt.H[i])
+		}
+		if hasLq {
+			out.Lq = append(out.Lq, pt.Lq[i])
 		}
 	}
 	if len(out.T) == 0 {
