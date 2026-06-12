@@ -46,9 +46,17 @@ type AirgibEvent struct {
 	VictimTeam     string `json:"victimTeam,omitempty"`     //
 	VictimUserID   int    `json:"victimUserID,omitempty"`   //
 	Height         int32  `json:"height"`                   // victim feet above floor at the hit (units)
-	Loc            string `json:"loc,omitempty"`            // victim's loc at the hit
-	Damage         int    `json:"damage"`                   // raw rocket damage (unbound, incl. overkill)
-	Lethal         bool   `json:"lethal,omitempty"`         // the hit killed the victim (matching rocket frag)
+	// HeightAboveAttacker is the victim's origin minus the shooter's at
+	// the hit (units; negative when the victim was below the shooter) —
+	// the vertical gap the rocket climbed, often what makes an airgib
+	// look spectacular independent of the floor height (schema v29).
+	// Origin-to-origin, so the equal hull offsets cancel. 0 (omitted)
+	// when the shooter had no position sample near the hit; a genuine
+	// dead-level hit also reads 0.
+	HeightAboveAttacker int32  `json:"heightAboveAttacker,omitempty"`
+	Loc                 string `json:"loc,omitempty"`    // victim's loc at the hit
+	Damage              int    `json:"damage"`           // raw rocket damage (unbound, incl. overkill)
+	Lethal              bool   `json:"lethal,omitempty"` // the hit killed the victim (matching rocket frag)
 }
 
 // ControlRegion represents a named area on the map for control tracking.

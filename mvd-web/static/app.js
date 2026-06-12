@@ -1947,6 +1947,12 @@ function renderAirgibs() {
             case 'loc':      return dir * (a.loc || '').localeCompare(b.loc || '') || (a.time - b.time);
             case 'lethal':   av = a.lethal ? 1 : 0; bv = b.lethal ? 1 : 0; break;
             case 'time':     av = a.time; bv = b.time; break;
+            // Absent on the wire means dead-level 0 (omitempty), or the
+            // rare missing shooter sample — both sort as the neutral 0.
+            case 'aboveShooter':
+                av = a.heightAboveAttacker ?? 0;
+                bv = b.heightAboveAttacker ?? 0;
+                break;
             case 'height':
             default:         av = a.height; bv = b.height; break;
         }
@@ -1970,9 +1976,14 @@ function renderAirgibs() {
         }
 
         const lethalCell = a.lethal ? '<span class="airgib-lethal">gib</span>' : '';
+        // heightAboveAttacker is omitted on the wire for a dead-level 0
+        // (omitempty) and when the shooter had no position sample near
+        // the hit — render the neutral 0 for both.
+        const aboveShooterCell = a.heightAboveAttacker ?? 0;
 
         tr.innerHTML = `
             <td>${a.height}</td>
+            <td>${aboveShooterCell}</td>
             <td>${escapeHtml(a.attacker || 'Unknown')}</td>
             <td>${escapeHtml(a.victim || 'Unknown')}</td>
             <td>${escapeHtml(a.loc || '-')}</td>

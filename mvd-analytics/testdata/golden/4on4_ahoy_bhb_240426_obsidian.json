@@ -55336,7 +55336,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 28,
+  "schemaVersion": 29,
   "streams": {
     "global": {
       "demoOffset": 10452,
@@ -129389,6 +129389,7 @@
         "attackerUserID": 29,
         "damage": 110,
         "height": 144,
+        "heightAboveAttacker": -56,
         "lethal": true,
         "loc": "YA",
         "time": 101248,
@@ -129402,6 +129403,7 @@
         "attackerUserID": 27,
         "damage": 110,
         "height": 98,
+        "heightAboveAttacker": -72,
         "lethal": true,
         "loc": "Quad",
         "time": 785721,

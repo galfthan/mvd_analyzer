@@ -322,7 +322,16 @@ package result
 //     and a dry sample airborne above water/slime/lava measures down to
 //     the liquid surface when it is the highest support beneath the
 //     player (bspvis.LiquidSurfaceBelow).
-const CurrentSchemaVersion = 28
+//
+// v29:
+//   - AirgibEvent gains heightAboveAttacker: the victim's origin minus
+//     the shooter's at the hit (units; negative = victim below) — the
+//     vertical gap the rocket climbed, often the more impressive number
+//     for a highlight than the floor height. From the two players'
+//     nearest position samples to the hit; 0/omitted when the shooter
+//     had no sample near the hit. Ranking and the >= 96 threshold still
+//     use the floor height; the web table adds a sortable column.
+const CurrentSchemaVersion = 29
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

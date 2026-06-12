@@ -15923,7 +15923,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 28,
+  "schemaVersion": 29,
   "streams": {
     "global": {
       "demoOffset": 10090,
@@ -102655,6 +102655,7 @@
         "attackerUserID": 74,
         "damage": 110,
         "height": 112,
+        "heightAboveAttacker": 112,
         "loc": "RA",
         "time": 171699,
         "victim": "SS",

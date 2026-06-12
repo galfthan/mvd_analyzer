@@ -51527,7 +51527,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 28,
+  "schemaVersion": 29,
   "streams": {
     "global": {
       "demoOffset": 10248,
@@ -125726,6 +125726,7 @@
         "attackerUserID": 6,
         "damage": 110,
         "height": 144,
+        "heightAboveAttacker": -91,
         "loc": "RA.door",
         "time": 146760,
         "victim": "rusti",

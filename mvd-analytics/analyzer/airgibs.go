@@ -102,18 +102,32 @@ func airgibsPost(res *Result, co *CoreOutputs) {
 		if idx < len(vs.Position.Li) {
 			loc = locNameForIndex(locTable, vs.Position.Li[idx])
 		}
+		// Vertical gap to the shooter: a rocket arriving from far below
+		// is often what makes an airgib spectacular, independent of the
+		// floor height. Origin-to-origin dz at the two players' nearest
+		// samples to the hit; 0 when the shooter has no sample close
+		// enough (and on a genuine dead-level hit — omitempty folds
+		// both, the neutral value either way).
+		dz := int32(0)
+		if as := streamByName[d.Attacker]; as != nil && as.Position != nil && len(as.Position.T) > 0 {
+			ai := nearestSampleIndex(as.Position.T, d.Time)
+			if ai >= 0 && absI32(as.Position.T[ai]-d.Time) <= airgibPosMaxGapMs {
+				dz = vs.Position.Z[idx] - as.Position.Z[ai]
+			}
+		}
 		events = append(events, result.AirgibEvent{
-			Time:           d.Time,
-			Attacker:       d.Attacker,
-			AttackerTeam:   teamFor(d.Attacker),
-			AttackerUserID: userIDs[d.Attacker],
-			Victim:         d.Victim,
-			VictimTeam:     teamFor(d.Victim),
-			VictimUserID:   userIDs[d.Victim],
-			Height:         h,
-			Loc:            loc,
-			Damage:         d.Damage,
-			Lethal:         airgibLethal(rlFrags, d),
+			Time:                d.Time,
+			Attacker:            d.Attacker,
+			AttackerTeam:        teamFor(d.Attacker),
+			AttackerUserID:      userIDs[d.Attacker],
+			Victim:              d.Victim,
+			VictimTeam:          teamFor(d.Victim),
+			VictimUserID:        userIDs[d.Victim],
+			Height:              h,
+			HeightAboveAttacker: dz,
+			Loc:                 loc,
+			Damage:              d.Damage,
+			Lethal:              airgibLethal(rlFrags, d),
 		})
 	}
 	if len(events) == 0 {

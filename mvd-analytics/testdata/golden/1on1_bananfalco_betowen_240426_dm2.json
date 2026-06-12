@@ -9670,7 +9670,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 28,
+  "schemaVersion": 29,
   "streams": {
     "global": {
       "demoOffset": 10286,
@@ -26835,6 +26835,7 @@
         "attackerUserID": 39,
         "damage": 110,
         "height": 377,
+        "heightAboveAttacker": 309,
         "loc": "floating",
         "time": 156362,
         "victim": "betowen",
@@ -26847,6 +26848,7 @@
         "attackerUserID": 39,
         "damage": 110,
         "height": 115,
+        "heightAboveAttacker": 83,
         "loc": "big.stairs",
         "time": 469683,
         "victim": "betowen",

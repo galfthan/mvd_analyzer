@@ -52704,7 +52704,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 28,
+  "schemaVersion": 29,
   "streams": {
     "global": {
       "demoOffset": 10326,
@@ -233882,6 +233882,7 @@
         "attackerUserID": 8,
         "damage": 110,
         "height": 99,
+        "heightAboveAttacker": 72,
         "loc": "RA.entry",
         "time": 951468,
         "victim": "sCorp",
