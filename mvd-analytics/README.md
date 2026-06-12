@@ -664,6 +664,14 @@ Three layers exercise different things:
    — `-update-golden` is registered only in this test package and
    wider scopes fail in `mapgen` with "flag provided but not defined".)
 
+   Golden output depends on the curated BSP corpus: the package's
+   `TestMain` (`setup_test.go`) points `MVDA_BSP_DIR` at the repo-root
+   `bsps/` directory, which feeds both the locvis visibility filter
+   (loc names) and the mapclip floor-height column (`pos.h`,
+   `airgibs`). Run `make bsps` before regenerating, or the goldens
+   silently degrade to V1 locs with no height data and every
+   provisioned machine's test run will diff against them.
+
    `filePath` is stripped before comparison (per-machine cache path).
    At schema v7 the parse-time `highResBuckets` is gone; the canonical
    storage is `streams` (per-player change streams + intervals + native
