@@ -348,7 +348,9 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 `ItemPickupHintEvent`, `BackpackPickupHintEvent`,
 `ItemPickupPrintEvent`, `BackpackPickupPrintEvent`,
 `DemoStartTimestampEvent` (mvdhidden `0x000B` wall-clock anchor),
-`PausedDurationEvent` (mvdhidden `0x000A` per-frame pause duration).
+`PausedDurationEvent` (mvdhidden `0x000A` per-frame pause duration),
+`MoverSpawnEvent` / `MoverStateEvent` (inline brush-model entities —
+lifts, doors, trains — identity plus per-frame origin while moving).
 Domain types carried by events — `ServerData`, `PlayerInfo`,
 `PlayerState`, `Stats` — are source-agnostic.
 
