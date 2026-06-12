@@ -12,12 +12,10 @@ const (
 	// feet above the floor) a victim must be at for a rocket hit to count
 	// as an airgib — ~two player models up. The player hull is 56 tall;
 	// 96 keeps the list to genuinely-airborne hits, not stair-steps or
-	// small hops.
+	// small hops. It is the only volume bound: every qualifying hit is
+	// emitted (schema v30), since the threshold already keeps the list
+	// to a handful per match.
 	airgibMinHeightUnits = 96
-
-	// airgibTopN caps the Key-Moments list. The web view re-sorts these
-	// client-side, so the cap is on what we surface, not the sort.
-	airgibTopN = 20
 
 	// airgibPosMaxGapMs rejects a hit whose nearest victim position
 	// sample is further away in time than this — without a position near
@@ -32,12 +30,13 @@ const (
 )
 
 // airgibsPost finds enemy rocket hits landed on airborne victims and
-// publishes the top airgibTopN (by height) to TimelineAnalysis.Airgibs
-// for the Key Moments view. It is a post-processor so it runs with the
-// full Result — the per-hit damage log (result.Damage), the streams'
-// floor-height column (PositionTrack.H), the frag log (for lethality),
-// and the loc table / name→userid map — all populated and in one
-// match-relative time frame (it runs after normalizeMatchRelativeTimes).
+// publishes every qualifying hit (height-sorted) to
+// TimelineAnalysis.Airgibs for the Key Moments view. It is a
+// post-processor so it runs with the full Result — the per-hit damage
+// log (result.Damage), the streams' floor-height column
+// (PositionTrack.H), the frag log (for lethality), and the loc table /
+// name→userid map — all populated and in one match-relative time frame
+// (it runs after normalizeMatchRelativeTimes).
 //
 // No-op when the map has no clip hull (no PositionTrack.H to read), so
 // the airgibs list is simply absent rather than wrong on BSP-less runs.
@@ -142,9 +141,6 @@ func airgibsPost(res *Result, co *CoreOutputs) {
 		}
 		return events[i].Time < events[j].Time
 	})
-	if len(events) > airgibTopN {
-		events = events[:airgibTopN]
-	}
 	res.TimelineAnalysis.Airgibs = events
 }
 

@@ -331,7 +331,15 @@ package result
 //     nearest position samples to the hit; 0/omitted when the shooter
 //     had no sample near the hit. Ranking and the >= 96 threshold still
 //     use the floor height; the web table adds a sortable column.
-const CurrentSchemaVersion = 29
+//
+// v30:
+//   - TimelineAnalysis.Airgibs is no longer capped at the top 20: every
+//     hit that qualifies (direct enemy rocket, victim >= 96 units above
+//     the floor) is emitted, still sorted by floor height descending.
+//     The qualification threshold already bounds the list to a handful
+//     per match, and a cap keyed on floor height could drop the hits a
+//     consumer sorting by heightAboveAttacker cares about most.
+const CurrentSchemaVersion = 30
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

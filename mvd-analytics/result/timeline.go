@@ -26,8 +26,10 @@ type TimelineAnalysisResult struct {
 // "airgib" — surfaced in Key Moments (schema v25). Height is the victim's
 // feet above the floor at the moment of the hit (PositionTrack.H), so the
 // list is meaningful only on maps with a provisioned BSP (where H is
-// populated). The analyzer emits the top airgibTopN sorted by Height
-// descending; the web view re-sorts client-side.
+// populated). The analyzer emits every qualifying hit sorted by Height
+// descending (uncapped since schema v30 — the airgibMinHeightUnits
+// qualification threshold already bounds the list); the web view
+// re-sorts client-side.
 //
 // "Airgib" here is a DIRECT enemy rocket hit (the rocket model striking
 // the player — splash/radius hits are excluded) whose victim was at least

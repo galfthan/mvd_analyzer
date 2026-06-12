@@ -72,10 +72,10 @@ func TestAirgibsPost_DetectsAirborneRocketHit(t *testing.T) {
 	}
 }
 
-func TestAirgibsPost_SortedByHeightAndCapped(t *testing.T) {
-	// Build many airborne hits with ascending height; expect descending,
-	// capped at airgibTopN.
-	const n = airgibTopN + 5
+func TestAirgibsPost_SortedByHeightUncapped(t *testing.T) {
+	// Build many airborne hits with ascending height; expect every
+	// qualifying hit emitted (no cap, schema v30), sorted descending.
+	const n = 25
 	pos := &result.PositionTrack{}
 	var dmg []result.DamageEntry
 	for i := 0; i < n; i++ {
@@ -95,8 +95,8 @@ func TestAirgibsPost_SortedByHeightAndCapped(t *testing.T) {
 	airgibsPost(res, &CoreOutputs{})
 
 	got := res.TimelineAnalysis.Airgibs
-	if len(got) != airgibTopN {
-		t.Fatalf("airgibs = %d, want cap %d", len(got), airgibTopN)
+	if len(got) != n {
+		t.Fatalf("airgibs = %d, want all %d qualifying hits", len(got), n)
 	}
 	for i := 1; i < len(got); i++ {
 		if got[i-1].Height < got[i].Height {
