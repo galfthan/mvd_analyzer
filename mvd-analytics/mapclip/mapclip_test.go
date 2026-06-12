@@ -175,6 +175,105 @@ func TestHeightAboveFloorBox_RimSkim(t *testing.T) {
 	}
 }
 
+// liftSceneBSP builds a two-model BSP: model 0 (worldspawn) is a deep
+// shaft with its floor at Z=-400 (clip plane Z=-376); model 1 is a lift
+// platform whose top surface is at local Z=0 (clip plane Z=24),
+// 128x128 wide per its model bounds. Both hulls live in the shared
+// CLIPNODES array, entered at their own HeadNodes[1] — the layout
+// BuildModel walks on a real BSP.
+func liftSceneBSP(t *testing.T) *bsp.BSP {
+	t.Helper()
+	return &bsp.BSP{
+		Planes: []bsp.Plane{
+			{Normal: bsp.Vec3{Z: 1}, Dist: -376, Type: 2}, // 0: shaft floor (Z=-400)
+			{Normal: bsp.Vec3{Z: 1}, Dist: 24, Type: 2},   // 1: lift top (local Z=0)
+		},
+		Models: []bsp.Model{
+			{Mins: bsp.Vec3{X: -1000, Y: -1000, Z: -500}, Maxs: bsp.Vec3{X: 1000, Y: 1000, Z: 500}, HeadNodes: [4]int32{0, 0, 0, 0}},
+			{Mins: bsp.Vec3{X: -64, Y: -64, Z: -16}, Maxs: bsp.Vec3{X: 64, Y: 64, Z: 0}, HeadNodes: [4]int32{0, 1, 0, 0}},
+		},
+		ClipNodes: []bsp.ClipNode{
+			{PlaneNum: 0, Children: [2]int32{contentsEmpty, contentsSolid}}, // 0: shaft
+			{PlaneNum: 1, Children: [2]int32{contentsEmpty, contentsSolid}}, // 1: lift
+		},
+	}
+}
+
+// BuildModel must enter the requested submodel's own clip tree and
+// carry its bounds; FloorBelowAt poses it at an entity origin.
+func TestBuildModel_PosedSubmodel(t *testing.T) {
+	b := liftSceneBSP(t)
+	lift, err := BuildModel(b, 1)
+	if err != nil {
+		t.Fatalf("BuildModel(1): %v", err)
+	}
+	if lift.mins != [3]float32{-64, -64, -16} || lift.maxs != [3]float32{64, 64, 0} {
+		t.Errorf("lift bounds = %v..%v, want model 1 bounds", lift.mins, lift.maxs)
+	}
+
+	// At rest (zero origin) the lift top reads local floor 0.
+	if fz, ok := lift.FloorBelow(0, 0, 200); !ok || math.Abs(float64(fz)) > 0.5 {
+		t.Errorf("lift at rest: floor = (%v,%v), want (≈0,true)", fz, ok)
+	}
+	// Risen 64: the same trace posed at org Z=64 reads world floor 64.
+	org := [3]float32{0, 0, 64}
+	if fz, ok := lift.FloorBelowAt(0, 0, 200, org); !ok || math.Abs(float64(fz-64)) > 0.5 {
+		t.Errorf("lift risen: floor = (%v,%v), want (≈64,true)", fz, ok)
+	}
+
+	if _, err := BuildModel(b, 2); err == nil {
+		t.Errorf("BuildModel(2) on a two-model BSP should error")
+	}
+}
+
+// The scene query stands a rider on the posed lift hull rather than
+// the shaft floor far below, leaves players outside the lift's posed
+// AABB on the world floor, and degrades to the worldspawn-only answer
+// with no movers.
+func TestHeightAboveFloorBoxScene_LiftRider(t *testing.T) {
+	b := liftSceneBSP(t)
+	world, err := Build(b)
+	if err != nil {
+		t.Fatalf("Build world: %v", err)
+	}
+	lift, err := BuildModel(b, 1)
+	if err != nil {
+		t.Fatalf("BuildModel(1): %v", err)
+	}
+
+	// Rider: lift risen to -100, player origin resting on it.
+	org := [3]float32{0, 0, -100}
+	z := float32(playerFeetOffset) - 100 + 0.5
+	movers := []PosedHull{{H: lift, Origin: org}}
+	h, ok := HeightAboveFloorBoxScene(world, movers, 0, 0, z)
+	if !ok || math.Abs(float64(h)) > 1.0 {
+		t.Errorf("rider height = (%v,%v), want (≈0,true)", h, ok)
+	}
+
+	// Without the lift the same origin reads the shaft floor at -400.
+	hNo, ok := HeightAboveFloorBoxScene(world, nil, 0, 0, z)
+	if !ok || hNo < 300 {
+		t.Errorf("no-mover height = (%v,%v), want the large shaft height", hNo, ok)
+	}
+
+	// A player horizontally outside the lift bounds (+16 box +slack)
+	// is rejected by the posed AABB and stands on the world floor.
+	far := float32(64 + playerBoxHalf + sceneAABBSlack + 8)
+	hFar, ok := HeightAboveFloorBoxScene(world, movers, far+8, 0, z)
+	if !ok || hFar < 300 {
+		t.Errorf("outside-AABB height = (%v,%v), want the shaft height", hFar, ok)
+	}
+
+	// Player far beneath the lift, grounded on the shaft floor (origin
+	// just above the clip plane at -376): the lift hull is above the
+	// trace start and contributes nothing; the shaft floor answers ≈0.
+	deep := float32(-376 + 0.5)
+	hDeep, ok := HeightAboveFloorBoxScene(world, []PosedHull{{H: lift, Origin: [3]float32{0, 0, 64}}}, 0, 0, deep)
+	if !ok || math.Abs(float64(hDeep)) > 1.0 {
+		t.Errorf("under-lift height = (%v,%v), want (≈0,true)", hDeep, ok)
+	}
+}
+
 // TestLoadForMap_FromBSP checks the runtime path: point the shared
 // mapbsp loader at the vendored maps/ tree and build dm2's hull straight
 // from its .bsp. Skips when maps/ is absent (CI has no BSPs — floor then

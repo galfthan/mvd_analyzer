@@ -7,23 +7,40 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/mapgen/bsp"
 )
 
-// Build distils a parsed BSP into the worldspawn player clip hull (hull
-// 1). It walks the CLIPNODES tree from model 0's HeadNodes[1], keeping
-// only the nodes reachable from that root — which drops hull 2 and every
-// brush-model submodel's clipnodes, leaving exactly the static world
-// collision the floor trace needs (Approach A) — then renumbers the kept
-// nodes and the planes they reference into dense local arrays.
+// Build distils a parsed BSP into the worldspawn player clip hull
+// (hull 1): BuildModel of model 0. It walks the CLIPNODES tree from the
+// model's HeadNodes[1], keeping only the nodes reachable from that root
+// — which drops hull 2 and every other model's clipnodes — then
+// renumbers the kept nodes and the planes they reference into dense
+// local arrays.
 //
-// A worldspawn whose hull-1 root is a contents leaf (no collision tree)
+// A model whose hull-1 root is a contents leaf (no collision tree)
 // yields a Hull with no nodes; FloorBelow then always reports "no
 // floor", which is the correct degenerate answer.
 func Build(b *bsp.BSP) (*Hull, error) {
+	return BuildModel(b, 0)
+}
+
+// BuildModel distils one BSP model's player clip hull (hull 1). Model 0
+// is the worldspawn; models 1.. are the inline brush submodels ("*1",
+// "*2", …) that mover entities pose — their clipnodes live in the same
+// global CLIPNODES array, entered at the model's own HeadNodes[1], and
+// their geometry is compiled in world coordinates (the entity origin is
+// a translation applied at trace time, see Hull.FloorBelowAt).
+func BuildModel(b *bsp.BSP, modelIdx int) (*Hull, error) {
 	if b == nil || len(b.Models) == 0 {
 		return nil, fmt.Errorf("mapclip: bsp has no models")
 	}
-	world := b.Models[0]
+	if modelIdx < 0 || modelIdx >= len(b.Models) {
+		return nil, fmt.Errorf("mapclip: model index %d out of range (%d models)", modelIdx, len(b.Models))
+	}
+	world := b.Models[modelIdx]
 	root := world.HeadNodes[1]
-	h := &Hull{minZ: world.Mins.Z}
+	h := &Hull{
+		minZ: world.Mins.Z,
+		mins: [3]float32{world.Mins.X, world.Mins.Y, world.Mins.Z},
+		maxs: [3]float32{world.Maxs.X, world.Maxs.Y, world.Maxs.Z},
+	}
 
 	if root < 0 {
 		// No clip tree — the whole world is a single contents leaf.

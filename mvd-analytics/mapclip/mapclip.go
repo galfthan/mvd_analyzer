@@ -14,15 +14,19 @@
 // edge artifacts. See mvdsv/src/cmodel.c RecursiveHullTrace for the
 // algorithm this file ports.
 //
-// Scope (Approach A): worldspawn only. Moving brush-model entities
-// (the dm2 RA/quad lift, func_door, func_train) are NOT in this hull —
-// they are pruned out when the hull is built — so a player riding one
-// reads the static floor beneath the platform. Tracking those needs the
-// demo entity stream and is deliberately out of scope here.
+// Scope: a Hull is one BSP model's clip hull. The worldspawn hull
+// (model 0) does not contain brush-model entities — the dm2 RA/quad
+// lift, func_door, func_train are separate submodels pruned out when
+// it is built — so a worldspawn-only trace under a player riding one
+// reads the static floor beneath the platform. Those entities' own
+// hulls are built per submodel (BuildModel) and posed at their
+// demo-streamed origins by the scene query (scene.go,
+// HeightAboveFloorBoxScene), mirroring the client's physent setup in
+// CL_SetSolidEntities (ezquake cl_ents.c).
 //
-// The hull is built straight from the map's provisioned BSP at analyze
-// time (see loader.go / mapbsp), so there is no separate corpus to ship
-// or keep in sync — a map update is just a new .bsp.
+// The hulls are built straight from the map's provisioned BSP at
+// analyze time (see loader.go / mapbsp), so there is no separate corpus
+// to ship or keep in sync — a map update is just a new .bsp.
 package mapclip
 
 // BSP clip-hull leaf contents codes (negative child values in a clip
@@ -71,6 +75,14 @@ const (
 	// of lift recovers exactly that class; a start more than a unit
 	// deep is genuinely embedded and still reports no floor.
 	startSolidNudge = 1.0
+
+	// playerBoxHalf / playerBoxTop are the remaining dimensions of the
+	// standard player hull ({-16,-16,-24}..{16,16,32}): the half-width
+	// the clip hull is inflated by sideways, and +maxs.z, the depth
+	// solid extends downward past raw geometry. Used by the scene
+	// query's posed-AABB fast reject (scene.go).
+	playerBoxHalf = 16.0
+	playerBoxTop  = 32.0
 )
 
 // plane is a renumbered collision plane. typ < 3 marks an axis-aligned
@@ -89,15 +101,19 @@ type clipNode struct {
 	children [2]int32
 }
 
-// Hull is a map's worldspawn player clip hull, ready for downward
+// Hull is one BSP model's player clip hull (the worldspawn, or an
+// inline brush submodel a mover entity poses), ready for downward
 // traces. root is the entry node (>= 0) or a contents code (< 0, for the
-// degenerate "whole world is one leaf" case). minZ is the worldspawn
-// bounding-box floor, the depth a trace descends to.
+// degenerate "whole model is one leaf" case). minZ is the model
+// bounding-box floor, the depth a trace descends to. mins/maxs are the
+// raw model geometry bounds (un-inflated), kept for the scene query's
+// fast reject.
 type Hull struct {
-	planes []plane
-	nodes  []clipNode
-	root   int32
-	minZ   float32
+	planes     []plane
+	nodes      []clipNode
+	root       int32
+	minZ       float32
+	mins, maxs [3]float32
 }
 
 // HeightAboveFloor returns how far the player's feet are above the floor
@@ -187,6 +203,22 @@ func (h *Hull) FloorBelow(x, y, z float32) (float32, bool) {
 		floorZ, ok, _ = h.floorTrace(x, y, z+startSolidNudge)
 	}
 	return floorZ, ok
+}
+
+// FloorBelowAt is FloorBelow with the hull posed at entity origin org:
+// the trace runs in model-local space (point − org) and the returned
+// floor Z is translated back into world space (+org[2]), mirroring how
+// the engine traces inline brush models at the entity's current origin
+// (ezquake cl_ents.c CL_SetSolidEntities → posed physent hulls). An
+// inline submodel's geometry is compiled in world coordinates; org is
+// the translation the entity has applied to it (zero for a door at
+// rest).
+func (h *Hull) FloorBelowAt(x, y, z float32, org [3]float32) (float32, bool) {
+	floorZ, ok := h.FloorBelow(x-org[0], y-org[1], z-org[2])
+	if !ok {
+		return 0, false
+	}
+	return floorZ + org[2], true
 }
 
 // floorTrace runs one straight-down hull trace from (x, y, z). The
