@@ -721,23 +721,23 @@ diff -r /tmp/before /tmp/after
    are handled, but a demo from a server that doesn't embed it has no
    per-pause signal, so its wall-clock mapping drifts by the pause time.
 
-8. **Floor height excludes moving platforms**: the per-sample height
+8. **Floor height provisioning and edge cases**: the per-sample height
    above the floor (`streams.players[].pos.h`, schema v24) is traced
-   through the map's *worldspawn* player clip hull only, so a player
-   standing on a moving brush model — the dm2 RA/quad lift, a func_door,
-   a func_train — measures against the static floor *beneath* the
-   platform (or gets the `NoFloor` sentinel over a void), making them
-   look airborne while riding it. Tracking platform poses needs the demo
-   entity stream and is out of scope for now. The hull comes from the
-   map's BSP via the same best-effort provisioning as the
-   visibility-aware loc filter, so the `h` column is absent for any map
-   whose BSP isn't deployed (and for the handful of HL/Quake 2-format
-   maps the BSP parser rejects). Static suspended geometry players *can*
-   stand on (e.g. schloss's chandelier-height brushwork) is part of
-   worldspawn and handled correctly. Since schema v26 the height is
-   measured over the player's bounding-box footprint, so a player skimming
-   a ledge or well rim — origin over the pit, box overhanging the rim —
-   reads the near floor rather than the distant one far below. See
+   through player clip hulls built from the map's BSP, via the same
+   best-effort provisioning as the visibility-aware loc filter — the
+   `h` column is absent for any map whose BSP isn't deployed (and for
+   the handful of HL/Quake 2-format maps the BSP parser rejects). Since
+   schema v26 the height is measured over the player's bounding-box
+   footprint, so a player skimming a ledge or well rim — origin over
+   the pit, box overhanging the rim — reads the near floor rather than
+   the distant one far below. Since schema v27 the trace scene also
+   poses every moving brush-model entity (the dm2 RA/quad lift,
+   func_door, func_train) at its demo-streamed origin, so riders read
+   ~0 instead of the static floor beneath the platform. Remaining
+   caveat: func_illusionary is traced like any other inline brush model
+   (the same approximation the client's prediction makes in
+   `CL_SetSolidEntities`), so a player passing through one can briefly
+   read it as a floor. See
    [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) (`PositionTrack.h`).
 
 ## Reference sources

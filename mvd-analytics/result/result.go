@@ -293,7 +293,21 @@ package result
 //     ledges change, which also removes the bogus high airgibs those
 //     samples produced (e.g. anwalked RA's well rim logged a 553-unit
 //     airgib that was really a rim skim).
-const CurrentSchemaVersion = 26
+//
+// v27:
+//   - PositionTrack.H now stands players on moving brush-model entities
+//     (lifts, doors, trains): the parser surfaces "*N" submodel entities
+//     as MoverSpawn/MoverState events, and the floor trace runs over the
+//     worldspawn hull PLUS each mover's submodel clip hull posed at its
+//     demo-streamed origin for the sample's timestamp (mapclip
+//     HeightAboveFloorBoxScene) — the highest floor wins. A player
+//     riding the dm2 RA lift reads ~0 instead of the height to the
+//     shaft floor, which also removes the false "airgib" entries rocket
+//     hits on lift riders produced (dm2 "path.lift"/"Quad.button", dm3
+//     "lifts"). NoFloor accordingly narrows: "on a moving brush model"
+//     disappears as a cause, leaving void/pit, embedded and zero
+//     origins. Same shape and units; only values over movers change.
+const CurrentSchemaVersion = 27
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

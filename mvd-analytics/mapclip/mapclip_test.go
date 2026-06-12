@@ -332,8 +332,10 @@ func TestFloorBelow_RealBSP(t *testing.T) {
 		tested++
 		if !ok {
 			// Legitimate: some dm2 spawns rest on the RA/quad lift, a
-			// moving brush model pruned from the worldspawn hull
-			// (Approach A). No static floor below is the correct answer.
+			// moving brush model pruned from the worldspawn hull. No
+			// static floor below is the correct answer here — the scene
+			// query (HeightAboveFloorBoxScene) is what stands riders on
+			// posed mover hulls.
 			continue
 		}
 		found++

@@ -4,6 +4,7 @@ import (
 	"math"
 	"sort"
 
+	"github.com/mvd-analyzer/mvd-analytics/mapclip"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
@@ -701,20 +702,49 @@ func (a *TimelineAnalyzer) resolveLocsAndFilterBlips() (locTable []string, locIn
 
 // resolveFloorHeights populates each player's PositionTrack.H column —
 // the feet-above-floor height — by tracing straight down through the
-// map's worldspawn player clip hull at every native-rate sample (schema
-// v24). Runs per-slot before the reconnect merge — the same staging as
+// map's player clip hulls at every native-rate sample (schema v24).
+// Runs per-slot before the reconnect merge — the same staging as
 // resolveLocsAndFilterBlips — so appendSlice carries posH alongside
 // posLi into the merged stream.
 //
+// The trace scene is the worldspawn hull plus every mover entity's
+// submodel hull posed at its demo-streamed origin for the sample's
+// timestamp (schema v27) — a player riding the dm2 RA lift stands on
+// the lift, not the shaft floor far beneath it. Mover poses come from
+// the moverTrack timelines via forward cursors (samples are
+// time-ascending per slot); movers are scanned in entity-number order
+// so the per-sample max is deterministic across runs.
+//
 // No-op when no clip hull is loaded for the map (no provisioned BSP, or
 // a format we can't parse): posH stays nil and the H column is absent.
-// Samples at the zero origin, over a void/pit, or on a moving brush
-// model excluded from the worldspawn hull (the dm2 lift) get the
-// result.NoFloor sentinel rather than a fabricated value.
+// Samples at the zero origin, over a void/pit, or with an embedded
+// origin get the result.NoFloor sentinel rather than a fabricated
+// value.
 func (a *TimelineAnalyzer) resolveFloorHeights() {
 	if a.clipHull == nil {
 		return
 	}
+
+	// Movers whose submodel hull was built, in entity-number order.
+	type posableMover struct {
+		track *moverTrack
+		hull  *mapclip.Hull
+	}
+	moverEnts := make([]int, 0, len(a.movers))
+	for ent, mt := range a.movers {
+		if a.moverHulls[mt.subModel] != nil {
+			moverEnts = append(moverEnts, ent)
+		}
+	}
+	sort.Ints(moverEnts)
+	posable := make([]posableMover, len(moverEnts))
+	for i, ent := range moverEnts {
+		mt := a.movers[ent]
+		posable[i] = posableMover{track: mt, hull: a.moverHulls[mt.subModel]}
+	}
+	cursors := make([]int, len(posable))
+	scratch := make([]mapclip.PosedHull, 0, len(posable))
+
 	slots := make([]int, 0, len(a.playerState))
 	for slot := range a.playerState {
 		slots = append(slots, slot)
@@ -726,6 +756,9 @@ func (a *TimelineAnalyzer) resolveFloorHeights() {
 		if len(b.posT) == 0 {
 			continue
 		}
+		for i := range cursors {
+			cursors[i] = -1 // each slot rescans the tracks from the start
+		}
 		b.posH = make([]int32, len(b.posT))
 		for i := range b.posT {
 			x, y, z := float32(b.posX[i]), float32(b.posY[i]), float32(b.posZ[i])
@@ -733,7 +766,15 @@ func (a *TimelineAnalyzer) resolveFloorHeights() {
 				b.posH[i] = result.NoFloor
 				continue
 			}
-			if h, ok := a.clipHull.HeightAboveFloorBox(x, y, z); ok {
+			scratch = scratch[:0]
+			for mi := range posable {
+				org, vis := posable[mi].track.atCursor(b.posT[i], &cursors[mi])
+				if !vis {
+					continue
+				}
+				scratch = append(scratch, mapclip.PosedHull{H: posable[mi].hull, Origin: org})
+			}
+			if h, ok := mapclip.HeightAboveFloorBoxScene(a.clipHull, scratch, x, y, z); ok {
 				b.posH[i] = int32(math.Round(float64(h)))
 			} else {
 				b.posH[i] = result.NoFloor

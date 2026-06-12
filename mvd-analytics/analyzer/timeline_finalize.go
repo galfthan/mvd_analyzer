@@ -20,12 +20,16 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		}
 	}
 
-	// Load the worldspawn clip hull for floor-height traces. Missing
-	// corpus (no BSP for the map, or an HL/Q2 format we don't parse)
-	// leaves clipHull nil → the PositionTrack.H column stays absent.
+	// Load the clip hulls for floor-height traces: the worldspawn hull
+	// plus one per submodel the demo's mover entities reference, so the
+	// floor pass can stand players on lifts/doors at their streamed
+	// origins. Missing corpus (no BSP for the map, or an HL/Q2 format we
+	// don't parse) leaves clipHull nil → the PositionTrack.H column
+	// stays absent.
 	if a.clipHull == nil && a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
-		if hull, err := mapclip.LoadForMap(a.core.DemoInfo.Map); err == nil {
+		if hull, moverHulls, err := mapclip.LoadForMapWithMovers(a.core.DemoInfo.Map, a.moverSubModels()); err == nil {
 			a.clipHull = hull
+			a.moverHulls = moverHulls
 		}
 	}
 

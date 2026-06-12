@@ -606,13 +606,23 @@ The per-sample height of each player above the floor beneath them —
 `PositionTrack.H` (`pos.h`, schema v24) — is produced by
 [`mapclip`](mapclip/). At finalize the timeline analyzer loads the map's
 worldspawn **player clip hull** (hull 1) straight from the BSP
-`CLIPNODES` lump via `mapclip.LoadForMap` (same `mapbsp` byte source as
-`locvis`), then traces straight down from every native-rate position
-through it, reproducing the server's `PM_CategorizePosition` floor test
-(`mvdsv/src/cmodel.c` `RecursiveHullTrace`). Because it traces the
-collision hull — the rendering geometry inflated by the 32×32×56 player
-box — the floor is width-aware, multi-level, and slope-correct, with no
-edge artifacts.
+`CLIPNODES` lump via `mapclip.LoadForMapWithMovers` (same `mapbsp` byte
+source as `locvis`), then traces straight down from every native-rate
+position through it, reproducing the server's `PM_CategorizePosition`
+floor test (`mvdsv/src/cmodel.c` `RecursiveHullTrace`). Because it
+traces the collision hull — the rendering geometry inflated by the
+32×32×56 player box — the floor is width-aware, multi-level, and
+slope-correct, with no edge artifacts.
+
+Since schema v27 the trace scene also includes **moving brush-model
+entities**: the parser streams every inline `"*N"` submodel entity
+(lift, door, train) as `MoverSpawn`/`MoverState` events, the loader
+builds hull 1 of each referenced submodel, and the floor pass poses
+those hulls at the entity's origin for the sample's timestamp
+(`mapclip.HeightAboveFloorBoxScene`, mirroring the client's
+`CL_SetSolidEntities` physent setup) — the highest floor across all
+hulls wins. A player riding the dm2 RA lift reads ~0 instead of the
+height to the shaft floor far below.
 
 Since schema v26 the height is **footprint-aware** (`HeightAboveFloorBox`):
 rather than the single origin column, it traces a 3×3 grid of columns
@@ -630,11 +640,9 @@ rim skim.) The single-column primitive remains as `HeightAboveFloor`.
 (airgib); the player-feet offset (24) is folded in so the value is 0 on
 the ground without the consumer knowing the hull dimensions (the
 absolute floor, if wanted, is `z − 24 − h`). `result.NoFloor` marks
-samples with no floor to measure from: over a void/pit, or on a moving
-brush model the worldspawn hull excludes (the dm2 RA/quad lift, doors,
-trains — tracking those needs the demo entity stream and is out of
-scope). There is no generated corpus to keep in sync; a map update is
-just a new `.bsp`.
+samples with no floor to measure from: over a void/pit, or an
+embedded/zero origin. There is no generated corpus to keep in sync; a
+map update is just a new `.bsp`.
 
 ## Running tests
 

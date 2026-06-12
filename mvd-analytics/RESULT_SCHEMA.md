@@ -612,16 +612,20 @@ is the *sparse* change-stream view of the same data.)
 
 `h` (when present, schema v24) is the **player's height above the floor
 beneath them** at each sample — how far the feet are above the highest
-solid world surface at or below the player, from straight-down traces
-through the map's worldspawn player clip hull (parsed from the map's BSP
-`CLIPNODES` at analyze time; see `mvd-analytics/mapclip`). Same length as
-`t`. **Since schema v26** it is measured over the player's bounding-box
-footprint, not just the origin column: the highest floor under a 3×3 grid
-of columns sampled ±8 around the origin wins (an effective ~48-wide
+solid surface at or below the player, from straight-down traces through
+the map's player clip hulls (parsed from the map's BSP `CLIPNODES` at
+analyze time; see `mvd-analytics/mapclip`). Same length as `t`. **Since
+schema v26** it is measured over the player's bounding-box footprint,
+not just the origin column: the highest floor under a 3×3 grid of
+columns sampled ±8 around the origin wins (an effective ~48-wide
 footprint on the already-±16-box-inflated hull), so a player skimming a
 ledge / well rim — origin momentarily over the pit while the box overhangs
 the rim — reads the **near** floor, not the distant one far below (this is
-what removed bogus high airgibs at spots like anwalked RA's well rim). It
+what removed bogus high airgibs at spots like anwalked RA's well rim).
+**Since schema v27** the trace scene also includes every moving
+brush-model entity (lift, door, train) posed at its demo-streamed origin
+for the sample's time, so a player riding the dm2 RA lift stands on the
+lift, not the shaft floor beneath it. It
 reads **~0 when grounded** and grows positive during a jump or airborne
 hit (airgib), so
 a consumer flags those directly with no coordinate arithmetic — test
@@ -629,9 +633,8 @@ a consumer flags those directly with no coordinate arithmetic — test
 a unit or two of slack. (The absolute floor surface, if needed, is
 `z[i] - 24 - h[i]` — the player origin rides 24 units above the floor.)
 The sentinel `-2147483648` (`result.NoFloor`) marks a sample with **no
-floor to measure from** — over a void / bottomless pit, on a *moving*
-brush model the worldspawn hull excludes (e.g. the dm2 RA/quad lift,
-doors), or at the zero origin. Absent entirely when no BSP is
+floor to measure from** — over a void / bottomless pit, an embedded
+origin, or the zero origin. Absent entirely when no BSP is
 provisioned for the map (same best-effort BSP source as the
 visibility-aware loc filter), so floor height and PVS-veto loc
 attribution light up together.
@@ -1106,6 +1109,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v27 | `PositionTrack.H` now stands players on **moving brush-model entities** (lifts, doors, trains): the parser surfaces `"*N"` submodel entities as `MoverSpawn`/`MoverState` events and the floor trace runs over the worldspawn hull **plus** each mover's submodel clip hull posed at its demo-streamed origin for the sample's time (`mapclip.HeightAboveFloorBoxScene`) — the highest floor wins. A player riding the dm2 RA lift reads ~0 instead of the height to the shaft floor, which also removes the false airgib entries rocket hits on lift riders produced (dm2 `path.lift`/`Quad.button`). `NoFloor` narrows accordingly: "on a moving brush model" disappears as a cause, leaving void/pit, embedded and zero origins. Same shape and units; only values over movers change. |
 | v26 | `PositionTrack.H` is now measured over the player's **bounding-box footprint** instead of the single origin column: the height is taken to the highest floor found under a 3×3 grid of columns sampled ±8 around the origin (`mapclip.HeightAboveFloorBox`) — an effective ~48-wide footprint on the already-±16-box-inflated hull. A player skimming a ledge / well rim — origin momentarily over the pit while the box overhangs the rim — now reads the near floor (small `h`) rather than plunging to the distant floor far below. Same shape and units; only values near ledges change, which also removes the bogus high airgibs those samples produced (e.g. anwalked RA's well rim logged a 553-unit airgib that was really a rim skim). |
 | v25 | `TimelineAnalysis` gains `airgibs[]` (`AirgibEvent`): the top airborne rocket hits for Key Moments — each direct enemy rocket hit (splash excluded) whose victim was ≥ 96 units above the floor, annotated with attacker/victim (name, team, userid), hit time, victim loc and height, raw damage, and lethality (a matching rocket frag near the hit). Derived by a post-processor from `Damage.Events` + the streams' `PositionTrack.H` column + the frag log; capped at top 20 sorted by height descending. Additive (`omitempty`); empty when the map has no clip hull (no `H` column). |
 | v24 | `PositionTrack` gains an `h` column: the player's height above the floor directly beneath them at each native-rate sample (feet above the nearest solid surface below), from a straight-down trace through the map's worldspawn player clip hull (parsed from BSP `CLIPNODES` at analyze time by the new `mvd-analytics/mapclip` package; BSPs come from the same best-effort source as the visibility-aware loc filter via the shared `mvd-analytics/mapbsp` loader). Reads ~0 grounded and grows during a jump / airborne hit (airgib); absolute floor is `z − 24 − h` if needed. Sentinel `-2147483648` (`result.NoFloor`) marks samples with no floor to measure from (void/pit, or a moving brush model such as the dm2 lift, which the worldspawn-only hull excludes). Additive (`omitempty`); absent when no BSP is provisioned for the map. |
