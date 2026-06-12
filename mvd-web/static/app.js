@@ -1903,9 +1903,11 @@ function displayKeyMoments(result) {
 }
 
 // Airgib table state: the raw events plus the active client-side sort.
-// Default sort is height descending (the analyzer already ships them in
-// that order, but the table is re-sortable by any column).
-const airgibState = { data: [], hubInfo: null, sortKey: 'height', sortDir: 'desc', bound: false };
+// Default sort is height-above-shooter descending — the vertical gap
+// the rocket climbed is what makes a hit look spectacular. (The
+// analyzer ships the list ordered by floor height; the table re-sorts
+// client-side and is re-sortable by any column.)
+const airgibState = { data: [], hubInfo: null, sortKey: 'aboveShooter', sortDir: 'desc', bound: false };
 
 function displayAirgibs(result) {
     const body = document.getElementById('airgibs-body');

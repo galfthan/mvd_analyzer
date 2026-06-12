@@ -73,9 +73,9 @@ viewport (no width cap). Sidebar order is `Search`, `Summary`,
 The **Key Moments** tab has three tables: powerup runs, longest frag
 streaks, and a full-width **Airborne Rocket Gibs** table — enemy rocket
 hits on airborne victims (`timelineAnalysis.airgibs`), sortable by any
-column and defaulting to height descending. Its rows are empty unless
-the map's BSP is provisioned (height needs the clip hull; see
-`PositionTrack.h`).
+column and defaulting to height-above-shooter descending (the vertical
+gap the rocket climbed). Its rows are empty unless the map's BSP is
+provisioned (height needs the clip hull; see `PositionTrack.h`).
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
