@@ -57,6 +57,41 @@ func TestFloorBelow_SinglePlane(t *testing.T) {
 	}
 }
 
+// TestFloorBelow_StartSolidNudge is the regression for int-truncated
+// origins on fractional-Z surfaces: stream positions are stored as
+// truncated int32, so a grounded origin over a slope can reconstruct up
+// to one unit inside the inflated hull. The first trace reads
+// start-solid; the one-unit retry must stand the player back up. A
+// start deeper than the nudge stays embedded and keeps reporting no
+// floor.
+func TestFloorBelow_StartSolidNudge(t *testing.T) {
+	h, err := Build(floorHull(t))
+	if err != nil {
+		t.Fatalf("Build: %v", err)
+	}
+
+	// Half a unit inside the clip plane at Z=24 (the truncation case):
+	// the retry from z+1 finds the floor surface at ≈0.
+	fz, ok := h.FloorBelow(0, 0, 23.5)
+	if !ok {
+		t.Fatalf("FloorBelow(0,0,23.5) found no floor — start-solid retry missing")
+	}
+	if math.Abs(float64(fz)) > 0.5 {
+		t.Errorf("floor Z = %v, want ≈ 0", fz)
+	}
+
+	// The height a caller derives stays within the documented grounded
+	// slack (the found surface sits a fraction above the original z).
+	if hg, ok := h.HeightAboveFloor(0, 0, 23.5); !ok || math.Abs(float64(hg)) > 1.0 {
+		t.Errorf("nudged grounded height = (%v,%v), want (|h|<=1,true)", hg, ok)
+	}
+
+	// Deeper than the nudge → genuinely embedded → still no floor.
+	if _, ok := h.FloorBelow(0, 0, 22.5); ok {
+		t.Errorf("FloorBelow(0,0,22.5) found a floor through >1u of solid")
+	}
+}
+
 func TestFloorBelow_NoFloorOverVoid(t *testing.T) {
 	// Both sides empty → nothing solid below → no floor anywhere.
 	b := &bsp.BSP{

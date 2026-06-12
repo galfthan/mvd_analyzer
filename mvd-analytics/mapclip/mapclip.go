@@ -61,6 +61,16 @@ const (
 	// lowest point so geometry sitting exactly on the bounding box still
 	// registers as a hit rather than the ray ending in mid-air.
 	traceMargin = 64.0
+
+	// startSolidNudge is how far FloorBelow lifts an embedded trace
+	// start for one retry. Stream positions are stored as truncated
+	// int32 world units (streamBuilder.posX/Y/Z), so a grounded origin
+	// over a fractional-Z hull surface — a slope, a ramp lip — can
+	// reconstruct up to one unit inside the inflated hull and read
+	// start-solid where the live player stood in open space. One unit
+	// of lift recovers exactly that class; a start more than a unit
+	// deep is genuinely embedded and still reports no floor.
+	startSolidNudge = 1.0
 )
 
 // plane is a renumbered collision plane. typ < 3 marks an axis-aligned
@@ -159,16 +169,36 @@ var footprintOffsets = [3]float32{-footprintMargin, 0, footprintMargin}
 // range (the point is over a void / bottomless pit) or the point starts
 // inside solid (an embedded / clipping origin we can't attribute).
 //
+// A start that reads solid is retried once from startSolidNudge higher:
+// stream positions are truncated to int32, so a grounded origin over a
+// fractional-Z surface (a slope) can reconstruct just inside the hull —
+// the retry stands it back up instead of dropping the column. A nudged
+// start that is itself solid (a genuinely embedded origin, or a head
+// touching the ceiling hull) keeps reporting no floor. The retry can
+// place the found surface a fraction of a unit above the original z, so
+// grounded heights read ≈0 with up to a unit of slack on either side.
+//
 // The value is the floor surface, so a player standing on it has
 // z - FloorBelow ≈ playerFeetOffset (24); a player jumping or airborne
 // over it reads larger. Coordinates are world units (Z up).
 func (h *Hull) FloorBelow(x, y, z float32) (float32, bool) {
+	floorZ, ok, startsolid := h.floorTrace(x, y, z)
+	if !ok && startsolid {
+		floorZ, ok, _ = h.floorTrace(x, y, z+startSolidNudge)
+	}
+	return floorZ, ok
+}
+
+// floorTrace runs one straight-down hull trace from (x, y, z). The
+// third result distinguishes "no floor because the start was inside
+// solid" (retryable by FloorBelow) from "nothing solid below".
+func (h *Hull) floorTrace(x, y, z float32) (floorZ float32, ok, startsolid bool) {
 	if h == nil || len(h.nodes) == 0 {
-		return 0, false
+		return 0, false, false
 	}
 	bottom := h.minZ - traceMargin
 	if bottom >= z {
-		return 0, false
+		return 0, false, false
 	}
 	start := [3]float32{x, y, z}
 	end := [3]float32{x, y, bottom}
@@ -176,12 +206,12 @@ func (h *Hull) FloorBelow(x, y, z float32) (float32, bool) {
 	ht := hullTrace{h: h, fraction: 1, endpos: end}
 	res := ht.recurse(h.root, 0, 1, start, end)
 	if res == trSolid || ht.startsolid {
-		return 0, false // origin embedded in solid — not attributable
+		return 0, false, true // origin embedded in solid
 	}
 	if ht.fraction >= 1 {
-		return 0, false // nothing solid below within range
+		return 0, false, false // nothing solid below within range
 	}
-	return ht.endpos[2] - playerFeetOffset, true
+	return ht.endpos[2] - playerFeetOffset, true, false
 }
 
 // trace return codes, mirroring RecursiveHullTrace's TR_* enum.
