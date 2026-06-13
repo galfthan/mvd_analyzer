@@ -7809,25 +7809,30 @@ function mapSolidEntries() {
         return s;
     };
 
+    const FLOOR_FLAT_SHADE = 0.85; // flat per-region floor tone (no Lambert)
     const entries = [];
-    const pushTris = (tris, name, base) => {
+    // flat=true → no Lambert (a single per-region tone, used for floor tops
+    // and slab sides); flat=false → per-face Lambert (walls, for the
+    // architectural read). Centroid is always computed for the depth sort.
+    const pushTris = (tris, name, base, flat) => {
         for (let i = 0; i + 8 < tris.length; i += 9) {
             const ax = tris[i],     ay = tris[i + 1], az = tris[i + 2];
             const bx = tris[i + 3], by = tris[i + 4], bz = tris[i + 5];
             const cx = tris[i + 6], cy = tris[i + 7], cz = tris[i + 8];
-            // Face normal via cross product; abs(dot) so backfaces (visible
-            // under rotation — BSP normals point out of the solid) shade
-            // like frontfaces instead of going black.
-            const ux = bx - ax, uy = by - ay, uz = bz - az;
-            const vx = cx - ax, vy = cy - ay, vz = cz - az;
-            let nx = uy * vz - uz * vy;
-            let ny = uz * vx - ux * vz;
-            let nz = ux * vy - uy * vx;
-            const nl = Math.hypot(nx, ny, nz);
-            let shade = 0.7;
-            if (nl > 0) {
-                const dot = (nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2]) / nl;
-                shade = 0.45 + 0.55 * Math.abs(dot);
+            let shade = FLOOR_FLAT_SHADE;
+            if (!flat) {
+                // Face normal via cross product; abs(dot) so backfaces (visible
+                // under rotation — BSP normals point out of the solid) shade
+                // like frontfaces instead of going black.
+                const ux = bx - ax, uy = by - ay, uz = bz - az;
+                const vx = cx - ax, vy = cy - ay, vz = cz - az;
+                const nx = uy * vz - uz * vy;
+                const ny = uz * vx - ux * vz;
+                const nz = ux * vy - uy * vx;
+                const nl = Math.hypot(nx, ny, nz);
+                shade = nl > 0
+                    ? 0.45 + 0.55 * Math.abs((nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2]) / nl)
+                    : 0.7;
             }
             const fill = styledFill(base, shade);
             entries.push({
@@ -7843,11 +7848,28 @@ function mapSolidEntries() {
         }
     };
 
+    // slabSides extrudes a floor region's outline down FLOOR_SLAB_DEPTH into
+    // vertical side quads, so floors read as solid slabs instead of
+    // zero-thickness planes. Returns a flat tri list.
+    const slabSides = (group) => {
+        const outline = computeRegionOutline(group);
+        if (!outline) return null;
+        const out = [];
+        for (let i = 0; i + 5 < outline.length; i += 6) {
+            const ax = outline[i],     ay = outline[i + 1], az = outline[i + 2];
+            const bx = outline[i + 3], by = outline[i + 4], bz = outline[i + 5];
+            const az2 = az - FLOOR_SLAB_DEPTH, bz2 = bz - FLOOR_SLAB_DEPTH;
+            out.push(ax, ay, az, bx, by, bz, bx, by, bz2);
+            out.push(ax, ay, az, bx, by, bz2, ax, ay, az2);
+        }
+        return out.length ? out : null;
+    };
+
     const NEUTRAL_FLOOR = [95, 105, 135];
     const WALL_BASE = [58, 63, 85];
     const backdropTris = geom.backdropTris;
     if (backdropTris && backdropTris.length >= 9) {
-        pushTris(backdropTris, null, NEUTRAL_FLOOR);
+        pushTris(backdropTris, null, NEUTRAL_FLOOR, true); // floor: flat
     }
     for (const group of groups) {
         if (!group.tris || group.tris.length < 9) continue;
@@ -7859,9 +7881,14 @@ function mapSolidEntries() {
             (rgb[1] + NEUTRAL_FLOOR[1]) / 2,
             (rgb[2] + NEUTRAL_FLOOR[2]) / 2,
         ];
-        pushTris(group.tris, group.name, base);
+        pushTris(group.tris, group.name, base, true); // floor top: flat (no Lambert)
+        const sides = slabSides(group);
+        if (sides) {
+            // Slab sides: a darker flat tone so the thickness reads.
+            pushTris(sides, group.name, [base[0] * 0.5, base[1] * 0.5, base[2] * 0.5], true);
+        }
     }
-    pushTris(geom.walls, null, WALL_BASE);
+    pushTris(geom.walls, null, WALL_BASE, false); // walls keep Lambert shading
 
     se = { geom, groups, entries, sortedFor: null };
     mapState._solidEntries = se;
@@ -8105,7 +8132,11 @@ function drawSolidWorld(ctx) {
 // Depth of the dark "skirt" hung from each region's outline edges when the
 // camera is tilted — roughly one step height. Turns flat floor outlines into
 // slabs so relative floor height reads at a glance.
-const SKIRT_DEPTH = 24;
+// Floors render as slabs this thick: the non-solid skirt extrudes region
+// outlines down by this much, and the solid model builds matching side
+// quads (mapSolidEntries.slabSides). Shared so both views agree.
+const FLOOR_SLAB_DEPTH = 20;
+const SKIRT_DEPTH = FLOOR_SLAB_DEPTH;
 const SKIRT_FILL = 'rgba(8, 10, 22, 0.55)';
 
 function drawRegionSkirt(ctx, group, fillStyle) {
