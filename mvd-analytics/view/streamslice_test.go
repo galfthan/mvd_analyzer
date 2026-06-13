@@ -108,12 +108,15 @@ func TestStreamSliceColumnProjection(t *testing.T) {
 			Lq:  []int8{0, 0, 5, 6, 7},
 			VP:  []int16{0, 100, 200, 300, 400},
 			VYa: []int16{0, -100, -200, -300, -400},
+			VX:  []int32{0, 11, 22, 33, 44},
+			VY:  []int32{0, -11, -22, -33, -44},
+			VZ:  []int32{0, 1, 2, 3, 4},
 		},
 	})
 	v, err := StreamSlice(r, StreamSliceOptions{
 		StartTime: 1.5,
 		EndTime:   3.5,
-		Fields:    []string{FieldPosition, FieldHeight, FieldLiquid, FieldView},
+		Fields:    []string{FieldPosition, FieldHeight, FieldLiquid, FieldView, FieldVelocity},
 	})
 	if err != nil {
 		t.Fatalf("StreamSlice: %v", err)
@@ -151,6 +154,14 @@ func TestStreamSliceColumnProjection(t *testing.T) {
 	if vw.VP[0] != 200 || vw.VP[1] != 300 || vw.VYa[0] != -200 || vw.VYa[1] != -300 {
 		t.Errorf("view = vp%v vya%v, want vp[200,300] vya[-200,-300]", vw.VP, vw.VYa)
 	}
+	// vel: t + vx/vy/vz.
+	vel := sl.Velocity
+	if vel == nil || len(vel.VX) != len(vel.T) || len(vel.VY) != len(vel.T) || len(vel.VZ) != len(vel.T) {
+		t.Fatalf("velocity track not aligned: %+v", vel)
+	}
+	if vel.VX[0] != 22 || vel.VX[1] != 33 || vel.VZ[0] != 2 {
+		t.Errorf("vel = vx%v vz%v, want vx[22,33] vz[2,3]", vel.VX, vel.VZ)
+	}
 
 	// A bare x/y/z track: pos carries no li, and hgt/lq/view stay absent.
 	r2 := makeStream(t, result.PlayerStream{
@@ -165,7 +176,7 @@ func TestStreamSliceColumnProjection(t *testing.T) {
 	v2, err := StreamSlice(r2, StreamSliceOptions{
 		StartTime: 0,
 		EndTime:   2,
-		Fields:    []string{FieldPosition, FieldHeight, FieldLiquid, FieldView},
+		Fields:    []string{FieldPosition, FieldHeight, FieldLiquid, FieldView, FieldVelocity},
 	})
 	if err != nil {
 		t.Fatalf("StreamSlice: %v", err)
@@ -174,8 +185,9 @@ func TestStreamSliceColumnProjection(t *testing.T) {
 	if sl2.Position == nil || sl2.Position.Li != nil {
 		t.Errorf("li materialized on bare track: %+v", sl2.Position)
 	}
-	if sl2.Height != nil || sl2.Liquid != nil || sl2.View != nil {
-		t.Errorf("hgt/lq/view materialized on bare track: hgt=%v lq=%v view=%v", sl2.Height, sl2.Liquid, sl2.View)
+	if sl2.Height != nil || sl2.Liquid != nil || sl2.View != nil || sl2.Velocity != nil {
+		t.Errorf("hgt/lq/view/vel materialized on bare track: hgt=%v lq=%v view=%v vel=%v",
+			sl2.Height, sl2.Liquid, sl2.View, sl2.Velocity)
 	}
 }
 

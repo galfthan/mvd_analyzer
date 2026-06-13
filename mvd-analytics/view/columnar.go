@@ -266,6 +266,10 @@ func buildColumnarPlayer(p *result.PlayerStream, fields []string, reds []Reducer
 			buildViewCols(p, redNames[fi], reds[fi], g, cp)
 			continue
 		}
+		if f == FieldVelocity {
+			buildVelocityCols(p, redNames[fi], reds[fi], g, cp)
+			continue
+		}
 		col, validFrom, present := buildColumn(p, f, redNames[fi], reds[fi], g, cp)
 		if !present {
 			continue
@@ -447,6 +451,43 @@ func buildViewCols(p *result.PlayerStream, redName string, red Reducer, g bucket
 	}
 }
 
+// buildVelocityCols splits the [3]int32 velocity reduction into the
+// dense vx/vy/vz int32 columns, mirroring buildPositionCols. All three
+// share one validFrom.
+func buildVelocityCols(p *result.PlayerStream, redName string, red Reducer, g bucketGrid, cp *ColumnarPlayer) {
+	n := cp.N
+	vxs := make([]int32, n)
+	vys := make([]int32, n)
+	vzs := make([]int32, n)
+	firstNonNil := -1
+	for j := 0; j < n; j++ {
+		v := reduceFieldValue(p, FieldVelocity, redName, red, g, cp.First+j)
+		if v == nil {
+			continue
+		}
+		if firstNonNil < 0 {
+			firstNonNil = cp.First + j
+		}
+		if vel, ok := v.([3]int32); ok {
+			vxs[j], vys[j], vzs[j] = vel[0], vel[1], vel[2]
+		}
+	}
+	if firstNonNil < 0 {
+		return
+	}
+	cp.Cols["vx"] = vxs
+	cp.Cols["vy"] = vys
+	cp.Cols["vz"] = vzs
+	if firstNonNil > cp.First {
+		if cp.ValidFrom == nil {
+			cp.ValidFrom = make(map[string]int)
+		}
+		cp.ValidFrom["vx"] = firstNonNil
+		cp.ValidFrom["vy"] = firstNonNil
+		cp.ValidFrom["vz"] = firstNonNil
+	}
+}
+
 // reduceFieldValue computes the reduced value for one (field, bucket),
 // mirroring reducePlayer's per-field branch exactly (fast path with
 // fallback to collectSamples + Reducer.Apply).
@@ -487,6 +528,8 @@ func columnElemType(field, redName string) string {
 		return "i32" // single floor-height column (first/last)
 	case KindLiquid:
 		return "i16" // single liquid-state column (first/last); lq fits int8
+	case KindVelocity:
+		return "vel" // handled by buildVelocityCols
 	case KindEventList:
 		return "f64" // first/last on an event list yields a timestamp
 	}

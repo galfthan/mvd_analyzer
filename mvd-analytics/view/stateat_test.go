@@ -45,11 +45,14 @@ func TestStateAtViewHeightLiquid(t *testing.T) {
 			Lq:  []int8{0, 5, 7},
 			VP:  []int16{10, 20, 30},
 			VYa: []int16{-10, -20, -30},
+			VX:  []int32{100, 200, 300},
+			VY:  []int32{-100, -200, -300},
+			VZ:  []int32{1, 2, 3},
 		},
 	})
 	v, err := StateAt(r, StateAtOptions{
 		Time:   1.1, // nearest sample is index 1 (t=1000)
-		Fields: []string{FieldView, FieldHeight, FieldLiquid},
+		Fields: []string{FieldView, FieldHeight, FieldLiquid, FieldVelocity},
 	})
 	if err != nil {
 		t.Fatalf("StateAt: %v", err)
@@ -64,6 +67,9 @@ func TestStateAtViewHeightLiquid(t *testing.T) {
 	if st.Lq == nil || *st.Lq != 5 {
 		t.Errorf("Lq at 1.1 = %v, want 5", st.Lq)
 	}
+	if st.Vel == nil || st.Vel.VX != 200 || st.Vel.VY != -200 || st.Vel.VZ != 2 {
+		t.Errorf("Vel at 1.1 = %+v, want {200,-200,2}", st.Vel)
+	}
 
 	// Bare x/y/z track: view present (always recorded), but hgt/lq absent.
 	r2 := makeStream(t, result.PlayerStream{
@@ -77,13 +83,13 @@ func TestStateAtViewHeightLiquid(t *testing.T) {
 			VYa: []int16{3, 4},
 		},
 	})
-	v2, _ := StateAt(r2, StateAtOptions{Time: 0, Fields: []string{FieldView, FieldHeight, FieldLiquid}})
+	v2, _ := StateAt(r2, StateAtOptions{Time: 0, Fields: []string{FieldView, FieldHeight, FieldLiquid, FieldVelocity}})
 	st2 := v2.Players["p1"]
 	if st2.View == nil {
 		t.Errorf("view should be present on bare track")
 	}
-	if st2.Hgt != nil || st2.Lq != nil {
-		t.Errorf("hgt/lq must be absent without their columns: hgt=%v lq=%v", st2.Hgt, st2.Lq)
+	if st2.Hgt != nil || st2.Lq != nil || st2.Vel != nil {
+		t.Errorf("hgt/lq/vel must be absent without their columns: hgt=%v lq=%v vel=%v", st2.Hgt, st2.Lq, st2.Vel)
 	}
 }
 

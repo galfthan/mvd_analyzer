@@ -48,6 +48,7 @@ type PlayerStateAt struct {
 	View *ViewAngles `json:"view,omitempty"`
 	Hgt  *int32      `json:"hgt,omitempty"`
 	Lq   *int8       `json:"lq,omitempty"`
+	Vel  *Velocity3D `json:"vel,omitempty"`
 
 	RL  *bool `json:"rl,omitempty"`
 	LG  *bool `json:"lg,omitempty"`
@@ -78,6 +79,14 @@ type Position3D struct {
 type ViewAngles struct {
 	VP  int16 `json:"vp"`
 	VYa int16 `json:"vya"`
+}
+
+// Velocity3D is the point-in-time velocity vector in Quake units/sec,
+// snapped to the nearest sample (see PositionTrack.VX for derivation).
+type Velocity3D struct {
+	VX int32 `json:"vx"`
+	VY int32 `json:"vy"`
+	VZ int32 `json:"vz"`
 }
 
 // StateAt resolves each requested field at Time per player. For
@@ -201,7 +210,8 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 			ps.Ring = boolPtr(intervalContains(p.Ring, tMs))
 		}
 
-		if (requested[FieldPosition] || requested[FieldView] || requested[FieldHeight] || requested[FieldLiquid]) &&
+		if (requested[FieldPosition] || requested[FieldView] || requested[FieldHeight] ||
+			requested[FieldLiquid] || requested[FieldVelocity]) &&
 			p.Position != nil && len(p.Position.T) > 0 {
 			pt := p.Position
 			idx := nearestPositionIndex(pt, opts.Time)
@@ -219,6 +229,9 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 				if requested[FieldLiquid] && len(pt.Lq) == len(pt.T) {
 					v := pt.Lq[idx]
 					ps.Lq = &v
+				}
+				if requested[FieldVelocity] && len(pt.VX) == len(pt.T) && len(pt.VY) == len(pt.T) && len(pt.VZ) == len(pt.T) {
+					ps.Vel = &Velocity3D{VX: pt.VX[idx], VY: pt.VY[idx], VZ: pt.VZ[idx]}
 				}
 			}
 		}

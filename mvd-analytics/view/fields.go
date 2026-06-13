@@ -25,9 +25,10 @@ const (
 	// whether they're submerged asks for it explicitly, and `pos` stays
 	// strictly x/y/z. Height (`hgt`, not `h` — that's Health) and Liquid
 	// are present only when the map's BSP was provisioned.
-	FieldView   = "view"
-	FieldHeight = "hgt"
-	FieldLiquid = "lq"
+	FieldView     = "view"
+	FieldHeight   = "hgt"
+	FieldLiquid   = "lq"
+	FieldVelocity = "vel" // velocity vx/vy/vz (units/sec), projected from the position track
 
 	FieldRL  = "rl"
 	FieldLG  = "lg"
@@ -61,6 +62,7 @@ const (
 	KindView      // view direction (vp/vya) projected from *PositionTrack
 	KindHeight    // height-above-floor (h) projected from *PositionTrack
 	KindLiquid    // liquid state (lq) projected from *PositionTrack
+	KindVelocity  // velocity (vx/vy/vz) projected from *PositionTrack
 )
 
 // FieldKindFor returns the kind for a known field code; ok=false on an
@@ -79,6 +81,7 @@ var fieldKinds = map[string]FieldKind{
 	FieldView:      KindView,
 	FieldHeight:    KindHeight,
 	FieldLiquid:    KindLiquid,
+	FieldVelocity:  KindVelocity,
 
 	FieldRL:  KindInterval,
 	FieldLG:  KindInterval,
@@ -102,10 +105,10 @@ var fieldKinds = map[string]FieldKind{
 // AllStandardFields is the canonical iteration order — used as the
 // default Fields filter and by the legacy bucket shim. Order chosen so
 // downstream JSON has a stable key sequence (helpful for byte-level
-// diffs across runs). FieldView / FieldHeight / FieldLiquid are
-// deliberately absent: they are opt-in, so a default query keeps the
-// pre-v31 shape and a consumer only pays for view / height / liquid when
-// it asks for them by code.
+// diffs across runs). FieldView / FieldHeight / FieldLiquid /
+// FieldVelocity are deliberately absent: they are opt-in, so a default
+// query keeps the pre-v31 shape and a consumer only pays for view /
+// height / liquid / velocity when it asks for them by code.
 var AllStandardFields = []string{
 	FieldHealth, FieldArmor, FieldArmorType, FieldLoc, FieldPosition,
 	FieldRL, FieldLG, FieldGL, FieldSSG, FieldSNG,
@@ -144,6 +147,7 @@ var DefaultReducers = map[string]string{
 	FieldView:      "first",
 	FieldHeight:    "first",
 	FieldLiquid:    "first",
+	FieldVelocity:  "first",
 
 	FieldRL:  "first",
 	FieldLG:  "first",

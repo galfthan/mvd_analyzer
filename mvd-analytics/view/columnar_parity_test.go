@@ -103,8 +103,16 @@ func reconstructPlayers(cb *view.ColumnarBuckets, i int) map[string]map[string]a
 				colVal(cp, "vya", i).(int16),
 			}
 		}
+		if colVal(cp, "vx", i) != nil {
+			pdata[view.FieldVelocity] = [3]int32{
+				colVal(cp, "vx", i).(int32),
+				colVal(cp, "vy", i).(int32),
+				colVal(cp, "vz", i).(int32),
+			}
+		}
 		for field := range cp.Cols {
-			if field == "x" || field == "y" || field == "z" || field == "vp" || field == "vya" {
+			switch field {
+			case "x", "y", "z", "vp", "vya", "vx", "vy", "vz":
 				continue
 			}
 			if v := colVal(cp, field, i); v != nil {
@@ -246,7 +254,7 @@ func TestColumnarParityCorpus(t *testing.T) {
 func TestColumnarParityViewFields(t *testing.T) {
 	fields := []string{
 		view.FieldPosition, view.FieldView, view.FieldHeight,
-		view.FieldLiquid, view.FieldHealth,
+		view.FieldLiquid, view.FieldVelocity, view.FieldHealth,
 	}
 	for _, gameID := range []int{corpus4on4, corpus1on1} {
 		gameID := gameID

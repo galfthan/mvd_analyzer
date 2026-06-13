@@ -667,10 +667,26 @@ it). See MVD_FORMAT.md "View-angle semantics" for the wire derivation
 vector formula.
 
 The view-layer query API and CLI let consumers select position channels
-independently — `pos` is strictly x/y/z, and `view` / `hgt` / `lq` are
-opt-in field codes. The CLI mirrors this: `-include positions,view,height,liquid`
-each keep their column set in the full-result JSON (default strips the
-whole heavy track).
+independently — `pos` is strictly x/y/z, and `view` / `hgt` / `lq` /
+`vel` are opt-in field codes. The CLI mirrors this:
+`-include positions,view,height,liquid,velocity` each keep their column
+set in the full-result JSON (default strips the whole heavy track).
+
+## Velocity (`PositionTrack.VX` / `VY` / `VZ`)
+
+Per-sample velocity in Quake units/sec (`pos.vx`/`vy`/`vz`, schema v32)
+is **derived** from the position columns in `resolveVelocities` (the
+finalize pass, per-slot before the reconnect merge, no BSP needed) by a
+central-difference estimator — `v[i] = (p[i+1]-p[i-1]) / (t[i+1]-t[i-1])`,
+second-order accurate, one-sided at a segment end. The estimator refuses
+to differentiate across a discontinuity that isn't real movement: a
+respawn (a spawn timestamp between the samples), an abnormal time gap
+(`velGapCapMs`, death / pause / reconnect), or a teleporter-sized
+displacement (`velTeleportSpeedUps`, above the server's `sv_maxvelocity`
+clamp) — each reads ~0 instead of a tens-of-thousands-ups spike. The
+source positions are integer-rounded, so the raw derivative carries
+±1-unit quantization noise; smooth client-side for a clean speed curve.
+Exposed via the opt-in `vel` field code (and `-include velocity`).
 
 ## Running tests
 

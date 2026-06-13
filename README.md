@@ -752,7 +752,10 @@ diff -r /tmp/before /tmp/after
    angles ride the same `svc_playerinfo` samples as x/y/z. The view-layer
    query API and CLI expose position channels independently: `pos` is
    strictly x/y/z, with opt-in `view` / `hgt` / `lq` for look direction,
-   floor height, and liquid state.
+   floor height, and liquid state. Since **schema v32** there is also a
+   derived per-sample **velocity** (`pos.vx`/`vy`/`vz`, Quake units/sec,
+   opt-in `vel`), computed by a central-difference estimator that does
+   not differentiate across respawns, teleporters, or time gaps.
 
 ## Reference sources
 

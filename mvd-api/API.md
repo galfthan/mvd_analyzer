@@ -85,13 +85,14 @@ Scale ms→s by `* 0.001`.
   See §4.10.
 
 The valid **field codes** (`h`, `a`, `rl`, `pos`, `view`, `hgt`, `lq`,
-`sp`, `d`, …) and **reducer names** are listed once in
+`vel`, `sp`, `d`, …) and **reducer names** are listed once in
 [RESULT_SCHEMA.md §Field vocabulary / Reducer registry](../mvd-analytics/RESULT_SCHEMA.md#field-vocabulary).
-Note (schema v31): `pos` is **strictly x/y/z** (+ the per-sample loc
+Note (schema v31+): `pos` is **strictly x/y/z** (+ the per-sample loc
 label `li`). The player's **view direction** is the opt-in `view` field
 (raw `angle16` pitch/yaw, decode `deg = uint16(v)*360/65536`,
-pitch > 180° = looking up); floor height is `hgt`; liquid state is `lq`.
-Height/liquid no longer ride along `pos` — request them by code.
+pitch > 180° = looking up); floor height is `hgt`; liquid state is `lq`;
+**velocity** (vx/vy/vz, Quake units/sec, schema v32) is `vel`.
+Height/liquid no longer ride along `pos` — request each by code.
 
 ### 2.3 Caching (use it — the data is immutable)
 
@@ -399,7 +400,8 @@ scrubbers and detail charts.
     // each projects into its own sibling track with its own t axis
     "view": { "t": [105001,105014,…], "vp": [288,289,…], "vya": [16384,16390,…] }, // raw angle16
     "hgt":  { "t": [105001,105014,…], "h":  [0,0,40,…] },     // units above floor (BSP only)
-    "lq":   { "t": [105001,105014,…], "lq": [0,0,5,…] } } ] }  // 0 dry, else (type<<2)|level
+    "lq":   { "t": [105001,105014,…], "lq": [0,0,5,…] },     // 0 dry, else (type<<2)|level
+    "vel":  { "t": [105001,105014,…], "vx": [312,318,…], "vy": [-44,…], "vz": [0,…] } } ] }  // units/sec
 ```
 
 ⚠️ Entry `t` / `s` / `e` are **int32 ms** even though the envelope
@@ -530,6 +532,10 @@ Common frontend features → the call that backs them.
   add `view` to the fields: `GET /stream-slice?fields=pos,view&players=X&from=…&to=…`.
   Decode `vp`/`vya` with `deg = uint16(v)*360/65536`; forward vector
   `= (cos p·cos y, cos p·sin y, −sin p)`.
+- **Speed curve / bunny-hop analysis** → add `vel`:
+  `GET /stream-slice?fields=vel&players=X&from=…&to=…`. Speed =
+  `hypot(vx,vy,vz)`, horizontal = `hypot(vx,vy)`; expect ±1-unit
+  quantization noise on the raw derivative, smooth client-side if needed.
 - **Scrubber tooltip (state at playhead)** → `GET /state-at?time=T&fields=h,a,rl,pos`
   (add `view`/`hgt`/`lq` for look direction / height / liquid).
 - **Life events / deaths timeline** → `GET /events?types=spawn,death`.

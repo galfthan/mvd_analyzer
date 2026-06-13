@@ -174,6 +174,19 @@ type GlobalStream struct {
 // forward = (cos p·cos y, cos p·sin y, −sin p). Same source as the
 // origin columns (svc_playerinfo), so they are populated whenever T is;
 // same length as T when present.
+//
+// VX / VY / VZ are the player's velocity per sample in **Quake units per
+// second** (schema v32), derived — not a wire field — from the position
+// columns by a central-difference estimator (second-order accurate) over
+// the native-rate samples. The estimator does not differentiate across a
+// respawn teleport or an abnormal time gap (death / pause / reconnect),
+// so a velocity reads ~0 over those rather than spiking; an isolated
+// sample reads 0. Because the source x/y/z are integer-rounded Quake
+// units sampled ~every 13 ms, expect ±1-unit quantization noise (a few
+// tens of ups) on the raw derivative — smooth client-side if a clean
+// speed curve is wanted. Speed is hypot(vx,vy,vz); horizontal speed
+// (the usual "are they bunnying" metric) is hypot(vx,vy). Populated
+// whenever T is (no BSP needed); same length as T when present.
 type PositionTrack struct {
 	T   []int32 `json:"t"` // milliseconds since the stream's time origin
 	X   []int32 `json:"x"`
@@ -184,6 +197,9 @@ type PositionTrack struct {
 	Lq  []int8  `json:"lq,omitempty"`  // liquid state: 0 dry, else (type<<2)|level
 	VP  []int16 `json:"vp,omitempty"`  // view pitch, raw angle16 (decode: u16*360/65536; >180 = up)
 	VYa []int16 `json:"vya,omitempty"` // view yaw, raw angle16 (decode: u16*360/65536)
+	VX  []int32 `json:"vx,omitempty"`  // velocity X, Quake units/sec (central difference)
+	VY  []int32 `json:"vy,omitempty"`  // velocity Y, units/sec
+	VZ  []int32 `json:"vz,omitempty"`  // velocity Z, units/sec
 }
 
 // Lq liquid-type codes (the high bits of a PositionTrack.Lq value).

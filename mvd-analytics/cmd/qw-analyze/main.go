@@ -78,7 +78,7 @@ func main() {
 	minDwellStr := flag.String("min-dwell", "0", "drop transitions shorter than this for -view trails")
 	timeStr := flag.String("time", "", "time for -view state-at (required)")
 	includeTeam := flag.Bool("include-team", false, "emit per-team aggregates on -view buckets")
-	includeStr := flag.String("include", "", "comma-separated position-track columns for -view full: positions (x/y/z+loc), view (pitch/yaw), height, liquid")
+	includeStr := flag.String("include", "", "comma-separated position-track columns for -view full: positions (x/y/z+loc), view (pitch/yaw), height, liquid, velocity")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: qw-analyze [options] <demo.mvd | demo.mvd.gz | directory>\n\n")
@@ -248,6 +248,7 @@ func dumpJSON(path string, w io.Writer, pretty bool, regionsOverride []config.Ma
 		sel.view = vopts.include["view"]
 		sel.height = vopts.include["height"]
 		sel.liquid = vopts.include["liquid"]
+		sel.velocity = vopts.include["velocity"]
 	}
 	stripStreamColumns(res, sel)
 
@@ -371,10 +372,11 @@ type streamColumnSelection struct {
 	view      bool // vp/vya — view direction
 	height    bool // h — height above floor
 	liquid    bool // lq — liquid state
+	velocity  bool // vx/vy/vz — velocity
 }
 
 func (s streamColumnSelection) any() bool {
-	return s.positions || s.view || s.height || s.liquid
+	return s.positions || s.view || s.height || s.liquid || s.velocity
 }
 
 // stripStreamColumns drops position-track data the consumer did not ask
@@ -408,6 +410,11 @@ func stripStreamColumns(r *result.Result, sel streamColumnSelection) {
 		}
 		if !sel.liquid {
 			pt.Lq = nil
+		}
+		if !sel.velocity {
+			pt.VX = nil
+			pt.VY = nil
+			pt.VZ = nil
 		}
 	}
 }

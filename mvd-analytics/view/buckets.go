@@ -408,6 +408,8 @@ func fastReduce(p *result.PlayerStream, field, reducer string, bStart, bEnd floa
 			return firstHeight(p.Position, bStart, bEnd), true
 		case KindLiquid:
 			return firstLiquid(p.Position, bStart, bEnd), true
+		case KindVelocity:
+			return firstVelocity(p.Position, bStart, bEnd), true
 		}
 	case "any":
 		if kind == KindEventList {
@@ -504,6 +506,8 @@ func collectSamples(p *result.PlayerStream, field string, bStart, bEnd float64) 
 		return heightSamples(p, bStart, bEnd)
 	case KindLiquid:
 		return liquidSamples(p, bStart, bEnd)
+	case KindVelocity:
+		return velocitySamples(p, bStart, bEnd)
 	case KindEventList:
 		return eventListSamples(p, field, bStart, bEnd)
 	}
@@ -646,6 +650,16 @@ func firstLiquid(pt *result.PositionTrack, bStart, bEnd float64) any {
 	return nil
 }
 
+func firstVelocity(pt *result.PositionTrack, bStart, bEnd float64) any {
+	if pt == nil || len(pt.VX) != len(pt.T) || len(pt.VY) != len(pt.T) || len(pt.VZ) != len(pt.T) {
+		return nil
+	}
+	if i := firstPosIndex(pt, bStart, bEnd); i >= 0 {
+		return velocityTriple(pt, i)
+	}
+	return nil
+}
+
 // firstPosIndex returns the index of the first sample in [bStart, bEnd),
 // else the carry-forward sample before bStart, else -1. Shared liveness
 // logic behind firstPosition/firstView/firstHeight/firstLiquid.
@@ -691,6 +705,19 @@ func liquidSamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
 		return nil
 	}
 	return columnSamples(pt, bStart, bEnd, func(i int) any { return int16(pt.Lq[i]) })
+}
+
+func velocitySamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
+	pt := p.Position
+	if pt == nil || len(pt.VX) != len(pt.T) || len(pt.VY) != len(pt.T) || len(pt.VZ) != len(pt.T) {
+		return nil
+	}
+	return columnSamples(pt, bStart, bEnd, func(i int) any { return velocityTriple(pt, i) })
+}
+
+// velocityTriple returns the [vx, vy, vz] units/sec vector for sample i.
+func velocityTriple(pt *result.PositionTrack, i int) [3]int32 {
+	return [3]int32{pt.VX[i], pt.VY[i], pt.VZ[i]}
 }
 
 // columnSamples is positionSamples generalised over a per-index value

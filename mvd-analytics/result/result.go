@@ -350,7 +350,18 @@ package result
 //     them: `view` (vp/vya), plus `hgt` (h) and `lq` split out so a
 //     consumer can request height/liquid/view without x/y/z — and `pos`
 //     now returns strictly x/y/z (h/lq no longer ride along it).
-const CurrentSchemaVersion = 31
+//
+// v32:
+//   - PositionTrack gains VX/VY/VZ columns: the player's velocity per
+//     sample in Quake units/sec, derived from the position columns by a
+//     central-difference estimator (it does not differentiate across a
+//     respawn teleport or an abnormal time gap, so it reads ~0 there
+//     instead of spiking). Additive (omitempty), populated whenever the
+//     track is — no BSP needed. New opt-in view-layer field code `vel`
+//     (vx/vy/vz) and CLI `-include velocity`. Expect ±1-unit
+//     quantization noise on the raw derivative (integer-rounded source
+//     positions); smooth client-side for a clean speed curve.
+const CurrentSchemaVersion = 32
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

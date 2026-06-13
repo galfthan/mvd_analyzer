@@ -50,6 +50,7 @@ type PlayerSlice struct {
 	View     *result.PositionTrack `json:"view,omitempty"`
 	Height   *result.PositionTrack `json:"hgt,omitempty"`
 	Liquid   *result.PositionTrack `json:"lq,omitempty"`
+	Velocity *result.PositionTrack `json:"vel,omitempty"`
 
 	Health    []result.ChangeI16 `json:"h,omitempty"`
 	Armor     []result.ChangeI16 `json:"a,omitempty"`
@@ -191,6 +192,9 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 		}
 		if requested[FieldLiquid] && p.Position != nil {
 			ps.Liquid = sliceLiquid(p.Position, start, end)
+		}
+		if requested[FieldVelocity] && p.Position != nil {
+			ps.Velocity = sliceVelocity(p.Position, start, end)
 		}
 
 		out.Players = append(out.Players, ps)
@@ -423,5 +427,23 @@ func sliceLiquid(pt *result.PositionTrack, start, end float64) *result.PositionT
 	out := &result.PositionTrack{}
 	out.T = append(out.T, pt.T[lo:hi]...)
 	out.Lq = append(out.Lq, pt.Lq[lo:hi]...)
+	return out
+}
+
+// sliceVelocity projects the velocity columns (t, vx, vy, vz). Returns
+// nil when the track has no velocity samples in the window.
+func sliceVelocity(pt *result.PositionTrack, start, end float64) *result.PositionTrack {
+	if pt == nil || len(pt.VX) != len(pt.T) || len(pt.VY) != len(pt.T) || len(pt.VZ) != len(pt.T) {
+		return nil
+	}
+	lo, hi := sliceWindowIndices(pt, start, end)
+	if lo >= hi {
+		return nil
+	}
+	out := &result.PositionTrack{}
+	out.T = append(out.T, pt.T[lo:hi]...)
+	out.VX = append(out.VX, pt.VX[lo:hi]...)
+	out.VY = append(out.VY, pt.VY[lo:hi]...)
+	out.VZ = append(out.VZ, pt.VZ[lo:hi]...)
 	return out
 }
