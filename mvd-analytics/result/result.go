@@ -339,7 +339,18 @@ package result
 //     The qualification threshold already bounds the list to a handful
 //     per match, and a cap keyed on floor height could drop the hits a
 //     consumer sorting by heightAboveAttacker cares about most.
-const CurrentSchemaVersion = 30
+//
+// v31:
+//   - PositionTrack gains VP/VYa columns: the player's view direction
+//     (pitch, yaw) per sample as the raw angle16 wire shorts, kept
+//     losslessly. Decode to degrees with float(uint16(v)) * 360/65536
+//     (values in [0,360); pitch > 180 = looking up). Roll is not stored
+//     (the server forces it to 0). Additive (omitempty), populated
+//     whenever the position track is. New view-layer field codes expose
+//     them: `view` (vp/vya), plus `hgt` (h) and `lq` split out so a
+//     consumer can request height/liquid/view without x/y/z — and `pos`
+//     now returns strictly x/y/z (h/lq no longer ride along it).
+const CurrentSchemaVersion = 31
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

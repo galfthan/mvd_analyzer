@@ -653,6 +653,25 @@ sample airborne above water/slime/lava measures down to the liquid
 surface (`bspvis.LiquidSurfaceBelow`) when it is the highest support.
 See [RESULT_SCHEMA.md](RESULT_SCHEMA.md) for the `lq` vocabulary.
 
+## View direction (`PositionTrack.VP` / `VYa`)
+
+Each native-rate position sample also carries the player's **view
+direction** (pitch, yaw) — `pos.vp` / `pos.vya`, schema v31. These come
+free from the same `svc_playerinfo` message as x/y/z (no BSP needed):
+the parser keeps the **raw `angle16` wire shorts** losslessly in
+`PlayerPositionEvent.Angles`, and the timeline analyzer records them
+alongside x/y/z. Decode to degrees with `uint16(v) * 360/65536` (values
+`[0,360)`, pitch > 180° = looking up); roll is dropped (the server zeroes
+it). See MVD_FORMAT.md "View-angle semantics" for the wire derivation
+(the `*−3` model-pitch recovery) and RESULT_SCHEMA.md for the forward-
+vector formula.
+
+The view-layer query API and CLI let consumers select position channels
+independently — `pos` is strictly x/y/z, and `view` / `hgt` / `lq` are
+opt-in field codes. The CLI mirrors this: `-include positions,view,height,liquid`
+each keep their column set in the full-result JSON (default strips the
+whole heavy track).
+
 ## Running tests
 
 ```bash

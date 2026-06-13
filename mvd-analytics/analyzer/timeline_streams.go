@@ -98,12 +98,15 @@ func (b *streamBuilder) recordCells(tMs int32, v int16) {
 // recordPosition appends every native sample (no dedup; D11
 // asymmetry). Time is integer milliseconds — the canonical wire-native
 // unit; we never narrow it back to float to avoid drift across the
-// boundary comparisons in locgraph / blip filter.
-func (b *streamBuilder) recordPosition(tMs int32, x, y, z float32) {
+// boundary comparisons in locgraph / blip filter. vp/vya are the raw
+// angle16 view pitch/yaw shorts off the wire, stored losslessly.
+func (b *streamBuilder) recordPosition(tMs int32, x, y, z float32, vp, vya int16) {
 	b.posT = append(b.posT, tMs)
 	b.posX = append(b.posX, int32(x))
 	b.posY = append(b.posY, int32(y))
 	b.posZ = append(b.posZ, int32(z))
+	b.posVP = append(b.posVP, vp)
+	b.posVYa = append(b.posVYa, vya)
 }
 
 func (b *streamBuilder) recordSpawn(tMs int32) {
@@ -248,6 +251,12 @@ func (b *streamBuilder) toPlayerStream(name, team string) result.PlayerStream {
 		if len(b.posLq) == len(b.posT) {
 			pos.Lq = append([]int8(nil), b.posLq...)
 		}
+		if len(b.posVP) == len(b.posT) {
+			pos.VP = append([]int16(nil), b.posVP...)
+		}
+		if len(b.posVYa) == len(b.posT) {
+			pos.VYa = append([]int16(nil), b.posVYa...)
+		}
 		ps.Position = pos
 	}
 	if len(b.spawns) > 0 {
@@ -351,6 +360,8 @@ func (b *streamBuilder) appendSlice(src *streamBuilder, startMs, endMs int32) {
 	hasLi := len(src.posLi) == len(src.posT)
 	hasH := len(src.posH) == len(src.posT)
 	hasLq := len(src.posLq) == len(src.posT)
+	hasVP := len(src.posVP) == len(src.posT)
+	hasVYa := len(src.posVYa) == len(src.posT)
 	for i, t := range src.posT {
 		if !in(t) {
 			continue
@@ -367,6 +378,12 @@ func (b *streamBuilder) appendSlice(src *streamBuilder, startMs, endMs int32) {
 		}
 		if hasLq {
 			b.posLq = append(b.posLq, src.posLq[i])
+		}
+		if hasVP {
+			b.posVP = append(b.posVP, src.posVP[i])
+		}
+		if hasVYa {
+			b.posVYa = append(b.posVYa, src.posVYa[i])
 		}
 	}
 

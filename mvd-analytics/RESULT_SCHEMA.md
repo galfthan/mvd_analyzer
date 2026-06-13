@@ -567,7 +567,7 @@ when the demo has no pauses or the server does not embed the block.
 |---|---|---|---|
 | Name | `name` | string | Canonical player name (D12: collisions in same match get a `#slotIndex` suffix). |
 | Team | `team` | string (omitempty) | Team label (post-duel-normalise: per-player synthetic team). |
-| Position | `pos` | *PositionTrack (omitempty) | Native-rate position track. Omitted from default JSON unless `-include positions` (CLI) or equivalent is set. |
+| Position | `pos` | *PositionTrack (omitempty) | Native-rate position track: x/y/z plus optional per-sample `li`/`h`/`lq` and (schema v31) view-direction `vp`/`vya` columns. Omitted from default JSON unless `-include positions` (CLI) or equivalent is set; `-include view`/`height`/`liquid` keep the respective extra columns. |
 | Health / Armor | `h` / `a` | []ChangeI16 | Vital change streams. Health caps at 250, Armor at 200; int16 holds the range. |
 | ArmorType | `at` | []ChangeStr | `"ga"` / `"ya"` / `"ra"` / `""` transitions. |
 | Loc | `li` | []ChangeI16 | Index into `TimelineAnalysisResult.LocTable`. Smoothed by the blip filter. |
@@ -590,15 +590,18 @@ origin (see PositionTrack for the unit rationale).
 ### PositionTrack
 
 Columnar to compress JSON. Indices align across all arrays. `t`/`x`/`y`/`z`
-are always present; `li` and `h` are optional (`omitempty`) per-sample
-columns populated during analysis when their inputs are available.
+are always present; `li`, `h`, `lq`, `vp`, `vya` are optional
+(`omitempty`) per-sample columns populated during analysis when their
+inputs are available.
 
 ```
 PositionTrack = {
   "t": [int32...], "x": [int32...], "y": [int32...], "z": [int32...],
-  "li": [int16...],   // optional: loc index per sample
-  "h":  [int32...],   // optional: height above floor per sample
-  "lq": [int8...]     // optional: liquid state per sample
+  "li":  [int16...],  // optional: loc index per sample
+  "h":   [int32...],  // optional: height above floor per sample
+  "lq":  [int8...],   // optional: liquid state per sample
+  "vp":  [int16...],  // optional: view pitch per sample (raw angle16)
+  "vya": [int16...]   // optional: view yaw per sample (raw angle16)
 }
 ```
 
@@ -665,6 +668,18 @@ Same length as `t`; absent when no BSP is provisioned. (One deliberate
 deviation from the engine predicate: `CONTENTS_SKY` does **not** count
 as liquid — the physics treats sky like water for drag, but a
 void-faller reported as swimming would mislead consumers.)
+
+`vp` / `vya` (when present, schema v31) are the **player's view
+direction** — pitch and yaw — at each sample, stored as the **raw
+`angle16` wire shorts** (the exact 2-byte value the server wrote, kept
+losslessly; see MVD_FORMAT.md "View-angle semantics"). Decode to degrees
+with `deg = uint16(v) * 360/65536`; values land in `[0,360)`, so a pitch
+**> 180° means looking up**. Roll is not stored (the server forces it to
+0). A forward unit vector is one trig call away — with `p`, `y` the
+decoded pitch/yaw in radians,
+`forward = (cos p·cos y, cos p·sin y, −sin p)`. Same length as `t`;
+populated whenever the track is (the angles ride the same
+`svc_playerinfo` samples as x/y/z, so unlike `h`/`lq` they need no BSP).
 
 ### Time units: all times are int32 milliseconds
 
@@ -776,6 +791,9 @@ aggregation (`min`, `max`, `mean`, `dominant`, etc.).
 | `at` | Armor type | `[]ChangeStr` | `first` |
 | `li` | Loc index | `[]ChangeI16` | `first` |
 | `pos` | Position xyz | `*PositionTrack` | `first` |
+| `view` | View direction (pitch/yaw, raw angle16) | `*PositionTrack` (vp/vya) | `first` |
+| `hgt` | Height above floor | `*PositionTrack` (h) | `first` |
+| `lq` | Liquid state | `*PositionTrack` (lq) | `first` |
 | `rl` | Rocket Launcher held | `[]Interval` | `first` |
 | `lg` | Lightning Gun held | `[]Interval` | `first` |
 | `gl` | Grenade Launcher held | `[]Interval` | `first` |
@@ -793,6 +811,24 @@ aggregation (`min`, `max`, `mean`, `dominant`, etc.).
 
 `sp` / `d` stay on `any` because they need a bool ("did this event
 happen during the bucket?"); `first` would return a timestamp.
+
+**`view` / `hgt` / `lq` are opt-in** — they are *not* in the default
+field set (`AllStandardFields`), so a query that omits `fields` keeps
+the pre-v31 shape and a consumer only pays for view direction, floor
+height, or liquid state when it asks for the code explicitly. They all
+read from the player's `*PositionTrack` but project disjoint columns:
+`view` → `vp`/`vya`, `hgt` → `h`, `lq` → `lq`. **Clean break (schema
+v31):** `pos` now returns **strictly** `x`/`y`/`z` (plus the per-sample
+loc label `li`); height and liquid no longer ride along it — request
+`hgt` / `lq` for those. In `view.StreamSlice` each projects into its own
+sibling track (`pos`/`view`/`hgt`/`lq`); in `view.Buckets` `view`
+reduces to a `[vp, vya]` pair (split to `vp`/`vya` columns in the
+columnar layout), `hgt` to a scalar height (so `mean`/`min`/`max` give a
+jump apex / average), `lq` to a scalar liquid code; in `view.StateAt`
+they surface as `view` (`{vp, vya}`), `hgt`, and `lq`. (The stored
+`result.PositionTrack` still carries every column — the split is purely
+in the query projection; the WASM frontend reads the track directly and
+is unaffected.)
 
 ### Reducer registry
 
@@ -1136,6 +1172,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v31 | `PositionTrack` gains `vp` / `vya` columns: the player's **view direction** (pitch, yaw) per sample as the raw `angle16` wire shorts, kept losslessly (decode `deg = uint16(v) * 360/65536`; values `[0,360)`, pitch > 180° = looking up; roll not stored). Additive (`omitempty`), populated whenever the track is — no BSP needed (the angles ride the same `svc_playerinfo` samples as x/y/z). New opt-in view-layer field codes expose per-channel selection: `view` (vp/vya), `hgt` (h), `lq` (lq). **Clean break:** the `view`-API `pos` code now returns strictly x/y/z (+`li`); height/liquid no longer ride along it — request `hgt` / `lq`. CLI `-include` becomes column-aware (`positions` / `view` / `height` / `liquid`). |
 | v30 | `timelineAnalysis.airgibs` is no longer capped at the top 20: every qualifying hit (direct enemy rocket, victim ≥ 96 units above the floor) is emitted, still ordered by `height` descending. The qualification threshold already bounds the list to a handful per match, and a cap keyed on floor height could drop the hits a consumer sorting by `heightAboveAttacker` cares about most. |
 | v29 | `AirgibEvent` gains `heightAboveAttacker`: the victim's origin minus the shooter's at the hit (units; negative = victim below the shooter) — the vertical gap the rocket climbed, often the more impressive number for a highlight than the floor height. Computed from the two players' nearest position samples to the hit; `0`/absent when the shooter had no sample within the gap window. Ranking and the ≥ 96 qualification still use the floor height. Additive (`omitempty`). |
 | v28 | `PositionTrack` gains an `lq` column: per-sample **liquid state**, packed `(type << 2) \| level` — level 1–3 (feet/waist/eyes submerged, mirroring the engine's `PM_CategorizePosition` probes at z−23 / z+4 / z+22 against the map's render BSP), type 1 water / 2 slime / 3 lava (water 5/6/7, slime 9/10/11, lava 13/14/15; `0` = dry). Decode with `lq & 3` (level) and `lq >> 2` (type). `h` interacts with liquids: a sample in liquid (level ≥ 1) reads `h = 0` by definition, and a dry sample airborne above liquid measures down to the **liquid surface** when it is the highest support beneath the player. Additive (`omitempty`); absent when no BSP is provisioned for the map. |

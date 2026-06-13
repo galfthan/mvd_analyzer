@@ -163,14 +163,27 @@ type GlobalStream struct {
 // the liquid surface if it is the highest support under them.
 // Populated only when the map's BSP is provisioned (same source as H);
 // same length as T when present.
+//
+// VP / VYa are the player's view direction per sample (schema v31): the
+// raw angle16 wire shorts for view pitch and yaw, kept losslessly (the
+// exact 2-byte value the server wrote). Decode to degrees with
+// float(uint16(v)) * 360/65536 — values are in [0,360), so a pitch
+// > 180 means looking up. The wire's roll is always 0 (the server zeroes
+// it), so it is not stored. A forward unit vector is one trig call away:
+// with p,y the decoded pitch/yaw in radians,
+// forward = (cos p·cos y, cos p·sin y, −sin p). Same source as the
+// origin columns (svc_playerinfo), so they are populated whenever T is;
+// same length as T when present.
 type PositionTrack struct {
-	T  []int32 `json:"t"` // milliseconds since the stream's time origin
-	X  []int32 `json:"x"`
-	Y  []int32 `json:"y"`
-	Z  []int32 `json:"z"`
-	Li []int16 `json:"li,omitempty"`
-	H  []int32 `json:"h,omitempty"`  // height above the floor beneath the player; NoFloor = none
-	Lq []int8  `json:"lq,omitempty"` // liquid state: 0 dry, else (type<<2)|level
+	T   []int32 `json:"t"` // milliseconds since the stream's time origin
+	X   []int32 `json:"x"`
+	Y   []int32 `json:"y"`
+	Z   []int32 `json:"z"`
+	Li  []int16 `json:"li,omitempty"`
+	H   []int32 `json:"h,omitempty"`   // height above the floor beneath the player; NoFloor = none
+	Lq  []int8  `json:"lq,omitempty"`  // liquid state: 0 dry, else (type<<2)|level
+	VP  []int16 `json:"vp,omitempty"`  // view pitch, raw angle16 (decode: u16*360/65536; >180 = up)
+	VYa []int16 `json:"vya,omitempty"` // view yaw, raw angle16 (decode: u16*360/65536)
 }
 
 // Lq liquid-type codes (the high bits of a PositionTrack.Lq value).
