@@ -6014,6 +6014,8 @@ let mapState = {
     focusGroupName: null,     // normalized loc-group name under region focus, or null
     focusNeighbors: null,     // Set of group names adjacent to the focused one
     solidMode: false,         // opt-in occluding 3D model (needs walls in geometry v3)
+    movers: [],               // result.streams.movers — brush-model pose timelines (v32)
+    submodelMeshes: null,     // { submodelId -> tris } from corpus v4 geom.submodels
     mapEntities: [],          // result.mapEntities.entities for the current demo
     teleportArrows: [],       // precomputed {sx,sy,sz,dx,dy,dz} entrance→exit world-coord pairs
     entityFilters: {          // per-category visibility in learn mode
@@ -6097,10 +6099,22 @@ function applyMapGeometry(geom) {
     geom.backdropTris = backdrop && Array.isArray(backdrop.tris) && backdrop.tris.length >= 9
         ? backdrop.tris : null;
     mapState.mapGeometry = geom;
+    // Submodel meshes (corpus v4) keyed by id for the mover renderer.
+    mapState.submodelMeshes = null;
+    if (Array.isArray(geom.submodels)) {
+        const sm = {};
+        for (const s of geom.submodels) {
+            if (s && Number.isInteger(s.id) && Array.isArray(s.tris) && s.tris.length >= 9) {
+                sm[s.id] = s.tris;
+            }
+        }
+        if (Object.keys(sm).length > 0) mapState.submodelMeshes = sm;
+    }
     // Geometry-derived caches are stale now.
     mapState._floorZCache = null;
     mapState._solidEntries = null;
     mapState._solidCanvasKey = null;
+    mapState._moverShades = null;
     // The Solid (occluding model) toggle needs wall geometry — only
     // version-3 files carry it.
     const solidBtn = document.getElementById('map-solid-toggle');
@@ -6161,6 +6175,15 @@ function initMapView(result) {
     mapState._floorZCache = null;   // floor-anchor lookups are per-geometry too
     const solidBtnInit = document.getElementById('map-solid-toggle');
     if (solidBtnInit) solidBtnInit.style.display = 'none'; // shown again if v3 geometry arrives
+
+    // Mover pose timelines (result.streams.movers, schema v32) — animated
+    // lifts/doors/plats. Meshes (mapState.submodelMeshes) arrive with the
+    // async corpus geometry; both are required to draw a mover, so either
+    // being absent is a graceful no-op.
+    mapState.movers = (result.streams && Array.isArray(result.streams.movers))
+        ? result.streams.movers : [];
+    mapState.submodelMeshes = null;
+    mapState._moverShades = null;
 
     // Static map-entity corpus (result.mapEntities) for the "learn map" view.
     mapState.mapEntities = (result.mapEntities && Array.isArray(result.mapEntities.entities))
@@ -7854,6 +7877,142 @@ function renderSolidEntries(ctx, se) {
     if (open) ctx.fill();
 }
 
+// Mover (lift/door/plat/train) rendering. Tints distinct from floors/walls.
+const MOVER_FLAT_FILL = 'rgba(150, 162, 196, 0.42)';
+const MOVER_FLAT_STROKE = 'rgba(90, 100, 140, 0.7)';
+const MOVER_SOLID_BASE = [120, 132, 165];
+
+// moverPoseAt returns the mover's {x, y, z, vis} at tMs (match-relative
+// milliseconds): the last recorded sample at or before tMs, clamped to the
+// first sample for earlier times. Binary search — tracks can be long for a
+// lift that ran the whole match.
+function moverPoseAt(m, tMs) {
+    const t = m.t;
+    const n = t ? t.length : 0;
+    if (n === 0) return null;
+    let idx;
+    if (tMs <= t[0]) idx = 0;
+    else if (tMs >= t[n - 1]) idx = n - 1;
+    else {
+        let lo = 0, hi = n - 1;
+        idx = 0;
+        while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            if (t[mid] <= tMs) { idx = mid; lo = mid + 1; }
+            else hi = mid - 1;
+        }
+    }
+    return { x: m.x[idx], y: m.y[idx], z: m.z[idx], vis: m.vis[idx] };
+}
+
+// moverShadedMesh returns the per-triangle Lambert-shaded fills for a
+// submodel mesh, cached by submodel id. Translation preserves face
+// normals, so the shading is pose-independent and computed once.
+function moverShadedMesh(sub) {
+    let cache = mapState._moverShades;
+    if (!cache) cache = mapState._moverShades = {};
+    if (cache[sub]) return cache[sub];
+    const tris = mapState.submodelMeshes[sub];
+    const base = MOVER_SOLID_BASE;
+    const shaded = [];
+    for (let i = 0; i + 8 < tris.length; i += 9) {
+        const ux = tris[i + 3] - tris[i],     uy = tris[i + 4] - tris[i + 1], uz = tris[i + 5] - tris[i + 2];
+        const vx = tris[i + 6] - tris[i],     vy = tris[i + 7] - tris[i + 1], vz = tris[i + 8] - tris[i + 2];
+        const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        const nl = Math.hypot(nx, ny, nz);
+        let shade = 0.7;
+        if (nl > 0) {
+            const dot = (nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2]) / nl;
+            shade = 0.45 + 0.55 * Math.abs(dot);
+        }
+        const q = Math.round(shade * 12) / 12;
+        shaded.push({
+            off: i,
+            fill: `rgba(${Math.round(base[0] * q)}, ${Math.round(base[1] * q)}, ${Math.round(base[2] * q)}, 0.97)`,
+        });
+    }
+    cache[sub] = shaded;
+    return shaded;
+}
+
+// drawMovers poses every mover at the current time and draws the ones that
+// are visible. No-op unless both the pose streams and the submodel meshes
+// are present (the meshes ride the async corpus v4 fetch).
+function drawMovers(ctx) {
+    const movers = mapState.movers;
+    const meshes = mapState.submodelMeshes;
+    if (!movers || movers.length === 0 || !meshes) return;
+    const tMs = mapState.currentTime * 1000;
+    const solid = mapState.solidMode && mapSolidEntries();
+    for (const m of movers) {
+        const mesh = meshes[m.sub];
+        if (!mesh || mesh.length < 9) continue;
+        const pose = moverPoseAt(m, tMs);
+        if (!pose || !pose.vis) continue;
+        if (solid) drawMoverSolid(ctx, mesh, m.sub, pose);
+        else drawMoverFlat(ctx, mesh, pose);
+    }
+}
+
+function drawMoverFlat(ctx, mesh, pose) {
+    const ox = pose.x, oy = pose.y, oz = pose.z;
+    ctx.beginPath();
+    for (let i = 0; i + 8 < mesh.length; i += 9) {
+        let p = worldToCanvas(mesh[i] + ox, mesh[i + 1] + oy, mesh[i + 2] + oz);
+        ctx.moveTo(p.x, p.y);
+        p = worldToCanvas(mesh[i + 3] + ox, mesh[i + 4] + oy, mesh[i + 5] + oz);
+        ctx.lineTo(p.x, p.y);
+        p = worldToCanvas(mesh[i + 6] + ox, mesh[i + 7] + oy, mesh[i + 8] + oz);
+        ctx.lineTo(p.x, p.y);
+        ctx.closePath();
+    }
+    ctx.fillStyle = MOVER_FLAT_FILL;
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = MOVER_FLAT_STROKE;
+    ctx.stroke();
+}
+
+// drawMoverSolid draws one posed mover into the live ctx (AFTER the solid
+// world blit, which is camera-keyed and time-free and must stay that way).
+// Per-frame painter-sort of the mover's own triangles by posed-centroid
+// depth, batched by the cached per-triangle shade.
+function drawMoverSolid(ctx, mesh, sub, pose) {
+    const ox = pose.x, oy = pose.y, oz = pose.z;
+    const w = _wtc;
+    const shaded = moverShadedMesh(sub);
+    const order = [];
+    for (const s of shaded) {
+        const i = s.off;
+        const cx = (mesh[i] + mesh[i + 3] + mesh[i + 6]) / 3 + ox;
+        const cy = (mesh[i + 1] + mesh[i + 4] + mesh[i + 7]) / 3 + oy;
+        const cz = (mesh[i + 2] + mesh[i + 5] + mesh[i + 8]) / 3 + oz;
+        const dx = cx - w.cx, dy = cy - w.cy, dz = cz - w.zMid;
+        const yr = dx * w.sinYaw + dy * w.cosYaw;
+        order.push({ s, depth: dz * w.sinPitch - yr * w.cosPitch });
+    }
+    order.sort((a, b) => a.depth - b.depth);
+    let curFill = null, open = false;
+    for (const { s } of order) {
+        if (s.fill !== curFill) {
+            if (open) ctx.fill();
+            ctx.fillStyle = s.fill;
+            ctx.beginPath();
+            curFill = s.fill;
+            open = true;
+        }
+        const i = s.off;
+        let p = worldToCanvas(mesh[i] + ox, mesh[i + 1] + oy, mesh[i + 2] + oz);
+        ctx.moveTo(p.x, p.y);
+        p = worldToCanvas(mesh[i + 3] + ox, mesh[i + 4] + oy, mesh[i + 5] + oz);
+        ctx.lineTo(p.x, p.y);
+        p = worldToCanvas(mesh[i + 6] + ox, mesh[i + 7] + oy, mesh[i + 8] + oz);
+        ctx.lineTo(p.x, p.y);
+        ctx.closePath();
+    }
+    if (open) ctx.fill();
+}
+
 // drawSolidWorld: blit the cached solid model, re-rendering the offscreen
 // canvas only when any projection input changed.
 function drawSolidWorld(ctx) {
@@ -7955,6 +8114,11 @@ function drawLocationLayer(ctx) {
             }
         }
     }
+
+    // Movers (lifts/doors/plats) posed at the current time. In solid mode
+    // this draws on top of the (time-free) solid-world blit; in flat mode
+    // it sits above the region fills and below the outlines/labels.
+    drawMovers(ctx);
 
     // Thin grey outlines around each traced region — drawn after all fills so
     // they sit on top and stay visible regardless of adjacent region tinting.

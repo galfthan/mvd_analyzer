@@ -345,6 +345,17 @@ rotation/pan/zoom/focus changes re-render (~35 ms on dm3's ~6k
 triangles). Code: `mapSolidEntries` / `renderSolidEntries` /
 `drawSolidWorld`.
 
+**Movers** — on version-4 geometry (carries `submodels`) plus a result
+with `streams.movers` (schema v32), lifts/doors/plats animate at their
+demo-streamed poses during playback. Each mover's submodel mesh is offset
+by the pose origin binary-searched for the current time (`moverPoseAt`);
+flat mode draws a translucent tinted fill + outline, Solid mode draws the
+mover *after* the (time-free) solid-world blit with cached per-face
+Lambert shades and a per-frame painter sort of its own triangles. A mover
+sampled `vis=false` is hidden. Missing either piece (older geometry, or a
+demo with no movers) is a graceful no-op. Code: `drawMovers` /
+`moverPoseAt` / `drawMoverFlat` / `drawMoverSolid`.
+
 Everything is drawn through one orbit-camera orthographic projection
 (`projectWorld` in `app.js`): floor geometry uses the per-vertex heights
 in the version-2 map JSON, so each floor renders at its real level, and
