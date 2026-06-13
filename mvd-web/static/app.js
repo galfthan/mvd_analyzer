@@ -7993,13 +7993,15 @@ function drawMovers(ctx) {
 }
 
 // projectBoxFace projects a face's 4 corners (12-float v), offset by the
-// pose origin, to canvas points.
+// pose origin, to canvas points. Uses the *allocating* worldToCanvasNew:
+// all four points are held at once, so the shared-object worldToCanvas
+// (which returns one reused _tmpPt) would alias them to a single point.
 function projectBoxFace(v, ox, oy, oz) {
     return [
-        worldToCanvas(v[0] + ox, v[1] + oy, v[2] + oz),
-        worldToCanvas(v[3] + ox, v[4] + oy, v[5] + oz),
-        worldToCanvas(v[6] + ox, v[7] + oy, v[8] + oz),
-        worldToCanvas(v[9] + ox, v[10] + oy, v[11] + oz),
+        worldToCanvasNew(v[0] + ox, v[1] + oy, v[2] + oz),
+        worldToCanvasNew(v[3] + ox, v[4] + oy, v[5] + oz),
+        worldToCanvasNew(v[6] + ox, v[7] + oy, v[8] + oz),
+        worldToCanvasNew(v[9] + ox, v[10] + oy, v[11] + oz),
     ];
 }
 
@@ -8082,17 +8084,23 @@ function fillTrisUnion(ctx, tris, fill) {
     ctx.fillStyle = fill;
     ctx.beginPath();
     for (let i = 0; i + 8 < tris.length; i += 9) {
-        const a = worldToCanvas(tris[i],     tris[i + 1], tris[i + 2]);
-        const b = worldToCanvas(tris[i + 3], tris[i + 4], tris[i + 5]);
-        const c = worldToCanvas(tris[i + 6], tris[i + 7], tris[i + 8]);
-        const area = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
-        ctx.moveTo(a.x, a.y);
+        // Copy each projected point's scalars immediately: worldToCanvas
+        // returns one reused object, so holding three at once would alias
+        // them to a single point (degenerate → nothing drawn).
+        let p = worldToCanvas(tris[i],     tris[i + 1], tris[i + 2]);
+        const ax = p.x, ay = p.y;
+        p = worldToCanvas(tris[i + 3], tris[i + 4], tris[i + 5]);
+        const bx = p.x, by = p.y;
+        p = worldToCanvas(tris[i + 6], tris[i + 7], tris[i + 8]);
+        const cx = p.x, cy = p.y;
+        const area = (bx - ax) * (cy - ay) - (cx - ax) * (by - ay);
+        ctx.moveTo(ax, ay);
         if (area < 0) { // CW in screen space → swap to force CCW
-            ctx.lineTo(c.x, c.y);
-            ctx.lineTo(b.x, b.y);
+            ctx.lineTo(cx, cy);
+            ctx.lineTo(bx, by);
         } else {
-            ctx.lineTo(b.x, b.y);
-            ctx.lineTo(c.x, c.y);
+            ctx.lineTo(bx, by);
+            ctx.lineTo(cx, cy);
         }
         ctx.closePath();
     }
