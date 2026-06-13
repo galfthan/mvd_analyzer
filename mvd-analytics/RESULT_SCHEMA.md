@@ -521,6 +521,7 @@ state, loc trails) are computed on demand from this storage by the
 |---|---|---|
 | Players | `players` | []PlayerStream |
 | Global | `global` | GlobalStream |
+| Movers | `movers` | []MoverStream (brush-model lifts/doors/plats/trains; since v32, `omitempty`) |
 
 ### GlobalStream
 
@@ -718,6 +719,34 @@ text is rounded to 3 decimals (the float32 division tail, e.g.
 smooth client-side only if a softer curve is wanted. Speed is `hypot(vx,vy,vz)`;
 horizontal speed (the usual movement metric) is `hypot(vx,vy)`. Same
 length as `t`; populated whenever the track is (no BSP needed).
+
+### MoverStream (`streams.movers[]`, schema v35)
+
+The pose timeline of one brush-model entity — a lift, door, plat or
+train. Columnar like PositionTrack; indices align across `t`/`x`/`y`/`z`/`vis`.
+
+```
+MoverStream = {
+  "ent": int,            // MVD entity number
+  "sub": int,            // brush-model index ("*sub"); matches the corpus SubModelMesh id
+  "t":   [int32...],     // match-relative milliseconds
+  "x": [float32...], "y": [float32...], "z": [float32...],  // origin per sample
+  "vis": [bool...]       // whether the mover is drawn at that sample
+}
+```
+
+At `t[i]` ms the mover sits at `(x,y,z)[i]` and is rendered when
+`vis[i]`. A renderer offsets the map-geometry `SubModelMesh` whose `id`
+equals `sub` by `(x,y,z)` to place it. Origins are `float32` (wire
+values are exact ⅛-unit multiples; `int32` would quantize the pose
+stepping). Tracks are **short**: MVD delta compression only re-sends an
+origin when it changes, so a parked mover is a single entry and a
+travelling one re-sends per frame only while in motion. The first entry
+is clamped to `t = 0` carrying the **match-start pose**, so a parked
+mover whose only wire state predates the match still has a pose to draw;
+earlier pre-match states are dropped as superseded. Absent (`omitempty`)
+when the demo has no movers. The same internal mover tracks already feed
+the v27 floor-height pass (players ride lifts).
 
 ### Time units: all times are int32 milliseconds
 
@@ -1213,6 +1242,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v35 | `streams` gains `movers[]` (`MoverStream`): the pose timeline of every tracked brush-model entity (lift, door, plat, train). Each carries `ent` (entity number), `sub` (the `*N` brush-model index, matching the corpus `SubModelMesh` id), and index-aligned `t`/`x`/`y`/`z`/`vis` columns — the mover sits at `(x,y,z)[i]` at `t[i]` ms and is drawn when `vis[i]`. Origins are `float32` (exact ⅛-unit wire values). The first entry is clamped to `t = 0` carrying the match-start pose so a parked mover (only wire state predates the match) still has one. Additive (`omitempty`); absent when the demo has no movers. The same internal tracks already drive the v27 floor-height pass. |
 | v34 | `timelineAnalysis.locationData` now carries **one `MapLocation` per loc name** — the medoid of that name's `.loc` corpus points — instead of every raw point. The corpus often repeats a name across several nearby points, which drew duplicate map labels; the medoid is the actual point minimizing summed distance to its same-name siblings (never an averaged mid-air centroid). `locGraph` node coordinates (resolved from this list by name) move to the medoid. Same field name and `MapLocation` shape; the list is just shorter. |
 | v33 | `PositionTrack` `x` / `y` / `z`, `vx` / `vy` / `vz`, and `h` change from `int32` to **`float32`** — the pipeline stops truncating the wire-native sub-unit origin (mvd-reader decodes coordinates as float32; the wire carries eighth-unit fixed point, or true floats under the float-coords extension). v32 and earlier rounded each axis to whole units (losing up to ~1 unit) and derived velocity from those rounded positions; velocity is now sub-unit precise, so the old ±1-unit quantization noise is gone. Values are kept at **native float32 in memory**; only the JSON text is rounded — to 3 decimals, applied by `PositionTrack.MarshalJSON` (lossless for eighth-unit coordinates; it just sheds the float division/epsilon tail on derived velocity & height). The `PositionTrack.H` `NoFloor` sentinel changes from `-2147483648` (`math.MinInt32`, which a float32 cannot represent exactly and serializes as `-2147483600`) to **`-1000000000`** (`-1e9`, exact in float32 and float64). The `buckets` x/y/z/vx/vy/vz/hgt columns get the same 3-decimal rounding; the point-in-time `state-at` `pos`/`vel`/`hgt` and the `AirgibEvent` heights are float32 too but emitted at full precision (low volume). Time axes stay `int32` ms; view angles stay `int16` raw `angle16`; loc/liquid columns unchanged. JSON keys unchanged; values now carry fractional digits where the wire delivered sub-unit positions. |
 | v32 | `PositionTrack` gains `vx` / `vy` / `vz` columns: the player's **velocity** per sample in Quake units/sec, derived from the position columns by a central-difference estimator (it does not differentiate across a respawn teleport, a map-teleporter relocation, or an abnormal time gap — those read ~0 instead of spiking). Additive (`omitempty`), populated whenever the track is (no BSP needed). New opt-in view-layer field code `vel` (vx/vy/vz) and CLI `-include velocity`. Expect ±1-unit quantization noise on the raw derivative (integer-rounded source positions); smooth client-side for a clean speed curve. |

@@ -640,7 +640,10 @@ those hulls at the entity's origin for the sample's timestamp
 (`mapclip.HeightAboveFloorBoxScene`, mirroring the client's
 `CL_SetSolidEntities` physent setup) — the highest floor across all
 hulls wins. A player riding the dm2 RA lift reads ~0 instead of the
-height to the shaft floor far below.
+height to the shaft floor far below. Since schema v32 those same mover
+tracks are also exported as `streams.movers` (`MoverStream`, one per
+brush-model entity) so the web map can animate lifts/doors at their
+demo-streamed poses.
 
 Since schema v26 the height is **footprint-aware** (`HeightAboveFloorBox`):
 rather than the single origin column, it traces a 3×3 grid of columns
