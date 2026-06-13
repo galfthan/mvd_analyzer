@@ -340,44 +340,52 @@ the stem is a direct visual readout of `H`. Falls back to a barycentric
 scan of the floor geometry (`playerFloorZ`, memoised) when `H` is absent
 (no BSP) or `NoFloor` (over a void).
 
-**Floor boxes** — in tilted views the floor renders as one solid box
-`FLOOR_SLAB_DEPTH` (10 units) tall rather than a zero-height plane.
-`floorBoundaryEdges` finds the floor's *outer* boundary (edges shared by
-exactly one floor triangle across all regions + backdrop — the true
-perimeter plus internal step risers), each tagged with its outward
-horizontal normal. Internal loc-region boundaries are shared by two
-triangles, so they're excluded and leave no walls inside a continuous
-floor — the box is clean, with thickness showing only at the perimeter,
-steps and raised platforms. The non-solid view draws the camera-facing
-sides as flat single-tone quads (`drawFloorBox`, far sides culled so the
-slab never reads as a sunken pit); Solid mode bakes the same boundary into
-its opaque mesh (`floorBoundaryWalls`).
+**Floor model (the default view)** — the floor is a flat, near-opaque,
+depth-sorted model (`buildFloorModel`): each loc region is its own flat
+tone (no Lambert/normal shading — from overhead it reads dead flat), the
+unnamed floor is one backdrop tone, and the floor's outer boundary is
+extruded `FLOOR_SLAB_DEPTH` (10 units) down into flat box sides so the
+floor reads as a solid 10u slab. `floorBoundaryEdges` finds that boundary
+(edges shared by exactly one floor triangle across all regions + backdrop
+— the true perimeter plus internal step risers); interior loc-region
+boundaries are shared by two triangles and excluded, so no walls appear
+inside a continuous floor. `floorBoundaryWalls` extrudes the edges into
+side triangles. Because everything is **near-opaque and painter-sorted**,
+a higher floor cleanly *covers* a lower one rather than tinting it through
+translucency (the translucent stacking used to read as "shading"); the box
+sides read as solid thickness, not a dark smear. Players, items, liquids
+and overlays all draw live on top.
 
-**Solid mode** — for maps whose geometry JSON is version 3 (carries
-wall triangles), a **Solid** toggle appears: floors and walls are
-painter-sorted by projected camera depth and drawn near-opaque, so upper
-floors genuinely occlude lower ones and the map reads as an architectural
-model. Floors use a single flat per-region tone (plus darker slab sides);
-**walls** keep per-face Lambert shading — the floor Lambert looked patchy,
-so it was removed. Players, items and overlays still draw on top — seeing
-the action through walls is the point. The sorted model renders into an
-offscreen canvas keyed by the full camera state; steady playback just
-blits it (~1 ms), only rotation/pan/zoom/focus changes re-render. Code:
-`mapSolidEntries` / `renderSolidEntries` / `drawSolidWorld`.
+**Solid mode** — an optional **Solid** toggle (maps whose geometry JSON
+carries wall triangles, version 3+) adds the **walls** on top of the same
+floor treatment, so the map reads as an enclosed architectural model.
+Walls keep per-face Lambert shading (the floor Lambert looked patchy, so
+floors stay flat). Players, items and overlays still draw on top — seeing
+the action through walls is the point.
+
+Both the default floor model and the Solid model render into an offscreen
+canvas keyed by the full camera state (`drawCachedWorld`, separate cache
+slots so they don't evict each other); steady playback just blits it
+(~1 ms), only rotation/pan/zoom/focus changes re-render. The painter sort
+scatters same-colour triangles so per-frame batching would cost many
+`fill()` calls — hence the bitmap cache. Code: `buildFloorModel` /
+`mapSolidEntries` / `renderSolidEntries` / `drawCachedWorld` /
+`drawSolidWorld`.
 
 **Movers** — on version-4 geometry (carries `submodels`) plus a result
 with `streams.movers` (schema v32), lifts/doors/plats animate at their
-demo-streamed poses during playback. Each is drawn as its actual submodel
-mesh, offset by the pose origin binary-searched for the current time
-(`moverPoseAt`), Lambert-shaded per triangle (shade quantized so coplanar
-faces share it — the triangulation vanishes, the real lift shape shows).
-Faces are **backface-culled** (BSP normals are outward; only the near hull
-draws) and **opaque**, so a closed mover renders solid with no see-through
-or painter-sort flicker. Painter-sorted, batched by shade, no stroke; same
-renderer in both modes (in Solid mode drawn *after* the time-free world
-blit). A mover sampled `vis=false` is hidden. Missing either piece (older
-geometry, or a demo with no movers) is a graceful no-op. Code:
-`drawMovers` / `moverPoseAt` / `moverShadedMesh` / `drawMoverMesh`.
+demo-streamed poses during playback. Each is drawn as a moving piece of
+floor: the submodel mesh offset by the pose origin binary-searched for the
+current time (`moverPoseAt`), **backface-culled** to its near hull (the
+submodel triangulation winds so its normals point into the solid, so the
+near hull is the faces whose normal points away from the camera) and
+filled **once** as a single flat translucent silhouette in the backdrop
+floor colour (`MOVER_FILL`). One fill at one alpha → no per-face
+double-blend, no painter-sort flicker, and the mover blends with the floor
+instead of standing out. A mover sampled `vis=false` is hidden. Missing
+either piece (older geometry, or a demo with no movers) is a graceful
+no-op. Code: `drawMovers` / `moverPoseAt` / `moverMeshFaces` /
+`drawMoverMesh`.
 
 **Liquids** — version-4 geometry also carries `liquids` (water/slime/lava
 volume meshes). Rendered as a shaded, depth-sorted translucent solid

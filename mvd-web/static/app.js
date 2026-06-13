@@ -6114,7 +6114,9 @@ function applyMapGeometry(geom) {
     mapState._floorZCache = null;
     mapState._solidEntries = null;
     mapState._solidCanvasKey = null;
-    mapState._moverShades = null;
+    mapState._floorModel = null;
+    mapState._floorCanvasKey = null;
+    mapState._moverFaces = null;
     // The Solid (occluding model) toggle needs wall geometry — only
     // version-3 files carry it.
     const solidBtn = document.getElementById('map-solid-toggle');
@@ -6183,7 +6185,7 @@ function initMapView(result) {
     mapState.movers = (result.streams && Array.isArray(result.streams.movers))
         ? result.streams.movers : [];
     mapState.submodelMeshes = null;
-    mapState._moverShades = null;
+    mapState._moverFaces = null;
 
     // Per-player native-rate position tracks (result.streams.players[].pos)
     // keyed by canonical name. The map animates symbol positions from these
@@ -7978,8 +7980,11 @@ function renderSolidEntries(ctx, se) {
     if (open) ctx.fill();
 }
 
-// Mover (lift/door/plat/train) rendering. Tints distinct from floors/walls.
-const MOVER_SOLID_BASE = [120, 132, 165];
+// Mover (lift/door/plat/train) rendering. A mover reads as a moving piece of
+// floor: same colour as the backdrop floor (BACKDROP_FLOOR_RGB), drawn
+// translucent so it doesn't stand out, as a single flat silhouette (near hull
+// only) — no shading.
+const MOVER_FILL = 'rgba(70, 80, 110, 0.5)';
 
 // moverPoseAt returns the mover's {x, y, z, vis} at tMs (match-relative
 // milliseconds): the last recorded sample at or before tMs, clamped to the
@@ -8004,48 +8009,30 @@ function moverPoseAt(m, tMs) {
     return { x: m.x[idx], y: m.y[idx], z: m.z[idx], vis: m.vis[idx] };
 }
 
-// moverShadedMesh returns a submodel mesh's per-triangle Lambert-shaded
-// fills, cached by submodel id (translation preserves face normals, so the
-// shade is pose-independent). Coplanar triangles get the same shade, so the
-// mesh's internal triangulation edges vanish and only real face boundaries
-// (read as shade changes) show — the actual lift/door shape, not a busy
-// wireframe and not an over-merged box.
-function moverShadedMesh(sub) {
-    let cache = mapState._moverShades;
-    if (!cache) cache = mapState._moverShades = {};
+// moverMeshFaces returns a submodel mesh's per-triangle outward-test normals,
+// cached by submodel id (translation preserves normals, so this is pose-
+// independent). Only the normal is needed — the fill is one flat tone — so
+// drawMoverMesh can cull back faces and fill the near hull as a single
+// silhouette.
+function moverMeshFaces(sub) {
+    let cache = mapState._moverFaces;
+    if (!cache) cache = mapState._moverFaces = {};
     if (cache[sub]) return cache[sub];
     const tris = mapState.submodelMeshes[sub];
-    const base = MOVER_SOLID_BASE;
-    const shaded = [];
+    const faces = [];
     for (let i = 0; i + 8 < tris.length; i += 9) {
         const ux = tris[i + 3] - tris[i],     uy = tris[i + 4] - tris[i + 1], uz = tris[i + 5] - tris[i + 2];
         const vx = tris[i + 6] - tris[i],     vy = tris[i + 7] - tris[i + 1], vz = tris[i + 8] - tris[i + 2];
-        let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-        const nl = Math.hypot(nx, ny, nz) || 1;
-        nx /= nl; ny /= nl; nz /= nl;
-        // Geometric normal of the triangle (the submodel triangulation winds
-        // so it points into the solid). Shade uses |dot| so direction doesn't
-        // matter here; drawMoverMesh relies on the direction for backface cull.
-        const dot = nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2];
-        const shade = 0.45 + 0.55 * Math.abs(dot);
-        const q = Math.round(shade * 12) / 12;
-        shaded.push({
-            off: i,
-            nx, ny, nz,
-            // Opaque: a translucent mover let the painter-sort order show
-            // through (faces flickering "off"); opaque + backface culling
-            // keeps it a solid object.
-            fill: `rgb(${Math.round(base[0] * q)}, ${Math.round(base[1] * q)}, ${Math.round(base[2] * q)})`,
-        });
+        const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        faces.push({ off: i, nx, ny, nz }); // unnormalized: only the sign matters
     }
-    cache[sub] = shaded;
-    return shaded;
+    cache[sub] = faces;
+    return faces;
 }
 
 // drawMovers poses every mover at the current time and draws the visible
-// ones as their actual (shaded) mesh. No-op unless both the pose streams
-// and the submodel meshes are present (the meshes ride the async corpus v4
-// fetch). In Solid mode this runs AFTER the (time-free) solid-world blit.
+// ones. No-op unless both the pose streams and the submodel meshes are
+// present (the meshes ride the async corpus v4 fetch).
 function drawMovers(ctx) {
     const movers = mapState.movers;
     const meshes = mapState.submodelMeshes;
@@ -8060,43 +8047,23 @@ function drawMovers(ctx) {
     }
 }
 
-// drawMoverMesh draws one posed mover as its shaded mesh: painter-sort the
-// triangles by posed-centroid depth, batch consecutive same-shade tris into
-// one path, fill — NO stroke, so the triangulation is invisible and the
-// real shape (e.g. a lift's two pillars + platform) reads cleanly. Each
-// projected point is consumed immediately (worldToCanvas reuses one object).
+// drawMoverMesh draws one posed mover as a single flat translucent silhouette
+// in the floor colour: cull the back faces (the submodel triangulation winds
+// so its normals point *into* the solid, so the near hull is the faces whose
+// normal points away from the camera) and fill the near hull's union once.
+// One fill at one alpha → no per-face double-blend, no painter-sort flicker,
+// and it blends with the floor instead of standing out. worldToCanvas reuses
+// one object, so each projected point is consumed immediately.
 function drawMoverMesh(ctx, mesh, sub, pose) {
     const ox = pose.x, oy = pose.y, oz = pose.z;
     const w = _wtc;
-    // Direction from the scene toward the camera (gradient of the depth used
-    // by the painter sort). The submodel triangulation winds so its computed
-    // normals point *into* the solid, so the near (front) hull is the set of
-    // faces whose normal points away from the camera; cull the rest. Result:
-    // a closed mover shows only its near hull — no see-through, no flicker.
     const vx = -w.sinYaw * w.cosPitch, vy = -w.cosYaw * w.cosPitch, vz = w.sinPitch;
-    const shaded = moverShadedMesh(sub);
-    const order = [];
-    for (const s of shaded) {
-        if (s.nx * vx + s.ny * vy + s.nz * vz >= 0) continue; // back-facing
-        const i = s.off;
-        const cx = (mesh[i] + mesh[i + 3] + mesh[i + 6]) / 3 + ox;
-        const cy = (mesh[i + 1] + mesh[i + 4] + mesh[i + 7]) / 3 + oy;
-        const cz = (mesh[i + 2] + mesh[i + 5] + mesh[i + 8]) / 3 + oz;
-        const dx = cx - w.cx, dy = cy - w.cy, dz = cz - w.zMid;
-        const yr = dx * w.sinYaw + dy * w.cosYaw;
-        order.push({ s, depth: dz * w.sinPitch - yr * w.cosPitch });
-    }
-    order.sort((a, b) => a.depth - b.depth);
-    let curFill = null, open = false;
-    for (const { s } of order) {
-        if (s.fill !== curFill) {
-            if (open) ctx.fill();
-            ctx.fillStyle = s.fill;
-            ctx.beginPath();
-            curFill = s.fill;
-            open = true;
-        }
-        const i = s.off;
+    const faces = moverMeshFaces(sub);
+    ctx.fillStyle = MOVER_FILL;
+    ctx.beginPath();
+    for (const f of faces) {
+        if (f.nx * vx + f.ny * vy + f.nz * vz >= 0) continue; // back-facing
+        const i = f.off;
         let p = worldToCanvas(mesh[i] + ox, mesh[i + 1] + oy, mesh[i + 2] + oz);
         ctx.moveTo(p.x, p.y);
         p = worldToCanvas(mesh[i + 3] + ox, mesh[i + 4] + oy, mesh[i + 5] + oz);
@@ -8105,7 +8072,7 @@ function drawMoverMesh(ctx, mesh, sub, pose) {
         ctx.lineTo(p.x, p.y);
         ctx.closePath();
     }
-    if (open) ctx.fill();
+    ctx.fill();
 }
 
 // Liquid volumes (water/slime/lava) from corpus v4. Rendered as a shaded,
@@ -8163,10 +8130,14 @@ function drawLiquidFills(ctx) {
     }
 }
 
-// drawSolidWorld: blit the cached solid model, re-rendering the offscreen
-// canvas only when any projection input changed.
-function drawSolidWorld(ctx) {
-    const se = mapSolidEntries();
+// drawCachedWorld: blit a depth-sorted entry set (solid model or flat floor
+// model), re-rendering the offscreen canvas only when a projection input
+// changed. The painter sort scatters same-colour triangles, so batching costs
+// many fill() calls — too much to redo every frame, hence the per-camera
+// bitmap cache. cacheField/keyField pick the cache slot so the two models
+// don't evict each other. bakeLiquids folds the (static) liquid volumes into
+// the cache; the flat floor view instead draws them live on top.
+function drawCachedWorld(ctx, se, cacheField, keyField, bakeLiquids) {
     if (!se) return;
     const canvas = mapState.canvas;
     const dpr = mapState.dpr || 1;
@@ -8177,11 +8148,11 @@ function drawSolidWorld(ctx) {
         _wtc.cx, _wtc.cy, _wtc.zMid,
         mapState.focusGroupName, canvas.width, canvas.height, dpr,
         se.entries.length,
-        Array.isArray(liquids) ? liquids.length : 0,
+        bakeLiquids && Array.isArray(liquids) ? liquids.length : 0,
     ].join('|');
-    let cache = mapState._solidCanvas;
-    if (!cache) cache = mapState._solidCanvas = document.createElement('canvas');
-    if (mapState._solidCanvasKey !== key) {
+    let cache = mapState[cacheField];
+    if (!cache) cache = mapState[cacheField] = document.createElement('canvas');
+    if (mapState[keyField] !== key) {
         cache.width = canvas.width;   // also clears
         cache.height = canvas.height;
         const cctx = cache.getContext('2d');
@@ -8190,8 +8161,8 @@ function drawSolidWorld(ctx) {
         // Liquids are static geometry, so they bake into the cache too — a
         // translucent pass on top of the opaque world (large volumes tint
         // whatever's behind them).
-        drawLiquidFills(cctx);
-        mapState._solidCanvasKey = key;
+        if (bakeLiquids) drawLiquidFills(cctx);
+        mapState[keyField] = key;
     }
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -8199,54 +8170,70 @@ function drawSolidWorld(ctx) {
     ctx.restore();
 }
 
-// Floors are this many units tall. Both views extrude the floor's outer
-// boundary (perimeter + step risers, via floorBoundaryEdges) down by this
-// much: the non-solid view draws flat box sides (drawFloorBox), the Solid
-// model bakes them into its opaque mesh (floorBoundaryWalls).
-const FLOOR_SLAB_DEPTH = 10;
-// One flat tone for every floor-box side (no shading — a box, not a gradient).
-const FLOOR_BOX_SIDE = 'rgba(34, 40, 60, 0.72)';
-
-// cachedFloorBoxEdges memoizes floorBoundaryEdges for the current geometry —
-// the edge set only changes when the map (geometry/groups) does.
-function cachedFloorBoxEdges() {
-    const geom = mapState.mapGeometry;
-    const groups = mapState.locationGroups || [];
-    const c = mapState._floorBoxEdges;
-    if (c && c.geom === geom && c.groups === groups) return c.edges;
-    const edges = floorBoundaryEdges(geom && geom.backdropTris, groups);
-    mapState._floorBoxEdges = { geom, groups, edges };
-    return edges;
+function drawSolidWorld(ctx) {
+    drawCachedWorld(ctx, mapSolidEntries(), '_solidCanvas', '_solidCanvasKey', true);
 }
 
-// drawFloorBox extrudes the floor's outer boundary down FLOOR_SLAB_DEPTH into
-// flat box sides, so the floor reads as one solid slab in the non-solid view.
-// One flat tone, no shading. Only the camera-facing sides are drawn — the far
-// sides would paint a dark rim over the floor's far edge and read as a sunken
-// pit. Internal loc-region boundaries are excluded by floorBoundaryEdges, so
-// no walls appear inside a continuous floor (the old per-region skirt dropped
-// a dark band at every shared region boundary — that was the "internal
-// shading"). Each projected point is held only until the next, but the quad
-// needs all four at once, so worldToCanvasNew (allocates) is required.
-function drawFloorBox(ctx) {
-    const edges = cachedFloorBoxEdges();
-    if (!edges || edges.length === 0) return;
-    const vx = -_wtc.sinYaw, vy = -_wtc.cosYaw;
-    ctx.fillStyle = FLOOR_BOX_SIDE;
-    ctx.beginPath();
-    for (const e of edges) {
-        if (e.nx * vx + e.ny * vy <= 0) continue; // far side → cull
-        const a  = worldToCanvasNew(e.ax, e.ay, e.az);
-        const b  = worldToCanvasNew(e.bx, e.by, e.bz);
-        const b2 = worldToCanvasNew(e.bx, e.by, e.bz - FLOOR_SLAB_DEPTH);
-        const a2 = worldToCanvasNew(e.ax, e.ay, e.az - FLOOR_SLAB_DEPTH);
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.lineTo(b2.x, b2.y);
-        ctx.lineTo(a2.x, a2.y);
-        ctx.closePath();
+// Floors are this many units tall. Both views extrude the floor's outer
+// boundary (perimeter + step risers, via floorBoundaryEdges) down by this
+// much into box sides (floorBoundaryWalls), baked into the depth-sorted
+// floor model so the floor reads as one solid slab.
+const FLOOR_SLAB_DEPTH = 10;
+
+// Floor-model tones. Region tops use the loc's own colour; the backdrop
+// (unnamed floor) and the box sides each use one flat tone. No Lambert/normal
+// shading anywhere — every surface is a single flat colour, so from overhead
+// the floor reads dead flat. Near-opaque so a higher floor cleanly covers a
+// lower one (no translucent stacking, which was the apparent "shading").
+const BACKDROP_FLOOR_RGB = [70, 80, 110];
+const FLOOR_BOX_SIDE_RGB = [44, 50, 72]; // darker than the tops → reads as a side
+const FLOOR_TOP_ALPHA = 0.95;
+
+// buildFloorModel builds the per-triangle render list for the one clean view:
+// flat region tops (loc colour) + the backdrop + the 10u box sides, each a
+// single flat tone, with a centroid for the painter sort. Rendered opaque and
+// depth-sorted by renderSolidEntries (shared with Solid mode, which only adds
+// walls on top). Cached per (geometry, groups). Returns null when the map has
+// no triangle geometry at all (callers fall back to the flat translucent
+// fills / loc blobs).
+function buildFloorModel() {
+    const geom = mapState.mapGeometry;
+    const groups = mapState.locationGroups || [];
+    const backdropTris = geom && geom.backdropTris;
+    const haveBackdrop = backdropTris && backdropTris.length >= 9;
+    if (!haveBackdrop && groups.length === 0) return null;
+
+    let m = mapState._floorModel;
+    if (m && m.geom === geom && m.groups === mapState.locationGroups) return m;
+
+    const entries = [];
+    const push = (tris, rgb, name) => {
+        if (!tris || tris.length < 9) return;
+        const fill = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${FLOOR_TOP_ALPHA})`;
+        const fillFaded = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${FLOOR_TOP_ALPHA * 0.18})`;
+        for (let i = 0; i + 8 < tris.length; i += 9) {
+            entries.push({
+                tris, off: i,
+                cx: (tris[i] + tris[i + 3] + tris[i + 6]) / 3,
+                cy: (tris[i + 1] + tris[i + 4] + tris[i + 7]) / 3,
+                cz: (tris[i + 2] + tris[i + 5] + tris[i + 8]) / 3,
+                name, fill, fillFaded, depth: 0,
+            });
+        }
+    };
+
+    if (haveBackdrop) push(backdropTris, BACKDROP_FLOOR_RGB, null);
+    for (const g of groups) {
+        if (!g.tris || g.tris.length < 9) continue;
+        push(g.tris, parseRgbPrefix(g.color.fill), g.name);
     }
-    ctx.fill();
+    const sides = floorBoundaryWalls(backdropTris, groups);
+    if (sides.length >= 9) push(sides, FLOOR_BOX_SIDE_RGB, null);
+
+    if (entries.length === 0) return null;
+    m = { geom, groups: mapState.locationGroups, entries, sortedFor: null };
+    mapState._floorModel = m;
+    return m;
 }
 
 function drawLocationLayer(ctx) {
@@ -8255,32 +8242,32 @@ function drawLocationLayer(ctx) {
     if (groups.length === 0 && (!backdropTris || backdropTris.length < 9)) return;
 
     const focused = !!mapState.focusGroupName;
-    const tilted = mapIs3D();
     const solid = mapState.solidMode && mapSolidEntries();
+    const floorModel = !solid && buildFloorModel();
 
     if (solid) {
         drawSolidWorld(ctx);
+    } else if (floorModel) {
+        // One clean view: flat, near-opaque, depth-sorted region tops + 10u box
+        // sides. A higher floor covers a lower one (no translucent stacking),
+        // the sides read as solid thickness, and from overhead it's dead flat.
+        // Cached to an offscreen bitmap (per camera) like the Solid model.
+        drawCachedWorld(ctx, floorModel, '_floorCanvas', '_floorCanvasKey', false);
+        // Liquids: translucent volumes above the floor, drawn live.
+        drawLiquidFills(ctx);
     } else {
+        // No triangle geometry (loc-blob maps): the old flat translucent fills.
         if (backdropTris && backdropTris.length >= 9) {
             drawTriangleListFill(ctx, backdropTris,
                 focused ? 'rgba(70, 80, 110, 0.14)' : 'rgba(70, 80, 110, 0.35)',
                 worldToCanvas);
         }
-
         for (const group of groups) {
             if (group.tris && group.tris.length >= 9) {
                 drawTriangleListFill(ctx, group.tris,
                     tierFill(group, focusTier(group.name)), worldToCanvas);
             }
         }
-
-        // Floor box: extrude the floor's outer boundary into 10u-tall sides so
-        // it reads as a solid slab. Only meaningful when tilted (at top-down
-        // the extruded quads project to zero area); superseded by the real
-        // walls baked into the Solid model.
-        if (tilted) drawFloorBox(ctx);
-        // Liquids: translucent volumes above the region fills/box. (In Solid
-        // mode they're baked into the cached blit by drawSolidWorld.)
         drawLiquidFills(ctx);
     }
 
