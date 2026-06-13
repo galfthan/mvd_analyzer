@@ -737,7 +737,7 @@ Three layers exercise different things:
    this so a 4on4 demo's ~10 MB native position track doesn't bloat
    the committed corpus. On top of that, the dense per-sample
    position/view track (`streams.players[].pos`: x/y/z, vp/vya, h/lq/li,
-   velocity) is pinned on only two demos — a wet 2on2 and a duel
+   velocity) is pinned on only two demos — a full 4on4 and a duel
    (`densePosDemos`) — and dropped from the other eight by
    `dropPositionTracks`, since the emitter / BSP-trace code is identical
    across demos. That keeps the committed corpus ~13 MB (was ~34 MB)

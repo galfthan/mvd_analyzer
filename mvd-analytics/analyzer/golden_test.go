@@ -228,13 +228,14 @@ func canonicalJSON(v interface{}, keepPos bool) ([]byte, error) {
 
 // densePosDemos are the labels whose golden keeps the full per-sample
 // position/view track (streams.players[].pos: x/y/z, vp/vya, h/lq/li,
-// velocity). One wet team game (dm6 — exercises the height + liquid
-// BSP traces) and one duel (dm2 — the two-player case) are enough to
-// catch drift in the position / view / height / liquid pipeline, which
-// runs identically across demos. Pinning it on all ten would roughly
-// double the committed corpus for no extra coverage.
+// velocity). One full 4on4 (obsidian — eight players, exercises the
+// height + liquid BSP traces under load) and one duel (dm2 — the
+// two-player case) are enough to catch drift in the position / view /
+// height / liquid pipeline, which runs identically across demos.
+// Pinning it on all ten would roughly double the committed corpus for
+// no extra coverage.
 var densePosDemos = map[string]bool{
-	"2on2_nani_pora_210426_dm6":          true,
+	"4on4_ahoy_bhb_240426_obsidian":      true,
 	"1on1_bananfalco_betowen_240426_dm2": true,
 }
 

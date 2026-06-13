@@ -610,8 +610,8 @@ series in `streams.players[]` are sliced to three 15 s windows
 position track alone would otherwise run ~10 MB per 4on4 demo and
 swamp the git history (see [`golden_test.go`](mvd-analytics/analyzer/golden_test.go)
 `sampleStreams`). On top of that, the dense per-sample position/view
-track (`streams.players[].pos`) is pinned on only two demos — a wet
-2on2 and a duel — and dropped from the rest (`dropPositionTracks`),
+track (`streams.players[].pos`) is pinned on only two demos — a full
+4on4 and a duel — and dropped from the rest (`dropPositionTracks`),
 since that pipeline is map-independent; this keeps the committed corpus
 ~13 MB total instead of ~34 MB while still verifying every aggregate on
 all demos. The golden output also depends on the curated BSP set
