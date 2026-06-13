@@ -26,6 +26,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mvd-analyzer/mvd-analytics/mapclip"
 	"github.com/mvd-analyzer/mvd-analytics/mapgen/bsp"
 	"github.com/mvd-analyzer/mvd-analytics/loc"
 )
@@ -82,7 +83,21 @@ type Params struct {
 	// PlayerOriginAboveFloor: standing-player origin height used to
 	// put face Z and loc Z in the same frame for the ceiling cap.
 	PlayerOriginAboveFloor float32 `json:"playerOriginAboveFloor,omitempty"`
+	// PruneXYTol: max XY distance from a usage sample to a floor polygon
+	// for the sample to count as "touching" it (BuildPruned only).
+	// Default mapclip.FootprintReach (24).
+	PruneXYTol float32 `json:"pruneXYTol,omitempty"`
+	// PruneZTol: max |faceZ − sampleZ| for a usage sample to count as on
+	// a floor polygon (BuildPruned only). Larger for slope-heavy maps.
+	PruneZTol float32 `json:"pruneZTol,omitempty"`
 }
+
+// defaultPruneZTol is the BuildPruned vertical match tolerance: how far a
+// recorded floor-contact Z may sit from the candidate face's plane Z and
+// still count as a touch. 16 absorbs slope/trace slack without bridging
+// to a distinctly different level (the nearest real floor below a stack
+// is typically ≥ 64 away).
+const defaultPruneZTol float32 = 16.0
 
 // DefaultParams returns the thresholds the committed corpus is built with.
 func DefaultParams() Params {
@@ -90,6 +105,8 @@ func DefaultParams() Params {
 		FloorNormalZ:           floorNormalZ,
 		CeilingMaxAboveLoc:     ceilingMaxAboveLoc,
 		PlayerOriginAboveFloor: playerOriginAboveFloor,
+		PruneXYTol:             mapclip.FootprintReach,
+		PruneZTol:              defaultPruneZTol,
 	}
 }
 
@@ -104,6 +121,12 @@ func (p Params) withDefaults() Params {
 	}
 	if p.PlayerOriginAboveFloor == 0 {
 		p.PlayerOriginAboveFloor = d.PlayerOriginAboveFloor
+	}
+	if p.PruneXYTol == 0 {
+		p.PruneXYTol = d.PruneXYTol
+	}
+	if p.PruneZTol == 0 {
+		p.PruneZTol = d.PruneZTol
 	}
 	return p
 }
@@ -213,6 +236,7 @@ type Stats struct {
 	LiquidTris     int // triangles emitted across all LiquidMesh
 	SubModelMeshes int // brush-model meshes emitted into SubModels
 	SubModelTris   int // triangles emitted across all SubModelMesh
+	FacesPruned    int // floor faces dropped by usage pruning (BuildPruned)
 }
 
 // Build extracts floor geometry from bsp with the default thresholds,
@@ -225,7 +249,19 @@ func Build(mapName string, b *bsp.BSP, finder *loc.Finder) (*MapRegions, Stats) 
 // BuildParams is Build with caller-supplied thresholds (zero fields fall
 // back to the defaults).
 func BuildParams(mapName string, b *bsp.BSP, finder *loc.Finder, params Params) (*MapRegions, Stats) {
-	p := params.withDefaults()
+	return buildRegions(mapName, b, finder, params.withDefaults(), nil)
+}
+
+// BuildPruned is BuildParams plus offline usage-based floor pruning: a
+// floor face that no recorded floor-contact sample in usage lands on
+// (within params.PruneXYTol / PruneZTol) is dropped, and result.Pruned
+// records the provenance. Walls, liquids and submodels are never pruned.
+// A nil usage behaves exactly like BuildParams.
+func BuildPruned(mapName string, b *bsp.BSP, finder *loc.Finder, params Params, usage *FloorUsage) (*MapRegions, Stats) {
+	return buildRegions(mapName, b, finder, params.withDefaults(), usage)
+}
+
+func buildRegions(mapName string, b *bsp.BSP, finder *loc.Finder, p Params, usage *FloorUsage) (*MapRegions, Stats) {
 	var stats Stats
 
 	result := &MapRegions{
@@ -379,6 +415,14 @@ func BuildParams(mapName string, b *bsp.BSP, finder *loc.Finder, params Params) 
 			continue
 		}
 
+		// Usage pruning (BuildPruned only): drop a floor face that no
+		// recorded player floor-contact sample lands on. Uses the original
+		// (non-side-negated) plane so planeZ is evaluated correctly.
+		if usage != nil && !usage.matches(ring3D, plane, p.PruneXYTol, p.PruneZTol) {
+			stats.FacesPruned++
+			continue
+		}
+
 		if key == UnnamedRegionKey {
 			stats.FacesUnnamed++
 		}
@@ -517,6 +561,14 @@ func BuildParams(mapName string, b *bsp.BSP, finder *loc.Finder, params Params) 
 		}
 	}
 	stats.SubModelMeshes = len(result.SubModels)
+
+	if usage != nil {
+		result.Pruned = &PruneInfo{
+			Demos:        usage.demos,
+			Points:       usage.Points(),
+			FacesDropped: stats.FacesPruned,
+		}
+	}
 
 	if hasBounds {
 		result.Bounds = bounds

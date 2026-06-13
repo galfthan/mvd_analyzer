@@ -82,9 +82,15 @@ that downstream consumers render, summarise, or feed to an agent.
   Degenerate zero-area fan triangles are dropped. Extraction thresholds
   (floor slope, roof cap, origin height) are tunable via
   `mapgeom.Params` / `BuildParams` — used by the web viewer's geometry
-  edit mode, which re-runs the extraction in WASM. A usage-pruned file
-  (floor faces no player touched removed) carries a `pruned` provenance
-  block.
+  edit mode, which re-runs the extraction in WASM. The optional
+  `-demos <dir>` flag turns on usage-based pruning: every `.mvd`/`.mvd.gz`
+  under the directory is analyzed (a fresh registry per demo), the floor
+  surface beneath each grounded, non-swimming sample
+  (`(X, Y, Z − PlayerFeetOffset − H)`) is collected per map, and floor
+  faces no sample lands on (within `-prune-xy-tol`, default
+  `mapclip.FootprintReach` = 24, and `-prune-z-tol`, default 16) are
+  dropped. Pruned files carry a `pruned` provenance block; maps with no
+  matching demos emit unpruned.
 - `cmd/qw-analyze/` — CLI consumer. `qw-analyze demo.mvd` produces Result
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.
