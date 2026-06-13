@@ -8031,12 +8031,40 @@ const LIQUID_FILLS = {
     lava:  'rgba(255, 120, 40, 0.38)',
 };
 
+// fillTrisUnion fills the projected UNION of a triangle soup as one path.
+// Each triangle's screen winding is normalized to CCW first, so the
+// nonzero fill rule unions overlapping faces instead of cancelling them.
+// A liquid is a closed VOLUME whose opposing faces (top/bottom/sides) wind
+// oppositely once projected; drawn naively (drawTriangleListFill) those
+// cancel and a deep volume fills to nothing — which hid dm2's lava.
+function fillTrisUnion(ctx, tris, fill) {
+    if (!tris || tris.length < 9) return;
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    for (let i = 0; i + 8 < tris.length; i += 9) {
+        const a = worldToCanvas(tris[i],     tris[i + 1], tris[i + 2]);
+        const b = worldToCanvas(tris[i + 3], tris[i + 4], tris[i + 5]);
+        const c = worldToCanvas(tris[i + 6], tris[i + 7], tris[i + 8]);
+        const area = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
+        ctx.moveTo(a.x, a.y);
+        if (area < 0) { // CW in screen space → swap to force CCW
+            ctx.lineTo(c.x, c.y);
+            ctx.lineTo(b.x, b.y);
+        } else {
+            ctx.lineTo(b.x, b.y);
+            ctx.lineTo(c.x, c.y);
+        }
+        ctx.closePath();
+    }
+    ctx.fill('nonzero');
+}
+
 function drawLiquidFills(ctx) {
     const liquids = mapState.mapGeometry && mapState.mapGeometry.liquids;
     if (!Array.isArray(liquids)) return;
     for (const lq of liquids) {
         if (!lq || !Array.isArray(lq.tris) || lq.tris.length < 9) continue;
-        drawTriangleListFill(ctx, lq.tris, LIQUID_FILLS[lq.kind] || LIQUID_FILLS.water, worldToCanvas);
+        fillTrisUnion(ctx, lq.tris, LIQUID_FILLS[lq.kind] || LIQUID_FILLS.water);
     }
 }
 
