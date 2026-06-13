@@ -6016,6 +6016,7 @@ let mapState = {
     solidMode: false,         // opt-in occluding 3D model (needs walls in geometry v3)
     movers: [],               // result.streams.movers — brush-model pose timelines (v32)
     submodelMeshes: null,     // { submodelId -> tris } from corpus v4 geom.submodels
+    posStreams: {},           // name -> PositionTrack {t,x,y,z,h,lq} for stream-sourced animation
     mapEntities: [],          // result.mapEntities.entities for the current demo
     teleportArrows: [],       // precomputed {sx,sy,sz,dx,dy,dz} entrance→exit world-coord pairs
     entityFilters: {          // per-category visibility in learn mode
@@ -6184,6 +6185,21 @@ function initMapView(result) {
         ? result.streams.movers : [];
     mapState.submodelMeshes = null;
     mapState._moverShades = null;
+    mapState._moverBoxes = null;
+
+    // Per-player native-rate position tracks (result.streams.players[].pos)
+    // keyed by canonical name. The map animates symbol positions from these
+    // and reads the per-sample floor-height H for the floor-anchor stem
+    // (state badges still come from the bucket view). Keyed by the same
+    // disambiguated name the bucket view uses.
+    mapState.posStreams = {};
+    if (result.streams && Array.isArray(result.streams.players)) {
+        for (const p of result.streams.players) {
+            if (p && p.pos && Array.isArray(p.pos.t) && p.pos.t.length > 0) {
+                mapState.posStreams[p.name] = p.pos;
+            }
+        }
+    }
 
     // Static map-entity corpus (result.mapEntities) for the "learn map" view.
     mapState.mapEntities = (result.mapEntities && Array.isArray(result.mapEntities.entities))
@@ -6791,6 +6807,12 @@ function setOrbitCenter(wx, wy, wz) {
 // "pan/zoom to a place, then rotate" orbits where you're looking.
 function currentOrbitPivot() {
     if (mapState.followPlayer) {
+        // Match the stream-sourced symbol position so the orbit pivots
+        // exactly on the drawn symbol.
+        const sp = streamPosAt(mapState.followPlayer, mapState.currentTime * 1000);
+        if (sp && !(sp.x === 0 && sp.y === 0)) {
+            return { x: sp.x, y: sp.y, z: sp.z || 0 };
+        }
         const bucket = findBucketAtTime(mapState.currentTime);
         const fp = bucket && bucket.p ? bucket.p[mapState.followPlayer] : null;
         if (fp && !(fp.x === 0 && fp.y === 0)) {
@@ -8368,6 +8390,11 @@ function renderMap(time) {
     mapState.lastRenderedBucket = bucket;
     mapState.renderDirty = false;
 
+    // Player positions (and the floor-height fh for the anchor stem) come
+    // from the native-rate streams; state badges stay on the bucket. Built
+    // once here from a non-mutating overlay on the cached bucket.
+    const playerData = bucket ? augmentPlayerData(bucket.p, time * 1000) : null;
+
     // Normalize to CSS pixel coordinates. The canvas backing store is sized
     // to cssDims * devicePixelRatio for sharp rendering on HiDPI displays;
     // setTransform(dpr,...) makes every subsequent draw interpret its
@@ -8379,8 +8406,8 @@ function renderMap(time) {
 
     // Follow-player: pin the camera on the tracked player this frame by
     // adjusting panX/panY so their symbol lands at canvas center.
-    if (mapState.followPlayer && bucket && bucket.p) {
-        const fp = bucket.p[mapState.followPlayer];
+    if (mapState.followPlayer && playerData) {
+        const fp = playerData[mapState.followPlayer];
         if (fp && !(fp.x === 0 && fp.y === 0)) {
             _wtc.panX = 0;
             _wtc.panY = 0;
@@ -8425,9 +8452,8 @@ function renderMap(time) {
 
     // Highlight regions that currently contain at least one player so the
     // viewer can tell which loc each symbol belongs to without squinting.
-    const occupancyData = bucket ? (bucket.p) : null;
-    if (occupancyData) {
-        drawOccupiedRegionsOverlay(ctx, occupancyData);
+    if (playerData) {
+        drawOccupiedRegionsOverlay(ctx, playerData);
     }
 
     // Draw tracks (per-player visibility controlled by enabledPlayers)
@@ -8438,7 +8464,6 @@ function renderMap(time) {
     // player also draws on top. Items carry a downward sort bias
     // (ITEM_Z_TOP_THRESHOLD) so they lose the tie when a player stands on
     // them — the common case — but win when they sit a real floor above.
-    const playerData = bucket ? bucket.p : null;
     drawItemsAndPlayersZSorted(ctx, time, playerData);
 
     // Recent-death markers — drawn last so the X sits on top of everything
@@ -8593,6 +8618,54 @@ function itemStatus(item, time) {
 // A standing player's origin sits this far above the floor (mins.z = -24 in
 // standard Quake 1).
 const PLAYER_ORIGIN_ABOVE_FLOOR = 24;
+// result.NoFloor sentinel in PositionTrack.H — no floor to measure from.
+const MAP_NO_FLOOR = -2147483648;
+
+// streamPosAt returns {x, y, z, h} from a player's native-rate position
+// track at tMs (match-relative ms): the last sample at or before tMs,
+// clamped to the first. h is the PositionTrack.H floor-height (or null when
+// the column is absent / NoFloor). Binary search — tracks are dense.
+function streamPosAt(name, tMs) {
+    const pos = mapState.posStreams && mapState.posStreams[name];
+    if (!pos || !pos.t || pos.t.length === 0) return null;
+    const t = pos.t;
+    const n = t.length;
+    let idx;
+    if (tMs <= t[0]) idx = 0;
+    else if (tMs >= t[n - 1]) idx = n - 1;
+    else {
+        let lo = 0, hi = n - 1;
+        idx = 0;
+        while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            if (t[mid] <= tMs) { idx = mid; lo = mid + 1; }
+            else hi = mid - 1;
+        }
+    }
+    let h = null;
+    if (pos.h && pos.h.length === n && pos.h[idx] !== MAP_NO_FLOOR) h = pos.h[idx];
+    return { x: pos.x[idx], y: pos.y[idx], z: pos.z[idx], h };
+}
+
+// augmentPlayerData overlays stream-sourced position (x/y/z) and the
+// per-sample floor-height (fh) onto the bucket-reconstructed player map,
+// without mutating the cached bucket. State fields (health/armor/weapons)
+// are carried through from the bucket unchanged. Players with no position
+// stream keep their bucket position.
+function augmentPlayerData(bucketPlayers, tMs) {
+    if (!bucketPlayers) return bucketPlayers;
+    const out = {};
+    for (const name in bucketPlayers) {
+        const d = bucketPlayers[name];
+        const sp = streamPosAt(name, tMs);
+        if (sp) {
+            out[name] = Object.assign({}, d, { x: sp.x, y: sp.y, z: sp.z, fh: sp.h });
+        } else {
+            out[name] = d;
+        }
+    }
+    return out;
+}
 // Slack added when searching for the supporting floor, so interpolation
 // noise on ramps / step edges doesn't make the search miss the surface the
 // player is actually standing on.
@@ -8648,10 +8721,19 @@ function playerFloorZ(name, x, y, z) {
 
 function drawPlayerFloorStem(ctx, name, data, symbolInfo, pos) {
     const z = data.z || 0;
-    const floorZ = playerFloorZ(name, data.x, data.y, z);
-    // No covering floor (off-geometry, over void): fall back to standing
-    // height so every player still gets a consistent anchor "leg".
-    const bottomZ = floorZ !== null ? floorZ : z - PLAYER_ORIGIN_ABOVE_FLOOR;
+    // Prefer the per-sample computed floor height H (data.fh): the floor
+    // surface is z - 24 - H (H is measured from the bottom of the player's
+    // bounding box, which sits 24 below the origin). H is accurate on lifts
+    // (the floor pass stands players on movers) and makes the stem a direct
+    // visual readout of H. Fall back to scanning the static floor geometry
+    // when H is unavailable (no BSP) or NoFloor (over a void).
+    let bottomZ;
+    if (typeof data.fh === 'number') {
+        bottomZ = z - PLAYER_ORIGIN_ABOVE_FLOOR - data.fh;
+    } else {
+        const floorZ = playerFloorZ(name, data.x, data.y, z);
+        bottomZ = floorZ !== null ? floorZ : z - PLAYER_ORIGIN_ABOVE_FLOOR;
+    }
     const bot = worldToCanvasNew(data.x, data.y, bottomZ);
     const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
     ctx.strokeStyle = hexToRgba(teamHex, 0.55);
@@ -9649,8 +9731,11 @@ function hitTestPlayerSymbol(cx, cy, time) {
     let best = null;
     let bestD2 = FOLLOW_HIT_RADIUS_PX * FOLLOW_HIT_RADIUS_PX;
     for (const [name, data] of Object.entries(bucket.p)) {
-        if (data.x === 0 && data.y === 0) continue;
-        const pos = worldToCanvas(data.x, data.y, data.z);
+        // Hit-test against the stream-sourced position the symbol is drawn at.
+        const sp = streamPosAt(name, time * 1000);
+        const x = sp ? sp.x : data.x, y = sp ? sp.y : data.y, z = sp ? sp.z : data.z;
+        if (x === 0 && y === 0) continue;
+        const pos = worldToCanvas(x, y, z);
         const dx = pos.x - cx;
         const dy = pos.y - cy;
         const d2 = dx * dx + dy * dy;
