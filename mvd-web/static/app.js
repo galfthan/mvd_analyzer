@@ -7884,8 +7884,9 @@ function mapSolidEntries() {
         pushTris(group.tris, group.name, base, true); // floor top: flat (no Lambert)
         const sides = slabSides(group);
         if (sides) {
-            // Slab sides: a darker flat tone so the thickness reads.
-            pushTris(sides, group.name, [base[0] * 0.5, base[1] * 0.5, base[2] * 0.5], true);
+            // Slab sides: a moderately darker flat tone — dark enough to read
+            // as a side, light enough to stay visible against the background.
+            pushTris(sides, group.name, [base[0] * 0.66, base[1] * 0.66, base[2] * 0.66], true);
         }
     }
     pushTris(geom.walls, null, WALL_BASE, false); // walls keep Lambert shading
@@ -7976,17 +7977,21 @@ function moverShadedMesh(sub) {
     for (let i = 0; i + 8 < tris.length; i += 9) {
         const ux = tris[i + 3] - tris[i],     uy = tris[i + 4] - tris[i + 1], uz = tris[i + 5] - tris[i + 2];
         const vx = tris[i + 6] - tris[i],     vy = tris[i + 7] - tris[i + 1], vz = tris[i + 8] - tris[i + 2];
-        const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-        const nl = Math.hypot(nx, ny, nz);
-        let shade = 0.7;
-        if (nl > 0) {
-            const dot = (nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2]) / nl;
-            shade = 0.45 + 0.55 * Math.abs(dot);
-        }
+        let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        const nl = Math.hypot(nx, ny, nz) || 1;
+        nx /= nl; ny /= nl; nz /= nl;
+        // BSP face windings are outward, so this is the outward normal —
+        // used both for Lambert shade and for backface culling at draw time.
+        const dot = nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2];
+        const shade = 0.45 + 0.55 * Math.abs(dot);
         const q = Math.round(shade * 12) / 12;
         shaded.push({
             off: i,
-            fill: `rgba(${Math.round(base[0] * q)}, ${Math.round(base[1] * q)}, ${Math.round(base[2] * q)}, 0.92)`,
+            nx, ny, nz,
+            // Opaque: a translucent mover let the painter-sort order show
+            // through (faces flickering "off"); opaque + backface culling
+            // keeps it a solid object.
+            fill: `rgb(${Math.round(base[0] * q)}, ${Math.round(base[1] * q)}, ${Math.round(base[2] * q)})`,
         });
     }
     cache[sub] = shaded;
@@ -8019,16 +8024,23 @@ function drawMovers(ctx) {
 function drawMoverMesh(ctx, mesh, sub, pose) {
     const ox = pose.x, oy = pose.y, oz = pose.z;
     const w = _wtc;
+    // Direction from the scene toward the camera (gradient of the depth
+    // used by the painter sort). A face is front-facing when its outward
+    // normal points along it; back faces are culled, so a closed mover
+    // shows only its near hull — no see-through, no sort flicker.
+    const vx = -w.sinYaw * w.cosPitch, vy = -w.cosYaw * w.cosPitch, vz = w.sinPitch;
     const shaded = moverShadedMesh(sub);
-    const order = shaded.map(s => {
+    const order = [];
+    for (const s of shaded) {
+        if (s.nx * vx + s.ny * vy + s.nz * vz <= 0) continue; // back-facing
         const i = s.off;
         const cx = (mesh[i] + mesh[i + 3] + mesh[i + 6]) / 3 + ox;
         const cy = (mesh[i + 1] + mesh[i + 4] + mesh[i + 7]) / 3 + oy;
         const cz = (mesh[i + 2] + mesh[i + 5] + mesh[i + 8]) / 3 + oz;
         const dx = cx - w.cx, dy = cy - w.cy, dz = cz - w.zMid;
         const yr = dx * w.sinYaw + dy * w.cosYaw;
-        return { s, depth: dz * w.sinPitch - yr * w.cosPitch };
-    });
+        order.push({ s, depth: dz * w.sinPitch - yr * w.cosPitch });
+    }
     order.sort((a, b) => a.depth - b.depth);
     let curFill = null, open = false;
     for (const { s } of order) {
@@ -8051,28 +8063,41 @@ function drawMoverMesh(ctx, mesh, sub, pose) {
     if (open) ctx.fill();
 }
 
-// Translucent liquid volumes (water/slime/lava) from corpus v4. Static
-// geometry: in flat mode drawn live above the floors; in Solid mode baked
-// into the offscreen cache on top of the opaque world.
-// Base per-face alpha is low because the volume render stacks every face a
-// camera ray passes through (top + sides + bottom), so the body reads as a
-// translucent solid that darkens with depth rather than a flat silhouette.
-const LIQUID_FILLS = {
-    water: 'rgba(64, 128, 255, 0.16)',
-    slime: 'rgba(80, 200, 80, 0.16)',
-    lava:  'rgba(255, 120, 40, 0.17)',
+// Liquid volumes (water/slime/lava) from corpus v4. Rendered as a shaded,
+// depth-sorted translucent solid: each face is Lambert-shaded (so the top
+// surface reads brighter than the descending sides) and painted back to
+// front, so the body reads as a 3D volume with visible depth rather than a
+// flat silhouette. Static geometry — drawn live in flat mode, baked into
+// the solid cache in Solid mode.
+const LIQUID_BASE = {
+    water: [64, 128, 255],
+    slime: [80, 200, 80],
+    lava:  [255, 120, 40],
 };
+const LIQUID_ALPHA = 0.34; // per-face; back-to-front stacking deepens it
 
-// fillTrisVolume draws each triangle of a liquid soup as its own translucent
-// fill, so overlapping faces of the closed volume composite (stack alpha) —
-// the body reads as a 3D volume that's denser where it's deeper, not a flat
-// 2D silhouette. Each projected point is consumed immediately (worldToCanvas
-// returns one reused object, so it can't be held across the next call).
-function fillTrisVolume(ctx, tris, fill) {
-    if (!tris || tris.length < 9) return;
-    ctx.fillStyle = fill;
+function drawLiquidVolume(ctx, tris, base) {
+    const w = _wtc;
+    const faces = [];
     for (let i = 0; i + 8 < tris.length; i += 9) {
+        const ax = tris[i],     ay = tris[i + 1], az = tris[i + 2];
+        const bx = tris[i + 3], by = tris[i + 4], bz = tris[i + 5];
+        const cx = tris[i + 6], cy = tris[i + 7], cz = tris[i + 8];
+        const ux = bx - ax, uy = by - ay, uz = bz - az;
+        const vx = cx - ax, vy = cy - ay, vz = cz - az;
+        let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        const nl = Math.hypot(nx, ny, nz) || 1;
+        const shade = 0.5 + 0.5 * Math.abs((nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2]) / nl);
+        const dcx = (ax + bx + cx) / 3 - w.cx, dcy = (ay + by + cy) / 3 - w.cy, dcz = (az + bz + cz) / 3 - w.zMid;
+        const yr = dcx * w.sinYaw + dcy * w.cosYaw;
+        faces.push({ off: i, shade, depth: dcz * w.sinPitch - yr * w.cosPitch });
+    }
+    faces.sort((a, b) => a.depth - b.depth); // back to front for translucency
+    for (const f of faces) {
+        const q = Math.round(f.shade * 10) / 10;
+        ctx.fillStyle = `rgba(${Math.round(base[0] * q)}, ${Math.round(base[1] * q)}, ${Math.round(base[2] * q)}, ${LIQUID_ALPHA})`;
         ctx.beginPath();
+        const i = f.off;
         let p = worldToCanvas(tris[i],     tris[i + 1], tris[i + 2]);
         ctx.moveTo(p.x, p.y);
         p = worldToCanvas(tris[i + 3], tris[i + 4], tris[i + 5]);
@@ -8089,7 +8114,7 @@ function drawLiquidFills(ctx) {
     if (!Array.isArray(liquids)) return;
     for (const lq of liquids) {
         if (!lq || !Array.isArray(lq.tris) || lq.tris.length < 9) continue;
-        fillTrisVolume(ctx, lq.tris, LIQUID_FILLS[lq.kind] || LIQUID_FILLS.water);
+        drawLiquidVolume(ctx, lq.tris, LIQUID_BASE[lq.kind] || LIQUID_BASE.water);
     }
 }
 

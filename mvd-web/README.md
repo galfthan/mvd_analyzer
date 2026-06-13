@@ -362,25 +362,25 @@ blits it (~1 ms), only rotation/pan/zoom/focus changes re-render. Code:
 with `streams.movers` (schema v32), lifts/doors/plats animate at their
 demo-streamed poses during playback. Each is drawn as its actual submodel
 mesh, offset by the pose origin binary-searched for the current time
-(`moverPoseAt`), Lambert-shaded per triangle with the shade quantized so
-coplanar faces share it — the internal triangulation vanishes and the real
-shape (e.g. a lift's two pillars + platform) reads cleanly, no busy
-wireframe and no over-merged box. Painter-sorted, batched by shade, no
-stroke; same renderer in both modes (in Solid mode drawn *after* the
-time-free world blit). A mover sampled `vis=false` is hidden. Missing
-either piece (older geometry, or a demo with no movers) is a graceful
-no-op. Code: `drawMovers` / `moverPoseAt` / `moverShadedMesh` /
-`drawMoverMesh`.
+(`moverPoseAt`), Lambert-shaded per triangle (shade quantized so coplanar
+faces share it — the triangulation vanishes, the real lift shape shows).
+Faces are **backface-culled** (BSP normals are outward; only the near hull
+draws) and **opaque**, so a closed mover renders solid with no see-through
+or painter-sort flicker. Painter-sorted, batched by shade, no stroke; same
+renderer in both modes (in Solid mode drawn *after* the time-free world
+blit). A mover sampled `vis=false` is hidden. Missing either piece (older
+geometry, or a demo with no movers) is a graceful no-op. Code:
+`drawMovers` / `moverPoseAt` / `moverShadedMesh` / `drawMoverMesh`.
 
 **Liquids** — version-4 geometry also carries `liquids` (water/slime/lava
-volume meshes). Each face is filled separately and translucently
-(`fillTrisVolume`, low per-face alpha) so the closed volume's overlapping
-faces stack and read as a 3D body that darkens with depth — water blue,
-slime green, lava orange. In flat mode they draw above the region fills
-and below the outlines/players; in Solid mode they bake into the offscreen
-cache on top of the opaque world (the liquid count is part of the cache
-key). Liquids are not pickable in edit mode but round-trip through Export
-JSON.
+volume meshes). Rendered as a shaded, depth-sorted translucent solid
+(`drawLiquidVolume`): each face is Lambert-shaded so the top surface reads
+brighter than the descending sides, and faces paint back-to-front, so the
+body reads as a 3D volume with visible depth (water blue, slime green,
+lava orange). In flat mode they draw above the region fills and below the
+outlines/players; in Solid mode they bake into the offscreen cache on top
+of the opaque world (the liquid count is part of the cache key). Liquids
+are not pickable in edit mode but round-trip through Export JSON.
 
 Everything is drawn through one orbit-camera orthographic projection
 (`projectWorld` in `app.js`): floor geometry uses the per-vertex heights
