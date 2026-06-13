@@ -43,9 +43,9 @@ import (
 
 func main() {
 	bspDir := flag.String("bsp-dir", "", "directory containing .bsp files (required)")
-	outDir := flag.String("out-dir", "internal/web/static/maps", "output directory for geometry JSON; empty to skip geometry")
+	outDir := flag.String("out-dir", "mvd-web/static/maps", "output directory for geometry JSON; empty to skip geometry")
 	entitiesOut := flag.String("entities-out", "", "output directory for per-map entity JSON (mapents corpus); empty to skip entities")
-	locDir := flag.String("loc-dir", "internal/web/static/locs", "directory containing .loc files")
+	locDir := flag.String("loc-dir", "", "directory of .loc files; empty uses the embedded loc corpus (mvd-analytics/loc/data)")
 	mapFilter := flag.String("map", "", "process only the BSP whose basename (no extension) matches")
 	verbose := flag.Bool("verbose", false, "print per-map progress and stats")
 	demosDir := flag.String("demos", "", "directory of .mvd/.mvd.gz demos for usage-based floor pruning (geometry only); empty to skip")
