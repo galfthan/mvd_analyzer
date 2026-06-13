@@ -37,7 +37,7 @@ const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
 const CHAT_PX_PER_SEC   = 17.5; // ~same density as the original 40s/700px window
 const CHAT_ITEM_HEIGHT  = 18;
 const DEATH_X_DURATION  = 2.0;  // seconds an "X" death marker stays on the map
-const PLAYBACK_FPS_MS   = 33;   // map playback throttle (~30 fps = 33 ms/frame)
+const PLAYBACK_FPS_MS   = 16;   // map playback throttle (~60 fps = 16 ms/frame)
 
 // Derive strong/weak color variants from a hex color for region control displays
 function hexToRgb(hex) {
@@ -8402,9 +8402,14 @@ function renderMap(time) {
 
     if (!ctx || !canvas) return;
 
-    // Skip redraw if same data bucket and nothing else changed
+    // Skip redraw if same data bucket and nothing else changed — but NOT
+    // during playback: positions come from the native-rate streams, so the
+    // map must repaint every frame to animate at native rate (the old
+    // bucket-gated repaint froze the view between 50 ms buckets, which read
+    // as ~2 fps in slow motion). When paused/idle the skip still elides
+    // redundant redraws.
     const bucket = findBucketAtTime(time);
-    if (bucket === mapState.lastRenderedBucket && !mapState.renderDirty) return;
+    if (bucket === mapState.lastRenderedBucket && !mapState.renderDirty && !mapState.isPlaying) return;
     mapState.lastRenderedBucket = bucket;
     mapState.renderDirty = false;
 
@@ -10841,7 +10846,7 @@ function animatePlayback() {
     const now = performance.now();
     const elapsed = (now - mapState.lastRenderTime) / 1000;
 
-    // Throttle map redraws to PLAYBACK_FPS_MS (~30 fps).
+    // Throttle map redraws to PLAYBACK_FPS_MS (~60 fps).
     if (elapsed < PLAYBACK_FPS_MS / 1000) return;
 
     mapState.currentTime += elapsed * mapState.playbackSpeed;
