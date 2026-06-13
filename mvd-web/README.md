@@ -322,12 +322,23 @@ sketch. Click the same region, click empty space, press Escape, or
 Reset view to clear. Code: `setFocusGroup` / `pickLocGroupAt` /
 `focusTier`.
 
+**Player animation source** — symbol positions (and the floor-height `H`
+the anchor stem uses) come from the native-rate `result.streams.players[].pos`
+tracks, binary-searched at the current time (`streamPosAt` /
+`augmentPlayerData`, a non-mutating overlay on the cached bucket); the
+state badges (health/armor/weapons) still read the bucket view. Orbit
+pivot and click-to-follow hit-testing read the same stream position so
+they line up with the drawn symbol. Trails stay on the bucket view.
+
 **Floor anchor stems** — in any tilted view, each player symbol hangs a
-thin team-colored stem down to the floor surface beneath it (barycentric
-z on the covering floor triangle, so ramps anchor correctly), ending in
-a small ground dot. The stem ties the symbol to its floor and its length
-shows air height during jumps and falls. Lookups are memoised per player
-position (`playerFloorZ`), so paused/rotating frames don't re-scan.
+thin team-colored stem down to the floor surface beneath it, ending in a
+small ground dot. The drop is `z − 24 − H` using the per-sample
+floor-height `H` (measured from the bottom of the player's bounding box,
+which sits 24 below the origin) — so it is accurate on lifts (the floor
+pass stands players on movers, which a static floor scan can't see) and
+the stem is a direct visual readout of `H`. Falls back to a barycentric
+scan of the floor geometry (`playerFloorZ`, memoised) when `H` is absent
+(no BSP) or `NoFloor` (over a void).
 
 **Skirts** — when tilted (and not in Solid mode), each region's outline
 edges are extruded ~24 units downward as dark quads, turning flat floor
@@ -347,14 +358,16 @@ triangles). Code: `mapSolidEntries` / `renderSolidEntries` /
 
 **Movers** — on version-4 geometry (carries `submodels`) plus a result
 with `streams.movers` (schema v32), lifts/doors/plats animate at their
-demo-streamed poses during playback. Each mover's submodel mesh is offset
-by the pose origin binary-searched for the current time (`moverPoseAt`);
-flat mode draws a translucent tinted fill + outline, Solid mode draws the
-mover *after* the (time-free) solid-world blit with cached per-face
-Lambert shades and a per-frame painter sort of its own triangles. A mover
-sampled `vis=false` is hidden. Missing either piece (older geometry, or a
-demo with no movers) is a graceful no-op. Code: `drawMovers` /
-`moverPoseAt` / `drawMoverFlat` / `drawMoverSolid`.
+demo-streamed poses during playback. Each is drawn as its **bounding box**
+(the submodel brush is essentially a box; the full triangulated mesh read
+as busy noise), offset by the pose origin binary-searched for the current
+time (`moverPoseAt`). Flat mode: one translucent silhouette fill plus a
+clean box-edge wireframe (no triangle diagonals). Solid mode: the 6 box
+faces, each Lambert-shaded (cached) and painter-sorted, drawn *after* the
+(time-free) solid-world blit. A mover sampled `vis=false` is hidden.
+Missing either piece (older geometry, or a demo with no movers) is a
+graceful no-op. Code: `drawMovers` / `moverPoseAt` / `submodelBox` /
+`drawMoverBoxFlat` / `drawMoverBoxSolid`.
 
 **Liquids** — version-4 geometry also carries `liquids` (water/slime/lava
 volume meshes). They render as translucent fills — water blue, slime

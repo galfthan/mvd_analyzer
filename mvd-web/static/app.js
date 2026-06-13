@@ -6115,7 +6115,7 @@ function applyMapGeometry(geom) {
     mapState._floorZCache = null;
     mapState._solidEntries = null;
     mapState._solidCanvasKey = null;
-    mapState._moverShades = null;
+    mapState._moverBoxes = null;
     // The Solid (occluding model) toggle needs wall geometry — only
     // version-3 files carry it.
     const solidBtn = document.getElementById('map-solid-toggle');
@@ -6184,7 +6184,6 @@ function initMapView(result) {
     mapState.movers = (result.streams && Array.isArray(result.streams.movers))
         ? result.streams.movers : [];
     mapState.submodelMeshes = null;
-    mapState._moverShades = null;
     mapState._moverBoxes = null;
 
     // Per-player native-rate position tracks (result.streams.players[].pos)
@@ -7936,39 +7935,46 @@ function moverPoseAt(m, tMs) {
     return { x: m.x[idx], y: m.y[idx], z: m.z[idx], vis: m.vis[idx] };
 }
 
-// moverShadedMesh returns the per-triangle Lambert-shaded fills for a
-// submodel mesh, cached by submodel id. Translation preserves face
-// normals, so the shading is pose-independent and computed once.
-function moverShadedMesh(sub) {
-    let cache = mapState._moverShades;
-    if (!cache) cache = mapState._moverShades = {};
-    if (cache[sub]) return cache[sub];
-    const tris = mapState.submodelMeshes[sub];
-    const base = MOVER_SOLID_BASE;
-    const shaded = [];
-    for (let i = 0; i + 8 < tris.length; i += 9) {
-        const ux = tris[i + 3] - tris[i],     uy = tris[i + 4] - tris[i + 1], uz = tris[i + 5] - tris[i + 2];
-        const vx = tris[i + 6] - tris[i],     vy = tris[i + 7] - tris[i + 1], vz = tris[i + 8] - tris[i + 2];
-        const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-        const nl = Math.hypot(nx, ny, nz);
-        let shade = 0.7;
-        if (nl > 0) {
-            const dot = (nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2]) / nl;
-            shade = 0.45 + 0.55 * Math.abs(dot);
-        }
-        const q = Math.round(shade * 12) / 12;
-        shaded.push({
-            off: i,
-            fill: `rgba(${Math.round(base[0] * q)}, ${Math.round(base[1] * q)}, ${Math.round(base[2] * q)}, 0.97)`,
-        });
+// submodelBox returns a submodel mesh's AABB as 6 quad faces, each with a
+// 12-float corner list and a precomputed Lambert-shaded fill (cached per
+// submodel id — translation preserves normals so the shade is constant).
+// Lifts/doors/plats are essentially boxes, so the AABB renders far cleaner
+// than the full triangulated brush.
+function submodelBox(sub) {
+    let cache = mapState._moverBoxes;
+    if (!cache) cache = mapState._moverBoxes = {};
+    if (cache[sub] !== undefined) return cache[sub];
+    const mesh = mapState.submodelMeshes[sub];
+    let x0 = Infinity, y0 = Infinity, z0 = Infinity;
+    let x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
+    for (let i = 0; i + 2 < mesh.length; i += 3) {
+        const x = mesh[i], y = mesh[i + 1], z = mesh[i + 2];
+        if (x < x0) x0 = x; if (x > x1) x1 = x;
+        if (y < y0) y0 = y; if (y > y1) y1 = y;
+        if (z < z0) z0 = z; if (z > z1) z1 = z;
     }
-    cache[sub] = shaded;
-    return shaded;
+    if (x0 > x1) { cache[sub] = null; return null; }
+    const base = MOVER_SOLID_BASE;
+    const shade = (nx, ny, nz) => {
+        const dot = nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2];
+        const q = Math.round((0.45 + 0.55 * Math.abs(dot)) * 12) / 12;
+        return `rgba(${Math.round(base[0] * q)}, ${Math.round(base[1] * q)}, ${Math.round(base[2] * q)}, 0.97)`;
+    };
+    const faces = [
+        { v: [x0,y0,z0, x0,y1,z0, x1,y1,z0, x1,y0,z0], fill: shade(0, 0, -1) }, // bottom
+        { v: [x0,y0,z1, x1,y0,z1, x1,y1,z1, x0,y1,z1], fill: shade(0, 0,  1) }, // top
+        { v: [x0,y0,z0, x0,y0,z1, x0,y1,z1, x0,y1,z0], fill: shade(-1, 0, 0) }, // -X
+        { v: [x1,y0,z0, x1,y1,z0, x1,y1,z1, x1,y0,z1], fill: shade( 1, 0, 0) }, // +X
+        { v: [x0,y0,z0, x1,y0,z0, x1,y0,z1, x0,y0,z1], fill: shade(0, -1, 0) }, // -Y
+        { v: [x0,y1,z0, x0,y1,z1, x1,y1,z1, x1,y1,z0], fill: shade(0,  1, 0) }, // +Y
+    ];
+    cache[sub] = faces;
+    return faces;
 }
 
-// drawMovers poses every mover at the current time and draws the ones that
-// are visible. No-op unless both the pose streams and the submodel meshes
-// are present (the meshes ride the async corpus v4 fetch).
+// drawMovers poses every mover at the current time and draws the visible
+// ones as their bounding box. No-op unless both the pose streams and the
+// submodel meshes are present (the meshes ride the async corpus v4 fetch).
 function drawMovers(ctx) {
     const movers = mapState.movers;
     const meshes = mapState.submodelMeshes;
@@ -7976,72 +7982,84 @@ function drawMovers(ctx) {
     const tMs = mapState.currentTime * 1000;
     const solid = mapState.solidMode && mapSolidEntries();
     for (const m of movers) {
-        const mesh = meshes[m.sub];
-        if (!mesh || mesh.length < 9) continue;
+        if (!meshes[m.sub] || meshes[m.sub].length < 9) continue;
+        const faces = submodelBox(m.sub);
+        if (!faces) continue;
         const pose = moverPoseAt(m, tMs);
         if (!pose || !pose.vis) continue;
-        if (solid) drawMoverSolid(ctx, mesh, m.sub, pose);
-        else drawMoverFlat(ctx, mesh, pose);
+        if (solid) drawMoverBoxSolid(ctx, faces, pose);
+        else drawMoverBoxFlat(ctx, faces, pose);
     }
 }
 
-function drawMoverFlat(ctx, mesh, pose) {
+// projectBoxFace projects a face's 4 corners (12-float v), offset by the
+// pose origin, to canvas points.
+function projectBoxFace(v, ox, oy, oz) {
+    return [
+        worldToCanvas(v[0] + ox, v[1] + oy, v[2] + oz),
+        worldToCanvas(v[3] + ox, v[4] + oy, v[5] + oz),
+        worldToCanvas(v[6] + ox, v[7] + oy, v[8] + oz),
+        worldToCanvas(v[9] + ox, v[10] + oy, v[11] + oz),
+    ];
+}
+
+// Flat mode: one translucent silhouette fill (winding-normalized so the
+// box's opposing faces union instead of cancelling) plus a clean wireframe
+// of the box edges — no triangle diagonals.
+function drawMoverBoxFlat(ctx, faces, pose) {
     const ox = pose.x, oy = pose.y, oz = pose.z;
+    ctx.fillStyle = MOVER_FLAT_FILL;
     ctx.beginPath();
-    for (let i = 0; i + 8 < mesh.length; i += 9) {
-        let p = worldToCanvas(mesh[i] + ox, mesh[i + 1] + oy, mesh[i + 2] + oz);
-        ctx.moveTo(p.x, p.y);
-        p = worldToCanvas(mesh[i + 3] + ox, mesh[i + 4] + oy, mesh[i + 5] + oz);
-        ctx.lineTo(p.x, p.y);
-        p = worldToCanvas(mesh[i + 6] + ox, mesh[i + 7] + oy, mesh[i + 8] + oz);
-        ctx.lineTo(p.x, p.y);
+    for (const f of faces) {
+        const p = projectBoxFace(f.v, ox, oy, oz);
+        const area = (p[1].x - p[0].x) * (p[2].y - p[0].y) - (p[2].x - p[0].x) * (p[1].y - p[0].y);
+        ctx.moveTo(p[0].x, p[0].y);
+        if (area < 0) { ctx.lineTo(p[3].x, p[3].y); ctx.lineTo(p[2].x, p[2].y); ctx.lineTo(p[1].x, p[1].y); }
+        else { ctx.lineTo(p[1].x, p[1].y); ctx.lineTo(p[2].x, p[2].y); ctx.lineTo(p[3].x, p[3].y); }
         ctx.closePath();
     }
-    ctx.fillStyle = MOVER_FLAT_FILL;
-    ctx.fill();
+    ctx.fill('nonzero');
     ctx.lineWidth = 1;
     ctx.strokeStyle = MOVER_FLAT_STROKE;
+    ctx.beginPath();
+    for (const f of faces) {
+        const p = projectBoxFace(f.v, ox, oy, oz);
+        ctx.moveTo(p[0].x, p[0].y);
+        ctx.lineTo(p[1].x, p[1].y);
+        ctx.lineTo(p[2].x, p[2].y);
+        ctx.lineTo(p[3].x, p[3].y);
+        ctx.closePath();
+    }
     ctx.stroke();
 }
 
-// drawMoverSolid draws one posed mover into the live ctx (AFTER the solid
-// world blit, which is camera-keyed and time-free and must stay that way).
-// Per-frame painter-sort of the mover's own triangles by posed-centroid
-// depth, batched by the cached per-triangle shade.
-function drawMoverSolid(ctx, mesh, sub, pose) {
+// Solid mode: painter-sort the 6 box faces by posed-centroid depth and fill
+// each with its cached Lambert shade. Drawn AFTER the (time-free) solid-
+// world blit.
+function drawMoverBoxSolid(ctx, faces, pose) {
     const ox = pose.x, oy = pose.y, oz = pose.z;
     const w = _wtc;
-    const shaded = moverShadedMesh(sub);
-    const order = [];
-    for (const s of shaded) {
-        const i = s.off;
-        const cx = (mesh[i] + mesh[i + 3] + mesh[i + 6]) / 3 + ox;
-        const cy = (mesh[i + 1] + mesh[i + 4] + mesh[i + 7]) / 3 + oy;
-        const cz = (mesh[i + 2] + mesh[i + 5] + mesh[i + 8]) / 3 + oz;
+    const order = faces.map(f => {
+        const v = f.v;
+        const cx = (v[0] + v[3] + v[6] + v[9]) / 4 + ox;
+        const cy = (v[1] + v[4] + v[7] + v[10]) / 4 + oy;
+        const cz = (v[2] + v[5] + v[8] + v[11]) / 4 + oz;
         const dx = cx - w.cx, dy = cy - w.cy, dz = cz - w.zMid;
         const yr = dx * w.sinYaw + dy * w.cosYaw;
-        order.push({ s, depth: dz * w.sinPitch - yr * w.cosPitch });
-    }
+        return { f, depth: dz * w.sinPitch - yr * w.cosPitch };
+    });
     order.sort((a, b) => a.depth - b.depth);
-    let curFill = null, open = false;
-    for (const { s } of order) {
-        if (s.fill !== curFill) {
-            if (open) ctx.fill();
-            ctx.fillStyle = s.fill;
-            ctx.beginPath();
-            curFill = s.fill;
-            open = true;
-        }
-        const i = s.off;
-        let p = worldToCanvas(mesh[i] + ox, mesh[i + 1] + oy, mesh[i + 2] + oz);
-        ctx.moveTo(p.x, p.y);
-        p = worldToCanvas(mesh[i + 3] + ox, mesh[i + 4] + oy, mesh[i + 5] + oz);
-        ctx.lineTo(p.x, p.y);
-        p = worldToCanvas(mesh[i + 6] + ox, mesh[i + 7] + oy, mesh[i + 8] + oz);
-        ctx.lineTo(p.x, p.y);
+    for (const { f } of order) {
+        const p = projectBoxFace(f.v, ox, oy, oz);
+        ctx.fillStyle = f.fill;
+        ctx.beginPath();
+        ctx.moveTo(p[0].x, p[0].y);
+        ctx.lineTo(p[1].x, p[1].y);
+        ctx.lineTo(p[2].x, p[2].y);
+        ctx.lineTo(p[3].x, p[3].y);
         ctx.closePath();
+        ctx.fill();
     }
-    if (open) ctx.fill();
 }
 
 // Translucent liquid volumes (water/slime/lava) from corpus v4. Static
