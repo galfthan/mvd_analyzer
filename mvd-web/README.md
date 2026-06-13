@@ -340,42 +340,47 @@ the stem is a direct visual readout of `H`. Falls back to a barycentric
 scan of the floor geometry (`playerFloorZ`, memoised) when `H` is absent
 (no BSP) or `NoFloor` (over a void).
 
-**Skirts** — when tilted (and not in Solid mode), each region's outline
-edges are extruded ~24 units downward as dark quads, turning flat floor
-outlines into slabs so relative floor height reads at a glance.
+**Floor slabs** — floors render with `FLOOR_SLAB_DEPTH` (20 units) of
+thickness rather than as zero-height planes. In non-solid tilted views a
+"skirt" extrudes each region's outline edges down 20u as dark quads; in
+Solid mode `mapSolidEntries.slabSides` builds matching side quads so the
+slab reads the same way. Steps and ledges now show their thickness.
 
 **Solid mode** — for maps whose geometry JSON is version 3 (carries
 wall triangles), a **Solid** toggle appears: floors and walls are
-painter-sorted by projected camera depth and drawn near-opaque with
-per-face Lambert shading, so upper floors genuinely occlude lower ones
-and the map reads as an architectural model. Players, items and
-overlays still draw on top — seeing the action through walls is the
-point. The sorted model renders into an offscreen canvas keyed by the
-full camera state; steady playback just blits it (~1 ms), only
-rotation/pan/zoom/focus changes re-render (~35 ms on dm3's ~6k
-triangles). Code: `mapSolidEntries` / `renderSolidEntries` /
-`drawSolidWorld`.
+painter-sorted by projected camera depth and drawn near-opaque, so upper
+floors genuinely occlude lower ones and the map reads as an architectural
+model. Floors use a single flat per-region tone (plus darker slab sides);
+**walls** keep per-face Lambert shading — the floor Lambert looked patchy,
+so it was removed. Players, items and overlays still draw on top — seeing
+the action through walls is the point. The sorted model renders into an
+offscreen canvas keyed by the full camera state; steady playback just
+blits it (~1 ms), only rotation/pan/zoom/focus changes re-render. Code:
+`mapSolidEntries` / `renderSolidEntries` / `drawSolidWorld`.
 
 **Movers** — on version-4 geometry (carries `submodels`) plus a result
 with `streams.movers` (schema v32), lifts/doors/plats animate at their
-demo-streamed poses during playback. Each is drawn as its **bounding box**
-(the submodel brush is essentially a box; the full triangulated mesh read
-as busy noise), offset by the pose origin binary-searched for the current
-time (`moverPoseAt`). Flat mode: one translucent silhouette fill plus a
-clean box-edge wireframe (no triangle diagonals). Solid mode: the 6 box
-faces, each Lambert-shaded (cached) and painter-sorted, drawn *after* the
-(time-free) solid-world blit. A mover sampled `vis=false` is hidden.
-Missing either piece (older geometry, or a demo with no movers) is a
-graceful no-op. Code: `drawMovers` / `moverPoseAt` / `submodelBox` /
-`drawMoverBoxFlat` / `drawMoverBoxSolid`.
+demo-streamed poses during playback. Each is drawn as its actual submodel
+mesh, offset by the pose origin binary-searched for the current time
+(`moverPoseAt`), Lambert-shaded per triangle with the shade quantized so
+coplanar faces share it — the internal triangulation vanishes and the real
+shape (e.g. a lift's two pillars + platform) reads cleanly, no busy
+wireframe and no over-merged box. Painter-sorted, batched by shade, no
+stroke; same renderer in both modes (in Solid mode drawn *after* the
+time-free world blit). A mover sampled `vis=false` is hidden. Missing
+either piece (older geometry, or a demo with no movers) is a graceful
+no-op. Code: `drawMovers` / `moverPoseAt` / `moverShadedMesh` /
+`drawMoverMesh`.
 
 **Liquids** — version-4 geometry also carries `liquids` (water/slime/lava
-volume meshes). They render as translucent fills — water blue, slime
-green, lava orange (`drawLiquidFills`). In flat mode they draw above the
-region fills and below the outlines/players; in Solid mode they bake into
-the offscreen cache as a translucent pass on top of the opaque world (the
-liquid count is part of the cache key). Liquids are not pickable in edit
-mode but round-trip through Export JSON.
+volume meshes). Each face is filled separately and translucently
+(`fillTrisVolume`, low per-face alpha) so the closed volume's overlapping
+faces stack and read as a 3D body that darkens with depth — water blue,
+slime green, lava orange. In flat mode they draw above the region fills
+and below the outlines/players; in Solid mode they bake into the offscreen
+cache on top of the opaque world (the liquid count is part of the cache
+key). Liquids are not pickable in edit mode but round-trip through Export
+JSON.
 
 Everything is drawn through one orbit-camera orthographic projection
 (`projectWorld` in `app.js`): floor geometry uses the per-vertex heights
