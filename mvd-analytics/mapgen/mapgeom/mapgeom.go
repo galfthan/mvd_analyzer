@@ -22,6 +22,7 @@
 package mapgeom
 
 import (
+	"math"
 	"sort"
 
 	"github.com/mvd-analyzer/mvd-analytics/mapgen/bsp"
@@ -53,6 +54,16 @@ const (
 	// and lifts connecting levels stay covered as long as each level
 	// has its own loc point.
 	ceilingMaxAboveLoc float32 = 128.0
+
+	// minTriArea is the smallest triangle area (world units²) the fan
+	// triangulation keeps. A face ring with a redundant collinear
+	// mid-edge vertex fan-triangulates into zero/near-zero-area slivers:
+	// invisible in the viewer, and poison for the WASM edit mode, where
+	// triPlane returns null on them so they survive as stray, unpickable,
+	// undeletable lines/points once the surrounding patch is removed.
+	// Real floor/wall triangles are orders of magnitude larger, so this
+	// threshold only ever catches degenerate output.
+	minTriArea float32 = 0.5
 )
 
 // Params are the tunable extraction thresholds. The zero value of any
@@ -150,12 +161,13 @@ type Stats struct {
 	FacesTotal   int
 	FacesKept    int
 	FacesDropped int // ring assembly or geometry drops (not Z-reject)
-	FacesUnnamed int // kept but routed into the unnamed backdrop bucket
-	FacesCeiling int // kept-but-filtered-as-ceiling-detail
-	WallsKept    int // vertical faces emitted into MapRegions.Walls
-	Locs         int
-	Triangles    int
-	WallTris     int
+	FacesUnnamed   int // kept but routed into the unnamed backdrop bucket
+	FacesCeiling   int // kept-but-filtered-as-ceiling-detail
+	WallsKept      int // vertical faces emitted into MapRegions.Walls
+	Locs           int
+	Triangles      int
+	WallTris       int
+	DegenerateTris int // fan triangles dropped for sub-minTriArea area
 }
 
 // Build extracts floor geometry from bsp with the default thresholds,
@@ -285,6 +297,10 @@ func BuildParams(mapName string, b *bsp.BSP, finder *loc.Finder, params Params) 
 			stats.WallsKept++
 			for i := 1; i+1 < len(ring3D); i++ {
 				a, bb, c := ring3D[0], ring3D[i], ring3D[i+1]
+				if triArea(a, bb, c) < minTriArea {
+					stats.DegenerateTris++
+					continue
+				}
 				walls = append(walls,
 					a.X, a.Y, a.Z,
 					bb.X, bb.Y, bb.Z,
@@ -341,6 +357,10 @@ func BuildParams(mapName string, b *bsp.BSP, finder *loc.Finder, params Params) 
 				a := f.ring[0]
 				b := f.ring[i]
 				c := f.ring[i+1]
+				if triArea(a, b, c) < minTriArea {
+					stats.DegenerateTris++
+					continue
+				}
 				tris = append(tris,
 					a.X, a.Y, a.Z,
 					b.X, b.Y, b.Z,
@@ -434,5 +454,18 @@ func assembleRing(b *bsp.BSP, face bsp.Face) ([]bsp.Vec3, bool) {
 
 func negate(v bsp.Vec3) bsp.Vec3 {
 	return bsp.Vec3{X: -v.X, Y: -v.Y, Z: -v.Z}
+}
+
+// triArea returns the area of triangle a,b,c — half the magnitude of the
+// cross product of its two edges. Collinear vertices yield ~0, which is
+// how a face ring with a redundant mid-edge vertex shows up after fan
+// triangulation (see minTriArea).
+func triArea(a, b, c bsp.Vec3) float32 {
+	ux, uy, uz := b.X-a.X, b.Y-a.Y, b.Z-a.Z
+	vx, vy, vz := c.X-a.X, c.Y-a.Y, c.Z-a.Z
+	cx := uy*vz - uz*vy
+	cy := uz*vx - ux*vz
+	cz := ux*vy - uy*vx
+	return 0.5 * float32(math.Sqrt(float64(cx*cx+cy*cy+cz*cz)))
 }
 

@@ -378,6 +378,77 @@ func TestBuildParams_StricterSlopeRejectsRamp(t *testing.T) {
 	}
 }
 
+// buildCollinearFloorBSP constructs a single floor quad with a redundant
+// vertex sitting exactly on the midpoint of the bottom edge — a pentagon
+// ring (0,0)-(32,0)-(64,0)-(64,64)-(0,64) at z=0. Fan triangulation from
+// vertex 0 produces three triangles; the first, (0,0)-(32,0)-(64,0), is
+// collinear and therefore zero-area. Quake compilers emit exactly this
+// shape where a T-junction was healed by splitting an edge.
+func buildCollinearFloorBSP() *bsp.BSP {
+	return &bsp.BSP{
+		Version: 29,
+		Planes: []bsp.Plane{
+			{Normal: bsp.Vec3{X: 0, Y: 0, Z: 1}, Dist: 0, Type: 2},
+		},
+		Vertices: []bsp.Vec3{
+			{X: 0, Y: 0, Z: 0},
+			{X: 32, Y: 0, Z: 0}, // collinear mid-edge vertex
+			{X: 64, Y: 0, Z: 0},
+			{X: 64, Y: 64, Z: 0},
+			{X: 0, Y: 64, Z: 0},
+		},
+		Edges: []bsp.Edge{
+			{V: [2]uint32{0, 0}}, // sentinel
+			{V: [2]uint32{0, 1}},
+			{V: [2]uint32{1, 2}},
+			{V: [2]uint32{2, 3}},
+			{V: [2]uint32{3, 4}},
+			{V: [2]uint32{4, 0}},
+		},
+		Surfedges: []int32{1, 2, 3, 4, 5},
+		Faces: []bsp.Face{
+			{PlaneID: 0, Side: 0, FirstEdge: 0, NumEdges: 5},
+		},
+		Models: []bsp.Model{
+			{FirstFace: 0, NumFaces: 1},
+		},
+	}
+}
+
+func TestBuild_SkipsDegenerateTriangles(t *testing.T) {
+	b := buildCollinearFloorBSP()
+	finder := loc.NewFinder("test", []loc.Location{
+		{X: 32, Y: 32, Z: 24, Name: "room"},
+	})
+
+	regions, stats := Build("test", b, finder)
+
+	// The pentagon fans into 3 triangles, one of which is collinear.
+	if stats.DegenerateTris != 1 {
+		t.Errorf("DegenerateTris = %d, want 1", stats.DegenerateTris)
+	}
+	if stats.Triangles != 2 {
+		t.Errorf("Triangles = %d, want 2 (zero-area sliver dropped)", stats.Triangles)
+	}
+	if len(regions.Locs) != 1 {
+		t.Fatalf("regions.Locs len = %d, want 1", len(regions.Locs))
+	}
+	// 2 kept triangles × 9 floats; the dropped sliver must not appear.
+	if got := len(regions.Locs[0].Tris); got != 18 {
+		t.Errorf("room.Tris len = %d, want 18", got)
+	}
+	// No emitted triangle may be zero-area.
+	tris := regions.Locs[0].Tris
+	for i := 0; i+8 < len(tris); i += 9 {
+		a := bsp.Vec3{X: tris[i], Y: tris[i+1], Z: tris[i+2]}
+		bb := bsp.Vec3{X: tris[i+3], Y: tris[i+4], Z: tris[i+5]}
+		c := bsp.Vec3{X: tris[i+6], Y: tris[i+7], Z: tris[i+8]}
+		if triArea(a, bb, c) < minTriArea {
+			t.Errorf("triangle %d is degenerate (area %v)", i/9, triArea(a, bb, c))
+		}
+	}
+}
+
 func TestBuildParams_RoofCapTunable(t *testing.T) {
 	// Stacked trio: floor z=0, platform z=128 (at the default cap),
 	// ceiling z=384. Lowering CeilingMaxAboveLoc to 100 also drops the
