@@ -7429,8 +7429,29 @@ function expandPatch(arr, startOff) {
             list.push(i);
         }
     }
-    const p0 = triPlane(arr, startOff);
-    if (!p0) return [startOff];
+    let p0 = triPlane(arr, startOff);
+    if (!p0) {
+        // The clicked triangle is itself a degenerate zero-area sliver
+        // (no plane). Walk shared edges to the first real neighbor and
+        // adopt its plane so the patch still grows instead of selecting
+        // the lone sliver.
+        const visited = new Set([startOff]);
+        const q = [startOff];
+        while (q.length && !p0) {
+            const off = q.shift();
+            for (const [u, v] of [[off, off + 3], [off + 3, off + 6], [off + 6, off]]) {
+                for (const next of byEdge.get(edgeKey(u, v)) || []) {
+                    if (visited.has(next)) continue;
+                    visited.add(next);
+                    const p = triPlane(arr, next);
+                    if (p) { p0 = p; break; }
+                    q.push(next);
+                }
+                if (p0) break;
+            }
+        }
+        if (!p0) return [startOff]; // whole connected component is degenerate
+    }
     const seen = new Set([startOff]);
     const queue = [startOff];
     while (queue.length) {
@@ -7439,7 +7460,17 @@ function expandPatch(arr, startOff) {
             for (const next of byEdge.get(edgeKey(u, v)) || []) {
                 if (seen.has(next)) continue;
                 const p = triPlane(arr, next);
-                if (!p) continue;
+                if (!p) {
+                    // Degenerate sliver sharing an edge with the patch: no
+                    // plane to test, but it must be swept in — otherwise
+                    // deleting the patch strands its lone surviving edge as
+                    // an unselectable, undeletable line. Keep flowing the
+                    // BFS through it (its edges bridge to real neighbors,
+                    // which are still plane-tested below).
+                    seen.add(next);
+                    queue.push(next);
+                    continue;
+                }
                 // Coplanar within tolerance (either normal orientation).
                 const dot = p.nx * p0.nx + p.ny * p0.ny + p.nz * p0.nz;
                 if (Math.abs(dot) < 0.995) continue;
@@ -7541,6 +7572,15 @@ function editUndo() {
     const snap = editState.undoStack.pop();
     if (!snap || !mapState.mapGeometry) return;
     const geom = mapState.mapGeometry;
+    // A snapshot is only valid against the loc-array layout it was taken
+    // from. If the geometry was reloaded or regenerated since (loc count
+    // changed), the positional index mapping is stale — drop the snapshot
+    // rather than corrupt tris with undefined / misaligned arrays.
+    if (!snap.locsTris || snap.locsTris.length !== geom.locs.length) {
+        editState.edited = editState.undoStack.length > 0;
+        updateEditStatus();
+        return;
+    }
     geom.locs.forEach((l, i) => { l.tris = snap.locsTris[i]; });
     geom.walls = snap.walls;
     editState.selection = [];

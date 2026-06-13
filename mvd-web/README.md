@@ -409,7 +409,9 @@ and canvas clicks switch from follow/focus to triangle selection:
   the cursor (≈ the original BSP face, merging same-plane neighbours);
   a dropdown switches to single-triangle mode. Shift-click adds/toggles.
   Hovered triangles get a live outline. In Solid mode wall triangles
-  are selectable too.
+  are selectable too. Adjacent zero-area slivers (degenerate fan
+  triangles in older corpus files) are swept into the patch so deleting
+  it leaves no stranded, unselectable line behind.
 - **Delete / Undo** — `Del` removes the selection (e.g. stray roof or
   out-of-bounds detail the extractor kept); `Ctrl+Z` undoes. Undo
   snapshots are whole-array references — deletion replaces arrays,
