@@ -72,13 +72,19 @@ that downstream consumers render, summarise, or feed to an agent.
   checks on the analysis result.
 - `cmd/mapgen/` — developer tool: reads BSP + loc files, writes per-loc
   floor-polygon JSON for the web viewer
-  (`mvd-web/static/maps/<name>.json`). Geometry version 3: triangles
+  (`mvd-web/static/maps/<name>.json`). Geometry version 4: triangles
   carry per-vertex x,y,z (9 floats each) so the map tab can render the
   floor plan in 3D, plus a top-level `walls` triangle list (vertical
-  faces) for the viewer's occluding "solid" mode. Extraction thresholds
+  faces) for the viewer's occluding "solid" mode (v3), and optional
+  `liquids` (water/slime/lava volume meshes from the engine's turbulent
+  `*` textures) and `submodels` (brush-model lifts/doors, keyed by their
+  `*id` index and posed at runtime from the result's mover streams) (v4).
+  Degenerate zero-area fan triangles are dropped. Extraction thresholds
   (floor slope, roof cap, origin height) are tunable via
   `mapgeom.Params` / `BuildParams` — used by the web viewer's geometry
-  edit mode, which re-runs the extraction in WASM.
+  edit mode, which re-runs the extraction in WASM. A usage-pruned file
+  (floor faces no player touched removed) carries a `pruned` provenance
+  block.
 - `cmd/qw-analyze/` — CLI consumer. `qw-analyze demo.mvd` produces Result
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.

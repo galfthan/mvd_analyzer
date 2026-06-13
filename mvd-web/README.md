@@ -509,11 +509,15 @@ while old `?tab=loc-graph` links keep resolving.
 
 Per-map floor polygon JSON under `static/maps/` is produced by the
 `mapgen` developer tool, which reads Quake 1 BSPs from an off-repo
-working directory. Current files are geometry version 2 (9 floats per
-triangle — x,y,z per vertex); a few test maps (schloss, dm3, dm2, e1m2)
-are version 3, which adds a top-level `walls` triangle list for the map
-tab's Solid mode. The frontend accepts all three versions (v1 — 6
-floats, XY only — is flattened to each region's median z on load).
+working directory. Files are geometry version 2 (9 floats per
+triangle — x,y,z per vertex), version 3 (adds a top-level `walls`
+triangle list for the map tab's Solid mode), or version 4 (adds optional
+`liquids` water/slime/lava volume meshes and `submodels` brush-model
+lifts/doors, and drops degenerate zero-area triangles). The frontend is
+presence-based and accepts every version (v1 — 6 floats, XY only — is
+flattened to each region's median z on load; missing `walls`/`liquids`/
+`submodels` simply render nothing). A usage-pruned file carries a
+`pruned` provenance block.
 See
 [mvd-analytics/README.md](../mvd-analytics/README.md) (the `cmd/mapgen`
 entry) and `CLAUDE.md`'s quick reference for the workflow.

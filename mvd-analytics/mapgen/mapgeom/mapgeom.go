@@ -24,6 +24,7 @@ package mapgeom
 import (
 	"math"
 	"sort"
+	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/mapgen/bsp"
 	"github.com/mvd-analyzer/mvd-analytics/loc"
@@ -141,18 +142,58 @@ type LocRegion struct {
 // floor plan in 3D; version 1 files were XY-only (6 floats/triangle).
 // Version 3 adds the optional Walls list (vertical faces, same 9-float
 // triangle layout) used by the viewer's occluding "solid" 3D mode.
-const GeometryVersion = 3
+// Version 4 adds the optional Liquids and SubModels meshes (water/slime/
+// lava volumes and brush-model lifts/doors) and the Pruned provenance
+// block. All readers stay presence-based: a v4 reader handles v1–v3 files
+// (missing fields read as empty), and v1–v3 readers ignore the new
+// fields, so a mixed-version corpus is fine in production.
+const GeometryVersion = 4
+
+// LiquidMesh is one liquid volume's triangle soup. Liquids come from the
+// engine's turbulent '*' textures (excluding teleporters) at any
+// orientation — the side faces give the pool its volume — so they are not
+// split per loc and never run the floor/ceiling heuristics. Tris layout
+// matches LocRegion.Tris (9 floats/triangle).
+type LiquidMesh struct {
+	Kind string    `json:"kind"` // "water" | "slime" | "lava"
+	Tris []float32 `json:"tris"`
+}
+
+// SubModelMesh is the static geometry of one brush model (Models[ID],
+// ID>=1) — lifts, doors, plats, trains. ID is the brush-model index the
+// MVD's "*ID" entities and the result's MoverStream.SubModel reference.
+// Vertices are at the model's authored (rest) position; the viewer offsets
+// them by the demo-streamed pose origin. Tris layout matches
+// LocRegion.Tris.
+type SubModelMesh struct {
+	ID   int       `json:"id"`
+	Tris []float32 `json:"tris"`
+}
+
+// PruneInfo records how a usage-pruned corpus file was produced, so a
+// reader can tell a pruned map (floor faces no player touched were
+// dropped) from a full one. Absent (nil) on unpruned files. Filled only
+// by the offline `mapgen -demos` path, never by Build.
+type PruneInfo struct {
+	Demos        int `json:"demos"`        // demos analyzed for floor usage
+	Points       int `json:"points"`       // floor-usage sample points collected
+	FacesDropped int `json:"facesDropped"` // floor faces removed as never-touched
+}
 
 // MapRegions is the JSON output root. Walls is a flat triangle list (9
 // floats per triangle, like LocRegion.Tris) of the map's vertical faces —
 // not split per loc because walls only serve occlusion/shape, never loc
-// identity. Empty for pre-v3 files.
+// identity. Empty for pre-v3 files. Liquids, SubModels and Pruned are v4
+// additions and omitted when empty.
 type MapRegions struct {
-	Map     string      `json:"map"`
-	Version int         `json:"version"`
-	Bounds  Bounds      `json:"bounds"`
-	Locs    []LocRegion `json:"locs"`
-	Walls   []float32   `json:"walls,omitempty"`
+	Map       string         `json:"map"`
+	Version   int            `json:"version"`
+	Bounds    Bounds         `json:"bounds"`
+	Locs      []LocRegion    `json:"locs"`
+	Walls     []float32      `json:"walls,omitempty"`
+	Liquids   []LiquidMesh   `json:"liquids,omitempty"`
+	SubModels []SubModelMesh `json:"submodels,omitempty"`
+	Pruned    *PruneInfo     `json:"pruned,omitempty"`
 }
 
 
@@ -168,6 +209,10 @@ type Stats struct {
 	Triangles      int
 	WallTris       int
 	DegenerateTris int // fan triangles dropped for sub-minTriArea area
+	LiquidFaces    int // worldspawn '*' faces routed into Liquids
+	LiquidTris     int // triangles emitted across all LiquidMesh
+	SubModelMeshes int // brush-model meshes emitted into SubModels
+	SubModelTris   int // triangles emitted across all SubModelMesh
 }
 
 // Build extracts floor geometry from bsp with the default thresholds,
@@ -219,6 +264,9 @@ func BuildParams(mapName string, b *bsp.BSP, finder *loc.Finder, params Params) 
 
 	var walls []float32
 
+	// Liquid triangles accumulated per kind ("water"/"slime"/"lava").
+	liquidTris := make(map[string][]float32)
+
 	for faceIdx := firstFace; faceIdx < endFace; faceIdx++ {
 		stats.FacesTotal++
 		face := b.Faces[faceIdx]
@@ -226,6 +274,26 @@ func BuildParams(mapName string, b *bsp.BSP, finder *loc.Finder, params Params) 
 		if int(face.PlaneID) >= len(b.Planes) {
 			continue
 		}
+
+		// Liquid faces (engine '*' textures, excluding teleporters) mark a
+		// water/slime/lava volume, not walkable floor. Route every
+		// orientation — the side faces give the pool depth — into the
+		// Liquids mesh and skip loc assignment and the ceiling cap. When
+		// the BSP has no texture lump FaceTexName returns "" and the face
+		// falls through to the floor/wall path (pre-v4 behaviour).
+		if texName := strings.ToLower(b.FaceTexName(face)); strings.HasPrefix(texName, "*") && !strings.Contains(texName, "tele") {
+			ring3D, ok := assembleRing(b, face)
+			if !ok || len(ring3D) < 3 {
+				continue
+			}
+			stats.LiquidFaces++
+			kind := liquidKind(texName)
+			before := len(liquidTris[kind])
+			liquidTris[kind] = fanTriangulate(liquidTris[kind], ring3D, &stats.DegenerateTris)
+			stats.LiquidTris += (len(liquidTris[kind]) - before) / 9
+			continue
+		}
+
 		plane := b.Planes[face.PlaneID]
 		normal := plane.Normal
 		if face.Side == 1 {
@@ -402,7 +470,53 @@ func BuildParams(mapName string, b *bsp.BSP, finder *loc.Finder, params Params) 
 
 	// Walls intentionally don't contribute to Bounds — outer-shell walls
 	// would pad the fit-to-canvas view beyond the playable floor area.
+	// Liquids and submodels are excluded for the same reason (and movers
+	// shift at runtime, so their rest pose is not a stable bound).
 	result.Walls = walls
+
+	// Liquids: emit one mesh per kind in a stable order.
+	for _, kind := range []string{"water", "slime", "lava"} {
+		if tris := liquidTris[kind]; len(tris) > 0 {
+			result.Liquids = append(result.Liquids, LiquidMesh{Kind: kind, Tris: tris})
+		}
+	}
+
+	// SubModels: every brush model (Models[1:]) — lifts, doors, plats,
+	// trains. All orientations are kept (a lift needs its sides); only
+	// trigger-textured faces (invisible touch volumes) are skipped. Empty
+	// models (e.g. trigger-only brushes) are not emitted.
+	for modelIdx := 1; modelIdx < len(b.Models); modelIdx++ {
+		m := b.Models[modelIdx]
+		mf := int(m.FirstFace)
+		me := mf + int(m.NumFaces)
+		if mf < 0 {
+			mf = 0
+		}
+		if me > len(b.Faces) {
+			me = len(b.Faces)
+		}
+		var tris []float32
+		for fi := mf; fi < me; fi++ {
+			face := b.Faces[fi]
+			if int(face.PlaneID) >= len(b.Planes) {
+				continue
+			}
+			if strings.Contains(strings.ToLower(b.FaceTexName(face)), "trigger") {
+				continue
+			}
+			ring3D, ok := assembleRing(b, face)
+			if !ok || len(ring3D) < 3 {
+				continue
+			}
+			before := len(tris)
+			tris = fanTriangulate(tris, ring3D, &stats.DegenerateTris)
+			stats.SubModelTris += (len(tris) - before) / 9
+		}
+		if len(tris) > 0 {
+			result.SubModels = append(result.SubModels, SubModelMesh{ID: modelIdx, Tris: tris})
+		}
+	}
+	stats.SubModelMeshes = len(result.SubModels)
 
 	if hasBounds {
 		result.Bounds = bounds
@@ -454,6 +568,41 @@ func assembleRing(b *bsp.BSP, face bsp.Face) ([]bsp.Vec3, bool) {
 
 func negate(v bsp.Vec3) bsp.Vec3 {
 	return bsp.Vec3{X: -v.X, Y: -v.Y, Z: -v.Z}
+}
+
+// fanTriangulate appends ring's non-degenerate fan triangles (9 floats
+// each) to dst and returns the grown slice; degenerate slivers below
+// minTriArea are skipped and counted into *degen. Used for liquid and
+// submodel meshes (the floor and wall loops inline the same guard because
+// they also track per-triangle bounds/stats).
+func fanTriangulate(dst []float32, ring []bsp.Vec3, degen *int) []float32 {
+	for i := 1; i+1 < len(ring); i++ {
+		a, b, c := ring[0], ring[i], ring[i+1]
+		if triArea(a, b, c) < minTriArea {
+			*degen++
+			continue
+		}
+		dst = append(dst,
+			a.X, a.Y, a.Z,
+			b.X, b.Y, b.Z,
+			c.X, c.Y, c.Z,
+		)
+	}
+	return dst
+}
+
+// liquidKind classifies a lowercased '*' texture name into the liquid kind
+// the viewer tints. Engine convention: substrings "lava"/"slime"; anything
+// else turbulent is water (*water*, *04mwat*, plain "*").
+func liquidKind(name string) string {
+	switch {
+	case strings.Contains(name, "lava"):
+		return "lava"
+	case strings.Contains(name, "slime"):
+		return "slime"
+	default:
+		return "water"
+	}
 }
 
 // triArea returns the area of triangle a,b,c — half the magnitude of the

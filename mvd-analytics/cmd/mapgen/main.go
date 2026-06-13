@@ -176,8 +176,10 @@ func emitGeometry(path, name string, finder *loc.Finder, outDir string, verbose 
 	}
 
 	if verbose {
-		fmt.Fprintf(os.Stderr, "  ok   %s: locs=%d tris=%d walls=%d faces=%d/%d unnamed=%d ceiling=%d dropped=%d degen=%d bytes=%d\n",
-			name, stats.Locs, stats.Triangles, stats.WallTris, stats.FacesKept, stats.FacesTotal,
+		fmt.Fprintf(os.Stderr, "  ok   %s: locs=%d tris=%d walls=%d liquids=%d/%d submodels=%d/%d faces=%d/%d unnamed=%d ceiling=%d dropped=%d degen=%d bytes=%d\n",
+			name, stats.Locs, stats.Triangles, stats.WallTris,
+			stats.LiquidFaces, stats.LiquidTris, stats.SubModelMeshes, stats.SubModelTris,
+			stats.FacesKept, stats.FacesTotal,
 			stats.FacesUnnamed, stats.FacesCeiling, stats.FacesDropped, stats.DegenerateTris, len(data))
 	}
 	return nil
