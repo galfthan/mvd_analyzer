@@ -356,6 +356,14 @@ sampled `vis=false` is hidden. Missing either piece (older geometry, or a
 demo with no movers) is a graceful no-op. Code: `drawMovers` /
 `moverPoseAt` / `drawMoverFlat` / `drawMoverSolid`.
 
+**Liquids** — version-4 geometry also carries `liquids` (water/slime/lava
+volume meshes). They render as translucent fills — water blue, slime
+green, lava orange (`drawLiquidFills`). In flat mode they draw above the
+region fills and below the outlines/players; in Solid mode they bake into
+the offscreen cache as a translucent pass on top of the opaque world (the
+liquid count is part of the cache key). Liquids are not pickable in edit
+mode but round-trip through Export JSON.
+
 Everything is drawn through one orbit-camera orthographic projection
 (`projectWorld` in `app.js`): floor geometry uses the per-vertex heights
 in the version-2 map JSON, so each floor renders at its real level, and
@@ -427,9 +435,11 @@ and canvas clicks switch from follow/focus to triangle selection:
   out-of-bounds detail the extractor kept); `Ctrl+Z` undoes. Undo
   snapshots are whole-array references — deletion replaces arrays,
   never mutates — so the stack is cheap and exact.
-- **Export JSON** — downloads the current geometry as a version-3 file
-  (per-vertex tris + walls, coordinates rounded to 2 decimals),
-  drop-in compatible with `mvd-web/static/maps/<map>.json`.
+- **Export JSON** — downloads the current geometry as a version-4 file
+  (per-vertex tris + walls, coordinates rounded to 2 decimals), round-
+  tripping any `liquids` / `submodels` / `pruned` blocks (not editable, so
+  passed through unchanged), drop-in compatible with
+  `mvd-web/static/maps/<map>.json`.
 - **Regenerate** — re-runs the mapgen extraction *in the browser*
   against the server-hosted BSP (`bsps/<map>.bsp`, the core-map set
   fetched by `make bsps`), with tunable thresholds: floor slope

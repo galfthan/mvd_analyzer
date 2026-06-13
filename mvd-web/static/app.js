@@ -7628,13 +7628,22 @@ function exportEditedGeometry() {
     }
     const out = {
         map: geom.map || mapState.mapBasename || 'map',
-        version: 3,
+        version: 4,
         bounds: geom.bounds,
         locs,
     };
     if (Array.isArray(geom.walls) && geom.walls.length >= 9) {
         out.walls = geom.walls.map(round);
     }
+    // Liquids and submodels are not editable (not pickable), but the export
+    // must round-trip them so an edited v4 file stays complete.
+    if (Array.isArray(geom.liquids) && geom.liquids.length > 0) {
+        out.liquids = geom.liquids.map(lq => ({ kind: lq.kind, tris: lq.tris.map(round) }));
+    }
+    if (Array.isArray(geom.submodels) && geom.submodels.length > 0) {
+        out.submodels = geom.submodels.map(s => ({ id: s.id, tris: s.tris.map(round) }));
+    }
+    if (geom.pruned) out.pruned = geom.pruned;
     const blob = new Blob([JSON.stringify(out)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -8013,6 +8022,24 @@ function drawMoverSolid(ctx, mesh, sub, pose) {
     if (open) ctx.fill();
 }
 
+// Translucent liquid volumes (water/slime/lava) from corpus v4. Static
+// geometry: in flat mode drawn live above the floors; in Solid mode baked
+// into the offscreen cache on top of the opaque world.
+const LIQUID_FILLS = {
+    water: 'rgba(64, 128, 255, 0.30)',
+    slime: 'rgba(80, 200, 80, 0.30)',
+    lava:  'rgba(255, 120, 40, 0.38)',
+};
+
+function drawLiquidFills(ctx) {
+    const liquids = mapState.mapGeometry && mapState.mapGeometry.liquids;
+    if (!Array.isArray(liquids)) return;
+    for (const lq of liquids) {
+        if (!lq || !Array.isArray(lq.tris) || lq.tris.length < 9) continue;
+        drawTriangleListFill(ctx, lq.tris, LIQUID_FILLS[lq.kind] || LIQUID_FILLS.water, worldToCanvas);
+    }
+}
+
 // drawSolidWorld: blit the cached solid model, re-rendering the offscreen
 // canvas only when any projection input changed.
 function drawSolidWorld(ctx) {
@@ -8020,12 +8047,14 @@ function drawSolidWorld(ctx) {
     if (!se) return;
     const canvas = mapState.canvas;
     const dpr = mapState.dpr || 1;
+    const liquids = mapState.mapGeometry && mapState.mapGeometry.liquids;
     const key = [
         _wtc.yaw, _wtc.pitch, _wtc.zoomK, _wtc.panX, _wtc.panY,
         _wtc.scale, _wtc.offsetX, _wtc.offsetY,
         _wtc.cx, _wtc.cy, _wtc.zMid,
         mapState.focusGroupName, canvas.width, canvas.height, dpr,
         se.entries.length,
+        Array.isArray(liquids) ? liquids.length : 0,
     ].join('|');
     let cache = mapState._solidCanvas;
     if (!cache) cache = mapState._solidCanvas = document.createElement('canvas');
@@ -8035,6 +8064,10 @@ function drawSolidWorld(ctx) {
         const cctx = cache.getContext('2d');
         cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         renderSolidEntries(cctx, se);
+        // Liquids are static geometry, so they bake into the cache too — a
+        // translucent pass on top of the opaque world (large volumes tint
+        // whatever's behind them).
+        drawLiquidFills(cctx);
         mapState._solidCanvasKey = key;
     }
     ctx.save();
@@ -8113,6 +8146,9 @@ function drawLocationLayer(ctx) {
                     tier === 'far' ? scaleRgbaAlpha(SKIRT_FILL, 0.3) : SKIRT_FILL);
             }
         }
+        // Liquids: translucent volumes above the region fills/skirts. (In
+        // Solid mode they're baked into the cached blit by drawSolidWorld.)
+        drawLiquidFills(ctx);
     }
 
     // Movers (lifts/doors/plats) posed at the current time. In solid mode
