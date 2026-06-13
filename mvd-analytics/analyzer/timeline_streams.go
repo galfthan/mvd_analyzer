@@ -863,7 +863,7 @@ func (a *TimelineAnalyzer) resolveFloorHeights() {
 			// feet-relative, so smaller h = higher support.
 			if a.visBSP != nil {
 				if surfZ, _, ok := a.visBSP.LiquidSurfaceBelow(x, y, z); ok {
-					hSurf := (z - playerFeetOffset) - surfZ
+					hSurf := (z - mapclip.PlayerFeetOffset) - surfZ
 					if hSurf < 0 {
 						// Feet a sub-unit into the surface while the feet
 						// probe still reads dry — supported by the liquid.
@@ -882,10 +882,6 @@ func (a *TimelineAnalyzer) resolveFloorHeights() {
 		}
 	}
 }
-
-// playerFeetOffset mirrors mapclip's constant: -mins.z of the player
-// hull, the distance the origin rides above the floor the feet rest on.
-const playerFeetOffset = 24.0
 
 // lqValue packs a bspvis.WaterLevel result into the PositionTrack.Lq
 // encoding: 0 dry, else (type << 2) | level — water 5/6/7, slime
