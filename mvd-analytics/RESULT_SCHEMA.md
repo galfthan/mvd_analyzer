@@ -318,7 +318,7 @@ read the streams' times, so they sit next to them.
 | PowerupEvents | `powerupEvents` | []PowerupEvent |
 | FragStreaks | `fragStreaks` | []FragStreakEvent |
 | Airgibs | `airgibs` | []AirgibEvent (top airborne rocket hits) |
-| LocationData | `locationData` | []MapLocation (loc anchor points) |
+| LocationData | `locationData` | []MapLocation — one anchor point per loc name (the medoid of that name's `.loc` points; since v31) |
 | LocTable | `locTable` | []string (interned loc names; index 0 = ""). `Streams.Players[].Loc[].V` indexes into this. |
 | PlayerUserIDs | `playerUserIDs` | map[string]int (name → Hub viewer UserID) |
 | RegionControl | `regionControl` | *RegionControlResult |
@@ -410,8 +410,16 @@ killing-blow flag.
 
 ### MapLocation
 
-`{ x, y, z, name }`. Used by `LocationData` (loc anchor points) and
-`ControlRegion.Points` (rendering anchors).
+`{ x, y, z, name }`. Used by `LocationData` (one anchor point per loc
+name — see below) and `ControlRegion.Points` (rendering anchors).
+
+Since schema v31 `LocationData` holds one `MapLocation` per loc name
+instead of every raw `.loc` corpus point. The point chosen is the
+**medoid** of that name's corpus points — the actual point minimizing
+summed 3D distance to its same-name siblings, never an averaged mid-air
+centroid — so the map view draws one label per name instead of a cluster
+of duplicates. `locGraph` node coordinates (resolved from this list by
+name) move to the medoid accordingly.
 
 ### RegionControlResult (`regionControl`)
 
@@ -1205,6 +1213,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v34 | `timelineAnalysis.locationData` now carries **one `MapLocation` per loc name** — the medoid of that name's `.loc` corpus points — instead of every raw point. The corpus often repeats a name across several nearby points, which drew duplicate map labels; the medoid is the actual point minimizing summed distance to its same-name siblings (never an averaged mid-air centroid). `locGraph` node coordinates (resolved from this list by name) move to the medoid. Same field name and `MapLocation` shape; the list is just shorter. |
 | v33 | `PositionTrack` `x` / `y` / `z`, `vx` / `vy` / `vz`, and `h` change from `int32` to **`float32`** — the pipeline stops truncating the wire-native sub-unit origin (mvd-reader decodes coordinates as float32; the wire carries eighth-unit fixed point, or true floats under the float-coords extension). v32 and earlier rounded each axis to whole units (losing up to ~1 unit) and derived velocity from those rounded positions; velocity is now sub-unit precise, so the old ±1-unit quantization noise is gone. Values are kept at **native float32 in memory**; only the JSON text is rounded — to 3 decimals, applied by `PositionTrack.MarshalJSON` (lossless for eighth-unit coordinates; it just sheds the float division/epsilon tail on derived velocity & height). The `PositionTrack.H` `NoFloor` sentinel changes from `-2147483648` (`math.MinInt32`, which a float32 cannot represent exactly and serializes as `-2147483600`) to **`-1000000000`** (`-1e9`, exact in float32 and float64). The `buckets` x/y/z/vx/vy/vz/hgt columns get the same 3-decimal rounding; the point-in-time `state-at` `pos`/`vel`/`hgt` and the `AirgibEvent` heights are float32 too but emitted at full precision (low volume). Time axes stay `int32` ms; view angles stay `int16` raw `angle16`; loc/liquid columns unchanged. JSON keys unchanged; values now carry fractional digits where the wire delivered sub-unit positions. |
 | v32 | `PositionTrack` gains `vx` / `vy` / `vz` columns: the player's **velocity** per sample in Quake units/sec, derived from the position columns by a central-difference estimator (it does not differentiate across a respawn teleport, a map-teleporter relocation, or an abnormal time gap — those read ~0 instead of spiking). Additive (`omitempty`), populated whenever the track is (no BSP needed). New opt-in view-layer field code `vel` (vx/vy/vz) and CLI `-include velocity`. Expect ±1-unit quantization noise on the raw derivative (integer-rounded source positions); smooth client-side for a clean speed curve. |
 | v31 | `PositionTrack` gains `vp` / `vya` columns: the player's **view direction** (pitch, yaw) per sample as the raw `angle16` state, kept losslessly after `svc_playerinfo` delta carry-forward (decode `deg = uint16(v) * 360/65536`; values `[0,360)`, pitch > 180° = looking up; roll not stored). Additive (`omitempty`), populated whenever the track is — no BSP needed (the angles ride the same `svc_playerinfo` samples as x/y/z). New opt-in view-layer field codes expose per-channel selection: `view` (vp/vya), `hgt` (h), `lq` (lq). **Clean break:** the `view`-API `pos` code now returns strictly x/y/z (+`li`); height/liquid no longer ride along it — request `hgt` / `lq`. CLI `-include` becomes column-aware (`positions` / `view` / `height` / `liquid`). |

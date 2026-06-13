@@ -374,7 +374,16 @@ package result
 //     -1000000000 (-1e9, exact in float32 and float64). Time axes stay
 //     int32 ms; view angles stay int16 (raw angle16); loc/liquid columns
 //     unchanged.
-const CurrentSchemaVersion = 33
+//
+// v34:
+//   - TimelineAnalysis.LocationData now carries one MapLocation per loc
+//     name — the medoid of that name's corpus points — instead of every
+//     raw .loc point. The .loc corpus often repeats a name across several
+//     nearby points, which drew duplicate map labels; the medoid is the
+//     actual point minimizing summed distance to its same-name siblings
+//     (never an averaged mid-air position). Same field name and shape;
+//     the list is shorter. locgraph already read one point per name.
+const CurrentSchemaVersion = 34
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
