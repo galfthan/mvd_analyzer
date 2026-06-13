@@ -7784,6 +7784,47 @@ function parseRgbPrefix(rgba) {
     return m ? [parseFloat(m[1]), parseFloat(m[2]), parseFloat(m[3])] : [170, 170, 190];
 }
 
+// floorBoundaryWalls returns the side-wall triangles that turn the whole
+// floor into one solid box FLOOR_SLAB_DEPTH units tall. It walks every
+// floor triangle across all regions + the backdrop, counts shared edges,
+// and extrudes only the edges shared by exactly one triangle — the floor's
+// true outer perimeter and its step risers. Edges shared by two triangles
+// (internal loc-region boundaries inside a continuous floor) cancel, so no
+// walls appear inside the floor. Quantized edge keys absorb float noise.
+function floorBoundaryWalls(backdropTris, groups) {
+    const edges = new Map();
+    const k = (x, y, z) => Math.round(x * 8) + ',' + Math.round(y * 8) + ',' + Math.round(z * 8);
+    const add = (tris) => {
+        if (!tris || tris.length < 9) return;
+        for (let i = 0; i + 8 < tris.length; i += 9) {
+            for (let e = 0; e < 3; e++) {
+                const o1 = i + e * 3, o2 = i + ((e + 1) % 3) * 3;
+                const ka = k(tris[o1], tris[o1 + 1], tris[o1 + 2]);
+                const kb = k(tris[o2], tris[o2 + 1], tris[o2 + 2]);
+                const key = ka < kb ? ka + '|' + kb : kb + '|' + ka;
+                const info = edges.get(key);
+                if (info) info.count++;
+                else edges.set(key, {
+                    count: 1,
+                    ax: tris[o1], ay: tris[o1 + 1], az: tris[o1 + 2],
+                    bx: tris[o2], by: tris[o2 + 1], bz: tris[o2 + 2],
+                });
+            }
+        }
+    };
+    add(backdropTris);
+    for (const g of groups) add(g.tris);
+    const walls = [];
+    for (const info of edges.values()) {
+        if (info.count !== 1) continue; // shared (internal) edge → no wall
+        const { ax, ay, az, bx, by, bz } = info;
+        const az2 = az - FLOOR_SLAB_DEPTH, bz2 = bz - FLOOR_SLAB_DEPTH;
+        walls.push(ax, ay, az, bx, by, bz, bx, by, bz2);
+        walls.push(ax, ay, az, bx, by, bz2, ax, ay, az2);
+    }
+    return walls;
+}
+
 // mapSolidEntries: per-triangle render list for the solid model (floors from
 // the loc groups + backdrop, walls from geometry v3), with centroid and
 // pre-shaded fill styles. Built lazily, cached per (geometry, groups) pair.
@@ -7848,28 +7889,12 @@ function mapSolidEntries() {
         }
     };
 
-    // slabSides extrudes a floor region's outline down FLOOR_SLAB_DEPTH into
-    // vertical side quads, so floors read as solid slabs instead of
-    // zero-thickness planes. Returns a flat tri list.
-    const slabSides = (group) => {
-        const outline = computeRegionOutline(group);
-        if (!outline) return null;
-        const out = [];
-        for (let i = 0; i + 5 < outline.length; i += 6) {
-            const ax = outline[i],     ay = outline[i + 1], az = outline[i + 2];
-            const bx = outline[i + 3], by = outline[i + 4], bz = outline[i + 5];
-            const az2 = az - FLOOR_SLAB_DEPTH, bz2 = bz - FLOOR_SLAB_DEPTH;
-            out.push(ax, ay, az, bx, by, bz, bx, by, bz2);
-            out.push(ax, ay, az, bx, by, bz2, ax, ay, az2);
-        }
-        return out.length ? out : null;
-    };
-
     const NEUTRAL_FLOOR = [95, 105, 135];
     const WALL_BASE = [58, 63, 85];
+    const SLAB_SIDE = [50, 55, 76]; // one flat tone for every floor-box side
     const backdropTris = geom.backdropTris;
     if (backdropTris && backdropTris.length >= 9) {
-        pushTris(backdropTris, null, NEUTRAL_FLOOR, true); // floor: flat
+        pushTris(backdropTris, null, NEUTRAL_FLOOR, true); // floor top: flat
     }
     for (const group of groups) {
         if (!group.tris || group.tris.length < 9) continue;
@@ -7882,13 +7907,13 @@ function mapSolidEntries() {
             (rgb[2] + NEUTRAL_FLOOR[2]) / 2,
         ];
         pushTris(group.tris, group.name, base, true); // floor top: flat (no Lambert)
-        const sides = slabSides(group);
-        if (sides) {
-            // Slab sides: a moderately darker flat tone — dark enough to read
-            // as a side, light enough to stay visible against the background.
-            pushTris(sides, group.name, [base[0] * 0.66, base[1] * 0.66, base[2] * 0.66], true);
-        }
     }
+    // Turn the floor into one solid 20u box: extrude only the *outer*
+    // boundary (edges not shared between two floor triangles) down
+    // FLOOR_SLAB_DEPTH. Internal loc-region boundaries are shared, so they
+    // cancel and produce no walls inside the floor. One flat side tone.
+    const boxSides = floorBoundaryWalls(backdropTris, groups);
+    if (boxSides.length >= 9) pushTris(boxSides, null, SLAB_SIDE, true);
     pushTris(geom.walls, null, WALL_BASE, false); // walls keep Lambert shading
 
     se = { geom, groups, entries, sortedFor: null };
@@ -8157,9 +8182,10 @@ function drawSolidWorld(ctx) {
 // Depth of the dark "skirt" hung from each region's outline edges when the
 // camera is tilted — roughly one step height. Turns flat floor outlines into
 // slabs so relative floor height reads at a glance.
-// Floors render as slabs this thick: the non-solid skirt extrudes region
-// outlines down by this much, and the solid model builds matching side
-// quads (mapSolidEntries.slabSides). Shared so both views agree.
+// Floors are this many units tall: the non-solid skirt extrudes region
+// outlines down by this much, and the solid model extrudes the floor's
+// outer boundary into a 20u box (floorBoundaryWalls). Shared so both
+// views agree.
 const FLOOR_SLAB_DEPTH = 20;
 const SKIRT_DEPTH = FLOOR_SLAB_DEPTH;
 const SKIRT_FILL = 'rgba(8, 10, 22, 0.55)';

@@ -340,11 +340,15 @@ the stem is a direct visual readout of `H`. Falls back to a barycentric
 scan of the floor geometry (`playerFloorZ`, memoised) when `H` is absent
 (no BSP) or `NoFloor` (over a void).
 
-**Floor slabs** — floors render with `FLOOR_SLAB_DEPTH` (20 units) of
-thickness rather than as zero-height planes. In non-solid tilted views a
-"skirt" extrudes each region's outline edges down 20u as dark quads; in
-Solid mode `mapSolidEntries.slabSides` builds matching side quads so the
-slab reads the same way. Steps and ledges now show their thickness.
+**Floor boxes** — in Solid mode the floor renders as one solid box
+`FLOOR_SLAB_DEPTH` (20 units) tall rather than zero-height planes:
+`floorBoundaryWalls` extrudes only the floor's *outer* boundary (edges
+shared by exactly one floor triangle across all regions) down 20u into
+flat side walls. Internal loc-region boundaries are shared by two
+triangles, so they cancel and leave no walls inside a continuous floor —
+the box is clean, with thickness showing at the perimeter, steps and
+raised platforms. (In non-solid tilted views the older per-region "skirt"
+still hints depth at 20u.)
 
 **Solid mode** — for maps whose geometry JSON is version 3 (carries
 wall triangles), a **Solid** toggle appears: floors and walls are
