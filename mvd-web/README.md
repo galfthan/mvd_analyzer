@@ -340,15 +340,18 @@ the stem is a direct visual readout of `H`. Falls back to a barycentric
 scan of the floor geometry (`playerFloorZ`, memoised) when `H` is absent
 (no BSP) or `NoFloor` (over a void).
 
-**Floor boxes** — in Solid mode the floor renders as one solid box
-`FLOOR_SLAB_DEPTH` (20 units) tall rather than zero-height planes:
-`floorBoundaryWalls` extrudes only the floor's *outer* boundary (edges
-shared by exactly one floor triangle across all regions) down 20u into
-flat side walls. Internal loc-region boundaries are shared by two
-triangles, so they cancel and leave no walls inside a continuous floor —
-the box is clean, with thickness showing at the perimeter, steps and
-raised platforms. (In non-solid tilted views the older per-region "skirt"
-still hints depth at 20u.)
+**Floor boxes** — in tilted views the floor renders as one solid box
+`FLOOR_SLAB_DEPTH` (10 units) tall rather than a zero-height plane.
+`floorBoundaryEdges` finds the floor's *outer* boundary (edges shared by
+exactly one floor triangle across all regions + backdrop — the true
+perimeter plus internal step risers), each tagged with its outward
+horizontal normal. Internal loc-region boundaries are shared by two
+triangles, so they're excluded and leave no walls inside a continuous
+floor — the box is clean, with thickness showing only at the perimeter,
+steps and raised platforms. The non-solid view draws the camera-facing
+sides as flat single-tone quads (`drawFloorBox`, far sides culled so the
+slab never reads as a sunken pit); Solid mode bakes the same boundary into
+its opaque mesh (`floorBoundaryWalls`).
 
 **Solid mode** — for maps whose geometry JSON is version 3 (carries
 wall triangles), a **Solid** toggle appears: floors and walls are

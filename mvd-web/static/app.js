@@ -5643,8 +5643,7 @@ function drawTriangleListFill(ctx, tris, fillStyle, worldToCanvasFunc) {
 // segment endpoints (x1,y1,z1,x2,y2,z2, ...). Also caches, aligned per edge,
 // the outward horizontal normal (2 floats, pointing away from the region
 // interior — derived from the owning triangle's centroid) in
-// group.outlineNormals; drawRegionSkirt uses it to backface-cull skirt
-// quads. Cached on the group for reuse.
+// group.outlineNormals. Cached on the group for reuse.
 function computeRegionOutline(group) {
     if (group.outline !== undefined) return group.outline;
     const tris = group.tris;
@@ -7784,40 +7783,59 @@ function parseRgbPrefix(rgba) {
     return m ? [parseFloat(m[1]), parseFloat(m[2]), parseFloat(m[3])] : [170, 170, 190];
 }
 
-// floorBoundaryWalls returns the side-wall triangles that turn the whole
-// floor into one solid box FLOOR_SLAB_DEPTH units tall. It walks every
-// floor triangle across all regions + the backdrop, counts shared edges,
-// and extrudes only the edges shared by exactly one triangle — the floor's
-// true outer perimeter and its step risers. Edges shared by two triangles
-// (internal loc-region boundaries inside a continuous floor) cancel, so no
-// walls appear inside the floor. Quantized edge keys absorb float noise.
-function floorBoundaryWalls(backdropTris, groups) {
+// floorBoundaryEdges returns the floor's outer-boundary edges: edges that
+// belong to exactly one floor triangle across all regions + the backdrop —
+// the floor's true outer perimeter plus its internal step risers. Edges
+// shared by two triangles (loc-region boundaries inside a continuous floor)
+// are interior and excluded, so nothing is extruded inside a flat floor.
+// Each returned edge carries its outward horizontal normal (nx, ny) for
+// backface culling. Quantized edge keys absorb float noise.
+function floorBoundaryEdges(backdropTris, groups) {
     const edges = new Map();
     const k = (x, y, z) => Math.round(x * 8) + ',' + Math.round(y * 8) + ',' + Math.round(z * 8);
     const add = (tris) => {
         if (!tris || tris.length < 9) return;
         for (let i = 0; i + 8 < tris.length; i += 9) {
             for (let e = 0; e < 3; e++) {
-                const o1 = i + e * 3, o2 = i + ((e + 1) % 3) * 3;
+                const o1 = i + e * 3, o2 = i + ((e + 1) % 3) * 3, o3 = i + ((e + 2) % 3) * 3;
                 const ka = k(tris[o1], tris[o1 + 1], tris[o1 + 2]);
                 const kb = k(tris[o2], tris[o2 + 1], tris[o2 + 2]);
                 const key = ka < kb ? ka + '|' + kb : kb + '|' + ka;
                 const info = edges.get(key);
-                if (info) info.count++;
-                else edges.set(key, {
+                if (info) { info.count++; continue; }
+                edges.set(key, {
                     count: 1,
                     ax: tris[o1], ay: tris[o1 + 1], az: tris[o1 + 2],
                     bx: tris[o2], by: tris[o2 + 1], bz: tris[o2 + 2],
+                    ox: tris[o3], oy: tris[o3 + 1], // opposite vertex → outward dir
                 });
             }
         }
     };
     add(backdropTris);
     for (const g of groups) add(g.tris);
-    const walls = [];
+    const out = [];
     for (const info of edges.values()) {
-        if (info.count !== 1) continue; // shared (internal) edge → no wall
-        const { ax, ay, az, bx, by, bz } = info;
+        if (info.count !== 1) continue; // interior edge → no box side
+        const { ax, ay, az, bx, by, bz, ox, oy } = info;
+        // Horizontal normal ⟂ the edge, flipped to point away from the
+        // triangle's opposite vertex (i.e. out of the floor).
+        let nx = -(by - ay), ny = bx - ax;
+        const mx = (ax + bx) / 2, my = (ay + by) / 2;
+        if (nx * (ox - mx) + ny * (oy - my) > 0) { nx = -nx; ny = -ny; }
+        const nl = Math.hypot(nx, ny) || 1;
+        out.push({ ax, ay, az, bx, by, bz, nx: nx / nl, ny: ny / nl });
+    }
+    return out;
+}
+
+// floorBoundaryWalls extrudes the boundary edges into the side-wall triangles
+// that turn the floor into one solid box FLOOR_SLAB_DEPTH units tall — used by
+// the Solid model, which depth-sorts opaque triangles (no per-edge culling).
+function floorBoundaryWalls(backdropTris, groups) {
+    const walls = [];
+    for (const e of floorBoundaryEdges(backdropTris, groups)) {
+        const { ax, ay, az, bx, by, bz } = e;
         const az2 = az - FLOOR_SLAB_DEPTH, bz2 = bz - FLOOR_SLAB_DEPTH;
         walls.push(ax, ay, az, bx, by, bz, bx, by, bz2);
         walls.push(ax, ay, az, bx, by, bz2, ax, ay, az2);
@@ -7908,10 +7926,10 @@ function mapSolidEntries() {
         ];
         pushTris(group.tris, group.name, base, true); // floor top: flat (no Lambert)
     }
-    // Turn the floor into one solid 20u box: extrude only the *outer*
-    // boundary (edges not shared between two floor triangles) down
-    // FLOOR_SLAB_DEPTH. Internal loc-region boundaries are shared, so they
-    // cancel and produce no walls inside the floor. One flat side tone.
+    // Turn the floor into one solid box: extrude only the *outer* boundary
+    // (edges not shared between two floor triangles) down FLOOR_SLAB_DEPTH.
+    // Internal loc-region boundaries are shared, so they cancel and produce
+    // no walls inside the floor. One flat side tone.
     const boxSides = floorBoundaryWalls(backdropTris, groups);
     if (boxSides.length >= 9) pushTris(boxSides, null, SLAB_SIDE, true);
     pushTris(geom.walls, null, WALL_BASE, false); // walls keep Lambert shading
@@ -8005,8 +8023,9 @@ function moverShadedMesh(sub) {
         let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
         const nl = Math.hypot(nx, ny, nz) || 1;
         nx /= nl; ny /= nl; nz /= nl;
-        // BSP face windings are outward, so this is the outward normal —
-        // used both for Lambert shade and for backface culling at draw time.
+        // Geometric normal of the triangle (the submodel triangulation winds
+        // so it points into the solid). Shade uses |dot| so direction doesn't
+        // matter here; drawMoverMesh relies on the direction for backface cull.
         const dot = nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2];
         const shade = 0.45 + 0.55 * Math.abs(dot);
         const q = Math.round(shade * 12) / 12;
@@ -8049,15 +8068,16 @@ function drawMovers(ctx) {
 function drawMoverMesh(ctx, mesh, sub, pose) {
     const ox = pose.x, oy = pose.y, oz = pose.z;
     const w = _wtc;
-    // Direction from the scene toward the camera (gradient of the depth
-    // used by the painter sort). A face is front-facing when its outward
-    // normal points along it; back faces are culled, so a closed mover
-    // shows only its near hull — no see-through, no sort flicker.
+    // Direction from the scene toward the camera (gradient of the depth used
+    // by the painter sort). The submodel triangulation winds so its computed
+    // normals point *into* the solid, so the near (front) hull is the set of
+    // faces whose normal points away from the camera; cull the rest. Result:
+    // a closed mover shows only its near hull — no see-through, no flicker.
     const vx = -w.sinYaw * w.cosPitch, vy = -w.cosYaw * w.cosPitch, vz = w.sinPitch;
     const shaded = moverShadedMesh(sub);
     const order = [];
     for (const s of shaded) {
-        if (s.nx * vx + s.ny * vy + s.nz * vz <= 0) continue; // back-facing
+        if (s.nx * vx + s.ny * vy + s.nz * vz >= 0) continue; // back-facing
         const i = s.off;
         const cx = (mesh[i] + mesh[i + 3] + mesh[i + 6]) / 3 + ox;
         const cy = (mesh[i + 1] + mesh[i + 4] + mesh[i + 7]) / 3 + oy;
@@ -8179,37 +8199,47 @@ function drawSolidWorld(ctx) {
     ctx.restore();
 }
 
-// Depth of the dark "skirt" hung from each region's outline edges when the
-// camera is tilted — roughly one step height. Turns flat floor outlines into
-// slabs so relative floor height reads at a glance.
-// Floors are this many units tall: the non-solid skirt extrudes region
-// outlines down by this much, and the solid model extrudes the floor's
-// outer boundary into a 20u box (floorBoundaryWalls). Shared so both
-// views agree.
-const FLOOR_SLAB_DEPTH = 20;
-const SKIRT_DEPTH = FLOOR_SLAB_DEPTH;
-const SKIRT_FILL = 'rgba(8, 10, 22, 0.55)';
+// Floors are this many units tall. Both views extrude the floor's outer
+// boundary (perimeter + step risers, via floorBoundaryEdges) down by this
+// much: the non-solid view draws flat box sides (drawFloorBox), the Solid
+// model bakes them into its opaque mesh (floorBoundaryWalls).
+const FLOOR_SLAB_DEPTH = 10;
+// One flat tone for every floor-box side (no shading — a box, not a gradient).
+const FLOOR_BOX_SIDE = 'rgba(34, 40, 60, 0.72)';
 
-function drawRegionSkirt(ctx, group, fillStyle) {
-    const outline = computeRegionOutline(group);
-    if (!outline || outline.length < 6) return;
-    const normals = group.outlineNormals;
-    // Horizontal toward-camera direction (the depth gradient in world XY is
-    // ∝ (-sinYaw, -cosYaw) for any pitch < 90°). Skirt quads on edges whose
-    // outward normal points away from the camera are the *inside* of the
-    // slab — drawing them paints a dark rim over the floor's far edge and
-    // makes the surface read as a sunken pit, so they're culled. A real
-    // raised slab only ever shows its camera-facing sides.
-    const vx = -_wtc.sinYaw;
-    const vy = -_wtc.cosYaw;
-    ctx.fillStyle = fillStyle;
+// cachedFloorBoxEdges memoizes floorBoundaryEdges for the current geometry —
+// the edge set only changes when the map (geometry/groups) does.
+function cachedFloorBoxEdges() {
+    const geom = mapState.mapGeometry;
+    const groups = mapState.locationGroups || [];
+    const c = mapState._floorBoxEdges;
+    if (c && c.geom === geom && c.groups === groups) return c.edges;
+    const edges = floorBoundaryEdges(geom && geom.backdropTris, groups);
+    mapState._floorBoxEdges = { geom, groups, edges };
+    return edges;
+}
+
+// drawFloorBox extrudes the floor's outer boundary down FLOOR_SLAB_DEPTH into
+// flat box sides, so the floor reads as one solid slab in the non-solid view.
+// One flat tone, no shading. Only the camera-facing sides are drawn — the far
+// sides would paint a dark rim over the floor's far edge and read as a sunken
+// pit. Internal loc-region boundaries are excluded by floorBoundaryEdges, so
+// no walls appear inside a continuous floor (the old per-region skirt dropped
+// a dark band at every shared region boundary — that was the "internal
+// shading"). Each projected point is held only until the next, but the quad
+// needs all four at once, so worldToCanvasNew (allocates) is required.
+function drawFloorBox(ctx) {
+    const edges = cachedFloorBoxEdges();
+    if (!edges || edges.length === 0) return;
+    const vx = -_wtc.sinYaw, vy = -_wtc.cosYaw;
+    ctx.fillStyle = FLOOR_BOX_SIDE;
     ctx.beginPath();
-    for (let i = 0, e = 0; i + 5 < outline.length; i += 6, e += 2) {
-        if (normals[e] * vx + normals[e + 1] * vy <= 0) continue;
-        const a  = worldToCanvasNew(outline[i],     outline[i + 1], outline[i + 2]);
-        const b  = worldToCanvasNew(outline[i + 3], outline[i + 4], outline[i + 5]);
-        const b2 = worldToCanvasNew(outline[i + 3], outline[i + 4], outline[i + 5] - SKIRT_DEPTH);
-        const a2 = worldToCanvasNew(outline[i],     outline[i + 1], outline[i + 2] - SKIRT_DEPTH);
+    for (const e of edges) {
+        if (e.nx * vx + e.ny * vy <= 0) continue; // far side → cull
+        const a  = worldToCanvasNew(e.ax, e.ay, e.az);
+        const b  = worldToCanvasNew(e.bx, e.by, e.bz);
+        const b2 = worldToCanvasNew(e.bx, e.by, e.bz - FLOOR_SLAB_DEPTH);
+        const a2 = worldToCanvasNew(e.ax, e.ay, e.az - FLOOR_SLAB_DEPTH);
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
         ctx.lineTo(b2.x, b2.y);
@@ -8244,18 +8274,13 @@ function drawLocationLayer(ctx) {
             }
         }
 
-        // Skirts: only meaningful when tilted (at top-down the extruded quads
-        // project to zero area), and superseded by real walls in solid mode.
-        if (tilted) {
-            for (const group of groups) {
-                if (!group.tris || group.tris.length < 9) continue;
-                const tier = focusTier(group.name);
-                drawRegionSkirt(ctx, group,
-                    tier === 'far' ? scaleRgbaAlpha(SKIRT_FILL, 0.3) : SKIRT_FILL);
-            }
-        }
-        // Liquids: translucent volumes above the region fills/skirts. (In
-        // Solid mode they're baked into the cached blit by drawSolidWorld.)
+        // Floor box: extrude the floor's outer boundary into 10u-tall sides so
+        // it reads as a solid slab. Only meaningful when tilted (at top-down
+        // the extruded quads project to zero area); superseded by the real
+        // walls baked into the Solid model.
+        if (tilted) drawFloorBox(ctx);
+        // Liquids: translucent volumes above the region fills/box. (In Solid
+        // mode they're baked into the cached blit by drawSolidWorld.)
         drawLiquidFills(ctx);
     }
 
