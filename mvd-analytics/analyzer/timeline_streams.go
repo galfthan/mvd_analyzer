@@ -239,15 +239,15 @@ func (b *streamBuilder) toPlayerStream(name, team string) result.PlayerStream {
 	if len(b.posT) > 0 {
 		pos := &result.PositionTrack{
 			T: append([]int32(nil), b.posT...),
-			X: result.Coords(append([]float32(nil), b.posX...)),
-			Y: result.Coords(append([]float32(nil), b.posY...)),
-			Z: result.Coords(append([]float32(nil), b.posZ...)),
+			X: append([]float32(nil), b.posX...),
+			Y: append([]float32(nil), b.posY...),
+			Z: append([]float32(nil), b.posZ...),
 		}
 		if len(b.posLi) == len(b.posT) {
 			pos.Li = append([]int16(nil), b.posLi...)
 		}
 		if len(b.posH) == len(b.posT) {
-			pos.H = result.Coords(append([]float32(nil), b.posH...))
+			pos.H = append([]float32(nil), b.posH...)
 		}
 		if len(b.posLq) == len(b.posT) {
 			pos.Lq = append([]int8(nil), b.posLq...)
@@ -259,13 +259,13 @@ func (b *streamBuilder) toPlayerStream(name, team string) result.PlayerStream {
 			pos.VYa = append([]int16(nil), b.posVYa...)
 		}
 		if len(b.posVX) == len(b.posT) {
-			pos.VX = result.Coords(append([]float32(nil), b.posVX...))
+			pos.VX = append([]float32(nil), b.posVX...)
 		}
 		if len(b.posVY) == len(b.posT) {
-			pos.VY = result.Coords(append([]float32(nil), b.posVY...))
+			pos.VY = append([]float32(nil), b.posVY...)
 		}
 		if len(b.posVZ) == len(b.posT) {
-			pos.VZ = result.Coords(append([]float32(nil), b.posVZ...))
+			pos.VZ = append([]float32(nil), b.posVZ...)
 		}
 		ps.Position = pos
 	}

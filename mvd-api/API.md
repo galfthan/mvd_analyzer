@@ -97,11 +97,13 @@ Height/liquid no longer ride along `pos` — request each by code.
 Note (schema v33+): the coordinate values `pos` x/y/z, `vel` vx/vy/vz,
 and `hgt` are **`float32`** Quake units (sub-unit precise — earlier
 versions rounded them to whole `int32` units), so expect fractional
-numbers in those arrays. They are serialized rounded to **3 decimals**
+numbers in those arrays. In the dense outputs (`stream-slice` tracks and
+`buckets` columns) they are serialized **rounded to 3 decimals**
 (lossless for eighth-unit positions; trims the float tail on velocity),
-so a value like `-58.333` is the velocity, not `-58.333332`. Only the
-**time axes** stay int32 ms (above). The `hgt` no-floor sentinel is
-`-1000000000` (was `-2147483648`).
+so a value reads `-58.333`, not `-58.333332`. The point-in-time
+`state-at` values are emitted at full float32 precision (low volume, so
+not rounded). Only the **time axes** stay int32 ms (above). The `hgt`
+no-floor sentinel is `-1000000000` (was `-2147483648`).
 
 ### 2.3 Caching (use it — the data is immutable)
 

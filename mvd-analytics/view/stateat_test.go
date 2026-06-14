@@ -93,7 +93,7 @@ func TestStateAtViewHeightLiquid(t *testing.T) {
 	}
 }
 
-func deref32(p *result.Coord) result.Coord {
+func deref32(p *float32) float32 {
 	if p == nil {
 		return -1
 	}

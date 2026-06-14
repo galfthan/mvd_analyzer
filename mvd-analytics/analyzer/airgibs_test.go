@@ -103,7 +103,7 @@ func TestAirgibsPost_SortedByHeightUncapped(t *testing.T) {
 			t.Fatalf("not sorted by height desc at %d: %g < %g", i, got[i-1].Height, got[i].Height)
 		}
 	}
-	if got[0].Height != result.Coord(100+n-1) {
+	if got[0].Height != float32(100+n-1) {
 		t.Errorf("top height = %g, want %d", got[0].Height, 100+n-1)
 	}
 	// The attacker has no stream in this fixture: the shooter gap stays

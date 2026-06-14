@@ -184,24 +184,28 @@ type GlobalStream struct {
 // sample reads 0. The source x/y/z are float32 Quake units (the wire's
 // sub-unit origin, no longer rounded to whole units), sampled ~every
 // 13 ms, so the derivative is sub-unit precise — smooth client-side
-// only if a softer speed curve is wanted. Like x/y/z and h, these are
-// the Coords type: native float32 in memory, rounded to 3 decimals only
-// when serialized to JSON (see coord.go). Speed is hypot(vx,vy,vz); horizontal speed
+// only if a softer speed curve is wanted. Like x/y/z and h these are
+// native float32; only the JSON text is rounded to 3 decimals (see
+// PositionTrack.MarshalJSON / coord.go). Speed is hypot(vx,vy,vz); horizontal speed
 // (the usual "are they bunnying" metric) is hypot(vx,vy). Populated
 // whenever T is (no BSP needed); same length as T when present.
+// X/Y/Z, H and VX/VY/VZ are plain float32 (native resolution); the JSON
+// text is rounded to 3 decimals by PositionTrack.MarshalJSON (see
+// coord.go) — lossless for eighth-unit positions, trimming only the
+// float tail on derived velocity / height.
 type PositionTrack struct {
-	T   []int32 `json:"t"` // milliseconds since the stream's time origin
-	X   Coords  `json:"x"`
-	Y   Coords  `json:"y"`
-	Z   Coords  `json:"z"`
-	Li  []int16 `json:"li,omitempty"`
-	H   Coords  `json:"h,omitempty"`   // height above the floor beneath the player; NoFloor = none
-	Lq  []int8  `json:"lq,omitempty"`  // liquid state: 0 dry, else (type<<2)|level
-	VP  []int16 `json:"vp,omitempty"`  // view pitch, raw angle16 (decode: u16*360/65536; >180 = up)
-	VYa []int16 `json:"vya,omitempty"` // view yaw, raw angle16 (decode: u16*360/65536)
-	VX  Coords  `json:"vx,omitempty"`  // velocity X, Quake units/sec (central difference)
-	VY  Coords  `json:"vy,omitempty"`  // velocity Y, units/sec
-	VZ  Coords  `json:"vz,omitempty"`  // velocity Z, units/sec
+	T   []int32   `json:"t"` // milliseconds since the stream's time origin
+	X   []float32 `json:"x"`
+	Y   []float32 `json:"y"`
+	Z   []float32 `json:"z"`
+	Li  []int16   `json:"li,omitempty"`
+	H   []float32 `json:"h,omitempty"`   // height above the floor beneath the player; NoFloor = none
+	Lq  []int8    `json:"lq,omitempty"`  // liquid state: 0 dry, else (type<<2)|level
+	VP  []int16   `json:"vp,omitempty"`  // view pitch, raw angle16 (decode: u16*360/65536; >180 = up)
+	VYa []int16   `json:"vya,omitempty"` // view yaw, raw angle16 (decode: u16*360/65536)
+	VX  []float32 `json:"vx,omitempty"`  // velocity X, Quake units/sec (central difference)
+	VY  []float32 `json:"vy,omitempty"`  // velocity Y, units/sec
+	VZ  []float32 `json:"vz,omitempty"`  // velocity Z, units/sec
 }
 
 // Lq liquid-type codes (the high bits of a PositionTrack.Lq value).
