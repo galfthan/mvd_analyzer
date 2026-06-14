@@ -47,7 +47,7 @@ type AirgibEvent struct {
 	Victim         string `json:"victim"`                   // resolved name of the airborne victim
 	VictimTeam     string `json:"victimTeam,omitempty"`     //
 	VictimUserID   int    `json:"victimUserID,omitempty"`   //
-	Height         int32  `json:"height"`                   // victim feet above floor at the hit (units)
+	Height         Coord  `json:"height"`                   // victim feet above floor at the hit (units)
 	// HeightAboveAttacker is the victim's origin minus the shooter's at
 	// the hit (units; negative when the victim was below the shooter) —
 	// the vertical gap the rocket climbed, often what makes an airgib
@@ -55,7 +55,7 @@ type AirgibEvent struct {
 	// Origin-to-origin, so the equal hull offsets cancel. 0 (omitted)
 	// when the shooter had no position sample near the hit; a genuine
 	// dead-level hit also reads 0.
-	HeightAboveAttacker int32  `json:"heightAboveAttacker,omitempty"`
+	HeightAboveAttacker Coord  `json:"heightAboveAttacker,omitempty"`
 	Loc                 string `json:"loc,omitempty"`    // victim's loc at the hit
 	Damage              int    `json:"damage"`           // raw rocket damage (unbound, incl. overkill)
 	Lethal              bool   `json:"lethal,omitempty"` // the hit killed the victim (matching rocket frag)

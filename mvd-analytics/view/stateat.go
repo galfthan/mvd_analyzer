@@ -45,10 +45,10 @@ type PlayerStateAt struct {
 	// floor, and liquid state — snapped to the nearest position sample,
 	// like Pos. Hgt / Lq are present only when the map's BSP supplied
 	// those columns.
-	View *ViewAngles `json:"view,omitempty"`
-	Hgt  *int32      `json:"hgt,omitempty"`
-	Lq   *int8       `json:"lq,omitempty"`
-	Vel  *Velocity3D `json:"vel,omitempty"`
+	View *ViewAngles   `json:"view,omitempty"`
+	Hgt  *result.Coord `json:"hgt,omitempty"`
+	Lq   *int8         `json:"lq,omitempty"`
+	Vel  *Velocity3D   `json:"vel,omitempty"`
 
 	RL  *bool `json:"rl,omitempty"`
 	LG  *bool `json:"lg,omitempty"`
@@ -69,9 +69,9 @@ type PlayerStateAt struct {
 // Position3D is the JSON-friendly companion to PositionTrack for
 // point-in-time results. Snapped to the nearest sample.
 type Position3D struct {
-	X int32 `json:"x"`
-	Y int32 `json:"y"`
-	Z int32 `json:"z"`
+	X result.Coord `json:"x"`
+	Y result.Coord `json:"y"`
+	Z result.Coord `json:"z"`
 }
 
 // ViewAngles is the point-in-time view direction: raw angle16 pitch/yaw
@@ -84,9 +84,9 @@ type ViewAngles struct {
 // Velocity3D is the point-in-time velocity vector in Quake units/sec,
 // snapped to the nearest sample (see PositionTrack.VX for derivation).
 type Velocity3D struct {
-	VX int32 `json:"vx"`
-	VY int32 `json:"vy"`
-	VZ int32 `json:"vz"`
+	VX result.Coord `json:"vx"`
+	VY result.Coord `json:"vy"`
+	VZ result.Coord `json:"vz"`
 }
 
 // StateAt resolves each requested field at Time per player. For
@@ -217,13 +217,13 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 			idx := nearestPositionIndex(pt, opts.Time)
 			if idx >= 0 {
 				if requested[FieldPosition] {
-					ps.Pos = &Position3D{X: pt.X[idx], Y: pt.Y[idx], Z: pt.Z[idx]}
+					ps.Pos = &Position3D{X: result.Coord(pt.X[idx]), Y: result.Coord(pt.Y[idx]), Z: result.Coord(pt.Z[idx])}
 				}
 				if requested[FieldView] && len(pt.VP) == len(pt.T) && len(pt.VYa) == len(pt.T) {
 					ps.View = &ViewAngles{VP: pt.VP[idx], VYa: pt.VYa[idx]}
 				}
 				if requested[FieldHeight] && len(pt.H) == len(pt.T) {
-					v := pt.H[idx]
+					v := result.Coord(pt.H[idx])
 					ps.Hgt = &v
 				}
 				if requested[FieldLiquid] && len(pt.Lq) == len(pt.T) {
@@ -231,7 +231,7 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 					ps.Lq = &v
 				}
 				if requested[FieldVelocity] && len(pt.VX) == len(pt.T) && len(pt.VY) == len(pt.T) && len(pt.VZ) == len(pt.T) {
-					ps.Vel = &Velocity3D{VX: pt.VX[idx], VY: pt.VY[idx], VZ: pt.VZ[idx]}
+					ps.Vel = &Velocity3D{VX: result.Coord(pt.VX[idx]), VY: result.Coord(pt.VY[idx]), VZ: result.Coord(pt.VZ[idx])}
 				}
 			}
 		}
