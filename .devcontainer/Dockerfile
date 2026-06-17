@@ -44,8 +44,13 @@ RUN curl -fsSL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz \
         | tar -C /usr/local -xz
 
 # Replace the default ubuntu user (UID 1000) with one matching the host UID/GID
-# so bind-mounted files stay owned by you.
+# so bind-mounted files stay owned by you. Free UID/GID 1000 first — the base
+# image's `ubuntu` user/group occupies it, and a leftover group there would
+# otherwise make groupadd fail.
 RUN userdel -r ubuntu 2>/dev/null || true; \
+    if getent group ${GID} >/dev/null; then \
+        groupdel "$(getent group ${GID} | cut -d: -f1)" 2>/dev/null || true; \
+    fi; \
     groupadd -g ${GID} ${USERNAME} && \
     useradd -u ${UID} -g ${GID} -m -s /bin/bash ${USERNAME} && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} && \
