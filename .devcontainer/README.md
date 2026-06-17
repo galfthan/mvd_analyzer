@@ -1,47 +1,36 @@
 # Dev container
 
-A self-contained dev environment for mvd-analyzer, usable from Zed
+Self-contained dev environment for mvd-analyzer — Zed
 (["reopen in container"](https://zed.dev/docs/dev-containers)), VS Code, or
-the `devcontainer` CLI. It builds from [`Dockerfile`](Dockerfile) — no
-prebuilt image and no parent Makefile required.
+the `devcontainer` CLI. Builds from [`Dockerfile`](Dockerfile); no prebuilt
+image or parent Makefile needed.
 
-## What's in the image
+## In the image
 
-Go (pinned to match the `go.work` toolchain) + `gopls`/`dlv`/`goimports`,
-`gh`, `jq`, `git`, `tmux`, `emacs` (go-mode), Claude Code, and the usual
-build deps. The web layer is Go→WASM, so Node is intentionally not included.
+Pinned Go (matches `go.work`) + `gopls`/`dlv`/`goimports`, `gh`, `jq`, `git`,
+`tmux`, `emacs` (go-mode), Claude Code, build deps. No Node (web is Go→WASM).
 
-## Personal config stays out of the repo
+## Identity & secrets (host-injected)
 
-The image holds **tools only**. Identity and secrets are injected from your
-**host** environment at container-create time via `containerEnv`
-(`${localEnv:VAR}` resolves in the environment that launched Zed). Export
-these in your host shell profile:
+Tools only in the image. Export on the host; pulled in via `remoteEnv`
+(`${localEnv:VAR}` resolves in the env that launched Zed):
 
 ```bash
 export GIT_AUTHOR_NAME="Your Name"
 export GIT_AUTHOR_EMAIL="you@example.com"
-export GH_TOKEN="…"          # optional; or run `gh auth login` in the container
+export GH_TOKEN="…"          # optional; or `gh auth login` in the container
 ```
 
-Git reads `GIT_AUTHOR_*` / `GIT_COMMITTER_*` from the environment, so your
-commit identity works without a committed `.gitconfig`. If a variable is
-unset on a contributor's machine it resolves to empty and is simply ignored.
+Unset vars resolve to empty and are ignored. Use `remoteEnv`, not
+`containerEnv` (the latter breaks the build on values with spaces). If the
+name ever still fails, drop `GIT_*_NAME` and mount your gitconfig:
+`"mounts": ["source=${localEnv:HOME}/.gitconfig,target=/home/dev/.gitconfig,type=bind,readonly"]`.
 
-Shell/tmux/emacs preferences are committed as generic defaults
-([`tmux.conf`](tmux.conf), [`bashrc.extra`](bashrc.extra),
-[`emacs-init.el`](emacs-init.el)) — colours and keybindings, nothing personal.
+Preferences are committed as generic defaults: [`tmux.conf`](tmux.conf),
+[`bashrc.extra`](bashrc.extra), [`emacs-init.el`](emacs-init.el).
 
 ## UID / GID
 
-The container user is `dev` at UID/GID **1000** (the Linux convention for the
-first user, and what bind mounts need so files stay owned by you). This is
-the default `ARG` in the `Dockerfile` — no personal values are baked in.
-
-- macOS / Windows (Docker Desktop): UID mapping is handled by the VM; ignore.
-- Linux with a non-1000 host UID: bind-mounted files would be owned by the
-  wrong id. Override at build time, e.g. add to `devcontainer.json`:
-
-  ```jsonc
-  "build": { "args": { "UID": "1001", "GID": "1001" } }
-  ```
+User `dev` at UID/GID **1000** (the `Dockerfile` default; no personal values).
+macOS/Windows Docker Desktop remaps automatically. On Linux with a non-1000
+host UID, override: `"build": { "args": { "UID": "1001", "GID": "1001" } }`.
