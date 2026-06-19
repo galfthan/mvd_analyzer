@@ -5832,22 +5832,38 @@ function pickLocGroupAt(cx, cy) {
     return bestName;
 }
 
-// Compute the set of loc-group names currently occupied by at least one
-// living player at this bucket. Uses the server-resolved 3D-nearest loc
-// (matches ezQuake) via resolvePlayerLoc.
-function computeOccupiedGroupNames(playerData) {
-    const occupied = new Set();
+// Compute, per loc-group occupied by at least one living player this bucket,
+// the set of team indices present in it. Keyed by normalized loc name. Uses
+// the server-resolved 3D-nearest loc (matches ezQuake) via resolvePlayerLoc;
+// each player's team index comes from the canonical playerSymbols mapping.
+function computeOccupiedGroupTeams(playerData) {
+    const occupied = new Map(); // normalized loc name -> Set<teamIdx>
     if (!playerData) return occupied;
     const locations = mapState.locations;
-    for (const data of Object.values(playerData)) {
+    const symbols = mapState.playerSymbols || {};
+    for (const [name, data] of Object.entries(playerData)) {
         if (!data) continue;
         if (data.d || (data.h !== undefined && data.h <= 0)) continue;
         if (data.x === 0 && data.y === 0) continue;
         const locName = resolvePlayerLoc(data, locations);
         if (!locName) continue;
-        occupied.add(normalizeLocationName(locName));
+        const key = normalizeLocationName(locName);
+        let teams = occupied.get(key);
+        if (!teams) { teams = new Set(); occupied.set(key, teams); }
+        teams.add(symbols[name] ? symbols[name].teamIdx : 0);
     }
     return occupied;
+}
+
+// regionActiveTint: tint for a region by the team(s) currently in it — one
+// team → that team's canonical colour, both teams → white (contested). Drawn
+// over the neutral floor, so colour here always means "a player is here".
+const REGION_TINT_ALPHA = 0.3;
+const REGION_TINT_CONTESTED = `rgba(235, 235, 245, ${REGION_TINT_ALPHA})`;
+function regionActiveTint(teams) {
+    if (!teams || teams.size !== 1) return REGION_TINT_CONTESTED;
+    const teamIdx = teams.values().next().value;
+    return hexToRgba(TEAM_COLORS[teamIdx] || TEAM_COLORS[0], REGION_TINT_ALPHA);
 }
 
 // Highlight loc regions that contain at least one player. Drawn on top of
@@ -5856,11 +5872,22 @@ function computeOccupiedGroupNames(playerData) {
 function drawOccupiedRegionsOverlay(ctx, playerData) {
     const groupsByName = mapState.locationGroupByName;
     if (!groupsByName) return;
-    const occupied = computeOccupiedGroupNames(playerData);
+    const occupied = computeOccupiedGroupTeams(playerData);
     if (occupied.size === 0) return;
 
+    // Colour-fill pass: tint each occupied region by the team(s) present so
+    // the active area stands out against the otherwise-neutral floor. The
+    // floor is drawn neutral by default (buildFloorModel / mapSolidEntries),
+    // so a tint only ever appears here, under a player. One translucent path
+    // per region (single fill → no internal triangle seams).
+    for (const [name, teams] of occupied) {
+        const group = groupsByName[name];
+        if (!group || !group.tris || group.tris.length < 9) continue;
+        drawTriangleListFill(ctx, group.tris, regionActiveTint(teams), worldToCanvas);
+    }
+
     // Brighter outline pass.
-    for (const name of occupied) {
+    for (const name of occupied.keys()) {
         const group = groupsByName[name];
         if (!group || !group.tris || group.tris.length < 9) continue;
         drawLocationRegionOutline(ctx, group, worldToCanvasNew, 'rgba(220, 220, 220, 0.7)', 1);
@@ -5871,7 +5898,7 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
     ctx.font = `bold ${boldPx}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    for (const name of occupied) {
+    for (const name of occupied.keys()) {
         const group = groupsByName[name];
         if (!group) continue;
         const pos = worldToCanvasNew(group.centroid.x, group.centroid.y, group.centroid.z);
@@ -6002,6 +6029,8 @@ let mapState = {
     enabledPlayers: {},         // playerName -> boolean — per-player trail toggle
     teams: [],
     playerSymbols: {}, // playerName -> { symbol, team, teamIdx }
+    showViewArrows: false,      // per-player 3D view-direction arrows (opt-in)
+    showVelArrows: false,       // per-player 3D velocity arrows (opt-in)
     initialized: false,
     lastRenderedBucket: null, // Skip redundant redraws
     renderDirty: false,       // Force redraw on track toggle/reset/etc
@@ -6245,15 +6274,16 @@ function initMapView(result) {
     calculateMapBounds(result);
 
     // Size canvas and recompute transform. A fresh demo load resets user
-    // pan/zoom and the 3D camera back to the top-down (2D) view.
+    // pan/zoom and the camera to the default tilted 3D view (floors at
+    // different heights separate at a glance; the 3D toggle drops to top-down).
     _wtc.panX = 0;
     _wtc.panY = 0;
     _wtc.zoomK = 1;
-    _wtc.yaw = 0;
-    _wtc.pitch = MAP_PITCH_MAX;
+    _wtc.yaw = MAP_DEFAULT_YAW;
+    _wtc.pitch = MAP_3D_DEFAULT_PITCH;
     refreshMapCameraTrig();
     const btn3d = document.getElementById('map-3d-toggle');
-    if (btn3d) btn3d.classList.remove('active');
+    if (btn3d) btn3d.classList.toggle('active', mapIs3D());
     mapState.followPlayer = null;
     resizeMapCanvas();
 
@@ -6752,7 +6782,13 @@ const MAP_YAW_SNAP = 2 * Math.PI / 180;
 
 // Pitch applied by the "3D" toggle button — tilted enough that floors at
 // different heights separate clearly, while the layout stays recognizable.
+// 55° from top-down is also ~the isometric tilt (true iso ≈ 54.7°).
 const MAP_3D_DEFAULT_PITCH = 55 * Math.PI / 180;
+
+// Yaw for the default view — 45° spins the map onto a corner so it reads as a
+// classical isometric / three-quarter view (angled in both x and y) rather
+// than looking straight down an axis. Clears the ±2° cardinal snap.
+const MAP_DEFAULT_YAW = 45 * Math.PI / 180;
 
 // mapIs3D: true while the camera is rotated off the exact top-down view.
 function mapIs3D() {
@@ -6899,8 +6935,8 @@ function resetMapView() {
     // drags may have re-centered it.
     updateWorldToCanvasTransform();
     _wtc.zMid = _wtc.zMidDefault || 0;
-    // Back to the top-down 2D view (also syncs the 3D button and redraws).
-    setMapCamera(0, MAP_PITCH_MAX);
+    // Back to the default isometric view (also syncs the 3D button and redraws).
+    setMapCamera(MAP_DEFAULT_YAW, MAP_3D_DEFAULT_PITCH);
 }
 
 // Reusable point to avoid GC — only use for immediate consumption, not storage
@@ -7916,17 +7952,12 @@ function mapSolidEntries() {
     if (backdropTris && backdropTris.length >= 9) {
         pushTris(backdropTris, null, NEUTRAL_FLOOR, true); // floor top: flat
     }
+    // Region tops default to the neutral floor tone (no per-loc hue) — the loc
+    // colour only appears under a player, via the live occupied overlay. Keeps
+    // the solid model a calm single-tone floor instead of a garish patchwork.
     for (const group of groups) {
         if (!group.tris || group.tris.length < 9) continue;
-        // Blend the loc hue toward the neutral floor tone so the solid model
-        // keeps region identity without turning garish at full opacity.
-        const rgb = parseRgbPrefix(group.color.fill);
-        const base = [
-            (rgb[0] + NEUTRAL_FLOOR[0]) / 2,
-            (rgb[1] + NEUTRAL_FLOOR[1]) / 2,
-            (rgb[2] + NEUTRAL_FLOOR[2]) / 2,
-        ];
-        pushTris(group.tris, group.name, base, true); // floor top: flat (no Lambert)
+        pushTris(group.tris, group.name, NEUTRAL_FLOOR, true); // floor top: flat (no Lambert)
     }
     // Turn the floor into one solid box: extrude only the *outer* boundary
     // (edges not shared between two floor triangles) down FLOOR_SLAB_DEPTH.
@@ -7995,10 +8026,13 @@ function renderSolidEntries(ctx, se) {
 }
 
 // Mover (lift/door/plat/train) rendering. A mover reads as a moving piece of
-// floor: same colour as the backdrop floor (BACKDROP_FLOOR_RGB), drawn
-// translucent so it doesn't stand out, as a single flat silhouette (near hull
-// only) — no shading.
-const MOVER_FILL = 'rgba(70, 80, 110, 0.5)';
+// floor: a single flat silhouette (near hull only), no shading, at the same
+// opacity as the floor tops (the old 0.5 alpha left it ghostly next to the
+// near-opaque floor). A touch lighter than the backdrop floor so the moving
+// piece stays legible at rest; when a player is riding it the mover takes the
+// brighter MOVER_FILL_ACTIVE tone so it stands out like an occupied region.
+const MOVER_FILL = 'rgba(96, 107, 140, 0.92)';
+const MOVER_FILL_ACTIVE = 'rgba(150, 170, 215, 0.95)';
 
 // moverPoseAt returns the mover's {x, y, z, vis} at tMs (match-relative
 // milliseconds): the last recorded sample at or before tMs, clamped to the
@@ -8044,20 +8078,74 @@ function moverMeshFaces(sub) {
     return faces;
 }
 
+// moverLocalBBox returns a submodel mesh's local-space XY/Z bounds, cached per
+// submodel id. A pose is a pure translation, so the box is pose-independent;
+// the world footprint is this box shifted by the pose offset.
+function moverLocalBBox(sub) {
+    let cache = mapState._moverBBox;
+    if (!cache) cache = mapState._moverBBox = {};
+    if (cache[sub]) return cache[sub];
+    const mesh = mapState.submodelMeshes[sub];
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    for (let i = 0; i + 2 < mesh.length; i += 3) {
+        const x = mesh[i], y = mesh[i + 1], z = mesh[i + 2];
+        if (x < minX) minX = x; if (x > maxX) maxX = x;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+        if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
+    }
+    cache[sub] = { minX, maxX, minY, maxY, minZ, maxZ };
+    return cache[sub];
+}
+
+// A player counts as "riding" a posed mover when their XY lands within its
+// footprint and their z sits within a player-height window of its top surface.
+const MOVER_RIDE_Z_BELOW = 24; // tolerance under the top (interp / step noise)
+const MOVER_RIDE_Z_ABOVE = 56; // ~player height above the top
+function playerOnMover(pose, sub, players) {
+    const bb = moverLocalBBox(sub);
+    const minX = bb.minX + pose.x, maxX = bb.maxX + pose.x;
+    const minY = bb.minY + pose.y, maxY = bb.maxY + pose.y;
+    const topZ = bb.maxZ + pose.z;
+    for (const p of players) {
+        if (p.x < minX || p.x > maxX || p.y < minY || p.y > maxY) continue;
+        if (p.z < topZ - MOVER_RIDE_Z_BELOW || p.z > topZ + MOVER_RIDE_Z_ABOVE) continue;
+        return true;
+    }
+    return false;
+}
+
+// Living players (x,y,z) at the current frame, for mover-ride tests. Drawn
+// from the frame's playerData, stashed by renderMap before drawLocationLayer.
+function livingPlayersAtFrame() {
+    const pd = mapState._framePlayerData;
+    const out = [];
+    if (!pd) return out;
+    for (const d of Object.values(pd)) {
+        if (!d) continue;
+        if (d.d || (d.h !== undefined && d.h <= 0)) continue;
+        if (d.x === 0 && d.y === 0) continue;
+        out.push(d);
+    }
+    return out;
+}
+
 // drawMovers poses every mover at the current time and draws the visible
-// ones. No-op unless both the pose streams and the submodel meshes are
-// present (the meshes ride the async corpus v4 fetch).
+// ones, highlighting any a player is currently riding. No-op unless both the
+// pose streams and the submodel meshes are present (the meshes ride the async
+// corpus v4 fetch).
 function drawMovers(ctx) {
     const movers = mapState.movers;
     const meshes = mapState.submodelMeshes;
     if (!movers || movers.length === 0 || !meshes) return;
     const tMs = mapState.currentTime * 1000;
+    const players = livingPlayersAtFrame();
     for (const m of movers) {
         const mesh = meshes[m.sub];
         if (!mesh || mesh.length < 9) continue;
         const pose = moverPoseAt(m, tMs);
         if (!pose || !pose.vis) continue;
-        drawMoverMesh(ctx, mesh, m.sub, pose);
+        const active = players.length > 0 && playerOnMover(pose, m.sub, players);
+        drawMoverMesh(ctx, mesh, m.sub, pose, active);
     }
 }
 
@@ -8068,12 +8156,12 @@ function drawMovers(ctx) {
 // One fill at one alpha → no per-face double-blend, no painter-sort flicker,
 // and it blends with the floor instead of standing out. worldToCanvas reuses
 // one object, so each projected point is consumed immediately.
-function drawMoverMesh(ctx, mesh, sub, pose) {
+function drawMoverMesh(ctx, mesh, sub, pose, active) {
     const ox = pose.x, oy = pose.y, oz = pose.z;
     const w = _wtc;
     const vx = -w.sinYaw * w.cosPitch, vy = -w.cosYaw * w.cosPitch, vz = w.sinPitch;
     const faces = moverMeshFaces(sub);
-    ctx.fillStyle = MOVER_FILL;
+    ctx.fillStyle = active ? MOVER_FILL_ACTIVE : MOVER_FILL;
     ctx.beginPath();
     for (const f of faces) {
         if (f.nx * vx + f.ny * vy + f.nz * vz >= 0) continue; // back-facing
@@ -8100,7 +8188,7 @@ const LIQUID_BASE = {
     slime: [80, 200, 80],
     lava:  [255, 120, 40],
 };
-const LIQUID_ALPHA = 0.34; // per-face; back-to-front stacking deepens it
+const LIQUID_ALPHA = 0.15; // per-face; back-to-front stacking deepens it
 
 function drawLiquidVolume(ctx, tris, base) {
     const w = _wtc;
@@ -8237,9 +8325,13 @@ function buildFloorModel() {
     };
 
     if (haveBackdrop) push(backdropTris, BACKDROP_FLOOR_RGB, null);
+    // Region tops default to the neutral backdrop tone. Colouring every loc by
+    // its own hue was mostly visual noise; a region only takes on its loc
+    // colour when a player is in it, via drawOccupiedRegionsOverlay's live
+    // fill pass. The name is still carried so that overlay can find the tris.
     for (const g of groups) {
         if (!g.tris || g.tris.length < 9) continue;
-        push(g.tris, parseRgbPrefix(g.color.fill), g.name);
+        push(g.tris, BACKDROP_FLOOR_RGB, g.name);
     }
     const sides = floorBoundaryWalls(backdropTris, groups);
     if (sides.length >= 9) push(sides, FLOOR_BOX_SIDE_RGB, null);
@@ -8297,11 +8389,14 @@ function drawLocationLayer(ctx) {
     for (const group of groups) {
         if (!group.tris || group.tris.length < 9) continue;
         const tier = focusTier(group.name);
-        let stroke = 'rgba(180, 180, 180, 0.5)';
+        // Idle baseline is kept quiet (faint outline) so the floor reads as one
+        // calm surface; the occupied overlay brightens the active region's
+        // outline on top when a player is in it.
+        let stroke = 'rgba(180, 180, 180, 0.22)';
         let width = 1;
         if (tier === 'focus')    { stroke = 'rgba(255, 255, 255, 0.85)'; width = 1.5; }
-        else if (tier === 'far') { stroke = 'rgba(180, 180, 180, 0.15)'; }
-        else if (solid)          { stroke = 'rgba(180, 180, 180, 0.3)'; }
+        else if (tier === 'far') { stroke = 'rgba(180, 180, 180, 0.1)'; }
+        else if (solid)          { stroke = 'rgba(180, 180, 180, 0.18)'; }
         drawLocationRegionOutline(ctx, group, worldToCanvasNew, stroke, width);
     }
 
@@ -8483,6 +8578,9 @@ function renderMap(time) {
     // from the native-rate streams; state badges stay on the bucket. Built
     // once here from a non-mutating overlay on the cached bucket.
     const playerData = bucket ? augmentPlayerData(bucket.p, time * 1000) : null;
+    // Stash for drawMovers (runs inside drawLocationLayer, which has no
+    // playerData of its own) to highlight movers a player is riding.
+    mapState._framePlayerData = playerData;
 
     // Normalize to CSS pixel coordinates. The canvas backing store is sized
     // to cssDims * devicePixelRatio for sharp rendering on HiDPI displays;
@@ -8733,7 +8831,19 @@ function streamPosAt(name, tMs) {
     }
     let h = null;
     if (pos.h && pos.h.length === n && pos.h[idx] !== MAP_NO_FLOOR) h = pos.h[idx];
-    return { x: pos.x[idx], y: pos.y[idx], z: pos.z[idx], h };
+    const out = { x: pos.x[idx], y: pos.y[idx], z: pos.z[idx], h };
+    // View direction (raw angle16) and velocity (u/s) ride the same stream
+    // when present (schema v31–v32); the map's optional arrows read them.
+    if (pos.vya && pos.vya.length === n) {
+        out.vya = pos.vya[idx];
+        out.vp = (pos.vp && pos.vp.length === n) ? pos.vp[idx] : 0;
+    }
+    if (pos.vx && pos.vx.length === n) {
+        out.vx = pos.vx[idx];
+        out.vy = (pos.vy && pos.vy.length === n) ? pos.vy[idx] : 0;
+        out.vz = (pos.vz && pos.vz.length === n) ? pos.vz[idx] : 0;
+    }
+    return out;
 }
 
 // augmentPlayerData overlays stream-sourced position (x/y/z) and the
@@ -8748,7 +8858,10 @@ function augmentPlayerData(bucketPlayers, tMs) {
         const d = bucketPlayers[name];
         const sp = streamPosAt(name, tMs);
         if (sp) {
-            out[name] = Object.assign({}, d, { x: sp.x, y: sp.y, z: sp.z, fh: sp.h });
+            out[name] = Object.assign({}, d, {
+                x: sp.x, y: sp.y, z: sp.z, fh: sp.h,
+                vya: sp.vya, vp: sp.vp, vx: sp.vx, vy: sp.vy, vz: sp.vz,
+            });
         } else {
             out[name] = d;
         }
@@ -8808,6 +8921,73 @@ function playerFloorZ(name, x, y, z) {
     return floorZ;
 }
 
+// ─── Per-player 3D arrows: view direction + velocity ────────────────────────
+//
+// Both arrows are true 3D: the shaft runs from the player origin to a
+// world-space tip (projected through the orbit camera), and a small arrowhead
+// is drawn at the projected tip, oriented along the projected shaft. The view
+// arrow is a short fixed-length facing indicator; the velocity arrow's length
+// encodes speed at VEL_UNITS_PER_MAP_UNIT u/s per world unit.
+const ANGLE16_TO_RAD = (360 / 65536) * (Math.PI / 180); // raw angle16 → radians
+const VIEW_ARROW_LEN = 64;            // world units — shows facing clearly
+const VEL_UNITS_PER_MAP_UNIT = 5;     // 5 u/s of speed → 1 world unit of arrow
+const VEL_ARROW_MIN_SPEED = 10;       // u/s below which no velocity arrow is drawn
+const VIEW_ARROW_COLOR = 'rgba(245, 245, 255, 0.92)';
+const ARROWHEAD_PX = 7;               // arrowhead length in screen px
+
+// drawWorldArrow strokes a shaft from world (ox,oy,oz) along world (dx,dy,dz)
+// and caps it with a screen-space arrowhead at the projected tip. Skipped when
+// the arrow projects to nearly a point (pointing at/away from the camera).
+function drawWorldArrow(ctx, ox, oy, oz, dx, dy, dz, color, width) {
+    const a = worldToCanvasNew(ox, oy, oz);
+    const b = worldToCanvasNew(ox + dx, oy + dy, oz + dz);
+    const sx = b.x - a.x, sy = b.y - a.y;
+    const slen = Math.hypot(sx, sy);
+    if (slen < 1) return;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+    const ux = sx / slen, uy = sy / slen;
+    const hl = ARROWHEAD_PX, hw = ARROWHEAD_PX * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(b.x, b.y);
+    ctx.lineTo(b.x - ux * hl - uy * hw, b.y - uy * hl + ux * hw);
+    ctx.lineTo(b.x - ux * hl + uy * hw, b.y - uy * hl - ux * hw);
+    ctx.closePath();
+    ctx.fill();
+}
+
+// drawPlayerArrows draws the enabled arrows for one player. Velocity uses the
+// team colour (it's that player's motion); view uses a neutral light tone so
+// the two are distinguishable when both are on.
+function drawPlayerArrows(ctx, data, symbolInfo) {
+    const ox = data.x, oy = data.y, oz = data.z;
+    if (mapState.showVelArrows && typeof data.vx === 'number') {
+        const speed = Math.hypot(data.vx, data.vy, data.vz);
+        if (speed > VEL_ARROW_MIN_SPEED) {
+            const s = 1 / VEL_UNITS_PER_MAP_UNIT;
+            const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
+            drawWorldArrow(ctx, ox, oy, oz, data.vx * s, data.vy * s, data.vz * s,
+                           hexToRgba(teamHex, 0.9), 3.5);
+        }
+    }
+    if (mapState.showViewArrows && typeof data.vya === 'number') {
+        const yaw = data.vya * ANGLE16_TO_RAD;
+        const pitch = (data.vp || 0) * ANGLE16_TO_RAD;
+        const cp = Math.cos(pitch);
+        // Quake forward vector: +pitch looks down, so z = -sin(pitch).
+        drawWorldArrow(ctx, ox, oy, oz,
+                       cp * Math.cos(yaw) * VIEW_ARROW_LEN,
+                       cp * Math.sin(yaw) * VIEW_ARROW_LEN,
+                       -Math.sin(pitch) * VIEW_ARROW_LEN,
+                       VIEW_ARROW_COLOR, 3);
+    }
+}
+
 function drawPlayerFloorStem(ctx, name, data, symbolInfo, pos) {
     const z = data.z || 0;
     // Prefer the per-sample computed floor height H (data.fh): the floor
@@ -8826,7 +9006,7 @@ function drawPlayerFloorStem(ctx, name, data, symbolInfo, pos) {
     const bot = worldToCanvasNew(data.x, data.y, bottomZ);
     const teamHex = TEAM_COLORS[symbolInfo.teamIdx] || TEAM_COLORS[0];
     ctx.strokeStyle = hexToRgba(teamHex, 0.55);
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(pos.x, pos.y);
     ctx.lineTo(bot.x, bot.y);
@@ -8911,6 +9091,11 @@ function drawItemsAndPlayersZSorted(ctx, time, playerData) {
             // top-down it projects to a point).
             if (tilted) {
                 drawPlayerFloorStem(ctx, d.name, d.data, d.symbolInfo, d.pos);
+            }
+            // Optional view/velocity arrows (work at any tilt — xy shows even
+            // top-down). Drawn under the symbol so the letter stays legible.
+            if (mapState.showViewArrows || mapState.showVelArrows) {
+                drawPlayerArrows(ctx, d.data, d.symbolInfo);
             }
             drawSinglePlayer(ctx, d.data, d.symbolInfo,
                              iconScale, zRange, zSpan, d.pos);
@@ -9535,10 +9720,31 @@ function setupMapTrailControls() {
     const btn3d = document.getElementById('map-3d-toggle');
     if (btn3d) {
         btn3d.addEventListener('click', () => {
-            // Toggle between top-down (2D) and the default tilted 3D view.
-            // Yaw resets either way so the map keeps its familiar orientation;
-            // free rotation is available via right-drag / Ctrl+drag.
-            setMapCamera(0, mapIs3D() ? MAP_PITCH_MAX : MAP_3D_DEFAULT_PITCH);
+            // Toggle between top-down (2D, yaw 0) and the default isometric
+            // view (yaw 45° / 55° tilt). Free rotation is available via
+            // right-drag / Ctrl+drag.
+            setMapCamera(mapIs3D() ? 0 : MAP_DEFAULT_YAW,
+                         mapIs3D() ? MAP_PITCH_MAX : MAP_3D_DEFAULT_PITCH);
+        });
+    }
+
+    const viewArrowsBtn = document.getElementById('map-view-arrows');
+    if (viewArrowsBtn) {
+        viewArrowsBtn.addEventListener('click', () => {
+            mapState.showViewArrows = !mapState.showViewArrows;
+            viewArrowsBtn.classList.toggle('active', mapState.showViewArrows);
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        });
+    }
+
+    const velArrowsBtn = document.getElementById('map-vel-arrows');
+    if (velArrowsBtn) {
+        velArrowsBtn.addEventListener('click', () => {
+            mapState.showVelArrows = !mapState.showVelArrows;
+            velArrowsBtn.classList.toggle('active', mapState.showVelArrows);
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
         });
     }
 

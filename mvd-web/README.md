@@ -294,15 +294,18 @@ full-sync tick in `animatePlayback`.
 
 ## Map-tab 3D view
 
-The map starts in the classic top-down 2D view and can be rotated into
-3D: the **3D** button tilts the camera to a default oblique view, and
-right-drag (or Ctrl/Cmd+drag) rotates freely — horizontal motion spins
-the map (yaw), vertical motion tilts it (pitch, from top-down all the
-way to a horizontal side elevation at 0°). Yaw lightly snaps to the
-four cardinal directions (±2°) so "look straight along x / y" is easy
-to hit; the snap can be dragged through (the drag applies absolute
-deltas from its start). **Reset view** and double-click return to
-top-down. Left-drag pan and wheel zoom-about-cursor work at any
+The map opens in a default **isometric** view — yaw 45°, tilted 55°
+from top-down (≈ the true isometric angle), so floors at different
+heights separate at a glance and the layout reads from a corner. The
+**3D** button toggles between this isometric view and the classic
+top-down 2D view; right-drag (or Ctrl/Cmd+drag) rotates freely —
+horizontal motion spins the map (yaw), vertical motion tilts it (pitch,
+from top-down all the way to a horizontal side elevation at 0°). Yaw
+lightly snaps to the four cardinal directions (±2°) so "look straight
+along x / y" is easy to hit; the snap can be dragged through (the drag
+applies absolute deltas from its start). **Reset view** and double-click
+return to the default isometric view. Left-drag pan and wheel
+zoom-about-cursor work at any
 rotation (the zoom anchor is solved in view space, so it stays exact
 even at pitch 0), as does click-to-follow (rotating does not drop
 follow mode; panning does).
@@ -341,9 +344,11 @@ scan of the floor geometry (`playerFloorZ`, memoised) when `H` is absent
 (no BSP) or `NoFloor` (over a void).
 
 **Floor model (the default view)** — the floor is a flat, near-opaque,
-depth-sorted model (`buildFloorModel`): each loc region is its own flat
-tone (no Lambert/normal shading — from overhead it reads dead flat), the
-unnamed floor is one backdrop tone, and the floor's outer boundary is
+depth-sorted model (`buildFloorModel`): every region renders in one
+neutral backdrop tone by default (colouring each loc by its own hue was
+visual noise — colour now means *a player is here*, see the occupied
+overlay below), with no Lambert/normal shading — from overhead it reads
+dead flat. The floor's outer boundary is
 extruded `FLOOR_SLAB_DEPTH` (10 units) down into flat box sides so the
 floor reads as a solid 10u slab. `floorBoundaryEdges` finds that boundary
 (edges shared by exactly one floor triangle across all regions + backdrop
@@ -354,7 +359,27 @@ side triangles. Because everything is **near-opaque and painter-sorted**,
 a higher floor cleanly *covers* a lower one rather than tinting it through
 translucency (the translucent stacking used to read as "shading"); the box
 sides read as solid thickness, not a dark smear. Players, items, liquids
-and overlays all draw live on top.
+and overlays all draw live on top. `renderSolidEntries` also strokes each
+fill-batch with its own colour at a hairline width, sealing the
+anti-aliasing seams between adjacent triangles so a continuous floor reads
+as one clean surface instead of showing its triangulation as a mesh.
+
+**Occupied-region overlay** — a region a living player currently stands
+in is tinted by the team(s) present (`drawOccupiedRegionsOverlay`): one
+team → that team's canonical colour, both teams → white (contested),
+drawn live over the neutral floor with a brighter outline and bold label.
+This is the *only* place a region takes on colour, so a coloured patch
+always means "someone is here". Team membership comes from the canonical
+`playerSymbols[name].teamIdx`, so it matches team colours everywhere else.
+
+**View / velocity arrows** — two optional per-player toggles, **View**
+and **Vel**, draw 3D arrows from each player's origin (`drawPlayerArrows`
+/ `drawWorldArrow`). View is a fixed-length (64u) facing indicator built
+from the stream's `vya`/`vp` view angles (Quake forward vector). Vel
+encodes the stream's `vx`/`vy`/`vz` velocity with length proportional to
+speed (5 u/s per world unit) in the player's team colour, hidden below
+10 u/s. Both project the shaft through the orbit camera with a screen-space
+arrowhead at the projected tip, so they tilt correctly with the view.
 
 **Solid mode** — an optional **Solid** toggle (maps whose geometry JSON
 carries wall triangles, version 3+) adds the **walls** on top of the same
@@ -379,10 +404,13 @@ floor: the submodel mesh offset by the pose origin binary-searched for the
 current time (`moverPoseAt`), **backface-culled** to its near hull (the
 submodel triangulation winds so its normals point into the solid, so the
 near hull is the faces whose normal points away from the camera) and
-filled **once** as a single flat translucent silhouette in the backdrop
-floor colour (`MOVER_FILL`). One fill at one alpha → no per-face
-double-blend, no painter-sort flicker, and the mover blends with the floor
-instead of standing out. A mover sampled `vis=false` is hidden. Missing
+filled **once** as a single flat silhouette at the same near-opaque alpha
+as the floor tops, a touch lighter than the backdrop floor so the moving
+piece stays legible (`MOVER_FILL`). When a player is riding it (their XY
+within the posed footprint and z within a player-height window of its top,
+`playerOnMover`) it takes the brighter `MOVER_FILL_ACTIVE` tone so it
+stands out like an occupied region. One fill at one alpha → no per-face
+double-blend, no painter-sort flicker. A mover sampled `vis=false` is hidden. Missing
 either piece (older geometry, or a demo with no movers) is a graceful
 no-op. Code: `drawMovers` / `moverPoseAt` / `moverMeshFaces` /
 `drawMoverMesh`.
@@ -392,7 +420,9 @@ volume meshes). Rendered as a shaded, depth-sorted translucent solid
 (`drawLiquidVolume`): each face is Lambert-shaded so the top surface reads
 brighter than the descending sides, and faces paint back-to-front, so the
 body reads as a 3D volume with visible depth (water blue, slime green,
-lava orange). In flat mode they draw above the region fills and below the
+lava orange). The per-face alpha is kept low (`LIQUID_ALPHA`) so the
+volume reads as a faint tint rather than dominating the floor under it.
+In flat mode they draw above the region fills and below the
 outlines/players; in Solid mode they bake into the offscreen cache on top
 of the opaque world (the liquid count is part of the cache key). Liquids
 are not pickable in edit mode but round-trip through Export JSON.
@@ -402,12 +432,11 @@ Everything is drawn through one orbit-camera orthographic projection
 in the version-2 map JSON, so each floor renders at its real level, and
 player tracks, player symbols, items, death/drop markers, loc labels and
 the region-control / occupancy overlays all project through the same
-transform. At exact top-down the projection degenerates to the old 2D
-transform — the default view is pixel-identical to the previous 2D map,
-and the painter's sort (projected camera depth) degenerates to the old
-z-sort. Floor fills stay semi-transparent, so tilted views read as a
-see-through architectural model rather than occluding solids; opaque
-markers (players, items, entities) are depth-sorted per frame.
+transform. At exact top-down (the **3D** toggle's other state) the
+projection degenerates to the old 2D transform — pixel-identical to the
+previous 2D map — and the painter's sort (projected camera depth)
+degenerates to the old z-sort. Opaque markers (players, items, entities)
+are depth-sorted per frame.
 
 Version-1 geometry files (e.g. a stale browser cache) are upgraded on
 load by `normalizeMapGeometry`, which flattens each region to its median
