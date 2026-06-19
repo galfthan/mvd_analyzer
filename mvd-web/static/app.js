@@ -6231,7 +6231,6 @@ function initMapView(result) {
     if (learnBtn) {
         learnBtn.style.display = mapState.mapEntities.length > 0 ? '' : 'none';
         learnBtn.classList.remove('active');
-        learnBtn.textContent = 'Learn map';
     }
 
     // Fire-and-forget: try to load pre-generated BSP-derived map geometry.
@@ -7047,6 +7046,7 @@ function assignPlayerSymbols(result) {
     // player roster is known for this demo.
     buildMapLegend();
     buildTrailPlayersPanel();
+    updateTrailButtonStates(); // reflect the initial selection (None on load)
 }
 
 // Base size (px) of a player symbol at iconScale=1. The letter circle
@@ -7149,6 +7149,7 @@ function buildTrailPlayersPanel() {
             if (cb.checked) {
                 mapState.trailStartTimes[name] = mapState.currentTime;
             }
+            updateTrailButtonStates();
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
@@ -9199,7 +9200,7 @@ function setLearnMode(on) {
         if (entPanel) entPanel.style.display = 'none';
     }
     const btn = document.getElementById('map-learn-toggle');
-    if (btn) { btn.classList.toggle('active', on); btn.textContent = on ? 'Exit learn' : 'Learn map'; }
+    if (btn) btn.classList.toggle('active', on); // highlight only; label stays "Learn map"
     const tableWrap = document.getElementById('map-entities-table-wrap');
     if (tableWrap) tableWrap.style.display = on ? '' : 'none';
     if (on) buildEntityTable();
@@ -9539,6 +9540,23 @@ function findBucketAtTime(time) {
     return findHighResBucketAtTime(time);
 }
 
+// updateTrailButtonStates: reflect the current trail selection in the control
+// buttons — All highlighted when every player's trail is on, None when none
+// are, and the "Players" dropdown summary when a custom subset is chosen. Call
+// after any change to mapState.enabledPlayers.
+function updateTrailButtonStates() {
+    const names = Object.keys(mapState.fullTrails || {});
+    const total = names.length;
+    let on = 0;
+    for (const n of names) if (mapState.enabledPlayers[n]) on++;
+    const allBtn = document.getElementById('map-trails-all');
+    const noneBtn = document.getElementById('map-trails-none');
+    const summary = document.querySelector('#map-trails-dropdown > summary');
+    if (allBtn)  allBtn.classList.toggle('active', total > 0 && on === total);
+    if (noneBtn) noneBtn.classList.toggle('active', on === 0);
+    if (summary) summary.classList.toggle('active', on > 0 && on < total);
+}
+
 function setupMapTrailControls() {
     const allBtn = document.getElementById('map-trails-all');
     if (allBtn) {
@@ -9552,6 +9570,7 @@ function setupMapTrailControls() {
             }
             // Sync legend checkboxes
             document.querySelectorAll('.map-player-trail-cb').forEach(cb => { cb.checked = true; });
+            updateTrailButtonStates();
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
@@ -9564,6 +9583,7 @@ function setupMapTrailControls() {
                 mapState.enabledPlayers[name] = false;
             }
             document.querySelectorAll('.map-player-trail-cb').forEach(cb => { cb.checked = false; });
+            updateTrailButtonStates();
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });
@@ -9976,7 +9996,7 @@ function onMapFullscreenChange() {
     panel.classList.toggle('map-panel--fullscreen', nowFs);
     mapState.fullscreen = nowFs;
     const btn = document.getElementById('map-fullscreen');
-    if (btn) btn.textContent = nowFs ? 'Exit fullscreen' : 'Fullscreen';
+    if (btn) btn.classList.toggle('active', nowFs); // highlight only; label stays "Fullscreen"
 
     // Relocate the shared timeline (playback buttons + scrubber) into the
     // fullscreen map panel so it stays usable. On exit, put it back.
