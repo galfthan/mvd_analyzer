@@ -1,11 +1,11 @@
 // Package mapgeom turns a parsed Quake 1 BSP into per-loc walkable-floor
-// polygon sets (plus a flat wall-triangle list) suitable for the
-// viewer's mini-map and its 3D modes.
+// polygon sets suitable for the viewer's mini-map and its 3D floor model.
 //
 // Faces whose plane normal points "up enough" (Z >= floorNormalZ) are
-// floors; vertical-ish faces (|Z| < floorNormalZ) are emitted into the
-// top-level Walls list for the viewer's occluding "solid" render;
-// downward faces (ceiling undersides) are skipped. Each floor face is then
+// floors; vertical-ish faces (|Z| < floorNormalZ) are walls and downward
+// faces (ceiling undersides) are skipped. Walls are still classified (for
+// the diagnostic counters) but no longer emitted — they only fed the
+// removed occluding "solid" render. Each floor face is then
 // assigned to the nearest loc by plain 3D Euclidean distance, matching
 // ezQuake's TP_LocationName exactly (see
 // ezquake-source/src/teamplay_locfiles.c). Faces are fan-triangulated
@@ -163,8 +163,9 @@ type LocRegion struct {
 // GeometryVersion is written to MapRegions.Version. Version 2 carries
 // per-vertex Z in Tris (9 floats/triangle) so the viewer can render the
 // floor plan in 3D; version 1 files were XY-only (6 floats/triangle).
-// Version 3 adds the optional Walls list (vertical faces, same 9-float
-// triangle layout) used by the viewer's occluding "solid" 3D mode.
+// Version 3 added the optional Walls list (vertical faces) for the viewer's
+// occluding "solid" 3D mode; that mode was removed, so walls are no longer
+// emitted (the field is kept only to parse existing v3 files).
 // Version 4 adds the optional Liquids and SubModels meshes (water/slime/
 // lava volumes and brush-model lifts/doors) and the Pruned provenance
 // block. All readers stay presence-based: a v4 reader handles v1–v3 files
@@ -203,11 +204,11 @@ type PruneInfo struct {
 	FacesDropped int `json:"facesDropped"` // floor faces removed as never-touched
 }
 
-// MapRegions is the JSON output root. Walls is a flat triangle list (9
-// floats per triangle, like LocRegion.Tris) of the map's vertical faces —
-// not split per loc because walls only serve occlusion/shape, never loc
-// identity. Empty for pre-v3 files. Liquids, SubModels and Pruned are v4
-// additions and omitted when empty.
+// MapRegions is the JSON output root. Walls (a flat vertical-face triangle
+// list) is retained only so readers can still parse the v3 files that carried
+// it; the generator no longer populates it (the occluding "solid" render it
+// fed was removed), so it is omitted from fresh output. Liquids, SubModels and
+// Pruned are v4 additions and omitted when empty.
 type MapRegions struct {
 	Map       string         `json:"map"`
 	Version   int            `json:"version"`
@@ -227,10 +228,10 @@ type Stats struct {
 	FacesDropped int // ring assembly or geometry drops (not Z-reject)
 	FacesUnnamed   int // kept but routed into the unnamed backdrop bucket
 	FacesCeiling   int // kept-but-filtered-as-ceiling-detail
-	WallsKept      int // vertical faces emitted into MapRegions.Walls
+	WallsKept      int // vertical faces classified as walls (not stored)
 	Locs           int
 	Triangles      int
-	WallTris       int
+	WallTris       int // wall triangles classified (not stored)
 	DegenerateTris int // fan triangles dropped for sub-minTriArea area
 	LiquidFaces    int // worldspawn '*' faces routed into Liquids
 	LiquidTris     int // triangles emitted across all LiquidMesh
@@ -298,8 +299,6 @@ func buildRegions(mapName string, b *bsp.BSP, finder *loc.Finder, p Params, usag
 	// Group keptFaces by normalized loc name.
 	groups := make(map[string][]keptFace)
 
-	var walls []float32
-
 	// Liquid triangles accumulated per kind ("water"/"slime"/"lava").
 	liquidTris := make(map[string][]float32)
 
@@ -336,7 +335,7 @@ func buildRegions(mapName string, b *bsp.BSP, finder *loc.Finder, p Params, usag
 			normal = negate(normal)
 		}
 		// Classify by normal: upward-facing enough → floor; vertical-ish
-		// → wall (kept for the viewer's occluding 3D mode); downward →
+		// → wall (classified for diagnostics but not stored); downward →
 		// ceiling underside, never visible from the analysis camera.
 		isFloor := normal.Z >= p.FloorNormalZ
 		isWall := !isFloor && normal.Z > -p.FloorNormalZ
@@ -398,18 +397,14 @@ func buildRegions(mapName string, b *bsp.BSP, finder *loc.Finder, p Params, usag
 		}
 
 		if isWall {
+			// Counted for the verbose diagnostics, but not stored: walls
+			// only served the removed occluding "solid" render.
 			stats.WallsKept++
 			for i := 1; i+1 < len(ring3D); i++ {
-				a, bb, c := ring3D[0], ring3D[i], ring3D[i+1]
-				if triArea(a, bb, c) < minTriArea {
+				if triArea(ring3D[0], ring3D[i], ring3D[i+1]) < minTriArea {
 					stats.DegenerateTris++
 					continue
 				}
-				walls = append(walls,
-					a.X, a.Y, a.Z,
-					bb.X, bb.Y, bb.Z,
-					c.X, c.Y, c.Z,
-				)
 				stats.WallTris++
 			}
 			continue
@@ -512,11 +507,10 @@ func buildRegions(mapName string, b *bsp.BSP, finder *loc.Finder, p Params, usag
 	}
 	stats.Locs = len(result.Locs)
 
-	// Walls intentionally don't contribute to Bounds — outer-shell walls
-	// would pad the fit-to-canvas view beyond the playable floor area.
-	// Liquids and submodels are excluded for the same reason (and movers
-	// shift at runtime, so their rest pose is not a stable bound).
-	result.Walls = walls
+	// Walls are no longer emitted (they only fed the removed "solid" render),
+	// so result.Walls stays nil. Bounds already excluded them; liquids and
+	// submodels are likewise excluded (and movers shift at runtime, so their
+	// rest pose is not a stable bound).
 
 	// Liquids: emit one mesh per kind in a stable order.
 	for _, kind := range []string{"water", "slime", "lava"} {

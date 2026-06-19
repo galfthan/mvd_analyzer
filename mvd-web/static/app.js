@@ -5877,7 +5877,7 @@ function drawOccupiedRegionsOverlay(ctx, playerData) {
 
     // Colour-fill pass: tint each occupied region by the team(s) present so
     // the active area stands out against the otherwise-neutral floor. The
-    // floor is drawn neutral by default (buildFloorModel / mapSolidEntries),
+    // floor is drawn neutral by default (buildFloorModel),
     // so a tint only ever appears here, under a player. One translucent path
     // per region (single fill → no internal triangle seams).
     for (const [name, teams] of occupied) {
@@ -6041,7 +6041,6 @@ let mapState = {
     learnMode: false,
     focusGroupName: null,     // normalized loc-group name under region focus, or null
     focusNeighbors: null,     // Set of group names adjacent to the focused one
-    solidMode: false,         // opt-in occluding 3D model (needs walls in geometry v3)
     movers: [],               // result.streams.movers — brush-model pose timelines (v32)
     submodelMeshes: null,     // { submodelId -> tris } from corpus v4 geom.submodels
     posStreams: {},           // name -> PositionTrack {t,x,y,z,h,lq} for stream-sourced animation
@@ -6141,18 +6140,9 @@ function applyMapGeometry(geom) {
     }
     // Geometry-derived caches are stale now.
     mapState._floorZCache = null;
-    mapState._solidEntries = null;
-    mapState._solidCanvasKey = null;
     mapState._floorModel = null;
     mapState._floorCanvasKey = null;
     mapState._moverFaces = null;
-    // The Solid (occluding model) toggle needs wall geometry — only
-    // version-3 files carry it.
-    const solidBtn = document.getElementById('map-solid-toggle');
-    if (solidBtn) {
-        solidBtn.style.display =
-            (Array.isArray(geom.walls) && geom.walls.length >= 9) ? '' : 'none';
-    }
     // Rebuild groups with tris attached, then refresh region->group
     // references so the control overlay doesn't keep pointing at the
     // previous (stale-tris) group objects.
@@ -6201,11 +6191,9 @@ function initMapView(result) {
     mapState.mapGeometry = null;    // Reset BSP-derived geometry for new demo
     mapState.focusGroupName = null; // Region focus doesn't survive demo switch
     mapState.focusNeighbors = null;
-    mapState._solidEntries = null;  // Solid-model caches are per-geometry
-    mapState._solidCanvasKey = null;
-    mapState._floorZCache = null;   // floor-anchor lookups are per-geometry too
-    const solidBtnInit = document.getElementById('map-solid-toggle');
-    if (solidBtnInit) solidBtnInit.style.display = 'none'; // shown again if v3 geometry arrives
+    mapState._floorModel = null;    // floor-model + anchor caches are per-geometry
+    mapState._floorCanvasKey = null;
+    mapState._floorZCache = null;
 
     // Mover pose timelines (result.streams.movers, schema v32) — animated
     // lifts/doors/plats. Meshes (mapState.submodelMeshes) arrive with the
@@ -7415,8 +7403,8 @@ function tierFill(group, tier) {
 // ─── Geometry edit mode (?edit=1) ───────────────────────────────────────────
 //
 // Hidden cleanup tool for the committed map-geometry corpus, enabled by the
-// `edit=1` URL param. Canvas clicks select floor (and, in Solid mode, wall)
-// triangles — by connected coplanar patch (≈ the original BSP face) or
+// `edit=1` URL param. Canvas clicks select floor triangles — by connected
+// coplanar patch (≈ the original BSP face) or
 // single triangle — for deletion of stray roof/outside detail the extractor
 // kept. Delete/undo work on whole-array snapshots (deletion replaces the
 // arrays, never mutates), Export downloads the result as a version-3
@@ -7441,17 +7429,13 @@ function enableMapEditMode() {
     updateEditStatus();
 }
 
-// editCandidateLists: the triangle arrays clicks can currently hit. Walls
-// are only pickable while the Solid model actually draws them.
+// editCandidateLists: the floor-triangle arrays clicks can currently hit.
 function editCandidateLists() {
     const geom = mapState.mapGeometry;
     if (!geom) return [];
     const lists = [];
     for (const l of geom.locs) {
         if (l && Array.isArray(l.tris) && l.tris.length >= 9) lists.push(l.tris);
-    }
-    if (mapState.solidMode && Array.isArray(geom.walls) && geom.walls.length >= 9) {
-        lists.push(geom.walls);
     }
     return lists;
 }
@@ -7796,20 +7780,18 @@ function drawEditOverlay(ctx) {
     }
 }
 
-// ─── Solid 3D model (opt-in occluding render) ───────────────────────────────
+// ─── Floor-model geometry + shading helpers ─────────────────────────────────
 //
-// When geometry v3 walls are present, the "Solid" toggle replaces the
-// translucent floor underlay with an occluding model: every floor and wall
-// triangle is painter-sorted by projected camera depth and drawn near-opaque
-// with per-face Lambert shading, so upper floors genuinely hide lower ones
-// and the map reads as an architectural model. Players / items / overlays
-// still draw on top (seeing the action through walls is the point of an
-// analysis view). The sorted pass renders into an offscreen canvas keyed by
-// the full camera state, so steady playback just blits — only rotation /
-// pan / zoom / focus changes re-render the model.
+// The floor model (buildFloorModel) extrudes the floor's outer boundary into
+// box sides and painter-sorts every triangle by projected camera depth into
+// an offscreen canvas keyed by the full camera state, so steady playback just
+// blits — only rotation / pan / zoom / focus changes re-render. The helpers
+// below find that boundary (floorBoundaryEdges / floorBoundaryWalls) and draw
+// the sorted entries (renderSolidEntries); SOLID_LIGHT shades the liquid
+// volumes.
 
-// Fixed light for face shading — high, slightly off-axis so walls facing
-// different directions separate tonally.
+// Fixed light for face shading — high, slightly off-axis so faces pointing
+// different directions separate tonally (used by the liquid volumes).
 const SOLID_LIGHT = (() => {
     const l = [0.35, 0.25, 0.9];
     const n = Math.hypot(l[0], l[1], l[2]);
@@ -7869,7 +7851,7 @@ function floorBoundaryEdges(backdropTris, groups) {
 
 // floorBoundaryWalls extrudes the boundary edges into the side-wall triangles
 // that turn the floor into one solid box FLOOR_SLAB_DEPTH units tall — used by
-// the Solid model, which depth-sorts opaque triangles (no per-edge culling).
+// the floor model, which depth-sorts opaque triangles (no per-edge culling).
 function floorBoundaryWalls(backdropTris, groups) {
     const walls = [];
     for (const e of floorBoundaryEdges(backdropTris, groups)) {
@@ -7879,97 +7861,6 @@ function floorBoundaryWalls(backdropTris, groups) {
         walls.push(ax, ay, az, bx, by, bz2, ax, ay, az2);
     }
     return walls;
-}
-
-// mapSolidEntries: per-triangle render list for the solid model (floors from
-// the loc groups + backdrop, walls from geometry v3), with centroid and
-// pre-shaded fill styles. Built lazily, cached per (geometry, groups) pair.
-function mapSolidEntries() {
-    const geom = mapState.mapGeometry;
-    if (!geom || !Array.isArray(geom.walls) || geom.walls.length < 9) return null;
-    const groups = mapState.locationGroups;
-    if (!groups || groups.length === 0) return null;
-    let se = mapState._solidEntries;
-    if (se && se.geom === geom && se.groups === groups) return se;
-
-    const fillCache = new Map();
-    const styledFill = (base, shade) => {
-        // Quantize the shade so neighboring faces share fill strings — the
-        // painter pass batches consecutive same-style triangles into one path.
-        const q = Math.round(shade * 12) / 12;
-        const key = base[0] + ',' + base[1] + ',' + base[2] + '|' + q;
-        let s = fillCache.get(key);
-        if (!s) {
-            s = `rgba(${Math.round(base[0] * q)}, ${Math.round(base[1] * q)}, ${Math.round(base[2] * q)}, 0.96)`;
-            fillCache.set(key, s);
-        }
-        return s;
-    };
-
-    const FLOOR_FLAT_SHADE = 0.85; // flat per-region floor tone (no Lambert)
-    const entries = [];
-    // flat=true → no Lambert (a single per-region tone, used for floor tops
-    // and slab sides); flat=false → per-face Lambert (walls, for the
-    // architectural read). Centroid is always computed for the depth sort.
-    const pushTris = (tris, name, base, flat) => {
-        for (let i = 0; i + 8 < tris.length; i += 9) {
-            const ax = tris[i],     ay = tris[i + 1], az = tris[i + 2];
-            const bx = tris[i + 3], by = tris[i + 4], bz = tris[i + 5];
-            const cx = tris[i + 6], cy = tris[i + 7], cz = tris[i + 8];
-            let shade = FLOOR_FLAT_SHADE;
-            if (!flat) {
-                // Face normal via cross product; abs(dot) so backfaces (visible
-                // under rotation — BSP normals point out of the solid) shade
-                // like frontfaces instead of going black.
-                const ux = bx - ax, uy = by - ay, uz = bz - az;
-                const vx = cx - ax, vy = cy - ay, vz = cz - az;
-                const nx = uy * vz - uz * vy;
-                const ny = uz * vx - ux * vz;
-                const nz = ux * vy - uy * vx;
-                const nl = Math.hypot(nx, ny, nz);
-                shade = nl > 0
-                    ? 0.45 + 0.55 * Math.abs((nx * SOLID_LIGHT[0] + ny * SOLID_LIGHT[1] + nz * SOLID_LIGHT[2]) / nl)
-                    : 0.7;
-            }
-            const fill = styledFill(base, shade);
-            entries.push({
-                tris, off: i,
-                cx: (ax + bx + cx) / 3,
-                cy: (ay + by + cy) / 3,
-                cz: (az + bz + cz) / 3,
-                name,
-                fill,
-                fillFaded: scaleRgbaAlpha(fill, 0.25),
-                depth: 0,
-            });
-        }
-    };
-
-    const NEUTRAL_FLOOR = [95, 105, 135];
-    const WALL_BASE = [58, 63, 85];
-    const SLAB_SIDE = [50, 55, 76]; // one flat tone for every floor-box side
-    const backdropTris = geom.backdropTris;
-    if (backdropTris && backdropTris.length >= 9) {
-        pushTris(backdropTris, null, NEUTRAL_FLOOR, true); // floor top: flat
-    }
-    // Region tops default to the neutral floor tone (no per-loc hue) — the loc
-    // colour only appears under a player, via the live occupied overlay. Keeps
-    // the solid model a calm single-tone floor instead of a garish patchwork.
-    for (const group of groups) {
-        if (!group.tris || group.tris.length < 9) continue;
-        pushTris(group.tris, group.name, NEUTRAL_FLOOR, true); // floor top: flat (no Lambert)
-    }
-    // Turn the floor into one solid box: extrude only the *outer* boundary
-    // (edges not shared between two floor triangles) down FLOOR_SLAB_DEPTH.
-    // Internal loc-region boundaries are shared, so they cancel and produce
-    // no walls inside the floor. One flat side tone.
-    const boxSides = floorBoundaryWalls(backdropTris, groups);
-    if (boxSides.length >= 9) pushTris(boxSides, null, SLAB_SIDE, true);
-    pushTris(geom.walls, null, WALL_BASE, false); // walls keep Lambert shading
-
-    se = { geom, groups, entries, sortedFor: null };
-    mapState._solidEntries = se;
-    return se;
 }
 
 // renderSolidEntries: painter-sort by projected centroid depth (cached per
@@ -8181,8 +8072,7 @@ function drawMoverMesh(ctx, mesh, sub, pose, active) {
 // depth-sorted translucent solid: each face is Lambert-shaded (so the top
 // surface reads brighter than the descending sides) and painted back to
 // front, so the body reads as a 3D volume with visible depth rather than a
-// flat silhouette. Static geometry — drawn live in flat mode, baked into
-// the solid cache in Solid mode.
+// flat silhouette. Static geometry — drawn live on top of the floor model.
 const LIQUID_BASE = {
     water: [64, 128, 255],
     slime: [80, 200, 80],
@@ -8232,13 +8122,12 @@ function drawLiquidFills(ctx) {
     }
 }
 
-// drawCachedWorld: blit a depth-sorted entry set (solid model or flat floor
-// model), re-rendering the offscreen canvas only when a projection input
-// changed. The painter sort scatters same-colour triangles, so batching costs
-// many fill() calls — too much to redo every frame, hence the per-camera
-// bitmap cache. cacheField/keyField pick the cache slot so the two models
-// don't evict each other. bakeLiquids folds the (static) liquid volumes into
-// the cache; the flat floor view instead draws them live on top.
+// drawCachedWorld: blit the depth-sorted floor model, re-rendering the
+// offscreen canvas only when a projection input changed. The painter sort
+// scatters same-colour triangles, so batching costs many fill() calls — too
+// much to redo every frame, hence the per-camera bitmap cache. cacheField/
+// keyField pick the cache slot. bakeLiquids folds the (static) liquid volumes
+// into the cache; the floor view passes false and draws them live on top.
 function drawCachedWorld(ctx, se, cacheField, keyField, bakeLiquids) {
     if (!se) return;
     const canvas = mapState.canvas;
@@ -8272,10 +8161,6 @@ function drawCachedWorld(ctx, se, cacheField, keyField, bakeLiquids) {
     ctx.restore();
 }
 
-function drawSolidWorld(ctx) {
-    drawCachedWorld(ctx, mapSolidEntries(), '_solidCanvas', '_solidCanvasKey', true);
-}
-
 // Floors are this many units tall. Both views extrude the floor's outer
 // boundary (perimeter + step risers, via floorBoundaryEdges) down by this
 // much into box sides (floorBoundaryWalls), baked into the depth-sorted
@@ -8294,8 +8179,7 @@ const FLOOR_TOP_ALPHA = 0.95;
 // buildFloorModel builds the per-triangle render list for the one clean view:
 // flat region tops (loc colour) + the backdrop + the 10u box sides, each a
 // single flat tone, with a centroid for the painter sort. Rendered opaque and
-// depth-sorted by renderSolidEntries (shared with Solid mode, which only adds
-// walls on top). Cached per (geometry, groups). Returns null when the map has
+// depth-sorted by renderSolidEntries. Cached per (geometry, groups). Returns null when the map has
 // no triangle geometry at all (callers fall back to the flat translucent
 // fills / loc blobs).
 function buildFloorModel() {
@@ -8348,16 +8232,13 @@ function drawLocationLayer(ctx) {
     if (groups.length === 0 && (!backdropTris || backdropTris.length < 9)) return;
 
     const focused = !!mapState.focusGroupName;
-    const solid = mapState.solidMode && mapSolidEntries();
-    const floorModel = !solid && buildFloorModel();
+    const floorModel = buildFloorModel();
 
-    if (solid) {
-        drawSolidWorld(ctx);
-    } else if (floorModel) {
+    if (floorModel) {
         // One clean view: flat, near-opaque, depth-sorted region tops + 10u box
         // sides. A higher floor covers a lower one (no translucent stacking),
         // the sides read as solid thickness, and from overhead it's dead flat.
-        // Cached to an offscreen bitmap (per camera) like the Solid model.
+        // Cached to an offscreen bitmap (per camera).
         drawCachedWorld(ctx, floorModel, '_floorCanvas', '_floorCanvasKey', false);
         // Liquids: translucent volumes above the floor, drawn live.
         drawLiquidFills(ctx);
@@ -8377,9 +8258,8 @@ function drawLocationLayer(ctx) {
         drawLiquidFills(ctx);
     }
 
-    // Movers (lifts/doors/plats) posed at the current time. In solid mode
-    // this draws on top of the (time-free) solid-world blit; in flat mode
-    // it sits above the region fills and below the outlines/labels.
+    // Movers (lifts/doors/plats) posed at the current time — above the region
+    // fills and below the outlines/labels.
     drawMovers(ctx);
 
     // Thin grey outlines around each traced region — drawn after all fills so
@@ -8396,7 +8276,6 @@ function drawLocationLayer(ctx) {
         let width = 1;
         if (tier === 'focus')    { stroke = 'rgba(255, 255, 255, 0.85)'; width = 1.5; }
         else if (tier === 'far') { stroke = 'rgba(180, 180, 180, 0.1)'; }
-        else if (solid)          { stroke = 'rgba(180, 180, 180, 0.18)'; }
         drawLocationRegionOutline(ctx, group, worldToCanvasNew, stroke, width);
     }
 
@@ -9743,16 +9622,6 @@ function setupMapTrailControls() {
         velArrowsBtn.addEventListener('click', () => {
             mapState.showVelArrows = !mapState.showVelArrows;
             velArrowsBtn.classList.toggle('active', mapState.showVelArrows);
-            mapState.renderDirty = true;
-            renderMap(mapState.currentTime);
-        });
-    }
-
-    const solidBtn = document.getElementById('map-solid-toggle');
-    if (solidBtn) {
-        solidBtn.addEventListener('click', () => {
-            mapState.solidMode = !mapState.solidMode;
-            solidBtn.classList.toggle('active', mapState.solidMode);
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });

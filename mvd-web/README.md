@@ -381,21 +381,16 @@ speed (5 u/s per world unit) in the player's team colour, hidden below
 10 u/s. Both project the shaft through the orbit camera with a screen-space
 arrowhead at the projected tip, so they tilt correctly with the view.
 
-**Solid mode** — an optional **Solid** toggle (maps whose geometry JSON
-carries wall triangles, version 3+) adds the **walls** on top of the same
-floor treatment, so the map reads as an enclosed architectural model.
-Walls keep per-face Lambert shading (the floor Lambert looked patchy, so
-floors stay flat). Players, items and overlays still draw on top — seeing
-the action through walls is the point.
+The floor model renders into an offscreen canvas keyed by the full camera
+state (`drawCachedWorld`); steady playback just blits it (~1 ms), only
+rotation/pan/zoom/focus changes re-render. The painter sort scatters
+same-colour triangles so per-frame batching would cost many `fill()`
+calls — hence the bitmap cache. Code: `buildFloorModel` /
+`renderSolidEntries` / `drawCachedWorld`.
 
-Both the default floor model and the Solid model render into an offscreen
-canvas keyed by the full camera state (`drawCachedWorld`, separate cache
-slots so they don't evict each other); steady playback just blits it
-(~1 ms), only rotation/pan/zoom/focus changes re-render. The painter sort
-scatters same-colour triangles so per-frame batching would cost many
-`fill()` calls — hence the bitmap cache. Code: `buildFloorModel` /
-`mapSolidEntries` / `renderSolidEntries` / `drawCachedWorld` /
-`drawSolidWorld`.
+(An earlier occluding **Solid** mode drew the map's vertical walls on top
+of the floor model; it was removed, and the generator no longer emits the
+`walls` triangle list it needed — see "Map geometry versions" below.)
 
 **Movers** — on version-4 geometry (carries `submodels`) plus a result
 with `streams.movers` (schema v32), lifts/doors/plats animate at their
@@ -422,10 +417,8 @@ brighter than the descending sides, and faces paint back-to-front, so the
 body reads as a 3D volume with visible depth (water blue, slime green,
 lava orange). The per-face alpha is kept low (`LIQUID_ALPHA`) so the
 volume reads as a faint tint rather than dominating the floor under it.
-In flat mode they draw above the region fills and below the
-outlines/players; in Solid mode they bake into the offscreen cache on top
-of the opaque world (the liquid count is part of the cache key). Liquids
-are not pickable in edit mode but round-trip through Export JSON.
+They draw live above the region fills and below the outlines/players.
+Liquids are not pickable in edit mode but round-trip through Export JSON.
 
 Everything is drawn through one orbit-camera orthographic projection
 (`projectWorld` in `app.js`): floor geometry uses the per-vertex heights
@@ -441,7 +434,7 @@ are depth-sorted per frame.
 Version-1 geometry files (e.g. a stale browser cache) are upgraded on
 load by `normalizeMapGeometry`, which flattens each region to its median
 z — top-down looks identical, 3D shows flat-per-region floors.
-Version-2 files work fully except Solid mode (no walls). The
+Version-2+ files work fully. The
 height-based player-symbol size scaling (higher = up to 25% larger) is a
 2D-only cue and is disabled while the camera is tilted. Camera state
 lives in `_wtc` (`yaw`, `pitch`, orbit center `cx/cy/zMid`); rotation
@@ -489,16 +482,15 @@ and canvas clicks switch from follow/focus to triangle selection:
 - **Select** — click highlights the connected coplanar *patch* under
   the cursor (≈ the original BSP face, merging same-plane neighbours);
   a dropdown switches to single-triangle mode. Shift-click adds/toggles.
-  Hovered triangles get a live outline. In Solid mode wall triangles
-  are selectable too. Adjacent zero-area slivers (degenerate fan
-  triangles in older corpus files) are swept into the patch so deleting
-  it leaves no stranded, unselectable line behind.
+  Hovered triangles get a live outline. Adjacent zero-area slivers
+  (degenerate fan triangles in older corpus files) are swept into the
+  patch so deleting it leaves no stranded, unselectable line behind.
 - **Delete / Undo** — `Del` removes the selection (e.g. stray roof or
   out-of-bounds detail the extractor kept); `Ctrl+Z` undoes. Undo
   snapshots are whole-array references — deletion replaces arrays,
   never mutates — so the stack is cheap and exact.
 - **Export JSON** — downloads the current geometry as a version-4 file
-  (per-vertex tris + walls, coordinates rounded to 2 decimals), round-
+  (per-vertex floor tris, coordinates rounded to 2 decimals), round-
   tripping any `liquids` / `submodels` / `pruned` blocks (not editable, so
   passed through unchanged), drop-in compatible with
   `mvd-web/static/maps/<map>.json`.
@@ -593,14 +585,15 @@ while old `?tab=loc-graph` links keep resolving.
 Per-map floor polygon JSON under `static/maps/` is produced by the
 `mapgen` developer tool, which reads Quake 1 BSPs from an off-repo
 working directory. Files are geometry version 2 (9 floats per
-triangle — x,y,z per vertex), version 3 (adds a top-level `walls`
-triangle list for the map tab's Solid mode), or version 4 (adds optional
-`liquids` water/slime/lava volume meshes and `submodels` brush-model
-lifts/doors, and drops degenerate zero-area triangles). The frontend is
-presence-based and accepts every version (v1 — 6 floats, XY only — is
-flattened to each region's median z on load; missing `walls`/`liquids`/
-`submodels` simply render nothing). A usage-pruned file carries a
-`pruned` provenance block.
+triangle — x,y,z per vertex), version 3 (added a top-level `walls`
+triangle list for the since-removed Solid mode — the generator no longer
+emits it, though the reader still tolerates it in older files), or
+version 4 (adds optional `liquids` water/slime/lava volume meshes and
+`submodels` brush-model lifts/doors, and drops degenerate zero-area
+triangles). The frontend is presence-based and accepts every version
+(v1 — 6 floats, XY only — is flattened to each region's median z on load;
+missing `walls`/`liquids`/`submodels` simply render nothing). A
+usage-pruned file carries a `pruned` provenance block.
 See
 [mvd-analytics/README.md](../mvd-analytics/README.md) (the `cmd/mapgen`
 entry) and `CLAUDE.md`'s quick reference for the workflow.

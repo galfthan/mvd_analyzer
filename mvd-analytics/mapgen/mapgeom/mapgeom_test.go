@@ -325,13 +325,16 @@ func TestBuild_RejectsNonFloorFaces(t *testing.T) {
 	if stats.FacesKept != 0 {
 		t.Errorf("FacesKept = %d, want 0 (vertical face is not a floor)", stats.FacesKept)
 	}
-	// The vertical face is emitted as wall geometry instead (version 3):
-	// one quad → 2 triangles × 9 floats.
+	// The vertical face is classified as a wall (one quad → 2 triangles) but
+	// no longer stored — the occluding "solid" render it fed was removed.
 	if stats.WallsKept != 1 {
 		t.Errorf("WallsKept = %d, want 1", stats.WallsKept)
 	}
-	if got := len(regions.Walls); got != 18 {
-		t.Errorf("Walls len = %d, want 18", got)
+	if stats.WallTris != 2 {
+		t.Errorf("WallTris = %d, want 2", stats.WallTris)
+	}
+	if got := len(regions.Walls); got != 0 {
+		t.Errorf("Walls len = %d, want 0 (walls no longer stored)", got)
 	}
 }
 

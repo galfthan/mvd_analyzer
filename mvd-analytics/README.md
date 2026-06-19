@@ -74,12 +74,13 @@ that downstream consumers render, summarise, or feed to an agent.
   floor-polygon JSON for the web viewer
   (`mvd-web/static/maps/<name>.json`). Geometry version 4: triangles
   carry per-vertex x,y,z (9 floats each) so the map tab can render the
-  floor plan in 3D, plus a top-level `walls` triangle list (vertical
-  faces) for the viewer's occluding "solid" mode (v3), and optional
+  floor plan in 3D, and optional
   `liquids` (water/slime/lava volume meshes from the engine's turbulent
   `*` textures) and `submodels` (brush-model lifts/doors, keyed by their
   `*id` index and posed at runtime from the result's mover streams) (v4).
-  Degenerate zero-area fan triangles are dropped. Extraction thresholds
+  (A v3 top-level `walls` list fed a since-removed occluding "solid"
+  render; walls are still classified for diagnostics but no longer
+  emitted.) Degenerate zero-area fan triangles are dropped. Extraction thresholds
   (floor slope, roof cap, origin height) are tunable via
   `mapgeom.Params` / `BuildParams` — used by the web viewer's geometry
   edit mode, which re-runs the extraction in WASM. The optional
