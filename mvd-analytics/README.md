@@ -91,7 +91,10 @@ that downstream consumers render, summarise, or feed to an agent.
   faces no sample lands on (within `-prune-xy-tol`, default
   `mapclip.FootprintReach` = 24, and `-prune-z-tol`, default 16) are
   dropped. Pruned files carry a `pruned` provenance block; maps with no
-  matching demos emit unpruned.
+  matching demos emit unpruned. The committed 3D corpus (the ~18 maps
+  with BSPs) is pruned this way against recent competitive games —
+  [`scripts/prune-demos.tsv`](../scripts/prune-demos.tsv) records the
+  exact map → mode → hub gameIds used, so the prune is reproducible.
 - `cmd/qw-analyze/` — CLI consumer. `qw-analyze demo.mvd` produces Result
   JSON; `-format md` produces a human summary; `-format events` dumps the
   raw event stream; `-bulk -out-dir dir/` processes a directory.
