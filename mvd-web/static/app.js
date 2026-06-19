@@ -7959,10 +7959,24 @@ function renderSolidEntries(ctx, se) {
     const focused = !!mapState.focusGroupName;
     let curFill = null;
     let open = false;
+    // Seal the anti-aliasing seams between adjacent triangles. The painter
+    // sort interleaves triangles, so even one continuous floor's same-colour
+    // tris land in separate sub-paths; canvas anti-aliases each shared edge
+    // against the backdrop, so the triangulation reads as a distracting mesh.
+    // Stroking every batch with its own fill colour at a hairline width covers
+    // those gaps. Genuine 3D edges (floor-top↔slab-side folds, walls) survive
+    // because they're a different colour and so aren't painted over.
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 1;
+    const flush = () => {
+        ctx.fill();
+        ctx.strokeStyle = curFill;
+        ctx.stroke();
+    };
     for (const e of se.entries) {
         const fill = (focused && focusTier(e.name) === 'far') ? e.fillFaded : e.fill;
         if (fill !== curFill) {
-            if (open) ctx.fill();
+            if (open) flush();
             ctx.fillStyle = fill;
             ctx.beginPath();
             curFill = fill;
@@ -7977,7 +7991,7 @@ function renderSolidEntries(ctx, se) {
         ctx.lineTo(p.x, p.y);
         ctx.closePath();
     }
-    if (open) ctx.fill();
+    if (open) flush();
 }
 
 // Mover (lift/door/plat/train) rendering. A mover reads as a moving piece of
