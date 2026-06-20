@@ -590,10 +590,32 @@ when the demo has no pauses or the server does not embed the block.
 | Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds. |
 | LOS | `los` | []LosTrack (omitempty) | Per-opponent line-of-sight intervals (schema v37). BSP-backed maps only, and **computed lazily** — absent from the default parse; populated on demand (web LOS overlay, `qw-analyze -include los`, mvd-api `/los`). |
 
+### ChangeI16 / ChangeStr / Interval
+
+The shared building blocks the `PlayerStream` fields above are made of — each
+field is a list of one of these.
+
+```
+ChangeI16 = { "t": int32, "v": int16 }
+ChangeStr = { "t": int32, "v": string }
+Interval  = { "s": int32, "e": int32 }   // half-open [s, e)
+```
+
+`ChangeI16` / `ChangeStr` are entries in a **change stream**: a sparse series
+that records one `{t, v}` only when the value *changes*; a reader carries the
+last value forward until the next entry (so `h: [{t:0,v:100},{t:10000,v:50}]`
+means health is 100 from `t=0` and 50 from `t=10000`). Health/Armor/Loc/ammo
+use these. An `Interval` is a half-open `[s, e)` period during which something
+was *true* (start included, end excluded) — weapons-held, powerups, and
+`LosTrack.iv` use these.
+
+`t` / `s` / `e` are **integer milliseconds** since the stream's time
+origin (see PositionTrack for the unit rationale).
+
 ### LosTrack (`streams.players[].los[]`, schema v37)
 
 One entry per opponent this player (the **looker**) ever had a clear line of
-sight to, as half-open `[s, e)` ms intervals.
+sight to, as half-open `[s, e)` ms `Interval`s.
 
 ```
 LosTrack = { "o": int16, "iv": [Interval...] }   // o = index into streams.players (the seen player)
@@ -616,17 +638,6 @@ are alive, against the map's visibility BSP — present only on maps with a
 provisioned BSP (same gate as `PositionTrack.h`/`lq`), absent otherwise. View
 direction is not considered: this is geometric visibility, not FOV. Raw
 transitions, no smoothing.
-
-### ChangeI16 / ChangeStr / Interval
-
-```
-ChangeI16 = { "t": int32, "v": int16 }
-ChangeStr = { "t": int32, "v": string }
-Interval  = { "s": int32, "e": int32 }   // half-open [s, e)
-```
-
-`t` / `s` / `e` are **integer milliseconds** since the stream's time
-origin (see PositionTrack for the unit rationale).
 
 ### PositionTrack
 
