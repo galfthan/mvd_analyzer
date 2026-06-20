@@ -132,9 +132,11 @@ Non-2xx responses use a stable envelope:
 | HTTP | `code` | Meaning |
 |---|---|---|
 | 400 | `invalid_demo_id` | malformed `{id}` |
-| 400 | `invalid_param` | view-layer rejection (unknown field / bad reducer) |
+| 400 | `invalid_param` | malformed query-param **value** — bad number, malformed `reducers` pair, unknown `loc`/`layout` token |
 | 400 | `missing_param` | required param absent (e.g. `time` on `/state-at`) |
+| 400 | `view_error` | view-layer rejection of an otherwise-parseable query — unknown `fields` code or unknown reducer **name** (`/buckets`, `/events`, `/stream-slice`, `/state-at`, `/loc-trails`, `/region-control`) |
 | 404 | `demo_not_found` | hub has no row for this gameId |
+| 404 | `map_unavailable` | no entity corpus / geometry for this map (`/v1/maps/{map}/…`) |
 | 422 | `demoinfo_unavailable` | non-KTX server or aborted match |
 | 422 | `metadata_unavailable` | no fullserverinfo / countdown centerprint |
 | 422 | `frags_unavailable` | no frag log |
@@ -192,7 +194,7 @@ all endpoints and aren't repeated.
 Warm the cache and resolve the canonical id. Idempotent.
 
 ```jsonc
-{ "demoId": "sha:abc…", "sha256": "abc…", "fromCache": true, "schemaVersion": 20 }
+{ "demoId": "sha:abc…", "sha256": "abc…", "fromCache": true, "schemaVersion": 35 }
 ```
 
 Use `demoId` for subsequent calls to skip the gameId→sha lookup.
@@ -204,7 +206,7 @@ single call to populate a match header and decide which panels to show.
 
 ```jsonc
 {
-  "schemaVersion": 23,
+  "schemaVersion": 35,
   "map": "dm6", "gameDir": "qw",
   "mode": "4on4",            // omitempty
   "duration": 613.4,         // seconds
@@ -503,7 +505,7 @@ indices client-side.
 
 - **`/chat`** (`from`, `to`, `players`, `types`) — chat + teamsay only;
   `[]result.MatchEvent`.
-- **`/healthz`** — `{ "ok": true, "schemaVersion": 20 }`.
+- **`/healthz`** — `{ "ok": true, "schemaVersion": 35 }`.
 - **`/v1/version`** — `{ "hash", "tag", "buildDate" }`.
 
 ### 4.16 Per-map static data — `GET /v1/maps/{map}/…`
