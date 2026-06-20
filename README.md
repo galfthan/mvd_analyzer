@@ -596,7 +596,6 @@ mvd-analyzer/
 - [mvd-reader/MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md) — MVD binary format spec with ezQuake references
 - [mvd-analytics/README.md](mvd-analytics/README.md) — pipeline, how to add an analyzer, Result schema
 - [mvd-analytics/RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) — Result JSON schema reference (every field, every section)
-- [API-SCHEMA-REVIEW.md](API-SCHEMA-REVIEW.md) — high-level guide to the schema + API, API↔schema verification, and a design review of improvement candidates (R1–R11)
 - [mvd-api/README.md](mvd-api/README.md) — REST endpoint table, cache layout, smoke tests
 - [mvd-mcp/README.md](mvd-mcp/README.md) — stdio MCP shim, distribution
 - [mvd-mcp/CLAUDE_DESKTOP.md](mvd-mcp/CLAUDE_DESKTOP.md) — Claude Desktop / Claude Code config snippets
