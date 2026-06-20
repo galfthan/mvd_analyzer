@@ -318,6 +318,10 @@ func NewDefaultRegistry() *Registry {
 	// teams and normalised time anchors.
 	r.RegisterPostProcessor(recoverTelefragTeamkills)
 	r.RegisterPostProcessor(normalizeMatchRelativeTimes)
+	// LOS needs match-relative positions + movers + spawns/deaths in one epoch,
+	// which normalizeMatchRelativeTimes establishes; it is independent of the
+	// team/anchor passes that follow.
+	r.RegisterPostProcessor(losPost)
 	r.RegisterPostProcessor(deriveDemoStartAnchor)
 	r.RegisterPostProcessor(duelTeamNormalize)
 	r.RegisterPostProcessor(airgibsPost)

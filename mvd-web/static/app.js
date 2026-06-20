@@ -6000,6 +6000,8 @@ let mapState = {
     playerSymbols: {}, // playerName -> { symbol, team, teamIdx }
     showViewArrows: false,      // per-player 3D view-direction arrows (opt-in)
     showVelArrows: false,       // per-player 3D velocity arrows (opt-in)
+    showLos: false,             // line-of-sight debug lines between players (opt-in)
+    losByPair: {},              // looker name -> { target name -> [{s,e} intervals] } (schema v37)
     initialized: false,
     lastRenderedBucket: null, // Skip redundant redraws
     renderDirty: false,       // Force redraw on track toggle/reset/etc
@@ -6183,6 +6185,24 @@ function initMapView(result) {
         for (const p of result.streams.players) {
             if (p && p.pos && Array.isArray(p.pos.t) && p.pos.t.length > 0) {
                 mapState.posStreams[p.name] = p.pos;
+            }
+        }
+    }
+
+    // Per-player line-of-sight intervals (result.streams.players[].los, schema
+    // v37) flattened to losByPair[lookerName][targetName] = [{s,e},…] so the
+    // debug overlay can answer "did looker see target at time t". LosTrack.o is
+    // an index into streams.players; resolve it to that player's name. LOS is
+    // asymmetric, so each direction is stored under its own looker.
+    mapState.losByPair = {};
+    if (result.streams && Array.isArray(result.streams.players)) {
+        const idxToName = result.streams.players.map(p => p && p.name);
+        for (const p of result.streams.players) {
+            if (!p || !Array.isArray(p.los)) continue;
+            const byTarget = (mapState.losByPair[p.name] ||= {});
+            for (const tr of p.los) {
+                const other = idxToName[tr.o];
+                if (other != null && Array.isArray(tr.iv)) byTarget[other] = tr.iv;
             }
         }
     }
@@ -8111,6 +8131,10 @@ function renderMap(time) {
     // Draw tracks (per-player visibility controlled by enabledPlayers)
     drawTracks(ctx, time);
 
+    // Line-of-sight debug overlay (opt-in): connects players who can see each
+    // other at the current time. Drawn under the player symbols.
+    drawLosLines(ctx, time, playerData);
+
     // Z-depth pass for items + players: overlapping players occlude by z
     // (higher deck on top), and an item whose z is clearly higher than a
     // player also draws on top. Items carry a downward sort bias
@@ -8969,6 +8993,60 @@ function trailIndexAtTime(points, time) {
     return low;
 }
 
+// losCovers reports whether the half-open [s,e) interval list (ascending,
+// match-relative ms) covers tMs. Linear is fine — a pair has few intervals.
+function losCovers(iv, tMs) {
+    if (!iv) return false;
+    for (let i = 0; i < iv.length; i++) {
+        if (tMs >= iv[i].s && tMs < iv[i].e) return true;
+        if (iv[i].s > tMs) break;
+    }
+    return false;
+}
+
+// Line-of-sight debug colours. White when both players see each other; the
+// one-way case is coloured by which of the pair (as ordered in the name list)
+// is the sole seer — red = the first, blue = the second. The colours are
+// debug-arbitrary, not team colours.
+const LOS_MUTUAL_COLOR = 'rgba(255,255,255,0.6)';
+const LOS_FIRST_COLOR = 'rgba(255,80,80,0.6)';
+const LOS_SECOND_COLOR = 'rgba(90,150,255,0.6)';
+
+// drawLosLines draws a line between every player pair that currently has line
+// of sight (mapState.losByPair, schema v37). Endpoints sit at eye height
+// (origin + 22) for visual honesty. White = mutual; red/blue = one-way (see
+// the colour constants). No-op unless the overlay is toggled on and LOS data
+// is present (BSP-backed maps only).
+function drawLosLines(ctx, time, playerData) {
+    if (!mapState.showLos || !playerData) return;
+    const byPair = mapState.losByPair;
+    if (!byPair) return;
+    const tMs = time * 1000;
+    const names = Object.keys(playerData);
+    ctx.save();
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < names.length; i++) {
+        const a = names[i], pa = playerData[a];
+        if (!pa || typeof pa.x !== 'number') continue;
+        for (let j = i + 1; j < names.length; j++) {
+            const b = names[j], pb = playerData[b];
+            if (!pb || typeof pb.x !== 'number') continue;
+            const aSeesB = losCovers(byPair[a] && byPair[a][b], tMs);
+            const bSeesA = losCovers(byPair[b] && byPair[b][a], tMs);
+            if (!aSeesB && !bSeesA) continue;
+            const ea = worldToCanvasNew(pa.x, pa.y, pa.z + 22);
+            const eb = worldToCanvasNew(pb.x, pb.y, pb.z + 22);
+            ctx.strokeStyle = (aSeesB && bSeesA) ? LOS_MUTUAL_COLOR
+                : aSeesB ? LOS_FIRST_COLOR : LOS_SECOND_COLOR;
+            ctx.beginPath();
+            ctx.moveTo(ea.x, ea.y);
+            ctx.lineTo(eb.x, eb.y);
+            ctx.stroke();
+        }
+    }
+    ctx.restore();
+}
+
 function drawTracks(ctx, time) {
     const trailDuration = mapState.trailDuration;
 
@@ -9227,6 +9305,16 @@ function setupMapTrailControls() {
         velArrowsBtn.addEventListener('click', () => {
             mapState.showVelArrows = !mapState.showVelArrows;
             velArrowsBtn.classList.toggle('active', mapState.showVelArrows);
+            mapState.renderDirty = true;
+            renderMap(mapState.currentTime);
+        });
+    }
+
+    const losBtn = document.getElementById('map-los');
+    if (losBtn) {
+        losBtn.addEventListener('click', () => {
+            mapState.showLos = !mapState.showLos;
+            losBtn.classList.toggle('active', mapState.showLos);
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
         });

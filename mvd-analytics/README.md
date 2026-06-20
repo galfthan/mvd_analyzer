@@ -283,7 +283,7 @@ type Result struct {
 
 Each sub-type is defined in its own file under `result/`. The JSON shape
 is the wire contract with every consumer; breaking changes bump
-`CurrentSchemaVersion` (currently `36`). For "how long was the match"
+`CurrentSchemaVersion` (currently `37`). For "how long was the match"
 read `Match.Duration` (float, parser-derived) or `DemoInfo.Duration`
 (integer, KTX-authoritative); the legacy top-level `duration` was
 removed in v6.
@@ -699,6 +699,37 @@ independently — `pos` is strictly x/y/z, and `view` / `hgt` / `lq` /
 `vel` are opt-in field codes. The CLI mirrors this:
 `-include positions,view,height,liquid,velocity` each keep their column
 set in the full-result JSON (default strips the whole heavy track).
+
+## Line of sight (`PlayerStream.LOS`)
+
+The `losPost` post-processor (`analyzer/los.go`, schema v37) records, per
+ordered player pair, the half-open `[s,e)` ms intervals during which one
+player (the **looker**) had a clear geometric sightline to another, stored on
+the looker's `PlayerStream.LOS` as one `LosTrack` per opponent. It runs right
+after `normalizeMatchRelativeTimes`, so positions, spawns/deaths and the mover
+pose timeline share one match-relative epoch.
+
+A sightline is clear when **any** of the 9 rays from the looker's eye
+(`origin + (0,0,22)`) to the opponent's 8 bounding-box corners + box midpoint
+reaches the target without crossing `CONTENTS_SOLID` — worldspawn geometry
+(`bspvis.RayHitsSolid`) **or** any active mover (door / lift / plat / train)
+posed in the way (`bspvis.RayHitsSolidModel` against the brush submodel
+`Models[sub]` at its streamed origin). It is **asymmetric** (the looker is a
+single eye point, the target a whole body), so `A→B` and `B→A` are computed and
+stored independently. View direction is not considered — this is geometric
+visibility, not FOV. Computed only while both players are alive, and only on
+maps with a provisioned BSP (same gate as `H`/`Lq`); absent otherwise.
+
+Cost scales with pairs × duration: each looker-sample tests every opponent, so
+a 4on4 (8 players → 56 ordered pairs) over a full 20-minute match is the heavy
+case. Two losses-free reductions keep it bounded: a **PVS cull** (the opponent
+is skipped unless a leaf its bounding box touches is potentially visible from
+the looker's eye leaf — `bspvis.BoxLeafs` + the leaf PVS) and an any-clear-ray
+early-out with the midpoint tested first. Still, LOS is the most expensive
+position-derived pass; it belongs in the future "full" parse tier (see
+[`FOLLOWUPS.md`](../FOLLOWUPS.md)). Debug overlay: the web map view's **LOS**
+button draws a line between players who currently have sight (white = mutual,
+red/blue = one-way).
 
 ## Velocity (`PositionTrack.VX` / `VY` / `VZ`)
 

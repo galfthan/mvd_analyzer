@@ -404,7 +404,17 @@ package result
 //     `endTime` key disappears from the `match` object — read Duration for
 //     match length, or streams.global for the match window. Breaking
 //     removal (not additive); the view query API is unaffected.
-const CurrentSchemaVersion = 36
+//
+// v37:
+//   - PlayerStream gains LOS []LosTrack: per-opponent line-of-sight as
+//     half-open [Start,End) ms intervals during which the looker had a clear
+//     sightline (origin+(0,0,22) eye → any of the opponent's 8 bbox corners +
+//     midpoint), blocked by worldspawn solids or any active mover posed in
+//     the way. Asymmetric (A→B in A's stream, B→A in B's); Other indexes
+//     Streams.Players. Computed against the visibility BSP, so present only on
+//     maps with a provisioned BSP (same gate as PositionTrack.H/Lq). Additive
+//     (omitempty); absent on BSP-less maps. View direction is not considered.
+const CurrentSchemaVersion = 37
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
