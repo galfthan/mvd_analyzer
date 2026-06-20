@@ -83,20 +83,23 @@ func TestLosTargets(t *testing.T) {
 }
 
 func TestLosAliveAt(t *testing.T) {
-	spawns := []int32{100, 500}
+	// Realistic KTX ordering: the match-start spawn is NOT recorded, so the
+	// first event is a death; each recorded spawn is a respawn that follows it.
 	deaths := []int32{300, 700}
+	spawns := []int32{450, 900}
 	cases := []struct {
 		t    int32
 		want bool
 	}{
-		{50, false},  // before first spawn
-		{100, true},  // at spawn
-		{200, true},  // alive
-		{300, false}, // at death (dead)
-		{400, false}, // dead between death and next spawn
-		{500, true},  // respawn
+		{50, true},   // before first death → alive since match start (no spawn recorded yet)
+		{200, true},  // still pre-first-death → alive
+		{300, false}, // at first death → dead
+		{400, false}, // dead between death and respawn
+		{450, true},  // respawn
 		{600, true},  // alive
-		{800, false}, // after final death
+		{700, false}, // second death
+		{800, false}, // dead awaiting respawn
+		{900, true},  // second respawn
 	}
 	for _, c := range cases {
 		if got := losAliveAt(spawns, deaths, c.t); got != c.want {
@@ -107,7 +110,7 @@ func TestLosAliveAt(t *testing.T) {
 	if !losAliveAt(nil, nil, 1234) {
 		t.Errorf("empty spawns/deaths must read alive")
 	}
-	// Deaths only (POV demo without spawns) → alive until the death.
+	// Deaths only (no respawn recorded) → alive until the death, dead after.
 	if !losAliveAt(nil, []int32{500}, 400) {
 		t.Errorf("deaths-only: should be alive before the death")
 	}

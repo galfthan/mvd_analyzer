@@ -1,7 +1,6 @@
 package analyzer
 
 import (
-	"math"
 	"sort"
 
 	"github.com/mvd-analyzer/mvd-analytics/bspvis"
@@ -372,22 +371,27 @@ func losTargets(ox, oy, oz float32, dst *[9][3]float32) {
 }
 
 // losAliveAt reports whether a player is alive at match-relative time t, given
-// their ascending Spawns/Deaths streams: alive from the most recent spawn at
-// or before t until the next death. With no spawns recorded (POV demos can
-// omit them) the player is treated as spawned since the start — positions only
-// exist in-world, so the death gate still closes LOS correctly. Binary search
-// keeps this O(log n) since it runs once per sample-pair.
+// their ascending Spawns/Deaths streams.
+//
+// A player is alive from match start and stays alive until a death; each death
+// begins a dead period that the next spawn ends. So liveness is decided by the
+// most recent event at or before t: a death ⇒ dead, a spawn ⇒ alive, neither
+// ⇒ alive (spawned at match start). Crucially this does NOT require a recorded
+// match-start spawn — KTX demos emit the first spawn only on the first
+// *respawn* (the spawn that starts a life follows the death that ended the
+// previous one), so a player's first recorded spawn is typically a minute+ in.
+// Keying off "most recent spawn" instead would wrongly mark everyone dead until
+// their first respawn and erase all early-match line of sight. This mirrors the
+// liveness semantics of view.playerActiveInWindow (the bucket view's canonical
+// alive test) — keep the two in sync. Binary search keeps this O(log n) since
+// it runs once per sample-pair.
 func losAliveAt(spawns, deaths []int32, t int32) bool {
-	// Most recent spawn at or before t.
+	di := sort.Search(len(deaths), func(i int) bool { return deaths[i] > t })
+	if di == 0 {
+		return true // no death yet ⇒ alive since match start
+	}
+	lastDeath := deaths[di-1]
 	si := sort.Search(len(spawns), func(i int) bool { return spawns[i] > t })
-	if len(spawns) > 0 && si == 0 {
-		return false // spawns recorded, but all after t → not yet alive
-	}
-	sp := int32(math.MinInt32)
-	if si > 0 {
-		sp = spawns[si-1]
-	}
-	// Any death in (sp, t] means dead: the first death after sp, if it is <= t.
-	di := sort.Search(len(deaths), func(i int) bool { return deaths[i] > sp })
-	return di >= len(deaths) || deaths[di] > t
+	// Alive iff a spawn at or before t is more recent than that last death.
+	return si > 0 && spawns[si-1] > lastDeath
 }
