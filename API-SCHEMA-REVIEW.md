@@ -1,9 +1,7 @@
 # Analytics Schema & API — Report and Design Review
 
-**Scope:** the `mvd-analytics` Result schema (currently **v35**) and the
-`mvd-api` REST surface (**23 endpoints**) built on top of it.
-**Status:** point-in-time review (schema v35). The R-items in §4 are
-*proposals*, not applied changes.
+**Scope:** the `mvd-analytics` Result schema (now **v36**) and the
+`mvd-api` REST surface (**22 endpoints**) built on top of it.
 
 This document is three things: a human-readable map of what the schema and
 API contain (§1–§2), a verification that the API matches the schema (§3),
@@ -12,6 +10,26 @@ cleaner (§4). The authoritative field-level references remain
 [`mvd-analytics/RESULT_SCHEMA.md`](mvd-analytics/RESULT_SCHEMA.md) (shapes)
 and [`mvd-api/API.md`](mvd-api/API.md) (HTTP surface); this report sits
 above them.
+
+**Implementation status (schema v36).** R1, R3, R4, R5, R6, R7, R8, R9 from
+§4 have since been **implemented**; the per-item text below is kept as the
+rationale of record and marked ✅ where done. Still open: **R2** (split
+version surfaces), **R10** (a deliberate *keep* — no change wanted), **R11**
+(the seconds/ms split — a deliberate trade-off left as is).
+
+| Item | Status | One-line |
+|---|---|---|
+| R1 | ✅ done | section filtering moved to `view.Frags/Damage/Items/Backpacks/WeaponPickups/Chat` |
+| R2 | open | split result-vs-view version surfaces |
+| R3 | ✅ done | documented `422`-unavailable vs `200`-empty rule (`view.ErrUnavailable`) |
+| R4 | ✅ done | `weapon` is a CSV set on every endpoint (incl. `/backpacks`) |
+| R5 | ✅ done | `/region-control` accepts `from`/`to` |
+| R6 | ✅ done | `view_error` folded into `invalid_param` |
+| R7 | ✅ done | query-param names are case-insensitive (`ciGet`) |
+| R8 | ✅ done | demo-scoped `/map-entities` removed; per-map endpoint kept |
+| R9 | ✅ done | `MatchResult.startTime`/`endTime` removed (schema v36) |
+| R10 | keep | frag triple-representation is intentional — no change |
+| R11 | open | seconds-envelope / ms-array split kept (deliberate) |
 
 ---
 
@@ -73,7 +91,7 @@ by `gameId:NNNN` (hub.quakeworld.nu — fetched & parsed on first touch) or
 `sha:HEX` (a warm cache entry). Everything except `loadDemo` is served from
 the cached result, sub-millisecond, immutable, ETag'd.
 
-The 23 endpoints fall into five intents:
+The 22 endpoints fall into five intents:
 
 | Intent | Endpoints | Returns |
 |---|---|---|
@@ -99,7 +117,7 @@ a single `CurrentSchemaVersion` (and the tension R2 raises).
 
 ## 3. Does the API match the schema?
 
-**Endpoint coverage: yes.** All 23 registered routes (`router.go`) are
+**Endpoint coverage: yes.** All 22 registered routes (`router.go`) are
 documented in `API.md`; every demo endpoint returns either a
 `result.XxxResult` (documented in `RESULT_SCHEMA.md`) or a `view.XxxView`.
 The doc split is clean: `API.md` owns the HTTP surface (params, units,

@@ -9241,7 +9241,6 @@
   },
   "match": {
     "duration": 599980,
-    "endTime": 599980,
     "gameDir": "qw",
     "map": "Claustrophobopolis",
     "players": [
@@ -9691,7 +9690,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 35,
+  "schemaVersion": 36,
   "streams": {
     "global": {
       "demoOffset": 10286,

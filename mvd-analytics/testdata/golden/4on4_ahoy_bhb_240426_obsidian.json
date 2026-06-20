@@ -40178,7 +40178,6 @@
   },
   "match": {
     "duration": 1200128,
-    "endTime": 1200128,
     "gameDir": "qw",
     "map": "Obsidian",
     "players": [
@@ -55336,7 +55335,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 35,
+  "schemaVersion": 36,
   "streams": {
     "global": {
       "demoOffset": 10452,
