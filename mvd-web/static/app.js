@@ -90,8 +90,6 @@ let analyzeResolve = null;
 let analyzeReject = null;
 let recomputeResolve = null;
 let recomputeReject = null;
-let geometryResolve = null;
-let geometryReject = null;
 
 // ─── Load-timing instrumentation ────────────────────────────────────────────
 // Structured per-stage timing for the demo load path, printed to the console
@@ -231,18 +229,6 @@ worker.onmessage = (e) => {
             recomputeResolve = null;
             recomputeReject = null;
         }
-    } else if (e.data.type === 'geometry_result') {
-        if (geometryResolve) {
-            geometryResolve(e.data.json);
-            geometryResolve = null;
-            geometryReject = null;
-        }
-    } else if (e.data.type === 'geometry_error') {
-        if (geometryReject) {
-            geometryReject(new Error(e.data.message));
-            geometryResolve = null;
-            geometryReject = null;
-        }
     }
 };
 
@@ -336,16 +322,6 @@ function recomputeInWorker(overrideJSON) {
         recomputeResolve = resolve;
         recomputeReject = reject;
         worker.postMessage({ type: 'recomputeRegions', overrideJSON });
-    });
-}
-
-// generateGeometryInWorker: run the mapgen extraction in WASM against a
-// server-hosted BSP with user-tuned thresholds (geometry edit mode).
-function generateGeometryInWorker(optsJSON) {
-    return new Promise((resolve, reject) => {
-        geometryResolve = resolve;
-        geometryReject = reject;
-        worker.postMessage({ type: 'generateGeometry', optsJSON });
     });
 }
 
@@ -448,9 +424,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const hubId = params.get('gameId') || params.get('hub');
     const requestedTab = params.get('tab');
 
-    // Hidden geometry edit/cleanup mode (see the editState section).
-    if (params.get('edit') === '1') enableMapEditMode();
-
     // Pick the initial active tab. When deep-linking to a demo we want
     // the destination tab to be active even before the demo finishes
     // loading, so the wasm-loading overlay covers the right pane and
@@ -539,10 +512,6 @@ function updateUrlState() {
 
             if (mapState.learnMode) {
                 params.set('learn', '1');
-            }
-
-            if (editState.enabled) {
-                params.set('edit', '1');
             }
 
             if (mapState.currentTime > 0) {
@@ -6238,7 +6207,7 @@ function initMapView(result) {
     // If absent (404 or fetch error), the existing hull path remains as fallback.
     const rawMapName = result.demoInfo && result.demoInfo.map ? result.demoInfo.map : '';
     const mapBasename = rawMapName.toLowerCase().replace(/^maps\//, '').replace(/\.bsp$/, '');
-    mapState.mapBasename = mapBasename; // kept for the edit mode's regenerate/export
+    mapState.mapBasename = mapBasename;
     if (mapBasename) {
         const tGeom = performance.now();
         fetch(`maps/${mapBasename}.json`)
@@ -7401,386 +7370,6 @@ function tierFill(group, tier) {
     return base;
 }
 
-// ─── Geometry edit mode (?edit=1) ───────────────────────────────────────────
-//
-// Hidden cleanup tool for the committed map-geometry corpus, enabled by the
-// `edit=1` URL param. Canvas clicks select floor triangles — by connected
-// coplanar patch (≈ the original BSP face) or
-// single triangle — for deletion of stray roof/outside detail the extractor
-// kept. Delete/undo work on whole-array snapshots (deletion replaces the
-// arrays, never mutates), Export downloads the result as a version-3
-// geometry JSON ready to commit over mvd-web/static/maps/<map>.json, and
-// Regenerate re-runs the mapgen extraction in WASM against the
-// server-hosted BSP (bsps/<map>.bsp, core maps only) with user-tuned
-// thresholds (floor slope, roof cap, origin height).
-
-const editState = {
-    enabled: false,
-    hover: null,      // {arr, off} under the cursor
-    selection: [],    // [{arr, off}]
-    undoStack: [],    // [{locsTris: [array refs], walls}]
-    edited: false,    // any deletion/regeneration since load
-};
-
-function enableMapEditMode() {
-    if (editState.enabled) return;
-    editState.enabled = true;
-    const panel = document.getElementById('map-edit-panel');
-    if (panel) panel.style.display = '';
-    updateEditStatus();
-}
-
-// editCandidateLists: the floor-triangle arrays clicks can currently hit.
-function editCandidateLists() {
-    const geom = mapState.mapGeometry;
-    if (!geom) return [];
-    const lists = [];
-    for (const l of geom.locs) {
-        if (l && Array.isArray(l.tris) && l.tris.length >= 9) lists.push(l.tris);
-    }
-    return lists;
-}
-
-// pickEditTriAt: the triangle under a canvas point; nearest the camera wins.
-function pickEditTriAt(cx, cy) {
-    let best = null;
-    let bestDepth = -Infinity;
-    for (const arr of editCandidateLists()) {
-        for (let i = 0; i + 8 < arr.length; i += 9) {
-            const a = worldToCanvasNew(arr[i],     arr[i + 1], arr[i + 2]);
-            const b = worldToCanvasNew(arr[i + 3], arr[i + 4], arr[i + 5]);
-            const c = worldToCanvasNew(arr[i + 6], arr[i + 7], arr[i + 8]);
-            if (!pointInTriangle(cx, cy, a, b, c)) continue;
-            const depth = Math.max(a.depth, b.depth, c.depth);
-            if (depth > bestDepth) {
-                bestDepth = depth;
-                best = { arr, off: i };
-            }
-        }
-    }
-    return best;
-}
-
-function triPlane(arr, off) {
-    const ax = arr[off],     ay = arr[off + 1], az = arr[off + 2];
-    const ux = arr[off + 3] - ax, uy = arr[off + 4] - ay, uz = arr[off + 5] - az;
-    const vx = arr[off + 6] - ax, vy = arr[off + 7] - ay, vz = arr[off + 8] - az;
-    let nx = uy * vz - uz * vy;
-    let ny = uz * vx - ux * vz;
-    let nz = ux * vy - uy * vx;
-    const nl = Math.hypot(nx, ny, nz);
-    if (nl === 0) return null;
-    nx /= nl; ny /= nl; nz /= nl;
-    return { nx, ny, nz, d: nx * ax + ny * ay + nz * az };
-}
-
-// expandPatch: BFS from a triangle across shared edges to all connected
-// coplanar triangles in the same array — recovers (at least) the original
-// fan-triangulated BSP face, and merges adjacent faces in the same plane,
-// which is what "delete this roof" wants.
-function expandPatch(arr, startOff) {
-    const vkey = (i) =>
-        Math.round(arr[i] * 100) + ',' + Math.round(arr[i + 1] * 100) + ',' + Math.round(arr[i + 2] * 100);
-    const edgeKey = (i, j) => {
-        const a = vkey(i), b = vkey(j);
-        return a < b ? a + '|' + b : b + '|' + a;
-    };
-    // Edge → triangle offsets adjacency for the whole array.
-    const byEdge = new Map();
-    for (let i = 0; i + 8 < arr.length; i += 9) {
-        for (const [u, v] of [[i, i + 3], [i + 3, i + 6], [i + 6, i]]) {
-            const k = edgeKey(u, v);
-            let list = byEdge.get(k);
-            if (!list) byEdge.set(k, list = []);
-            list.push(i);
-        }
-    }
-    let p0 = triPlane(arr, startOff);
-    if (!p0) {
-        // The clicked triangle is itself a degenerate zero-area sliver
-        // (no plane). Walk shared edges to the first real neighbor and
-        // adopt its plane so the patch still grows instead of selecting
-        // the lone sliver.
-        const visited = new Set([startOff]);
-        const q = [startOff];
-        while (q.length && !p0) {
-            const off = q.shift();
-            for (const [u, v] of [[off, off + 3], [off + 3, off + 6], [off + 6, off]]) {
-                for (const next of byEdge.get(edgeKey(u, v)) || []) {
-                    if (visited.has(next)) continue;
-                    visited.add(next);
-                    const p = triPlane(arr, next);
-                    if (p) { p0 = p; break; }
-                    q.push(next);
-                }
-                if (p0) break;
-            }
-        }
-        if (!p0) return [startOff]; // whole connected component is degenerate
-    }
-    const seen = new Set([startOff]);
-    const queue = [startOff];
-    while (queue.length) {
-        const off = queue.pop();
-        for (const [u, v] of [[off, off + 3], [off + 3, off + 6], [off + 6, off]]) {
-            for (const next of byEdge.get(edgeKey(u, v)) || []) {
-                if (seen.has(next)) continue;
-                const p = triPlane(arr, next);
-                if (!p) {
-                    // Degenerate sliver sharing an edge with the patch: no
-                    // plane to test, but it must be swept in — otherwise
-                    // deleting the patch strands its lone surviving edge as
-                    // an unselectable, undeletable line. Keep flowing the
-                    // BFS through it (its edges bridge to real neighbors,
-                    // which are still plane-tested below).
-                    seen.add(next);
-                    queue.push(next);
-                    continue;
-                }
-                // Coplanar within tolerance (either normal orientation).
-                const dot = p.nx * p0.nx + p.ny * p0.ny + p.nz * p0.nz;
-                if (Math.abs(dot) < 0.995) continue;
-                if (Math.abs(Math.abs(p.d) - Math.abs(p0.d)) > 1.0 &&
-                    Math.abs(p.d - p0.d * Math.sign(dot)) > 1.0) continue;
-                seen.add(next);
-                queue.push(next);
-            }
-        }
-    }
-    return [...seen];
-}
-
-function editSelectionKey(s) {
-    // Selection identity for toggling; arrays are compared by reference via
-    // an index into the current candidate lists.
-    return editCandidateLists().indexOf(s.arr) + ':' + s.off;
-}
-
-function editHandleClick(cx, cy, additive) {
-    const hit = pickEditTriAt(cx, cy);
-    if (!hit) {
-        if (!additive && editState.selection.length) {
-            editState.selection = [];
-            updateEditStatus();
-            mapState.renderDirty = true;
-            renderMap(mapState.currentTime);
-        }
-        return;
-    }
-    const mode = document.getElementById('map-edit-selmode')?.value || 'patch';
-    const offs = mode === 'patch' ? expandPatch(hit.arr, hit.off) : [hit.off];
-    const items = offs.map(off => ({ arr: hit.arr, off }));
-    if (additive) {
-        // Shift-click toggles: if the clicked patch is already fully
-        // selected, remove it; otherwise add the missing pieces.
-        const have = new Set(editState.selection.map(editSelectionKey));
-        const keys = items.map(editSelectionKey);
-        const allIn = keys.every(k => have.has(k));
-        if (allIn) {
-            const drop = new Set(keys);
-            editState.selection = editState.selection.filter(s => !drop.has(editSelectionKey(s)));
-        } else {
-            for (let i = 0; i < items.length; i++) {
-                if (!have.has(keys[i])) editState.selection.push(items[i]);
-            }
-        }
-    } else {
-        editState.selection = items;
-    }
-    updateEditStatus();
-    mapState.renderDirty = true;
-    renderMap(mapState.currentTime);
-}
-
-function editDeleteSelection() {
-    if (!editState.selection.length || !mapState.mapGeometry) return;
-    const geom = mapState.mapGeometry;
-    // Shallow snapshot is a real undo point: deletion below replaces the
-    // arrays, it never mutates them.
-    editState.undoStack.push({
-        locsTris: geom.locs.map(l => l.tris),
-        walls: geom.walls || null,
-    });
-    const byArr = new Map();
-    for (const s of editState.selection) {
-        let set = byArr.get(s.arr);
-        if (!set) byArr.set(s.arr, set = new Set());
-        set.add(s.off);
-    }
-    const filterArr = (arr, dropOffs) => {
-        const out = [];
-        for (let i = 0; i + 8 < arr.length; i += 9) {
-            if (dropOffs.has(i)) continue;
-            for (let k = 0; k < 9; k++) out.push(arr[i + k]);
-        }
-        return out;
-    };
-    for (const [arr, offs] of byArr) {
-        if (geom.walls === arr) {
-            geom.walls = filterArr(arr, offs);
-            continue;
-        }
-        for (const l of geom.locs) {
-            if (l && l.tris === arr) {
-                l.tris = filterArr(arr, offs);
-                break;
-            }
-        }
-    }
-    editState.selection = [];
-    editState.hover = null;
-    editState.edited = true;
-    applyMapGeometry(geom);
-    updateEditStatus();
-}
-
-function editUndo() {
-    const snap = editState.undoStack.pop();
-    if (!snap || !mapState.mapGeometry) return;
-    const geom = mapState.mapGeometry;
-    // A snapshot is only valid against the loc-array layout it was taken
-    // from. If the geometry was reloaded or regenerated since (loc count
-    // changed), the positional index mapping is stale — drop the snapshot
-    // rather than corrupt tris with undefined / misaligned arrays.
-    if (!snap.locsTris || snap.locsTris.length !== geom.locs.length) {
-        editState.edited = editState.undoStack.length > 0;
-        updateEditStatus();
-        return;
-    }
-    geom.locs.forEach((l, i) => { l.tris = snap.locsTris[i]; });
-    geom.walls = snap.walls;
-    editState.selection = [];
-    editState.hover = null;
-    editState.edited = editState.undoStack.length > 0;
-    applyMapGeometry(geom);
-    updateEditStatus();
-}
-
-// exportEditedGeometry: download the current (possibly edited) geometry as
-// a version-3 JSON, drop-in compatible with mvd-web/static/maps/<map>.json.
-// Coordinates are rounded to 2 decimals — BSP vertices are float32 and
-// mostly grid-aligned, so this only trims JS float noise.
-function exportEditedGeometry() {
-    const geom = mapState.mapGeometry;
-    if (!geom) return;
-    const round = v => Math.round(v * 100) / 100;
-    const locs = [];
-    for (const l of geom.locs) {
-        if (!l || !Array.isArray(l.tris) || l.tris.length < 9) continue;
-        locs.push({ name: l.name, z: l.z, tris: l.tris.map(round) });
-    }
-    const out = {
-        map: geom.map || mapState.mapBasename || 'map',
-        version: 4,
-        bounds: geom.bounds,
-        locs,
-    };
-    if (Array.isArray(geom.walls) && geom.walls.length >= 9) {
-        out.walls = geom.walls.map(round);
-    }
-    // Liquids and submodels are not editable (not pickable), but the export
-    // must round-trip them so an edited v4 file stays complete.
-    if (Array.isArray(geom.liquids) && geom.liquids.length > 0) {
-        out.liquids = geom.liquids.map(lq => ({ kind: lq.kind, tris: lq.tris.map(round) }));
-    }
-    if (Array.isArray(geom.submodels) && geom.submodels.length > 0) {
-        out.submodels = geom.submodels.map(s => ({ id: s.id, tris: s.tris.map(round) }));
-    }
-    if (geom.pruned) out.pruned = geom.pruned;
-    const blob = new Blob([JSON.stringify(out)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = out.map + '.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 0);
-}
-
-async function regenerateGeometryFromBsp() {
-    const mapName = mapState.mapBasename || mapState.mapGeometry?.map || '';
-    const status = document.getElementById('map-edit-status');
-    if (!mapName) {
-        if (status) status.textContent = 'no map loaded';
-        return;
-    }
-    const num = (id) => {
-        const v = parseFloat(document.getElementById(id)?.value);
-        return Number.isFinite(v) ? v : 0; // 0 → mapgen default on the Go side
-    };
-    const opts = {
-        map: mapName,
-        floorNormalZ: num('map-edit-floornz'),
-        ceilingMaxAboveLoc: num('map-edit-roofcap'),
-        playerOriginAboveFloor: num('map-edit-originh'),
-    };
-    const btn = document.getElementById('map-edit-regen');
-    if (btn) btn.disabled = true;
-    if (status) status.textContent = 'regenerating…';
-    try {
-        const res = JSON.parse(await generateGeometryInWorker(JSON.stringify(opts)));
-        if (res.error) {
-            if (status) status.textContent = res.error;
-            return;
-        }
-        // Regeneration replaces every array — old undo snapshots no longer
-        // line up with geom.locs, so the history resets.
-        editState.undoStack = [];
-        editState.selection = [];
-        editState.hover = null;
-        editState.edited = true;
-        applyMapGeometry(res.geometry);
-        if (status) {
-            const s = res.stats || {};
-            status.textContent =
-                `regenerated: locs=${s.Locs ?? '?'} tris=${s.Triangles ?? '?'} walls=${s.WallTris ?? '?'}`;
-        }
-    } catch (err) {
-        if (status) status.textContent = err.message || String(err);
-    } finally {
-        if (btn) btn.disabled = false;
-    }
-}
-
-function updateEditStatus() {
-    const el = document.getElementById('map-edit-status');
-    if (!el) return;
-    const n = editState.selection.length;
-    const parts = [];
-    if (n > 0) parts.push(`${n} tri${n === 1 ? '' : 's'} selected`);
-    if (editState.edited) parts.push('edited — export to keep');
-    el.textContent = parts.join(' · ');
-}
-
-// drawEditOverlay: hovered triangle + selection highlight, projected like
-// everything else so it tracks pan/zoom/rotation.
-function drawEditOverlay(ctx) {
-    if (!editState.enabled) return;
-    const drawTri = (arr, off, fill, stroke) => {
-        const a = worldToCanvasNew(arr[off],     arr[off + 1], arr[off + 2]);
-        const b = worldToCanvasNew(arr[off + 3], arr[off + 4], arr[off + 5]);
-        const c = worldToCanvasNew(arr[off + 6], arr[off + 7], arr[off + 8]);
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.lineTo(c.x, c.y);
-        ctx.closePath();
-        ctx.fillStyle = fill;
-        ctx.fill();
-        ctx.strokeStyle = stroke;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    };
-    for (const s of editState.selection) {
-        drawTri(s.arr, s.off, 'rgba(255, 64, 64, 0.4)', 'rgba(255, 96, 96, 0.9)');
-    }
-    if (editState.hover) {
-        drawTri(editState.hover.arr, editState.hover.off,
-                'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.6)');
-    }
-}
-
 // ─── Floor-model geometry + shading helpers ─────────────────────────────────
 //
 // The floor model (buildFloorModel) extrudes the floor's outer boundary into
@@ -8497,10 +8086,6 @@ function renderMap(time) {
     // labels). Fresh each frame so it follows pan / zoom precisely and stays
     // crisp at any zoom level.
     drawLocationLayer(ctx);
-
-    // Geometry edit mode: hovered/selected triangle highlight, directly on
-    // the floor layer (also live in learn mode below).
-    drawEditOverlay(ctx);
 
     // Learn-map mode: static entity study view — keep the floor/loc base,
     // draw the designed entity layout, and skip all player/time-based layers.
@@ -9676,47 +9261,14 @@ function setupMapTrailControls() {
         document.addEventListener('fullscreenchange', onMapFullscreenChange);
         window.addEventListener('resize', onMapWindowResize);
         // Escape clears region focus (no-op otherwise, so it doesn't fight
-        // other Escape behaviours like exiting fullscreen). Delete / undo
-        // shortcuts only act in geometry edit mode and never while typing
-        // in a form field.
+        // other Escape behaviours like exiting fullscreen).
         document.addEventListener('keydown', (ev) => {
-            const tag = ev.target && ev.target.tagName;
-            const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
-            if (editState.enabled && !typing) {
-                if ((ev.key === 'Delete' || ev.key === 'Backspace') && editState.selection.length) {
-                    ev.preventDefault();
-                    editDeleteSelection();
-                    return;
-                }
-                if ((ev.key === 'z' || ev.key === 'Z') && (ev.ctrlKey || ev.metaKey)) {
-                    ev.preventDefault();
-                    editUndo();
-                    return;
-                }
-            }
-            if (ev.key === 'Escape') {
-                if (editState.enabled && editState.selection.length) {
-                    editState.selection = [];
-                    updateEditStatus();
-                    mapState.renderDirty = true;
-                    renderMap(mapState.currentTime);
-                } else if (mapState.focusGroupName) {
-                    setFocusGroup(null);
-                }
+            if (ev.key === 'Escape' && mapState.focusGroupName) {
+                setFocusGroup(null);
             }
         });
         setupMapTrailControls.__fsListenerAttached = true;
     }
-
-    // Geometry edit mode controls (panel only visible with ?edit=1).
-    const editDelBtn = document.getElementById('map-edit-delete');
-    if (editDelBtn) editDelBtn.addEventListener('click', () => editDeleteSelection());
-    const editUndoBtn = document.getElementById('map-edit-undo');
-    if (editUndoBtn) editUndoBtn.addEventListener('click', () => editUndo());
-    const editExportBtn = document.getElementById('map-edit-export');
-    if (editExportBtn) editExportBtn.addEventListener('click', () => exportEditedGeometry());
-    const editRegenBtn = document.getElementById('map-edit-regen');
-    if (editRegenBtn) editRegenBtn.addEventListener('click', () => regenerateGeometryFromBsp());
 }
 
 // installMapInteraction adds pan / zoom / rotate / click handlers to the map
@@ -9835,19 +9387,6 @@ function installMapInteraction(canvas) {
         }
     });
 
-    // Geometry edit mode: live hover highlight of the triangle under the
-    // cursor (a few thousand projected point-in-triangle tests — sub-ms).
-    canvas.addEventListener('mousemove', (ev) => {
-        if (!editState.enabled || drag.active) return;
-        const p = canvasPointFromEvent(ev);
-        const hit = pickEditTriAt(p.x, p.y);
-        const cur = editState.hover;
-        if ((hit && cur && hit.arr === cur.arr && hit.off === cur.off) || (!hit && !cur)) return;
-        editState.hover = hit;
-        mapState.renderDirty = true;
-        renderMap(mapState.currentTime);
-    });
-
     canvas.addEventListener('wheel', (ev) => {
         ev.preventDefault();
         const p = canvasPointFromEvent(ev);
@@ -9880,15 +9419,10 @@ function installMapInteraction(canvas) {
     canvas.style.cursor = 'grab';
 }
 
-// Dispatched from installMapInteraction on a true click (no drag). In
-// geometry edit mode clicks select triangles (shift = add/toggle).
-// Otherwise player symbols win (toggle follow), then the click picks a loc
+// Dispatched from installMapInteraction on a true click (no drag).
+// Player symbols win first (toggle follow), then the click picks a loc
 // region for focus mode — same region or empty space clears it.
 function handleMapCanvasClick(cx, cy, ev) {
-    if (editState.enabled) {
-        editHandleClick(cx, cy, !!(ev && ev.shiftKey));
-        return;
-    }
     const hit = hitTestPlayerSymbol(cx, cy, mapState.currentTime);
     if (hit) {
         setFollowPlayer(mapState.followPlayer === hit ? null : hit);

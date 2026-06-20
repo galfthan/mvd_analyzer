@@ -236,19 +236,5 @@ onmessage = function(e) {
         } catch (err) {
             postMessage({ type: 'recompute_error', message: err.message || String(err) });
         }
-    } else if (e.data.type === 'generateGeometry') {
-        // generateMapGeometry re-runs the mapgen extraction against a
-        // server-hosted BSP (fetched via this worker's fetchBspSync) with
-        // user-tuned thresholds — the map tab's geometry edit mode.
-        if (!wasmReady) {
-            postMessage({ type: 'geometry_error', message: 'WASM not loaded yet' });
-            return;
-        }
-        try {
-            const jsonStr = generateMapGeometry(e.data.optsJSON);
-            postMessage({ type: 'geometry_result', json: jsonStr });
-        } catch (err) {
-            postMessage({ type: 'geometry_error', message: err.message || String(err) });
-        }
     }
 };

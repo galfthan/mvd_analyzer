@@ -600,22 +600,6 @@
                         <button id="map-reset-view" title="Reset pan / zoom / rotation">Reset view</button>
                         <button id="map-fullscreen" title="Toggle fullscreen">Fullscreen</button>
                     </div>
-                    <div id="map-edit-panel" class="map-track-controls map-edit-panel" style="display: none;">
-                        <span class="map-trail-label">Edit geometry:</span>
-                        <select id="map-edit-selmode" class="map-trail-select" title="What a click selects: the connected coplanar patch (≈ BSP face) or a single triangle">
-                            <option value="patch" selected>Patch</option>
-                            <option value="tri">Triangle</option>
-                        </select>
-                        <button id="map-edit-delete" title="Delete selected triangles (Del)">Delete</button>
-                        <button id="map-edit-undo" title="Undo last delete (Ctrl+Z)">Undo</button>
-                        <button id="map-edit-export" title="Download the edited geometry as version-3 JSON (drop into mvd-web/static/maps/)">Export JSON</button>
-                        <span class="map-track-sep" aria-hidden="true"></span>
-                        <label class="map-edit-field" title="Minimum plane-normal Z to count as floor (0.7 ≈ 45°); steeper faces become walls">slope nz≥ <input id="map-edit-floornz" type="number" step="0.05" min="0.05" max="1" value="0.7"></label>
-                        <label class="map-edit-field" title="Drop faces more than this far above their nearest loc point (roof/ceiling cap)">roof cap <input id="map-edit-roofcap" type="number" step="16" min="16" value="128"></label>
-                        <label class="map-edit-field" title="Standing-player origin height used by the roof cap comparison">origin h <input id="map-edit-originh" type="number" step="4" min="0" value="24"></label>
-                        <button id="map-edit-regen" title="Re-run the mapgen extraction in-browser against the server-hosted BSP (core maps only)">Regenerate</button>
-                        <span id="map-edit-status" class="map-edit-status"></span>
-                    </div>
                     <div id="map-entities-table-wrap" class="map-entities-table-wrap" style="display: none;">
                         <table class="stats-table">
                             <thead>

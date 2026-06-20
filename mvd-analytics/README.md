@@ -82,8 +82,7 @@ that downstream consumers render, summarise, or feed to an agent.
   render; walls are still classified for diagnostics but no longer
   emitted.) Degenerate zero-area fan triangles are dropped. Extraction thresholds
   (floor slope, roof cap, origin height) are tunable via
-  `mapgeom.Params` / `BuildParams` — used by the web viewer's geometry
-  edit mode, which re-runs the extraction in WASM. The optional
+  `mapgeom.Params` / `BuildParams`. The optional
   `-demos <dir>` flag turns on usage-based pruning: every `.mvd`/`.mvd.gz`
   under the directory is analyzed (a fresh registry per demo), the floor
   surface beneath each grounded, non-swimming sample

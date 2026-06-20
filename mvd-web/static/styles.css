@@ -2621,33 +2621,6 @@ th.sortable.sort-desc::after {
     background: var(--accent-cyan);
 }
 
-/* Geometry edit mode (?edit=1): cleanup toolbar under the track controls. */
-.map-edit-panel {
-    border-top: 1px dashed #444;
-    padding-top: 6px;
-}
-
-.map-edit-field {
-    color: #888;
-    font-size: 0.8rem;
-    white-space: nowrap;
-}
-
-.map-edit-field input {
-    width: 60px;
-    background: transparent;
-    border: 1px solid #555;
-    border-radius: 3px;
-    color: #ccc;
-    padding: 3px 4px;
-    font-size: 0.8rem;
-}
-
-.map-edit-status {
-    color: var(--accent-cyan, #6cf);
-    font-size: 0.8rem;
-}
-
 /* Learn-map sidebar: category filter checklist. */
 .map-entities-panel {
     margin-bottom: 12px;
