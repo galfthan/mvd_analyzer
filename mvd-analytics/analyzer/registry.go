@@ -318,10 +318,10 @@ func NewDefaultRegistry() *Registry {
 	// teams and normalised time anchors.
 	r.RegisterPostProcessor(recoverTelefragTeamkills)
 	r.RegisterPostProcessor(normalizeMatchRelativeTimes)
-	// LOS needs match-relative positions + movers + spawns/deaths in one epoch,
-	// which normalizeMatchRelativeTimes establishes; it is independent of the
-	// team/anchor passes that follow.
-	r.RegisterPostProcessor(losPost)
+	// Line of sight is NOT a default post-processor — it is the heaviest
+	// position-derived pass and has no in-pipeline consumer, so it is computed
+	// lazily on demand via analyzer.ComputeLOS (web overlay / -include los /
+	// the mvd-api /los endpoint).
 	r.RegisterPostProcessor(deriveDemoStartAnchor)
 	r.RegisterPostProcessor(duelTeamNormalize)
 	r.RegisterPostProcessor(airgibsPost)

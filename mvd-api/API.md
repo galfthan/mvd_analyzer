@@ -457,6 +457,30 @@ position is the nearest sample. Shape: `view.StateAtView`.
     "pos": { "x": -1072, "y": -348.5, "z": 216.125 } } } }  // float32 units
 ```
 
+### 4.11b `GET /v1/demos/{id}/los`
+
+No params. Per-player **line of sight**: for each ordered pair, the half-open
+`[s,e)` **millisecond** intervals during which the looker had a clear sightline
+to the opponent (eye `origin+(0,0,22)` → any of the opponent's 8 bbox corners +
+midpoint, blocked by worldspawn solids or any active mover posed in the way).
+Asymmetric — `los` on player A with `o = B` is A→B; B→A lives on B. `o` indexes
+the `players` array.
+
+LOS is **computed lazily**: it is the heaviest position-derived pass, so it is
+not in the default parse — the **first** request for a demo runs the raycast
+pass (a few seconds on a large 4on4) and caches it in memory, so later requests
+are free. BSP-backed maps only; on a map with no BSP every player's `los` is
+omitted. View direction is not considered (geometric visibility, not FOV).
+
+```jsonc
+{ "players": [
+  { "name": "ok98", "los": [
+    { "o": 1, "iv": [ { "s": 167696, "e": 169316 },     // ok98 saw players[1]
+                      { "s": 193422, "e": 193622 } ] },  // s/e = MILLISECONDS
+    { "o": 2, "iv": [ … ] } ] },
+  { "name": "realpit", "los": [ … ] }, … ] }
+```
+
 ### 4.12 `GET /v1/demos/{id}/loc-trails`
 
 Params: `from`, `to`, `players`, `minDwellMs`, `loc`. Per-player loc

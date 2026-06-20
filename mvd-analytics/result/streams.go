@@ -15,6 +15,15 @@ type Streams struct {
 	// (lifts, doors, plats, trains). Schema v32; omitted when the demo has
 	// no movers.
 	Movers []MoverStream `json:"movers,omitempty"`
+
+	// LOSComputed records whether the (lazy) line-of-sight pass has run, so a
+	// caller can compute it on demand exactly once and not retry on maps that
+	// genuinely have no LOS (no BSP). It is gob-serialized — the API persists
+	// it with the cached Result so a second request reuses the first's work —
+	// but excluded from JSON (`json:"-"`): consumers read presence/absence of
+	// PlayerStream.LOS itself, and the goldens stay agnostic to it. See
+	// analyzer.ComputeLOS.
+	LOSComputed bool `json:"-"`
 }
 
 // MoverStream is one brush-model entity's pose timeline (a lift, door,

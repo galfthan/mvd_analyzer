@@ -202,21 +202,25 @@ deliberate gaps and one cost characteristic worth knowing.
   "transparent floor") already pass through: only worldspawn `Models[0]` and
   *tracked movers* are traced, so non-mover decorative submodels never block.
 
-- **Cost on large team games.** LOS is `O(pairs × looker-samples × rays)`. A
-  full 20-minute 4on4 (8 players → 56 ordered pairs, ~700k samples) adds
-  ~10–13 s to a cold full parse — it is the most expensive position-derived
-  pass. The PVS cull (`bspvis.BoxLeafs` + leaf PVS) and the any-clear-ray
-  early-out are already applied and are lossless, but on open maps (dm2) PVS
-  only culls ~20% because most pairs are mutually in-PVS but wall-occluded, so
-  they still pay the rays. Levers, in order of preference: (1) fold LOS into
-  the planned **fast-vs-full parse tier** (above) so it is computed only when
-  position-derived analytics are actually requested — it already gates on a
-  provisioned BSP; (2) a lossless temporal-coherence skip (reuse the prior
-  result when neither player's eye/box leaf changed *and* no mover moved since
-  the last sample); (3) as a last resort, evaluate on a coarser cadence than
-  the ~72 Hz native rate (quantizes interval edges, can miss sub-cadence
-  peeks — a form of the smoothing the repo otherwise avoids, so weigh it
-  against the data-fidelity rule).
+- **Cost on large team games (now lazy).** LOS is `O(pairs × looker-samples ×
+  rays)`. A full 20-minute 4on4 (8 players → 56 ordered pairs, ~700k samples)
+  is ~10–13 s — the most expensive position-derived pass. It is therefore
+  **computed lazily** (`analyzer.ComputeLOS`, not a default post-processor):
+  the cost is paid only when a consumer asks (web LOS overlay /
+  `qw-analyze -include los` / mvd-api `/los`) and at most once per demo
+  (idempotent via `Streams.LOSComputed`, which mvd-api persists in its gob
+  cache — though it deliberately does *not* bake LOS into the on-disk Result
+  gob, keeping that lean for the non-LOS endpoints; an evicted/restarted
+  process recomputes once on the next request). The PVS cull
+  (`bspvis.BoxLeafs` + leaf PVS) and the midpoint-first any-clear-ray early-out
+  are lossless but only cull ~20% on open maps (dm2), where most pairs are
+  mutually in-PVS but wall-occluded and still pay the rays. If the per-request
+  latency ever matters, remaining lossless levers: a temporal-coherence skip
+  (reuse the prior result when neither player's eye/box leaf changed *and* no
+  mover moved) or parallelizing the per-looker loop. A coarser-than-native
+  evaluation cadence would cut cost further but quantizes interval edges and
+  can miss sub-cadence peeks — a form of smoothing the repo otherwise avoids,
+  so weigh it against the data-fidelity rule.
 
 ## Pickup-attribution data quality
 

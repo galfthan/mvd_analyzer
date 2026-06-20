@@ -702,12 +702,28 @@ set in the full-result JSON (default strips the whole heavy track).
 
 ## Line of sight (`PlayerStream.LOS`)
 
-The `losPost` post-processor (`analyzer/los.go`, schema v37) records, per
-ordered player pair, the half-open `[s,e)` ms intervals during which one
-player (the **looker**) had a clear geometric sightline to another, stored on
-the looker's `PlayerStream.LOS` as one `LosTrack` per opponent. It runs right
-after `normalizeMatchRelativeTimes`, so positions, spawns/deaths and the mover
-pose timeline share one match-relative epoch.
+`analyzer.ComputeLOS(res)` (`analyzer/los.go`, schema v37) records, per ordered
+player pair, the half-open `[s,e)` ms intervals during which one player (the
+**looker**) had a clear geometric sightline to another, stored on the looker's
+`PlayerStream.LOS` as one `LosTrack` per opponent.
+
+**It is computed lazily — NOT during the default parse.** LOS is the heaviest
+position-derived pass (N² pairs × samples × rays) and has no in-pipeline
+consumer, so the registry does not run it; callers invoke `ComputeLOS` on
+demand. It is idempotent (the first call sets `Streams.LOSComputed`, which the
+mvd-api persists in its gob cache so a demo's LOS is computed at most once).
+The three consumers:
+
+- **Web map overlay** — the **LOS** button calls the WASM `computeLineOfSight()`
+  export (via the worker) on first toggle and caches the result client-side.
+- **CLI** — `qw-analyze -include los` computes and emits it.
+- **REST API** — `GET /v1/demos/{id}/los` computes it on the cached Result on
+  first request.
+
+`ComputeLOS` must be called on a Result whose times are already match-relative
+(true of any Result the default pipeline hands out), so positions, spawns/deaths
+and the mover pose timeline share one epoch and the intervals need no further
+normalization.
 
 A sightline is clear when **any** of the 9 rays from the looker's eye
 (`origin + (0,0,22)`) to the opponent's 8 bounding-box corners + box midpoint
@@ -725,11 +741,11 @@ a 4on4 (8 players → 56 ordered pairs) over a full 20-minute match is the heavy
 case. Two losses-free reductions keep it bounded: a **PVS cull** (the opponent
 is skipped unless a leaf its bounding box touches is potentially visible from
 the looker's eye leaf — `bspvis.BoxLeafs` + the leaf PVS) and an any-clear-ray
-early-out with the midpoint tested first. Still, LOS is the most expensive
-position-derived pass; it belongs in the future "full" parse tier (see
-[`FOLLOWUPS.md`](../FOLLOWUPS.md)). Debug overlay: the web map view's **LOS**
-button draws a line between players who currently have sight (white = mutual,
-red/blue = one-way).
+early-out with the midpoint tested first. Even so it is the most expensive
+position-derived pass (~10–13 s for a full 20-minute 4on4), which is exactly
+why it is lazy: that cost is paid only when a consumer asks for LOS, and at
+most once per demo. The web map view's **LOS** button draws a line between
+players who currently have sight (white = mutual, red/blue = one-way).
 
 ## Velocity (`PositionTrack.VX` / `VY` / `VZ`)
 

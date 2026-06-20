@@ -90,6 +90,8 @@ let analyzeResolve = null;
 let analyzeReject = null;
 let recomputeResolve = null;
 let recomputeReject = null;
+let losResolve = null;
+let losReject = null;
 
 // ─── Load-timing instrumentation ────────────────────────────────────────────
 // Structured per-stage timing for the demo load path, printed to the console
@@ -229,6 +231,18 @@ worker.onmessage = (e) => {
             recomputeResolve = null;
             recomputeReject = null;
         }
+    } else if (e.data.type === 'los_result') {
+        if (losResolve) {
+            losResolve(e.data.json);
+            losResolve = null;
+            losReject = null;
+        }
+    } else if (e.data.type === 'los_error') {
+        if (losReject) {
+            losReject(new Error(e.data.message));
+            losResolve = null;
+            losReject = null;
+        }
     }
 };
 
@@ -322,6 +336,17 @@ function recomputeInWorker(overrideJSON) {
         recomputeResolve = resolve;
         recomputeReject = reject;
         worker.postMessage({ type: 'recomputeRegions', overrideJSON });
+    });
+}
+
+// computeLosInWorker asks the worker to run the lazy line-of-sight pass on the
+// already-parsed demo (computeLineOfSight is a Go export on the worker scope).
+// Resolves with the JSON array of per-player {name, los} tracks.
+function computeLosInWorker() {
+    return new Promise((resolve, reject) => {
+        losResolve = resolve;
+        losReject = reject;
+        worker.postMessage({ type: 'computeLos' });
     });
 }
 
@@ -6002,6 +6027,8 @@ let mapState = {
     showVelArrows: false,       // per-player 3D velocity arrows (opt-in)
     showLos: false,             // line-of-sight debug lines between players (opt-in)
     losByPair: {},              // looker name -> { target name -> [{s,e} intervals] } (schema v37)
+    losComputed: false,         // lazy LOS pass has run for this demo
+    losPending: false,          // a computeLos worker round-trip is in flight
     initialized: false,
     lastRenderedBucket: null, // Skip redundant redraws
     renderDirty: false,       // Force redraw on track toggle/reset/etc
@@ -6189,23 +6216,12 @@ function initMapView(result) {
         }
     }
 
-    // Per-player line-of-sight intervals (result.streams.players[].los, schema
-    // v37) flattened to losByPair[lookerName][targetName] = [{s,e},…] so the
-    // debug overlay can answer "did looker see target at time t". LosTrack.o is
-    // an index into streams.players; resolve it to that player's name. LOS is
-    // asymmetric, so each direction is stored under its own looker.
+    // Line of sight is computed lazily (it is the heaviest position-derived
+    // pass), so it is NOT in the parsed result. The map's LOS overlay requests
+    // it from the worker on first toggle; reset the cache here.
     mapState.losByPair = {};
-    if (result.streams && Array.isArray(result.streams.players)) {
-        const idxToName = result.streams.players.map(p => p && p.name);
-        for (const p of result.streams.players) {
-            if (!p || !Array.isArray(p.los)) continue;
-            const byTarget = (mapState.losByPair[p.name] ||= {});
-            for (const tr of p.los) {
-                const other = idxToName[tr.o];
-                if (other != null && Array.isArray(tr.iv)) byTarget[other] = tr.iv;
-            }
-        }
-    }
+    mapState.losComputed = false;
+    mapState.losPending = false;
 
     // Static map-entity corpus (result.mapEntities) for the "learn map" view.
     mapState.mapEntities = (result.mapEntities && Array.isArray(result.mapEntities.entities))
@@ -8993,6 +9009,50 @@ function trailIndexAtTime(points, time) {
     return low;
 }
 
+// ensureLosComputed runs the lazy line-of-sight pass once via the worker, then
+// builds mapState.losByPair and re-renders. The button shows a pending state
+// while the (potentially multi-second on a 4on4) raycast pass runs in the
+// worker — the main thread stays responsive. On a BSP-less map the reply has
+// no intervals; losComputed still latches so we don't re-ask.
+async function ensureLosComputed(losBtn) {
+    mapState.losPending = true;
+    if (losBtn) losBtn.classList.add('pending');
+    try {
+        const json = await computeLosInWorker();
+        const players = JSON.parse(json);
+        if (players && players.error) throw new Error(players.error);
+        mapState.losByPair = buildLosByPair(players);
+        mapState.losComputed = true;
+    } catch (err) {
+        console.warn('computeLineOfSight:', err.message);
+        // Leave losComputed false so a later toggle can retry.
+    } finally {
+        mapState.losPending = false;
+        if (losBtn) losBtn.classList.remove('pending');
+        mapState.renderDirty = true;
+        renderMap(mapState.currentTime);
+    }
+}
+
+// buildLosByPair flattens the worker's per-player [{name, los:[{o,iv}]}] reply
+// into losByPair[lookerName][targetName] = [{s,e},…]. los.o indexes the
+// players array; resolve it to that player's name. LOS is asymmetric, so each
+// direction is stored under its own looker.
+function buildLosByPair(players) {
+    const byPair = {};
+    if (!Array.isArray(players)) return byPair;
+    const idxToName = players.map(p => p && p.name);
+    for (const p of players) {
+        if (!p || !Array.isArray(p.los)) continue;
+        const byTarget = (byPair[p.name] ||= {});
+        for (const tr of p.los) {
+            const other = idxToName[tr.o];
+            if (other != null && Array.isArray(tr.iv)) byTarget[other] = tr.iv;
+        }
+    }
+    return byPair;
+}
+
 // losCovers reports whether the half-open [s,e) interval list (ascending,
 // match-relative ms) covers tMs. Linear is fine — a pair has few intervals.
 function losCovers(iv, tMs) {
@@ -9317,6 +9377,10 @@ function setupMapTrailControls() {
             losBtn.classList.toggle('active', mapState.showLos);
             mapState.renderDirty = true;
             renderMap(mapState.currentTime);
+            // Compute LOS lazily the first time it is switched on.
+            if (mapState.showLos && !mapState.losComputed && !mapState.losPending) {
+                ensureLosComputed(losBtn);
+            }
         });
     }
 

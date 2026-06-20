@@ -588,7 +588,7 @@ when the demo has no pauses or the server does not embed the block.
 | Quad / Pent / Ring | `q` / `pe` / `r` | []Interval | Same shape as weapons. |
 | Shells / Nails / Rockets / Cells | `sh` / `nl` / `rk` / `cl` | []ChangeI16 | Ammo change streams. |
 | Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds. |
-| LOS | `los` | []LosTrack (omitempty) | Per-opponent line-of-sight intervals (schema v37). BSP-backed maps only. |
+| LOS | `los` | []LosTrack (omitempty) | Per-opponent line-of-sight intervals (schema v37). BSP-backed maps only, and **computed lazily** — absent from the default parse; populated on demand (web LOS overlay, `qw-analyze -include los`, mvd-api `/los`). |
 
 ### LosTrack (`streams.players[].los[]`, schema v37)
 
@@ -598,6 +598,12 @@ sight to, as half-open `[s, e)` ms intervals.
 ```
 LosTrack = { "o": int16, "iv": [Interval...] }   // o = index into streams.players (the seen player)
 ```
+
+LOS is **computed lazily**, not during the default parse — it is the heaviest
+position-derived pass and has no in-pipeline consumer. `analyzer.ComputeLOS`
+populates it on demand (the web map's LOS overlay, `qw-analyze -include los`,
+the mvd-api `GET /v1/demos/{id}/los` endpoint), idempotently. So a default
+Result never carries `los`; it appears only in responses that requested it.
 
 Line of sight is **asymmetric** — the looker's single eye point
 (`origin + (0,0,22)`) versus the opponent's whole body — so `A→B` lives in
@@ -1268,7 +1274,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
-| v37 | `PlayerStream` gains `los[]` (`LosTrack`): per-opponent line-of-sight as half-open `[s,e)` ms intervals during which the looker had a clear sightline (eye `origin+(0,0,22)` → any of the opponent's 8 bbox corners + midpoint), blocked by worldspawn solids or any active mover posed in the way. Asymmetric (`A→B` in A's stream, `B→A` in B's); `o` indexes `streams.players`. Computed against the visibility BSP, so present only on maps with a provisioned BSP (same gate as `pos.h`/`lq`). Additive (`omitempty`); absent on BSP-less maps. View direction is not considered. |
+| v37 | `PlayerStream` gains `los[]` (`LosTrack`): per-opponent line-of-sight as half-open `[s,e)` ms intervals during which the looker had a clear sightline (eye `origin+(0,0,22)` → any of the opponent's 8 bbox corners + midpoint), blocked by worldspawn solids or any active mover posed in the way. Asymmetric (`A→B` in A's stream, `B→A` in B's); `o` indexes `streams.players`. **Computed lazily** (`analyzer.ComputeLOS`) — absent from the default parse; populated on demand by the web LOS overlay, `qw-analyze -include los`, and mvd-api `/los`. Against the visibility BSP, so only on maps with a provisioned BSP (same gate as `pos.h`/`lq`). Additive (`omitempty`). View direction is not considered. |
 | v36 | `MatchResult` drops the dead `startTime` / `endTime` fields. After the match-relative time normalization `startTime` was always 0 (already `omitempty`, so absent from JSON) and `endTime` always equalled `duration`; both duplicated `streams.global.matchStart` / `matchEnd`. The `endTime` key disappears from the `match` object — read `duration` for match length, or `streams.global` for the match window. Breaking removal (not additive). |
 | v35 | `streams` gains `movers[]` (`MoverStream`): the pose timeline of every tracked brush-model entity (lift, door, plat, train). Each carries `ent` (entity number), `sub` (the `*N` brush-model index, matching the corpus `SubModelMesh` id), and index-aligned `t`/`x`/`y`/`z`/`vis` columns — the mover sits at `(x,y,z)[i]` at `t[i]` ms and is drawn when `vis[i]`. Origins are `float32` (exact ⅛-unit wire values). The first entry is clamped to `t = 0` carrying the match-start pose so a parked mover (only wire state predates the match) still has one. Additive (`omitempty`); absent when the demo has no movers. The same internal tracks already drive the v27 floor-height pass. |
 | v34 | `timelineAnalysis.locationData` now carries **one `MapLocation` per loc name** — the medoid of that name's `.loc` corpus points — instead of every raw point. The corpus often repeats a name across several nearby points, which drew duplicate map labels; the medoid is the actual point minimizing summed distance to its same-name siblings (never an averaged mid-air centroid). `locGraph` node coordinates (resolved from this list by name) move to the medoid. Same field name and `MapLocation` shape; the list is just shorter. |

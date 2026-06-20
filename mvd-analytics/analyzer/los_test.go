@@ -185,8 +185,9 @@ func TestComputeLosAB_MoverBlocks(t *testing.T) {
 	}
 }
 
-// TestLosPost_NoBSP: a map with no provisioned BSP leaves LOS absent.
-func TestLosPost_NoBSP(t *testing.T) {
+// TestComputeLOS_NoBSP: a map with no provisioned BSP leaves LOS absent, and
+// the pass marks itself computed so it is not retried.
+func TestComputeLOS_NoBSP(t *testing.T) {
 	ts := []int32{0, 50}
 	res := &Result{
 		DemoInfo: &DemoInfoResult{Map: "zzz_no_such_map_xyz"},
@@ -197,7 +198,10 @@ func TestLosPost_NoBSP(t *testing.T) {
 			},
 		},
 	}
-	losPost(res, nil)
+	ComputeLOS(res)
+	if !res.Streams.LOSComputed {
+		t.Errorf("ComputeLOS should mark LOSComputed even with no BSP")
+	}
 	for i := range res.Streams.Players {
 		if res.Streams.Players[i].LOS != nil {
 			t.Errorf("player %q got LOS on a BSP-less map: %v", res.Streams.Players[i].Name, res.Streams.Players[i].LOS)

@@ -22,21 +22,33 @@ var (
 	losBoxMax = [3]float32{16, 16, 32}
 )
 
-// losPost computes per-ordered-pair line-of-sight intervals against the map's
-// visibility BSP and writes them to Streams.Players[].LOS (schema v37).
+// ComputeLOS computes per-ordered-pair line-of-sight intervals against the
+// map's visibility BSP and writes them to Streams.Players[].LOS (schema v37).
 //
-// It is a post-processor so it runs after normalizeMatchRelativeTimes: by then
-// positions, spawns/deaths and the mover pose timeline (Streams.Movers) all
-// share one match-relative epoch, so it emits match-relative intervals
-// directly with no second normalization (the same reason airgibsPost is a
-// post-processor). It loads its own visibility BSP — the TimelineAnalyzer's is
-// private analyzer state, gone by now — which is the same two cheap calls
-// timeline_finalize.go makes.
+// It is computed lazily, NOT during the default parse: LOS is the heaviest
+// position-derived pass (N² pairs × samples × rays) and has no in-pipeline
+// consumer, so the registry no longer runs it. Callers invoke it on demand —
+// the web map's LOS overlay (WASM), `qw-analyze -include los`, the mvd-api
+// `/los` endpoint — and it is idempotent: the first call sets Streams.LOSComputed
+// (gob-persisted), later calls return immediately, so a map with no BSP is
+// attempted once and not retried.
 //
-// No-op (LOS simply absent) when the map has no provisioned BSP, mirroring the
-// PositionTrack.H/Lq gate, or when there are fewer than two players.
-func losPost(res *Result, _ *CoreOutputs) {
-	if res == nil || res.Streams == nil || res.DemoInfo == nil || res.DemoInfo.Map == "" {
+// It must be called only after the times are match-relative (the default
+// pipeline's normalizeMatchRelativeTimes has run by the time any Result is
+// handed out), so positions, spawns/deaths and the mover poses share one epoch
+// and the emitted intervals need no further normalization. It loads its own
+// visibility BSP (the same two cheap calls timeline_finalize.go makes); no-op
+// (LOS simply absent) when the map has no provisioned BSP — mirroring the
+// PositionTrack.H/Lq gate — or when there are fewer than two players.
+func ComputeLOS(res *Result) {
+	if res == nil || res.Streams == nil {
+		return
+	}
+	if res.Streams.LOSComputed {
+		return // idempotent — already computed (possibly to "no LOS")
+	}
+	res.Streams.LOSComputed = true
+	if res.DemoInfo == nil || res.DemoInfo.Map == "" {
 		return
 	}
 	players := res.Streams.Players

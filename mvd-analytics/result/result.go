@@ -414,6 +414,11 @@ package result
 //     Streams.Players. Computed against the visibility BSP, so present only on
 //     maps with a provisioned BSP (same gate as PositionTrack.H/Lq). Additive
 //     (omitempty); absent on BSP-less maps. View direction is not considered.
+//     Computed lazily (analyzer.ComputeLOS) — NOT during the default parse,
+//     since it is the heaviest position-derived pass — and so absent unless a
+//     consumer requested it (web LOS overlay, qw-analyze -include los,
+//     mvd-api /los). The Streams.LOSComputed guard (gob-only, json:"-") makes
+//     it idempotent.
 const CurrentSchemaVersion = 37
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
