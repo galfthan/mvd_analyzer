@@ -588,7 +588,7 @@ when the demo has no pauses or the server does not embed the block.
 | Quad / Pent / Ring | `q` / `pe` / `r` | []Interval | Same shape as weapons. |
 | Shells / Nails / Rockets / Cells | `sh` / `nl` / `rk` / `cl` | []ChangeI16 | Ammo change streams. |
 | Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds. |
-| LOS | `los` | []LosTrack (omitempty) | Per-opponent line-of-sight intervals (schema v37). BSP-backed maps only, and **computed lazily** — absent from the default parse; populated on demand (web LOS overlay, `qw-analyze -include los`, mvd-api `/los`). |
+| LOS | `los` | []LosTrack (omitempty) | Per-opponent line-of-sight intervals. BSP-backed maps only, and **computed lazily** — absent from the default parse; populated on demand (web LOS overlay, `qw-analyze -include los`, mvd-api `/los`). |
 
 ### ChangeI16 / ChangeStr / Interval
 
