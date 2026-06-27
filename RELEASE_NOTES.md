@@ -31,7 +31,10 @@ detail.
   — and built only on request: `qw-analyze -include projectiles,beams`, and
   the WASM map build (where the result stays in browser memory, so no extra
   download). The map renders rockets/grenades as moving dots and LG bolts as
-  brief beams at the playback cursor (`drawProjectiles` / `drawBeams`).
+  brief beams at the playback cursor (`drawProjectiles` / `drawBeams`). The
+  REST API serves them as three independent, build-on-demand endpoints —
+  `GET /v1/demos/{id}/streams/{projectiles|beams|nails}` — re-parsing the
+  cached demo on the first request and latching the result (like `/los`).
 
 - **Nail (ng/sng) tracking** (schema v40, opt-in). A separate, highest-volume
   request (`qw-analyze -include nails`) that decodes nails — spike packet

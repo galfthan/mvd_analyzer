@@ -9,16 +9,21 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mvd-analyzer/mvd-api/internal/democache"
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
+	"github.com/mvd-analyzer/mvd-api/internal/democache"
 )
 
 // demoStore is the subset of *democache.Cache the handlers depend on.
 // Tests inject a fake.
 type demoStore interface {
 	GetResult(ctx context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error)
+	// EnsureShotStreams returns the Result with the opt-in spatial weapon-fire
+	// streams built (projectiles + beams; plus nails when nails is true),
+	// re-parsing the cached MVD bytes on first request. Callers serialize via
+	// streamsMu.
+	EnsureShotStreams(ctx context.Context, id democache.DemoID, nails bool) (*result.Result, democache.CacheMeta, error)
 }
 
 // httpError carries the wire-format error body.
@@ -597,6 +602,79 @@ func (s *server) handleLOS(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	writeJSON(w, http.StatusOK, out)
+}
+
+// resolveShotStreams mirrors resolveDemo but routes through EnsureShotStreams
+// (under streamsMu) so the requested spatial weapon-fire streams are built —
+// a one-time re-parse of the cached MVD bytes, since they are opt-in and not
+// in the lean default Result.
+func (s *server) resolveShotStreams(w http.ResponseWriter, r *http.Request, nails bool) (*result.Result, bool) {
+	id, err := democache.ParseDemoID(r.PathValue("id"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_demo_id", err.Error())
+		return nil, false
+	}
+	s.streamsMu.Lock()
+	res, meta, err := s.store.EnsureShotStreams(r.Context(), id, nails)
+	s.streamsMu.Unlock()
+	if err != nil {
+		mapStoreError(w, err)
+		return nil, false
+	}
+	setCacheHeaders(w, meta)
+	etag := fmt.Sprintf(`"%s-v%d"`, meta.SHA256, meta.SchemaVersion)
+	if match := r.Header.Get("If-None-Match"); match != "" && strings.Contains(match, etag) {
+		w.WriteHeader(http.StatusNotModified)
+		return nil, false
+	}
+	return res, true
+}
+
+// handleProjectiles serves the rocket/grenade flight stream (opt-in; built on
+// first request). Body is {"projectiles": ...}, null when the demo has none.
+func (s *server) handleProjectiles(w http.ResponseWriter, r *http.Request) {
+	res, ok := s.resolveShotStreams(w, r, false)
+	if !ok {
+		return
+	}
+	var pr *result.ProjectileStreams
+	if res.Streams != nil {
+		pr = res.Streams.Projectiles
+	}
+	writeJSON(w, http.StatusOK, struct {
+		Projectiles *result.ProjectileStreams `json:"projectiles"`
+	}{pr})
+}
+
+// handleBeams serves the LG bolt stream (opt-in; built on first request).
+func (s *server) handleBeams(w http.ResponseWriter, r *http.Request) {
+	res, ok := s.resolveShotStreams(w, r, false)
+	if !ok {
+		return
+	}
+	var bm *result.BeamStreams
+	if res.Streams != nil {
+		bm = res.Streams.Beams
+	}
+	writeJSON(w, http.StatusOK, struct {
+		Beams *result.BeamStreams `json:"beams"`
+	}{bm})
+}
+
+// handleNails serves the ng/sng nail-flight stream (opt-in, highest volume;
+// built on first request, separate from projectiles/beams).
+func (s *server) handleNails(w http.ResponseWriter, r *http.Request) {
+	res, ok := s.resolveShotStreams(w, r, true)
+	if !ok {
+		return
+	}
+	var nl *result.ProjectileStreams
+	if res.Streams != nil {
+		nl = res.Streams.Nails
+	}
+	writeJSON(w, http.StatusOK, struct {
+		Nails *result.ProjectileStreams `json:"nails"`
+	}{nl})
 }
 
 func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {

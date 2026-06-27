@@ -37,6 +37,14 @@ type Streams struct {
 	// PlayerStream.LOS itself, and the goldens stay agnostic to it. See
 	// analyzer.ComputeLOS.
 	LOSComputed bool `json:"-"`
+
+	// ShotStreamsComputed / NailsComputed latch the opt-in spatial weapon-fire
+	// streams the same way LOSComputed latches LOS: the API builds them on
+	// demand (a re-parse, since unlike LOS they cannot be recomputed from the
+	// lean cached Result) and sets the flag so later requests reuse the work.
+	// JSON-excluded — clients read presence/absence of the streams themselves.
+	ShotStreamsComputed bool `json:"-"`
+	NailsComputed       bool `json:"-"`
 }
 
 // ProjectileStreams is every tracked rocket/grenade flight as parallel

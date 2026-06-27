@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mvd-analyzer/mvd-api/internal/democache"
 	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-api/internal/democache"
 )
 
 // fakeStore implements demoStore for handler tests without touching
@@ -36,6 +36,12 @@ func (f *fakeStore) GetResult(_ context.Context, id democache.DemoID) (*result.R
 		FromCache:     true,
 		SchemaVersion: result.CurrentSchemaVersion,
 	}, nil
+}
+
+// EnsureShotStreams returns the stored Result as-is — fakes pre-populate any
+// streams they want to assert on; there is no re-parse without real bytes.
+func (f *fakeStore) EnsureShotStreams(ctx context.Context, id democache.DemoID, _ bool) (*result.Result, democache.CacheMeta, error) {
+	return f.GetResult(ctx, id)
 }
 
 // stubResult builds a minimal but well-formed *Result so handlers
@@ -115,6 +121,50 @@ func stubResult() *result.Result {
 			{Time: 100000, Player: "milton", Team: "blue", Weapon: "rl", Source: "backpack", BackpackEnt: 17, Dropper: "bps", Kills: 1},
 		},
 		Errors: []string{"itemAnalyzer: respawn before pickup"},
+	}
+}
+
+// TestShotStreamEndpoints exercises the three on-demand spatial-stream
+// endpoints; the fake store returns whatever streams the result carries.
+func TestShotStreamEndpoints(t *testing.T) {
+	r := stubResult()
+	r.Streams.Projectiles = &result.ProjectileStreams{
+		Weapon: []string{"rl"}, Spawn: []int32{1000}, End: []int32{1500},
+		Sx: []float32{1}, Sy: []float32{2}, Sz: []float32{3},
+		Ex: []float32{4}, Ey: []float32{5}, Ez: []float32{6},
+	}
+	r.Streams.Beams = &result.BeamStreams{
+		T: []int32{2000}, Sx: []float32{1}, Sy: []float32{2}, Sz: []float32{3},
+		Ex: []float32{4}, Ey: []float32{5}, Ez: []float32{6},
+	}
+	r.Streams.Nails = &result.ProjectileStreams{
+		Weapon: []string{"nail"}, Spawn: []int32{3000}, End: []int32{3100},
+		Sx: []float32{1}, Sy: []float32{2}, Sz: []float32{3},
+		Ex: []float32{4}, Ey: []float32{5}, Ez: []float32{6},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+
+	for _, c := range []struct{ path, key string }{
+		{"/v1/demos/gameId:42/streams/projectiles", "projectiles"},
+		{"/v1/demos/gameId:42/streams/beams", "beams"},
+		{"/v1/demos/gameId:42/streams/nails", "nails"},
+	} {
+		resp := getJSON(t, srv.URL+c.path, 200)
+		if resp[c.key] == nil {
+			t.Errorf("%s: %q missing/null, body=%v", c.path, c.key, resp)
+		}
+	}
+}
+
+// TestShotStreamEndpoints_Absent returns 200 with a null stream when the demo
+// has none (the stub has no rockets).
+func TestShotStreamEndpoints_Absent(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/streams/projectiles", 200)
+	if resp["projectiles"] != nil {
+		t.Errorf("expected null projectiles, got %v", resp["projectiles"])
 	}
 }
 

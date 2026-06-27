@@ -500,6 +500,41 @@ visibility, not FOV).
   { "name": "realpit", "los": [ … ], "pvs": [ … ] }, … ] }
 ```
 
+### 4.11c `GET /v1/demos/{id}/streams/{projectiles|beams|nails}`
+
+Three endpoints serving the opt-in **spatial weapon-fire streams** for the map
+view (schema v40), each requested independently:
+
+- `/streams/projectiles` → `{ "projectiles": ProjectileStreams | null }` —
+  every rocket/grenade flight as a spawn→despawn segment + times.
+- `/streams/beams` → `{ "beams": BeamStreams | null }` — every LG
+  `TE_LIGHTNING2` bolt as a muzzle→impact segment + time.
+- `/streams/nails` → `{ "nails": ProjectileStreams | null }` — ng/sng spike
+  flights (`Weapon` == `"nail"`). Highest volume; a **separate** request.
+
+No params. All columnar (parallel arrays), times **match-relative
+milliseconds**. Shapes are in
+[RESULT_SCHEMA.md → ProjectileStreams / BeamStreams](../mvd-analytics/RESULT_SCHEMA.md#projectilestreams-streamsprojectiles).
+The body field is `null` when the demo has none (e.g. no LG → `beams: null`).
+
+Like `/los`, these are **built on demand** — they are off in the default parse
+to keep the cache lean, and (unlike LOS) cannot be recomputed from the cached
+Result, so the **first** request re-parses the demo with the build flags on (a
+few seconds on a large 4on4) and caches the streams in memory; later requests
+are free. `/streams/nails` is latched separately from projectiles/beams. The
+on-disk gob stays lean.
+
+```jsonc
+// GET /streams/projectiles
+{ "projectiles": {
+  "w":  ["rl", "rl", "gl"],          // weapon per flight
+  "s":  [3042, 5210, 9001],          // spawn ms
+  "e":  [3065, 5470, 9800],          // despawn ms
+  "sx": [88, …], "sy": […], "sz": […],   // muzzle
+  "ex": [88, …], "ey": […], "ez": […] }  // impact
+}
+```
+
 ### 4.12 `GET /v1/demos/{id}/loc-trails`
 
 Params: `from`, `to`, `players`, `minDwellMs`, `loc`. Per-player loc
