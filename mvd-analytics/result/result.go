@@ -422,13 +422,13 @@ package result
 //
 // v38:
 //   - PlayerStream gains PVS []LosTrack alongside LOS: per-opponent
-//     potentially-visible-set intervals — the PVS cull the LOS raycast gates
-//     on, recorded before the rays narrow it to actual sight. Same LosTrack
-//     shape, same lazy pass (analyzer.ComputeLOS), BSP gate and Streams.LOSComputed
-//     guard as LOS. PVS is a lossless superset of LOS (PVS ⊇ LOS): the gap
-//     between them is an occlusion-tolerant "potentially visible but no clear
-//     ray" proximity/awareness signal. Additive (omitempty); absent on BSP-less
-//     maps and on the default parse (populated only when a consumer asks).
+//     potentially-visible-set intervals — a point-to-point PVS test (looker eye
+//     leaf vs the opponent's body leaf, the same notion the loc filter uses).
+//     Same LosTrack shape, same lazy pass (analyzer.ComputeLOS), BSP gate and
+//     Streams.LOSComputed guard as LOS. PVS ⊇ LOS (actual sight is OR-ed in):
+//     the gap between them is an occlusion-tolerant "potentially visible but no
+//     clear ray" proximity/awareness signal. Additive (omitempty); absent on
+//     BSP-less maps and on the default parse (populated only when a consumer asks).
 const CurrentSchemaVersion = 38
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each

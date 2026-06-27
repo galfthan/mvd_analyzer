@@ -466,11 +466,13 @@ during which the looker could see the opponent.
 - `los` — a clear geometric sightline: eye `origin+(0,0,22)` → any of the
   opponent's 8 bbox corners + midpoint, unblocked by worldspawn solids or any
   active mover posed in the way.
-- `pvs` — the opponent is merely in the looker's **potentially-visible set** (the
-  PVS cull the raycast gates on, before the rays filter it). It is a lossless
-  superset of `los` — **PVS ⊇ LOS**, every `los` interval lies inside a `pvs`
-  one. The gap (in PVS but never in LOS) is an occlusion-tolerant
-  proximity/awareness signal: same vis region, no direct sightline.
+- `pvs` — the opponent is in the looker's **potentially-visible set**: a
+  point-to-point PVS test (looker eye leaf vs the opponent's body leaf, the same
+  notion the loc filter uses), so it is on whenever the two are in mutually
+  visible vis regions even without a clear ray. **PVS ⊇ LOS** (actual sight is
+  OR-ed in) — every `los` interval lies inside a `pvs` one. The gap (in PVS but
+  never in LOS) is an occlusion-tolerant proximity/awareness signal: same vis
+  region, no direct sightline.
 
 Both are asymmetric — `los`/`pvs` on player A with `o = B` is A→B; B→A lives on
 B. `o` indexes the `players` array. Both share shape (`{o, iv}`) and gating.

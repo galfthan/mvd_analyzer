@@ -107,15 +107,18 @@ type PlayerStream struct {
 	// Raw transitions, no smoothing (surface authoritative data).
 	LOS []LosTrack `json:"los,omitempty"`
 
-	// PVS records when each other player was in this player's (the looker's)
-	// potentially-visible set — the PVS cull the LOS raycast gates on, recorded
-	// before the rays narrow it to actual sight. Same LosTrack shape, same lazy
-	// pass (analyzer.ComputeLOS) and BSP gate as LOS, schema v38. PVS is a
-	// lossless superset of LOS: every LOS interval lies inside the matching PVS
-	// one, so PVS ⊇ LOS. The gap between them (potentially visible, but no clear
-	// ray) is an occlusion-tolerant proximity/awareness signal — the opponent is
-	// close enough to be in the same vis region without a direct sightline. Raw
-	// transitions, no smoothing.
+	// PVS records when each other player was potentially visible to this player
+	// (the looker) — a point-to-point PVS test, the looker's eye leaf vs the
+	// opponent's single body leaf (the same notion the loc filter uses). Same
+	// LosTrack shape, same lazy pass (analyzer.ComputeLOS) and BSP gate as LOS,
+	// schema v38. PVS ⊇ LOS (actual sight implies potential visibility is OR-ed
+	// in), so every LOS interval lies inside the matching PVS one. The gap
+	// between them (potentially visible, but no clear ray) is an
+	// occlusion-tolerant proximity/awareness signal — the opponent is in the
+	// same vis region without a direct sightline. Note this is the selective
+	// point test, NOT the looser bounding-box cull the LOS raycast gates on
+	// (that box spans many leaves and is almost always potentially visible near
+	// a vis-region boundary). Raw transitions, no smoothing.
 	PVS []LosTrack `json:"pvs,omitempty"`
 }
 

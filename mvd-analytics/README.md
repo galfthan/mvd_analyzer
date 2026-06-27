@@ -749,19 +749,28 @@ why it is lazy: that cost is paid only when a consumer asks for LOS, and at
 most once per demo. The web map view's **LOS** button draws a line between
 players who currently have sight (white = mutual, red/blue = one-way).
 
-**Potential visibility (`PlayerStream.PVS`).** The PVS cull above is itself a
-useful metric, so the same pass records it on `PlayerStream.PVS` (one `LosTrack`
-per opponent, identical shape and gating to `LOS`) before the rays narrow it.
-`pvs` is on whenever the opponent's bounding box shares a leaf with the looker's
-PVS row — i.e. the opponent is *potentially* visible — regardless of whether any
-ray is actually clear. Because the cull is lossless, **PVS ⊇ LOS**: every `los`
-interval lies inside a `pvs` interval for the same opponent (verified against the
-golden corpus). The gap between them — potentially visible but no clear ray — is
-an occlusion-tolerant proximity/awareness signal: the opponent is in the same
-vis region (close enough to potentially be seen) without a direct sightline. It
-costs nothing beyond the bit test `LOS` already does, rides along on every `LOS`
-consumer (web overlay, `qw-analyze -include los`, mvd-api `/los`), and is
-likewise absent on BSP-less maps and on the default parse.
+**Potential visibility (`PlayerStream.PVS`).** The same pass records, on
+`PlayerStream.PVS` (one `LosTrack` per opponent, identical shape and gating to
+`LOS`), whether the opponent is *potentially* visible — regardless of whether
+any ray is clear. This is a **point-to-point** PVS test: the looker's eye leaf
+(`PointInLeaf(origin+(0,0,22))`) vs the opponent's single body leaf
+(`PointInLeaf(origin)`), the same notion the loc filter uses (`locvis`).
+
+Crucially it is **not** the bounding-box cull that gates the raycast above. That
+cull tests the opponent's whole bounding box (~dozens of leaves) and must stay
+lossless, so it passes whenever *any* of those leaves is potentially visible —
+almost always true near a vis-region boundary, hence useless as a standalone
+signal (measured ~73–87 % of alive pairs on dm3/dm6/dm4/aerowalk). The point
+test drops that to ~23–67 % (dm3 23 %, aerowalk — a genuinely open map — 67 %),
+matching the leaf-level PVS density. For players on opposite sides of the map the
+two agree (neither in PVS); the box only over-counts the nearby-but-occluded
+pairs. **PVS ⊇ LOS** because actual sight is OR-ed in: every `los` interval lies
+inside a `pvs` interval for the same opponent (verified: zero LOS-without-PVS
+samples in the golden corpus). The gap between them — potentially visible but no
+clear ray — is an occlusion-tolerant proximity/awareness signal: same vis region,
+no direct sightline. It costs one extra leaf lookup per player-sample, rides
+along on every `LOS` consumer (web overlay, `qw-analyze -include los`, mvd-api
+`/los`), and is likewise absent on BSP-less maps and on the default parse.
 
 ## Velocity (`PositionTrack.VX` / `VY` / `VZ`)
 
