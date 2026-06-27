@@ -27,6 +27,11 @@ type Context struct {
 	Players     [events.MaxClients]*events.PlayerInfo
 	FragsBySlot map[int]int     // Final frag count per slot
 	DemoInfo    *DemoInfoResult // Parsed demoinfo (set during finalization, used by ResolveSlotDemoInfo)
+
+	// ShotStreams opts the shots analyzer into building the spatial
+	// weapon-fire streams (Streams.Projectiles / Streams.Beams). Off by
+	// default (lean output); set from Registry.BuildShotStreams.
+	ShotStreams bool
 }
 
 // SlotDemoInfo holds the resolved demoinfo player for a slot.
@@ -200,6 +205,8 @@ type (
 	WeaponShots            = result.WeaponShots
 	ShotsReconciliation    = result.ShotsReconciliation
 	ShotsDelta             = result.ShotsDelta
+	ProjectileStreams      = result.ProjectileStreams
+	BeamStreams            = result.BeamStreams
 	MapEntitiesResult      = result.MapEntitiesResult
 	MapEntity              = result.MapEntity
 	Bounds                 = result.Bounds

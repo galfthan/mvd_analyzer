@@ -23,6 +23,16 @@ detail.
 
 ## 2026-06-27
 
+- **Weapon-fire map overlay** (schema v40). Two opt-in spatial streams under
+  `streams` for the 3D map view: `projectiles` (every tracked rocket/grenade
+  flight as a spawn→despawn segment + times) and `beams` (every LG
+  `TE_LIGHTNING2` bolt as a muzzle→impact segment + time), both columnar.
+  They are **off by default** — sizeable in a team game (thousands of beams)
+  — and built only on request: `qw-analyze -include projectiles,beams`, and
+  the WASM map build (where the result stays in browser memory, so no extra
+  download). The map renders rockets/grenades as moving dots and LG bolts as
+  brief beams at the playback cursor (`drawProjectiles` / `drawBeams`).
+
 - **Per-shot weapon-fire stream** (schema v39). New top-level `shots`
   result: who fired what weapon, at exactly what match-relative ms — the
   foundation for accuracy metrics (including over short intervals) and for

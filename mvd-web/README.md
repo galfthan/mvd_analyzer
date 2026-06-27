@@ -429,6 +429,16 @@ either piece (older geometry, or a demo with no movers) is a graceful
 no-op. Code: `drawMovers` / `moverPoseAt` / `moverMeshFaces` /
 `drawMoverMesh`.
 
+**Weapon fire** — with `streams.projectiles` / `streams.beams` (schema
+v40, built by the WASM map analysis), rocket/grenade flights and LG bolts
+overlay the map during playback. Each in-flight rocket/grenade is a small
+dot interpolated along its spawn→despawn segment at the current time
+(orange for `rl`, green for `gl`); each LG bolt is a brief light-blue line
+from muzzle to impact, flashed for ~60 ms around its instant. Both are
+columnar parallel-array streams; absent (e.g. a non-WASM result that
+didn't build them) is a graceful no-op. Code: `drawProjectiles` /
+`drawBeams`.
+
 **Liquids** — version-4 geometry also carries `liquids` (water/slime/lava
 volume meshes). Rendered as a shaded, depth-sorted translucent solid
 (`drawLiquidVolume`): each face is Lambert-shaded so the top surface reads

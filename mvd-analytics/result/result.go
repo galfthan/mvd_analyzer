@@ -396,6 +396,7 @@ package result
 //     the match) still has one. Additive (omitempty); absent when the
 //     demo has no movers. The same internal mover tracks already feed the
 //     v27 floor-height pass.
+//
 // v36:
 //   - MatchResult drops the dead StartTime / EndTime fields. After the
 //     match-relative time normalization StartTime was always 0 (already
@@ -441,7 +442,16 @@ package result
 //     diagnostic reconciliation against KTX acc.attacks. Additive
 //     (omitempty); the stream is present whenever any fire is detected,
 //     even on non-KTX servers (no damage stream → no hit links).
-const CurrentSchemaVersion = 39
+//
+// v40:
+//   - Streams gains two opt-in spatial weapon-fire streams for the map view:
+//     Streams.Projectiles (every tracked rocket/grenade flight as
+//     spawn→despawn segments + times) and Streams.Beams (every LG
+//     TE_LIGHTNING2 bolt as a muzzle→impact segment + time). Both are built
+//     only when requested (qw-analyze -include projectiles,beams; the WASM
+//     map build) so the default output and goldens stay lean. Additive
+//     (omitempty); absent from the default parse.
+const CurrentSchemaVersion = 40
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

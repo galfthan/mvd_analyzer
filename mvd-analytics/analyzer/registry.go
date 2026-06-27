@@ -43,6 +43,12 @@ type Registry struct {
 	postProcessors []ResultPostProcessor
 	Config         *config.Config
 
+	// BuildShotStreams opts into the spatial weapon-fire streams
+	// (Streams.Projectiles / Streams.Beams) for the map view. Off by
+	// default so the standard output and golden corpus stay lean; the WASM
+	// map build and qw-analyze -include projectiles,beams turn it on.
+	BuildShotStreams bool
+
 	// PhaseTimings holds per-phase wall-clock durations from the most
 	// recent analyzeSource run (init, event pass, each analyzer's
 	// Finalize, each post-processor). Repopulated every run; read by the
@@ -165,6 +171,7 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 
 	ctx := &Context{
 		FragsBySlot: make(map[int]int),
+		ShotStreams: r.BuildShotStreams,
 	}
 
 	initStart := time.Now()

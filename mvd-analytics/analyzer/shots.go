@@ -33,6 +33,9 @@ type ShotsAnalyzer struct {
 	openProj    map[int]*rawProjectile
 	projectiles []rawProjectile
 
+	// beams holds every LG bolt's geometry for the spatial beam stream.
+	beams []rawBeam
+
 	shots  []rawShot
 	dmgs   []rawShotDmg
 	hadDmg bool // any DamageEvent seen — distinguishes 0% accuracy from no-stream
@@ -71,13 +74,23 @@ type rawShotDmg struct {
 }
 
 // rawProjectile is one tracked rocket/grenade flight: its weapon kind, the
-// muzzle spawn (time + origin) and the despawn time (impact / timeout). The
+// muzzle spawn (time + origin) and the despawn (time + last origin). The
 // entity number bracketed the flight; only these endpoints are kept.
 type rawProjectile struct {
-	kind        string
-	spawnTMs    int32
-	spawnOrigin [3]float32
-	despawnTMs  int32
+	kind          string
+	spawnTMs      int32
+	spawnOrigin   [3]float32
+	despawnTMs    int32
+	despawnOrigin [3]float32
+}
+
+// rawBeam is one LG TE_LIGHTNING2 bolt: when it flashed and its muzzle→impact
+// segment. Kept only for the spatial beam stream (the LG shot itself is a
+// rawShot); collected regardless of the ShotStreams flag (cheap, bounded).
+type rawBeam struct {
+	tMs   int32
+	start [3]float32
+	end   [3]float32
 }
 
 const (
@@ -139,6 +152,7 @@ func (a *ShotsAnalyzer) OnEvent(event events.Event) error {
 	case *events.ProjectileDespawnEvent:
 		if p := a.openProj[e.EntNum]; p != nil {
 			p.despawnTMs = e.TimeMs
+			p.despawnOrigin = e.Origin
 			a.projectiles = append(a.projectiles, *p)
 			delete(a.openProj, e.EntNum)
 		}
@@ -199,6 +213,7 @@ func (a *ShotsAnalyzer) onBeam(e *events.BeamEvent) {
 		hitscan:    true,
 		shooterPos: a.pos[slot],
 	})
+	a.beams = append(a.beams, rawBeam{tMs: e.TimeMs, start: e.Start, end: e.End})
 }
 
 func (a *ShotsAnalyzer) Finalize(result *Result) error {
@@ -275,7 +290,50 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 	out.Reconciliation = a.reconcile(aggByName)
 
 	result.Shots = out
+	a.buildSpatialStreams(result)
 	return nil
+}
+
+// buildSpatialStreams attaches the projectile-flight and LG-beam streams to
+// result.Streams for the map view. Opt-in (ShotStreams) and a no-op when the
+// streams result is absent — these are sizeable (thousands of beams in a
+// team game) so they are off by default. Times are demo-relative ms here;
+// normalizeMatchRelativeTimes rebases them to match time like the other
+// streams.
+func (a *ShotsAnalyzer) buildSpatialStreams(result *Result) {
+	if !a.ctx.ShotStreams || result.Streams == nil {
+		return
+	}
+	if len(a.projectiles) > 0 {
+		ps := &ProjectileStreams{}
+		for i := range a.projectiles {
+			p := &a.projectiles[i]
+			ps.Weapon = append(ps.Weapon, p.kind)
+			ps.Spawn = append(ps.Spawn, p.spawnTMs)
+			ps.End = append(ps.End, p.despawnTMs)
+			ps.Sx = append(ps.Sx, p.spawnOrigin[0])
+			ps.Sy = append(ps.Sy, p.spawnOrigin[1])
+			ps.Sz = append(ps.Sz, p.spawnOrigin[2])
+			ps.Ex = append(ps.Ex, p.despawnOrigin[0])
+			ps.Ey = append(ps.Ey, p.despawnOrigin[1])
+			ps.Ez = append(ps.Ez, p.despawnOrigin[2])
+		}
+		result.Streams.Projectiles = ps
+	}
+	if len(a.beams) > 0 {
+		bs := &BeamStreams{}
+		for i := range a.beams {
+			b := &a.beams[i]
+			bs.T = append(bs.T, b.tMs)
+			bs.Sx = append(bs.Sx, b.start[0])
+			bs.Sy = append(bs.Sy, b.start[1])
+			bs.Sz = append(bs.Sz, b.start[2])
+			bs.Ex = append(bs.Ex, b.end[0])
+			bs.Ey = append(bs.Ey, b.end[1])
+			bs.Ez = append(bs.Ez, b.end[2])
+		}
+		result.Streams.Beams = bs
+	}
 }
 
 // linkProjectiles matches each tracked rocket/grenade flight to the fire

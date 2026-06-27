@@ -6219,6 +6219,12 @@ function initMapView(result) {
         }
     }
 
+    // Spatial weapon-fire streams (schema v40): rocket/grenade flights
+    // (projectiles) and LG bolts (beams), as parallel columns. Present only
+    // when the analysis built them (WASM map build); absent → graceful no-op.
+    mapState.projectiles = (result.streams && result.streams.projectiles) || null;
+    mapState.beams = (result.streams && result.streams.beams) || null;
+
     // Line of sight is computed lazily (it is the heaviest position-derived
     // pass), so it is NOT in the parsed result. The map's LOS overlay requests
     // it from the worker on first toggle; reset the cache here.
@@ -7670,6 +7676,59 @@ function drawMovers(ctx) {
     }
 }
 
+// Colours for the weapon-fire overlays.
+const PROJECTILE_COLORS = { rl: '#ff7733', gl: '#66cc44' };
+const BEAM_COLOR = 'rgba(150, 200, 255, 0.85)';
+// A beam flashes for this half-window (ms) around its instant.
+const BEAM_FLASH_MS = 60;
+
+// drawProjectiles draws each in-flight rocket/grenade at the current time as
+// a small dot, linearly interpolated along its spawn→despawn segment (exact
+// for rockets; grenades only approximate, they bounce). Columns are parallel
+// arrays in mapState.projectiles (schema v40).
+function drawProjectiles(ctx) {
+    const pr = mapState.projectiles;
+    if (!pr || !Array.isArray(pr.s) || pr.s.length === 0) return;
+    const tMs = mapState.currentTime * 1000;
+    ctx.save();
+    for (let i = 0; i < pr.s.length; i++) {
+        const t0 = pr.s[i], t1 = pr.e[i];
+        if (tMs < t0 || tMs > t1) continue;
+        const f = t1 > t0 ? (tMs - t0) / (t1 - t0) : 0;
+        const x = pr.sx[i] + (pr.ex[i] - pr.sx[i]) * f;
+        const y = pr.sy[i] + (pr.ey[i] - pr.sy[i]) * f;
+        const z = pr.sz[i] + (pr.ez[i] - pr.sz[i]) * f;
+        const p = worldToCanvas(x, y, z);
+        ctx.fillStyle = PROJECTILE_COLORS[pr.w[i]] || '#ffffff';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+// drawBeams draws each LG bolt active near the current time as a short-lived
+// line from muzzle to impact. Columns are parallel arrays in mapState.beams.
+function drawBeams(ctx) {
+    const bm = mapState.beams;
+    if (!bm || !Array.isArray(bm.t) || bm.t.length === 0) return;
+    const tMs = mapState.currentTime * 1000;
+    ctx.save();
+    ctx.strokeStyle = BEAM_COLOR;
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < bm.t.length; i++) {
+        if (Math.abs(bm.t[i] - tMs) > BEAM_FLASH_MS) continue;
+        const a = worldToCanvas(bm.sx[i], bm.sy[i], bm.sz[i]);
+        const ax = a.x, ay = a.y;
+        const b = worldToCanvas(bm.ex[i], bm.ey[i], bm.ez[i]);
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
 // drawMoverMesh draws one posed mover as a single flat translucent silhouette
 // in the floor colour: cull the back faces (the submodel triangulation winds
 // so its normals point *into* the solid, so the near hull is the faces whose
@@ -7891,6 +7950,12 @@ function drawLocationLayer(ctx) {
     // Movers (lifts/doors/plats) posed at the current time — above the region
     // fills and below the outlines/labels.
     drawMovers(ctx);
+
+    // Weapon-fire overlays at the current time: rocket/grenade flights as
+    // moving dots, LG bolts as brief beams. No-op unless the spatial streams
+    // were built (WASM map build).
+    drawProjectiles(ctx);
+    drawBeams(ctx);
 
     // Thin grey outlines around each traced region — drawn after all fills so
     // they sit on top and stay visible regardless of adjacent region tinting.

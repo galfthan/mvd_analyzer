@@ -265,6 +265,51 @@ func TestShots_LGBeam(t *testing.T) {
 	}
 }
 
+// TestShots_SpatialStreams builds the projectile-flight and LG-beam streams
+// when the ShotStreams flag is on, with correct spawn/despawn geometry.
+func TestShots_SpatialStreams(t *testing.T) {
+	a, ctx := newTestShotsAnalyzer()
+	ctx.ShotStreams = true
+
+	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 1000))
+	_ = a.OnEvent(projSpawn(50, "rl", [3]float32{10, 20, 30}, 1000))
+	_ = a.OnEvent(&events.ProjectileDespawnEvent{
+		EntNum: 50, Kind: "rl", Origin: [3]float32{100, 20, 30}, Time: 1.5, TimeMs: 1500,
+	})
+	_ = a.OnEvent(lgBeam(4, 2000)) // start {0,0,0} end {100,0,0}
+
+	r := &Result{Streams: &Streams{}}
+	_ = a.Finalize(r)
+
+	pr := r.Streams.Projectiles
+	if pr == nil || len(pr.Spawn) != 1 {
+		t.Fatalf("projectiles = %+v", pr)
+	}
+	if pr.Weapon[0] != "rl" || pr.Spawn[0] != 1000 || pr.End[0] != 1500 ||
+		pr.Sx[0] != 10 || pr.Ex[0] != 100 {
+		t.Errorf("projectile flight = w%s s%d e%d sx%v ex%v", pr.Weapon[0], pr.Spawn[0], pr.End[0], pr.Sx[0], pr.Ex[0])
+	}
+	bm := r.Streams.Beams
+	if bm == nil || len(bm.T) != 1 || bm.T[0] != 2000 || bm.Ex[0] != 100 {
+		t.Fatalf("beams = %+v", bm)
+	}
+}
+
+// TestShots_SpatialStreamsGatedOff leaves the streams absent when the flag is
+// off (the default — keeps the standard output and goldens lean).
+func TestShots_SpatialStreamsGatedOff(t *testing.T) {
+	a, _ := newTestShotsAnalyzer() // ShotStreams defaults false
+	_ = a.OnEvent(projSpawn(50, "rl", [3]float32{0, 0, 0}, 1000))
+	_ = a.OnEvent(projDespawn(50, "rl", 1500))
+	_ = a.OnEvent(lgBeam(4, 2000))
+
+	r := &Result{Streams: &Streams{}}
+	_ = a.Finalize(r)
+	if r.Streams.Projectiles != nil || r.Streams.Beams != nil {
+		t.Errorf("spatial streams built despite ShotStreams=false")
+	}
+}
+
 // TestShots_WarmupGating keeps warmup fires in the stream but excludes them
 // from the match-time ByPlayer aggregate.
 func TestShots_WarmupGating(t *testing.T) {
