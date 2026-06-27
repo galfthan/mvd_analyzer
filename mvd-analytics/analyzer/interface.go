@@ -194,6 +194,12 @@ type (
 	DamagePair             = result.DamagePair
 	DamageReconciliation   = result.DamageReconciliation
 	DamageDelta            = result.DamageDelta
+	ShotsResult            = result.ShotsResult
+	Shot                   = result.Shot
+	PlayerShots            = result.PlayerShots
+	WeaponShots            = result.WeaponShots
+	ShotsReconciliation    = result.ShotsReconciliation
+	ShotsDelta             = result.ShotsDelta
 	MapEntitiesResult      = result.MapEntitiesResult
 	MapEntity              = result.MapEntity
 	Bounds                 = result.Bounds

@@ -304,6 +304,7 @@ func NewDefaultRegistry() *Registry {
 	r.RegisterDerived(ta)
 	r.RegisterDerived(NewItemAnalyzer())
 	r.RegisterDerived(NewDamageAnalyzer())
+	r.RegisterDerived(NewShotsAnalyzer())
 	r.RegisterDerived(NewMapEntitiesAnalyzer())
 	r.RegisterDerived(NewBackpackAnalyzer())
 	r.RegisterDerived(NewWeaponPickupsAnalyzer())

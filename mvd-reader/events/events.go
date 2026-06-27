@@ -62,6 +62,7 @@ const (
 	KindPausedDuration      = parser.EventPausedDuration
 	KindMoverSpawn          = parser.EventMoverSpawn
 	KindMoverState          = parser.EventMoverState
+	KindSound               = parser.EventSound
 )
 
 // Concrete event types emitted on the Source.
@@ -91,6 +92,7 @@ type (
 	PausedDurationEvent      = parser.PausedDurationEvent
 	MoverSpawnEvent          = parser.MoverSpawnEvent
 	MoverStateEvent          = parser.MoverStateEvent
+	SoundEvent               = parser.SoundEvent
 	EntityState              = parser.EntityState
 )
 

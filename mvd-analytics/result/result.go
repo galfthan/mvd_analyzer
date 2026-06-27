@@ -432,7 +432,16 @@ package result
 //     This test also gates the LOS raycast, so PVS ⊇ LOS by construction: the
 //     gap is the occlusion-tolerant "on the wire but no clear ray" signal.
 //     Additive (omitempty); absent on BSP-less maps and on the default parse.
-const CurrentSchemaVersion = 38
+//
+// v39:
+//   - New top-level Shots *ShotsResult: a per-shot weapon-fire stream
+//     (who fired what, at exactly what match-relative ms) derived from
+//     svc_sound CHAN_WEAPON fire sounds (SG/SSG/RL/GL/NG/SNG) and LG cell
+//     decrements, with same-frame hitscan→damage linking (sg/ssg/lg) and a
+//     diagnostic reconciliation against KTX acc.attacks. Additive
+//     (omitempty); the stream is present whenever any fire is detected,
+//     even on non-KTX servers (no damage stream → no hit links).
+const CurrentSchemaVersion = 39
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -454,6 +463,7 @@ type Result struct {
 	LocGraph         *LocGraphResult         `json:"locGraph,omitempty"`
 	Items            *ItemsResult            `json:"items,omitempty"`
 	Damage           *DamageResult           `json:"damage,omitempty"`
+	Shots            *ShotsResult            `json:"shots,omitempty"`
 	MapEntities      *MapEntitiesResult      `json:"mapEntities,omitempty"`
 	Backpacks        []BackpackDrop          `json:"backpacks,omitempty"`
 	WeaponPickups    []WeaponPickup          `json:"weaponPickups,omitempty"`

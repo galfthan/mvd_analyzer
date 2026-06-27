@@ -23,6 +23,34 @@ detail.
 
 ## 2026-06-27
 
+- **Per-shot weapon-fire stream** (schema v39). New top-level `shots`
+  result: who fired what weapon, at exactly what match-relative ms — the
+  foundation for accuracy metrics (including over short intervals) and for
+  external analysis correlating crosshair/aim movement with when shots were
+  taken (join a shot's `time` against `streams.players[].pos` view
+  angles/velocity).
+  - **Detection.** SG/SSG/RL/GL/NG/SNG fires come from `svc_sound` on the
+    shooter's `CHAN_WEAPON` — the sound carries the firing entity, so
+    attribution is exact and works on **any** QW server (not just KTX), and
+    the distinct fire wavs disambiguate RL vs GL where ammo deltas cannot.
+    (The Quake sound filenames are historically mismatched: the rocket
+    launcher fires `sgun1.wav`, the nailgun fires `rocket1i.wav`.) LG, which
+    has no per-shot fire sound, is counted from cell-ammo decrements
+    (`source:"ammo"`).
+  - **Truthful cross-linking.** Instantaneous hitscan fires (sg/ssg/lg) are
+    linked to the damage they caused in the **same server frame** via the
+    KTX `mvdhidden_dmgdone` stream (`hit`/`victims`). Projectile fires
+    (rl/gl/ng/sng) have travel time and no authoritative projectile↔impact
+    id, so they are left unlinked here — entity-tracking comes in a later
+    phase.
+  - **Validation built in.** A `reconciliation` block cross-checks detected
+    counts against KTX's authoritative `acc.attacks`; across the golden
+    corpus the converted `streamAttacks` matches KTX exactly (a 4on4 game
+    reconciles 42/42 player×weapon rows), with LG occasionally off by a
+    single cell at a death/discharge boundary.
+  - New parser events: `svc_sound` is decoded into `SoundEvent` and
+    `svc_soundlist` is captured to resolve fired sounds to weapons.
+
 - **Line-of-sight & potential-visibility metrics** (schema v37–v38,
   [#94](https://github.com/galfthan/mvd_analyzer/pull/94)). Two new
   per-opponent visibility tracks on `PlayerStream`, both computed lazily

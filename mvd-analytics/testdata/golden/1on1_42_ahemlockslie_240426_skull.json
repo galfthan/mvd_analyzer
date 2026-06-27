@@ -8550,7 +8550,5146 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 38,
+  "schemaVersion": 39,
+  "shots": {
+    "byPlayer": [
+      {
+        "byWeapon": [
+          {
+            "accuracy": 0.6,
+            "hits": 3,
+            "shots": 5,
+            "weapon": "sg"
+          },
+          {
+            "accuracy": 1,
+            "hits": 1,
+            "shots": 1,
+            "weapon": "ssg"
+          },
+          {
+            "shots": 119,
+            "weapon": "rl"
+          },
+          {
+            "accuracy": 0.29906542056074764,
+            "hits": 96,
+            "shots": 321,
+            "weapon": "lg"
+          }
+        ],
+        "player": "42",
+        "team": "red",
+        "total": 446
+      },
+      {
+        "byWeapon": [
+          {
+            "accuracy": 0.3333333333333333,
+            "hits": 3,
+            "shots": 9,
+            "weapon": "sg"
+          },
+          {
+            "shots": 2,
+            "weapon": "gl"
+          },
+          {
+            "shots": 121,
+            "weapon": "rl"
+          },
+          {
+            "accuracy": 0.2608695652173913,
+            "hits": 18,
+            "shots": 69,
+            "weapon": "lg"
+          }
+        ],
+        "player": "AHemlocksLie",
+        "team": "'tro",
+        "total": 201
+      }
+    ],
+    "reconciliation": {
+      "byPlayer": {
+        "42": [
+          {
+            "ktxAttacks": 30,
+            "ktxHits": 10,
+            "streamAttacks": 30,
+            "streamShots": 5,
+            "weapon": "sg"
+          },
+          {
+            "ktxAttacks": 14,
+            "ktxHits": 3,
+            "streamAttacks": 14,
+            "streamShots": 1,
+            "weapon": "ssg"
+          },
+          {
+            "ktxAttacks": 119,
+            "ktxHits": 11,
+            "streamAttacks": 119,
+            "streamShots": 119,
+            "weapon": "rl"
+          },
+          {
+            "ktxAttacks": 321,
+            "ktxHits": 96,
+            "streamAttacks": 321,
+            "streamShots": 321,
+            "weapon": "lg"
+          }
+        ],
+        "AHemlocksLie": [
+          {
+            "ktxAttacks": 54,
+            "ktxHits": 13,
+            "streamAttacks": 54,
+            "streamShots": 9,
+            "weapon": "sg"
+          },
+          {
+            "ktxAttacks": 2,
+            "ktxHits": 0,
+            "streamAttacks": 2,
+            "streamShots": 2,
+            "weapon": "gl"
+          },
+          {
+            "ktxAttacks": 121,
+            "ktxHits": 12,
+            "streamAttacks": 121,
+            "streamShots": 121,
+            "weapon": "rl"
+          },
+          {
+            "ktxAttacks": 70,
+            "ktxHits": 19,
+            "streamAttacks": 69,
+            "streamShots": 69,
+            "weapon": "lg"
+          }
+        ]
+      }
+    },
+    "shots": [
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 3042,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 3120,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "sg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 3757,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "sg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 3844,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 5441,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 7402,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 8302,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 9493,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 10519,
+        "weapon": "sg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 11142,
+        "victims": [
+          "42"
+        ],
+        "weapon": "sg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 11692,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 11727,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 12610,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 13415,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 13588,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 14237,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 14402,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 17328,
+        "weapon": "sg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 17835,
+        "weapon": "sg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 31909,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 31977,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 35896,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 35990,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 36080,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 36185,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 36276,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 36389,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 38457,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 38558,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 38665,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 38767,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 38861,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 38974,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 39054,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 39168,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 39262,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 39366,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 39379,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 39457,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 39571,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 39678,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 39766,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 39870,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 39963,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 40065,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 40327,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 40441,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 48859,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 57470,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 58328,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 64012,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 64106,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 64207,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 64311,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 64402,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 64496,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 64600,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 64700,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 64804,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 64899,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 65002,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 65093,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 65197,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 65301,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 65394,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 65506,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 65610,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 65700,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 65700,
+        "weapon": "sg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 65804,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 65899,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 66207,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 66220,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "ssg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 66285,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 66392,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 66493,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 66583,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 66691,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 66804,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 66886,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 66938,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 66990,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 67103,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 67194,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 67285,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 67394,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 67496,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 67583,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 67687,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 67752,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 67795,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 67895,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 67990,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 68090,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 68194,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 68285,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 68402,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 68493,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 68561,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 75963,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 76054,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 76804,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 76869,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 77609,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 77717,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 83454,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 84262,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 93664,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 95181,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 95952,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 96038,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 96843,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 96898,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 111129,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 111596,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 111681,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 111791,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 111885,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 111934,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 111990,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 112090,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 112184,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 112288,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 112379,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 112492,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 120963,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 121054,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 121168,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 121275,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 121353,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 121466,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 121573,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 121651,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 121765,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 121872,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 121972,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 122064,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 122167,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 122275,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 122354,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 122466,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 122573,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 122573,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 123314,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 123388,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 124314,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 124443,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 125612,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 125765,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 126404,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 126570,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 127223,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 128933,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "sg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 129496,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 130404,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 130466,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 146702,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 146819,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 147959,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 148024,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 148897,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 148933,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 149700,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 149856,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 160884,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 160998,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 161689,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 161858,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 162505,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 163676,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 164481,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 167193,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 167208,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 168374,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 168569,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 169505,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 171478,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 173335,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 174582,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 174678,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 175478,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 175674,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 187712,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 188114,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 188504,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 197907,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 197985,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198001,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198102,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198198,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198296,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198390,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198508,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198595,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198699,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198792,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198909,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 198989,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 199244,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 199504,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 200322,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 201247,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 202322,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 203452,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 203507,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 204416,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 204958,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 205218,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 205312,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 205403,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 205517,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 205611,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 205712,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 205807,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 205897,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 206013,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 206115,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 206208,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 206309,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 206413,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 214841,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 215920,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 216026,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 216841,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 219023,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 219702,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 219819,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 240439,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 240676,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 241477,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 242377,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 242509,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 243287,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 243469,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 244179,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 244270,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 245023,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 245078,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 245117,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 245179,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 245221,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 245283,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 245335,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 245377,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 245426,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 245478,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 245517,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 245584,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 245633,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 245675,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 245766,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 245880,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 245984,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 248467,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 248555,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 248649,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 248753,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 248854,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 249156,
+        "weapon": "sg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 271101,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 271195,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 271286,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 271403,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 271490,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 271529,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 271584,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 271698,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 271792,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 271896,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 271987,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 272078,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 272195,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 272286,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 272364,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 272390,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 272490,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 272597,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 272701,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 283960,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 284776,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 287101,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 287181,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 287285,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 287399,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 287493,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 287597,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 287698,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 287789,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 287896,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 287997,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 288107,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 288156,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 288191,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 288295,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 288399,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 288480,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 288594,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 288698,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 288779,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 288896,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 288997,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 289091,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 289182,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 289295,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 289584,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 296698,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 298191,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 298451,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 298532,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 298646,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 298749,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 298840,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 299064,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 299152,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 299259,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 299350,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 299454,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 299467,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 299545,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 299658,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 299750,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 299844,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 299957,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 300061,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 300152,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 300256,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 300580,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 303412,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 307256,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 308061,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 308866,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 310620,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 311061,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 311415,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 311505,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 311610,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 311714,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 311817,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 315321,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 323064,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 323881,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 324684,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 324934,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 325493,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 325736,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 326454,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 326545,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 327272,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 328269,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 328350,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 328464,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 328571,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 337970,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 338892,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 339726,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 339843,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 340791,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 341323,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 341596,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 342178,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 342411,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 343321,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 345114,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 345528,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 345918,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 346489,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 347414,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 350853,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 352399,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 353724,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 355491,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 358647,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 359424,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 359580,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 360553,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 363634,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 365154,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 365246,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 365281,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 365348,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 365452,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 365553,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 365658,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 366022,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 366644,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 366736,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 366816,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 366839,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 366907,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 366933,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 367021,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 367034,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 367125,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 367138,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 367216,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 367242,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 367333,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 367425,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 367530,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 371178,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 371801,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 371891,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 371985,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 372063,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 372099,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 372180,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 372294,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 388245,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 389595,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 393904,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 393995,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 394099,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 394203,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 394294,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 394397,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 394492,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 394593,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 394696,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 394775,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 394803,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 394894,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 394985,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 395089,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 395193,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 395294,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 395398,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 395502,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 395570,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 395592,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 395697,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 395790,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 395894,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 395998,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 396090,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 396203,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 396293,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 396400,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 396491,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 403008,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 403866,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 404956,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 405385,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 410088,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 410895,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 413177,
+        "weapon": "gl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 413865,
+        "weapon": "gl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 415904,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 417657,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 417700,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 422867,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 422956,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 423060,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 423060,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 423164,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 423255,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 423348,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 423465,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 423543,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 423647,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 423762,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 423867,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 423946,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 424008,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 424059,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 424164,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 424244,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 424348,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 424452,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 424567,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 424660,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 424764,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 424842,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 424946,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 425062,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 425164,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 425257,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 425349,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 425453,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 425774,
+        "weapon": "sg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 425802,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 426527,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 426686,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 427397,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 427556,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 430361,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 431436,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 435607,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 436399,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 441503,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 441527,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 442359,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 442812,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 443786,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 446309,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 452138,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 452218,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 452321,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 452438,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 452529,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 452631,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 452735,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 452839,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 452919,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 453034,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 453137,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 453218,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 453332,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 453425,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 453852,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 454371,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 461114,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 465127,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 465228,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 465332,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 465436,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 465516,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 465630,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 466384,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 466618,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 474307,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 475124,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 479591,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 480397,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 480838,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 482189,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 482435,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 483125,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 483347,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 483917,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 484149,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 486125,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 486920,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 487023,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 487127,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 487228,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 490578,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 490660,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 490774,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 497734,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 497815,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 497929,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 497996,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 498033,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 498115,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 498228,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 498321,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 498422,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 498526,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 509098,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 509176,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 509280,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 509384,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 509488,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 509551,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 509579,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 509694,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 509787,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 509889,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 509983,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 510074,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 510188,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 510282,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 510348,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 510396,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 510477,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 510592,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 510696,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 510786,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 510890,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 510982,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 511084,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 511170,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 511188,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 511280,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 511386,
+        "victims": [
+          "42"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 511475,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 511591,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "ammo",
+        "team": "'tro",
+        "time": 511694,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 511994,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 511994,
+        "victims": [
+          "42"
+        ],
+        "weapon": "sg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 512655,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 512788,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526020,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526111,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 526201,
+        "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526215,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526308,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526410,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526516,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526610,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526708,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526812,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526916,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 526997,
+        "weapon": "lg"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 529503,
+        "weapon": "sg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 529643,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 529734,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 529837,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 529920,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 530019,
+        "victims": [
+          "42"
+        ],
+        "weapon": "sg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 530033,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 530137,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 530230,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 530331,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 530646,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 531682,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 539851,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 540876,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 540980,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 541786,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 542684,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 542798,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 543580,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 543630,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 544382,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 544435,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 544642,
+        "weapon": "sg"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 565878,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 577670,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 579396,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 580266,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 580279,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 581070,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 581539,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 581878,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 582437,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "sound",
+        "team": "red",
+        "time": 582721,
+        "weapon": "rl"
+      },
+      {
+        "player": "AHemlocksLie",
+        "source": "sound",
+        "team": "'tro",
+        "time": 583259,
+        "weapon": "rl"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 583514,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 583618,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 583709,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 583825,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 583915,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 584008,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 584125,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 584204,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 589865,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 589955,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 590047,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 590151,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 590253,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 590346,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 590463,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 590553,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 590655,
+        "victims": [
+          "AHemlocksLie"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 590760,
+        "weapon": "lg"
+      },
+      {
+        "player": "42",
+        "source": "ammo",
+        "team": "red",
+        "time": 590875,
+        "weapon": "lg"
+      }
+    ]
+  },
   "streams": {
     "global": {
       "demoOffset": 10104,

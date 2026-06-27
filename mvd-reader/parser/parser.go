@@ -42,6 +42,7 @@ const (
 	EventPausedDuration
 	EventMoverSpawn
 	EventMoverState
+	EventSound
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -146,6 +147,7 @@ type Parser struct {
 	// and respawn without downstream analyzers having to reconstruct
 	// entity state. See entities.go for the decoder.
 	modelList              []string
+	soundList              []string // sound-index table from svc_soundlist; index 0 reserved
 	baselines              map[int]*EntityState
 	currentEntities        map[int]*EntityState
 	spawnedItems           map[int]string // ent -> kind, set once per item
@@ -308,6 +310,18 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 		case mvd.SvcModelList:
 			if err := p.parseModelList(r); err != nil {
 				p.warn(msg.Time, "parse_error", "svc_modellist: %v", err)
+				return nil
+			}
+
+		case mvd.SvcSoundList:
+			if err := p.parseSoundList(r); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_soundlist: %v", err)
+				return nil
+			}
+
+		case mvd.SvcSound:
+			if err := p.parseSound(r, msg.Time, msg.TimeMs, p.floatCoords); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_sound: %v", err)
 				return nil
 			}
 

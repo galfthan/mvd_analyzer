@@ -567,6 +567,71 @@ func parseModelList(r *BufferReader) string {
 
 ---
 
+## svc_soundlist (46) - Sound Precache List
+
+Mirrors `svc_modellist` exactly, but for sound paths. Index 0 is the
+reserved null sound, so a `svc_sound` `sound_num` of N indexes the Nth
+precached path. The parser keeps this table (`p.soundList`) so it can
+resolve a fired sound back to its path (e.g. `"weapons/rocket1i.wav"`).
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_soundlist (46)
+1       1     start_index (usually 0)
+?       var   sound_1 (string, e.g., "weapons/sgun1.wav")
+...
+?       var   sound_N (string)
+?       1     empty string (0x00 terminator)
+?       1     next_index (for continuation, usually 0)
+```
+
+## svc_sound (6) - Start Sound
+
+Plays a sound on an entity's channel. The **entity number is packed into
+the channel word**, so the message tells us *who* made the sound, not just
+where — this is what makes weapon-fire sounds a truthful per-shot signal
+(the firing player is `ent - 1`).
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_sound (6)
+1       2     channel (short)         <- bit field, see below
+[1]     [1]   volume        (only if channel & 0x8000 / SND_VOLUME)
+[1]     [1]   attenuation   (only if channel & 0x4000 / SND_ATTENUATION)
+1       1     sound_num               <- index into svc_soundlist
+6/12    var   origin (3 coords, short or float)
+```
+
+Channel-word decode (ezquake `cl_parse.c`): `ent = (channel >> 3) & 1023;
+channel &= 7`. The 3-bit channel index is the Quake `CHAN_*` value —
+`CHAN_WEAPON` (1) carries every weapon fire (ktx `weapons.c`).
+
+**Weapon-fire sounds.** KTX fires each weapon with a distinct precached
+wav, so the resolved `Name` identifies the weapon. The Quake sound
+filenames are historically mismatched with the weapons that play them —
+note especially that the **rocket launcher** fires `sgun1.wav` and the
+**nailgun** fires `rocket1i.wav`:
+
+| Sound path | Weapon | KTX fire function |
+|---|---|---|
+| `weapons/guncock.wav` | sg | `W_FireShotgun` |
+| `weapons/shotgn2.wav` | ssg | `W_FireSuperShotgun` |
+| `weapons/sgun1.wav` | **rl** | `W_FireRocket` |
+| `weapons/grenade.wav` | gl | `W_FireGrenade` |
+| `weapons/rocket1i.wav` | **ng** | `W_FireSpikes` |
+| `weapons/spike2.wav` | sng | `W_FireSuperSpikes` |
+| `weapons/coilgun.wav` | sg (instagib) | instagib rail |
+
+The lightning gun has **no** per-shot fire sound (`lstart.wav` plays once
+per burst on `CHAN_AUTO`; `lhit.wav` is throttled hit feedback), so LG fire
+is counted from cell-ammo decrements instead. The grenade *bounce*
+(`bounce.wav`), ricochets (`ric*`), spike tinks (`tink1`) and axe sounds
+are not fires.
+
+---
+
 ## svc_playerinfo (42) - Player State Update
 
 This is the core message type for player positions in MVD. The format differs between MVD and standard QWD.

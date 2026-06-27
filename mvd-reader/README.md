@@ -79,6 +79,7 @@ The concrete event list, in stable order:
 | `KindPausedDuration` | `PausedDurationEvent` | mvdhidden `0x000A`: real wall-clock ms for one paused idle frame. One per frame while paused (clock frozen); sum a run for the pause length. Note the non-standard, length-header-less framing — see [MVD_FORMAT.md](MVD_FORMAT.md#hidden-message-types) |
 | `KindMoverSpawn` | `MoverSpawnEvent` | Inline brush-model ("*N") entity observed — lift/door/train identity: entnum, BSP submodel index, baseline origin |
 | `KindMoverState` | `MoverStateEvent` | Mover wire-state change — origin moved (per frame while travelling) or visibility flipped. Hold-last between events is the exact pose |
+| `KindSound` | `SoundEvent` | `svc_sound` — a sound started on an entity's channel: emitting entity (`Ent`), channel (`CHAN_WEAPON`=1 for weapon fire), resolved precache `Name`, and origin. Weapon-fire sounds are the truthful per-shot signal consumed by the `shots` analyzer |
 
 `DeathEvent` and `SpawnEvent` are derived events synthesised by the
 parser from protocol-level `StatHealth` transitions. They fire at the

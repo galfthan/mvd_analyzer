@@ -359,6 +359,8 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 `ItemPickupPrintEvent`, `BackpackPickupPrintEvent`,
 `DemoStartTimestampEvent` (mvdhidden `0x000B` wall-clock anchor),
 `PausedDurationEvent` (mvdhidden `0x000A` per-frame pause duration),
+`SoundEvent` (`svc_sound` — emitting entity + channel + resolved sound
+path; weapon-fire sounds drive the shots analyzer),
 `MoverSpawnEvent` / `MoverStateEvent` (inline brush-model entities —
 lifts, doors, trains — identity plus per-frame origin while moving).
 Domain types carried by events — `ServerData`, `PlayerInfo`,
@@ -399,6 +401,9 @@ items (per-item pickup / respawn timeline — works on any MVD source),
 damage (per-hit damage log + aggregates — attacker→victim matrix,
 per-weapon, given/taken, and the EWep victim-weapon buckets — from the
 KTX `mvdhidden_dmgdone` stream, with a scoreboard cross-check),
+shots (per-shot weapon-fire stream — who fired what at exactly what ms,
+from `svc_sound` fire sounds + LG cell-ammo — with same-frame
+hitscan→damage links and a KTX-accuracy cross-check),
 backpacks (RL/LG drops attributed to the dropping player via KTX's
 `//ktx drop` hint), and weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
@@ -693,8 +698,15 @@ diff -r /tmp/before /tmp/after
 ## Known limitations
 
 1. **Weapon switching scripts**: QW players use scripts that switch weapons
-   faster than MVD stat updates, causing RL/GL shot undercounting in
-   MVD-based tracking. KTX demoinfo stats (when available) are authoritative.
+   faster than MVD stat updates, so any *ammo-delta*-based inference of
+   RL/GL usage undercounts. The `shots` analyzer sidesteps this by keying on
+   the `svc_sound` weapon-fire sound (which carries the firing entity), not
+   ammo — its per-weapon counts match KTX `acc.attacks` exactly across the
+   corpus, including RL/GL. The one weapon still counted from ammo is LG
+   (it has no per-shot fire sound), which can slip by a single cell at a
+   death/discharge boundary. KTX demoinfo stats (when available) remain the
+   authoritative reference, and `shots.reconciliation` cross-checks against
+   them.
 
 2. **Auth name override**: When players authenticate via mvdsv,
    `sv_forcenick` can set the userinfo name to the login. The analyzer

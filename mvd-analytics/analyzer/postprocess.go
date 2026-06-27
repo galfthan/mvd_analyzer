@@ -154,6 +154,12 @@ func normalizeMatchRelativeTimes(res *Result, _ *CoreOutputs) {
 			res.Damage.Events[i].Time -= matchStartMs
 		}
 	}
+
+	if res.Shots != nil {
+		for i := range res.Shots.Shots {
+			res.Shots.Shots[i].Time -= matchStartMs
+		}
+	}
 }
 
 // shiftAndFilterChangeI16 subtracts matchStartMs from each entry's T
