@@ -583,6 +583,7 @@ func (s *server) handleLOS(w http.ResponseWriter, r *http.Request) {
 	type losPlayer struct {
 		Name string            `json:"name"`
 		LOS  []result.LosTrack `json:"los,omitempty"`
+		PVS  []result.LosTrack `json:"pvs,omitempty"`
 	}
 	out := struct {
 		Players []losPlayer `json:"players"`
@@ -592,6 +593,7 @@ func (s *server) handleLOS(w http.ResponseWriter, r *http.Request) {
 		for i := range res.Streams.Players {
 			out.Players[i].Name = res.Streams.Players[i].Name
 			out.Players[i].LOS = res.Streams.Players[i].LOS
+			out.Players[i].PVS = res.Streams.Players[i].PVS
 		}
 	}
 	writeJSON(w, http.StatusOK, out)

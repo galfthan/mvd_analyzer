@@ -106,6 +106,17 @@ type PlayerStream struct {
 	// provisioned BSP (same gate as PositionTrack.H/Lq); absent otherwise.
 	// Raw transitions, no smoothing (surface authoritative data).
 	LOS []LosTrack `json:"los,omitempty"`
+
+	// PVS records when each other player was in this player's (the looker's)
+	// potentially-visible set — the PVS cull the LOS raycast gates on, recorded
+	// before the rays narrow it to actual sight. Same LosTrack shape, same lazy
+	// pass (analyzer.ComputeLOS) and BSP gate as LOS, schema v38. PVS is a
+	// lossless superset of LOS: every LOS interval lies inside the matching PVS
+	// one, so PVS ⊇ LOS. The gap between them (potentially visible, no clear
+	// ray) is the occlusion-tolerant signal for spotting a player reacting to
+	// opponents they cannot actually see — a cheat-detection aid. Raw
+	// transitions, no smoothing.
+	PVS []LosTrack `json:"pvs,omitempty"`
 }
 
 // LosTrack is one looker's line-of-sight onto a single opponent, as the

@@ -589,6 +589,7 @@ when the demo has no pauses or the server does not embed the block.
 | Shells / Nails / Rockets / Cells | `sh` / `nl` / `rk` / `cl` | []ChangeI16 | Ammo change streams. |
 | Spawns / Deaths | `sp` / `d` | []int32 | Discrete event timestamps in milliseconds. |
 | LOS | `los` | []LosTrack (omitempty) | Per-opponent line-of-sight intervals. BSP-backed maps only, and **computed lazily** — absent from the default parse; populated on demand (web LOS overlay, `qw-analyze -include los`, mvd-api `/los`). |
+| PVS | `pvs` | []LosTrack (omitempty) | Per-opponent potentially-visible-set intervals: the PVS cull the LOS raycast gates on, recorded before the rays narrow it. Lossless superset of `los` (PVS ⊇ LOS). Same shape, gate, and lazy pass as `los`. |
 
 ### ChangeI16 / ChangeStr / Interval
 
@@ -638,6 +639,24 @@ are alive, against the map's visibility BSP — present only on maps with a
 provisioned BSP (same gate as `PositionTrack.h`/`lq`), absent otherwise. View
 direction is not considered: this is geometric visibility, not FOV. Raw
 transitions, no smoothing.
+
+### PVS (`streams.players[].pvs[]`)
+
+Same `LosTrack` shape as `los`, populated by the same lazy `analyzer.ComputeLOS`
+pass under the same BSP gate, but recording **potential** visibility: the
+opponent's bounding box shares at least one leaf with the looker's
+potentially-visible set (`bspvis.BoxLeafs` ∩ the eye leaf's PVS row). This is
+exactly the cull the LOS pass applies *before* casting rays — `pvs` reports it,
+`los` then narrows it to an actual unblocked sightline.
+
+Because the PVS cull is a lossless superset of the raycast (no ray can reach a
+target whose leaves are all outside the PVS), **PVS ⊇ LOS**: every `los`
+interval lies inside a `pvs` interval for the same opponent. The gap between
+them — potentially visible but no clear ray — is the occlusion-tolerant signal
+intended for cheat detection: a player consistently reacting to opponents that
+are in PVS but never in LOS is suspect. Like `los`, it is per-ordered-pair
+(`o` indexes `streams.players`), computed only while both players are alive,
+raw transitions with no smoothing.
 
 ### PositionTrack
 
@@ -1285,6 +1304,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v38 | `PlayerStream` gains `pvs[]` (`LosTrack`): per-opponent potentially-visible-set intervals, populated alongside `los[]` by the same lazy `analyzer.ComputeLOS` pass under the same BSP gate. `pvs` records the PVS cull the LOS raycast gates on (opponent's bbox leaves ∩ the looker's PVS row) *before* the rays narrow it, so it is a lossless superset of `los` — **PVS ⊇ LOS**, every `los` interval lies inside a `pvs` one. The gap (potentially visible, no clear ray) is the occlusion-tolerant signal for cheat detection. Same `o`/`iv` shape, asymmetry, alive-gating; additive (`omitempty`); absent on BSP-less maps and on the default parse. Exposed by the same consumers as `los` (web overlay, `qw-analyze -include los`, mvd-api `/los`). |
 | v37 | `PlayerStream` gains `los[]` (`LosTrack`): per-opponent line-of-sight as half-open `[s,e)` ms intervals during which the looker had a clear sightline (eye `origin+(0,0,22)` → any of the opponent's 8 bbox corners + midpoint), blocked by worldspawn solids or any active mover posed in the way. Asymmetric (`A→B` in A's stream, `B→A` in B's); `o` indexes `streams.players`. **Computed lazily** (`analyzer.ComputeLOS`) — absent from the default parse; populated on demand by the web LOS overlay, `qw-analyze -include los`, and mvd-api `/los`. Against the visibility BSP, so only on maps with a provisioned BSP (same gate as `pos.h`/`lq`). Additive (`omitempty`). View direction is not considered. |
 | v36 | `MatchResult` drops the dead `startTime` / `endTime` fields. After the match-relative time normalization `startTime` was always 0 (already `omitempty`, so absent from JSON) and `endTime` always equalled `duration`; both duplicated `streams.global.matchStart` / `matchEnd`. The `endTime` key disappears from the `match` object — read `duration` for match length, or `streams.global` for the match window. Breaking removal (not additive). |
 | v35 | `streams` gains `movers[]` (`MoverStream`): the pose timeline of every tracked brush-model entity (lift, door, plat, train). Each carries `ent` (entity number), `sub` (the `*N` brush-model index, matching the corpus `SubModelMesh` id), and index-aligned `t`/`x`/`y`/`z`/`vis` columns — the mover sits at `(x,y,z)[i]` at `t[i]` ms and is drawn when `vis[i]`. Origins are `float32` (exact ⅛-unit wire values). The first entry is clamped to `t = 0` carrying the match-start pose so a parked mover (only wire state predates the match) still has one. Additive (`omitempty`); absent when the demo has no movers. The same internal tracks already drive the v27 floor-height pass. |

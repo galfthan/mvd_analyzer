@@ -188,6 +188,42 @@ func TestComputeLosAB_MoverBlocks(t *testing.T) {
 	}
 }
 
+// TestComputePvsAB_SupersetOfLos: PVS is a lossless superset of LOS. On the
+// z-floor BSP (no vis lump, so the PVS cull never rejects) B's eye sits inside
+// solid: B→A has no clear ray (empty LOS) yet B→A is potentially visible the
+// whole alive window (non-empty PVS) — exactly the "potentially visible, no
+// clear ray" gap the metric is meant to surface. A→B has both, with PVS
+// covering at least the LOS span.
+func TestComputePvsAB_SupersetOfLos(t *testing.T) {
+	vb := zFloorBSP()
+	ts := []int32{0, 50}
+	a := &result.PlayerStream{Name: "A", Position: staticTrack(ts, 0, 0, 0)}      // eye z=22 (front)
+	b := &result.PlayerStream{Name: "B", Position: staticTrack(ts, 100, 0, -30)} // eye z=-8 (in solid)
+
+	// B→A: no raycast sightline, but B↔A are potentially visible (nil PVS row).
+	if los := computeLosAB(vb, b, a, nil, 100); len(los) != 0 {
+		t.Errorf("B→A LOS: expected none (B's eye in solid), got %v", los)
+	}
+	pvsBA := computePvsAB(vb, b, a, nil, 100)
+	if len(pvsBA) == 0 {
+		t.Errorf("B→A PVS: expected a potentially-visible interval, got none")
+	}
+
+	// A→B: PVS must contain the LOS span (superset). Same single ramp here, so
+	// they coincide, but PVS must never be empty when LOS is non-empty.
+	losAB := computeLosAB(vb, a, b, nil, 100)
+	pvsAB := computePvsAB(vb, a, b, nil, 100)
+	if len(losAB) == 0 {
+		t.Fatalf("A→B LOS: expected a visible interval, got none")
+	}
+	if len(pvsAB) == 0 {
+		t.Fatalf("A→B PVS: expected a potentially-visible interval, got none")
+	}
+	if pvsAB[0].Start > losAB[0].Start || pvsAB[len(pvsAB)-1].End < losAB[len(losAB)-1].End {
+		t.Errorf("A→B PVS %v does not span LOS %v", pvsAB, losAB)
+	}
+}
+
 // TestComputeLOS_NoBSP: a map with no provisioned BSP leaves LOS absent, and
 // the pass marks itself computed so it is not retried.
 func TestComputeLOS_NoBSP(t *testing.T) {
@@ -208,6 +244,9 @@ func TestComputeLOS_NoBSP(t *testing.T) {
 	for i := range res.Streams.Players {
 		if res.Streams.Players[i].LOS != nil {
 			t.Errorf("player %q got LOS on a BSP-less map: %v", res.Streams.Players[i].Name, res.Streams.Players[i].LOS)
+		}
+		if res.Streams.Players[i].PVS != nil {
+			t.Errorf("player %q got PVS on a BSP-less map: %v", res.Streams.Players[i].Name, res.Streams.Players[i].PVS)
 		}
 	}
 }

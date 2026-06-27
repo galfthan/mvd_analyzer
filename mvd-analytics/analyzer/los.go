@@ -81,10 +81,62 @@ func ComputeLOS(res *Result) {
 		if players[ai].Position == nil || len(players[ai].Position.T) == 0 {
 			continue
 		}
-		if tracks := losForLooker(vb, players, ai, movers, matchEnd, pvsCache, trails); len(tracks) > 0 {
-			players[ai].LOS = tracks
+		los, pvs := losForLooker(vb, players, ai, movers, matchEnd, pvsCache, trails)
+		if len(los) > 0 {
+			players[ai].LOS = los
+		}
+		if len(pvs) > 0 {
+			players[ai].PVS = pvs
 		}
 	}
+}
+
+// visAccum collects per-opponent half-open visibility intervals from a boolean
+// sampled in ascending looker time: open/start hold the in-progress interval
+// per opponent and out the closed ones. Both the LOS (raycast) and PVS
+// (potentially-visible) passes feed one of these, so the interval bookkeeping
+// stays identical between the two metrics.
+type visAccum struct {
+	open  []bool
+	start []int32
+	out   [][]result.Interval
+}
+
+func newVisAccum(n int) visAccum {
+	return visAccum{open: make([]bool, n), start: make([]int32, n), out: make([][]result.Interval, n)}
+}
+
+// sample records opponent bi's visibility at looker time t, opening an interval
+// on a rising edge and closing it on a falling one.
+func (ac *visAccum) sample(bi int, visible bool, t int32) {
+	if visible && !ac.open[bi] {
+		ac.open[bi], ac.start[bi] = true, t
+	} else if !visible && ac.open[bi] {
+		ac.open[bi] = false
+		ac.out[bi] = append(ac.out[bi], result.Interval{Start: ac.start[bi], End: t})
+	}
+}
+
+// tracks closes any still-open interval at end (never before its own start) and
+// returns one LosTrack per opponent ever seen, skipping the looker ai itself.
+func (ac *visAccum) tracks(ai int, end int32) []result.LosTrack {
+	var tracks []result.LosTrack
+	for bi := range ac.open {
+		if bi == ai {
+			continue
+		}
+		if ac.open[bi] {
+			e := end
+			if e < ac.start[bi] {
+				e = ac.start[bi]
+			}
+			ac.out[bi] = append(ac.out[bi], result.Interval{Start: ac.start[bi], End: e})
+		}
+		if len(ac.out[bi]) > 0 {
+			tracks = append(tracks, result.LosTrack{Other: int16(bi), Iv: ac.out[bi]})
+		}
+	}
+	return tracks
 }
 
 // leafTrail is one player's per-sample bounding-box leaf set in CSR layout:
@@ -123,25 +175,34 @@ func buildLeafTrails(vb *bspvis.BSP, players []result.PlayerStream) []leafTrail 
 	return trails
 }
 
-// losForLooker computes looker ai's line-of-sight onto every other player,
-// returning one LosTrack per opponent ever seen (Other = opponent index). It
-// walks ai's own samples once; at each sample it resolves the eye leaf + PVS
-// row (the cheap cull that skips the 9 raycasts when an opponent's leaf isn't
-// potentially visible) and the active-mover snapshot, both shared across all
-// opponents at that time.
+// losForLooker computes looker ai's visibility onto every other player in one
+// walk of ai's own samples, returning two parallel metrics, each one LosTrack
+// per opponent ever seen (Other = opponent index):
+//
+//   - los: a clear raycast sightline (PVS-allowed AND an unblocked ray).
+//   - pvs: the opponent is merely in the looker's potentially-visible set — the
+//     same PVS cull the raycast pass gates on, recorded before the rays filter
+//     it down. PVS is a lossless superset of LOS, so every los interval lies
+//     inside the matching pvs one; the gap between them (potentially visible but
+//     no clear ray) is the cheap, occlusion-tolerant signal an analysis can use
+//     to flag a player reacting to opponents they cannot actually see.
+//
+// At each sample it resolves the eye leaf + PVS row and the active-mover
+// snapshot once, sharing them across all opponents at that time. The 9 raycasts
+// (and the mover snapshot they need) run only when the PVS cull passes, so the
+// pvs metric costs nothing beyond the bit test the los pass already did.
 //
 // Mover cursors are reset here, so the caller may reuse one mover slice across
 // lookers. No memoization across samples: a mover sweeping between a stationary
 // pair changes LOS even when neither player moves.
-func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers []losMover, matchEnd int32, pvsCache map[int][]byte, trails []leafTrail) []result.LosTrack {
+func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers []losMover, matchEnd int32, pvsCache map[int][]byte, trails []leafTrail) (los, pvs []result.LosTrack) {
 	a := &players[ai]
 	ap := a.Position
 	n := len(players)
 
-	open := make([]bool, n)
-	start := make([]int32, n)
+	losAcc := newVisAccum(n)
+	pvsAcc := newVisAccum(n)
 	bcur := make([]int, n)
-	out := make([][]result.Interval, n)
 
 	for mi := range movers {
 		movers[mi].cursor = 0
@@ -172,7 +233,8 @@ func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers 
 			if bp == nil || len(bp.T) == 0 {
 				continue
 			}
-			visible := false
+			visible := false    // clear raycast sightline
+			potVisible := false // opponent in the looker's PVS
 			if aAlive {
 				for bcur[bi]+1 < len(bp.T) && bp.T[bcur[bi]+1] <= t {
 					bcur[bi]++
@@ -183,9 +245,11 @@ func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers 
 					// points, so if none of its leaves is potentially visible no
 					// ray can reach a target — a strict superset of the raycast
 					// test (lossless) that skips the rays for the common
-					// different-room pair with only bit tests.
+					// different-room pair with only bit tests. This same cull is
+					// the pvs metric: record it, then narrow to los with the rays.
 					tr := &trails[bi]
 					if pvsAllowsLeaves(vb, pvsRow, tr.leaves[tr.offs[bj]:tr.offs[bj+1]]) {
+						potVisible = true
 						var tg [9][3]float32
 						losTargets(bp.X[bj], bp.Y[bj], bp.Z[bj], &tg)
 						if !moversReady {
@@ -196,12 +260,8 @@ func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers 
 					}
 				}
 			}
-			if visible && !open[bi] {
-				open[bi], start[bi] = true, t
-			} else if !visible && open[bi] {
-				open[bi] = false
-				out[bi] = append(out[bi], result.Interval{Start: start[bi], End: t})
-			}
+			losAcc.sample(bi, visible, t)
+			pvsAcc.sample(bi, potVisible, t)
 		}
 	}
 
@@ -211,23 +271,7 @@ func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers 
 	if m := len(ap.T); m > 0 && ap.T[m-1] < end {
 		end = ap.T[m-1]
 	}
-	var tracks []result.LosTrack
-	for bi := 0; bi < n; bi++ {
-		if bi == ai {
-			continue
-		}
-		if open[bi] {
-			e := end
-			if e < start[bi] {
-				e = start[bi]
-			}
-			out[bi] = append(out[bi], result.Interval{Start: start[bi], End: e})
-		}
-		if len(out[bi]) > 0 {
-			tracks = append(tracks, result.LosTrack{Other: int16(bi), Iv: out[bi]})
-		}
-	}
-	return tracks
+	return losAcc.tracks(ai, end), pvsAcc.tracks(ai, end)
 }
 
 // losMover is one mover's pose timeline plus a forward-only cursor, prepared
@@ -303,7 +347,24 @@ func activeMoversAt(movers []losMover, t int32, dst []posedMover) []posedMover {
 func computeLosAB(vb *bspvis.BSP, a, b *result.PlayerStream, movers []losMover, matchEnd int32) []result.Interval {
 	two := []result.PlayerStream{*a, *b}
 	trails := buildLeafTrails(vb, two)
-	for _, tr := range losForLooker(vb, two, 0, movers, matchEnd, make(map[int][]byte), trails) {
+	los, _ := losForLooker(vb, two, 0, movers, matchEnd, make(map[int][]byte), trails)
+	for _, tr := range los {
+		if tr.Other == 1 {
+			return tr.Iv
+		}
+	}
+	return nil
+}
+
+// computePvsAB is the pvs-metric counterpart of computeLosAB: the half-open
+// intervals during which looker a had target b in its potentially-visible set
+// (before the raycast narrows it to actual line of sight). Kept for direct unit
+// testing.
+func computePvsAB(vb *bspvis.BSP, a, b *result.PlayerStream, movers []losMover, matchEnd int32) []result.Interval {
+	two := []result.PlayerStream{*a, *b}
+	trails := buildLeafTrails(vb, two)
+	_, pvs := losForLooker(vb, two, 0, movers, matchEnd, make(map[int][]byte), trails)
+	for _, tr := range pvs {
 		if tr.Other == 1 {
 			return tr.Iv
 		}

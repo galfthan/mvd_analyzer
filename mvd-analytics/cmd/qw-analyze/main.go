@@ -78,7 +78,7 @@ func main() {
 	minDwellStr := flag.String("min-dwell", "0", "drop transitions shorter than this for -view trails")
 	timeStr := flag.String("time", "", "time for -view state-at (required)")
 	includeTeam := flag.Bool("include-team", false, "emit per-team aggregates on -view buckets")
-	includeStr := flag.String("include", "", "comma-separated extras for -view full: positions (x/y/z+loc), view (pitch/yaw), height, liquid, velocity; los (line-of-sight intervals, computed on request)")
+	includeStr := flag.String("include", "", "comma-separated extras for -view full: positions (x/y/z+loc), view (pitch/yaw), height, liquid, velocity; los (line-of-sight + pvs potential-visibility intervals, computed on request)")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: qw-analyze [options] <demo.mvd | demo.mvd.gz | directory>\n\n")
@@ -240,7 +240,8 @@ func dumpJSON(path string, w io.Writer, pretty bool, regionsOverride []config.Ma
 	}
 
 	// Line of sight is computed lazily (the heaviest position-derived pass);
-	// -include los triggers it on request.
+	// -include los triggers it on request. The same pass also fills the PVS
+	// (potentially-visible) tracks, so both los and pvs appear together.
 	if vopts != nil && vopts.include["los"] {
 		analyzer.ComputeLOS(res)
 	}

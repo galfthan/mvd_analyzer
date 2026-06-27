@@ -700,12 +700,14 @@ independently — `pos` is strictly x/y/z, and `view` / `hgt` / `lq` /
 `-include positions,view,height,liquid,velocity` each keep their column
 set in the full-result JSON (default strips the whole heavy track).
 
-## Line of sight (`PlayerStream.LOS`)
+## Line of sight (`PlayerStream.LOS`) and potential visibility (`PlayerStream.PVS`)
 
-`analyzer.ComputeLOS(res)` (`analyzer/los.go`, schema v37) records, per ordered
+`analyzer.ComputeLOS(res)` (`analyzer/los.go`, schema v38) records, per ordered
 player pair, the half-open `[s,e)` ms intervals during which one player (the
 **looker**) had a clear geometric sightline to another, stored on the looker's
-`PlayerStream.LOS` as one `LosTrack` per opponent.
+`PlayerStream.LOS` as one `LosTrack` per opponent. The same pass also fills
+`PlayerStream.PVS` (same `LosTrack` shape) with **potential** visibility — see
+below.
 
 **It is computed lazily — NOT during the default parse.** LOS is the heaviest
 position-derived pass (N² pairs × samples × rays) and has no in-pipeline
@@ -746,6 +748,20 @@ position-derived pass (~10–13 s for a full 20-minute 4on4), which is exactly
 why it is lazy: that cost is paid only when a consumer asks for LOS, and at
 most once per demo. The web map view's **LOS** button draws a line between
 players who currently have sight (white = mutual, red/blue = one-way).
+
+**Potential visibility (`PlayerStream.PVS`).** The PVS cull above is itself a
+useful metric, so the same pass records it on `PlayerStream.PVS` (one `LosTrack`
+per opponent, identical shape and gating to `LOS`) before the rays narrow it.
+`pvs` is on whenever the opponent's bounding box shares a leaf with the looker's
+PVS row — i.e. the opponent is *potentially* visible — regardless of whether any
+ray is actually clear. Because the cull is lossless, **PVS ⊇ LOS**: every `los`
+interval lies inside a `pvs` interval for the same opponent (verified against the
+golden corpus). The gap between them — potentially visible but no clear ray — is
+the occlusion-tolerant signal intended for **cheat detection**: a player who
+keeps reacting to opponents that are in PVS but never in LOS is suspect. It
+costs nothing beyond the bit test `LOS` already does, rides along on every `LOS`
+consumer (web overlay, `qw-analyze -include los`, mvd-api `/los`), and is
+likewise absent on BSP-less maps and on the default parse.
 
 ## Velocity (`PositionTrack.VX` / `VY` / `VZ`)
 

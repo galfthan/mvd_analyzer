@@ -419,7 +419,17 @@ package result
 //     consumer requested it (web LOS overlay, qw-analyze -include los,
 //     mvd-api /los). The Streams.LOSComputed guard (gob-only, json:"-") makes
 //     it idempotent.
-const CurrentSchemaVersion = 37
+//
+// v38:
+//   - PlayerStream gains PVS []LosTrack alongside LOS: per-opponent
+//     potentially-visible-set intervals — the PVS cull the LOS raycast gates
+//     on, recorded before the rays narrow it to actual sight. Same LosTrack
+//     shape, same lazy pass (analyzer.ComputeLOS), BSP gate and Streams.LOSComputed
+//     guard as LOS. PVS is a lossless superset of LOS (PVS ⊇ LOS): the gap
+//     between them is the occlusion-tolerant "potentially visible but no clear
+//     ray" signal for cheat detection. Additive (omitempty); absent on BSP-less
+//     maps and on the default parse (populated only when a consumer asks).
+const CurrentSchemaVersion = 38
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
