@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 
 # Toolchain image for mvd-analyzer. This holds tools only — no personal
 # identity or secrets. Git author/email and GH_TOKEN are injected from the
-# host at container-create time via devcontainer.json containerEnv
+# host at container-create time via devcontainer.json remoteEnv
 # (${localEnv:...}), so nothing personal is baked into the image or the repo.
 
 ARG GO_VERSION=1.25.10
