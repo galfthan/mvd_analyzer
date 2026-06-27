@@ -422,13 +422,16 @@ package result
 //
 // v38:
 //   - PlayerStream gains PVS []LosTrack alongside LOS: per-opponent
-//     potentially-visible-set intervals — a point-to-point PVS test (looker eye
-//     leaf vs the opponent's body leaf, the same notion the loc filter uses).
-//     Same LosTrack shape, same lazy pass (analyzer.ComputeLOS), BSP gate and
-//     Streams.LOSComputed guard as LOS. This test also gates the LOS raycast, so
-//     PVS ⊇ LOS by construction: the gap between them is an occlusion-tolerant
-//     "potentially visible but no clear ray" proximity/awareness signal. Additive
-//     (omitempty); absent on BSP-less maps and on the default parse.
+//     potentially-visible-set intervals reproducing the server's per-client
+//     entity cull (mvdsv SV_PlayerVisibleToClient) — the looker's fat PVS
+//     (CM_FatPVS of origin+view_ofs) ∩ the opponent's entity leaf set (expanded
+//     box, non-solid), or always when it overflows MAX_ENT_LEAFS. I.e. whether a
+//     live server would have sent that opponent to the client (the recorded MVD
+//     itself stores every entity, pvs = NULL). Same LosTrack shape, same lazy
+//     pass (analyzer.ComputeLOS), BSP gate and Streams.LOSComputed guard as LOS.
+//     This test also gates the LOS raycast, so PVS ⊇ LOS by construction: the
+//     gap is the occlusion-tolerant "on the wire but no clear ray" signal.
+//     Additive (omitempty); absent on BSP-less maps and on the default parse.
 const CurrentSchemaVersion = 38
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each

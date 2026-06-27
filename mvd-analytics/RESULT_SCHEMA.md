@@ -643,27 +643,35 @@ transitions, no smoothing.
 ### PVS (`streams.players[].pvs[]`)
 
 Same `LosTrack` shape as `los`, populated by the same lazy `analyzer.ComputeLOS`
-pass under the same BSP gate, but recording **potential** visibility: a
-point-to-point PVS test — the looker's eye leaf (`PointInLeaf(origin+(0,0,22))`)
-vs the opponent's single body leaf (`PointInLeaf(origin)`). The opponent is
-potentially visible when its body leaf is set in the looker's PVS row. This is
-the same notion the loc filter uses (`locvis`).
+pass under the same BSP gate, but recording **potential** visibility — and
+specifically reproducing what a live **mvdsv** server would have sent. `pvs` is
+on for opponent `O` at looker `L` exactly when the server's per-client entity
+cull (`SV_PlayerVisibleToClient`) would have transmitted `O`'s entity to `L`'s
+client that frame:
 
-A body centre in solid (a wall-clip) is treated as not visible — leaf 0 / the
-solid sink would otherwise test unconditionally true. For players on opposite
-sides of the map both agree (neither is in PVS); the test is on only when the
-two are in mutually visible vis regions.
+- **viewer side** — `L`'s **fat PVS**: `CM_FatPVS(origin+view_ofs)`, the OR of
+  the PVS rows of every non-solid leaf within **8 units** of the eye
+  (`view_ofs.z = 22`).
+- **target side** — `O`'s **entity leaf set**: the non-solid leaves its bounding
+  box touches, where the box is the player hull (`±16` xy, `−24/+32` z) **expanded
+  1 unit** on every side (`SV_LinkEdict`). If that box touches more than
+  `MAX_ENT_LEAFS` (16) leaves the server marks it always-sent — `pvs` is then on
+  unconditionally.
+- **test** — on iff any target leaf is set in the viewer's fat PVS.
 
-**PVS ⊇ LOS by construction**: this same point test gates the LOS raycast (LOS
-is cast only for potentially-visible pairs), so every `los` interval lies inside
-a `pvs` interval for the same opponent. (Gating on the point rather than a
-lossless bounding-box cull drops a measured ~0.05 % of true sightlines — a body
-centre occluded while a corner peeks through a portal — within the noise of a
-9-point eye-height LOS.) The gap between them — potentially visible but no clear
-ray — is an occlusion-tolerant proximity/awareness signal: the opponent is in the
-same vis region without a direct sightline. Like `los`, it is per-ordered-pair
-(`o` indexes `streams.players`), computed only while both players are alive, raw
-transitions with no smoothing.
+This is *the wire*: the recorded MVD itself does **not** carry it — the demo
+recorder is a fake client with `pvs = NULL` and stores every entity
+(`SV_WriteEntitiesToClient`), so the per-client cull is reconstructed here from
+the position tracks. (The one unavoidable approximation: we only have `origin`,
+so `view_ofs.z` is taken as the standing `22`, exact for living players.)
+
+**PVS ⊇ LOS by construction**: this wire PVS also gates the LOS raycast (LOS is
+cast only for potentially-visible pairs), so every `los` interval lies inside a
+`pvs` interval for the same opponent; because the PVS is a conservative superset
+of true reachability the gate loses no real sightline. The gap between them — on
+the wire but no clear ray — is an occlusion-tolerant proximity/awareness signal.
+Like `los`, it is per-ordered-pair (`o` indexes `streams.players`), computed only
+while both players are alive, raw transitions with no smoothing.
 
 ### PositionTrack
 
@@ -1311,7 +1319,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
-| v38 | `PlayerStream` gains `pvs[]` (`LosTrack`): per-opponent potentially-visible-set intervals, populated alongside `los[]` by the same lazy `analyzer.ComputeLOS` pass under the same BSP gate. A point-to-point PVS test (looker eye leaf vs the opponent's body leaf — the same notion the loc filter uses). This test also gates the LOS raycast, so **PVS ⊇ LOS** by construction: every `los` interval lies inside a `pvs` one. The gap (potentially visible, no clear ray) is an occlusion-tolerant proximity/awareness signal. Same `o`/`iv` shape, asymmetry, alive-gating; additive (`omitempty`); absent on BSP-less maps and on the default parse. Exposed by the same consumers as `los` (web overlay, `qw-analyze -include los`, mvd-api `/los`). |
+| v38 | `PlayerStream` gains `pvs[]` (`LosTrack`): per-opponent potentially-visible-set intervals, populated alongside `los[]` by the same lazy `analyzer.ComputeLOS` pass under the same BSP gate. Reproduces the mvdsv per-client entity cull (`SV_PlayerVisibleToClient`): the looker's fat PVS (`CM_FatPVS` of `origin+view_ofs`) ∩ the opponent's entity leaf set (1-unit-expanded box, non-solid leaves), or always when it overflows `MAX_ENT_LEAFS` — i.e. whether a live server would have sent that opponent to the client (the recorded MVD stores every entity, `pvs = NULL`). This test also gates the LOS raycast, so **PVS ⊇ LOS** by construction. The gap (potentially visible, no clear ray) is an occlusion-tolerant proximity/awareness signal. Same `o`/`iv` shape, asymmetry, alive-gating; additive (`omitempty`); absent on BSP-less maps and on the default parse. Exposed by the same consumers as `los` (web overlay, `qw-analyze -include los`, mvd-api `/los`). |
 | v37 | `PlayerStream` gains `los[]` (`LosTrack`): per-opponent line-of-sight as half-open `[s,e)` ms intervals during which the looker had a clear sightline (eye `origin+(0,0,22)` → any of the opponent's 8 bbox corners + midpoint), blocked by worldspawn solids or any active mover posed in the way. Asymmetric (`A→B` in A's stream, `B→A` in B's); `o` indexes `streams.players`. **Computed lazily** (`analyzer.ComputeLOS`) — absent from the default parse; populated on demand by the web LOS overlay, `qw-analyze -include los`, and mvd-api `/los`. Against the visibility BSP, so only on maps with a provisioned BSP (same gate as `pos.h`/`lq`). Additive (`omitempty`). View direction is not considered. |
 | v36 | `MatchResult` drops the dead `startTime` / `endTime` fields. After the match-relative time normalization `startTime` was always 0 (already `omitempty`, so absent from JSON) and `endTime` always equalled `duration`; both duplicated `streams.global.matchStart` / `matchEnd`. The `endTime` key disappears from the `match` object — read `duration` for match length, or `streams.global` for the match window. Breaking removal (not additive). |
 | v35 | `streams` gains `movers[]` (`MoverStream`): the pose timeline of every tracked brush-model entity (lift, door, plat, train). Each carries `ent` (entity number), `sub` (the `*N` brush-model index, matching the corpus `SubModelMesh` id), and index-aligned `t`/`x`/`y`/`z`/`vis` columns — the mover sits at `(x,y,z)[i]` at `t[i]` ms and is drawn when `vis[i]`. Origins are `float32` (exact ⅛-unit wire values). The first entry is clamped to `t = 0` carrying the match-start pose so a parked mover (only wire state predates the match) still has one. Additive (`omitempty`); absent when the demo has no movers. The same internal tracks already drive the v27 floor-height pass. |

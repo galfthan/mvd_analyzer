@@ -108,15 +108,19 @@ type PlayerStream struct {
 	LOS []LosTrack `json:"los,omitempty"`
 
 	// PVS records when each other player was potentially visible to this player
-	// (the looker) — a point-to-point PVS test, the looker's eye leaf vs the
-	// opponent's single body leaf (the same notion the loc filter uses). Same
-	// LosTrack shape, same lazy pass (analyzer.ComputeLOS) and BSP gate as LOS,
-	// schema v38. This same test gates the LOS raycast (LOS is cast only for
-	// potentially-visible pairs), so PVS ⊇ LOS by construction: every LOS
-	// interval lies inside the matching PVS one. The gap between them
-	// (potentially visible, but no clear ray) is an occlusion-tolerant
-	// proximity/awareness signal — the opponent is in the same vis region
-	// without a direct sightline. Raw transitions, no smoothing.
+	// (the looker), reproducing exactly the server's per-client entity cull —
+	// i.e. whether a live mvdsv would have sent that opponent's entity to this
+	// player's client that frame (SV_PlayerVisibleToClient): the looker's fat PVS
+	// (CM_FatPVS of origin+view_ofs) intersected with the opponent's entity leaf
+	// set (its 1-unit-expanded bounding box, non-solid leaves), or always when
+	// the opponent overflows MAX_ENT_LEAFS. The recorded MVD does not carry this
+	// (the demo recorder sets pvs = NULL and stores every entity); it is
+	// reconstructed here from the position tracks. Same LosTrack shape, same lazy
+	// pass (analyzer.ComputeLOS) and BSP gate as LOS, schema v38. This same test
+	// gates the LOS raycast (cast only for potentially-visible pairs), so PVS ⊇
+	// LOS by construction. The gap between them (on the wire, but no clear ray)
+	// is an occlusion-tolerant proximity/awareness signal. Raw transitions, no
+	// smoothing.
 	PVS []LosTrack `json:"pvs,omitempty"`
 }
 

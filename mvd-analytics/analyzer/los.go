@@ -65,24 +65,25 @@ func ComputeLOS(res *Result) {
 
 	matchEnd := res.Streams.Global.MatchEnd
 	movers := buildLosMovers(res.Streams.Movers)
-	// PVS rows are per-leaf and immutable, so cache them across every looker.
+	// Per-leaf PVS rows are immutable, so memoise them (leaf index → row) across
+	// every looker; the fat PVS ORs a handful of them per eye sample.
 	pvsCache := make(map[int][]byte)
-	// Each player's body leaf (the leaf its origin sits in) is independent of who
-	// is looking, so resolve it once per sample and reuse it across every looker
-	// — the per-pair inner loop is then a single PVS bit test, never a tree
-	// descent. This point-to-point leaf is both the pvs metric and the gate that
-	// decides which pairs get the expensive LOS raycast (see losForLooker).
-	bodyLeaves := buildBodyLeaves(vb, players)
+	// Each player's server-side entity leaf set is independent of who is looking,
+	// so resolve it once per sample (one BoxLeafs descent) and reuse it across
+	// every looker as the PVS-cull target. This replicates what the server links
+	// for each player and is both the pvs metric and the LOS gate (see
+	// losForLooker).
+	entLeaves := buildEntityLeaves(vb, players)
 
 	// One looker at a time: A→B for every opponent B is computed in a single
-	// walk of A's samples, so A's eye leaf / PVS row and the mover snapshot are
-	// resolved once per sample rather than once per pair. A→B and B→A are
-	// independent (LOS is asymmetric), so each looker is handled on its own.
+	// walk of A's samples, so A's fat PVS and the mover snapshot are resolved
+	// once per sample rather than once per pair. A→B and B→A are independent
+	// (visibility is asymmetric), so each looker is handled on its own.
 	for ai := range players {
 		if players[ai].Position == nil || len(players[ai].Position.T) == 0 {
 			continue
 		}
-		los, pvs := losForLooker(vb, players, ai, movers, matchEnd, pvsCache, bodyLeaves)
+		los, pvs := losForLooker(vb, players, ai, movers, matchEnd, pvsCache, entLeaves)
 		if len(los) > 0 {
 			players[ai].LOS = los
 		}
@@ -140,63 +141,140 @@ func (ac *visAccum) tracks(ai int, end int32) []result.LosTrack {
 	return tracks
 }
 
-// buildBodyLeaves resolves every player's per-sample body leaf (PointInLeaf of
-// the origin) — the point-to-point PVS target, shared across lookers. The body
-// origin is the LOS box centre; testing this single leaf (rather than the whole
-// box trail) is what makes the PVS gate selective. A body centre that lands in
-// solid (a wall-clip) is stored as -1 so it is never counted potentially
-// visible: a solid leaf is leaf 0 / the solid sink, for which a raw PVS bit test
-// is unconditionally true. A nil Position yields a nil row.
-func buildBodyLeaves(vb *bspvis.BSP, players []result.PlayerStream) [][]int32 {
-	out := make([][]int32, len(players))
+// maxEntLeafs mirrors mvdsv MAX_ENT_LEAFS (progs.h): an entity touching more
+// than this many non-solid leaves overflows (num_leafs = -1) and the server
+// sends it to every client unconditionally — the PVS check is skipped
+// (SV_PlayerVisibleToClient, sv_ents.c).
+const maxEntLeafs = 16
+
+// entityBoxMin/Max are the player hull (losBoxMin/Max) expanded 1 unit on every
+// side — the abs box SV_LinkEdict feeds to CM_FindTouchedLeafs (sv_world.c:
+// "movement is clipped an epsilon away from an actual edge").
+var (
+	entityBoxMin = [3]float32{losBoxMin[0] - 1, losBoxMin[1] - 1, losBoxMin[2] - 1}
+	entityBoxMax = [3]float32{losBoxMax[0] + 1, losBoxMax[1] + 1, losBoxMax[2] + 1}
+)
+
+// entityLeaves is one player's per-sample server-side entity leaf set — the
+// leaves that decide whether the server sends this player to a client. At sample
+// i the expanded box touches the non-solid leaves leaves[offs[i]:offs[i+1]];
+// overflow[i] marks the >maxEntLeafs case the server always sends. Built once
+// and shared across all lookers (it does not depend on who is looking).
+type entityLeaves struct {
+	leaves   []int32
+	offs     []int32
+	overflow []bool
+}
+
+// buildEntityLeaves resolves every player's per-sample entity leaf set,
+// replicating SV_LinkToLeafs: CM_FindTouchedLeafs over the 1-unit-expanded box,
+// dropping CONTENTS_SOLID leaves (the server's recursion returns at solid and
+// never lists leaf 0), and flagging the >maxEntLeafs overflow. A nil Position
+// yields an empty set.
+func buildEntityLeaves(vb *bspvis.BSP, players []result.PlayerStream) []entityLeaves {
+	out := make([]entityLeaves, len(players))
+	var scratch []int
 	for pi := range players {
 		pt := players[pi].Position
 		if pt == nil || len(pt.T) == 0 {
 			continue
 		}
-		leaves := make([]int32, len(pt.T))
-		for i := range pt.T {
-			l := vb.PointInLeaf([3]float32{pt.X[i], pt.Y[i], pt.Z[i]})
-			if l <= 0 || vb.LeafContents(l) == bspvis.ContentsSolid {
-				leaves[i] = -1
-			} else {
-				leaves[i] = int32(l)
+		n := len(pt.T)
+		el := entityLeaves{offs: make([]int32, n+1), overflow: make([]bool, n)}
+		for i := 0; i < n; i++ {
+			ox, oy, oz := pt.X[i], pt.Y[i], pt.Z[i]
+			scratch = vb.BoxLeafs(
+				[3]float32{ox + entityBoxMin[0], oy + entityBoxMin[1], oz + entityBoxMin[2]},
+				[3]float32{ox + entityBoxMax[0], oy + entityBoxMax[1], oz + entityBoxMax[2]},
+				scratch)
+			cnt := 0
+			for _, lf := range scratch {
+				if lf <= 0 || vb.LeafContents(lf) == bspvis.ContentsSolid {
+					continue
+				}
+				el.leaves = append(el.leaves, int32(lf))
+				cnt++
 			}
+			el.overflow[i] = cnt > maxEntLeafs
+			el.offs[i+1] = int32(len(el.leaves))
 		}
-		out[pi] = leaves
+		out[pi] = el
 	}
 	return out
+}
+
+// fatPVS builds the server's fat PVS for an eye point into dst (reused): the
+// bitwise OR of the PVS rows of every non-solid leaf within 8 units of the eye
+// (CM_FatPVS / AddToFatPVS_r, cmodel.c). Per-leaf rows are memoised in pvsCache
+// (leaf index → decompressed row). Returns dst and the reused leaf scratch.
+func fatPVS(vb *bspvis.BSP, eye [3]float32, pvsCache map[int][]byte, dst []byte, leafScratch []int) ([]byte, []int) {
+	rowBytes := (len(vb.Leaves) + 7) >> 3
+	if cap(dst) < rowBytes {
+		dst = make([]byte, rowBytes)
+	}
+	dst = dst[:rowBytes]
+	for i := range dst {
+		dst[i] = 0
+	}
+	leafScratch = vb.BoxLeafs(
+		[3]float32{eye[0] - 8, eye[1] - 8, eye[2] - 8},
+		[3]float32{eye[0] + 8, eye[1] + 8, eye[2] + 8}, leafScratch)
+	for _, lf := range leafScratch {
+		if lf <= 0 || vb.LeafContents(lf) == bspvis.ContentsSolid {
+			continue
+		}
+		row, ok := pvsCache[lf]
+		if !ok {
+			row = vb.LeafPVS(lf)
+			pvsCache[lf] = row
+		}
+		for i := 0; i < rowBytes && i < len(row); i++ {
+			dst[i] |= row[i]
+		}
+	}
+	return dst, leafScratch
+}
+
+// entityPotentiallyVisible replicates the server's per-player PVS test
+// (SV_PlayerVisibleToClient): an overflowed entity is always sent; otherwise it
+// is sent iff any of its leaves is set in the viewer's fat PVS row.
+func entityPotentiallyVisible(vb *bspvis.BSP, fatRow []byte, el *entityLeaves, sample int) bool {
+	if el.overflow[sample] {
+		return true
+	}
+	for _, lf := range el.leaves[el.offs[sample]:el.offs[sample+1]] {
+		if vb.PVSContains(fatRow, int(lf)) {
+			return true
+		}
+	}
+	return false
 }
 
 // losForLooker computes looker ai's visibility onto every other player in one
 // walk of ai's own samples, returning two parallel metrics, each one LosTrack
 // per opponent ever seen (Other = opponent index), in two stages:
 //
-//   - pvs: the opponent is potentially visible — a point-to-point PVS test, the
-//     looker's eye leaf vs the opponent's single body leaf (bodyLeaves), the
-//     same notion the loc filter uses (locvis). Both a reported metric and the
-//     gate for stage two.
+//   - pvs: the opponent is potentially visible — reproducing exactly what the
+//     mvdsv server decides when sending player entities to a client
+//     (SV_PlayerVisibleToClient): the looker's fat PVS (CM_FatPVS of the eye)
+//     intersected with the opponent's entity leaf set (its 1-unit-expanded box,
+//     non-solid leaves), or unconditionally true when the opponent overflows
+//     maxEntLeafs. This is the live wire-visibility the recorded MVD itself does
+//     not carry (the demo recorder sets pvs = NULL and stores every entity).
 //   - los: a clear raycast sightline — the 9 eye→body rays, cast ONLY for pairs
 //     the pvs gate passed. So los ⊆ pvs by construction, and the gap between
 //     them (potentially visible, no clear ray) is the occlusion-tolerant signal.
 //
-// Gating the raycast on the point PVS (rather than the opponent's full
-// bounding-box leaf set) is what makes this cheap: the gate is a single bit test
-// and passes only ~1/4 of alive pairs on typical maps, so most pairs never
-// raycast. The box-leaf cull it replaces was both pricier (a BoxLeafs descent
-// per sample) and — because the player box dips into the floor's solid leaf 0,
-// for which a PVS bit test is unconditionally true — barely culled at all. The
-// point gate drops a vanishing 0.05% of true sightlines (a body centre occluded
-// while a corner peeks through a portal), within the noise of an already
-// 9-point eye-height LOS approximation.
-//
-// At each sample it resolves the eye leaf + PVS row and the active-mover
-// snapshot once, sharing them across all opponents at that time.
+// The fat PVS (and the mover snapshot the rays need) is resolved once per looker
+// sample and shared across all opponents; each opponent's entity leaves are
+// precomputed once by the caller (buildEntityLeaves). Gating the raycast on the
+// PVS keeps it cheap — most pairs never raycast — and since the wire PVS is a
+// conservative superset of reachability the raycast loses no real sightline.
 //
 // Mover cursors are reset here, so the caller may reuse one mover slice across
 // lookers. No memoization across samples: a mover sweeping between a stationary
 // pair changes LOS even when neither player moves.
-func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers []losMover, matchEnd int32, pvsCache map[int][]byte, bodyLeaves [][]int32) (los, pvs []result.LosTrack) {
+func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers []losMover, matchEnd int32, pvsCache map[int][]byte, entLeaves []entityLeaves) (los, pvs []result.LosTrack) {
 	a := &players[ai]
 	ap := a.Position
 	n := len(players)
@@ -209,21 +287,16 @@ func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers 
 		movers[mi].cursor = 0
 	}
 	var scratch []posedMover
+	var fatRow []byte
+	var fatScratch []int
 
 	for i, t := range ap.T {
 		aAlive := losAliveAt(a.Spawns, a.Deaths, t)
 		var eye [3]float32
-		var pvsRow []byte
 		moversReady := false
 		if aAlive {
 			eye = [3]float32{ap.X[i], ap.Y[i], ap.Z[i] + losEyeOffsetZ}
-			aLeaf := vb.PointInLeaf(eye)
-			if row, ok := pvsCache[aLeaf]; ok {
-				pvsRow = row
-			} else {
-				pvsRow = vb.LeafPVS(aLeaf)
-				pvsCache[aLeaf] = pvsRow
-			}
+			fatRow, fatScratch = fatPVS(vb, eye, pvsCache, fatRow, fatScratch)
 		}
 
 		for bi := 0; bi < n; bi++ {
@@ -235,16 +308,15 @@ func losForLooker(vb *bspvis.BSP, players []result.PlayerStream, ai int, movers 
 				continue
 			}
 			visible := false    // clear raycast sightline
-			potVisible := false // opponent in the looker's PVS
+			potVisible := false // opponent potentially visible (server would send)
 			if aAlive {
 				for bcur[bi]+1 < len(bp.T) && bp.T[bcur[bi]+1] <= t {
 					bcur[bi]++
 				}
 				if bj := bcur[bi]; bp.T[bj] <= t && losAliveAt(players[bi].Spawns, players[bi].Deaths, t) {
-					// Stage 1 — PVS gate (and the pvs metric): point-to-point, is
-					// the opponent's body leaf in the looker's PVS row. A solid
-					// body centre is stored as -1 (never potentially visible).
-					if bl := bodyLeaves[bi][bj]; bl > 0 && vb.PVSContains(pvsRow, int(bl)) {
+					// Stage 1 — wire PVS gate (and the pvs metric): would the
+					// server send opponent bi to looker ai this frame?
+					if entityPotentiallyVisible(vb, fatRow, &entLeaves[bi], bj) {
 						potVisible = true
 						// Stage 2 — LOS: cast the 9 eye→body rays only for pairs
 						// the gate passed, so los ⊆ pvs by construction.
@@ -344,8 +416,8 @@ func activeMoversAt(movers []losMover, t int32, dst []posedMover) []posedMover {
 // for direct unit testing.
 func computeLosAB(vb *bspvis.BSP, a, b *result.PlayerStream, movers []losMover, matchEnd int32) []result.Interval {
 	two := []result.PlayerStream{*a, *b}
-	bodyLeaves := buildBodyLeaves(vb, two)
-	los, _ := losForLooker(vb, two, 0, movers, matchEnd, make(map[int][]byte), bodyLeaves)
+	entLeaves := buildEntityLeaves(vb, two)
+	los, _ := losForLooker(vb, two, 0, movers, matchEnd, make(map[int][]byte), entLeaves)
 	for _, tr := range los {
 		if tr.Other == 1 {
 			return tr.Iv
@@ -360,8 +432,8 @@ func computeLosAB(vb *bspvis.BSP, a, b *result.PlayerStream, movers []losMover, 
 // testing.
 func computePvsAB(vb *bspvis.BSP, a, b *result.PlayerStream, movers []losMover, matchEnd int32) []result.Interval {
 	two := []result.PlayerStream{*a, *b}
-	bodyLeaves := buildBodyLeaves(vb, two)
-	_, pvs := losForLooker(vb, two, 0, movers, matchEnd, make(map[int][]byte), bodyLeaves)
+	entLeaves := buildEntityLeaves(vb, two)
+	_, pvs := losForLooker(vb, two, 0, movers, matchEnd, make(map[int][]byte), entLeaves)
 	for _, tr := range pvs {
 		if tr.Other == 1 {
 			return tr.Iv
