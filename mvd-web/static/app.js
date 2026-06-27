@@ -9079,16 +9079,16 @@ function losCovers(iv, tMs) {
 // lower alpha so the (much denser) potential-visibility lines read as a faint
 // backdrop under the solid LOS lines.
 const LOS_STYLE = {
-    width: 1.5,
-    mutual: 'rgba(255,255,255,0.6)',
-    first: 'rgba(255,80,80,0.6)',
-    second: 'rgba(90,150,255,0.6)',
+    width: 3,
+    mutual: 'rgba(255,255,255,0.65)',
+    first: 'rgba(255,80,80,0.65)',
+    second: 'rgba(90,150,255,0.65)',
 };
 const PVS_STYLE = {
-    width: 0.6,
-    mutual: 'rgba(255,255,255,0.22)',
-    first: 'rgba(255,80,80,0.22)',
-    second: 'rgba(90,150,255,0.22)',
+    width: 1.5,
+    mutual: 'rgba(255,255,255,0.35)',
+    first: 'rgba(255,80,80,0.35)',
+    second: 'rgba(90,150,255,0.35)',
 };
 
 // drawVisLines draws a line between every player pair whose byPair intervals
