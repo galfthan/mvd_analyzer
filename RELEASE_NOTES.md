@@ -33,6 +33,16 @@ detail.
   download). The map renders rockets/grenades as moving dots and LG bolts as
   brief beams at the playback cursor (`drawProjectiles` / `drawBeams`).
 
+- **Nail (ng/sng) tracking** (schema v40, opt-in). A separate, highest-volume
+  request (`qw-analyze -include nails`) that decodes nails — spike packet
+  entities on `sv_nailhack` servers (the common case), or the `svc_nails` /
+  `svc_nails2` stream otherwise — brackets each nail's flight, links ng/sng
+  fires to their nail damage (`hit`/`victims`, approximate: per-fire linking
+  credits one of SNG's two nails), and emits a `streams.nails` map overlay.
+  Off everywhere by default — including the web map — so nails are never
+  downloaded unless explicitly requested. Per-player nail hit counts track
+  KTX's within a small margin across the corpus.
+
 - **Per-shot weapon-fire stream** (schema v39). New top-level `shots`
   result: who fired what weapon, at exactly what match-relative ms — the
   foundation for accuracy metrics (including over short intervals) and for

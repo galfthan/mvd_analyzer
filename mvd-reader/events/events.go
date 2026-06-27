@@ -66,6 +66,7 @@ const (
 	KindProjectileSpawn     = parser.EventProjectileSpawn
 	KindProjectileDespawn   = parser.EventProjectileDespawn
 	KindBeam                = parser.EventBeam
+	KindNails               = parser.EventNails
 )
 
 // Concrete event types emitted on the Source.
@@ -99,6 +100,8 @@ type (
 	ProjectileSpawnEvent     = parser.ProjectileSpawnEvent
 	ProjectileDespawnEvent   = parser.ProjectileDespawnEvent
 	BeamEvent                = parser.BeamEvent
+	NailsFrameEvent          = parser.NailsFrameEvent
+	Nail                     = parser.Nail
 	EntityState              = parser.EntityState
 )
 

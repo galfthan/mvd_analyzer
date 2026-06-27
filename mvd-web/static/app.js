@@ -6224,6 +6224,7 @@ function initMapView(result) {
     // when the analysis built them (WASM map build); absent → graceful no-op.
     mapState.projectiles = (result.streams && result.streams.projectiles) || null;
     mapState.beams = (result.streams && result.streams.beams) || null;
+    mapState.nails = (result.streams && result.streams.nails) || null;
 
     // Line of sight is computed lazily (it is the heaviest position-derived
     // pass), so it is NOT in the parsed result. The map's LOS overlay requests
@@ -7678,16 +7679,16 @@ function drawMovers(ctx) {
 
 // Colours for the weapon-fire overlays.
 const PROJECTILE_COLORS = { rl: '#ff7733', gl: '#66cc44' };
+const NAIL_COLOR = '#ffe066';
 const BEAM_COLOR = 'rgba(150, 200, 255, 0.85)';
 // A beam flashes for this half-window (ms) around its instant.
 const BEAM_FLASH_MS = 60;
 
-// drawProjectiles draws each in-flight rocket/grenade at the current time as
-// a small dot, linearly interpolated along its spawn→despawn segment (exact
-// for rockets; grenades only approximate, they bounce). Columns are parallel
-// arrays in mapState.projectiles (schema v40).
-function drawProjectiles(ctx) {
-    const pr = mapState.projectiles;
+// drawFlightDots draws each flight (rocket/grenade/nail) live at the current
+// time as a dot interpolated along its spawn→despawn segment (linear — exact
+// for the straight-flying rocket, approximate for grenades/nails). Columns are
+// the parallel arrays of a ProjectileStreams (schema v40).
+function drawFlightDots(ctx, pr, radius, colorOf) {
     if (!pr || !Array.isArray(pr.s) || pr.s.length === 0) return;
     const tMs = mapState.currentTime * 1000;
     ctx.save();
@@ -7699,12 +7700,19 @@ function drawProjectiles(ctx) {
         const y = pr.sy[i] + (pr.ey[i] - pr.sy[i]) * f;
         const z = pr.sz[i] + (pr.ez[i] - pr.sz[i]) * f;
         const p = worldToCanvas(x, y, z);
-        ctx.fillStyle = PROJECTILE_COLORS[pr.w[i]] || '#ffffff';
+        ctx.fillStyle = colorOf(pr.w[i]);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
         ctx.fill();
     }
     ctx.restore();
+}
+
+// drawProjectiles draws rocket/grenade flights (and nails when present —
+// nails are opt-in, so usually absent) at the current playback time.
+function drawProjectiles(ctx) {
+    drawFlightDots(ctx, mapState.projectiles, 3, (w) => PROJECTILE_COLORS[w] || '#ffffff');
+    drawFlightDots(ctx, mapState.nails, 1.5, () => NAIL_COLOR);
 }
 
 // drawBeams draws each LG bolt active near the current time as a short-lived

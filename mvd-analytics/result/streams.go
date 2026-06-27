@@ -23,6 +23,11 @@ type Streams struct {
 	// default output and golden corpus stay lean. Omitted when not built.
 	Projectiles *ProjectileStreams `json:"projectiles,omitempty"`
 	Beams       *BeamStreams       `json:"beams,omitempty"`
+	// Nails is the nail-flight stream (ng/sng spikes), same columnar shape as
+	// Projectiles with Weapon == "nail". Doubly opt-in: built only when nail
+	// tracking is on AND shot streams are requested, since nails are far
+	// higher volume than rockets/grenades.
+	Nails *ProjectileStreams `json:"nails,omitempty"`
 
 	// LOSComputed records whether the (lazy) line-of-sight pass has run, so a
 	// caller can compute it on demand exactly once and not retry on maps that

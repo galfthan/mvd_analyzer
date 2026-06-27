@@ -213,6 +213,25 @@ func classifyProjectile(modelPath string) string {
 	return projectilePathToKind[strings.ToLower(modelPath)]
 }
 
+// nailModels are the spike models nailguns fire. On servers with sv_nailhack
+// (common) nails travel as ordinary packet entities with these models rather
+// than the compact svc_nails stream, so the projectile tracker can bracket
+// them like rockets. They are tagged "nail" (weapon-agnostic): svc_nails is
+// untyped and the spike-vs-super-spike model split is unreliable, so ng/sng is
+// resolved downstream from the DtNG/DtSNG damage type, not the model.
+var nailModels = map[string]bool{
+	"progs/spike.mdl":   true,
+	"progs/s_spike.mdl": true,
+}
+
+// classifyNail returns "nail" for a spike model path, else "".
+func classifyNail(modelPath string) string {
+	if nailModels[strings.ToLower(modelPath)] {
+		return "nail"
+	}
+	return ""
+}
+
 // classifyMover reports whether modelPath names an inline brush
 // submodel of the map BSP ("*1", "*2", …) and returns the submodel
 // index. Submodel 0 is the worldspawn itself and never appears as an
@@ -717,7 +736,13 @@ func (p *Parser) diffProjectileEntity(ent int, s, o *EntityState, time float64, 
 	}
 	curKind := ""
 	if s != nil && s.Present && s.ModelIndex != 0 {
-		curKind = classifyProjectile(p.resolveModel(s.ModelIndex))
+		path := p.resolveModel(s.ModelIndex)
+		curKind = classifyProjectile(path)
+		if curKind == "" && p.decodeNails {
+			// sv_nailhack servers send spikes as packet entities; track them
+			// only when nail tracking is enabled (they are high volume).
+			curKind = classifyNail(path)
+		}
 	}
 	tracked, isTracked := p.spawnedProjectiles[ent]
 

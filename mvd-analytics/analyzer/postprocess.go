@@ -101,7 +101,10 @@ func normalizeMatchRelativeTimes(res *Result, _ *CoreOutputs) {
 		for mi := range streams.Movers {
 			shiftAndClampMoverStream(&streams.Movers[mi], matchStartMs)
 		}
-		if pr := streams.Projectiles; pr != nil {
+		for _, pr := range []*result.ProjectileStreams{streams.Projectiles, streams.Nails} {
+			if pr == nil {
+				continue
+			}
 			for i := range pr.Spawn {
 				pr.Spawn[i] -= matchStartMs
 				pr.End[i] -= matchStartMs

@@ -46,6 +46,7 @@ const (
 	EventProjectileSpawn
 	EventProjectileDespawn
 	EventBeam
+	EventNails
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -142,6 +143,7 @@ type Parser struct {
 	floatCoords    bool
 	fteExtensions  uint32 // FTE protocol extension flags
 	diagnosticMode bool
+	decodeNails    bool // opt-in: decode svc_nails/svc_nails2 into NailsFrameEvent (off by default; high volume)
 	warnings       []Warning
 
 	// Entity state tracking — fills from svc_modellist, svc_spawnbaseline,
@@ -332,6 +334,12 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 		case mvd.SvcTempEntity:
 			if teType, err := p.parseTempEntity(r, msg.Time, msg.TimeMs, p.floatCoords); err != nil {
 				p.warn(msg.Time, "unknown_te", "temp entity type %d: %v, %d bytes remaining in payload abandoned", teType, err, r.Remaining())
+				return nil
+			}
+
+		case mvd.SvcNails, mvd.SvcNails2:
+			if err := p.parseNails(r, cmd == mvd.SvcNails2, msg.Time, msg.TimeMs); err != nil {
+				p.warn(msg.Time, "parse_error", "svc_nails: %v", err)
 				return nil
 			}
 

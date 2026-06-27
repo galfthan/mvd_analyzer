@@ -2455,7 +2455,25 @@ Baselines seed the "initial" state so items at match start are already "up". Non
 
 Rockets and grenades are dynamic entities — `spawn()` + `setmodel()` in the QuakeC fire functions (`ktx/src/weapons.c` `W_FireRocket` → `progs/missile.mdl`, `W_FireGrenade` → `progs/grenade.mdl`), transmitted through the same `svc_packetentities` stream as items. Because MVD recording ignores PVS, every projectile appears for its whole flight, so its entity number **brackets the flight**: first sighting → `ProjectileSpawnEvent` (kind + muzzle origin), removal on impact/timeout → `ProjectileDespawnEvent` (last origin). The wire carries no owner field, so attribution is the analyzer's job — the projectile spawns at the firer's muzzle the same frame as their RL/GL fire sound, and the despawn frame co-locates with the explosion and `mvdhidden_dmgdone` damage, so a specific fire links to a specific impact (see `shots` analyzer).
 
-Unlike item/mover entnums (stable for the match), projectile entnums are **recycled**, so the per-ent classification is cleared on despawn and re-derived on the next spawn. Nails (`progs/spike.mdl` / `progs/s_spike.mdl`) are *not* tracked here — they ride the separate `svc_nails` projectile stream, not `svc_packetentities`.
+Unlike item/mover entnums (stable for the match), projectile entnums are **recycled**, so the per-ent classification is cleared on despawn and re-derived on the next spawn.
+
+**Nails.** Where nails travel depends on the server. Most modern servers run `sv_nailhack` (mvdsv `SV_AddNailUpdate` bails when it is set), which sends spikes (`progs/spike.mdl` / `progs/s_spike.mdl`) as ordinary packet entities — so the projectile tracker brackets them like rockets, tagged `"nail"` (weapon-agnostic; ng vs sng is resolved from the `DtNG`/`DtSNG` damage type, not the model). Without `sv_nailhack` the server uses the compact `svc_nails` / `svc_nails2` stream instead (see below). Either way, nail tracking is **opt-in** (`Parser.SetDecodeNails`) because of the volume; the default parse ignores nails.
+
+### svc_nails (43) / svc_nails2 (54) — Nail projectiles
+
+The compact spike stream (mvdsv `SV_EmitNailUpdate`, ezquake `CL_ParseProjectiles`). One message carries the full live nail set for the frame. `svc_nails2` is the MVD-recording variant: it prefixes each nail with a 1-byte id (the entity colormap, recycled `& 255`) that is stable while the nail lives, so a consumer can bracket each nail's flight across frames.
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_nails (43) | svc_nails2 (54)
+1       1     count
+// per nail:
+[1]     [1]   id          (svc_nails2 only)
+?       6     bits[0..5]  — packed origin (12/12/12) + angles (4/8)
+```
+
+Origin unpack (whole-unit precision): `x = ((bits[0] + ((bits[1] & 15) << 8)) << 1) - 4096`, `y = (((bits[1] >> 4) + (bits[2] << 4)) << 1) - 4096`, `z = ((bits[3] + ((bits[4] & 15) << 8)) << 1) - 4096`. The parser decodes these into `NailsFrameEvent` only when `SetDecodeNails` is enabled; otherwise it consumes the payload (`count × 6` or `× 7` bytes) without emitting.
 
 **Inline brush-model entities (movers).** An entity whose model path is `"*N"` references submodel N of the map BSP itself (the `dmodel_t` array) rather than a separate model file: func_plat, func_door, func_train, func_button, func_wall, func_illusionary. Their geometry is compiled in world coordinates; the entity origin is a *translation offset* from that compiled position (a door at rest has origin `0 0 0`), which is exactly how the client poses their collision hulls for prediction (`CL_SetSolidEntities`, ezquake `cl_ents.c` — `VectorCopy(state->origin, physent.origin)` and trace in model-local space). Trigger volumes are also `"*N"` submodels in the BSP but never appear in the entity stream: Quake progs `InitTrigger` (`subs.qc`) clears `modelindex`/`model` after `setmodel`, and mvdsv only writes entities with a non-zero modelindex and model string (`sv_ents.c:790`). MVD packets have no PVS filtering, so every visible mover is in every frame; delta compression means its origin is re-sent only when it changes. The parser synthesises:
 

@@ -49,6 +49,12 @@ type Registry struct {
 	// map build and qw-analyze -include projectiles,beams turn it on.
 	BuildShotStreams bool
 
+	// BuildNails opts into nail (ng/sng) processing: decoding svc_nails,
+	// bracketing each nail's flight for ng/sng → damage linking, and (with
+	// BuildShotStreams) the nail map stream. Off by default — nails are high
+	// volume, so this is a separate request (qw-analyze -include nails).
+	BuildNails bool
+
 	// PhaseTimings holds per-phase wall-clock durations from the most
 	// recent analyzeSource run (init, event pass, each analyzer's
 	// Finalize, each post-processor). Repopulated every run; read by the
@@ -137,6 +143,7 @@ func (r *Registry) Analyze(filePath string) (*Result, error) {
 		return nil, err
 	}
 	defer src.Close()
+	src.Parser().SetDecodeNails(r.BuildNails)
 	return r.analyzeSource(src, filePath)
 }
 
@@ -149,6 +156,7 @@ func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, er
 		return nil, err
 	}
 	defer src.Close()
+	src.Parser().SetDecodeNails(r.BuildNails)
 	return r.analyzeSource(src, filename)
 }
 
@@ -172,6 +180,7 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 	ctx := &Context{
 		FragsBySlot: make(map[int]int),
 		ShotStreams: r.BuildShotStreams,
+		Nails:       r.BuildNails,
 	}
 
 	initStart := time.Now()

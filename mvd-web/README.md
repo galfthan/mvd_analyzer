@@ -436,8 +436,10 @@ dot interpolated along its spawn→despawn segment at the current time
 (orange for `rl`, green for `gl`); each LG bolt is a brief light-blue line
 from muzzle to impact, flashed for ~60 ms around its instant. Both are
 columnar parallel-array streams; absent (e.g. a non-WASM result that
-didn't build them) is a graceful no-op. Code: `drawProjectiles` /
-`drawBeams`.
+didn't build them) is a graceful no-op. Nails (`streams.nails`, small
+yellow dots) render the same way when present, but are **off by default**
+even in the web build — they are the highest-volume stream and a separate
+opt-in. Code: `drawProjectiles` / `drawBeams` / `drawFlightDots`.
 
 **Liquids** — version-4 geometry also carries `liquids` (water/slime/lava
 volume meshes). Rendered as a shaded, depth-sorted translucent solid

@@ -78,7 +78,7 @@ func main() {
 	minDwellStr := flag.String("min-dwell", "0", "drop transitions shorter than this for -view trails")
 	timeStr := flag.String("time", "", "time for -view state-at (required)")
 	includeTeam := flag.Bool("include-team", false, "emit per-team aggregates on -view buckets")
-	includeStr := flag.String("include", "", "comma-separated extras for -view full: positions (x/y/z+loc), view (pitch/yaw), height, liquid, velocity; los (line-of-sight + pvs potential-visibility intervals, computed on request); projectiles, beams (spatial rocket/grenade-flight and LG-beam streams for the map)")
+	includeStr := flag.String("include", "", "comma-separated extras for -view full: positions (x/y/z+loc), view (pitch/yaw), height, liquid, velocity; los (line-of-sight + pvs potential-visibility intervals, computed on request); projectiles, beams (spatial rocket/grenade-flight and LG-beam streams for the map); nails (ng/sng nail tracking — links ng/sng fires to damage + nail map stream; high volume)")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: qw-analyze [options] <demo.mvd | demo.mvd.gz | directory>\n\n")
@@ -238,6 +238,14 @@ func dumpJSON(path string, w io.Writer, pretty bool, regionsOverride []config.Ma
 	// sizeable and off by default; -include projectiles/beams builds them.
 	if vopts != nil && (vopts.include["projectiles"] || vopts.include["beams"]) {
 		reg.BuildShotStreams = true
+	}
+	// Nails (ng/sng) are highest volume and a separate opt-in: -include nails
+	// decodes svc_nails, links ng/sng fires to their nail damage, and builds
+	// the nail map stream. AnalyzeSource takes a pre-opened source, so the
+	// parser's nail decode is enabled here rather than inside the registry.
+	if vopts != nil && vopts.include["nails"] {
+		reg.BuildNails = true
+		src.Parser().SetDecodeNails(true)
 	}
 	res, err := reg.AnalyzeSource(src, filepath.Base(path))
 	if err != nil {

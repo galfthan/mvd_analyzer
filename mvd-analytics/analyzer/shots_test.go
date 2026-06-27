@@ -310,6 +310,56 @@ func TestShots_SpatialStreamsGatedOff(t *testing.T) {
 	}
 }
 
+// TestShots_NailLinking links an sng fire to its nail's impact via the nail
+// flight bracket (weapon-agnostic "nail" flight → ng/sng fire, impact by the
+// fire's weapon). Only active with nail tracking on.
+func TestShots_NailLinking(t *testing.T) {
+	a, ctx := newTestShotsAnalyzer()
+	ctx.Nails = true
+
+	_ = a.OnEvent(weaponSound(4, "weapons/spike2.wav", 1000)) // sng fire, slot 3
+	_ = a.OnEvent(projSpawn(60, "nail", [3]float32{0, 0, 0}, 1000))
+	_ = a.OnEvent(&events.ProjectileDespawnEvent{
+		EntNum: 60, Kind: "nail", Origin: [3]float32{50, 0, 0}, Time: 1.1, TimeMs: 1100,
+	})
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSNG, Damage: 18, Time: 1.1})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+	var sng *Shot
+	for i := range r.Shots.Shots {
+		if r.Shots.Shots[i].Weapon == "sng" {
+			sng = &r.Shots.Shots[i]
+		}
+	}
+	if sng == nil || !sng.Hit || len(sng.Victims) != 1 || sng.Victims[0] != "victimA" {
+		t.Fatalf("sng shot = %+v, want hit victimA", sng)
+	}
+}
+
+// TestShots_NailLinkingGatedOff leaves ng/sng unlinked (and reports no
+// accuracy for them) when nail tracking is off — the default.
+func TestShots_NailLinkingGatedOff(t *testing.T) {
+	a, _ := newTestShotsAnalyzer() // ctx.Nails defaults false
+	_ = a.OnEvent(weaponSound(4, "weapons/spike2.wav", 1000))
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtSNG, Damage: 18, Time: 1.1})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+	for _, s := range r.Shots.Shots {
+		if s.Weapon == "sng" && s.Hit {
+			t.Errorf("sng linked despite nails off: %+v", s)
+		}
+	}
+	for _, p := range r.Shots.ByPlayer {
+		for _, w := range p.ByWeapon {
+			if w.Weapon == "sng" && (w.Hits != 0 || w.Accuracy != 0) {
+				t.Errorf("sng accuracy reported despite nails off: %+v", w)
+			}
+		}
+	}
+}
+
 // TestShots_WarmupGating keeps warmup fires in the stream but excludes them
 // from the match-time ByPlayer aggregate.
 func TestShots_WarmupGating(t *testing.T) {

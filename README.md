@@ -365,6 +365,7 @@ path; weapon-fire sounds drive the shots analyzer),
 flight brackets — the shots analyzer links RL/GL fires to their impacts),
 `BeamEvent` (`svc_temp_entity` lightning beams — `TE_LIGHTNING2` is the
 per-tick LG fire signal),
+`NailsFrameEvent` (`svc_nails` spike snapshots — opt-in, off by default),
 `MoverSpawnEvent` / `MoverStateEvent` (inline brush-model entities —
 lifts, doors, trains — identity plus per-frame origin while moving).
 Domain types carried by events — `ServerData`, `PlayerInfo`,

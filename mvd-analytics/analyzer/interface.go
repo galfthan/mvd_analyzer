@@ -32,6 +32,11 @@ type Context struct {
 	// weapon-fire streams (Streams.Projectiles / Streams.Beams). Off by
 	// default (lean output); set from Registry.BuildShotStreams.
 	ShotStreams bool
+
+	// Nails opts the shots analyzer into nail (ng/sng) tracking and linking.
+	// Off by default; set from Registry.BuildNails. Requires the parser's
+	// nail decode to be enabled (the registry wires both together).
+	Nails bool
 }
 
 // SlotDemoInfo holds the resolved demoinfo player for a slot.

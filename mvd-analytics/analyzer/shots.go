@@ -36,6 +36,14 @@ type ShotsAnalyzer struct {
 	// beams holds every LG bolt's geometry for the spatial beam stream.
 	beams []rawBeam
 
+	// Nail tracking (opt-in, ctx.Nails). svc_nails2 ids are stable while a
+	// nail lives, so openNail brackets each flight (spawn → despawn) the same
+	// way projectile entnums bracket rockets. nailFlights are the completed
+	// brackets, linked to ng/sng fires and exported as the nail map stream.
+	openNail    map[int]*rawProjectile // nail id -> open flight
+	nailLastPos map[int][3]float32     // nail id -> last seen origin
+	nailFlights []rawProjectile
+
 	shots  []rawShot
 	dmgs   []rawShotDmg
 	hadDmg bool // any DamageEvent seen — distinguishes 0% accuracy from no-stream
@@ -119,8 +127,10 @@ const (
 // NewShotsAnalyzer creates a new shots analyzer.
 func NewShotsAnalyzer() *ShotsAnalyzer {
 	return &ShotsAnalyzer{
-		pos:      make(map[int][3]float32),
-		openProj: make(map[int]*rawProjectile),
+		pos:         make(map[int][3]float32),
+		openProj:    make(map[int]*rawProjectile),
+		openNail:    make(map[int]*rawProjectile),
+		nailLastPos: make(map[int][3]float32),
 	}
 }
 
@@ -153,13 +163,21 @@ func (a *ShotsAnalyzer) OnEvent(event events.Event) error {
 		if p := a.openProj[e.EntNum]; p != nil {
 			p.despawnTMs = e.TimeMs
 			p.despawnOrigin = e.Origin
-			a.projectiles = append(a.projectiles, *p)
+			// Spikes (sv_nailhack packet entities) are tagged "nail" and feed
+			// the nail flights; rockets/grenades feed the projectile flights.
+			if p.kind == "nail" {
+				a.nailFlights = append(a.nailFlights, *p)
+			} else {
+				a.projectiles = append(a.projectiles, *p)
+			}
 			delete(a.openProj, e.EntNum)
 		}
+	case *events.NailsFrameEvent:
+		a.onNails(e)
 	case *events.DamageEvent:
 		a.hadDmg = true
 		if e.Attacker >= 0 {
-			if w := events.DeathTypeToWeapon(e.DeathType); canLinkWeapon(w) {
+			if w := events.DeathTypeToWeapon(e.DeathType); a.canLink(w) {
 				a.dmgs = append(a.dmgs, rawShotDmg{
 					attacker: e.Attacker,
 					victim:   e.Victim,
@@ -170,6 +188,34 @@ func (a *ShotsAnalyzer) OnEvent(event events.Event) error {
 		}
 	}
 	return nil
+}
+
+// onNails brackets each nail's flight by its svc_nails2 id: a new id opens a
+// flight at the muzzle, an id that vanishes from the frame closes it at its
+// last position. Completed flights feed ng/sng → damage linking and the nail
+// map stream. Only runs when nail tracking is enabled.
+func (a *ShotsAnalyzer) onNails(e *events.NailsFrameEvent) {
+	if !a.ctx.Nails {
+		return
+	}
+	present := make(map[int]bool, len(e.Nails))
+	for _, n := range e.Nails {
+		present[n.ID] = true
+		a.nailLastPos[n.ID] = n.Origin
+		if a.openNail[n.ID] == nil {
+			a.openNail[n.ID] = &rawProjectile{kind: "nail", spawnTMs: e.TimeMs, spawnOrigin: n.Origin}
+		}
+	}
+	for id, fl := range a.openNail {
+		if present[id] {
+			continue
+		}
+		fl.despawnTMs = e.TimeMs
+		fl.despawnOrigin = a.nailLastPos[id]
+		a.nailFlights = append(a.nailFlights, *fl)
+		delete(a.openNail, id)
+		delete(a.nailLastPos, id)
+	}
 }
 
 // onSound records a shot when the sound is a weapon-fire sound played on a
@@ -250,8 +296,10 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 	}
 
 	// 3. Projectiles: bracket each rocket/grenade flight back to its
-	//    launching fire (by muzzle) and forward to its impact damage.
-	a.linkProjectiles(dmgBySlot)
+	//    launching fire (by muzzle) and forward to its impact damage. Nail
+	//    flights (opt-in) link the same way for ng/sng.
+	a.linkProjectiles(a.projectiles, dmgBySlot)
+	a.linkProjectiles(a.nailFlights, dmgBySlot)
 
 	// 4. Emit the stream + match-time aggregates from the resolved state.
 	out := &ShotsResult{}
@@ -301,63 +349,61 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 // normalizeMatchRelativeTimes rebases them to match time like the other
 // streams.
 func (a *ShotsAnalyzer) buildSpatialStreams(result *Result) {
-	if !a.ctx.ShotStreams || result.Streams == nil {
+	if result.Streams == nil {
 		return
 	}
-	if len(a.projectiles) > 0 {
-		ps := &ProjectileStreams{}
-		for i := range a.projectiles {
-			p := &a.projectiles[i]
-			ps.Weapon = append(ps.Weapon, p.kind)
-			ps.Spawn = append(ps.Spawn, p.spawnTMs)
-			ps.End = append(ps.End, p.despawnTMs)
-			ps.Sx = append(ps.Sx, p.spawnOrigin[0])
-			ps.Sy = append(ps.Sy, p.spawnOrigin[1])
-			ps.Sz = append(ps.Sz, p.spawnOrigin[2])
-			ps.Ex = append(ps.Ex, p.despawnOrigin[0])
-			ps.Ey = append(ps.Ey, p.despawnOrigin[1])
-			ps.Ez = append(ps.Ez, p.despawnOrigin[2])
+	// Rocket/grenade flights + LG beams ride the shot-streams gate.
+	if a.ctx.ShotStreams {
+		if len(a.projectiles) > 0 {
+			result.Streams.Projectiles = flightsToStream(a.projectiles)
 		}
-		result.Streams.Projectiles = ps
+		if len(a.beams) > 0 {
+			bs := &BeamStreams{}
+			for i := range a.beams {
+				b := &a.beams[i]
+				bs.T = append(bs.T, b.tMs)
+				bs.Sx = append(bs.Sx, b.start[0])
+				bs.Sy = append(bs.Sy, b.start[1])
+				bs.Sz = append(bs.Sz, b.start[2])
+				bs.Ex = append(bs.Ex, b.end[0])
+				bs.Ey = append(bs.Ey, b.end[1])
+				bs.Ez = append(bs.Ez, b.end[2])
+			}
+			result.Streams.Beams = bs
+		}
 	}
-	if len(a.beams) > 0 {
-		bs := &BeamStreams{}
-		for i := range a.beams {
-			b := &a.beams[i]
-			bs.T = append(bs.T, b.tMs)
-			bs.Sx = append(bs.Sx, b.start[0])
-			bs.Sy = append(bs.Sy, b.start[1])
-			bs.Sz = append(bs.Sz, b.start[2])
-			bs.Ex = append(bs.Ex, b.end[0])
-			bs.Ey = append(bs.Ey, b.end[1])
-			bs.Ez = append(bs.Ez, b.end[2])
-		}
-		result.Streams.Beams = bs
+	// Nails are their own opt-in (high volume), independent of the other
+	// shot streams.
+	if a.ctx.Nails && len(a.nailFlights) > 0 {
+		result.Streams.Nails = flightsToStream(a.nailFlights)
 	}
 }
 
-// linkProjectiles matches each tracked rocket/grenade flight to the fire
-// that launched it and the damage it caused. The launching fire is the
-// unclaimed same-weapon sound shot in the spawn frame nearest the spawn
-// origin by muzzle (proximity only matters when two players fire the same
-// weapon in one frame — otherwise there is a single candidate). The impact
-// is that shooter's same-weapon damage at the despawn frame; the damage's
-// attacker is authoritative, the projectile's [spawn,despawn] bracket is
+// linkProjectiles matches each tracked flight (rocket/grenade, or a nail when
+// kind is "nail") to the fire that launched it and the damage it caused. The
+// launching fire is the unclaimed sound shot in the spawn frame nearest the
+// spawn origin by muzzle (proximity only matters when two players fire the
+// same weapon in one frame — otherwise there is a single candidate). The
+// impact is that shooter's same-weapon damage at the despawn frame; the
+// damage's attacker is authoritative, the flight's [spawn,despawn] bracket is
 // what pins *which* shot caused *which* impact when several are in flight.
-func (a *ShotsAnalyzer) linkProjectiles(dmgBySlot map[int][]*rawShotDmg) {
-	if len(a.projectiles) == 0 {
+// A "nail" flight is weapon-agnostic (svc_nails does not tag ng vs sng), so it
+// matches either ng or sng fires and the matched fire's weapon drives the
+// impact lookup.
+func (a *ShotsAnalyzer) linkProjectiles(flights []rawProjectile, dmgBySlot map[int][]*rawShotDmg) {
+	if len(flights) == 0 {
 		return
 	}
-	sort.SliceStable(a.projectiles, func(i, j int) bool {
-		return a.projectiles[i].spawnTMs < a.projectiles[j].spawnTMs
+	sort.SliceStable(flights, func(i, j int) bool {
+		return flights[i].spawnTMs < flights[j].spawnTMs
 	})
-	for pi := range a.projectiles {
-		p := &a.projectiles[pi]
+	for pi := range flights {
+		p := &flights[pi]
 		var best *rawShot
 		bestDist := float32(math.MaxFloat32)
 		for si := range a.shots {
 			s := &a.shots[si]
-			if s.linked || s.source != "sound" || s.weapon != p.kind || s.name == "" {
+			if s.linked || s.source != "sound" || s.name == "" || !flightMatchesFire(p.kind, s.weapon) {
 				continue
 			}
 			if dt := s.tMs - p.spawnTMs; dt < -projSpawnWindowMs || dt > projSpawnWindowMs {
@@ -374,7 +420,7 @@ func (a *ShotsAnalyzer) linkProjectiles(dmgBySlot map[int][]*rawShotDmg) {
 		var victims []string
 		seen := make(map[string]bool)
 		for _, d := range dmgBySlot[best.slot] {
-			if d.used || d.weapon != p.kind || absInt32(d.tMs-p.despawnTMs) > projImpactWindowMs {
+			if d.used || d.weapon != best.weapon || absInt32(d.tMs-p.despawnTMs) > projImpactWindowMs {
 				continue
 			}
 			d.used = true
@@ -387,6 +433,35 @@ func (a *ShotsAnalyzer) linkProjectiles(dmgBySlot map[int][]*rawShotDmg) {
 			best.hit, best.victims = true, victims
 		}
 	}
+}
+
+// flightsToStream packs a flight slice into the columnar ProjectileStreams
+// shape (one entry per flight). Shared by the rocket/grenade and nail streams.
+func flightsToStream(flights []rawProjectile) *ProjectileStreams {
+	ps := &ProjectileStreams{}
+	for i := range flights {
+		p := &flights[i]
+		ps.Weapon = append(ps.Weapon, p.kind)
+		ps.Spawn = append(ps.Spawn, p.spawnTMs)
+		ps.End = append(ps.End, p.despawnTMs)
+		ps.Sx = append(ps.Sx, p.spawnOrigin[0])
+		ps.Sy = append(ps.Sy, p.spawnOrigin[1])
+		ps.Sz = append(ps.Sz, p.spawnOrigin[2])
+		ps.Ex = append(ps.Ex, p.despawnOrigin[0])
+		ps.Ey = append(ps.Ey, p.despawnOrigin[1])
+		ps.Ez = append(ps.Ez, p.despawnOrigin[2])
+	}
+	return ps
+}
+
+// flightMatchesFire reports whether a flight of the given kind could have been
+// launched by a fire of weapon w. A "nail" flight matches ng or sng (svc_nails
+// is not weapon-tagged); every other flight matches its own weapon.
+func flightMatchesFire(kind, w string) bool {
+	if kind == "nail" {
+		return isNailWeapon(w)
+	}
+	return w == kind
 }
 
 // linkHitscan returns the names of players damaged by this hitscan fire —
@@ -427,7 +502,7 @@ func (a *ShotsAnalyzer) buildByPlayer(aggByName map[string]*shotAgg, order []str
 				continue
 			}
 			ws := WeaponShots{Weapon: w, Shots: wa.shots}
-			if a.hadDmg && canLinkWeapon(w) {
+			if a.hadDmg && a.canLink(w) {
 				ws.Hits = wa.hits
 				ws.Accuracy = float64(wa.hits) / float64(wa.shots)
 			}
@@ -553,15 +628,25 @@ func isHitscanWeapon(w string) bool {
 
 // isProjectileWeapon reports whether a fire launches a tracked slow
 // projectile (rocket / grenade), linked via the entity flight bracket.
-// Nails (ng/sng) ride a separate stream and are not tracked here.
 func isProjectileWeapon(w string) bool {
 	return w == "rl" || w == "gl"
 }
 
-// canLinkWeapon reports whether a weapon's fires can be linked to damage at
-// all — either same-frame hitscan or entity-tracked projectiles.
-func canLinkWeapon(w string) bool {
-	return isHitscanWeapon(w) || isProjectileWeapon(w)
+// isNailWeapon reports whether a fire launches nails (ng / sng), linked via
+// svc_nails id brackets — only when nail tracking is enabled.
+func isNailWeapon(w string) bool {
+	return w == "ng" || w == "sng"
+}
+
+// canLink reports whether a weapon's fires can be linked to damage: same-frame
+// hitscan, entity-tracked rl/gl projectiles, or — when nail tracking is on —
+// ng/sng nails. Gated on ctx.Nails so ng/sng don't show a bogus 0% accuracy
+// in the default (un-tracked) output.
+func (a *ShotsAnalyzer) canLink(w string) bool {
+	if isHitscanWeapon(w) || isProjectileWeapon(w) {
+		return true
+	}
+	return a.ctx != nil && a.ctx.Nails && isNailWeapon(w)
 }
 
 // dist2 is the squared Euclidean distance between two points (no sqrt — only
