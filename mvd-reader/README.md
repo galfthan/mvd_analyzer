@@ -80,6 +80,8 @@ The concrete event list, in stable order:
 | `KindMoverSpawn` | `MoverSpawnEvent` | Inline brush-model ("*N") entity observed — lift/door/train identity: entnum, BSP submodel index, baseline origin |
 | `KindMoverState` | `MoverStateEvent` | Mover wire-state change — origin moved (per frame while travelling) or visibility flipped. Hold-last between events is the exact pose |
 | `KindSound` | `SoundEvent` | `svc_sound` — a sound started on an entity's channel: emitting entity (`Ent`), channel (`CHAN_WEAPON`=1 for weapon fire), resolved precache `Name`, and origin. Weapon-fire sounds are the truthful per-shot signal consumed by the `shots` analyzer |
+| `KindProjectileSpawn` | `ProjectileSpawnEvent` | A rocket (`progs/missile.mdl`) or grenade (`progs/grenade.mdl`) entity first observed — kind + muzzle origin. The entnum brackets the flight; the `shots` analyzer attributes it to the same-frame RL/GL fire |
+| `KindProjectileDespawn` | `ProjectileDespawnEvent` | A tracked projectile left the wire (impact / timeout) — last origin. Co-locates with the explosion + `mvdhidden_dmgdone` damage, so the launching shot links to that impact |
 
 `DeathEvent` and `SpawnEvent` are derived events synthesised by the
 parser from protocol-level `StatHealth` transitions. They fire at the

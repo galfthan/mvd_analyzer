@@ -22006,10 +22006,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.1,
+            "hits": 1,
             "shots": 10,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.43805309734513276,
+            "hits": 99,
             "shots": 226,
             "weapon": "rl"
           },
@@ -22033,10 +22037,14 @@
             "weapon": "sg"
           },
           {
+            "accuracy": 0.26666666666666666,
+            "hits": 4,
             "shots": 15,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.39473684210526316,
+            "hits": 60,
             "shots": 152,
             "weapon": "rl"
           },
@@ -22064,6 +22072,8 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.4782608695652174,
+            "hits": 99,
             "shots": 207,
             "weapon": "rl"
           },
@@ -22091,10 +22101,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.058823529411764705,
+            "hits": 1,
             "shots": 17,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.38650306748466257,
+            "hits": 63,
             "shots": 163,
             "weapon": "rl"
           },
@@ -22278,10 +22292,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 2806,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -22296,10 +22315,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 3727,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -22310,10 +22334,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 4533,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -22324,10 +22353,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 5336,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -22363,10 +22396,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 6830,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -22632,10 +22669,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 12923,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -22699,10 +22740,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 16118,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -22731,17 +22776,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 19090,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 19800,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -22766,10 +22819,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 22428,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -22791,10 +22848,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 24635,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -22841,10 +22902,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 26464,
+        "victims": [
+          "wd.char",
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -23044,10 +23110,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 30339,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -23107,10 +23177,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 30908,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -23121,10 +23195,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 31143,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -23135,10 +23213,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 31921,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -23149,10 +23231,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 32896,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -23163,10 +23249,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 34845,
+        "victims": [
+          "wd.char",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -23177,10 +23268,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 35690,
+        "victims": [
+          "wd.char",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -23198,17 +23294,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 36595,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 37403,
+        "victims": [
+          "wd.char",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -23314,10 +23419,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 39207,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -23342,10 +23451,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 40559,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -23374,17 +23487,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 41372,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 42530,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -23399,10 +23520,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 43661,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -23417,17 +23542,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 44467,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 44529,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -23438,17 +23571,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 46417,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 46916,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -23459,24 +23600,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 47428,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 48404,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 48736,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -23487,17 +23640,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 50116,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 50143,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -23671,10 +23832,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 52313,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -23756,10 +23921,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 53597,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -23770,10 +23939,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 54935,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -23791,10 +23964,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 56014,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -23819,10 +23996,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 57733,
+        "victims": [
+          "wd.dilbert",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -23861,10 +24043,15 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 60944,
+        "victims": [
+          "wd.char",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -23879,31 +24066,48 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 61440,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 61591,
+        "victims": [
+          "wd.cao",
+          "wd.dilbert"
+        ],
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 61649,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 61739,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -24024,10 +24228,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 67999,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -24052,10 +24260,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 70076,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -24101,17 +24313,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 72853,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 73715,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -24126,10 +24347,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 73909,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -24147,10 +24372,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 76832,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -24196,10 +24425,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 78433,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -24266,10 +24500,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 79245,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -24305,10 +24543,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 81257,
+        "victims": [
+          "wd.dilbert",
+          "wd.cao",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -24326,10 +24570,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 82083,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -24361,10 +24609,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 84016,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -24396,10 +24648,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 87056,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -24410,10 +24666,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 88247,
+        "victims": [
+          "wd.cao",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -24446,17 +24707,27 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 88913,
+        "victims": [
+          "psy*overon",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 89089,
+        "victims": [
+          "wd.cao",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -24474,10 +24745,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 90428,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -24537,10 +24812,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 95012,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -24555,10 +24834,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 95157,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -24576,24 +24859,36 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 97232,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 97316,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 97412,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -24611,10 +24906,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 99116,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -24682,17 +24981,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 101882,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 102090,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -24830,10 +25137,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 110600,
+        "victims": [
+          "psy*overon",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -24872,10 +25184,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 110912,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -24997,10 +25313,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 112432,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -25096,10 +25416,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 117741,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -25159,10 +25483,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 120037,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -25265,10 +25593,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 123377,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -25290,10 +25622,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 123622,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -25447,10 +25783,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 125389,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -25500,10 +25840,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 128637,
+        "victims": [
+          "psy*overon",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -25563,10 +25908,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 129466,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -25602,24 +25951,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 131184,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 131401,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 131987,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -25958,10 +26319,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 142273,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -26278,10 +26643,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 147218,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -26417,10 +26786,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 149487,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -26484,10 +26857,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 153270,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -26617,10 +26994,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 161479,
+        "victims": [
+          "psy*overon",
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -26663,10 +27045,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 166610,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -26719,10 +27105,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 169416,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -26740,10 +27130,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 170933,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -26779,10 +27173,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 171766,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -26842,10 +27240,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 174260,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -26863,10 +27265,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 174855,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -26884,10 +27290,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 175142,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -26919,24 +27329,37 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 177468,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 177531,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 177702,
+        "victims": [
+          "wd.dilbert",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -26972,10 +27395,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 179790,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -27014,10 +27441,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 184065,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -27075,10 +27506,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 184882,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -27089,10 +27524,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 185676,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -27117,10 +27556,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 187390,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -27131,10 +27574,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 188922,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -27177,10 +27624,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 190649,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -27223,17 +27674,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 191621,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 192415,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -27244,24 +27703,37 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 193049,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 193231,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 193818,
+        "victims": [
+          "psy*overon",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -27279,10 +27751,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 195545,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -27293,10 +27769,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 196060,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -27321,10 +27801,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 198102,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -27388,10 +27872,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 201740,
+        "victims": [
+          "psy*overon",
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -27441,10 +27930,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 202545,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -27476,10 +27969,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 204546,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -27518,10 +28016,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 207102,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -27752,10 +28254,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 211182,
+        "victims": [
+          "psy*overon",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -27886,10 +28393,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 215749,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28101,10 +28612,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 224454,
+        "victims": [
+          "wd.cao",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28115,10 +28631,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 225961,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28140,10 +28661,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 229702,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28154,10 +28679,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 231117,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28168,10 +28697,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 232390,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -28182,10 +28715,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 232922,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28196,10 +28733,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 233205,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -28217,10 +28758,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 234818,
+        "victims": [
+          "wd.dilbert",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -28341,10 +28887,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 238798,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28380,10 +28930,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 239350,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -28394,17 +28948,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 240025,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 240178,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -28454,10 +29016,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 243233,
+        "victims": [
+          "psy*overon",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -28503,10 +29070,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 244156,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28559,10 +29131,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 249649,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28580,31 +29156,48 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 252103,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 252192,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 253025,
+        "victims": [
+          "psy*overon",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 253109,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -28615,10 +29208,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 254753,
+        "victims": [
+          "psy*overon",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28629,10 +29227,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 255256,
+        "victims": [
+          "wd.char",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -28696,10 +29299,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 257271,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -28731,17 +29338,27 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 257702,
+        "victims": [
+          "psy*overon",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 257719,
+        "victims": [
+          "psy*overon",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -28759,10 +29376,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 258600,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28780,10 +29401,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 259476,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -28822,17 +29447,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 262145,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 262719,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -28843,10 +29476,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 263531,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -28952,10 +29589,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 267101,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -29012,10 +29653,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 270882,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -29061,10 +29706,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 271754,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -29103,24 +29752,38 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 273386,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 273828,
+        "victims": [
+          "psy*overon",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 275182,
+        "victims": [
+          "psy*overon",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -29149,10 +29812,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 276731,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -29205,24 +29872,36 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 280090,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 280463,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 280827,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -29240,10 +29919,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 281705,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -29296,17 +29979,27 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 283542,
+        "victims": [
+          "wd.cao",
+          "wd.dilbert",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 283687,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -29321,10 +30014,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 285181,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -29349,24 +30047,38 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 286359,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 287074,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 287165,
+        "victims": [
+          "wd.char",
+          "wd.cao",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -29508,10 +30220,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 290627,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -29582,10 +30298,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 292650,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -29610,10 +30330,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 294497,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -29653,10 +30377,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 297840,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -29674,24 +30402,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 300585,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 301281,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 301428,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -29802,10 +30542,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 307557,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -29820,10 +30564,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 307753,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -29848,17 +30596,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 308264,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 308350,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -29987,17 +30743,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 311375,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 311389,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -30154,10 +30918,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 316918,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -30200,10 +30968,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 317336,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -30260,24 +31032,36 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 320751,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 320843,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 321571,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -30295,17 +31079,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 322528,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 322621,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -30323,17 +31115,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 323337,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 323427,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -30429,10 +31229,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 328324,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -30729,10 +31533,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 336609,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -30778,10 +31586,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 338519,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -30806,10 +31618,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 339327,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -30881,17 +31697,25 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 340257,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 340389,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -30909,10 +31733,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 342177,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -30930,10 +31758,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 343075,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -30951,24 +31783,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 344554,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 344645,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 344700,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "gl"
       },
       {
@@ -31104,10 +31948,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 346451,
+        "victims": [
+          "psy*overon",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -31192,10 +32041,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 349895,
+        "victims": [
+          "psy*overon",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -31210,10 +32064,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 350687,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -31238,17 +32096,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 352762,
+        "victims": [
+          "wd.cao",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 352788,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -31270,10 +32137,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 353739,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -31421,10 +32292,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 356904,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -31503,10 +32378,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 358882,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -31517,10 +32396,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 359973,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -31616,10 +32499,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 364089,
+        "victims": [
+          "wd.cao",
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -31683,17 +32571,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 366415,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 366607,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -31719,10 +32615,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 367649,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -31747,10 +32647,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 370021,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -31797,10 +32701,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 370709,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -31860,17 +32768,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 375483,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 375659,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -31892,10 +32808,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 377566,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -31913,10 +32833,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 379077,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -31948,10 +32873,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 380251,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -32122,10 +33051,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 383413,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -32382,10 +33315,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 390845,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -32407,10 +33344,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 391143,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -32475,10 +33416,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 391655,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -32531,17 +33476,27 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 395996,
+        "victims": [
+          "psy*overon",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 396095,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -32566,10 +33521,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 400439,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -32587,10 +33546,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 401279,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -32615,10 +33578,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 403167,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -32750,17 +33717,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 406194,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 406613,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -32785,10 +33760,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 407047,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -32856,10 +33835,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 407859,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -32916,10 +33899,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 410559,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -32958,10 +33945,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 413532,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -32979,17 +33970,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 414492,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 414807,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -33067,10 +34066,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 419101,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -33134,10 +34137,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 420069,
+        "victims": [
+          "wd.cao",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -33152,10 +34160,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 420699,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -33216,10 +34228,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 422927,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -33280,10 +34296,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 425571,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -33333,10 +34353,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 426823,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -33347,17 +34371,25 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 427483,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 427516,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -33389,10 +34421,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 430985,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -33491,10 +34527,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 435685,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -33587,10 +34627,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 438993,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -33685,10 +34729,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 443107,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -33724,10 +34772,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 444491,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -33806,10 +34858,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 445407,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -33834,10 +34890,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 447817,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -33866,10 +34926,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 448447,
+        "victims": [
+          "wd.dilbert",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -33887,17 +34952,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 450563,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 451499,
+        "victims": [
+          "wd.dilbert",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -33947,10 +35021,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 453211,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -33993,24 +35071,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 454023,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 454323,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 454477,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -34067,17 +35157,26 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 455129,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 455381,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -34113,10 +35212,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 457142,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -34148,10 +35251,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 460915,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -34261,10 +35368,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 463903,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -34307,10 +35418,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 464621,
+        "victims": [
+          "psy*overon",
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -34325,10 +35441,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 464719,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -34403,10 +35523,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 465584,
+        "victims": [
+          "wd.char",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -34502,10 +35627,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 468142,
+        "victims": [
+          "wd.char",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -34565,10 +35695,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 474028,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -34579,10 +35713,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 475563,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "gl"
       },
       {
@@ -34593,10 +35731,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 476142,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -34635,10 +35777,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 479129,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -34721,10 +35867,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 484037,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -34735,10 +35885,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 484144,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -34756,10 +35910,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 486959,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -34924,10 +36083,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 490153,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -35047,10 +36210,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 495726,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -35170,10 +36337,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 499055,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -35315,31 +36486,47 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 505388,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 506115,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 506245,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 506596,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -35524,10 +36711,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 509447,
+        "victims": [
+          "psy*overon",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -35602,10 +36794,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 511581,
+        "victims": [
+          "wd.char",
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -35637,10 +36834,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 513851,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -35672,10 +36873,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 517817,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -35732,10 +36937,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 519076,
+        "victims": [
+          "wd.cao",
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -35807,10 +37017,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 522336,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -35943,10 +37157,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 525451,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -35992,10 +37210,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 528764,
+        "victims": [
+          "wd.dilbert",
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -36013,17 +37236,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 530400,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 530887,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36084,10 +37315,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 531827,
+        "victims": [
+          "psy*overon",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36119,10 +37355,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 534180,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36140,10 +37380,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 538251,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36161,10 +37405,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 540719,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36196,10 +37444,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 542851,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36210,17 +37462,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 545073,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 545435,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -36231,24 +37491,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 547037,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 548049,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 548580,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -36273,10 +37545,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 551125,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -36287,10 +37563,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 551932,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -36340,10 +37620,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 552905,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -36379,10 +37663,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 553608,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
@@ -36443,10 +37731,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 560308,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36500,10 +37792,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 561459,
+        "victims": [
+          "wd.dilbert",
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36535,17 +37832,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 562107,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 562270,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -36556,10 +37861,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 564249,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -36570,10 +37879,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 565478,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -36584,10 +37897,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 566631,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -36605,10 +37922,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 568608,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -36626,10 +37947,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 570387,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -36640,10 +37965,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 571191,
+        "victims": [
+          "wd.dilbert"
+        ],
         "weapon": "rl"
       },
       {
@@ -36686,10 +38015,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 571842,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -36732,10 +38065,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 574776,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -36795,10 +38132,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 577015,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -36809,10 +38150,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 578010,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36830,10 +38175,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 579426,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36865,10 +38214,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "wd.dilbert",
         "source": "sound",
         "team": "pys",
         "time": 580232,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -36968,31 +38321,47 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 583308,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 583760,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
         "time": 584114,
+        "victims": [
+          "psy*overon"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 584556,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -37010,10 +38379,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 586759,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -37052,10 +38425,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 591108,
+        "victims": [
+          "wd.cao"
+        ],
         "weapon": "rl"
       },
       {
@@ -37230,10 +38607,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
         "time": 595749,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       },
       {
@@ -37244,10 +38625,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
         "source": "sound",
         "team": "wd",
         "time": 599915,
+        "victims": [
+          "wd.char"
+        ],
         "weapon": "rl"
       }
     ]

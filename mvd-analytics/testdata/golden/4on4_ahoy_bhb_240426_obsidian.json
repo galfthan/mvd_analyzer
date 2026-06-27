@@ -55357,10 +55357,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.23076923076923078,
+            "hits": 6,
             "shots": 26,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.7,
+            "hits": 7,
             "shots": 10,
             "weapon": "rl"
           }
@@ -55388,10 +55392,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.2,
+            "hits": 1,
             "shots": 5,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.7941176470588235,
+            "hits": 27,
             "shots": 34,
             "weapon": "rl"
           }
@@ -55423,10 +55431,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.25,
+            "hits": 12,
             "shots": 48,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.6923076923076923,
+            "hits": 45,
             "shots": 65,
             "weapon": "rl"
           }
@@ -55454,10 +55466,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.19047619047619047,
+            "hits": 8,
             "shots": 42,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.6,
+            "hits": 6,
             "shots": 10,
             "weapon": "rl"
           }
@@ -55485,10 +55501,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.14285714285714285,
+            "hits": 1,
             "shots": 7,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.6063829787234043,
+            "hits": 57,
             "shots": 94,
             "weapon": "rl"
           }
@@ -55516,10 +55536,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.5,
+            "hits": 2,
             "shots": 4,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.5357142857142857,
+            "hits": 15,
             "shots": 28,
             "weapon": "rl"
           }
@@ -55551,10 +55575,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.09090909090909091,
+            "hits": 1,
             "shots": 11,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.6976744186046512,
+            "hits": 30,
             "shots": 43,
             "weapon": "rl"
           }
@@ -55582,10 +55610,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.35714285714285715,
+            "hits": 5,
             "shots": 14,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.8588235294117647,
+            "hits": 73,
             "shots": 85,
             "weapon": "rl"
           }
@@ -57784,10 +57816,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 37441,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "gl"
       },
       {
@@ -58145,17 +58181,25 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 47045,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 47669,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "gl"
       },
       {
@@ -58626,10 +58670,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 60317,
+        "victims": [
+          "ocoini",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -58651,10 +58700,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 60628,
+        "victims": [
+          "ocoini",
+          "nexus"
+        ],
         "weapon": "gl"
       },
       {
@@ -58665,10 +58719,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 61278,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -58693,10 +58751,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 62268,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -58822,10 +58884,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 66173,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -58968,10 +59034,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 70212,
+        "victims": [
+          "rghst",
+          "nexus"
+        ],
         "weapon": "gl"
       },
       {
@@ -58993,10 +59064,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 72034,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -59203,10 +59278,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 76445,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -59257,10 +59336,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 77280,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -59290,10 +59373,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 78120,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -59455,10 +59542,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 82249,
+        "victims": [
+          "rghst",
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -59473,10 +59565,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 83046,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -59505,10 +59601,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 84259,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -59688,10 +59788,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 89695,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -60105,10 +60209,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 100274,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -60126,10 +60234,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 101053,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -60289,10 +60401,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 116000,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -60328,10 +60444,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 117814,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -60511,10 +60631,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 127435,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -60651,10 +60775,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 133193,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -60857,10 +60985,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 136271,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -60990,10 +61122,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 138743,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -61105,10 +61241,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 141914,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -61451,10 +61591,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 149958,
+        "victims": [
+          "ThundeR",
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -61665,10 +61810,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 158714,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -61847,10 +61996,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 160113,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -61925,10 +62078,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 160740,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -61971,10 +62128,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 161931,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -62057,10 +62218,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 164358,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -62085,10 +62250,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 165383,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -62146,10 +62315,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 166948,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "gl"
       },
       {
@@ -62160,10 +62333,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 167582,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -62206,10 +62383,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 169678,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -62264,10 +62445,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 171067,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -62315,10 +62500,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 171866,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -62365,10 +62554,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 172664,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -62575,10 +62768,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 178266,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -62705,10 +62902,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 179171,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -62804,10 +63005,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 181513,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -63619,10 +63824,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 203485,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "gl"
       },
       {
@@ -63726,10 +63935,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 220987,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -63766,10 +63979,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 221810,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -63885,10 +64102,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 225481,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -64195,10 +64416,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 233568,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -64639,10 +64864,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 244866,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -64736,10 +64965,15 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 246517,
+        "victims": [
+          "sailorman",
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -65063,10 +65297,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 253013,
+        "victims": [
+          "ocoini",
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -65139,10 +65378,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 256112,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "gl"
       },
       {
@@ -65256,10 +65499,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 266105,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "gl"
       },
       {
@@ -65312,10 +65559,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 266731,
+        "victims": [
+          "rghst",
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -65450,10 +65702,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 268011,
+        "victims": [
+          "sailorman",
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -65524,10 +65781,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 268739,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "gl"
       },
       {
@@ -65585,10 +65846,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 269827,
+        "victims": [
+          "[nW].Veggie",
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -65816,10 +66082,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 273780,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -68782,10 +69052,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 328733,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -68814,10 +69088,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 329842,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -68874,10 +69152,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 333720,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -68888,10 +69170,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 334522,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -68913,10 +69199,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 336997,
+        "victims": [
+          "[nW].Veggie",
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -69942,10 +70233,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 357024,
+        "victims": [
+          "nexus",
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -69960,10 +70256,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 357194,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -70171,10 +70471,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 360535,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -70242,10 +70546,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 362883,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -70296,10 +70604,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 363753,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -70383,10 +70695,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 369169,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -70532,17 +70848,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 373466,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 373913,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -70644,10 +70968,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 377189,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -70915,17 +71243,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 385738,
+        "victims": [
+          "ocoini",
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 385778,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -70950,10 +71287,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 391455,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -70964,10 +71305,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 392245,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -70985,24 +71330,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 393427,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 393427,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 394283,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -71153,10 +71510,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 398335,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -71185,17 +71546,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 399166,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 399311,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -71206,10 +71575,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 400069,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -71238,17 +71611,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 400991,
+        "victims": [
+          "ThundeR",
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 401244,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -71371,10 +71753,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 407840,
+        "victims": [
+          "sailorman",
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -71389,10 +71776,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 408230,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -71457,10 +71848,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 411737,
+        "victims": [
+          "rghst",
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -71552,10 +71948,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 417970,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -71655,10 +72055,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 418762,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -71893,10 +72297,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 420918,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -71935,10 +72343,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 422950,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -72005,10 +72417,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 423801,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -72040,10 +72456,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 424619,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -72061,10 +72481,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 425186,
+        "victims": [
+          "ocoini",
+          "Doomie",
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -72103,10 +72529,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 426074,
+        "victims": [
+          "sailorman",
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -72205,10 +72636,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 427890,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -72277,10 +72712,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 431702,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "gl"
       },
       {
@@ -72552,10 +72991,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 436697,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -73185,10 +73628,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 446579,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -73199,10 +73646,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 447072,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -73224,10 +73675,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 447362,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -73428,10 +73883,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 452497,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -73617,10 +74076,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 455448,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -73798,10 +74261,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 463273,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -73909,10 +74376,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 468652,
+        "victims": [
+          "nexus",
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -74298,10 +74770,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 477304,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -74312,10 +74788,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 477822,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -74388,10 +74868,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 481014,
+        "victims": [
+          "nexus",
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -74688,10 +75173,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 487520,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -74781,10 +75270,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 496555,
+        "victims": [
+          "ocoini",
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -74907,10 +75401,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 499354,
+        "victims": [
+          "ocoini",
+          "ThundeR"
+        ],
         "weapon": "gl"
       },
       {
@@ -75131,10 +75630,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 502947,
+        "victims": [
+          "ThundeR",
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -75329,10 +75833,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 506579,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "gl"
       },
       {
@@ -75456,10 +75964,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 509908,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -75615,10 +76127,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 513676,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -75691,10 +76207,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 514861,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -75784,10 +76304,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 516596,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -75916,10 +76440,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 520219,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -76210,10 +76738,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 525521,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -76249,31 +76781,49 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 526841,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 527989,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 528129,
+        "victims": [
+          "rghst",
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 528792,
+        "victims": [
+          "ThundeR",
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -76310,17 +76860,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 530680,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 530714,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -76382,10 +76940,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 532132,
+        "victims": [
+          "Doomie",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -76407,10 +76970,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 534007,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -76432,10 +76999,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 537840,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -76464,10 +77035,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 538638,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -76514,10 +77089,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 539713,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -76561,10 +77140,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 540534,
+        "victims": [
+          "ThundeR",
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -76698,10 +77282,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 542026,
+        "victims": [
+          "rghst",
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -76777,10 +77366,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 544167,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -76809,10 +77402,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 545686,
+        "victims": [
+          "rghst",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -76844,10 +77442,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 547521,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -77756,10 +78358,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 564517,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -78376,17 +78982,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 582211,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 582246,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -78862,10 +79476,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 593874,
+        "victims": [
+          "ocoini",
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -78972,10 +79591,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 594746,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -79044,10 +79667,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 597102,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -79147,10 +79774,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 598890,
+        "victims": [
+          "ocoini",
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -79261,10 +79893,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 602567,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -79290,17 +79926,27 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 603824,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 605819,
+        "victims": [
+          "ocoini",
+          "rghst",
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -79354,10 +80000,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 607096,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -79379,10 +80029,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 607891,
+        "victims": [
+          "sailorman",
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -79472,10 +80127,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 611217,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -79525,10 +80184,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 612940,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -79611,10 +80274,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 615769,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -80078,10 +80745,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 630773,
+        "victims": [
+          "KreatoR",
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -80131,10 +80803,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 631606,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -80230,10 +80906,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 633274,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -80273,10 +80953,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 637277,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -80291,10 +80975,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 638065,
+        "victims": [
+          "ThundeR",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -80305,10 +80994,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 639228,
+        "victims": [
+          "KreatoR",
+          "sailorman"
+        ],
         "weapon": "gl"
       },
       {
@@ -80383,10 +81077,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 641082,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -80397,10 +81095,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 641150,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -80522,10 +81224,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 646113,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -80554,10 +81260,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 646669,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "gl"
       },
       {
@@ -80572,10 +81282,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 646909,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -80629,10 +81343,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 647771,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -80712,10 +81430,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 652018,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -80751,10 +81473,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 652434,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "gl"
       },
       {
@@ -80780,10 +81506,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 652816,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -80798,10 +81528,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 653027,
+        "victims": [
+          "nexus",
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -81147,10 +81882,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 665385,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -81311,10 +82050,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 669051,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -81360,10 +82103,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 671025,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -81392,10 +82139,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 672134,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -81417,10 +82168,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 672376,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -81537,10 +82292,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 675453,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -81562,10 +82321,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 676284,
+        "victims": [
+          "ThundeR",
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -81715,10 +82479,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 680574,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -81843,10 +82611,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 681821,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -81940,10 +82712,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 683452,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -82263,10 +83039,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 689136,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -82370,10 +83150,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 691490,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -82913,10 +83697,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 703885,
+        "victims": [
+          "ThundeR",
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -82949,10 +83738,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 704677,
+        "victims": [
+          "KreatoR",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -83174,10 +83968,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 712065,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -83347,10 +84145,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 722020,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -83383,10 +84185,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 723028,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -83401,10 +84207,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 723924,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -83443,17 +84253,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 725354,
+        "victims": [
+          "ThundeR",
+          "sailorman"
+        ],
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 725909,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -83857,10 +84676,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 740707,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -84153,10 +84976,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 747348,
+        "victims": [
+          "ThundeR",
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -84178,10 +85006,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 748140,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -84268,10 +85100,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 752517,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -84308,10 +85144,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 753350,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -85051,10 +85891,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 762747,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -85083,10 +85927,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 763879,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -85108,10 +85956,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 764337,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -85129,17 +85981,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 765738,
+        "victims": [
+          "nexus",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 765985,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -85189,10 +86050,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 767956,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -85225,10 +86090,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 768671,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -85387,10 +86256,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 771074,
+        "victims": [
+          "Doomie",
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -85479,10 +86353,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 771989,
+        "victims": [
+          "ocoini",
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -85657,10 +86536,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 773592,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -85700,10 +86583,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 774788,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -85959,10 +86846,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 783306,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -86005,10 +86896,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 785546,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -86054,10 +86949,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 788087,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -86101,24 +87000,38 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 788933,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 788968,
+        "victims": [
+          "[nW].Veggie",
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 789007,
+        "victims": [
+          "ocoini",
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -86129,10 +87042,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 789760,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -86147,10 +87064,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 789794,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -86225,10 +87146,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 797273,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -86254,10 +87179,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 797941,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -86312,10 +87241,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 800412,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -86333,10 +87266,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 800897,
+        "victims": [
+          "rghst",
+          "Doomie",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -86365,10 +87304,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 802535,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -86544,10 +87487,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 806355,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -86636,10 +87583,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 807956,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -87158,10 +88109,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 821374,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -87283,10 +88238,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 825248,
+        "victims": [
+          "sailorman",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -87356,10 +88316,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 827131,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -87374,10 +88338,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 827930,
+        "victims": [
+          "nexus",
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -87409,10 +88378,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 828733,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -87510,10 +88483,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 829845,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -87589,10 +88566,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 831652,
+        "victims": [
+          "nexus",
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -87786,10 +88768,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 834498,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -87811,10 +88797,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 835293,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -88338,10 +89328,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 848151,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -88505,10 +89499,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 854597,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -88552,10 +89550,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 855407,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -88988,10 +89990,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 866285,
+        "victims": [
+          "ThundeR",
+          "[nW].Veggie"
+        ],
         "weapon": "gl"
       },
       {
@@ -89502,10 +90509,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 883164,
+        "victims": [
+          "ocoini",
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -89621,10 +90633,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 884761,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -90111,10 +91127,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 890401,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -91304,10 +92324,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 913189,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -91365,10 +92389,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 914431,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -91411,10 +92439,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 920447,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -91907,10 +92939,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 937856,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "gl"
       },
       {
@@ -92509,10 +93545,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 955956,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "gl"
       },
       {
@@ -92534,10 +93574,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 956647,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "gl"
       },
       {
@@ -92864,10 +93908,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 961331,
+        "victims": [
+          "KreatoR",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -92929,10 +93978,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 963379,
+        "victims": [
+          "nexus",
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -92989,10 +94043,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 965906,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "gl"
       },
       {
@@ -93057,10 +94115,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 967324,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -93118,10 +94180,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 968227,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -93339,10 +94405,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 974768,
+        "victims": [
+          "KreatoR",
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -93415,10 +94486,15 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
         "time": 977048,
+        "victims": [
+          "KreatoR",
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -94240,10 +95316,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 1005646,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -94355,17 +95435,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 1007932,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 1008036,
+        "victims": [
+          "sailorman",
+          "Doomie"
+        ],
         "weapon": "gl"
       },
       {
@@ -94550,10 +95639,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 1011295,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -94888,10 +95981,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 1016417,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -94902,10 +95999,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 1016624,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -94927,17 +96028,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 1019728,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 1020559,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -94984,10 +96093,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 1022394,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -95055,10 +96168,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "KreatoR",
         "source": "sound",
         "team": "BhB",
         "time": 1023190,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -96642,10 +97759,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1066021,
+        "victims": [
+          "Doomie",
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -96770,10 +97892,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1070138,
+        "victims": [
+          "ThundeR",
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -97004,10 +98131,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1074808,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -97427,10 +98558,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 1096090,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -97513,10 +98648,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 1096886,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -97648,10 +98787,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1099242,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -97770,10 +98913,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1104566,
+        "victims": [
+          "sailorman"
+        ],
         "weapon": "rl"
       },
       {
@@ -97802,10 +98949,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1105397,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -97838,10 +98989,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1106504,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -97924,10 +99079,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1108132,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -98045,10 +99204,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1112841,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -98077,10 +99240,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1124074,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -98123,10 +99290,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1124868,
+        "victims": [
+          "[nW].Veggie",
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -98179,10 +99351,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1125526,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -98225,10 +99401,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1126326,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -98452,10 +99632,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1135582,
+        "victims": [
+          "nexus",
+          "sailorman",
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -98497,10 +99683,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1136273,
+        "victims": [
+          "ThundeR",
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -98511,10 +99702,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1136447,
+        "victims": [
+          "sailorman",
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -98546,10 +99742,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1137486,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -98632,10 +99832,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1139873,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -98788,10 +99992,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 1142745,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -98860,10 +100068,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1145239,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -98889,10 +100101,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rghst",
         "source": "sound",
         "team": "BhB",
         "time": 1146207,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -98939,10 +100155,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 1148908,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -98957,17 +100177,25 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1149464,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 1149740,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -99222,10 +100450,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1153763,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -99332,10 +100564,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1154558,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {
@@ -99918,10 +101154,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
         "time": 1168924,
+        "victims": [
+          "ocoini",
+          "ThundeR"
+        ],
         "weapon": "gl"
       },
       {
@@ -99968,10 +101209,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1170538,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -100096,10 +101341,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1172252,
+        "victims": [
+          "rghst",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -100114,10 +101364,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1174594,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -100143,10 +101397,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1175391,
+        "victims": [
+          "rghst"
+        ],
         "weapon": "rl"
       },
       {
@@ -100388,10 +101646,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Doomie",
         "source": "sound",
         "team": "BhB",
         "time": 1183048,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -100604,10 +101866,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1188240,
+        "victims": [
+          "rghst",
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -100685,10 +101952,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1189797,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -100773,10 +102044,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1190706,
+        "victims": [
+          "KreatoR"
+        ],
         "weapon": "rl"
       },
       {
@@ -100881,10 +102156,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ThundeR",
         "source": "sound",
         "team": "BhB",
         "time": 1192644,
+        "victims": [
+          "[nW].Veggie"
+        ],
         "weapon": "rl"
       },
       {
@@ -101043,10 +102322,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1197210,
+        "victims": [
+          "Doomie"
+        ],
         "weapon": "rl"
       },
       {
@@ -101104,10 +102387,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
         "time": 1199576,
+        "victims": [
+          "ThundeR"
+        ],
         "weapon": "rl"
       },
       {

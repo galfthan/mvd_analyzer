@@ -25191,10 +25191,14 @@
             "weapon": "ssg"
           },
           {
+            "accuracy": 0.5,
+            "hits": 1,
             "shots": 2,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.47959183673469385,
+            "hits": 94,
             "shots": 196,
             "weapon": "rl"
           },
@@ -25224,10 +25228,14 @@
             "weapon": "ssg"
           },
           {
+            "accuracy": 1,
+            "hits": 3,
             "shots": 3,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.3641025641025641,
+            "hits": 71,
             "shots": 195,
             "weapon": "rl"
           },
@@ -25257,6 +25265,8 @@
             "weapon": "ssg"
           },
           {
+            "accuracy": 0.38,
+            "hits": 38,
             "shots": 100,
             "weapon": "rl"
           },
@@ -25290,10 +25300,14 @@
             "weapon": "ng"
           },
           {
+            "accuracy": 0.2,
+            "hits": 1,
             "shots": 5,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.4111111111111111,
+            "hits": 74,
             "shots": 180,
             "weapon": "rl"
           },
@@ -25607,10 +25621,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 4950,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -25693,10 +25711,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 8502,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -25914,10 +25936,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 11859,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -25939,10 +25965,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 13361,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -26046,10 +26076,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 15400,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -26318,10 +26352,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 19924,
+        "victims": [
+          "stepcop",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -26332,10 +26371,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 20761,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -26385,17 +26428,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 24496,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 24717,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -26664,10 +26715,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 33800,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -26685,10 +26740,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 34013,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -26713,10 +26772,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 35111,
+        "victims": [
+          "squeeze",
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -26780,10 +26844,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 36151,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -26858,10 +26926,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 40475,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -26872,10 +26944,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 41325,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -26886,10 +26962,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 42124,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -27076,10 +27156,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 47205,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -27168,10 +27252,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 50915,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -27324,10 +27412,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 59512,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -27349,17 +27441,26 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 60458,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 60592,
+        "victims": [
+          "shazam",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -27409,10 +27510,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 61802,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -27825,10 +27930,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 69079,
+        "victims": [
+          "stepcop",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -27846,10 +27956,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 69929,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -27860,10 +27974,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 71159,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -27896,10 +28014,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 74449,
+        "victims": [
+          "squeeze",
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -28152,10 +28275,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 82209,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -28198,10 +28325,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 84027,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -28472,10 +28603,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 89380,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -28576,10 +28711,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 93306,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "gl"
       },
       {
@@ -28594,10 +28733,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 93497,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -28680,10 +28823,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 94354,
+        "victims": [
+          "squeeze",
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -28750,17 +28898,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 97498,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 98299,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -28874,10 +29030,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 99507,
+        "victims": [
+          "shazam",
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -28948,10 +29109,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 102832,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -28987,10 +29152,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 103717,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -29045,10 +29214,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 106458,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -29131,10 +29304,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 110304,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -29245,10 +29422,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 113568,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -29259,10 +29440,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 113808,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -29348,10 +29533,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 115314,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -29456,10 +29645,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 116248,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -29527,10 +29720,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 116692,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -29680,10 +29877,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 119002,
+        "victims": [
+          "stepcop",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -29698,10 +29900,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 119708,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -29740,10 +29946,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 122539,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -29754,10 +29964,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 122999,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -29775,10 +29989,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 123886,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -29810,10 +30028,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 125340,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -29845,10 +30067,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 126445,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -29873,10 +30099,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 128457,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -29943,10 +30173,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 131769,
+        "victims": [
+          "stepcop",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -29968,10 +30203,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 132096,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "gl"
       },
       {
@@ -30132,17 +30371,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 138403,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 139201,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -30209,10 +30456,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 142248,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -30522,10 +30773,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 146305,
+        "victims": [
+          "stepcop",
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -30764,10 +31020,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 150641,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -30778,17 +31038,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 152798,
+        "victims": [
+          "shazam",
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 153001,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -30977,24 +31246,37 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 158183,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 158211,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 158872,
+        "victims": [
+          "squeeze",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -31116,10 +31398,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 161964,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -31151,10 +31437,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 162900,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -31172,10 +31462,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 165302,
+        "victims": [
+          "squeeze",
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -31186,10 +31481,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 165546,
+        "victims": [
+          "squeeze",
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -31385,10 +31685,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 167489,
+        "victims": [
+          "shazam",
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -31445,10 +31750,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 168568,
+        "victims": [
+          "shazam",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -31506,10 +31816,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 170041,
+        "victims": [
+          "shazam",
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -31549,10 +31864,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 171857,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -31638,10 +31957,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 172691,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -32142,10 +32465,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 186876,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -32213,10 +32540,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 188899,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -32519,10 +32850,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 192941,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -32936,10 +33271,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 200038,
+        "victims": [
+          "stepcop",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -32957,10 +33297,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 201513,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -32971,10 +33315,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 202434,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -33010,31 +33358,48 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 206873,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 207001,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 207707,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 208042,
+        "victims": [
+          "shazam",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -33045,10 +33410,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 208561,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -33087,17 +33456,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 211586,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 211618,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -33302,10 +33679,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 215665,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -33576,10 +33957,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 222248,
+        "victims": [
+          "squeeze",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -33653,10 +34039,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 223042,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -33936,10 +34326,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 230053,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -33989,10 +34383,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 231198,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -34079,10 +34477,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 232027,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -34132,17 +34534,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 232755,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 232847,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -34160,10 +34570,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 233756,
+        "victims": [
+          "squeeze",
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -34189,17 +34604,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 234549,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 234568,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -34214,10 +34637,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 235387,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -34318,10 +34745,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 237485,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -34336,10 +34767,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 238092,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -34368,10 +34803,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 238291,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -34442,10 +34881,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 240781,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -34478,10 +34921,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 241936,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -34496,10 +34943,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 242181,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -34571,10 +35022,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 244437,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -34585,17 +35040,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 245605,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 245782,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -34627,10 +35090,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 247872,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -34648,24 +35115,37 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 250027,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 250081,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 250832,
+        "victims": [
+          "stepcop",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -34691,10 +35171,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 251170,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -34712,10 +35196,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 251392,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -34928,10 +35416,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 255461,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -35059,10 +35551,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 256985,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -35138,10 +35634,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 258416,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -35216,10 +35716,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 260847,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -35234,10 +35738,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 261889,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -35248,10 +35756,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 263432,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -35380,10 +35892,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 267418,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -35394,10 +35910,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 268224,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -35415,10 +35935,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 269222,
+        "victims": [
+          "Milton",
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -35636,10 +36161,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 275931,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -35812,10 +36341,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 280522,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -35865,10 +36398,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 283334,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -35879,10 +36416,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 284387,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -35900,10 +36441,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 286224,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -35993,10 +36538,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 287111,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -36118,10 +36667,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 289430,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -36132,10 +36685,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 290366,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -36196,10 +36753,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 293540,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -36231,10 +36792,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 294345,
+        "victims": [
+          "stepcop",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -36329,10 +36895,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 305651,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "gl"
       },
       {
@@ -36354,10 +36924,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 306258,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "gl"
       },
       {
@@ -36368,10 +36942,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 306346,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -36403,10 +36981,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 306871,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -36438,10 +37020,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 308185,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -36480,10 +37066,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 309120,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -36645,10 +37235,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 311146,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -37050,10 +37644,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 320756,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -37071,31 +37669,47 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 322690,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 322916,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 323600,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 323729,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -37148,10 +37762,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 324651,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -37368,10 +37986,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 328916,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -37479,10 +38101,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 331781,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -37518,24 +38144,36 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 332133,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 332301,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 333610,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -37599,10 +38237,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 336898,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -37888,10 +38530,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 342792,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -38027,10 +38673,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 343599,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -38211,10 +38861,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 347897,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -38225,10 +38879,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 348872,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -38267,10 +38925,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 350573,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -38292,10 +38954,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 352323,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -38456,10 +39122,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 354722,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -39102,17 +39772,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 365403,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 365820,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -39123,10 +39801,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 366584,
+        "victims": [
+          "shazam",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -39211,10 +39894,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 371210,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -39300,10 +39987,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 372895,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -39422,10 +40113,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 375886,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -39436,17 +40131,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 376760,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 376792,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -39464,17 +40167,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 377587,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 377716,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -39703,17 +40414,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 387392,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 387833,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -39847,10 +40566,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 391429,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -39868,10 +40591,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 393856,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -40074,10 +40801,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 398236,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -40163,10 +40894,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 400574,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -40280,10 +41015,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 402898,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -40298,10 +41037,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 403204,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -40415,10 +41158,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 405964,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -40486,10 +41233,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 406561,
+        "victims": [
+          "stepcop",
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -41187,10 +41939,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 418221,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -41302,10 +42058,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 421045,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -41378,17 +42138,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 422405,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 423219,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -41513,10 +42281,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 424027,
+        "victims": [
+          "squeeze",
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -41567,10 +42340,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 424722,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -41581,10 +42358,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 426361,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -41606,10 +42387,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 427327,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -41717,10 +42502,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 428481,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -41731,10 +42520,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 429053,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -42097,10 +42890,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 434624,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -42118,10 +42915,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 436021,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -42143,10 +42944,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 437815,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -42192,10 +42997,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 439288,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -42241,10 +43050,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 441571,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -42324,10 +43137,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 442829,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -42366,10 +43183,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 446869,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -42380,10 +43201,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 447416,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -42412,10 +43237,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 447686,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -42475,10 +43304,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 449293,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -42496,10 +43329,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 450171,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -42510,10 +43347,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 450990,
+        "victims": [
+          "Milton",
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -42843,10 +43685,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 461117,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "gl"
       },
       {
@@ -42878,10 +43724,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 462704,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -43073,10 +43923,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 469515,
+        "victims": [
+          "squeeze",
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -43232,10 +44087,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 473366,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -43253,10 +44112,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 473522,
+        "victims": [
+          "stepcop",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -43274,10 +44138,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 474195,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -43288,10 +44156,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 475279,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -43302,10 +44174,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 476091,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -43320,10 +44196,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 477723,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -43355,10 +44235,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 478234,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -43369,10 +44253,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 478842,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -43401,10 +44289,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 479496,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -43550,10 +44442,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 482065,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -43628,10 +44524,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 482737,
+        "victims": [
+          "squeeze",
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -43642,10 +44543,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 483133,
+        "victims": [
+          "squeeze",
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -43859,10 +44765,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 486000,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -43983,10 +44893,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 488689,
+        "victims": [
+          "Milton",
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -44004,10 +44919,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 490925,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -44153,10 +45072,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 495252,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -44174,10 +45097,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 495624,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -44248,10 +45175,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 498612,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -44262,17 +45193,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 499253,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 499461,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -44297,31 +45236,47 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 501295,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 502541,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 502860,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 506016,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -44332,10 +45287,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 506909,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -44586,10 +45545,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 509039,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -44639,10 +45602,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 509862,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -45033,10 +46000,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 516951,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -45047,17 +46018,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 517198,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 517772,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -45075,10 +46054,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 519528,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -45089,10 +46072,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 520229,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -45331,10 +46318,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 527184,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -45366,17 +46357,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 528669,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 529481,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -45394,10 +46393,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 531146,
+        "victims": [
+          "shazam",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -45430,10 +46434,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 531578,
+        "victims": [
+          "Milton",
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -45444,10 +46453,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 531953,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -45458,10 +46471,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 534041,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -45479,10 +46496,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 535177,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -45493,17 +46514,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 536084,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 536821,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -45656,10 +46685,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 539860,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -45746,10 +46779,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 541363,
+        "victims": [
+          "stepcop",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -45760,10 +46798,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 543535,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -45781,10 +46823,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 544748,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -45802,10 +46848,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 546530,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -45865,10 +46915,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 547346,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -45900,10 +46954,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 549912,
+        "victims": [
+          "shazam",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -45914,17 +46973,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 551299,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 552177,
+        "victims": [
+          "Milton",
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -45956,10 +47024,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 554820,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -46023,10 +47095,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 556003,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -46090,10 +47166,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 556808,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -46198,10 +47278,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 558863,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -46240,10 +47324,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 561046,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -46297,10 +47385,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 561683,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -46415,10 +47507,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 562784,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -46553,10 +47649,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 564236,
+        "victims": [
+          "squeeze",
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -46720,10 +47821,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 568327,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -46818,10 +47923,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 574948,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -46839,10 +47948,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 576978,
+        "victims": [
+          "squeeze"
+        ],
         "weapon": "rl"
       },
       {
@@ -46867,10 +47980,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 578054,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -46920,10 +48037,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 578857,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -47046,17 +48167,26 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 579724,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 579916,
+        "victims": [
+          "shazam",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -47142,10 +48272,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 582539,
+        "victims": [
+          "stepcop",
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -47218,10 +48353,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 583872,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -47246,10 +48385,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 585714,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -47323,45 +48466,69 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 588441,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 589111,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 589240,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "squeeze",
         "source": "sound",
         "team": "1",
         "time": 589259,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "shazam",
         "source": "sound",
         "team": "n n",
         "time": 589649,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 590142,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -47465,10 +48632,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 593950,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {
@@ -47479,10 +48650,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "stepcop",
         "source": "sound",
         "team": "n n",
         "time": 595600,
+        "victims": [
+          "Milton"
+        ],
         "weapon": "rl"
       },
       {
@@ -47604,10 +48779,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 596885,
+        "victims": [
+          "stepcop"
+        ],
         "weapon": "rl"
       },
       {
@@ -47772,10 +48951,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "Milton",
         "source": "sound",
         "team": "1",
         "time": 598809,
+        "victims": [
+          "shazam"
+        ],
         "weapon": "rl"
       },
       {

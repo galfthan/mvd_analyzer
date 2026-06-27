@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"math"
 	"sort"
 
 	"github.com/mvd-analyzer/mvd-reader/events"
@@ -30,6 +31,15 @@ type ShotsAnalyzer struct {
 	cellKnown map[int]bool
 	dead      map[int]bool
 
+	// pos is each slot's last-seen origin (svc_playerinfo) — the muzzle
+	// reference that disambiguates which same-frame fire launched a rocket.
+	pos map[int][3]float32
+
+	// openProj tracks in-flight projectile entities by entnum; on despawn
+	// the completed [spawn,despawn] bracket is appended to projectiles.
+	openProj    map[int]*rawProjectile
+	projectiles []rawProjectile
+
 	shots  []rawShot
 	dmgs   []rawShotDmg
 	hadDmg bool // any DamageEvent seen — distinguishes 0% accuracy from no-stream
@@ -37,23 +47,44 @@ type ShotsAnalyzer struct {
 
 // rawShot is one detected fire pinned to a wire slot + time, plus whether
 // the match was running (for gated aggregates) and whether the weapon is
-// instantaneous hitscan (linkable to same-frame damage).
+// instantaneous hitscan (linkable to same-frame damage). shooterPos is the
+// firer's last-seen origin, used as the muzzle reference when matching a
+// rocket spawn back to its fire. The resolved identity and link result are
+// filled in Finalize.
 type rawShot struct {
-	slot    int
-	weapon  string
-	source  string // "sound" | "ammo"
-	tMs     int32
-	inMatch bool
-	hitscan bool
+	slot       int
+	weapon     string
+	source     string // "sound" | "ammo"
+	tMs        int32
+	inMatch    bool
+	hitscan    bool
+	shooterPos [3]float32
+
+	name    string
+	team    string
+	hit     bool
+	victims []string
+	linked  bool // a projectile has already claimed this fire
 }
 
-// rawShotDmg is a hitscan DamageEvent kept for same-frame shot linking.
+// rawShotDmg is a DamageEvent (hitscan sg/ssg/lg, or projectile rl/gl) kept
+// for shot linking.
 type rawShotDmg struct {
 	attacker int // wire slot
 	victim   int // wire slot
 	weapon   string
 	tMs      int32
 	used     bool
+}
+
+// rawProjectile is one tracked rocket/grenade flight: its weapon kind, the
+// muzzle spawn (time + origin) and the despawn time (impact / timeout). The
+// entity number bracketed the flight; only these endpoints are kept.
+type rawProjectile struct {
+	kind        string
+	spawnTMs    int32
+	spawnOrigin [3]float32
+	despawnTMs  int32
 }
 
 const (
@@ -69,6 +100,15 @@ const (
 	// still be read as LG fire. A larger drop is a death/disconnect dump or
 	// an in-water discharge (all cells at once), not normal firing.
 	maxCellsPerTick = 10
+
+	// projSpawnWindowMs bounds how far a rocket/grenade spawn may sit from
+	// the fire sound that launched it — they are emitted in the same server
+	// frame, so a few frames of slack is ample.
+	projSpawnWindowMs = 50
+
+	// projImpactWindowMs bounds the projectile's despawn frame to its impact
+	// damage (T_MissileTouch fires the explosion + damage as it is removed).
+	projImpactWindowMs = 34
 )
 
 // NewShotsAnalyzer creates a new shots analyzer.
@@ -77,6 +117,8 @@ func NewShotsAnalyzer() *ShotsAnalyzer {
 		cells:     make(map[int]int),
 		cellKnown: make(map[int]bool),
 		dead:      make(map[int]bool),
+		pos:       make(map[int][3]float32),
+		openProj:  make(map[int]*rawProjectile),
 	}
 }
 
@@ -103,16 +145,26 @@ func (a *ShotsAnalyzer) OnEvent(event events.Event) error {
 	case *events.DeathEvent:
 		a.dead[e.PlayerNum] = true
 		a.cellKnown[e.PlayerNum] = false // death ammo dump is not a fire
+	case *events.PlayerPositionEvent:
+		a.pos[e.PlayerNum] = e.Origin
 	case *events.StatUpdateEvent:
 		if e.StatIndex == events.StatCells {
 			a.onCells(e.PlayerNum, e.Value, msTime(e.Time))
 		}
 	case *events.SoundEvent:
 		a.onSound(e)
+	case *events.ProjectileSpawnEvent:
+		a.openProj[e.EntNum] = &rawProjectile{kind: e.Kind, spawnTMs: e.TimeMs, spawnOrigin: e.Origin}
+	case *events.ProjectileDespawnEvent:
+		if p := a.openProj[e.EntNum]; p != nil {
+			p.despawnTMs = e.TimeMs
+			a.projectiles = append(a.projectiles, *p)
+			delete(a.openProj, e.EntNum)
+		}
 	case *events.DamageEvent:
 		a.hadDmg = true
 		if e.Attacker >= 0 {
-			if w := events.DeathTypeToWeapon(e.DeathType); isHitscanWeapon(w) {
+			if w := events.DeathTypeToWeapon(e.DeathType); canLinkWeapon(w) {
 				a.dmgs = append(a.dmgs, rawShotDmg{
 					attacker: e.Attacker,
 					victim:   e.Victim,
@@ -135,13 +187,15 @@ func (a *ShotsAnalyzer) onSound(e *events.SoundEvent) {
 	if !ok {
 		return
 	}
+	slot := e.Ent - 1
 	a.shots = append(a.shots, rawShot{
-		slot:    e.Ent - 1,
-		weapon:  w,
-		source:  "sound",
-		tMs:     e.TimeMs,
-		inMatch: a.timing.Started && !a.timing.Ended,
-		hitscan: isHitscanWeapon(w),
+		slot:       slot,
+		weapon:     w,
+		source:     "sound",
+		tMs:        e.TimeMs,
+		inMatch:    a.timing.Started && !a.timing.Ended,
+		hitscan:    isHitscanWeapon(w),
+		shooterPos: a.pos[slot],
 	})
 }
 
@@ -178,8 +232,8 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 		return nil
 	}
 
-	// Index hitscan damage by attacker slot so linking is per-slot, not a
-	// full scan per shot.
+	// Index damage by attacker slot so linking is per-slot, not a full scan
+	// per shot. Holds both hitscan (sg/ssg/lg) and projectile (rl/gl) damage.
 	dmgBySlot := make(map[int][]*rawShotDmg)
 	for i := range a.dmgs {
 		d := &a.dmgs[i]
@@ -188,36 +242,49 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 
 	sort.SliceStable(a.shots, func(i, j int) bool { return a.shots[i].tMs < a.shots[j].tMs })
 
-	out := &ShotsResult{}
-	aggByName := make(map[string]*shotAgg)
-	var aggOrder []string
-
+	// 1. Resolve each fire's shooter identity.
 	for i := range a.shots {
 		s := &a.shots[i]
 		id := a.resolveAt(s.slot, s.tMs)
-		if id.Name == "" {
+		s.name, s.team = id.Name, id.Team
+	}
+
+	// 2. Hitscan: link each sg/ssg/lg fire to its same-frame damage.
+	for i := range a.shots {
+		s := &a.shots[i]
+		if s.name == "" || !s.hitscan {
+			continue
+		}
+		if v := a.linkHitscan(dmgBySlot[s.slot], s.weapon, s.tMs); len(v) > 0 {
+			s.hit, s.victims = true, v
+		}
+	}
+
+	// 3. Projectiles: bracket each rocket/grenade flight back to its
+	//    launching fire (by muzzle) and forward to its impact damage.
+	a.linkProjectiles(dmgBySlot)
+
+	// 4. Emit the stream + match-time aggregates from the resolved state.
+	out := &ShotsResult{}
+	aggByName := make(map[string]*shotAgg)
+	var aggOrder []string
+	for i := range a.shots {
+		s := &a.shots[i]
+		if s.name == "" {
 			continue // can't attribute the fire to a known player
 		}
-
-		shot := Shot{Time: s.tMs, Player: id.Name, Team: id.Team, Weapon: s.weapon, Source: s.source}
-		connected := false
-		if s.hitscan {
-			if victims := a.linkHitscan(dmgBySlot[s.slot], s.weapon, s.tMs); len(victims) > 0 {
-				shot.Hit = true
-				shot.Victims = victims
-				connected = true
-			}
-		}
-		out.Shots = append(out.Shots, shot)
-
+		out.Shots = append(out.Shots, Shot{
+			Time: s.tMs, Player: s.name, Team: s.team,
+			Weapon: s.weapon, Source: s.source, Hit: s.hit, Victims: s.victims,
+		})
 		if !s.inMatch {
 			continue
 		}
-		ag := aggByName[id.Name]
+		ag := aggByName[s.name]
 		if ag == nil {
-			ag = &shotAgg{team: id.Team, weapons: make(map[string]*weaponAgg)}
-			aggByName[id.Name] = ag
-			aggOrder = append(aggOrder, id.Name)
+			ag = &shotAgg{team: s.team, weapons: make(map[string]*weaponAgg)}
+			aggByName[s.name] = ag
+			aggOrder = append(aggOrder, s.name)
 		}
 		wa := ag.weapons[s.weapon]
 		if wa == nil {
@@ -225,7 +292,7 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 			ag.weapons[s.weapon] = wa
 		}
 		wa.shots++
-		if connected {
+		if s.hit {
 			wa.hits++
 		}
 	}
@@ -235,6 +302,59 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 
 	result.Shots = out
 	return nil
+}
+
+// linkProjectiles matches each tracked rocket/grenade flight to the fire
+// that launched it and the damage it caused. The launching fire is the
+// unclaimed same-weapon sound shot in the spawn frame nearest the spawn
+// origin by muzzle (proximity only matters when two players fire the same
+// weapon in one frame — otherwise there is a single candidate). The impact
+// is that shooter's same-weapon damage at the despawn frame; the damage's
+// attacker is authoritative, the projectile's [spawn,despawn] bracket is
+// what pins *which* shot caused *which* impact when several are in flight.
+func (a *ShotsAnalyzer) linkProjectiles(dmgBySlot map[int][]*rawShotDmg) {
+	if len(a.projectiles) == 0 {
+		return
+	}
+	sort.SliceStable(a.projectiles, func(i, j int) bool {
+		return a.projectiles[i].spawnTMs < a.projectiles[j].spawnTMs
+	})
+	for pi := range a.projectiles {
+		p := &a.projectiles[pi]
+		var best *rawShot
+		bestDist := float32(math.MaxFloat32)
+		for si := range a.shots {
+			s := &a.shots[si]
+			if s.linked || s.source != "sound" || s.weapon != p.kind || s.name == "" {
+				continue
+			}
+			if dt := s.tMs - p.spawnTMs; dt < -projSpawnWindowMs || dt > projSpawnWindowMs {
+				continue
+			}
+			if d := dist2(s.shooterPos, p.spawnOrigin); d < bestDist {
+				bestDist, best = d, s
+			}
+		}
+		if best == nil {
+			continue
+		}
+		best.linked = true
+		var victims []string
+		seen := make(map[string]bool)
+		for _, d := range dmgBySlot[best.slot] {
+			if d.used || d.weapon != p.kind || absInt32(d.tMs-p.despawnTMs) > projImpactWindowMs {
+				continue
+			}
+			d.used = true
+			if vn := a.resolveAt(d.victim, d.tMs).Name; vn != "" && !seen[vn] {
+				seen[vn] = true
+				victims = append(victims, vn)
+			}
+		}
+		if len(victims) > 0 {
+			best.hit, best.victims = true, victims
+		}
+	}
 }
 
 // linkHitscan returns the names of players damaged by this hitscan fire —
@@ -261,7 +381,8 @@ func (a *ShotsAnalyzer) linkHitscan(dmgs []*rawShotDmg, weapon string, tMs int32
 
 // buildByPlayer flattens the match-time aggregates into the result shape,
 // sorted by player then by a stable weapon order. Hits/Accuracy are emitted
-// only for hitscan weapons and only when a damage stream was present.
+// only for linkable weapons (hitscan sg/ssg/lg + projectile rl/gl) and only
+// when a damage stream was present.
 func (a *ShotsAnalyzer) buildByPlayer(aggByName map[string]*shotAgg, order []string) []PlayerShots {
 	sort.Strings(order)
 	out := make([]PlayerShots, 0, len(order))
@@ -274,7 +395,7 @@ func (a *ShotsAnalyzer) buildByPlayer(aggByName map[string]*shotAgg, order []str
 				continue
 			}
 			ws := WeaponShots{Weapon: w, Shots: wa.shots}
-			if a.hadDmg && isHitscanWeapon(w) {
+			if a.hadDmg && canLinkWeapon(w) {
 				ws.Hits = wa.hits
 				ws.Accuracy = float64(wa.hits) / float64(wa.shots)
 			}
@@ -392,10 +513,30 @@ func fireSoundWeapon(name string) (string, bool) {
 }
 
 // isHitscanWeapon reports whether a weapon's shot and its damage land in the
-// same server frame (so they can be linked truthfully). Nail/rocket/grenade
-// fires are projectiles and are excluded.
+// same server frame (so they link via same-frame matching). Nail/rocket/
+// grenade fires are projectiles and are excluded.
 func isHitscanWeapon(w string) bool {
 	return w == "sg" || w == "ssg" || w == "lg"
+}
+
+// isProjectileWeapon reports whether a fire launches a tracked slow
+// projectile (rocket / grenade), linked via the entity flight bracket.
+// Nails (ng/sng) ride a separate stream and are not tracked here.
+func isProjectileWeapon(w string) bool {
+	return w == "rl" || w == "gl"
+}
+
+// canLinkWeapon reports whether a weapon's fires can be linked to damage at
+// all — either same-frame hitscan or entity-tracked projectiles.
+func canLinkWeapon(w string) bool {
+	return isHitscanWeapon(w) || isProjectileWeapon(w)
+}
+
+// dist2 is the squared Euclidean distance between two points (no sqrt — only
+// used for nearest-muzzle comparison).
+func dist2(a, b [3]float32) float32 {
+	dx, dy, dz := a[0]-b[0], a[1]-b[1], a[2]-b[2]
+	return dx*dx + dy*dy + dz*dz
 }
 
 // ktxAttackMultiplier converts a discrete fire count into KTX's acc.attacks

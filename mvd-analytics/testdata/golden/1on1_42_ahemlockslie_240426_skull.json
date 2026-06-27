@@ -8568,6 +8568,8 @@
             "weapon": "ssg"
           },
           {
+            "accuracy": 0.46218487394957986,
+            "hits": 55,
             "shots": 119,
             "weapon": "rl"
           },
@@ -8595,6 +8597,8 @@
             "weapon": "gl"
           },
           {
+            "accuracy": 0.4628099173553719,
+            "hits": 56,
             "shots": 121,
             "weapon": "rl"
           },
@@ -8676,10 +8680,15 @@
     },
     "shots": [
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 3042,
+        "victims": [
+          "42",
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -8705,10 +8714,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 3844,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -8726,10 +8739,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 8302,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -8765,10 +8782,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 11727,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -8779,10 +8800,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 13415,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -8793,10 +8818,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 14237,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -8971,10 +9000,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 39379,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -9027,17 +9060,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 40327,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 40441,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -9470,10 +9511,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 68561,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -9491,45 +9537,69 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 76804,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 76869,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 77609,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 77717,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 83454,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 84262,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -9540,10 +9610,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 95181,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -9561,17 +9635,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 96843,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 96898,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -9830,10 +9913,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 124443,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -9844,17 +9931,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 125765,
+        "victims": [
+          "42",
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 126404,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -9890,17 +9986,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 130404,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 130466,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -9911,10 +10015,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 146819,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -9925,52 +10033,80 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 148024,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 148897,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 148933,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 149700,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 149856,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 160884,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 160998,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -10002,10 +10138,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 164481,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -10051,31 +10191,47 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 173335,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 174582,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 174678,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 175478,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -10086,10 +10242,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 187712,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -10100,10 +10260,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 188504,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -10114,10 +10278,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 197985,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -10202,17 +10370,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 199244,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 199504,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -10230,17 +10406,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 202322,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 203452,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -10382,10 +10566,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 216026,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -10403,17 +10592,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 219702,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 219819,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -10431,38 +10628,60 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 241477,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 242377,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 242509,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 243287,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 243469,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -10712,10 +10931,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 271529,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -10787,10 +11010,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 272364,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -11030,10 +11257,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 298191,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -11115,10 +11346,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 299467,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -11200,38 +11435,59 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 307256,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 308061,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 308866,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 310620,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 311061,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -11274,17 +11530,26 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 315321,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 323064,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -11295,10 +11560,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 324684,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -11309,10 +11579,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 325493,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -11323,10 +11597,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 326454,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -11390,10 +11668,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 339726,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -11404,10 +11686,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 340791,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -11418,10 +11704,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 341596,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -11523,10 +11813,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 359580,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -11566,10 +11860,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 365281,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -11737,10 +12036,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 371178,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -11773,10 +12076,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 372063,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -11809,10 +12116,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 388245,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -11890,10 +12201,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 394775,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -12066,10 +12381,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 403008,
+        "victims": [
+          "42",
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -12087,10 +12407,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 405385,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -12101,10 +12425,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 410895,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -12129,10 +12457,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 417657,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -12254,10 +12586,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 424008,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -12396,10 +12732,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 426527,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -12410,10 +12751,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 427397,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -12438,31 +12783,48 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 435607,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 436399,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 441503,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 441527,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -12487,10 +12849,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 446309,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -12616,10 +12982,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 453852,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -12707,10 +13077,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 479591,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -12735,10 +13109,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 482435,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -12749,24 +13127,38 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 483347,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 483917,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 484149,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -12859,10 +13251,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 497996,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -13030,10 +13426,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 510348,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -13154,10 +13554,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 511994,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -13172,17 +13576,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 512655,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 512788,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -13204,10 +13617,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 526201,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -13381,17 +13798,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 540876,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 540980,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
@@ -13402,45 +13827,71 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 542684,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 542798,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 543580,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 543630,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 544382,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 544435,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -13486,10 +13937,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 581070,
+        "victims": [
+          "AHemlocksLie",
+          "42"
+        ],
         "weapon": "rl"
       },
       {
@@ -13500,24 +13956,36 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 581878,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "AHemlocksLie",
         "source": "sound",
         "team": "'tro",
         "time": 582437,
+        "victims": [
+          "42"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "42",
         "source": "sound",
         "team": "red",
         "time": 582721,
+        "victims": [
+          "AHemlocksLie"
+        ],
         "weapon": "rl"
       },
       {

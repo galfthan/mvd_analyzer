@@ -39,10 +39,18 @@ detail.
     (`source:"ammo"`).
   - **Truthful cross-linking.** Instantaneous hitscan fires (sg/ssg/lg) are
     linked to the damage they caused in the **same server frame** via the
-    KTX `mvdhidden_dmgdone` stream (`hit`/`victims`). Projectile fires
-    (rl/gl/ng/sng) have travel time and no authoritative projectile↔impact
-    id, so they are left unlinked here — entity-tracking comes in a later
-    phase.
+    KTX `mvdhidden_dmgdone` stream (`hit`/`victims`). Rocket/grenade fires
+    (rl/gl) are linked by **entity flight tracking**: the projectile entity
+    brackets the flight (`spawn → despawn`), so a fire is matched to its
+    launch frame (by muzzle) and its impact damage to the shooter's
+    same-weapon damage at the despawn frame — which disambiguates *which*
+    fire caused *which* impact when several rockets are in flight (a naive
+    "next damage" link cannot). Across the corpus, rl/gl connect-counts
+    match KTX's authoritative `real` hit counts to within one. Nail fires
+    (ng/sng) ride a separate stream and stay unlinked for now.
+  - New parser events `ProjectileSpawnEvent` / `ProjectileDespawnEvent`
+    track rocket (`progs/missile.mdl`) and grenade (`progs/grenade.mdl`)
+    entities by their recycled entity number.
   - **Validation built in.** A `reconciliation` block cross-checks detected
     counts against KTX's authoritative `acc.attacks`; across the golden
     corpus the converted `streamAttacks` matches KTX exactly (a 4on4 game

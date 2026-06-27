@@ -9712,6 +9712,8 @@
             "weapon": "gl"
           },
           {
+            "accuracy": 0.36904761904761907,
+            "hits": 62,
             "shots": 168,
             "weapon": "rl"
           }
@@ -9733,10 +9735,14 @@
             "weapon": "ng"
           },
           {
+            "accuracy": 0.1111111111111111,
+            "hits": 3,
             "shots": 27,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.33962264150943394,
+            "hits": 54,
             "shots": 159,
             "weapon": "rl"
           }
@@ -9868,17 +9874,27 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 23922,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 24000,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -9896,10 +9912,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 25610,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -9952,10 +9972,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 37610,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -9966,17 +9990,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 38428,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 39013,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -9994,24 +10027,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 44961,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 45817,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 49493,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -10036,10 +10081,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 51506,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10050,17 +10099,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 52468,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 53013,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -10071,10 +10128,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 53792,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -10096,10 +10157,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 58844,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -10110,31 +10175,47 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 59623,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 59662,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 64830,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 65447,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10152,17 +10233,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 79143,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 80078,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -10184,24 +10274,37 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 80895,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 84337,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 85116,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10233,10 +10336,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 91597,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -10310,10 +10417,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 100155,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10324,17 +10435,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 110869,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 111753,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10352,10 +10471,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 113531,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -10387,10 +10510,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 116635,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10450,10 +10577,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 121882,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10485,10 +10616,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 130714,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10510,10 +10645,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 131609,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10549,10 +10688,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 133324,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -10591,10 +10735,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 153518,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10619,10 +10767,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 155972,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10647,10 +10799,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 158141,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10682,10 +10838,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 159972,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10710,10 +10870,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 161446,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "gl"
       },
       {
@@ -10759,10 +10923,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 164051,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "gl"
       },
       {
@@ -10787,10 +10955,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 166103,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10836,17 +11008,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 188362,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 188751,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10892,10 +11072,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 197530,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -10906,45 +11090,69 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 198920,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 199193,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 199778,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 199965,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 200648,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 200803,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -10955,24 +11163,36 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 201608,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 202427,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 206985,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -10997,10 +11217,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 227426,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -11046,17 +11270,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 244581,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 244581,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11145,10 +11378,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 263127,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11215,10 +11452,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 271880,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "gl"
       },
       {
@@ -11250,10 +11491,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 277315,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11299,10 +11544,14 @@
         "weapon": "ng"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 280413,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11313,17 +11562,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 281192,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 281425,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -11397,17 +11654,27 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 336632,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 336671,
+        "victims": [
+          "banan falco",
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -11418,10 +11685,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 337490,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11432,10 +11703,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 338308,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11460,17 +11736,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 348697,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 349516,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11488,24 +11772,36 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 351035,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 351152,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 351874,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -11551,10 +11847,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 372502,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -11580,10 +11880,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 373658,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -11630,10 +11934,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 379645,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -11693,10 +12001,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 387281,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11770,10 +12082,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 403476,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11826,38 +12142,60 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 410892,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 410969,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 411709,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 411748,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 413645,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11904,10 +12242,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 416930,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -11932,10 +12274,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 428048,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11946,10 +12292,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 428865,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11960,10 +12310,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 429684,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11974,10 +12329,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 444177,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -11988,24 +12347,36 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 445261,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 445910,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 446449,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -12023,10 +12394,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 447541,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -12156,10 +12531,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 466813,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -12177,10 +12556,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 467988,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -12191,10 +12574,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 468787,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -12212,17 +12599,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 470423,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 470462,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -12240,17 +12635,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 472020,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 472099,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -12359,17 +12762,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 513994,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 516436,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -12387,10 +12798,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 519488,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -12419,24 +12834,37 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 526461,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 529292,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 529410,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -12458,17 +12886,25 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 538838,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 540350,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -12479,45 +12915,71 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 541163,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 541591,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 542097,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 542409,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 542994,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 543344,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -12532,10 +12994,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 545176,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -12575,10 +13041,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 556850,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -12617,10 +13087,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 563630,
+        "victims": [
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -12687,10 +13161,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 590278,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -12708,17 +13186,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 591487,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 592220,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {
@@ -12743,17 +13230,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "betowen",
         "source": "sound",
         "team": "red",
         "time": 593850,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 594396,
+        "victims": [
+          "betowen"
+        ],
         "weapon": "rl"
       },
       {
@@ -12764,10 +13259,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "banan falco",
         "source": "sound",
         "team": "coop",
         "time": 595363,
+        "victims": [
+          "betowen",
+          "banan falco"
+        ],
         "weapon": "rl"
       },
       {

@@ -52691,10 +52691,14 @@
             "weapon": "ng"
           },
           {
+            "accuracy": 0.2222222222222222,
+            "hits": 2,
             "shots": 9,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.6,
+            "hits": 30,
             "shots": 50,
             "weapon": "rl"
           },
@@ -52732,10 +52736,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.11764705882352941,
+            "hits": 2,
             "shots": 17,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.423728813559322,
+            "hits": 25,
             "shots": 59,
             "weapon": "rl"
           },
@@ -52769,6 +52777,8 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.5526315789473685,
+            "hits": 21,
             "shots": 38,
             "weapon": "rl"
           },
@@ -52802,10 +52812,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.13333333333333333,
+            "hits": 2,
             "shots": 15,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.5932203389830508,
+            "hits": 35,
             "shots": 59,
             "weapon": "rl"
           },
@@ -52843,10 +52857,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.5555555555555556,
+            "hits": 5,
             "shots": 9,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.42424242424242425,
+            "hits": 28,
             "shots": 66,
             "weapon": "rl"
           },
@@ -52880,10 +52898,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.42857142857142855,
+            "hits": 3,
             "shots": 7,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.5357142857142857,
+            "hits": 30,
             "shots": 56,
             "weapon": "rl"
           },
@@ -52921,10 +52943,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.13333333333333333,
+            "hits": 2,
             "shots": 15,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.39285714285714285,
+            "hits": 33,
             "shots": 84,
             "weapon": "rl"
           },
@@ -52962,6 +52988,8 @@
             "weapon": "gl"
           },
           {
+            "accuracy": 0.45217391304347826,
+            "hits": 52,
             "shots": 115,
             "weapon": "rl"
           },
@@ -53367,10 +53395,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 1405,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -54910,10 +54942,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 31917,
+        "victims": [
+          "nlk",
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -54928,10 +54965,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 32717,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -55224,10 +55265,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 38320,
+        "victims": [
+          "nlk",
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -55305,10 +55351,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 39123,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -55595,10 +55645,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 56865,
+        "victims": [
+          "sCorp",
+          "doberman"
+        ],
         "weapon": "gl"
       },
       {
@@ -55634,10 +55689,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 57481,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "gl"
       },
       {
@@ -55752,10 +55811,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 58856,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -56040,10 +56103,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 62637,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -56303,10 +56370,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 65943,
+        "victims": [
+          "nlk",
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -56381,10 +56453,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 67681,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -56815,10 +56891,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 75437,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -56934,10 +57014,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 77066,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -57725,10 +57809,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 97710,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -57743,10 +57831,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 98853,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -57847,10 +57939,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 105175,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -58314,10 +58410,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 110062,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -58388,10 +58488,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 110684,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -58438,10 +58542,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 111708,
+        "victims": [
+          "[cmd] witka",
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -58509,10 +58618,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 113126,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -58597,17 +58710,25 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 114629,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 114941,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -58618,17 +58739,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 115489,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 116435,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -58657,10 +58786,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 122023,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -58857,10 +58990,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 128856,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -58903,17 +59040,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 129221,
+        "victims": [
+          "[cmd] witka",
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 129664,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -59490,10 +59636,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 144675,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -59533,10 +59683,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 146410,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -59547,10 +59701,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 148646,
+        "victims": [
+          "marksuzu",
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -59811,10 +59970,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 158904,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -59872,10 +60035,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 162815,
+        "victims": [
+          "lakso",
+          "apa",
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -59942,10 +60111,14 @@
         "weapon": "ng"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 163685,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -59963,10 +60136,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 164386,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -60006,10 +60183,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 165192,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -60071,10 +60252,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 166816,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -60484,10 +60669,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 177656,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -60703,10 +60892,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 181483,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -60810,10 +61003,16 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 182424,
+        "victims": [
+          "nlk",
+          "clox",
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -60884,10 +61083,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 183229,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -61071,10 +61274,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 188296,
+        "victims": [
+          "apa",
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -61128,10 +61336,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 191325,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -61397,10 +61609,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 199568,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -61432,10 +61648,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 200428,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -61663,10 +61883,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 208793,
+        "victims": [
+          "lakso",
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -61699,10 +61924,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 209598,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -61745,10 +61974,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 213054,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -62013,10 +62246,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 215604,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -62027,10 +62264,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 215673,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -62150,10 +62391,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 216988,
+        "victims": [
+          "nlk",
+          "lakso"
+        ],
         "weapon": "gl"
       },
       {
@@ -62178,10 +62424,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 217345,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -62306,10 +62556,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 223559,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -62546,10 +62800,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 228203,
+        "victims": [
+          "apa",
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -62567,10 +62826,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 228999,
+        "victims": [
+          "apa",
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -62669,10 +62933,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 231639,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -62773,10 +63041,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 235661,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -62983,10 +63255,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 244464,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -63054,10 +63330,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 245272,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -63140,10 +63420,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 246076,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -63240,10 +63524,16 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 246882,
+        "victims": [
+          "marksuzu",
+          "[cmd] witka",
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -63272,10 +63562,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 247844,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -63473,10 +63767,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 258391,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -63615,10 +63913,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 261817,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -63785,17 +64087,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 271631,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 271658,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -64030,10 +64340,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 280441,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -64101,10 +64415,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 282043,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -64151,10 +64469,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 284243,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -64244,10 +64566,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 291039,
+        "victims": [
+          "[cmd] witka",
+          "marksuzu"
+        ],
         "weapon": "gl"
       },
       {
@@ -64573,10 +64900,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 299831,
+        "victims": [
+          "marksuzu",
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -64652,10 +64984,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 301106,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "gl"
       },
       {
@@ -64670,10 +65006,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 301545,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -64695,10 +65035,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 302160,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -64720,10 +65064,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 302853,
+        "victims": [
+          "clox",
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -64920,10 +65269,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 307104,
+        "victims": [
+          "marksuzu",
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -65049,10 +65403,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 309667,
+        "victims": [
+          "doberman",
+          "apa",
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -65074,10 +65434,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 310962,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -65237,10 +65601,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 317460,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -65679,10 +66047,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 334977,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -65868,10 +66240,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 336597,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -66102,10 +66478,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 341624,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -66239,10 +66619,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 344875,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -66282,10 +66666,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 345681,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -66314,10 +66702,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 347130,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -66332,10 +66724,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 347741,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -66758,10 +67154,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 362204,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -67357,10 +67757,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 373484,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -67552,10 +67956,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 378219,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -67856,10 +68264,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 385368,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -67981,10 +68393,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 388744,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "gl"
       },
       {
@@ -68093,10 +68509,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 393162,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -68710,10 +69130,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 413558,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -69022,10 +69446,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 423352,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -69065,10 +69493,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 429421,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -69272,10 +69704,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 437924,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -69397,10 +69833,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 438726,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -69579,10 +70019,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 445102,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -69717,10 +70161,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 457284,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -69814,10 +70262,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 465804,
+        "victims": [
+          "clox",
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -69924,10 +70377,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 466604,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -69992,10 +70449,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 467137,
+        "victims": [
+          "nlk",
+          "doberman"
+        ],
         "weapon": "gl"
       },
       {
@@ -70070,10 +70532,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 469246,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -70120,10 +70586,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 469895,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -70145,10 +70615,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 470044,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -70376,10 +70850,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 476476,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -70415,10 +70893,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 477642,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -70440,10 +70922,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 478071,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -70483,10 +70969,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 479049,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -70576,10 +71066,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 482188,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -71232,10 +71726,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 498597,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -71600,10 +72098,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 509845,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -72153,10 +72655,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 528035,
+        "victims": [
+          "nlk",
+          "lakso"
+        ],
         "weapon": "gl"
       },
       {
@@ -72200,10 +72707,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 529415,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "gl"
       },
       {
@@ -72275,10 +72786,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 530627,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "gl"
       },
       {
@@ -73088,10 +73603,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 548740,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -74352,10 +74871,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 582098,
+        "victims": [
+          "clox",
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -75008,10 +75532,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 602481,
+        "victims": [
+          "lakso",
+          "doberman"
+        ],
         "weapon": "gl"
       },
       {
@@ -75033,10 +75562,16 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 602797,
+        "victims": [
+          "clox",
+          "marksuzu",
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -75058,10 +75593,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 603091,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "gl"
       },
       {
@@ -75177,10 +75716,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 604442,
+        "victims": [
+          "nlk",
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -75231,10 +75775,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 605507,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -75302,10 +75850,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 607271,
+        "victims": [
+          "apa"
+        ],
         "weapon": "gl"
       },
       {
@@ -75786,10 +76338,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 629733,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -76298,10 +76854,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 649687,
+        "victims": [
+          "nlk",
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -76639,10 +77200,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 657921,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -77332,10 +77897,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 665795,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -77498,10 +78067,15 @@
         "weapon": "ng"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 666617,
+        "victims": [
+          "[cmd] witka",
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -78225,10 +78799,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 682678,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -78267,10 +78845,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 687014,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -78680,10 +79262,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 705893,
+        "victims": [
+          "doberman",
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -79173,10 +79760,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 722813,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -79198,10 +79789,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 723628,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -79308,10 +79903,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 730529,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -79520,10 +80119,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 735670,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -79567,10 +80170,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 736493,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -79585,10 +80192,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 736576,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -79797,10 +80408,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 750173,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -80039,10 +80654,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 757719,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -80332,10 +80951,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 765783,
+        "victims": [
+          "clox",
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -80514,10 +81138,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 776685,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -80971,10 +81599,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 786669,
+        "victims": [
+          "nlk",
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -81140,10 +81773,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 788386,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -81193,10 +81830,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 789878,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -81218,10 +81859,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 790211,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -81239,10 +81884,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 791057,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -81328,10 +81977,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 802087,
+        "victims": [
+          "lakso",
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -81356,10 +82010,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 803399,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -81420,10 +82078,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 804316,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -81631,10 +82293,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 816608,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -81767,10 +82433,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 819511,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -81795,10 +82465,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 819970,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -82001,10 +82675,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 826576,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -82019,10 +82697,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 827374,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -82040,10 +82722,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 828240,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -82054,10 +82740,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 829057,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -82121,10 +82811,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 829945,
+        "victims": [
+          "marksuzu",
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -82250,10 +82945,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 832957,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -82303,10 +83002,16 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 833880,
+        "victims": [
+          "sCorp",
+          "apa",
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -82591,17 +83296,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 839226,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 840029,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -82672,10 +83385,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 851655,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -82686,10 +83403,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 852512,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -82878,17 +83599,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 870111,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 870348,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -82939,10 +83668,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 871162,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -82988,10 +83721,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 871980,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -83051,10 +83788,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 877607,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -83079,10 +83820,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 879985,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -83104,10 +83849,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 880855,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -83239,10 +83988,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 884508,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -83313,10 +84066,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 894920,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -83464,10 +84221,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 896608,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -83619,10 +84380,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 898332,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -83666,10 +84431,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 898501,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "gl"
       },
       {
@@ -83857,10 +84626,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 900166,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -83964,10 +84737,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 901790,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -84000,10 +84777,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 902597,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -84092,10 +84873,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 906415,
+        "victims": [
+          "[cmd] witka",
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -84175,10 +84961,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 908590,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -84224,10 +85014,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 909396,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -84245,10 +85039,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 909700,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -84281,10 +85079,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 910507,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -84351,10 +85153,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 916747,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -84819,10 +85625,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 934453,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -84837,10 +85647,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 935258,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -84915,10 +85729,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 939177,
+        "victims": [
+          "[cmd] witka",
+          "clox"
+        ],
         "weapon": "gl"
       },
       {
@@ -85052,10 +85871,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 941494,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -85174,10 +85997,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 946325,
+        "victims": [
+          "lakso",
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -85330,10 +86158,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 949349,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -85351,10 +86183,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 950492,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -85387,10 +86223,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 951280,
+        "victims": [
+          "[cmd] witka",
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -85405,10 +86246,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 951375,
+        "victims": [
+          "sCorp",
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -85433,10 +86279,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 952085,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -85576,10 +86426,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 959142,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -85687,10 +86541,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 964780,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -85955,17 +86813,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 970998,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 971151,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -86101,10 +86967,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 974598,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -86521,10 +87391,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 987548,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -86581,10 +87455,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 989306,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -86998,10 +87876,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 996221,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -87096,10 +87978,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 998340,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -87131,10 +88017,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1001041,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -87308,10 +88198,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1003191,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -87421,10 +88315,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1004818,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -87464,10 +88362,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1005639,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -87522,10 +88424,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1006535,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -87600,10 +88506,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1008223,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -87687,10 +88597,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1010017,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -87796,10 +88710,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1011709,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -88161,10 +89079,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 1024247,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -88282,10 +89204,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 1027740,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -88329,10 +89255,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 1028534,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -88637,10 +89567,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1035898,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -89235,10 +90169,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 1056629,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -89398,10 +90336,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 1075244,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -89412,10 +90354,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 1076174,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -89448,10 +90394,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 1077364,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -89477,10 +90427,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 1078205,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -89548,10 +90502,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 1080083,
+        "victims": [
+          "nlk",
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -89636,10 +90595,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 1081623,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
@@ -89695,10 +90658,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1082451,
+        "victims": [
+          "[cmd] witka",
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -89734,10 +90702,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1083477,
+        "victims": [
+          "[cmd] witka",
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -89759,17 +90732,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "doberman",
         "source": "sound",
         "team": ".ra.",
         "time": 1084523,
+        "victims": [
+          "marksuzu"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1084861,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -89837,10 +90818,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 1087949,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -90080,10 +91065,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 1093633,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -90101,10 +91090,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 1094443,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -90115,10 +91108,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1095087,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -90129,10 +91126,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 1095239,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -90179,10 +91180,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1098880,
+        "victims": [
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -90200,10 +91205,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1099802,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -90221,10 +91230,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1101322,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -90366,17 +91379,25 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 1108387,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 1109599,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -90394,10 +91415,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 1112048,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -90437,10 +91462,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 1113773,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -90572,10 +91601,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 1116009,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -90636,17 +91669,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 1119221,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 1119410,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -90700,17 +91741,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 1123055,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 1126534,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -90735,10 +91784,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 1127971,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -90749,10 +91802,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 1128772,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -90770,10 +91827,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 1136564,
+        "victims": [
+          "clox"
+        ],
         "weapon": "gl"
       },
       {
@@ -90966,10 +92027,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1146464,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
@@ -90980,10 +92045,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 1147628,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -91041,24 +92110,36 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 1148717,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 1150362,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1151089,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -91069,10 +92150,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 1151751,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -91111,31 +92196,47 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 1154834,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 1154892,
+        "victims": [
+          "nlk"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 1155635,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
         "time": 1155691,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -91344,10 +92445,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 1164206,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -91650,10 +92755,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
         "time": 1176985,
+        "victims": [
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -91682,10 +92791,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 1178063,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -91809,10 +92922,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 1181933,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -91883,10 +93000,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 1182738,
+        "victims": [
+          "lakso"
+        ],
         "weapon": "rl"
       },
       {
@@ -91937,10 +93058,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 1183518,
+        "victims": [
+          "nlk",
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -91973,10 +93099,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 1184318,
+        "victims": [
+          "sCorp"
+        ],
         "weapon": "rl"
       },
       {
@@ -92110,10 +93240,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1189717,
+        "victims": [
+          "nlk",
+          "doberman"
+        ],
         "weapon": "rl"
       },
       {
@@ -92139,10 +93274,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1190525,
+        "victims": [
+          "doberman",
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -92227,10 +93367,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
         "time": 1191437,
+        "victims": [
+          "doberman",
+          "apa"
+        ],
         "weapon": "rl"
       },
       {
@@ -92369,10 +93514,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 1193765,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -92472,10 +93621,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 1195380,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {
@@ -92532,10 +93685,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sCorp",
         "source": "sound",
         "team": ".ra.",
         "time": 1197153,
+        "victims": [
+          "clox"
+        ],
         "weapon": "rl"
       },
       {
@@ -92632,10 +93789,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "marksuzu",
         "source": "sound",
         "team": "oSaMs",
         "time": 1198789,
+        "victims": [
+          "[cmd] witka"
+        ],
         "weapon": "rl"
       },
       {

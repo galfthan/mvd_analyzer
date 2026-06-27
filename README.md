@@ -361,6 +361,8 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 `PausedDurationEvent` (mvdhidden `0x000A` per-frame pause duration),
 `SoundEvent` (`svc_sound` — emitting entity + channel + resolved sound
 path; weapon-fire sounds drive the shots analyzer),
+`ProjectileSpawnEvent` / `ProjectileDespawnEvent` (rocket/grenade entity
+flight brackets — the shots analyzer links RL/GL fires to their impacts),
 `MoverSpawnEvent` / `MoverStateEvent` (inline brush-model entities —
 lifts, doors, trains — identity plus per-frame origin while moving).
 Domain types carried by events — `ServerData`, `PlayerInfo`,
@@ -402,8 +404,9 @@ damage (per-hit damage log + aggregates — attacker→victim matrix,
 per-weapon, given/taken, and the EWep victim-weapon buckets — from the
 KTX `mvdhidden_dmgdone` stream, with a scoreboard cross-check),
 shots (per-shot weapon-fire stream — who fired what at exactly what ms,
-from `svc_sound` fire sounds + LG cell-ammo — with same-frame
-hitscan→damage links and a KTX-accuracy cross-check),
+from `svc_sound` fire sounds + LG cell-ammo — with same-frame hitscan→damage
+links, entity-tracked rocket/grenade→impact links, and a KTX-accuracy
+cross-check),
 backpacks (RL/LG drops attributed to the dropping player via KTX's
 `//ktx drop` hint), and weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death

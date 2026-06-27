@@ -57356,10 +57356,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.1875,
+            "hits": 3,
             "shots": 16,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.6104651162790697,
+            "hits": 105,
             "shots": 172,
             "weapon": "rl"
           }
@@ -57387,10 +57391,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.15,
+            "hits": 3,
             "shots": 20,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.48,
+            "hits": 36,
             "shots": 75,
             "weapon": "rl"
           }
@@ -57418,10 +57426,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.30434782608695654,
+            "hits": 7,
             "shots": 23,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.5041322314049587,
+            "hits": 61,
             "shots": 121,
             "weapon": "rl"
           }
@@ -57449,10 +57461,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.25,
+            "hits": 2,
             "shots": 8,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.6086956521739131,
+            "hits": 84,
             "shots": 138,
             "weapon": "rl"
           }
@@ -57484,6 +57500,8 @@
             "weapon": "gl"
           },
           {
+            "accuracy": 0.5975609756097561,
+            "hits": 49,
             "shots": 82,
             "weapon": "rl"
           }
@@ -57511,6 +57529,8 @@
             "weapon": "gl"
           },
           {
+            "accuracy": 0.5440414507772021,
+            "hits": 105,
             "shots": 193,
             "weapon": "rl"
           }
@@ -57538,10 +57558,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.23809523809523808,
+            "hits": 5,
             "shots": 21,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.5875,
+            "hits": 47,
             "shots": 80,
             "weapon": "rl"
           }
@@ -57573,10 +57597,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.3548387096774194,
+            "hits": 11,
             "shots": 31,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.5891472868217055,
+            "hits": 76,
             "shots": 129,
             "weapon": "rl"
           }
@@ -57938,17 +57966,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 2143,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 2435,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -58060,10 +58096,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 8117,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -58106,10 +58146,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 8930,
+        "victims": [
+          "paniagua",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -58216,10 +58261,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 9741,
+        "victims": [
+          "paniagua",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -58290,10 +58340,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 10300,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -58798,10 +58852,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 19530,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -58823,10 +58881,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 20624,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -58986,10 +59048,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 25164,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -59029,10 +59095,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 26526,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -59380,10 +59450,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 31058,
+        "victims": [
+          "gore",
+          "anni",
+          "biggz"
+        ],
         "weapon": "gl"
       },
       {
@@ -59457,10 +59533,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 32220,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -59500,10 +59580,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 33533,
+        "victims": [
+          "gore",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -59759,10 +59844,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 39674,
+        "victims": [
+          "gore",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -59943,10 +60033,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 44481,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "gl"
       },
       {
@@ -59975,10 +60069,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 45206,
+        "victims": [
+          "paniagua",
+          "ocoini",
+          "biggz"
+        ],
         "weapon": "gl"
       },
       {
@@ -60225,10 +60325,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 50721,
+        "victims": [
+          "gore",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -60643,10 +60748,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 61027,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -60715,17 +60824,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 61638,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 61739,
+        "victims": [
+          "anni",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -60740,10 +60858,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 61908,
+        "victims": [
+          "gore",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -60772,10 +60895,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 62446,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -60804,17 +60931,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 63058,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 63256,
+        "victims": [
+          ".N3ophyt3.",
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -60832,10 +60968,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 65973,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -60871,10 +61011,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 67032,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -61118,10 +61262,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 72758,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -61201,10 +61349,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 73758,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -61379,10 +61531,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 79325,
+        "victims": [
+          "anni"
+        ],
         "weapon": "gl"
       },
       {
@@ -61450,10 +61606,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 79922,
+        "victims": [
+          "anni"
+        ],
         "weapon": "gl"
       },
       {
@@ -61591,10 +61751,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 83468,
+        "victims": [
+          "anni",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -61716,10 +61881,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 86334,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -61730,10 +61899,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 86584,
+        "victims": [
+          "gore",
+          "paniagua"
+        ],
         "weapon": "gl"
       },
       {
@@ -61934,10 +62108,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 91135,
+        "victims": [
+          "gore"
+        ],
         "weapon": "gl"
       },
       {
@@ -61981,10 +62159,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 91832,
+        "victims": [
+          "anni",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -62092,10 +62275,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 98083,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -62390,10 +62577,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 108013,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -62436,10 +62627,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 111063,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -62454,10 +62649,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 111867,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -62482,10 +62681,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 113028,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -62507,10 +62710,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 113829,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -62532,10 +62739,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 115865,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -62553,10 +62764,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 116141,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -62628,10 +62843,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 118343,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -62660,10 +62879,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 119318,
+        "victims": [
+          "anni",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -62693,10 +62917,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 119883,
+        "victims": [
+          "ocoini",
+          "anni",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -62750,10 +62980,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 120829,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -62786,10 +63020,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 121630,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -62804,10 +63042,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 122013,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -62840,10 +63082,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 122935,
+        "victims": [
+          "gore",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -62865,10 +63112,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 123735,
+        "victims": [
+          "ocoini",
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -62904,10 +63156,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 124545,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -62966,10 +63222,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 125257,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -63027,17 +63287,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 126158,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 126273,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -63088,10 +63356,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 127072,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -63267,10 +63539,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 130304,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -63759,10 +64035,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 138753,
+        "victims": [
+          "biggz",
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -63907,10 +64188,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 144278,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -64038,10 +64323,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 146745,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -64261,10 +64550,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 154675,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -64516,10 +64809,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 161472,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -64581,17 +64878,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 162280,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 162519,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "gl"
       },
       {
@@ -64786,10 +65091,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 168005,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -64800,17 +65109,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 168823,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 169324,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -64832,10 +65149,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 169796,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -64853,10 +65174,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 170593,
+        "victims": [
+          "biggz",
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -64889,17 +65215,27 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 172147,
+        "victims": [
+          "DobeZz",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 172316,
+        "victims": [
+          "nexus",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -64910,10 +65246,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 173586,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -64953,10 +65293,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 178143,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -64967,10 +65311,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 178939,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -65007,10 +65355,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 180147,
+        "victims": [
+          "ocoini",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -65035,10 +65388,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 183429,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -65075,10 +65432,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 184058,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -65171,10 +65532,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 186552,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -65275,17 +65640,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 189285,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 189313,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -65307,10 +65680,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 190110,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -65390,10 +65767,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 191975,
+        "victims": [
+          "biggz",
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -65411,10 +65793,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 192044,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -65472,38 +65858,58 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 195820,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 196628,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 197352,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 197462,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 197476,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -65539,10 +65945,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 199279,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -65564,17 +65974,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 200108,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 200247,
+        "victims": [
+          "ocoini",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -65610,10 +66029,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 201052,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -65635,17 +66058,25 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 201838,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 202331,
+        "victims": [
+          "anni"
+        ],
         "weapon": "gl"
       },
       {
@@ -65663,17 +66094,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 203346,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 203605,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -65781,10 +66220,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 208709,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -65861,10 +66304,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 216862,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -65919,10 +66366,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 217835,
+        "victims": [
+          ".N3ophyt3.",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -65969,10 +66421,15 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 219150,
+        "victims": [
+          "DobeZz",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -66037,10 +66494,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 221786,
+        "victims": [
+          "paniagua",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -66087,10 +66549,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 223377,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -66143,10 +66609,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 227111,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -66196,10 +66666,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 230636,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -66224,10 +66698,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 231467,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -66277,10 +66755,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 232601,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -66370,10 +66852,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 235936,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -66384,10 +66870,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 237181,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -66402,10 +66892,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 237389,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -66427,17 +66921,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 237989,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 238788,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -66448,10 +66950,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 239259,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "gl"
       },
       {
@@ -66476,10 +66982,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 240095,
+        "victims": [
+          "paniagua",
+          "ocoini"
+        ],
         "weapon": "gl"
       },
       {
@@ -66501,17 +67012,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 240498,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 240708,
+        "victims": [
+          "anni",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -66522,10 +67042,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 240905,
+        "victims": [
+          "nexus",
+          ".N3ophyt3."
+        ],
         "weapon": "gl"
       },
       {
@@ -66550,17 +67075,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 241818,
+        "victims": [
+          "gore",
+          "paniagua"
+        ],
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 242428,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -66928,10 +67462,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 249870,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -67005,10 +67543,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 252930,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -67019,10 +67561,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 253704,
+        "victims": [
+          "anni",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -67058,10 +67605,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 254626,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -67215,10 +67766,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 257597,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -67466,10 +68021,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 263052,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -67907,10 +68466,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 267909,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -68011,10 +68574,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 269482,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -68069,10 +68636,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 270284,
+        "victims": [
+          "gore",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -68312,10 +68884,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 273341,
+        "victims": [
+          "ocoini",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -68347,10 +68924,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 280678,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -68541,10 +69122,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 284571,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -68625,10 +69210,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 287151,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -68654,10 +69243,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 287957,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -68675,24 +69268,37 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 289416,
+        "victims": [
+          "biggz",
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 289712,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 290216,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -68703,10 +69309,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 291112,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -68735,17 +69345,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 291919,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 292402,
+        "victims": [
+          "DobeZz",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -68770,10 +69389,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 293209,
+        "victims": [
+          "DobeZz",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -68809,17 +69433,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 294389,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 294545,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "gl"
       },
       {
@@ -68837,10 +69469,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 295185,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -68936,17 +69572,28 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 296000,
+        "victims": [
+          "anni",
+          "ocoini",
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 296000,
+        "victims": [
+          "ocoini",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -68975,10 +69622,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 296607,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -69115,10 +69766,16 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 299657,
+        "victims": [
+          "gore",
+          "paniagua",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -69129,10 +69786,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 300176,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -69178,10 +69839,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 301007,
+        "victims": [
+          "ocoini",
+          ".N3ophyt3.",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -69214,10 +69881,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 303194,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -69239,10 +69910,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 303999,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -69289,10 +69964,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 304795,
+        "victims": [
+          "gore",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -69661,31 +70341,47 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 316423,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 316521,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 317143,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 317224,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -69700,10 +70396,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 318040,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -69735,10 +70435,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 318938,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -70576,10 +71280,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 340087,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -70590,24 +71298,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 344064,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 344872,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 345677,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -70625,10 +71345,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 346488,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -70998,10 +71722,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 353776,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -71051,10 +71779,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 355165,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -71129,10 +71861,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 356731,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -71164,10 +71900,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 357470,
+        "victims": [
+          "gore",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -71196,10 +71937,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 358277,
+        "victims": [
+          "gore",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -71210,10 +71956,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 359090,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -71285,10 +72035,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 360269,
+        "victims": [
+          "ocoini",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -71332,10 +72087,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 361155,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -71389,10 +72148,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 364048,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -71758,10 +72521,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 372328,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -71848,10 +72615,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 373729,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -72110,10 +72881,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 381616,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -72135,10 +72910,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 381825,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -72167,10 +72946,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 382963,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -72282,17 +73065,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 385747,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 386048,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -72307,10 +73098,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 386607,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -72357,10 +73152,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 388064,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -72472,10 +73271,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 392788,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -72501,10 +73304,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 393781,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -72671,10 +73478,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 399918,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -72696,10 +73507,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 400555,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "gl"
       },
       {
@@ -72731,10 +73546,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 401300,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -72873,10 +73692,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 403225,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -72944,10 +73767,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 404142,
+        "victims": [
+          "paniagua",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -72976,10 +73804,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 404789,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "gl"
       },
       {
@@ -73008,10 +73840,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 405389,
+        "victims": [
+          "nexus",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -73061,10 +73898,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 405838,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -73138,24 +73979,36 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 406861,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 406991,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 407018,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -73177,17 +74030,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 407924,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 408008,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -73259,10 +74120,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 413119,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -73309,10 +74174,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 415839,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -73487,10 +74356,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 418534,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -73541,10 +74414,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 419335,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -73601,10 +74478,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 420271,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -73676,10 +74557,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 423051,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -73701,10 +74586,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 424425,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -73715,10 +74604,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 425230,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -73740,24 +74633,37 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 426164,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 427255,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 427269,
+        "victims": [
+          "nexus",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -73786,10 +74692,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 430200,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -73800,10 +74710,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 431307,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -73814,10 +74728,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 432167,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -73865,10 +74783,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 432984,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -73883,10 +74805,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 433421,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -73923,17 +74849,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 434309,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 434309,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -74002,10 +74936,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 437941,
+        "victims": [
+          "DobeZz",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -74052,10 +74991,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 439967,
+        "victims": [
+          "gore",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -74224,10 +75168,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 449486,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -74263,10 +75211,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 451291,
+        "victims": [
+          "gore"
+        ],
         "weapon": "gl"
       },
       {
@@ -74312,24 +75264,36 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 453385,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 454313,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 454479,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -74379,10 +75343,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 455986,
+        "victims": [
+          "ocoini",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -74407,10 +75376,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 457051,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -74646,10 +75619,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 470856,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -74696,10 +75673,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 471753,
+        "victims": [
+          "gore",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -74826,10 +75808,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 475597,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -74880,10 +75866,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 477527,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -74999,10 +75989,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 481283,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -75013,10 +76007,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 481492,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -75041,17 +76039,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 482101,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 482308,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -75117,10 +76123,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 483349,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -75149,10 +76159,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 483935,
+        "victims": [
+          "paniagua",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -75196,10 +76211,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 484518,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -75210,10 +76229,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 484741,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -75343,10 +76366,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 488475,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -75509,10 +76536,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 491778,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -75566,10 +76597,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 493088,
+        "victims": [
+          "anni"
+        ],
         "weapon": "gl"
       },
       {
@@ -75608,10 +76643,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 495322,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "gl"
       },
       {
@@ -76058,10 +77097,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 505224,
+        "victims": [
+          "nexus",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -76076,10 +77120,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 506344,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -76758,10 +77806,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 523398,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -76853,10 +77905,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 525262,
+        "victims": [
+          "anni",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -76937,10 +77994,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 526150,
+        "victims": [
+          "ocoini",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -76951,17 +78013,25 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 526747,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 526844,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -76990,10 +78060,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 527571,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -77047,17 +78121,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 528324,
+        "victims": [
+          "DobeZz",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 528364,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -77180,10 +78263,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 534050,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -77227,10 +78314,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 535608,
+        "victims": [
+          "biggz",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -77241,10 +78333,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 536413,
+        "victims": [
+          "biggz",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -77313,10 +78410,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 538859,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "gl"
       },
       {
@@ -77331,10 +78432,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 539284,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -77382,10 +78487,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 540166,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -77442,10 +78551,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 541839,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -77478,24 +78591,38 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 542701,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 542803,
+        "victims": [
+          "anni",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 542803,
+        "victims": [
+          "paniagua",
+          "anni"
+        ],
         "weapon": "gl"
       },
       {
@@ -77521,10 +78648,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 543423,
+        "victims": [
+          "paniagua",
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -77553,10 +78685,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 546495,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "gl"
       },
       {
@@ -77585,10 +78721,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 547725,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -77599,17 +78739,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 548501,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 548826,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -77645,10 +78793,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 550794,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -77703,10 +78855,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 552493,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -77968,10 +79124,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 557092,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -78097,10 +79257,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 560101,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -78165,10 +79329,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 560878,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -78193,10 +79361,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 561688,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -78229,10 +79401,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 562026,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -78258,10 +79434,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 563024,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -78272,10 +79452,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 563932,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -78331,10 +79515,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 565170,
+        "victims": [
+          "gore",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -78377,10 +79566,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 566971,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -78420,10 +79613,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 567840,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -78449,10 +79646,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 568947,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -78463,10 +79664,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 569249,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -78670,10 +79875,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 574453,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -78727,10 +79936,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 575311,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -78817,10 +80030,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 577713,
+        "victims": [
+          "DobeZz",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -79072,10 +80290,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 583960,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -79121,10 +80343,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 589258,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -79156,24 +80382,36 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 599831,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 599920,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 600047,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -79212,10 +80450,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 600842,
+        "victims": [
+          "DobeZz",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -79254,10 +80497,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 601302,
+        "victims": [
+          "DobeZz",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -79289,17 +80537,25 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 601627,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 601660,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -79366,10 +80622,16 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 602311,
+        "victims": [
+          "gore",
+          "biggz",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -79394,10 +80656,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 602544,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -79422,17 +80688,27 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 603128,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 603297,
+        "victims": [
+          "biggz",
+          "gore",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -79531,10 +80807,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 604894,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -79581,10 +80861,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 608271,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -79656,10 +80940,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 616219,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -79681,10 +80969,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 617016,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -79778,10 +81070,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 620948,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -80095,10 +81391,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 627757,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -80153,10 +81453,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 628594,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -80171,10 +81475,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 630608,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -80185,31 +81493,48 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 631075,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 631471,
+        "victims": [
+          "paniagua",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 631490,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 631503,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -80290,10 +81615,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 632362,
+        "victims": [
+          "anni",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -80502,10 +81832,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 643529,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -80527,10 +81861,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 644343,
+        "victims": [
+          "anni",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -80541,10 +81880,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 647349,
+        "victims": [
+          "gore",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -80555,10 +81899,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 648621,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -80584,10 +81932,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 649037,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -80623,17 +81975,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 649932,
+        "victims": [
+          "DobeZz",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 650056,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -80799,10 +82160,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 652907,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -80940,10 +82305,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 655662,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -81046,10 +82415,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 661283,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -81081,10 +82454,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 663374,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -81192,10 +82569,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 665693,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -81228,10 +82609,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 666596,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -81281,10 +82666,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 667867,
+        "victims": [
+          "gore",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -81299,10 +82689,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 668076,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -81317,10 +82711,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 668218,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -81338,17 +82736,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 668699,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 668879,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -81370,10 +82776,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 669505,
+        "victims": [
+          "ocoini",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -81431,10 +82842,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 670635,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -81552,10 +82967,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 673835,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -81595,10 +83014,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 675192,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -81613,10 +83036,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 675998,
+        "victims": [
+          "ocoini",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -81631,10 +83059,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 676654,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -81663,10 +83095,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 677467,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -81681,10 +83117,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 677763,
+        "victims": [
+          "gore",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -81706,17 +83147,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 678569,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 678738,
+        "victims": [
+          "gore",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -81731,10 +83181,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 678903,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -81805,10 +83259,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 682348,
+        "victims": [
+          "anni",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -81834,17 +83293,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 683998,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 686083,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -81880,10 +83347,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 686953,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -82011,10 +83482,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 689076,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -82112,17 +83587,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 691013,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 691154,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -82148,24 +83631,37 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 691322,
+        "victims": [
+          "ocoini",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 691699,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 692063,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -82237,10 +83733,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 693790,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -82272,10 +83772,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 694596,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -82315,10 +83819,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 695427,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -82618,10 +84126,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 702128,
+        "victims": [
+          "biggz",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -82639,10 +84152,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 703829,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -82689,10 +84206,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 705390,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -82703,10 +84224,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 705478,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -83094,10 +84619,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 713452,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -83188,10 +84717,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 715062,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -83295,10 +84828,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 718933,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -83313,10 +84850,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 719226,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -83471,10 +85012,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 721963,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -83521,10 +85066,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 722777,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -83625,10 +85174,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 724032,
+        "victims": [
+          "gore",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -83834,10 +85388,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 727076,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -83909,10 +85467,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 728843,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -84038,10 +85600,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 733283,
+        "victims": [
+          "anni",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -84171,10 +85738,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 735880,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -84210,10 +85781,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 736578,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -84379,10 +85954,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 738621,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -84426,10 +86005,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 739167,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -84770,10 +86353,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 748505,
+        "victims": [
+          "anni",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -84802,10 +86390,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 750866,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -84831,10 +86423,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 752102,
+        "victims": [
+          ".N3ophyt3.",
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -84859,17 +86456,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 759934,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 760324,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -84915,24 +86520,37 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 764427,
+        "victims": [
+          "paniagua",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 764893,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 765232,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -84964,31 +86582,47 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 768895,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 769115,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 771386,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 772188,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -85031,10 +86665,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 774037,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -85059,10 +86697,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 774389,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -85106,10 +86748,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 775350,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -85120,10 +86766,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 776024,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -85149,17 +86799,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 776374,
+        "victims": [
+          "paniagua",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 776417,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -85292,10 +86951,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 782046,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -85385,10 +87048,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 785103,
+        "victims": [
+          "gore",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -85427,10 +87095,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 786735,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -85445,10 +87117,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 786903,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -85488,10 +87164,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 788672,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -85559,17 +87239,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 791515,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 792513,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -85623,10 +87311,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 793818,
+        "victims": [
+          "anni",
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -85684,10 +87377,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 797830,
+        "victims": [
+          "gore",
+          "ocoini",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -85749,10 +87448,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 798630,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -86078,10 +87781,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 805246,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -86128,10 +87835,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 807571,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -86182,10 +87893,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 808973,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -86203,10 +87918,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 810749,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -86387,10 +88106,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 819935,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -86573,10 +88296,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 822865,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -86832,10 +88559,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 827862,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -86909,10 +88640,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 830066,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -86969,10 +88704,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 830657,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -87022,10 +88761,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 831962,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -87076,10 +88819,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 833021,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -87161,10 +88908,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 835441,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -87316,10 +89067,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 839502,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -87390,24 +89145,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 843178,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 843303,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 844101,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -87418,10 +89185,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 845242,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -87461,10 +89232,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 846628,
+        "victims": [
+          "paniagua",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -87479,10 +89255,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 846999,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -87497,10 +89277,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 847431,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -87515,10 +89299,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 847805,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -87605,10 +89393,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 854562,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -87637,10 +89429,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 856599,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -87782,10 +89578,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 860374,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -87817,24 +89617,37 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 861231,
+        "victims": [
+          "gore",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 861246,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 861841,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -87870,10 +89683,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 866606,
+        "victims": [
+          "paniagua",
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -87895,10 +89713,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 867010,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -87913,10 +89735,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 867494,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -87949,10 +89775,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 867871,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -88028,10 +89858,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 869996,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -88162,17 +89996,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 871736,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 871906,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -88212,10 +90054,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 872652,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -88251,10 +90097,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 873463,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -88362,10 +90212,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 877845,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -88401,10 +90255,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 879947,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -88419,10 +90277,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 880198,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -88512,10 +90374,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 885049,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -88547,10 +90413,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 886854,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -88579,24 +90449,36 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 888558,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 888906,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 889365,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -88621,10 +90503,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 890372,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -88664,10 +90550,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 892053,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -88696,10 +90586,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 893833,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -88714,17 +90608,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 894568,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 894625,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -88771,10 +90673,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 896562,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -88803,10 +90709,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 898441,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -88839,17 +90749,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 899247,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 899274,
+        "victims": [
+          "gore"
+        ],
         "weapon": "gl"
       },
       {
@@ -88874,10 +90792,15 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 900049,
+        "victims": [
+          "DobeZz",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -88906,10 +90829,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 900945,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -88924,10 +90851,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 901122,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "gl"
       },
       {
@@ -88942,17 +90873,27 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 901259,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 901508,
+        "victims": [
+          "ocoini",
+          "nexus",
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -88963,17 +90904,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 902119,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 902529,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -88984,10 +90933,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 902922,
+        "victims": [
+          "gore",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -88998,10 +90952,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 903434,
+        "victims": [
+          "DobeZz",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -89019,10 +90978,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 904456,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -89538,10 +91501,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 919166,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -89552,10 +91519,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 920907,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -89598,10 +91569,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 924870,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -89626,10 +91601,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 925555,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -89665,10 +91644,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 927060,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -89690,10 +91673,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 927865,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -89726,10 +91713,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 930325,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -89747,17 +91738,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 933504,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 934299,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -89828,10 +91827,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 938351,
+        "victims": [
+          "gore",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -89899,10 +91903,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 939150,
+        "victims": [
+          "gore",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -90032,10 +92041,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 942342,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -90100,10 +92113,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 944111,
+        "victims": [
+          "ocoini",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -90157,10 +92175,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 945754,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -90250,10 +92272,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 947478,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -90278,10 +92304,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 948871,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -90457,10 +92487,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 961169,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -90485,10 +92519,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 967026,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -90542,17 +92580,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 968143,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 969306,
+        "victims": [
+          "ocoini",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -90581,10 +92628,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 971098,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -90631,24 +92682,37 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 973789,
+        "victims": [
+          "biggz",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 974828,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 974912,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -90666,10 +92730,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 975730,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -90741,17 +92809,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 977548,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 977828,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -90780,10 +92856,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 978614,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -90870,10 +92950,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 981997,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -91158,10 +93242,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 984304,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -91342,10 +93430,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 986309,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -91360,10 +93452,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 986871,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -91381,10 +93477,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 987113,
+        "victims": [
+          "anni",
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -91508,10 +93609,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 988594,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -91667,10 +93772,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 989510,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -91731,10 +93840,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 990393,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -91794,10 +93907,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 991198,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -91868,10 +93985,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 993049,
+        "victims": [
+          "DobeZz",
+          "nexus",
+          "anni"
+        ],
         "weapon": "gl"
       },
       {
@@ -92056,10 +94179,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 994565,
+        "victims": [
+          "gore",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -92440,10 +94568,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1006718,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -92504,10 +94636,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1008209,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -92536,10 +94672,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1009721,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -92572,10 +94712,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1010734,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -92593,10 +94737,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1012474,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -92622,10 +94770,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1013584,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -92702,10 +94854,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1021593,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -92970,10 +95126,15 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1025266,
+        "victims": [
+          "gore",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -93080,10 +95241,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1026088,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -93112,10 +95277,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1026286,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -93232,10 +95401,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1027318,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -93296,10 +95469,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1028563,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -93431,10 +95608,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1031010,
+        "victims": [
+          "paniagua",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -93470,10 +95652,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1031827,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -93484,10 +95670,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1032204,
+        "victims": [
+          "paniagua",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -93549,10 +95740,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1034130,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -93631,10 +95826,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1035763,
+        "victims": [
+          "ocoini",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -93941,10 +96141,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1045736,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -94101,10 +96305,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1048507,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -94133,10 +96341,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1049723,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "gl"
       },
       {
@@ -94266,10 +96478,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1053158,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -94280,10 +96496,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1053980,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -94298,17 +96518,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1054399,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1055212,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -94334,10 +96562,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1055905,
+        "victims": [
+          "DobeZz",
+          ".N3ophyt3."
+        ],
         "weapon": "gl"
       },
       {
@@ -94405,10 +96638,16 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1057585,
+        "victims": [
+          ".N3ophyt3.",
+          "anni",
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -94437,10 +96676,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1058746,
+        "victims": [
+          "DobeZz",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -94545,10 +96789,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1060958,
+        "victims": [
+          "DobeZz",
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -94584,10 +96833,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1064821,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -94695,10 +96948,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 1070227,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -94738,10 +96995,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1070642,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -94816,10 +97077,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 1072317,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -94830,17 +97095,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1073238,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 1073393,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -94916,10 +97189,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 1074876,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -95062,10 +97339,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1078701,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -95094,10 +97375,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1079520,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -95219,10 +97504,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 1084144,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -95258,10 +97547,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1085165,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -95308,10 +97601,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 1086079,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -95537,10 +97834,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1089084,
+        "victims": [
+          "ocoini",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -95598,10 +97900,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1090201,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -95678,10 +97984,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1098590,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -95692,10 +98002,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1099399,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -95749,10 +98063,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1105860,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -95774,10 +98092,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1107132,
+        "victims": [
+          "gore",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -95856,10 +98179,16 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1109421,
+        "victims": [
+          "DobeZz",
+          "nexus",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -95877,10 +98206,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1109710,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -95924,10 +98257,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1110590,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -95942,10 +98279,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1110678,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -95978,17 +98319,26 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1111395,
+        "victims": [
+          "biggz",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1111490,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -96036,10 +98386,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1112339,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -96173,17 +98527,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1117050,
+        "victims": [
+          ".N3ophyt3.",
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1117135,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -96294,10 +98657,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1120665,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -96396,10 +98763,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1121733,
+        "victims": [
+          ".N3ophyt3."
+        ],
         "weapon": "rl"
       },
       {
@@ -96487,10 +98858,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1123499,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -96550,10 +98925,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1124434,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -96578,10 +98957,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1125906,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -96599,10 +98982,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1127331,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -96624,10 +99011,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1127678,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -96667,17 +99058,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1128704,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "DobeZz",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1128786,
+        "victims": [
+          "ocoini",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -96789,10 +99189,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1130720,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -96810,10 +99214,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1131362,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -96884,10 +99292,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1136499,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -96916,10 +99328,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1138266,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "gl"
       },
       {
@@ -96955,10 +99371,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 1139061,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -97023,10 +99443,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1140191,
+        "victims": [
+          "paniagua"
+        ],
         "weapon": "gl"
       },
       {
@@ -97062,10 +99486,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1143300,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -97076,10 +99504,14 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1144140,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -97119,10 +99551,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1148776,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -97133,10 +99569,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 1149360,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -97152,10 +99592,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1149503,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -97166,17 +99610,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1150337,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1151168,
+        "victims": [
+          "DobeZz",
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
@@ -97187,10 +99640,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "nexus",
         "source": "sound",
         "team": "'tbg",
         "time": 1152034,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -97219,10 +99676,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1155938,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -97266,17 +99727,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1156753,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1157568,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -97419,10 +99888,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1162175,
+        "victims": [
+          "DobeZz"
+        ],
         "weapon": "rl"
       },
       {
@@ -97621,10 +100094,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1166811,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -97721,10 +100198,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1170798,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -97803,10 +100284,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1172474,
+        "victims": [
+          "biggz"
+        ],
         "weapon": "rl"
       },
       {
@@ -97843,17 +100328,25 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1173001,
+        "victims": [
+          "nexus"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 1173059,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
@@ -97864,10 +100357,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1173451,
+        "victims": [
+          "biggz",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -97885,10 +100383,15 @@
         "weapon": "ssg"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1173888,
+        "victims": [
+          "nexus",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -97906,10 +100409,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": ".N3ophyt3.",
         "source": "sound",
         "team": "'tbg",
         "time": 1174760,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -97920,10 +100427,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "anni",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1175279,
+        "victims": [
+          ".N3ophyt3.",
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -98044,10 +100556,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
         "source": "sound",
         "team": "'tbg",
         "time": 1176454,
+        "victims": [
+          "ocoini",
+          "paniagua"
+        ],
         "weapon": "rl"
       },
       {
@@ -98304,10 +100821,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1179698,
+        "victims": [
+          "anni"
+        ],
         "weapon": "rl"
       },
       {
@@ -99468,10 +101989,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1192631,
+        "victims": [
+          "ocoini",
+          "nexus"
+        ],
         "weapon": "gl"
       },
       {
@@ -99556,17 +102082,25 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1195474,
+        "victims": [
+          "gore"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1196458,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -99605,10 +102139,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "'tbg",
         "time": 1198125,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "rl"
       },
       {
@@ -99658,10 +102196,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gore",
         "source": "sound",
         "team": "'\u003e\u003c\u003e",
         "time": 1199822,
+        "victims": [
+          "biggz",
+          "gore"
+        ],
         "weapon": "rl"
       },
       {

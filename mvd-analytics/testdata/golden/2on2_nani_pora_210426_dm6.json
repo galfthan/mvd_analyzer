@@ -15940,10 +15940,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.047619047619047616,
+            "hits": 2,
             "shots": 42,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.4251497005988024,
+            "hits": 71,
             "shots": 167,
             "weapon": "rl"
           },
@@ -15971,10 +15975,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.08,
+            "hits": 4,
             "shots": 50,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.27586206896551724,
+            "hits": 40,
             "shots": 145,
             "weapon": "rl"
           },
@@ -16002,10 +16010,14 @@
             "weapon": "sng"
           },
           {
+            "accuracy": 0.04081632653061224,
+            "hits": 2,
             "shots": 49,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.37777777777777777,
+            "hits": 51,
             "shots": 135,
             "weapon": "rl"
           },
@@ -16029,10 +16041,14 @@
             "weapon": "sg"
           },
           {
+            "accuracy": 0.05,
+            "hits": 1,
             "shots": 20,
             "weapon": "gl"
           },
           {
+            "accuracy": 0.296,
+            "hits": 37,
             "shots": 125,
             "weapon": "rl"
           },
@@ -16209,10 +16225,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 4809,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -16223,17 +16243,25 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 4822,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 5259,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -16244,52 +16272,82 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 5640,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 6065,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 6169,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 6433,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 6467,
+        "victims": [
+          "gLAd",
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 7169,
+        "victims": [
+          "SS",
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 7273,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -16395,17 +16453,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 14596,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 14821,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -16472,10 +16538,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 23491,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -16518,10 +16588,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 26530,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -16539,10 +16613,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 27080,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -16617,10 +16695,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 28691,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -16649,10 +16731,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 29169,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -16720,10 +16806,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 32166,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -16741,10 +16831,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 32976,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -16755,10 +16849,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 33518,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -16769,10 +16867,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 33789,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -16790,10 +16892,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 36737,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -16895,10 +17001,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 43466,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -16966,10 +17076,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 44259,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -17030,17 +17144,26 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 44936,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 45544,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -17128,10 +17251,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 51936,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -17210,10 +17337,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 54242,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -17692,10 +17823,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 61311,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -17766,10 +17902,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 63870,
+        "victims": [
+          "SS",
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -17787,10 +17928,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 67259,
+        "victims": [
+          "rusti",
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -17843,17 +17989,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 71426,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 71530,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -18046,24 +18200,36 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 78619,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 79320,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 79424,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "gl"
       },
       {
@@ -18102,17 +18268,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 83479,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 83891,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -18553,10 +18727,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 108302,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -18588,17 +18766,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 109475,
+        "victims": [
+          "SS"
+        ],
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 110107,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -18616,10 +18802,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 110821,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -18630,10 +18820,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 111619,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -18931,10 +19125,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 117448,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -18999,10 +19197,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 118602,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -19045,10 +19247,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 120213,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -19063,17 +19269,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 120370,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 121015,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -19084,10 +19299,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 122669,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -19304,10 +19524,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 131988,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -19403,10 +19627,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 133955,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -19435,10 +19663,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 135432,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -19470,10 +19702,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 138226,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -19484,10 +19720,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 138939,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "gl"
       },
       {
@@ -19523,10 +19763,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 140668,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -19551,10 +19795,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 141526,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -19572,10 +19820,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 143589,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -19608,10 +19860,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 144383,
+        "victims": [
+          "gLAd",
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -19622,17 +19879,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 146162,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 146601,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -19664,10 +19929,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 148186,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -19748,10 +20017,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 155106,
+        "victims": [
+          "gLAd",
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -19783,10 +20057,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 156625,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -19955,17 +20233,26 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 163674,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 163862,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -20046,10 +20333,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 171339,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -20060,10 +20351,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 173303,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -20096,10 +20391,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 173972,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -20164,10 +20463,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 174770,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -20345,10 +20648,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 181335,
+        "victims": [
+          "rusti",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -20525,10 +20833,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 186412,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -20571,10 +20883,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 190892,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -20641,10 +20957,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 193107,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -20733,10 +21053,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 194678,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -20754,10 +21078,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 195905,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -20789,10 +21117,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 198139,
+        "victims": [
+          "SS"
+        ],
         "weapon": "gl"
       },
       {
@@ -20863,17 +21195,25 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 204077,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 204077,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -20884,10 +21224,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 204882,
+        "victims": [
+          "SS",
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -20940,10 +21285,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 206843,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -20954,10 +21303,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 207664,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -20975,10 +21328,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 208713,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -20996,17 +21353,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 209987,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 210235,
+        "victims": [
+          "SS"
+        ],
         "weapon": "gl"
       },
       {
@@ -21053,10 +21418,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 212202,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -21110,10 +21479,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 214208,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -21313,10 +21686,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 224585,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -21404,10 +21781,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 225712,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -21453,10 +21834,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 229370,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -21467,10 +21852,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 230272,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -21650,10 +22039,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 238360,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -21752,10 +22145,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 239090,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -21862,10 +22259,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 239907,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -22245,10 +22646,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 246427,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -22316,10 +22722,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 247232,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -22435,10 +22846,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 261751,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -22456,10 +22871,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 263906,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -22889,10 +23308,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 278449,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -22970,10 +23393,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 279983,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -23002,10 +23430,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 280335,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -23165,10 +23598,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 284242,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -23214,10 +23651,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 284832,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -23242,10 +23683,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 287923,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -23438,10 +23883,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 291922,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -23491,17 +23940,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 294039,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 294188,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -23512,10 +23969,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 294857,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -23589,10 +24050,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 301385,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -23680,17 +24145,25 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 308116,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 308266,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -23722,31 +24195,48 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 309720,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 309734,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 310696,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 311408,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -23775,10 +24265,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 311916,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -23832,10 +24326,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 313596,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -23846,10 +24344,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 315721,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -24264,10 +24766,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 332915,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -24278,10 +24784,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 334782,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -24356,10 +24866,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 336979,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -24444,10 +24959,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 339537,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -24497,17 +25016,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 341160,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 341824,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -24686,10 +25213,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 355145,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -24711,10 +25242,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 355982,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -24771,17 +25306,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 356787,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 356821,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -24845,10 +25388,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 359755,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -24874,10 +25421,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 360559,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -24888,17 +25439,25 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 361340,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 361397,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "gl"
       },
       {
@@ -24916,10 +25475,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 362471,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -24959,17 +25522,26 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 362955,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 363521,
+        "victims": [
+          "gLAd",
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -25008,10 +25580,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 366288,
+        "victims": [
+          "gLAd",
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -25036,10 +25613,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 366887,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -25085,10 +25666,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 371445,
+        "victims": [
+          "gLAd",
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -25106,10 +25692,15 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 372422,
+        "victims": [
+          "rusti",
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -25181,10 +25772,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 375447,
+        "victims": [
+          "SS"
+        ],
         "weapon": "gl"
       },
       {
@@ -25408,10 +26003,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 383430,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -25489,17 +26088,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 385962,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 386174,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -25552,10 +26159,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 390441,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -25744,10 +26355,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 396740,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -25797,10 +26412,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 397095,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -25914,10 +26533,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 406155,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -25968,10 +26591,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 406586,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "gl"
       },
       {
@@ -26049,10 +26676,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 408977,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -26159,10 +26790,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 414089,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -26344,10 +26979,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 415673,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -26468,10 +27107,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 420444,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -26610,10 +27253,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 424589,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -26631,10 +27278,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 426841,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -26688,10 +27339,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 427634,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -26961,10 +27617,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 451022,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -27682,10 +28342,14 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 463547,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -27714,17 +28378,25 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 465635,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 465774,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -27742,10 +28414,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 467891,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -27827,10 +28503,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 471137,
+        "victims": [
+          "gLAd",
+          "kippo"
+        ],
         "weapon": "gl"
       },
       {
@@ -27848,10 +28529,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 473059,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -27862,10 +28547,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 473669,
+        "victims": [
+          "SS",
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -27876,10 +28566,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 476292,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -27890,10 +28584,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 477517,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -27911,10 +28609,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 481226,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -27939,10 +28641,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 482230,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -27981,10 +28687,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 484996,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -28037,10 +28747,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 488437,
+        "victims": [
+          "gLAd",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -28104,10 +28819,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 494213,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -28196,10 +28915,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 495187,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -28267,10 +28990,15 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 497307,
+        "victims": [
+          "rusti",
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -28327,10 +29055,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 498121,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -28397,10 +29129,14 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 502540,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -28411,24 +29147,36 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 503862,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 503956,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 505553,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -28450,10 +29198,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 507877,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -28475,10 +29227,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 508682,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -28496,10 +29252,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 510199,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -28510,24 +29270,38 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 511004,
+        "victims": [
+          "gLAd",
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 512498,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 513121,
+        "victims": [
+          "SS",
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -28545,10 +29319,15 @@
         "weapon": "gl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 514653,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -28559,10 +29338,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 516640,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -28671,10 +29454,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 525796,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -28748,10 +29535,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 527642,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -28794,10 +29585,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 528473,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -28840,17 +29635,25 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 529171,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 529289,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -28861,10 +29664,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 529655,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -28945,10 +29752,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "pora",
         "time": 539756,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -28977,10 +29788,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 541288,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -29019,10 +29834,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 542966,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -29390,10 +30209,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 562598,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -29468,10 +30291,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 563805,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -29517,10 +30345,15 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 565442,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -29542,10 +30375,15 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 566236,
+        "victims": [
+          "kippo",
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -29556,10 +30394,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 567948,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -29613,10 +30455,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 569483,
+        "victims": [
+          "SS"
+        ],
         "weapon": "rl"
       },
       {
@@ -29709,10 +30555,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 572052,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -29772,10 +30622,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 573844,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -29829,10 +30683,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 575013,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -29865,10 +30723,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "kippo",
         "source": "sound",
         "team": "pora",
         "time": 575819,
+        "victims": [
+          "gLAd"
+        ],
         "weapon": "rl"
       },
       {
@@ -29957,10 +30819,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 577508,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -29999,10 +30865,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 581989,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -30205,10 +31075,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 585625,
+        "victims": [
+          "kippo"
+        ],
         "weapon": "rl"
       },
       {
@@ -30319,10 +31193,14 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
         "source": "sound",
         "team": "nAnI",
         "time": 589350,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {
@@ -30410,10 +31288,14 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "SS",
         "source": "sound",
         "team": "nAnI",
         "time": 595077,
+        "victims": [
+          "rusti"
+        ],
         "weapon": "rl"
       },
       {

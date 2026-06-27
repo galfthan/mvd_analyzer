@@ -43,6 +43,8 @@ const (
 	EventMoverSpawn
 	EventMoverState
 	EventSound
+	EventProjectileSpawn
+	EventProjectileDespawn
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -147,7 +149,8 @@ type Parser struct {
 	// and respawn without downstream analyzers having to reconstruct
 	// entity state. See entities.go for the decoder.
 	modelList              []string
-	soundList              []string // sound-index table from svc_soundlist; index 0 reserved
+	soundList              []string       // sound-index table from svc_soundlist; index 0 reserved
+	spawnedProjectiles     map[int]string // ent -> projectile kind ("rl"/"gl") while in flight; cleared on despawn (entnums recycle)
 	baselines              map[int]*EntityState
 	currentEntities        map[int]*EntityState
 	spawnedItems           map[int]string // ent -> kind, set once per item

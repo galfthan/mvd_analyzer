@@ -131,6 +131,95 @@ func TestShots_HitscanLinking(t *testing.T) {
 	}
 }
 
+// projSpawn / projDespawn build the entity-tracking events for one flight.
+func projSpawn(ent int, kind string, origin [3]float32, tMs int32) *events.ProjectileSpawnEvent {
+	return &events.ProjectileSpawnEvent{EntNum: ent, Kind: kind, Origin: origin, Time: float64(tMs) / 1000, TimeMs: tMs}
+}
+func projDespawn(ent int, kind string, tMs int32) *events.ProjectileDespawnEvent {
+	return &events.ProjectileDespawnEvent{EntNum: ent, Kind: kind, Time: float64(tMs) / 1000, TimeMs: tMs}
+}
+func rlDamage(attacker, victim int, tMs int32) *events.DamageEvent {
+	return &events.DamageEvent{Attacker: attacker, Victim: victim, DeathType: mvd.DtRL, Damage: 80, Time: float64(tMs) / 1000}
+}
+
+// TestShots_ProjectileBracketDisambiguation is the core Phase-2 case: one
+// player fires two rockets; the SECOND rocket impacts BEFORE the first
+// (it hit a near wall while the first flew on). A naive "next RL damage
+// after the shot" link would cross the wires. The entity [spawn,despawn]
+// bracket pins each shot to the impact its own rocket caused.
+func TestShots_ProjectileBracketDisambiguation(t *testing.T) {
+	a, _ := newTestShotsAnalyzer()
+
+	// Two RL fires by slot 3.
+	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 1000)) // shot A
+	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 1300)) // shot B
+
+	// Rocket A (ent 50) flies long: spawn 1000, despawn 1500.
+	// Rocket B (ent 51) hits a near wall: spawn 1300, despawn 1400.
+	_ = a.OnEvent(projSpawn(50, "rl", [3]float32{0, 0, 0}, 1000))
+	_ = a.OnEvent(projSpawn(51, "rl", [3]float32{0, 0, 0}, 1300))
+	_ = a.OnEvent(projDespawn(51, "rl", 1400)) // B impacts first
+	_ = a.OnEvent(rlDamage(3, 0, 1400))        // B hits victimA
+	_ = a.OnEvent(projDespawn(50, "rl", 1500)) // A impacts later
+	_ = a.OnEvent(rlDamage(3, 1, 1500))        // A hits victimB
+
+	r := &Result{}
+	_ = a.Finalize(r)
+
+	byTime := map[int32]*Shot{}
+	for i := range r.Shots.Shots {
+		byTime[r.Shots.Shots[i].Time] = &r.Shots.Shots[i]
+	}
+	a0, b0 := byTime[1000], byTime[1300]
+	if a0 == nil || b0 == nil {
+		t.Fatalf("missing shots: %+v", r.Shots.Shots)
+	}
+	// Shot A (fired first, impacted last at 1500) hit victimB.
+	if !a0.Hit || len(a0.Victims) != 1 || a0.Victims[0] != "victimB" {
+		t.Errorf("shot@1000 = %+v, want hit victimB", a0)
+	}
+	// Shot B (fired second, impacted first at 1400) hit victimA.
+	if !b0.Hit || len(b0.Victims) != 1 || b0.Victims[0] != "victimA" {
+		t.Errorf("shot@1300 = %+v, want hit victimA", b0)
+	}
+}
+
+// TestShots_ProjectileMiss leaves a rocket whose flight ends with no damage
+// unlinked (a miss), and reports rl accuracy from the connecting fraction.
+func TestShots_ProjectileMiss(t *testing.T) {
+	a, _ := newTestShotsAnalyzer()
+	a.hadDmg = true // a damage stream exists (so accuracy is reported)
+
+	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 1000)) // hits
+	_ = a.OnEvent(projSpawn(50, "rl", [3]float32{0, 0, 0}, 1000))
+	_ = a.OnEvent(projDespawn(50, "rl", 1500))
+	_ = a.OnEvent(rlDamage(3, 0, 1500))
+
+	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 3000)) // misses
+	_ = a.OnEvent(projSpawn(51, "rl", [3]float32{0, 0, 0}, 3000))
+	_ = a.OnEvent(projDespawn(51, "rl", 3600)) // no damage -> miss
+
+	r := &Result{}
+	_ = a.Finalize(r)
+
+	hits := 0
+	for _, s := range r.Shots.Shots {
+		if s.Hit {
+			hits++
+		}
+	}
+	if hits != 1 {
+		t.Errorf("rl hits = %d, want 1 (one of two rockets connected)", hits)
+	}
+	for _, p := range r.Shots.ByPlayer {
+		for _, w := range p.ByWeapon {
+			if w.Weapon == "rl" && w.Accuracy != 0.5 {
+				t.Errorf("rl accuracy = %v, want 0.5", w.Accuracy)
+			}
+		}
+	}
+}
+
 // TestShots_LGAmmoDelta counts LG fire from cell decrements while rejecting
 // the spawn baseline, ammo pickups, and the death/discharge dump.
 func TestShots_LGAmmoDelta(t *testing.T) {
