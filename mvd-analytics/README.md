@@ -757,8 +757,8 @@ PVS row — i.e. the opponent is *potentially* visible — regardless of whether
 ray is actually clear. Because the cull is lossless, **PVS ⊇ LOS**: every `los`
 interval lies inside a `pvs` interval for the same opponent (verified against the
 golden corpus). The gap between them — potentially visible but no clear ray — is
-the occlusion-tolerant signal intended for **cheat detection**: a player who
-keeps reacting to opponents that are in PVS but never in LOS is suspect. It
+an occlusion-tolerant proximity/awareness signal: the opponent is in the same
+vis region (close enough to potentially be seen) without a direct sightline. It
 costs nothing beyond the bit test `LOS` already does, rides along on every `LOS`
 consumer (web overlay, `qw-analyze -include los`, mvd-api `/los`), and is
 likewise absent on BSP-less maps and on the default parse.

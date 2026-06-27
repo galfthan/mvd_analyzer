@@ -112,9 +112,9 @@ type PlayerStream struct {
 	// before the rays narrow it to actual sight. Same LosTrack shape, same lazy
 	// pass (analyzer.ComputeLOS) and BSP gate as LOS, schema v38. PVS is a
 	// lossless superset of LOS: every LOS interval lies inside the matching PVS
-	// one, so PVS ⊇ LOS. The gap between them (potentially visible, no clear
-	// ray) is the occlusion-tolerant signal for spotting a player reacting to
-	// opponents they cannot actually see — a cheat-detection aid. Raw
+	// one, so PVS ⊇ LOS. The gap between them (potentially visible, but no clear
+	// ray) is an occlusion-tolerant proximity/awareness signal — the opponent is
+	// close enough to be in the same vis region without a direct sightline. Raw
 	// transitions, no smoothing.
 	PVS []LosTrack `json:"pvs,omitempty"`
 }

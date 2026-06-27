@@ -426,8 +426,8 @@ package result
 //     on, recorded before the rays narrow it to actual sight. Same LosTrack
 //     shape, same lazy pass (analyzer.ComputeLOS), BSP gate and Streams.LOSComputed
 //     guard as LOS. PVS is a lossless superset of LOS (PVS ⊇ LOS): the gap
-//     between them is the occlusion-tolerant "potentially visible but no clear
-//     ray" signal for cheat detection. Additive (omitempty); absent on BSP-less
+//     between them is an occlusion-tolerant "potentially visible but no clear
+//     ray" proximity/awareness signal. Additive (omitempty); absent on BSP-less
 //     maps and on the default parse (populated only when a consumer asks).
 const CurrentSchemaVersion = 38
 

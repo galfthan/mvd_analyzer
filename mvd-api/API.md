@@ -469,8 +469,8 @@ during which the looker could see the opponent.
 - `pvs` — the opponent is merely in the looker's **potentially-visible set** (the
   PVS cull the raycast gates on, before the rays filter it). It is a lossless
   superset of `los` — **PVS ⊇ LOS**, every `los` interval lies inside a `pvs`
-  one. The gap (in PVS but never in LOS) is the occlusion-tolerant signal for
-  flagging suspect players in cheat analysis.
+  one. The gap (in PVS but never in LOS) is an occlusion-tolerant
+  proximity/awareness signal: same vis region, no direct sightline.
 
 Both are asymmetric — `los`/`pvs` on player A with `o = B` is A→B; B→A lives on
 B. `o` indexes the `players` array. Both share shape (`{o, iv}`) and gating.
