@@ -740,37 +740,42 @@ maps with a provisioned BSP (same gate as `H`/`Lq`); absent otherwise.
 
 Cost scales with pairs × duration: each looker-sample tests every opponent, so
 a 4on4 (8 players → 56 ordered pairs) over a full 20-minute match is the heavy
-case. Two losses-free reductions keep it bounded: a **PVS cull** (the opponent
-is skipped unless a leaf its bounding box touches is potentially visible from
-the looker's eye leaf — `bspvis.BoxLeafs` + the leaf PVS) and an any-clear-ray
-early-out with the midpoint tested first. Even so it is the most expensive
-position-derived pass (~10–13 s for a full 20-minute 4on4), which is exactly
-why it is lazy: that cost is paid only when a consumer asks for LOS, and at
-most once per demo. The web map view's **LOS** button draws a line between
-players who currently have sight (white = mutual, red/blue = one-way).
+case. The work is bounded by gating the raycast on a cheap **point-to-point PVS
+test** (stage one below): only pairs that pass — ~1/4 of alive pairs on typical
+maps — cast the 9 rays. With an any-clear-ray early-out (midpoint first) this
+runs in ~1.5–3 s for a full 20-minute 4on4. It is still lazy so the cost is paid
+only when a consumer asks, at most once per demo. The web map view's **LOS**
+button draws a line between players who currently have sight (white = mutual,
+red/blue = one-way).
 
-**Potential visibility (`PlayerStream.PVS`).** The same pass records, on
-`PlayerStream.PVS` (one `LosTrack` per opponent, identical shape and gating to
-`LOS`), whether the opponent is *potentially* visible — regardless of whether
-any ray is clear. This is a **point-to-point** PVS test: the looker's eye leaf
+> Earlier the raycast was gated on the opponent's whole bounding-box leaf set
+> (`bspvis.BoxLeafs` ∩ the leaf PVS). That cull barely culled: the player box
+> dips into the floor's solid **leaf 0**, for which a PVS bit test is
+> unconditionally true, so it passed ~73–87 % of alive pairs (≈3–4× more
+> raycasts) and, when reused as the PVS metric, drew phantom lines between
+> players in different rooms. The point gate replaced it.
+
+**Potential visibility (`PlayerStream.PVS`).** The gate above is itself the PVS
+metric, recorded on `PlayerStream.PVS` (one `LosTrack` per opponent, identical
+shape and gating to `LOS`): a **point-to-point** PVS test — the looker's eye leaf
 (`PointInLeaf(origin+(0,0,22))`) vs the opponent's single body leaf
-(`PointInLeaf(origin)`), the same notion the loc filter uses (`locvis`).
+(`PointInLeaf(origin)`), the same notion the loc filter uses (`locvis`). It is on
+whenever the two are in mutually visible vis regions, regardless of a clear ray.
+A body centre that lands in solid (a wall-clip) is treated as not visible
+(`buildBodyLeaves` stores `-1`), since leaf 0 / the solid sink would otherwise
+test unconditionally true.
 
-Crucially it is **not** the bounding-box cull that gates the raycast above. That
-cull tests the opponent's whole bounding box (~dozens of leaves) and must stay
-lossless, so it passes whenever *any* of those leaves is potentially visible —
-almost always true near a vis-region boundary, hence useless as a standalone
-signal (measured ~73–87 % of alive pairs on dm3/dm6/dm4/aerowalk). The point
-test drops that to ~23–67 % (dm3 23 %, aerowalk — a genuinely open map — 67 %),
-matching the leaf-level PVS density. For players on opposite sides of the map the
-two agree (neither in PVS); the box only over-counts the nearby-but-occluded
-pairs. **PVS ⊇ LOS** because actual sight is OR-ed in: every `los` interval lies
-inside a `pvs` interval for the same opponent (verified: zero LOS-without-PVS
-samples in the golden corpus). The gap between them — potentially visible but no
-clear ray — is an occlusion-tolerant proximity/awareness signal: same vis region,
-no direct sightline. It costs one extra leaf lookup per player-sample, rides
-along on every `LOS` consumer (web overlay, `qw-analyze -include los`, mvd-api
-`/los`), and is likewise absent on BSP-less maps and on the default parse.
+This point test passes ~23–67 % of alive pairs (dm3 23 %, aerowalk — a genuinely
+open map — 67 %), matching the leaf-level PVS density; players on opposite sides
+of the map are never in PVS. **PVS ⊇ LOS by construction**: the LOS raycast runs
+only for pairs the PVS gate passed, so every `los` interval lies inside a `pvs`
+interval for the same opponent. (Gating LOS on the point rather than a lossless
+box cull drops a measured 0.05 % of true sightlines — a body centre occluded
+while a corner peeks through a portal — within the noise of a 9-point eye-height
+LOS.) The gap between `pvs` and `los` — potentially visible but no clear ray — is
+an occlusion-tolerant proximity/awareness signal: same vis region, no direct
+sightline. PVS rides along on every `LOS` consumer (web overlay, `qw-analyze
+-include los`, mvd-api `/los`), absent on BSP-less maps and on the default parse.
 
 ## Velocity (`PositionTrack.VX` / `VY` / `VZ`)
 

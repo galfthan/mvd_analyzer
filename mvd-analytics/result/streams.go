@@ -111,14 +111,12 @@ type PlayerStream struct {
 	// (the looker) — a point-to-point PVS test, the looker's eye leaf vs the
 	// opponent's single body leaf (the same notion the loc filter uses). Same
 	// LosTrack shape, same lazy pass (analyzer.ComputeLOS) and BSP gate as LOS,
-	// schema v38. PVS ⊇ LOS (actual sight implies potential visibility is OR-ed
-	// in), so every LOS interval lies inside the matching PVS one. The gap
-	// between them (potentially visible, but no clear ray) is an
-	// occlusion-tolerant proximity/awareness signal — the opponent is in the
-	// same vis region without a direct sightline. Note this is the selective
-	// point test, NOT the looser bounding-box cull the LOS raycast gates on
-	// (that box spans many leaves and is almost always potentially visible near
-	// a vis-region boundary). Raw transitions, no smoothing.
+	// schema v38. This same test gates the LOS raycast (LOS is cast only for
+	// potentially-visible pairs), so PVS ⊇ LOS by construction: every LOS
+	// interval lies inside the matching PVS one. The gap between them
+	// (potentially visible, but no clear ray) is an occlusion-tolerant
+	// proximity/awareness signal — the opponent is in the same vis region
+	// without a direct sightline. Raw transitions, no smoothing.
 	PVS []LosTrack `json:"pvs,omitempty"`
 }
 

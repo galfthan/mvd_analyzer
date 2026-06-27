@@ -425,10 +425,10 @@ package result
 //     potentially-visible-set intervals — a point-to-point PVS test (looker eye
 //     leaf vs the opponent's body leaf, the same notion the loc filter uses).
 //     Same LosTrack shape, same lazy pass (analyzer.ComputeLOS), BSP gate and
-//     Streams.LOSComputed guard as LOS. PVS ⊇ LOS (actual sight is OR-ed in):
-//     the gap between them is an occlusion-tolerant "potentially visible but no
-//     clear ray" proximity/awareness signal. Additive (omitempty); absent on
-//     BSP-less maps and on the default parse (populated only when a consumer asks).
+//     Streams.LOSComputed guard as LOS. This test also gates the LOS raycast, so
+//     PVS ⊇ LOS by construction: the gap between them is an occlusion-tolerant
+//     "potentially visible but no clear ray" proximity/awareness signal. Additive
+//     (omitempty); absent on BSP-less maps and on the default parse.
 const CurrentSchemaVersion = 38
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each

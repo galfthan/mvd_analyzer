@@ -27,6 +27,26 @@ func zFloorBSP() *bspvis.BSP {
 	}
 }
 
+// zCeilingBSP is zFloorBSP flipped: the front half (z>0) is solid, the back
+// half (z<=0) is empty. Because a player's eye (origin+22) sits above the body
+// origin, this is the only way to give a player an empty body leaf but a solid
+// eye leaf — the configuration the LOS asymmetry test needs now that LOS is
+// gated on the body leaf (a body in solid is never potentially visible).
+func zCeilingBSP() *bspvis.BSP {
+	return &bspvis.BSP{
+		Version: "v29",
+		Planes:  []bspvis.Plane{{Normal: bspvis.Vec3{Z: 1}, Dist: 0}},
+		Nodes:   []bspvis.Node{{PlaneID: 0, Children: [2]int32{-1, -2}}}, // front(z>0) solid, back empty
+		Leaves: []bspvis.Leaf{
+			{Contents: bspvis.ContentsSolid},
+			{Contents: bspvis.ContentsEmpty},
+		},
+		Models: []bspvis.Model{
+			{HeadNodes: [4]int32{0}, Mins: bspvis.Vec3{X: -9999, Y: -9999, Z: -9999}, Maxs: bspvis.Vec3{X: 9999, Y: 9999, Z: 9999}},
+		},
+	}
+}
+
 // openWithSlabBSP has an all-empty worldspawn (Models[0] points straight at an
 // empty leaf, so it never blocks) plus an inline brush submodel (Models[1])
 // that is a solid slab occupying -8 <= x < 8, used to test mover occlusion.
@@ -119,17 +139,19 @@ func TestLosAliveAt(t *testing.T) {
 	}
 }
 
-// TestComputeLosAB_Asymmetry: A above the floor can see B near it, but B's eye
-// is below the floor (inside solid) so B sees nothing — A→B and B→A differ.
+// TestComputeLosAB_Asymmetry: with solid above z=0, both players' bodies sit in
+// the empty lower half (so each is potentially visible), but B's eye (origin+22)
+// pokes into the solid ceiling while A's stays below it. A→B has a clear ray;
+// B→A starts in solid and is blocked — so the two directions differ.
 func TestComputeLosAB_Asymmetry(t *testing.T) {
-	vb := zFloorBSP()
+	vb := zCeilingBSP()
 	ts := []int32{0, 50}
-	a := &result.PlayerStream{Name: "A", Position: staticTrack(ts, 0, 0, 0)}      // eye z=22 (front)
-	b := &result.PlayerStream{Name: "B", Position: staticTrack(ts, 100, 0, -30)} // eye z=-8 (in solid)
+	a := &result.PlayerStream{Name: "A", Position: staticTrack(ts, 0, 0, -30)}   // body z=-30, eye z=-8: both empty
+	b := &result.PlayerStream{Name: "B", Position: staticTrack(ts, 100, 0, -10)} // body z=-10 empty, eye z=12 (in solid)
 
 	ab := computeLosAB(vb, a, b, nil, 100)
 	if len(ab) == 0 {
-		t.Errorf("A→B: expected a visible interval (A above floor can see B's top), got none")
+		t.Errorf("A→B: expected a visible interval (A's eye below the ceiling sees B's body), got none")
 	}
 	ba := computeLosAB(vb, b, a, nil, 100)
 	if len(ba) != 0 {
@@ -148,7 +170,7 @@ func TestComputeLosAB_Transitions(t *testing.T) {
 		Y: []float32{0, 0, 0, 0},
 		Z: []float32{0, -50, 0, 0}, // eye front, back, front, front
 	}}
-	b := &result.PlayerStream{Name: "B", Position: staticTrack([]int32{0}, 100, 0, 0)}
+	b := &result.PlayerStream{Name: "B", Position: staticTrack([]int32{0}, 100, 0, 10)} // body above floor (empty)
 
 	got := computeLosAB(vb, a, b, nil, 400)
 	want := []result.Interval{{Start: 0, End: 100}, {Start: 200, End: 300}}
@@ -188,39 +210,35 @@ func TestComputeLosAB_MoverBlocks(t *testing.T) {
 	}
 }
 
-// TestComputePvsAB_SupersetOfLos: PVS is a lossless superset of LOS. On the
-// z-floor BSP (no vis lump, so the PVS cull never rejects) B's eye sits inside
-// solid: B→A has no clear ray (empty LOS) yet B→A is potentially visible the
-// whole alive window (non-empty PVS) — exactly the "potentially visible, no
-// clear ray" gap the metric is meant to surface. A→B has both, with PVS
-// covering at least the LOS span.
+// TestComputePvsAB_SupersetOfLos: PVS ⊇ LOS, and PVS can be on while LOS is off
+// (the "potentially visible, no clear ray" gap). In the open-arena BSP (no vis
+// lump, so every empty leaf potentially sees every other) A and B have both LOS
+// and PVS; drop a solid mover slab between them and LOS goes dark while PVS stays
+// on. Since LOS is gated on PVS, los ⊆ pvs by construction in both cases.
 func TestComputePvsAB_SupersetOfLos(t *testing.T) {
-	vb := zFloorBSP()
+	vb := openWithSlabBSP()
 	ts := []int32{0, 50}
-	a := &result.PlayerStream{Name: "A", Position: staticTrack(ts, 0, 0, 0)}      // eye z=22 (front)
-	b := &result.PlayerStream{Name: "B", Position: staticTrack(ts, 100, 0, -30)} // eye z=-8 (in solid)
+	a := &result.PlayerStream{Name: "A", Position: staticTrack(ts, -50, 0, 0)}
+	b := &result.PlayerStream{Name: "B", Position: staticTrack(ts, 50, 0, 0)}
 
-	// B→A: no raycast sightline, but B↔A are potentially visible (nil PVS row).
-	if los := computeLosAB(vb, b, a, nil, 100); len(los) != 0 {
-		t.Errorf("B→A LOS: expected none (B's eye in solid), got %v", los)
+	// Open arena: A sees B, and B is potentially visible.
+	if los := computeLosAB(vb, a, b, nil, 100); len(los) == 0 {
+		t.Fatalf("open arena: expected LOS, got none")
 	}
-	pvsBA := computePvsAB(vb, b, a, nil, 100)
-	if len(pvsBA) == 0 {
-		t.Errorf("B→A PVS: expected a potentially-visible interval, got none")
+	if pvs := computePvsAB(vb, a, b, nil, 100); len(pvs) == 0 {
+		t.Fatalf("open arena: expected PVS, got none")
 	}
 
-	// A→B: PVS must contain the LOS span (superset). Same single ramp here, so
-	// they coincide, but PVS must never be empty when LOS is non-empty.
-	losAB := computeLosAB(vb, a, b, nil, 100)
-	pvsAB := computePvsAB(vb, a, b, nil, 100)
-	if len(losAB) == 0 {
-		t.Fatalf("A→B LOS: expected a visible interval, got none")
+	// Solid slab between them: the ray is blocked (LOS off) but they remain in
+	// the same vis region (PVS on) — the gap the metric surfaces.
+	slab := buildLosMovers([]result.MoverStream{{
+		SubModel: 1, T: []int32{0}, X: []float32{0}, Y: []float32{0}, Z: []float32{0}, Vis: []bool{true},
+	}})
+	if los := computeLosAB(vb, a, b, slab, 100); len(los) != 0 {
+		t.Errorf("slab between players should block LOS, got %v", los)
 	}
-	if len(pvsAB) == 0 {
-		t.Fatalf("A→B PVS: expected a potentially-visible interval, got none")
-	}
-	if pvsAB[0].Start > losAB[0].Start || pvsAB[len(pvsAB)-1].End < losAB[len(losAB)-1].End {
-		t.Errorf("A→B PVS %v does not span LOS %v", pvsAB, losAB)
+	if pvs := computePvsAB(vb, a, b, slab, 100); len(pvs) == 0 {
+		t.Errorf("slab blocks the ray but not PVS — expected a PVS gap interval, got none")
 	}
 }
 
