@@ -34,9 +34,12 @@ detail.
     attribution is exact and works on **any** QW server (not just KTX), and
     the distinct fire wavs disambiguate RL vs GL where ammo deltas cannot.
     (The Quake sound filenames are historically mismatched: the rocket
-    launcher fires `sgun1.wav`, the nailgun fires `rocket1i.wav`.) LG, which
-    has no per-shot fire sound, is counted from cell-ammo decrements
-    (`source:"ammo"`).
+    launcher fires `sgun1.wav`, the nailgun fires `rocket1i.wav`.) LG has no
+    per-shot fire sound, so it is counted from its `TE_LIGHTNING2` beam —
+    emitted once per fire tick and carrying the firing entity directly
+    (`source:"beam"`). One beam == one LG attack == one cell, so LG counts
+    match KTX `acc.attacks` exactly. The beam decode also surfaces the
+    muzzle→impact geometry as `BeamEvent` (for map rendering).
   - **Truthful cross-linking.** Instantaneous hitscan fires (sg/ssg/lg) are
     linked to the damage they caused in the **same server frame** via the
     KTX `mvdhidden_dmgdone` stream (`hit`/`victims`). Rocket/grenade fires

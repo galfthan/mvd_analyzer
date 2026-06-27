@@ -15987,15 +15987,15 @@
             "weapon": "rl"
           },
           {
-            "accuracy": 0.2880886426592798,
-            "hits": 104,
-            "shots": 361,
+            "accuracy": 0.29201101928374656,
+            "hits": 106,
+            "shots": 363,
             "weapon": "lg"
           }
         ],
         "player": "gLAd",
         "team": "nAnI",
-        "total": 672
+        "total": 674
       },
       {
         "byWeapon": [
@@ -16135,8 +16135,8 @@
           {
             "ktxAttacks": 363,
             "ktxHits": 106,
-            "streamAttacks": 361,
-            "streamShots": 361,
+            "streamAttacks": 363,
+            "streamShots": 363,
             "weapon": "lg"
           }
         ],
@@ -16394,28 +16394,28 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 11924,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 12003,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 12116,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 12222,
         "weapon": "lg"
@@ -16423,7 +16423,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 12311,
         "victims": [
@@ -16433,7 +16433,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 12415,
         "weapon": "lg"
@@ -16557,14 +16557,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 24388,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 24478,
         "weapon": "lg"
@@ -16579,7 +16579,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 26480,
         "victims": [
@@ -16600,7 +16600,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 26571,
         "weapon": "lg"
@@ -16640,7 +16640,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 28117,
         "victims": [
@@ -16650,21 +16650,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 28208,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 28299,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 28414,
         "weapon": "lg"
@@ -16678,7 +16678,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 28496,
         "weapon": "lg"
@@ -16686,7 +16686,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 28608,
         "victims": [
@@ -16707,14 +16707,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 28712,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 28793,
         "weapon": "lg"
@@ -16722,7 +16722,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 28896,
         "victims": [
@@ -16757,28 +16757,28 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 31672,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 31764,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 31868,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 31972,
         "weapon": "lg"
@@ -16786,7 +16786,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 32063,
         "victims": [
@@ -16797,7 +16797,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 32166,
         "victims": [
@@ -16911,21 +16911,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 37661,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 37752,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 37855,
         "weapon": "lg"
@@ -16995,7 +16995,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 43425,
         "weapon": "lg"
@@ -17014,7 +17014,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 43516,
         "victims": [
@@ -17024,7 +17024,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 43620,
         "weapon": "lg"
@@ -17032,7 +17032,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 43724,
         "victims": [
@@ -17049,28 +17049,28 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 43815,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 43919,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 44126,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 44230,
         "weapon": "lg"
@@ -17096,7 +17096,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 44438,
         "victims": [
@@ -17107,7 +17107,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 44530,
         "victims": [
@@ -17117,14 +17117,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 44633,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 44740,
         "weapon": "lg"
@@ -17138,7 +17138,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 44831,
         "weapon": "lg"
@@ -17289,7 +17289,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 53827,
         "victims": [
@@ -17299,7 +17299,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 53917,
         "weapon": "lg"
@@ -17307,7 +17307,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54023,
         "victims": [
@@ -17317,7 +17317,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54125,
         "weapon": "lg"
@@ -17331,7 +17331,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54221,
         "weapon": "lg"
@@ -17349,28 +17349,28 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54322,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54426,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54517,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54517,
         "weapon": "lg"
@@ -17378,7 +17378,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54605,
         "victims": [
@@ -17388,14 +17388,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54712,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54815,
         "weapon": "lg"
@@ -17403,7 +17403,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 54905,
         "victims": [
@@ -17413,21 +17413,21 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 55010,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 55112,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 55195,
         "weapon": "lg"
@@ -17449,7 +17449,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 56260,
         "victims": [
@@ -17460,7 +17460,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 56480,
         "victims": [
@@ -17470,14 +17470,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 56569,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 56675,
         "weapon": "lg"
@@ -17491,14 +17491,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 56779,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 56867,
         "weapon": "lg"
@@ -17526,14 +17526,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 58905,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 58996,
         "weapon": "lg"
@@ -17554,49 +17554,49 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 59218,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 59299,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 59402,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 59506,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 59597,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 59701,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 59813,
         "weapon": "lg"
@@ -17611,7 +17611,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 59904,
         "victims": [
@@ -17621,14 +17621,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 60009,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 60113,
         "weapon": "lg"
@@ -17636,7 +17636,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 60204,
         "victims": [
@@ -17646,35 +17646,35 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 60219,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 60297,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 60311,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 60389,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 60402,
         "weapon": "lg"
@@ -17682,7 +17682,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 60493,
         "victims": [
@@ -17692,7 +17692,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 60514,
         "weapon": "lg"
@@ -17700,7 +17700,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 60584,
         "victims": [
@@ -17710,7 +17710,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 60605,
         "weapon": "lg"
@@ -17724,7 +17724,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 60687,
         "weapon": "lg"
@@ -17732,7 +17732,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 60701,
         "victims": [
@@ -17742,42 +17742,42 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 60790,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 60805,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 60881,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 60909,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 60987,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 61000,
         "weapon": "lg"
@@ -17785,7 +17785,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 61089,
         "victims": [
@@ -17796,7 +17796,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 61104,
         "victims": [
@@ -17807,7 +17807,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 61193,
         "victims": [
@@ -17817,7 +17817,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 61284,
         "weapon": "lg"
@@ -17836,35 +17836,35 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 61389,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 61493,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 61584,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 61697,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 61803,
         "weapon": "lg"
@@ -17872,7 +17872,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 61891,
         "victims": [
@@ -17882,21 +17882,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 61994,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 62100,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 62202,
         "weapon": "lg"
@@ -18054,63 +18054,63 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 74214,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 74305,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 74411,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 74516,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 74605,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 74710,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 74801,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 74895,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 75008,
         "weapon": "lg"
@@ -18124,14 +18124,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 75112,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 75193,
         "weapon": "lg"
@@ -18417,7 +18417,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101251,
         "weapon": "lg"
@@ -18425,7 +18425,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 101281,
         "victims": [
@@ -18435,7 +18435,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101342,
         "weapon": "lg"
@@ -18443,7 +18443,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 101383,
         "victims": [
@@ -18454,7 +18454,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101446,
         "victims": [
@@ -18464,35 +18464,35 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 101489,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101552,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 101581,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101581,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101645,
         "weapon": "lg"
@@ -18500,7 +18500,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 101679,
         "victims": [
@@ -18510,35 +18510,35 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101679,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101750,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 101785,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101785,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101850,
         "weapon": "lg"
@@ -18546,7 +18546,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 101878,
         "victims": [
@@ -18556,42 +18556,42 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101892,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 101978,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 101978,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 102082,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 102082,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 102186,
         "weapon": "lg"
@@ -18605,14 +18605,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 102269,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 102386,
         "weapon": "lg"
@@ -18669,7 +18669,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 107490,
         "victims": [
@@ -18679,14 +18679,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 107576,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 107671,
         "weapon": "lg"
@@ -18700,28 +18700,28 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 107788,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 107995,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 108084,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 108187,
         "weapon": "lg"
@@ -18843,28 +18843,28 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 111931,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 112022,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 112139,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 112239,
         "weapon": "lg"
@@ -18878,14 +18878,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 113866,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 113886,
         "weapon": "lg"
@@ -18893,7 +18893,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 113968,
         "victims": [
@@ -18903,7 +18903,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 113983,
         "weapon": "lg"
@@ -18911,7 +18911,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 114072,
         "victims": [
@@ -18921,7 +18921,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 114087,
         "weapon": "lg"
@@ -18929,7 +18929,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 114163,
         "victims": [
@@ -18939,7 +18939,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 114178,
         "weapon": "lg"
@@ -18947,7 +18947,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 114266,
         "victims": [
@@ -18958,7 +18958,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 114281,
         "victims": [
@@ -18969,7 +18969,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 114357,
         "victims": [
@@ -18980,7 +18980,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 114372,
         "victims": [
@@ -18991,7 +18991,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 114463,
         "victims": [
@@ -19002,7 +19002,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 114483,
         "victims": [
@@ -19013,7 +19013,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 114552,
         "victims": [
@@ -19024,7 +19024,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 114567,
         "victims": [
@@ -19034,21 +19034,21 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 114671,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 114786,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 114890,
         "weapon": "lg"
@@ -19077,7 +19077,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 116994,
         "victims": [
@@ -19098,28 +19098,28 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 117084,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 117187,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 117291,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 117379,
         "weapon": "lg"
@@ -19137,7 +19137,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 117476,
         "weapon": "lg"
@@ -19162,7 +19162,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 118266,
         "weapon": "lg"
@@ -19170,7 +19170,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 118353,
         "victims": [
@@ -19180,7 +19180,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 118460,
         "weapon": "lg"
@@ -19188,7 +19188,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 118554,
         "victims": [
@@ -19209,7 +19209,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 118645,
         "weapon": "lg"
@@ -19217,7 +19217,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 118749,
         "victims": [
@@ -19475,21 +19475,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 131421,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 131512,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 131625,
         "weapon": "lg"
@@ -19497,7 +19497,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 131729,
         "victims": [
@@ -19507,7 +19507,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 131820,
         "weapon": "lg"
@@ -19515,7 +19515,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 131913,
         "victims": [
@@ -19537,7 +19537,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 132030,
         "victims": [
@@ -19548,7 +19548,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 132121,
         "victims": [
@@ -19558,14 +19558,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 132212,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 132319,
         "weapon": "lg"
@@ -19586,35 +19586,35 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 133352,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 133436,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 133540,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 133651,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 133744,
         "weapon": "lg"
@@ -19640,7 +19640,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 134757,
         "victims": [
@@ -19650,14 +19650,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 134858,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 134962,
         "weapon": "lg"
@@ -19902,14 +19902,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 146966,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 147057,
         "weapon": "lg"
@@ -19948,14 +19948,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 148860,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 148954,
         "weapon": "lg"
@@ -19969,7 +19969,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 149065,
         "weapon": "lg"
@@ -19983,7 +19983,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 149162,
         "weapon": "lg"
@@ -20105,7 +20105,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 157441,
         "victims": [
@@ -20115,7 +20115,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 157524,
         "weapon": "lg"
@@ -20278,35 +20278,35 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 169743,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 169847,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 169946,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 170043,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 170133,
         "weapon": "lg"
@@ -20364,7 +20364,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 173780,
         "victims": [
@@ -20375,19 +20375,12 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 173868,
         "victims": [
           "SS"
         ],
-        "weapon": "lg"
-      },
-      {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "pora",
-        "time": 173972,
         "weapon": "lg"
       },
       {
@@ -20403,7 +20396,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
+        "team": "pora",
+        "time": 173972,
+        "weapon": "lg"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
         "team": "pora",
         "time": 174081,
         "weapon": "lg"
@@ -20411,7 +20411,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 174173,
         "victims": [
@@ -20421,7 +20421,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 174277,
         "weapon": "lg"
@@ -20429,7 +20429,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 174381,
         "victims": [
@@ -20440,7 +20440,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 174478,
         "victims": [
@@ -20450,14 +20450,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 174576,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 174673,
         "weapon": "lg"
@@ -20475,7 +20475,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 174790,
         "weapon": "lg"
@@ -20490,7 +20490,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 174874,
         "victims": [
@@ -20500,21 +20500,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 174975,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 175079,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 175173,
         "weapon": "lg"
@@ -20529,7 +20529,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 176574,
         "victims": [
@@ -20539,14 +20539,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 176678,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 176769,
         "weapon": "lg"
@@ -20560,7 +20560,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 179808,
         "weapon": "lg"
@@ -20568,7 +20568,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 179912,
         "victims": [
@@ -20579,7 +20579,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 180003,
         "victims": [
@@ -20589,21 +20589,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 180106,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 180210,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 180313,
         "weapon": "lg"
@@ -20624,7 +20624,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 181121,
         "weapon": "lg"
@@ -20632,7 +20632,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 181218,
         "victims": [
@@ -20642,7 +20642,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 181322,
         "weapon": "lg"
@@ -20661,21 +20661,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 181419,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 181510,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 181614,
         "weapon": "lg"
@@ -20689,35 +20689,35 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 181724,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 181815,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 181919,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 182016,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 182120,
         "weapon": "lg"
@@ -20731,14 +20731,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 182224,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 182322,
         "weapon": "lg"
@@ -20753,7 +20753,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 182419,
         "victims": [
@@ -20764,7 +20764,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 182510,
         "victims": [
@@ -20774,14 +20774,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 182614,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 182731,
         "weapon": "lg"
@@ -20789,7 +20789,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 182821,
         "victims": [
@@ -20799,21 +20799,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 182924,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 183028,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 183131,
         "weapon": "lg"
@@ -20877,7 +20877,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 190873,
         "weapon": "lg"
@@ -20895,14 +20895,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 190951,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 191065,
         "weapon": "lg"
@@ -20916,14 +20916,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 191169,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 191250,
         "weapon": "lg"
@@ -20969,35 +20969,35 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 193183,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 193274,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 193378,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 193495,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 193586,
         "weapon": "lg"
@@ -21005,7 +21005,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 193678,
         "victims": [
@@ -21016,7 +21016,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 193782,
         "victims": [
@@ -21026,7 +21026,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 193872,
         "weapon": "lg"
@@ -21040,14 +21040,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 193988,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 194091,
         "weapon": "lg"
@@ -21144,7 +21144,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 201311,
         "victims": [
@@ -21154,21 +21154,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 201404,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 201508,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 201612,
         "weapon": "lg"
@@ -21218,7 +21218,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 204882,
         "weapon": "lg"
@@ -21237,28 +21237,28 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 204973,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 205064,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 205181,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 205259,
         "weapon": "lg"
@@ -21377,7 +21377,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 210410,
         "victims": [
@@ -21388,7 +21388,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 210494,
         "victims": [
@@ -21398,21 +21398,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 210598,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 210702,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 210800,
         "weapon": "lg"
@@ -21442,7 +21442,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 213007,
         "victims": [
@@ -21452,21 +21452,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 213103,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 213207,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 213310,
         "weapon": "lg"
@@ -21519,35 +21519,35 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 216299,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 216390,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 216494,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 216610,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 216688,
         "weapon": "lg"
@@ -21913,7 +21913,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 235478,
         "weapon": "lg"
@@ -21921,7 +21921,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 235564,
         "victims": [
@@ -21931,63 +21931,63 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 235674,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 235778,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 235869,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 235973,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 236077,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 236155,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 236246,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 236350,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 236452,
         "weapon": "lg"
@@ -22001,7 +22001,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 236538,
         "weapon": "lg"
@@ -22023,7 +22023,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 238256,
         "victims": [
@@ -22033,7 +22033,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 238343,
         "weapon": "lg"
@@ -22051,21 +22051,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 238428,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 238447,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 238518,
         "weapon": "lg"
@@ -22073,7 +22073,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 238545,
         "victims": [
@@ -22083,63 +22083,63 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 238622,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 238635,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 238724,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 238739,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 238817,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 238843,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 238914,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 238945,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 239018,
         "weapon": "lg"
@@ -22157,7 +22157,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 239109,
         "weapon": "lg"
@@ -22165,7 +22165,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 239213,
         "victims": [
@@ -22175,14 +22175,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 239323,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 239421,
         "weapon": "lg"
@@ -22190,7 +22190,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 239524,
         "victims": [
@@ -22200,7 +22200,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 239570,
         "weapon": "lg"
@@ -22208,7 +22208,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 239615,
         "victims": [
@@ -22225,35 +22225,35 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 239674,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 239719,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 239776,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 239817,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 239880,
         "weapon": "lg"
@@ -22271,14 +22271,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 239920,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 239960,
         "weapon": "lg"
@@ -22286,7 +22286,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 240025,
         "victims": [
@@ -22296,14 +22296,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 240075,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 240122,
         "weapon": "lg"
@@ -22311,7 +22311,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 240167,
         "victims": [
@@ -22322,7 +22322,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 240219,
         "victims": [
@@ -22332,119 +22332,119 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 240259,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 240322,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 240368,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 240425,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 240466,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 240516,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 240557,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 240620,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 240661,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 240726,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 240765,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 240810,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 240881,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 240927,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 240972,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 241018,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 241063,
         "weapon": "lg"
@@ -22452,7 +22452,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 241109,
         "victims": [
@@ -22462,14 +22462,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 241219,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 241323,
         "weapon": "lg"
@@ -22483,7 +22483,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 241425,
         "weapon": "lg"
@@ -22497,14 +22497,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 243070,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 243167,
         "weapon": "lg"
@@ -22522,7 +22522,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 243269,
         "weapon": "lg"
@@ -22530,7 +22530,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 243373,
         "victims": [
@@ -22548,7 +22548,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 243466,
         "victims": [
@@ -22559,7 +22559,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 243557,
         "victims": [
@@ -22569,7 +22569,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 243673,
         "weapon": "lg"
@@ -22587,7 +22587,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 243758,
         "weapon": "lg"
@@ -22595,7 +22595,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 243862,
         "victims": [
@@ -22605,21 +22605,21 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 243973,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 244077,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 244167,
         "weapon": "lg"
@@ -22640,7 +22640,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 246414,
         "weapon": "lg"
@@ -22659,14 +22659,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 246518,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 246609,
         "weapon": "lg"
@@ -22674,7 +22674,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 246726,
         "victims": [
@@ -22684,21 +22684,21 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 246814,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 246918,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 247022,
         "weapon": "lg"
@@ -22706,7 +22706,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 247115,
         "victims": [
@@ -22716,7 +22716,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 247217,
         "weapon": "lg"
@@ -22735,49 +22735,49 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 247321,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 247425,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 247505,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 247622,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 247931,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 248011,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 248128,
         "weapon": "lg"
@@ -22791,35 +22791,35 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 249640,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 250061,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 250152,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 250244,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 250361,
         "weapon": "lg"
@@ -22833,7 +22833,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 250452,
         "weapon": "lg"
@@ -22858,14 +22858,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 263089,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 263177,
         "weapon": "lg"
@@ -22897,63 +22897,63 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 266412,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 266509,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 266555,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 266618,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 266646,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 266865,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 266958,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 267016,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 267062,
         "weapon": "lg"
@@ -22968,7 +22968,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 267106,
         "victims": [
@@ -22978,28 +22978,28 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 267166,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 267255,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 267359,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 267373,
         "weapon": "lg"
@@ -23007,7 +23007,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 267464,
         "victims": [
@@ -23017,7 +23017,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 267555,
         "weapon": "lg"
@@ -23025,7 +23025,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 267574,
         "victims": [
@@ -23035,7 +23035,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 267646,
         "weapon": "lg"
@@ -23043,7 +23043,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 267683,
         "victims": [
@@ -23054,7 +23054,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 267761,
         "victims": [
@@ -23065,7 +23065,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 267774,
         "victims": [
@@ -23075,35 +23075,35 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 267865,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 267878,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 267956,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 267971,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 268060,
         "weapon": "lg"
@@ -23111,7 +23111,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 268073,
         "victims": [
@@ -23121,42 +23121,42 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 268127,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 268177,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 268228,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 268280,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 268322,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 268385,
         "weapon": "lg"
@@ -23178,7 +23178,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 271254,
         "victims": [
@@ -23189,7 +23189,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 271335,
         "victims": [
@@ -23200,7 +23200,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 271448,
         "victims": [
@@ -23217,7 +23217,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 271553,
         "weapon": "lg"
@@ -23225,7 +23225,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 271644,
         "victims": [
@@ -23235,14 +23235,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 271747,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 271846,
         "weapon": "lg"
@@ -23263,14 +23263,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 277761,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 277851,
         "weapon": "lg"
@@ -23284,7 +23284,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 277968,
         "weapon": "lg"
@@ -23292,7 +23292,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 278072,
         "victims": [
@@ -23327,35 +23327,35 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 279163,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 279257,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 279360,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 279462,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 279554,
         "weapon": "lg"
@@ -23363,7 +23363,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 279659,
         "victims": [
@@ -23373,21 +23373,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 279773,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 279859,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 279955,
         "weapon": "lg"
@@ -23406,7 +23406,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 280072,
         "weapon": "lg"
@@ -23414,19 +23414,12 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 280244,
         "victims": [
           "rusti"
         ],
-        "weapon": "lg"
-      },
-      {
-        "player": "gLAd",
-        "source": "ammo",
-        "team": "nAnI",
-        "time": 280335,
         "weapon": "lg"
       },
       {
@@ -23443,14 +23436,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
+        "team": "nAnI",
+        "time": 280335,
+        "weapon": "lg"
+      },
+      {
+        "player": "gLAd",
+        "source": "beam",
         "team": "nAnI",
         "time": 280449,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 280554,
         "weapon": "lg"
@@ -23485,14 +23485,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 282552,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 282643,
         "weapon": "lg"
@@ -23507,7 +23507,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 282749,
         "victims": [
@@ -23517,14 +23517,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 282845,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 282936,
         "weapon": "lg"
@@ -23532,7 +23532,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 283034,
         "victims": [
@@ -23542,20 +23542,9 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 283157,
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "gLAd",
-        "source": "ammo",
-        "team": "nAnI",
-        "time": 283229,
-        "victims": [
-          "rusti"
-        ],
         "weapon": "lg"
       },
       {
@@ -23564,6 +23553,17 @@
         "team": "pora",
         "time": 283229,
         "weapon": "sg"
+      },
+      {
+        "hit": true,
+        "player": "gLAd",
+        "source": "beam",
+        "team": "nAnI",
+        "time": 283229,
+        "victims": [
+          "rusti"
+        ],
+        "weapon": "lg"
       },
       {
         "player": "kippo",
@@ -23716,7 +23716,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 290320,
         "weapon": "lg"
@@ -23731,7 +23731,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 290411,
         "victims": [
@@ -23742,7 +23742,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 290520,
         "victims": [
@@ -23753,7 +23753,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 290624,
         "victims": [
@@ -23763,14 +23763,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 290715,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 290824,
         "weapon": "lg"
@@ -23785,7 +23785,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 290917,
         "victims": [
@@ -23795,7 +23795,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 291008,
         "weapon": "lg"
@@ -23803,7 +23803,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 291125,
         "victims": [
@@ -23820,28 +23820,28 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 291227,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 291331,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 291411,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 291527,
         "weapon": "lg"
@@ -23849,7 +23849,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 291631,
         "victims": [
@@ -23860,7 +23860,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 291721,
         "victims": [
@@ -23870,14 +23870,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 291826,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 291922,
         "weapon": "lg"
@@ -23895,7 +23895,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 292019,
         "weapon": "lg"
@@ -23910,7 +23910,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 292112,
         "victims": [
@@ -24241,14 +24241,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 311501,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 311591,
         "weapon": "lg"
@@ -24256,7 +24256,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 311708,
         "victims": [
@@ -24277,14 +24277,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 312810,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 312903,
         "weapon": "lg"
@@ -24292,7 +24292,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 313006,
         "victims": [
@@ -24302,7 +24302,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 313109,
         "weapon": "lg"
@@ -24310,7 +24310,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 313201,
         "victims": [
@@ -24320,7 +24320,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 313305,
         "weapon": "lg"
@@ -24466,7 +24466,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 323785,
         "victims": [
@@ -24476,35 +24476,35 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 323876,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 323967,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 324071,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 324175,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 324266,
         "weapon": "lg"
@@ -24512,7 +24512,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 325370,
         "victims": [
@@ -24522,14 +24522,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 325460,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 325536,
         "weapon": "lg"
@@ -24537,7 +24537,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 325565,
         "victims": [
@@ -24547,21 +24547,32 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 325621,
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
+        "team": "nAnI",
+        "time": 325668,
+        "victims": [
+          "rusti"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "gLAd",
+        "source": "beam",
         "team": "nAnI",
         "time": 325864,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 325968,
         "weapon": "lg"
@@ -24596,28 +24607,28 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 328491,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 328577,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 328692,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 328790,
         "weapon": "lg"
@@ -24625,7 +24636,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 328849,
         "victims": [
@@ -24635,7 +24646,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 328876,
         "weapon": "lg"
@@ -24643,7 +24654,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 328932,
         "victims": [
@@ -24654,7 +24665,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 328979,
         "victims": [
@@ -24665,7 +24676,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 329043,
         "victims": [
@@ -24675,14 +24686,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 329084,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 329148,
         "weapon": "lg"
@@ -24690,7 +24701,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 329174,
         "victims": [
@@ -24701,7 +24712,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 329231,
         "victims": [
@@ -24711,7 +24722,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 329343,
         "weapon": "lg"
@@ -24725,14 +24736,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 329447,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 329530,
         "weapon": "lg"
@@ -24810,21 +24821,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 336498,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 336589,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 336693,
         "weapon": "lg"
@@ -24839,7 +24850,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 336797,
         "victims": [
@@ -24850,19 +24861,12 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 336875,
         "victims": [
           "kippo"
         ],
-        "weapon": "lg"
-      },
-      {
-        "player": "gLAd",
-        "source": "ammo",
-        "team": "nAnI",
-        "time": 336979,
         "weapon": "lg"
       },
       {
@@ -24879,21 +24883,28 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
+        "team": "nAnI",
+        "time": 336979,
+        "weapon": "lg"
+      },
+      {
+        "player": "gLAd",
+        "source": "beam",
         "team": "nAnI",
         "time": 337087,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 337187,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 337290,
         "weapon": "lg"
@@ -24908,7 +24919,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 337594,
         "victims": [
@@ -24918,14 +24929,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 337691,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 337797,
         "weapon": "lg"
@@ -24946,14 +24957,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 339225,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 339329,
         "weapon": "lg"
@@ -25088,21 +25099,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 347080,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 347165,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 347264,
         "weapon": "lg"
@@ -25116,14 +25127,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 347381,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 347472,
         "weapon": "lg"
@@ -25226,7 +25237,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 355807,
         "victims": [
@@ -25236,7 +25247,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 355891,
         "weapon": "lg"
@@ -25254,7 +25265,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 355995,
         "weapon": "lg"
@@ -25262,7 +25273,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 356095,
         "victims": [
@@ -25272,35 +25283,35 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 356186,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 356290,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 356407,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 356497,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 356599,
         "weapon": "lg"
@@ -25329,35 +25340,35 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 357639,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 357730,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 357834,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 357937,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 358029,
         "weapon": "lg"
@@ -25365,7 +25376,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 358132,
         "victims": [
@@ -25462,14 +25473,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 362353,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 362443,
         "weapon": "lg"
@@ -25488,7 +25499,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 362549,
         "victims": [
@@ -25498,14 +25509,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 362653,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 362743,
         "weapon": "lg"
@@ -25513,7 +25524,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 362851,
         "victims": [
@@ -25553,21 +25564,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 364873,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 364975,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 365079,
         "weapon": "lg"
@@ -25593,21 +25604,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 366302,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 366393,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 366508,
         "weapon": "lg"
@@ -25741,7 +25752,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 375160,
         "victims": [
@@ -25752,7 +25763,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 375248,
         "victims": [
@@ -25763,7 +25774,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 375357,
         "victims": [
@@ -25785,7 +25796,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 375468,
         "victims": [
@@ -25802,7 +25813,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 375551,
         "weapon": "lg"
@@ -25816,7 +25827,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 375663,
         "weapon": "lg"
@@ -25837,7 +25848,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378032,
         "weapon": "lg"
@@ -25856,7 +25867,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378119,
         "victims": [
@@ -25866,7 +25877,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378236,
         "weapon": "lg"
@@ -25874,7 +25885,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378340,
         "victims": [
@@ -25884,14 +25895,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378340,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378418,
         "weapon": "lg"
@@ -25899,7 +25910,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378434,
         "victims": [
@@ -25909,7 +25920,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378525,
         "weapon": "lg"
@@ -25917,7 +25928,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378546,
         "victims": [
@@ -25927,28 +25938,28 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378636,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378636,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378730,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378730,
         "weapon": "lg"
@@ -25962,7 +25973,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 378832,
         "weapon": "lg"
@@ -26015,7 +26026,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 383486,
         "weapon": "lg"
@@ -26023,7 +26034,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 383572,
         "victims": [
@@ -26040,21 +26051,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 383676,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 383784,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 383873,
         "weapon": "lg"
@@ -26199,7 +26210,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 392716,
         "weapon": "lg"
@@ -26207,7 +26218,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 392818,
         "victims": [
@@ -26218,7 +26229,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 392922,
         "victims": [
@@ -26235,7 +26246,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 393026,
         "weapon": "lg"
@@ -26249,21 +26260,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 393117,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 393221,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 393325,
         "weapon": "lg"
@@ -26271,7 +26282,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 393416,
         "victims": [
@@ -26282,7 +26293,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 393520,
         "victims": [
@@ -26291,8 +26302,19 @@
         "weapon": "lg"
       },
       {
+        "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
+        "team": "nAnI",
+        "time": 393623,
+        "victims": [
+          "rusti"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "gLAd",
+        "source": "beam",
         "team": "nAnI",
         "time": 393831,
         "weapon": "lg"
@@ -26335,7 +26357,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 396584,
         "victims": [
@@ -26346,7 +26368,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 396675,
         "victims": [
@@ -26367,7 +26389,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 396768,
         "weapon": "lg"
@@ -26375,7 +26397,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 396883,
         "victims": [
@@ -26385,29 +26407,29 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 396965,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 396985,
         "weapon": "lg"
       },
       {
-        "player": "gLAd",
-        "source": "ammo",
-        "team": "nAnI",
+        "player": "kippo",
+        "source": "beam",
+        "team": "pora",
         "time": 397066,
         "weapon": "lg"
       },
       {
-        "player": "kippo",
-        "source": "ammo",
-        "team": "pora",
+        "player": "gLAd",
+        "source": "beam",
+        "team": "nAnI",
         "time": 397066,
         "weapon": "lg"
       },
@@ -26423,9 +26445,16 @@
         "weapon": "rl"
       },
       {
+        "player": "kippo",
+        "source": "beam",
+        "team": "pora",
+        "time": 397170,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 397170,
         "victims": [
@@ -26434,22 +26463,15 @@
         "weapon": "lg"
       },
       {
-        "player": "kippo",
-        "source": "ammo",
-        "team": "pora",
-        "time": 397170,
-        "weapon": "lg"
-      },
-      {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 397261,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 397378,
         "weapon": "lg"
@@ -26506,7 +26528,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 405859,
         "victims": [
@@ -26517,7 +26539,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 405950,
         "victims": [
@@ -26527,7 +26549,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 406055,
         "weapon": "lg"
@@ -26545,7 +26567,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 406170,
         "weapon": "lg"
@@ -26553,7 +26575,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 406261,
         "victims": [
@@ -26563,7 +26585,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 406365,
         "weapon": "lg"
@@ -26571,7 +26593,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 406456,
         "victims": [
@@ -26582,7 +26604,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 406558,
         "victims": [
@@ -26603,14 +26625,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 406662,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 406765,
         "weapon": "lg"
@@ -26756,7 +26778,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 413769,
         "victims": [
@@ -26766,7 +26788,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 413860,
         "weapon": "lg"
@@ -26774,7 +26796,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 413973,
         "victims": [
@@ -26784,7 +26806,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 414076,
         "weapon": "lg"
@@ -26802,14 +26824,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 414158,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 414271,
         "weapon": "lg"
@@ -26817,7 +26839,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 414647,
         "victims": [
@@ -26827,21 +26849,21 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 414703,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 414738,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 414794,
         "weapon": "lg"
@@ -26849,7 +26871,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 414855,
         "victims": [
@@ -26867,7 +26889,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 414899,
         "victims": [
@@ -26877,21 +26899,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 414946,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 415002,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 415037,
         "weapon": "lg"
@@ -26899,7 +26921,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 415093,
         "victims": [
@@ -26909,42 +26931,42 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 415141,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 415197,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 415245,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 415310,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 415339,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 415392,
         "weapon": "lg"
@@ -26952,7 +26974,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 415440,
         "victims": [
@@ -26963,7 +26985,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 415496,
         "victims": [
@@ -26973,7 +26995,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 415609,
         "weapon": "lg"
@@ -26991,7 +27013,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 415700,
         "weapon": "lg"
@@ -26999,7 +27021,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 415804,
         "victims": [
@@ -27009,14 +27031,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 415908,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 415989,
         "weapon": "lg"
@@ -27024,7 +27046,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 416011,
         "victims": [
@@ -27035,7 +27057,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 416080,
         "victims": [
@@ -27045,21 +27067,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 416183,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 416287,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 416390,
         "weapon": "lg"
@@ -27120,7 +27142,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 420688,
         "victims": [
@@ -27145,7 +27167,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 422015,
         "victims": [
@@ -27163,7 +27185,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 422114,
         "victims": [
@@ -27174,7 +27196,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 422219,
         "victims": [
@@ -27184,28 +27206,28 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 422325,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 422416,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 422521,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 422625,
         "weapon": "lg"
@@ -27290,7 +27312,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 427166,
         "weapon": "lg"
@@ -27308,14 +27330,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 427257,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 427361,
         "weapon": "lg"
@@ -27323,7 +27345,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 427467,
         "victims": [
@@ -27333,7 +27355,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 427558,
         "weapon": "lg"
@@ -27352,28 +27374,28 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 427662,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 427766,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 427846,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 427962,
         "weapon": "lg"
@@ -27597,21 +27619,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 450801,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 450883,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 450986,
         "weapon": "lg"
@@ -27629,21 +27651,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 451099,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 451181,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 451294,
         "weapon": "lg"
@@ -27651,7 +27673,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 451400,
         "victims": [
@@ -27662,7 +27684,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 451489,
         "victims": [
@@ -27672,21 +27694,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 451595,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 451699,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 451801,
         "weapon": "lg"
@@ -27700,7 +27722,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 451892,
         "weapon": "lg"
@@ -27819,7 +27841,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 458401,
         "weapon": "lg"
@@ -27827,7 +27849,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 458492,
         "victims": [
@@ -27838,7 +27860,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 458596,
         "victims": [
@@ -27848,28 +27870,28 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 458674,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 458700,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 458764,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 458791,
         "weapon": "lg"
@@ -27877,7 +27899,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 458868,
         "victims": [
@@ -27887,7 +27909,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 458895,
         "weapon": "lg"
@@ -27902,7 +27924,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 458973,
         "victims": [
@@ -27912,7 +27934,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 458999,
         "weapon": "lg"
@@ -27920,7 +27942,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 459076,
         "victims": [
@@ -27931,7 +27953,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 459090,
         "victims": [
@@ -27941,42 +27963,42 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 459193,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 459297,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 459411,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 459502,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 459595,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 459699,
         "weapon": "lg"
@@ -27990,14 +28012,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 459787,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 459891,
         "weapon": "lg"
@@ -28005,19 +28027,12 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 459999,
         "victims": [
           "SS"
         ],
-        "weapon": "lg"
-      },
-      {
-        "player": "kippo",
-        "source": "ammo",
-        "team": "pora",
-        "time": 460088,
         "weapon": "lg"
       },
       {
@@ -28029,7 +28044,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
+        "team": "pora",
+        "time": 460088,
+        "weapon": "lg"
+      },
+      {
+        "player": "kippo",
+        "source": "beam",
         "team": "pora",
         "time": 460192,
         "weapon": "lg"
@@ -28037,7 +28059,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 460296,
         "victims": [
@@ -28048,7 +28070,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 460411,
         "victims": [
@@ -28059,7 +28081,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 460492,
         "victims": [
@@ -28076,14 +28098,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 460596,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 460696,
         "weapon": "lg"
@@ -28102,7 +28124,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 460800,
         "victims": [
@@ -28113,7 +28135,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 460891,
         "victims": [
@@ -28123,21 +28145,21 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 460999,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 461089,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 461193,
         "weapon": "lg"
@@ -28155,21 +28177,21 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 461307,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 461410,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 461502,
         "weapon": "lg"
@@ -28177,7 +28199,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 461605,
         "victims": [
@@ -28187,7 +28209,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 461699,
         "weapon": "lg"
@@ -28212,7 +28234,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 461790,
         "weapon": "lg"
@@ -28220,7 +28242,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 462008,
         "victims": [
@@ -28230,14 +28252,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 462099,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 462206,
         "weapon": "lg"
@@ -28255,14 +28277,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 462310,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 462400,
         "weapon": "lg"
@@ -28426,14 +28448,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 468826,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 468931,
         "weapon": "lg"
@@ -28441,7 +28463,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 469024,
         "victims": [
@@ -28452,7 +28474,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 469128,
         "victims": [
@@ -28462,21 +28484,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 469218,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 469322,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 469423,
         "weapon": "lg"
@@ -28781,28 +28803,28 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 493800,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 493892,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 493983,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 494096,
         "weapon": "lg"
@@ -28810,7 +28832,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 494178,
         "victims": [
@@ -28831,21 +28853,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 494291,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 494398,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 494489,
         "weapon": "lg"
@@ -28853,7 +28875,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 494581,
         "victims": [
@@ -28863,42 +28885,42 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 494694,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 494785,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 494889,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 494983,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 495096,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 495174,
         "weapon": "lg"
@@ -28906,7 +28928,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 495187,
         "victims": [
@@ -28928,7 +28950,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 495252,
         "victims": [
@@ -28938,42 +28960,42 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 495281,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 495356,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 495385,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 495473,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 495486,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 495554,
         "weapon": "lg"
@@ -28981,7 +29003,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 497265,
         "victims": [
@@ -29004,7 +29026,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 497356,
         "victims": [
@@ -29014,42 +29036,42 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 497450,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 497566,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 497655,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 497762,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 497852,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 497956,
         "weapon": "lg"
@@ -29448,7 +29470,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 525796,
         "weapon": "lg"
@@ -29466,16 +29488,9 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 525889,
-        "weapon": "lg"
-      },
-      {
-        "player": "kippo",
-        "source": "ammo",
-        "team": "pora",
-        "time": 525994,
         "weapon": "lg"
       },
       {
@@ -29487,28 +29502,35 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
+        "team": "pora",
+        "time": 525994,
+        "weapon": "lg"
+      },
+      {
+        "player": "kippo",
+        "source": "beam",
         "team": "pora",
         "time": 526098,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 526188,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 526292,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 526406,
         "weapon": "lg"
@@ -29547,28 +29569,28 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 528055,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 528148,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 528252,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 528356,
         "weapon": "lg"
@@ -29576,7 +29598,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 528445,
         "victims": [
@@ -29597,14 +29619,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 528548,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 528652,
         "weapon": "lg"
@@ -29612,7 +29634,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 528743,
         "victims": [
@@ -29622,14 +29644,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 528850,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 528954,
         "weapon": "lg"
@@ -29772,7 +29794,7 @@
       {
         "hit": true,
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 541171,
         "victims": [
@@ -29782,7 +29804,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 541252,
         "weapon": "lg"
@@ -29800,7 +29822,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 541356,
         "weapon": "lg"
@@ -29814,7 +29836,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 541469,
         "weapon": "lg"
@@ -29854,7 +29876,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 545017,
         "victims": [
@@ -29864,14 +29886,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 545106,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 545209,
         "weapon": "lg"
@@ -29886,7 +29908,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 545223,
         "victims": [
@@ -29896,7 +29918,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 545300,
         "weapon": "lg"
@@ -29904,7 +29926,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 545329,
         "victims": [
@@ -29914,14 +29936,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 545394,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 545407,
         "weapon": "lg"
@@ -29929,7 +29951,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 545498,
         "victims": [
@@ -29940,7 +29962,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 545599,
         "victims": [
@@ -29957,14 +29979,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 545703,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 545807,
         "weapon": "lg"
@@ -29972,7 +29994,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 545898,
         "victims": [
@@ -29982,14 +30004,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 546002,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 546106,
         "weapon": "lg"
@@ -30221,7 +30243,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 562770,
         "weapon": "lg"
@@ -30235,7 +30257,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 562861,
         "weapon": "lg"
@@ -30243,7 +30265,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 562974,
         "victims": [
@@ -30254,7 +30276,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 563068,
         "victims": [
@@ -30264,21 +30286,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 563159,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 563262,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 563366,
         "weapon": "lg"
@@ -30304,21 +30326,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 564406,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 564484,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 564588,
         "weapon": "lg"
@@ -30332,7 +30354,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 564704,
         "weapon": "lg"
@@ -30420,14 +30442,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 569108,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 569198,
         "weapon": "lg"
@@ -30435,7 +30457,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 569301,
         "victims": [
@@ -30446,7 +30468,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 569407,
         "victims": [
@@ -30468,7 +30490,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 569496,
         "victims": [
@@ -30478,14 +30500,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 569600,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 569717,
         "weapon": "lg"
@@ -30493,7 +30515,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 569807,
         "victims": [
@@ -30503,7 +30525,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 569911,
         "weapon": "lg"
@@ -30511,7 +30533,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 570015,
         "victims": [
@@ -30521,21 +30543,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 570117,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 570207,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 570311,
         "weapon": "lg"
@@ -30567,21 +30589,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 572532,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 572624,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 572729,
         "weapon": "lg"
@@ -30609,14 +30631,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 573727,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 573807,
         "weapon": "lg"
@@ -30635,7 +30657,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 573911,
         "victims": [
@@ -30653,7 +30675,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 574015,
         "victims": [
@@ -30663,7 +30685,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 574106,
         "weapon": "lg"
@@ -30696,7 +30718,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 575549,
         "victims": [
@@ -30707,7 +30729,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 575651,
         "victims": [
@@ -30717,7 +30739,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 575752,
         "weapon": "lg"
@@ -30735,7 +30757,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 575847,
         "weapon": "lg"
@@ -30743,7 +30765,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 575951,
         "victims": [
@@ -30753,28 +30775,28 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 576042,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 576157,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 576246,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 576350,
         "weapon": "lg"
@@ -30782,7 +30804,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 576445,
         "victims": [
@@ -30792,21 +30814,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 576536,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 576640,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 576755,
         "weapon": "lg"
@@ -30877,7 +30899,7 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 582417,
         "weapon": "lg"
@@ -30895,14 +30917,14 @@
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 582622,
         "weapon": "lg"
       },
       {
         "player": "kippo",
-        "source": "ammo",
+        "source": "beam",
         "team": "pora",
         "time": 582713,
         "weapon": "lg"
@@ -30942,7 +30964,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 583597,
         "victims": [
@@ -30952,14 +30974,14 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 583687,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 583792,
         "weapon": "lg"
@@ -30967,7 +30989,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 583895,
         "victims": [
@@ -30977,7 +30999,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 583986,
         "weapon": "lg"
@@ -30998,7 +31020,7 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 584090,
         "weapon": "lg"
@@ -31006,7 +31028,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 584196,
         "victims": [
@@ -31017,7 +31039,7 @@
       {
         "hit": true,
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 584285,
         "victims": [
@@ -31027,21 +31049,21 @@
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 584389,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 584494,
         "weapon": "lg"
       },
       {
         "player": "gLAd",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 584587,
         "weapon": "lg"
@@ -31108,14 +31130,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 588532,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 588622,
         "weapon": "lg"
@@ -31130,7 +31152,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 588716,
         "victims": [
@@ -31148,7 +31170,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 588817,
         "victims": [
@@ -31159,7 +31181,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 588908,
         "victims": [
@@ -31170,7 +31192,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 589025,
         "victims": [
@@ -31180,14 +31202,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 589116,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 589219,
         "weapon": "lg"
@@ -31233,21 +31255,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 591260,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 591351,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 591455,
         "weapon": "lg"
@@ -31314,21 +31336,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 597467,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 597558,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 597663,
         "weapon": "lg"
@@ -31336,7 +31358,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 597778,
         "victims": [
@@ -31346,7 +31368,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 597868,
         "weapon": "lg"
@@ -31360,14 +31382,14 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 597960,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 598065,
         "weapon": "lg"
@@ -31375,7 +31397,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 598155,
         "victims": [
@@ -31385,7 +31407,7 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 598262,
         "weapon": "lg"
@@ -31393,7 +31415,7 @@
       {
         "hit": true,
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 598366,
         "victims": [
@@ -31410,21 +31432,21 @@
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 598457,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 598558,
         "weapon": "lg"
       },
       {
         "player": "SS",
-        "source": "ammo",
+        "source": "beam",
         "team": "nAnI",
         "time": 598662,
         "weapon": "lg"

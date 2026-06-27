@@ -363,6 +363,8 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 path; weapon-fire sounds drive the shots analyzer),
 `ProjectileSpawnEvent` / `ProjectileDespawnEvent` (rocket/grenade entity
 flight brackets — the shots analyzer links RL/GL fires to their impacts),
+`BeamEvent` (`svc_temp_entity` lightning beams — `TE_LIGHTNING2` is the
+per-tick LG fire signal),
 `MoverSpawnEvent` / `MoverStateEvent` (inline brush-model entities —
 lifts, doors, trains — identity plus per-frame origin while moving).
 Domain types carried by events — `ServerData`, `PlayerInfo`,

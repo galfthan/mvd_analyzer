@@ -220,37 +220,48 @@ func TestShots_ProjectileMiss(t *testing.T) {
 	}
 }
 
-// TestShots_LGAmmoDelta counts LG fire from cell decrements while rejecting
-// the spawn baseline, ammo pickups, and the death/discharge dump.
-func TestShots_LGAmmoDelta(t *testing.T) {
-	a, _ := newTestShotsAnalyzer()
-	cell := func(slot, v int, tMs int32) *events.StatUpdateEvent {
-		return &events.StatUpdateEvent{PlayerNum: slot, StatIndex: events.StatCells, Value: v, Time: float64(tMs) / 1000}
+// lgBeam builds a TE_LIGHTNING2 beam from entity ent (slot ent-1).
+func lgBeam(ent int, tMs int32) *events.BeamEvent {
+	return &events.BeamEvent{
+		Ent: ent, Type: 6, Start: [3]float32{0, 0, 0}, End: [3]float32{100, 0, 0},
+		Time: float64(tMs) / 1000, TimeMs: tMs,
 	}
+}
 
-	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 3})
-	_ = a.OnEvent(cell(3, 50, 100)) // baseline after spawn — no shots
-	_ = a.OnEvent(cell(3, 48, 200)) // -2 cells -> 2 LG shots
-	_ = a.OnEvent(cell(3, 47, 300)) // -1 cell  -> 1 LG shot
-	_ = a.OnEvent(cell(3, 80, 400)) // pickup (+33) -> no shots
-	_ = a.OnEvent(cell(3, 79, 500)) // -1 cell  -> 1 LG shot
-	_ = a.OnEvent(cell(3, 0, 600))  // -79 drop (death/discharge) -> no shots
+// TestShots_LGBeam counts one LG fire per TE_LIGHTNING2 beam, attributing it
+// to the firing entity, and links its same-frame LG damage. Non-LG beams
+// (TE_LIGHTNING1/3) and non-player entities are ignored.
+func TestShots_LGBeam(t *testing.T) {
+	a, _ := newTestShotsAnalyzer()
+
+	_ = a.OnEvent(lgBeam(4, 1000)) // slot 3 fires LG
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtLGBeam, Damage: 7, Time: 1.0})
+	_ = a.OnEvent(lgBeam(4, 1100)) // fires again, misses
+	// TE_LIGHTNING1 (non-player bolt) and a world entity: ignored.
+	_ = a.OnEvent(&events.BeamEvent{Ent: 4, Type: 5, TimeMs: 1200})
+	_ = a.OnEvent(&events.BeamEvent{Ent: 30, Type: 6, TimeMs: 1300})
 
 	r := &Result{}
 	_ = a.Finalize(r)
 
-	lg := 0
+	lg := []Shot{}
 	for _, s := range r.Shots.Shots {
 		if s.Weapon != "lg" {
 			t.Fatalf("unexpected non-lg shot %+v", s)
 		}
-		if s.Source != "ammo" {
-			t.Errorf("lg shot source = %q, want ammo", s.Source)
+		if s.Source != "beam" {
+			t.Errorf("lg shot source = %q, want beam", s.Source)
 		}
-		lg++
+		lg = append(lg, s)
 	}
-	if lg != 4 {
-		t.Errorf("lg shots = %d, want 4 (2+1+1)", lg)
+	if len(lg) != 2 {
+		t.Fatalf("lg shots = %d, want 2", len(lg))
+	}
+	if !lg[0].Hit || len(lg[0].Victims) != 1 || lg[0].Victims[0] != "victimA" {
+		t.Errorf("first LG shot = %+v, want hit victimA", lg[0])
+	}
+	if lg[1].Hit {
+		t.Errorf("second LG shot = %+v, want miss", lg[1])
 	}
 }
 

@@ -10537,48 +10537,48 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 19832,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 19935,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 20039,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 20143,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 20234,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 21278,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 21390,
         "weapon": "lg"
       },
@@ -10592,7 +10592,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 21486,
         "victims": [
           "mj"
@@ -10601,26 +10601,26 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 21589,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 21694,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 21793,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 21896,
         "victims": [
           "mj"
@@ -10629,7 +10629,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 21987,
         "weapon": "lg"
       },
@@ -10733,7 +10733,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 34520,
         "victims": [
           "mj"
@@ -10742,7 +10742,7 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 34520,
         "weapon": "lg"
@@ -10750,7 +10750,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 34629,
         "victims": [
           "mj"
@@ -10759,7 +10759,7 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 34629,
         "weapon": "lg"
@@ -10767,7 +10767,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 34727,
         "victims": [
           "mj"
@@ -10776,7 +10776,7 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 34727,
         "weapon": "lg"
@@ -10784,7 +10784,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 34831,
         "victims": [
           "mj"
@@ -10793,34 +10793,34 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 34831,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 34914,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 34928,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 35031,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 35031,
         "victims": [
@@ -10831,7 +10831,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 35123,
         "victims": [
           "mj"
@@ -10841,7 +10841,7 @@
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 35143,
         "victims": [
@@ -10851,14 +10851,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 35221,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 35221,
         "victims": [
@@ -10868,14 +10868,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 35325,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 35325,
         "victims": [
@@ -10885,14 +10885,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 35429,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 35429,
         "victims": [
@@ -10902,14 +10902,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 35512,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 35533,
         "victims": [
@@ -10919,28 +10919,28 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 35624,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 35727,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 35831,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 35922,
         "weapon": "lg"
@@ -11023,7 +11023,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 41637,
         "victims": [
           "mj"
@@ -11033,7 +11033,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 41740,
         "victims": [
           "mj"
@@ -11042,45 +11042,45 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 41844,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 41954,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 42032,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 44987,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 45104,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 45117,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 45201,
         "weapon": "lg"
@@ -11088,7 +11088,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 45221,
         "victims": [
           "mj"
@@ -11098,7 +11098,7 @@
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 45305,
         "victims": [
@@ -11109,7 +11109,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 45325,
         "victims": [
           "mj"
@@ -11119,7 +11119,7 @@
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 45390,
         "victims": [
@@ -11129,14 +11129,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 45429,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 45494,
         "victims": [
@@ -11146,21 +11146,21 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 45611,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 45689,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 45805,
         "weapon": "lg"
@@ -11268,7 +11268,7 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 59422,
         "weapon": "lg"
@@ -11276,19 +11276,12 @@
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 59520,
         "victims": [
           "speedball"
         ],
-        "weapon": "lg"
-      },
-      {
-        "player": "mj",
-        "source": "ammo",
-        "team": "red",
-        "time": 59630,
         "weapon": "lg"
       },
       {
@@ -11304,49 +11297,56 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
+        "team": "red",
+        "time": 59630,
+        "weapon": "lg"
+      },
+      {
+        "player": "mj",
+        "source": "beam",
         "team": "red",
         "time": 59734,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 59819,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 59923,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 60032,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 60117,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 60221,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 60325,
         "weapon": "lg"
@@ -11359,35 +11359,35 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 60442,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 60533,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 60624,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 60728,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 60819,
         "weapon": "lg"
@@ -11412,14 +11412,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 65097,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 65201,
         "victims": [
           "mj"
@@ -11429,7 +11429,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 65312,
         "victims": [
           "mj"
@@ -11438,14 +11438,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 65416,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 65500,
         "victims": [
           "mj"
@@ -11454,19 +11454,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 65604,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 65715,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 65811,
         "weapon": "lg"
       },
@@ -11524,32 +11524,32 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 74377,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 74474,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 74585,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 74689,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 74787,
         "victims": [
           "mj"
@@ -11558,19 +11558,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 74884,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 74988,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 75079,
         "weapon": "lg"
       },
@@ -11614,14 +11614,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 77925,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 78027,
         "victims": [
           "mj"
@@ -11630,13 +11630,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 78131,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 78240,
         "weapon": "lg"
       },
@@ -11662,7 +11662,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 81949,
         "weapon": "lg"
       },
@@ -11735,7 +11735,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 90085,
         "weapon": "lg"
       },
@@ -11748,26 +11748,26 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 90196,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 90306,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 90396,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 90495,
         "victims": [
           "mj"
@@ -11777,7 +11777,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 90591,
         "victims": [
           "mj"
@@ -11786,13 +11786,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 90708,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 90799,
         "weapon": "lg"
       },
@@ -11860,7 +11860,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 103981,
         "victims": [
           "mj"
@@ -11877,7 +11877,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 104085,
         "victims": [
           "mj"
@@ -11886,43 +11886,43 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 104197,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 104306,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 104396,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 104495,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 104605,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 104690,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 104799,
         "weapon": "lg"
       },
@@ -11936,7 +11936,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 104898,
         "victims": [
           "mj"
@@ -11946,7 +11946,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 105002,
         "victims": [
           "mj"
@@ -11955,43 +11955,43 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 105093,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 105202,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 105306,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 107807,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 107903,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 108015,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 108125,
         "weapon": "lg"
       },
@@ -12037,7 +12037,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 113046,
         "victims": [
           "mj"
@@ -12047,7 +12047,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 113138,
         "victims": [
           "mj"
@@ -12057,7 +12057,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 113254,
         "victims": [
           "mj"
@@ -12066,25 +12066,25 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 113352,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 113449,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 113677,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 113786,
         "weapon": "lg"
       },
@@ -12098,7 +12098,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 113885,
         "victims": [
           "mj"
@@ -12107,19 +12107,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 113982,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 114080,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 114184,
         "weapon": "lg"
       },
@@ -12181,7 +12181,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 119768,
         "victims": [
           "mj"
@@ -12190,25 +12190,25 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 119872,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 119976,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 120080,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 120171,
         "weapon": "lg"
       },
@@ -12425,7 +12425,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 141522,
         "victims": [
           "mj"
@@ -12434,14 +12434,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 141626,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 141730,
         "victims": [
           "mj"
@@ -12462,7 +12462,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 141834,
         "victims": [
           "mj"
@@ -12471,14 +12471,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 141925,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 142021,
         "victims": [
           "mj"
@@ -12487,19 +12487,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 142133,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 142223,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 142321,
         "weapon": "lg"
       },
@@ -12611,20 +12611,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 149496,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 149600,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 149704,
         "victims": [
           "mj"
@@ -12633,31 +12633,31 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 149808,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 149899,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 150009,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 150100,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 150190,
         "weapon": "lg"
       },
@@ -12670,25 +12670,25 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 150301,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 150405,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 150509,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 150593,
         "weapon": "lg"
       },
@@ -12811,20 +12811,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 162289,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 162386,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 162496,
         "victims": [
           "mj"
@@ -12834,7 +12834,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 162600,
         "victims": [
           "mj"
@@ -12844,7 +12844,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 162691,
         "victims": [
           "mj"
@@ -12853,19 +12853,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 162801,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 162899,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 162996,
         "weapon": "lg"
       },
@@ -12878,7 +12878,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 163088,
         "weapon": "lg"
       },
@@ -12897,13 +12897,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 164711,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 164821,
         "weapon": "lg"
       },
@@ -12916,38 +12916,38 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 164919,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 165029,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 165120,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 165230,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 165321,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 165425,
         "victims": [
           "mj"
@@ -12957,7 +12957,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 165523,
         "victims": [
           "mj"
@@ -12966,7 +12966,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 165627,
         "weapon": "lg"
       },
@@ -12980,7 +12980,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 165730,
         "victims": [
           "mj"
@@ -12989,19 +12989,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 165815,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 165918,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 166022,
         "weapon": "lg"
       },
@@ -13098,7 +13098,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 178698,
         "victims": [
           "mj"
@@ -13108,7 +13108,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 178808,
         "victims": [
           "mj"
@@ -13118,7 +13118,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 178912,
         "victims": [
           "mj"
@@ -13127,19 +13127,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 179016,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 179107,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 179211,
         "weapon": "lg"
       },
@@ -13166,20 +13166,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 181035,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 181146,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 181244,
         "victims": [
           "mj"
@@ -13199,7 +13199,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 181360,
         "weapon": "lg"
       },
@@ -13327,14 +13327,14 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 194835,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 194939,
         "weapon": "lg"
@@ -13348,7 +13348,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 197734,
         "victims": [
           "mj"
@@ -13358,7 +13358,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 197841,
         "victims": [
           "mj"
@@ -13367,32 +13367,32 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 197945,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 198037,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 198127,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 198245,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 198342,
         "victims": [
           "mj"
@@ -13408,13 +13408,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 198439,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 198542,
         "weapon": "lg"
       },
@@ -13469,7 +13469,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 209231,
         "victims": [
           "mj"
@@ -13479,7 +13479,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 209335,
         "victims": [
           "mj"
@@ -13489,7 +13489,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 209446,
         "victims": [
           "mj"
@@ -13510,7 +13510,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 209556,
         "victims": [
           "mj"
@@ -13519,13 +13519,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 209647,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 209751,
         "weapon": "lg"
       },
@@ -13545,7 +13545,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 211556,
         "victims": [
           "mj"
@@ -13565,14 +13565,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 211673,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 211777,
         "victims": [
           "mj"
@@ -13582,7 +13582,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 211875,
         "victims": [
           "mj"
@@ -13591,7 +13591,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 211959,
         "weapon": "lg"
       },
@@ -13623,7 +13623,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 218713,
         "victims": [
           "mj"
@@ -13640,7 +13640,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 218829,
         "victims": [
           "mj"
@@ -13650,7 +13650,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 218927,
         "victims": [
           "mj"
@@ -13659,49 +13659,49 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 219031,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 219121,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 219226,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 219329,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 219414,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 219524,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 219953,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 220056,
         "weapon": "lg"
       },
@@ -13714,14 +13714,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 220167,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 220271,
         "victims": [
           "mj"
@@ -13730,19 +13730,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 220355,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 220466,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 220557,
         "weapon": "lg"
       },
@@ -14004,16 +14004,6 @@
         "weapon": "rl"
       },
       {
-        "hit": true,
-        "player": "speedball",
-        "source": "ammo",
-        "time": 253837,
-        "victims": [
-          "mj"
-        ],
-        "weapon": "lg"
-      },
-      {
         "player": "mj",
         "source": "sound",
         "team": "red",
@@ -14023,7 +14013,17 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
+        "time": 253837,
+        "victims": [
+          "mj"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "speedball",
+        "source": "beam",
         "time": 253947,
         "victims": [
           "mj"
@@ -14033,7 +14033,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 254045,
         "victims": [
           "mj"
@@ -14043,7 +14043,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 254149,
         "victims": [
           "mj"
@@ -14053,7 +14053,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 254246,
         "victims": [
           "mj"
@@ -14062,25 +14062,25 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 254337,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 254538,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 254635,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 254746,
         "weapon": "lg"
       },
@@ -14122,7 +14122,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 258947,
         "victims": [
           "mj"
@@ -14143,7 +14143,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 259045,
         "victims": [
           "mj"
@@ -14152,25 +14152,25 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 259149,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 259259,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 259635,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 259746,
         "weapon": "lg"
       },
@@ -14183,7 +14183,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 259850,
         "weapon": "lg"
       },
@@ -14342,7 +14342,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 278383,
         "victims": [
           "mj"
@@ -14351,7 +14351,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 278481,
         "weapon": "lg"
       },
@@ -14365,7 +14365,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 278591,
         "victims": [
           "mj"
@@ -14374,20 +14374,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 278695,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 278779,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 278889,
         "victims": [
           "mj"
@@ -14396,20 +14396,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 279000,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 279091,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 279188,
         "victims": [
           "mj"
@@ -14419,7 +14419,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 279299,
         "victims": [
           "mj"
@@ -14440,7 +14440,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 279396,
         "victims": [
           "mj"
@@ -14449,7 +14449,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 279481,
         "weapon": "lg"
       },
@@ -14525,14 +14525,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 290819,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 291027,
         "victims": [
           "mj"
@@ -14541,14 +14541,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 291118,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 291235,
         "victims": [
           "mj"
@@ -14564,14 +14564,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 291339,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 291430,
         "victims": [
           "mj"
@@ -14581,7 +14581,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 291521,
         "victims": [
           "mj"
@@ -14613,19 +14613,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 296560,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 296669,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 296773,
         "weapon": "lg"
       },
@@ -14649,7 +14649,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 297819,
         "victims": [
           "mj"
@@ -14658,13 +14658,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 297916,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 298020,
         "weapon": "lg"
       },
@@ -14704,7 +14704,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 302936,
         "victims": [
           "mj"
@@ -14713,7 +14713,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 303040,
         "weapon": "lg"
       },
@@ -14726,38 +14726,38 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 303144,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 303235,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 303339,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 303430,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 303534,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 303630,
         "victims": [
           "mj"
@@ -14767,7 +14767,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 303728,
         "victims": [
           "mj"
@@ -14777,7 +14777,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 303838,
         "victims": [
           "mj"
@@ -14786,19 +14786,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 303937,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 304028,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 304145,
         "weapon": "lg"
       },
@@ -14826,7 +14826,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 307171,
         "victims": [
           "mj"
@@ -14836,7 +14836,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 307261,
         "victims": [
           "mj"
@@ -14845,14 +14845,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 307371,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 307475,
         "victims": [
           "mj"
@@ -14861,7 +14861,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 307573,
         "weapon": "lg"
       },
@@ -14874,20 +14874,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 307669,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 307773,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 307864,
         "victims": [
           "mj"
@@ -14896,19 +14896,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 307975,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 308072,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 308183,
         "weapon": "lg"
       },
@@ -15036,14 +15036,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 328969,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 329080,
         "victims": [
           "mj"
@@ -15059,14 +15059,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 329176,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 329280,
         "victims": [
           "mj"
@@ -15076,7 +15076,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 329379,
         "victims": [
           "mj"
@@ -15085,20 +15085,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 329483,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 329579,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 329665,
         "victims": [
           "mj"
@@ -15107,13 +15107,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 329781,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 329885,
         "weapon": "lg"
       },
@@ -15129,26 +15129,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 331327,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 331417,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 331527,
-        "weapon": "lg"
-      },
-      {
-        "player": "speedball",
-        "source": "ammo",
-        "time": 331625,
         "weapon": "lg"
       },
       {
@@ -15160,7 +15154,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
+        "time": 331625,
+        "weapon": "lg"
+      },
+      {
+        "player": "speedball",
+        "source": "beam",
         "time": 331730,
         "weapon": "lg"
       },
@@ -15193,19 +15193,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 333852,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 333956,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 334060,
         "weapon": "lg"
       },
@@ -15376,7 +15376,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 349203,
         "victims": [
           "mj"
@@ -15385,19 +15385,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 349302,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 349405,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 349515,
         "weapon": "lg"
       },
@@ -15410,14 +15410,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 351255,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 351359,
         "victims": [
           "mj"
@@ -15437,14 +15437,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 351463,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 351575,
         "victims": [
           "mj"
@@ -15454,7 +15454,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 351658,
         "victims": [
           "mj"
@@ -15657,20 +15657,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 367393,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 367484,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 367593,
         "victims": [
           "mj"
@@ -15679,13 +15679,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 367705,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 367788,
         "weapon": "lg"
       },
@@ -15698,13 +15698,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 367892,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 367990,
         "weapon": "lg"
       },
@@ -15722,14 +15722,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 370341,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 370458,
         "victims": [
           "mj"
@@ -15738,19 +15738,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 370554,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 370666,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 370744,
         "weapon": "lg"
       },
@@ -15803,7 +15803,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 374502,
         "victims": [
           "mj"
@@ -15813,7 +15813,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 374601,
         "victims": [
           "mj"
@@ -15822,7 +15822,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 374710,
         "weapon": "lg"
       },
@@ -15853,13 +15853,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 378710,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 378814,
         "weapon": "lg"
       },
@@ -15872,7 +15872,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 382004,
         "weapon": "lg"
       },
@@ -15890,37 +15890,37 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 382113,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 382217,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 382433,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 382541,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 382645,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 382744,
         "weapon": "lg"
       },
@@ -15938,7 +15938,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 382848,
         "victims": [
           "mj"
@@ -15948,7 +15948,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 382944,
         "victims": [
           "mj"
@@ -15957,19 +15957,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 383048,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 383134,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 383242,
         "weapon": "lg"
       },
@@ -15993,14 +15993,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 390367,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 390471,
         "victims": [
           "mj"
@@ -16016,14 +16016,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 390563,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 390679,
         "victims": [
           "mj"
@@ -16032,43 +16032,43 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 390757,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 390866,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 390969,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 391057,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 391164,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 391264,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 391372,
         "weapon": "lg"
       },
@@ -16111,14 +16111,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 393355,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 393472,
         "victims": [
           "mj"
@@ -16128,7 +16128,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 393567,
         "victims": [
           "mj"
@@ -16137,19 +16137,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 393680,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 393762,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 393875,
         "weapon": "lg"
       },
@@ -16172,26 +16172,26 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 394866,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 394970,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 396004,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 396121,
         "victims": [
           "mj"
@@ -16208,7 +16208,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 396225,
         "victims": [
           "mj"
@@ -16217,26 +16217,26 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 396316,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 396412,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 396511,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 396619,
         "victims": [
           "mj"
@@ -16246,7 +16246,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 396710,
         "victims": [
           "mj"
@@ -16255,13 +16255,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 396822,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 396918,
         "weapon": "lg"
       },
@@ -16305,7 +16305,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 403529,
         "victims": [
           "mj"
@@ -16315,7 +16315,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 403628,
         "victims": [
           "mj"
@@ -16324,19 +16324,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 403745,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 403848,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 403931,
         "weapon": "lg"
       },
@@ -16374,7 +16374,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 407797,
         "victims": [
           "mj"
@@ -16383,13 +16383,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 407901,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 408005,
         "weapon": "lg"
       },
@@ -16427,19 +16427,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 414213,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 414317,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 414408,
         "weapon": "lg"
       },
@@ -16452,7 +16452,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 414516,
         "weapon": "lg"
       },
@@ -16497,7 +16497,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 416525,
         "victims": [
           "mj"
@@ -16507,7 +16507,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 416628,
         "victims": [
           "mj"
@@ -16516,20 +16516,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 416724,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 416823,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 416918,
         "victims": [
           "mj"
@@ -16538,19 +16538,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 417022,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 417126,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 417225,
         "weapon": "lg"
       },
@@ -16648,7 +16648,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 432655,
         "victims": [
           "mj"
@@ -16657,26 +16657,26 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 432746,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 432850,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 432958,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 433057,
         "victims": [
           "mj"
@@ -16692,25 +16692,25 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 433152,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 433265,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 433357,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 433451,
         "weapon": "lg"
       },
@@ -16765,7 +16765,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 437551,
         "weapon": "lg"
       },
@@ -16778,20 +16778,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 437668,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 437763,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 437867,
         "victims": [
           "mj"
@@ -16801,7 +16801,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 437958,
         "victims": [
           "mj"
@@ -16810,19 +16810,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 438058,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 438165,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 438256,
         "weapon": "lg"
       },
@@ -16847,25 +16847,25 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 440776,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 440880,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 440993,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 441097,
         "weapon": "lg"
       },
@@ -16895,20 +16895,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 442876,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 442971,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 443071,
         "victims": [
           "mj"
@@ -16918,7 +16918,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 443188,
         "victims": [
           "mj"
@@ -16934,7 +16934,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 443266,
         "weapon": "lg"
       },
@@ -16971,7 +16971,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 446967,
         "victims": [
           "mj"
@@ -16980,7 +16980,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 447075,
         "weapon": "lg"
       },
@@ -16993,26 +16993,26 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 447179,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 447283,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 447374,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 447478,
         "victims": [
           "mj"
@@ -17021,13 +17021,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 447582,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 447672,
         "weapon": "lg"
       },
@@ -17041,7 +17041,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 447776,
         "victims": [
           "mj"
@@ -17051,7 +17051,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 447881,
         "victims": [
           "mj"
@@ -17060,13 +17060,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 447993,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 448075,
         "weapon": "lg"
       },
@@ -17458,14 +17458,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 487245,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 487359,
         "victims": [
           "mj"
@@ -17475,7 +17475,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 487449,
         "victims": [
           "mj"
@@ -17484,37 +17484,37 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 487557,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 487647,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 487751,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 487852,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 487955,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 488050,
         "weapon": "lg"
       },
@@ -17549,14 +17549,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 489647,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 489748,
         "victims": [
           "mj"
@@ -17565,20 +17565,20 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 489855,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 489956,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 490050,
         "victims": [
           "mj"
@@ -17588,7 +17588,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 490154,
         "victims": [
           "mj"
@@ -17636,14 +17636,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 493725,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 493829,
         "victims": [
           "mj"
@@ -17660,7 +17660,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 493930,
         "victims": [
           "mj"
@@ -17670,7 +17670,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 494034,
         "victims": [
           "mj"
@@ -17680,7 +17680,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 494128,
         "victims": [
           "mj"
@@ -17689,19 +17689,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 494229,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 494346,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 494437,
         "weapon": "lg"
       },
@@ -17727,14 +17727,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 499138,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 499255,
         "victims": [
           "mj"
@@ -17755,7 +17755,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 499346,
         "victims": [
           "mj"
@@ -17765,7 +17765,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 499453,
         "victims": [
           "mj"
@@ -17775,7 +17775,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 499544,
         "victims": [
           "mj"
@@ -17784,19 +17784,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 499657,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 499752,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 499839,
         "weapon": "lg"
       },
@@ -17878,7 +17878,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 509103,
         "victims": [
           "mj"
@@ -17887,14 +17887,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 509207,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 509311,
         "victims": [
           "mj"
@@ -17903,19 +17903,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 509424,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 509506,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 509618,
         "weapon": "lg"
       },
@@ -18042,7 +18042,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 523974,
         "victims": [
           "mj"
@@ -18051,14 +18051,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 524078,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 524190,
         "victims": [
           "mj"
@@ -18067,14 +18067,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 524285,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 524386,
         "victims": [
           "mj"
@@ -18084,7 +18084,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 524480,
         "victims": [
           "mj"
@@ -18093,19 +18093,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 524584,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 524675,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 524779,
         "weapon": "lg"
       },
@@ -18194,21 +18194,15 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 545130,
         "weapon": "lg"
       },
       {
-        "player": "speedball",
-        "source": "ammo",
-        "time": 545234,
-        "weapon": "lg"
-      },
-      {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 545234,
         "victims": [
@@ -18218,21 +18212,38 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
-        "time": 545334,
+        "source": "beam",
+        "time": 545234,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 545334,
         "weapon": "lg"
       },
       {
+        "player": "speedball",
+        "source": "beam",
+        "time": 545334,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "mj",
+        "source": "beam",
+        "team": "red",
+        "time": 545442,
+        "victims": [
+          "speedball"
+        ],
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 545442,
         "victims": [
           "mj"
@@ -18242,18 +18253,7 @@
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
-        "team": "red",
-        "time": 545442,
-        "victims": [
-          "speedball"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 545533,
         "victims": [
@@ -18263,13 +18263,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 545546,
         "weapon": "lg"
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 545623,
         "weapon": "lg"
@@ -18277,7 +18277,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 545637,
         "victims": [
           "mj"
@@ -18285,9 +18285,16 @@
         "weapon": "lg"
       },
       {
+        "player": "mj",
+        "source": "beam",
+        "team": "red",
+        "time": 545736,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 545736,
         "victims": [
           "mj"
@@ -18296,14 +18303,7 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
-        "team": "red",
-        "time": 545736,
-        "weapon": "lg"
-      },
-      {
-        "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 545818,
         "weapon": "lg"
@@ -18311,7 +18311,7 @@
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 545931,
         "victims": [
@@ -18332,7 +18332,7 @@
       {
         "hit": true,
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 546039,
         "victims": [
@@ -18342,7 +18342,7 @@
       },
       {
         "player": "mj",
-        "source": "ammo",
+        "source": "beam",
         "team": "red",
         "time": 546130,
         "weapon": "lg"
@@ -18421,26 +18421,26 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 557780,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 557893,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 557984,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 558088,
         "victims": [
           "mj"
@@ -18449,13 +18449,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 558183,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 558287,
         "weapon": "lg"
       },
@@ -18508,49 +18508,49 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 563845,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 563949,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 564053,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 564157,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 564248,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 564352,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 564452,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 564555,
         "weapon": "lg"
       },
@@ -18567,14 +18567,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 564750,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 564854,
         "victims": [
           "mj"
@@ -18583,31 +18583,31 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 564958,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 565066,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 565157,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 565257,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 565365,
         "weapon": "lg"
       },
@@ -18625,7 +18625,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 565455,
         "victims": [
           "mj"
@@ -18634,19 +18634,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 565556,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 565663,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 565763,
         "weapon": "lg"
       },
@@ -18681,20 +18681,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 569183,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 569287,
-        "weapon": "lg"
-      },
-      {
-        "player": "speedball",
-        "source": "ammo",
-        "time": 569387,
         "weapon": "lg"
       },
       {
@@ -18706,26 +18700,32 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
+        "time": 569387,
+        "weapon": "lg"
+      },
+      {
+        "player": "speedball",
+        "source": "beam",
         "time": 569504,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 569585,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 569689,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 569802,
         "victims": [
           "mj"
@@ -18734,7 +18734,7 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 569893,
         "weapon": "lg"
       },
@@ -18747,14 +18747,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 569988,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 570088,
         "victims": [
           "mj"
@@ -18763,19 +18763,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 570183,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 570282,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 570389,
         "weapon": "lg"
       },
@@ -18788,14 +18788,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 570491,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 570582,
         "victims": [
           "mj"
@@ -18804,14 +18804,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 570689,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 570789,
         "victims": [
           "mj"
@@ -18821,7 +18821,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 570884,
         "victims": [
           "mj"
@@ -18838,7 +18838,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 570988,
         "victims": [
           "mj"
@@ -18847,26 +18847,26 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 571092,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 571192,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 571295,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 571400,
         "victims": [
           "mj"
@@ -18886,14 +18886,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 571494,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 571594,
         "victims": [
           "mj"
@@ -18903,7 +18903,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 571698,
         "victims": [
           "mj"
@@ -18912,19 +18912,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 571789,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 571884,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 571984,
         "weapon": "lg"
       },
@@ -18976,7 +18976,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 579923,
         "victims": [
           "mj"
@@ -18985,13 +18985,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 580027,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 580235,
         "weapon": "lg"
       },
@@ -19050,13 +19050,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 582897,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 583001,
         "weapon": "lg"
       },
@@ -19134,14 +19134,14 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 592349,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 592465,
         "victims": [
           "mj"
@@ -19151,7 +19151,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 592560,
         "victims": [
           "mj"
@@ -19160,19 +19160,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 592664,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 592751,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 592855,
         "weapon": "lg"
       },
@@ -19186,7 +19186,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 592958,
         "victims": [
           "mj"
@@ -19195,19 +19195,19 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 593053,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 593166,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 593261,
         "weapon": "lg"
       },
@@ -19227,7 +19227,7 @@
       {
         "hit": true,
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 598014,
         "victims": [
           "mj"
@@ -19243,13 +19243,13 @@
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 598118,
         "weapon": "lg"
       },
       {
         "player": "speedball",
-        "source": "ammo",
+        "source": "beam",
         "time": 598232,
         "weapon": "lg"
       },

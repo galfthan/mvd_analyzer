@@ -22018,15 +22018,15 @@
             "weapon": "rl"
           },
           {
-            "accuracy": 0.28708133971291866,
+            "accuracy": 0.2843601895734597,
             "hits": 60,
-            "shots": 209,
+            "shots": 211,
             "weapon": "lg"
           }
         ],
         "player": "psy*overon",
         "team": "pys",
-        "total": 478
+        "total": 480
       },
       {
         "byWeapon": [
@@ -22158,8 +22158,8 @@
           {
             "ktxAttacks": 211,
             "ktxHits": 60,
-            "streamAttacks": 209,
-            "streamShots": 209,
+            "streamAttacks": 211,
+            "streamShots": 211,
             "weapon": "lg"
           }
         ],
@@ -22379,7 +22379,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 6712,
         "weapon": "lg"
@@ -22387,7 +22387,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 6816,
         "victims": [
@@ -22409,7 +22409,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 6920,
         "victims": [
@@ -22420,7 +22420,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 7024,
         "victims": [
@@ -22430,21 +22430,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 7100,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 7204,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 7313,
         "weapon": "lg"
@@ -22452,7 +22452,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 7404,
         "victims": [
@@ -22463,7 +22463,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 7508,
         "victims": [
@@ -22473,14 +22473,14 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 7703,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 7805,
         "weapon": "lg"
@@ -22498,14 +22498,14 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 9076,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 9165,
         "weapon": "lg"
@@ -22513,7 +22513,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 9269,
         "victims": [
@@ -22530,7 +22530,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 9378,
         "weapon": "lg"
@@ -22538,7 +22538,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 9467,
         "victims": [
@@ -22549,7 +22549,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 9571,
         "victims": [
@@ -22560,7 +22560,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 9672,
         "victims": [
@@ -22570,21 +22570,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 9765,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 9868,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 9972,
         "weapon": "lg"
@@ -22606,7 +22606,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 11544,
         "victims": [
@@ -22616,7 +22616,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 11648,
         "weapon": "lg"
@@ -22631,7 +22631,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 11752,
         "victims": [
@@ -22642,7 +22642,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 11855,
         "victims": [
@@ -22653,7 +22653,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 11945,
         "victims": [
@@ -22663,7 +22663,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 12061,
         "weapon": "lg"
@@ -22839,7 +22839,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 24559,
         "victims": [
@@ -22861,7 +22861,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 24676,
         "victims": [
@@ -22872,7 +22872,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 24780,
         "victims": [
@@ -22882,14 +22882,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 24882,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 24972,
         "weapon": "lg"
@@ -22922,49 +22922,49 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 26566,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 26677,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 26767,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 27066,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 27157,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 27261,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 27376,
         "weapon": "lg"
@@ -22972,7 +22972,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 27462,
         "victims": [
@@ -22982,28 +22982,28 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 27675,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 27776,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 27880,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 27984,
         "weapon": "lg"
@@ -23011,7 +23011,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 28066,
         "victims": [
@@ -23022,7 +23022,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 28177,
         "victims": [
@@ -23032,7 +23032,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 28287,
         "weapon": "lg"
@@ -23046,7 +23046,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 28376,
         "weapon": "lg"
@@ -23060,7 +23060,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30090,
         "weapon": "lg"
@@ -23068,7 +23068,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30183,
         "victims": [
@@ -23079,7 +23079,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30204,
         "victims": [
@@ -23090,7 +23090,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30287,
         "victims": [
@@ -23101,7 +23101,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30324,
         "victims": [
@@ -23122,56 +23122,56 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30402,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30415,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30487,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30519,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30592,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30608,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30696,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 30711,
         "weapon": "lg"
@@ -23333,7 +23333,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 38545,
         "victims": [
@@ -23343,77 +23343,77 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 38592,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 38650,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 38701,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 38749,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 38792,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 38853,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 38908,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 38949,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 38996,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 39049,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 39164,
         "weapon": "lg"
@@ -23431,7 +23431,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 39246,
         "weapon": "lg"
@@ -23663,28 +23663,28 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 50397,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 50494,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 50598,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 50703,
         "weapon": "lg"
@@ -23698,7 +23698,7 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 50793,
         "weapon": "lg"
@@ -23706,7 +23706,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 50897,
         "victims": [
@@ -23717,7 +23717,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 51001,
         "victims": [
@@ -23727,35 +23727,35 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 51090,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 51207,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 51311,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 51401,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 51494,
         "weapon": "lg"
@@ -23769,21 +23769,21 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 51598,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 51715,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 51805,
         "weapon": "lg"
@@ -23791,7 +23791,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 51908,
         "victims": [
@@ -23801,14 +23801,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 52011,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 52100,
         "weapon": "lg"
@@ -23816,7 +23816,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 52193,
         "victims": [
@@ -23826,7 +23826,7 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 52313,
         "weapon": "lg"
@@ -23844,14 +23844,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 52415,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 52500,
         "weapon": "lg"
@@ -23859,7 +23859,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 52611,
         "victims": [
@@ -23876,14 +23876,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 52699,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 52802,
         "weapon": "lg"
@@ -23891,7 +23891,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 52904,
         "victims": [
@@ -23901,14 +23901,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 53092,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 53201,
         "weapon": "lg"
@@ -24391,28 +24391,28 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 78039,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 78143,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 78259,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 78361,
         "weapon": "lg"
@@ -24438,65 +24438,58 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 78447,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 78558,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 78661,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 78744,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 78849,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 78952,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 79053,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 79157,
-        "weapon": "lg"
-      },
-      {
-        "player": "wd.dilbert",
-        "source": "ammo",
-        "team": "pys",
-        "time": 79245,
         "weapon": "lg"
       },
       {
@@ -24512,7 +24505,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
+        "team": "pys",
+        "time": 79245,
+        "weapon": "lg"
+      },
+      {
+        "player": "wd.dilbert",
+        "source": "beam",
         "team": "pys",
         "time": 79349,
         "weapon": "lg"
@@ -24520,7 +24520,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 79453,
         "victims": [
@@ -24679,7 +24679,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 88505,
         "weapon": "lg"
@@ -24687,7 +24687,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 88611,
         "victims": [
@@ -24698,7 +24698,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 88717,
         "victims": [
@@ -24806,7 +24806,7 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 94977,
         "weapon": "lg"
@@ -24825,7 +24825,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 95080,
         "victims": [
@@ -24958,7 +24958,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 100952,
         "victims": [
@@ -24968,7 +24968,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 101057,
         "weapon": "lg"
@@ -25018,14 +25018,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 104725,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 104830,
         "weapon": "lg"
@@ -25046,21 +25046,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 107662,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 107753,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 107861,
         "weapon": "lg"
@@ -25088,14 +25088,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 110299,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 110312,
         "weapon": "lg"
@@ -25103,7 +25103,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 110402,
         "victims": [
@@ -25114,7 +25114,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 110416,
         "victims": [
@@ -25124,14 +25124,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 110517,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 110530,
         "weapon": "lg"
@@ -25150,35 +25150,35 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 110622,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 110636,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 110713,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 110726,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 110830,
         "weapon": "lg"
@@ -25196,7 +25196,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 110933,
         "weapon": "lg"
@@ -25204,7 +25204,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 111017,
         "victims": [
@@ -25215,7 +25215,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 111120,
         "victims": [
@@ -25225,7 +25225,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 111232,
         "weapon": "lg"
@@ -25233,7 +25233,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 111337,
         "victims": [
@@ -25243,7 +25243,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 111364,
         "weapon": "lg"
@@ -25257,7 +25257,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 111428,
         "weapon": "lg"
@@ -25265,7 +25265,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 111455,
         "victims": [
@@ -25275,7 +25275,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 111533,
         "weapon": "lg"
@@ -25283,7 +25283,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 111561,
         "victims": [
@@ -25293,7 +25293,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 111673,
         "weapon": "lg"
@@ -25354,7 +25354,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 116078,
         "victims": [
@@ -25364,7 +25364,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 116195,
         "weapon": "lg"
@@ -25372,7 +25372,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 116288,
         "victims": [
@@ -25382,14 +25382,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 116401,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 116481,
         "weapon": "lg"
@@ -25449,35 +25449,35 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 119557,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 119663,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 119766,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 119869,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 119961,
         "weapon": "lg"
@@ -25496,7 +25496,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 120079,
         "victims": [
@@ -25506,7 +25506,7 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 120169,
         "weapon": "lg"
@@ -25514,7 +25514,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 120273,
         "victims": [
@@ -25524,42 +25524,42 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 120377,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 120426,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 120468,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 120530,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 120572,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 120622,
         "weapon": "lg"
@@ -25605,7 +25605,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 123417,
         "weapon": "lg"
@@ -25613,7 +25613,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 123531,
         "victims": [
@@ -25634,14 +25634,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 123637,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 123728,
         "weapon": "lg"
@@ -25649,7 +25649,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 124053,
         "victims": [
@@ -25659,14 +25659,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 124156,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 124261,
         "weapon": "lg"
@@ -25674,7 +25674,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 124365,
         "victims": [
@@ -25684,14 +25684,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 124466,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 124466,
         "weapon": "lg"
@@ -25706,7 +25706,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 124572,
         "victims": [
@@ -25717,7 +25717,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 124662,
         "victims": [
@@ -25727,29 +25727,29 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 124676,
         "weapon": "lg"
       },
       {
-        "player": "psy*overon",
-        "source": "ammo",
-        "team": "pys",
+        "player": "wd.char",
+        "source": "beam",
+        "team": "wd",
         "time": 124766,
         "weapon": "lg"
       },
       {
-        "player": "wd.char",
-        "source": "ammo",
-        "team": "wd",
+        "player": "psy*overon",
+        "source": "beam",
+        "team": "pys",
         "time": 124766,
         "weapon": "lg"
       },
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 124869,
         "victims": [
@@ -25760,7 +25760,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 124882,
         "victims": [
@@ -25770,14 +25770,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 124986,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 125074,
         "weapon": "lg"
@@ -25799,6 +25799,13 @@
         "team": "wd",
         "time": 125752,
         "weapon": "sg"
+      },
+      {
+        "player": "psy*overon",
+        "source": "beam",
+        "team": "pys",
+        "time": 125842,
+        "weapon": "lg"
       },
       {
         "player": "wd.char",
@@ -25853,56 +25860,56 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 128665,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 128780,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 128881,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 128986,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 129064,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 129180,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 129286,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 129377,
         "weapon": "lg"
@@ -25921,7 +25928,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 129479,
         "victims": [
@@ -25931,7 +25938,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 129582,
         "weapon": "lg"
@@ -26006,7 +26013,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 135050,
         "weapon": "lg"
@@ -26014,7 +26021,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 135144,
         "victims": [
@@ -26025,7 +26032,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 135249,
         "victims": [
@@ -26036,7 +26043,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 135270,
         "victims": [
@@ -26046,7 +26053,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 135362,
         "weapon": "lg"
@@ -26054,7 +26061,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 135375,
         "victims": [
@@ -26071,7 +26078,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 135481,
         "weapon": "lg"
@@ -26085,14 +26092,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 135585,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 135673,
         "weapon": "lg"
@@ -26100,7 +26107,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 135777,
         "victims": [
@@ -26110,28 +26117,28 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 135882,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 135962,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 136065,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 136182,
         "weapon": "lg"
@@ -26145,7 +26152,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 136285,
         "weapon": "lg"
@@ -26153,7 +26160,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 137726,
         "victims": [
@@ -26164,7 +26171,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 137830,
         "victims": [
@@ -26174,7 +26181,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 137934,
         "weapon": "lg"
@@ -26188,7 +26195,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 138039,
         "weapon": "lg"
@@ -26202,7 +26209,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 138129,
         "weapon": "lg"
@@ -26210,7 +26217,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 138232,
         "victims": [
@@ -26220,14 +26227,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 138336,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 138429,
         "weapon": "lg"
@@ -26242,7 +26249,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 139572,
         "victims": [
@@ -26260,7 +26267,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 139689,
         "victims": [
@@ -26271,7 +26278,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 139791,
         "victims": [
@@ -26281,7 +26288,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 139894,
         "weapon": "lg"
@@ -26289,7 +26296,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 139985,
         "victims": [
@@ -26299,7 +26306,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 140089,
         "weapon": "lg"
@@ -26332,7 +26339,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 142390,
         "victims": [
@@ -26342,9 +26349,16 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 142492,
+        "weapon": "lg"
+      },
+      {
+        "player": "psy*overon",
+        "source": "beam",
+        "team": "pys",
+        "time": 142598,
         "weapon": "lg"
       },
       {
@@ -26363,7 +26377,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 143882,
         "weapon": "lg"
@@ -26371,7 +26385,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 143985,
         "victims": [
@@ -26381,14 +26395,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 144089,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 144192,
         "weapon": "lg"
@@ -26396,7 +26410,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 144352,
         "victims": [
@@ -26406,7 +26420,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 144374,
         "weapon": "lg"
@@ -26414,7 +26428,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 144456,
         "victims": [
@@ -26424,14 +26438,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 144478,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 144569,
         "weapon": "lg"
@@ -26439,7 +26453,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 144582,
         "victims": [
@@ -26450,7 +26464,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 144676,
         "victims": [
@@ -26460,21 +26474,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 144693,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 144766,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 144780,
         "weapon": "lg"
@@ -26482,7 +26496,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 144857,
         "victims": [
@@ -26492,21 +26506,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 144973,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 145062,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 145158,
         "weapon": "lg"
@@ -26520,35 +26534,35 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146299,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146299,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146403,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146403,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146505,
         "weapon": "lg"
@@ -26556,7 +26570,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146520,
         "victims": [
@@ -26566,14 +26580,14 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146622,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146622,
         "weapon": "lg"
@@ -26587,7 +26601,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146705,
         "weapon": "lg"
@@ -26595,7 +26609,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146705,
         "victims": [
@@ -26606,7 +26620,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146816,
         "victims": [
@@ -26623,21 +26637,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146920,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 146920,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 147000,
         "weapon": "lg"
@@ -26669,21 +26683,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 148556,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 148655,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 148753,
         "weapon": "lg"
@@ -26691,7 +26705,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 148856,
         "victims": [
@@ -26701,28 +26715,28 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 148946,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 149050,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 149141,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 149169,
         "weapon": "lg"
@@ -26730,7 +26744,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 149234,
         "victims": [
@@ -26740,7 +26754,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 149247,
         "weapon": "lg"
@@ -26748,7 +26762,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 149338,
         "victims": [
@@ -26759,7 +26773,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 149352,
         "victims": [
@@ -26768,21 +26782,21 @@
         "weapon": "lg"
       },
       {
-        "player": "psy*overon",
-        "source": "ammo",
-        "team": "pys",
-        "time": 149454,
-        "weapon": "lg"
-      },
-      {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 149454,
         "victims": [
           "psy*overon"
         ],
+        "weapon": "lg"
+      },
+      {
+        "player": "psy*overon",
+        "source": "beam",
+        "team": "pys",
+        "time": 149454,
         "weapon": "lg"
       },
       {
@@ -26798,14 +26812,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 149533,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 149569,
         "weapon": "lg"
@@ -26813,7 +26827,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 149649,
         "victims": [
@@ -26823,7 +26837,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 149842,
         "weapon": "lg"
@@ -26890,21 +26904,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 155400,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 155504,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 155598,
         "weapon": "lg"
@@ -26918,7 +26932,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 155713,
         "weapon": "lg"
@@ -26953,7 +26967,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 158465,
         "weapon": "lg"
@@ -26988,7 +27002,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 160714,
         "weapon": "lg"
@@ -27036,7 +27050,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 166596,
         "victims": [
@@ -27057,28 +27071,28 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 166688,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 166806,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 166897,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 166997,
         "weapon": "lg"
@@ -27156,7 +27170,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 171634,
         "weapon": "lg"
@@ -27164,7 +27178,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 171739,
         "victims": [
@@ -27185,14 +27199,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 171844,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 171946,
         "weapon": "lg"
@@ -27206,14 +27220,14 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 172572,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 172674,
         "weapon": "lg"
@@ -27259,7 +27273,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 174792,
         "weapon": "lg"
@@ -27277,7 +27291,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 174896,
         "weapon": "lg"
@@ -27435,7 +27449,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 183986,
         "weapon": "lg"
@@ -27453,7 +27467,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 184083,
         "weapon": "lg"
@@ -27461,7 +27475,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 184182,
         "victims": [
@@ -27471,14 +27485,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 184286,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 184377,
         "weapon": "lg"
@@ -27486,7 +27500,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 184481,
         "victims": [
@@ -27497,7 +27511,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 184585,
         "victims": [
@@ -27587,7 +27601,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 188986,
         "victims": [
@@ -27597,28 +27611,28 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 189093,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 189197,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 189307,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 189390,
         "weapon": "lg"
@@ -27637,7 +27651,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 190689,
         "victims": [
@@ -27647,7 +27661,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 190792,
         "weapon": "lg"
@@ -27841,14 +27855,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 200195,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 201477,
         "weapon": "lg"
@@ -27856,7 +27870,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 201580,
         "victims": [
@@ -27866,7 +27880,7 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 201685,
         "weapon": "lg"
@@ -27885,30 +27899,23 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 201790,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 201881,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 201986,
-        "weapon": "lg"
-      },
-      {
-        "player": "wd.dilbert",
-        "source": "ammo",
-        "team": "pys",
-        "time": 202078,
         "weapon": "lg"
       },
       {
@@ -27924,7 +27931,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
+        "team": "pys",
+        "time": 202078,
+        "weapon": "lg"
+      },
+      {
+        "player": "wd.dilbert",
+        "source": "beam",
         "team": "pys",
         "time": 202169,
         "weapon": "lg"
@@ -28035,7 +28049,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 207750,
         "weapon": "lg"
@@ -28050,7 +28064,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 208633,
         "victims": [
@@ -28071,7 +28085,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 208731,
         "weapon": "lg"
@@ -28079,7 +28093,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 208837,
         "victims": [
@@ -28090,7 +28104,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 208948,
         "victims": [
@@ -28100,7 +28114,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 209036,
         "weapon": "lg"
@@ -28108,7 +28122,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 209133,
         "victims": [
@@ -28118,14 +28132,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 209234,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 209325,
         "weapon": "lg"
@@ -28139,7 +28153,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 209870,
         "weapon": "lg"
@@ -28153,21 +28167,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 210078,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 210184,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 210295,
         "weapon": "lg"
@@ -28181,21 +28195,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 210400,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 210491,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 210593,
         "weapon": "lg"
@@ -28203,7 +28217,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 210699,
         "victims": [
@@ -28213,14 +28227,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 210790,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 210892,
         "weapon": "lg"
@@ -28234,23 +28248,16 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 210987,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 211095,
-        "weapon": "lg"
-      },
-      {
-        "player": "psy*overon",
-        "source": "ammo",
-        "team": "pys",
-        "time": 211182,
         "weapon": "lg"
       },
       {
@@ -28267,28 +28274,35 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
+        "team": "pys",
+        "time": 211182,
+        "weapon": "lg"
+      },
+      {
+        "player": "psy*overon",
+        "source": "beam",
         "team": "pys",
         "time": 211305,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 211390,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 211481,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 211595,
         "weapon": "lg"
@@ -28302,7 +28316,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 211698,
         "weapon": "lg"
@@ -28310,7 +28324,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 211779,
         "victims": [
@@ -28321,7 +28335,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 211883,
         "victims": [
@@ -28331,14 +28345,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 211993,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 212097,
         "weapon": "lg"
@@ -28418,13 +28432,6 @@
         "weapon": "rl"
       },
       {
-        "player": "psy*overon",
-        "source": "ammo",
-        "team": "pys",
-        "time": 218442,
-        "weapon": "lg"
-      },
-      {
         "player": "wd.cao",
         "source": "sound",
         "team": "wd",
@@ -28433,21 +28440,28 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
+        "team": "pys",
+        "time": 218442,
+        "weapon": "lg"
+      },
+      {
+        "player": "psy*overon",
+        "source": "beam",
         "team": "pys",
         "time": 218546,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 218661,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 218763,
         "weapon": "lg"
@@ -28510,14 +28524,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 221896,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 222000,
         "weapon": "lg"
@@ -28525,7 +28539,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 222110,
         "victims": [
@@ -28535,14 +28549,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 222218,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 222298,
         "weapon": "lg"
@@ -28550,7 +28564,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 222414,
         "victims": [
@@ -28561,7 +28575,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 222516,
         "victims": [
@@ -28571,21 +28585,21 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 222608,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 222713,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 222815,
         "weapon": "lg"
@@ -28771,14 +28785,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 235623,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 235698,
         "weapon": "lg"
@@ -28786,7 +28800,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 235740,
         "victims": [
@@ -28796,7 +28810,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 235803,
         "weapon": "lg"
@@ -28804,7 +28818,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 235844,
         "victims": [
@@ -28821,21 +28835,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 235907,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 235939,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 236013,
         "weapon": "lg"
@@ -28843,7 +28857,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 236026,
         "victims": [
@@ -28853,21 +28867,21 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 236139,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 236234,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 236324,
         "weapon": "lg"
@@ -28881,7 +28895,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 238740,
         "weapon": "lg"
@@ -28899,7 +28913,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 238843,
         "weapon": "lg"
@@ -28907,7 +28921,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 238946,
         "victims": [
@@ -28917,14 +28931,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 239050,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 239141,
         "weapon": "lg"
@@ -28993,7 +29007,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 242997,
         "victims": [
@@ -29003,14 +29017,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 243101,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 243201,
         "weapon": "lg"
@@ -29029,42 +29043,42 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 243397,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 243496,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 243597,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 243714,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 243792,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 243896,
         "weapon": "lg"
@@ -29261,21 +29275,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 256907,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 257010,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 257114,
         "weapon": "lg"
@@ -29293,7 +29307,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 257211,
         "weapon": "lg"
@@ -29311,21 +29325,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 257303,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 257413,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 257523,
         "weapon": "lg"
@@ -29427,14 +29441,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 261518,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 261636,
         "weapon": "lg"
@@ -29470,7 +29484,7 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 263427,
         "weapon": "lg"
@@ -29489,7 +29503,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 263636,
         "victims": [
@@ -29548,7 +29562,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 266672,
         "weapon": "lg"
@@ -29562,28 +29576,28 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 266778,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 266879,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 266979,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 267074,
         "weapon": "lg"
@@ -29602,7 +29616,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 267179,
         "victims": [
@@ -29612,7 +29626,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 267285,
         "weapon": "lg"
@@ -29665,21 +29679,21 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 270895,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 270999,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 271103,
         "weapon": "lg"
@@ -29693,14 +29707,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 271207,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 271314,
         "weapon": "lg"
@@ -29931,21 +29945,21 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 282182,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 282286,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 282390,
         "weapon": "lg"
@@ -30119,84 +30133,84 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 289285,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 289399,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 289503,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 289609,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 289699,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 289792,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 289908,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 289985,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 290104,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 290204,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 290312,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 290402,
         "weapon": "lg"
@@ -30204,7 +30218,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 290491,
         "victims": [
@@ -30214,7 +30228,7 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 290610,
         "weapon": "lg"
@@ -30232,21 +30246,21 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 290688,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 290801,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 290910,
         "weapon": "lg"
@@ -30254,7 +30268,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 290999,
         "victims": [
@@ -30264,21 +30278,21 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 291104,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 291193,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 291307,
         "weapon": "lg"
@@ -30343,7 +30357,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 295307,
         "victims": [
@@ -30354,7 +30368,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 295411,
         "victims": [
@@ -30364,7 +30378,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 295620,
         "weapon": "lg"
@@ -30464,7 +30478,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 305895,
         "weapon": "lg"
@@ -30472,7 +30486,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 305999,
         "victims": [
@@ -30483,7 +30497,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 306091,
         "victims": [
@@ -30494,7 +30508,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 306204,
         "victims": [
@@ -30505,7 +30519,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 306294,
         "victims": [
@@ -30522,7 +30536,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 306399,
         "weapon": "lg"
@@ -30536,7 +30550,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 307494,
         "weapon": "lg"
@@ -30555,7 +30569,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 307598,
         "victims": [
@@ -30576,14 +30590,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 307794,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 307905,
         "weapon": "lg"
@@ -30627,7 +30641,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 308922,
         "victims": [
@@ -30638,7 +30652,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 309015,
         "victims": [
@@ -30649,7 +30663,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 309125,
         "victims": [
@@ -30666,14 +30680,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 309229,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 309314,
         "weapon": "lg"
@@ -30688,7 +30702,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 309418,
         "victims": [
@@ -30699,7 +30713,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 309534,
         "victims": [
@@ -30709,14 +30723,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 309610,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 309727,
         "weapon": "lg"
@@ -30781,7 +30795,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 312286,
         "victims": [
@@ -30798,14 +30812,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 312389,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 312488,
         "weapon": "lg"
@@ -30813,7 +30827,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 312594,
         "victims": [
@@ -30823,7 +30837,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 312690,
         "weapon": "lg"
@@ -30831,7 +30845,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 312794,
         "victims": [
@@ -30841,7 +30855,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 312897,
         "weapon": "lg"
@@ -30870,20 +30884,9 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 316418,
-        "victims": [
-          "wd.char"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "psy*overon",
-        "source": "ammo",
-        "team": "pys",
-        "time": 316528,
         "victims": [
           "wd.char"
         ],
@@ -30897,22 +30900,33 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
+        "team": "pys",
+        "time": 316528,
+        "victims": [
+          "wd.char"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "psy*overon",
+        "source": "beam",
         "team": "pys",
         "time": 316635,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 316736,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 316827,
         "weapon": "lg"
@@ -30930,41 +30944,30 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 316931,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 317026,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 317125,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 317231,
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "psy*overon",
-        "source": "ammo",
-        "team": "pys",
-        "time": 317336,
-        "victims": [
-          "wd.char"
-        ],
         "weapon": "lg"
       },
       {
@@ -30981,7 +30984,18 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
+        "team": "pys",
+        "time": 317336,
+        "victims": [
+          "wd.char"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "psy*overon",
+        "source": "beam",
         "team": "pys",
         "time": 317441,
         "victims": [
@@ -30991,21 +31005,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 317534,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 317626,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 317742,
         "weapon": "lg"
@@ -31188,7 +31202,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 327935,
         "victims": [
@@ -31199,7 +31213,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 328051,
         "victims": [
@@ -31216,14 +31230,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 328155,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 328247,
         "weapon": "lg"
@@ -31242,7 +31256,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 328337,
         "victims": [
@@ -31253,7 +31267,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 328441,
         "victims": [
@@ -31263,14 +31277,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 328554,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 328644,
         "weapon": "lg"
@@ -31320,7 +31334,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 332415,
         "weapon": "lg"
@@ -31328,7 +31342,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 332523,
         "victims": [
@@ -31338,7 +31352,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 332623,
         "weapon": "lg"
@@ -31346,7 +31360,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 332739,
         "victims": [
@@ -31357,7 +31371,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 332829,
         "victims": [
@@ -31368,7 +31382,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 332933,
         "victims": [
@@ -31378,14 +31392,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 333037,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 333125,
         "weapon": "lg"
@@ -31399,14 +31413,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 334956,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 335063,
         "weapon": "lg"
@@ -31420,28 +31434,28 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 335167,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 335269,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 335361,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 335463,
         "weapon": "lg"
@@ -31455,7 +31469,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 335907,
         "weapon": "lg"
@@ -31463,7 +31477,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 336011,
         "victims": [
@@ -31474,7 +31488,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 336115,
         "victims": [
@@ -31484,7 +31498,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 336231,
         "weapon": "lg"
@@ -31498,20 +31512,9 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 336320,
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "wd.cao",
-        "source": "ammo",
-        "team": "wd",
-        "time": 336418,
-        "victims": [
-          "psy*overon"
-        ],
         "weapon": "lg"
       },
       {
@@ -31524,9 +31527,9 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
-        "time": 336609,
+        "time": 336418,
         "victims": [
           "psy*overon"
         ],
@@ -31544,29 +31547,40 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
+        "team": "wd",
+        "time": 336609,
+        "victims": [
+          "psy*overon"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "wd.cao",
+        "source": "beam",
         "team": "wd",
         "time": 336723,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 336826,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 336923,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 337012,
         "weapon": "lg"
@@ -31598,21 +31612,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 338731,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 339183,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 339285,
         "weapon": "lg"
@@ -31638,7 +31652,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 339398,
         "victims": [
@@ -31649,7 +31663,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 339502,
         "victims": [
@@ -31660,7 +31674,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 339587,
         "victims": [
@@ -31817,21 +31831,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 345033,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 345141,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 345251,
         "weapon": "lg"
@@ -31839,7 +31853,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 345346,
         "victims": [
@@ -31850,7 +31864,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 345431,
         "victims": [
@@ -31860,7 +31874,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 345535,
         "weapon": "lg"
@@ -31868,7 +31882,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 345639,
         "victims": [
@@ -31886,7 +31900,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 345735,
         "victims": [
@@ -31896,14 +31910,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 345835,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 345944,
         "weapon": "lg"
@@ -31918,7 +31932,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 346043,
         "victims": [
@@ -31928,23 +31942,16 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 346138,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 346346,
-        "weapon": "lg"
-      },
-      {
-        "player": "psy*overon",
-        "source": "ammo",
-        "team": "pys",
-        "time": 346451,
         "weapon": "lg"
       },
       {
@@ -31958,6 +31965,13 @@
           "wd.char"
         ],
         "weapon": "rl"
+      },
+      {
+        "player": "psy*overon",
+        "source": "beam",
+        "team": "pys",
+        "time": 346451,
+        "weapon": "lg"
       },
       {
         "player": "wd.cao",
@@ -32021,21 +32035,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 349627,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 349739,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 349841,
         "weapon": "lg"
@@ -32121,7 +32135,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 353619,
         "victims": [
@@ -32131,7 +32145,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 353723,
         "weapon": "lg"
@@ -32149,21 +32163,21 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 353826,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 353923,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 354012,
         "weapon": "lg"
@@ -32171,7 +32185,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 354129,
         "victims": [
@@ -32193,7 +32207,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 354233,
         "victims": [
@@ -32204,7 +32218,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 354311,
         "victims": [
@@ -32214,7 +32228,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 354427,
         "weapon": "lg"
@@ -32222,7 +32236,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 354528,
         "victims": [
@@ -32232,7 +32246,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 354622,
         "weapon": "lg"
@@ -32240,7 +32254,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 354725,
         "victims": [
@@ -32258,7 +32272,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 354826,
         "victims": [
@@ -32268,7 +32282,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 354930,
         "weapon": "lg"
@@ -32283,7 +32297,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 356887,
         "victims": [
@@ -32305,7 +32319,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 356995,
         "victims": [
@@ -32316,7 +32330,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 357100,
         "victims": [
@@ -32334,7 +32348,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 357203,
         "victims": [
@@ -32344,7 +32358,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 357297,
         "weapon": "lg"
@@ -32358,7 +32372,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 357399,
         "weapon": "lg"
@@ -32408,14 +32422,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 360774,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 360881,
         "weapon": "lg"
@@ -32464,7 +32478,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 363713,
         "weapon": "lg"
@@ -32472,7 +32486,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 363807,
         "victims": [
@@ -32483,7 +32497,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 363908,
         "victims": [
@@ -32493,7 +32507,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 364021,
         "weapon": "lg"
@@ -32512,7 +32526,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 364103,
         "weapon": "lg"
@@ -32526,7 +32540,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 364207,
         "weapon": "lg"
@@ -32660,7 +32674,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 370181,
         "victims": [
@@ -32670,14 +32684,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 370289,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 370391,
         "weapon": "lg"
@@ -32685,7 +32699,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 370599,
         "victims": [
@@ -32695,7 +32709,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 370709,
         "weapon": "lg"
@@ -32720,7 +32734,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 370815,
         "weapon": "lg"
@@ -32846,21 +32860,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 379787,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 379876,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 379991,
         "weapon": "lg"
@@ -32900,7 +32914,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 381292,
         "victims": [
@@ -32911,7 +32925,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 381413,
         "victims": [
@@ -32921,35 +32935,35 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 381518,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 381607,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 381699,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 381803,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 381908,
         "weapon": "lg"
@@ -32964,7 +32978,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 382003,
         "victims": [
@@ -32981,14 +32995,14 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 382099,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 382205,
         "weapon": "lg"
@@ -32996,7 +33010,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 382315,
         "victims": [
@@ -33006,14 +33020,14 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 382407,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 382511,
         "weapon": "lg"
@@ -33021,7 +33035,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 382615,
         "victims": [
@@ -33031,14 +33045,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 382731,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 382823,
         "weapon": "lg"
@@ -33071,7 +33085,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 384557,
         "victims": [
@@ -33088,35 +33102,35 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 384661,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 384763,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 384869,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 384951,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 385059,
         "weapon": "lg"
@@ -33124,7 +33138,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 385168,
         "victims": [
@@ -33134,14 +33148,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 385259,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 385350,
         "weapon": "lg"
@@ -33160,7 +33174,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 385627,
         "victims": [
@@ -33171,7 +33185,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 385736,
         "victims": [
@@ -33182,7 +33196,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 385839,
         "victims": [
@@ -33193,7 +33207,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 385945,
         "victims": [
@@ -33203,7 +33217,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 386035,
         "weapon": "lg"
@@ -33217,7 +33231,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 386142,
         "weapon": "lg"
@@ -33231,14 +33245,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 388193,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 388391,
         "weapon": "lg"
@@ -33246,7 +33260,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 388494,
         "victims": [
@@ -33257,7 +33271,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 388596,
         "victims": [
@@ -33267,42 +33281,42 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 388713,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 388804,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 388907,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 389011,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 389101,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 389199,
         "weapon": "lg"
@@ -33327,7 +33341,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 390962,
         "weapon": "lg"
@@ -33335,7 +33349,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 391069,
         "victims": [
@@ -33357,7 +33371,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 391170,
         "victims": [
@@ -33368,7 +33382,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 391273,
         "victims": [
@@ -33379,7 +33393,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 391362,
         "victims": [
@@ -33389,7 +33403,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 391481,
         "weapon": "lg"
@@ -33403,16 +33417,9 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 391572,
-        "weapon": "lg"
-      },
-      {
-        "player": "wd.cao",
-        "source": "ammo",
-        "team": "wd",
-        "time": 391655,
         "weapon": "lg"
       },
       {
@@ -33425,6 +33432,13 @@
           "psy*overon"
         ],
         "weapon": "rl"
+      },
+      {
+        "player": "wd.cao",
+        "source": "beam",
+        "team": "wd",
+        "time": 391655,
+        "weapon": "lg"
       },
       {
         "player": "psy*overon",
@@ -33558,7 +33572,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 401955,
         "weapon": "lg"
@@ -33590,35 +33604,35 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 403355,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 403447,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 403552,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 403656,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 403754,
         "weapon": "lg"
@@ -33626,7 +33640,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 403862,
         "victims": [
@@ -33636,7 +33650,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 403961,
         "weapon": "lg"
@@ -33651,7 +33665,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 404049,
         "victims": [
@@ -33661,14 +33675,14 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 404149,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 404267,
         "weapon": "lg"
@@ -33676,7 +33690,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 404367,
         "victims": [
@@ -33687,7 +33701,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 404459,
         "victims": [
@@ -33697,21 +33711,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 404563,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 404655,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 404747,
         "weapon": "lg"
@@ -33740,21 +33754,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 406778,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 406883,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 406987,
         "weapon": "lg"
@@ -33773,7 +33787,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 407090,
         "victims": [
@@ -33783,21 +33797,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 407181,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 407284,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 407388,
         "weapon": "lg"
@@ -33805,7 +33819,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 407480,
         "victims": [
@@ -33815,21 +33829,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 407585,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 407685,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 407777,
         "weapon": "lg"
@@ -33847,7 +33861,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 407895,
         "weapon": "lg"
@@ -33868,14 +33882,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 409468,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 409575,
         "weapon": "lg"
@@ -33883,7 +33897,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 409667,
         "victims": [
@@ -33893,7 +33907,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 409911,
         "weapon": "lg"
@@ -33925,14 +33939,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 413187,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 413295,
         "weapon": "lg"
@@ -34018,14 +34032,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 416883,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 416986,
         "weapon": "lg"
@@ -34079,7 +34093,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 419312,
         "victims": [
@@ -34089,35 +34103,35 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 419412,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 419519,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 419623,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 419713,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 419817,
         "weapon": "lg"
@@ -34172,14 +34186,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 420781,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 420887,
         "weapon": "lg"
@@ -34194,7 +34208,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 420991,
         "victims": [
@@ -34205,7 +34219,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 421091,
         "victims": [
@@ -34262,7 +34276,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 425025,
         "victims": [
@@ -34272,7 +34286,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 425117,
         "weapon": "lg"
@@ -34290,7 +34304,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 425231,
         "weapon": "lg"
@@ -34433,7 +34447,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 431128,
         "weapon": "lg"
@@ -34441,7 +34455,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 431220,
         "victims": [
@@ -34451,14 +34465,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 431324,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 431428,
         "weapon": "lg"
@@ -34472,14 +34486,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 433713,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 433817,
         "weapon": "lg"
@@ -34493,35 +34507,35 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 433911,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 434015,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 435477,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 435583,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 435685,
         "weapon": "lg"
@@ -34539,21 +34553,21 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 435783,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 435876,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 435972,
         "weapon": "lg"
@@ -34567,7 +34581,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 438324,
         "weapon": "lg"
@@ -34575,7 +34589,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 438431,
         "victims": [
@@ -34586,7 +34600,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 438543,
         "victims": [
@@ -34596,21 +34610,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 438633,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 438737,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 438829,
         "weapon": "lg"
@@ -34618,7 +34632,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 438934,
         "victims": [
@@ -34639,23 +34653,16 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 439023,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 439128,
-        "weapon": "lg"
-      },
-      {
-        "player": "wd.cao",
-        "source": "ammo",
-        "team": "wd",
-        "time": 439231,
         "weapon": "lg"
       },
       {
@@ -34667,21 +34674,28 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
+        "team": "wd",
+        "time": 439231,
+        "weapon": "lg"
+      },
+      {
+        "player": "wd.cao",
+        "source": "beam",
         "team": "wd",
         "time": 439323,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 439439,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 439529,
         "weapon": "lg"
@@ -34755,7 +34769,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 444315,
         "weapon": "lg"
@@ -34763,7 +34777,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 444425,
         "victims": [
@@ -34784,14 +34798,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 444520,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 444623,
         "weapon": "lg"
@@ -34799,7 +34813,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 444714,
         "victims": [
@@ -34810,7 +34824,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 444829,
         "victims": [
@@ -34820,7 +34834,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 444933,
         "weapon": "lg"
@@ -34828,7 +34842,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 445023,
         "victims": [
@@ -34838,21 +34852,21 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 445115,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 445231,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 445321,
         "weapon": "lg"
@@ -34903,7 +34917,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 447936,
         "victims": [
@@ -34913,14 +34927,14 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 448043,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 448166,
         "weapon": "lg"
@@ -35012,7 +35026,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 453167,
         "victims": [
@@ -35033,28 +35047,28 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 453272,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 453387,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 453477,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 453571,
         "weapon": "lg"
@@ -35106,7 +35120,7 @@
       {
         "hit": true,
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 454535,
         "victims": [
@@ -35116,14 +35130,14 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 454645,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 454743,
         "weapon": "lg"
@@ -35137,21 +35151,21 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 454844,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 454936,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 455043,
         "weapon": "lg"
@@ -35270,14 +35284,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 461438,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 461535,
         "weapon": "lg"
@@ -35292,20 +35306,9 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 461739,
-        "victims": [
-          "wd.dilbert"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "wd.char",
-        "source": "ammo",
-        "team": "wd",
-        "time": 461847,
         "victims": [
           "wd.dilbert"
         ],
@@ -35319,8 +35322,19 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
+        "team": "wd",
+        "time": 461847,
+        "victims": [
+          "wd.dilbert"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "wd.char",
+        "source": "beam",
         "team": "wd",
         "time": 461957,
         "weapon": "lg"
@@ -35334,7 +35348,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 462055,
         "weapon": "lg"
@@ -35380,7 +35394,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 464275,
         "weapon": "lg"
@@ -35394,14 +35408,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 464379,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 464480,
         "weapon": "lg"
@@ -35409,7 +35423,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 464587,
         "victims": [
@@ -35432,7 +35446,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 464676,
         "victims": [
@@ -35453,28 +35467,28 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 464778,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 464894,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 464976,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 465191,
         "weapon": "lg"
@@ -35482,7 +35496,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 465285,
         "victims": [
@@ -35493,7 +35507,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 465388,
         "victims": [
@@ -35503,16 +35517,9 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 465492,
-        "weapon": "lg"
-      },
-      {
-        "player": "wd.char",
-        "source": "ammo",
-        "team": "wd",
-        "time": 465584,
         "weapon": "lg"
       },
       {
@@ -35535,9 +35542,16 @@
         "weapon": "rl"
       },
       {
+        "player": "wd.char",
+        "source": "beam",
+        "team": "wd",
+        "time": 465584,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 465688,
         "victims": [
@@ -35554,14 +35568,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 465791,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 465895,
         "weapon": "lg"
@@ -35569,7 +35583,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 465986,
         "victims": [
@@ -35579,35 +35593,35 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 466090,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 466193,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 466752,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 466860,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 466961,
         "weapon": "lg"
@@ -35825,7 +35839,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 483675,
         "victims": [
@@ -35836,7 +35850,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 483778,
         "victims": [
@@ -35847,7 +35861,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 483883,
         "victims": [
@@ -35858,7 +35872,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 483986,
         "victims": [
@@ -35879,7 +35893,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 484071,
         "weapon": "lg"
@@ -35930,7 +35944,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 487664,
         "weapon": "lg"
@@ -35952,7 +35966,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489003,
         "victims": [
@@ -35970,7 +35984,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489035,
         "victims": [
@@ -35981,7 +35995,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489107,
         "victims": [
@@ -35999,7 +36013,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489139,
         "victims": [
@@ -36009,42 +36023,42 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489217,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489232,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489315,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489347,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489402,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489435,
         "weapon": "lg"
@@ -36052,7 +36066,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 489927,
         "victims": [
@@ -36063,7 +36077,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490035,
         "victims": [
@@ -36074,7 +36088,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490139,
         "victims": [
@@ -36096,7 +36110,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490239,
         "victims": [
@@ -36106,63 +36120,63 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490323,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490359,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490435,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490466,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490572,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490674,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490751,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490863,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 490972,
         "weapon": "lg"
@@ -36237,7 +36251,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 496175,
         "victims": [
@@ -36247,21 +36261,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 496279,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 496388,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 496492,
         "weapon": "lg"
@@ -36289,7 +36303,7 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 498453,
         "weapon": "lg"
@@ -36303,35 +36317,35 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 498557,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 498660,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 498768,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 498872,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 498967,
         "weapon": "lg"
@@ -36350,7 +36364,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 499071,
         "victims": [
@@ -36360,21 +36374,21 @@
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 499175,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 499263,
         "weapon": "lg"
       },
       {
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 499373,
         "weapon": "lg"
@@ -36388,14 +36402,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 502803,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 502907,
         "weapon": "lg"
@@ -36410,7 +36424,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 503012,
         "victims": [
@@ -36420,14 +36434,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 503123,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 503208,
         "weapon": "lg"
@@ -36435,7 +36449,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 503312,
         "victims": [
@@ -36445,21 +36459,21 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 503419,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 503509,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 503615,
         "weapon": "lg"
@@ -36531,7 +36545,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 506926,
         "weapon": "lg"
@@ -36546,7 +36560,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 507029,
         "victims": [
@@ -36557,7 +36571,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 507063,
         "victims": [
@@ -36574,7 +36588,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 507128,
         "weapon": "lg"
@@ -36582,7 +36596,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 507155,
         "victims": [
@@ -36593,7 +36607,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 507233,
         "victims": [
@@ -36603,21 +36617,21 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 507271,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 507373,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 507464,
         "weapon": "lg"
@@ -36631,7 +36645,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 507570,
         "weapon": "lg"
@@ -36645,7 +36659,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 507661,
         "weapon": "lg"
@@ -36659,7 +36673,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 507751,
         "weapon": "lg"
@@ -36673,14 +36687,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 507855,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 507960,
         "weapon": "lg"
@@ -36731,7 +36745,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 510284,
         "weapon": "lg"
@@ -36739,7 +36753,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 510388,
         "victims": [
@@ -36749,7 +36763,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 510492,
         "weapon": "lg"
@@ -36763,7 +36777,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 510596,
         "weapon": "lg"
@@ -36778,7 +36792,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 511478,
         "victims": [
@@ -36788,7 +36802,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 511581,
         "weapon": "lg"
@@ -36807,21 +36821,21 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 511674,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 511783,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 511879,
         "weapon": "lg"
@@ -36899,7 +36913,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 518427,
         "weapon": "lg"
@@ -36907,7 +36921,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 518539,
         "victims": [
@@ -36917,14 +36931,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 518647,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 518751,
         "weapon": "lg"
@@ -37036,14 +37050,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 523141,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 523257,
         "weapon": "lg"
@@ -37051,7 +37065,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 523362,
         "victims": [
@@ -37068,7 +37082,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 523465,
         "weapon": "lg"
@@ -37087,7 +37101,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 523555,
         "victims": [
@@ -37097,14 +37111,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 523647,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 523751,
         "weapon": "lg"
@@ -37112,7 +37126,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 523855,
         "victims": [
@@ -37123,7 +37137,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 523957,
         "victims": [
@@ -37134,7 +37148,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 524061,
         "victims": [
@@ -37144,14 +37158,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 524142,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 524249,
         "weapon": "lg"
@@ -37260,7 +37274,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 531219,
         "victims": [
@@ -37270,14 +37284,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 531315,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 531426,
         "weapon": "lg"
@@ -37285,7 +37299,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 531518,
         "victims": [
@@ -37295,7 +37309,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 531609,
         "weapon": "lg"
@@ -37424,14 +37438,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 542063,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 542167,
         "weapon": "lg"
@@ -37575,7 +37589,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 552167,
         "weapon": "lg"
@@ -37590,7 +37604,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 552276,
         "victims": [
@@ -37600,7 +37614,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 552383,
         "weapon": "lg"
@@ -37639,14 +37653,14 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 553383,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 553476,
         "weapon": "lg"
@@ -37654,7 +37668,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 553591,
         "victims": [
@@ -37682,7 +37696,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 553683,
         "weapon": "lg"
@@ -37704,7 +37718,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 560048,
         "victims": [
@@ -37714,7 +37728,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 560154,
         "weapon": "lg"
@@ -37722,7 +37736,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 560258,
         "victims": [
@@ -37744,7 +37758,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 560362,
         "victims": [
@@ -37755,7 +37769,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 560459,
         "victims": [
@@ -37765,7 +37779,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 560554,
         "weapon": "lg"
@@ -37779,7 +37793,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 560660,
         "weapon": "lg"
@@ -37805,28 +37819,28 @@
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 561539,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 561643,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 561747,
         "weapon": "lg"
       },
       {
         "player": "wd.dilbert",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 561841,
         "weapon": "lg"
@@ -37959,7 +37973,7 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 571178,
         "weapon": "lg"
@@ -37977,21 +37991,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 571283,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 571395,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 571489,
         "weapon": "lg"
@@ -37999,7 +38013,7 @@
       {
         "hit": true,
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 571575,
         "victims": [
@@ -38028,7 +38042,7 @@
       {
         "hit": true,
         "player": "wd.cao",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 571983,
         "victims": [
@@ -38077,21 +38091,21 @@
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 575111,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 575205,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 575309,
         "weapon": "lg"
@@ -38194,21 +38208,21 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 580007,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 580114,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 580218,
         "weapon": "lg"
@@ -38227,7 +38241,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 580309,
         "victims": [
@@ -38238,7 +38252,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 580413,
         "victims": [
@@ -38248,7 +38262,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 580504,
         "weapon": "lg"
@@ -38256,7 +38270,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 580608,
         "victims": [
@@ -38272,13 +38286,6 @@
         "weapon": "rl"
       },
       {
-        "player": "wd.char",
-        "source": "ammo",
-        "team": "wd",
-        "time": 580708,
-        "weapon": "lg"
-      },
-      {
         "player": "psy*overon",
         "source": "sound",
         "team": "pys",
@@ -38287,7 +38294,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
+        "team": "wd",
+        "time": 580708,
+        "weapon": "lg"
+      },
+      {
+        "player": "wd.char",
+        "source": "beam",
         "team": "wd",
         "time": 580812,
         "weapon": "lg"
@@ -38444,7 +38458,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 592796,
         "weapon": "lg"
@@ -38452,7 +38466,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 592894,
         "victims": [
@@ -38462,7 +38476,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 593009,
         "weapon": "lg"
@@ -38477,7 +38491,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 593111,
         "victims": [
@@ -38487,14 +38501,14 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 593205,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 593308,
         "weapon": "lg"
@@ -38502,7 +38516,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 593400,
         "victims": [
@@ -38513,7 +38527,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 593504,
         "victims": [
@@ -38524,7 +38538,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 593595,
         "victims": [
@@ -38541,7 +38555,7 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 593703,
         "weapon": "lg"
@@ -38549,7 +38563,7 @@
       {
         "hit": true,
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 593793,
         "victims": [
@@ -38559,16 +38573,9 @@
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 593900,
-        "weapon": "lg"
-      },
-      {
-        "player": "wd.char",
-        "source": "ammo",
-        "team": "wd",
-        "time": 593997,
         "weapon": "lg"
       },
       {
@@ -38579,29 +38586,36 @@
         "weapon": "sg"
       },
       {
+        "player": "wd.char",
+        "source": "beam",
+        "team": "wd",
+        "time": 593997,
+        "weapon": "lg"
+      },
+      {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 595279,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 595386,
         "weapon": "lg"
       },
       {
         "player": "psy*overon",
-        "source": "ammo",
+        "source": "beam",
         "team": "pys",
         "time": 595491,
         "weapon": "lg"
       },
       {
         "player": "wd.char",
-        "source": "ammo",
+        "source": "beam",
         "team": "wd",
         "time": 595699,
         "weapon": "lg"

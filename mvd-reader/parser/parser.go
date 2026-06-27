@@ -45,6 +45,7 @@ const (
 	EventSound
 	EventProjectileSpawn
 	EventProjectileDespawn
+	EventBeam
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -328,6 +329,12 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 				return nil
 			}
 
+		case mvd.SvcTempEntity:
+			if teType, err := p.parseTempEntity(r, msg.Time, msg.TimeMs, p.floatCoords); err != nil {
+				p.warn(msg.Time, "unknown_te", "temp entity type %d: %v, %d bytes remaining in payload abandoned", teType, err, r.Remaining())
+				return nil
+			}
+
 		case mvd.SvcDisconnect:
 			message, _ := r.ReadString()
 			if message == "EndOfDemo" {
@@ -433,13 +440,7 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			}
 
 		default:
-			if cmd == mvd.SvcTempEntity && p.diagnosticMode {
-				teType, err := skipTempEntityDiag(r, p.floatCoords)
-				if err != nil {
-					p.warn(msg.Time, "unknown_te", "unknown temp entity type %d, %d bytes remaining in payload abandoned", teType, r.Remaining())
-					return nil
-				}
-			} else if err := skipCommand(r, cmd, p.floatCoords, p.fteExtensions); err != nil {
+			if err := skipCommand(r, cmd, p.floatCoords, p.fteExtensions); err != nil {
 				p.warn(msg.Time, "unknown_svc", "%s (cmd %d), %d bytes remaining in payload abandoned",
 					SvcName(cmd), cmd, r.Remaining())
 				return nil
@@ -901,29 +902,10 @@ func skipSpawnStatic(r *mvd.BufferReader, floatCoords bool) error {
 //
 // Unknown TE types deliberately bail (io.EOF) rather than guessing a length —
 // silent drift is much worse than dropping the rest of the message.
-// skipTempEntityDiag is like skipTempEntity but returns the TE type on unknown types
-// so the caller can emit a diagnostic warning. Returns (teType, error).
-func skipTempEntityDiag(r *mvd.BufferReader, floatCoords bool) (byte, error) {
-	teType, err := r.ReadByte()
-	if err != nil {
-		return 0, err
-	}
-	coordSize := 2
-	if floatCoords {
-		coordSize = 4
-	}
-	switch teType {
-	case 0, 1, 3, 4, 7, 8, 10, 11, 13:
-		return teType, r.Skip(3 * coordSize)
-	case 2, 12:
-		return teType, r.Skip(1 + 3*coordSize)
-	case 5, 6, 9:
-		return teType, r.Skip(2 + 6*coordSize)
-	default:
-		return teType, io.EOF
-	}
-}
-
+//
+// skipTempEntity is the skip-only fallback retained on skipCommand's path;
+// the live parser routes svc_temp_entity through parseTempEntity (which also
+// surfaces lightning beams as BeamEvent) — see tempentity.go.
 func skipTempEntity(r *mvd.BufferReader, floatCoords bool) error {
 	teType, err := r.ReadByte()
 	if err != nil {

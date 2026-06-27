@@ -626,9 +626,44 @@ note especially that the **rocket launcher** fires `sgun1.wav` and the
 
 The lightning gun has **no** per-shot fire sound (`lstart.wav` plays once
 per burst on `CHAN_AUTO`; `lhit.wav` is throttled hit feedback), so LG fire
-is counted from cell-ammo decrements instead. The grenade *bounce*
-(`bounce.wav`), ricochets (`ric*`), spike tinks (`tink1`) and axe sounds
-are not fires.
+is counted from its lightning beam instead (see `svc_temp_entity` below).
+The grenade *bounce* (`bounce.wav`), ricochets (`ric*`), spike tinks
+(`tink1`) and axe sounds are not fires.
+
+---
+
+## svc_temp_entity (23) - Temporary Entity
+
+A one-shot visual effect (explosion, gunshot puff, blood, lightning beam).
+The byte layout depends on the type:
+
+```
+Offset  Size  Field
+------  ----  -----
+0       1     svc_temp_entity (23)
+1       1     te_type
+
+// Point effects (TE_SPIKE/SUPERSPIKE/EXPLOSION/TAREXPLOSION/...):
+2       6/12  3 coords (origin)
+// TE_GUNSHOT (2), TE_BLOOD (12): 1-byte count, then 3 coords
+// Lightning beams (TE_LIGHTNING1=5 / 2=6 / 3=9):
+2       2     entity (short)        <- the entity drawing the beam
+4       6/12  3 coords (start)
+?       6/12  3 coords (end)
+```
+
+The parser decodes the **lightning beams** into `BeamEvent` (firing entity +
+start/end) and consumes every other type for its known length; an unknown
+type bails rather than guessing a length and drifting the cursor.
+
+**Player Lightning Gun.** `TE_LIGHTNING2` is the bolt KTX writes once per LG
+fire tick (`ktx/src/weapons.c` `W_FireLightning`), carrying the firing
+entity, the muzzle (`start`) and the hitscan trace endpoint (`end`). Because
+it is emitted in the same function that increments the accuracy counter — and
+LG *discharge* (firing in water) returns before that point and writes no beam
+— the beam count equals KTX `acc.attacks` exactly. The `shots` analyzer uses
+it as the authoritative per-shot LG signal (`Ent-1` is the shooter).
+`TE_LIGHTNING1/3` are non-player bolts and are not counted as LG fire.
 
 ---
 

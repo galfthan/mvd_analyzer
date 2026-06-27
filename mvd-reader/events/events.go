@@ -65,6 +65,7 @@ const (
 	KindSound               = parser.EventSound
 	KindProjectileSpawn     = parser.EventProjectileSpawn
 	KindProjectileDespawn   = parser.EventProjectileDespawn
+	KindBeam                = parser.EventBeam
 )
 
 // Concrete event types emitted on the Source.
@@ -97,6 +98,7 @@ type (
 	SoundEvent               = parser.SoundEvent
 	ProjectileSpawnEvent     = parser.ProjectileSpawnEvent
 	ProjectileDespawnEvent   = parser.ProjectileDespawnEvent
+	BeamEvent                = parser.BeamEvent
 	EntityState              = parser.EntityState
 )
 

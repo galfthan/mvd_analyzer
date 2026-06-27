@@ -51767,15 +51767,15 @@
             "weapon": "rl"
           },
           {
-            "accuracy": 0.27741935483870966,
+            "accuracy": 0.27564102564102566,
             "hits": 43,
-            "shots": 155,
+            "shots": 156,
             "weapon": "lg"
           }
         ],
         "player": "paniagua",
         "team": "jah",
-        "total": 758
+        "total": 759
       },
       {
         "byWeapon": [
@@ -52133,8 +52133,8 @@
           {
             "ktxAttacks": 156,
             "ktxHits": 43,
-            "streamAttacks": 155,
-            "streamShots": 155,
+            "streamAttacks": 156,
+            "streamShots": 156,
             "weapon": "lg"
           }
         ],
@@ -52461,17 +52461,6 @@
       },
       {
         "hit": true,
-        "player": "sailorman",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 11542,
-        "victims": [
-          "paniagua"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
         "player": "rusti",
         "source": "sound",
         "team": "jah",
@@ -52483,8 +52472,19 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 11542,
+        "victims": [
+          "paniagua"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "sailorman",
+        "source": "beam",
         "team": "ahoy",
         "time": 11648,
         "weapon": "lg"
@@ -52492,7 +52492,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 11753,
         "victims": [
@@ -52503,7 +52503,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 11855,
         "victims": [
@@ -52524,14 +52524,14 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 11960,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 12064,
         "weapon": "lg"
@@ -52545,21 +52545,21 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 12168,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 12272,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 12381,
         "weapon": "lg"
@@ -52592,7 +52592,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 12485,
         "victims": [
@@ -52610,7 +52610,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 12588,
         "victims": [
@@ -52638,7 +52638,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 12659,
         "weapon": "lg"
@@ -52652,7 +52652,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 12761,
         "weapon": "lg"
@@ -53313,7 +53313,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 27886,
         "weapon": "lg"
@@ -53321,7 +53321,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 27990,
         "victims": [
@@ -53331,20 +53331,9 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 28093,
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "sailorman",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 28198,
-        "victims": [
-          "biggz"
-        ],
         "weapon": "lg"
       },
       {
@@ -53357,7 +53346,18 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 28198,
+        "victims": [
+          "biggz"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "sailorman",
+        "source": "beam",
         "team": "ahoy",
         "time": 28302,
         "victims": [
@@ -53367,14 +53367,14 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 28406,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 28510,
         "weapon": "lg"
@@ -53389,7 +53389,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 28925,
         "victims": [
@@ -53400,7 +53400,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 29028,
         "victims": [
@@ -53411,7 +53411,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 29133,
         "victims": [
@@ -53421,7 +53421,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 29237,
         "weapon": "lg"
@@ -53435,7 +53435,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 29306,
         "weapon": "lg"
@@ -53449,7 +53449,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 29410,
         "weapon": "lg"
@@ -53457,7 +53457,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 29514,
         "victims": [
@@ -53820,7 +53820,7 @@
       {
         "hit": true,
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 40584,
         "victims": [
@@ -53831,7 +53831,7 @@
       {
         "hit": true,
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 40690,
         "victims": [
@@ -53841,7 +53841,7 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 40793,
         "weapon": "lg"
@@ -53849,7 +53849,7 @@
       {
         "hit": true,
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 40897,
         "victims": [
@@ -53859,14 +53859,14 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 41001,
         "weapon": "lg"
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 41106,
         "weapon": "lg"
@@ -53891,21 +53891,21 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 41208,
         "weapon": "lg"
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 41279,
         "weapon": "lg"
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 41381,
         "weapon": "lg"
@@ -53974,7 +53974,7 @@
       {
         "hit": true,
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 43671,
         "victims": [
@@ -53985,7 +53985,7 @@
       {
         "hit": true,
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 43775,
         "victims": [
@@ -53995,21 +53995,21 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 43880,
         "weapon": "lg"
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 43983,
         "weapon": "lg"
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 44053,
         "weapon": "lg"
@@ -54716,14 +54716,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 70971,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 71110,
         "weapon": "lg"
@@ -54731,7 +54731,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 71179,
         "victims": [
@@ -54741,7 +54741,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 71315,
         "weapon": "lg"
@@ -54756,7 +54756,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 71383,
         "victims": [
@@ -54767,7 +54767,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 71487,
         "victims": [
@@ -54777,14 +54777,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 71591,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 71695,
         "weapon": "lg"
@@ -54792,7 +54792,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 71799,
         "victims": [
@@ -54813,7 +54813,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 71903,
         "weapon": "lg"
@@ -54821,7 +54821,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 72006,
         "victims": [
@@ -54831,7 +54831,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 72075,
         "weapon": "lg"
@@ -54839,7 +54839,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 72178,
         "victims": [
@@ -55166,7 +55166,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 86258,
         "victims": [
@@ -55195,7 +55195,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 86360,
         "victims": [
@@ -55571,7 +55571,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 103313,
         "victims": [
@@ -55582,7 +55582,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 103450,
         "victims": [
@@ -55599,7 +55599,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 103520,
         "weapon": "lg"
@@ -55617,14 +55617,14 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 103624,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 103728,
         "weapon": "lg"
@@ -55639,7 +55639,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 103832,
         "victims": [
@@ -55978,7 +55978,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 118773,
         "victims": [
@@ -55989,7 +55989,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 118878,
         "victims": [
@@ -56000,7 +56000,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 118981,
         "victims": [
@@ -56011,7 +56011,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 119085,
         "victims": [
@@ -56029,7 +56029,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 119189,
         "victims": [
@@ -56039,7 +56039,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 119292,
         "weapon": "lg"
@@ -56064,14 +56064,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 119397,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 119467,
         "weapon": "lg"
@@ -56079,7 +56079,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 119571,
         "victims": [
@@ -56089,14 +56089,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 119674,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 119776,
         "weapon": "lg"
@@ -56114,7 +56114,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 119877,
         "weapon": "lg"
@@ -56157,7 +56157,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 121401,
         "weapon": "lg"
@@ -56165,7 +56165,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 121505,
         "victims": [
@@ -56176,7 +56176,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 121607,
         "victims": [
@@ -56187,7 +56187,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 121713,
         "victims": [
@@ -56198,7 +56198,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 121781,
         "victims": [
@@ -56222,7 +56222,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 121989,
         "weapon": "lg"
@@ -56476,7 +56476,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 132751,
         "victims": [
@@ -56486,7 +56486,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 132854,
         "weapon": "lg"
@@ -56500,7 +56500,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 132958,
         "weapon": "lg"
@@ -56584,7 +56584,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 134855,
         "victims": [
@@ -56595,7 +56595,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 134958,
         "victims": [
@@ -56605,21 +56605,21 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 135062,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 135166,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 135270,
         "weapon": "lg"
@@ -56649,7 +56649,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 137312,
         "victims": [
@@ -56725,7 +56725,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 138627,
         "victims": [
@@ -56736,7 +56736,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 138731,
         "victims": [
@@ -57074,7 +57074,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 149474,
         "weapon": "lg"
@@ -57082,7 +57082,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 149578,
         "victims": [
@@ -57103,7 +57103,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 149682,
         "weapon": "lg"
@@ -57111,7 +57111,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 149787,
         "victims": [
@@ -57666,7 +57666,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 160301,
         "weapon": "lg"
@@ -57680,14 +57680,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 160405,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 160509,
         "weapon": "lg"
@@ -57877,13 +57877,6 @@
         "weapon": "rl"
       },
       {
-        "player": "nexus",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 166526,
-        "weapon": "lg"
-      },
-      {
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -57896,7 +57889,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 166526,
+        "weapon": "lg"
+      },
+      {
+        "player": "nexus",
+        "source": "beam",
         "team": "ahoy",
         "time": 166630,
         "weapon": "lg"
@@ -57904,7 +57904,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 166733,
         "victims": [
@@ -57922,7 +57922,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 166837,
         "victims": [
@@ -57940,7 +57940,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 166941,
         "victims": [
@@ -57962,7 +57962,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 167044,
         "victims": [
@@ -57972,21 +57972,21 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 167148,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 167217,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 167318,
         "weapon": "lg"
@@ -58457,14 +58457,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 175224,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 175328,
         "weapon": "lg"
@@ -58482,7 +58482,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 175429,
         "weapon": "lg"
@@ -58496,7 +58496,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 175533,
         "weapon": "lg"
@@ -59110,7 +59110,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 194911,
         "weapon": "lg"
@@ -59123,13 +59123,6 @@
         "weapon": "sg"
       },
       {
-        "player": "nexus",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 195016,
-        "weapon": "lg"
-      },
-      {
         "hit": true,
         "player": "ocoini",
         "source": "sound",
@@ -59139,6 +59132,13 @@
           "rusti"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "nexus",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 195016,
+        "weapon": "lg"
       },
       {
         "player": "gandi",
@@ -59813,7 +59813,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 213227,
         "weapon": "lg"
@@ -59821,7 +59821,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 213331,
         "victims": [
@@ -59831,14 +59831,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 213435,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 213539,
         "weapon": "lg"
@@ -59846,7 +59846,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 213643,
         "victims": [
@@ -59856,14 +59856,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 213747,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 213851,
         "weapon": "lg"
@@ -59871,7 +59871,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 213921,
         "victims": [
@@ -59881,7 +59881,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 214128,
         "weapon": "lg"
@@ -59949,7 +59949,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 215963,
         "victims": [
@@ -59960,7 +59960,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 216066,
         "victims": [
@@ -59978,7 +59978,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 216169,
         "victims": [
@@ -59988,7 +59988,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 216275,
         "weapon": "lg"
@@ -60007,7 +60007,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 216378,
         "victims": [
@@ -60017,7 +60017,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 216481,
         "weapon": "lg"
@@ -60357,7 +60357,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 226062,
         "victims": [
@@ -60373,9 +60373,16 @@
         "weapon": "rl"
       },
       {
+        "player": "[nW].Veggie",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 226166,
+        "weapon": "sg"
+      },
+      {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 226166,
         "victims": [
@@ -60384,15 +60391,8 @@
         "weapon": "lg"
       },
       {
-        "player": "[nW].Veggie",
-        "source": "sound",
-        "team": "ahoy",
-        "time": 226166,
-        "weapon": "sg"
-      },
-      {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 226269,
         "weapon": "lg"
@@ -60406,14 +60406,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 226373,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 226475,
         "weapon": "lg"
@@ -60464,7 +60464,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 231098,
         "victims": [
@@ -60486,7 +60486,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 231200,
         "victims": [
@@ -60496,28 +60496,28 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 231303,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 231407,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 231511,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 231615,
         "weapon": "lg"
@@ -60525,7 +60525,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 231719,
         "victims": [
@@ -60535,7 +60535,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 231823,
         "weapon": "lg"
@@ -61335,7 +61335,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 261338,
         "victims": [
@@ -61346,7 +61346,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 261442,
         "victims": [
@@ -61565,14 +61565,14 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 272537,
         "weapon": "lg"
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 272641,
         "weapon": "lg"
@@ -61590,14 +61590,14 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 272746,
         "weapon": "lg"
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 272849,
         "weapon": "lg"
@@ -61793,7 +61793,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 276485,
         "victims": [
@@ -61804,7 +61804,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 276589,
         "victims": [
@@ -62168,7 +62168,7 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 294116,
         "weapon": "lg"
@@ -62289,14 +62289,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 300985,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 301088,
         "weapon": "lg"
@@ -62310,7 +62310,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 301193,
         "weapon": "lg"
@@ -62367,7 +62367,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 305977,
         "weapon": "lg"
@@ -62375,7 +62375,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 306080,
         "victims": [
@@ -62385,7 +62385,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 306184,
         "weapon": "lg"
@@ -62399,14 +62399,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 306289,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 306392,
         "weapon": "lg"
@@ -62414,7 +62414,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 306496,
         "victims": [
@@ -62424,7 +62424,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 306599,
         "weapon": "lg"
@@ -62432,7 +62432,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 306669,
         "victims": [
@@ -62442,7 +62442,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 306770,
         "weapon": "lg"
@@ -62450,19 +62450,12 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 306872,
         "victims": [
           "[nW].Veggie"
         ],
-        "weapon": "lg"
-      },
-      {
-        "player": "paniagua",
-        "source": "ammo",
-        "team": "jah",
-        "time": 306976,
         "weapon": "lg"
       },
       {
@@ -62474,7 +62467,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
+        "team": "jah",
+        "time": 306976,
+        "weapon": "lg"
+      },
+      {
+        "player": "paniagua",
+        "source": "beam",
         "team": "jah",
         "time": 307183,
         "weapon": "lg"
@@ -62582,28 +62582,28 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 314737,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 314840,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 314944,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 315048,
         "weapon": "lg"
@@ -63600,14 +63600,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 340845,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 340947,
         "weapon": "lg"
@@ -63615,7 +63615,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 341051,
         "victims": [
@@ -63633,20 +63633,9 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 341157,
-        "victims": [
-          "ocoini"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "biggz",
-        "source": "ammo",
-        "team": "jah",
-        "time": 341263,
         "victims": [
           "ocoini"
         ],
@@ -63662,7 +63651,18 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
+        "team": "jah",
+        "time": 341263,
+        "victims": [
+          "ocoini"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "biggz",
+        "source": "beam",
         "team": "jah",
         "time": 341368,
         "victims": [
@@ -63672,21 +63672,21 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 341472,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 341540,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 341644,
         "weapon": "lg"
@@ -63748,7 +63748,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 343315,
         "victims": [
@@ -63758,21 +63758,21 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 343420,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 343527,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 343630,
         "weapon": "lg"
@@ -63826,7 +63826,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 345629,
         "weapon": "lg"
@@ -63845,7 +63845,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 345734,
         "weapon": "lg"
@@ -64001,13 +64001,6 @@
         "weapon": "rl"
       },
       {
-        "player": "nexus",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 356281,
-        "weapon": "lg"
-      },
-      {
         "hit": true,
         "player": "sailorman",
         "source": "sound",
@@ -64019,9 +64012,16 @@
         "weapon": "sg"
       },
       {
+        "player": "nexus",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 356281,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 356382,
         "victims": [
@@ -64032,7 +64032,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 356485,
         "victims": [
@@ -64042,14 +64042,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 356590,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 356694,
         "weapon": "lg"
@@ -64160,9 +64160,16 @@
         "weapon": "sg"
       },
       {
+        "player": "nexus",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 358501,
+        "weapon": "sng"
+      },
+      {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 358501,
         "victims": [
@@ -64174,19 +64181,12 @@
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
-        "time": 358501,
-        "weapon": "sng"
-      },
-      {
-        "player": "nexus",
-        "source": "sound",
-        "team": "ahoy",
         "time": 358602,
         "weapon": "sng"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 358636,
         "weapon": "lg"
@@ -64200,7 +64200,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 358737,
         "weapon": "lg"
@@ -64236,19 +64236,12 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 358842,
         "weapon": "lg"
       },
       {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 358912,
-        "weapon": "lg"
-      },
-      {
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -64257,9 +64250,9 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
-        "time": 359016,
+        "time": 358912,
         "weapon": "lg"
       },
       {
@@ -64268,11 +64261,18 @@
         "team": "ahoy",
         "time": 359016,
         "weapon": "sng"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 359016,
+        "weapon": "lg"
       },
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 359123,
         "victims": [
@@ -64282,7 +64282,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 359227,
         "weapon": "lg"
@@ -64307,14 +64307,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 359329,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 359431,
         "weapon": "lg"
@@ -64427,20 +64427,9 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 371148,
-        "victims": [
-          "ocoini"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 371253,
         "victims": [
           "ocoini"
         ],
@@ -64456,7 +64445,18 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
+        "team": "jah",
+        "time": 371253,
+        "victims": [
+          "ocoini"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "rusti",
+        "source": "beam",
         "team": "jah",
         "time": 371357,
         "victims": [
@@ -64466,14 +64466,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 371463,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 371564,
         "weapon": "lg"
@@ -64624,7 +64624,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 386760,
         "weapon": "lg"
@@ -64642,14 +64642,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 386864,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 386968,
         "weapon": "lg"
@@ -64657,7 +64657,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 387072,
         "victims": [
@@ -64667,7 +64667,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 387175,
         "weapon": "lg"
@@ -64675,7 +64675,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 387281,
         "victims": [
@@ -64685,7 +64685,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 387383,
         "weapon": "lg"
@@ -64693,7 +64693,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 387452,
         "victims": [
@@ -64711,7 +64711,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 387556,
         "victims": [
@@ -64753,7 +64753,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 388828,
         "weapon": "lg"
@@ -64761,7 +64761,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 388933,
         "victims": [
@@ -64772,7 +64772,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 389036,
         "victims": [
@@ -64790,7 +64790,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 389140,
         "victims": [
@@ -64807,14 +64807,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 389244,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 389348,
         "weapon": "lg"
@@ -65790,7 +65790,7 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 421546,
         "weapon": "lg"
@@ -65804,7 +65804,7 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 421647,
         "weapon": "lg"
@@ -65812,7 +65812,7 @@
       {
         "hit": true,
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 421750,
         "victims": [
@@ -65823,7 +65823,7 @@
       {
         "hit": true,
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 421852,
         "victims": [
@@ -65833,7 +65833,7 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 421921,
         "weapon": "lg"
@@ -65851,7 +65851,7 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 422023,
         "weapon": "lg"
@@ -65889,13 +65889,6 @@
         "weapon": "sg"
       },
       {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 422889,
-        "weapon": "lg"
-      },
-      {
         "hit": true,
         "player": "nexus",
         "source": "sound",
@@ -65907,9 +65900,16 @@
         "weapon": "rl"
       },
       {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 422889,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 422990,
         "victims": [
@@ -65920,7 +65920,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 423091,
         "victims": [
@@ -65941,21 +65941,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 423195,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 423267,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 423371,
         "weapon": "lg"
@@ -66034,7 +66034,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 424964,
         "weapon": "lg"
@@ -66049,7 +66049,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 425068,
         "victims": [
@@ -66069,18 +66069,18 @@
         "weapon": "sg"
       },
       {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 425172,
-        "weapon": "lg"
-      },
-      {
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
         "time": 425172,
         "weapon": "sg"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 425172,
+        "weapon": "lg"
       },
       {
         "player": "ocoini",
@@ -66091,7 +66091,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 425276,
         "weapon": "lg"
@@ -66099,7 +66099,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 425380,
         "victims": [
@@ -66203,14 +66203,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 430730,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 430834,
         "weapon": "lg"
@@ -66218,7 +66218,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 430941,
         "victims": [
@@ -66229,19 +66229,12 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 431045,
         "victims": [
           "ocoini"
         ],
-        "weapon": "lg"
-      },
-      {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 431114,
         "weapon": "lg"
       },
       {
@@ -66257,7 +66250,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
+        "team": "jah",
+        "time": 431114,
+        "weapon": "lg"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
         "team": "jah",
         "time": 431220,
         "weapon": "lg"
@@ -66333,23 +66333,16 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 432824,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 432930,
-        "weapon": "lg"
-      },
-      {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 433031,
         "weapon": "lg"
       },
       {
@@ -66358,6 +66351,13 @@
         "team": "ahoy",
         "time": 433031,
         "weapon": "sg"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 433031,
+        "weapon": "lg"
       },
       {
         "player": "nexus",
@@ -66369,7 +66369,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 433134,
         "victims": [
@@ -66391,7 +66391,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 433236,
         "victims": [
@@ -66401,14 +66401,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 433341,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 433444,
         "weapon": "lg"
@@ -66840,7 +66840,7 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 447650,
         "weapon": "lg"
@@ -66855,7 +66855,7 @@
       {
         "hit": true,
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 447753,
         "victims": [
@@ -66866,7 +66866,7 @@
       {
         "hit": true,
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 447855,
         "victims": [
@@ -66876,7 +66876,7 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 447962,
         "weapon": "lg"
@@ -66890,14 +66890,14 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 448033,
         "weapon": "lg"
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 448135,
         "weapon": "lg"
@@ -67641,14 +67641,14 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 469739,
         "weapon": "lg"
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 469840,
         "weapon": "lg"
@@ -67674,14 +67674,14 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 470220,
         "weapon": "lg"
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 470325,
         "weapon": "lg"
@@ -67695,14 +67695,14 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 470498,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 470603,
         "weapon": "lg"
@@ -68005,7 +68005,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 481894,
         "victims": [
@@ -68016,7 +68016,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 481998,
         "victims": [
@@ -68026,14 +68026,14 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 482101,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 482205,
         "weapon": "lg"
@@ -68047,7 +68047,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 482274,
         "weapon": "lg"
@@ -68080,7 +68080,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 483696,
         "victims": [
@@ -68091,7 +68091,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 483803,
         "victims": [
@@ -68111,13 +68111,6 @@
         "weapon": "sg"
       },
       {
-        "player": "sailorman",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 483906,
-        "weapon": "lg"
-      },
-      {
         "hit": true,
         "player": "biggz",
         "source": "sound",
@@ -68129,14 +68122,10 @@
         "weapon": "sg"
       },
       {
-        "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
-        "time": 484010,
-        "victims": [
-          "paniagua"
-        ],
+        "time": 483906,
         "weapon": "lg"
       },
       {
@@ -68145,6 +68134,17 @@
         "team": "jah",
         "time": 484010,
         "weapon": "rl"
+      },
+      {
+        "hit": true,
+        "player": "sailorman",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 484010,
+        "victims": [
+          "paniagua"
+        ],
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -68159,7 +68159,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 484246,
         "weapon": "lg"
@@ -68184,7 +68184,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 484351,
         "weapon": "lg"
@@ -68202,21 +68202,21 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 484456,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 484560,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 484665,
         "weapon": "lg"
@@ -68224,7 +68224,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 484767,
         "victims": [
@@ -68244,18 +68244,18 @@
         "weapon": "sg"
       },
       {
-        "player": "nexus",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 484872,
-        "weapon": "lg"
-      },
-      {
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
         "time": 484872,
         "weapon": "ssg"
+      },
+      {
+        "player": "nexus",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 484872,
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -68270,21 +68270,21 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 484975,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 485044,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 485183,
         "weapon": "lg"
@@ -68320,7 +68320,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 485980,
         "weapon": "lg"
@@ -68328,7 +68328,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 486083,
         "victims": [
@@ -68349,21 +68349,21 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 486188,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 486259,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 486293,
         "weapon": "lg"
@@ -68371,7 +68371,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 486364,
         "victims": [
@@ -68381,7 +68381,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 486400,
         "weapon": "lg"
@@ -68389,7 +68389,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 486468,
         "victims": [
@@ -68542,7 +68542,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 490659,
         "victims": [
@@ -68560,7 +68560,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 490763,
         "victims": [
@@ -68571,7 +68571,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 490867,
         "victims": [
@@ -68581,7 +68581,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 490969,
         "weapon": "lg"
@@ -68589,7 +68589,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 491072,
         "victims": [
@@ -68599,14 +68599,14 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 491178,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 491279,
         "weapon": "lg"
@@ -68628,7 +68628,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 494295,
         "victims": [
@@ -68650,7 +68650,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 494399,
         "victims": [
@@ -69000,17 +69000,6 @@
       },
       {
         "hit": true,
-        "player": "sailorman",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 505338,
-        "victims": [
-          "paniagua"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
         "player": "[nW].Veggie",
         "source": "sound",
         "team": "ahoy",
@@ -69023,7 +69012,18 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 505338,
+        "victims": [
+          "paniagua"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "sailorman",
+        "source": "beam",
         "team": "ahoy",
         "time": 505442,
         "victims": [
@@ -69033,7 +69033,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 505544,
         "weapon": "lg"
@@ -70348,18 +70348,18 @@
         "weapon": "sg"
       },
       {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 534473,
-        "weapon": "lg"
-      },
-      {
         "player": "biggz",
         "source": "sound",
         "team": "jah",
         "time": 534473,
         "weapon": "sg"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 534473,
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -70374,28 +70374,28 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 534577,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 534681,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 534785,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 534889,
         "weapon": "lg"
@@ -70413,17 +70413,6 @@
       },
       {
         "hit": true,
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 534993,
-        "victims": [
-          "sailorman"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -70434,15 +70423,26 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
+        "team": "jah",
+        "time": 534993,
+        "victims": [
+          "sailorman"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
         "team": "jah",
         "time": 535096,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 535200,
         "weapon": "lg"
@@ -70450,7 +70450,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 535303,
         "victims": [
@@ -70471,16 +70471,9 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 535406,
-        "weapon": "lg"
-      },
-      {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 535477,
         "weapon": "lg"
       },
       {
@@ -70491,6 +70484,13 @@
         "weapon": "sg"
       },
       {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 535477,
+        "weapon": "lg"
+      },
+      {
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -70499,7 +70499,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 535582,
         "weapon": "lg"
@@ -70517,7 +70517,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 535995,
         "weapon": "lg"
@@ -70525,7 +70525,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 536100,
         "victims": [
@@ -70536,7 +70536,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 536205,
         "victims": [
@@ -70709,20 +70709,9 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 539766,
-        "victims": [
-          "ocoini"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "paniagua",
-        "source": "ammo",
-        "team": "jah",
-        "time": 539871,
         "victims": [
           "ocoini"
         ],
@@ -70741,6 +70730,17 @@
       },
       {
         "hit": true,
+        "player": "paniagua",
+        "source": "beam",
+        "team": "jah",
+        "time": 539871,
+        "victims": [
+          "ocoini"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -70752,7 +70752,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 539974,
         "weapon": "lg"
@@ -70784,9 +70784,16 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 540077,
+        "weapon": "lg"
+      },
+      {
+        "player": "paniagua",
+        "source": "beam",
+        "team": "jah",
+        "time": 540147,
         "weapon": "lg"
       },
       {
@@ -71013,7 +71020,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 552128,
         "victims": [
@@ -71046,7 +71053,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 552233,
         "victims": [
@@ -71068,7 +71075,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 552337,
         "victims": [
@@ -71078,21 +71085,21 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 552441,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 552545,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 552649,
         "weapon": "lg"
@@ -71122,19 +71129,12 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 552751,
         "victims": [
           "biggz"
         ],
-        "weapon": "lg"
-      },
-      {
-        "player": "sailorman",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 552822,
         "weapon": "lg"
       },
       {
@@ -71145,9 +71145,16 @@
         "weapon": "sg"
       },
       {
+        "player": "sailorman",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 552822,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 552925,
         "victims": [
@@ -71157,7 +71164,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 553030,
         "weapon": "lg"
@@ -71352,7 +71359,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 560668,
         "victims": [
@@ -71362,7 +71369,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 560769,
         "weapon": "lg"
@@ -71370,7 +71377,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 560871,
         "victims": [
@@ -71380,21 +71387,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 560971,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 561074,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 561178,
         "weapon": "lg"
@@ -71433,7 +71440,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 561733,
         "weapon": "lg"
@@ -71447,7 +71454,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 561834,
         "weapon": "lg"
@@ -73428,7 +73435,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 606373,
         "victims": [
@@ -73449,28 +73456,28 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 606477,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 606580,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 606716,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 606787,
         "weapon": "lg"
@@ -73478,7 +73485,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 606892,
         "victims": [
@@ -73499,14 +73506,14 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 606995,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 607101,
         "weapon": "lg"
@@ -73575,7 +73582,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 610579,
         "victims": [
@@ -73586,7 +73593,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 610683,
         "victims": [
@@ -73607,7 +73614,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 610787,
         "weapon": "lg"
@@ -73615,7 +73622,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 610891,
         "victims": [
@@ -73625,7 +73632,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 610995,
         "weapon": "lg"
@@ -73643,14 +73650,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 611097,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 611198,
         "weapon": "lg"
@@ -73678,16 +73685,9 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 612204,
-        "weapon": "lg"
-      },
-      {
-        "player": "sailorman",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 612308,
         "weapon": "lg"
       },
       {
@@ -73698,9 +73698,16 @@
         "weapon": "sg"
       },
       {
+        "player": "sailorman",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 612308,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 612410,
         "victims": [
@@ -73710,14 +73717,14 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 612516,
         "weapon": "lg"
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 612620,
         "weapon": "lg"
@@ -73725,7 +73732,7 @@
       {
         "hit": true,
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 612723,
         "victims": [
@@ -73746,7 +73753,7 @@
       },
       {
         "player": "sailorman",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 612826,
         "weapon": "lg"
@@ -74029,7 +74036,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 626733,
         "victims": [
@@ -74049,18 +74056,18 @@
         "weapon": "sg"
       },
       {
-        "player": "paniagua",
-        "source": "ammo",
-        "team": "jah",
-        "time": 626838,
-        "weapon": "lg"
-      },
-      {
         "player": "biggz",
         "source": "sound",
         "team": "jah",
         "time": 626838,
         "weapon": "sg"
+      },
+      {
+        "player": "paniagua",
+        "source": "beam",
+        "team": "jah",
+        "time": 626838,
+        "weapon": "lg"
       },
       {
         "player": "gandi",
@@ -74071,7 +74078,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 626942,
         "weapon": "lg"
@@ -74079,7 +74086,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 627043,
         "victims": [
@@ -74090,7 +74097,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 627248,
         "victims": [
@@ -74111,14 +74118,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 627352,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 627456,
         "weapon": "lg"
@@ -74787,14 +74794,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 655198,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 655302,
         "weapon": "lg"
@@ -74812,21 +74819,21 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 655408,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 655510,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 655618,
         "weapon": "lg"
@@ -74834,7 +74841,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 655723,
         "victims": [
@@ -74844,7 +74851,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 655831,
         "weapon": "lg"
@@ -74852,7 +74859,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 655900,
         "victims": [
@@ -74862,21 +74869,21 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 656004,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 656108,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 656212,
         "weapon": "lg"
@@ -75014,14 +75021,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 659986,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 660092,
         "weapon": "lg"
@@ -75051,7 +75058,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 660195,
         "weapon": "lg"
@@ -75059,7 +75066,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 660300,
         "victims": [
@@ -75080,16 +75087,9 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 660369,
-        "weapon": "lg"
-      },
-      {
-        "player": "paniagua",
-        "source": "ammo",
-        "team": "jah",
-        "time": 660470,
         "weapon": "lg"
       },
       {
@@ -75105,7 +75105,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
+        "team": "jah",
+        "time": 660470,
+        "weapon": "lg"
+      },
+      {
+        "player": "paniagua",
+        "source": "beam",
         "team": "jah",
         "time": 660575,
         "weapon": "lg"
@@ -75123,7 +75130,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 660684,
         "weapon": "lg"
@@ -75500,7 +75507,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 667689,
         "weapon": "lg"
@@ -76123,7 +76130,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 682750,
         "victims": [
@@ -76133,7 +76140,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 682856,
         "weapon": "lg"
@@ -76141,7 +76148,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 682962,
         "victims": [
@@ -76152,7 +76159,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 683072,
         "victims": [
@@ -76174,7 +76181,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 683141,
         "victims": [
@@ -76184,7 +76191,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 683246,
         "weapon": "lg"
@@ -76192,7 +76199,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 683350,
         "victims": [
@@ -76203,7 +76210,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 683457,
         "victims": [
@@ -76213,14 +76220,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 683559,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 683768,
         "weapon": "lg"
@@ -76235,7 +76242,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 683871,
         "victims": [
@@ -76245,7 +76252,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 684079,
         "weapon": "lg"
@@ -76263,7 +76270,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 684183,
         "weapon": "lg"
@@ -76282,7 +76289,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 684286,
         "victims": [
@@ -76292,7 +76299,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 684466,
         "weapon": "lg"
@@ -77093,7 +77100,7 @@
       {
         "hit": true,
         "player": "[nW].Veggie",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 705926,
         "victims": [
@@ -77114,7 +77121,7 @@
       },
       {
         "player": "[nW].Veggie",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 706030,
         "weapon": "lg"
@@ -77133,7 +77140,7 @@
       {
         "hit": true,
         "player": "[nW].Veggie",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 706134,
         "victims": [
@@ -77144,7 +77151,7 @@
       {
         "hit": true,
         "player": "[nW].Veggie",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 706238,
         "victims": [
@@ -77154,14 +77161,14 @@
       },
       {
         "player": "[nW].Veggie",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 706306,
         "weapon": "lg"
       },
       {
         "player": "[nW].Veggie",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 706408,
         "weapon": "lg"
@@ -77172,13 +77179,6 @@
         "team": "jah",
         "time": 706477,
         "weapon": "sg"
-      },
-      {
-        "player": "[nW].Veggie",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 706511,
-        "weapon": "lg"
       },
       {
         "hit": true,
@@ -77201,6 +77201,13 @@
           "sailorman"
         ],
         "weapon": "ssg"
+      },
+      {
+        "player": "[nW].Veggie",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 706511,
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -78531,7 +78538,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 736746,
         "victims": [
@@ -78541,14 +78548,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 736848,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 736953,
         "weapon": "lg"
@@ -78556,7 +78563,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 737056,
         "victims": [
@@ -78573,14 +78580,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 737126,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 737230,
         "weapon": "lg"
@@ -79876,14 +79883,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 768314,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 768418,
         "weapon": "lg"
@@ -79897,21 +79904,21 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 768523,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 768625,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 768729,
         "weapon": "lg"
@@ -79919,7 +79926,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 768836,
         "victims": [
@@ -79937,7 +79944,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 768941,
         "victims": [
@@ -79966,7 +79973,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 769011,
         "victims": [
@@ -79976,7 +79983,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 769116,
         "weapon": "lg"
@@ -79993,13 +80000,6 @@
         "weapon": "sg"
       },
       {
-        "player": "paniagua",
-        "source": "ammo",
-        "team": "jah",
-        "time": 769224,
-        "weapon": "lg"
-      },
-      {
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -80008,7 +80008,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
+        "team": "jah",
+        "time": 769224,
+        "weapon": "lg"
+      },
+      {
+        "player": "paniagua",
+        "source": "beam",
         "team": "jah",
         "time": 769327,
         "weapon": "lg"
@@ -80301,7 +80308,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 780524,
         "victims": [
@@ -80311,7 +80318,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 780628,
         "weapon": "lg"
@@ -80319,7 +80326,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 780732,
         "victims": [
@@ -80340,7 +80347,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 780841,
         "weapon": "lg"
@@ -81073,7 +81080,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 800626,
         "weapon": "lg"
@@ -81091,14 +81098,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 800730,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 800835,
         "weapon": "lg"
@@ -81124,7 +81131,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 800943,
         "victims": [
@@ -81134,7 +81141,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 801222,
         "weapon": "lg"
@@ -81363,21 +81370,21 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 807336,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 807441,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 807542,
         "weapon": "lg"
@@ -81385,7 +81392,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 807647,
         "victims": [
@@ -81395,7 +81402,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 807751,
         "weapon": "lg"
@@ -81420,21 +81427,21 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 807854,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 807958,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 808028,
         "weapon": "lg"
@@ -82541,7 +82548,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 832559,
         "victims": [
@@ -82551,7 +82558,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 832663,
         "weapon": "lg"
@@ -82754,7 +82761,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 839454,
         "victims": [
@@ -82786,7 +82793,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 839558,
         "weapon": "lg"
@@ -82804,7 +82811,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 839662,
         "weapon": "lg"
@@ -82812,7 +82819,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 839770,
         "victims": [
@@ -82822,14 +82829,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 839838,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 839944,
         "weapon": "lg"
@@ -82855,7 +82862,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 840046,
         "victims": [
@@ -82865,21 +82872,21 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 840150,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 840254,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 840359,
         "weapon": "lg"
@@ -83001,7 +83008,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 847428,
         "victims": [
@@ -83011,7 +83018,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 847531,
         "weapon": "lg"
@@ -83229,7 +83236,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 856089,
         "victims": [
@@ -83246,14 +83253,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 856193,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 856333,
         "weapon": "lg"
@@ -83299,14 +83306,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 860667,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 860737,
         "weapon": "lg"
@@ -83324,7 +83331,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 860842,
         "weapon": "lg"
@@ -83342,21 +83349,21 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 860946,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 861057,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 861162,
         "weapon": "lg"
@@ -83364,7 +83371,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 861265,
         "victims": [
@@ -83381,14 +83388,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 861369,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 861439,
         "weapon": "lg"
@@ -83442,14 +83449,14 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 862340,
         "weapon": "lg"
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 862444,
         "weapon": "lg"
@@ -83463,14 +83470,14 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 862547,
         "weapon": "lg"
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 862652,
         "weapon": "lg"
@@ -83478,7 +83485,7 @@
       {
         "hit": true,
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 862720,
         "victims": [
@@ -83489,7 +83496,7 @@
       {
         "hit": true,
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 862824,
         "victims": [
@@ -83499,7 +83506,7 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 862927,
         "weapon": "lg"
@@ -83539,7 +83546,7 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 863031,
         "weapon": "lg"
@@ -83547,7 +83554,7 @@
       {
         "hit": true,
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 863135,
         "victims": [
@@ -83557,7 +83564,7 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 863239,
         "weapon": "lg"
@@ -83565,7 +83572,7 @@
       {
         "hit": true,
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 863343,
         "victims": [
@@ -83575,7 +83582,7 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 863446,
         "weapon": "lg"
@@ -83589,7 +83596,7 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 863550,
         "weapon": "lg"
@@ -83608,7 +83615,7 @@
       {
         "hit": true,
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 863654,
         "victims": [
@@ -83618,7 +83625,7 @@
       },
       {
         "player": "ocoini",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 863761,
         "weapon": "lg"
@@ -84213,14 +84220,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 894119,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 894223,
         "weapon": "lg"
@@ -84228,7 +84235,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 894812,
         "victims": [
@@ -84249,14 +84256,14 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 894916,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 895020,
         "weapon": "lg"
@@ -84264,7 +84271,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 895122,
         "victims": [
@@ -84274,21 +84281,21 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 895189,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 895293,
         "weapon": "lg"
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 895396,
         "weapon": "lg"
@@ -84316,7 +84323,7 @@
       },
       {
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 896539,
         "weapon": "lg"
@@ -84324,7 +84331,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 896677,
         "victims": [
@@ -84353,7 +84360,7 @@
       {
         "hit": true,
         "player": "nexus",
-        "source": "ammo",
+        "source": "beam",
         "team": "ahoy",
         "time": 896747,
         "victims": [
@@ -84362,18 +84369,18 @@
         "weapon": "lg"
       },
       {
-        "player": "nexus",
-        "source": "ammo",
-        "team": "ahoy",
-        "time": 896851,
-        "weapon": "lg"
-      },
-      {
         "player": "rusti",
         "source": "sound",
         "team": "jah",
         "time": 896851,
         "weapon": "sg"
+      },
+      {
+        "player": "nexus",
+        "source": "beam",
+        "team": "ahoy",
+        "time": 896851,
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -84388,17 +84395,6 @@
       },
       {
         "hit": true,
-        "player": "paniagua",
-        "source": "ammo",
-        "team": "jah",
-        "time": 897197,
-        "victims": [
-          "nexus"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
         "player": "gandi",
         "source": "sound",
         "team": "jah",
@@ -84409,8 +84405,19 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
+        "team": "jah",
+        "time": 897197,
+        "victims": [
+          "nexus"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "paniagua",
+        "source": "beam",
         "team": "jah",
         "time": 897300,
         "weapon": "lg"
@@ -84418,7 +84425,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 897404,
         "victims": [
@@ -84439,7 +84446,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 897509,
         "weapon": "lg"
@@ -84454,7 +84461,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 897613,
         "victims": [
@@ -84475,7 +84482,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 897715,
         "weapon": "lg"
@@ -84483,7 +84490,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 897817,
         "victims": [
@@ -84493,14 +84500,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 897921,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 898027,
         "weapon": "lg"
@@ -84514,16 +84521,9 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 898129,
-        "weapon": "lg"
-      },
-      {
-        "player": "paniagua",
-        "source": "ammo",
-        "team": "jah",
-        "time": 898199,
         "weapon": "lg"
       },
       {
@@ -84536,6 +84536,13 @@
           "sailorman"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "paniagua",
+        "source": "beam",
+        "team": "jah",
+        "time": 898199,
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -85843,21 +85850,21 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 926715,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 926816,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 926918,
         "weapon": "lg"
@@ -85865,7 +85872,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 927022,
         "victims": [
@@ -85875,7 +85882,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 927126,
         "weapon": "lg"
@@ -85893,7 +85900,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 927230,
         "weapon": "lg"
@@ -85912,7 +85919,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 927614,
         "victims": [
@@ -85928,18 +85935,18 @@
         "weapon": "rl"
       },
       {
-        "player": "paniagua",
-        "source": "ammo",
-        "team": "jah",
-        "time": 927719,
-        "weapon": "lg"
-      },
-      {
         "player": "gandi",
         "source": "sound",
         "team": "jah",
         "time": 927719,
         "weapon": "gl"
+      },
+      {
+        "player": "paniagua",
+        "source": "beam",
+        "team": "jah",
+        "time": 927719,
+        "weapon": "lg"
       },
       {
         "player": "ocoini",
@@ -85950,14 +85957,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 927823,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 927926,
         "weapon": "lg"
@@ -85986,7 +85993,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 928619,
         "weapon": "lg"
@@ -86001,7 +86008,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 928758,
         "victims": [
@@ -86011,14 +86018,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 928827,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 929035,
         "weapon": "lg"
@@ -86071,7 +86078,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 932077,
         "weapon": "lg"
@@ -86738,17 +86745,6 @@
         "weapon": "rl"
       },
       {
-        "hit": true,
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 956911,
-        "victims": [
-          "ocoini"
-        ],
-        "weapon": "lg"
-      },
-      {
         "player": "biggz",
         "source": "sound",
         "team": "jah",
@@ -86758,9 +86754,9 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
-        "time": 957012,
+        "time": 956911,
         "victims": [
           "ocoini"
         ],
@@ -86785,10 +86781,14 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
-        "time": 957113,
+        "time": 957012,
+        "victims": [
+          "ocoini"
+        ],
         "weapon": "lg"
       },
       {
@@ -86797,6 +86797,13 @@
         "team": "jah",
         "time": 957113,
         "weapon": "sng"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 957113,
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -86810,18 +86817,18 @@
         "weapon": "sg"
       },
       {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 957217,
-        "weapon": "lg"
-      },
-      {
         "player": "biggz",
         "source": "sound",
         "team": "jah",
         "time": 957217,
         "weapon": "sng"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 957217,
+        "weapon": "lg"
       },
       {
         "player": "biggz",
@@ -86832,16 +86839,9 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 957323,
-        "weapon": "lg"
-      },
-      {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 957425,
         "weapon": "lg"
       },
       {
@@ -86853,9 +86853,9 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
-        "time": 957529,
+        "time": 957425,
         "weapon": "lg"
       },
       {
@@ -86870,9 +86870,16 @@
         "weapon": "sg"
       },
       {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 957529,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 957633,
         "victims": [
@@ -86894,7 +86901,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 957736,
         "weapon": "lg"
@@ -86913,7 +86920,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 957840,
         "victims": [
@@ -86934,7 +86941,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 957947,
         "weapon": "lg"
@@ -86942,7 +86949,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 958019,
         "victims": [
@@ -86962,18 +86969,18 @@
         "weapon": "sg"
       },
       {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 958122,
-        "weapon": "lg"
-      },
-      {
         "player": "paniagua",
         "source": "sound",
         "team": "jah",
         "time": 958122,
         "weapon": "gl"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 958122,
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -86988,14 +86995,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 958227,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 958329,
         "weapon": "lg"
@@ -87096,7 +87103,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 959781,
         "weapon": "lg"
@@ -87104,7 +87111,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 959881,
         "victims": [
@@ -87115,7 +87122,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 959983,
         "victims": [
@@ -87125,7 +87132,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 960087,
         "weapon": "lg"
@@ -87133,7 +87140,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 960191,
         "victims": [
@@ -87150,14 +87157,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 960295,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 960399,
         "weapon": "lg"
@@ -87171,7 +87178,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 960503,
         "weapon": "lg"
@@ -87190,7 +87197,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 960606,
         "victims": [
@@ -87207,7 +87214,7 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 960711,
         "weapon": "lg"
@@ -87225,14 +87232,14 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 960814,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 960920,
         "weapon": "lg"
@@ -88676,7 +88683,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 987894,
         "weapon": "lg"
@@ -88694,14 +88701,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 987998,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 988102,
         "weapon": "lg"
@@ -88885,7 +88892,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 991596,
         "victims": [
@@ -88895,7 +88902,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 991699,
         "weapon": "lg"
@@ -89259,22 +89266,22 @@
         "weapon": "sng"
       },
       {
+        "player": "sailorman",
+        "source": "sound",
+        "team": "ahoy",
+        "time": 995820,
+        "weapon": "sg"
+      },
+      {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 995820,
         "victims": [
           "[nW].Veggie"
         ],
         "weapon": "lg"
-      },
-      {
-        "player": "sailorman",
-        "source": "sound",
-        "team": "ahoy",
-        "time": 995820,
-        "weapon": "sg"
       },
       {
         "player": "nexus",
@@ -89285,7 +89292,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 995924,
         "weapon": "lg"
@@ -90133,14 +90140,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1012496,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1012604,
         "weapon": "lg"
@@ -90158,21 +90165,21 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1012708,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1012811,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1012915,
         "weapon": "lg"
@@ -90193,7 +90200,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1012983,
         "weapon": "lg"
@@ -90201,7 +90208,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1013087,
         "victims": [
@@ -90223,7 +90230,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1013226,
         "victims": [
@@ -90396,7 +90403,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1019067,
         "victims": [
@@ -90417,21 +90424,21 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1019173,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1019277,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1019381,
         "weapon": "lg"
@@ -90439,7 +90446,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1019449,
         "victims": [
@@ -90449,16 +90456,9 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1019553,
-        "weapon": "lg"
-      },
-      {
-        "player": "paniagua",
-        "source": "ammo",
-        "team": "jah",
-        "time": 1019660,
         "weapon": "lg"
       },
       {
@@ -90467,6 +90467,13 @@
         "team": "jah",
         "time": 1019660,
         "weapon": "sg"
+      },
+      {
+        "player": "paniagua",
+        "source": "beam",
+        "team": "jah",
+        "time": 1019660,
+        "weapon": "lg"
       },
       {
         "player": "[nW].Veggie",
@@ -90517,42 +90524,42 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1030304,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1030410,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1030514,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1030622,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1030726,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1031005,
         "weapon": "lg"
@@ -90571,7 +90578,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1031108,
         "victims": [
@@ -90582,7 +90589,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1031213,
         "victims": [
@@ -90592,21 +90599,21 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1031318,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1031389,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1031493,
         "weapon": "lg"
@@ -90625,7 +90632,7 @@
       {
         "hit": true,
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1031602,
         "victims": [
@@ -90635,35 +90642,35 @@
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1031713,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1031817,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1031921,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1032025,
         "weapon": "lg"
       },
       {
         "player": "paniagua",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1032135,
         "weapon": "lg"
@@ -91969,7 +91976,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1061905,
         "victims": [
@@ -91979,7 +91986,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1062009,
         "weapon": "lg"
@@ -91987,7 +91994,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1062113,
         "victims": [
@@ -91998,7 +92005,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1062216,
         "victims": [
@@ -92015,14 +92022,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1062318,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1062424,
         "weapon": "lg"
@@ -92036,7 +92043,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1062529,
         "weapon": "lg"
@@ -92104,17 +92111,6 @@
       },
       {
         "hit": true,
-        "player": "biggz",
-        "source": "ammo",
-        "team": "jah",
-        "time": 1064021,
-        "victims": [
-          "sailorman"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -92123,6 +92119,17 @@
           "biggz"
         ],
         "weapon": "sg"
+      },
+      {
+        "hit": true,
+        "player": "biggz",
+        "source": "beam",
+        "team": "jah",
+        "time": 1064021,
+        "victims": [
+          "sailorman"
+        ],
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -92137,7 +92144,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1064125,
         "weapon": "lg"
@@ -92145,7 +92152,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1064229,
         "victims": [
@@ -92873,7 +92880,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1074912,
         "weapon": "lg"
@@ -92888,7 +92895,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1075050,
         "victims": [
@@ -92904,13 +92911,6 @@
         "weapon": "sng"
       },
       {
-        "player": "biggz",
-        "source": "ammo",
-        "team": "jah",
-        "time": 1075224,
-        "weapon": "lg"
-      },
-      {
         "hit": true,
         "player": "gandi",
         "source": "sound",
@@ -92922,6 +92922,13 @@
         "weapon": "sg"
       },
       {
+        "player": "biggz",
+        "source": "beam",
+        "team": "jah",
+        "time": 1075224,
+        "weapon": "lg"
+      },
+      {
         "player": "nexus",
         "source": "sound",
         "team": "ahoy",
@@ -92931,7 +92938,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1075328,
         "victims": [
@@ -92948,7 +92955,7 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1075468,
         "weapon": "lg"
@@ -93458,14 +93465,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1094608,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1094713,
         "weapon": "lg"
@@ -93483,7 +93490,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1094817,
         "weapon": "lg"
@@ -93491,7 +93498,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1094920,
         "victims": [
@@ -93501,21 +93508,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1094988,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1095092,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1095196,
         "weapon": "lg"
@@ -93530,7 +93537,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1095302,
         "victims": [
@@ -93551,7 +93558,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1095405,
         "weapon": "lg"
@@ -93569,14 +93576,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1095508,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1095612,
         "weapon": "lg"
@@ -94339,16 +94346,9 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1111682,
-        "weapon": "lg"
-      },
-      {
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 1111788,
         "weapon": "lg"
       },
       {
@@ -94363,6 +94363,13 @@
         "weapon": "sg"
       },
       {
+        "player": "rusti",
+        "source": "beam",
+        "team": "jah",
+        "time": 1111788,
+        "weapon": "lg"
+      },
+      {
         "player": "ocoini",
         "source": "sound",
         "team": "ahoy",
@@ -94371,7 +94378,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1111892,
         "weapon": "lg"
@@ -94385,7 +94392,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1111995,
         "weapon": "lg"
@@ -94406,7 +94413,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1112065,
         "weapon": "lg"
@@ -94609,21 +94616,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1114929,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1115034,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1115139,
         "weapon": "lg"
@@ -94637,7 +94644,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1115247,
         "weapon": "lg"
@@ -94655,14 +94662,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1115315,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1115420,
         "weapon": "lg"
@@ -94670,7 +94677,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1115526,
         "victims": [
@@ -94680,7 +94687,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1115630,
         "weapon": "lg"
@@ -94698,7 +94705,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1115732,
         "weapon": "lg"
@@ -94712,7 +94719,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1115835,
         "weapon": "lg"
@@ -94827,7 +94834,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1118048,
         "weapon": "lg"
@@ -94835,20 +94842,9 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1118152,
-        "victims": [
-          "sailorman"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 1118256,
         "victims": [
           "sailorman"
         ],
@@ -94873,8 +94869,19 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
+        "team": "jah",
+        "time": 1118256,
+        "victims": [
+          "sailorman"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
         "team": "jah",
         "time": 1118360,
         "weapon": "lg"
@@ -94892,14 +94899,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1118464,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1118568,
         "weapon": "lg"
@@ -95607,14 +95614,14 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1142547,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1142651,
         "weapon": "lg"
@@ -95697,7 +95704,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1145332,
         "victims": [
@@ -95725,30 +95732,23 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1145436,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1145540,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1145643,
-        "weapon": "lg"
-      },
-      {
-        "player": "biggz",
-        "source": "ammo",
-        "team": "jah",
-        "time": 1145748,
         "weapon": "lg"
       },
       {
@@ -95757,6 +95757,13 @@
         "team": "ahoy",
         "time": 1145748,
         "weapon": "sg"
+      },
+      {
+        "player": "biggz",
+        "source": "beam",
+        "team": "jah",
+        "time": 1145748,
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -95772,7 +95779,7 @@
       {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1145852,
         "victims": [
@@ -95793,23 +95800,16 @@
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1145961,
         "weapon": "lg"
       },
       {
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1146063,
-        "weapon": "lg"
-      },
-      {
-        "player": "biggz",
-        "source": "ammo",
-        "team": "jah",
-        "time": 1146135,
         "weapon": "lg"
       },
       {
@@ -95824,9 +95824,16 @@
         "weapon": "ssg"
       },
       {
+        "player": "biggz",
+        "source": "beam",
+        "team": "jah",
+        "time": 1146135,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "biggz",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1146239,
         "victims": [
@@ -95992,7 +95999,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1148695,
         "weapon": "lg"
@@ -96010,7 +96017,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1148903,
         "weapon": "lg"
@@ -96024,14 +96031,14 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1149007,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1149111,
         "weapon": "lg"
@@ -96057,7 +96064,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1149215,
         "weapon": "lg"
@@ -96072,7 +96079,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1149282,
         "victims": [
@@ -96082,20 +96089,9 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1149386,
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "rusti",
-        "source": "ammo",
-        "team": "jah",
-        "time": 1149490,
-        "victims": [
-          "nexus"
-        ],
         "weapon": "lg"
       },
       {
@@ -96122,8 +96118,19 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
+        "team": "jah",
+        "time": 1149490,
+        "victims": [
+          "nexus"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "rusti",
+        "source": "beam",
         "team": "jah",
         "time": 1149595,
         "weapon": "lg"
@@ -96144,7 +96151,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1149699,
         "weapon": "lg"
@@ -96162,21 +96169,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1149802,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1149872,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1149976,
         "weapon": "lg"
@@ -96191,7 +96198,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1150080,
         "victims": [
@@ -96202,7 +96209,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1150184,
         "victims": [
@@ -96219,21 +96226,21 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1150288,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1150392,
         "weapon": "lg"
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1150496,
         "weapon": "lg"
@@ -96247,7 +96254,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1150599,
         "weapon": "lg"
@@ -96386,7 +96393,7 @@
       {
         "hit": true,
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1152581,
         "victims": [
@@ -96396,7 +96403,7 @@
       },
       {
         "player": "rusti",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1152685,
         "weapon": "lg"
@@ -96814,21 +96821,21 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1174849,
         "weapon": "lg"
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1174927,
         "weapon": "lg"
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1175038,
         "weapon": "lg"
@@ -96846,14 +96853,14 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1175142,
         "weapon": "lg"
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1175251,
         "weapon": "lg"
@@ -96928,17 +96935,6 @@
       },
       {
         "hit": true,
-        "player": "gandi",
-        "source": "ammo",
-        "team": "jah",
-        "time": 1180563,
-        "victims": [
-          "sailorman"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
         "player": "sailorman",
         "source": "sound",
         "team": "ahoy",
@@ -96947,6 +96943,17 @@
           "gandi"
         ],
         "weapon": "sg"
+      },
+      {
+        "hit": true,
+        "player": "gandi",
+        "source": "beam",
+        "team": "jah",
+        "time": 1180563,
+        "victims": [
+          "sailorman"
+        ],
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -96961,21 +96968,21 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1180676,
         "weapon": "lg"
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1180784,
         "weapon": "lg"
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1180888,
         "weapon": "lg"
@@ -96990,7 +96997,7 @@
       {
         "hit": true,
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1180992,
         "victims": [
@@ -97000,7 +97007,7 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1181069,
         "weapon": "lg"
@@ -97021,14 +97028,14 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1181186,
         "weapon": "lg"
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1181303,
         "weapon": "lg"
@@ -97104,14 +97111,14 @@
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1182874,
         "weapon": "lg"
       },
       {
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1182978,
         "weapon": "lg"
@@ -97166,7 +97173,7 @@
       {
         "hit": true,
         "player": "gandi",
-        "source": "ammo",
+        "source": "beam",
         "team": "jah",
         "time": 1184940,
         "victims": [

@@ -24,13 +24,6 @@ type ShotsAnalyzer struct {
 	core   *CoreOutputs
 	timing MatchTimingDetector
 
-	// cells tracks each slot's last STAT_CELLS value; cellKnown guards the
-	// first sample after a spawn/death so an ammo reset is not counted as
-	// LG fire. dead gates the cell-dump that lands when a player dies.
-	cells     map[int]int
-	cellKnown map[int]bool
-	dead      map[int]bool
-
 	// pos is each slot's last-seen origin (svc_playerinfo) — the muzzle
 	// reference that disambiguates which same-frame fire launched a rocket.
 	pos map[int][3]float32
@@ -96,10 +89,9 @@ const (
 	// jitter while staying far below any weapon's refire interval.
 	hitscanLinkWindowMs = 26
 
-	// maxCellsPerTick caps how many cells a single stat update may drop and
-	// still be read as LG fire. A larger drop is a death/disconnect dump or
-	// an in-water discharge (all cells at once), not normal firing.
-	maxCellsPerTick = 10
+	// beamLightningLG is the TE_LIGHTNING2 type — the player Lightning Gun
+	// bolt KTX emits once per fire tick (TE_LIGHTNING1/3 are non-player).
+	beamLightningLG = 6
 
 	// projSpawnWindowMs bounds how far a rocket/grenade spawn may sit from
 	// the fire sound that launched it — they are emitted in the same server
@@ -114,11 +106,8 @@ const (
 // NewShotsAnalyzer creates a new shots analyzer.
 func NewShotsAnalyzer() *ShotsAnalyzer {
 	return &ShotsAnalyzer{
-		cells:     make(map[int]int),
-		cellKnown: make(map[int]bool),
-		dead:      make(map[int]bool),
-		pos:       make(map[int][3]float32),
-		openProj:  make(map[int]*rawProjectile),
+		pos:      make(map[int][3]float32),
+		openProj: make(map[int]*rawProjectile),
 	}
 }
 
@@ -139,20 +128,12 @@ func (a *ShotsAnalyzer) OnEvent(event events.Event) error {
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
 		a.timing.OnIntermission(e.Time)
-	case *events.SpawnEvent:
-		a.dead[e.PlayerNum] = false
-		a.cellKnown[e.PlayerNum] = false // spawn ammo set is not a fire
-	case *events.DeathEvent:
-		a.dead[e.PlayerNum] = true
-		a.cellKnown[e.PlayerNum] = false // death ammo dump is not a fire
 	case *events.PlayerPositionEvent:
 		a.pos[e.PlayerNum] = e.Origin
-	case *events.StatUpdateEvent:
-		if e.StatIndex == events.StatCells {
-			a.onCells(e.PlayerNum, e.Value, msTime(e.Time))
-		}
 	case *events.SoundEvent:
 		a.onSound(e)
+	case *events.BeamEvent:
+		a.onBeam(e)
 	case *events.ProjectileSpawnEvent:
 		a.openProj[e.EntNum] = &rawProjectile{kind: e.Kind, spawnTMs: e.TimeMs, spawnOrigin: e.Origin}
 	case *events.ProjectileDespawnEvent:
@@ -199,32 +180,25 @@ func (a *ShotsAnalyzer) onSound(e *events.SoundEvent) {
 	})
 }
 
-// onCells turns a cell-ammo decrease into LG shots. Cells are used only by
-// the lightning gun, so a decrement unambiguously counts LG fire ticks —
-// guarded against the spawn/death ammo resets and the all-at-once discharge.
-func (a *ShotsAnalyzer) onCells(slot, value int, tMs int32) {
-	known := a.cellKnown[slot]
-	prev := a.cells[slot]
-	a.cells[slot] = value
-	a.cellKnown[slot] = true
-	if !known || a.dead[slot] {
-		return // first sample after spawn/death, or dead: baseline only
+// onBeam records an LG fire from a TE_LIGHTNING2 beam. KTX emits exactly one
+// such beam per LG fire tick, carrying the firing entity, so the beam is the
+// authoritative per-shot LG signal (one beam == one attack == one cell;
+// discharge emits no beam). TE_LIGHTNING1/3 are non-player bolts and are
+// ignored. LG is hitscan, so its same-frame damage links like sg/ssg.
+func (a *ShotsAnalyzer) onBeam(e *events.BeamEvent) {
+	if e.Type != beamLightningLG || e.Ent < 1 || e.Ent > events.MaxClients {
+		return
 	}
-	drop := prev - value
-	if drop <= 0 || drop > maxCellsPerTick {
-		return // increase = pickup; large drop = death dump / discharge
-	}
-	inMatch := a.timing.Started && !a.timing.Ended
-	for i := 0; i < drop; i++ {
-		a.shots = append(a.shots, rawShot{
-			slot:    slot,
-			weapon:  "lg",
-			source:  "ammo",
-			tMs:     tMs,
-			inMatch: inMatch,
-			hitscan: true,
-		})
-	}
+	slot := e.Ent - 1
+	a.shots = append(a.shots, rawShot{
+		slot:       slot,
+		weapon:     "lg",
+		source:     "beam",
+		tMs:        e.TimeMs,
+		inMatch:    a.timing.Started && !a.timing.Ended,
+		hitscan:    true,
+		shooterPos: a.pos[slot],
+	})
 }
 
 func (a *ShotsAnalyzer) Finalize(result *Result) error {

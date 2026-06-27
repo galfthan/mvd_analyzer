@@ -261,9 +261,10 @@ Defined in `result/shots.go`. A **shot** is one discrete weapon fire on the
 wire: for SG/SSG/RL/GL/NG/SNG it is one `svc_sound` fire sound on the
 shooter's `CHAN_WEAPON` (the sound carries the firing entity, so attribution
 is exact and works on any QW server); for LG — which has no per-shot fire
-sound — it is one cell consumed, inferred from the cell-ammo stat and
-flagged `source:"ammo"`. Times are match-relative ms (same clock as
-`damage.events[].time`).
+sound — it is one `TE_LIGHTNING2` beam, emitted once per fire tick and
+carrying the firing entity directly (`source:"beam"`). One beam == one LG
+attack == one cell, so LG counts match KTX `acc.attacks` exactly. Times are
+match-relative ms (same clock as `damage.events[].time`).
 
 The `shots` stream is **not** match-gated (warmup fires are kept; window by
 `time`). `byPlayer` aggregates **are** match-gated, for KTX scoreboard
@@ -280,8 +281,9 @@ velocity) by player + nearest `t`.
 ### Shot
 
 `weapon` is the lowercase KTX name (`sg`,`ssg`,`ng`,`sng`,`gl`,`rl`,`lg`).
-`source` is `sound` or `ammo`. `hit`/`victims` are set for linkable weapons
-via the KTX damage stream:
+`source` is `sound` (a CHAN_WEAPON fire sound) or `beam` (an LG
+TE_LIGHTNING2 bolt). `hit`/`victims` are set for linkable weapons via the
+KTX damage stream:
 - **Hitscan** (`sg`/`ssg`/`lg`) — the fire and its damage land in the same
   server frame and link by attacker + weapon + frame.
 - **Rocket/grenade** (`rl`/`gl`) — linked by entity flight tracking: the
@@ -301,7 +303,7 @@ them. No damage stream (non-KTX) → `hit` never set.
 | Player | `player` | string | Resolved shooter. |
 | Team | `team` | string (omitempty) | |
 | Weapon | `weapon` | string | |
-| Source | `source` | string | `sound` \| `ammo`. |
+| Source | `source` | string | `sound` \| `beam` (LG). |
 | Hit | `hit` | bool (omitempty) | Hitscan fire that connected (≥1 victim same frame). |
 | Victims | `victims` | []string (omitempty) | Hitscan victims hit by this fire. |
 
@@ -1411,7 +1413,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
-| v39 | New top-level `Shots` (`shots`): a per-shot weapon-fire stream — who fired what, at what match-relative ms — derived from `svc_sound` `CHAN_WEAPON` fire sounds (SG/SSG/RL/GL/NG/SNG; the sound carries the firing entity) and LG cell-ammo decrements. Hitscan fires (sg/ssg/lg) link to their same-frame `mvdhidden_dmgdone` damage; rocket/grenade fires (rl/gl) link via entity flight tracking (the projectile entity brackets `spawn → despawn`, so a fire matches its launch frame by muzzle and its impact damage by attacker + despawn frame — disambiguating overlapping flights). Sets `hit`/`victims`, adds `byPlayer` match-time per-weapon counts + accuracy, and a `reconciliation` cross-check whose `streamAttacks` matches KTX `acc.attacks` exactly across the corpus (rl/gl connect-counts match KTX `real` hits to within one). Additive (`omitempty`); present whenever any fire is detected, including non-KTX demos (no damage stream → no links). |
+| v39 | New top-level `Shots` (`shots`): a per-shot weapon-fire stream — who fired what, at what match-relative ms — derived from `svc_sound` `CHAN_WEAPON` fire sounds (SG/SSG/RL/GL/NG/SNG; the sound carries the firing entity) and `TE_LIGHTNING2` beams for LG (one beam per fire tick, carrying the firing entity — exact, beating ammo deltas). Hitscan fires (sg/ssg/lg) link to their same-frame `mvdhidden_dmgdone` damage; rocket/grenade fires (rl/gl) link via entity flight tracking (the projectile entity brackets `spawn → despawn`, so a fire matches its launch frame by muzzle and its impact damage by attacker + despawn frame — disambiguating overlapping flights). Sets `hit`/`victims`, adds `byPlayer` match-time per-weapon counts + accuracy, and a `reconciliation` cross-check whose `streamAttacks` matches KTX `acc.attacks` exactly across the corpus (rl/gl connect-counts match KTX `real` hits to within one). Additive (`omitempty`); present whenever any fire is detected, including non-KTX demos (no damage stream → no links). |
 | v38 | `PlayerStream` gains `pvs[]` (`LosTrack`): per-opponent potentially-visible-set intervals, populated alongside `los[]` by the same lazy `analyzer.ComputeLOS` pass under the same BSP gate. Reproduces the mvdsv per-client entity cull (`SV_PlayerVisibleToClient`): the looker's fat PVS (`CM_FatPVS` of `origin+view_ofs`) ∩ the opponent's entity leaf set (1-unit-expanded box, non-solid leaves), or always when it overflows `MAX_ENT_LEAFS` — i.e. whether a live server would have sent that opponent to the client (the recorded MVD stores every entity, `pvs = NULL`). This test also gates the LOS raycast, so **PVS ⊇ LOS** by construction. The gap (potentially visible, no clear ray) is an occlusion-tolerant proximity/awareness signal. Same `o`/`iv` shape, asymmetry, alive-gating; additive (`omitempty`); absent on BSP-less maps and on the default parse. Exposed by the same consumers as `los` (web overlay, `qw-analyze -include los`, mvd-api `/los`). |
 | v37 | `PlayerStream` gains `los[]` (`LosTrack`): per-opponent line-of-sight as half-open `[s,e)` ms intervals during which the looker had a clear sightline (eye `origin+(0,0,22)` → any of the opponent's 8 bbox corners + midpoint), blocked by worldspawn solids or any active mover posed in the way. Asymmetric (`A→B` in A's stream, `B→A` in B's); `o` indexes `streams.players`. **Computed lazily** (`analyzer.ComputeLOS`) — absent from the default parse; populated on demand by the web LOS overlay, `qw-analyze -include los`, and mvd-api `/los`. Against the visibility BSP, so only on maps with a provisioned BSP (same gate as `pos.h`/`lq`). Additive (`omitempty`). View direction is not considered. |
 | v36 | `MatchResult` drops the dead `startTime` / `endTime` fields. After the match-relative time normalization `startTime` was always 0 (already `omitempty`, so absent from JSON) and `endTime` always equalled `duration`; both duplicated `streams.global.matchStart` / `matchEnd`. The `endTime` key disappears from the `match` object — read `duration` for match length, or `streams.global` for the match window. Breaking removal (not additive). |

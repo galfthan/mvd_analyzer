@@ -52824,15 +52824,15 @@
             "weapon": "rl"
           },
           {
-            "accuracy": 0.3953488372093023,
-            "hits": 34,
-            "shots": 86,
+            "accuracy": 0.3977272727272727,
+            "hits": 35,
+            "shots": 88,
             "weapon": "lg"
           }
         ],
         "player": "doberman",
         "team": ".ra.",
-        "total": 534
+        "total": 536
       },
       {
         "byWeapon": [
@@ -52955,15 +52955,15 @@
             "weapon": "rl"
           },
           {
-            "accuracy": 0.400990099009901,
+            "accuracy": 0.39901477832512317,
             "hits": 81,
-            "shots": 202,
+            "shots": 203,
             "weapon": "lg"
           }
         ],
         "player": "nlk",
         "team": ".ra.",
-        "total": 695
+        "total": 696
       },
       {
         "byWeapon": [
@@ -52994,15 +52994,15 @@
             "weapon": "rl"
           },
           {
-            "accuracy": 0.3560606060606061,
-            "hits": 47,
-            "shots": 132,
+            "accuracy": 0.3609022556390977,
+            "hits": 48,
+            "shots": 133,
             "weapon": "lg"
           }
         ],
         "player": "sCorp",
         "team": ".ra.",
-        "total": 450
+        "total": 451
       }
     ],
     "reconciliation": {
@@ -53178,8 +53178,8 @@
           {
             "ktxAttacks": 88,
             "ktxHits": 35,
-            "streamAttacks": 86,
-            "streamShots": 86,
+            "streamAttacks": 88,
+            "streamShots": 88,
             "weapon": "lg"
           }
         ],
@@ -53324,8 +53324,8 @@
           {
             "ktxAttacks": 203,
             "ktxHits": 81,
-            "streamAttacks": 202,
-            "streamShots": 202,
+            "streamAttacks": 203,
+            "streamShots": 203,
             "weapon": "lg"
           }
         ],
@@ -53368,8 +53368,8 @@
           {
             "ktxAttacks": 133,
             "ktxHits": 48,
-            "streamAttacks": 132,
-            "streamShots": 132,
+            "streamAttacks": 133,
+            "streamShots": 133,
             "weapon": "lg"
           }
         ]
@@ -54537,7 +54537,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 26100,
         "victims": [
@@ -54555,7 +54555,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 26199,
         "victims": [
@@ -54566,7 +54566,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 26307,
         "victims": [
@@ -54583,14 +54583,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 26408,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 26506,
         "weapon": "lg"
@@ -54608,7 +54608,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 26702,
         "weapon": "lg"
@@ -54622,7 +54622,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 26812,
         "weapon": "lg"
@@ -54640,14 +54640,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 27021,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 27123,
         "weapon": "lg"
@@ -54673,7 +54673,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 27229,
         "victims": [
@@ -54694,7 +54694,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 27496,
         "weapon": "lg"
@@ -54730,7 +54730,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 28109,
         "weapon": "lg"
@@ -54748,7 +54748,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 28216,
         "weapon": "lg"
@@ -54766,14 +54766,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 28554,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 28655,
         "weapon": "lg"
@@ -54787,7 +54787,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 28766,
         "weapon": "lg"
@@ -54795,7 +54795,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 28865,
         "victims": [
@@ -54806,7 +54806,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 28961,
         "victims": [
@@ -54835,7 +54835,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 29059,
         "victims": [
@@ -54845,7 +54845,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 29168,
         "weapon": "lg"
@@ -54853,7 +54853,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 29251,
         "victims": [
@@ -54864,7 +54864,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 29364,
         "victims": [
@@ -54875,7 +54875,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 29462,
         "victims": [
@@ -54886,7 +54886,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 29566,
         "victims": [
@@ -54908,7 +54908,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 29652,
         "victims": [
@@ -54918,7 +54918,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 29760,
         "weapon": "lg"
@@ -54926,7 +54926,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 29861,
         "victims": [
@@ -56203,22 +56203,22 @@
         "weapon": "sng"
       },
       {
+        "player": "[cmd] witka",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 63689,
+        "weapon": "sg"
+      },
+      {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 63689,
         "victims": [
           "nlk"
         ],
         "weapon": "lg"
-      },
-      {
-        "player": "[cmd] witka",
-        "source": "sound",
-        "team": ".ra.",
-        "time": 63689,
-        "weapon": "sg"
       },
       {
         "player": "lakso",
@@ -57210,7 +57210,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 85489,
         "victims": [
@@ -57220,7 +57220,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 85590,
         "weapon": "lg"
@@ -57228,7 +57228,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 85685,
         "victims": [
@@ -57239,7 +57239,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 85800,
         "victims": [
@@ -57249,14 +57249,14 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 85888,
         "weapon": "lg"
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 85996,
         "weapon": "lg"
@@ -57270,7 +57270,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 86097,
         "weapon": "lg"
@@ -57285,7 +57285,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 86190,
         "victims": [
@@ -57295,21 +57295,21 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 86291,
         "weapon": "lg"
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 86387,
         "weapon": "lg"
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 86502,
         "weapon": "lg"
@@ -57317,7 +57317,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 86586,
         "victims": [
@@ -57335,7 +57335,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 86697,
         "victims": [
@@ -57345,14 +57345,14 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 86793,
         "weapon": "lg"
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 86892,
         "weapon": "lg"
@@ -59107,28 +59107,28 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 131632,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 131730,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 131842,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 131943,
         "weapon": "lg"
@@ -59146,14 +59146,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 132024,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 132137,
         "weapon": "lg"
@@ -59168,7 +59168,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 132233,
         "victims": [
@@ -59178,7 +59178,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 132332,
         "weapon": "lg"
@@ -59304,7 +59304,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 135721,
         "victims": [
@@ -59315,7 +59315,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 135825,
         "victims": [
@@ -59326,7 +59326,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 135923,
         "victims": [
@@ -59337,7 +59337,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 136036,
         "victims": [
@@ -59354,7 +59354,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 136123,
         "weapon": "lg"
@@ -59362,7 +59362,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 136221,
         "victims": [
@@ -59373,7 +59373,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 136334,
         "victims": [
@@ -59391,7 +59391,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 136416,
         "victims": [
@@ -59402,7 +59402,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 136531,
         "victims": [
@@ -59424,7 +59424,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 136631,
         "victims": [
@@ -59435,7 +59435,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 136734,
         "victims": [
@@ -59446,7 +59446,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 136816,
         "victims": [
@@ -59456,7 +59456,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 136931,
         "weapon": "lg"
@@ -60012,7 +60012,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 159582,
         "victims": [
@@ -60022,7 +60022,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 159683,
         "weapon": "lg"
@@ -60623,7 +60623,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 177098,
         "weapon": "lg"
@@ -60631,7 +60631,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 177205,
         "victims": [
@@ -60642,7 +60642,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 177306,
         "victims": [
@@ -60854,7 +60854,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 181244,
         "weapon": "lg"
@@ -60869,7 +60869,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 181340,
         "victims": [
@@ -60886,7 +60886,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 181441,
         "weapon": "lg"
@@ -60904,7 +60904,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 181555,
         "weapon": "lg"
@@ -60918,7 +60918,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 181637,
         "weapon": "lg"
@@ -60937,7 +60937,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 181922,
         "victims": [
@@ -60947,21 +60947,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 182023,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 182116,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 182229,
         "weapon": "lg"
@@ -60983,7 +60983,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 182323,
         "victims": [
@@ -60994,7 +60994,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 182424,
         "victims": [
@@ -61017,14 +61017,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 182519,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 182620,
         "weapon": "lg"
@@ -61032,7 +61032,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 182717,
         "victims": [
@@ -61042,7 +61042,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 182828,
         "weapon": "lg"
@@ -61056,28 +61056,28 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 182931,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 183016,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 183128,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 183229,
         "weapon": "lg"
@@ -62444,7 +62444,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 219858,
         "victims": [
@@ -62454,21 +62454,21 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 219959,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 220058,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 220171,
         "weapon": "lg"
@@ -62476,7 +62476,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 220258,
         "victims": [
@@ -62486,14 +62486,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 220361,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 220462,
         "weapon": "lg"
@@ -63092,14 +63092,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 243011,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 243314,
         "weapon": "lg"
@@ -63114,7 +63114,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 243415,
         "victims": [
@@ -63124,14 +63124,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 243518,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 243618,
         "weapon": "lg"
@@ -63145,14 +63145,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 243713,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 243808,
         "weapon": "lg"
@@ -63181,14 +63181,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 243921,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 244008,
         "weapon": "lg"
@@ -63196,7 +63196,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 244118,
         "victims": [
@@ -63207,7 +63207,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 244213,
         "victims": [
@@ -63217,7 +63217,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 244323,
         "weapon": "lg"
@@ -63230,18 +63230,18 @@
         "weapon": "sg"
       },
       {
-        "player": "marksuzu",
-        "source": "ammo",
-        "team": "oSaMs",
-        "time": 244408,
-        "weapon": "lg"
-      },
-      {
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 244408,
         "weapon": "sg"
+      },
+      {
+        "player": "marksuzu",
+        "source": "beam",
+        "team": "oSaMs",
+        "time": 244408,
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -63267,14 +63267,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 244518,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 244713,
         "weapon": "lg"
@@ -63288,14 +63288,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 244924,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 245022,
         "weapon": "lg"
@@ -63303,7 +63303,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 245132,
         "victims": [
@@ -63314,7 +63314,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 245232,
         "victims": [
@@ -63342,7 +63342,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 245314,
         "weapon": "lg"
@@ -63350,7 +63350,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 245427,
         "victims": [
@@ -63361,7 +63361,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 245522,
         "victims": [
@@ -63372,7 +63372,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 245622,
         "victims": [
@@ -63382,7 +63382,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 245717,
         "weapon": "lg"
@@ -63396,14 +63396,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 245830,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 245930,
         "weapon": "lg"
@@ -63411,7 +63411,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 246016,
         "victims": [
@@ -63432,7 +63432,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 246132,
         "weapon": "lg"
@@ -63450,7 +63450,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 246234,
         "weapon": "lg"
@@ -63468,21 +63468,21 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 246321,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 246417,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 246531,
         "weapon": "lg"
@@ -63490,7 +63490,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 246616,
         "victims": [
@@ -63500,7 +63500,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 246729,
         "weapon": "lg"
@@ -63518,7 +63518,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 246826,
         "weapon": "lg"
@@ -63549,7 +63549,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 246924,
         "weapon": "lg"
@@ -63575,7 +63575,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 247872,
         "victims": [
@@ -63585,7 +63585,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 247986,
         "weapon": "lg"
@@ -63593,7 +63593,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 248414,
         "victims": [
@@ -63603,14 +63603,14 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 248528,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 248631,
         "weapon": "lg"
@@ -63624,7 +63624,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 248727,
         "weapon": "lg"
@@ -63797,7 +63797,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 259028,
         "weapon": "lg"
@@ -63822,14 +63822,14 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 259142,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 259237,
         "weapon": "lg"
@@ -63847,21 +63847,21 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 259340,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 259440,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 259540,
         "weapon": "lg"
@@ -63971,21 +63971,21 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 268195,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 268307,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 268405,
         "weapon": "lg"
@@ -63993,7 +63993,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 268506,
         "victims": [
@@ -64003,21 +64003,21 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 268609,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 268704,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 268805,
         "weapon": "lg"
@@ -64032,7 +64032,7 @@
       {
         "hit": true,
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 269324,
         "victims": [
@@ -64043,7 +64043,7 @@
       {
         "hit": true,
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 269423,
         "victims": [
@@ -64060,28 +64060,28 @@
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 269527,
         "weapon": "lg"
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 269623,
         "weapon": "lg"
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 269722,
         "weapon": "lg"
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 269817,
         "weapon": "lg"
@@ -64122,7 +64122,7 @@
       {
         "hit": true,
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 272869,
         "victims": [
@@ -64133,7 +64133,7 @@
       {
         "hit": true,
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 272963,
         "victims": [
@@ -64155,7 +64155,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 273051,
         "victims": [
@@ -64165,28 +64165,28 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 273146,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 273249,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 273363,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 273445,
         "weapon": "lg"
@@ -64605,7 +64605,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 292779,
         "victims": [
@@ -64615,7 +64615,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 292878,
         "weapon": "lg"
@@ -64623,7 +64623,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 292978,
         "victims": [
@@ -64633,16 +64633,9 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 293079,
-        "weapon": "lg"
-      },
-      {
-        "player": "doberman",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 293169,
         "weapon": "lg"
       },
       {
@@ -64654,7 +64647,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 293169,
+        "weapon": "lg"
+      },
+      {
+        "player": "doberman",
+        "source": "beam",
         "team": ".ra.",
         "time": 293276,
         "weapon": "lg"
@@ -64662,7 +64662,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 293389,
         "victims": [
@@ -64672,7 +64672,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 293471,
         "weapon": "lg"
@@ -64680,7 +64680,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 293584,
         "victims": [
@@ -64690,21 +64690,21 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 293684,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 293779,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 293882,
         "weapon": "lg"
@@ -65026,12 +65026,19 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 301806,
         "victims": [
           "marksuzu"
         ],
+        "weapon": "lg"
+      },
+      {
+        "player": "doberman",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 301918,
         "weapon": "lg"
       },
       {
@@ -66081,7 +66088,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 335780,
         "victims": [
@@ -66106,7 +66113,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 335879,
         "victims": [
@@ -66123,7 +66130,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 335988,
         "weapon": "lg"
@@ -66148,7 +66155,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 336100,
         "weapon": "lg"
@@ -66163,7 +66170,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 336183,
         "victims": [
@@ -66181,7 +66188,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 336287,
         "victims": [
@@ -66199,7 +66206,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 336386,
         "victims": [
@@ -66216,7 +66223,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 336484,
         "weapon": "lg"
@@ -66238,6 +66245,17 @@
         "team": "oSaMs",
         "time": 336556,
         "weapon": "sng"
+      },
+      {
+        "hit": true,
+        "player": "sCorp",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 336583,
+        "victims": [
+          "clox"
+        ],
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -68666,7 +68684,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 398819,
         "victims": [
@@ -68676,7 +68694,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 398928,
         "weapon": "lg"
@@ -68684,7 +68702,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 399029,
         "victims": [
@@ -68694,21 +68712,21 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 399131,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 399226,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 399324,
         "weapon": "lg"
@@ -68763,7 +68781,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 406499,
         "victims": [
@@ -68774,7 +68792,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 406602,
         "victims": [
@@ -68791,7 +68809,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 406699,
         "weapon": "lg"
@@ -68821,7 +68839,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 406811,
         "victims": [
@@ -68832,7 +68850,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 406897,
         "victims": [
@@ -68842,14 +68860,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 407001,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 407111,
         "weapon": "lg"
@@ -68868,7 +68886,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 407322,
         "victims": [
@@ -68879,7 +68897,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 407417,
         "victims": [
@@ -68900,7 +68918,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 407527,
         "weapon": "lg"
@@ -68908,7 +68926,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 407628,
         "victims": [
@@ -68918,7 +68936,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 407716,
         "weapon": "lg"
@@ -68943,14 +68961,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 407826,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 407927,
         "weapon": "lg"
@@ -68969,7 +68987,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 408014,
         "victims": [
@@ -68986,21 +69004,21 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 408116,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 408228,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 408314,
         "weapon": "lg"
@@ -69408,14 +69426,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 422161,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 422268,
         "weapon": "lg"
@@ -69433,7 +69451,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 422363,
         "weapon": "lg"
@@ -69631,7 +69649,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 437242,
         "victims": [
@@ -69641,7 +69659,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 437354,
         "weapon": "lg"
@@ -69656,7 +69674,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 437452,
         "victims": [
@@ -69666,7 +69684,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 437553,
         "weapon": "lg"
@@ -69680,7 +69698,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 437655,
         "weapon": "lg"
@@ -69688,7 +69706,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 437757,
         "victims": [
@@ -69698,7 +69716,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 437853,
         "weapon": "lg"
@@ -69727,7 +69745,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 437951,
         "weapon": "lg"
@@ -69735,7 +69753,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 438048,
         "victims": [
@@ -69756,21 +69774,21 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 438161,
         "weapon": "lg"
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 438249,
         "weapon": "lg"
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 438345,
         "weapon": "lg"
@@ -69781,13 +69799,6 @@
         "team": "oSaMs",
         "time": 438345,
         "weapon": "gl"
-      },
-      {
-        "player": "clox",
-        "source": "ammo",
-        "team": "oSaMs",
-        "time": 438447,
-        "weapon": "lg"
       },
       {
         "hit": true,
@@ -69802,7 +69813,14 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
+        "team": "oSaMs",
+        "time": 438447,
+        "weapon": "lg"
+      },
+      {
+        "player": "clox",
+        "source": "beam",
         "team": "oSaMs",
         "time": 438556,
         "weapon": "lg"
@@ -69819,16 +69837,16 @@
         "weapon": "sg"
       },
       {
-        "player": "sCorp",
-        "source": "ammo",
-        "team": ".ra.",
+        "player": "clox",
+        "source": "beam",
+        "team": "oSaMs",
         "time": 438657,
         "weapon": "lg"
       },
       {
-        "player": "clox",
-        "source": "ammo",
-        "team": "oSaMs",
+        "player": "sCorp",
+        "source": "beam",
+        "team": ".ra.",
         "time": 438657,
         "weapon": "lg"
       },
@@ -69845,14 +69863,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 438757,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 438859,
         "weapon": "lg"
@@ -69870,21 +69888,21 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 438962,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 439060,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 439162,
         "weapon": "lg"
@@ -69892,7 +69910,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 439264,
         "victims": [
@@ -69902,14 +69920,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 439353,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 439462,
         "weapon": "lg"
@@ -70096,7 +70114,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 447194,
         "victims": [
@@ -70106,7 +70124,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 447409,
         "weapon": "lg"
@@ -70187,14 +70205,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 464266,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 464363,
         "weapon": "lg"
@@ -70202,7 +70220,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 465388,
         "victims": [
@@ -70224,7 +70242,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 465499,
         "victims": [
@@ -70235,7 +70253,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 465597,
         "victims": [
@@ -70246,7 +70264,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 465708,
         "victims": [
@@ -70256,7 +70274,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 465789,
         "weapon": "lg"
@@ -70282,21 +70300,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 465899,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 465999,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 466097,
         "weapon": "lg"
@@ -70315,7 +70333,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 466194,
         "victims": [
@@ -70339,7 +70357,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 466309,
         "weapon": "lg"
@@ -70353,14 +70371,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 466392,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 466490,
         "weapon": "lg"
@@ -70368,7 +70386,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 466604,
         "victims": [
@@ -70390,7 +70408,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 466701,
         "victims": [
@@ -70408,7 +70426,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 466801,
         "victims": [
@@ -70426,7 +70444,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 466903,
         "victims": [
@@ -70436,14 +70454,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 466996,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 467095,
         "weapon": "lg"
@@ -70563,7 +70581,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 469644,
         "victims": [
@@ -70573,14 +70591,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 469753,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 469851,
         "weapon": "lg"
@@ -70598,20 +70616,9 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 469964,
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "doberman",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 470044,
-        "victims": [
-          "apa"
-        ],
         "weapon": "lg"
       },
       {
@@ -70627,6 +70634,17 @@
       },
       {
         "hit": true,
+        "player": "doberman",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 470044,
+        "victims": [
+          "apa"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
         "player": "apa",
         "source": "sound",
         "team": "oSaMs",
@@ -70638,14 +70656,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 470154,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 470253,
         "weapon": "lg"
@@ -70727,7 +70745,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 472750,
         "victims": [
@@ -70738,7 +70756,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 472845,
         "victims": [
@@ -70755,28 +70773,28 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 472956,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 473052,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 473153,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 473251,
         "weapon": "lg"
@@ -70784,19 +70802,12 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 473359,
         "victims": [
           "apa"
         ],
-        "weapon": "lg"
-      },
-      {
-        "player": "sCorp",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 473444,
         "weapon": "lg"
       },
       {
@@ -70811,9 +70822,16 @@
         "weapon": "sg"
       },
       {
+        "player": "sCorp",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 473444,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 473544,
         "victims": [
@@ -70823,14 +70841,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 473657,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 473744,
         "weapon": "lg"
@@ -71039,7 +71057,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 481875,
         "victims": [
@@ -71050,7 +71068,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 481987,
         "victims": [
@@ -71299,21 +71317,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488064,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488176,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488273,
         "weapon": "lg"
@@ -71331,7 +71349,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488384,
         "weapon": "lg"
@@ -71350,7 +71368,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488471,
         "victims": [
@@ -71371,21 +71389,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488580,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488665,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488678,
         "weapon": "lg"
@@ -71393,7 +71411,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488778,
         "victims": [
@@ -71403,21 +71421,21 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488875,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 488974,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 489075,
         "weapon": "lg"
@@ -71452,7 +71470,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 489908,
         "weapon": "lg"
@@ -71460,7 +71478,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 490018,
         "victims": [
@@ -71482,7 +71500,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 490116,
         "victims": [
@@ -71492,14 +71510,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 490218,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 490414,
         "weapon": "lg"
@@ -71507,7 +71525,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 490528,
         "victims": [
@@ -71517,7 +71535,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 490626,
         "weapon": "lg"
@@ -71532,7 +71550,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 490725,
         "victims": [
@@ -71542,21 +71560,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 490822,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 490922,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 491036,
         "weapon": "lg"
@@ -71585,7 +71603,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 493194,
         "victims": [
@@ -71595,7 +71613,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 493406,
         "weapon": "lg"
@@ -71634,7 +71652,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 496078,
         "weapon": "lg"
@@ -71642,7 +71660,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 496200,
         "victims": [
@@ -71652,21 +71670,21 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 496287,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 496400,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 496803,
         "weapon": "lg"
@@ -71674,7 +71692,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 496906,
         "victims": [
@@ -71706,21 +71724,21 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 498196,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 498305,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 498413,
         "weapon": "lg"
@@ -71752,14 +71770,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 499643,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 499740,
         "weapon": "lg"
@@ -71767,7 +71785,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 499837,
         "victims": [
@@ -71777,21 +71795,21 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 499936,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 500045,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 500144,
         "weapon": "lg"
@@ -71870,7 +71888,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 504408,
         "victims": [
@@ -71880,7 +71898,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 504510,
         "weapon": "lg"
@@ -71888,7 +71906,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 504621,
         "victims": [
@@ -72032,7 +72050,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 507112,
         "weapon": "lg"
@@ -72040,7 +72058,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 507220,
         "victims": [
@@ -72050,14 +72068,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 507320,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 507421,
         "weapon": "lg"
@@ -72185,7 +72203,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 512507,
         "victims": [
@@ -72195,7 +72213,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 512623,
         "weapon": "lg"
@@ -72213,7 +72231,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 512725,
         "weapon": "lg"
@@ -72357,7 +72375,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 517549,
         "weapon": "lg"
@@ -72372,7 +72390,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 517660,
         "victims": [
@@ -72383,7 +72401,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 517757,
         "victims": [
@@ -72404,7 +72422,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 517869,
         "weapon": "lg"
@@ -72422,7 +72440,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 517953,
         "weapon": "lg"
@@ -72465,21 +72483,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 522468,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 522578,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 522675,
         "weapon": "lg"
@@ -72487,7 +72505,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 522791,
         "victims": [
@@ -72498,20 +72516,9 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 524186,
-        "victims": [
-          "marksuzu"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "nlk",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 524287,
         "victims": [
           "marksuzu"
         ],
@@ -72531,7 +72538,18 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 524287,
+        "victims": [
+          "marksuzu"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "nlk",
+        "source": "beam",
         "team": ".ra.",
         "time": 524396,
         "victims": [
@@ -72541,7 +72559,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 524494,
         "weapon": "lg"
@@ -72559,14 +72577,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 524595,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 524694,
         "weapon": "lg"
@@ -72574,7 +72592,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 524791,
         "victims": [
@@ -72585,7 +72603,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 524889,
         "victims": [
@@ -72607,7 +72625,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 524998,
         "victims": [
@@ -72617,21 +72635,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 525096,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 525193,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 525293,
         "weapon": "lg"
@@ -72687,7 +72705,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 528843,
         "victims": [
@@ -72737,7 +72755,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 530000,
         "weapon": "lg"
@@ -72762,27 +72780,16 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 530425,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 530525,
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "nlk",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 530627,
-        "victims": [
-          "doberman"
-        ],
         "weapon": "lg"
       },
       {
@@ -72795,6 +72802,17 @@
           "doberman"
         ],
         "weapon": "gl"
+      },
+      {
+        "hit": true,
+        "player": "nlk",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 530627,
+        "victims": [
+          "doberman"
+        ],
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -73395,7 +73413,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 546935,
         "victims": [
@@ -73406,7 +73424,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 547049,
         "victims": [
@@ -73416,7 +73434,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 547149,
         "weapon": "lg"
@@ -73434,7 +73452,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 547248,
         "weapon": "lg"
@@ -73448,7 +73466,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 547350,
         "weapon": "lg"
@@ -73478,7 +73496,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 547661,
         "victims": [
@@ -73500,7 +73518,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 547857,
         "victims": [
@@ -73533,7 +73551,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 547972,
         "victims": [
@@ -73562,7 +73580,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 548075,
         "victims": [
@@ -73579,14 +73597,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 548174,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 548260,
         "weapon": "lg"
@@ -73787,7 +73805,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 554114,
         "weapon": "lg"
@@ -73805,7 +73823,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 554225,
         "weapon": "lg"
@@ -73813,7 +73831,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 554322,
         "victims": [
@@ -73835,7 +73853,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 554433,
         "victims": [
@@ -74045,7 +74063,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 563115,
         "weapon": "lg"
@@ -74063,34 +74081,23 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 563213,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 563317,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 563416,
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "sCorp",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 563513,
-        "victims": [
-          "apa"
-        ],
         "weapon": "lg"
       },
       {
@@ -74101,6 +74108,17 @@
         "weapon": "sg"
       },
       {
+        "hit": true,
+        "player": "sCorp",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 563513,
+        "victims": [
+          "apa"
+        ],
+        "weapon": "lg"
+      },
+      {
         "player": "lakso",
         "source": "sound",
         "team": "oSaMs",
@@ -74109,16 +74127,9 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 563616,
-        "weapon": "lg"
-      },
-      {
-        "player": "sCorp",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 563714,
         "weapon": "lg"
       },
       {
@@ -74131,6 +74142,13 @@
           "doberman"
         ],
         "weapon": "sg"
+      },
+      {
+        "player": "sCorp",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 563714,
+        "weapon": "lg"
       },
       {
         "player": "sCorp",
@@ -74148,28 +74166,28 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 565485,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 565597,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 565700,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 565799,
         "weapon": "lg"
@@ -74177,7 +74195,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 565884,
         "victims": [
@@ -74187,21 +74205,21 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 565998,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 566099,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 566186,
         "weapon": "lg"
@@ -75079,7 +75097,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 587096,
         "victims": [
@@ -75112,7 +75130,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 587196,
         "victims": [
@@ -75123,7 +75141,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 587311,
         "victims": [
@@ -75134,7 +75152,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 587412,
         "victims": [
@@ -75144,14 +75162,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 587494,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 587608,
         "weapon": "lg"
@@ -75180,7 +75198,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 587706,
         "weapon": "lg"
@@ -75458,14 +75476,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 601927,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 602028,
         "weapon": "lg"
@@ -75476,13 +75494,6 @@
         "team": ".ra.",
         "time": 602100,
         "weapon": "ssg"
-      },
-      {
-        "player": "doberman",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 602127,
-        "weapon": "lg"
       },
       {
         "hit": true,
@@ -75497,7 +75508,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 602127,
+        "weapon": "lg"
+      },
+      {
+        "player": "doberman",
+        "source": "beam",
         "team": ".ra.",
         "time": 602240,
         "weapon": "lg"
@@ -75512,7 +75530,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 602326,
         "victims": [
@@ -75523,7 +75541,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 602422,
         "victims": [
@@ -75545,7 +75563,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 602539,
         "weapon": "lg"
@@ -75553,7 +75571,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 602624,
         "victims": [
@@ -75587,7 +75605,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 603046,
         "weapon": "lg"
@@ -75605,14 +75623,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 603162,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 603260,
         "weapon": "lg"
@@ -75627,7 +75645,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 603357,
         "victims": [
@@ -75637,7 +75655,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 603456,
         "weapon": "lg"
@@ -75645,7 +75663,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 603566,
         "victims": [
@@ -75663,7 +75681,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 603667,
         "victims": [
@@ -76429,14 +76447,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 634683,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 634980,
         "weapon": "lg"
@@ -76444,7 +76462,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 635080,
         "victims": [
@@ -76472,7 +76490,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 635182,
         "weapon": "lg"
@@ -76498,7 +76516,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 635293,
         "victims": [
@@ -76509,7 +76527,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 635377,
         "victims": [
@@ -76519,7 +76537,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 635487,
         "weapon": "lg"
@@ -76527,7 +76545,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 635585,
         "victims": [
@@ -76965,7 +76983,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 653008,
         "victims": [
@@ -76976,7 +76994,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 653121,
         "victims": [
@@ -76987,7 +77005,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 653221,
         "victims": [
@@ -76998,7 +77016,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 653332,
         "victims": [
@@ -77008,14 +77026,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 653418,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 653514,
         "weapon": "lg"
@@ -77105,7 +77123,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 657028,
         "victims": [
@@ -77122,14 +77140,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 657130,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 657240,
         "weapon": "lg"
@@ -77137,7 +77155,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 657344,
         "victims": [
@@ -77147,7 +77165,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 657431,
         "weapon": "lg"
@@ -77162,7 +77180,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 657540,
         "victims": [
@@ -77184,7 +77202,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 657643,
         "victims": [
@@ -77194,7 +77212,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 657728,
         "weapon": "lg"
@@ -77313,7 +77331,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 663242,
         "victims": [
@@ -77323,7 +77341,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 663256,
         "weapon": "lg"
@@ -77337,7 +77355,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 663351,
         "weapon": "lg"
@@ -77345,7 +77363,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 663364,
         "victims": [
@@ -77373,7 +77391,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 663462,
         "weapon": "lg"
@@ -77381,7 +77399,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 663462,
         "victims": [
@@ -77397,24 +77415,6 @@
         "weapon": "ng"
       },
       {
-        "hit": true,
-        "player": "doberman",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 663565,
-        "victims": [
-          "marksuzu"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "player": "apa",
-        "source": "ammo",
-        "team": "oSaMs",
-        "time": 663565,
-        "weapon": "lg"
-      },
-      {
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -77424,7 +77424,25 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 663565,
+        "victims": [
+          "marksuzu"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "apa",
+        "source": "beam",
+        "team": "oSaMs",
+        "time": 663565,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "doberman",
+        "source": "beam",
         "team": ".ra.",
         "time": 663651,
         "victims": [
@@ -77435,7 +77453,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 663664,
         "victims": [
@@ -77459,14 +77477,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 663748,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 663761,
         "weapon": "lg"
@@ -77486,20 +77504,6 @@
         "weapon": "sng"
       },
       {
-        "player": "doberman",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 663863,
-        "weapon": "lg"
-      },
-      {
-        "player": "apa",
-        "source": "ammo",
-        "team": "oSaMs",
-        "time": 663863,
-        "weapon": "lg"
-      },
-      {
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -77508,7 +77512,21 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 663863,
+        "weapon": "lg"
+      },
+      {
+        "player": "apa",
+        "source": "beam",
+        "team": "oSaMs",
+        "time": 663863,
+        "weapon": "lg"
+      },
+      {
+        "player": "doberman",
+        "source": "beam",
         "team": ".ra.",
         "time": 663950,
         "weapon": "lg"
@@ -77698,7 +77716,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 665042,
         "victims": [
@@ -77736,7 +77754,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 665158,
         "weapon": "lg"
@@ -77763,22 +77781,22 @@
         "weapon": "ng"
       },
       {
+        "player": "doberman",
+        "source": "sound",
+        "team": ".ra.",
+        "time": 665254,
+        "weapon": "sng"
+      },
+      {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 665254,
         "victims": [
           "[cmd] witka"
         ],
         "weapon": "lg"
-      },
-      {
-        "player": "doberman",
-        "source": "sound",
-        "team": ".ra.",
-        "time": 665254,
-        "weapon": "sng"
       },
       {
         "player": "clox",
@@ -77788,17 +77806,6 @@
         "weapon": "sng"
       },
       {
-        "hit": true,
-        "player": "apa",
-        "source": "ammo",
-        "team": "oSaMs",
-        "time": 665353,
-        "victims": [
-          "clox"
-        ],
-        "weapon": "lg"
-      },
-      {
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -77813,6 +77820,17 @@
         "weapon": "sng"
       },
       {
+        "hit": true,
+        "player": "apa",
+        "source": "beam",
+        "team": "oSaMs",
+        "time": 665353,
+        "victims": [
+          "clox"
+        ],
+        "weapon": "lg"
+      },
+      {
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -77820,18 +77838,18 @@
         "weapon": "sng"
       },
       {
-        "player": "apa",
-        "source": "ammo",
-        "team": "oSaMs",
-        "time": 665444,
-        "weapon": "lg"
-      },
-      {
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 665444,
         "weapon": "ng"
+      },
+      {
+        "player": "apa",
+        "source": "beam",
+        "team": "oSaMs",
+        "time": 665444,
+        "weapon": "lg"
       },
       {
         "player": "doberman",
@@ -77849,16 +77867,9 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 665561,
-        "weapon": "lg"
-      },
-      {
-        "player": "apa",
-        "source": "ammo",
-        "team": "oSaMs",
-        "time": 665652,
         "weapon": "lg"
       },
       {
@@ -77877,7 +77888,14 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
+        "team": "oSaMs",
+        "time": 665652,
+        "weapon": "lg"
+      },
+      {
+        "player": "apa",
+        "source": "beam",
         "team": "oSaMs",
         "time": 665754,
         "weapon": "lg"
@@ -77917,7 +77935,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 665851,
         "victims": [
@@ -77933,17 +77951,6 @@
         "weapon": "sng"
       },
       {
-        "hit": true,
-        "player": "apa",
-        "source": "ammo",
-        "team": "oSaMs",
-        "time": 665951,
-        "victims": [
-          "doberman"
-        ],
-        "weapon": "lg"
-      },
-      {
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
@@ -77953,7 +77960,18 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
+        "team": "oSaMs",
+        "time": 665951,
+        "victims": [
+          "doberman"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "apa",
+        "source": "beam",
         "team": "oSaMs",
         "time": 666048,
         "victims": [
@@ -77976,18 +77994,18 @@
         "weapon": "sng"
       },
       {
-        "player": "apa",
-        "source": "ammo",
-        "team": "oSaMs",
-        "time": 666145,
-        "weapon": "lg"
-      },
-      {
         "player": "[cmd] witka",
         "source": "sound",
         "team": ".ra.",
         "time": 666145,
         "weapon": "ng"
+      },
+      {
+        "player": "apa",
+        "source": "beam",
+        "team": "oSaMs",
+        "time": 666145,
+        "weapon": "lg"
       },
       {
         "player": "doberman",
@@ -78005,7 +78023,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 666261,
         "weapon": "lg"
@@ -78026,7 +78044,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 666358,
         "weapon": "lg"
@@ -79456,7 +79474,7 @@
       {
         "hit": true,
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 711627,
         "victims": [
@@ -79473,14 +79491,14 @@
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 711724,
         "weapon": "lg"
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 711835,
         "weapon": "lg"
@@ -79494,7 +79512,7 @@
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 711937,
         "weapon": "lg"
@@ -79550,18 +79568,18 @@
         "weapon": "sg"
       },
       {
-        "player": "[cmd] witka",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 717667,
-        "weapon": "lg"
-      },
-      {
         "player": "nlk",
         "source": "sound",
         "team": ".ra.",
         "time": 717667,
         "weapon": "sg"
+      },
+      {
+        "player": "[cmd] witka",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 717667,
+        "weapon": "lg"
       },
       {
         "hit": true,
@@ -79576,21 +79594,21 @@
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 717765,
         "weapon": "lg"
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 717875,
         "weapon": "lg"
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 717972,
         "weapon": "lg"
@@ -79615,7 +79633,7 @@
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 718306,
         "weapon": "lg"
@@ -79629,7 +79647,7 @@
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 718421,
         "weapon": "lg"
@@ -79637,7 +79655,7 @@
       {
         "hit": true,
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 718524,
         "victims": [
@@ -79647,7 +79665,7 @@
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 718626,
         "weapon": "lg"
@@ -79655,7 +79673,7 @@
       {
         "hit": true,
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 718710,
         "victims": [
@@ -81164,14 +81182,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 778637,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 778749,
         "weapon": "lg"
@@ -81186,7 +81204,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 778851,
         "victims": [
@@ -81204,7 +81222,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 778953,
         "victims": [
@@ -81214,14 +81232,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 779147,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 779251,
         "weapon": "lg"
@@ -81238,13 +81256,6 @@
         "weapon": "sg"
       },
       {
-        "player": "nlk",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 780591,
-        "weapon": "lg"
-      },
-      {
         "hit": true,
         "player": "clox",
         "source": "sound",
@@ -81256,9 +81267,16 @@
         "weapon": "sg"
       },
       {
+        "player": "nlk",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 780591,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 780706,
         "victims": [
@@ -81268,21 +81286,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 780801,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 780913,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 780995,
         "weapon": "lg"
@@ -81300,7 +81318,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 781108,
         "weapon": "lg"
@@ -81318,7 +81336,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 781204,
         "weapon": "lg"
@@ -81336,14 +81354,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 781304,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 781398,
         "weapon": "lg"
@@ -81475,7 +81493,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 785815,
         "weapon": "lg"
@@ -81483,7 +81501,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 785916,
         "victims": [
@@ -81503,22 +81521,22 @@
         "weapon": "sg"
       },
       {
+        "player": "clox",
+        "source": "sound",
+        "team": "oSaMs",
+        "time": 786030,
+        "weapon": "sg"
+      },
+      {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 786030,
         "victims": [
           "marksuzu"
         ],
         "weapon": "lg"
-      },
-      {
-        "player": "clox",
-        "source": "sound",
-        "team": "oSaMs",
-        "time": 786030,
-        "weapon": "sg"
       },
       {
         "player": "lakso",
@@ -81530,7 +81548,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 786125,
         "victims": [
@@ -81547,7 +81565,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 786224,
         "weapon": "lg"
@@ -81561,14 +81579,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 786320,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 786423,
         "weapon": "lg"
@@ -81576,7 +81594,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 786526,
         "victims": [
@@ -81593,7 +81611,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 786623,
         "weapon": "lg"
@@ -81612,14 +81630,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 786723,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 786824,
         "weapon": "lg"
@@ -81627,7 +81645,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 786918,
         "victims": [
@@ -81637,7 +81655,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 787033,
         "weapon": "lg"
@@ -81645,7 +81663,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 787126,
         "victims": [
@@ -81663,7 +81681,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 787216,
         "victims": [
@@ -81674,7 +81692,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 787333,
         "victims": [
@@ -81685,7 +81703,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 787435,
         "victims": [
@@ -81702,7 +81720,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 787516,
         "weapon": "lg"
@@ -81710,7 +81728,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 787618,
         "victims": [
@@ -81732,7 +81750,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 787732,
         "victims": [
@@ -81742,21 +81760,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 787813,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 787927,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 788030,
         "weapon": "lg"
@@ -81800,7 +81818,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 789191,
         "victims": [
@@ -81810,7 +81828,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 789304,
         "weapon": "lg"
@@ -81824,7 +81842,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 789399,
         "weapon": "lg"
@@ -82236,13 +82254,6 @@
         "weapon": "sg"
       },
       {
-        "player": "nlk",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 816296,
-        "weapon": "lg"
-      },
-      {
         "hit": true,
         "player": "lakso",
         "source": "sound",
@@ -82255,7 +82266,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 816296,
+        "weapon": "lg"
+      },
+      {
+        "player": "nlk",
+        "source": "beam",
         "team": ".ra.",
         "time": 816412,
         "weapon": "lg"
@@ -82269,7 +82287,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 816511,
         "weapon": "lg"
@@ -82287,7 +82305,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 816608,
         "weapon": "lg"
@@ -82305,7 +82323,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 816707,
         "weapon": "lg"
@@ -82417,7 +82435,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 819343,
         "victims": [
@@ -82427,7 +82445,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 819437,
         "weapon": "lg"
@@ -82445,7 +82463,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 819553,
         "weapon": "lg"
@@ -83120,7 +83138,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 836148,
         "weapon": "lg"
@@ -83139,7 +83157,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 836244,
         "victims": [
@@ -83183,7 +83201,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 836358,
         "victims": [
@@ -83205,7 +83223,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 836459,
         "victims": [
@@ -83216,7 +83234,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 836555,
         "victims": [
@@ -83226,7 +83244,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 836645,
         "weapon": "lg"
@@ -83244,7 +83262,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 836751,
         "weapon": "lg"
@@ -83441,7 +83459,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 855297,
         "victims": [
@@ -83452,7 +83470,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 855399,
         "victims": [
@@ -83462,14 +83480,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 855512,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 855608,
         "weapon": "lg"
@@ -83477,7 +83495,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 855698,
         "victims": [
@@ -83499,7 +83517,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 855811,
         "victims": [
@@ -83509,14 +83527,14 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 855906,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 856009,
         "weapon": "lg"
@@ -83893,21 +83911,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 883396,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 883491,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 883604,
         "weapon": "lg"
@@ -83915,7 +83933,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 883699,
         "victims": [
@@ -83925,7 +83943,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 883798,
         "weapon": "lg"
@@ -83944,7 +83962,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 883894,
         "victims": [
@@ -83954,28 +83972,28 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 883997,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 884112,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 884200,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 884297,
         "weapon": "lg"
@@ -84261,7 +84279,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 897557,
         "weapon": "lg"
@@ -84269,7 +84287,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 897661,
         "victims": [
@@ -84280,7 +84298,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 897773,
         "victims": [
@@ -84302,7 +84320,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 897882,
         "victims": [
@@ -84313,7 +84331,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 897972,
         "victims": [
@@ -84324,7 +84342,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 898072,
         "victims": [
@@ -84335,7 +84353,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 898162,
         "victims": [
@@ -84345,14 +84363,14 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 898176,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 898259,
         "weapon": "lg"
@@ -84360,7 +84378,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 898272,
         "victims": [
@@ -84392,8 +84410,19 @@
       },
       {
         "hit": true,
+        "player": "apa",
+        "source": "beam",
+        "team": "oSaMs",
+        "time": 898373,
+        "victims": [
+          "nlk"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 898373,
         "victims": [
@@ -84404,9 +84433,9 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
-        "time": 898373,
+        "time": 898473,
         "victims": [
           "nlk"
         ],
@@ -84414,20 +84443,9 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 898473,
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
-        "player": "apa",
-        "source": "ammo",
-        "team": "oSaMs",
-        "time": 898473,
-        "victims": [
-          "nlk"
-        ],
         "weapon": "lg"
       },
       {
@@ -84444,7 +84462,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 898557,
         "victims": [
@@ -84454,7 +84472,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 898577,
         "weapon": "lg"
@@ -84462,7 +84480,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 898660,
         "victims": [
@@ -84472,22 +84490,22 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 898674,
         "weapon": "lg"
       },
       {
-        "player": "nlk",
-        "source": "ammo",
-        "team": ".ra.",
+        "player": "apa",
+        "source": "beam",
+        "team": "oSaMs",
         "time": 898777,
         "weapon": "lg"
       },
       {
-        "player": "apa",
-        "source": "ammo",
-        "team": "oSaMs",
+        "player": "nlk",
+        "source": "beam",
+        "team": ".ra.",
         "time": 898777,
         "weapon": "lg"
       },
@@ -84500,64 +84518,71 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 898881,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 898881,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 898967,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 898980,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 899063,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 899076,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 899176,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 899176,
         "weapon": "lg"
       },
       {
+        "player": "nlk",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 899278,
+        "weapon": "lg"
+      },
+      {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 899278,
         "victims": [
@@ -84592,7 +84617,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 899377,
         "weapon": "lg"
@@ -84606,14 +84631,14 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 899466,
         "weapon": "lg"
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 899582,
         "weapon": "lg"
@@ -84663,7 +84688,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 900491,
         "weapon": "lg"
@@ -84671,7 +84696,7 @@
       {
         "hit": true,
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 900584,
         "victims": [
@@ -84681,7 +84706,7 @@
       },
       {
         "player": "apa",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 900687,
         "weapon": "lg"
@@ -85450,7 +85475,7 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 932631,
         "weapon": "lg"
@@ -85458,7 +85483,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 932727,
         "victims": [
@@ -85469,7 +85494,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 932830,
         "victims": [
@@ -85493,21 +85518,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 932947,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 933027,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 933059,
         "weapon": "lg"
@@ -85515,7 +85540,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 933128,
         "victims": [
@@ -85526,7 +85551,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 933155,
         "victims": [
@@ -85537,7 +85562,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 933241,
         "victims": [
@@ -85548,7 +85573,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 933269,
         "victims": [
@@ -85559,7 +85584,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 933337,
         "victims": [
@@ -85569,7 +85594,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 933363,
         "weapon": "lg"
@@ -85577,7 +85602,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 933436,
         "victims": [
@@ -85587,7 +85612,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 933466,
         "weapon": "lg"
@@ -85595,7 +85620,7 @@
       {
         "hit": true,
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 933532,
         "victims": [
@@ -85605,21 +85630,21 @@
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 933648,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 933749,
         "weapon": "lg"
       },
       {
         "player": "nlk",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 933830,
         "weapon": "lg"
@@ -90776,7 +90801,7 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1087509,
         "weapon": "lg"
@@ -90784,7 +90809,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1087608,
         "victims": [
@@ -90794,14 +90819,14 @@
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1087721,
         "weapon": "lg"
       },
       {
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1087822,
         "weapon": "lg"
@@ -90809,7 +90834,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1087906,
         "victims": [
@@ -90831,7 +90856,7 @@
       {
         "hit": true,
         "player": "sCorp",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1088019,
         "victims": [
@@ -91474,7 +91499,7 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1113846,
         "weapon": "lg"
@@ -91488,35 +91513,35 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1113963,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1114062,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1114162,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1114250,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1114361,
         "weapon": "lg"
@@ -91534,21 +91559,21 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1114462,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1114560,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1114659,
         "weapon": "lg"
@@ -91591,17 +91616,6 @@
       },
       {
         "hit": true,
-        "player": "doberman",
-        "source": "ammo",
-        "team": ".ra.",
-        "time": 1116009,
-        "victims": [
-          "clox"
-        ],
-        "weapon": "lg"
-      },
-      {
-        "hit": true,
         "player": "clox",
         "source": "sound",
         "team": "oSaMs",
@@ -91612,17 +91626,39 @@
         "weapon": "rl"
       },
       {
+        "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 1116009,
+        "victims": [
+          "clox"
+        ],
+        "weapon": "lg"
+      },
+      {
+        "player": "doberman",
+        "source": "beam",
         "team": ".ra.",
         "time": 1116109,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1116206,
+        "weapon": "lg"
+      },
+      {
+        "hit": true,
+        "player": "doberman",
+        "source": "beam",
+        "team": ".ra.",
+        "time": 1116321,
+        "victims": [
+          "clox"
+        ],
         "weapon": "lg"
       },
       {
@@ -92064,14 +92100,14 @@
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1148239,
         "weapon": "lg"
       },
       {
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1148344,
         "weapon": "lg"
@@ -92079,7 +92115,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1148453,
         "victims": [
@@ -92090,7 +92126,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1148552,
         "victims": [
@@ -92101,7 +92137,7 @@
       {
         "hit": true,
         "player": "doberman",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1148646,
         "victims": [
@@ -92478,7 +92514,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1165018,
         "weapon": "lg"
@@ -92493,7 +92529,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1165129,
         "victims": [
@@ -92503,14 +92539,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1165229,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1165329,
         "weapon": "lg"
@@ -92618,28 +92654,28 @@
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1172628,
         "weapon": "lg"
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1172738,
         "weapon": "lg"
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1172840,
         "weapon": "lg"
       },
       {
         "player": "[cmd] witka",
-        "source": "ammo",
+        "source": "beam",
         "team": ".ra.",
         "time": 1172938,
         "weapon": "lg"
@@ -92647,7 +92683,7 @@
       {
         "hit": true,
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1172965,
         "victims": [
@@ -92657,21 +92693,21 @@
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1173063,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1173160,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1173276,
         "weapon": "lg"
@@ -92689,7 +92725,7 @@
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1173474,
         "weapon": "lg"
@@ -92697,7 +92733,7 @@
       {
         "hit": true,
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1173570,
         "victims": [
@@ -92707,21 +92743,21 @@
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1173668,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1173782,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1173866,
         "weapon": "lg"
@@ -92803,7 +92839,7 @@
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1178076,
         "weapon": "lg"
@@ -92831,7 +92867,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1179608,
         "weapon": "lg"
@@ -92839,7 +92875,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1179719,
         "victims": [
@@ -92849,7 +92885,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1179816,
         "weapon": "lg"
@@ -92864,7 +92900,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1179912,
         "victims": [
@@ -92874,14 +92910,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1180009,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1180119,
         "weapon": "lg"
@@ -92934,28 +92970,28 @@
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1181977,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1182075,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1182175,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1182275,
         "weapon": "lg"
@@ -92963,7 +92999,7 @@
       {
         "hit": true,
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1182371,
         "victims": [
@@ -92973,21 +93009,21 @@
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1182479,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1182581,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1182683,
         "weapon": "lg"
@@ -93012,7 +93048,7 @@
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1182778,
         "weapon": "lg"
@@ -93020,7 +93056,7 @@
       {
         "hit": true,
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1182880,
         "victims": [
@@ -93031,7 +93067,7 @@
       {
         "hit": true,
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1182990,
         "victims": [
@@ -93112,7 +93148,7 @@
       {
         "hit": true,
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1185835,
         "victims": [
@@ -93134,7 +93170,7 @@
       {
         "hit": true,
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1185933,
         "victims": [
@@ -93145,7 +93181,7 @@
       {
         "hit": true,
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1186033,
         "victims": [
@@ -93155,21 +93191,21 @@
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1186141,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1186226,
         "weapon": "lg"
       },
       {
         "player": "lakso",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1186342,
         "weapon": "lg"
@@ -93301,14 +93337,14 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1190886,
         "weapon": "lg"
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1190984,
         "weapon": "lg"
@@ -93322,7 +93358,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1191094,
         "weapon": "lg"
@@ -93336,14 +93372,14 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1191194,
         "weapon": "lg"
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1191280,
         "weapon": "lg"
@@ -93380,7 +93416,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1191817,
         "weapon": "lg"
@@ -93394,7 +93430,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1191918,
         "weapon": "lg"
@@ -93402,7 +93438,7 @@
       {
         "hit": true,
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1192025,
         "victims": [
@@ -93412,7 +93448,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1192127,
         "weapon": "lg"
@@ -93426,14 +93462,14 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1192211,
         "weapon": "lg"
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1192329,
         "weapon": "lg"
@@ -93447,7 +93483,7 @@
       },
       {
         "player": "clox",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1192427,
         "weapon": "lg"
@@ -93494,7 +93530,7 @@
       {
         "hit": true,
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1193765,
         "victims": [
@@ -93526,7 +93562,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1193861,
         "weapon": "lg"
@@ -93544,7 +93580,7 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1193972,
         "weapon": "lg"
@@ -93558,14 +93594,14 @@
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1194069,
         "weapon": "lg"
       },
       {
         "player": "marksuzu",
-        "source": "ammo",
+        "source": "beam",
         "team": "oSaMs",
         "time": 1194167,
         "weapon": "lg"
