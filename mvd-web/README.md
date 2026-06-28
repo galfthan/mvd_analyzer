@@ -70,7 +70,17 @@ A slim top bar (wordmark + commit-hash version + GitHub link) sits
 above a Grafana-style frame: a fixed left **sidebar** with one button
 per analysis tab, and a **main pane** that fills the rest of the
 viewport (no width cap). Sidebar order is `Search`, `Summary`,
-`Timeline`, `Chat`, `Map`, `Locs & Regions`, `Key Moments`, `Pack Drops`.
+`Timeline`, `Chat`, `Map`, `Locs & Regions`, `Key Moments`, `Pack Drops`,
+`Pickups`, `Aim Stats`.
+
+The **Aim Stats** tab (experimental) is a thin renderer over the Go-computed
+`result.aim` block: a per-player picker drives an accuracy table, a
+normalized crosshair-placement heatmap (hitscan; radius 1 ≈ the hitbox edge,
+so it's range-comparable), an LG ramp-onto-target bar chart, a rocket
+direct/splash panel, and an LG-whiffs split. All geometry/attribution lives
+in `mvd-analytics/analyzer/aim.go`; the tab only bins and paints. Target
+attribution is exact in duels and a labeled nearest-crosshair heuristic in
+team games.
 The **Key Moments** tab has three tables: powerup runs, longest frag
 streaks, and a full-width **Airborne Rocket Gibs** table — enemy rocket
 hits on airborne victims (`timelineAnalysis.airgibs`), sortable by any

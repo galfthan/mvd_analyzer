@@ -28,6 +28,7 @@ analyzer are also covered there.
 | Items | `items` | *ItemsResult | Per-entity pickup / respawn timeline (per match). |
 | Damage | `damage` | *DamageResult | Per-hit damage log + aggregates (matrix, per-weapon, given/taken, EWep victim-weapon buckets) from the KTX `mvdhidden_dmgdone` stream, with a KTX-scoreboard cross-check. |
 | Shots | `shots` | *ShotsResult | Per-shot weapon-fire stream (who fired what, at what ms) from `svc_sound` fire sounds + LG cell-ammo, with same-frame hitscan→damage links and a KTX-accuracy cross-check. |
+| Aim | `aim` | *AimResult | Per-player aim analysis: normalized crosshair-error samples (hitscan), LG ramp-onto-target, rocket direct/splash, LG reach/whiff. Derived (post-process) from Shots + Streams + Damage. |
 | MapEntities | `mapEntities` | *MapEntitiesResult | Static designed map layout (item spawns, spawnpoints, teleporters, buttons) from the BSP entity corpus. |
 | Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops from KTX `//ktx drop` hint. |
 | WeaponPickups | `weaponPickups` | []WeaponPickup | Slot-weapon acquisitions with kills-before-next-death effectiveness. |
@@ -352,6 +353,108 @@ only — never used to adjust the detected stream.
 | StreamAttacks | `streamAttacks` | int (converted to KTX attack unit) |
 | KtxAttacks | `ktxAttacks` | int (demoInfo acc.attacks) |
 | KtxHits | `ktxHits` | int (demoInfo acc.hits) |
+
+## AimResult (`aim`)
+
+Defined in `result/aim.go`. Per-player aim analysis derived as a
+post-processor (`analyzer/aim.go`) from `Shots` + `Streams` (interpolated
+position/view at fire time via `PositionTrack.SampleAt`) + `Damage` + the LG
+`Streams.Beams`. Experimental and additive — it never modifies its inputs.
+
+Geometry: the shot traces from the weapon **muzzle** (origin + 16, the LG/SG
+fire origin) toward the enemy **hull center** (origin + 4, the −24..+32 box
+midpoint). The forward vector uses the Quake `AngleVectors` convention
+(`F = (cos p·cos y, cos p·sin y, −sin p)`, +pitch = down). The signed errors
+`DYaw`/`DPitch` are normalized per axis by the target's angular half-extent so
+the hull maps to the unit square (see CrosshairSamples).
+
+**Truthfulness.** Hit/miss is `Shot.Hit` (the Go-linked truth), never
+re-derived. The crosshair samples are **hitscan-only** (sg/ssg/lg — rockets
+are led); note SG/SSG have pellet spread, so the web heatmap renders **LG
+only** (the precise hitscan). A shot is attributed only to an enemy whose
+position track brackets the fire time. `Mode` is `"duel"` (one enemy → exact)
+or `"team"` (nearest-crosshair-enemy heuristic). Rocket "direct" is a
+non-splash-damage heuristic.
+
+| Field | JSON key | Type |
+|---|---|---|
+| Players | `players` | []PlayerAim |
+
+### PlayerAim
+
+| Field | JSON key | Type |
+|---|---|---|
+| Player | `player` | string |
+| Team | `team` | string (omitempty) |
+| Mode | `mode` | string — `"duel"` or `"team"` |
+| Crosshair | `crosshair` | *CrosshairSamples (omitempty) |
+| LGRamp | `lgRamp` | *LGRampSamples (omitempty) |
+| Weapons | `weapons` | []WeaponAim (omitempty) — rich per-weapon effectiveness |
+
+### CrosshairSamples
+
+Columnar, one index per hitscan fire. `DYaw`/`DPitch` are signed **degrees**
+(right/up positive) — the literal "degrees off the enemy" drift. `NYaw`/`NPitch`
+divide each by the target's angular half-extent on that axis, so the hull maps
+to the unit square: **±1 on an axis = the hull edge** (corner ≈ √2). The yaw
+half-extent uses the box silhouette at the viewing angle (an axis-aligned hull
+is up to √2 wider seen corner-on: `16·(|cosθ|+|sinθ|)`); the pitch half-extent
+is 28. `Dist` is the muzzle→hull-center distance in Quake units. (Validated:
+LG hits land ~86% inside the unit square, median radius ≈ 0.77, vs misses well
+outside.)
+
+| Field | JSON key | Type |
+|---|---|---|
+| T | `t` | []int32 (fire time, match ms) |
+| Weapon | `w` | []string (sg/ssg/lg) |
+| DYaw | `dyaw` | []float32 (deg) |
+| DPitch | `dpitch` | []float32 (deg) |
+| NYaw | `nyaw` | []float32 (normalized) |
+| NPitch | `npitch` | []float32 (normalized) |
+| Dist | `dist` | []float32 (qu) |
+| Hit | `hit` | []bool |
+| Target | `tgt` | []string (attributed enemy) |
+
+### LGRampSamples
+
+Columnar, one index per LG fire. `Since` is ms since the start of the shaft
+the fire belongs to (fires < 150 ms apart are one shaft).
+
+| Field | JSON key | Type |
+|---|---|---|
+| Since | `since` | []int32 (ms since shaft start) |
+| Hit | `hit` | []bool |
+
+### WeaponAim
+
+One entry per weapon the player fired. `Shots` (fires) and `Hits` (fires that
+connected) are always present; the rest are weapon-specific and `omitempty`.
+`Pellets`/`PelletHits` match the server's authoritative SG/SSG per-pellet
+stats; `Direct` matches the server's RL/GL direct-hit count.
+
+| Field | JSON key | Type / meaning |
+|---|---|---|
+| Weapon | `weapon` | string (lg/sg/ssg/rl/gl) |
+| Shots | `shots` | int — fires |
+| Hits | `hits` | int — fires that connected |
+| Pellets | `pellets` | int (sg/ssg) — pellets fired (shots × 6/14) |
+| PelletHits | `pelletHits` | int (sg/ssg) — pellets that hit (Σ damage / 4) |
+| Full | `full` | int (sg/ssg) — fires where all pellets hit |
+| Partial | `partial` | int (sg/ssg) — fires where some pellets hit |
+| Miss | `miss` | int (sg/ssg) — fires where no pellet hit |
+| Direct | `direct` | int (rl/gl) — non-splash contacts (≈ server hits) |
+| Splash | `splash` | int (rl/gl) — linked hits that were splash-only |
+| Missed | `missed` | int (rl/gl) — fires that linked to no impact |
+| NearMiss | `nearMiss` | int (lg) — missed beam ended ≤ 48 qu from an enemy hull (aim error) |
+| Blocked | `blocked` | int (lg) — missed beam stopped on geometry short of max range (object in the way) |
+| OutOfRange | `outOfRange` | int (lg) — missed beam reached its ~600u max length (open space / beyond reach) |
+| Unresolved | `unresolved` | int (lg) — no beam matched the miss |
+
+For LG, `Hits + NearMiss + Blocked + OutOfRange + Unresolved == Shots`.
+
+The pellet stats need the KTX damage stream; the RL/GL direct/splash split
+needs projectile linking (`Streams.Projectiles`); the LG near/blocked split
+needs `Streams.Beams`. Absent inputs simply leave those fields zero.
 
 ## MessagesResult (`messages`)
 

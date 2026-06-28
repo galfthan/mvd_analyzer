@@ -706,6 +706,8 @@ function setupTabs() {
                     renderChatMessages();
                 } else if (tabName === 'loc-graph') {
                     renderLocGraph();
+                } else if (tabName === 'aimstats') {
+                    renderAimStats();
                 }
             };
             renderForTab();
@@ -1127,6 +1129,9 @@ function displayResults(result) {
 
     // Loc Graph
     timeRender('initLocGraphView', () => initLocGraphView(result));
+
+    // Aim Stats (experimental) — builds the player picker and renders result.aim.
+    timeRender('initAimStatsView', () => initAimStatsView(result));
 
     // Make all static tables sortable
     document.querySelectorAll('.stats-table').forEach(makeSortable);
@@ -10729,12 +10734,223 @@ function renderHeatmapTable(tableId, theadRowId, tbodyId, data, firstColLabel) {
             const style = rgb ? ` style="background: rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}); color: ${contrastInk(rgb)}"` : '';
             const title = data.cellTitle ? data.cellTitle(columns[ci], row, ci) : '';
             const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
-            tds.push(`<td class="${cls.join(' ')}"${style} data-sort-value="${cell.p}"${titleAttr}>${Math.round(cell.p)}%</td>`);
+            // Cells default to "<p>%"; pass data.cellText to show another unit
+            // (e.g. a raw count) while keeping cell.p as the sort key.
+            const text = data.cellText ? data.cellText(cell) : `${Math.round(cell.p)}%`;
+            tds.push(`<td class="${cls.join(' ')}"${style} data-sort-value="${cell.p}"${titleAttr}>${text}</td>`);
         });
         return tds.join('');
     });
 
     makeSortable(table);
+}
+
+// ─── Aim Stats Tab (experimental) ─────────────────────────────────────────
+//
+// Thin renderer over result.aim, which is computed in Go
+// (mvd-analytics/analyzer/aim.go): per-player columnar crosshair-error samples
+// (hitscan), LG ramp, rocket direct/splash, and LG reach. This layer only bins
+// + paints — all geometry, target attribution and classification live in the
+// analytics layer so every client (CLI / API / web) shares one truth.
+
+// Heatmap extents (normalized so 1.0 = hull edge). Yaw is shown wider and
+// finer because horizontal aim is the story.
+const AIM_YAW_HALF = 4.0;
+const AIM_PITCH_HALF = 2.5;
+const AIM_YAW_W = 0.25;
+const AIM_PITCH_W = 0.5;
+const AIM_YAW_BINS = Math.round((2 * AIM_YAW_HALF) / AIM_YAW_W);       // 32
+const AIM_PITCH_BINS = Math.round((2 * AIM_PITCH_HALF) / AIM_PITCH_W); // 10
+
+function aimBin(v, half, w, nb) {
+    let i = Math.floor((v + half) / w);
+    if (i < 0) i = 0;
+    if (i >= nb) i = nb - 1;
+    return i;
+}
+
+function aimCenter(i, half, w) { return -half + w * (i + 0.5); }
+
+// initAimStatsView (re)builds the player picker per demo and renders the tab.
+function initAimStatsView(result) {
+    const sel = document.getElementById('aim-player');
+    if (sel) {
+        const players = (result && result.aim && result.aim.players)
+            ? result.aim.players.map(p => p.player).sort((a, b) => a.localeCompare(b))
+            : [];
+        sel.innerHTML = '';
+        for (const n of players) {
+            const opt = document.createElement('option');
+            opt.value = n;
+            opt.textContent = n;
+            sel.appendChild(opt);
+        }
+        if (!sel._aimWired) {
+            sel.addEventListener('change', renderAimStats);
+            sel._aimWired = true;
+        }
+    }
+    renderAimStats();
+}
+
+function renderAimStats() {
+    const result = currentResult;
+    const aim = result && result.aim;
+    const hasData = !!(aim && aim.players && aim.players.length);
+
+    const tab = document.getElementById('tab-aimstats');
+    const es = tab ? tab.querySelector('.empty-state') : null;
+    if (es) es.style.display = result ? 'none' : '';
+    const empty = document.getElementById('aim-empty');
+    if (empty) empty.style.display = (result && !hasData) ? '' : 'none';
+    ['aim-controls', 'aim-accuracy-panel', 'aim-heatmap-panel', 'aim-ramp-panel'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = hasData ? '' : 'none';
+    });
+    if (!hasData) return;
+
+    const sel = document.getElementById('aim-player');
+    const want = sel ? sel.value : '';
+    const pa = aim.players.find(p => p.player === want) || aim.players[0];
+    if (sel && sel.value !== pa.player) sel.value = pa.player;
+
+    renderAimMode(pa);
+    renderAimAccuracy(result, pa);
+    renderAimHeatmap(pa);
+    renderAimRamp(pa);
+}
+
+function renderAimMode(pa) {
+    const el = document.getElementById('aim-mode');
+    if (!el) return;
+    el.textContent = pa.mode === 'duel'
+        ? 'Target attribution: duel (exact — one enemy)'
+        : 'Target attribution: team game (nearest-crosshair-enemy heuristic)';
+}
+
+// renderAimAccuracy builds the wide per-weapon stats table straight from the
+// Go aim.weapons block: shared Shots/Hits/Hit%, then column groups for SG/SSG
+// pellets (fired/hit/acc/full/partial/miss), RL/GL (direct/splash/missed) and
+// LG misses (near/blocked/out-of-range). Cells that don't apply to a weapon
+// render a muted "·".
+function renderAimAccuracy(result, pa) {
+    const weapons = pa.weapons || [];
+    const na = '<td class="aim-na">·</td>';
+    const cell = (applies, v) => applies ? `<td>${v}</td>` : na;
+    renderTableRows('aim-accuracy-body', weapons, w => {
+        const shot = w.weapon === 'sg' || w.weapon === 'ssg';
+        const roc = w.weapon === 'rl' || w.weapon === 'gl';
+        const lg = w.weapon === 'lg';
+        const hitPct = w.shots ? (w.hits / w.shots) * 100 : 0;
+        const pPct = (shot && w.pellets) ? Math.round((w.pelletHits || 0) / w.pellets * 100) : 0;
+        return [
+            `<td>${escapeHtml(getWeaponName(w.weapon))}</td>`,
+            `<td>${w.shots}</td>`,
+            `<td>${w.hits}</td>`,
+            `<td><span class="${getAccuracyClass(hitPct)}">${hitPct.toFixed(0)}%</span></td>`,
+            cell(shot, w.pellets || 0),
+            cell(shot, w.pelletHits || 0),
+            shot ? `<td>${pPct}%</td>` : na,
+            cell(shot, w.full || 0),
+            cell(shot, w.partial || 0),
+            cell(shot, w.miss || 0),
+            cell(roc, w.direct || 0),
+            cell(roc, w.splash || 0),
+            cell(roc, w.missed || 0),
+            cell(lg, w.nearMiss || 0),
+            cell(lg, w.blocked || 0),
+            cell(lg, w.outOfRange || 0),
+        ].join('');
+    });
+}
+
+// renderAimHeatmap shows where the crosshair sat relative to the enemy at each
+// hitscan fire (LG/SG/SSG) — aim intent, i.e. where you take your shots. The
+// cell value is the SHOT COUNT (a tight cluster near center = good placement);
+// colour is the same density. (SG/SSG pellet spread is about where pellets
+// *land*, not where you aimed, so it doesn't change this placement view.)
+function renderAimHeatmap(pa) {
+    const nodata = document.getElementById('aim-heatmap-nodata');
+    const wrap = document.querySelector('#aim-heatmap-panel .heatmap-table-wrap');
+    const c = pa.crosshair;
+    const n = (c && c.t) ? c.t.length : 0;
+    if (nodata) nodata.style.display = n ? 'none' : '';
+    if (wrap) wrap.style.display = n ? '' : 'none';
+    if (!n) return;
+
+    // grid[row][col]: row 0 = top (highest pitch), col 0 = left. The x axis is
+    // the enemy's offset relative to the crosshair, so enemy-right reads on the
+    // right (= −dYaw, since +dYaw is enemy-left in Quake); y is dPitch, top = up.
+    const grid = Array.from({ length: AIM_PITCH_BINS }, () => new Array(AIM_YAW_BINS).fill(null));
+    let maxShots = 0;
+    for (let i = 0; i < n; i++) {
+        const col = aimBin(-c.nyaw[i], AIM_YAW_HALF, AIM_YAW_W, AIM_YAW_BINS);
+        const row = AIM_PITCH_BINS - 1 - aimBin(c.npitch[i], AIM_PITCH_HALF, AIM_PITCH_W, AIM_PITCH_BINS);
+        let g = grid[row][col];
+        if (!g) { g = { shots: 0, hits: 0 }; grid[row][col] = g; }
+        g.shots++;
+        if (c.hit[i]) g.hits++;
+        if (g.shots > maxShots) maxShots = g.shots;
+    }
+
+    const columns = [];
+    for (let col = 0; col < AIM_YAW_BINS; col++) {
+        const cen = aimCenter(col, AIM_YAW_HALF, AIM_YAW_W);
+        columns.push({
+            kind: 'bin', teamIdx: -1, label: cen.toFixed(1),
+            full: `enemy ${cen >= 0 ? 'right' : 'left'} ${Math.abs(cen).toFixed(2)} (×hull half-width)`,
+        });
+    }
+    const rows = [];
+    for (let row = 0; row < AIM_PITCH_BINS; row++) {
+        const cells = [], counts = [];
+        for (let col = 0; col < AIM_YAW_BINS; col++) {
+            const g = grid[row][col];
+            if (!g) { cells.push({ i: 0, p: null }); counts.push(null); continue; }
+            cells.push({ i: maxShots ? g.shots / maxShots : 0, p: g.shots });
+            counts.push(g);
+        }
+        rows.push({ name: aimCenter(AIM_PITCH_BINS - 1 - row, AIM_PITCH_HALF, AIM_PITCH_W).toFixed(1), cells, counts });
+    }
+    renderHeatmapTable('aim-heatmap-table', 'aim-heatmap-thead-row', 'aim-heatmap-body', {
+        columns, rows,
+        cellText: cell => (cell.p > 0 ? String(cell.p) : ''),
+        cellTitle: (_col, r, ci) => {
+            const g = r.counts[ci];
+            return g ? `${g.shots} shot${g.shots === 1 ? '' : 's'}, ${g.hits} hit (${Math.round(g.hits / g.shots * 100)}%)` : '';
+        },
+    }, 'Δpitch ↓ / Δyaw →');
+}
+
+function renderAimRamp(pa) {
+    const chart = document.getElementById('aim-ramp-chart');
+    const nodata = document.getElementById('aim-ramp-nodata');
+    const ramp = pa.lgRamp;
+    const n = (ramp && ramp.since) ? ramp.since.length : 0;
+    if (nodata) nodata.style.display = n ? 'none' : '';
+    if (!chart) return;
+    chart.innerHTML = '';
+    if (!n) return;
+
+    const BW = 100, NB = 7; // 0-100 … 500-600, then 600+
+    const buckets = Array.from({ length: NB }, () => ({ shots: 0, hits: 0 }));
+    for (let i = 0; i < n; i++) {
+        let b = Math.floor(ramp.since[i] / BW);
+        if (b >= NB) b = NB - 1;
+        buckets[b].shots++;
+        if (ramp.hit[i]) buckets[b].hits++;
+    }
+    buckets.forEach((bk, b) => {
+        const pct = bk.shots ? (bk.hits / bk.shots) * 100 : 0;
+        const label = b === NB - 1 ? `${b * BW}+ ms` : `${b * BW}-${(b + 1) * BW} ms`;
+        const div = document.createElement('div');
+        div.className = 'aim-bar';
+        div.innerHTML =
+            `<span class="weapon-name">${label}</span>` +
+            `<div class="bar-container"><div class="bar" style="width:${pct}%"></div></div>` +
+            `<span class="weapon-count">${bk.shots ? pct.toFixed(0) + '% (' + bk.shots + ')' : '-'}</span>`;
+        chart.appendChild(div);
+    });
 }
 
 // ─── Playback Engine ──────────────────────────────────────────────────────

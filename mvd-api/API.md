@@ -314,6 +314,21 @@ and exposed as the opt-in `telefrag` / `stomp` events (see §4.8). The
 `weapon` filter treats their implicit weapon as `tele` / `stomp`. The
 kill itself still appears in `/frags` and as a `frag` event.
 
+### 4.5c `GET /v1/demos/{id}/aim`
+
+No params. Per-player aim analysis (`result.Aim`): columnar
+crosshair-error samples for hitscan fires (signed degrees off the enemy +
+a version normalized by the target's angular size, so radius 1 ≈ the hitbox
+edge), an LG ramp-onto-target series, rocket direct/splash counts, and an LG
+reach/whiff split. `mode` is `"duel"` (exact target) or `"team"` (nearest-
+crosshair-enemy heuristic). Shape: `result.AimResult` →
+[RESULT_SCHEMA.md §AimResult](../mvd-analytics/RESULT_SCHEMA.md#aimresult-aim).
+
+**Availability:** the `crosshair` + `lgRamp` blocks are always present; the
+`rocket` + `lgReach` blocks need the projectile/beam streams, which this
+endpoint's default parse does not build, so they are absent here. 422
+(`aim_unavailable`) when the demo has no shots/position data.
+
 ### 4.6 `GET /v1/demos/{id}/loc-graph`
 
 Per-map loc adjacency graph (nodes + directed transitions, with optional

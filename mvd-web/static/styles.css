@@ -894,6 +894,53 @@ table tbody tr:hover {
     color: var(--accent-cyan);
 }
 
+/* Aim Stats tab (experimental) */
+.aim-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.aim-mode {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.aim-desc {
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+    max-width: 72ch;
+}
+
+.aim-bar {
+    display: grid;
+    grid-template-columns: 130px 1fr 96px;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0;
+}
+
+/* Wide per-weapon stats table: muted "·" for cells a weapon doesn't use, and
+   a group-header row over the SG/RL/LG column clusters. */
+.aim-na {
+    color: #555;
+    text-align: center;
+}
+
+#aim-accuracy-table .aim-group-row th {
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 600;
+    border-bottom: 1px solid var(--bg-panel);
+    text-align: center;
+}
+
+#aim-accuracy-table th {
+    font-size: 0.8rem;
+}
+
 /* Timeline Styles */
 .timeline-container {
     max-height: 600px;

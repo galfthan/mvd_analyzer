@@ -253,6 +253,28 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, out)
 }
 
+// handleAim: GET /v1/demos/{id}/aim — per-player aim analysis
+// (result.Aim): normalized crosshair-error samples (hitscan), LG
+// ramp-onto-target, rocket direct/splash, LG reach/whiff. Pass-through, like
+// /demoinfo.
+//
+// The crosshair + LG-ramp blocks are always present; the rocket + LG-reach
+// blocks need the projectile/beam streams, which the default parse does not
+// build, so they are absent here. For those, use the WASM map build or
+// `qw-analyze -include projectiles,beams`.
+func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if res.Aim == nil {
+		writeError(w, http.StatusUnprocessableEntity, "aim_unavailable",
+			"this demo has no aim data (needs shots + position/view streams)")
+		return
+	}
+	writeJSON(w, http.StatusOK, res.Aim)
+}
+
 // handleChat: GET /v1/demos/{id}/chat — chat-only slice of
 // result.Messages.Events, with optional player / time-window / type
 // filters.

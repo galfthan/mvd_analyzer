@@ -212,6 +212,11 @@ type (
 	ShotsDelta             = result.ShotsDelta
 	ProjectileStreams      = result.ProjectileStreams
 	BeamStreams            = result.BeamStreams
+	AimResult              = result.AimResult
+	PlayerAim              = result.PlayerAim
+	CrosshairSamples       = result.CrosshairSamples
+	LGRampSamples          = result.LGRampSamples
+	WeaponAim              = result.WeaponAim
 	MapEntitiesResult      = result.MapEntitiesResult
 	MapEntity              = result.MapEntity
 	Bounds                 = result.Bounds

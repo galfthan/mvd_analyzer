@@ -616,6 +616,39 @@ func TestDemoInfo_Unavailable(t *testing.T) {
 	}
 }
 
+func TestAim(t *testing.T) {
+	r := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Aim: &result.AimResult{Players: []result.PlayerAim{{
+			Player: "bps", Team: "blue", Mode: "duel",
+			Crosshair: &result.CrosshairSamples{
+				T: []int32{1000}, Weapon: []string{"lg"},
+				DYaw: []float32{1}, DPitch: []float32{-1},
+				NYaw: []float32{0.5}, NPitch: []float32{-0.5},
+				Dist: []float32{800}, Hit: []bool{true}, Target: []string{"milton"},
+			},
+		}}},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/aim", 200)
+	if players, _ := resp["players"].([]any); len(players) != 1 {
+		t.Fatalf("len(players) = %d; want 1 (%v)", len(players), resp)
+	}
+}
+
+func TestAim_Unavailable(t *testing.T) {
+	store := &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no Aim
+	}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/aim")
+	if status != 422 {
+		t.Errorf("status = %d; want 422 (%s)", status, resp)
+	}
+}
+
 func TestChat_All(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()

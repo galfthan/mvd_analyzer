@@ -410,6 +410,10 @@ shots (per-shot weapon-fire stream — who fired what at exactly what ms,
 from `svc_sound` fire sounds + LG cell-ammo — with same-frame hitscan→damage
 links, entity-tracked rocket/grenade→impact links, and a KTX-accuracy
 cross-check),
+aim (per-player aim analysis derived from shots + streams + damage —
+normalized crosshair-error samples for hitscan, LG ramp-onto-target, rocket
+direct/splash, and LG reach/whiff; exact target attribution in duels, a
+labeled nearest-crosshair heuristic in team games),
 backpacks (RL/LG drops attributed to the dropping player via KTX's
 `//ktx drop` hint), and weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
@@ -826,6 +830,17 @@ diff -r /tmp/before /tmp/after
    height (h) are **`float32`** — the wire-native sub-unit origin, no
    longer truncated to whole units (which also sharpens the velocity);
    the `h` no-floor sentinel is now `-1000000000`.
+
+9. **Aim target attribution (schema v41)**: the `aim` block's crosshair
+   error is computed against the enemy it attributes each shot to. In a
+   **duel** this is exact (one enemy → `mode: "duel"`). In a **team game**
+   it is a heuristic: each shot is attributed to the enemy nearest the
+   crosshair at the fire time (`mode: "team"`), so a shot tracking one
+   opponent while another crosses closer to the crosshair can be mis-
+   attributed. Shots are only attributed to an enemy whose position track
+   brackets the fire time. The rocket "direct hit" count is likewise a
+   heuristic (non-splash damage events ≈ direct contacts). These are
+   labeled in the data so consumers can disambiguate.
 
 ## Reference sources
 

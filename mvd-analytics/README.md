@@ -31,11 +31,11 @@ that downstream consumers render, summarise, or feed to an agent.
   into two phases: **core** (`demoinfo`, `identity`, `frag` — the
   producers that fill `CoreOutputs`) finalise first; **derived** (`metadata`, `match`,
   `messages`, `timeline`, `items`, `damage`, `shots`, `backpacks`, `weapon_pickups`)
-  finalise after, with `CoreOutputs` already populated. Six default
+  finalise after, with `CoreOutputs` already populated. Seven default
   result post-processors run last (victim-named teamkill recovery, time
-  normalisation, duel team rewrite, scoreboard kills/deaths/suicides
-  correction, locgraph synthesis, region-control classification) — see
-  `postprocess.go`
+  normalisation, duel team rewrite, **aim analysis**, scoreboard
+  kills/deaths/suicides correction, locgraph synthesis, region-control
+  classification) — see `postprocess.go` and `aim.go`
   and `teamkill_telefrag.go`.
 - `view/` — **time-parameterised query API** over a finalised
   `*Result`. Six pure functions (`Buckets`, `Events`, `StreamSlice`,
@@ -274,6 +274,7 @@ type Result struct {
     Items            *ItemsResult             // per-item pickup / respawn timeline (all MVD sources)
     Damage           *DamageResult            // per-hit damage log + aggregates (KTX dmgdone stream)
     Shots            *ShotsResult             // per-shot weapon-fire stream (sound + LG ammo) + hitscan→damage links
+    Aim              *AimResult               // per-player aim analysis (crosshair error, LG ramp, rocket direct/splash, LG reach)
     MapEntities      *MapEntitiesResult       // static map layout from the BSP entity corpus (mapents)
     Backpacks        []BackpackDrop           // RL/LG backpack drops (from KTX //ktx drop hint)
     WeaponPickups    []WeaponPickup           // slot-weapon pickups + kills-before-next-death metric

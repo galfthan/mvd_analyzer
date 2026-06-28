@@ -21,6 +21,31 @@ detail.
   mapents, mapbsp, and the `/v1/maps/{map}` endpoint. Only the dominant
   `phantombase` BSP is fetched; the low-play predecessors are not.
 
+## 2026-06-28
+
+- **Aim analytics** (schema v41). A new top-level `aim` block: per-player aim
+  metrics derived as a post-processor from `shots` + `streams`
+  (position/view interpolated at fire time) + `damage` + LG `beams`. Columnar
+  per-shot **crosshair-error samples** for hitscan (sg/ssg/lg) — both signed
+  degrees off the enemy and a version normalized by the target's angular size
+  (range-comparable; radius 1 ≈ the hitbox edge); an **LG ramp-onto-target**
+  series (ms since shaft start + hit); **rocket direct/splash** counts; and an
+  **LG reach/whiff** classification (near miss vs blocked vs unresolved).
+  Target attribution is exact in duels (`mode: "duel"`) and a labeled
+  nearest-crosshair-enemy heuristic in team games (`mode: "team"`). Computed
+  by default for every client (CLI / API / web) — the crosshair + ramp blocks
+  always; the rocket + reach blocks when the projectile/beam streams were
+  built (the WASM map build, `qw-analyze -include projectiles,beams`). The web
+  UI adds an experimental **Aim Stats** tab that renders the block: a rich
+  per-weapon table (SG/SSG pellets hit/fired + full/partial/whiff fires, RL/GL
+  direct/splash/missed, LG near-aim/blocked whiffs — the pellet and direct
+  figures match the server's authoritative stats), a hitscan
+  crosshair-placement heatmap (shot density, normalized so ±1 = the hull edge),
+  and an LG ramp chart. Also adds a reusable
+  `result.PositionTrack.SampleAt` interpolating
+  sampler (position + shortest-arc view angle + velocity) other position-
+  derived analytics can adopt.
+
 ## 2026-06-27
 
 - **Weapon-fire map overlay** (schema v40). Two opt-in spatial streams under

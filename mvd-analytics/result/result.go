@@ -451,7 +451,15 @@ package result
 //     only when requested (qw-analyze -include projectiles,beams; the WASM
 //     map build) so the default output and goldens stay lean. Additive
 //     (omitempty); absent from the default parse.
-const CurrentSchemaVersion = 40
+//
+// v41:
+//   - New top-level Aim (*AimResult): per-player aim analysis derived as a
+//     post-process from Shots + Streams (interpolated position/view at fire
+//     time) + Damage + the LG beam stream — normalized crosshair-error
+//     samples (hitscan), LG ramp-onto-target, rocket direct/splash, LG
+//     reach/whiff. Additive (omitempty); the crosshair/ramp blocks compute
+//     by default, the rocket/reach blocks only when their streams were built.
+const CurrentSchemaVersion = 41
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -474,6 +482,7 @@ type Result struct {
 	Items            *ItemsResult            `json:"items,omitempty"`
 	Damage           *DamageResult           `json:"damage,omitempty"`
 	Shots            *ShotsResult            `json:"shots,omitempty"`
+	Aim              *AimResult              `json:"aim,omitempty"`
 	MapEntities      *MapEntitiesResult      `json:"mapEntities,omitempty"`
 	Backpacks        []BackpackDrop          `json:"backpacks,omitempty"`
 	WeaponPickups    []WeaponPickup          `json:"weaponPickups,omitempty"`

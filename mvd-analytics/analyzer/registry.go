@@ -341,6 +341,10 @@ func NewDefaultRegistry() *Registry {
 	// the mvd-api /los endpoint).
 	r.RegisterPostProcessor(deriveDemoStartAnchor)
 	r.RegisterPostProcessor(duelTeamNormalize)
+	// Aim runs after the match-relative shift and duel team rewrite so it sees
+	// normalised fire/position times and stable team labels for enemy
+	// attribution. It reads Shots + Streams + Damage; it writes only Result.Aim.
+	r.RegisterPostProcessor(aimPost)
 	r.RegisterPostProcessor(airgibsPost)
 	r.RegisterPostProcessor(scoreboardStatsPost)
 	r.RegisterPostProcessor(locGraphPost)
