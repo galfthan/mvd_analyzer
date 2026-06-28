@@ -21793,7 +21793,7 @@
           },
           {
             "hits": 57,
-            "shots": 95,
+            "shots": 94,
             "weapon": "rl"
           },
           {
@@ -33235,7 +33235,7 @@
           },
           {
             "hits": 0,
-            "shots": 101,
+            "shots": 100,
             "weapon": "sng"
           }
         ]
@@ -88578,7 +88578,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "shots": {
     "byPlayer": [
       {
@@ -89190,6 +89190,7 @@
         "source": "sound",
         "team": "ahoy",
         "time": -10246,
+        "warmup": true,
         "weapon": "rl"
       },
       {
@@ -135680,6 +135681,7 @@
         "source": "sound",
         "team": "ahoy",
         "time": 1200128,
+        "warmup": true,
         "weapon": "sng"
       }
     ]

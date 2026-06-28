@@ -312,6 +312,7 @@ KTX damage stream:
 | Source | `source` | string | `sound` \| `beam` (LG). |
 | Hit | `hit` | bool (omitempty) | Hitscan fire that connected (≥1 victim same frame). |
 | Victims | `victims` | []string (omitempty) | Hitscan victims hit by this fire. |
+| Warmup | `warmup` | bool (omitempty) | Fired outside the match (prewar / warmup / post-match). The stream keeps it; `ByPlayer` and the aim analysis exclude it. |
 
 ### PlayerShots / WeaponShots
 

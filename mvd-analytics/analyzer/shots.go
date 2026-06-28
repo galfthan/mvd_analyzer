@@ -313,6 +313,7 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 		out.Shots = append(out.Shots, Shot{
 			Time: s.tMs, Player: s.name, Team: s.team,
 			Weapon: s.weapon, Source: s.source, Hit: s.hit, Victims: s.victims,
+			Warmup: !s.inMatch,
 		})
 		if !s.inMatch {
 			continue

@@ -271,7 +271,7 @@
           },
           {
             "hits": 62,
-            "shots": 169,
+            "shots": 168,
             "weapon": "rl"
           },
           {
@@ -10278,7 +10278,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "shots": {
     "byPlayer": [
       {
@@ -13891,6 +13891,7 @@
         "source": "sound",
         "team": "coop",
         "time": 600058,
+        "warmup": true,
         "weapon": "rl"
       }
     ]

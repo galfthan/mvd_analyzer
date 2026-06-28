@@ -23,7 +23,7 @@ detail.
 
 ## 2026-06-28
 
-- **Aim analytics** (schema v41). A new top-level `aim` block: per-player aim
+- **Aim analytics** (schema v41–v42). A new top-level `aim` block: per-player aim
   metrics derived as a post-processor from `shots` + `streams`
   (position/view interpolated at fire time) + `damage` + LG `beams`. Columnar
   per-shot **crosshair-error samples** for hitscan (sg/ssg/lg) — both signed
@@ -44,7 +44,10 @@ detail.
   and an LG ramp chart. Also adds a reusable
   `result.PositionTrack.SampleAt` interpolating
   sampler (position + shortest-arc view angle + velocity) other position-
-  derived analytics can adopt.
+  derived analytics can adopt. The web table is one table per weapon with
+  players on the rows (team-coloured like the Summary tab), and the heatmap is
+  split into LG and SG. Shots gained `warmup` (v42) — fires outside the match;
+  the aim analysis is match-time and excludes them, matching `shots.byPlayer`.
 
 ## 2026-06-27
 

@@ -920,83 +920,67 @@
                 <div class="panel" id="aim-accuracy-panel">
                     <h3>Accuracy &amp; effectiveness</h3>
                     <div class="aim-desc">
-                        Per-weapon fires, hits and hit-rate (share of trigger pulls that
-                        connected), with a rich breakdown: <strong>SG/SSG</strong> show
-                        pellets hit / fired and how many fires landed all pellets (full),
-                        some (partial) or none (whiff); <strong>RL/GL</strong> show
-                        direct vs splash vs missed; <strong>LG</strong> splits its misses
-                        into near-aim (just off the hull) vs blocked (hit geometry). The
-                        pellet and direct figures match the server's authoritative stats.
+                        One table per weapon; rows are players (team-coloured, click a
+                        column to sort). <strong>SG/SSG</strong> show pellets hit / fired
+                        and how many fires landed all pellets (full), some (partial) or
+                        none (miss); <strong>RL/GL</strong> show direct vs splash vs
+                        missed; <strong>LG</strong> splits its misses into near-aim (just
+                        off the hull), blocked (an object was in the way) and out of
+                        range (beam reached its full ~600u length). Pellet and direct
+                        figures match the server's authoritative stats.
                     </div>
-                    <table class="stats-table" id="aim-accuracy-table">
-                        <thead>
-                            <tr class="aim-group-row">
-                                <th colspan="4"></th>
-                                <th colspan="6">Pellets (SG / SSG)</th>
-                                <th colspan="3">Rockets (RL / GL)</th>
-                                <th colspan="3">LG misses</th>
-                            </tr>
-                            <tr>
-                                <th>Weapon</th>
-                                <th title="Trigger pulls">Shots</th>
-                                <th title="Fires that connected with at least one hit">Hits</th>
-                                <th title="Share of fires that connected">Hit %</th>
-                                <th title="Pellets fired (6 SG / 14 SSG per shot)">Fired</th>
-                                <th title="Pellets that hit (matches the server)">Hit</th>
-                                <th title="Per-pellet accuracy">Acc</th>
-                                <th title="Fires where every pellet hit">Full</th>
-                                <th title="Fires where some but not all pellets hit">Partial</th>
-                                <th title="Fires where no pellet hit">Miss</th>
-                                <th title="Direct rocket/grenade contacts (matches the server)">Direct</th>
-                                <th title="Hits from splash only (no direct contact)">Splash</th>
-                                <th title="Fires that hit nothing">Missed</th>
-                                <th title="Beam ended near the enemy hull — an aim error">Near</th>
-                                <th title="Beam stopped on geometry — an object was in the way">Blocked</th>
-                                <th title="Beam ran its full ~600u length into open space — out of range">Far</th>
-                            </tr>
-                        </thead>
-                        <tbody id="aim-accuracy-body"></tbody>
-                    </table>
+                    <div id="aim-weapon-tables"></div>
                 </div>
 
                 <div class="panel" id="aim-heatmap-panel">
-                    <h3>Crosshair placement</h3>
+                    <h3>Crosshair placement <span class="aim-sel-note">— selected player</span></h3>
                     <div class="aim-desc">
-                        Where the enemy sat relative to the crosshair at each hitscan fire
-                        (LG/SG/SSG) — your <em>aim intent</em>, i.e. where you take your
-                        shots. Each axis is the angular error <em>divided by the target's
-                        hull half-extent on that axis</em>, so the player box maps to the
-                        central [−1, 1] square: <strong>±1 = the edge of the hull</strong>
-                        (corner ≈ 1.4). Center = dead on; right/left and up/down = the
-                        enemy's offset from the crosshair. The cell value and colour are the
-                        <strong>number of shots</strong> — a tight cluster near center is
-                        good placement. Hover for the hit-rate.
+                        Where the enemy sat relative to the crosshair at each fire — your
+                        <em>aim intent</em>, i.e. where you take your shots. Each axis is
+                        the angular error <em>divided by the target's hull half-extent on
+                        that axis</em>, so the player box maps to the central [−1, 1]
+                        square: <strong>±1 = the edge of the hull</strong> (corner ≈ 1.4).
+                        Center = dead on; right/left and up/down = the enemy's offset from
+                        the crosshair. The cell value and colour are the <strong>number of
+                        shots</strong> — a tight cluster near center is good placement.
+                        Hover for the hit-rate.
                     </div>
                     <div class="heatmap-legend">
                         <span>fewer</span><span class="heatmap-legend-bar"></span><span>more</span>
                     </div>
-                    <div class="heatmap-table-wrap">
-                        <table class="stats-table heatmap-table" id="aim-heatmap-table">
-                            <thead><tr id="aim-heatmap-thead-row"></tr></thead>
-                            <tbody id="aim-heatmap-body"></tbody>
-                        </table>
+
+                    <div class="aim-heatmap-block">
+                        <h4>LG</h4>
+                        <div class="heatmap-table-wrap">
+                            <table class="stats-table heatmap-table" id="aim-heatmap-lg-table">
+                                <thead><tr id="aim-heatmap-lg-thead-row"></tr></thead>
+                                <tbody id="aim-heatmap-lg-body"></tbody>
+                            </table>
+                        </div>
+                        <div id="aim-heatmap-lg-nodata" class="aim-nodata" style="display:none">No LG fired by this player.</div>
                     </div>
-                    <div id="aim-heatmap-nodata" class="map-no-data" style="display:none">
-                        <p>No hitscan fires for this player.</p>
+
+                    <div class="aim-heatmap-block">
+                        <h4>SG <span class="aim-sel-note">— pellets scatter, so the cloud is wider than the aim</span></h4>
+                        <div class="heatmap-table-wrap">
+                            <table class="stats-table heatmap-table" id="aim-heatmap-sg-table">
+                                <thead><tr id="aim-heatmap-sg-thead-row"></tr></thead>
+                                <tbody id="aim-heatmap-sg-body"></tbody>
+                            </table>
+                        </div>
+                        <div id="aim-heatmap-sg-nodata" class="aim-nodata" style="display:none">No SG fired by this player.</div>
                     </div>
                 </div>
 
                 <div class="panel" id="aim-ramp-panel">
-                    <h3>LG ramp onto target</h3>
+                    <h3>LG ramp onto target <span class="aim-sel-note">— selected player</span></h3>
                     <div class="aim-desc">
                         Hit-rate by time since the start of each LG shaft (fires less
                         than 150 ms apart are one shaft). Shows how quickly the player
                         locks the beam on after opening fire.
                     </div>
                     <div id="aim-ramp-chart"></div>
-                    <div id="aim-ramp-nodata" class="map-no-data" style="display:none">
-                        <p>No LG fired by this player.</p>
-                    </div>
+                    <div id="aim-ramp-nodata" class="aim-nodata" style="display:none">No LG fired by this player.</div>
                 </div>
             </div>
 

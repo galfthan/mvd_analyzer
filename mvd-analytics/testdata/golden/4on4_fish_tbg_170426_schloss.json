@@ -21256,7 +21256,7 @@
           },
           {
             "hits": 105,
-            "shots": 194,
+            "shots": 193,
             "weapon": "rl"
           },
           {
@@ -26197,13 +26197,13 @@
         "team": "'\u003e\u003c\u003e",
         "weapons": [
           {
-            "full": 108,
-            "hits": 237,
+            "full": 107,
+            "hits": 236,
             "miss": 271,
             "partial": 129,
-            "pelletHits": 1050,
-            "pellets": 3048,
-            "shots": 508,
+            "pelletHits": 1044,
+            "pellets": 3042,
+            "shots": 507,
             "weapon": "sg"
           },
           {
@@ -86481,7 +86481,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "shots": {
     "byPlayer": [
       {
@@ -87067,6 +87067,7 @@
         "source": "sound",
         "team": "'tbg",
         "time": -10064,
+        "warmup": true,
         "weapon": "rl"
       },
       {
@@ -131370,6 +131371,7 @@
         "victims": [
           "nexus"
         ],
+        "warmup": true,
         "weapon": "sg"
       }
     ]

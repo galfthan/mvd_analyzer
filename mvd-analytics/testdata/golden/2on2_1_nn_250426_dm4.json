@@ -9936,7 +9936,6 @@
         },
         "lgRamp": {
           "hit": [
-            false,
             true,
             true,
             false,
@@ -10354,7 +10353,6 @@
             false
           ],
           "since": [
-            0,
             0,
             96,
             190,
@@ -10778,7 +10776,7 @@
         "weapons": [
           {
             "hits": 137,
-            "shots": 416,
+            "shots": 415,
             "weapon": "lg"
           },
           {
@@ -48346,7 +48344,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "shots": {
     "byPlayer": [
       {
@@ -48654,6 +48652,7 @@
         "source": "beam",
         "team": "n n",
         "time": -10143,
+        "warmup": true,
         "weapon": "lg"
       },
       {

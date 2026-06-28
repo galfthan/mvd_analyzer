@@ -11064,8 +11064,8 @@
             "weapon": "rl"
           },
           {
-            "hits": 10,
-            "shots": 46,
+            "hits": 9,
+            "shots": 45,
             "weapon": "gl"
           },
           {
@@ -89008,7 +89008,7 @@
       "timelimit": "20"
     }
   },
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "shots": {
     "byPlayer": [
       {
@@ -89720,6 +89720,7 @@
         "victims": [
           "ocoini"
         ],
+        "warmup": true,
         "weapon": "gl"
       },
       {

@@ -69,9 +69,14 @@ func aimPost(res *Result, co *CoreOutputs) {
 	}
 
 	// Group shots per player, time-sorted (ramp + shaft grouping need order).
+	// In-match fires only: the shot stream keeps warmup/prewar fires, but aim
+	// is a match-time view like shots.ByPlayer, so skip Warmup-flagged shots.
 	byPlayer := make(map[string][]Shot)
 	var order []string
 	for _, s := range res.Shots.Shots {
+		if s.Warmup {
+			continue
+		}
 		if _, ok := byPlayer[s.Player]; !ok {
 			order = append(order, s.Player)
 		}

@@ -459,7 +459,12 @@ package result
 //     samples (hitscan), LG ramp-onto-target, rocket direct/splash, LG
 //     reach/whiff. Additive (omitempty); the crosshair/ramp blocks compute
 //     by default, the rocket/reach blocks only when their streams were built.
-const CurrentSchemaVersion = 41
+//
+// v42:
+//   - Shot gains Warmup: true for fires outside the match (prewar / warmup /
+//     post-match). The shot stream still keeps them; ByPlayer and the aim
+//     analysis exclude them. Additive (omitempty).
+const CurrentSchemaVersion = 42
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

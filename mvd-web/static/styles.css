@@ -922,23 +922,46 @@ table tbody tr:hover {
     margin: 4px 0;
 }
 
-/* Wide per-weapon stats table: muted "·" for cells a weapon doesn't use, and
-   a group-header row over the SG/RL/LG column clusters. */
+/* One stats table per weapon, players on the rows (team-coloured stripe). */
+.aim-weapon-block {
+    margin-bottom: 18px;
+}
+
+.aim-weapon-block h4 {
+    margin: 0 0 6px;
+    color: var(--accent-cyan);
+}
+
+.aim-heatmap-block {
+    margin-top: 14px;
+}
+
+.aim-heatmap-block h4 {
+    margin: 0 0 6px;
+    color: var(--accent-cyan);
+}
+
+.aim-weapon-table th {
+    font-size: 0.8rem;
+}
+
+.aim-sel-note {
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: 400;
+}
+
+/* In-flow "no data" note (unlike .map-no-data, which is absolutely centred
+   over the map canvas and would float mid-panel without scrolling). */
+.aim-nodata {
+    color: #888;
+    font-size: 0.9rem;
+    padding: 6px 2px;
+}
+
 .aim-na {
     color: #555;
     text-align: center;
-}
-
-#aim-accuracy-table .aim-group-row th {
-    font-size: 0.75rem;
-    color: #888;
-    font-weight: 600;
-    border-bottom: 1px solid var(--bg-panel);
-    text-align: center;
-}
-
-#aim-accuracy-table th {
-    font-size: 0.8rem;
 }
 
 /* Timeline Styles */

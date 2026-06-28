@@ -32,6 +32,10 @@ type ShotsResult struct {
 // (rl/gl/ng/sng) are left unlinked here — they have travel time and are
 // linked by the entity-tracking phase. On non-KTX servers there is no
 // damage stream, so Hit is always false.
+//
+// Warmup is true for fires outside the match (prewar / warmup / post-match) —
+// the stream keeps them, but the ByPlayer aggregates and match-time consumers
+// (e.g. the aim analysis) exclude them. Match-time fires omit the field.
 type Shot struct {
 	Time    int32    `json:"time"`
 	Player  string   `json:"player"`
@@ -40,6 +44,7 @@ type Shot struct {
 	Source  string   `json:"source"`
 	Hit     bool     `json:"hit,omitempty"`
 	Victims []string `json:"victims,omitempty"`
+	Warmup  bool     `json:"warmup,omitempty"` // fired outside the match (prewar/warmup/post)
 }
 
 // PlayerShots is one player's match-time fire counts per weapon.
