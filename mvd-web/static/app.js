@@ -10771,26 +10771,54 @@ function aimBin(v, half, w, nb) {
 
 function aimCenter(i, half, w) { return -half + w * (i + 0.5); }
 
-// initAimStatsView (re)builds the player picker per demo and renders the tab.
+// Selected player for the per-player panels (heatmap + ramp). The weapon
+// tables are all-players and don't depend on it.
+let aimPlayer = null;
+let aimPlayersList = [];
+
+// initAimStatsView runs once per demo: build the player chip selector + the
+// (player-independent) weapon tables, then render the per-player panels.
 function initAimStatsView(result) {
-    const sel = document.getElementById('aim-player');
-    if (sel) {
-        const players = (result && result.aim && result.aim.players)
-            ? result.aim.players.map(p => p.player).sort((a, b) => a.localeCompare(b))
-            : [];
-        sel.innerHTML = '';
-        for (const n of players) {
-            const opt = document.createElement('option');
-            opt.value = n;
-            opt.textContent = n;
-            sel.appendChild(opt);
-        }
-        if (!sel._aimWired) {
-            sel.addEventListener('change', renderAimStats);
-            sel._aimWired = true;
-        }
-    }
+    aimPlayer = null;
+    buildAimChips(result);
+    renderAimWeaponTables(result);
     renderAimStats();
+}
+
+// buildAimChips renders a team-coloured chip per player. Click selects; Left/
+// Right arrow keys (with the strip focused) step prev/next for quick A/B
+// comparison.
+function buildAimChips(result) {
+    const box = document.getElementById('aim-player-chips');
+    if (!box) return;
+    box.innerHTML = '';
+    const players = (result && result.aim && result.aim.players) || [];
+    aimPlayersList = players.map(p => p.player);
+    if (!aimPlayersList.includes(aimPlayer)) aimPlayer = aimPlayersList[0] || null;
+    const teamOrder = getTeamOrder([]);
+    players.forEach(p => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'aim-chip';
+        btn.dataset.player = p.player;
+        btn.textContent = p.player;
+        const ti = teamOrder.indexOf(p.team || '');
+        if (ti >= 0 && ti < TEAM_COLORS.length) btn.style.borderBottomColor = TEAM_COLORS[ti];
+        btn.addEventListener('click', () => { aimPlayer = p.player; renderAimStats(); box.focus(); });
+        box.appendChild(btn);
+    });
+    if (!box._aimWired) {
+        box.addEventListener('keydown', e => {
+            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+            e.preventDefault();
+            if (!aimPlayersList.length) return;
+            let i = aimPlayersList.indexOf(aimPlayer);
+            i = (i + (e.key === 'ArrowRight' ? 1 : -1) + aimPlayersList.length) % aimPlayersList.length;
+            aimPlayer = aimPlayersList[i];
+            renderAimStats();
+        });
+        box._aimWired = true;
+    }
 }
 
 function renderAimStats() {
@@ -10809,13 +10837,12 @@ function renderAimStats() {
     });
     if (!hasData) return;
 
-    const sel = document.getElementById('aim-player');
-    const want = sel ? sel.value : '';
-    const pa = aim.players.find(p => p.player === want) || aim.players[0];
-    if (sel && sel.value !== pa.player) sel.value = pa.player;
+    if (!aim.players.some(p => p.player === aimPlayer)) aimPlayer = aim.players[0].player;
+    const pa = aim.players.find(p => p.player === aimPlayer);
+    const box = document.getElementById('aim-player-chips');
+    if (box) box.querySelectorAll('.aim-chip').forEach(b => b.classList.toggle('active', b.dataset.player === aimPlayer));
 
     renderAimMode(pa);
-    renderAimWeaponTables(result);
     renderAimHeatmap(pa);
     renderAimRamp(pa);
 }
@@ -10828,35 +10855,39 @@ function renderAimMode(pa) {
         : 'Target attribution: team game (nearest-crosshair-enemy heuristic)';
 }
 
-// Per-weapon extra columns (beyond the shared Player/Shots/Hits/Hit%). Each:
-// {h: header, t: tooltip, g: (WeaponAim) -> cell value}.
-const AIM_PELLET_COLS = [
-    { h: 'Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', g: w => w.pellets || 0 },
-    { h: 'Hit', t: 'Pellets that hit (matches the server)', g: w => w.pelletHits || 0 },
-    { h: 'Acc', t: 'Per-pellet accuracy', g: w => (w.pellets ? Math.round((w.pelletHits || 0) / w.pellets * 100) + '%' : '-') },
-    { h: 'Full', t: 'Fires where every pellet hit', g: w => w.full || 0 },
-    { h: 'Partial', t: 'Fires where some but not all pellets hit', g: w => w.partial || 0 },
-    { h: 'Miss', t: 'Fires where no pellet hit', g: w => w.miss || 0 },
-];
-const AIM_ROCKET_COLS = [
-    { h: 'Direct', t: 'Direct contacts (matches the server)', g: w => w.direct || 0 },
-    { h: 'Splash', t: 'Hits from splash only', g: w => w.splash || 0 },
-    { h: 'Missed', t: 'Fires that hit nothing', g: w => w.missed || 0 },
-];
-const AIM_LG_COLS = [
-    { h: 'Near', t: 'Miss — beam ended near the enemy hull (aim error)', g: w => w.nearMiss || 0 },
-    { h: 'Blocked', t: 'Miss — beam stopped on an object in the way', g: w => w.blocked || 0 },
-    { h: 'Far', t: 'Miss — beam reached its full ~600u length (out of range)', g: w => w.outOfRange || 0 },
-];
-const AIM_WEAPON_COLS = {
-    lg: AIM_LG_COLS, sg: AIM_PELLET_COLS, ssg: AIM_PELLET_COLS,
-    rl: AIM_ROCKET_COLS, gl: AIM_ROCKET_COLS,
+// Column descriptors: {h: header, t: tooltip, cell: (WeaponAim) -> html}. The
+// Player column is prepended automatically (with the team-coloured stripe).
+const pctCell = p => `<span class="${getAccuracyClass(p)}">${p.toFixed(0)}%</span>`;
+const AIM_COL = {
+    shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
+    hits: { h: 'Hits', t: 'Fires that connected', cell: w => w.hits },
+    hitPct: { h: 'Hit %', t: 'Share of fires that connected', cell: w => pctCell(w.shots ? w.hits / w.shots * 100 : 0) },
+    fired: { h: 'Pellets Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', cell: w => w.pellets || 0 },
+    pHit: { h: 'Pellets Hit', t: 'Pellets that hit (matches the server)', cell: w => w.pelletHits || 0 },
+    pAcc: { h: 'Pellet %', t: 'Per-pellet accuracy', cell: w => pctCell(w.pellets ? (w.pelletHits || 0) / w.pellets * 100 : 0) },
+    full: { h: 'Full', t: 'Fires where every pellet hit', cell: w => w.full || 0 },
+    partial: { h: 'Partial', t: 'Fires where some but not all pellets hit', cell: w => w.partial || 0 },
+    miss: { h: 'Miss', t: 'Fires where no pellet hit', cell: w => w.miss || 0 },
+    direct: { h: 'Direct', t: 'Direct contacts (matches the server)', cell: w => w.direct || 0 },
+    splash: { h: 'Splash', t: 'Hits from splash only', cell: w => w.splash || 0 },
+    missed: { h: 'Missed', t: 'Fires that hit nothing', cell: w => w.missed || 0 },
+    near: { h: 'Near', t: 'Miss — beam ended near the enemy hull (aim error)', cell: w => w.nearMiss || 0 },
+    blocked: { h: 'Blocked', t: 'Miss — beam stopped on an object in the way', cell: w => w.blocked || 0 },
+    far: { h: 'Far', t: 'Miss — beam reached its full ~600u length (out of range)', cell: w => w.outOfRange || 0 },
+};
+// Per-weapon column order. SG/SSG lead with the pellet stats.
+const AIM_TABLE_COLS = {
+    lg: ['shots', 'hits', 'hitPct', 'near', 'blocked', 'far'],
+    sg: ['fired', 'pHit', 'pAcc', 'full', 'partial', 'miss', 'shots', 'hits', 'hitPct'],
+    ssg: ['fired', 'pHit', 'pAcc', 'full', 'partial', 'miss', 'shots', 'hits', 'hitPct'],
+    rl: ['shots', 'hits', 'hitPct', 'direct', 'splash', 'missed'],
+    gl: ['shots', 'hits', 'hitPct', 'direct', 'splash', 'missed'],
 };
 const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl'];
 
 // renderAimWeaponTables builds one table per weapon, rows = players (all who
-// fired it), team-coloured like the Summary tab. Player-independent — it
-// ignores the dropdown (which drives the per-player heatmap/ramp below).
+// fired anything; "-" where they didn't fire this weapon), team-coloured like
+// the Summary tab. Player-independent.
 function renderAimWeaponTables(result) {
     const container = document.getElementById('aim-weapon-tables');
     if (!container) return;
@@ -10866,36 +10897,24 @@ function renderAimWeaponTables(result) {
     const teamOrder = getTeamOrder([]); // canonical frag-sorted order (= Summary)
 
     for (const wn of AIM_WEAPON_ORDER) {
-        // Every player who fired anything gets a row (so the roster is the same
-        // across weapon tables); a player who never fired this weapon shows "-".
+        const cols = (AIM_TABLE_COLS[wn] || []).map(k => AIM_COL[k]);
         const rows = players.map(pa => ({
             player: pa.player, team: pa.team,
             w: (pa.weapons || []).find(x => x.weapon === wn) || null,
         }));
         if (!rows.some(r => r.w)) continue; // weapon nobody fired → no table
         rows.sort((a, b) => (b.w ? b.w.shots : -1) - (a.w ? a.w.shots : -1));
-        const extra = AIM_WEAPON_COLS[wn] || [];
 
-        let head = '<th>Player</th><th title="Trigger pulls">Shots</th>' +
-            '<th title="Fires that connected">Hits</th>' +
-            '<th title="Share of fires that connected">Hit %</th>';
-        extra.forEach(c => { head += `<th title="${escapeHtml(c.t)}">${escapeHtml(c.h)}</th>`; });
-
-        const naCells = '<td class="aim-na">-</td>'.repeat(3 + extra.length);
+        const head = '<th>Player</th>' +
+            cols.map(c => `<th title="${escapeHtml(c.t)}">${escapeHtml(c.h)}</th>`).join('');
+        const naCells = '<td class="aim-na">-</td>'.repeat(cols.length);
         let body = '';
         rows.forEach(r => {
             const ti = teamOrder.indexOf(r.team || '');
             const color = (ti >= 0 && ti < TEAM_COLORS.length) ? TEAM_COLORS[ti] : '';
             const stripe = color ? ` style="border-left: 3px solid ${color}"` : '';
-            let tds = `<td>${escapeHtml(r.player)}</td>`;
-            if (!r.w) {
-                tds += naCells;
-            } else {
-                const hitPct = r.w.shots ? (r.w.hits / r.w.shots) * 100 : 0;
-                tds += `<td>${r.w.shots}</td><td>${r.w.hits}</td>` +
-                    `<td><span class="${getAccuracyClass(hitPct)}">${hitPct.toFixed(0)}%</span></td>`;
-                extra.forEach(c => { tds += `<td>${c.g(r.w)}</td>`; });
-            }
+            const tds = `<td>${escapeHtml(r.player)}</td>` +
+                (r.w ? cols.map(c => `<td>${c.cell(r.w)}</td>`).join('') : naCells);
             body += `<tr${stripe}>${tds}</tr>`;
         });
 

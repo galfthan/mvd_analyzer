@@ -898,8 +898,47 @@ table tbody tr:hover {
 .aim-controls {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     flex-wrap: wrap;
+}
+
+.aim-controls-label {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.aim-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    outline: none;
+}
+
+.aim-chips:focus-within,
+.aim-chips:focus {
+    box-shadow: 0 0 0 2px var(--accent-cyan-dim);
+    border-radius: 6px;
+}
+
+.aim-chip {
+    padding: 3px 10px;
+    background: var(--bg-panel);
+    color: var(--fg-default);
+    border: 1px solid transparent;
+    border-bottom: 2px solid #666;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.aim-chip:hover {
+    border-color: var(--accent-cyan-dim);
+}
+
+.aim-chip.active {
+    background: var(--accent-cyan-dim);
+    color: #06121a;
+    font-weight: 600;
 }
 
 .aim-mode {
