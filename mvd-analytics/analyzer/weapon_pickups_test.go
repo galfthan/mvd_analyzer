@@ -382,6 +382,36 @@ func TestWeaponPickups_WeaponStayPickupAfterDeathFrameRecorded(t *testing.T) {
 	}
 }
 
+// Grab-then-die (hub game 224763): the player touches the pad and is
+// killed inside one stat interval; the death-frame flush puts the flip
+// after the DeathEvent at the same timestamp. KTX counted the touch,
+// so the flip must be recorded despite the dead flag — while a flip
+// arriving later in the dead window (respawn bookkeeping) must not.
+func TestWeaponPickups_WeaponStayDeathFrameGrabRecorded(t *testing.T) {
+	a, ctx := newTestWeaponPickupsAnalyzer()
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
+
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1, Time: 5})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 9.99})
+	// Death frame: DEATH then the flip at the same timestamp.
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 10})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, Time: 10})
+	// Later, still dead: a bookkeeping flip must be absorbed.
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher | wpItLightning, Time: 11.5})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+	ps := r.WeaponPickups
+	if len(ps) != 1 {
+		t.Fatalf("want exactly the death-frame RL grab, got %d: %+v", len(ps), ps)
+	}
+	if ps[0].Weapon != "rl" || ps[0].Source != "world" || !ps[0].Inferred {
+		t.Errorf("got %+v, want weapon=rl source=world inferred=true", ps[0])
+	}
+}
+
 // The flip baseline must be maintained through warmup: when a player's
 // first in-match STAT_ITEMS update is already the pickup (the spawn
 // burst landed before the match-start print), seeding on it would

@@ -38269,6 +38269,13 @@
           },
           {
             "availableFrom": 170157,
+            "respawnAt": 170277,
+            "takenAt": 170277,
+            "takenBy": "shazam",
+            "team": "n n"
+          },
+          {
+            "availableFrom": 170277,
             "respawnAt": 170985,
             "takenAt": 170985,
             "takenBy": "squeeze",
@@ -99071,6 +99078,17 @@
       "source": "world",
       "team": "n n",
       "time": 170157,
+      "weapon": "lg"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 173666,
+      "player": "shazam",
+      "source": "world",
+      "team": "n n",
+      "time": 170277,
       "weapon": "lg"
     },
     {

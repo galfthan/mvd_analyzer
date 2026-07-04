@@ -208,7 +208,7 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	case *events.SpawnEvent:
 		a.flips.OnSpawn(e.PlayerNum, e.Time)
 	case *events.DeathEvent:
-		a.flips.OnDeath(e.PlayerNum)
+		a.flips.OnDeath(e.PlayerNum, e.Time)
 		if a.timing.Started && !a.timing.Ended {
 			a.deaths = append(a.deaths, wpDeathRecord{time: e.Time, slot: e.PlayerNum})
 		}
@@ -243,20 +243,33 @@ func (a *WeaponPickupsAnalyzer) maybeSynthesizeFromItemsFlip(e *events.StatUpdat
 		if a.recentRecordExplains(slot, kind, e.Time) {
 			continue
 		}
-		source := "unknown"
-		if a.nearWeaponEntity(slot, kind, e.Time) {
-			source = "world"
-		}
 		a.pickups = append(a.pickups, wpPickupRecord{
 			time:        e.Time,
 			pickerSlot:  slot,
 			weapon:      kind,
-			source:      source,
+			source:      a.classifyFlipSource(slot, kind, e.Time),
 			hadBefore:   false, // by construction: the bit was 0
 			inferred:    true,
 			dropperSlot: -1,
 		})
 	}
+}
+
+// classifyFlipSource decides where a synthesized grant came from:
+// "world" when the picker passed within touch range of a same-kind
+// weapon spawn during the stat-lag window, else "unknown" rather than
+// a forced guess. A hintless (non-RL/LG) pack grabbed while standing
+// on a matching pad classifies as "world" — genuinely wire-ambiguous:
+// KTX emits no hint for those packs and the backpack entity-state
+// stream flutters too hard to serve as a discriminator (hundreds of
+// spurious Taken transitions per resting pack; see the visibility-
+// flutter note in mvd-reader/MVD_FORMAT.md). KTX `taken` parity is
+// preserved either way; only the world-vs-pack split can drift.
+func (a *WeaponPickupsAnalyzer) classifyFlipSource(slot int, kind string, t float64) string {
+	if _, ok := a.nearestWeaponEntityDistSq(slot, kind, t); ok {
+		return "world"
+	}
+	return "unknown"
 }
 
 // recentRecordExplains reports whether a pickup record for (slot, kind)
@@ -276,12 +289,15 @@ func (a *WeaponPickupsAnalyzer) recentRecordExplains(slot int, kind string, t fl
 	return false
 }
 
-// nearWeaponEntity reports whether the slot passed within the pickup
-// distance gate of any spawn entity of the given weapon kind during the
-// stat lag window [t-statForwardWindow, t]. The window (not the flip
-// instant) matters: per-player stat updates can lag the touch by a few
-// hundred ms, during which the picker keeps moving.
-func (a *WeaponPickupsAnalyzer) nearWeaponEntity(slot int, kind string, t float64) bool {
+// nearestWeaponEntityDistSq returns the smallest squared distance from
+// the slot's position history to any spawn entity of the given weapon
+// kind during the stat lag window [t-statForwardWindow, t], gated by
+// maxDistanceSqAccept. The window (not the flip instant) matters:
+// per-player stat updates can lag the touch by a few hundred ms,
+// during which the picker keeps moving.
+func (a *WeaponPickupsAnalyzer) nearestWeaponEntityDistSq(slot int, kind string, t float64) (float32, bool) {
+	best := float32(0)
+	found := false
 	for ent, k := range a.itemKind {
 		if k != kind {
 			continue
@@ -290,11 +306,12 @@ func (a *WeaponPickupsAnalyzer) nearWeaponEntity(slot int, kind string, t float6
 		if !ok {
 			continue
 		}
-		if d, ok := a.pos.MinDistSqIn(slot, t-statForwardWindow, t, origin); ok && d <= maxDistanceSqAccept {
-			return true
+		if d, ok := a.pos.MinDistSqIn(slot, t-statForwardWindow, t, origin); ok && d <= maxDistanceSqAccept && (!found || d < best) {
+			best = d
+			found = true
 		}
 	}
-	return false
+	return best, found
 }
 
 func (a *WeaponPickupsAnalyzer) handleDropHint(e *events.BackpackDropHintEvent) {

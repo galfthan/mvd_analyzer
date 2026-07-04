@@ -94,6 +94,16 @@ func (d *weaponStayDetector) WeaponStay() bool {
 // small maps (dm4) players reach a weapon within 250 ms of spawning.
 const spawnSuppressWindow = 0.050
 
+// deathGrabWindow: a weapon-bit gain landing this soon after the
+// slot's DeathEvent is a grab-then-die — the player touched the pad
+// and was killed inside one stat interval, and the death-frame flush
+// put the flip after the DeathEvent in packet order (observed on hub
+// game 224763: `DEATH → RL+` at the same timestamp). Death bookkeeping
+// only ever clears weapon bits (pack drop, respawn strip), so a bit
+// gained in the death frame can only be a real touch, and KTX counts
+// it (weapon_touch ran before the kill).
+const deathGrabWindow = 0.050
+
 // weaponFlipTracker turns per-slot STAT_ITEMS updates into weapon-grant
 // detections for weapon-stay synthesis.
 //
@@ -111,7 +121,9 @@ const spawnSuppressWindow = 0.050
 //   - Flips while dead are inventory bookkeeping (pack-drop clears, or
 //     the respawn loadout when the stat lands before the SpawnEvent in
 //     the same frame — the observed wire order is DEATH → loadout STAT
-//     → SPAWN) and are absorbed silently.
+//     → SPAWN) and are absorbed silently. Exception: a flip within
+//     deathGrabWindow of the DeathEvent is a grab-then-die and is
+//     reported (see the constant above).
 //   - Flips within spawnSuppressWindow after a SpawnEvent are spawn
 //     loadout (dmm5-style modes, when the loadout stat lands just after
 //     the SpawnEvent) and are absorbed silently. dmm3 spawn loadout is
@@ -121,6 +133,7 @@ type weaponFlipTracker struct {
 	seeded    map[int]bool
 	dead      map[int]bool
 	lastSpawn map[int]float64
+	lastDeath map[int]float64
 }
 
 func (t *weaponFlipTracker) OnSpawn(slot int, time float64) {
@@ -132,11 +145,15 @@ func (t *weaponFlipTracker) OnSpawn(slot int, time float64) {
 	t.dead[slot] = false
 }
 
-func (t *weaponFlipTracker) OnDeath(slot int) {
+func (t *weaponFlipTracker) OnDeath(slot int, time float64) {
 	if t.dead == nil {
 		t.dead = make(map[int]bool)
 	}
+	if t.lastDeath == nil {
+		t.lastDeath = make(map[int]float64)
+	}
 	t.dead[slot] = true
+	t.lastDeath[slot] = time
 }
 
 // Observe folds one STAT_ITEMS update into the baseline and returns the
@@ -160,7 +177,12 @@ func (t *weaponFlipTracker) Observe(slot int, value int, time float64) []string 
 		return nil
 	}
 	if t.dead[slot] {
-		return nil // dead-player inventory bookkeeping, not a pickup
+		// Grab-then-die: the touch preceded the kill, its flip landed
+		// in the death-frame flush. Anything later while dead is
+		// inventory bookkeeping, not a pickup.
+		if ld, ok := t.lastDeath[slot]; !ok || time-ld > deathGrabWindow {
+			return nil
+		}
 	}
 	if ls, ok := t.lastSpawn[slot]; ok && time >= ls && time-ls <= spawnSuppressWindow {
 		return nil // spawn loadout, not a pickup

@@ -49,13 +49,16 @@ weapon-bit 0→1 transitions instead (`maybeSynthesizeFromItemsFlip`):
 - **Gate**: `weaponStayDetector` latches `deathmatch`/`coop` from the
   fullserverinfo dump (first value wins). No serverinfo → no synthesis.
 - **Baseline**: a `weaponFlipTracker` (shared with items.go via
-  `weaponstay.go`) maintained continuously, warmup included — a
-  player's first in-match update can already BE the pickup. Death
-  resets it (the death-frame clear or respawn loadout re-seeds
-  silently); spawn does NOT reset (the wire orders
-  DEATH → loadout STAT → SPAWN in one frame, and wiping the fresh seed
-  would swallow the life's first pickup), but grants within 250 ms
-  after a SpawnEvent are dropped as spawn loadout (dmm5-style).
+  `weaponstay.go`) maintained continuously and never reset — stat
+  updates fire on every value change, so the last observed value is by
+  construction the current inventory, and any reset creates a window
+  in which a real pickup is swallowed as a silent re-seed (measured:
+  a death-reset variant lost 20-40% of grants on a 2on2). Flips are
+  instead filtered by player state: flips while dead are inventory
+  bookkeeping — except within 50 ms of the DeathEvent, which is a
+  grab-then-die whose flip landed in the death-frame flush (KTX counts
+  it) — and flips within 50 ms after a SpawnEvent are spawn loadout
+  (dmm5-style; dmm3 spawns grant no tracked weapons).
 - **Dedup**: a flip already explained by a record within
   `statForwardWindow` (a `//ktx bp` backpack grant, or a `//ktx took`
   if weapon-stay was mis-detected) is skipped; conversely, a hint that

@@ -197,11 +197,12 @@ handles them (`synthesizeWeaponStayPickup`):
    `weaponstay.go`) latches `deathmatch`/`coop` from serverinfo. Off →
    weapon bits keep feeding Layer-3 stat evidence as before.
 2. Flips are detected by a shared `weaponFlipTracker` whose baseline
-   is maintained continuously (warmup included — the first in-match
-   update can already BE the pickup), reset on death (the respawn
-   loadout re-seeds silently; spawn must not reset because the wire
-   orders DEATH → loadout STAT → SPAWN within the death frame), with
-   grants inside a 250 ms post-spawn window dropped as loadout.
+   is maintained continuously and never reset (warmup included — the
+   first in-match update can already BE the pickup; any reset opens a
+   swallow window that loses real grants). Flips while dead are
+   absorbed as inventory bookkeeping — except within 50 ms of the
+   DeathEvent (grab-then-die, counted by KTX) — and flips inside a
+   50 ms post-spawn window are dropped as loadout.
 3. On a detected flip, the pickup is attributed to the nearest
    same-kind entity the slot passed within the distance gate of
    during the stat-lag window (`[T-0.5s, T]` — the flip can lag the

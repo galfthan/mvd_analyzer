@@ -1150,7 +1150,7 @@ func (a *ItemAnalyzer) handleSpawn(e *events.SpawnEvent) {
 // stat snapshot / pending evidence so the upcoming respawn loadout
 // doesn't feed the classifier.
 func (a *ItemAnalyzer) handleDeath(e *events.DeathEvent) {
-	a.wsFlips.OnDeath(e.PlayerNum)
+	a.wsFlips.OnDeath(e.PlayerNum, e.Time)
 	if !a.timing.Started || a.timing.Ended {
 		return
 	}
