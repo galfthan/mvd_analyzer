@@ -975,10 +975,12 @@ table tbody tr:hover {
     margin-top: 14px;
 }
 
-/* Smoothed crosshair-density image; intrinsic size set by drawAimDensity. */
+/* Smoothed crosshair-density image; intrinsic size set by drawAimDensity.
+   The background doubles as the image's zero-density colour (read back by
+   aimSurfaceRGB) — bg-deep so empty regions match the table heatmaps. */
 .aim-density {
     display: block;
-    background: var(--bg-panel);
+    background: var(--bg-deep);
     border-radius: 4px;
     max-width: 100%;
 }

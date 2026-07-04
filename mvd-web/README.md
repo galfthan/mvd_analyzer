@@ -80,7 +80,8 @@ directly), a smoothed crosshair-density image (hitscan; a Gaussian-smoothed
 2-D histogram on canvas with a colorbar, hull box marked; radius 1 ≈ the
 hitbox edge, so it's range-comparable) split into LG and SG, per-axis
 **yaw / pitch marginal histograms** under each image (zero-centered bins
-over a wider extent than the image, with the on-hull |n| ≤ 1 band shaded),
+over the image's extents; their clamp edge bins keep the outliers the
+image drops, and the on-hull |n| ≤ 1 band is shaded),
 an LG ramp-onto-target bar chart, a rocket direct/splash panel, and an
 LG-whiffs split. All geometry/attribution lives in
 `mvd-analytics/analyzer/aim.go`; the tab only bins and paints. Target attribution is exact in duels and a labeled

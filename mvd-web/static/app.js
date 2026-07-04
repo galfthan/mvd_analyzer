@@ -10753,10 +10753,11 @@ function renderHeatmapTable(tableId, theadRowId, tbodyId, data, firstColLabel) {
 // + paints — all geometry, target attribution and classification live in the
 // analytics layer so every client (CLI / API / web) shares one truth.
 
-// Crosshair-image extents (normalized so 1.0 = hull edge). Yaw is wider
-// because horizontal aim is the story.
-const AIM_YAW_HALF = 4.0;
-const AIM_PITCH_HALF = 2.5;
+// Crosshair extents (normalized so 1.0 = hull edge), shared by the density
+// image and the marginal histograms. Yaw is wider because horizontal aim is
+// the story.
+const AIM_YAW_HALF = 6.0;
+const AIM_PITCH_HALF = 4.0;
 const AIM_YAW_W = 0.25; // marginal-histogram yaw bin width
 
 // Selected player for the per-player panels (heatmap + ramp). The weapon
@@ -10960,10 +10961,28 @@ function renderAimHeatmapWeapon(pa, weapon, prefix) {
 // the hover grid is coarser so the read-out counts are meaningful.
 const AIM_IMG_CELL = 0.125;  // fine-grid bin, hull-normalized units
 const AIM_IMG_SIGMA = 1.4;   // gaussian σ, in fine cells
-const AIM_IMG_SCALE = 7;     // display px per fine cell
+const AIM_IMG_SCALE = 5;     // display px per fine cell
 const AIM_HOVER_BIN = 0.5;   // hover read-out bin, hull-normalized units
 
 function aimClampIndex(v, n) { return Math.max(0, Math.min(n - 1, v)); }
+
+// Zero density keeps the surface colour and the lowest densities fade into
+// the ramp — matching the table heatmaps, where empty cells keep the page
+// background and only real values get the shared viridis heatColorRGB.
+const AIM_IMG_FADE = 0.04; // density fraction over which the ramp fades in
+
+function aimSurfaceRGB(canvas) {
+    const m = (getComputedStyle(canvas).backgroundColor || '')
+        .match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    return m ? [+m[1], +m[2], +m[3]] : [26, 26, 46]; // --bg-deep fallback
+}
+
+function aimDensityRGB(t, bg) {
+    const rgb = heatColorRGB(t);
+    const a = Math.min(1, t / AIM_IMG_FADE);
+    for (let i = 0; i < 3; i++) rgb[i] = Math.round(bg[i] + (rgb[i] - bg[i]) * a);
+    return rgb;
+}
 
 function drawAimDensity(canvas, c, idx) {
     const nx = Math.round(2 * AIM_YAW_HALF / AIM_IMG_CELL);
@@ -10974,10 +10993,13 @@ function drawAimDensity(canvas, c, idx) {
     const hShots = new Uint32Array(hx * hy), hHits = new Uint32Array(hx * hy);
     // x is the enemy's offset relative to the crosshair, so enemy-right reads
     // on the right (= −dYaw, since +dYaw is enemy-left in Quake); y is dPitch,
-    // top = up (row 0 = highest pitch). Out-of-range samples clamp into the
-    // edge cells, same as the marginal histograms.
+    // top = up (row 0 = highest pitch). Samples beyond the extents are dropped
+    // rather than clamped: a clamp pile-up paints a bright rim on the smoothed
+    // image. The marginal histograms keep clamp edge bins, so the rare
+    // outliers stay visible there.
     for (const i of idx) {
         const x = -c.nyaw[i], y = c.npitch[i];
+        if (Math.abs(x) > AIM_YAW_HALF || Math.abs(y) > AIM_PITCH_HALF) continue;
         const xi = aimClampIndex(Math.floor((x + AIM_YAW_HALF) / AIM_IMG_CELL), nx);
         const yi = aimClampIndex(Math.floor((AIM_PITCH_HALF - y) / AIM_IMG_CELL), ny);
         grid[yi * nx + xi]++;
@@ -11019,8 +11041,9 @@ function drawAimDensity(canvas, c, idx) {
     img.height = ny;
     const ictx = img.getContext('2d');
     const idata = ictx.createImageData(nx, ny);
+    const bg = aimSurfaceRGB(canvas);
     for (let p = 0; p < nx * ny; p++) {
-        const rgb = heatColorRGB(max ? sm[p] / max : 0);
+        const rgb = aimDensityRGB(max ? sm[p] / max : 0, bg);
         idata.data[4 * p] = rgb[0];
         idata.data[4 * p + 1] = rgb[1];
         idata.data[4 * p + 2] = rgb[2];
@@ -11076,10 +11099,11 @@ function drawAimDensity(canvas, c, idx) {
         ctx.fillText(String(y), ML - 6, py(y));
     }
 
-    // Colorbar: 0 → max shots per fine cell (smoothed), same ramp.
+    // Colorbar: 0 → max shots per fine cell (smoothed), same ramp including
+    // the fade-to-surface bottom so bar and image agree exactly.
     const bx = ML + PW + GAP;
     for (let i = 0; i < PH; i++) {
-        const rgb = heatColorRGB(1 - i / (PH - 1));
+        const rgb = aimDensityRGB(1 - i / (PH - 1), bg);
         ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
         ctx.fillRect(bx, MT + i, CB, 1);
     }
@@ -11120,15 +11144,13 @@ function drawAimDensity(canvas, c, idx) {
     }
 }
 
-// Marginal histograms under each crosshair grid: the same normalized samples
+// Marginal histograms under each crosshair image: the same normalized samples
 // projected onto one axis at a time. Yaw plots −nyaw so enemy-right reads
-// right (matching the heatmap's x flip); pitch plots npitch ascending so
-// enemy-above reads right. Same clamp-into-edge-bins behaviour as the grid,
-// but over a wider extent so the clamp bins sit further out, and with an odd
-// bin count so the middle bin is centered on zero (dead center). Pitch bins
-// are finer than the heatmap's 0.5 rows — a 1-D strip can afford it.
-const AIM_HIST_YAW_HALF = 6.0;
-const AIM_HIST_PITCH_HALF = 4.0;
+// right (matching the image's x flip); pitch plots npitch ascending so
+// enemy-above reads right. Out-of-range samples clamp into the edge bins
+// (unlike the image, which drops them — a 1-D strip has room for catch-all
+// bins without smearing), and an odd bin count centers the middle bin on
+// zero (dead center).
 const AIM_HIST_PITCH_W = 0.25;
 
 function renderAimHistRow(prefix, c, idx) {
@@ -11138,9 +11160,9 @@ function renderAimHistRow(prefix, c, idx) {
     row.innerHTML = '';
     if (!idx.length) return;
     row.appendChild(buildAimHist('Yaw', 'enemy left ← → right', '×hull half-width',
-        AIM_HIST_YAW_HALF, AIM_YAW_W, i => -c.nyaw[i], c, idx));
+        AIM_YAW_HALF, AIM_YAW_W, i => -c.nyaw[i], c, idx));
     row.appendChild(buildAimHist('Pitch', 'enemy below ← → above', '×hull half-height',
-        AIM_HIST_PITCH_HALF, AIM_HIST_PITCH_W, i => c.npitch[i], c, idx));
+        AIM_PITCH_HALF, AIM_HIST_PITCH_W, i => c.npitch[i], c, idx));
 }
 
 function buildAimHist(name, dirNote, unit, half, w, val, c, idx) {

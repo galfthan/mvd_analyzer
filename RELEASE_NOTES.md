@@ -34,14 +34,18 @@ detail.
   all (the per-weapon fire counts still include it). No field changes —
   sample counts and targets shift on team demos. The web Aim Stats tab
   replaces the crosshair grid with a **smoothed density image** per weapon
-  (LG and SG): a Gaussian-smoothed 2-D histogram on canvas (viridis, no
-  external deps) with hull box + dead-center overlays, axis ticks and a
-  colorbar in shots per bin; hover reads exact shot/hit counts. Under each
-  image, two **marginal histograms**: the same normalized samples projected
-  onto one axis at a time — yaw (enemy left ↔ right) and pitch (enemy
-  below ↔ above) — zero-centered bins over a wider extent than the image
-  (yaw ±6, pitch ±4), with the |n| ≤ 1 on-hull band shaded and a
-  dead-center rule. All binning stays client-side. The per-weapon accuracy
+  (LG and SG): a Gaussian-smoothed 2-D histogram on canvas (the shared
+  viridis ramp anchored to the page background at zero, like the table
+  heatmaps; no external deps) with hull box + dead-center overlays, axis
+  ticks and a colorbar in shots per bin; hover reads exact shot/hit counts.
+  Under each image, two **marginal histograms**: the same normalized
+  samples projected onto one axis at a time — yaw (enemy left ↔ right) and
+  pitch (enemy below ↔ above) — zero-centered bins, with the |n| ≤ 1
+  on-hull band shaded and a dead-center rule. Image and histograms share
+  the same extents (yaw ±6, pitch ±4); samples outside them are dropped
+  from the image (a clamp pile-up would paint a bright rim) but stay
+  visible in the histograms' clamp edge bins. All binning stays
+  client-side. The per-weapon accuracy
   tables add **share-of-fires % columns** next to every count (LG
   near/blocked/far, RL/GL direct/splash/missed, SG/SSG full/partial/miss)
   so players with different shot volumes compare directly.
