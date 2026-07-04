@@ -79,12 +79,12 @@ share-of-fires % columns, so players with different shot volumes compare
 directly), a smoothed crosshair-density image (hitscan; a Gaussian-smoothed
 2-D histogram on canvas with a colorbar, hull box marked; radius 1 ≈ the
 hitbox edge, so it's range-comparable) split into LG and SG, per-axis
-**yaw / pitch marginal histograms** under each image (zero-centered bins
-over the image's extents; their clamp edge bins keep the outliers the
-image drops, and the on-hull |n| ≤ 1 band is shaded),
-an LG ramp-onto-target bar chart, a rocket direct/splash panel, and an
-LG-whiffs split. All geometry/attribution lives in
-`mvd-analytics/analyzer/aim.go`; the tab only bins and paints. Target attribution is exact in duels and a labeled
+**yaw / pitch marginal histograms** stacked under each image (zero-centered
+bins over the image's extents; their clamp edge bins keep the outliers the
+image drops, and the on-hull |n| ≤ 1 band is shaded), an LG shaft-time
+(ramp) histogram in the same style under the LG image, a rocket
+direct/splash panel, and an LG-whiffs split. All geometry/attribution lives
+in `mvd-analytics/analyzer/aim.go`; the tab only bins and paints. Target attribution is exact in duels and a labeled
 nearest-crosshair heuristic in team games, in both cases only among enemies
 alive at the fire time.
 The **Key Moments** tab has three tables: powerup runs, longest frag

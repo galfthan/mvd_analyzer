@@ -44,8 +44,11 @@ detail.
   on-hull band shaded and a dead-center rule. Image and histograms share
   the same extents (yaw ±6, pitch ±4); samples outside them are dropped
   from the image (a clamp pile-up would paint a bright rim) but stay
-  visible in the histograms' clamp edge bins. All binning stays
-  client-side. The per-weapon accuracy
+  visible in the histograms' clamp edge bins. The LG ramp panel is folded
+  into the LG block as a third histogram in the same style (shots by time
+  since the shaft opened, hover for per-bin hit-rate; `lgRamp` in the
+  schema is unchanged), and the histograms stack vertically. All binning
+  stays client-side. The per-weapon accuracy
   tables add **share-of-fires % columns** next to every count (LG
   near/blocked/far, RL/GL direct/splash/missed, SG/SSG full/partial/miss)
   so players with different shot volumes compare directly.

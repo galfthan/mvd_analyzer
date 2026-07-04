@@ -947,7 +947,8 @@
                         shot/hit counts. Below each image: yaw and pitch histograms
                         of the same fires (shaded band = within the hull edge, rule
                         = dead center; the outermost bins also collect shots beyond
-                        the plotted range).
+                        the plotted range). LG adds a ramp histogram: shots by time
+                        since the shaft opened, hover for the hit-rate.
                     </div>
 
                     <div class="aim-heatmap-block">
@@ -965,16 +966,6 @@
                     </div>
                 </div>
 
-                <div class="panel" id="aim-ramp-panel">
-                    <h3>LG ramp onto target <span class="aim-sel-note">— selected player</span></h3>
-                    <div class="aim-desc">
-                        Hit-rate by time since the start of each LG shaft (fires less
-                        than 150 ms apart are one shaft). Shows how quickly the player
-                        locks the beam on after opening fire.
-                    </div>
-                    <div id="aim-ramp-chart"></div>
-                    <div id="aim-ramp-nodata" class="aim-nodata" style="display:none">No LG fired by this player.</div>
-                </div>
             </div>
 
             </div><!-- /main-scroll -->

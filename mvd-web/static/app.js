@@ -10820,7 +10820,7 @@ function renderAimStats() {
     if (es) es.style.display = result ? 'none' : '';
     const empty = document.getElementById('aim-empty');
     if (empty) empty.style.display = (result && !hasData) ? '' : 'none';
-    ['aim-controls', 'aim-accuracy-panel', 'aim-heatmap-panel', 'aim-ramp-panel'].forEach(id => {
+    ['aim-controls', 'aim-accuracy-panel', 'aim-heatmap-panel'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = hasData ? '' : 'none';
     });
@@ -10833,7 +10833,6 @@ function renderAimStats() {
 
     renderAimMode(pa);
     renderAimHeatmap(pa);
-    renderAimRamp(pa);
 }
 
 function renderAimMode(pa) {
@@ -10952,7 +10951,7 @@ function renderAimHeatmapWeapon(pa, weapon, prefix) {
     }
     if (nodata) nodata.style.display = idx.length ? 'none' : '';
     if (canvas) canvas.style.display = idx.length ? '' : 'none';
-    renderAimHistRow(prefix, c, idx);
+    renderAimHistRow(prefix, c, idx, weapon === 'lg' ? pa.lgRamp : null);
     if (!idx.length || !canvas) return;
     drawAimDensity(canvas, c, idx);
 }
@@ -11153,7 +11152,7 @@ function drawAimDensity(canvas, c, idx) {
 // zero (dead center).
 const AIM_HIST_PITCH_W = 0.25;
 
-function renderAimHistRow(prefix, c, idx) {
+function renderAimHistRow(prefix, c, idx, ramp) {
     const row = document.getElementById(`${prefix}-hists`);
     if (!row) return;
     row.style.display = idx.length ? '' : 'none';
@@ -11163,6 +11162,7 @@ function renderAimHistRow(prefix, c, idx) {
         AIM_YAW_HALF, AIM_YAW_W, i => -c.nyaw[i], c, idx));
     row.appendChild(buildAimHist('Pitch', 'enemy below ← → above', '×hull half-height',
         AIM_PITCH_HALF, AIM_HIST_PITCH_W, i => c.npitch[i], c, idx));
+    if (ramp && ramp.since && ramp.since.length) row.appendChild(buildAimRampHist(ramp));
 }
 
 function buildAimHist(name, dirNote, unit, half, w, val, c, idx) {
@@ -11222,35 +11222,54 @@ function buildAimHist(name, dirNote, unit, half, w, val, c, idx) {
     return box;
 }
 
-function renderAimRamp(pa) {
-    const chart = document.getElementById('aim-ramp-chart');
-    const nodata = document.getElementById('aim-ramp-nodata');
-    const ramp = pa.lgRamp;
-    const n = (ramp && ramp.since) ? ramp.since.length : 0;
-    if (nodata) nodata.style.display = n ? 'none' : '';
-    if (!chart) return;
-    chart.innerHTML = '';
-    if (!n) return;
+// The LG ramp (result.aim lgRamp, computed in Go: time since the shaft
+// opened per fire, fires < 150 ms apart grouped into one shaft) shown as a
+// third histogram under the LG image, same style as the marginals: bars =
+// shots per time bin, hover for the per-bin hit-rate. The last bin collects
+// longer shafts.
+const AIM_RAMP_BIN = 100; // ms
+const AIM_RAMP_BINS = 7;  // 0-600 ms, then 600+
 
-    const BW = 100, NB = 7; // 0-100 … 500-600, then 600+
-    const buckets = Array.from({ length: NB }, () => ({ shots: 0, hits: 0 }));
-    for (let i = 0; i < n; i++) {
-        let b = Math.floor(ramp.since[i] / BW);
-        if (b >= NB) b = NB - 1;
-        buckets[b].shots++;
-        if (ramp.hit[i]) buckets[b].hits++;
+function buildAimRampHist(ramp) {
+    const bins = Array.from({ length: AIM_RAMP_BINS }, () => ({ shots: 0, hits: 0 }));
+    let max = 0;
+    for (let i = 0; i < ramp.since.length; i++) {
+        const b = bins[Math.min(AIM_RAMP_BINS - 1, Math.floor(ramp.since[i] / AIM_RAMP_BIN))];
+        b.shots++;
+        if (ramp.hit[i]) b.hits++;
+        if (b.shots > max) max = b.shots;
     }
-    buckets.forEach((bk, b) => {
-        const pct = bk.shots ? (bk.hits / bk.shots) * 100 : 0;
-        const label = b === NB - 1 ? `${b * BW}+ ms` : `${b * BW}-${(b + 1) * BW} ms`;
-        const div = document.createElement('div');
-        div.className = 'aim-bar';
-        div.innerHTML =
-            `<span class="weapon-name">${label}</span>` +
-            `<div class="bar-container"><div class="bar" style="width:${pct}%"></div></div>` +
-            `<span class="weapon-count">${bk.shots ? pct.toFixed(0) + '% (' + bk.shots + ')' : '-'}</span>`;
-        chart.appendChild(div);
+
+    const box = document.createElement('div');
+    box.className = 'aim-hist';
+    const title = document.createElement('div');
+    title.className = 'aim-hist-title';
+    title.innerHTML = 'Ramp <span class="aim-sel-note">time since the shaft opened; fires &lt; 150 ms apart are one shaft</span>';
+    box.appendChild(title);
+
+    const plot = document.createElement('div');
+    plot.className = 'aim-hist-plot';
+    bins.forEach((b, bi) => {
+        const col = document.createElement('div');
+        col.className = 'aim-hist-col';
+        const lo = bi * AIM_RAMP_BIN;
+        const range = bi === AIM_RAMP_BINS - 1 ? `${lo}+ ms` : `${lo}…${lo + AIM_RAMP_BIN} ms`;
+        col.title = `${range}: ${b.shots} shot${b.shots === 1 ? '' : 's'}` +
+            (b.shots ? `, ${b.hits} hit (${Math.round(b.hits / b.shots * 100)}%)` : '');
+        const fill = document.createElement('div');
+        fill.className = 'aim-hist-fill';
+        fill.style.height = `${max ? (b.shots / max) * 100 : 0}%`;
+        if (b.shots > 0) fill.style.minHeight = '2px';
+        col.appendChild(fill);
+        plot.appendChild(col);
     });
+    box.appendChild(plot);
+
+    const axis = document.createElement('div');
+    axis.className = 'aim-hist-axis';
+    axis.innerHTML = '<span>0</span><span></span><span>600+ ms</span>';
+    box.appendChild(axis);
+    return box;
 }
 
 // ─── Playback Engine ──────────────────────────────────────────────────────
