@@ -635,8 +635,11 @@ intentional: that channel is lean by design).
 ### FragStreakEvent
 
 `{ time, endTime, playerName, playerUserID, team, frags, duration,
-ewep }`. `ewep` = effective weapon = the weapon that scored the most
-kills during the streak.
+ewep }`. One record per spawn-to-death life with ≥ 1 enemy kill, top 10
+by frag count. A player already alive at match start has that first
+life's spawn synthesized at match start (the real spawn happened during
+warmup), so an opening run reads `time: 0`. `ewep` = effective weapon =
+the weapon that scored the most kills during the streak.
 
 ### AirgibEvent
 
