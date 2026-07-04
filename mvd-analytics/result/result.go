@@ -474,6 +474,27 @@ package result
 //     while the lone enemy is dead no longer emits a sample.
 //
 // v44:
+//   - Aim crosshair samples of hit shots attribute to the server-confirmed
+//     victim (nearest by crosshair error when a pellet fire hit several),
+//     bypassing the v43 liveness gate and the enemy filter. The killing blow
+//     lands in the same frame the victim dies, so the liveness gate read the
+//     victim as already dead at the fire time and attributed the shot to the
+//     nearest *other* live enemy — hits appeared tens of hull-widths off
+//     target in team games, and duels dropped their killing-blow samples
+//     entirely. No field changes; hit samples' tgt/dyaw/dpitch/nyaw/npitch/
+//     dist shift, and duels gain one sample per hitscan kill.
+//
+// v45:
+//   - Victim-class classification on the shots/aim pipeline, mirroring the
+//     Damage layer's IsSelf/IsTeam semantics. Shot gains VictimKinds
+//     (parallel to Victims: "enemy"/"team"/"self", omitted when all-enemy);
+//     WeaponShots gains EnemyHits/TeamHits/SelfHits (overlapping buckets —
+//     a multi-victim fire counts in each bucket it has a victim in);
+//     CrosshairSamples and LGRampSamples gain a Team column; WeaponAim gains
+//     Enemy/Team/Self *WeaponAimSplit hit-counter slices. All additive
+//     (omitempty) — Hits/Accuracy stay all-victims for KTX parity.
+//
+// v46:
 //   - Weapon-stay recovery (serverinfo deathmatch 2/3/5, or coop — the
 //     standard duel/2on2 dmm3 included): KTX never emits `//ktx took` for
 //     weapons in those modes and the weapon entity never leaves the wire,
@@ -490,7 +511,12 @@ package result
 //     teams (and transitively Aim teams), and Airgibs attacker/victim teams
 //     — previously these kept the raw pre-normalization team strings in 1v1
 //     demos, so team-keyed pickup aggregation bucketed under stale labels.
-const CurrentSchemaVersion = 44
+//   - Item pickup attribution: the Layer-4 distance corroborator samples
+//     positions from the per-frame history at the touch instant and all
+//     proximity consumers share a measured 128 u touch gate (was a 256 u
+//     stale-sample bound) — a handful of beyond-gate distance attributions
+//     become honestly unattributed phases.
+const CurrentSchemaVersion = 46
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

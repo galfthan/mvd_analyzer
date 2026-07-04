@@ -7,7 +7,7 @@ detail.
 
 ## 2026-07-04
 
-- **Weapon-stay pickup recovery (schema v44).** In weapon-stay modes
+- **Weapon-stay pickup recovery (schema v46).** In weapon-stay modes
   (serverinfo `deathmatch` 2/3/5 or `coop` — dmm3, the standard
   duel/2on2 mode, included) KTX never emits `//ktx took` for weapons
   and the weapon entity never leaves the wire, so `result.weaponPickups`
@@ -36,7 +36,7 @@ detail.
   columns are unchanged). Demos without KTX pickup counters (old /
   non-KTX servers) fall back to the analytics counts, trusted as-is.
 
-- **Duel team normalization now covers pickup/shot data (v44).** In 1v1
+- **Duel team normalization now covers pickup/shot data (v46).** In 1v1
   demos `normalizeDuelTeams` rewrites every player's team to their own
   name, but `items` phase teams, `weaponPickups` team/dropperTeam,
   `backpacks` team, `shots` stream/byPlayer teams (feeding `aim` teams),
@@ -47,6 +47,59 @@ detail.
   player streams). The web Pickups tab's per-team tables also join the
   existing duel-mode hide (`team-aggregate-table`), matching the other
   per-team stats tables.
+
+- **Pickup attribution: touch-instant sampling + measured 128 u gate
+  (v46).** The Layer-4 distance corroborator now samples each player's
+  position from the per-frame history at the entity-removal instant
+  (which is the touch frame) instead of a latest-only sample up to
+  250 ms stale, and all proximity consumers (corroborator, insta-regrab
+  picker, weapon-stay classifiers) share one 128 u touch gate — genuine
+  touches measure 54-104 u across the corpus, non-touch same-room grabs
+  ≥150 u. A handful of beyond-gate guesses become honestly unattributed.
+
+- **Shots/aim: enemy / team / self victim classification + Aim Stats
+  Victims cycle** (schema v45). Every linked victim is now classified
+  relative to the shooter — `enemy`, `team` (same non-empty team, not
+  self) or `self` (own wire slot: rl/gl self-splash, i.e. rocket jumps) —
+  mirroring the damage layer's `isSelf`/`isTeam` semantics, per victim
+  per fire (one rocket can splash an enemy, a teammate and the shooter at
+  once and counts in every bucket it has a victim in). `Shot` gains
+  `victimKinds`, `WeaponShots` gains `enemyHits`/`teamHits`/`selfHits`,
+  the aim crosshair/ramp samples gain a `team` column, and `WeaponAim`
+  gains `enemy`/`team`/`self` counter slices (`WeaponAimSplit`: hits,
+  pellet splits, direct — see RESULT_SCHEMA.md for the emission rules).
+  All additive; `hits`/`accuracy` stay all-victims for KTX scoreboard
+  parity. The Aim Stats tab gains a **Victims** filter
+  (All / Enemy / Team / Self) that slices the weapon tables, the
+  crosshair heatmaps + marginals and the LG ramp; **All** (default)
+  preserves the previous numbers, and **Enemy** is the first view where
+  rocket jumps no longer inflate RL hit % (they were always counted as
+  hits — now visible under Self). Duels hide the Team option (no
+  teammates); Self shows tables only (hitscan cannot self-hit, so there
+  are no self crosshair samples). The MCP `getAim` tool and `/aim` +
+  `/shots` endpoints carry the new fields automatically. Tab layout
+  reworked alongside: the Victims strip sits at the top of the tab, the
+  LG and SG crosshair blocks sit side by side where the pane is wide
+  enough (stacking on narrow panes), and the player picker moved into
+  the Crosshair placement panel — the only place it applies.
+
+- **Aim: hits attribute to the confirmed victim** (schema v44). The v43
+  liveness gate excluded the victim of a killing blow from attribution —
+  the kill lands in the same frame the victim dies, so `losAliveAt` read
+  the victim as already dead at the fire time. In team games the sample
+  went to the nearest *other* live enemy, producing impossible
+  "hits" tens of hull-widths off target (the big far-edge bars with
+  nonzero hit counts in the Aim Stats marginal histograms — verified on
+  hub demo 223930: 78 of 79 LG edge-bin hits were killing blows, the 79th
+  a team-damage hit, while the beams ended inside the actual victim's
+  hull); duels dropped their killing-blow samples entirely. Crosshair
+  samples of hit shots now attribute to the server-confirmed victim
+  (nearest by crosshair error when a pellet fire hit several), with no
+  liveness gate and no enemy filter (team damage is a confirmed target —
+  `tgt` can then name a teammate); misses keep the live-enemy
+  nearest-crosshair heuristic. Duels gain one crosshair sample per
+  hitscan kill; the web attribution note now spells out the hit/miss
+  split.
 
 - **API: `/shots` endpoint + complete `/aim`; MCP: `getAim`** (no schema
   change). New `GET /v1/demos/{id}/shots` serves the per-fire weapon stream

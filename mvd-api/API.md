@@ -319,13 +319,18 @@ kill itself still appears in `/frags` and as a `frag` event.
 
 No params. Per-player aim analysis (`result.Aim`): the `weapons` array
 (per-weapon shots/hits, SG/SSG pellet stats + full/partial/miss, RL/GL
-direct/splash/missed, the LG near/blocked/out-of-range whiff split), columnar
-`crosshair` samples for hitscan fires (signed degrees off the enemy + a
-version normalized by the target's angular size, so radius 1 ≈ the hitbox
-edge, with hit flag + attributed target), and the `lgRamp` series (per-LG-cell
-hit vs ms since the shaft opened). `mode` is `"duel"` (exact target) or
-`"team"` (nearest-crosshair-enemy heuristic); either way only enemies alive
-at the fire time are attribution candidates. Shape: `result.AimResult` →
+direct/splash/missed, the LG near/blocked/out-of-range whiff split, plus
+`enemy`/`team`/`self` per-victim-class counter slices — emitted only when a
+weapon had team or self hits; see RESULT_SCHEMA.md §WeaponAimSplit for the
+fallback rules), columnar `crosshair` samples for hitscan fires (signed
+degrees off the enemy + a version normalized by the target's angular size,
+so radius 1 ≈ the hitbox edge, with hit flag + attributed target + a `team`
+flag when the target is a teammate), and the `lgRamp` series (per-LG-cell
+hit vs ms since the shaft opened, with a `team` flag on teammate-only
+connects). `mode` is `"duel"` (exact target) or
+`"team"`; hits attribute to the server-confirmed victim, misses to the
+nearest-crosshair enemy alive at the fire time (a heuristic in team games).
+Shape: `result.AimResult` →
 [RESULT_SCHEMA.md §AimResult](../mvd-analytics/RESULT_SCHEMA.md#aimresult-aim).
 
 **Availability:** served from the stream-enriched parse (like the
@@ -338,11 +343,15 @@ no shots/position data.
 
 The per-fire weapon stream (`result.Shots`): `shots` — every detected fire,
 chronological, with `time` (match ms), `player`, `weapon`, `source`
-(`sound`/`beam`/`ammo`), `hit` + `victims` where linkable, and a `warmup`
-flag on out-of-match fires; `byPlayer` — match-time per-weapon counts and
-hitscan accuracy; `reconciliation` — the cross-check against KTX's
-authoritative `acc.attacks`. Served from the same stream-enriched parse as
-`/aim`, so rl/gl fires carry their projectile-linked hits.
+(`sound`/`beam`/`ammo`), `hit` + `victims` where linkable (plus
+`victimKinds` classifying each victim `enemy`/`team`/`self`, omitted when
+all-enemy), and a `warmup` flag on out-of-match fires; `byPlayer` —
+match-time per-weapon counts, hitscan accuracy and the
+`enemyHits`/`teamHits`/`selfHits` victim-class buckets (overlapping — a
+multi-victim fire counts in each); `reconciliation` — the cross-check
+against KTX's authoritative `acc.attacks`. Served from the same
+stream-enriched parse as `/aim`, so rl/gl fires carry their
+projectile-linked hits.
 
 | param | meaning |
 |---|---|
@@ -366,7 +375,7 @@ KTX-hint-derived item analytics:
 - **`/weapon-pickups`** (`players`, `weapon`, `source`) — slot-weapon
   acquisitions with kills-before-next-death; joins to backpacks via
   `backpackEnt`. `[]result.WeaponPickup`. `source` is
-  `world`/`backpack`/`unknown` (schema v44: weapon-stay demos carry
+  `world`/`backpack`/`unknown` (schema v46: weapon-stay demos carry
   synthesized `inferred` entries; `unknown` = a grant with no weapon
   pad in touch range, typically a non-RL/LG pack).
 

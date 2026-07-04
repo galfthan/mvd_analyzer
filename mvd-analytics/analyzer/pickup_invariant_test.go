@@ -25,7 +25,7 @@ package analyzer_test
 // Weapons aren't asserted in TestItemPickupCountsMatchDemoInfo: in
 // KTX's weapon-stay modes (deathmatch 2/3/5 — the standard duel/2on2
 // dmm3 included) weapon entities never disappear from the wire, so
-// the entity-visibility signal is silent for them. Since schema v44
+// the entity-visibility signal is silent for them. Since schema v46
 // both analyzers recover those pickups from STAT_ITEMS bit flips, and
 // TestWeaponPickupCountsMatchDemoInfo (below) asserts the recovered
 // counts against KTX's own weapon counters on the weapon-stay demos
@@ -228,7 +228,7 @@ const (
 )
 
 // TestWeaponPickupCountsMatchDemoInfo asserts the weapon-stay
-// synthesis (schema v44) against KTX's authoritative per-player weapon
+// synthesis (schema v46) against KTX's authoritative per-player weapon
 // counters, which stay correct in weapon-stay modes because
 // TookWeaponHandler runs before weapon_touch's early return
 // (ktx/src/items.c:981 → ktx/src/client.c:4749). Only demos whose
