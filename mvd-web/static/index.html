@@ -919,10 +919,6 @@
                         <button type="button" class="aim-chip" data-kind="team">Team</button>
                         <button type="button" class="aim-chip" data-kind="self">Self</button>
                     </div>
-                    <span class="aim-controls-label">Player:</span>
-                    <div id="aim-player-chips" class="aim-chips" tabindex="0"
-                         title="Click a player, or focus and use ← → to step between players"></div>
-                    <span id="aim-mode" class="aim-mode"></span>
                 </div>
 
                 <div class="panel" id="aim-accuracy-panel">
@@ -951,6 +947,12 @@
 
                 <div class="panel" id="aim-heatmap-panel">
                     <h3>Crosshair placement <span class="aim-sel-note">— selected player</span></h3>
+                    <div class="aim-controls">
+                        <span class="aim-controls-label">Player:</span>
+                        <div id="aim-player-chips" class="aim-chips" tabindex="0"
+                             title="Click a player, or focus and use ← → to step between players"></div>
+                        <span id="aim-mode" class="aim-mode"></span>
+                    </div>
                     <div class="aim-desc">
                         Where the enemy sat relative to the crosshair at each fire.
                         Each axis is the angular error divided by the target's hull

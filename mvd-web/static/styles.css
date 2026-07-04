@@ -902,6 +902,12 @@ table tbody tr:hover {
     flex-wrap: wrap;
 }
 
+/* The player picker lives inside the Crosshair placement panel (it only
+   drives the per-player plots); give the in-panel strip its own spacing. */
+#aim-heatmap-panel .aim-controls {
+    margin-bottom: 10px;
+}
+
 .aim-controls-label {
     color: #888;
     font-size: 0.85rem;
