@@ -11223,28 +11223,32 @@ function buildAimHist(name, dirNote, unit, half, w, val, c, idx) {
 }
 
 // The LG ramp (result.aim lgRamp, computed in Go: time since the shaft
-// opened per fire, fires < 150 ms apart grouped into one shaft) shown as a
+// opened per fire, fires < 150 ms apart grouped into one shaft — one fire ==
+// one 100 ms LG cell, so the bins align with the cell cadence) shown as a
 // third histogram under the LG image, same style as the marginals: bars =
-// shots per time bin, hover for the per-bin hit-rate. The last bin collects
-// longer shafts.
+// the bin's hit-rate on a dynamic y scale (max bin hit % rounded up to the
+// next 10%, labelled in a small gutter), hover for the counts. A bin with
+// fires but no hits keeps a 2px stub so it reads as 0%, not as no data.
+// The last bin collects longer shafts.
 const AIM_RAMP_BIN = 100; // ms
-const AIM_RAMP_BINS = 7;  // 0-600 ms, then 600+
+const AIM_RAMP_BINS = 12; // 0-1100 ms, then 1100+
 
 function buildAimRampHist(ramp) {
     const bins = Array.from({ length: AIM_RAMP_BINS }, () => ({ shots: 0, hits: 0 }));
-    let max = 0;
     for (let i = 0; i < ramp.since.length; i++) {
         const b = bins[Math.min(AIM_RAMP_BINS - 1, Math.floor(ramp.since[i] / AIM_RAMP_BIN))];
         b.shots++;
         if (ramp.hit[i]) b.hits++;
-        if (b.shots > max) max = b.shots;
     }
+    const pctOf = b => (b.shots ? b.hits / b.shots * 100 : 0);
+    const yMax = Math.max(10, Math.ceil(Math.max(...bins.map(pctOf)) / 10) * 10);
+    const maxShots = Math.max(...bins.map(b => b.shots));
 
     const box = document.createElement('div');
     box.className = 'aim-hist';
     const title = document.createElement('div');
     title.className = 'aim-hist-title';
-    title.innerHTML = 'Ramp <span class="aim-sel-note">time since the shaft opened; fires &lt; 150 ms apart are one shaft</span>';
+    title.innerHTML = 'Ramp <span class="aim-sel-note">hit % by time since the shaft opened; fires &lt; 150 ms apart are one shaft; faint = few fires</span>';
     box.appendChild(title);
 
     const plot = document.createElement('div');
@@ -11254,20 +11258,34 @@ function buildAimRampHist(ramp) {
         col.className = 'aim-hist-col';
         const lo = bi * AIM_RAMP_BIN;
         const range = bi === AIM_RAMP_BINS - 1 ? `${lo}+ ms` : `${lo}…${lo + AIM_RAMP_BIN} ms`;
+        const pct = pctOf(b);
         col.title = `${range}: ${b.shots} shot${b.shots === 1 ? '' : 's'}` +
-            (b.shots ? `, ${b.hits} hit (${Math.round(b.hits / b.shots * 100)}%)` : '');
+            (b.shots ? `, ${b.hits} hit (${Math.round(pct)}%)` : '');
         const fill = document.createElement('div');
         fill.className = 'aim-hist-fill';
-        fill.style.height = `${max ? (b.shots / max) * 100 : 0}%`;
+        fill.style.height = `${pct / yMax * 100}%`;
+        // A tall bar from a handful of fires is weak evidence: fade bars by
+        // sample size (sqrt keeps the steeply-decaying tail readable, the
+        // floor keeps every non-empty bin visible). Exact counts on hover.
+        fill.style.opacity = (0.25 + 0.75 * Math.sqrt(b.shots / maxShots)).toFixed(2);
         if (b.shots > 0) fill.style.minHeight = '2px';
         col.appendChild(fill);
         plot.appendChild(col);
     });
-    box.appendChild(plot);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'aim-hist-ywrap';
+    const yaxis = document.createElement('div');
+    yaxis.className = 'aim-hist-yaxis';
+    yaxis.innerHTML = `<span>${yMax}%</span><span>0</span>`;
+    wrap.appendChild(yaxis);
+    wrap.appendChild(plot);
+    box.appendChild(wrap);
 
     const axis = document.createElement('div');
-    axis.className = 'aim-hist-axis';
-    axis.innerHTML = '<span>0</span><span></span><span>600+ ms</span>';
+    axis.className = 'aim-hist-axis aim-hist-axis-inset';
+    axis.innerHTML = `<span>0</span><span>${AIM_RAMP_BINS * AIM_RAMP_BIN / 2}</span>` +
+        `<span>${(AIM_RAMP_BINS - 1) * AIM_RAMP_BIN}+ ms</span>`;
     box.appendChild(axis);
     return box;
 }

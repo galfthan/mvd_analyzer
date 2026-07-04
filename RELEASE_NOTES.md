@@ -45,8 +45,8 @@ detail.
   the same extents (yaw ±6, pitch ±4); samples outside them are dropped
   from the image (a clamp pile-up would paint a bright rim) but stay
   visible in the histograms' clamp edge bins. The LG ramp panel is folded
-  into the LG block as a third histogram in the same style (shots by time
-  since the shaft opened, hover for per-bin hit-rate; `lgRamp` in the
+  into the LG block as a third histogram in the same style (hit % by time
+  since the shaft opened, hover for per-bin counts; `lgRamp` in the
   schema is unchanged), and the histograms stack vertically. All binning
   stays client-side. The per-weapon accuracy
   tables add **share-of-fires % columns** next to every count (LG

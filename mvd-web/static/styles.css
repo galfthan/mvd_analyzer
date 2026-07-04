@@ -1067,6 +1067,32 @@ table tbody tr:hover {
     border-radius: 1px 1px 0 0;
 }
 
+/* Ramp histogram: y-axis gutter for its dynamic hit-% scale; the x axis
+   below gets a matching inset so its labels stay under the plot. */
+.aim-hist-ywrap {
+    display: flex;
+    gap: 6px;
+}
+
+.aim-hist-ywrap .aim-hist-plot {
+    flex: 1;
+}
+
+.aim-hist-yaxis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 34px;
+    color: #666;
+    font-size: 0.72rem;
+    text-align: right;
+    padding: 2px 0;
+}
+
+.aim-hist-axis-inset {
+    margin-left: 40px; /* y-axis gutter width + gap */
+}
+
 .aim-hist-axis {
     display: flex;
     color: #666;

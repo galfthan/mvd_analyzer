@@ -82,8 +82,9 @@ hitbox edge, so it's range-comparable) split into LG and SG, per-axis
 **yaw / pitch marginal histograms** stacked under each image (zero-centered
 bins over the image's extents; their clamp edge bins keep the outliers the
 image drops, and the on-hull |n| ≤ 1 band is shaded), an LG shaft-time
-(ramp) histogram in the same style under the LG image, a rocket
-direct/splash panel, and an LG-whiffs split. All geometry/attribution lives
+(ramp) histogram in the same style under the LG image (bars = hit % per
+100 ms cell on a dynamic labelled scale, bar opacity = sample size), a
+rocket direct/splash panel, and an LG-whiffs split. All geometry/attribution lives
 in `mvd-analytics/analyzer/aim.go`; the tab only bins and paints. Target attribution is exact in duels and a labeled
 nearest-crosshair heuristic in team games, in both cases only among enemies
 alive at the fire time.
