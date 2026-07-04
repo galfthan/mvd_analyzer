@@ -44,9 +44,15 @@ detail.
   strings — so the Pickups tab's per-team aggregation bucketed duel
   pickups under stale colour labels and showed zero rows. All are now
   rewritten in the duel pass (airgibs sources teams from the normalized
-  player streams). The web Pickups tab's per-team tables also join the
-  existing duel-mode hide (`team-aggregate-table`), matching the other
-  per-team stats tables.
+  player streams). The pass also reclassifies `shots[].victimKinds`
+  `"team"` → `"enemy"` and folds the per-weapon `teamHits` bucket into
+  `enemyHits` (v45's `victimKindOf` compares raw team strings, so a duel
+  where both players share a colour team classified every opponent hit
+  as team damage; in a 1v1 any non-self victim is an enemy — exact, since
+  the single opponent pair classifies uniformly). Aim's enemy/team splits
+  inherit the correction via `aimPost` ordering. The web Pickups tab's
+  per-team tables also join the existing duel-mode hide
+  (`team-aggregate-table`), matching the other per-team stats tables.
 
 - **Pickup attribution: touch-instant sampling + measured 128 u gate
   (v46).** The Layer-4 distance corroborator now samples each player's

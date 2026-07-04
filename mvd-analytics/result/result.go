@@ -511,6 +511,11 @@ package result
 //     teams (and transitively Aim teams), and Airgibs attacker/victim teams
 //     — previously these kept the raw pre-normalization team strings in 1v1
 //     demos, so team-keyed pickup aggregation bucketed under stale labels.
+//     It also reclassifies Shot.VictimKinds "team" → "enemy" (folding the
+//     WeaponShots TeamHits bucket into EnemyHits): victimKindOf compares
+//     raw team strings, so a duel where both players share a colour team
+//     classified every opponent hit as "team". Aim's enemy/team splits
+//     follow via aimPost ordering.
 //   - Item pickup attribution: the Layer-4 distance corroborator samples
 //     positions from the per-frame history at the touch instant and all
 //     proximity consumers share a measured 128 u touch gate (was a 256 u
