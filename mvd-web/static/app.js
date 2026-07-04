@@ -10882,8 +10882,8 @@ const AIM_COL = {
 // SG/SSG lead with the pellet stats.
 const AIM_TABLE_COLS = {
     lg: ['shots', 'hits', 'near', 'blocked', 'far', 'hitPct', 'nearPct', 'blockedPct', 'farPct'],
-    sg: ['fired', 'pHit', 'pAcc', 'full', 'partial', 'miss', 'fullPct', 'partialPct', 'missPct', 'shots', 'hits', 'hitPct'],
-    ssg: ['fired', 'pHit', 'pAcc', 'full', 'partial', 'miss', 'fullPct', 'partialPct', 'missPct', 'shots', 'hits', 'hitPct'],
+    sg: ['fired', 'pHit', 'pAcc', 'shots', 'hits', 'full', 'partial', 'miss', 'hitPct', 'fullPct', 'partialPct', 'missPct'],
+    ssg: ['fired', 'pHit', 'pAcc', 'shots', 'hits', 'full', 'partial', 'miss', 'hitPct', 'fullPct', 'partialPct', 'missPct'],
     rl: ['shots', 'hits', 'direct', 'splash', 'missed', 'hitPct', 'directPct', 'splashPct', 'missedPct'],
     gl: ['shots', 'hits', 'direct', 'splash', 'missed', 'hitPct', 'directPct', 'splashPct', 'missedPct'],
 };
