@@ -1047,7 +1047,7 @@ func (a *ItemAnalyzer) synthesizeWeaponStayPickup(slot int, kind string, t float
 			continue // phase closed — not currently on the map
 		}
 		d, ok := minDistSqOverWindow(a.playerPosHist[slot], t-statForwardWindow, t, it.origin)
-		if !ok || d > maxDistanceSqAccept {
+		if !ok || d > weaponStayPadGateSq {
 			continue
 		}
 		if bestEnt < 0 || d < bestDist {
