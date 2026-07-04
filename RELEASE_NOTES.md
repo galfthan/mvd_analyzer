@@ -27,7 +27,11 @@ detail.
   hits — now visible under Self). Duels hide the Team option (no
   teammates); Self shows tables only (hitscan cannot self-hit, so there
   are no self crosshair samples). The MCP `getAim` tool and `/aim` +
-  `/shots` endpoints carry the new fields automatically.
+  `/shots` endpoints carry the new fields automatically. Tab layout
+  reworked alongside: the Victims strip sits at the top of the tab, the
+  LG and SG crosshair blocks sit side by side where the pane is wide
+  enough (stacking on narrow panes), and the player picker moved into
+  the Crosshair placement panel — the only place it applies.
 
 - **Aim: hits attribute to the confirmed victim** (schema v44). The v43
   liveness gate excluded the victim of a killing blow from attribution —
