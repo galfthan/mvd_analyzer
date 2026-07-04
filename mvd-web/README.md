@@ -89,6 +89,13 @@ in `mvd-analytics/analyzer/aim.go`; the tab only bins and paints. Target
 attribution: hits use the server-confirmed victim (exact in duels and team
 games alike); misses are exact in duels and a labeled nearest-crosshair
 heuristic in team games, only among enemies alive at the fire time.
+A **Victims** filter (All / Enemy / Team / Self) slices every panel by who
+the shots hit — the tables read the Go-computed per-bucket counter slices
+(`WeaponAim.enemy/team/self`), the heatmaps/marginals filter samples by the
+per-sample `team` flag, and the LG ramp rescores its bars; **All** (the
+default) matches the server's authoritative numbers (KTX counts team and
+self hits too). Duels hide the Team option; Self (rl/gl self-splash —
+rocket jumps) has no crosshair samples, tables only.
 The **Key Moments** tab has three tables: powerup runs, longest frag
 streaks, and a full-width **Airborne Rocket Gibs** table — enemy rocket
 hits on airborne victims (`timelineAnalysis.airgibs`), sortable by any

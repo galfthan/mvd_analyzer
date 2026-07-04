@@ -923,7 +923,13 @@
                         a <strong>share-of-fires %</strong> column — the counts scale
                         with how much a player fired, so the percentages are what
                         compare across players. Pellet and direct figures match the
-                        server's authoritative stats.
+                        server's authoritative stats. The <strong>Victims</strong>
+                        filter below slices every hit figure by who the shots hit:
+                        <strong>Enemy</strong> (opponents only), <strong>Team</strong>
+                        (teammates, excluding the shooter), <strong>Self</strong>
+                        (RL/GL self-splash — rocket jumps) or <strong>All</strong>
+                        (everything; the view that matches the server's stats). A
+                        fire that hit both an enemy and a teammate counts in both.
                     </div>
                     <div id="aim-weapon-tables"></div>
                 </div>
@@ -932,6 +938,14 @@
                     <span class="aim-controls-label">Player:</span>
                     <div id="aim-player-chips" class="aim-chips" tabindex="0"
                          title="Click a player, or focus and use ← → to step between players"></div>
+                    <span class="aim-controls-label">Victims:</span>
+                    <div id="aim-victim-toggle" class="aim-chips"
+                         title="Filter every table and plot by who the shots hit">
+                        <button type="button" class="aim-chip" data-kind="all">All</button>
+                        <button type="button" class="aim-chip" data-kind="enemy">Enemy</button>
+                        <button type="button" class="aim-chip" data-kind="team">Team</button>
+                        <button type="button" class="aim-chip" data-kind="self">Self</button>
+                    </div>
                     <span id="aim-mode" class="aim-mode"></span>
                 </div>
 
@@ -948,7 +962,11 @@
                         of the same fires (shaded band = within the hull edge, rule
                         = dead center; the outermost bins also collect shots beyond
                         the plotted range). LG adds a ramp histogram: hit % by time
-                        since the shaft opened, hover for the counts.
+                        since the shaft opened, hover for the counts. The Victims
+                        filter applies here too: Team shows only confirmed teammate
+                        hits (misses always attribute to enemies, so they only
+                        appear in Enemy/All), and Self shows nothing — hitscan
+                        cannot self-hit.
                     </div>
 
                     <div class="aim-heatmap-block">
