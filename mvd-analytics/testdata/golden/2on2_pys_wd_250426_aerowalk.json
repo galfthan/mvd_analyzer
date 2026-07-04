@@ -27679,9 +27679,7 @@
           {
             "availableFrom": 144569,
             "respawnAt": 184349,
-            "takenAt": 154349,
-            "takenBy": "psy*overon",
-            "team": "pys"
+            "takenAt": 154349
           },
           {
             "availableFrom": 169338,
@@ -27701,9 +27699,7 @@
           {
             "availableFrom": 250802,
             "respawnAt": 308303,
-            "takenAt": 278303,
-            "takenBy": "wd.dilbert",
-            "team": "pys"
+            "takenAt": 278303
           },
           {
             "availableFrom": 293285,
@@ -27723,9 +27719,7 @@
           {
             "availableFrom": 362466,
             "respawnAt": 413569,
-            "takenAt": 383569,
-            "takenBy": "wd.cao",
-            "team": "wd"
+            "takenAt": 383569
           },
           {
             "availableFrom": 398571,
@@ -27745,9 +27739,7 @@
           {
             "availableFrom": 483205,
             "respawnAt": 515076,
-            "takenAt": 485076,
-            "takenBy": "psy*overon",
-            "team": "pys"
+            "takenAt": 485076
           },
           {
             "availableFrom": 500063,
@@ -27759,9 +27751,7 @@
           {
             "availableFrom": 515076,
             "respawnAt": 559686,
-            "takenAt": 529686,
-            "takenBy": "wd.dilbert",
-            "team": "pys"
+            "takenAt": 529686
           },
           {
             "availableFrom": 544684,

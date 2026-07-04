@@ -41388,9 +41388,7 @@
           {
             "availableFrom": 383635,
             "respawnAt": 419609,
-            "takenAt": 389609,
-            "takenBy": "squeeze",
-            "team": "1"
+            "takenAt": 389609
           },
           {
             "availableFrom": 404596,

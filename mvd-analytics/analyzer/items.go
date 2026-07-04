@@ -27,9 +27,9 @@ import (
 //      client config has msg >= 1.
 //   3. Per-slot stat deltas, computed by diffing StatUpdateEvents
 //      against a per-slot snapshot. Universal fallback.
-//   4. Distance corroborator gated by maxDistanceSqAccept and a
-//      position-recency window; restricted to L3 candidates if L3 was
-//      ambiguous.
+//   4. Distance corroborator: positions sampled from the per-frame
+//      history at the touch instant, gated by touchGateSq; restricted
+//      to L3 candidates if L3 was ambiguous.
 //
 // A pickup with no in-radius candidate and no other evidence gets
 // TakenBy="" and source="none" rather than a forced guess.
@@ -41,9 +41,7 @@ type ItemAnalyzer struct {
 	ctx       *Context
 	co        *CoreOutputs
 	items     map[int]*itemEntity // entNum -> tracked item
-	playerPos map[int][3]float32  // slot -> last known origin
-	playerPosTime map[int]float64 // slot -> time of last position update
-	playerPosHist map[int][]posSample // slot -> recent position samples (for synthesis)
+	playerPosHist map[int][]posSample // slot -> recent position samples
 	mapName   string
 	locFinder *locvis.Finder
 	timing    MatchTimingDetector
@@ -100,9 +98,10 @@ type syntheticSchedule struct {
 	chainLen  int
 }
 
-// posSample is one sample of a player's origin used by the synthesis
-// pass to ask "was this player at the item's spawn at time T", which
-// the latest-only `playerPos` map can't answer once T is in the past.
+// posSample is one sample of a player's origin. The rolling per-slot
+// history answers "where was this player at time T" for any T in the
+// recent past — the attribution layers all fire at (or shortly after)
+// a touch instant that is already behind the current event.
 type posSample struct {
 	origin [3]float32
 	time   float64
@@ -162,15 +161,23 @@ const (
 	statForwardWindow  = 0.500
 	statBackwardWindow = 0.100
 
-	// Position recency — drop slots from distance consideration whose
-	// last position update is older than this.
+	// Position recency — a slot whose nearest position sample is
+	// further than this from the touch instant has no usable position
+	// data and is dropped from distance consideration. With per-frame
+	// position streams the nearest sample is typically ~15 ms away.
 	positionRecencyWindow = 0.250
 
-	// Distance gate. KTX touch radius is ~40 u once item bbox is
-	// included; allow 256 u (squared) as the upper bound for accepting
-	// a distance-only attribution. Anything farther is implausible
-	// for a real pickup.
-	maxDistanceSqAccept = float32(256 * 256)
+	// Touch-proximity gate. A genuine pickup is a bbox overlap
+	// (~32-48 u center-to-center, ~65 u worst case in 3D with origin
+	// height offsets), and every consumer of this gate samples a dense
+	// per-frame position history at — or scanning a window around —
+	// the touch instant, so the sampled point sits essentially on the
+	// item. Measured genuine touches across the corpus bottom out at
+	// 54-104 u; same-room-but-not-touching grabs stay ≥150 u. 128 u
+	// splits the two populations with margin on both sides. Used by
+	// the distance corroborator, the insta-regrab picker, and the
+	// weapon-stay flip classifiers.
+	touchGateSq = float32(128 * 128)
 
 	// Cap on how long pending evidence/print/hint entries are kept.
 	// Anything older is pruned at attribution time so the buffers
@@ -219,8 +226,6 @@ var kindRespawnSec = map[string]float64{
 func NewItemAnalyzer() *ItemAnalyzer {
 	return &ItemAnalyzer{
 		items:               make(map[int]*itemEntity),
-		playerPos:           make(map[int][3]float32),
-		playerPosTime:       make(map[int]float64),
 		playerPosHist:       make(map[int][]posSample),
 		playerStats:         make(map[int]*playerStatSnapshot),
 		pendingStatEvidence: make(map[int][]statEvidence),
@@ -282,10 +287,7 @@ func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 			delete(a.packWeapon, e.BackpackEnt)
 		}
 	case *events.PlayerPositionEvent:
-		o := [3]float32{e.Origin[0], e.Origin[1], e.Origin[2]}
-		a.playerPos[e.PlayerNum] = o
-		a.playerPosTime[e.PlayerNum] = e.Time
-		a.recordPositionSample(e.PlayerNum, o, e.Time)
+		a.recordPositionSample(e.PlayerNum, e.Origin, e.Time)
 	case *events.ItemSpawnEvent:
 		a.handleItemSpawn(e)
 	case *events.ItemStateEvent:
@@ -434,11 +436,11 @@ func (a *ItemAnalyzer) recordPositionSample(slot int, origin [3]float32, t float
 	a.playerPosHist[slot] = hist
 }
 
-// positionAt returns the slot's position closest to time t (preferring
-// the latest sample at or before t). Returns ok=false if no sample is
-// within statForwardWindow on either side of t — meaning we don't have
-// recent enough position data to assess proximity.
-func (a *ItemAnalyzer) positionAt(slot int, t float64) ([3]float32, bool) {
+// positionNear returns the slot's sampled origin closest to time t,
+// ok only when that sample is within maxAge of t on either side. With
+// per-frame position streams the nearest sample is typically ~15 ms
+// away; a slot without one that fresh has no usable position data.
+func (a *ItemAnalyzer) positionNear(slot int, t, maxAge float64) ([3]float32, bool) {
 	hist := a.playerPosHist[slot]
 	if len(hist) == 0 {
 		return [3]float32{}, false
@@ -455,10 +457,17 @@ func (a *ItemAnalyzer) positionAt(slot int, t float64) ([3]float32, bool) {
 			bestIdx = i
 		}
 	}
-	if bestIdx < 0 || bestDelta > statForwardWindow {
+	if bestIdx < 0 || bestDelta > maxAge {
 		return [3]float32{}, false
 	}
 	return hist[bestIdx].origin, true
+}
+
+// positionAt is positionNear with the generous stat-correlation window
+// — used where the reference time is itself imprecise (the predicted
+// respawn instant of the insta-regrab pass).
+func (a *ItemAnalyzer) positionAt(slot int, t float64) ([3]float32, bool) {
+	return a.positionNear(slot, t, statForwardWindow)
 }
 
 // scheduleSyntheticRespawn registers an expectation that entity ent
@@ -544,7 +553,7 @@ func (a *ItemAnalyzer) findSyntheticPicker(kind string, origin [3]float32, predi
 			dx := pos[0] - origin[0]
 			dy := pos[1] - origin[1]
 			dz := pos[2] - origin[2]
-			if dx*dx+dy*dy+dz*dz > maxDistanceSqAccept {
+			if dx*dx+dy*dy+dz*dz > touchGateSq {
 				continue
 			}
 			candidates = append(candidates, cand{slot: slot, evIdx: i})
@@ -674,29 +683,24 @@ func (a *ItemAnalyzer) attributeWithLayeredSignals(entNum int, kind string, item
 }
 
 // distanceBest returns the slot with the smallest squared distance to
-// itemPos, gated by maxDistanceSqAccept and the position recency
-// window. If restrictTo is non-nil, only those slots are considered.
-// Returns -1 when no candidate satisfies the gate.
+// itemPos at the touch instant t, gated by touchGateSq. The entity-
+// removal frame IS the touch frame (no stat lag), so each slot's
+// position is sampled from its per-frame history at t; a slot with no
+// sample within positionRecencyWindow of t has no usable position
+// data and is not a candidate. If restrictTo is non-nil, only those
+// slots are considered. Returns -1 when no candidate satisfies the
+// gate.
 func (a *ItemAnalyzer) distanceBest(itemPos [3]float32, restrictTo map[int]bool, t float64) int {
 	bestSlot := -1
 	bestDistSq := float32(1e18)
-	slots := make([]int, 0, len(a.playerPos))
-	for slot := range a.playerPos {
-		slots = append(slots, slot)
-	}
-	sort.Ints(slots)
-	for _, slot := range slots {
+	for _, slot := range sortedKeys(a.playerPosHist) {
 		if restrictTo != nil && !restrictTo[slot] {
 			continue
 		}
-		// Drop stale positions — a slot whose last update is older
-		// than positionRecencyWindow is not considered.
-		if posT, ok := a.playerPosTime[slot]; ok {
-			if t-posT > positionRecencyWindow {
-				continue
-			}
+		pos, ok := a.positionNear(slot, t, positionRecencyWindow)
+		if !ok {
+			continue
 		}
-		pos := a.playerPos[slot]
 		dx := pos[0] - itemPos[0]
 		dy := pos[1] - itemPos[1]
 		dz := pos[2] - itemPos[2]
@@ -709,7 +713,7 @@ func (a *ItemAnalyzer) distanceBest(itemPos [3]float32, restrictTo map[int]bool,
 	if bestSlot < 0 {
 		return -1
 	}
-	if bestDistSq > maxDistanceSqAccept {
+	if bestDistSq > touchGateSq {
 		return -1
 	}
 	if bestSlot >= len(a.ctx.Players) || a.ctx.Players[bestSlot] == nil {
@@ -1047,7 +1051,7 @@ func (a *ItemAnalyzer) synthesizeWeaponStayPickup(slot int, kind string, t float
 			continue // phase closed — not currently on the map
 		}
 		d, ok := minDistSqOverWindow(a.playerPosHist[slot], t-statForwardWindow, t, it.origin)
-		if !ok || d > weaponStayPadGateSq {
+		if !ok || d > touchGateSq {
 			continue
 		}
 		if bestEnt < 0 || d < bestDist {

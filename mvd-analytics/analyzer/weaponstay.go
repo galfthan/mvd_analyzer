@@ -250,15 +250,3 @@ func minDistSqOverWindow(hist []posSample, from, to float64, target [3]float32) 
 	}
 	return best, found
 }
-
-// weaponStayPadGateSq is the distance gate for classifying a
-// weapon-stay STAT_ITEMS flip as a pad grab. Much tighter than
-// maxDistanceSqAccept (the corroborator gate for a single, possibly
-// stale position sample): the flip classifier scans a dense per-frame
-// position history over the whole stat-lag window, so at some sample
-// the picker stood essentially at the touch point. A real touch is a
-// bbox overlap (~32-48u center-to-center; ~65u worst case in 3D);
-// measured genuine pad grabs bottom out at 54-104u across the corpus,
-// while pack-in-the-same-room grabs stay ≥150u. 128u separates the two
-// populations with margin on both sides.
-const weaponStayPadGateSq = float32(128 * 128)

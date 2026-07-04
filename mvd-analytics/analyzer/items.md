@@ -62,13 +62,17 @@ and returns at the first hit:
    stat updates arrive at ~3 Hz per player so the correlation window
    is generous (T-100ms .. T+500ms).
 
-4. **Distance corroborator** — Last resort. Iterates slots whose
-   last `PlayerPositionEvent` is within 250 ms of `T` and returns
-   the closest within `256²` units squared of the item origin. If
-   layer 3 produced multiple candidates with the same kind evidence
-   (a real contest), the distance check is restricted to those
-   candidates only — *not* opened back up to the whole player set.
-   Refuses to attribute when no candidate is in radius.
+4. **Distance corroborator** — Last resort. Samples each slot's
+   position from its per-frame history at `T` (the entity-removal
+   frame *is* the touch frame; slots with no sample within 250 ms of
+   `T` are dropped) and returns the closest within the 128 u touch
+   gate — a genuine pickup is a bbox overlap (~32-48 u
+   center-to-center), and measured genuine touches across the corpus
+   bottom out at 54-104 u. If layer 3 produced multiple candidates
+   with the same kind evidence (a real contest), the distance check
+   is restricted to those candidates only — *not* opened back up to
+   the whole player set. Refuses to attribute when no candidate is
+   in radius.
 
 A pickup with no signal in any layer gets `TakenBy=""` and an
 internal `attributionSource="none"`. The diagnostic harness reports

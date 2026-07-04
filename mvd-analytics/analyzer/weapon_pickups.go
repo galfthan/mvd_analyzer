@@ -292,7 +292,7 @@ func (a *WeaponPickupsAnalyzer) recentRecordExplains(slot int, kind string, t fl
 // nearestWeaponEntityDistSq returns the smallest squared distance from
 // the slot's position history to any spawn entity of the given weapon
 // kind during the stat lag window [t-statForwardWindow, t], gated by
-// weaponStayPadGateSq. The window (not the flip instant) matters:
+// touchGateSq. The window (not the flip instant) matters:
 // per-player stat updates can lag the touch by a few hundred ms,
 // during which the picker keeps moving.
 func (a *WeaponPickupsAnalyzer) nearestWeaponEntityDistSq(slot int, kind string, t float64) (float32, bool) {
@@ -306,7 +306,7 @@ func (a *WeaponPickupsAnalyzer) nearestWeaponEntityDistSq(slot int, kind string,
 		if !ok {
 			continue
 		}
-		if d, ok := a.pos.MinDistSqIn(slot, t-statForwardWindow, t, origin); ok && d <= weaponStayPadGateSq && (!found || d < best) {
+		if d, ok := a.pos.MinDistSqIn(slot, t-statForwardWindow, t, origin); ok && d <= touchGateSq && (!found || d < best) {
 			best = d
 			found = true
 		}
