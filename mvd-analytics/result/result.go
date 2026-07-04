@@ -464,7 +464,15 @@ package result
 //   - Shot gains Warmup: true for fires outside the match (prewar / warmup /
 //     post-match). The shot stream still keeps them; ByPlayer and the aim
 //     analysis exclude them. Additive (omitempty).
-const CurrentSchemaVersion = 42
+//
+// v43:
+//   - Aim target attribution gates candidates on being alive at fire time
+//     (losAliveAt over the spawn/death streams). Dead players keep streaming
+//     position samples (the death-anim body), so a corpse could previously
+//     win nearest-crosshair attribution in team games. No field changes;
+//     crosshair sample counts/targets shift on team demos, and a duel fire
+//     while the lone enemy is dead no longer emits a sample.
+const CurrentSchemaVersion = 43
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

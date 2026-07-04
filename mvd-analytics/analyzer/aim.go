@@ -17,8 +17,11 @@ import (
 //
 // Truthfulness: hit/miss is Shot.Hit (never re-derived); the crosshair-error
 // heatmap is hitscan-only; a shot is attributed only to an enemy whose track
-// brackets the fire time; team-game attribution is a labeled nearest-crosshair
-// heuristic; rocket "direct" is a non-splash-damage heuristic.
+// brackets the fire time AND who is alive at it (dead players keep streaming
+// position samples — the death-anim body — so a corpse would otherwise stay a
+// candidate; same liveness rule as LOS, losAliveAt); team-game attribution is
+// a labeled nearest-crosshair heuristic; rocket "direct" is a
+// non-splash-damage heuristic.
 const (
 	aimShaftGapMs     = 150  // LG fires more than this apart start a new shaft
 	aimReachNearUnits = 48.0 // beam endpoint within this of an enemy hull = near miss
@@ -50,13 +53,21 @@ func aimPost(res *Result, co *CoreOutputs) {
 		return
 	}
 
-	// Position tracks keyed by canonical name.
+	// Position tracks keyed by canonical name, plus the spawn/death streams
+	// backing the per-shot alive test (aliveAt below).
 	tracks := make(map[string]*result.PositionTrack)
+	spawnsOf := make(map[string][]int32)
+	deathsOf := make(map[string][]int32)
 	for i := range res.Streams.Players {
 		p := &res.Streams.Players[i]
 		if p.Position != nil && len(p.Position.T) > 0 {
 			tracks[p.Name] = p.Position
 		}
+		spawnsOf[p.Name] = p.Spawns
+		deathsOf[p.Name] = p.Deaths
+	}
+	aliveAt := func(name string, t int32) bool {
+		return losAliveAt(spawnsOf[name], deathsOf[name], t)
 	}
 
 	// Best-effort team per player from the (same-namespace) shot stream. Empty
@@ -106,7 +117,7 @@ func aimPost(res *Result, co *CoreOutputs) {
 
 	out := &AimResult{}
 	for _, player := range order {
-		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], res.Streams); pa != nil {
+		if pa := computePlayerAim(player, byPlayer[player], tracks, teamOf, dmgByPlayer[player], res.Streams, aliveAt); pa != nil {
 			out.Players = append(out.Players, *pa)
 		}
 	}
@@ -125,7 +136,7 @@ type dmgRec struct {
 	used   bool
 }
 
-func computePlayerAim(player string, shots []Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg []*dmgRec, streams *Streams) *PlayerAim {
+func computePlayerAim(player string, shots []Shot, tracks map[string]*result.PositionTrack, teamOf map[string]string, dmg []*dmgRec, streams *Streams, aliveAt func(string, int32) bool) *PlayerAim {
 	shooterTrack := tracks[player]
 	sTeam := teamOf[player]
 
@@ -161,7 +172,7 @@ func computePlayerAim(player string, shots []Shot, tracks map[string]*result.Pos
 		if !ok || !ss.HasView {
 			continue
 		}
-		tgt, e, found := aimAttribute(ss, sh.Time, enemies, tracks)
+		tgt, e, found := aimAttribute(ss, sh.Time, enemies, tracks, aliveAt)
 		if !found || e.dist <= 0 {
 			continue
 		}
@@ -297,7 +308,7 @@ func computePlayerAim(player string, shots []Shot, tracks map[string]*result.Pos
 				ex, ey, ez := float64(streams.Beams.Ex[bi]), float64(streams.Beams.Ey[bi]), float64(streams.Beams.Ez[bi])
 				best := math.MaxFloat64
 				for _, e := range enemies {
-					if !trackCovers(tracks[e], sh.Time) {
+					if !trackCovers(tracks[e], sh.Time) || !aliveAt(e, sh.Time) {
 						continue
 					}
 					es, ok := tracks[e].SampleAt(sh.Time)
@@ -360,13 +371,13 @@ type aimErr struct {
 
 // aimAttribute picks the enemy whose hull is nearest the crosshair at the fire
 // time (the single enemy in a duel), among those whose track brackets the fire
-// time, and returns the error to it. "Nearest" uses the normalized error, so
-// it is range-aware.
-func aimAttribute(ss result.TrackSample, t int32, enemies []string, tracks map[string]*result.PositionTrack) (tgt string, out aimErr, ok bool) {
+// time and who are alive at it, and returns the error to it. "Nearest" uses
+// the normalized error, so it is range-aware.
+func aimAttribute(ss result.TrackSample, t int32, enemies []string, tracks map[string]*result.PositionTrack, aliveAt func(string, int32) bool) (tgt string, out aimErr, ok bool) {
 	bestMag := math.MaxFloat64
 	for _, e := range enemies {
 		et := tracks[e]
-		if !trackCovers(et, t) {
+		if !trackCovers(et, t) || !aliveAt(e, t) {
 			continue
 		}
 		es, ok2 := et.SampleAt(t)

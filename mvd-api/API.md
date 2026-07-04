@@ -321,7 +321,8 @@ crosshair-error samples for hitscan fires (signed degrees off the enemy +
 a version normalized by the target's angular size, so radius 1 ≈ the hitbox
 edge), an LG ramp-onto-target series, rocket direct/splash counts, and an LG
 reach/whiff split. `mode` is `"duel"` (exact target) or `"team"` (nearest-
-crosshair-enemy heuristic). Shape: `result.AimResult` →
+crosshair-enemy heuristic); either way only enemies alive at the fire time
+are attribution candidates. Shape: `result.AimResult` →
 [RESULT_SCHEMA.md §AimResult](../mvd-analytics/RESULT_SCHEMA.md#aimresult-aim).
 
 **Availability:** the `crosshair` + `lgRamp` blocks are always present; the

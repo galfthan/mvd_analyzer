@@ -114,6 +114,78 @@ func findWeaponAim(pa result.PlayerAim, w string) *result.WeaponAim {
 	return nil
 }
 
+// Attribution must skip a dead enemy: dead players keep streaming position
+// samples (the death-anim body), so without the alive gate B — dead but
+// dead-center at the first fire — would win over the alive, off-center C.
+// The second fire lands after B's respawn, when B must win again.
+func TestAimPostDeadEnemyExcluded(t *testing.T) {
+	b := aimTrack("B", 1000, 0, 0, 3000)
+	b.Deaths = []int32{500}
+	b.Spawns = []int32{1500}
+	res := &result.Result{
+		Shots: &result.ShotsResult{
+			Shots: []result.Shot{
+				{Time: 1000, Player: "A", Team: "red", Weapon: "lg", Hit: false},
+				{Time: 2000, Player: "A", Team: "red", Weapon: "lg", Hit: false},
+			},
+			ByPlayer: []result.PlayerShots{
+				{Player: "A", Team: "red"},
+				{Player: "B", Team: "blue"},
+				{Player: "C", Team: "blue"},
+			},
+		},
+		Streams: &result.Streams{
+			Players: []result.PlayerStream{
+				aimTrack("A", 0, 0, 0, 3000),
+				b,
+				aimTrack("C", 1000, 300, 0, 3000),
+			},
+		},
+	}
+	aimPost(res, nil)
+	if res.Aim == nil || len(res.Aim.Players) != 1 {
+		t.Fatalf("expected 1 aim player, got %+v", res.Aim)
+	}
+	cs := res.Aim.Players[0].Crosshair
+	if cs == nil || len(cs.T) != 2 {
+		t.Fatalf("crosshair = %+v, want 2 samples", cs)
+	}
+	if cs.Target[0] != "C" {
+		t.Errorf("sample at t=1000 target = %q, want C (B dead)", cs.Target[0])
+	}
+	if cs.Target[1] != "B" {
+		t.Errorf("sample at t=2000 target = %q, want B (respawned)", cs.Target[1])
+	}
+}
+
+// In a duel a fire while the lone enemy is dead yields no crosshair sample —
+// the per-weapon fire counts keep it, the placement series drops it.
+func TestAimPostDuelDeadEnemyDropped(t *testing.T) {
+	b := aimTrack("B", 1000, 0, 0, 3000)
+	b.Deaths = []int32{500}
+	b.Spawns = []int32{1500}
+	res := &result.Result{
+		Shots: &result.ShotsResult{
+			Shots:    []result.Shot{{Time: 1000, Player: "A", Weapon: "sg", Hit: false}},
+			ByPlayer: []result.PlayerShots{{Player: "A"}, {Player: "B"}},
+		},
+		Streams: &result.Streams{
+			Players: []result.PlayerStream{aimTrack("A", 0, 0, 0, 3000), b},
+		},
+	}
+	aimPost(res, nil)
+	if res.Aim == nil || len(res.Aim.Players) != 1 {
+		t.Fatalf("expected 1 aim player, got %+v", res.Aim)
+	}
+	pa := res.Aim.Players[0]
+	if pa.Crosshair != nil {
+		t.Fatalf("crosshair = %+v, want nil (enemy dead at fire time)", pa.Crosshair)
+	}
+	if sg := findWeaponAim(pa, "sg"); sg == nil || sg.Shots != 1 {
+		t.Fatalf("sg weapon = %+v, want shots1 (fire still counted)", sg)
+	}
+}
+
 // A miss whose beam ends far from any enemy is "blocked", not a near miss.
 func TestAimPostReachBlocked(t *testing.T) {
 	res := &result.Result{

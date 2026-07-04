@@ -21,6 +21,31 @@ detail.
   mapents, mapbsp, and the `/v1/maps/{map}` endpoint. Only the dominant
   `phantombase` BSP is fetched; the low-play predecessors are not.
 
+## 2026-07-03
+
+- **Aim: alive-gated attribution + density image, marginal histograms,
+  share-of-fires columns** (schema v43).
+  Crosshair-error target attribution now skips enemies who are dead at the
+  fire time (same liveness rule as line of sight, `losAliveAt` over the
+  spawn/death streams). Dead players keep streaming position samples — the
+  death-anim body — so a corpse sitting near the crosshair could previously
+  win nearest-crosshair attribution in team games and log a guaranteed-miss
+  sample; a duel fire while the lone enemy is dead now emits no sample at
+  all (the per-weapon fire counts still include it). No field changes —
+  sample counts and targets shift on team demos. The web Aim Stats tab
+  replaces the crosshair grid with a **smoothed density image** per weapon
+  (LG and SG): a Gaussian-smoothed 2-D histogram on canvas (viridis, no
+  external deps) with hull box + dead-center overlays, axis ticks and a
+  colorbar in shots per bin; hover reads exact shot/hit counts. Under each
+  image, two **marginal histograms**: the same normalized samples projected
+  onto one axis at a time — yaw (enemy left ↔ right) and pitch (enemy
+  below ↔ above) — zero-centered bins over a wider extent than the image
+  (yaw ±6, pitch ±4), with the |n| ≤ 1 on-hull band shaded and a
+  dead-center rule. All binning stays client-side. The per-weapon accuracy
+  tables add **share-of-fires % columns** next to every count (LG
+  near/blocked/far, RL/GL direct/splash/missed, SG/SSG full/partial/miss)
+  so players with different shot volumes compare directly.
+
 ## 2026-06-28
 
 - **Aim analytics** (schema v41–v42). A new top-level `aim` block: per-player aim

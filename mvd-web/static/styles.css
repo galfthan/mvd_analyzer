@@ -975,6 +975,14 @@ table tbody tr:hover {
     margin-top: 14px;
 }
 
+/* Smoothed crosshair-density image; intrinsic size set by drawAimDensity. */
+.aim-density {
+    display: block;
+    background: var(--bg-panel);
+    border-radius: 4px;
+    max-width: 100%;
+}
+
 .aim-heatmap-block h4 {
     margin: 0 0 6px;
     color: var(--accent-cyan);
@@ -997,6 +1005,89 @@ table tbody tr:hover {
     font-size: 0.9rem;
     padding: 6px 2px;
 }
+
+/* Marginal histograms under each crosshair grid: one column per bin, the
+   shaded band marks |n| ≤ 1 (on the hull), the rule marks dead center. */
+.aim-hist-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.aim-hist {
+    flex: 1 1 340px;
+    max-width: 580px;
+}
+
+.aim-hist-title {
+    color: #888;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+}
+
+.aim-hist-plot {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+    height: 84px;
+    background: var(--bg-panel);
+    border-radius: 4px;
+    padding-top: 2px;
+}
+
+.aim-hist-band {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+}
+
+.aim-hist-zero {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.22);
+    pointer-events: none;
+}
+
+.aim-hist-col {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+}
+
+.aim-hist-col:hover .aim-hist-fill {
+    background: var(--accent-cyan);
+}
+
+.aim-hist-fill {
+    width: 100%;
+    background: var(--accent-cyan-dim);
+    border-radius: 1px 1px 0 0;
+}
+
+.aim-hist-axis {
+    display: flex;
+    color: #666;
+    font-size: 0.72rem;
+    margin-top: 2px;
+}
+
+/* Equal thirds so the middle "0" sits at the true center regardless of how
+   wide the unit suffix on the right label is. */
+.aim-hist-axis span {
+    flex: 1;
+    text-align: center;
+}
+
+.aim-hist-axis span:first-child { text-align: left; }
+.aim-hist-axis span:last-child { text-align: right; }
 
 .aim-na {
     color: #555;

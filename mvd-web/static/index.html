@@ -919,8 +919,11 @@
                         none (miss); <strong>RL/GL</strong> show direct vs splash vs
                         missed; <strong>LG</strong> splits its misses into near-aim (just
                         off the hull), blocked (an object was in the way) and out of
-                        range (beam reached its full ~600u length). Pellet and direct
-                        figures match the server's authoritative stats.
+                        range (beam reached its full ~600u length). Every count also has
+                        a <strong>share-of-fires %</strong> column — the counts scale
+                        with how much a player fired, so the percentages are what
+                        compare across players. Pellet and direct figures match the
+                        server's authoritative stats.
                     </div>
                     <div id="aim-weapon-tables"></div>
                 </div>
@@ -938,36 +941,29 @@
                         Where the enemy sat relative to the crosshair at each fire — your
                         <em>aim intent</em>, i.e. where you take your shots. Each axis is
                         the angular error <em>divided by the target's hull half-extent on
-                        that axis</em>, so the player box maps to the central [−1, 1]
-                        square: <strong>±1 = the edge of the hull</strong> (corner ≈ 1.4).
+                        that axis</em>, so the player box maps to the outlined [−1, 1]
+                        box: <strong>±1 = the edge of the hull</strong> (corner ≈ 1.4).
                         Center = dead on; right/left and up/down = the enemy's offset from
-                        the crosshair. The cell value and colour are the <strong>number of
-                        shots</strong> — a tight cluster near center is good placement.
-                        Hover for the hit-rate.
-                    </div>
-                    <div class="heatmap-legend">
-                        <span>fewer</span><span class="heatmap-legend-bar"></span><span>more</span>
+                        the crosshair. The image is the <strong>smoothed density of
+                        shots</strong> (Gaussian-smoothed 2-D histogram; the colorbar is
+                        shots per bin) — a tight bright spot at the center is good
+                        placement. Hover for exact shot/hit counts around the cursor.
+                        Below each image: the same fires projected onto one axis at a
+                        time — yaw and pitch histograms (shaded band = within the hull
+                        edge, rule = dead center).
                     </div>
 
                     <div class="aim-heatmap-block">
                         <h4>LG</h4>
-                        <div class="heatmap-table-wrap">
-                            <table class="stats-table heatmap-table" id="aim-heatmap-lg-table">
-                                <thead><tr id="aim-heatmap-lg-thead-row"></tr></thead>
-                                <tbody id="aim-heatmap-lg-body"></tbody>
-                            </table>
-                        </div>
+                        <canvas class="aim-density" id="aim-heatmap-lg-canvas"></canvas>
+                        <div class="aim-hist-row" id="aim-heatmap-lg-hists" style="display:none"></div>
                         <div id="aim-heatmap-lg-nodata" class="aim-nodata" style="display:none">No LG fired by this player.</div>
                     </div>
 
                     <div class="aim-heatmap-block">
                         <h4>SG <span class="aim-sel-note">— pellets scatter, so the cloud is wider than the aim</span></h4>
-                        <div class="heatmap-table-wrap">
-                            <table class="stats-table heatmap-table" id="aim-heatmap-sg-table">
-                                <thead><tr id="aim-heatmap-sg-thead-row"></tr></thead>
-                                <tbody id="aim-heatmap-sg-body"></tbody>
-                            </table>
-                        </div>
+                        <canvas class="aim-density" id="aim-heatmap-sg-canvas"></canvas>
+                        <div class="aim-hist-row" id="aim-heatmap-sg-hists" style="display:none"></div>
                         <div id="aim-heatmap-sg-nodata" class="aim-nodata" style="display:none">No SG fired by this player.</div>
                     </div>
                 </div>

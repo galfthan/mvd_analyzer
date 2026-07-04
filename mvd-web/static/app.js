@@ -10753,23 +10753,11 @@ function renderHeatmapTable(tableId, theadRowId, tbodyId, data, firstColLabel) {
 // + paints — all geometry, target attribution and classification live in the
 // analytics layer so every client (CLI / API / web) shares one truth.
 
-// Heatmap extents (normalized so 1.0 = hull edge). Yaw is shown wider and
-// finer because horizontal aim is the story.
+// Crosshair-image extents (normalized so 1.0 = hull edge). Yaw is wider
+// because horizontal aim is the story.
 const AIM_YAW_HALF = 4.0;
 const AIM_PITCH_HALF = 2.5;
-const AIM_YAW_W = 0.25;
-const AIM_PITCH_W = 0.5;
-const AIM_YAW_BINS = Math.round((2 * AIM_YAW_HALF) / AIM_YAW_W);       // 32
-const AIM_PITCH_BINS = Math.round((2 * AIM_PITCH_HALF) / AIM_PITCH_W); // 10
-
-function aimBin(v, half, w, nb) {
-    let i = Math.floor((v + half) / w);
-    if (i < 0) i = 0;
-    if (i >= nb) i = nb - 1;
-    return i;
-}
-
-function aimCenter(i, half, w) { return -half + w * (i + 0.5); }
+const AIM_YAW_W = 0.25; // marginal-histogram yaw bin width
 
 // Selected player for the per-player panels (heatmap + ramp). The weapon
 // tables are all-players and don't depend on it.
@@ -10857,7 +10845,13 @@ function renderAimMode(pa) {
 
 // Column descriptors: {h: header, t: tooltip, cell: (WeaponAim) -> html}. The
 // Player column is prepended automatically (with the team-coloured stripe).
+// Every count column has a share-of-fires % twin: counts depend on how much a
+// player fired, so the percentages are what compare across players. hit% keeps
+// the accuracy colour classes; the miss-type shares stay plain (high ≠ good
+// is weapon-dependent).
 const pctCell = p => `<span class="${getAccuracyClass(p)}">${p.toFixed(0)}%</span>`;
+const pctPlain = p => `${p.toFixed(0)}%`;
+const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
     hits: { h: 'Hits', t: 'Fires that connected', cell: w => w.hits },
@@ -10868,20 +10862,30 @@ const AIM_COL = {
     full: { h: 'Full', t: 'Fires where every pellet hit', cell: w => w.full || 0 },
     partial: { h: 'Partial', t: 'Fires where some but not all pellets hit', cell: w => w.partial || 0 },
     miss: { h: 'Miss', t: 'Fires where no pellet hit', cell: w => w.miss || 0 },
+    fullPct: { h: 'Full %', t: 'Share of fires where every pellet hit', cell: w => shotShare(w.full, w) },
+    partialPct: { h: 'Partial %', t: 'Share of fires where some but not all pellets hit', cell: w => shotShare(w.partial, w) },
+    missPct: { h: 'Miss %', t: 'Share of fires where no pellet hit', cell: w => shotShare(w.miss, w) },
     direct: { h: 'Direct', t: 'Direct contacts (matches the server)', cell: w => w.direct || 0 },
     splash: { h: 'Splash', t: 'Hits from splash only', cell: w => w.splash || 0 },
     missed: { h: 'Missed', t: 'Fires that hit nothing', cell: w => w.missed || 0 },
+    directPct: { h: 'Direct %', t: 'Share of fires that hit directly', cell: w => shotShare(w.direct, w) },
+    splashPct: { h: 'Splash %', t: 'Share of fires that hit via splash only', cell: w => shotShare(w.splash, w) },
+    missedPct: { h: 'Missed %', t: 'Share of fires that hit nothing', cell: w => shotShare(w.missed, w) },
     near: { h: 'Near', t: 'Miss — beam ended near the enemy hull (aim error)', cell: w => w.nearMiss || 0 },
     blocked: { h: 'Blocked', t: 'Miss — beam stopped on an object in the way', cell: w => w.blocked || 0 },
     far: { h: 'Far', t: 'Miss — beam reached its full ~600u length (out of range)', cell: w => w.outOfRange || 0 },
+    nearPct: { h: 'Near %', t: 'Share of fires that missed near the enemy hull', cell: w => shotShare(w.nearMiss, w) },
+    blockedPct: { h: 'Blocked %', t: 'Share of fires stopped by an object in the way', cell: w => shotShare(w.blocked, w) },
+    farPct: { h: 'Far %', t: 'Share of fires that ran out of beam range', cell: w => shotShare(w.outOfRange, w) },
 };
-// Per-weapon column order. SG/SSG lead with the pellet stats.
+// Per-weapon column order: counts first, then the share-of-fires block.
+// SG/SSG lead with the pellet stats.
 const AIM_TABLE_COLS = {
-    lg: ['shots', 'hits', 'hitPct', 'near', 'blocked', 'far'],
-    sg: ['fired', 'pHit', 'pAcc', 'full', 'partial', 'miss', 'shots', 'hits', 'hitPct'],
-    ssg: ['fired', 'pHit', 'pAcc', 'full', 'partial', 'miss', 'shots', 'hits', 'hitPct'],
-    rl: ['shots', 'hits', 'hitPct', 'direct', 'splash', 'missed'],
-    gl: ['shots', 'hits', 'hitPct', 'direct', 'splash', 'missed'],
+    lg: ['shots', 'hits', 'near', 'blocked', 'far', 'hitPct', 'nearPct', 'blockedPct', 'farPct'],
+    sg: ['fired', 'pHit', 'pAcc', 'full', 'partial', 'miss', 'fullPct', 'partialPct', 'missPct', 'shots', 'hits', 'hitPct'],
+    ssg: ['fired', 'pHit', 'pAcc', 'full', 'partial', 'miss', 'fullPct', 'partialPct', 'missPct', 'shots', 'hits', 'hitPct'],
+    rl: ['shots', 'hits', 'direct', 'splash', 'missed', 'hitPct', 'directPct', 'splashPct', 'missedPct'],
+    gl: ['shots', 'hits', 'direct', 'splash', 'missed', 'hitPct', 'directPct', 'splashPct', 'missedPct'],
 };
 const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl'];
 
@@ -10927,10 +10931,11 @@ function renderAimWeaponTables(result) {
     }
 }
 
-// renderAimHeatmap draws one crosshair-placement grid per weapon (LG, SG).
-// Cell value = SHOT COUNT (a tight cluster near center = good placement).
-// Split by weapon because SG/SSG pellet spread smears its cloud far wider
-// than LG, and mixing them hides each.
+// renderAimHeatmap draws one crosshair-placement density image per weapon
+// (LG, SG): a Gaussian-smoothed 2-D histogram of the normalized samples,
+// rendered on canvas with the shared viridis ramp plus a colorbar — the
+// MATLAB imagesc look. Split by weapon because SG/SSG pellet spread smears
+// its cloud far wider than LG, and mixing them hides each.
 function renderAimHeatmap(pa) {
     renderAimHeatmapWeapon(pa, 'lg', 'aim-heatmap-lg');
     renderAimHeatmapWeapon(pa, 'sg', 'aim-heatmap-sg');
@@ -10938,58 +10943,261 @@ function renderAimHeatmap(pa) {
 
 function renderAimHeatmapWeapon(pa, weapon, prefix) {
     const nodata = document.getElementById(`${prefix}-nodata`);
-    const wrap = document.querySelector(`#${prefix}-table`)?.closest('.heatmap-table-wrap');
+    const canvas = document.getElementById(`${prefix}-canvas`);
     const c = pa.crosshair;
     const idx = [];
     if (c && c.t) {
         for (let i = 0; i < c.t.length; i++) if (c.w[i] === weapon) idx.push(i);
     }
     if (nodata) nodata.style.display = idx.length ? 'none' : '';
-    if (wrap) wrap.style.display = idx.length ? '' : 'none';
-    if (!idx.length) return;
+    if (canvas) canvas.style.display = idx.length ? '' : 'none';
+    renderAimHistRow(prefix, c, idx);
+    if (!idx.length || !canvas) return;
+    drawAimDensity(canvas, c, idx);
+}
 
-    // grid[row][col]: row 0 = top (highest pitch), col 0 = left. The x axis is
-    // the enemy's offset relative to the crosshair, so enemy-right reads on the
-    // right (= −dYaw, since +dYaw is enemy-left in Quake); y is dPitch, top = up.
-    const grid = Array.from({ length: AIM_PITCH_BINS }, () => new Array(AIM_YAW_BINS).fill(null));
-    let maxShots = 0;
+// Density-image parameters. The fine grid is what gets smoothed and painted;
+// the hover grid is coarser so the read-out counts are meaningful.
+const AIM_IMG_CELL = 0.125;  // fine-grid bin, hull-normalized units
+const AIM_IMG_SIGMA = 1.4;   // gaussian σ, in fine cells
+const AIM_IMG_SCALE = 7;     // display px per fine cell
+const AIM_HOVER_BIN = 0.5;   // hover read-out bin, hull-normalized units
+
+function aimClampIndex(v, n) { return Math.max(0, Math.min(n - 1, v)); }
+
+function drawAimDensity(canvas, c, idx) {
+    const nx = Math.round(2 * AIM_YAW_HALF / AIM_IMG_CELL);
+    const ny = Math.round(2 * AIM_PITCH_HALF / AIM_IMG_CELL);
+    const hx = Math.round(2 * AIM_YAW_HALF / AIM_HOVER_BIN);
+    const hy = Math.round(2 * AIM_PITCH_HALF / AIM_HOVER_BIN);
+    const grid = new Float32Array(nx * ny);
+    const hShots = new Uint32Array(hx * hy), hHits = new Uint32Array(hx * hy);
+    // x is the enemy's offset relative to the crosshair, so enemy-right reads
+    // on the right (= −dYaw, since +dYaw is enemy-left in Quake); y is dPitch,
+    // top = up (row 0 = highest pitch). Out-of-range samples clamp into the
+    // edge cells, same as the marginal histograms.
     for (const i of idx) {
-        const col = aimBin(-c.nyaw[i], AIM_YAW_HALF, AIM_YAW_W, AIM_YAW_BINS);
-        const row = AIM_PITCH_BINS - 1 - aimBin(c.npitch[i], AIM_PITCH_HALF, AIM_PITCH_W, AIM_PITCH_BINS);
-        let g = grid[row][col];
-        if (!g) { g = { shots: 0, hits: 0 }; grid[row][col] = g; }
-        g.shots++;
-        if (c.hit[i]) g.hits++;
-        if (g.shots > maxShots) maxShots = g.shots;
+        const x = -c.nyaw[i], y = c.npitch[i];
+        const xi = aimClampIndex(Math.floor((x + AIM_YAW_HALF) / AIM_IMG_CELL), nx);
+        const yi = aimClampIndex(Math.floor((AIM_PITCH_HALF - y) / AIM_IMG_CELL), ny);
+        grid[yi * nx + xi]++;
+        const hxi = aimClampIndex(Math.floor((x + AIM_YAW_HALF) / AIM_HOVER_BIN), hx);
+        const hyi = aimClampIndex(Math.floor((AIM_PITCH_HALF - y) / AIM_HOVER_BIN), hy);
+        hShots[hyi * hx + hxi]++;
+        if (c.hit[i]) hHits[hyi * hx + hxi]++;
     }
 
-    const columns = [];
-    for (let col = 0; col < AIM_YAW_BINS; col++) {
-        const cen = aimCenter(col, AIM_YAW_HALF, AIM_YAW_W);
-        columns.push({
-            kind: 'bin', teamIdx: -1, label: cen.toFixed(1),
-            full: `enemy ${cen >= 0 ? 'right' : 'left'} ${Math.abs(cen).toFixed(2)} (×hull half-width)`,
+    // Separable gaussian blur, kernel normalized to sum 1 so values keep the
+    // shots-per-cell unit (edge cells replicate — they are clamp catch-alls).
+    const r = Math.ceil(3 * AIM_IMG_SIGMA);
+    const kern = new Float32Array(2 * r + 1);
+    let ksum = 0;
+    for (let i = -r; i <= r; i++) {
+        kern[i + r] = Math.exp(-(i * i) / (2 * AIM_IMG_SIGMA * AIM_IMG_SIGMA));
+        ksum += kern[i + r];
+    }
+    for (let i = 0; i < kern.length; i++) kern[i] /= ksum;
+    const tmp = new Float32Array(nx * ny);
+    for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) {
+        let s = 0;
+        for (let d = -r; d <= r; d++) s += kern[d + r] * grid[y * nx + aimClampIndex(x + d, nx)];
+        tmp[y * nx + x] = s;
+    }
+    const sm = new Float32Array(nx * ny);
+    let max = 0;
+    for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) {
+        let s = 0;
+        for (let d = -r; d <= r; d++) s += kern[d + r] * tmp[aimClampIndex(y + d, ny) * nx + x];
+        sm[y * nx + x] = s;
+        if (s > max) max = s;
+    }
+
+    // Paint the fine grid at 1px/cell offscreen, then upscale with bilinear
+    // smoothing onto the display canvas — the imagesc-with-interp look.
+    const img = document.createElement('canvas');
+    img.width = nx;
+    img.height = ny;
+    const ictx = img.getContext('2d');
+    const idata = ictx.createImageData(nx, ny);
+    for (let p = 0; p < nx * ny; p++) {
+        const rgb = heatColorRGB(max ? sm[p] / max : 0);
+        idata.data[4 * p] = rgb[0];
+        idata.data[4 * p + 1] = rgb[1];
+        idata.data[4 * p + 2] = rgb[2];
+        idata.data[4 * p + 3] = 255;
+    }
+    ictx.putImageData(idata, 0, 0);
+
+    const ML = 34, MT = 8, MB = 20, GAP = 10, CB = 14, MR = 40;
+    const PW = nx * AIM_IMG_SCALE, PH = ny * AIM_IMG_SCALE;
+    const W = ML + PW + GAP + CB + MR, H = MT + PH + MB;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = `${W}px`;
+    canvas.style.height = `${H}px`;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(img, ML, MT, PW, PH);
+
+    const px = x => ML + (x + AIM_YAW_HALF) / (2 * AIM_YAW_HALF) * PW;
+    const py = y => MT + (AIM_PITCH_HALF - y) / (2 * AIM_PITCH_HALF) * PH;
+    const crisp = v => Math.round(v) + 0.5;
+
+    // Dead-center cross + the |n| ≤ 1 hull box.
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(crisp(px(0)), MT);
+    ctx.lineTo(crisp(px(0)), MT + PH);
+    ctx.moveTo(ML, crisp(py(0)));
+    ctx.lineTo(ML + PW, crisp(py(0)));
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    ctx.strokeRect(crisp(px(-1)), crisp(py(1)), px(1) - px(-1), py(-1) - py(1));
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.strokeRect(crisp(ML), crisp(MT), PW, PH);
+
+    // Axis ticks at whole hull-widths.
+    ctx.fillStyle = '#8892a6';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let x = -AIM_YAW_HALF; x <= AIM_YAW_HALF; x++) {
+        ctx.fillRect(crisp(px(x)) - 0.5, MT + PH, 1, 3);
+        ctx.fillText(String(x), px(x), MT + PH + 5);
+    }
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let y = Math.ceil(-AIM_PITCH_HALF); y <= AIM_PITCH_HALF; y++) {
+        ctx.fillRect(ML - 3, crisp(py(y)) - 0.5, 3, 1);
+        ctx.fillText(String(y), ML - 6, py(y));
+    }
+
+    // Colorbar: 0 → max shots per fine cell (smoothed), same ramp.
+    const bx = ML + PW + GAP;
+    for (let i = 0; i < PH; i++) {
+        const rgb = heatColorRGB(1 - i / (PH - 1));
+        ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+        ctx.fillRect(bx, MT + i, CB, 1);
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.strokeRect(crisp(bx), crisp(MT), CB, PH);
+    const fmtBar = v => (v >= 10 ? String(Math.round(v)) : v.toFixed(1));
+    ctx.fillStyle = '#8892a6';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(fmtBar(max), bx + CB + 4, MT + 4);
+    ctx.fillText(fmtBar(max / 2), bx + CB + 4, MT + PH / 2);
+    ctx.fillText('0', bx + CB + 4, MT + PH - 3);
+
+    // Hover read-out: shot/hit counts in the coarse bin under the cursor.
+    canvas._aimHover = { hShots, hHits, hx, hy, ML, MT, PW, PH };
+    if (!canvas._aimWired) {
+        canvas.addEventListener('mousemove', e => {
+            const d = canvas._aimHover;
+            if (!d) return;
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            if (mx < d.ML || mx >= d.ML + d.PW || my < d.MT || my >= d.MT + d.PH) {
+                canvas.title = '';
+                return;
+            }
+            const xi = aimClampIndex(Math.floor((mx - d.ML) / d.PW * d.hx), d.hx);
+            const yi = aimClampIndex(Math.floor((my - d.MT) / d.PH * d.hy), d.hy);
+            const s = d.hShots[yi * d.hx + xi], h = d.hHits[yi * d.hx + xi];
+            const fmt = v => (v > 0 ? '+' : '') + v.toFixed(1);
+            const xlo = -AIM_YAW_HALF + xi * AIM_HOVER_BIN;
+            const yhi = AIM_PITCH_HALF - yi * AIM_HOVER_BIN;
+            const range = `Δyaw ${fmt(xlo)}…${fmt(xlo + AIM_HOVER_BIN)}, Δpitch ${fmt(yhi - AIM_HOVER_BIN)}…${fmt(yhi)}`;
+            canvas.title = s
+                ? `${range}: ${s} shot${s === 1 ? '' : 's'}, ${h} hit (${Math.round(h / s * 100)}%)`
+                : `${range}: no shots`;
         });
+        canvas._aimWired = true;
     }
-    const rows = [];
-    for (let row = 0; row < AIM_PITCH_BINS; row++) {
-        const cells = [], counts = [];
-        for (let col = 0; col < AIM_YAW_BINS; col++) {
-            const g = grid[row][col];
-            if (!g) { cells.push({ i: 0, p: null }); counts.push(null); continue; }
-            cells.push({ i: maxShots ? g.shots / maxShots : 0, p: g.shots });
-            counts.push(g);
-        }
-        rows.push({ name: aimCenter(AIM_PITCH_BINS - 1 - row, AIM_PITCH_HALF, AIM_PITCH_W).toFixed(1), cells, counts });
+}
+
+// Marginal histograms under each crosshair grid: the same normalized samples
+// projected onto one axis at a time. Yaw plots −nyaw so enemy-right reads
+// right (matching the heatmap's x flip); pitch plots npitch ascending so
+// enemy-above reads right. Same clamp-into-edge-bins behaviour as the grid,
+// but over a wider extent so the clamp bins sit further out, and with an odd
+// bin count so the middle bin is centered on zero (dead center). Pitch bins
+// are finer than the heatmap's 0.5 rows — a 1-D strip can afford it.
+const AIM_HIST_YAW_HALF = 6.0;
+const AIM_HIST_PITCH_HALF = 4.0;
+const AIM_HIST_PITCH_W = 0.25;
+
+function renderAimHistRow(prefix, c, idx) {
+    const row = document.getElementById(`${prefix}-hists`);
+    if (!row) return;
+    row.style.display = idx.length ? '' : 'none';
+    row.innerHTML = '';
+    if (!idx.length) return;
+    row.appendChild(buildAimHist('Yaw', 'enemy left ← → right', '×hull half-width',
+        AIM_HIST_YAW_HALF, AIM_YAW_W, i => -c.nyaw[i], c, idx));
+    row.appendChild(buildAimHist('Pitch', 'enemy below ← → above', '×hull half-height',
+        AIM_HIST_PITCH_HALF, AIM_HIST_PITCH_W, i => c.npitch[i], c, idx));
+}
+
+function buildAimHist(name, dirNote, unit, half, w, val, c, idx) {
+    // Bin i is centered on (i − mid)·w: the middle bin straddles zero and the
+    // outermost bin centers sit exactly at ±half (edges overhang by w/2).
+    const mid = Math.round(half / w);
+    const nb = 2 * mid + 1;
+    const span = nb * w;
+    const binOf = v => Math.max(0, Math.min(nb - 1, mid + Math.round(v / w)));
+    const bins = Array.from({ length: nb }, () => ({ shots: 0, hits: 0 }));
+    let max = 0;
+    for (const i of idx) {
+        const b = bins[binOf(val(i))];
+        b.shots++;
+        if (c.hit[i]) b.hits++;
+        if (b.shots > max) max = b.shots;
     }
-    renderHeatmapTable(`${prefix}-table`, `${prefix}-thead-row`, `${prefix}-body`, {
-        columns, rows,
-        cellText: cell => (cell.p > 0 ? String(cell.p) : ''),
-        cellTitle: (_col, r, ci) => {
-            const g = r.counts[ci];
-            return g ? `${g.shots} shot${g.shots === 1 ? '' : 's'}, ${g.hits} hit (${Math.round(g.hits / g.shots * 100)}%)` : '';
-        },
-    }, 'Δpitch ↓ / Δyaw →');
+
+    const box = document.createElement('div');
+    box.className = 'aim-hist';
+    const title = document.createElement('div');
+    title.className = 'aim-hist-title';
+    title.innerHTML = `${name} <span class="aim-sel-note">${dirNote}</span>`;
+    box.appendChild(title);
+
+    const plot = document.createElement('div');
+    plot.className = 'aim-hist-plot';
+    const band = document.createElement('div');
+    band.className = 'aim-hist-band';
+    band.style.left = `${((span / 2 - 1) / span) * 100}%`;
+    band.style.width = `${(2 / span) * 100}%`;
+    plot.appendChild(band);
+    const zero = document.createElement('div');
+    zero.className = 'aim-hist-zero';
+    plot.appendChild(zero);
+
+    bins.forEach((b, bi) => {
+        const col = document.createElement('div');
+        col.className = 'aim-hist-col';
+        const lo = (bi - mid) * w - w / 2;
+        col.title = `${lo.toFixed(2)} … ${(lo + w).toFixed(2)} ${unit}: ` +
+            `${b.shots} shot${b.shots === 1 ? '' : 's'}` +
+            (b.shots ? `, ${b.hits} hit (${Math.round(b.hits / b.shots * 100)}%)` : '');
+        const fill = document.createElement('div');
+        fill.className = 'aim-hist-fill';
+        fill.style.height = `${max ? (b.shots / max) * 100 : 0}%`;
+        if (b.shots > 0) fill.style.minHeight = '2px';
+        col.appendChild(fill);
+        plot.appendChild(col);
+    });
+    box.appendChild(plot);
+
+    const axis = document.createElement('div');
+    axis.className = 'aim-hist-axis';
+    axis.innerHTML = `<span>−${half}</span><span>0</span><span>+${half} ${unit}</span>`;
+    box.appendChild(axis);
+    return box;
 }
 
 function renderAimRamp(pa) {

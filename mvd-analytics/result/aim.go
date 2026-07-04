@@ -16,7 +16,8 @@ package result
 //   - Target attribution is exact in duels (Mode "duel") and a labeled
 //     nearest-crosshair-enemy heuristic in team games (Mode "team"). A shot
 //     is only attributed to an enemy whose position track brackets the fire
-//     time.
+//     time and who is alive at it (dead players keep streaming position
+//     samples, so a corpse would otherwise remain a candidate).
 type AimResult struct {
 	Players []PlayerAim `json:"players"`
 }

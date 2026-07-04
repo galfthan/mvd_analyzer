@@ -371,9 +371,12 @@ the hull maps to the unit square (see CrosshairSamples).
 
 **Truthfulness.** Hit/miss is `Shot.Hit` (the Go-linked truth), never
 re-derived. The crosshair samples are **hitscan-only** (sg/ssg/lg — rockets
-are led); note SG/SSG have pellet spread, so the web heatmap renders **LG
-only** (the precise hitscan). A shot is attributed only to an enemy whose
-position track brackets the fire time. `Mode` is `"duel"` (one enemy → exact)
+are led); note SG/SSG have pellet spread, so the web heatmap splits **LG and
+SG into separate grids** (the pellet cloud would smear the precise hitscan).
+A shot is attributed only to an enemy whose position track brackets the fire
+time **and who is alive at it** (dead players keep streaming position
+samples — the death-anim body — so a corpse would otherwise remain a
+candidate; same liveness rule as LOS). `Mode` is `"duel"` (one enemy → exact)
 or `"team"` (nearest-crosshair-enemy heuristic). Rocket "direct" is a
 non-splash-damage heuristic.
 
