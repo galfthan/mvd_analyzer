@@ -316,19 +316,38 @@ kill itself still appears in `/frags` and as a `frag` event.
 
 ### 4.5c `GET /v1/demos/{id}/aim`
 
-No params. Per-player aim analysis (`result.Aim`): columnar
-crosshair-error samples for hitscan fires (signed degrees off the enemy +
-a version normalized by the target's angular size, so radius 1 ≈ the hitbox
-edge), an LG ramp-onto-target series, rocket direct/splash counts, and an LG
-reach/whiff split. `mode` is `"duel"` (exact target) or `"team"` (nearest-
-crosshair-enemy heuristic); either way only enemies alive at the fire time
-are attribution candidates. Shape: `result.AimResult` →
+No params. Per-player aim analysis (`result.Aim`): the `weapons` array
+(per-weapon shots/hits, SG/SSG pellet stats + full/partial/miss, RL/GL
+direct/splash/missed, the LG near/blocked/out-of-range whiff split), columnar
+`crosshair` samples for hitscan fires (signed degrees off the enemy + a
+version normalized by the target's angular size, so radius 1 ≈ the hitbox
+edge, with hit flag + attributed target), and the `lgRamp` series (per-LG-cell
+hit vs ms since the shaft opened). `mode` is `"duel"` (exact target) or
+`"team"` (nearest-crosshair-enemy heuristic); either way only enemies alive
+at the fire time are attribution candidates. Shape: `result.AimResult` →
 [RESULT_SCHEMA.md §AimResult](../mvd-analytics/RESULT_SCHEMA.md#aimresult-aim).
 
-**Availability:** the `crosshair` + `lgRamp` blocks are always present; the
-`rocket` + `lgReach` blocks need the projectile/beam streams, which this
-endpoint's default parse does not build, so they are absent here. 422
-(`aim_unavailable`) when the demo has no shots/position data.
+**Availability:** served from the stream-enriched parse (like the
+`/streams/*` endpoints — the first request re-parses the demo with the
+projectile/beam streams on, then it is cached), so the stream-derived
+weapon blocks are always present. 422 (`aim_unavailable`) when the demo has
+no shots/position data.
+
+### 4.5d `GET /v1/demos/{id}/shots`
+
+The per-fire weapon stream (`result.Shots`): `shots` — every detected fire,
+chronological, with `time` (match ms), `player`, `weapon`, `source`
+(`sound`/`beam`/`ammo`), `hit` + `victims` where linkable, and a `warmup`
+flag on out-of-match fires; `byPlayer` — match-time per-weapon counts and
+hitscan accuracy; `reconciliation` — the cross-check against KTX's
+authoritative `acc.attacks`. Served from the same stream-enriched parse as
+`/aim`, so rl/gl fires carry their projectile-linked hits.
+
+| param | meaning |
+|---|---|
+| `nails` | `1`/`true` to include ng/sng fires (opt-in — high volume, needs the nail decode pass) |
+
+422 (`shots_unavailable`) when the demo has no shot data.
 
 ### 4.6 `GET /v1/demos/{id}/loc-graph`
 

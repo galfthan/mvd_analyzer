@@ -616,6 +616,41 @@ func TestDemoInfo_Unavailable(t *testing.T) {
 	}
 }
 
+func TestShots(t *testing.T) {
+	r := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Shots: &result.ShotsResult{
+			Shots: []result.Shot{
+				{Time: 1000, Player: "bps", Weapon: "lg", Source: "beam", Hit: true, Victims: []string{"milton"}},
+				{Time: 1500, Player: "milton", Weapon: "rl", Source: "sound"},
+			},
+			ByPlayer: []result.PlayerShots{{Player: "bps", Total: 1,
+				ByWeapon: []result.WeaponShots{{Weapon: "lg", Shots: 1, Hits: 1, Accuracy: 1}}}},
+		},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/shots", 200)
+	if shots, _ := resp["shots"].([]any); len(shots) != 2 {
+		t.Fatalf("len(shots) = %d; want 2 (%v)", len(shots), resp)
+	}
+	if byPlayer, _ := resp["byPlayer"].([]any); len(byPlayer) != 1 {
+		t.Fatalf("len(byPlayer) = %d; want 1 (%v)", len(byPlayer), resp)
+	}
+}
+
+func TestShots_Unavailable(t *testing.T) {
+	store := &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no Shots
+	}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/shots")
+	if status != 422 {
+		t.Errorf("status = %d; want 422 (%s)", status, resp)
+	}
+}
+
 func TestAim(t *testing.T) {
 	r := &result.Result{
 		SchemaVersion: result.CurrentSchemaVersion,

@@ -253,17 +253,35 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, out)
 }
 
-// handleAim: GET /v1/demos/{id}/aim — per-player aim analysis
-// (result.Aim): normalized crosshair-error samples (hitscan), LG
-// ramp-onto-target, rocket direct/splash, LG reach/whiff. Pass-through, like
-// /demoinfo.
+// handleShots: GET /v1/demos/{id}/shots — the per-fire weapon stream
+// (result.Shots): every detected fire with time/player/weapon/source, hit +
+// victims where linkable, per-player match-time aggregates, and the KTX
+// reconciliation cross-check. Served from the stream-enriched parse (like
+// /aim, built on first request) so rl/gl fires carry their projectile-linked
+// hits. Pass nails=1 to include ng/sng fires (opt-in — high volume).
+func (s *server) handleShots(w http.ResponseWriter, r *http.Request) {
+	res, ok := s.resolveShotStreams(w, r, parseBool(r.URL.Query(), "nails"))
+	if !ok {
+		return
+	}
+	if res.Shots == nil {
+		writeError(w, http.StatusUnprocessableEntity, "shots_unavailable",
+			"this demo has no shot data (no weapon fires decoded)")
+		return
+	}
+	writeJSON(w, http.StatusOK, res.Shots)
+}
+
+// handleAim: GET /v1/demos/{id}/aim — per-player aim analysis (result.Aim):
+// per-weapon effectiveness (shots/hits, SG/SSG pellet stats, RL/GL
+// direct/splash, the LG near/blocked/out-of-range whiff split), columnar
+// crosshair-error samples (hitscan), and the LG ramp series.
 //
-// The crosshair + LG-ramp blocks are always present; the rocket + LG-reach
-// blocks need the projectile/beam streams, which the default parse does not
-// build, so they are absent here. For those, use the WASM map build or
-// `qw-analyze -include projectiles,beams`.
+// Served from the stream-enriched parse (EnsureShotStreams — built on first
+// request like the /streams/* endpoints, then cached) so the projectile/
+// beam-derived weapon blocks are always present.
 func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
-	res, _, ok := s.resolveDemo(w, r)
+	res, ok := s.resolveShotStreams(w, r, false)
 	if !ok {
 		return
 	}

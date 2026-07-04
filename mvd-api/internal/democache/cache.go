@@ -208,8 +208,11 @@ func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID) (*result.
 // true) the nail-flight stream. These are off in the default parse to keep
 // the cache lean and — unlike LOS — cannot be recomputed from the cached
 // Result, so the first request re-parses the cached MVD bytes with the build
-// flags on and splices the streams onto the in-memory Result. The
-// ShotStreamsComputed / NailsComputed latches make repeat requests free.
+// flags on and splices the streams onto the in-memory Result. The rebuilt
+// Shots and Aim blocks ride along: their stream-derived parts (RL/GL
+// direct/splash, the LG whiff split, nail fires) only exist in the enriched
+// parse, so /shots and /aim serve complete data. The ShotStreamsComputed /
+// NailsComputed latches make repeat requests free.
 //
 // Callers serialize concurrent calls for one demo (see the API's streamsMu),
 // matching the ComputeLOS pattern. A demo with no Streams (no player tracks)
@@ -240,8 +243,12 @@ func (c *Cache) EnsureShotStreams(ctx context.Context, id DemoID, nails bool) (*
 	}
 
 	reg := analyzer.NewDefaultRegistry()
-	reg.BuildShotStreams = needBase
-	reg.BuildNails = needNails
+	// Always rebuild with the base streams on: the grafted Shots/Aim blocks
+	// below only carry their stream-derived parts when the pipeline saw the
+	// streams. Nails stay opt-in, but once computed they are kept on so a
+	// later base-only rebuild cannot drop them from the grafts.
+	reg.BuildShotStreams = true
+	reg.BuildNails = needNails || res.Streams.NailsComputed
 	built, err := reg.AnalyzeReader(bytes.NewReader(mvdBytes), fmt.Sprintf("%s.mvd.gz", sha))
 	if err != nil {
 		return nil, meta, fmt.Errorf("rebuild shot streams: %w", err)
@@ -256,6 +263,12 @@ func (c *Cache) EnsureShotStreams(ctx context.Context, id DemoID, nails bool) (*
 			res.Streams.Nails = built.Streams.Nails
 			res.Streams.NailsComputed = true
 		}
+	}
+	if built.Shots != nil {
+		res.Shots = built.Shots
+	}
+	if built.Aim != nil {
+		res.Aim = built.Aim
 	}
 	return res, meta, nil
 }
