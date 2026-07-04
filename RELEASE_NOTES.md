@@ -7,6 +7,22 @@ detail.
 
 ## 2026-07-04
 
+- **Timeline frag/death events no longer dropped for players with no
+  resolvable team.** `timelineAnalysis.fragEvents` and `.deathEvents`
+  gated on a resolvable team, so a duel player whose userinfo *and*
+  KTX demoinfo team are both empty lost every entry: gameId 224758
+  (iddQd, 34 deaths missing from the frags/deaths drill-down) and the
+  bravado golden (speedball, 7 deaths). FragEvents were partially
+  papered over by the duel post-processor's frogbot synthesis (rebuilt
+  from obituaries); DeathEvents had no such fallback. Both exports now
+  gate on a resolvable *name* — matching `killEvents`' documented
+  rationale — with `team` best-effort (`""` when unresolvable,
+  rewritten to the player's own name by duel normalization in 1v1s).
+  Audited the remaining team-keyed consumers for the same class of
+  loss: weapon pickups / items / messages fallback-fill instead of
+  dropping, and aim, airgibs, loc graph, and region control are
+  (re)computed after duel normalization, so they were already correct.
+
 - **Frag streaks now include the opening life.** A player already alive
   when the match begins has no spawn recorded for that first life (the
   parser's initial SpawnEvent fires during warmup and is dropped as
