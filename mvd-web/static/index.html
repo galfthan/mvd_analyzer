@@ -938,19 +938,16 @@
                 <div class="panel" id="aim-heatmap-panel">
                     <h3>Crosshair placement <span class="aim-sel-note">— selected player</span></h3>
                     <div class="aim-desc">
-                        Where the enemy sat relative to the crosshair at each fire — your
-                        <em>aim intent</em>, i.e. where you take your shots. Each axis is
-                        the angular error <em>divided by the target's hull half-extent on
-                        that axis</em>, so the player box maps to the outlined [−1, 1]
-                        box: <strong>±1 = the edge of the hull</strong> (corner ≈ 1.4).
-                        Center = dead on; right/left and up/down = the enemy's offset from
-                        the crosshair. The image is the <strong>smoothed density of
-                        shots</strong> (Gaussian-smoothed 2-D histogram; the colorbar is
-                        shots per bin) — a tight bright spot at the center is good
-                        placement. Hover for exact shot/hit counts around the cursor.
-                        Below each image: the same fires projected onto one axis at a
-                        time — yaw and pitch histograms (shaded band = within the hull
-                        edge, rule = dead center).
+                        Where the enemy sat relative to the crosshair at each fire.
+                        Each axis is the angular error divided by the target's hull
+                        half-extent, so <strong>±1 (the outlined box) = the edge of
+                        the hull</strong>. The image is the <strong>smoothed density
+                        of shots</strong> (colorbar = shots per bin); a tight bright
+                        spot at the center is good placement. Hover for exact
+                        shot/hit counts. Below each image: yaw and pitch histograms
+                        of the same fires (shaded band = within the hull edge, rule
+                        = dead center; the outermost bins also collect shots beyond
+                        the plotted range).
                     </div>
 
                     <div class="aim-heatmap-block">
