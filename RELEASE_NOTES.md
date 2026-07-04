@@ -24,6 +24,18 @@ detail.
   (`TookWeaponHandler` increments before the weapon-stay early return,
   so `demoInfo.players[].weapons[].pickups.*` were always correct).
 
+- **Pickups tab: KTX counters are the displayed numbers.** The
+  weapon/item verify cells now show the KTX-authoritative counter as
+  the cell value and acknowledge the analytics-derived count in the
+  tooltip, instead of showing the analytics count and flagging
+  divergence red. Rationale: in weapon-stay demos the analytics
+  reconstruction is known-imperfect (wire-invisible grab-then-die
+  coalescing, pad-vs-pack ambiguity), so a small divergence is
+  expected, not an error — while the analytics stream stays the right
+  source for timestamped/per-entity questions (the per-entity `@ loc`
+  columns are unchanged). Demos without KTX pickup counters (old /
+  non-KTX servers) fall back to the analytics counts, trusted as-is.
+
 - **Duel team normalization now covers pickup/shot data (v44).** In 1v1
   demos `normalizeDuelTeams` rewrites every player's team to their own
   name, but `items` phase teams, `weaponPickups` team/dropperTeam,
