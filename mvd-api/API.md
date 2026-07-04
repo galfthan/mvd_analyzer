@@ -151,6 +151,7 @@ Non-2xx responses use a stable envelope:
 | 422 | `damage_unavailable` | no KTX `mvdhidden_dmgdone` damage stream |
 | 422 | `locgraph_unavailable` | no position track |
 | 422 | `region_control_unavailable` | no region-control layout for this map |
+| 422 | `airgibs_unavailable` | no timeline analysis (BSP-less maps return `[]`, not this) |
 | 502 | `hub_upstream` | network / 5xx from the hub |
 | 500 | `internal` / `panic` | unexpected |
 
@@ -603,6 +604,20 @@ a sub-window — e.g. "who controlled QUAD between 4:00 and 6:00". Shape:
     "teamAControl": 10, "teamBControl": 8.3, "empty": 78.3, …,   // percent
     "byPlayer": { "sailorman": { "team":"red","armed":3,"unarmed":1 }, … } } } }
 ```
+
+### 4.13b `GET /v1/demos/{id}/airgibs`
+
+No params. The Key Moments airgib list (`timelineAnalysis.airgibs`): every
+**direct** enemy rocket hit on an airborne victim above the qualification
+height, sorted by height descending. Each entry carries `time`, `attacker` /
+`victim` (+ teams, user ids), `height` (victim's feet above the floor),
+`heightAboveAttacker` (the vertical gap the rocket climbed; negative =
+victim below the shooter), `loc`, `damage` (unbound), and the `lethal`
+heuristic. Shape: `[]result.AirgibEvent` →
+[RESULT_SCHEMA.md](../mvd-analytics/RESULT_SCHEMA.md). Height needs the
+map's clip hull, so the list is **empty (not an error) when the map's BSP
+was not provisioned** at parse time. `422 airgibs_unavailable` only when
+the demo has no timeline analysis at all.
 
 ### 4.14 `GET /v1/demos/{id}/loc-table`
 

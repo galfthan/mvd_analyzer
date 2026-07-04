@@ -616,6 +616,57 @@ func TestDemoInfo_Unavailable(t *testing.T) {
 	}
 }
 
+func TestAirgibs(t *testing.T) {
+	r := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		TimelineAnalysis: &result.TimelineAnalysisResult{
+			Airgibs: []result.AirgibEvent{{
+				Time: 60000, Attacker: "bps", Victim: "milton", Height: 120, Damage: 110,
+			}},
+		},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	var arr []map[string]any
+	if err := json.Unmarshal(body, &arr); err != nil {
+		t.Fatalf("unmarshal: %v (%s)", err, body)
+	}
+	if len(arr) != 1 || arr[0]["attacker"] != "bps" {
+		t.Errorf("airgibs = %s; want one bps hit", body)
+	}
+}
+
+func TestAirgibs_EmptyWithoutBSP(t *testing.T) {
+	// TimelineAnalysis present but no airgibs (no clip hull → no heights):
+	// an empty list, not an error.
+	r := &result.Result{
+		SchemaVersion:    result.CurrentSchemaVersion,
+		TimelineAnalysis: &result.TimelineAnalysisResult{},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
+	if status != 200 || strings.TrimSpace(string(body)) != "[]" {
+		t.Errorf("status = %d, body = %q; want 200 []", status, body)
+	}
+}
+
+func TestAirgibs_Unavailable(t *testing.T) {
+	store := &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no TimelineAnalysis
+	}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
+	if status != 422 {
+		t.Errorf("status = %d; want 422 (%s)", status, resp)
+	}
+}
+
 func TestShots(t *testing.T) {
 	r := &result.Result{
 		SchemaVersion: result.CurrentSchemaVersion,

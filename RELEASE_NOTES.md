@@ -15,8 +15,11 @@ detail.
   first request, then caches — the rebuilt `Shots`/`Aim` blocks are grafted
   onto the cached result), so the stream-derived aim blocks (RL/GL
   direct/splash, the LG near/blocked/out-of-range split) are now always
-  present over the API instead of silently absent. The MCP server adds a
-  `getAim` tool (aim stats only — the raw per-fire stream stays
+  present over the API instead of silently absent. New
+  `GET /v1/demos/{id}/airgibs` serves the Key Moments airgib list
+  (`timelineAnalysis.airgibs` — the last Result block with no endpoint);
+  empty, not an error, on maps without a provisioned BSP. The MCP server
+  adds a `getAim` tool (aim stats only — the raw per-fire stream stays
   API/JSON-only by design).
 
 - **Wider BSP corpus + phantom map-alias fix.** `scripts/fetch-bsps.sh`

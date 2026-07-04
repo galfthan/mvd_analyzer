@@ -811,6 +811,28 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, rcv)
 }
 
+// handleAirgibs: GET /v1/demos/{id}/airgibs — the Key Moments airgib list
+// (timelineAnalysis.airgibs): every DIRECT enemy rocket hit on an airborne
+// victim above the height threshold, sorted by height descending. Height
+// needs the map's clip hull, so the list is empty (not an error) when the
+// map's BSP was not provisioned at parse time.
+func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	if res.TimelineAnalysis == nil {
+		writeError(w, http.StatusUnprocessableEntity, "airgibs_unavailable",
+			"this demo has no timeline analysis")
+		return
+	}
+	airgibs := res.TimelineAnalysis.Airgibs
+	if airgibs == nil {
+		airgibs = []result.AirgibEvent{}
+	}
+	writeJSON(w, http.StatusOK, airgibs)
+}
+
 // recoverMiddleware turns a panic into a 500 + slog error line so a
 // single buggy handler can't take down the server.
 func recoverMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
