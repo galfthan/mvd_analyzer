@@ -7,6 +7,35 @@ detail.
 
 ## 2026-07-04
 
+- **Weapon-stay pickup recovery (schema v44).** In weapon-stay modes
+  (serverinfo `deathmatch` 2/3/5 or `coop` — dmm3, the standard
+  duel/2on2 mode, included) KTX never emits `//ktx took` for weapons
+  and the weapon entity never leaves the wire, so `result.weaponPickups`
+  contained **zero world weapon pickups** on those demos and weapon
+  `items` timelines never closed a phase. Both analyzers now synthesize
+  the pickups from STAT_ITEMS weapon-bit 0→1 transitions: weapon_pickups
+  records kind-level entries (`inferred: true`; `source: "world"` when
+  the picker was in touch range of a matching pad during the stat-lag
+  window, else the new `"unknown"` — typically a non-RL/LG backpack
+  grant), and items.go closes the matched entity's phase as a
+  zero-length unavailability (`takenAt == respawnAt`; the weapon never
+  left the map). Spawn-loadout bursts and `//ktx bp` grants are
+  deduplicated. Verified against KTX's own per-player counters
+  (`TookWeaponHandler` increments before the weapon-stay early return,
+  so `demoInfo.players[].weapons[].pickups.*` were always correct).
+
+- **Duel team normalization now covers pickup/shot data (v44).** In 1v1
+  demos `normalizeDuelTeams` rewrites every player's team to their own
+  name, but `items` phase teams, `weaponPickups` team/dropperTeam,
+  `backpacks` team, `shots` stream/byPlayer teams (feeding `aim` teams),
+  and `airgibs` attacker/victim teams kept the raw pre-normalization
+  strings — so the Pickups tab's per-team aggregation bucketed duel
+  pickups under stale colour labels and showed zero rows. All are now
+  rewritten in the duel pass (airgibs sources teams from the normalized
+  player streams). The web Pickups tab's per-team tables also join the
+  existing duel-mode hide (`team-aggregate-table`), matching the other
+  per-team stats tables.
+
 - **API: `/shots` endpoint + complete `/aim`; MCP: `getAim`** (no schema
   change). New `GET /v1/demos/{id}/shots` serves the per-fire weapon stream
   (`result.Shots`: linked hits/victims, per-player aggregates, KTX

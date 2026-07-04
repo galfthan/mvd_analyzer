@@ -472,7 +472,25 @@ package result
 //     win nearest-crosshair attribution in team games. No field changes;
 //     crosshair sample counts/targets shift on team demos, and a duel fire
 //     while the lone enemy is dead no longer emits a sample.
-const CurrentSchemaVersion = 43
+//
+// v44:
+//   - Weapon-stay recovery (serverinfo deathmatch 2/3/5, or coop — the
+//     standard duel/2on2 dmm3 included): KTX never emits `//ktx took` for
+//     weapons in those modes and the weapon entity never leaves the wire,
+//     so world weapon pickups were previously absent entirely. They are now
+//     synthesized from STAT_ITEMS weapon-bit 0→1 transitions. WeaponPickup
+//     gains Inferred (marks synthesized entries) and the Source vocabulary
+//     gains "unknown" (a flip with no weapon pad in touch range — typically
+//     a non-RL/LG backpack grant, which has no hint in any mode).
+//   - ItemTimeline weapon phases in weapon-stay demos use a zero-length
+//     unavailability convention: TakenAt == RespawnAt, with the next phase
+//     opening at the same instant (the weapon never left the map).
+//   - Duel team normalization now also rewrites Items phase teams,
+//     WeaponPickups Team/DropperTeam, Backpacks Team, Shots stream/ByPlayer
+//     teams (and transitively Aim teams), and Airgibs attacker/victim teams
+//     — previously these kept the raw pre-normalization team strings in 1v1
+//     demos, so team-keyed pickup aggregation bucketed under stale labels.
+const CurrentSchemaVersion = 44
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

@@ -550,3 +550,155 @@ func TestItemAnalyzer_ContestedDoubleHealthGoesToGainer(t *testing.T) {
 		t.Errorf("distance attributions = %d, want 0 (no box should fall to the distance corroborator)", a.attrCounts["distance"])
 	}
 }
+
+// Weapon-stay (dmm3): a weapon never emits ItemStateEvent{Taken}, so
+// the STAT_ITEMS flip must close the phase itself — with the
+// zero-length-unavailability convention (TakenAt == RespawnAt) and a
+// new phase opening at the same instant, since the weapon never left
+// the map.
+func TestItemAnalyzer_WeaponStayFlipClosesPhase(t *testing.T) {
+	a, ctx := newTestItemAnalyzer()
+	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "ace", Team: "red"}
+
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{500, 500, 100}, Time: 0})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{505, 500, 100}, Time: 9.9})
+	// Seed the STAT_ITEMS baseline silently, then flip the RL bit.
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatItems, Value: 1, Time: 5})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, Time: 10})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+	if len(r.Items.Items) != 1 {
+		t.Fatalf("want 1 item, got %d", len(r.Items.Items))
+	}
+	it := r.Items.Items[0]
+	if len(it.Phases) != 2 {
+		t.Fatalf("phases = %+v, want closed phase + reopened phase", it.Phases)
+	}
+	p0 := it.Phases[0]
+	if p0.TakenAt != 10000 || p0.RespawnAt != 10000 {
+		t.Errorf("phase[0] = %+v, want TakenAt == RespawnAt == 10000 (zero-length unavailability)", p0)
+	}
+	if p0.TakenBy != "ace" || p0.Team != "red" {
+		t.Errorf("phase[0] attribution = %q/%q, want ace/red", p0.TakenBy, p0.Team)
+	}
+	if it.Phases[1].AvailableFrom != 10000 || it.Phases[1].TakenAt != 0 {
+		t.Errorf("phase[1] = %+v, want open phase from 10000", it.Phases[1])
+	}
+	if a.attrCounts["weaponstay"] != 1 {
+		t.Errorf(`attrCounts["weaponstay"] = %d, want 1`, a.attrCounts["weaponstay"])
+	}
+}
+
+// Two same-kind weapon entities: the flip attributes to the pad the
+// picker was actually standing on (nearest within the gate).
+func TestItemAnalyzer_WeaponStayNearestEntityWins(t *testing.T) {
+	a, ctx := newTestItemAnalyzer()
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
+
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 91, Kind: "rl", Origin: [3]float32{200, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{190, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 10})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+	for _, it := range r.Items.Items {
+		closed := it.Phases[0].TakenAt != 0
+		if it.EntNum == 91 && !closed {
+			t.Errorf("ent 91 (the near pad) should have the closed phase")
+		}
+		if it.EntNum == 90 && closed {
+			t.Errorf("ent 90 (the far pad) should be untouched")
+		}
+	}
+}
+
+// No position samples inside the stat lag window → no entity phase is
+// closed (kind-level recovery is WeaponPickupsAnalyzer's job).
+func TestItemAnalyzer_WeaponStayNoPositionNoPhase(t *testing.T) {
+	a, ctx := newTestItemAnalyzer()
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
+
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "lg", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItLightning, Time: 10})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+	if got := r.Items.Items[0].Phases[0].TakenAt; got != 0 {
+		t.Errorf("phase closed at %v without any position data; want it left open", got)
+	}
+}
+
+// A //ktx bp grant of the same kind just before the flip: the bit gain
+// belongs to the backpack, not the pad — no entity phase closes even
+// though the picker happens to be standing near a matching pad.
+func TestItemAnalyzer_WeaponStayBackpackGrantSkipsPad(t *testing.T) {
+	a, ctx := newTestItemAnalyzer()
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
+
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 32, PlayerEnt: 2, Time: 9.8})
+	_ = a.OnEvent(&events.BackpackPickupHintEvent{BackpackEnt: 200, PlayerEnt: 1, Time: 9.9})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 10})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+	if got := r.Items.Items[0].Phases[0].TakenAt; got != 0 {
+		t.Errorf("pad phase closed at %v for a backpack-sourced bit flip; want it left open", got)
+	}
+	if a.attrCounts["weaponstay"] != 0 {
+		t.Errorf(`attrCounts["weaponstay"] = %d, want 0`, a.attrCounts["weaponstay"])
+	}
+}
+
+// A pending //ktx took hint for the same slot+kind means the wire path
+// owns the pickup (weapon-stay mis-detected) — the flip must not
+// synthesize a second closure.
+func TestItemAnalyzer_WeaponStayPendingHintSkipsSynthesis(t *testing.T) {
+	a, ctx := newTestItemAnalyzer()
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
+
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 90, PlayerEnt: 1, Time: 9.95})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 10})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+	if a.attrCounts["weaponstay"] != 0 {
+		t.Errorf(`attrCounts["weaponstay"] = %d, want 0 (pending hint owns the pickup)`, a.attrCounts["weaponstay"])
+	}
+}
+
+// dmm1 is not weapon-stay: the flip feeds Layer-3 stat evidence as
+// before and no phase is closed without a wire Taken transition.
+func TestItemAnalyzer_NoWeaponStaySynthesisInDmm1(t *testing.T) {
+	a, ctx := newTestItemAnalyzer()
+	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
+
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\1"`, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 10})
+
+	r := &Result{}
+	_ = a.Finalize(r)
+	if got := r.Items.Items[0].Phases[0].TakenAt; got != 0 {
+		t.Errorf("phase closed at %v in dmm1 without a wire transition; want it left open", got)
+	}
+	if len(a.pendingStatEvidence[0]) == 0 {
+		t.Errorf("dmm1 flip should have produced Layer-3 stat evidence")
+	}
+}

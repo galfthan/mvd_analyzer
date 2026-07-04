@@ -222,7 +222,7 @@
         },
         "mode": "duel",
         "player": "banan falco",
-        "team": "coop",
+        "team": "banan falco",
         "weapons": [
           {
             "hits": 7,
@@ -520,7 +520,7 @@
         },
         "mode": "duel",
         "player": "betowen",
-        "team": "red",
+        "team": "betowen",
         "weapons": [
           {
             "full": 4,
@@ -561,7 +561,7 @@
         57.125
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 39091,
       "weapon": "rl"
     },
@@ -574,7 +574,7 @@
         59.125
       ],
       "player": "banan falco",
-      "team": "coop",
+      "team": "banan falco",
       "time": 54766,
       "weapon": "rl"
     },
@@ -587,7 +587,7 @@
         65
       ],
       "player": "banan falco",
-      "team": "coop",
+      "team": "banan falco",
       "time": 59896,
       "weapon": "rl"
     },
@@ -600,7 +600,7 @@
         82.375
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 65636,
       "weapon": "rl"
     },
@@ -613,7 +613,7 @@
         57.75
       ],
       "player": "banan falco",
-      "team": "coop",
+      "team": "banan falco",
       "time": 245400,
       "weapon": "rl"
     },
@@ -626,7 +626,7 @@
         29.875
       ],
       "player": "banan falco",
-      "team": "coop",
+      "team": "banan falco",
       "time": 338348,
       "weapon": "rl"
     },
@@ -639,7 +639,7 @@
         25.5
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 352411,
       "weapon": "rl"
     },
@@ -652,7 +652,7 @@
         106
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 379917,
       "weapon": "rl"
     },
@@ -665,7 +665,7 @@
         172
       ],
       "player": "banan falco",
-      "team": "coop",
+      "team": "banan falco",
       "time": 387632,
       "weapon": "rl"
     },
@@ -678,7 +678,7 @@
         20
       ],
       "player": "banan falco",
-      "team": "coop",
+      "team": "banan falco",
       "time": 411819,
       "weapon": "rl"
     },
@@ -691,7 +691,7 @@
         61.25
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 417281,
       "weapon": "rl"
     },
@@ -704,7 +704,7 @@
         24
       ],
       "player": "banan falco",
-      "team": "coop",
+      "team": "banan falco",
       "time": 429762,
       "weapon": "rl"
     },
@@ -717,7 +717,7 @@
         62.5
       ],
       "player": "banan falco",
-      "team": "coop",
+      "team": "banan falco",
       "time": 472293,
       "weapon": "rl"
     },
@@ -730,7 +730,7 @@
         24.5
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 472371,
       "weapon": "rl"
     },
@@ -743,7 +743,7 @@
         111.25
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 494515,
       "weapon": "rl"
     },
@@ -756,7 +756,7 @@
         115.5
       ],
       "player": "banan falco",
-      "team": "coop",
+      "team": "banan falco",
       "time": 494515,
       "weapon": "rl"
     },
@@ -769,7 +769,7 @@
         -72.625
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 514306,
       "weapon": "rl"
     },
@@ -782,7 +782,7 @@
         89.75
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 519878,
       "weapon": "rl"
     },
@@ -795,7 +795,7 @@
         98.75
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 530189,
       "weapon": "rl"
     },
@@ -808,7 +808,7 @@
         120
       ],
       "player": "banan falco",
-      "team": "coop",
+      "team": "banan falco",
       "time": 543383,
       "weapon": "rl"
     },
@@ -821,7 +821,7 @@
         24
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 546604,
       "weapon": "rl"
     },
@@ -834,7 +834,7 @@
         20
       ],
       "player": "betowen",
-      "team": "red",
+      "team": "betowen",
       "time": 595558,
       "weapon": "rl"
     }
@@ -3972,7 +3972,63 @@
         "name": "gl",
         "phases": [
           {
-            "availableFrom": 0
+            "availableFrom": 0,
+            "respawnAt": 14727,
+            "takenAt": 14727,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 14727,
+            "respawnAt": 152128,
+            "takenAt": 152128,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 152128,
+            "respawnAt": 178518,
+            "takenAt": 178518,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 178518,
+            "respawnAt": 232686,
+            "takenAt": 232686,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 232686,
+            "respawnAt": 304529,
+            "takenAt": 304529,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 304529,
+            "respawnAt": 464410,
+            "takenAt": 464410,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 464410,
+            "respawnAt": 536519,
+            "takenAt": 536519,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 536519,
+            "respawnAt": 589422,
+            "takenAt": 589422,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 589422
           }
         ],
         "x": 2056,
@@ -3990,77 +4046,77 @@
             "respawnAt": 50896,
             "takenAt": 30896,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 50883,
             "respawnAt": 107597,
             "takenAt": 87597,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 107583,
             "respawnAt": 134583,
             "takenAt": 114583,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 134570,
             "respawnAt": 183310,
             "takenAt": 163310,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 183310,
             "respawnAt": 222231,
             "takenAt": 202231,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 222206,
             "respawnAt": 271620,
             "takenAt": 251620,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 271607,
             "respawnAt": 379840,
             "takenAt": 359840,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 379840,
             "respawnAt": 472449,
             "takenAt": 452449,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 472449,
             "respawnAt": 505092,
             "takenAt": 485092,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 505098,
             "respawnAt": 577233,
             "takenAt": 557233,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 577227,
             "respawnAt": 619396,
             "takenAt": 599396,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           }
         ],
         "x": 2528,
@@ -4078,7 +4134,7 @@
             "respawnAt": 473299,
             "takenAt": 453299,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 473293
@@ -4099,7 +4155,7 @@
             "respawnAt": 473377,
             "takenAt": 453377,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 473371
@@ -4120,35 +4176,35 @@
             "respawnAt": 127310,
             "takenAt": 107310,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 127316,
             "respawnAt": 221920,
             "takenAt": 201920,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 221938,
             "respawnAt": 275439,
             "takenAt": 255439,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 275419,
             "respawnAt": 394593,
             "takenAt": 374593,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 394593,
             "respawnAt": 475228,
             "takenAt": 455228,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 475203
@@ -4169,56 +4225,56 @@
             "respawnAt": 62701,
             "takenAt": 42701,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 62727,
             "respawnAt": 126038,
             "takenAt": 106038,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 126037,
             "respawnAt": 234245,
             "takenAt": 214245,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 234270,
             "respawnAt": 269153,
             "takenAt": 249153,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 269153,
             "respawnAt": 388463,
             "takenAt": 368463,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 388450,
             "respawnAt": 429040,
             "takenAt": 409040,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 429022,
             "respawnAt": 473878,
             "takenAt": 453878,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 473877,
             "respawnAt": 503124,
             "takenAt": 483124,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 503111
@@ -4239,84 +4295,84 @@
             "respawnAt": 62701,
             "takenAt": 42701,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 62727,
             "respawnAt": 101830,
             "takenAt": 81830,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 101817,
             "respawnAt": 126038,
             "takenAt": 106038,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 126037,
             "respawnAt": 179661,
             "takenAt": 159661,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 179648,
             "respawnAt": 234245,
             "takenAt": 214245,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 234270,
             "respawnAt": 269153,
             "takenAt": 249153,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 269153,
             "respawnAt": 388502,
             "takenAt": 368502,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 388489,
             "respawnAt": 429118,
             "takenAt": 409118,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 429099,
             "respawnAt": 456839,
             "takenAt": 436839,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 456826,
             "respawnAt": 503124,
             "takenAt": 483124,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 503111,
             "respawnAt": 580202,
             "takenAt": 560202,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 580163,
             "respawnAt": 617824,
             "takenAt": 597824,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           }
         ],
         "x": 2008,
@@ -4334,63 +4390,63 @@
             "respawnAt": 77687,
             "takenAt": 57687,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 77675,
             "respawnAt": 115103,
             "takenAt": 95103,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 115089,
             "respawnAt": 138726,
             "takenAt": 118726,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 138713,
             "respawnAt": 190973,
             "takenAt": 170973,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 190972,
             "respawnAt": 251633,
             "takenAt": 231633,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 251620,
             "respawnAt": 373775,
             "takenAt": 353775,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 373775,
             "respawnAt": 477956,
             "takenAt": 457956,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 477929,
             "respawnAt": 570149,
             "takenAt": 550149,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 570136,
             "respawnAt": 590954,
             "takenAt": 570954,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 590941
@@ -4411,77 +4467,77 @@
             "respawnAt": 28870,
             "takenAt": 8870,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 28870,
             "respawnAt": 77687,
             "takenAt": 57687,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 77675,
             "respawnAt": 115259,
             "takenAt": 95259,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 115245,
             "respawnAt": 138609,
             "takenAt": 118609,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 138636,
             "respawnAt": 188557,
             "takenAt": 168557,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 188518,
             "respawnAt": 251633,
             "takenAt": 231633,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 251620,
             "respawnAt": 285062,
             "takenAt": 265062,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 285067,
             "respawnAt": 370918,
             "takenAt": 350918,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 370918,
             "respawnAt": 477800,
             "takenAt": 457800,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 477813,
             "respawnAt": 570149,
             "takenAt": 550149,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 570136,
             "respawnAt": 590915,
             "takenAt": 570915,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 590903
@@ -4502,63 +4558,63 @@
             "respawnAt": 50896,
             "takenAt": 30896,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 50883,
             "respawnAt": 134622,
             "takenAt": 114622,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 134609,
             "respawnAt": 183427,
             "takenAt": 163427,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 183427,
             "respawnAt": 222348,
             "takenAt": 202348,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 222323,
             "respawnAt": 271620,
             "takenAt": 251620,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 271607,
             "respawnAt": 363255,
             "takenAt": 343255,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 363282,
             "respawnAt": 472449,
             "takenAt": 452449,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 472449,
             "respawnAt": 505202,
             "takenAt": 485202,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 505212,
             "respawnAt": 577233,
             "takenAt": 557233,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 577227
@@ -4579,28 +4635,28 @@
             "respawnAt": 190076,
             "takenAt": 170076,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 190075,
             "respawnAt": 242244,
             "takenAt": 222244,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 242217,
             "respawnAt": 277841,
             "takenAt": 257841,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 277854,
             "respawnAt": 532371,
             "takenAt": 512371,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 532389
@@ -4621,63 +4677,63 @@
             "respawnAt": 44883,
             "takenAt": 14571,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 45584,
             "respawnAt": 178492,
             "takenAt": 152011,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 178985,
             "respawnAt": 217842,
             "takenAt": 178985,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 218004,
             "respawnAt": 264698,
             "takenAt": 232607,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 265607,
             "respawnAt": 304256,
             "takenAt": 271374,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 304373,
             "respawnAt": 358269,
             "takenAt": 304373,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 358399,
             "respawnAt": 490852,
             "takenAt": 464371,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 491351,
             "respawnAt": 563227,
             "takenAt": 536402,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 563396,
             "respawnAt": 614785,
             "takenAt": 589422,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           }
         ],
         "x": 2040,
@@ -4695,77 +4751,77 @@
             "respawnAt": 49299,
             "takenAt": 17454,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 49415,
             "respawnAt": 100116,
             "takenAt": 71688,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 100700,
             "respawnAt": 185479,
             "takenAt": 141492,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 185518,
             "respawnAt": 220004,
             "takenAt": 185868,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 220829,
             "respawnAt": 264660,
             "takenAt": 236751,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 264750,
             "respawnAt": 315191,
             "takenAt": 269932,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 315905,
             "respawnAt": 361295,
             "takenAt": 321366,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 361360,
             "respawnAt": 431819,
             "takenAt": 392567,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 432540,
             "respawnAt": 491397,
             "takenAt": 463514,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 491502,
             "respawnAt": 561240,
             "takenAt": 505903,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 561889,
             "respawnAt": 614785,
             "takenAt": 567526,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           }
         ],
         "x": 2384,
@@ -4783,14 +4839,14 @@
             "respawnAt": 355918,
             "takenAt": 325918,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 340912,
             "respawnAt": 553383,
             "takenAt": 523383,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 538370
@@ -4811,70 +4867,70 @@
             "respawnAt": 31402,
             "takenAt": 1402,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 16403,
             "respawnAt": 104609,
             "takenAt": 74609,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 89623,
             "respawnAt": 121285,
             "takenAt": 91285,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 106304,
             "respawnAt": 212179,
             "takenAt": 182179,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 197181,
             "respawnAt": 268192,
             "takenAt": 238192,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 253192,
             "respawnAt": 338347,
             "takenAt": 308347,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 323347,
             "respawnAt": 405605,
             "takenAt": 375605,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 390593,
             "respawnAt": 489747,
             "takenAt": 459747,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 474734,
             "respawnAt": 546007,
             "takenAt": 516007,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 531007,
             "respawnAt": 627597,
             "takenAt": 597597,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           }
         ],
         "x": 2168,
@@ -4902,7 +4958,42 @@
         "name": "ng",
         "phases": [
           {
-            "availableFrom": 0
+            "availableFrom": 0,
+            "respawnAt": 156,
+            "takenAt": 156,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 156,
+            "respawnAt": 198264,
+            "takenAt": 198264,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 198264,
+            "respawnAt": 323879,
+            "takenAt": 323879,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 323879,
+            "respawnAt": 343944,
+            "takenAt": 343944,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 343944,
+            "respawnAt": 473254,
+            "takenAt": 473254,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 473254
           }
         ],
         "x": 2480,
@@ -4934,70 +5025,70 @@
             "respawnAt": 25922,
             "takenAt": 5922,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 25922,
             "respawnAt": 67370,
             "takenAt": 47370,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 67350,
             "respawnAt": 144881,
             "takenAt": 124881,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 144881,
             "respawnAt": 194596,
             "takenAt": 174596,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 194582,
             "respawnAt": 215946,
             "takenAt": 195946,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 215959,
             "respawnAt": 282620,
             "takenAt": 262620,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 282587,
             "respawnAt": 340685,
             "takenAt": 320685,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 340684,
             "respawnAt": 377593,
             "takenAt": 357593,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 377625,
             "respawnAt": 507722,
             "takenAt": 487722,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 507721,
             "respawnAt": 553708,
             "takenAt": 533708,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 553708
@@ -5018,112 +5109,112 @@
             "respawnAt": 37767,
             "takenAt": 17767,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 37728,
             "respawnAt": 91571,
             "takenAt": 71571,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 91557,
             "respawnAt": 161376,
             "takenAt": 141376,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 161376,
             "respawnAt": 206180,
             "takenAt": 186180,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 206173,
             "respawnAt": 235569,
             "takenAt": 215569,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 235556,
             "respawnAt": 256406,
             "takenAt": 236406,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 256413,
             "respawnAt": 289776,
             "takenAt": 269776,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 289789,
             "respawnAt": 324762,
             "takenAt": 304762,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 324723,
             "respawnAt": 347438,
             "takenAt": 327438,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 347450,
             "respawnAt": 407437,
             "takenAt": 387437,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 407423,
             "respawnAt": 444125,
             "takenAt": 424125,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 444138,
             "respawnAt": 483670,
             "takenAt": 463670,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 483663,
             "respawnAt": 503779,
             "takenAt": 483779,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 503773,
             "respawnAt": 525981,
             "takenAt": 505981,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 525955,
             "respawnAt": 575026,
             "takenAt": 555026,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 574993,
             "respawnAt": 598110,
             "takenAt": 578110,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 598090
@@ -5140,7 +5231,63 @@
         "name": "rl_1",
         "phases": [
           {
-            "availableFrom": 0
+            "availableFrom": 0,
+            "respawnAt": 8286,
+            "takenAt": 8286,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 8286,
+            "respawnAt": 36000,
+            "takenAt": 36000,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 36000,
+            "respawnAt": 110986,
+            "takenAt": 110986,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 110986,
+            "respawnAt": 344294,
+            "takenAt": 344294,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 344294,
+            "respawnAt": 394827,
+            "takenAt": 394827,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 394827,
+            "respawnAt": 423618,
+            "takenAt": 423618,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 423618,
+            "respawnAt": 445222,
+            "takenAt": 445222,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 445222,
+            "respawnAt": 553591,
+            "takenAt": 553591,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 553591
           }
         ],
         "x": 1472,
@@ -5154,7 +5301,133 @@
         "name": "rl_2",
         "phases": [
           {
-            "availableFrom": 0
+            "availableFrom": 0,
+            "respawnAt": 2208,
+            "takenAt": 2208,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 2208,
+            "respawnAt": 47902,
+            "takenAt": 47902,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 47902,
+            "respawnAt": 59038,
+            "takenAt": 59038,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 59038,
+            "respawnAt": 65064,
+            "takenAt": 65064,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 65064,
+            "respawnAt": 87986,
+            "takenAt": 87986,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 87986,
+            "respawnAt": 169336,
+            "takenAt": 169336,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 169336,
+            "respawnAt": 210790,
+            "takenAt": 210790,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 210790,
+            "respawnAt": 251893,
+            "takenAt": 251893,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 251893,
+            "respawnAt": 288392,
+            "takenAt": 288392,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 288392,
+            "respawnAt": 376424,
+            "takenAt": 376424,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 376424,
+            "respawnAt": 382003,
+            "takenAt": 382003,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 382003,
+            "respawnAt": 416852,
+            "takenAt": 416852,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 416852,
+            "respawnAt": 473760,
+            "takenAt": 473760,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 473760,
+            "respawnAt": 478670,
+            "takenAt": 478670,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 478670,
+            "respawnAt": 496424,
+            "takenAt": 496424,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 496424,
+            "respawnAt": 516942,
+            "takenAt": 516942,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 516942,
+            "respawnAt": 529292,
+            "takenAt": 529292,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 529292,
+            "respawnAt": 598513,
+            "takenAt": 598513,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 598513
           }
         ],
         "x": 2480,
@@ -5172,63 +5445,63 @@
             "respawnAt": 38519,
             "takenAt": 8519,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 23499,
             "respawnAt": 66156,
             "takenAt": 36156,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 51156,
             "respawnAt": 141181,
             "takenAt": 111181,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 126194,
             "respawnAt": 326244,
             "takenAt": 296244,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 311256,
             "respawnAt": 374294,
             "takenAt": 344294,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 359294,
             "respawnAt": 424827,
             "takenAt": 394827,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 409813,
             "respawnAt": 453735,
             "takenAt": 423735,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 438741,
             "respawnAt": 475222,
             "takenAt": 445222,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 460216,
             "respawnAt": 583591,
             "takenAt": 553591,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 568578
@@ -5249,63 +5522,63 @@
             "respawnAt": 44571,
             "takenAt": 14571,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 29571,
             "respawnAt": 182011,
             "takenAt": 152011,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 166998,
             "respawnAt": 208245,
             "takenAt": 178245,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 193225,
             "respawnAt": 262607,
             "takenAt": 232607,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 247607,
             "respawnAt": 294370,
             "takenAt": 264370,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 279374,
             "respawnAt": 334257,
             "takenAt": 304257,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 319243,
             "respawnAt": 494371,
             "takenAt": 464371,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 479371,
             "respawnAt": 566402,
             "takenAt": 536402,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 551396,
             "respawnAt": 619422,
             "takenAt": 589422,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           }
         ],
         "x": 2040,
@@ -5323,84 +5596,84 @@
             "respawnAt": 45467,
             "takenAt": 15467,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 30467,
             "respawnAt": 103246,
             "takenAt": 73246,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 88220,
             "respawnAt": 121168,
             "takenAt": 91168,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 106155,
             "respawnAt": 213777,
             "takenAt": 183777,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 198764,
             "respawnAt": 247163,
             "takenAt": 217163,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 232140,
             "respawnAt": 301412,
             "takenAt": 271412,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 286426,
             "respawnAt": 336905,
             "takenAt": 306905,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 321912,
             "respawnAt": 355262,
             "takenAt": 325262,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 340256,
             "respawnAt": 415385,
             "takenAt": 385385,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 400385,
             "respawnAt": 491728,
             "takenAt": 461728,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 476722,
             "respawnAt": 515397,
             "takenAt": 485397,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 500416,
             "respawnAt": 534007,
             "takenAt": 504007,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 519019
@@ -5421,119 +5694,119 @@
             "respawnAt": 33922,
             "takenAt": 3922,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 18896,
             "respawnAt": 61506,
             "takenAt": 31506,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 46519,
             "respawnAt": 105272,
             "takenAt": 75272,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 90246,
             "respawnAt": 136194,
             "takenAt": 106194,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 121181,
             "respawnAt": 153907,
             "takenAt": 123907,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 138869,
             "respawnAt": 201707,
             "takenAt": 171707,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 186686,
             "respawnAt": 234530,
             "takenAt": 204530,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 219517,
             "respawnAt": 257199,
             "takenAt": 227199,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 242179,
             "respawnAt": 289244,
             "takenAt": 259244,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 274217,
             "respawnAt": 369944,
             "takenAt": 339944,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 354944,
             "respawnAt": 397048,
             "takenAt": 367048,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 382041,
             "respawnAt": 420476,
             "takenAt": 390476,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 405450,
             "respawnAt": 449099,
             "takenAt": 419099,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 434085,
             "respawnAt": 488540,
             "takenAt": 458540,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 473566,
             "respawnAt": 561851,
             "takenAt": 531851,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 546838,
             "respawnAt": 578566,
             "takenAt": 548566,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 563552,
             "respawnAt": 611214,
             "takenAt": 581214,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 596214
@@ -5550,7 +5823,70 @@
         "name": "ssg",
         "phases": [
           {
-            "availableFrom": 0
+            "availableFrom": 0,
+            "respawnAt": 70597,
+            "takenAt": 70597,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 70597,
+            "respawnAt": 214556,
+            "takenAt": 214556,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 214556,
+            "respawnAt": 268763,
+            "takenAt": 268763,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 268763,
+            "respawnAt": 323386,
+            "takenAt": 323386,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 323386,
+            "respawnAt": 391528,
+            "takenAt": 391528,
+            "takenBy": "betowen",
+            "team": "betowen"
+          },
+          {
+            "availableFrom": 391528,
+            "respawnAt": 423112,
+            "takenAt": 423112,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 423112,
+            "respawnAt": 482773,
+            "takenAt": 482773,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 482773,
+            "respawnAt": 502579,
+            "takenAt": 502579,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 502579,
+            "respawnAt": 553980,
+            "takenAt": 553980,
+            "takenBy": "banan falco",
+            "team": "banan falco"
+          },
+          {
+            "availableFrom": 553980
           }
         ],
         "x": 2736,
@@ -5568,21 +5904,21 @@
             "respawnAt": 307087,
             "takenAt": 287087,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 307100,
             "respawnAt": 333243,
             "takenAt": 313243,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 333230,
             "respawnAt": 590798,
             "takenAt": 570798,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 590786
@@ -5603,7 +5939,7 @@
             "respawnAt": 88961,
             "takenAt": 68961,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 88960
@@ -5624,105 +5960,105 @@
             "respawnAt": 26195,
             "takenAt": 6195,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 26194,
             "respawnAt": 53987,
             "takenAt": 33987,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 53986,
             "respawnAt": 128739,
             "takenAt": 108739,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 128700,
             "respawnAt": 148739,
             "takenAt": 128739,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 148722,
             "respawnAt": 168722,
             "takenAt": 148722,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 168713,
             "respawnAt": 193972,
             "takenAt": 173972,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 193958,
             "respawnAt": 226751,
             "takenAt": 206751,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 226737,
             "respawnAt": 281478,
             "takenAt": 261478,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 281465,
             "respawnAt": 362217,
             "takenAt": 342217,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 362204,
             "respawnAt": 389203,
             "takenAt": 369203,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 389191,
             "respawnAt": 412801,
             "takenAt": 392801,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 412788,
             "respawnAt": 441424,
             "takenAt": 421424,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 441384,
             "respawnAt": 461424,
             "takenAt": 441424,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 461417,
             "respawnAt": 481417,
             "takenAt": 461417,
             "takenBy": "banan falco",
-            "team": "coop"
+            "team": "banan falco"
           },
           {
             "availableFrom": 481423,
             "respawnAt": 554247,
             "takenAt": 534247,
             "takenBy": "betowen",
-            "team": "red"
+            "team": "betowen"
           },
           {
             "availableFrom": 554253
@@ -10242,7 +10578,7 @@
       "timelimit": "10"
     }
   },
-  "schemaVersion": 43,
+  "schemaVersion": 44,
   "shots": {
     "byPlayer": [
       {
@@ -10271,7 +10607,7 @@
           }
         ],
         "player": "banan falco",
-        "team": "coop",
+        "team": "banan falco",
         "total": 201
       },
       {
@@ -10300,7 +10636,7 @@
           }
         ],
         "player": "betowen",
-        "team": "red",
+        "team": "betowen",
         "total": 216
       }
     ],
@@ -10372,56 +10708,56 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 4312,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 6728,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 8403,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 9909,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 14143,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 14338,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 17025,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 17650,
         "weapon": "gl"
       },
@@ -10429,7 +10765,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 23922,
         "victims": [
           "betowen",
@@ -10441,7 +10777,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 24000,
         "victims": [
           "betowen",
@@ -10452,14 +10788,14 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 24805,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 24844,
         "weapon": "rl"
       },
@@ -10467,7 +10803,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 25610,
         "victims": [
           "banan falco"
@@ -10477,49 +10813,49 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 27013,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 29299,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 33753,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 33870,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 35429,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 36831,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 37221,
         "weapon": "rl"
       },
@@ -10527,7 +10863,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 37610,
         "victims": [
           "banan falco"
@@ -10537,7 +10873,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 38038,
         "weapon": "rl"
       },
@@ -10545,7 +10881,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 38428,
         "victims": [
           "banan falco"
@@ -10556,7 +10892,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 39013,
         "victims": [
           "betowen",
@@ -10567,14 +10903,14 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 43947,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 44805,
         "weapon": "sg"
       },
@@ -10582,7 +10918,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 44961,
         "victims": [
           "betowen"
@@ -10593,7 +10929,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 45817,
         "victims": [
           "betowen"
@@ -10604,7 +10940,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 49493,
         "victims": [
           "banan falco"
@@ -10614,21 +10950,21 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 49843,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 50687,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 50961,
         "weapon": "rl"
       },
@@ -10636,7 +10972,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 51506,
         "victims": [
           "betowen"
@@ -10646,7 +10982,7 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 52051,
         "weapon": "rl"
       },
@@ -10654,7 +10990,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 52468,
         "victims": [
           "banan falco"
@@ -10665,7 +11001,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 53013,
         "victims": [
           "banan falco"
@@ -10675,7 +11011,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 53247,
         "weapon": "rl"
       },
@@ -10683,7 +11019,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 53792,
         "victims": [
           "banan falco"
@@ -10693,7 +11029,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 54103,
         "weapon": "rl"
       },
@@ -10701,7 +11037,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 54766,
         "victims": [
           "banan falco"
@@ -10712,7 +11048,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 58844,
         "victims": [
           "banan falco"
@@ -10722,7 +11058,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 59038,
         "weapon": "sg"
       },
@@ -10730,7 +11066,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 59623,
         "victims": [
           "banan falco"
@@ -10741,7 +11077,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 59662,
         "victims": [
           "betowen"
@@ -10752,7 +11088,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 64830,
         "victims": [
           "banan falco"
@@ -10763,7 +11099,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 65447,
         "victims": [
           "betowen"
@@ -10773,14 +11109,14 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 68493,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 76051,
         "weapon": "rl"
       },
@@ -10788,7 +11124,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 79143,
         "victims": [
           "betowen"
@@ -10799,7 +11135,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 80078,
         "victims": [
           "betowen",
@@ -10810,7 +11146,7 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 80272,
         "weapon": "sg"
       },
@@ -10818,7 +11154,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 80778,
         "victims": [
           "banan falco"
@@ -10829,7 +11165,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 80895,
         "victims": [
           "betowen",
@@ -10841,7 +11177,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 84337,
         "victims": [
           "betowen"
@@ -10852,7 +11188,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 85116,
         "victims": [
           "betowen"
@@ -10862,28 +11198,28 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 87142,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 88531,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 89000,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 90129,
         "weapon": "rl"
       },
@@ -10891,7 +11227,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 91597,
         "victims": [
           "banan falco"
@@ -10901,70 +11237,70 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 92259,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 92376,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 93077,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 93194,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 93973,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 94168,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 96649,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 96921,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 98402,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 99220,
         "weapon": "rl"
       },
@@ -10972,7 +11308,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 100155,
         "victims": [
           "betowen"
@@ -10982,7 +11318,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 104323,
         "weapon": "rl"
       },
@@ -10990,7 +11326,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 110869,
         "victims": [
           "betowen"
@@ -11001,7 +11337,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 111753,
         "victims": [
           "betowen"
@@ -11011,14 +11347,14 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 112558,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 112752,
         "weapon": "rl"
       },
@@ -11026,7 +11362,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 113531,
         "victims": [
           "banan falco"
@@ -11036,28 +11372,28 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 114116,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 115285,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 115791,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 116090,
         "weapon": "rl"
       },
@@ -11065,7 +11401,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 116635,
         "victims": [
           "betowen"
@@ -11075,56 +11411,56 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 116947,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 117493,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 117765,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 118272,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 118576,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 119290,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 119369,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 121064,
         "weapon": "rl"
       },
@@ -11132,7 +11468,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 121882,
         "victims": [
           "betowen"
@@ -11142,28 +11478,28 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 123090,
         "weapon": "ssg"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 129817,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 130090,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 130597,
         "weapon": "sg"
       },
@@ -11171,7 +11507,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 130714,
         "victims": [
           "betowen"
@@ -11181,7 +11517,7 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 131103,
         "weapon": "sg"
       },
@@ -11189,7 +11525,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 131609,
         "victims": [
           "banan falco"
@@ -11200,7 +11536,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 131609,
         "victims": [
           "betowen"
@@ -11211,7 +11547,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 132116,
         "victims": [
           "banan falco"
@@ -11221,21 +11557,21 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 132505,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 132622,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 133168,
         "weapon": "sg"
       },
@@ -11243,7 +11579,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 133324,
         "victims": [
           "betowen",
@@ -11254,35 +11590,35 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 143011,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 147908,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 151544,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 152544,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 153245,
         "weapon": "gl"
       },
@@ -11290,7 +11626,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 153518,
         "victims": [
           "betowen"
@@ -11300,21 +11636,21 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 153947,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 154725,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 155193,
         "weapon": "rl"
       },
@@ -11322,7 +11658,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 155972,
         "victims": [
           "betowen"
@@ -11332,21 +11668,21 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 157173,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 157285,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 157791,
         "weapon": "gl"
       },
@@ -11354,7 +11690,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 158141,
         "victims": [
           "betowen"
@@ -11364,28 +11700,28 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 158414,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 158959,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 159037,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 159621,
         "weapon": "gl"
       },
@@ -11393,7 +11729,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 159972,
         "victims": [
           "betowen"
@@ -11403,21 +11739,21 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 160245,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 160752,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 160869,
         "weapon": "gl"
       },
@@ -11425,7 +11761,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 161446,
         "victims": [
           "banan falco"
@@ -11435,42 +11771,42 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 161563,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 162063,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 162531,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 162687,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 163349,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 163466,
         "weapon": "gl"
       },
@@ -11478,7 +11814,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 164051,
         "victims": [
           "banan falco"
@@ -11488,21 +11824,21 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 164284,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 164674,
         "weapon": "sg"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 165089,
         "weapon": "rl"
       },
@@ -11510,7 +11846,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 166103,
         "victims": [
           "betowen"
@@ -11520,42 +11856,42 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 170115,
         "weapon": "ssg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 172621,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 175439,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 179726,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 182219,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 182764,
         "weapon": "rl"
       },
@@ -11563,7 +11899,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 188362,
         "victims": [
           "betowen"
@@ -11574,7 +11910,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 188751,
         "victims": [
           "betowen"
@@ -11584,42 +11920,42 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 189530,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 189571,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 190154,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 192141,
         "weapon": "ssg"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 196686,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 197491,
         "weapon": "rl"
       },
@@ -11627,7 +11963,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 197530,
         "victims": [
           "banan falco"
@@ -11637,7 +11973,7 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 198336,
         "weapon": "rl"
       },
@@ -11645,7 +11981,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 198920,
         "victims": [
           "betowen"
@@ -11656,7 +11992,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 199193,
         "victims": [
           "betowen"
@@ -11667,7 +12003,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 199778,
         "victims": [
           "betowen"
@@ -11678,7 +12014,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 199965,
         "victims": [
           "banan falco"
@@ -11689,7 +12025,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 200648,
         "victims": [
           "betowen"
@@ -11700,7 +12036,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 200803,
         "victims": [
           "banan falco"
@@ -11710,7 +12046,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 201491,
         "weapon": "rl"
       },
@@ -11718,7 +12054,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 201608,
         "victims": [
           "banan falco"
@@ -11729,7 +12065,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 202427,
         "victims": [
           "banan falco"
@@ -11740,7 +12076,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 206985,
         "victims": [
           "betowen"
@@ -11750,21 +12086,21 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 209271,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 210829,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 224569,
         "weapon": "rl"
       },
@@ -11772,7 +12108,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 227426,
         "victims": [
           "betowen"
@@ -11782,42 +12118,42 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 229640,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 238309,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 242958,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 242997,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 243769,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 243803,
         "weapon": "rl"
       },
@@ -11825,7 +12161,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 244581,
         "victims": [
           "banan falco"
@@ -11836,7 +12172,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 244581,
         "victims": [
           "betowen",
@@ -11847,21 +12183,21 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 245400,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 247297,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 247763,
         "weapon": "sg"
       },
@@ -11869,7 +12205,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 247804,
         "victims": [
           "betowen"
@@ -11879,7 +12215,7 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 248270,
         "weapon": "sg"
       },
@@ -11887,7 +12223,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 248309,
         "victims": [
           "betowen"
@@ -11897,35 +12233,35 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 248842,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 251348,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 252777,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 252881,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 261094,
         "weapon": "sg"
       },
@@ -11933,7 +12269,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 263127,
         "victims": [
           "banan falco"
@@ -11943,63 +12279,63 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 266347,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 266933,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 267556,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 268179,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 268763,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 269426,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 270049,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 270633,
         "weapon": "gl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 271257,
         "weapon": "gl"
       },
@@ -12007,7 +12343,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 271880,
         "victims": [
           "banan falco"
@@ -12017,28 +12353,28 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 272464,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 273049,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 273088,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 275652,
         "weapon": "rl"
       },
@@ -12046,7 +12382,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 277315,
         "victims": [
           "banan falco"
@@ -12056,42 +12392,42 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 277620,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 278127,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 278440,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 278907,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 279724,
         "weapon": "ng"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 279802,
         "weapon": "ng"
       },
@@ -12099,7 +12435,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 280413,
         "victims": [
           "banan falco"
@@ -12109,7 +12445,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 280607,
         "weapon": "rl"
       },
@@ -12117,7 +12453,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 281192,
         "victims": [
           "banan falco"
@@ -12128,7 +12464,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 281425,
         "victims": [
           "betowen"
@@ -12138,70 +12474,70 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 283010,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 295191,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 305269,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 307373,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 307958,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 308958,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 310749,
         "weapon": "gl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 313633,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 318269,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 318971,
         "weapon": "sg"
       },
@@ -12209,7 +12545,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 336632,
         "victims": [
           "betowen",
@@ -12221,7 +12557,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 336671,
         "victims": [
           "banan falco",
@@ -12232,7 +12568,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 337451,
         "weapon": "rl"
       },
@@ -12240,7 +12576,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 337490,
         "victims": [
           "banan falco"
@@ -12250,7 +12586,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 338269,
         "weapon": "rl"
       },
@@ -12258,7 +12594,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 338308,
         "victims": [
           "betowen",
@@ -12269,21 +12605,21 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 341295,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 345697,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 347879,
         "weapon": "rl"
       },
@@ -12291,7 +12627,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 348697,
         "victims": [
           "banan falco"
@@ -12302,7 +12638,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 349516,
         "victims": [
           "banan falco"
@@ -12312,14 +12648,14 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 350217,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 350334,
         "weapon": "rl"
       },
@@ -12327,7 +12663,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 351035,
         "victims": [
           "betowen"
@@ -12338,7 +12674,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 351152,
         "victims": [
           "banan falco"
@@ -12349,7 +12685,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 351874,
         "victims": [
           "betowen"
@@ -12359,42 +12695,42 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 352145,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 355021,
         "weapon": "sg"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 355957,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 358399,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 359412,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 365879,
         "weapon": "rl"
       },
@@ -12402,7 +12738,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 372502,
         "victims": [
           "betowen"
@@ -12413,7 +12749,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 372736,
         "victims": [
           "banan falco"
@@ -12424,7 +12760,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 373235,
         "victims": [
           "banan falco"
@@ -12435,7 +12771,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 373658,
         "victims": [
           "betowen"
@@ -12446,7 +12782,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 373775,
         "victims": [
           "banan falco"
@@ -12457,7 +12793,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 374281,
         "victims": [
           "banan falco"
@@ -12467,21 +12803,21 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 374554,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 374749,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 379372,
         "weapon": "rl"
       },
@@ -12489,7 +12825,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 379645,
         "victims": [
           "betowen"
@@ -12499,56 +12835,56 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 381191,
         "weapon": "sg"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 381697,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 382430,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 382502,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 383619,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 384242,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 384472,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 385697,
         "weapon": "rl"
       },
@@ -12556,7 +12892,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 387281,
         "victims": [
           "banan falco"
@@ -12566,70 +12902,70 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 387632,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 395334,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 398008,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 398827,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 398944,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 399723,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 400501,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 401866,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 402671,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 403281,
         "weapon": "rl"
       },
@@ -12637,7 +12973,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 403476,
         "victims": [
           "banan falco"
@@ -12647,49 +12983,49 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 404397,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 404437,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 405450,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 405645,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 406256,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 407853,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 409696,
         "weapon": "rl"
       },
@@ -12697,7 +13033,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 410892,
         "victims": [
           "banan falco"
@@ -12708,7 +13044,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 410969,
         "victims": [
           "betowen"
@@ -12719,7 +13055,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 411709,
         "victims": [
           "betowen",
@@ -12731,7 +13067,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 411748,
         "victims": [
           "betowen",
@@ -12743,7 +13079,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 413645,
         "victims": [
           "banan falco"
@@ -12754,7 +13090,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 413645,
         "victims": [
           "betowen"
@@ -12765,7 +13101,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 414152,
         "victims": [
           "betowen"
@@ -12775,21 +13111,21 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 414462,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 415001,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 415424,
         "weapon": "rl"
       },
@@ -12797,7 +13133,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 416930,
         "victims": [
           "betowen"
@@ -12807,21 +13143,21 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 417008,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 425801,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 427313,
         "weapon": "rl"
       },
@@ -12829,7 +13165,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 428048,
         "victims": [
           "banan falco"
@@ -12839,7 +13175,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 428281,
         "weapon": "rl"
       },
@@ -12847,7 +13183,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 428865,
         "victims": [
           "banan falco"
@@ -12857,7 +13193,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 429060,
         "weapon": "rl"
       },
@@ -12865,7 +13201,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 429684,
         "victims": [
           "betowen",
@@ -12876,7 +13212,7 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 443359,
         "weapon": "rl"
       },
@@ -12884,7 +13220,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 444177,
         "victims": [
           "banan falco"
@@ -12894,7 +13230,7 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 445066,
         "weapon": "rl"
       },
@@ -12902,7 +13238,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 445261,
         "victims": [
           "betowen"
@@ -12913,7 +13249,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 445910,
         "victims": [
           "banan falco"
@@ -12924,7 +13260,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 446449,
         "victims": [
           "betowen"
@@ -12934,14 +13270,14 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 446722,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 447306,
         "weapon": "rl"
       },
@@ -12949,7 +13285,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 447541,
         "victims": [
           "banan falco"
@@ -12959,126 +13295,126 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 448281,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 448436,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 449099,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 449255,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 450423,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 450813,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 453612,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 454528,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 455346,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 456164,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 456904,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 457253,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 458813,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 460371,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 464177,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 465579,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 465813,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 466397,
         "weapon": "rl"
       },
@@ -13086,7 +13422,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 466813,
         "victims": [
           "betowen"
@@ -13096,14 +13432,14 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 467196,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 467949,
         "weapon": "rl"
       },
@@ -13111,7 +13447,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 467988,
         "victims": [
           "banan falco"
@@ -13121,7 +13457,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 468747,
         "weapon": "rl"
       },
@@ -13129,7 +13465,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 468787,
         "victims": [
           "banan falco"
@@ -13139,14 +13475,14 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 469605,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 469605,
         "weapon": "rl"
       },
@@ -13154,7 +13490,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 470423,
         "victims": [
           "banan falco"
@@ -13165,7 +13501,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 470462,
         "victims": [
           "betowen"
@@ -13175,14 +13511,14 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 471241,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 471280,
         "weapon": "rl"
       },
@@ -13190,7 +13526,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 472020,
         "victims": [
           "banan falco"
@@ -13201,7 +13537,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 472099,
         "victims": [
           "betowen"
@@ -13211,105 +13547,105 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 474540,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 484747,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 486124,
         "weapon": "sg"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 492890,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 492929,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 493696,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 493735,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 494515,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 494515,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 498436,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 503812,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 505137,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 506326,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 513150,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 513955,
         "weapon": "rl"
       },
@@ -13317,7 +13653,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 513994,
         "victims": [
           "betowen"
@@ -13328,7 +13664,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 516436,
         "victims": [
           "banan falco"
@@ -13338,14 +13674,14 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 517682,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 518598,
         "weapon": "rl"
       },
@@ -13353,7 +13689,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 519488,
         "victims": [
           "betowen"
@@ -13363,14 +13699,14 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 519878,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 523266,
         "weapon": "rl"
       },
@@ -13378,7 +13714,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 526228,
         "victims": [
           "banan falco"
@@ -13389,7 +13725,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 526461,
         "victims": [
           "betowen",
@@ -13401,7 +13737,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 529292,
         "victims": [
           "betowen"
@@ -13412,7 +13748,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 529410,
         "victims": [
           "banan falco"
@@ -13423,7 +13759,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 530189,
         "victims": [
           "betowen"
@@ -13433,7 +13769,7 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 532124,
         "weapon": "ssg"
       },
@@ -13441,7 +13777,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 538838,
         "victims": [
           "banan falco"
@@ -13452,7 +13788,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 540350,
         "victims": [
           "betowen"
@@ -13462,7 +13798,7 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 540580,
         "weapon": "rl"
       },
@@ -13470,7 +13806,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 541163,
         "victims": [
           "betowen",
@@ -13482,7 +13818,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 541591,
         "victims": [
           "banan falco"
@@ -13493,7 +13829,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 542097,
         "victims": [
           "betowen"
@@ -13504,7 +13840,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 542409,
         "victims": [
           "banan falco"
@@ -13515,7 +13851,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 542994,
         "victims": [
           "betowen"
@@ -13526,7 +13862,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 543344,
         "victims": [
           "betowen",
@@ -13538,7 +13874,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 545097,
         "victims": [
           "betowen"
@@ -13549,7 +13885,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 545176,
         "victims": [
           "banan falco"
@@ -13559,14 +13895,14 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 545597,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 545981,
         "weapon": "rl"
       },
@@ -13574,7 +13910,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 546097,
         "victims": [
           "betowen"
@@ -13585,7 +13921,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 546604,
         "victims": [
           "betowen"
@@ -13596,7 +13932,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 556850,
         "victims": [
           "betowen"
@@ -13606,35 +13942,35 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 558110,
         "weapon": "sg"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 561239,
         "weapon": "sg"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 561311,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 562812,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 563123,
         "weapon": "rl"
       },
@@ -13642,7 +13978,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 563630,
         "victims": [
           "banan falco"
@@ -13652,63 +13988,63 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 564332,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 567837,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 568461,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 572123,
         "weapon": "ssg"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 575033,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 579896,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 586623,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 587428,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 588240,
         "weapon": "rl"
       },
@@ -13716,7 +14052,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 590278,
         "victims": [
           "betowen"
@@ -13726,14 +14062,14 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 590591,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 591409,
         "weapon": "rl"
       },
@@ -13741,7 +14077,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 591487,
         "victims": [
           "betowen"
@@ -13752,7 +14088,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 592220,
         "victims": [
           "betowen",
@@ -13763,21 +14099,21 @@
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 592721,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 593032,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 593577,
         "weapon": "rl"
       },
@@ -13785,7 +14121,7 @@
         "hit": true,
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 593850,
         "victims": [
           "betowen"
@@ -13796,7 +14132,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 594396,
         "victims": [
           "betowen"
@@ -13806,7 +14142,7 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 594707,
         "weapon": "rl"
       },
@@ -13814,7 +14150,7 @@
         "hit": true,
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 595363,
         "victims": [
           "betowen",
@@ -13825,35 +14161,35 @@
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 595480,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 596253,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 598902,
         "weapon": "rl"
       },
       {
         "player": "betowen",
         "source": "sound",
-        "team": "red",
+        "team": "betowen",
         "time": 599285,
         "weapon": "rl"
       },
       {
         "player": "banan falco",
         "source": "sound",
-        "team": "coop",
+        "team": "banan falco",
         "time": 600058,
         "warmup": true,
         "weapon": "rl"
@@ -282989,7 +283325,7 @@
     "airgibs": [
       {
         "attacker": "banan falco",
-        "attackerTeam": "coop",
+        "attackerTeam": "banan falco",
         "attackerUserID": 39,
         "damage": 110,
         "height": 376.96875,
@@ -282997,12 +283333,12 @@
         "loc": "floating",
         "time": 156362,
         "victim": "betowen",
-        "victimTeam": "red",
+        "victimTeam": "betowen",
         "victimUserID": 37
       },
       {
         "attacker": "banan falco",
-        "attackerTeam": "coop",
+        "attackerTeam": "banan falco",
         "attackerUserID": 39,
         "damage": 110,
         "height": 115.21875,
@@ -283010,7 +283346,7 @@
         "loc": "big.stairs",
         "time": 469683,
         "victim": "betowen",
-        "victimTeam": "red",
+        "victimTeam": "betowen",
         "victimUserID": 37
       }
     ],
@@ -284604,184 +284940,602 @@
   },
   "weaponPickups": [
     {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 25844,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 156,
+      "weapon": "ng"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 1,
+      "nextDeathTime": 39091,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 2208,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 25844,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 8286,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 25844,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 14727,
+      "weapon": "gl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 2,
+      "nextDeathTime": 54766,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 36000,
+      "weapon": "rl"
+    },
+    {
       "backpackEnt": 127,
       "dropTime": 39091,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 54766,
       "player": "banan falco",
       "source": "backpack",
-      "team": "coop",
+      "team": "banan falco",
       "time": 40532,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 1,
+      "nextDeathTime": 65636,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 47902,
       "weapon": "rl"
     },
     {
       "backpackEnt": 127,
       "dropTime": 54766,
       "dropper": "banan falco",
-      "dropperTeam": "coop",
+      "dropperTeam": "banan falco",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 65636,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 56168,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 59896,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 59038,
       "weapon": "rl"
     },
     {
       "backpackEnt": 128,
       "dropTime": 59896,
       "dropper": "banan falco",
-      "dropperTeam": "coop",
+      "dropperTeam": "banan falco",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 65636,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 61520,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 6,
+      "nextDeathTime": 202895,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 65064,
       "weapon": "rl"
     },
     {
       "backpackEnt": 37,
       "dropTime": 65636,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 202895,
       "player": "banan falco",
       "source": "backpack",
-      "team": "coop",
+      "team": "banan falco",
       "time": 66220,
       "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 202895,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 70597,
+      "weapon": "ssg"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 100506,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 87986,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 122778,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 110986,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 286113,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 152128,
+      "weapon": "gl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 2,
+      "nextDeathTime": 286113,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 169336,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 202895,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 178518,
+      "weapon": "gl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 286113,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 198264,
+      "weapon": "ng"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 245400,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 210790,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 245400,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 214556,
+      "weapon": "ssg"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 245400,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 232686,
+      "weapon": "gl"
     },
     {
       "backpackEnt": 127,
       "dropTime": 245400,
       "dropper": "banan falco",
-      "dropperTeam": "coop",
+      "dropperTeam": "banan falco",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 286113,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 246334,
       "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 338348,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 251893,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 338348,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 268763,
+      "weapon": "ssg"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 1,
+      "nextDeathTime": 352411,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 288392,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 338348,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 304529,
+      "weapon": "gl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 352411,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 323386,
+      "weapon": "ssg"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 338348,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 323879,
+      "weapon": "ng"
     },
     {
       "backpackEnt": 130,
       "dropTime": 338348,
       "dropper": "banan falco",
-      "dropperTeam": "coop",
+      "dropperTeam": "banan falco",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 352411,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 339282,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 352411,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 343944,
+      "weapon": "ng"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 3,
+      "nextDeathTime": 387632,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 344294,
       "weapon": "rl"
     },
     {
       "backpackEnt": 129,
       "dropTime": 352411,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 387632,
       "player": "banan falco",
       "source": "backpack",
-      "team": "coop",
+      "team": "banan falco",
       "time": 354671,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 379917,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 376424,
       "weapon": "rl"
     },
     {
       "backpackEnt": 135,
       "dropTime": 379917,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 387632,
       "player": "banan falco",
       "source": "backpack",
-      "team": "coop",
+      "team": "banan falco",
       "time": 381119,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 1,
+      "nextDeathTime": 417281,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 382003,
       "weapon": "rl"
     },
     {
       "backpackEnt": 133,
       "dropTime": 387632,
       "dropper": "banan falco",
-      "dropperTeam": "coop",
+      "dropperTeam": "banan falco",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 417281,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 390164,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 417281,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 391528,
+      "weapon": "ssg"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 411819,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 394827,
       "weapon": "rl"
     },
     {
       "backpackEnt": 131,
       "dropTime": 411819,
       "dropper": "banan falco",
-      "dropperTeam": "coop",
+      "dropperTeam": "banan falco",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 417281,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 412788,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 1,
+      "nextDeathTime": 429762,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 416852,
       "weapon": "rl"
     },
     {
       "backpackEnt": 135,
       "dropTime": 417281,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 429762,
       "player": "banan falco",
       "source": "backpack",
-      "team": "coop",
+      "team": "banan falco",
       "time": 418684,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 429762,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 423112,
+      "weapon": "ssg"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 2,
+      "nextDeathTime": 472371,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 423618,
       "weapon": "rl"
     },
     {
       "backpackEnt": 134,
       "dropTime": 429762,
       "dropper": "banan falco",
-      "dropperTeam": "coop",
+      "dropperTeam": "banan falco",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 472371,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 430878,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 472293,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 445222,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 472293,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 464410,
+      "weapon": "gl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 494515,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 473254,
+      "weapon": "ng"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 494515,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 473760,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 1,
+      "nextDeathTime": 494515,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 478670,
       "weapon": "rl"
     },
     {
       "backpackEnt": 130,
       "dropTime": 472293,
       "dropper": "banan falco",
-      "dropperTeam": "coop",
+      "dropperTeam": "banan falco",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 494515,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 479527,
       "weapon": "rl"
     },
@@ -284789,27 +285543,49 @@
       "backpackEnt": 131,
       "dropTime": 472371,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 494515,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 480339,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 494515,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 482773,
+      "weapon": "ssg"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 2,
+      "nextDeathTime": 543383,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 496424,
       "weapon": "rl"
     },
     {
       "backpackEnt": 128,
       "dropTime": 494515,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 514306,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 497618,
       "weapon": "rl"
     },
@@ -284817,41 +285593,74 @@
       "backpackEnt": 134,
       "dropTime": 494515,
       "dropper": "banan falco",
-      "dropperTeam": "coop",
+      "dropperTeam": "banan falco",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 514306,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 497773,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 1,
+      "nextDeathTime": 543383,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 502579,
+      "weapon": "ssg"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 519878,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 516942,
       "weapon": "rl"
     },
     {
       "backpackEnt": 131,
       "dropTime": 519878,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543383,
       "player": "banan falco",
       "source": "backpack",
-      "team": "coop",
+      "team": "banan falco",
       "time": 521202,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 530189,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 529292,
       "weapon": "rl"
     },
     {
       "backpackEnt": 127,
       "dropTime": 530189,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543383,
       "player": "banan falco",
       "source": "backpack",
-      "team": "coop",
+      "team": "banan falco",
       "time": 530968,
       "weapon": "rl"
     },
@@ -284859,27 +285668,38 @@
       "backpackEnt": 37,
       "dropTime": 514306,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 546604,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 531662,
       "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 546604,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 536519,
+      "weapon": "gl"
     },
     {
       "backpackEnt": 127,
       "dropTime": 543383,
       "dropper": "banan falco",
-      "dropperTeam": "coop",
+      "dropperTeam": "banan falco",
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 546604,
       "player": "betowen",
       "source": "backpack",
-      "team": "red",
+      "team": "betowen",
       "time": 544357,
       "weapon": "rl"
     },
@@ -284887,26 +285707,68 @@
       "backpackEnt": 37,
       "dropTime": 546604,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": false,
       "kills": 1,
       "player": "banan falco",
       "source": "backpack",
-      "team": "coop",
+      "team": "banan falco",
       "time": 547766,
       "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 595558,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 553591,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "player": "banan falco",
+      "source": "world",
+      "team": "banan falco",
+      "time": 553980,
+      "weapon": "ssg"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "nextDeathTime": 595558,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 589422,
+      "weapon": "gl"
     },
     {
       "backpackEnt": 127,
       "dropTime": 595558,
       "dropper": "betowen",
-      "dropperTeam": "red",
+      "dropperTeam": "betowen",
       "hadBefore": true,
       "kills": 0,
       "player": "banan falco",
       "source": "backpack",
-      "team": "coop",
+      "team": "banan falco",
       "time": 596136,
+      "weapon": "rl"
+    },
+    {
+      "hadBefore": false,
+      "inferred": true,
+      "kills": 0,
+      "player": "betowen",
+      "source": "world",
+      "team": "betowen",
+      "time": 598513,
       "weapon": "rl"
     }
   ]

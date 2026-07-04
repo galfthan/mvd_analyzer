@@ -69,6 +69,18 @@ type ItemAnalyzer struct {
 	heldMHs      map[int][]int   // slot -> MH entNums they currently hold
 	playerHealth map[int]int     // slot -> last seen StatHealth value
 
+	// Weapon-stay support (deathmatch 2/3/5, coop): weapon entities
+	// never emit a Taken transition there, so weapon phases are closed
+	// from STAT_ITEMS bit flips instead (synthesizeWeaponStayPickup).
+	// wsFlips owns the flip baseline and its boundary rules;
+	// packWeapon maps a dropped backpack's entNum to its weapon kind;
+	// recentPackGrant remembers the last //ktx bp grant per slot+kind
+	// so a pack-sourced bit flip isn't misread as a pad pickup.
+	weaponStay      weaponStayDetector
+	wsFlips         weaponFlipTracker
+	packWeapon      map[int]string
+	recentPackGrant map[int]map[string]float64
+
 	// Per-source attribution counters surfaced by the diagnostic harness.
 	attrCounts map[string]int
 
@@ -217,6 +229,8 @@ func NewItemAnalyzer() *ItemAnalyzer {
 		mhPickup:            make(map[int]float64),
 		heldMHs:             make(map[int][]int),
 		playerHealth:        make(map[int]int),
+		packWeapon:          make(map[int]string),
+		recentPackGrant:     make(map[int]map[string]float64),
 		attrCounts:          make(map[string]int),
 		syntheticEnabled:    true,
 		syntheticChain:      make(map[int]*syntheticSchedule),
@@ -250,6 +264,22 @@ func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 	case *events.StuffTextEvent:
 		if strings.HasPrefix(e.Command, "fullserverinfo ") {
 			a.extractMapName(e.Command)
+		}
+		a.weaponStay.OnStuffText(e)
+	case *events.ServerInfoEvent:
+		a.weaponStay.OnServerInfo(e)
+	case *events.BackpackDropHintEvent:
+		if w := weaponFromItemFlags(e.ItemFlags); w != "" {
+			a.packWeapon[e.BackpackEnt] = w
+		}
+	case *events.BackpackPickupHintEvent:
+		if w, ok := a.packWeapon[e.BackpackEnt]; ok {
+			slot := e.PlayerEnt - 1
+			if a.recentPackGrant[slot] == nil {
+				a.recentPackGrant[slot] = make(map[string]float64)
+			}
+			a.recentPackGrant[slot][w] = e.Time
+			delete(a.packWeapon, e.BackpackEnt)
 		}
 	case *events.PlayerPositionEvent:
 		o := [3]float32{e.Origin[0], e.Origin[1], e.Origin[2]}
@@ -792,6 +822,20 @@ func (a *ItemAnalyzer) handleItemPickupPrint(e *events.ItemPickupPrintEvent) {
 //     can be stamped at the >100→<=100 crossing.
 //   - Mirror IT_SUPERHEALTH bit clearing as a backup rot-end signal.
 func (a *ItemAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) {
+	// Weapon-stay flip tracking runs outside the match gate: the
+	// baseline must be maintained through warmup (a player's first
+	// in-match update can already BE their first pickup) and across
+	// death frames — see weaponFlipTracker. Only the synthesis itself
+	// is match-gated.
+	if e.StatIndex == events.StatItems && a.weaponStay.WeaponStay() {
+		kinds := a.wsFlips.Observe(e.PlayerNum, e.Value, e.Time)
+		if a.timing.Started && !a.timing.Ended {
+			for _, kind := range kinds {
+				a.synthesizeWeaponStayPickup(e.PlayerNum, kind, e.Time)
+			}
+		}
+	}
+
 	if !a.timing.Started || a.timing.Ended {
 		return
 	}
@@ -909,22 +953,22 @@ func (a *ItemAnalyzer) classifyStatDelta(e *events.StatUpdateEvent) {
 		}
 		// Weapons.
 		if newlySet&events.ITSuperShotgun != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"ssg"})
+			a.weaponBitGained(e.PlayerNum, "ssg", e.Time)
 		}
 		if newlySet&events.ITNailgun != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"ng"})
+			a.weaponBitGained(e.PlayerNum, "ng", e.Time)
 		}
 		if newlySet&events.ITSuperNailgun != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"sng"})
+			a.weaponBitGained(e.PlayerNum, "sng", e.Time)
 		}
 		if newlySet&events.ITGrenadeLauncher != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"gl"})
+			a.weaponBitGained(e.PlayerNum, "gl", e.Time)
 		}
 		if newlySet&events.ITRocketLauncher != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"rl"})
+			a.weaponBitGained(e.PlayerNum, "rl", e.Time)
 		}
 		if newlySet&events.ITLightning != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"lg"})
+			a.weaponBitGained(e.PlayerNum, "lg", e.Time)
 		}
 		// Powerups.
 		if newlySet&events.ITQuad != 0 {
@@ -946,6 +990,82 @@ func (a *ItemAnalyzer) classifyStatDelta(e *events.StatUpdateEvent) {
 			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"mh"})
 		}
 	}
+}
+
+// weaponBitGained routes a STAT_ITEMS weapon-bit 0→1 transition. In
+// normal modes it becomes Layer-3 stat evidence for the attribution
+// pipeline; in weapon-stay modes there is no Taken transition coming
+// for weapons — the wsFlips tracker path in handleStatUpdate owns the
+// synthesis instead (it needs boundary rules the match-gated snapshot
+// this delta came from can't provide).
+func (a *ItemAnalyzer) weaponBitGained(slot int, kind string, t float64) {
+	if a.weaponStay.WeaponStay() {
+		return
+	}
+	a.pushStatEvidence(slot, t, []string{kind})
+}
+
+// synthesizeWeaponStayPickup closes and reopens a weapon entity's phase
+// for a weapon-stay grant. In weapon-stay modes (KTX weapon_touch's
+// `leave` flag, ktx/src/items.c:835) the weapon keeps its model, so the
+// timeline records the pickup as a zero-length unavailability:
+// TakenAt == RespawnAt == t, with the next phase opening at the same
+// instant — the item was never actually off the map.
+//
+// The entity is chosen by proximity: nearest same-kind entity the slot
+// passed within the pickup distance gate of during the stat lag window.
+// Unlike the hint/entity paths this can misfire in principle, but the
+// picker is standing on the pad when the bit flips, so in practice the
+// gate is tight. No candidate → no phase (a non-RL/LG backpack grant
+// away from any pad lands here; WeaponPickupsAnalyzer still records it
+// kind-level with source "unknown").
+func (a *ItemAnalyzer) synthesizeWeaponStayPickup(slot int, kind string, t float64) {
+	// Safety net: if a //ktx took hint for this slot+kind is pending,
+	// the wire path owns the pickup (weapons evidently do disappear —
+	// weapon-stay was mis-detected).
+	for ent, h := range a.pendingHints {
+		if h.playerSlot != slot || absDelta(h.time, t) > hintMatchWindow {
+			continue
+		}
+		if it := a.items[ent]; it != nil && it.kind == kind {
+			return
+		}
+	}
+	// A recent //ktx bp grant of the same kind already explains the
+	// bit flip — that pickup belongs to the backpack, not a pad.
+	if gt, ok := a.recentPackGrant[slot][kind]; ok && absDelta(gt, t) <= statForwardWindow {
+		return
+	}
+	bestEnt := -1
+	var bestDist float32
+	for _, ent := range sortedKeys(a.items) {
+		it := a.items[ent]
+		if it.kind != kind || len(it.phases) == 0 {
+			continue
+		}
+		if it.phases[len(it.phases)-1].TakenAt != 0 {
+			continue // phase closed — not currently on the map
+		}
+		d, ok := minDistSqOverWindow(a.playerPosHist[slot], t-statForwardWindow, t, it.origin)
+		if !ok || d > maxDistanceSqAccept {
+			continue
+		}
+		if bestEnt < 0 || d < bestDist {
+			bestEnt, bestDist = ent, d
+		}
+	}
+	if bestEnt < 0 {
+		return
+	}
+	it := a.items[bestEnt]
+	tMs := msTime(t)
+	last := &it.phases[len(it.phases)-1]
+	last.TakenAt = tMs
+	last.RespawnAt = tMs // weapon-stay: the weapon never left the map
+	it.pickups[len(it.pickups)-1] = phaseAttribution{slot: slot, source: "weaponstay"}
+	it.phases = append(it.phases, ItemPhase{AvailableFrom: tMs})
+	it.pickups = append(it.pickups, phaseAttribution{slot: -1})
+	a.attrCounts["weaponstay"]++
 }
 
 // pushAmmoEvidence emits "any positive delta" evidence for an ammo
@@ -1015,6 +1135,7 @@ func (a *ItemAnalyzer) pruneBuffers(t float64) {
 // doesn't masquerade as pickup deltas. The first stat update for each
 // field re-seeds the baseline silently.
 func (a *ItemAnalyzer) handleSpawn(e *events.SpawnEvent) {
+	a.wsFlips.OnSpawn(e.PlayerNum, e.Time)
 	if !a.timing.Started || a.timing.Ended {
 		return
 	}
@@ -1029,6 +1150,7 @@ func (a *ItemAnalyzer) handleSpawn(e *events.SpawnEvent) {
 // stat snapshot / pending evidence so the upcoming respawn loadout
 // doesn't feed the classifier.
 func (a *ItemAnalyzer) handleDeath(e *events.DeathEvent) {
+	a.wsFlips.OnDeath(e.PlayerNum)
 	if !a.timing.Started || a.timing.Ended {
 		return
 	}

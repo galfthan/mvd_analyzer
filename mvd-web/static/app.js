@@ -2406,9 +2406,14 @@ function weaponCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
     // weap-verify (Σ for hasPack, or single combined cell otherwise).
     let ana;
     if (pickupsMode === 'first') {
-        // first-per-life from weaponPickups (any source for hasPack; world-only entries otherwise).
+        // first-per-life from weaponPickups. hasPack verifies against KTX
+        // `taken` (any source); non-pack weapons verify against
+        // `spawn-taken` (world items only), so unknown-source records
+        // (weapon-stay synthesis that couldn't tie the grant to a pad)
+        // must not inflate the count.
         ana = state.weaponPickups.filter(w =>
-            w.weapon === spec.kind && matches(w) && !w.hadBefore).length;
+            w.weapon === spec.kind && matches(w) && !w.hadBefore
+            && (spec.hasPack || w.source === 'world')).length;
     } else {
         ana = 0;
         const list = state.weaponEntsByKind.get(spec.kind) || [];

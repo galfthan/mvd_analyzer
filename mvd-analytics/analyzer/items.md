@@ -4,6 +4,8 @@
 **Inputs:** `ItemSpawnEvent`, `ItemStateEvent`, `ItemPickupHintEvent`,
             `ItemPickupPrintEvent`, `StatUpdateEvent`,
             `DeathEvent`, `SpawnEvent`, `PrintEvent`, `StuffTextEvent`,
+            `ServerInfoEvent`, `BackpackDropHintEvent`,
+            `BackpackPickupHintEvent` (weapon-stay support),
             `PlayerPositionEvent`, `IntermissionEvent`
 **Writes to Result:** `result.Items` (`*ItemsResult`)
 
@@ -180,6 +182,40 @@ correctly — see the +26..50 two-row evidence rule above.
 
 Synthesis can be disabled per analyser via `SetSyntheticPickups(false)`
 when wire-only behaviour is needed for comparison.
+
+## Weapon-stay synthesis
+
+In weapon-stay modes (serverinfo `deathmatch` 2/3/5 or `coop` — dmm3
+duels/2on2 included) touched weapons keep their model: no
+`ItemStateEvent{Taken}` ever fires for them and KTX skips the weapon
+`//ktx took` (its `weapon_touch` returns through the `leave` branch,
+`ktx/src/items.c:835, 1046-1052`). Neither the phase model above nor
+the insta-regrab synthesis can see those pickups, so a third path
+handles them (`synthesizeWeaponStayPickup`):
+
+1. A `weaponStayDetector` (shared with weapon_pickups.go via
+   `weaponstay.go`) latches `deathmatch`/`coop` from serverinfo. Off →
+   weapon bits keep feeding Layer-3 stat evidence as before.
+2. Flips are detected by a shared `weaponFlipTracker` whose baseline
+   is maintained continuously (warmup included — the first in-match
+   update can already BE the pickup), reset on death (the respawn
+   loadout re-seeds silently; spawn must not reset because the wire
+   orders DEATH → loadout STAT → SPAWN within the death frame), with
+   grants inside a 250 ms post-spawn window dropped as loadout.
+3. On a detected flip, the pickup is attributed to the nearest
+   same-kind entity the slot passed within the distance gate of
+   during the stat-lag window (`[T-0.5s, T]` — the flip can lag the
+   touch, so a point-in-time check would miss fast movers).
+4. The phase closes as a **zero-length unavailability** —
+   `TakenAt == RespawnAt == T`, next phase opening at `T` — because
+   the weapon never actually left the map
+   (`attributionSource = "weaponstay"`). No respawn prediction is
+   scheduled.
+5. Dedup guards: a pending `//ktx took` hint for the same slot+kind
+   (weapon-stay mis-detection) or a recent `//ktx bp` grant of the
+   same kind (backpack, not pad) suppresses the synthesis.
+6. No candidate in range → no phase change; the kind-level pickup is
+   still recorded by weapon_pickups.go with `source: "unknown"`.
 
 ## Display name resolution
 

@@ -134,6 +134,63 @@ func TestNormalizeDuelTeams_MatchRebuildFromDemoInfo(t *testing.T) {
 	}
 }
 
+// Pickup / shot data carries the raw userinfo team stamped at analyzer
+// Finalize time; the duel pass must re-point all of it at the synthetic
+// name-per-player teams or the frontend's team-keyed pickup aggregation
+// buckets everything under stale colour strings.
+func TestNormalizeDuelTeams_PickupAndShotTeamsRewritten(t *testing.T) {
+	r := &Result{
+		DemoInfo: &DemoInfoResult{
+			Players: []DemoInfoPlayer{
+				{Name: "alice", Team: "green"},
+				{Name: "bob", Team: ""},
+			},
+		},
+		Items: &ItemsResult{Items: []ItemTimeline{
+			{Kind: "ra", Phases: []ItemPhase{
+				{TakenAt: 1000, TakenBy: "alice", Team: "green"},
+				{TakenAt: 2000, TakenBy: "bob", Team: ""},
+				{AvailableFrom: 3000}, // open phase — untouched
+			}},
+		}},
+		WeaponPickups: []WeaponPickup{
+			{Player: "alice", Team: "green", Weapon: "rl", Source: "world"},
+			{Player: "bob", Team: "", Weapon: "rl", Source: "backpack",
+				Dropper: "alice", DropperTeam: "green"},
+		},
+		Backpacks: []BackpackDrop{
+			{Player: "alice", Team: "green", Weapon: "rl"},
+		},
+		Shots: &ShotsResult{
+			Shots:    []Shot{{Player: "bob", Team: "", Weapon: "sg"}},
+			ByPlayer: []PlayerShots{{Player: "alice", Team: "green"}},
+		},
+	}
+	normalizeDuelTeams(r)
+
+	phases := r.Items.Items[0].Phases
+	if phases[0].Team != "alice" || phases[1].Team != "bob" {
+		t.Errorf("item phase teams = %q/%q, want alice/bob", phases[0].Team, phases[1].Team)
+	}
+	if phases[2].Team != "" {
+		t.Errorf("open phase team = %q, want untouched empty", phases[2].Team)
+	}
+	if r.WeaponPickups[0].Team != "alice" {
+		t.Errorf("weaponPickups[0].Team = %q, want alice", r.WeaponPickups[0].Team)
+	}
+	if r.WeaponPickups[1].Team != "bob" || r.WeaponPickups[1].DropperTeam != "alice" {
+		t.Errorf("weaponPickups[1] teams = %q/%q, want bob/alice",
+			r.WeaponPickups[1].Team, r.WeaponPickups[1].DropperTeam)
+	}
+	if r.Backpacks[0].Team != "alice" {
+		t.Errorf("backpacks[0].Team = %q, want alice", r.Backpacks[0].Team)
+	}
+	if r.Shots.Shots[0].Team != "bob" || r.Shots.ByPlayer[0].Team != "alice" {
+		t.Errorf("shot teams = %q/%q, want bob/alice",
+			r.Shots.Shots[0].Team, r.Shots.ByPlayer[0].Team)
+	}
+}
+
 func TestNormalizeDuelTeams_NoOpForTeamMatches(t *testing.T) {
 	// 4 players → not a duel → normalizer should leave everything alone.
 	r := &Result{

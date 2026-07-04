@@ -215,6 +215,61 @@ func normalizeDuelTeams(result *Result) {
 			}
 		}
 	}
+
+	// Rewrite pickup-data team labels. ItemAnalyzer / WeaponPickups /
+	// Backpacks finalize before this post-processor runs and stamp the
+	// raw userinfo team on every record, so without this pass the
+	// frontend Pickups tab buckets duel pickups under stale colour
+	// strings that no longer match any player's (rewritten) team.
+	if result.Items != nil {
+		for i := range result.Items.Items {
+			it := &result.Items.Items[i]
+			for j := range it.Phases {
+				ph := &it.Phases[j]
+				if ph.TakenBy == "" {
+					continue
+				}
+				if t, ok := nameToTeam[ph.TakenBy]; ok {
+					ph.Team = t
+				}
+			}
+		}
+	}
+	for i := range result.WeaponPickups {
+		wp := &result.WeaponPickups[i]
+		if t, ok := nameToTeam[wp.Player]; ok {
+			wp.Team = t
+		}
+		if wp.Dropper != "" {
+			if t, ok := nameToTeam[wp.Dropper]; ok {
+				wp.DropperTeam = t
+			}
+		}
+	}
+	for i := range result.Backpacks {
+		bp := &result.Backpacks[i]
+		if t, ok := nameToTeam[bp.Player]; ok {
+			bp.Team = t
+		}
+	}
+
+	// Rewrite shot-stream team labels. aimPost runs after this
+	// post-processor and derives its per-player teams from Shots, so
+	// fixing the stream here also fixes Aim.Players[].Team.
+	if result.Shots != nil {
+		for i := range result.Shots.Shots {
+			s := &result.Shots.Shots[i]
+			if t, ok := nameToTeam[s.Player]; ok {
+				s.Team = t
+			}
+		}
+		for i := range result.Shots.ByPlayer {
+			p := &result.Shots.ByPlayer[i]
+			if t, ok := nameToTeam[p.Player]; ok {
+				p.Team = t
+			}
+		}
+	}
 }
 
 // isDuelResult returns true when the match is a 1v1, using the number
