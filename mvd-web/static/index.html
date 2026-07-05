@@ -956,12 +956,14 @@
                         <span id="aim-mode" class="aim-mode"></span>
                     </div>
                     <div class="aim-desc">
-                        Where the enemy sat relative to the crosshair at each fire.
-                        Each axis is the angular error divided by the target's hull
-                        half-extent, so <strong>±1 (the outlined box) = the edge of
-                        the hull</strong>. The image is the <strong>smoothed density
-                        of shots</strong> (colorbar = shots per bin); a tight bright
-                        spot at the center is good placement. Hover for exact
+                        Where the enemy sat relative to the crosshair at each fire,
+                        in <strong>Quake units at the target's range</strong> — both
+                        axes share the same scale, and <strong>the outlined box is
+                        the player's collision box, true to shape (32 wide × 56
+                        tall)</strong>; viewed corner-on its horizontal silhouette
+                        reads up to ~1.4× wider. The image is the <strong>smoothed
+                        density of shots</strong> (colorbar = shots per bin); a tight
+                        bright spot at the center is good placement. Hover for exact
                         shot/hit counts. Below each image: yaw and pitch histograms
                         of the same fires (shaded band = within the hull edge, rule
                         = dead center; the outermost bins also collect shots beyond

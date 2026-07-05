@@ -11,7 +11,8 @@ package result
 //   - Error is reported both as signed degrees (DYaw/DPitch — the literal
 //     "degrees off the enemy" drift metric) AND normalized by the target's
 //     angular half-size (NYaw/NPitch — comparable across range; |n|<=1 is
-//     roughly on the hitbox). The frontend bins the normalized values.
+//     roughly on the hitbox). The frontend plots offsets in Quake units at
+//     the target, derived from DYaw/DPitch and Dist.
 //   - Hit/miss is Shot.Hit (the Go-linked truth), never re-derived here.
 //   - Target attribution is exact in duels (Mode "duel") and a labeled
 //     nearest-crosshair-enemy heuristic in team games (Mode "team"). A shot

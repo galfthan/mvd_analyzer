@@ -7,6 +7,18 @@ detail.
 
 ## 2026-07-05
 
+- **Crosshair placement plots in true Quake units.** The Aim Stats
+  density images and yaw/pitch marginals plotted hull-normalized error
+  (each axis divided by the target's angular half-extent), so one x
+  unit was ~16-23 qu while one y unit was 28 qu, and the "hull" box
+  drew as a square. Both now plot the offset in Quake units at the
+  target's range (derived from the existing `dyaw`/`dpitch`/`dist`
+  columns — no schema change), the axes share one scale, and the
+  outlined box is the player's collision box true to shape (32 wide ×
+  56 tall; the horizontal silhouette reads up to ~1.4× wider viewed
+  corner-on). Extents ±96 qu × ±64 qu, ticks every hull-width (32 qu),
+  hover read-outs and histogram bins in qu.
+
 - **LG whiff split reclassified: miss / blocked / far (schema v47).**
   The split classified from the beam endpoint only, so every beam that
   stopped on geometry short of its ~600u max range counted as `blocked`
