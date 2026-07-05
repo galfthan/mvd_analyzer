@@ -43,10 +43,11 @@ const (
 	aimHalfH   = 28.0
 
 	// LG beam max length (KTX W_FireLightning traces v_forward·600). A missed
-	// beam within aimLGRangeSlack of this ran its full length without hitting
-	// anything (out of range); shorter means geometry stopped it — Blocked
-	// only when the beam's extension to full range crosses a live enemy hull
-	// (the obstruction denied a would-be hit), plain Miss otherwise.
+	// beam within aimLGRangeSlack of this ran its full length; shorter means
+	// geometry stopped it. Either way the miss is only Blocked / OutOfRange
+	// when the beam's extension (to full range / to infinity respectively)
+	// crosses a live enemy hull — something denied a would-be hit (an
+	// obstruction / the range cap). Plain Miss otherwise.
 	aimLGRange      = 600.0
 	aimLGRangeSlack = 12.0
 )
@@ -450,13 +451,20 @@ func computePlayerAim(player string, shots []Shot, tracks map[string]*result.Pos
 				if beamLen > 0 {
 					dir = [3]float64{(ex - sx) / beamLen, (ey - sy) / beamLen, (ez - sz) / beamLen}
 				}
-				// Blocked = the beam stopped short on geometry and its
-				// extension to full range crosses a live enemy's hull: the
-				// obstruction denied a would-be hit. Only worth computing
-				// when the beam stopped short (a full-length beam hit
-				// nothing) and has a direction to extend.
-				blocked := false
-				if beamLen > 0 && beamLen < aimLGRange-aimLGRangeSlack {
+				// On-target check: does the beam's extension past where it
+				// physically ended cross a live enemy hull? For a beam that
+				// stopped short on geometry the extension runs to max range
+				// (Blocked — the obstruction denied the hit); for a full-
+				// length beam it runs to infinity (OutOfRange — the enemy
+				// was on the line but beyond reach). Everything else is a
+				// plain aim-error Miss.
+				fullLen := beamLen >= aimLGRange-aimLGRangeSlack
+				onTarget := false
+				if beamLen > 0 {
+					extEnd := aimLGRange
+					if fullLen {
+						extEnd = math.Inf(1)
+					}
 					for _, e := range enemies {
 						if !trackCovers(tracks[e], sh.Time) || !aliveAt(e, sh.Time) {
 							continue
@@ -465,19 +473,19 @@ func computePlayerAim(player string, shots []Shot, tracks map[string]*result.Pos
 						if !ok {
 							continue
 						}
-						if segIntersectsHull(start, dir, beamLen, aimLGRange, es.X, es.Y, es.Z) {
-							blocked = true
+						if segIntersectsHull(start, dir, beamLen, extEnd, es.X, es.Y, es.Z) {
+							onTarget = true
 							break
 						}
 					}
 				}
 				switch {
-				case beamLen >= aimLGRange-aimLGRangeSlack:
-					wa.OutOfRange++ // beam ran its full length without hitting anything
-				case blocked:
-					wa.Blocked++ // on target within range — geometry intercepted
+				case !onTarget:
+					wa.Miss++ // aim error — no enemy on the beam's line
+				case fullLen:
+					wa.OutOfRange++ // on target — the enemy was beyond max range
 				default:
-					wa.Miss++ // aim error — the beam connected with nothing
+					wa.Blocked++ // on target within range — geometry intercepted
 				}
 			}
 		}

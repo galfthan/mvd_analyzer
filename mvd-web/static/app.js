@@ -10901,8 +10901,8 @@ function renderAimMode(pa) {
 // player fired, so the percentages are what compare across players. hit% keeps
 // the accuracy colour classes; the miss-type shares stay plain (high ≠ good
 // is weapon-dependent).
-const pctCell = p => `<span class="${getAccuracyClass(p)}">${p.toFixed(0)}%</span>`;
-const pctPlain = p => `${p.toFixed(0)}%`;
+const pctCell = p => `<span class="${getAccuracyClass(p)}">${p.toFixed(1)}%</span>`;
+const pctPlain = p => `${p.toFixed(1)}%`;
 const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
@@ -10924,11 +10924,11 @@ const AIM_COL = {
     splashPct: { h: 'Splash %', t: 'Share of fires that hit via splash only', cell: w => shotShare(w.splash, w) },
     missedPct: { h: 'Missed %', t: 'Share of fires that hit nothing', cell: w => shotShare(w.missed, w) },
     blocked: { h: 'Blocked', t: 'Miss — the beam would have hit an enemy in range, but an object stopped it short', cell: w => w.blocked || 0 },
-    lgMiss: { h: 'Miss', t: 'Miss — aim error (neither blocked nor out of range)', cell: w => w.miss || 0 },
-    far: { h: 'Far', t: 'Miss — beam ran its full ~600u length without hitting anything (out of range)', cell: w => w.outOfRange || 0 },
+    lgMiss: { h: 'Miss', t: 'Miss — aim error, no enemy on the beam\'s line', cell: w => w.miss || 0 },
+    far: { h: 'Far', t: 'Miss — the enemy was on the beam\'s line but beyond its ~600u reach', cell: w => w.outOfRange || 0 },
     blockedPct: { h: 'Blocked %', t: 'Share of fires denied by an object in the way', cell: w => shotShare(w.blocked, w) },
     lgMissPct: { h: 'Miss %', t: 'Share of fires missed on aim', cell: w => shotShare(w.miss, w) },
-    farPct: { h: 'Far %', t: 'Share of fires that ran out of beam range', cell: w => shotShare(w.outOfRange, w) },
+    farPct: { h: 'Far %', t: 'Share of fires denied by beam range', cell: w => shotShare(w.outOfRange, w) },
 };
 // Per-weapon column order: counts first, then the share-of-fires block.
 // SG/SSG lead with the pellet stats.

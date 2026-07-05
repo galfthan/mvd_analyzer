@@ -11,12 +11,14 @@ detail.
   The split classified from the beam endpoint only, so every beam that
   stopped on geometry short of its ~600u max range counted as `blocked`
   — including shafts fired into a wall with nobody behind them, which
-  made Blocked % implausibly high. Now: `blocked` = the beam stopped
-  short on geometry and its extension to full range crosses a live
-  enemy's collision hull (on target and in range — the obstruction
-  denied a would-be hit); `outOfRange` = the beam ran its full length,
-  i.e. hit nothing at all; `miss` = every other whiff, a plain aim
-  error (shares the `miss` field with the SG/SSG pellet split). The
+  made Blocked % implausibly high. Now a whiff only counts as blocked
+  or out of range when the shooter was on target: `blocked` = the beam
+  stopped short on geometry and its extension to full range crosses a
+  live enemy's collision hull (in range — the obstruction denied a
+  would-be hit); `outOfRange` = the beam ran its full length and its
+  extension to infinity crosses a live enemy's hull (denied by reach);
+  `miss` = every other whiff, a plain aim error with no enemy on the
+  beam's line (shares the `miss` field with the SG/SSG pellet split). The
   endpoint-proximity `nearMiss` field is **removed** — with blocked
   detection on the beam line, the near/wide distinction among aim
   errors carried no signal. The Aim Stats LG table now shows Miss /

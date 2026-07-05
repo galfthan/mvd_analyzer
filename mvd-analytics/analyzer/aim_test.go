@@ -369,11 +369,12 @@ func TestAimPostRampTeamFlag(t *testing.T) {
 	}
 }
 
-// Classification of a single missed LG fire: far (the beam ran its full
-// ~600 u length without hitting anything), blocked (it stopped short on
-// geometry and its extension to full range crosses the enemy hull — the
-// obstruction denied a would-be hit), miss (every other whiff — an aim
-// error).
+// Classification of a single missed LG fire: blocked (the beam stopped
+// short on geometry and its extension to full range crosses the enemy hull
+// — the obstruction denied a would-be hit), far (the beam ran its full
+// ~600 u length and its extension to infinity crosses the enemy hull — on
+// target, enemy beyond reach), miss (every other whiff — an aim error, no
+// enemy on the beam's line).
 func TestAimPostLGMissClasses(t *testing.T) {
 	cases := []struct {
 		name       string
@@ -395,10 +396,15 @@ func TestAimPostLGMissClasses(t *testing.T) {
 		// track-interpolation artifact): the extension starts inside the
 		// hull, so it reads as a denied would-be hit.
 		{"endpoint on the hull", 300, 0, 0, 300, 0, 4, "blocked"},
-		{"full-length beam into open space", 1000, 0, 0, 590, 0, 22, "far"},
-		// A full-length beam hit nothing by definition — always far, even
-		// when it narrowly passed a reachable hull.
-		{"full-length beam past the hull", 200, 40, 0, 590, 0, 22, "far"},
+		// Full-length beam pointing dead at B beyond max range: on target,
+		// denied only by reach.
+		{"enemy on the line beyond reach", 1000, 0, 0, 590, 0, 22, "far"},
+		// Full-length beam with B perpendicular to it: aimed into open
+		// space, nobody anywhere on the line — a plain miss, not "far".
+		{"full-length into open space", 0, 1000, 0, 590, 0, 22, "miss"},
+		// Full-length beam that narrowly passed the hull mid-flight with
+		// nobody on the line beyond: an aim error too.
+		{"full-length past the hull", 200, 40, 0, 590, 0, 22, "miss"},
 		// Degenerate zero-length beam: no direction to extend.
 		{"zero-length beam", 1000, 0, 0, 0, 0, 22, "miss"},
 	}
