@@ -5,6 +5,25 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-05
+
+- **LG whiff split reclassified: miss / blocked / far (schema v47).**
+  The split classified from the beam endpoint only, so every beam that
+  stopped on geometry short of its ~600u max range counted as `blocked`
+  — including shafts fired into a wall with nobody behind them, which
+  made Blocked % implausibly high. Now: `blocked` = the beam stopped
+  short on geometry and its extension to full range crosses a live
+  enemy's collision hull (on target and in range — the obstruction
+  denied a would-be hit); `outOfRange` = the beam ran its full length,
+  i.e. hit nothing at all; `miss` = every other whiff, a plain aim
+  error (shares the `miss` field with the SG/SSG pellet split). The
+  endpoint-proximity `nearMiss` field is **removed** — with blocked
+  detection on the beam line, the near/wide distinction among aim
+  errors carried no signal. The Aim Stats LG table now shows Miss /
+  Blocked / Far (+ share-of-fires %) with reworded tooltips. Only
+  beam-enriched parses are affected (the split needs `streams.beams`),
+  so the golden corpus is untouched.
+
 ## 2026-07-04
 
 - **Timeline frag/death events no longer dropped for players with no

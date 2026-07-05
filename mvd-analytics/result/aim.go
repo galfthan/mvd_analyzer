@@ -83,11 +83,13 @@ type LGRampSamples struct {
 //   - RL/GL: Direct (non-splash contacts ≈ KTX hits), Splash (linked hits that
 //     were splash-only), Missed (fires that linked to no impact);
 //     Direct+Splash+Missed == Shots. Present only when projectile linking ran.
-//   - LG: of the missed fires, NearMiss (beam ended near an enemy = aim error)
-//     vs Blocked (ended on geometry short of max range = an object was in the
-//     way) vs OutOfRange (beam reached its ~600-unit max length without
-//     hitting anything = aimed into open space / enemy beyond reach) vs
-//     Unresolved (no beam matched). Present only when the beam stream was built.
+//   - LG: of the missed fires, OutOfRange (the beam ran its full ~600-unit
+//     max length, i.e. hit nothing at all) vs Blocked (it stopped short on
+//     geometry and its extension to full range crosses a live enemy's
+//     collision hull — on target and in range, the obstruction denied a
+//     would-be hit) vs Miss (every other whiff — an aim error; reuses the
+//     Miss field, which is per-pellet for SG/SSG) vs Unresolved (no beam
+//     matched). Present only when the beam stream was built.
 type WeaponAim struct {
 	Weapon string `json:"weapon"`
 	Shots  int    `json:"shots"`
@@ -109,13 +111,12 @@ type WeaponAim struct {
 	PelletHits int `json:"pelletHits,omitempty"`
 	Full       int `json:"full,omitempty"`
 	Partial    int `json:"partial,omitempty"`
-	Miss       int `json:"miss,omitempty"`
+	Miss       int `json:"miss,omitempty"` // SG/SSG: zero-pellet fires; LG: aim-error misses (neither blocked nor out of range)
 
 	Direct int `json:"direct,omitempty"`
 	Splash int `json:"splash,omitempty"`
 	Missed int `json:"missed,omitempty"`
 
-	NearMiss   int `json:"nearMiss,omitempty"`
 	Blocked    int `json:"blocked,omitempty"`
 	OutOfRange int `json:"outOfRange,omitempty"`
 	Unresolved int `json:"unresolved,omitempty"`

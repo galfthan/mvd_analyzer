@@ -10923,17 +10923,17 @@ const AIM_COL = {
     directPct: { h: 'Direct %', t: 'Share of fires that hit directly', cell: w => shotShare(w.direct, w) },
     splashPct: { h: 'Splash %', t: 'Share of fires that hit via splash only', cell: w => shotShare(w.splash, w) },
     missedPct: { h: 'Missed %', t: 'Share of fires that hit nothing', cell: w => shotShare(w.missed, w) },
-    near: { h: 'Near', t: 'Miss — beam ended near the enemy hull (aim error)', cell: w => w.nearMiss || 0 },
-    blocked: { h: 'Blocked', t: 'Miss — beam stopped on an object in the way', cell: w => w.blocked || 0 },
-    far: { h: 'Far', t: 'Miss — beam reached its full ~600u length (out of range)', cell: w => w.outOfRange || 0 },
-    nearPct: { h: 'Near %', t: 'Share of fires that missed near the enemy hull', cell: w => shotShare(w.nearMiss, w) },
-    blockedPct: { h: 'Blocked %', t: 'Share of fires stopped by an object in the way', cell: w => shotShare(w.blocked, w) },
+    blocked: { h: 'Blocked', t: 'Miss — the beam would have hit an enemy in range, but an object stopped it short', cell: w => w.blocked || 0 },
+    lgMiss: { h: 'Miss', t: 'Miss — aim error (neither blocked nor out of range)', cell: w => w.miss || 0 },
+    far: { h: 'Far', t: 'Miss — beam ran its full ~600u length without hitting anything (out of range)', cell: w => w.outOfRange || 0 },
+    blockedPct: { h: 'Blocked %', t: 'Share of fires denied by an object in the way', cell: w => shotShare(w.blocked, w) },
+    lgMissPct: { h: 'Miss %', t: 'Share of fires missed on aim', cell: w => shotShare(w.miss, w) },
     farPct: { h: 'Far %', t: 'Share of fires that ran out of beam range', cell: w => shotShare(w.outOfRange, w) },
 };
 // Per-weapon column order: counts first, then the share-of-fires block.
 // SG/SSG lead with the pellet stats.
 const AIM_TABLE_COLS = {
-    lg: ['shots', 'hits', 'near', 'blocked', 'far', 'hitPct', 'nearPct', 'blockedPct', 'farPct'],
+    lg: ['shots', 'hits', 'lgMiss', 'blocked', 'far', 'hitPct', 'lgMissPct', 'blockedPct', 'farPct'],
     sg: ['fired', 'pHit', 'pAcc', 'shots', 'hits', 'full', 'partial', 'miss', 'hitPct', 'fullPct', 'partialPct', 'missPct'],
     ssg: ['fired', 'pHit', 'pAcc', 'shots', 'hits', 'full', 'partial', 'miss', 'hitPct', 'fullPct', 'partialPct', 'missPct'],
     rl: ['shots', 'hits', 'direct', 'splash', 'missed', 'hitPct', 'directPct', 'splashPct', 'missedPct'],
@@ -10947,8 +10947,10 @@ const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl'];
 // means enemy == all; team/self splits are absent when that bucket never
 // connected (zeros). Shots (and pellets fired) are filter-independent —
 // per-bucket splash/missed derive from them (splash = hits − direct,
-// missed = shots − hits). LG near/blocked/far ride through unchanged:
-// misses have no victim, so they don't move with the filter.
+// missed = shots − hits). LG miss/blocked/far ride through unchanged:
+// misses have no victim, so they don't move with the filter (the lg miss
+// bucket shares the `miss` field with the pellet split, so it must dodge
+// the pellet projection below).
 function aimWeaponView(w) {
     if (!w || aimVictimFilter === 'all') return w;
     if (aimVictimFilter === 'enemy' && !w.enemy) return w;
@@ -10958,7 +10960,8 @@ function aimWeaponView(w) {
     return {
         ...w, hits, direct,
         pelletHits: s.pelletHits || 0,
-        full: s.full || 0, partial: s.partial || 0, miss: s.miss || 0,
+        full: s.full || 0, partial: s.partial || 0,
+        miss: w.weapon === 'lg' ? (w.miss || 0) : (s.miss || 0),
         splash: Math.max(0, hits - direct),
         missed: (w.shots || 0) - hits,
     };
