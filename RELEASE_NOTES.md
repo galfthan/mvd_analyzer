@@ -14,10 +14,11 @@ detail.
   drew as a square. Both now plot the offset in Quake units at the
   target's range (derived from the existing `dyaw`/`dpitch`/`dist`
   columns — no schema change), the axes share one scale, and the
-  outlined box is the player's collision box true to shape (32 wide ×
-  56 tall; the horizontal silhouette reads up to ~1.4× wider viewed
-  corner-on). Extents ±96 qu × ±64 qu, ticks every hull-width (32 qu),
-  hover read-outs and histogram bins in qu.
+  solid outlined box is the player's collision box true to shape (32
+  wide × 56 tall), with a dashed outline at its corner-on silhouette
+  (~45 qu wide — the axis-aligned box reads √2 wider viewed
+  diagonally). Extents ±96 qu × ±64 qu, ticks every hull-width (32
+  qu), hover read-outs and histogram bins in qu.
 
 - **LG whiff split reclassified: miss / blocked / far (schema v47).**
   The split classified from the beam endpoint only, so every beam that

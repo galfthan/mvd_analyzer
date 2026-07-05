@@ -11185,7 +11185,8 @@ function drawAimDensity(canvas, c, idx) {
     const crisp = v => Math.round(v) + 0.5;
 
     // Dead-center cross + the player collision box, true to shape (32 wide ×
-    // 56 tall; its horizontal silhouette reads up to √2 wider corner-on).
+    // 56 tall), plus a dashed outline at the corner-on silhouette (the axis-
+    // aligned box viewed diagonally reads √2 wider; same height).
     ctx.strokeStyle = 'rgba(255,255,255,0.28)';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -11198,6 +11199,13 @@ function drawAimDensity(canvas, c, idx) {
     ctx.strokeRect(crisp(px(-AIM_HULL_HALF_W)), crisp(py(AIM_HULL_HALF_H)),
         px(AIM_HULL_HALF_W) - px(-AIM_HULL_HALF_W),
         py(-AIM_HULL_HALF_H) - py(AIM_HULL_HALF_H));
+    const dw = AIM_HULL_HALF_W * Math.SQRT2;
+    ctx.save();
+    ctx.setLineDash([4, 3]);
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.strokeRect(crisp(px(-dw)), crisp(py(AIM_HULL_HALF_H)),
+        px(dw) - px(-dw), py(-AIM_HULL_HALF_H) - py(AIM_HULL_HALF_H));
+    ctx.restore();
     ctx.strokeStyle = 'rgba(255,255,255,0.15)';
     ctx.strokeRect(crisp(ML), crisp(MT), PW, PH);
 
