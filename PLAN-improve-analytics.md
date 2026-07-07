@@ -8,7 +8,7 @@ in 3–4, no schema bump — stays v49). Per-stage records:
 - **Stage 1 / phase-6** (`db4bf36`): nodeSpecs + validation + Kahn topo
   sort (registration-index tie-break, provably == legacy order, enforced
   by test); `qw-analyze -graph {mermaid,json}`.
-- **Stage 2 / phase-7** (12 commits, `66b3f8c`…`f47a6c0`): `clock` and
+- **Stage 2 / phase-7** (12 commits, `phase-7` tip `dd7a5f2` (rebuilt 2026-07-07, see phase-10 note)): `clock` and
   `roster` core artifacts; every producer stamps match-relative times
   and duel-final team labels at Finalize; `normalizeMatchRelativeTimes`,
   `deriveDemoStartAnchor`, `duelTeamNormalize` deleted; `epoch:match` /
@@ -17,12 +17,12 @@ in 3–4, no schema bump — stays v49). Per-stage records:
   *Deferred:* converting recover-telefrag-teamkills / scoreboard-stats
   into final-artifact producers — zero output change, not load-bearing
   for Stages 3–4; their `Mutates` flags remain as debt markers.
-- **Stage 3 / phase-8** (`12bced5`…`2642421`): `los` + `shot-streams` as
+- **Stage 3 / phase-8** (`phase-8` tip `b03a840`): `los` + `shot-streams` as
   generic lazy artifacts (one-variant per api F12); tier-3 cache
   `artifacts/<sha[:2]>/<sha>/<name>@v<schema>.gob` — lazy computes
   survive restarts/evictions (closes api F8b). EV = schema version for
   now; per-node effective versions deferred until node versions diverge.
-- **Stage 4 / phase-9** (`4cbe583`…`a571e8a`): `GET /v1/artifacts`,
+- **Stage 4 / phase-9** (`phase-9` tip `72295bb`): `GET /v1/artifacts`,
   `GET /v1/demos/{id}/artifacts/{name}` (closed registry, no params,
   per-artifact ETags), `GET /v1/graph`; MCP `listArtifacts`/`getArtifact`
   generated from the manifest (curated tools deliberately kept as the
@@ -42,6 +42,27 @@ in 3–4, no schema bump — stays v49). Per-stage records:
   answer open question 3 (parallel Finalize) with data. Scheduling by
   readiness/critical path becomes safe once (a)+(b) hold; actual
   parallelism stays deferred behind the measurements.
+
+  **Phase-10 outcome (2026-07-07, branch `phase-10` tip `39099fa`):**
+  `Result.Errors` canonicalized (stream-abort first, then lexicographic);
+  `TestOrderIndependence` (3 corpus demos × default + 3 seeded shuffled
+  valid orders, byte-equal JSON) passes — the pipeline is genuinely
+  schedule-free and the declared edge list is complete. **Measured
+  timings (mean over the 10-demo corpus)** answering open question 3:
+  event pass ≈ 1316 ms; Finalize+post tail serial ≈ 1672 ms of which
+  `timeline` alone is ≈ 1580 ms (~94%); tail critical path ≈ 1616 ms →
+  best-case parallel tail speedup **1.03×**. Conclusion: a parallel
+  scheduler over the DAG tail buys nothing; any real win lives inside
+  the timeline analyzer or in overlapping it with the parse. `los`
+  (lazy, off-path) ≈ 2455 ms. Parallelism: **not worth building now.**
+
+  **Incident recorded:** phase-7's clock migration extracted the shift
+  helpers into `analyzer/timeshift.go` but never staged the new file —
+  phases 7–9 built only in the dirty working tree and were unbuildable
+  from a clean clone. Caught by the phase-10 agent, fixed by rebuilding
+  the stack with the file in its home commit (hence the new SHAs above;
+  phase-7/8/9 force-pushed). Standing gate added: every phase tip must
+  build in a fresh `git worktree`.
 
 The sections below are kept as the design rationale of record.
 
