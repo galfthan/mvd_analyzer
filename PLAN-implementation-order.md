@@ -7,7 +7,8 @@
 > [PLAN-reader.md](PLAN-reader.md) (reader),
 > [PLAN-api.md](PLAN-api.md) (api/mcp),
 > [PLAN-web.md](PLAN-web.md) (web),
-> [PLAN-improve-analytics.md](PLAN-improve-analytics.md) (DAG).
+> [PLAN-improve-analytics.md](PLAN-improve-analytics.md) (DAG),
+> [PLAN-hosting.md](PLAN-hosting.md) (hosting/auth/portal/MCP-HTTP, added 2026-07-07).
 > Item IDs below (`analytics F1`, `reader A2`, …) refer to those documents;
 > the details, line references and fix sketches live there, not here.
 
@@ -33,6 +34,13 @@
 > happened (reader F1 was pulled into Phase 1 when the 0-frag fix
 > exposed it; reader F17/F9 closed as documentation with mvdsv
 > citations; web F13 resolved by removing the filter).
+
+> **Status 2026-07-07: Phases 6–12 are DONE** (see the numbering table
+> below for per-phase records). **Next: Phase 13 — public hosting.**
+> Decided 2026-07-07: API + MCP serving (with a Discord-authenticated
+> API-key portal) is pulled ahead of the web restructure; mvd-web then
+> migrates onto the hosted API (phase 17) using a single service key.
+> Design: [PLAN-hosting.md](PLAN-hosting.md), phases 13–16b.
 
 Only two plans order their own work (PLAN-reader's sequencing section,
 PLAN-improve-analytics' Stage 1–4); none order work across plans. This file
@@ -184,12 +192,15 @@ branch, in dependency order:
 | 12 | ✅ DONE (branch `phase-12`) — always-full API parse: EnsureShotStreams/shot-streams artifact/degrade path deleted (~200 LOC), tier-2 cache-format bump (results/v<N>f2/) invalidates lean gobs, first /shots 2446ms → 17ms measured live, all endpoint bodies byte-identical to phase-11. WASM builds nails; Aim tab gains ng/sng (shots/hits/hit% only — nail accuracy is approximate). los is the one lazy artifact (22 nodes / 1 lazy). |
 | 11 | ✅ DONE (branch `phase-11`) — final-artifact producers: fix-up nodes renamed `frags-final`/`match-final` providing `frags:final`/`match:final`; in-pipeline consumers require the semantic name (match-final's honest edge is `frags:final`); timeline deliberately stays a raw-`frag` consumer. Byte-identical; Mutates flags stay honest. |
 | 10 | ✅ DONE (branch `phase-10`) — order independence: Result.Errors canonicalized, TestOrderIndependence green (schedule-free output, complete edge list), PhaseTimings measured: tail parallel speedup would be 1.03× (timeline is 94% of the tail) → parallelism NOT worth building. Also: timeshift.go missing-file incident found + stack rebuilt (phase-7/8/9 SHAs changed). |
-| 10 | web A1→A2→A3 — ES module split, init/reset registry, time-change subscriber |
-| 11 | reader schema batch — A4 value-snapshot events, A5 TimeMs everywhere, A6 multi-map reset |
-| 12 | maps A2 — unify the mapgen/bsp and bspvis parsers |
+| 13 | **NEXT** — hosting-prep hardening: api F14–F17 + F19 (quota/GC + cache prune/stats, parse throttle, capped reads, CORS, error hygiene) + riding nits. See [PLAN-hosting.md](PLAN-hosting.md). |
+| 14 | API keys: `internal/authkeys` store, auth middleware, per-key rate limiting (closes api F15's limit half), `keys` CLI, `/v1/auth/check`. [PLAN-hosting.md](PLAN-hosting.md) |
+| 15 | Discord-auth key portal (`internal/portal`, OAuth2 identify, one key per user). [PLAN-hosting.md](PLAN-hosting.md) |
+| 16 | MCP over streamable HTTP (`mvd-mcp -http`, Authorization passthrough) + 16b deploy templates (Caddy/systemd runbook). [PLAN-hosting.md](PLAN-hosting.md) |
+| 17 | web A1→A2→A3 — ES module split, init/reset registry, time-change subscriber — **then** migrate mvd-web from in-browser WASM to the hosted API using one operator-issued service key (no user registration for web users). Own plan pass when reached. |
+| 18 | reader schema batch — A4 value-snapshot events, A5 TimeMs everywhere, A6 multi-map reset (+ reader F20 handler-error contract, batched here per the 5.1 note) |
+| 19 | maps A2 — unify the mapgen/bsp and bspvis parsers |
 | future: timeline split | `timeline` is a mega-node — 94% of the Finalize tail (measured, phase 10), a grab-bag artifact (streams + locTable + events + pauses + regions + streaks), and the only real laziness/parallelism lever left. Split into cohesive nodes (streams-core, loc attribution, event streams, region layout) with declared edges; goldens byte-identical gate. Design pass first — the internal coupling is why it never split. |
 | future: airgibs own artifact | Make airgibs non-mutating: today it writes into `timelineAnalysis.airgibs` (another node's section — the last additive-only Mutates writer besides the :final pair). Move to its own top-level `resultKey` (`airgibs`), which is a **schema bump** + web/API consumer updates; retire its Mutates flag. Batch with the next planned schema bump rather than paying one alone. |
-| hosting-prep | api F14–F17 + F19 (quota/GC, throttling, capped reads, CORS, error hygiene) — before any public deployment |
 
 The 2026-07-06 deferred reviews (aim/shots analytics, Aim Stats tab,
 aim/full-data API + democache, #97 decoders) produced new findings —
@@ -226,11 +237,11 @@ until 5.4 is done**; then all phases go to main as sequential PRs
 
 The hosted-deployment cluster (api F14/F15/F16/F17 — disk quota/GC,
 cross-demo stampede + rate limiting, capped reads, CORS — plus F19
-error-text hygiene) is deliberately **not** part of 5.1–5.4: hosting
-is not imminent (decision 2026-07-06). It becomes its own
-**hosting-prep phase**, scheduled immediately before the service goes
-public — after Phase 12 in the current ordering, or pulled forward if
-hosting plans firm up.
+error-text hygiene) was deliberately **not** part of 5.1–5.4: hosting
+was not imminent at the time (decision 2026-07-06). **Reversed
+2026-07-07: hosting is now the next deliverable.** The cluster is
+Phase 13, followed by API keys / Discord portal / MCP-over-HTTP as
+phases 14–16 — the full design is [PLAN-hosting.md](PLAN-hosting.md).
 
 ## Loose ends (small, unscheduled)
 
