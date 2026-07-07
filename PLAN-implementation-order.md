@@ -187,6 +187,8 @@ branch, in dependency order:
 | 10 | web A1→A2→A3 — ES module split, init/reset registry, time-change subscriber |
 | 11 | reader schema batch — A4 value-snapshot events, A5 TimeMs everywhere, A6 multi-map reset |
 | 12 | maps A2 — unify the mapgen/bsp and bspvis parsers |
+| future: timeline split | `timeline` is a mega-node — 94% of the Finalize tail (measured, phase 10), a grab-bag artifact (streams + locTable + events + pauses + regions + streaks), and the only real laziness/parallelism lever left. Split into cohesive nodes (streams-core, loc attribution, event streams, region layout) with declared edges; goldens byte-identical gate. Design pass first — the internal coupling is why it never split. |
+| future: airgibs own artifact | Make airgibs non-mutating: today it writes into `timelineAnalysis.airgibs` (another node's section — the last additive-only Mutates writer besides the :final pair). Move to its own top-level `resultKey` (`airgibs`), which is a **schema bump** + web/API consumer updates; retire its Mutates flag. Batch with the next planned schema bump rather than paying one alone. |
 | hosting-prep | api F14–F17 + F19 (quota/GC, throttling, capped reads, CORS, error hygiene) — before any public deployment |
 
 The 2026-07-06 deferred reviews (aim/shots analytics, Aim Stats tab,
