@@ -181,6 +181,7 @@ branch, in dependency order:
 | 7 | ✅ DONE (branch `phase-7`) — DAG Stage 2: clock/roster artifacts; barrier mutators deleted (byte-identical on 14 real demos) |
 | 8 | ✅ DONE (branch `phase-8`) — DAG Stage 3: lazy materialisation + tier-3 artifact cache (closes api F8b) |
 | 9 | ✅ DONE (branch `phase-9`) — DAG Stage 4: artifact manifest, generic endpoints, MCP listArtifacts/getArtifact, ARTIFACTS.md |
+| 11 | ✅ DONE (branch `phase-11`) — final-artifact producers: fix-up nodes renamed `frags-final`/`match-final` providing `frags:final`/`match:final`; in-pipeline consumers require the semantic name (match-final's honest edge is `frags:final`); timeline deliberately stays a raw-`frag` consumer. Byte-identical; Mutates flags stay honest. |
 | 10 | ✅ DONE (branch `phase-10`) — order independence: Result.Errors canonicalized, TestOrderIndependence green (schedule-free output, complete edge list), PhaseTimings measured: tail parallel speedup would be 1.03× (timeline is 94% of the tail) → parallelism NOT worth building. Also: timeshift.go missing-file incident found + stack rebuilt (phase-7/8/9 SHAs changed). |
 | 10 | web A1→A2→A3 — ES module split, init/reset registry, time-change subscriber |
 | 11 | reader schema batch — A4 value-snapshot events, A5 TimeMs everywhere, A6 multi-map reset |
