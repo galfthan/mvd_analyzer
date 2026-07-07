@@ -1,8 +1,35 @@
 # PLAN — Extensible analytics as an explicit DAG
 
-Status: active roadmap — Stages 1–4 below map to Phases 6–9 of
-PLAN-implementation-order. The DAG engine itself is not yet implemented;
-phases 0–5 cleared the prerequisites and correctness debt around it.
+Status: **IMPLEMENTED (2026-07-07)** — Stages 1–4 shipped as phases 6–9
+on the stacked branches `phase-6`…`phase-9` (Opus-implemented,
+Fable-verified; goldens byte-identical through Stages 1–2, additive-only
+in 3–4, no schema bump — stays v49). Per-stage records:
+
+- **Stage 1 / phase-6** (`db4bf36`): nodeSpecs + validation + Kahn topo
+  sort (registration-index tie-break, provably == legacy order, enforced
+  by test); `qw-analyze -graph {mermaid,json}`.
+- **Stage 2 / phase-7** (12 commits, `66b3f8c`…`f47a6c0`): `clock` and
+  `roster` core artifacts; every producer stamps match-relative times
+  and duel-final team labels at Finalize; `normalizeMatchRelativeTimes`,
+  `deriveDemoStartAnchor`, `duelTeamNormalize` deleted; `epoch:match` /
+  `teams:final` barriers retired. Verified byte-identical on 14 real
+  demos incl. pause, reconnect, no-match-start and full-streams paths.
+  *Deferred:* converting recover-telefrag-teamkills / scoreboard-stats
+  into final-artifact producers — zero output change, not load-bearing
+  for Stages 3–4; their `Mutates` flags remain as debt markers.
+- **Stage 3 / phase-8** (`12bced5`…`2642421`): `los` + `shot-streams` as
+  generic lazy artifacts (one-variant per api F12); tier-3 cache
+  `artifacts/<sha[:2]>/<sha>/<name>@v<schema>.gob` — lazy computes
+  survive restarts/evictions (closes api F8b). EV = schema version for
+  now; per-node effective versions deferred until node versions diverge.
+- **Stage 4 / phase-9** (`4cbe583`…`a571e8a`): `GET /v1/artifacts`,
+  `GET /v1/demos/{id}/artifacts/{name}` (closed registry, no params,
+  per-artifact ETags), `GET /v1/graph`; MCP `listArtifacts`/`getArtifact`
+  generated from the manifest (curated tools deliberately kept as the
+  ergonomic surface); generated `mvd-analytics/ARTIFACTS.md` with a
+  drift-failing test. *Deferred:* per-deployment Heavy-disable knob.
+
+The sections below are kept as the design rationale of record.
 
 > Updated 2026-07-05 against main @ 05e2ed9 (schema v47); pipeline inventory in §1 re-verified after merging #98–#102.
 > Phases 0–5 of PLAN-implementation-order are implemented (2026-07-06); Stage 1 is unblocked and next. The §1 inventory below was re-verified after those phases.
