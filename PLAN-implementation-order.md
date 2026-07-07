@@ -181,6 +181,7 @@ branch, in dependency order:
 | 7 | ✅ DONE (branch `phase-7`) — DAG Stage 2: clock/roster artifacts; barrier mutators deleted (byte-identical on 14 real demos) |
 | 8 | ✅ DONE (branch `phase-8`) — DAG Stage 3: lazy materialisation + tier-3 artifact cache (closes api F8b) |
 | 9 | ✅ DONE (branch `phase-9`) — DAG Stage 4: artifact manifest, generic endpoints, MCP listArtifacts/getArtifact, ARTIFACTS.md |
+| 10 | Order independence (decided 2026-07-07): canonicalize order-sensitive sinks (Result.Errors), N-seed shuffled-topo-order byte-identical test (retires registration order as a correctness crutch), PhaseTimings measurement over the corpus. Parallel execution itself DEFERRED until the measured data justifies it. |
 | 10 | web A1→A2→A3 — ES module split, init/reset registry, time-change subscriber |
 | 11 | reader schema batch — A4 value-snapshot events, A5 TimeMs everywhere, A6 multi-map reset |
 | 12 | maps A2 — unify the mapgen/bsp and bspvis parsers |

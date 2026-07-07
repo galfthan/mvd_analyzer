@@ -29,6 +29,20 @@ in 3–4, no schema bump — stays v49). Per-stage records:
   ergonomic surface); generated `mvd-analytics/ARTIFACTS.md` with a
   drift-failing test. *Deferred:* per-deployment Heavy-disable knob.
 
+- **Stage 5 / phase-10 (added 2026-07-07)** — order independence: the
+  Stage-1 registration-index tie-break froze the legacy order so the
+  goldens could referee; the target property is stronger — ANY valid
+  topological order must produce byte-identical output (goldens, ETags
+  and gob caches all assume output is a pure function of the input).
+  Phase 10 (a) canonicalizes order-sensitive sinks (`Result.Errors`
+  append order), (b) adds an N-seed shuffled-order test asserting
+  byte-equal JSON — which also continuously verifies the declared edge
+  list is COMPLETE (an undeclared cross-node read surfaces as a shuffle
+  diff), and (c) records PhaseTimings measurements over the corpus to
+  answer open question 3 (parallel Finalize) with data. Scheduling by
+  readiness/critical path becomes safe once (a)+(b) hold; actual
+  parallelism stays deferred behind the measurements.
+
 The sections below are kept as the design rationale of record.
 
 > Updated 2026-07-05 against main @ 05e2ed9 (schema v47); pipeline inventory in §1 re-verified after merging #98–#102.
