@@ -286,6 +286,8 @@ item, not a phase blocker.
 >
 > **Post-deploy fix (2026-07-08, `eb89bcc`):** real proxied deployment surfaced a bug the httptest suite missed — the go-sdk streamable handler's DNS-rebinding guard 403s loopback-arriving requests (i.e. all traffic from Caddy) that carry a non-loopback Host, so every MCP call failed with `invalid Host header`. Fixed by setting `DisableLocalhostProtection` (the mode runs behind a trusted proxy with its own key gate); added `TestHTTP_NonLoopbackHostAccepted` (reproduces the 403 with the guard on). Stack tip is now `phase-16` @ `eb89bcc`.
 >
+> **Post-deploy fix 2 (2026-07-08, `d9027e6`):** MCP array/map tool filters (`players`/`fields`/`types`/`weapon`/`items`/`kinds`/`reducers`) were broken in real client use — jsonschema-go reflects nilable slices/maps to a `["null",X]` type union that some MCP clients coerce to a string, silently dropping the filter. Fixed with an `addTool` wrapper that strips the null unions from the input schema (`stripNullTypes`) + `TestInputSchemasHaveNoNullUnions`. jsonschema-go promoted to a direct dep (already in the graph). Stack tip `phase-16` @ `d9027e6`.
+>
 > **Operator-only (not in CI):** create the Discord app, provision VPS+DNS,
 > fill `/etc/mvd/secrets.env`, install units + Caddy, run the smoke-test
 > checklist — all in `deploy/README.md`.
