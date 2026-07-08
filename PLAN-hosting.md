@@ -130,7 +130,29 @@ Gate: `make test` green; manual: fill cache past budget → GC observed;
 cold-parse storm bounded (log shows queueing); browser fetch from a
 foreign origin succeeds.
 
-## Phase 14 — API keys + auth middleware (`internal/authkeys`)
+## Phase 14 — API keys + auth middleware (`internal/authkeys`) — ✅ DONE
+
+> **DONE 2026-07-08** on branch `phase-14` (off `phase-13`). Commits
+> `b315c9e` (authkeys store) · `8753737` (auth middleware, per-key rate
+> limiting, `/v1/auth/check`) · `b796489` (keys CLI + docs) · `9e6ba82`
+> (review hardening: `Chmod` pre-existing auth dir to 0700, `path.Clean`
+> before the exemption test, reject unknown subcommands, DoS-ordering +
+> perms + corrupt-file pinning tests) · plus test-only flake fixes
+> `09b8a05`/`a91a5f9`/`bb0ac32`. Three parallel Opus reviews (crypto/store ·
+> middleware/ratelimit/secret-logs · CLI/docs/spec): no blockers, no majors.
+> **Deviation from D8 (sanctioned):** rate limiting uses a stdlib token
+> bucket (`ratelimit.go`), NOT `x/time/rate` — keeps mvd-api
+> dependency-free (go.mod unchanged). Unknown keys 401 BEFORE a limiter
+> bucket is allocated (no DoS map growth, pinned by test). No schema bump;
+> goldens unchanged.
+>
+> **CARRY-FORWARD RESOLVED IN PHASE 15 (below):** the store is a whole-file
+> read-modify-write with NO cross-process lock. Safe in phase 14 (issuance
+> is CLI-only; the server opens read-side), but phase 15's portal issues
+> keys inside the LIVE server while an operator CLI could also issue — the
+> store must gain a cross-process guard (flock on `keys.json`, or
+> reload-under-lock before each mutation) so a concurrent CLI issue can't
+> lose the portal's write. Build it as part of phase 15's store work.
 
 Branch `phase-14` off `phase-13`.
 
@@ -180,13 +202,33 @@ Branch `phase-15` off `phase-14`.
   OAuth library.
 - Templates + CSS in `internal/portal/static/` via `embed.FS`;
   visual style can crib the mvd-web palette but stays dependency-free.
+- **Store cross-process guard (carried from phase 14 review):** the
+  portal calls `authkeys.Store.Issue` inside the LIVE server; the phase-14
+  store is whole-file read-modify-write with no cross-process lock, so a
+  concurrent operator `keys` CLI could clobber the portal's write (or vice
+  versa). Add a cross-process guard to the store: flock the dir/`keys.json`
+  around each mutation, and reload-under-lock before applying so the
+  in-memory map can't serve a stale write back to disk. In-process access
+  stays mutex-guarded as today. Test: two Stores on one dir issuing
+  concurrently both survive (no lost write).
 - Tests: state/cookie round-trip, callback with a stubbed Discord
-  server (httptest), regenerate-revokes-old invariant.
+  server (httptest — this is how the flow is proven WITHOUT a live Discord
+  app), regenerate-revokes-old invariant, the store cross-process test
+  above. The stubbed-Discord test IS the CI gate; the live-Discord run is
+  a separate manual step gated on operator provisioning (below).
 - Docs: README "getting a key" section; API.md links the portal.
 
-Gate: full flow against the real Discord app on a dev redirect URI
+Gate (automated): `make test` green incl. the stubbed-Discord callback
+flow and the store cross-process test.
+
+Gate (manual, DEFERRED — needs operator-provisioned Discord app):
+full flow against the real Discord app on a dev redirect URI
 (`http://localhost:8080/portal/callback` registered as a second URI);
-key from the portal works against `/v1/auth/check`.
+key from the portal works against `/v1/auth/check`. **Operator action
+required before this gate**: create the Discord application (client id +
+secret, redirect URIs) per "Operator prerequisites". The phase ships and
+merges on the automated gate; the manual gate is a pre-deploy checklist
+item, not a phase blocker.
 
 ## Phase 16 — MCP over streamable HTTP
 
