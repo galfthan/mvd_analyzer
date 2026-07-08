@@ -99,15 +99,28 @@ secret, and give it its own rate-limit class (see phase 14).
   writes the Caddyfile + systemd units into `deploy/` as tracked
   templates; secrets stay machine-local.
 
-## Phase 13 — hosting-prep hardening (existing findings)
+## Phase 13 — hosting-prep hardening (existing findings) — ✅ DONE
 
-All specified in PLAN-api.md §"Aim/full-data API + democache"; this
-just schedules them. One branch `phase-13`, stacked on `review`.
+> **DONE 2026-07-08** on branch `phase-13` (stacked on `phase-12`, the
+> implementation stack tip — NOT `review`; the original "stacked on
+> `review`" text below was the base-branch error that forced a rebase,
+> corrected here). Commits: `e0ba263` (F14/F15 GC+semaphore+subcommands) ·
+> `d8da6ff` (F16) · `267fae0` (F17/F19) · `ab38217` (nits+docs) ·
+> `1023a86` (bound the on-demand LOS raycast — the one heavy lazy path
+> the parse semaphore didn't cover, found by review) · `5a02254` (prune
+> `-dry-run`, reject `-max-bytes 0`, online temp cleanup with GC off,
+> preflight `X-Request-Id`). Three parallel Opus reviews (GC/concurrency ·
+> HTTP/security · spec/tests/docs): no blockers; the LOS-raycast MAJOR was
+> fixed in-phase rather than deferred. No schema bump; goldens unchanged.
+> GC evicts by **mtime** (bumped on every cache hit), not atime —
+> relatime/noatime make atime unreliable.
+
+All specified in PLAN-api.md §"Aim/full-data API + democache".
 
 | Item | What | Effort |
 |---|---|---|
-| api F14 | Cache quota + GC: `-cache-max-bytes` (default ~20 GB), LRU-by-atime sweep of tier-1 + tier-2 when over budget; startup sweep deletes `results/v<old>/` trees ≠ CurrentSchemaVersion; `mvd-api cache prune`/`cache stats` subcommands (FOLLOWUPS ops items ride along) | M |
-| api F15 (throttle half) | Weighted semaphore (`-max-parses`, default ~NumCPU/2) around download+parse; N cold demos no longer run N unbounded parses. Rate-limit half lands in phase 14 keyed on API key (D8) | M |
+| api F14 | Cache quota + GC: `-cache-max-bytes` (default ~20 GiB), LRU-by-**mtime** sweep of tier-1 + tier-2 + tier-3 when over budget; startup sweep deletes `results/v<old>[f<F>]/` trees ≠ current `resultsVersionName()`; `mvd-api cache prune`/`cache stats` subcommands | M |
+| api F15 (throttle half) | Counting semaphore (`-max-parses`, default `max(1, NumCPU/2)`) around download+parse **and the on-demand LOS raycast** (shared instance = one heavy-cold-op knob); N cold demos no longer run N unbounded parses/raycasts. Rate-limit half lands in phase 14 keyed on API key (D8) | M |
 | api F16 | `io.LimitReader` cap (64 MB) in hubfetch on both CDN and `demo_source_url` paths; over-cap → `ErrHubUpstream` | S |
 | api F17 | CORS middleware: permissive `Access-Control-Allow-Origin: *` + `Authorization` in allowed headers, OPTIONS preflight handled; API is read-only so `*` is safe, and the netlify-hosted web client needs it in phase 17 | S |
 | api F19 | 5xx bodies become generic message + request id; `err.Error()` (cache paths, upstream URLs) goes to the log only, keyed by the same id | S |

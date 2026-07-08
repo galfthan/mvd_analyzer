@@ -38,6 +38,17 @@ Overall assessment: both modules remain small, well-layered, and pleasant to rea
 
 Scope: the #97 surface (`/shots`, `/aim`, `/streams/{projectiles,beams,nails}`, `/airgibs`, their API.md sections, the `getAim` MCP tool) and all of `internal/democache` (cache.go end-to-end post-P3/P5, keyedmutex.go, singleflight.go, lru.go, paths.go, util.go), weighted for public hosting.
 
+> **RESOLVED 2026-07-08 (phase 13, branch `phase-13`).** F14, F15
+> (throttle half — the rate-limit half is phase 14), F16, F17, and F19 are
+> all implemented and reviewed (3 parallel Opus reviews); see the resolved
+> ledger for the commit map. Review also found and fixed in-phase the one
+> heavy lazy path F15's original text missed: the on-demand LOS raycast is
+> now bounded by the same parse semaphore. **F18 is OBSOLETED by phase 12**
+> — both sub-points named `EnsureShotStreams` and the shot-stream degrade
+> path, which phase 12's always-full parse deleted; there is no
+> rebuild-reported-as-HIT and no degraded-ETag case anymore. The line
+> references below are pre-phase-12 and stale; kept for provenance.
+
 What checks out: the handler side of #97 is clean — all four full-data endpoints funnel through `resolveShotStreams` → `EnsureShotStreams`, availability routes through the shared view accessors, the degrade path (`X-Shot-Streams: unavailable` + `no-store`, CacheMeta.ShotStreamsUnavailable, cache.go:290-299) is well-commented, documented in API.md §4.5c/4.5d/4.11c and README.md:49, and tested (shotstreams_test.go, handlers_test.go). Locking is correct: the shot-stream need-check sits inside the per-SHA lock (no TOCTOU, cache.go:280-287), `KeyedMutex` reclaims entries, path handling is traversal-safe (`isValidSHA` before `sha[:2]`, `sanitizeMapName`), tier writes are atomic, and the `getAim` tool description is accurate and thorough (mcp_tools.go:77). The findings:
 
 - **F14 — no disk quota, eviction, or GC on the cache root.** Tier-1 MVDs (~MBs each), tier-2 gobs, and the gameId index grow monotonically (paths.go — no delete path exists anywhere in democache), and every schema bump orphans the entire previous `results/v<N>/` tree forever. Combined with the unauthenticated `POST /v1/demos/{id}` warm-up endpoint (handlers.go:161-180), a public deployment lets anyone fill the disk by iterating hub gameIds. Needs a size-capped store or periodic GC (LRU by atime is fine — everything is reconstructible) plus an old-schema-version sweep, before hosting. *(hosted exposure — high for public hosting, non-issue locally)*
@@ -47,10 +58,16 @@ What checks out: the handler side of #97 is clean — all four full-data endpoin
 - **F18 — degrade/meta interactions are slightly off.** (a) `EnsureShotStreams` returns `GetResult`'s meta unchanged (cache.go:268-287), so a first-time stream rebuild that runs a multi-second re-parse reports `X-Cache: HIT` — misleading in the access log's `cache` field and to clients timing requests; consider a meta flag for "rebuilt this request". (b) On the degraded path, a conditional GET still 304s against the strong ETag (handlers.go:625-635 sets the marker before `revalidated` — deliberate, per the comment) — but that tells a client holding the *full* cached body that its copy is current *and* degraded simultaneously; a fresh GET would return a leaner body under the same ETag. Consider a distinct (or absent) ETag for degraded responses. *(observability / HTTP semantics — low)*
 - **F19 — internal error text leaks to clients.** `mapStoreError`'s default branch and `writeUnavailable`'s 500 branch echo `err.Error()` into response bodies (handlers.go:99, 113), and those errors can embed local cache paths (`write tier-1: …`, cache.go:234-236; writeFileAtomic errors carry full paths, util.go:90-115) and upstream URLs. Standard practice for a hosted service: log the detail, return a generic message + request id for 5xx. *(hosted exposure — low)*
 
-## Resolved (implementation phases 0–5)
+## Resolved (implementation phases 0–5, 13)
 
 | ID | What | Phase / commit |
 |---|---|---|
+| F14 | Cache quota + GC by mtime (tier-1/2/3), startup orphan-schema-tree sweep, `cache stats`/`cache prune` (`-dry-run`, `-max-bytes`/`-older-than`/`-all`) subcommands; `-cache-max-bytes` default 20 GiB, 0 disables | P13 e0ba263, 5a02254 |
+| F15 (throttle) | Shared counting semaphore (`-max-parses`, default max(1,NumCPU/2)) around the cold download+parse AND the on-demand LOS raycast; distinct-demo storms bounded. Rate-limit half → phase 14 (per API key) | P13 e0ba263, 1023a86 |
+| F16 | `io.LimitReader` 64 MiB cap on both hub paths (CDN + `demo_source_url`); over-cap → `ErrHubUpstream`, never cached | P13 d8da6ff |
+| F17 | Permissive CORS (`*`) + OPTIONS preflight (204) + `Access-Control-Expose-Headers` incl. ETag; read-only API so `*` is safe | P13 267fae0, 5a02254 |
+| F18 | Obsoleted by phase 12 (always-full parse deleted `EnsureShotStreams` + the shot-stream degrade/ETag path both sub-points named) | — |
+| F19 | Per-request `X-Request-Id` (crypto/rand); all 5xx bodies generic + id, real error only to the log; 4xx keep specific non-leaking messages | P13 267fae0 |
 | F1 | Downloaded demo bytes SHA-verified before caching; mismatch → `ErrHubUpstream`, nothing cached (cache.go:226-233) | P3-api 6179589 |
 | F2 | `hubfetch.ErrNotFound` + `errors.Is` classification in one `classifyHubError` helper — no more error-string matching | P3-api 6179589 |
 | F3 | Error-accumulating `qp` reader replaces ~30 inline parse-and-writeError blocks; shared `writeInvalidParam` tail | P5-api 7c8cf5c |
