@@ -9,6 +9,16 @@
 > Execution order lives in
 > [PLAN-implementation-order.md](PLAN-implementation-order.md)
 > (phases 13–16 here; the web-on-API migration is phase 17+, after).
+>
+> **Rebased 2026-07-08:** phase-12.1 (phase-12 + a DAG node-model cleanup —
+> tiers collapsed into one task model, `tier` dropped from the artifact
+> manifest / graph) was merged to `main` (`origin/main` @ `57dc5ee`, PR
+> #103). The whole hosting stack `phase-13`…`phase-16` was rebased onto it
+> (one RELEASE_NOTES conflict, resolved keeping both entries; `artifacts.go`
+> merged both the tier-comment removal and the phase-13 error-hygiene
+> cleanly). `make test` green on the rebased tip incl. the golden corpus.
+> All commit SHAs below are POST-rebase; the pre-rebase SHAs are dead.
+> Stack tip is now `phase-16` @ `4fe9da3`.
 
 ## Goal
 
@@ -111,10 +121,10 @@ secret, and give it its own rate-limit class (see phase 14).
 > **DONE 2026-07-08** on branch `phase-13` (stacked on `phase-12`, the
 > implementation stack tip — NOT `review`; the original "stacked on
 > `review`" text below was the base-branch error that forced a rebase,
-> corrected here). Commits: `e0ba263` (F14/F15 GC+semaphore+subcommands) ·
-> `d8da6ff` (F16) · `267fae0` (F17/F19) · `ab38217` (nits+docs) ·
-> `1023a86` (bound the on-demand LOS raycast — the one heavy lazy path
-> the parse semaphore didn't cover, found by review) · `5a02254` (prune
+> corrected here). Commits: `8d9a9c5` (F14/F15 GC+semaphore+subcommands) ·
+> `af47b32` (F16) · `7af6931` (F17/F19) · `ce62f6f` (nits+docs) ·
+> `d334208` (bound the on-demand LOS raycast — the one heavy lazy path
+> the parse semaphore didn't cover, found by review) · `23f6edf` (prune
 > `-dry-run`, reject `-max-bytes 0`, online temp cleanup with GC off,
 > preflight `X-Request-Id`). Three parallel Opus reviews (GC/concurrency ·
 > HTTP/security · spec/tests/docs): no blockers; the LOS-raycast MAJOR was
@@ -140,12 +150,12 @@ foreign origin succeeds.
 ## Phase 14 — API keys + auth middleware (`internal/authkeys`) — ✅ DONE
 
 > **DONE 2026-07-08** on branch `phase-14` (off `phase-13`). Commits
-> `b315c9e` (authkeys store) · `8753737` (auth middleware, per-key rate
-> limiting, `/v1/auth/check`) · `b796489` (keys CLI + docs) · `9e6ba82`
+> `7fab21f` (authkeys store) · `83338fb` (auth middleware, per-key rate
+> limiting, `/v1/auth/check`) · `a481fc9` (keys CLI + docs) · `75d5ef7`
 > (review hardening: `Chmod` pre-existing auth dir to 0700, `path.Clean`
 > before the exemption test, reject unknown subcommands, DoS-ordering +
 > perms + corrupt-file pinning tests) · plus test-only flake fixes
-> `09b8a05`/`a91a5f9`/`bb0ac32`. Three parallel Opus reviews (crypto/store ·
+> `2e3159b`/`db8bbbf`/`9c12079`. Three parallel Opus reviews (crypto/store ·
 > middleware/ratelimit/secret-logs · CLI/docs/spec): no blockers, no majors.
 > **Deviation from D8 (sanctioned):** rate limiting uses a stdlib token
 > bucket (`ratelimit.go`), NOT `x/time/rate` — keeps mvd-api
@@ -192,11 +202,11 @@ byte-identical; with it → 401 without key, 200 with, 429 past burst.
 ## Phase 15 — Discord portal (`internal/portal`) — ✅ DONE
 
 > **DONE 2026-07-08** on branch `phase-15` (off `phase-14`). Commits
-> `0d74526` (authkeys cross-process flock on a dedicated `keys.json.lock`
-> + reload-under-lock) · `0c7aaa5` (portal package: OAuth `identify`,
+> `28b2990` (authkeys cross-process flock on a dedicated `keys.json.lock`
+> + reload-under-lock) · `32a1146` (portal package: OAuth `identify`,
 > HMAC cookies, one-key-per-user, embedded templates, off by default) ·
-> `6c8904f` (clear state cookie before write) · `e391540` (docs) ·
-> `d347004` (Revoke in-memory rollback on save failure) · `9c3d86f`
+> `8924902` (clear state cookie before write) · `f19c66a` (docs) ·
+> `9f16718` (Revoke in-memory rollback on save failure) · `3218b0e`
 > (scheme-conditional `Secure` per the D5 amendment above + nits). Three
 > parallel Opus security reviews (OAuth/secrets · cookies/flock ·
 > XSS/wiring/config/docs): no blockers, no majors — forged-state,
@@ -259,14 +269,14 @@ item, not a phase blocker.
 ## Phase 16 — MCP over streamable HTTP — ✅ DONE (incl. 16b)
 
 > **DONE 2026-07-08** on branch `phase-16` (off `phase-15`). Commits
-> `0e6f660` (`mvd-mcp -http`: streamable HTTP via go-sdk
+> `7b53a66` (`mvd-mcp -http`: streamable HTTP via go-sdk
 > `NewStreamableHTTPHandler`, `Stateless=true`, outer fail-closed auth gate
 > validating `Authorization: Bearer` against mvd-api `/v1/auth/check`,
 > per-request `getServer` proxy backend forwarding the caller's key) ·
-> `2465e91` (end-to-end tests with a real go-sdk client + stubbed mvd-api:
+> `7a21426` (end-to-end tests with a real go-sdk client + stubbed mvd-api:
 > valid-key forwards the key, missing/bad-key 401, keyless search blocked) ·
-> `1f88c3c` (16b deploy templates: Caddyfile, systemd units, runbook) ·
-> `f151f80` (review fixes). Three parallel Opus reviews (auth-gate security ·
+> `5ebadf7` (16b deploy templates: Caddyfile, systemd units, runbook) ·
+> `4fe9da3` (review fixes). Three parallel Opus reviews (auth-gate security ·
 > deploy templates · docs/spec/stdio): no blockers; one MAJOR — the runbook
 > used the wrong build target (`make build` is WASM-only) — fixed to
 > `make build-bin`. Fail-closed gate verified empirically (timeout/500/429/

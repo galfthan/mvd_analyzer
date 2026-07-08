@@ -62,12 +62,12 @@ What checks out: the handler side of #97 is clean — all four full-data endpoin
 
 | ID | What | Phase / commit |
 |---|---|---|
-| F14 | Cache quota + GC by mtime (tier-1/2/3), startup orphan-schema-tree sweep, `cache stats`/`cache prune` (`-dry-run`, `-max-bytes`/`-older-than`/`-all`) subcommands; `-cache-max-bytes` default 20 GiB, 0 disables | P13 e0ba263, 5a02254 |
-| F15 (throttle) | Shared counting semaphore (`-max-parses`, default max(1,NumCPU/2)) around the cold download+parse AND the on-demand LOS raycast; distinct-demo storms bounded. Rate-limit half → phase 14 (per API key) | P13 e0ba263, 1023a86 |
-| F16 | `io.LimitReader` 64 MiB cap on both hub paths (CDN + `demo_source_url`); over-cap → `ErrHubUpstream`, never cached | P13 d8da6ff |
-| F17 | Permissive CORS (`*`) + OPTIONS preflight (204) + `Access-Control-Expose-Headers` incl. ETag; read-only API so `*` is safe | P13 267fae0, 5a02254 |
+| F14 | Cache quota + GC by mtime (tier-1/2/3), startup orphan-schema-tree sweep, `cache stats`/`cache prune` (`-dry-run`, `-max-bytes`/`-older-than`/`-all`) subcommands; `-cache-max-bytes` default 20 GiB, 0 disables | P13 8d9a9c5, 23f6edf |
+| F15 (throttle) | Shared counting semaphore (`-max-parses`, default max(1,NumCPU/2)) around the cold download+parse AND the on-demand LOS raycast; distinct-demo storms bounded. Rate-limit half → phase 14 (per API key) | P13 8d9a9c5, d334208 |
+| F16 | `io.LimitReader` 64 MiB cap on both hub paths (CDN + `demo_source_url`); over-cap → `ErrHubUpstream`, never cached | P13 af47b32 |
+| F17 | Permissive CORS (`*`) + OPTIONS preflight (204) + `Access-Control-Expose-Headers` incl. ETag; read-only API so `*` is safe | P13 7af6931, 23f6edf |
 | F18 | Obsoleted by phase 12 (always-full parse deleted `EnsureShotStreams` + the shot-stream degrade/ETag path both sub-points named) | — |
-| F19 | Per-request `X-Request-Id` (crypto/rand); all 5xx bodies generic + id, real error only to the log; 4xx keep specific non-leaking messages | P13 267fae0 |
+| F19 | Per-request `X-Request-Id` (crypto/rand); all 5xx bodies generic + id, real error only to the log; 4xx keep specific non-leaking messages | P13 7af6931 |
 | F1 | Downloaded demo bytes SHA-verified before caching; mismatch → `ErrHubUpstream`, nothing cached (cache.go:226-233) | P3-api 6179589 |
 | F2 | `hubfetch.ErrNotFound` + `errors.Is` classification in one `classifyHubError` helper — no more error-string matching | P3-api 6179589 |
 | F3 | Error-accumulating `qp` reader replaces ~30 inline parse-and-writeError blocks; shared `writeInvalidParam` tail | P5-api 7c8cf5c |
