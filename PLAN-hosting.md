@@ -284,6 +284,8 @@ item, not a phase blocker.
 > mvd-analytics import, stdio byte-identical, no schema bump. Caddy XFF is
 > *replaced* not appended (no IP spoof); secrets only via `EnvironmentFile`.
 >
+> **Post-deploy fix (2026-07-08, `eb89bcc`):** real proxied deployment surfaced a bug the httptest suite missed — the go-sdk streamable handler's DNS-rebinding guard 403s loopback-arriving requests (i.e. all traffic from Caddy) that carry a non-loopback Host, so every MCP call failed with `invalid Host header`. Fixed by setting `DisableLocalhostProtection` (the mode runs behind a trusted proxy with its own key gate); added `TestHTTP_NonLoopbackHostAccepted` (reproduces the 403 with the guard on). Stack tip is now `phase-16` @ `eb89bcc`.
+>
 > **Operator-only (not in CI):** create the Discord app, provision VPS+DNS,
 > fill `/etc/mvd/secrets.env`, install units + Caddy, run the smoke-test
 > checklist — all in `deploy/README.md`.
