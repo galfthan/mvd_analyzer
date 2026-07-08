@@ -56,10 +56,17 @@ secret, and give it its own rate-limit class (see phase 14).
   `service: true` so they can carry a different rate class.
 - **D5 — Portal auth is Discord OAuth2 `identify` only.** No guilds,
   no email. Session = HMAC-signed cookie (stdlib `crypto/hmac`, no
-  server-side session store), 1 h TTL, `SameSite=Lax`, `Secure`,
-  `HttpOnly`. OAuth `state` param double-submits against the cookie.
-  All mutations are POSTs. No JS framework — embedded static HTML/CSS
-  via `embed.FS`.
+  server-side session store), 1 h TTL, `SameSite=Lax`, `HttpOnly`, and
+  `Secure` — **but `Secure` is scheme-conditional** (amended 2026-07-08
+  during phase-15 review): it is set when `-portal-base-url` is `https`
+  (production, the norm) and cleared when it is `http` (local dev only),
+  because a browser silently drops a `Secure` cookie over http and the
+  documented `http://localhost:8080/portal/callback` dev flow would never
+  receive the session/state cookie. The server logs a startup warning
+  when cookies are non-Secure; an http base URL must never be used in
+  production (production is always https behind Caddy, D9). OAuth `state`
+  param double-submits against a signed state cookie. All mutations are
+  POSTs. No JS framework — embedded static HTML/CSS via `embed.FS`.
 - **D6 — MCP stays a separate process; HTTP mode added to `mvd-mcp`.**
   `mvd-mcp -http :8081 -api http://localhost:8080` serves
   `mcp.NewStreamableHTTPHandler` (go-sdk v1.6.0, already vendored;
@@ -182,7 +189,26 @@ Branch `phase-14` off `phase-13`.
 Gate: `make test`; manual: no `-auth-dir` → today's behaviour
 byte-identical; with it → 401 without key, 200 with, 429 past burst.
 
-## Phase 15 — Discord portal (`internal/portal`)
+## Phase 15 — Discord portal (`internal/portal`) — ✅ DONE
+
+> **DONE 2026-07-08** on branch `phase-15` (off `phase-14`). Commits
+> `0d74526` (authkeys cross-process flock on a dedicated `keys.json.lock`
+> + reload-under-lock) · `0c7aaa5` (portal package: OAuth `identify`,
+> HMAC cookies, one-key-per-user, embedded templates, off by default) ·
+> `6c8904f` (clear state cookie before write) · `e391540` (docs) ·
+> `d347004` (Revoke in-memory rollback on save failure) · `9c3d86f`
+> (scheme-conditional `Secure` per the D5 amendment above + nits). Three
+> parallel Opus security reviews (OAuth/secrets · cookies/flock ·
+> XSS/wiring/config/docs): no blockers, no majors — forged-state,
+> secret-reflection, open-redirect, tamper/expiry, XSS-payload, and
+> lost-write attacks all defended (verified by running the exploits).
+> Zero new deps (all stdlib). No schema bump; goldens unchanged. The
+> phase-14 carry-forward (cross-process store lock) is resolved here.
+>
+> **Deferred manual gate (needs operator):** the live end-to-end run
+> against a real Discord app (create the OAuth2 app, register redirect
+> URIs) is a pre-deploy checklist item, not a merge blocker — CI proves
+> the full flow against a stubbed Discord (httptest).
 
 Branch `phase-15` off `phase-14`.
 
