@@ -288,6 +288,8 @@ item, not a phase blocker.
 >
 > **Post-deploy fix 2 (2026-07-08, `d9027e6`):** MCP array/map tool filters (`players`/`fields`/`types`/`weapon`/`items`/`kinds`/`reducers`) were broken in real client use — jsonschema-go reflects nilable slices/maps to a `["null",X]` type union that some MCP clients coerce to a string, silently dropping the filter. Fixed with an `addTool` wrapper that strips the null unions from the input schema (`stripNullTypes`) + `TestInputSchemasHaveNoNullUnions`. jsonschema-go promoted to a direct dep (already in the graph). Stack tip `phase-16` @ `d9027e6`.
 >
+> **Post-deploy fix 3 (2026-07-08):** cold demo loads 502'd — the phase-3 download integrity check hashed the gzipped CDN bytes, but the hub's `demo_sha256` is the *uncompressed* content hash (confirmed across 4 live games). `authenticatesToSHA` now verifies the decompressed content (raw fallback also accepted); zip-bomb-bounded. Escaped tests: golden corpus is pre-cached, phase-3 unit tests self-consistent. mvd-api commit `0cd5756`.
+>
 > **Operator-only (not in CI):** create the Discord app, provision VPS+DNS,
 > fill `/etc/mvd/secrets.env`, install units + Caddy, run the smoke-test
 > checklist — all in `deploy/README.md`.
