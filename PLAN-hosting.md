@@ -256,7 +256,29 @@ secret, redirect URIs) per "Operator prerequisites". The phase ships and
 merges on the automated gate; the manual gate is a pre-deploy checklist
 item, not a phase blocker.
 
-## Phase 16 — MCP over streamable HTTP
+## Phase 16 — MCP over streamable HTTP — ✅ DONE (incl. 16b)
+
+> **DONE 2026-07-08** on branch `phase-16` (off `phase-15`). Commits
+> `0e6f660` (`mvd-mcp -http`: streamable HTTP via go-sdk
+> `NewStreamableHTTPHandler`, `Stateless=true`, outer fail-closed auth gate
+> validating `Authorization: Bearer` against mvd-api `/v1/auth/check`,
+> per-request `getServer` proxy backend forwarding the caller's key) ·
+> `2465e91` (end-to-end tests with a real go-sdk client + stubbed mvd-api:
+> valid-key forwards the key, missing/bad-key 401, keyless search blocked) ·
+> `1f88c3c` (16b deploy templates: Caddyfile, systemd units, runbook) ·
+> `f151f80` (review fixes). Three parallel Opus reviews (auth-gate security ·
+> deploy templates · docs/spec/stdio): no blockers; one MAJOR — the runbook
+> used the wrong build target (`make build` is WASM-only) — fixed to
+> `make build-bin`. Fail-closed gate verified empirically (timeout/500/429/
+> non-204/DNS-fail all deny). Zero new deps (go-sdk already vendored), no
+> mvd-analytics import, stdio byte-identical, no schema bump. Caddy XFF is
+> *replaced* not appended (no IP spoof); secrets only via `EnvironmentFile`.
+>
+> **Operator-only (not in CI):** create the Discord app, provision VPS+DNS,
+> fill `/etc/mvd/secrets.env`, install units + Caddy, run the smoke-test
+> checklist — all in `deploy/README.md`.
+
+## Phase 16 — MCP over streamable HTTP (original plan)
 
 Branch `phase-16` off `phase-15`.
 
