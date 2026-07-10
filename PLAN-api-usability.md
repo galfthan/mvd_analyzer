@@ -14,6 +14,44 @@
 > operations (`getArtifact(demoIds[], …)` etc.) are a separate future
 > phase. Nothing here may quietly grow a batch surface.
 
+## Status — ✅ DONE (2026-07-10, branch `phase-16.1` off `phase-16`)
+
+> All three workstreams landed on `phase-16.1` (pushed), each followed
+> by an adversarial review pass with confirmed findings fixed in-branch:
+>
+> - **A** (`4b1d5ed` analyzer: match-start spawn synthesis + `opening`
+>   artifact, schema v51 · `6f33364` view: default `pickup` events with
+>   spawner identity + spawn `detail{loc}` · `d0a624d` review fixes).
+>   Review: 3 agents; one MAJOR — the manifest marked `opening`
+>   servable but mvd-api's `eagerArtifacts` map had no accessor, so
+>   `getArtifact('opening')` 500'd; fixed + pinned by
+>   `TestEveryServableEagerArtifactHasAccessor`.
+> - **B** (`385a6f2` items/backpacks/weapon-pickups `from`/`to` + items
+>   `summary`, region-control proxy passthrough, MCP `summary:true`
+>   defaults for damage/aim/items with response `hint`, searchGames
+>   compact rosters + PostgREST `total`; no schema bump ·
+>   `bfe5b11` review fixes: closed [from,to] boundaries — weapon-stay
+>   zero-length phases at the window edge survived, end bound made
+>   inclusive to match every sibling endpoint).
+> - **C** (`c825ff0` schema v52: `streams.global.timeBase:"demo"` +
+>   `errors[]` notice on no-match-start demos (D9); field errors
+>   enumerate all 23 codes with glosses (D6 amended, drift-tested);
+>   view envelope switched to correctly-rounded ms/1000 division —
+>   goldens diff schemaVersion-only (D8 amended); shots.go stale
+>   warmup comments, demoInfo units island, items time sentinels,
+>   powerup `duration` dropped from view detail (D10), `getOverview`
+>   units-seam note · `1ae916e` review fix: the demoInfo island block
+>   itself had KTX units wrong — timelimit is minutes, item
+>   `{took, time}` is count + cumulative-hold seconds, not timestamps).
+>
+> `make test` green (21 packages incl. golden corpus) at every commit.
+> Acceptance shape achieved: the schloss opening question is now 1×
+> `getArtifact('opening')` per demo (~15 small rows) + optional
+> `getItems(endTime:60)` — no `getStateAt(0.3)` workaround, no
+> timestamp cross-referencing. F1e partially remains by decision
+> (Result-field floats: shots.accuracy, locGraph weights,
+> aim.crosshair — documented known-wart per amended D8).
+
 ## Findings (verified)
 
 ### F1 — time semantics are clean; the remnants are edges, not streams
