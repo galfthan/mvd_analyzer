@@ -107,6 +107,12 @@ taken — the single biggest call-multiplier in the usage report.
 
 ## Design decisions (veto here, not in review)
 
+> **All decisions walked through and resolved with the user 2026-07-10.**
+> D1, D2, D3, D5, D7, D9, D10 confirmed as proposed. **D6 amended**
+> (error enumeration only — no field aliases) and **D8 amended**
+> (envelope-only rounding — no Result-field precision changes); the
+> amended text below is the decision of record.
+
 - **D1 — MCP defaults may diverge from REST toward token-lean.**
   Precedent exists: the proxy already defaults `windowMs` to 1000 vs
   REST's 50 (`mcp_backend_proxy.go:420-423,536-539`). REST keeps
@@ -150,11 +156,17 @@ taken — the single biggest call-multiplier in the usage report.
   per demo instead of three large ones. Not duplicated into
   `getOverview` for now — overview stays a scoreboard; revisit if the
   artifact round-trip proves annoying in practice.
-- **D6 — field-name aliases + self-describing errors.** `validateFields`
-  accepts the resolved output names as aliases for codes (`loc`→`li`,
-  `health`→`h`, `armor`→`a`, …one map, both directions documented), and
-  `unknownFieldError` enumerates the valid codes. Applies to state-at,
-  buckets, stream-slice.
+- **D6 — self-describing field errors; NO aliases** *(amended
+  2026-07-10 — the original proposal also aliased resolved output names
+  to codes, e.g. `loc`→`li`)*. Selector codes stay strict;
+  `unknownFieldError` enumerates all valid codes with one-word glosses
+  (`li=location, h=health, …`). Applies to state-at, buckets,
+  stream-slice. Rationale for dropping aliases: the output keys `loc`
+  (resolved name) and `li` (raw locTable index) are two
+  *representations* of one field selected by the separate `loc=`
+  param — letting `loc` double as a fields-selector spelling *and* the
+  representation param invites exactly the confusion it was meant to
+  fix. A typo'd agent pays one self-correcting round trip instead.
 - **D7 — searchGames goes compact by default.** MCP-side projection:
   keep `id, timestamp, map, mode, matchtag, demo_sha256,
   demo_source_url, teams`, and project each roster entry to
@@ -164,15 +176,20 @@ taken — the single biggest call-multiplier in the usage report.
   `Prefer: count=exact` and surface `total` (fallback `hasMore` via
   limit+1 if the hub disallows count). REST is untouched — searchGames
   never transits mvd-api.
-- **D8 — precision policy: round at the serialization boundary,
-  never retype.** (Established convention — see the JSON-precision
-  memory / coord.go.) View seconds → 3 decimals (ms resolution) at the
-  point of `*0.001`. `shots.accuracy` → 3 decimals. locGraph weights:
-  accumulate in int ms internally, emit seconds at 3 decimals (keeping
-  the documented seconds unit — changing units is a breaking change
-  with no information gain). `aim.crosshair` angle/dist columns →
-  2 decimals via the container-MarshalJSON pattern. Airgib heights and
-  state-at pos/vel stay full-precision (documented deliberate, v33/v34).
+- **D8 — precision: fix the view envelope only** *(amended 2026-07-10 —
+  the original proposal also rounded `shots.accuracy`, the locGraph
+  float-seconds accumulators, and `aim.crosshair` columns)*. Round the
+  view-layer ms→seconds conversions to 3 decimals at the point of
+  `*0.001` (`view/events.go`, `view/trails.go`, `view/buckets.go` row
+  layout + envelope, `view/streamslice.go`) — kills the
+  `13.155000000000001` class on the API surface with **no schema bump**
+  (values change in the last decimals, shapes don't; goldens pin the
+  Result, not view output — verify none of these views leak into
+  goldens before assuming that). All **Result** fields stay untouched:
+  `shots.accuracy`, locGraph weights, `aim.crosshair` keep full
+  precision (F1e stays open as a documented known-wart; revisit only
+  with evidence the token cost matters). Airgib heights and state-at
+  pos/vel full-precision remains deliberate (v33/v34).
 - **D9 — no-match-start demos get flagged, not fixed.** New
   `streams.global.timeBase: "demo"` (omitted in the normal case) plus
   an `overview.errors[]` entry. Surfacing beats coercing: we cannot
@@ -219,17 +236,17 @@ highest-leverage items first.
    uses a wrong `players` shape, `supabase_test.go:136`).
 
 ### 16.1-C — friction + correctness edges
-10. **C1** field aliases + enumerating field errors per D6; document
-    the `li`/`loc` pair in state-at/buckets/stream-slice tool
-    descriptions.
+10. **C1** enumerating field errors per D6 (no aliases — amended);
+    document the `li`-selects / `loc=`-renders pair in
+    state-at/buckets/stream-slice tool descriptions.
 11. **C2** tool-description truth pass: loadDemo is optional
     (auto-resolve documented as the norm, loadDemo = warm-up),
     searchGames count semantics, seconds-in/ms-out units note.
-12. **C3** precision pass per D8 — view rounding is API-visible but
-    not a schema *shape* change; aim/shots/locGraph rounding touches
-    Result → schema bump + golden regen (share one bump).
+12. **C3** precision pass per D8 (amended: envelope only) — view-layer
+    ms→seconds rounding to 3 decimals; no Result fields touched, no
+    schema bump expected (confirm goldens don't pin view output).
 13. **C4** `timeBase:"demo"` flag + overview error per D9 — schema
-    bump (share C3's).
+    bump (can share A-workstream's if landed together).
 14. **C5** doc-debt: fix stale `result/shots.go` Warmup comment (F1c);
     RESULT_SCHEMA notes for the demoInfo KTX island (F1b) and items
     negative-time/0-sentinel semantics (F1d); drop `duration` from
