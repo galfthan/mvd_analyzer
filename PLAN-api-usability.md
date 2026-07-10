@@ -52,6 +52,39 @@
 > (Result-field floats: shots.accuracy, locGraph weights,
 > aim.crosshair — documented known-wart per amended D8).
 
+## Phase 16.2 — OpenAPI + REST papercuts (DECIDED 2026-07-10, plan before building)
+
+> User decision: at least three external projects already integrate via
+> the REST API, with more expected — a machine-readable spec graduates
+> from nice-to-have to due. Detailed planning happens before
+> implementation; this section captures the sizing and open questions.
+>
+> **Scope sketch (from the 2026-07-10 fresh-eyes API review):**
+> hand-authored OpenAPI 3.1 (~33 operations, ~15 highly-reused query
+> params → components), served as `/openapi.yaml` + a `/docs` viewer
+> (vendored single-file asset via embed.FS — no CDN, zero new Go deps).
+> Generate the artifact-name enum slice from `ArtifactManifest()` (the
+> one machine-readable inventory that already exists). Companion drift
+> test in the ARTIFACTS.md style: extract `METHOD /path` patterns from
+> router.go and the writeError code enum; fail on spec mismatch.
+> **Known-awkward shapes to decide up front:** the `{id}` segment
+> (pattern validates `gameId:N|sha:HEX` but loses semantics), the
+> generic artifact response (oneOf across ~16 servable artifacts —
+> generate it), columnar buckets and events[].detail (dynamic/
+> polymorphic keys — spec them loosely, link RESULT_SCHEMA).
+> Estimate: ~1-2 days incl. viewer + drift test.
+>
+> **Deferred REST/MCP papercuts** (fresh-eyes findings acknowledged but
+> not acted on; candidates to ride 16.2): singular `weapon` CSV param
+> among plural siblings (rename or alias); missing cross-links in the
+> items/weapon-pickups/backpacks trio descriptions; getDamage/getAim
+> description walls (lead with routing facts, move field vocab to a
+> trailing note, drop the duplicated telefrag sentence); a node-name ↔
+> curated-route ↔ body-key mapping table in API.md §4.17b; "who won"
+> confirmation sentence on getOverview. Declined outright: route
+> pluralization renames (breaking, cosmetic); geometry ETag hash (the
+> len-proxy caveat is now documented in code).
+
 ## Findings (verified)
 
 ### F1 — time semantics are clean; the remnants are edges, not streams
