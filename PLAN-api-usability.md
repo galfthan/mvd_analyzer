@@ -1,0 +1,251 @@
+# PLAN-api-usability — phase 16.1: API/MCP usability + correctness
+
+> Written 2026-07-10 on `phase-16` (hosting stack tip, post-deploy).
+> Numbered 16.1 deliberately: phase 17 remains the mvd-web-on-API
+> migration ([PLAN-hosting.md](PLAN-hosting.md) "explicitly after").
+> Trigger: first real multi-demo agent session over the hosted MCP
+> ("opening spawn → item control on schloss ×15") burned ~45 tool calls
+> and most of a context window on work that should have been ~15 small
+> calls. This plan turns that usage report into verified findings and
+> a work programme. Everything below was audited against the code on
+> `phase-16`; file:line refs are to that tree.
+>
+> **Out of scope (user decision 2026-07-10):** multi-demo / batch
+> operations (`getArtifact(demoIds[], …)` etc.) are a separate future
+> phase. Nothing here may quietly grow a batch surface.
+
+## Findings (verified)
+
+### F1 — time semantics are clean; the remnants are edges, not streams
+
+The per-producer rebase architecture (each node subtracts
+`Clock.MatchStartMs` in its own Finalize) holds everywhere it should:
+frags, messages, timeline events/streaks, all player/mover/projectile
+streams, damage (incl. the recently rebased telefrags/stomps), shots,
+items phases, backpacks, weaponPickups, aim. All API `from`/`to`/`time`
+params are match-relative seconds end to end. What remains:
+
+- **F1a** — on a demo with *no detectable match start*, `ToMatch` is the
+  identity (`analyzer/clock.go:58-63`) and the **entire result silently
+  stays on the demo clock**, indistinguishable from a rebased result.
+- **F1b** — `demoInfo` is a deliberate KTX island (verbatim, integer
+  *seconds*, KTX's own base — `result/demoinfo.go:125-126`), but
+  RESULT_SCHEMA.md never says how (or that you can't) reconcile it with
+  match time.
+- **F1c** — `result/shots.go:10-13,37-45` still documents the removed
+  `Warmup` field and claims the stream is not match-gated; v50 gated it.
+  The comment now lies about time semantics.
+- **F1d** — items phases: warmup pickups rebase to *negative* times and
+  `availableFrom==0` doubles as the "available since match start"
+  sentinel (`analyzer/items.go:1315-1330`). Real, useful signal — but
+  undocumented.
+- **F1e** — float precision. The view layer converts int-ms back to
+  seconds with bare `float64(t)*0.001`, reintroducing
+  `13.155000000000001` on the API surface: `view/events.go:74-125`,
+  `view/trails.go:40-62`, `view/buckets.go` (row layout + envelope),
+  `view/streamslice.go:15-30`. Also raw: `shots.accuracy`
+  (`analyzer/shots.go:630`), `locGraph` float-seconds accumulators
+  (`analyzer/locgraph.go:89-99,190-207` — also a units oddity: seconds
+  in an ms schema), `aim.crosshair` float32 columns (`result/aim.go:61-72`).
+
+### F2 — initial spawn is missing from the spawn stream (bug)
+
+`SpawnEvent` fires only on a dead→alive health transition
+(`mvd-reader/parser/stats.go:120-134`). A player alive through the
+countdown never transitions, so the **match-start respawn — the most
+important spawn of the match — never appears** in
+`streams.players[].spawns` or `getEvents type=spawn`. Only the
+`FragStreakEvent` synthesizer acknowledges it ("first life synthesized
+at match start", `result/timeline.go:210-219`). Spawn events also carry
+no location anywhere (the events view doesn't join the loc stream), so
+even mid-match spawns answer "when" but not "where". Current
+workarounds — `getStateAt(0.3)` or `locTrails[0]` — are exactly what an
+agent shouldn't have to discover.
+
+### F3 — pickup identity exists in the Result but not in the event stream
+
+The parser is rich: `ItemPickupHintEvent` (ItemEnt + PlayerEnt +
+RespawnSec, `mvd-reader/parser/ktx_pickup.go:29-34`),
+`BackpackPickupHintEvent`, `ItemSpawnEvent` (EntNum + Kind + Origin),
+`ItemStateEvent`. And the Result keeps the authoritative joins:
+`items[]` (per-spawner entNum/loc/name incl. `ya_1`/`ya_2`, phases with
+takenBy/takenAt), `weaponPickups[]` (world-vs-backpack + backpackEnt +
+dropper), `backpacks[]`. But the **events view discards all of it**:
+`weapon`/`item` events are synthesized from *held-interval* streams
+(`view/events.go:257-274,345-381`) → anonymous `weapon gain: rl`; armor
+is an opt-in raw value column where same-tick pickup+damage collapses
+into one net delta. There is no `pickup` event type. An agent must make
+a second call and cross-reference timestamps to learn *which* YA was
+taken — the single biggest call-multiplier in the usage report.
+
+### F4 — filter gaps (each one is "fetch everything, discard most")
+
+| Tool | Gap | Evidence |
+|---|---|---|
+| getItems | **no from/to**, no summary — full-match phases always | `view/sections.go:398-446`, `mcp_backend.go:198-203` |
+| getBackpacks | no from/to | `mcp_backend.go:191-195` |
+| getWeaponPickups | no from/to | `mcp_backend.go:214-219` |
+| getRegionControl | REST accepts from/to; **MCP proxy drops them** | `mcp_backend_proxy.go:540-542` |
+| getEvents/getChat/getItems | no summary mode (frags/damage/aim have one) | `handlers.go:293,336,404` |
+| searchGames | `count`=rows-returned, no total/hasMore; full hub rosters (name_color, per-player ping, color arrays) passed through verbatim | `supabase.go:22,129-134` |
+
+### F5 — friction the usage report paid for
+
+- `getStateAt(fields=['loc'])` → `unknown field code loc`: the field
+  *code* is `li` (`view/fields.go:19`) but the *output key* is `loc`;
+  the error names no valid codes (`view/fields.go:206`) and no tool
+  description mentions the mismatch.
+- `loadDemo` reads as mandatory (`mcp_tools.go:24,32`) but every
+  endpoint auto-resolves `gameId:N`/`sha:HEX` and auto-loads on cache
+  miss (`handlers.go:85-102`, `democache/cache.go:266-322`). 15 of the
+  session's ~45 calls were unnecessary warm-ups.
+- `PowerupEvent` serializes `t`, `endTime`, *and* `duration`
+  (`result/timeline.go:196-206`; echoed in view detail
+  `view/events.go:101-107`) — one derivable.
+- locTrails duplicates every boundary (`e[i] == s[i+1]`,
+  `view/trails.go:100-143`).
+
+## Design decisions (veto here, not in review)
+
+- **D1 — MCP defaults may diverge from REST toward token-lean.**
+  Precedent exists: the proxy already defaults `windowMs` to 1000 vs
+  REST's 50 (`mcp_backend_proxy.go:420-423,536-539`). REST keeps
+  today's defaults (it serves programs); MCP defaults serve a context
+  window. Concretely: `summary` defaults **true** at the MCP layer for
+  `getDamage`, `getAim`, and the new `getItems` summary (F4); an agent
+  passes `summary:false` to get the full log. `getFrags` keeps the full
+  kill log by default — the log *is* the product there and is moderate.
+  Every summary response embeds a hint field (e.g.
+  `"detail":"pass summary:false for the per-event log"`) so agents can
+  self-serve.
+- **D2 — pickups become a first-class event type, synthesized in the
+  view.** No parser or analyzer change: `view/events.go` joins
+  `items[].phases` (takenAt/takenBy + parent name/kind/entNum/loc),
+  `weaponPickups[]` (source, dropper), `backpacks[]`. Event shape:
+  `{t, type:"pickup", player, detail:{item:"ya_1", kind:"armor",
+  entNum, loc, source:"world"|"backpack", dropper?}}`. `pickup` joins
+  the **default** type set (discrete, low-frequency, high-value); the
+  existing interval-based `weapon`/`item` gain/lose events are
+  unchanged (they tell the *holding* story and consumers exist).
+- **D3 — the initial spawn is real data, so it lives in the analyzer,
+  not the view.** Synthesize one spawn per player at match start in the
+  streams finalize (same policy as the FragStreak first-life synthesis,
+  which is prior art for "t=0 is a life boundary"). Implementation
+  first checks whether the parser can see the actual match-start
+  respawn (position teleport + stat reset at countdown end) and uses it
+  when present; synthesis at `t=0` is the fallback. This changes
+  `spawns[]` counts — schema bump + RELEASE_NOTES + golden regen.
+- **D4 — spawn events get a location in the events view** by sampling
+  the loc/position stream at spawn time (carry-forward, same lookup
+  `getStateAt` uses). View-only; no schema change to streams.
+- **D5 — a new eager `opening` artifact** (post-processor node;
+  requires `timeline`, `items`, `weapon-pickups`, `roster`, `clock`):
+  per player `{name, team, spawnLoc}` + per tracked item the first
+  take `{item, kind, entNum, loc, t, takenBy, team}`. Tracked = all
+  armors, mega, powerups, RL/LG spawners — i.e. `items[]` entries whose
+  kind ∈ {armor, mega, powerup} plus weapon spawners for rl/lg. Served
+  for free via `listArtifacts`/`getArtifact`
+  (`analyzer/manifest.go:57-82`) — **zero new MCP tools**, which is
+  also why this stays useful even with batch deferred: one small call
+  per demo instead of three large ones. Not duplicated into
+  `getOverview` for now — overview stays a scoreboard; revisit if the
+  artifact round-trip proves annoying in practice.
+- **D6 — field-name aliases + self-describing errors.** `validateFields`
+  accepts the resolved output names as aliases for codes (`loc`→`li`,
+  `health`→`h`, `armor`→`a`, …one map, both directions documented), and
+  `unknownFieldError` enumerates the valid codes. Applies to state-at,
+  buckets, stream-slice.
+- **D7 — searchGames goes compact by default.** MCP-side projection:
+  keep `id, timestamp, map, mode, matchtag, demo_sha256,
+  demo_source_url, teams`, and project each roster entry to
+  `{name, team, frags}` (drop `name_color`, `ping`, `color`,
+  `team_color`, `is_bot`). `roster:true` opts back into the verbatim
+  hub rows. Add honest pagination: request PostgREST
+  `Prefer: count=exact` and surface `total` (fallback `hasMore` via
+  limit+1 if the hub disallows count). REST is untouched — searchGames
+  never transits mvd-api.
+- **D8 — precision policy: round at the serialization boundary,
+  never retype.** (Established convention — see the JSON-precision
+  memory / coord.go.) View seconds → 3 decimals (ms resolution) at the
+  point of `*0.001`. `shots.accuracy` → 3 decimals. locGraph weights:
+  accumulate in int ms internally, emit seconds at 3 decimals (keeping
+  the documented seconds unit — changing units is a breaking change
+  with no information gain). `aim.crosshair` angle/dist columns →
+  2 decimals via the container-MarshalJSON pattern. Airgib heights and
+  state-at pos/vel stay full-precision (documented deliberate, v33/v34).
+- **D9 — no-match-start demos get flagged, not fixed.** New
+  `streams.global.timeBase: "demo"` (omitted in the normal case) plus
+  an `overview.errors[]` entry. Surfacing beats coercing: we cannot
+  invent a match start, but consumers must be able to tell.
+- **D10 — powerup `duration` is dropped from the *view* event detail
+  only.** The Result keeps t/endTime/duration (authoritative-data
+  policy: redundancy in the stable contract is harmless, and removing
+  it breaks consumers for a ~8-byte win). locTrails boundary
+  duplication: **keep** — `[s,e)` residences are self-contained and the
+  claimed 2× saving is really ~25% of the row; not worth a second
+  format. Documented as considered-and-rejected.
+
+## Workstreams (suggested landing order)
+
+Each lands with its docs (RESULT_SCHEMA.md / API.md / mcp README + tool
+descriptions / ARTIFACTS.md regen / RELEASE_NOTES.md) and `make test`
+incl. golden regen where flagged. Order puts the usage report's
+highest-leverage items first.
+
+### 16.1-A — pickup identity + initial spawn (the call-multiplier fixes)
+1. **A1** `pickup` event type in `view/events.go` per D2; join tests
+   against a golden demo (ya_1 vs ya_2 disambiguation, backpack
+   source, dropper). Docs: RESULT_SCHEMA view-shapes + API.md events
+   table + mcp getEvents description.
+2. **A2** initial-spawn synthesis per D3 (analyzer,
+   `timeline_finalize.go` / streams build) — schema bump, golden regen.
+3. **A3** spawn-loc join in events view per D4 (rides on A1's plumbing).
+4. **A4** `opening` artifact per D5 — new result type + post node +
+   `postNodeMeta` entry, `make artifacts-md`, schema bump (can share
+   A2's bump if landed together), goldens.
+
+### 16.1-B — filters + MCP defaults (the bloat fixes)
+5. **B1** getItems: `from`/`to` (phase overlaps window; parent item
+   header always kept) + `summary` (per item: takenCount, byPlayer
+   counts, firstTake) — view + handler + proxy + tool schema.
+6. **B2** `from`/`to` for backpacks + weapon-pickups (same three
+   layers).
+7. **B3** proxy forwards `from`/`to` on region-control (REST already
+   parses them).
+8. **B4** MCP summary defaults per D1 (damage, aim, items) + the
+   embedded "how to get detail" hint.
+9. **B5** searchGames compact + `total`/`hasMore` per D7 (mvd-mcp only;
+   supabase_test gains a real-shape roster fixture — the current mock
+   uses a wrong `players` shape, `supabase_test.go:136`).
+
+### 16.1-C — friction + correctness edges
+10. **C1** field aliases + enumerating field errors per D6; document
+    the `li`/`loc` pair in state-at/buckets/stream-slice tool
+    descriptions.
+11. **C2** tool-description truth pass: loadDemo is optional
+    (auto-resolve documented as the norm, loadDemo = warm-up),
+    searchGames count semantics, seconds-in/ms-out units note.
+12. **C3** precision pass per D8 — view rounding is API-visible but
+    not a schema *shape* change; aim/shots/locGraph rounding touches
+    Result → schema bump + golden regen (share one bump).
+13. **C4** `timeBase:"demo"` flag + overview error per D9 — schema
+    bump (share C3's).
+14. **C5** doc-debt: fix stale `result/shots.go` Warmup comment (F1c);
+    RESULT_SCHEMA notes for the demoInfo KTX island (F1b) and items
+    negative-time/0-sentinel semantics (F1d); drop `duration` from
+    view powerup detail (D10).
+
+### Deferred (explicitly not 16.1)
+- Multi-demo / batch fetch (user call, 2026-07-10) — future phase;
+  the `opening` artifact is designed so batch later composes with it.
+- Columnar/transition-list variants for items phases and locTrails
+  (D10 keep; revisit only with fresh usage evidence).
+- Overview `initialSpawn` mirror (D5 revisit clause).
+
+## Acceptance test
+
+Re-run the schloss question that motivated this plan. Target shape:
+per demo — 1× `getArtifact(opening)` (spawns + first takes, ~small),
+optionally 1× `getItems(summary, to=120)` for early-phase depth. ~15-30
+small calls total, no timestamp cross-referencing, no `getStateAt(0.3)`
+workaround, no full-match item dumps.

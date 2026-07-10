@@ -8,7 +8,8 @@
 > [PLAN-api.md](PLAN-api.md) (api/mcp),
 > [PLAN-web.md](PLAN-web.md) (web),
 > [PLAN-improve-analytics.md](PLAN-improve-analytics.md) (DAG),
-> [PLAN-hosting.md](PLAN-hosting.md) (hosting/auth/portal/MCP-HTTP, added 2026-07-07).
+> [PLAN-hosting.md](PLAN-hosting.md) (hosting/auth/portal/MCP-HTTP, added 2026-07-07),
+> [PLAN-api-usability.md](PLAN-api-usability.md) (phase 16.1: API/MCP usability + correctness, added 2026-07-10).
 > Item IDs below (`analytics F1`, `reader A2`, …) refer to those documents;
 > the details, line references and fix sketches live there, not here.
 
