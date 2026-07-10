@@ -54,6 +54,43 @@
 
 ## Phase 16.2 — OpenAPI + REST papercuts (DECIDED 2026-07-10, plan before building)
 
+> ### Status — ✅ DONE (2026-07-10, branch `phase-16.2` off `phase-16.1`)
+>
+> Landed in six commits, `make test` green at each:
+> `0e411d8` (spec skeleton + /docs viewer — RapiDoc 9.3.8 vendored via
+> embed.FS, auth-exempt, content-hash ETags) · `51571f3` (drift tests:
+> route parity both directions, error-code/artifact/field-code marker
+> enums, info.version = schemaVersion) · `1a03f77` (full field-level
+> response schemas + golden-response validation) · `5c9fdee` (weapons
+> param: REST alias, MCP field rename) · `e385e53` (description
+> papercuts + §4.17b table) · `9862a5e` (docs). No schema bump.
+>
+> **Decisions taken at planning (2026-07-10, this phase's session):**
+> - Viewer: RapiDoc (single-file, try-it console with Bearer auth).
+> - `weapon` param: `weapons` canonical + REST legacy alias
+>   (`qp.CSVAny`, canonical wins); MCP input field renamed outright.
+> - Response schemas: **full field-level** (amends the "spec loosely"
+>   sketch below) — bootstrapped from the Go structs by reflection,
+>   hand-curated, and enforced by a golden-response validation test
+>   (`mvd-api/openapi_validate_test.go`): the committed dm3 golden
+>   Result is served through the real router and every JSON response
+>   (~50 cases: all 35 ops, summary/layout/loc=index/all-fields
+>   variants, every error class) must validate against its spec schema;
+>   a coverage sweep forces new endpoints into the case table. This
+>   relaxed "zero new Go deps" to two TEST-ONLY imports (gopkg.in/
+>   yaml.v3 + google/jsonschema-go, already in the workspace); the
+>   binary still embeds the spec as bytes.
+> - The generic artifact response is a oneOf of 16 resultKey-keyed
+>   envelopes; events[].detail types its known keys with
+>   additionalProperties kept open; the columnar player wire shape
+>   (custom MarshalJSON) is hand-written.
+>
+> Fallout: the validation harness exposed a latent panic —
+> `firstChangeI16/Str` (view/buckets.go) nil-guarded but indexed
+> `stream[0]`, so an empty-but-non-nil change stream (any JSON
+> round-trip of one) crashed /buckets; fixed with len() guards.
+> All papercuts below landed except the declined ones (unchanged).
+
 > User decision: at least three external projects already integrate via
 > the REST API, with more expected — a machine-readable spec graduates
 > from nice-to-have to due. Detailed planning happens before
