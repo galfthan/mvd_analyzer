@@ -5,7 +5,7 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## Unreleased (branch `phase-16.3`)
+## 2026-07-12 (phase-16.3)
 
 - **The bounded damage family (schema v55).** Damage now ships in **two
   families**. The **raw** family is the v53 shape — the full hit
@@ -106,7 +106,7 @@ detail.
     [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for the
     field-level reference.
 
-## Unreleased (branch `phase-16.2`)
+## 2026-07-12 (phase-16.2)
 
 - **GDPR disclosure: privacy policy + terms of use on the portal (no
   schema change).** `/portal/privacy` and `/portal/terms`, linked from
@@ -190,7 +190,7 @@ detail.
     first-value reducers no longer panic on empty-but-non-nil change
     streams.
 
-## Unreleased (branch `phase-16.1`)
+## 2026-07-12 (phase-16.1)
 
 - **Fresh-eyes review fixes: the remaining size footguns + doc drift
   (no schema change).** Two independent no-history design reviews of
