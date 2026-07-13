@@ -26,6 +26,15 @@ type demoStore interface {
 	// streams are baked into the always-full GetResult parse, so /shots, /aim
 	// and /streams/* read them straight off the base Result.)
 	EnsureLOS(ctx context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error)
+
+	// PutDemo stores an uploaded demo body under its content SHA and reports
+	// the SHA plus whether the demo already existed (POST /v1/demos). The
+	// handler then calls GetResult on the returned SHA to parse it.
+	PutDemo(ctx context.Context, body []byte) (sha string, existed bool, err error)
+	// RemoveDemo best-effort deletes the tier-1 + tier-2 files for a SHA. The
+	// upload parse-gate calls it to evict a body that parsed to nothing usable,
+	// so the service can't be used as content-addressed storage.
+	RemoveDemo(sha string)
 }
 
 // httpError carries the wire-format error body.

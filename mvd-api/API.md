@@ -32,8 +32,10 @@ Base URL defaults to `http://localhost:8080`. A demo is addressed by an
 - **`gameId:NNNN`** — a numeric [hub.quakeworld.nu](https://hub.quakeworld.nu)
   game id. On first use the server fetches and parses the MVD; subsequent
   calls hit the cache.
-- **`sha:HEX`** — the 64-char SHA-256 of a demo already in the local
-  cache (returned by `loadDemo`; good for bookmarking a warm entry).
+- **`sha:HEX`** — the 64-char SHA-256 of the demo's *uncompressed* MVD
+  content: a demo already in the local cache (returned by `loadDemo`;
+  good for bookmarking a warm entry) or one you uploaded with
+  `uploadDemo` (`POST /v1/demos`).
 
 Typical frontend flow:
 
@@ -43,9 +45,9 @@ GET  /v1/demos/gameId:12345/overview     → "what was this match" in one call
 GET  /v1/demos/gameId:12345/<detail>     → drill into a specific panel
 ```
 
-`loadDemo` is the only call that can be slow (cold fetch + parse).
-Everything else is served from the cached `*Result`, typically
-sub-millisecond.
+`loadDemo` and `uploadDemo` are the only calls that can be slow (cold
+fetch/upload + parse). Everything else is served from the cached
+`*Result`, typically sub-millisecond.
 
 A machine-readable **OpenAPI 3.1** description of the whole surface is
 served at **`GET /openapi.yaml`** (embedded in the binary; drift tests pin
@@ -395,6 +397,26 @@ Common frontend features → the call that backs them.
   floor polygons to render underneath.
 - **Weapon effectiveness** → `GET /demoinfo` (KTX accuracy/damage) or
   `/weapon-pickups` (kills-before-next-death).
+- **Analyze a local demo file (no hub gameId)** → upload it, then use the
+  returned `demoId` with any per-demo GET:
+
+  ```
+  curl -sS -X POST --data-binary @match.mvd.gz \
+       -H 'Authorization: Bearer <key>' \
+       https://<host>/v1/demos
+  # → {"demoId":"sha:…","sha256":"…","fromCache":false,"schemaVersion":…}
+  curl -sS -H 'Authorization: Bearer <key>' \
+       https://<host>/v1/demos/sha:…/overview
+  ```
+
+  Raw `.mvd` and gzipped `.mvd.gz` both work (sniffed by gzip magic; the
+  `sha` is always of the uncompressed content, so both forms yield the
+  same id). Re-uploading a known demo is an idempotent cache hit. Limits:
+  64 MiB on the wire, 512 MiB decompressed, plus a per-key daily quota in
+  auth mode. Note that an uploaded demo has **no owner** — any key holder
+  who knows its `sha` can read the analysis — and it lives in the shared
+  cache eviction pool, so after eviction a `sha:` GET returns 404 and the
+  client simply re-uploads.
 
 When fetching positions or any raw stream in `index` loc mode, fetch
 `/loc-table` once and decode client-side.

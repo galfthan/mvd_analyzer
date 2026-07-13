@@ -35,6 +35,11 @@ type reqInfo struct {
 	// requestLabel(r) (which returns the raw Bearer — the secret key in this
 	// mode) when identity is empty (an unauthenticated 401).
 	authApplied bool
+	// keyHash is the authenticated key's hash, written by authMiddleware after
+	// a successful lookup. The upload handler keys its per-key daily quota on
+	// it. Empty in no-auth (localhost) mode — no key identity, so the quota is
+	// skipped there. Never logged (the hash prefix goes through identity).
+	keyHash string
 }
 
 // reqInfoFrom returns the request's *reqInfo, or nil if accessLog did not run

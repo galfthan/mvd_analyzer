@@ -15,6 +15,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -247,10 +248,28 @@ type validationCase struct {
 	method string // "" = GET
 	url    string // concrete request URL (path + query)
 	path   string // spec path pattern
+	body   []byte // request body (POST /v1/demos upload); nil for GETs
 	status int
 }
 
-func validationCases() []validationCase {
+// gzipDemoBody is a tiny valid gzip stream used as the upload request body.
+// fakeStore.PutDemo does not actually parse it (it registers a stub Result), so
+// the bytes only need to be a decodable gzip so the handler's PutDemo path
+// succeeds.
+func gzipDemoBody(t *testing.T) []byte {
+	t.Helper()
+	var buf bytes.Buffer
+	gw := gzip.NewWriter(&buf)
+	if _, err := gw.Write([]byte("upload-demo-fixture")); err != nil {
+		t.Fatal(err)
+	}
+	if err := gw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return buf.Bytes()
+}
+
+func validationCases(t *testing.T) []validationCase {
 	cases := []validationCase{
 		{name: "health", url: "/healthz", path: "/healthz", status: 200},
 		{name: "version", url: "/v1/version", path: "/v1/version", status: 200},
@@ -258,6 +277,7 @@ func validationCases() []validationCase {
 		{name: "artifacts-manifest", url: "/v1/artifacts", path: "/v1/artifacts", status: 200},
 		{name: "graph", url: "/v1/graph", path: "/v1/graph", status: 200},
 		{name: "load", method: "POST", url: "/v1/demos/gameId:42", path: "/v1/demos/{id}", status: 200},
+		{name: "upload", method: "POST", url: "/v1/demos", path: "/v1/demos", body: gzipDemoBody(t), status: 200},
 
 		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200},
 		{name: "demoinfo", url: "/v1/demos/gameId:42/demoinfo", path: "/v1/demos/{id}/demoinfo", status: 200},
@@ -373,13 +393,17 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	defer srv.Close()
 
 	covered := map[string]bool{}
-	for _, tc := range validationCases() {
+	for _, tc := range validationCases(t) {
 		t.Run(tc.name, func(t *testing.T) {
 			method := tc.method
 			if method == "" {
 				method = http.MethodGet
 			}
-			req, err := http.NewRequest(method, srv.URL+tc.url, nil)
+			var reqBody io.Reader
+			if tc.body != nil {
+				reqBody = bytes.NewReader(tc.body)
+			}
+			req, err := http.NewRequest(method, srv.URL+tc.url, reqBody)
 			if err != nil {
 				t.Fatal(err)
 			}

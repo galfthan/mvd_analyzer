@@ -220,6 +220,99 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
+  /v1/demos:
+    post:
+      operationId: uploadDemo
+      tags: [demo]
+      summary: Upload a demo file for analysis
+      description: >
+        Analyze a demo you hold locally — the API counterpart of the web
+        app's local-file flow — instead of one addressable by hub gameId.
+        POST the demo as the raw request body (`application/octet-stream`,
+        e.g. `curl --data-binary @demo.mvd.gz`); a raw `.mvd` or a gzipped
+        `.mvd.gz` is accepted, sniffed by the gzip magic bytes
+        (Content-Type is not enforced). The server stores it, parses it
+        synchronously, and returns the same identity metadata as
+        `POST /v1/demos/{id}` — a `sha:HEX` `demoId` you then read with the
+        per-demo GET endpoints. Like a cold gameId load this call can be
+        slow (it parses before responding); a client that times out can
+        retry into a cache hit.
+
+
+        The `sha` keys the demo by the SHA-256 of its UNCOMPRESSED content,
+        so uploading the raw `.mvd` and its `.mvd.gz` yields the same id, and
+        re-uploading an already-known demo is idempotent (`fromCache: true`,
+        deduped — no reparse).
+
+
+        PRIVACY: an uploaded demo has no owner — it is readable by ANY key
+        holder who knows its `sha`. It is a first-class entry in the shared
+        cache eviction pool, so after eviction a `sha:` GET returns 404 and
+        the client simply re-uploads.
+
+
+        LIMITS: the on-wire body is capped at 64 MiB and the decompressed
+        content at 512 MiB; in auth mode a per-key daily quota (bytes +
+        demo count) also applies. A body that is not a parseable MVD demo —
+        or one that parses to no actual game — is rejected and not retained.
+        When the server runs with uploads disabled (`-max-upload-bytes 0`)
+        this endpoint returns 404 `uploads_disabled`.
+      requestBody:
+        required: true
+        description: The demo file bytes — raw `.mvd` or gzipped `.mvd.gz`.
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Demo identity + cache state.
+          headers:
+            X-Cache: { $ref: "#/components/headers/XCache" }
+            X-Schema-Version: { $ref: "#/components/headers/XSchemaVersion" }
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoadResult" }
+        "400":
+          description: >
+            Empty body (`invalid_param`) or a gzip-magic body that is not a
+            valid gzip stream (`invalid_gzip`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: Uploads are disabled on this server (`uploads_disabled`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "413":
+          description: >
+            Body exceeds the on-wire limit, or decompresses past the
+            512 MiB cap (`demo_too_large`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "422":
+          description: >
+            The uploaded bytes are not a parseable MVD demo, or parse to no
+            analyzable game (`unparseable_demo`). Not retained.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "429":
+          description: >
+            Per-key daily upload quota exceeded (`upload_quota_exceeded`) or
+            the request rate limit (`rate_limited`); both carry `Retry-After`.
+          headers:
+            Retry-After:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "500": { $ref: "#/components/responses/Internal" }
   /v1/demos/{id}:
     post:
       operationId: loadDemo
@@ -1507,11 +1600,13 @@ components:
         - bounded_unavailable
         - damage_unavailable
         - demo_not_found
+        - demo_too_large
         - demoinfo_unavailable
         - frags_unavailable
         - hub_upstream
         - internal
         - invalid_demo_id
+        - invalid_gzip
         - invalid_param
         - locgraph_unavailable
         - map_unavailable
@@ -1522,6 +1617,9 @@ components:
         - region_control_unavailable
         - shots_unavailable
         - unauthorized
+        - unparseable_demo
+        - upload_quota_exceeded
+        - uploads_disabled
         # error-code-enum:end
     Health:
       type: object

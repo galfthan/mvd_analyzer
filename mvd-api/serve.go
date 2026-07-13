@@ -28,6 +28,10 @@ func runServe(args []string) error {
 		cacheMaxBytes = fs.Int64("cache-max-bytes", 20<<30, "cache disk budget in bytes (tiers 1-3); background GC evicts oldest files when exceeded; 0 disables GC")
 		maxParses     = fs.Int("max-parses", 0, "max concurrent heavy cold operations (demo download+parse or LOS raycast) (0 = max(1, NumCPU/2))")
 		mapsDir       = fs.String("maps-dir", "", "directory of per-map geometry JSON for /v1/maps/{map}/geometry; empty disables the endpoint")
+		maxUpload     = fs.Int64("max-upload-bytes", 64<<20, "max on-wire body for POST /v1/demos; 0 disables the upload endpoint")
+		uploadBytes   = fs.Int64("upload-daily-bytes", 512<<20, "per-key daily upload byte budget for POST /v1/demos (auth mode only); 0 disables that dimension")
+		uploadCount   = fs.Int64("upload-daily-count", 50, "per-key daily upload demo-count budget for POST /v1/demos (auth mode only); 0 disables that dimension")
+		parseTimeout  = fs.Duration("parse-timeout", 120*time.Second, "wall-clock timeout for a single cold demo parse; 0 disables")
 		logFormat     = fs.String("log-format", "text", "access log format: text | json")
 		authDir       = fs.String("auth-dir", "", "directory holding keys.json; when set, /v1/* and POST /v1/demos/{id} require an API key. Empty = no auth (localhost mode)")
 		rateUser      = fs.Float64("rate-user", 5, "per-key sustained request rate (req/s) for portal (user) keys")
@@ -45,6 +49,7 @@ func runServe(args []string) error {
 	cache := democache.New(*cacheDir, hubfetch.NewClient())
 	cache.MaxBytes = *cacheMaxBytes
 	cache.MaxParses = *maxParses
+	cache.ParseTimeout = *parseTimeout
 	cache.Logger = logger
 	cache.CleanupOnStartup()
 
@@ -95,7 +100,12 @@ func runServe(args []string) error {
 		portalHandler = portal.New(cfg)
 	}
 
-	handler := newRouter(cache, logger, *mapsDir, auth, portalHandler)
+	upload := uploadConfig{
+		maxBytes:   *maxUpload,
+		dailyBytes: *uploadBytes,
+		dailyCount: *uploadCount,
+	}
+	handler := newRouter(cache, logger, *mapsDir, upload, auth, portalHandler)
 
 	srv := &http.Server{
 		Addr:         *addr,
@@ -107,7 +117,9 @@ func runServe(args []string) error {
 
 	logger.Info("mvd-api starting",
 		"addr", *addr, "cacheDir", *cacheDir, "cacheMaxBytes", *cacheMaxBytes,
-		"maxParses", cache.MaxParses, "mapsDir", *mapsDir, "authEnabled", auth != nil,
+		"maxParses", cache.MaxParses, "parseTimeout", *parseTimeout, "mapsDir", *mapsDir,
+		"authEnabled", auth != nil,
+		"maxUploadBytes", *maxUpload, "uploadDailyBytes", *uploadBytes, "uploadDailyCount", *uploadCount,
 		"schemaVersion", result.CurrentSchemaVersion)
 
 	errCh := make(chan error, 1)

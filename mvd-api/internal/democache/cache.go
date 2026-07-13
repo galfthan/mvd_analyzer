@@ -39,6 +39,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"runtime"
@@ -57,6 +58,13 @@ var (
 	ErrInvalidDemoID = errors.New("invalid demo id")
 	ErrDemoNotFound  = errors.New("demo not found")
 	ErrHubUpstream   = errors.New("hub upstream error")
+
+	// Upload-path sentinels (PutDemo + the parse gate). The upload handler
+	// maps these to 4xx; a hub-origin parse failure keeps its 500 because
+	// mapStoreError has no ErrParse case (only the upload handler checks it).
+	ErrDemoTooLarge = errors.New("demo exceeds size limit")
+	ErrInvalidGzip  = errors.New("invalid gzip body")
+	ErrParse        = errors.New("demo parse failed")
 )
 
 // DemoID identifies a demo. Exactly one of GameID (with Kind="gameId")
@@ -96,11 +104,30 @@ func defaultBuildLOS(art *analyzer.LazyArtifact, res *result.Result) error {
 // streams into tier 2 deletes the lazy re-parse machinery without changing any
 // response body. The CLI/WASM registries are configured by their own callers;
 // only this API parse turns both flags on.
-func defaultParse(_ context.Context, mvdBytes []byte, filename string) (*result.Result, error) {
+func defaultParse(ctx context.Context, mvdBytes []byte, filename string) (*result.Result, error) {
 	registry := analyzer.NewDefaultRegistry()
 	registry.BuildShotStreams = true
 	registry.BuildNails = true
-	return registry.AnalyzeReader(bytes.NewReader(mvdBytes), filename)
+	return registry.AnalyzeReader(&ctxReader{ctx: ctx, r: bytes.NewReader(mvdBytes)}, filename)
+}
+
+// ctxReader aborts an in-flight parse once ctx is done. The analyzer event
+// loop reads the demo one message at a time, so the next Read after the
+// deadline (or a cancel) returns ctx.Err() and the parse unwinds promptly
+// without touching the analyzer API. This is what makes Cache.ParseTimeout
+// effective: a pathological demo can no longer pin a parse slot forever.
+// GetResult strips client cancellation before loadResult (WithoutCancel), so
+// in practice the deadline is the only thing that fires here.
+type ctxReader struct {
+	ctx context.Context
+	r   io.Reader
+}
+
+func (cr *ctxReader) Read(p []byte) (int, error) {
+	if err := cr.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return cr.r.Read(p)
 }
 
 // Cache is a two-tier on-disk cache for demos. Safe for concurrent
@@ -120,6 +147,12 @@ type Cache struct {
 	// MaxParses bounds concurrent cold download+parse operations. <= 0 →
 	// max(1, NumCPU/2), resolved in ensureInit.
 	MaxParses int
+	// ParseTimeout bounds a single cold parse's wall-clock time. <= 0
+	// disables it (serve.go wires it from -parse-timeout, default 120s).
+	// Enforced in loadResult via context.WithTimeout, made effective by the
+	// ctx-checking reader in defaultParse. Since GetResult strips client
+	// cancellation (WithoutCancel), this is the only bound on a parse slot.
+	ParseTimeout time.Duration
 	// Logger receives GC lines; nil → slog.Default().
 	Logger *slog.Logger
 
@@ -408,9 +441,18 @@ func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID) (*result.
 	}
 
 	filename := fmt.Sprintf("%s.mvd.gz", sha)
-	r, err := c.Parse(ctx, mvdBytes, filename)
+	parseCtx := ctx
+	if c.ParseTimeout > 0 {
+		var cancel context.CancelFunc
+		parseCtx, cancel = context.WithTimeout(ctx, c.ParseTimeout)
+		defer cancel()
+	}
+	r, err := c.Parse(parseCtx, mvdBytes, filename)
 	if err != nil {
-		return nil, CacheMeta{}, fmt.Errorf("parse: %w", err)
+		// Wrap in ErrParse so the upload handler can 422 an unparseable body
+		// (and a timed-out parse). mapStoreError has no ErrParse case, so a
+		// hub-origin parse failure still 500s — the wrap is upload-only signal.
+		return nil, CacheMeta{}, fmt.Errorf("%w: %v", ErrParse, err)
 	}
 	if data, err := encodeResult(r); err == nil {
 		if writeErr := writeFileAtomic(rp, data, 0o644); writeErr == nil {
@@ -419,6 +461,85 @@ func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID) (*result.
 	}
 	c.mem.put(sha, r)
 	return r, meta, nil
+}
+
+// PutDemo stores an uploaded demo body under its content SHA and reports that
+// SHA plus whether the demo already existed on disk. It is the write half of
+// the upload endpoint: tier-1 is populated from the request body, then the
+// handler calls GetResult to parse + cache it.
+//
+// The SHA keys everything downstream (the sha: public address, the ETag, the
+// tier paths), so it is always the hash of the UNCOMPRESSED .mvd content — the
+// same convention as the hub-download integrity check:
+//
+//   - gzip body (magic sniff): hashed through gzipContentSHA with the
+//     maxDemoUncompressed cap (a decompression bomb → ErrDemoTooLarge, a
+//     malformed stream → ErrInvalidGzip), and stored verbatim (tier-1 is
+//     always .mvd.gz);
+//   - raw body: hashed directly, then gzip-compressed for storage.
+//
+// The storage path derives ONLY from this server-computed, validated SHA —
+// never from any client-supplied filename. A body that hashes to a SHA already
+// present is deduped: the tier-1 file's mtime is bumped (GC recency) and
+// existed=true is returned without a rewrite.
+func (c *Cache) PutDemo(_ context.Context, body []byte) (sha string, existed bool, err error) {
+	return c.putDemo(body, maxDemoUncompressed)
+}
+
+// putDemo is PutDemo with an injectable decompressed cap so tests can exercise
+// the over-cap rejection without a multi-hundred-MB fixture (the pattern
+// authenticatesToSHALimit uses).
+func (c *Cache) putDemo(body []byte, limit int64) (sha string, existed bool, err error) {
+	c.ensureInit()
+
+	var storeBytes []byte
+	if hasGzipMagic(body) {
+		sha, err = gzipContentSHA(body, limit)
+		if err != nil {
+			if errors.Is(err, errOverCap) {
+				return "", false, ErrDemoTooLarge
+			}
+			return "", false, fmt.Errorf("%w: %v", ErrInvalidGzip, err)
+		}
+		storeBytes = body
+	} else {
+		sha = sha256Hex(body)
+		gz, gzErr := gzipCompress(body)
+		if gzErr != nil {
+			return "", false, fmt.Errorf("gzip compress: %w", gzErr)
+		}
+		storeBytes = gz
+	}
+
+	mp := mvdPath(c.Root, sha)
+	if _, statErr := os.Stat(mp); statErr == nil {
+		touch(mp)
+		return sha, true, nil
+	}
+	if writeErr := writeFileAtomic(mp, storeBytes, 0o644); writeErr != nil {
+		return "", false, fmt.Errorf("write tier-1: %w", writeErr)
+	}
+	// Account the new tier-1 bytes against the disk budget exactly like the
+	// download path does.
+	c.maybeGC()
+	return sha, false, nil
+}
+
+// RemoveDemo best-effort deletes the tier-1 (raw bytes) and tier-2 (parsed
+// Result gob) files for a SHA, and evicts the in-memory LRU entry. The upload
+// parse-gate calls it when a body parses to nothing usable, so the service
+// cannot be turned into content-addressed storage for arbitrary bytes. Errors
+// are ignored — a leftover is inert (a stale sha: GET 404s once tier-1 is gone)
+// and the GC reaps it anyway.
+func (c *Cache) RemoveDemo(sha string) {
+	if !isValidSHA(sha) {
+		return
+	}
+	c.ensureInit()
+	sha = strings.ToLower(sha)
+	_ = os.Remove(mvdPath(c.Root, sha))
+	_ = os.Remove(resultPath(c.Root, result.CurrentSchemaVersion, sha))
+	c.mem.delete(sha)
 }
 
 // EnsureLOS returns the demo's Result with the per-player line-of-sight / PVS

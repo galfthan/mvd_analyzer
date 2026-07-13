@@ -16,6 +16,21 @@ type server struct {
 	store   demoStore
 	logger  *slog.Logger
 	mapsDir string // directory of per-map geometry JSON; "" disables /geometry
+
+	// upload holds the POST /v1/demos limits; uploadLedger is the per-key
+	// daily quota (skipped in no-auth mode). Both are inert when uploads are
+	// disabled (upload.maxBytes == 0).
+	upload       uploadConfig
+	uploadLedger *uploadLedger
+}
+
+// uploadConfig bundles the POST /v1/demos knobs (serve.go wires them from
+// flags). maxBytes == 0 disables the endpoint entirely; a 0 daily dimension
+// disables that dimension of the quota.
+type uploadConfig struct {
+	maxBytes   int64 // on-wire body cap; 0 disables the endpoint
+	dailyBytes int64 // per-key daily byte budget; 0 disables that dimension
+	dailyCount int64 // per-key daily demo-count budget; 0 disables that dimension
 }
 
 // newRouter returns an http.Handler with every endpoint registered.
@@ -24,8 +39,8 @@ type server struct {
 // between accessLog and recover. p may be nil (portal disabled); when non-nil
 // its /portal routes are registered on the mux (and are auth-exempt, so they
 // are reachable without an API key even in auth mode — see authExempt).
-func newRouter(store demoStore, logger *slog.Logger, mapsDir string, auth *authenticator, p *portal.Portal) http.Handler {
-	s := &server{store: store, logger: logger, mapsDir: mapsDir}
+func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uploadConfig, auth *authenticator, p *portal.Portal) http.Handler {
+	s := &server{store: store, logger: logger, mapsDir: mapsDir, upload: upload, uploadLedger: newUploadLedger()}
 	mux := http.NewServeMux()
 
 	// Portal routes are registered ONLY when -portal is set (p != nil). When
@@ -57,6 +72,7 @@ func newRouter(store demoStore, logger *slog.Logger, mapsDir string, auth *authe
 	mux.HandleFunc("GET /v1/graph", s.handleGraph)
 	mux.HandleFunc("GET /v1/demos/{id}/artifacts/{name}", s.handleArtifact)
 
+	mux.HandleFunc("POST /v1/demos", s.handleUpload)
 	mux.HandleFunc("POST /v1/demos/{id}", s.handleLoad)
 	mux.HandleFunc("GET /v1/demos/{id}/overview", s.handleOverview)
 	mux.HandleFunc("GET /v1/demos/{id}/demoinfo", s.handleDemoInfo)

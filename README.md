@@ -118,10 +118,11 @@ make build-api-linux build-api-darwin build-api-windows
 
 `mvd-api` hosts the analytics surface for non-Go consumers
 (third-party integrations, the MCP shim, a future web frontend that
-benefits from server-side caching). See
-[`mvd-api/README.md`](mvd-api/README.md) for the endpoint table; the
-running server also describes itself — an OpenAPI 3.1 spec at
-`/openapi.yaml`, browsable at `/docs`.
+benefits from server-side caching). Demos are addressed by hub gameId
+or uploaded directly (`POST /v1/demos`, REST-only) and analyzed
+identically. See [`mvd-api/README.md`](mvd-api/README.md) for the
+endpoint table; the running server also describes itself — an OpenAPI
+3.1 spec at `/openapi.yaml`, browsable at `/docs`.
 
 ### Run MCP locally (`mvd-mcp`)
 

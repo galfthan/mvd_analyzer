@@ -43,6 +43,18 @@ func (l *resultLRU) get(key string) *result.Result {
 	return nil
 }
 
+// delete drops a key from the LRU if present. Used by RemoveDemo so an
+// upload rejected by the parse-gate cannot be served from memory after its
+// disk tiers are removed.
+func (l *resultLRU) delete(key string) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if e, ok := l.idx[key]; ok {
+		l.ll.Remove(e)
+		delete(l.idx, key)
+	}
+}
+
 func (l *resultLRU) put(key string, val *result.Result) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
