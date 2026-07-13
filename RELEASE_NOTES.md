@@ -5,7 +5,7 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## Unreleased (add-upload)
+## 2026-07-13 (add-upload)
 
 - **Demo upload endpoint (`POST /v1/demos`, no schema bump).** Apps can
   now analyze a demo the user holds locally — the API counterpart of
