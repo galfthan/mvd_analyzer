@@ -5,7 +5,7 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## Unreleased
+## 2026-07-13 (log-identity-fields)
 
 - **Access log: `discord` + `key` identity fields (no schema bump).** The
   request line's `label` is the key's *note* when one is set, and the
