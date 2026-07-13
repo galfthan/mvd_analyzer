@@ -11273,7 +11273,10 @@ function buildAimHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
     box.className = 'aim-hist';
     const title = document.createElement('div');
     title.className = 'aim-hist-title';
-    title.innerHTML = `${name} <span class="aim-sel-note">${dirNote}</span>`;
+    // Escaped even though both callers pass literals today: a future caller
+    // passing a player name would otherwise make this a stored-XSS sink, since
+    // names come from demo userinfo and a demo can be uploaded by anyone.
+    title.innerHTML = `${escapeHtml(name)} <span class="aim-sel-note">${escapeHtml(dirNote)}</span>`;
     box.appendChild(title);
 
     const plot = document.createElement('div');

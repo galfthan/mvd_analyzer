@@ -37,14 +37,26 @@ EnvironmentFile=/etc/mvd/secrets.env
 # on this same box (its XFF rewrite assumes direct backend access is
 # impossible). Bind a LAN/all-interfaces address (e.g. :8080) only if you
 # know why — a public bind lets callers spoof X-Forwarded-For past Caddy.
+#
+# UPLOADS (POST /v1/demos) ARE ON BY DEFAULT. The -upload-* / -max-upload-bytes
+# flags below are set to their compiled-in defaults explicitly, so this file is
+# the whole story rather than half of it. To close the endpoint entirely, set
+# -max-upload-bytes 0 (the route stays registered but answers 404
+# uploads_disabled). The per-key daily quota applies in auth mode only and is
+# held IN MEMORY: a restart resets every key's daily usage to zero, so treat it
+# as abuse damping, not a hard guarantee.
 ExecStart=/opt/mvd/bin/mvd-api serve \
     -addr 127.0.0.1:8080 \
     -cache-dir /opt/mvd/cache \
     -cache-max-bytes 21474836480 \
     -max-parses 2 \
+    -parse-timeout 120s \
     -auth-dir /opt/mvd/auth \
     -rate-user 5 -burst-user 20 \
     -rate-service 50 -burst-service 200 \
+    -max-upload-bytes 67108864 \
+    -upload-daily-bytes 536870912 \
+    -upload-daily-count 50 \
     -portal \
     -portal-base-url https://qw.example.com \
     -log-format json
@@ -67,6 +79,17 @@ LockPersonality=true
 MemoryDenyWriteExecute=true
 # The cache + key store are the only writable paths the service needs.
 ReadWritePaths=/opt/mvd/cache /opt/mvd/auth
+
+# Memory ceiling. TUNE TO THE BOX — these values assume >=4 GiB of RAM; on a
+# smaller VPS scale them down (and consider -max-parses 1). A cold parse holds
+# the demo bytes plus its Result in memory, and -max-parses bounds how many run
+# at once, so the peak is roughly max-parses x (demo + result). Uploads mean a
+# stranger can now trigger that work, so cap it: without a ceiling the kernel
+# OOM killer picks a victim process on the whole box (quite possibly Caddy),
+# whereas with one an overrun kills only this unit and Restart=on-failure
+# brings it straight back.
+MemoryHigh=2G
+MemoryMax=3G
 
 [Install]
 WantedBy=multi-user.target
