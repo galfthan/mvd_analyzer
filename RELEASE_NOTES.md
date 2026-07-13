@@ -5,6 +5,20 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## Unreleased
+
+- **Access log: `discord` + `key` identity fields (no schema bump).** The
+  request line's `label` is the key's *note* when one is set, and the
+  Discord portal stamps `note="portal"` on **every** key it issues — so
+  all portal users pooled under a single `label=portal`, and their Discord
+  name never reached the log. Attribution was effectively impossible.
+  The request line now also carries `discord` (the Discord display name)
+  and `key` (the 8-char hash prefix, the same one `keys list` prints, so
+  it joins the log to the key store). Neither can be masked by a note.
+  `label` is unchanged, so existing queries keep working; both new fields
+  are empty on auth-exempt paths and 401s, where no key is resolved. The
+  Bearer value and the full hash are still never logged.
+
 ## 2026-07-13 (add-upload)
 
 - **Demo upload endpoint (`POST /v1/demos`, no schema bump).** Apps can

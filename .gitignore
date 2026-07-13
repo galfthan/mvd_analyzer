@@ -21,3 +21,6 @@ mvd-analytics/testdata/cache/
 # compiled binaries accidentally buildable in-tree
 mvd-mcp/mvd-mcp
 mvd-web/wasm
+
+# Local production runbook — real deployment topology, deliberately not published.
+DEPLOY-HETZNER.md
