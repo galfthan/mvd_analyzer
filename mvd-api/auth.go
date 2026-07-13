@@ -113,9 +113,16 @@ func (a *authenticator) middleware(next http.Handler) http.Handler {
 		// Log identity is the safe label — note, else Discord name, else the
 		// hash prefix. Never the key or the full hash. The full hash goes into
 		// keyHash for the upload quota (never logged).
+		//
+		// discord + keyPrefix are logged as their own fields so that a key's
+		// note cannot mask who called: logIdentity prefers the note, and the
+		// portal sets note="portal" on every key it issues, which would
+		// otherwise pool every portal user under one label.
 		if info := reqInfoFrom(r.Context()); info != nil {
 			info.identity = logIdentity(rec)
 			info.keyHash = rec.KeyHash
+			info.discord = rec.DiscordName
+			info.keyPrefix = rec.HashPrefix()
 		}
 
 		// Per-key rate limit (D8). Only authenticated keys reach here, so the

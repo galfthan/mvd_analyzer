@@ -38,8 +38,21 @@ type reqInfo struct {
 	// keyHash is the authenticated key's hash, written by authMiddleware after
 	// a successful lookup. The upload handler keys its per-key daily quota on
 	// it. Empty in no-auth (localhost) mode — no key identity, so the quota is
-	// skipped there. Never logged (the hash prefix goes through identity).
+	// skipped there. Never logged in full; only keyPrefix goes to the log.
 	keyHash string
+	// discord and keyPrefix are the access log's *unmaskable* identity fields,
+	// written by authMiddleware alongside identity. They exist because identity
+	// (logIdentity) collapses to the key's note when one is set — and the portal
+	// stamps note="portal" on every key it issues, so every portal user would
+	// otherwise log under the same label, with their Discord name nowhere in the
+	// line. Logging these separately means a note can never shadow who called.
+	//
+	// discord is the Discord display name ("" for a CLI-issued key with no
+	// Discord identity). keyPrefix is the first 8 hex chars of the key's SHA-256
+	// hash — never the key, never the full hash — and is the stable join key back
+	// to `mvd-api keys list`, which prints the same prefix.
+	discord   string
+	keyPrefix string
 }
 
 // reqInfoFrom returns the request's *reqInfo, or nil if accessLog did not run
@@ -179,6 +192,9 @@ func accessLogMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
 			label = requestLabel(r)
 		}
 
+		// discord/key come only from an authenticated Record, so they are empty
+		// on an exempt path, a 401, and in no-auth mode — and they can never
+		// carry the raw Bearer the way the label fallback could.
 		logger.Info("request",
 			"method", r.Method,
 			"path", r.URL.Path,
@@ -187,6 +203,8 @@ func accessLogMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
 			"latency_ms", time.Since(start).Milliseconds(),
 			"remote", clientIP(r),
 			"label", label,
+			"discord", info.discord,
+			"key", info.keyPrefix,
 			"cache", w.Header().Get("X-Cache"),
 			"request_id", requestID(r.Context()),
 		)
