@@ -28,6 +28,10 @@ mvd-api keys list   -auth-dir DIR
 | `-cache-max-bytes`  | `21474836480` (20 GiB)                  | Disk budget for cache tiers 1–3; a background sweep evicts the oldest files (by mtime) when exceeded. `0` disables eviction (stale atomic-write temp files are still reaped) |
 | `-max-parses`       | `max(1, NumCPU/2)`                      | Max concurrent heavy cold operations — a demo download+parse or an on-demand LOS raycast (both bounded by one semaphore; cache hits are unbounded) |
 | `-maps-dir`         | _(empty)_                               | Directory of per-map geometry JSON for `/v1/maps/{map}/geometry`; empty disables that endpoint (ship `dist/maps/` next to the binary to enable) |
+| `-max-upload-bytes` | `67108864` (64 MiB)                     | Max on-wire request body for `POST /v1/demos` (`uploadDemo`); `0` disables the upload endpoint (it answers `404 uploads_disabled`) |
+| `-upload-daily-bytes` | `536870912` (512 MiB)                 | Auth mode: per-key daily upload byte budget for `POST /v1/demos`; `0` disables that dimension. In-memory, resets on restart |
+| `-upload-daily-count` | `50`                                  | Auth mode: per-key daily upload demo-count budget; `0` disables that dimension |
+| `-parse-timeout`    | `120s`                                  | Wall-clock budget for a single cold demo parse (hub download or upload); `0` disables. Bounds how long a pathological demo can hold a parse slot |
 | `-log-format`       | `text`                                  | Access log format: `text` or `json` |
 | `-auth-dir`         | _(empty)_                               | Directory holding `keys.json`. **Empty = no auth** (localhost mode; today's behaviour). When set, `/v1/*` and `POST /v1/demos/{id}` require an `Authorization: Bearer qwmvd_…` key; see "Running authenticated vs local" below |
 | `-rate-user`        | `5`                                     | Auth mode: per-key sustained request rate (req/s) for portal (user) keys |
@@ -198,6 +202,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/openapi.yaml` | — | the OpenAPI 3.1 description of this surface (embedded; content-hash ETag; auth-exempt) |
 | GET | `/docs` | — | browsable API reference (vendored RapiDoc viewer over `/openapi.yaml`; auth-exempt) |
 | GET | `/docs/result-schema` | — | RESULT_SCHEMA.md rendered standalone (vendored marked.js; raw markdown at `/docs/result-schema.md`; auth-exempt) |
+| POST | `/v1/demos` | — (raw `.mvd`/`.mvd.gz` request body) | `{demoId, sha256, fromCache, schemaVersion}` (`uploadDemo` — analyze a local demo file; REST-only, deliberately not an MCP tool) |
 | POST | `/v1/demos/{id}` | — | `{demoId, sha256, fromCache, schemaVersion}` (`loadDemo` — warms the cache) |
 | GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, top streaks, top powerups, playerUserIDs, analyzer `errors`) |
 | GET | `/v1/demos/{id}/demoinfo` | — | `result.DemoInfoResult` (KTX scoreboard — per-player weapon accuracy, kills/deaths/TK, damage, sprees, item counts, RL/LG transfers) |

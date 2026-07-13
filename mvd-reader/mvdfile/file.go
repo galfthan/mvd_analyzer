@@ -4,9 +4,48 @@ package mvdfile
 import (
 	"bufio"
 	"compress/gzip"
+	"errors"
 	"io"
 	"os"
 )
+
+// ErrDecompressedTooLarge is returned when a gzip stream expands past
+// maxDecompressedSize. It is a distinct sentinel (not io.EOF) so callers can
+// tell a decompression bomb from a cleanly terminated or truncated stream.
+var ErrDecompressedTooLarge = errors.New("mvdfile: decompressed size exceeds limit")
+
+// maxDecompressedSize caps the number of bytes a gzip stream may expand to
+// before decompression aborts. A hostile ~KiB gzip can inflate to gigabytes;
+// this bounds that. 512 MiB matches democache.maxDemoUncompressed, the
+// ceiling the API's content-integrity path already enforces on stored demos.
+const maxDecompressedSize = 512 << 20
+
+// limitedGzipReader wraps a gzip.Reader and fails once cumulative decompressed
+// output exceeds limit, returning ErrDecompressedTooLarge instead of more data.
+type limitedGzipReader struct {
+	gz        *gzip.Reader
+	remaining int64
+}
+
+func (l *limitedGzipReader) Read(p []byte) (int, error) {
+	if l.remaining < 0 {
+		return 0, ErrDecompressedTooLarge
+	}
+	// Allow one extra byte so exactly-at-limit output is not misread as a bomb.
+	if int64(len(p)) > l.remaining+1 {
+		p = p[:l.remaining+1]
+	}
+	n, err := l.gz.Read(p)
+	l.remaining -= int64(n)
+	if l.remaining < 0 {
+		return n, ErrDecompressedTooLarge
+	}
+	return n, err
+}
+
+func (l *limitedGzipReader) Close() error {
+	return l.gz.Close()
+}
 
 // File represents an opened MVD file that may be compressed
 type File struct {
@@ -34,7 +73,7 @@ func Open(path string) (*File, error) {
 		return &File{
 			file:       f,
 			gzipReader: gzReader,
-			reader:     gzReader,
+			reader:     &limitedGzipReader{gz: gzReader, remaining: maxDecompressedSize},
 		}, nil
 	}
 
@@ -82,16 +121,24 @@ func (f *File) IsCompressed() bool {
 }
 
 // NewReader wraps an io.Reader with automatic gzip detection.
-// If the stream starts with gzip magic bytes (0x1f 0x8b), it returns a gzip reader.
-// Otherwise, it returns the original stream. The caller must close the returned ReadCloser.
+// If the stream starts with gzip magic bytes (0x1f 0x8b), it returns a gzip
+// reader bounded by maxDecompressedSize (a gzip stream expanding past the cap
+// yields ErrDecompressedTooLarge, not io.EOF). Otherwise, it returns the
+// original stream. The caller must close the returned ReadCloser.
 func NewReader(r io.Reader) (io.ReadCloser, error) {
+	return newReaderLimit(r, maxDecompressedSize)
+}
+
+// newReaderLimit is NewReader with an injectable decompressed-size cap so tests
+// can exercise the bomb guard without generating hundreds of MiB.
+func newReaderLimit(r io.Reader, limit int64) (io.ReadCloser, error) {
 	bufReader, isGzip := peekGzip(r)
 	if isGzip {
 		gzReader, err := gzip.NewReader(bufReader)
 		if err != nil {
 			return nil, err
 		}
-		return gzReader, nil
+		return &limitedGzipReader{gz: gzReader, remaining: limit}, nil
 	}
 	return io.NopCloser(bufReader), nil
 }

@@ -111,9 +111,11 @@ func (a *authenticator) middleware(next http.Handler) http.Handler {
 		}
 
 		// Log identity is the safe label — note, else Discord name, else the
-		// hash prefix. Never the key or the full hash.
+		// hash prefix. Never the key or the full hash. The full hash goes into
+		// keyHash for the upload quota (never logged).
 		if info := reqInfoFrom(r.Context()); info != nil {
 			info.identity = logIdentity(rec)
+			info.keyHash = rec.KeyHash
 		}
 
 		// Per-key rate limit (D8). Only authenticated keys reach here, so the

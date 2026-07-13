@@ -75,6 +75,22 @@ func gzipContentSHA(data []byte, limit int64) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
+// gzipCompress returns data wrapped in a gzip stream, so a raw uploaded .mvd
+// can be stored in the always-.mvd.gz tier-1 layout. Demos are a few MB, so
+// buffering the whole result is fine here.
+func gzipCompress(data []byte) ([]byte, error) {
+	var buf bytes.Buffer
+	gw := gzip.NewWriter(&buf)
+	if _, err := gw.Write(data); err != nil {
+		_ = gw.Close()
+		return nil, err
+	}
+	if err := gw.Close(); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 // authenticatesToSHA reports whether the downloaded demo bytes authenticate
 // against the hub's demo_sha256 (`want`).
 //

@@ -5,6 +5,36 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-13 (add-upload)
+
+- **Demo upload endpoint (`POST /v1/demos`, no schema bump).** Apps can
+  now analyze a demo the user holds locally — the API counterpart of
+  the web app's local-file flow. The raw request body (a `.mvd` or
+  `.mvd.gz`, sniffed by gzip magic) is stored under the SHA-256 of its
+  uncompressed content and parsed synchronously; the response is the
+  same `{demoId, sha256, fromCache, schemaVersion}` shape as `loadDemo`,
+  and every existing `GET /v1/demos/sha:…/*` endpoint works on it
+  unchanged. Re-uploads are idempotent cache hits. **REST-only by
+  design**: the tool is deliberately absent from `mvd-mcp`.
+  - **Safeguards.** On-wire body cap (`-max-upload-bytes`, 64 MiB
+    default, `0` disables the endpoint), 512 MiB decompressed cap, and
+    in auth mode a per-key daily quota (`-upload-daily-bytes` /
+    `-upload-daily-count`, 429 with `Retry-After`). A body that fails to
+    parse — or parses to no actual game — is rejected 422 and its bytes
+    removed, so the cache cannot be used as content-addressed storage
+    for arbitrary data. Uploaded demos have no owner (readable by any
+    key holder that knows the sha) and share the normal GC pool
+    (evicted → re-upload); both documented in `API.md` and the OpenAPI
+    description.
+  - **Parser hardening (Layer 1).** Reachable-from-upload input bounds,
+    protecting all callers: the MVD decoder now rejects wire block sizes
+    over 8 MiB instead of allocating up to ~4 GiB from a crafted 4-byte
+    header (mvdsv writes blocks from an 8 KiB buffer, `MAX_MVD_SIZE`),
+    and `mvdfile` caps gzip decompression at 512 MiB with a distinct
+    `ErrDecompressedTooLarge` sentinel. A new `-parse-timeout` (120s
+    default) bounds how long any single cold parse can hold a parse
+    slot.
+
 ## 2026-07-12 (phase-16.3)
 
 - **The bounded damage family (schema v55).** Damage now ships in **two

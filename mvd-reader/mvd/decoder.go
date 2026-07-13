@@ -11,6 +11,15 @@ var (
 	ErrEndOfDemo = errors.New("end of demo")
 )
 
+// maxBlockSize caps the payload size a single dem_* message may declare on the
+// wire before ReadBytes allocates. The size field is an attacker-controlled
+// uint32, and ReadBytes does make([]byte, n) up front, so an unbounded value
+// forces a ~4 GiB allocation from a 4-byte crafted header. mvdsv writes MVD
+// messages out of an 8 KiB buffer (MAX_MVD_SIZE = MSG_BUF_SIZE(8192) - 100,
+// bothdefs.h:27-35), so legitimate blocks are at most a few KiB; 8 MiB is ~1000x
+// headroom for any conceivable extension while still refusing hostile input.
+const maxBlockSize = 8 << 20
+
 // Decoder reads MVD demo messages from a stream
 type Decoder struct {
 	reader *BinaryReader
@@ -130,6 +139,9 @@ func (d *Decoder) NextMessage() (*DemoMessage, error) {
 		if err != nil {
 			return nil, err
 		}
+		if size > maxBlockSize {
+			return nil, fmt.Errorf("dem_multiple block size %d exceeds maximum %d at stream offset %d", size, maxBlockSize, d.reader.Offset())
+		}
 
 		// Read payload
 		payload, err := d.reader.ReadBytes(int(size))
@@ -147,6 +159,9 @@ func (d *Decoder) NextMessage() (*DemoMessage, error) {
 		size, err := d.reader.ReadUint32()
 		if err != nil {
 			return nil, err
+		}
+		if size > maxBlockSize {
+			return nil, fmt.Errorf("dem block size %d exceeds maximum %d at stream offset %d", size, maxBlockSize, d.reader.Offset())
 		}
 
 		// Read payload

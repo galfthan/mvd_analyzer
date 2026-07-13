@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -22,21 +23,60 @@ import (
 type fakeStore struct {
 	byID map[string]*result.Result
 	err  error
+
+	// Upload knobs (POST /v1/demos).
+	putErr    error          // PutDemo returns this (e.g. ErrDemoTooLarge)
+	putExists bool           // 'existed' return of PutDemo
+	putResult *result.Result // registered under the put SHA so GetResult hits (default: stubResult)
+	parseFail bool           // GetResult(sha:…) returns ErrParse — simulate an unparseable upload
+	removed   []string       // SHAs passed to RemoveDemo (assert parse-gate cleanup)
 }
 
 func (f *fakeStore) GetResult(_ context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error) {
 	if f.err != nil {
 		return nil, democache.CacheMeta{}, f.err
 	}
+	if f.parseFail && id.Kind == "sha256" {
+		return nil, democache.CacheMeta{}, fmt.Errorf("%w: stub parse failure", democache.ErrParse)
+	}
 	r, ok := f.byID[id.String()]
 	if !ok {
 		return nil, democache.CacheMeta{}, democache.ErrDemoNotFound
 	}
+	sha := strings.Repeat("a", 64)
+	if id.Kind == "sha256" {
+		sha = id.SHA
+	}
 	return r, democache.CacheMeta{
-		SHA256:        strings.Repeat("a", 64),
+		SHA256:        sha,
 		FromCache:     true,
 		SchemaVersion: result.CurrentSchemaVersion,
 	}, nil
+}
+
+// PutDemo computes a content SHA for the body and (unless parseFail) registers
+// the put result under it so the handler's follow-up GetResult hits.
+func (f *fakeStore) PutDemo(_ context.Context, body []byte) (string, bool, error) {
+	if f.putErr != nil {
+		return "", false, f.putErr
+	}
+	sha := fmt.Sprintf("%x", sha256.Sum256(body))
+	if !f.parseFail {
+		if f.byID == nil {
+			f.byID = map[string]*result.Result{}
+		}
+		res := f.putResult
+		if res == nil {
+			res = stubResult()
+		}
+		f.byID["sha:"+sha] = res
+	}
+	return sha, f.putExists, nil
+}
+
+func (f *fakeStore) RemoveDemo(sha string) {
+	f.removed = append(f.removed, sha)
+	delete(f.byID, "sha:"+sha)
 }
 
 // EnsureLOS runs the (idempotent) LOS pass on the stored Result, mirroring the
@@ -459,8 +499,14 @@ func newTestServer(t *testing.T, store demoStore) *httptest.Server {
 func newTestServerMaps(t *testing.T, store demoStore, mapsDir string) *httptest.Server {
 	t.Helper()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return httptest.NewServer(newRouter(store, logger, mapsDir, nil, nil))
+	return httptest.NewServer(newRouter(store, logger, mapsDir, testUploadConfig, nil, nil))
 }
+
+// testUploadConfig is the default upload config for handler tests: the
+// endpoint is enabled with the production wire cap and no quota (the ledger is
+// skipped in no-auth mode anyway). Tests that need uploads disabled or a quota
+// build their own router.
+var testUploadConfig = uploadConfig{maxBytes: 64 << 20}
 
 // --- /healthz, /v1/version ---
 
