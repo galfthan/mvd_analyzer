@@ -5,6 +5,41 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-14 (deploy-upload-config)
+
+- **Deployment: BSPs for LOS, explicit limits, memory ceiling (no schema
+  bump).** Operator-facing only — no API behaviour changes.
+  - **`/los` and `/airgibs` need map BSPs, and the unit now points at
+    them** (`Environment=MVDA_BSP_DIR=/opt/mvd/bsps`). There is no
+    `-bsp-dir` flag: `mapbsp` reads `$MVDA_BSP_DIR`, then a `bsps/` dir
+    relative to the working directory. Provision the sha-pinned set with
+    `scripts/fetch-bsps.sh`. **Gotcha now documented:** an absent BSP does
+    not error — `BuildLOS` yields an *empty* LOS and `EnsureLOS` caches it
+    to tier 3 like a real answer, so demos whose `/los` was served before
+    the BSPs existed keep returning empty. Provisioning afterwards does
+    not fix them; the lazy artifacts must be dropped
+    (`rm -rf <cache-dir>/artifacts`). `cache prune` will not do it — it
+    only sweeps stale-*version* gobs, and an empty-but-current LOS looks
+    valid to it.
+  - The upload and parse limits (`-max-upload-bytes`, `-upload-daily-*`,
+    `-parse-timeout`) are now set explicitly in the shipped unit at their
+    defaults, so the config states them rather than hiding them in the
+    binary — notably that **uploads are on by default** and
+    `-max-upload-bytes 0` is the kill switch.
+  - `MemoryHigh`/`MemoryMax` added to the unit. Uploads let a stranger
+    trigger a parse, and without a cgroup ceiling an overrun lets the
+    kernel OOM-killer pick a victim across the whole box. **Tune to your
+    box** — the shipped values assume ≥4 GiB of RAM.
+- **Two security margins closed.** `loc.NormalizeMapName`'s
+  `filepath.Base` is documented as a security boundary, not a
+  convenience: the map name comes from the demo's `svc_serverdata` and
+  feeds a filesystem path in the mapents/mapbsp/locvis loaders, so
+  stripping directory components is what stops an uploaded demo declaring
+  its map as `../../../../etc/passwd`. And `buildAimHist` now escapes its
+  title — not a live XSS (both callers pass literals), but it interpolates
+  into `innerHTML` and player names are attacker-controlled via any
+  uploaded demo.
+
 ## 2026-07-13 (log-identity-fields)
 
 - **Access log: `discord` + `key` identity fields (no schema bump).** The

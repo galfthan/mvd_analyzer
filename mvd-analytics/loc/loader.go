@@ -62,6 +62,15 @@ var mapAliases = map[string]string{}
 // NormalizeMapName extracts the lowercased base name (no path or extension)
 // from a map identifier and applies known aliases. The resulting string is
 // the basename of the .loc file (without the ".loc" suffix).
+//
+// The filepath.Base call is also a SECURITY BOUNDARY, not just a convenience:
+// mapName originates in the demo (svc_serverdata's model list, e.g.
+// "maps/dm6.bsp") and is therefore attacker-controlled on any untrusted demo —
+// notably one uploaded via POST /v1/demos. Callers feed the result straight
+// into a filesystem path (mapents/mapbsp/locvis build "<dir>/<base>.json|.bsp"),
+// so stripping every directory component here is what stops a demo declaring
+// its map as "../../../../etc/passwd" from escaping the corpus directory.
+// Keep it first, and do not replace it with a bare suffix trim.
 func NormalizeMapName(mapName string) string {
 	base := filepath.Base(mapName)
 	base = strings.TrimSuffix(base, ".bsp")

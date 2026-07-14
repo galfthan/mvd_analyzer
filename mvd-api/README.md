@@ -299,6 +299,43 @@ All three are empty on an auth-exempt path (`/healthz`, `/v1/version`,
 resolve a key, so they are genuinely unattributable. A valid key sent to an
 exempt path is *not* recorded: the auth middleware never runs there.
 
+## Map BSPs (needed for `/los` and `/airgibs`)
+
+Line of sight and airgibs are BSP-derived: without the map's `.bsp` the
+server cannot trace sightlines. **There is no `-bsp-dir` flag.** `mapbsp`
+looks in exactly two places at runtime:
+
+1. `$MVDA_BSP_DIR`, then
+2. a `bsps/` directory relative to the process's working directory.
+
+Prefer the env var — the relative path silently depends on where the unit
+happens to start. Provision the curated, SHA-pinned set (13 maps: aerowalk,
+bravado, cmt4, dm2, dm3, dm4, dm6, e1m2, phantombase, schloss, skull,
+spinev2, ztndm3) with:
+
+```sh
+./scripts/fetch-bsps.sh /opt/mvd/bsps     # idempotent; hard-fails on a sha mismatch
+```
+
+Filenames must be the normalised loc-corpus form (`loc.NormalizeMapName`),
+which the script already produces — don't hand-copy BSPs out of a Quake
+install and expect the loader to find them.
+
+> **An absent BSP does not error — it yields an *empty* LOS, and that empty
+> result is cached to tier 3 like a real one.** So a demo whose `/los` was
+> requested before the BSPs were in place keeps returning empty forever.
+> After provisioning, drop the lazy artifacts to force a recompute:
+> `systemctl stop mvd-api && rm -rf <cache-dir>/artifacts && systemctl start mvd-api`.
+> Tier 3 is derived data — tiers 1 and 2 are untouched, so nothing is
+> re-downloaded or re-parsed. `cache prune` will **not** do this for you: it
+> only sweeps *stale-version* artifact gobs, and an empty-but-current-version
+> LOS looks perfectly valid to it.
+
+A demo on a map outside the provisioned set also returns an empty LOS, so
+"empty" is ambiguous between "no BSP for this map" and "genuinely no
+sightlines". LOS is the heaviest pass in the pipeline (~2.5 s of raycasting
+per demo) and is bounded by the same `-max-parses` semaphore as cold parses.
+
 ## Cache layout
 
 Under `-cache-dir`:
