@@ -37,6 +37,11 @@ Base URL defaults to `http://localhost:8080`. A demo is addressed by an
   good for bookmarking a warm entry) or one you uploaded with
   `uploadDemo` (`POST /v1/demos`).
 
+Don't have a `gameId` yet? **`GET /v1/games/search`** discovers demos in
+the hub catalog by player / team / map / mode / matchtag / date, returns
+`{limit, offset, count, total?, games}`, and each row's `id` becomes the
+`gameId:<id>` you feed the flow below.
+
 Typical frontend flow:
 
 ```
@@ -126,8 +131,8 @@ weapon / item / kind / loc / layout tokens.
 - **There is deliberately no `limit`/`offset` pagination** on the
   per-demo endpoints: the data is time-series, so the size controls are
   the `from`/`to` window, `players`/`fields` scoping, and `summary`.
-  (`searchGames`-style pagination exists only on the hub search, which
-  is not part of this API.)
+  `limit`/`offset` pagination applies only to the game-discovery
+  endpoint `GET /v1/games/search` (page until `offset + count >= total`).
 - **`loc`** — `name` (default) resolves loc indices to names; `index`
   returns the raw `LocTable` index for index-based math (decode via
   `/loc-table`). Honoured by `buckets`, `events`, `stream-slice`,

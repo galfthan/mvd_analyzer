@@ -38,7 +38,7 @@ func (f *fakeSupabase) Close() { f.srv.Close() }
 
 func newTestSupabaseClient(srvURL string) *supabaseClient {
 	c := newSupabaseClient(5 * time.Second)
-	c.baseURL = srvURL
+	c.hub.SupabaseURL = srvURL
 	return c
 }
 

@@ -1,7 +1,9 @@
 // mvd-mcp is an MCP server that forwards every tool call to a running
-// mvd-api. The shim is intentionally minimal: it does not import any
-// qwanalytics code, so the distributable binary is small (~5 MB) and
-// stable against analytics-side changes.
+// mvd-api. The shim is intentionally minimal: its only qwanalytics
+// dependency is the stdlib-only hubfetch package (shared with mvd-api so
+// searchGames and GET /v1/games/search answer discovery identically), so
+// the distributable binary stays small (~5 MB) and stable against
+// analytics-side changes.
 //
 // It has two transports:
 //

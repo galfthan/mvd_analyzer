@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-analytics/hubfetch"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-api/internal/democache"
 )
@@ -499,7 +500,42 @@ func newTestServer(t *testing.T, store demoStore) *httptest.Server {
 func newTestServerMaps(t *testing.T, store demoStore, mapsDir string) *httptest.Server {
 	t.Helper()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return httptest.NewServer(newRouter(store, logger, mapsDir, testUploadConfig, nil, nil))
+	return httptest.NewServer(newRouter(store, logger, mapsDir, testUploadConfig, nil, nil, &fakeSearcher{}))
+}
+
+// fakeSearcher stands in for the hub game search in handler tests. The
+// default response is schema-valid for GET /v1/games/search; err simulates
+// an upstream failure.
+type fakeSearcher struct {
+	out any
+	err error
+}
+
+func (f *fakeSearcher) Search(_ context.Context, _ hubfetch.SearchParams) (any, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	if f.out != nil {
+		return f.out, nil
+	}
+	return map[string]any{
+		"limit":  20,
+		"offset": 0,
+		"count":  1,
+		"total":  1,
+		"games": []any{
+			map[string]any{
+				"id":              12345,
+				"timestamp":       "2025-06-01T10:00:00",
+				"mode":            "4on4",
+				"map":             "dm3",
+				"teams":           []any{map[string]any{"name": "red", "score": 89}},
+				"players":         []any{map[string]any{"name": "bps", "team": "red", "frags": 31}},
+				"demo_sha256":     "abc",
+				"demo_source_url": "https://example.com/x.mvd.gz",
+			},
+		},
+	}, nil
 }
 
 // testUploadConfig is the default upload config for handler tests: the

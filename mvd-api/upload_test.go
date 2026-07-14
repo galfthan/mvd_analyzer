@@ -52,7 +52,7 @@ func postDemo(t *testing.T, url, bearer string, body []byte) (*http.Response, []
 func newUploadServer(t *testing.T, store demoStore, cfg uploadConfig) *httptest.Server {
 	t.Helper()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	srv := httptest.NewServer(newRouter(store, logger, "", cfg, nil, nil))
+	srv := httptest.NewServer(newRouter(store, logger, "", cfg, nil, nil, &fakeSearcher{}))
 	t.Cleanup(srv.Close)
 	return srv
 }
@@ -178,7 +178,7 @@ func TestUpload_QuotaExceeded(t *testing.T) {
 		logger:  logger,
 	}
 	cfg := uploadConfig{maxBytes: 64 << 20, dailyCount: 1}
-	srv := httptest.NewServer(newRouter(&fakeStore{}, logger, "", cfg, auth, nil))
+	srv := httptest.NewServer(newRouter(&fakeStore{}, logger, "", cfg, auth, nil, &fakeSearcher{}))
 	defer srv.Close()
 
 	key, _, _ := auth.store.Issue("1", "u", false, "")

@@ -7,6 +7,19 @@ detail.
 
 ## 2026-07-14 (tweak-api)
 
+- **Game discovery over REST: `GET /v1/games/search` (no schema bump).**
+  The hub.quakeworld.nu catalog search that used to live only in the MCP
+  `searchGames` tool is now a first-class REST endpoint, so a plain HTTP
+  client can find a `gameId` without the MCP shim. Query by `players`,
+  `teams`, `map`, `mode`, `matchtag`, `from`/`to` (ISO dates), with
+  `limit`/`offset` pagination and `roster` for verbatim rows; the response
+  is the same `{limit, offset, count, total?, games}` the MCP tool returns
+  (compact `{name, team, frags}` rosters by default). The query itself
+  moved into the shared `hubfetch` package, so the REST endpoint and the
+  MCP tool answer discovery identically. It proxies a live upstream, so it
+  is uncached and maps hub failures to `502 hub_upstream`. No schema bump —
+  the search response is not part of the demo `Result` (same as the upload
+  endpoint before it).
 - **BSP-derived features now work on demos with no KTX demoinfo block (no
   schema bump).** LOS/PVS, loc resolution, floor height (`pos.h`), liquid
   state (`pos.lq`), and region control were all gated on the KTX demoinfo

@@ -36,7 +36,7 @@ func newAuthTestServer(t *testing.T, store demoStore) (*httptest.Server, *authen
 		),
 		logger: logger,
 	}
-	srv := httptest.NewServer(newRouter(store, logger, "", testUploadConfig, auth, nil))
+	srv := httptest.NewServer(newRouter(store, logger, "", testUploadConfig, auth, nil, &fakeSearcher{}))
 	t.Cleanup(srv.Close)
 	return srv, auth, buf
 }
@@ -304,7 +304,7 @@ func TestRateLimit_BurstThen429(t *testing.T) {
 		),
 		logger: logger,
 	}
-	srv := httptest.NewServer(newRouter(rlStore(), logger, "", testUploadConfig, auth, nil))
+	srv := httptest.NewServer(newRouter(rlStore(), logger, "", testUploadConfig, auth, nil, &fakeSearcher{}))
 	defer srv.Close()
 
 	key, _, _ := auth.store.Issue("1", "u", false, "")
@@ -342,7 +342,7 @@ func TestRateLimit_ServiceLooser(t *testing.T) {
 		),
 		logger: logger,
 	}
-	srv := httptest.NewServer(newRouter(rlStore(), logger, "", testUploadConfig, auth, nil))
+	srv := httptest.NewServer(newRouter(rlStore(), logger, "", testUploadConfig, auth, nil, &fakeSearcher{}))
 	defer srv.Close()
 
 	svcKey, _, _ := auth.store.Issue("", "", true, "svc")
@@ -370,7 +370,7 @@ func TestRateLimit_IndependentBuckets(t *testing.T) {
 		),
 		logger: logger,
 	}
-	srv := httptest.NewServer(newRouter(rlStore(), logger, "", testUploadConfig, auth, nil))
+	srv := httptest.NewServer(newRouter(rlStore(), logger, "", testUploadConfig, auth, nil, &fakeSearcher{}))
 	defer srv.Close()
 
 	k1, _, _ := auth.store.Issue("1", "a", false, "")

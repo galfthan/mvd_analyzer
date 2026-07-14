@@ -11,9 +11,11 @@ import (
 
 // registerTools wires every MCP tool onto the given server. Tools
 // that act on a single demo go through `b` (the mvd-api proxy);
-// `searchGames` goes through `sr` (a direct hub.quakeworld.nu
-// Supabase client — discovery is the hub's responsibility, not
-// mvd-api's).
+// `searchGames` goes through `sr` (a hub.quakeworld.nu Supabase client).
+// The search query itself lives in the shared hubfetch package, so the
+// MCP shim and mvd-api's GET /v1/games/search answer discovery
+// identically; the shim keeps its own client only so a stdio session can
+// search without a running mvd-api.
 //
 // All view-shaped tool outputs are opaque JSON pass-through; only
 // LoadDemo is typed, because consumers need to extract `demoId`

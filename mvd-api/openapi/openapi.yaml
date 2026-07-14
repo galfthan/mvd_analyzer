@@ -1126,6 +1126,46 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/games/search:
+    get:
+      operationId: searchGames
+      tags: [demo]
+      summary: Search the hub game catalog
+      description: >
+        Discovery over hub.quakeworld.nu's public game catalog — no demo is
+        involved. Filter by player names, teams, map, mode, matchtag, or
+        date range; the newest matches come back when no filter is given.
+        Feed a result's `gameId:<id>` to any per-demo endpoint to analyse
+        it. `count` is rows in THIS page, `total` (when the hub reports it)
+        is all matching rows — page with limit/offset until offset+count >=
+        total. Rows are compact by default (each player projected to
+        {name, team, frags}); `roster=true` returns the verbatim hub rows
+        (per-player ping, colors, is_bot). This endpoint proxies a live
+        upstream, so it is not cached and can 502 `hub_upstream`.
+      parameters:
+        - $ref: "#/components/parameters/SearchPlayers"
+        - $ref: "#/components/parameters/SearchTeams"
+        - $ref: "#/components/parameters/SearchMap"
+        - $ref: "#/components/parameters/SearchMode"
+        - $ref: "#/components/parameters/SearchMatchtag"
+        - $ref: "#/components/parameters/SearchFrom"
+        - $ref: "#/components/parameters/SearchTo"
+        - $ref: "#/components/parameters/SearchLimit"
+        - $ref: "#/components/parameters/SearchOffset"
+        - $ref: "#/components/parameters/SearchRoster"
+      responses:
+        "200":
+          description: The matching page of games.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GamesSearchResult" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
+        "500": { $ref: "#/components/responses/Internal" }
   /v1/maps/{map}/entities:
     get:
       operationId: getMapEntitiesByMap
@@ -1484,6 +1524,79 @@ components:
       required: true
       description: The instant to sample, match-relative SECONDS (float).
       schema: { type: number }
+    SearchPlayers:
+      name: players
+      in: query
+      description: >
+        CSV of player names to match (full-text search on the roster,
+        AND'd across multiple names). Case-sensitive (QW names are
+        case-significant).
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: string }
+    SearchTeams:
+      name: teams
+      in: query
+      description: >
+        CSV of team names that must all appear in the game's team list
+        (contains).
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: string }
+    SearchMap:
+      name: map
+      in: query
+      description: Map name, exact match (e.g. `dm6`).
+      schema: { type: string }
+    SearchMode:
+      name: mode
+      in: query
+      description: Game mode, exact match (e.g. `1on1`, `2on2`, `4on4`, `FFA`).
+      schema: { type: string }
+    SearchMatchtag:
+      name: matchtag
+      in: query
+      description: >
+        Tournament / event tag, case-insensitive substring (e.g. `qwsl`).
+      schema: { type: string }
+    SearchFrom:
+      name: from
+      in: query
+      description: ISO date lower bound, inclusive (`YYYY-MM-DD`).
+      schema: { type: string }
+    SearchTo:
+      name: to
+      in: query
+      description: ISO date upper bound, inclusive (`YYYY-MM-DD`).
+      schema: { type: string }
+    SearchLimit:
+      name: limit
+      in: query
+      description: Max rows per page. Default 20, capped at 100.
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+    SearchOffset:
+      name: offset
+      in: query
+      description: Pagination offset (number of rows to skip).
+      schema:
+        type: integer
+        minimum: 0
+    SearchRoster:
+      name: roster
+      in: query
+      description: >
+        `1`/`true` returns the verbatim hub rows (per-player ping, color
+        arrays, name_color, is_bot); default returns compact rows with each
+        player projected to {name, team, frags}.
+      schema: { type: boolean }
   headers:
     ETag:
       description: >
@@ -1681,6 +1794,40 @@ components:
             key). Empty = internal / no direct section.
         servable: { type: boolean }
         description: { type: string }
+    GamesSearchResult:
+      type: object
+      description: >
+        One page of hub game-catalog matches (GET /v1/games/search). The
+        game rows are passed through from the hub verbatim (roster=true) or
+        with each player compacted to {name, team, frags} (the default), so
+        the shape is left open here.
+      required: [limit, offset, count, games]
+      additionalProperties: false
+      properties:
+        limit:
+          type: integer
+          description: Page size actually applied (the request's limit clamped to 1..100).
+        offset:
+          type: integer
+          description: Pagination offset echoed from the request.
+        count:
+          type: integer
+          description: Rows returned in THIS page.
+        total:
+          type: integer
+          description: >
+            Total matching rows across all pages, present only when the hub
+            reports it. Absent = unknown (do not assume count == total).
+        games:
+          type: array
+          description: >
+            Matching games, newest first. Each row carries id, timestamp,
+            mode, matchtag, map, teams, players, demo_sha256,
+            demo_source_url; `players` is compact ({name, team, frags})
+            unless roster=true.
+          items:
+            type: object
+            additionalProperties: true
     # --- Per-endpoint response schemas (full field-level).
     # Bootstrapped from the Go structs (result/, view/, mvd-api Overview)
     # via reflection and hand-curated; every schema is validated against
