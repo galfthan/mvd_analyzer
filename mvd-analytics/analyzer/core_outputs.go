@@ -89,6 +89,30 @@ type CoreOutputs struct {
 	// roster analyser was
 	// not registered — TeamFor / Duel are nil-safe and pass raw teams through.
 	Roster *Roster
+
+	// ServerInfoMap is the serverinfo `map` key MetadataAnalyzer parsed from the
+	// `fullserverinfo` stufftext (e.g. "dm3"). Produced by the metadata node
+	// (PopulateCore). It is the KTX-independent map identifier every
+	// BSP-derived producer falls back to when the KTX demoinfo block is absent
+	// — read it through EffectiveMap, not directly. Empty when no serverinfo
+	// map was seen.
+	ServerInfoMap string
+}
+
+// EffectiveMap resolves which map (hence which BSP / loc corpus) the demo was
+// recorded on for Finalize-time consumers, independent of whether the KTX
+// demoinfo block is present: the demoinfo map name if it exists, else the
+// serverinfo `map` key (ServerInfoMap). Returns "" when neither source names a
+// map. This mirrors result.Result.EffectiveMap for the post-hoc path; see that
+// method for why the fallback matters (2024-era demoinfo-less recorders).
+func (co *CoreOutputs) EffectiveMap() string {
+	if co == nil {
+		return ""
+	}
+	if co.DemoInfo != nil && co.DemoInfo.Map != "" {
+		return co.DemoInfo.Map
+	}
+	return co.ServerInfoMap
 }
 
 // MatchStartMs returns the demo→match shift published on the Clock, or 0 when

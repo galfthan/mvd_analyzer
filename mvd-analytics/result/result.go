@@ -698,3 +698,31 @@ type Result struct {
 	Streams          *Streams                `json:"streams,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
 }
+
+// EffectiveMap resolves which map (hence which BSP / loc corpus) this demo was
+// recorded on, independent of whether the KTX demoinfo block is present. It
+// prefers the KTX demoinfo map name and falls back to the serverinfo `map` key
+// that MetadataAnalyzer parses from the `fullserverinfo` stufftext. Returns ""
+// when neither source names a map.
+//
+// The fallback matters: older recorders (e.g. MVDSV 1.00 with KTX 1.43/1.44,
+// 2024-era) never emit the demoinfo hidden block — MVDSV writes it only when
+// KTX issues `cmd demoinfo` (mvdsv/src/sv_demo_misc.c; ktx/src/commands.c) — so
+// r.DemoInfo is nil there even though serverinfo always carries the map. Every
+// BSP-derived feature (LOS/PVS, loc resolution, floor height, liquid state,
+// region control) resolves its map through this accessor so the absence of the
+// KTX block never reads as "no map". This is a post-hoc accessor over the
+// assembled Result (used by lazy passes like ComputeLOS); the analyzer pipeline
+// has the equivalent CoreOutputs.EffectiveMap for Finalize-time use.
+func (r *Result) EffectiveMap() string {
+	if r == nil {
+		return ""
+	}
+	if r.DemoInfo != nil && r.DemoInfo.Map != "" {
+		return r.DemoInfo.Map
+	}
+	if r.Metadata != nil && r.Metadata.ServerInfo != nil {
+		return r.Metadata.ServerInfo["map"]
+	}
+	return ""
+}

@@ -255,10 +255,10 @@ func collectUsage(demosDir string, verbose bool) (map[string]*mapgeom.FloorUsage
 			fmt.Fprintf(os.Stderr, "  warn demo %s: %v\n", filepath.Base(p), err)
 			continue
 		}
-		if res.DemoInfo == nil || res.Streams == nil {
+		if res.Streams == nil {
 			continue
 		}
-		key := loc.NormalizeMapName(res.DemoInfo.Map)
+		key := loc.NormalizeMapName(res.EffectiveMap())
 		if key == "" {
 			continue
 		}

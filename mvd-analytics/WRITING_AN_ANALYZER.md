@@ -58,6 +58,7 @@ handed to you via the `CoreConsumer` hook. The field → producing node map:
 | `VictimNamedTeamkills` | `frag` | Teamkill obituaries with no named killer (input to `frags-final`) |
 | `Clock` | `clock` | The match time base — call `co.Clock.ToMatch(t)` (or `co.MatchStartMs()`) so your timestamps are **born match-relative**; nil-safe |
 | `Roster` | `roster` | Final team labels — call `co.TeamFor(name, rawTeam)` so duel demos get name-as-team labels **at birth**; nil-safe |
+| `ServerInfoMap` | `metadata` | The serverinfo `map` key — read via `co.EffectiveMap()` (demoinfo map, else this) so BSP-derived passes resolve the map on demoinfo-less demos; nil-safe |
 
 The nil-safe helpers (`co.MatchStartMs()`, `co.TeamFor(...)`,
 `co.Clock.ToMatch(...)`) tolerate a missing producer, so unit tests can

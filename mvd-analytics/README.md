@@ -350,6 +350,8 @@ flowchart TB
   items -->|"items"| opening
   match -->|"match"| match_final
   match -->|"match"| region_control
+  metadata -->|"metadata"| los
+  metadata -->|"metadata"| timeline
   roster -->|"roster"| backpacks
   roster -->|"roster"| damage
   roster -->|"roster"| items

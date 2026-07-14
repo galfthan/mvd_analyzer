@@ -5,6 +5,25 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-14 (tweak-api)
+
+- **BSP-derived features now work on demos with no KTX demoinfo block (no
+  schema bump).** LOS/PVS, loc resolution, floor height (`pos.h`), liquid
+  state (`pos.lq`), and region control were all gated on the KTX demoinfo
+  hidden block (`res.DemoInfo.Map`). Older recorders — e.g. MVDSV 1.00 with
+  KTX 1.43/1.44 (2024-era) — never emit that block: MVDSV writes it only when
+  KTX issues `cmd demoinfo` (`mvdsv/src/sv_demo_misc.c:851`,
+  `ktx/src/commands.c:7740`). Those demos got `DemoInfo == nil` and silently
+  produced none of the above, even with positions recorded and the BSP
+  provisioned. The map is now resolved through a single `EffectiveMap`
+  accessor (`result.Result.EffectiveMap` post-hoc, `CoreOutputs.EffectiveMap`
+  at pipeline time) that prefers the demoinfo map and falls back to the
+  serverinfo `map` key — which every demo carries. No result **shape**
+  changes; the affected fields simply populate where they were previously
+  absent, so no `CurrentSchemaVersion` bump (consistent with prior
+  "existing field now populates more often" changes). Requires the map's BSP
+  to be provisioned, same as before.
+
 ## 2026-07-14 (deploy-upload-config)
 
 - **Deployment: BSPs for LOS, explicit limits, memory ceiling (no schema

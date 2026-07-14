@@ -109,7 +109,7 @@ var analyzerNodeMeta = map[string]nodeMeta{
 		desc: "Match summary: map, mode, duration, and the per-player scoreboard. In-pipeline consumers wanting the frag-log-corrected kills/deaths/suicides require `match:final`; the served `match` key is corrected by serve time since all nodes run."},
 	"messages": {name: "messages", requires: []string{"clock", "demoinfo", "roster"}, resultKey: "messages",
 		desc: "Chat, teamsay, and other match print messages with markup-stripped text."},
-	"timelineAnalysis": {name: "timeline", requires: []string{"clock", "demoinfo", "identity", "frag", "roster"}, resultKey: "timelineAnalysis",
+	"timelineAnalysis": {name: "timeline", requires: []string{"clock", "demoinfo", "identity", "frag", "roster", "metadata"}, resultKey: "timelineAnalysis",
 		desc: "Match timeline: phases, streaks, powerup runs, pauses, region-control layout, airgibs, and the per-player event-stream container. LARGE — one of the biggest Result sections; prefer the windowed views (events, buckets, region-control) over fetching it whole."},
 	"items": {name: "items", requires: []string{"clock", "demoinfo", "identity", "roster"}, resultKey: "items",
 		desc: "Per-item pickup/respawn timeline with world position and nearest loc."},
