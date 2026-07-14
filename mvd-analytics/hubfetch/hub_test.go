@@ -31,6 +31,7 @@ func TestResolve_HappyPath(t *testing.T) {
 
 	c := NewClient()
 	c.SupabaseURL = srv.URL
+	c.APIKey = "test-anon-key"
 
 	info, err := c.Resolve(212111)
 	if err != nil {
@@ -49,6 +50,7 @@ func TestResolve_NotFound(t *testing.T) {
 
 	c := NewClient()
 	c.SupabaseURL = srv.URL
+	c.APIKey = "test-anon-key"
 
 	_, err := c.Resolve(99999999)
 	if err == nil || !strings.Contains(err.Error(), "not found") {
@@ -65,6 +67,7 @@ func TestResolve_HTTPError(t *testing.T) {
 
 	c := NewClient()
 	c.SupabaseURL = srv.URL
+	c.APIKey = "test-anon-key"
 
 	_, err := c.Resolve(1)
 	if err == nil || !strings.Contains(err.Error(), "500") {

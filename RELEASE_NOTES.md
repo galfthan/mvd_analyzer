@@ -7,6 +7,19 @@ detail.
 
 ## 2026-07-14 (tweak-api)
 
+- **Hub URL / key / CDN moved out of the source into the environment
+  (operator-facing, no schema bump).** `hubfetch` no longer compiles in the
+  Supabase URL, anon key, and CDN base; `NewClient()` reads
+  `HUB_SUPABASE_URL`, `HUB_SUPABASE_KEY`, and `HUB_CDN_URL` instead, so the
+  key can rotate without a rebuild and never sits in the tree or the deploy
+  examples. When unset the client returns a clear "hub not configured"
+  error on use: `mvd-api` still starts and serves its local cache, but a
+  cache miss and `GET /v1/games/search` return `502 hub_upstream`, and the
+  MCP `searchGames` tool reports the same. **Deploy change:** add the three
+  vars to `mvd-api`'s `secrets.env` and (for `searchGames`) `mvd-mcp`'s
+  `mcp.env` — see `deploy/README.md`. Golden-corpus tests are unaffected
+  offline (they read the committed cache); only a cold cache needs the vars.
+
 - **Game discovery over REST: `GET /v1/games/search` (no schema bump).**
   The hub.quakeworld.nu catalog search that used to live only in the MCP
   `searchGames` tool is now a first-class REST endpoint, so a plain HTTP

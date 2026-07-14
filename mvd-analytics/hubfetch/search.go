@@ -37,6 +37,9 @@ type SearchParams struct {
 // the hub reports a Content-Range. Rosters are compacted to
 // {name, team, frags} unless params.Roster is set.
 func (c *Client) Search(ctx context.Context, params SearchParams) (any, error) {
+	if err := c.configErr(); err != nil {
+		return nil, err
+	}
 	parts := []string{
 		"select=" + url.QueryEscape(SearchSelect),
 		"order=timestamp.desc",
@@ -92,8 +95,8 @@ func (c *Client) Search(ctx context.Context, params SearchParams) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("apikey", SupabaseAPIKey)
-	req.Header.Set("Authorization", "Bearer "+SupabaseAPIKey)
+	req.Header.Set("apikey", c.APIKey)
+	req.Header.Set("Authorization", "Bearer "+c.APIKey)
 	req.Header.Set("accept-profile", "public")
 	// Ask PostgREST for the total match count (Content-Range: 0-19/1234)
 	// so pagination is honest: `count` is rows-in-this-page, `total` is

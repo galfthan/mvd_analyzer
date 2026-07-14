@@ -28,6 +28,12 @@
 // The portal's secrets come from the environment, never flags:
 // DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, PORTAL_COOKIE_SECRET (>= 16 bytes).
 //
+// The hub connection also comes from the environment (not the source tree):
+// HUB_SUPABASE_URL, HUB_SUPABASE_KEY, HUB_CDN_URL. They back on-demand demo
+// fetch (cache miss) and GET /v1/games/search. When unset the server still
+// starts and serves the local cache, but cache misses and /games/search
+// return 502 hub_upstream ("hub not configured").
+//
 // See mvd-api/README.md for the endpoint surface.
 package main
 

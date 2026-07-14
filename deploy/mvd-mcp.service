@@ -11,6 +11,12 @@
 # /etc/mvd/mcp.env (root-owned, 0600). The `-` prefix makes the file
 # optional so a no-auth (localhost-mode) mvd-api needs no key at all.
 #
+# The shim's searchGames tool queries the hub directly (it does not proxy
+# search through mvd-api), so mcp.env must ALSO carry the hub connection
+# vars HUB_SUPABASE_URL / HUB_SUPABASE_KEY (and optionally HUB_CDN_URL) —
+# the same values as mvd-api's secrets.env. Without them searchGames returns
+# "hub not configured"; every other (proxied) tool is unaffected.
+#
 # Install: copy to /etc/systemd/system/mvd-mcp.service, then
 #   systemctl daemon-reload && systemctl enable --now mvd-mcp
 

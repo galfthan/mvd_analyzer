@@ -39,6 +39,7 @@ func (f *fakeSupabase) Close() { f.srv.Close() }
 func newTestSupabaseClient(srvURL string) *supabaseClient {
 	c := newSupabaseClient(5 * time.Second)
 	c.hub.SupabaseURL = srvURL
+	c.hub.APIKey = "test-anon-key" // configErr requires a key; the fake checks the header is set
 	return c
 }
 

@@ -54,6 +54,21 @@ With `-portal` set, the server **refuses to start** if `-auth-dir`,
 `-portal-base-url`, or any of the three env vars is missing — a
 misconfigured portal never runs half-open.
 
+The **hub connection** is also environment-driven (kept out of the source
+tree so the anon key can rotate without a rebuild):
+
+| Env var | Description |
+|---|---|
+| `HUB_SUPABASE_URL` | hub.quakeworld.nu PostgREST `v1_games` endpoint |
+| `HUB_SUPABASE_KEY` | Supabase anon key (public, read-only) |
+| `HUB_CDN_URL`      | Demo CDN base (e.g. `https://d.quake.world`); optional — without it, downloads fall back to each demo's source URL |
+
+These back on-demand demo fetch (cache miss) and `GET /v1/games/search`.
+Unlike the portal, they are **not** a startup requirement — the server
+starts and serves the local cache without them, but a cache miss and any
+`/games/search` return `502 hub_upstream` with a "hub not configured"
+message.
+
 Running the server is the default action — bare flags (or an explicit
 `serve`) start it. A positional first argument that isn't a known
 subcommand (`version`, `cache`, `keys`) is rejected with a usage error

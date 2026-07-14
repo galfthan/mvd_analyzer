@@ -42,6 +42,7 @@ mvd-mcp version
 | Env var | Description |
 |---|---|
 | `MVD_API_KEY` | API key forwarded as `Authorization: Bearer` on every proxied `mvd-api` call. Required (as an operator-issued **service** key) when the target `mvd-api` runs with `-auth-dir`; unnecessary against a local no-auth `mvd-api`. An env var, not a flag, so the secret never shows in `ps`. |
+| `HUB_SUPABASE_URL`, `HUB_SUPABASE_KEY` | hub.quakeworld.nu connection for `searchGames`. That tool queries the hub directly (it does not proxy through `mvd-api`), so the shim needs the PostgREST `v1_games` URL and the public Supabase anon key. Unset → `searchGames` returns "hub not configured"; every other (proxied) tool is unaffected. `HUB_CDN_URL` is not used by the shim. |
 
 ## Tool surface
 
