@@ -42,21 +42,52 @@ type eagerArtifact struct {
 // otherwise returns the raw section at 200. shots/aim serve their stream-
 // enriched sections here: since phase 12 the base parse is always-full, so the
 // spatial weapon-fire streams (and the splits they feed) are on every Result.
+//
+// Time UNITS: the sections that also have a curated view endpoint (frag,
+// damage, shots, aim, items, backpacks, weapon-pickups) are served in the
+// same float-seconds VIEW shape as that endpoint (schema v56) — one shape per
+// section on the REST surface. The remaining raw stored-structure sections
+// (match, messages, timeline, map-entities) keep their stored int32-ms shape,
+// like /overview.
 var eagerArtifacts = map[string]eagerArtifact{
 	"demoinfo": {extract: func(r *result.Result) (any, error) { return view.DemoInfo(r) },
 		code: "demoinfo_unavailable", msg: "this demo has no KTX demoinfo block (likely non-KTX or pre-match abort)"},
-	"frag": {extract: func(r *result.Result) (any, error) { return view.Frags(r, view.FragOptions{}) },
+	"frag": {extract: func(r *result.Result) (any, error) {
+		fr, err := view.Frags(r, view.FragOptions{})
+		if err != nil {
+			return nil, err
+		}
+		return view.NewFragsView(fr), nil
+	},
 		code: "frags_unavailable", msg: "this demo has no frag log"},
 	"metadata": {extract: func(r *result.Result) (any, error) { return view.Metadata(r) },
 		code: "metadata_unavailable", msg: "this demo has no metadata (no fullserverinfo / no countdown centerprint)"},
 	// Dmg "both" keeps the artifact "the stored section as-is": the view's
 	// unset default is the raw strip, which would silently delete the
 	// stored bounded family from an endpoint contracted to serve it.
-	"damage": {extract: func(r *result.Result) (any, error) { return view.Damage(r, view.DamageOptions{Dmg: "both"}) },
+	"damage": {extract: func(r *result.Result) (any, error) {
+		d, err := view.Damage(r, view.DamageOptions{Dmg: "both"})
+		if err != nil {
+			return nil, err
+		}
+		return view.NewDamageView(d), nil
+	},
 		code: "damage_unavailable", msg: "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"},
-	"shots": {extract: func(r *result.Result) (any, error) { return view.Shots(r) },
+	"shots": {extract: func(r *result.Result) (any, error) {
+		sh, err := view.Shots(r)
+		if err != nil {
+			return nil, err
+		}
+		return view.NewShotsView(sh), nil
+	},
 		code: "shots_unavailable", msg: "this demo has no shot data (no weapon fires decoded)"},
-	"aim": {extract: func(r *result.Result) (any, error) { return view.Aim(r, view.AimOptions{}) },
+	"aim": {extract: func(r *result.Result) (any, error) {
+		am, err := view.Aim(r, view.AimOptions{})
+		if err != nil {
+			return nil, err
+		}
+		return view.NewAimView(am), nil
+	},
 		code: "aim_unavailable", msg: "this demo has no aim data (needs shots + position/view streams)"},
 	"loc-graph": {extract: func(r *result.Result) (any, error) { return view.LocGraph(r) },
 		code: "locgraph_unavailable", msg: "this demo has no loc graph (probably no position track was emitted)"},
@@ -74,10 +105,10 @@ var eagerArtifacts = map[string]eagerArtifact{
 	"match":          {extract: func(r *result.Result) (any, error) { return r.Match, nil }},
 	"messages":       {extract: func(r *result.Result) (any, error) { return r.Messages, nil }},
 	"timeline":       {extract: func(r *result.Result) (any, error) { return r.TimelineAnalysis, nil }},
-	"items":          {extract: func(r *result.Result) (any, error) { return r.Items, nil }},
+	"items":          {extract: func(r *result.Result) (any, error) { return view.NewItemsView(r.Items), nil }},
 	"map-entities":   {extract: func(r *result.Result) (any, error) { return r.MapEntities, nil }},
-	"backpacks":      {extract: func(r *result.Result) (any, error) { return r.Backpacks, nil }},
-	"weapon-pickups": {extract: func(r *result.Result) (any, error) { return r.WeaponPickups, nil }},
+	"backpacks":      {extract: func(r *result.Result) (any, error) { return view.NewBackpacksView(r.Backpacks), nil }},
+	"weapon-pickups": {extract: func(r *result.Result) (any, error) { return view.NewWeaponPickupsView(r.WeaponPickups), nil }},
 }
 
 // handleArtifactsManifest: GET /v1/artifacts — the manifest of every DAG node

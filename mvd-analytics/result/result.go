@@ -667,7 +667,18 @@ package result
 //     back to the shadow-health cap.
 //   - Corpus given/taken reconcile ~2.5× tighter (max |Δ| 16/15 vs 44/44);
 //     ewep/team bands unchanged (the victim-item one-frame window).
-const CurrentSchemaVersion = 55
+// v56: REST view-surface time fields unified to float seconds (view shape
+// only — no stored-struct change). The pass-through endpoints /frags,
+// /damage, /shots, /aim, /items, /backpacks, /weapon-pickups, /chat,
+// /airgibs (and the artifacts that mirror them) previously leaked their
+// stored int32-ms timestamps; they now emit float64 seconds under the same
+// rule as /events and /buckets: the primary event time is renamed `t`,
+// multi-field records (nextDeathTime, dropTime, availableFrom, takenAt,
+// respawnAt, positional-kill times) keep their names but become seconds, and
+// the dense aim sample columns stay int32 ms with explicit names (crosshair
+// `t`→`tMs`, lgRamp `since`→`sinceMs`). The stored result.* structs and the
+// golden corpus are unchanged (qw-analyze / WASM still emit ms).
+const CurrentSchemaVersion = 56
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

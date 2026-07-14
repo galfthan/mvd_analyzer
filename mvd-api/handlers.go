@@ -310,7 +310,7 @@ func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 		s.writeUnavailable(w, r, err, "frags_unavailable", "this demo has no frag log")
 		return
 	}
-	writeJSON(w, http.StatusOK, out)
+	writeJSON(w, http.StatusOK, view.NewFragsView(out))
 }
 
 // handleDamage: GET /v1/demos/{id}/damage — per-hit damage log +
@@ -398,7 +398,7 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 			"this demo has no damage data (no KTX mvdhidden_dmgdone stream)")
 		return
 	}
-	writeJSON(w, http.StatusOK, out)
+	writeJSON(w, http.StatusOK, view.NewDamageView(out))
 }
 
 // handleShots: GET /v1/demos/{id}/shots — the per-fire weapon stream
@@ -421,7 +421,7 @@ func (s *server) handleShots(w http.ResponseWriter, r *http.Request) {
 			"this demo has no shot data (no weapon fires decoded)")
 		return
 	}
-	writeJSON(w, http.StatusOK, sh)
+	writeJSON(w, http.StatusOK, view.NewShotsView(sh))
 }
 
 // handleAim: GET /v1/demos/{id}/aim — per-player aim analysis (result.Aim):
@@ -466,7 +466,7 @@ func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
 			"this demo has no aim data (needs shots + position/view streams)")
 		return
 	}
-	writeJSON(w, http.StatusOK, am)
+	writeJSON(w, http.StatusOK, view.NewAimView(am))
 }
 
 // handleChat: GET /v1/demos/{id}/chat — chat-only slice of
@@ -497,7 +497,7 @@ func (s *server) handleChat(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
-	writeJSON(w, http.StatusOK, view.Chat(res, opts))
+	writeJSON(w, http.StatusOK, view.NewChatView(view.Chat(res, opts)))
 }
 
 // handleDemoInfo: GET /v1/demos/{id}/demoinfo — KTX demoinfo blob
@@ -541,7 +541,7 @@ func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
-	writeJSON(w, http.StatusOK, view.Backpacks(res, opts))
+	writeJSON(w, http.StatusOK, view.NewBackpacksView(view.Backpacks(res, opts)))
 }
 
 // handleItems: GET /v1/demos/{id}/items — per-item pickup/respawn
@@ -592,7 +592,7 @@ func (s *server) handleItems(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, view.ItemsSummary(res, opts))
 		return
 	}
-	writeJSON(w, http.StatusOK, view.Items(res, opts))
+	writeJSON(w, http.StatusOK, view.NewItemsView(view.Items(res, opts)))
 }
 
 // handleWeaponPickups: GET /v1/demos/{id}/weapon-pickups — slot-weapon
@@ -631,7 +631,7 @@ func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
 			fmt.Sprintf("unknown source %q; valid: world, backpack, unknown", opts.Source))
 		return
 	}
-	writeJSON(w, http.StatusOK, view.WeaponPickups(res, opts))
+	writeJSON(w, http.StatusOK, view.NewWeaponPickupsView(view.WeaponPickups(res, opts)))
 }
 
 func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
@@ -924,5 +924,5 @@ func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 			"this demo has no timeline analysis")
 		return
 	}
-	writeJSON(w, http.StatusOK, airgibs)
+	writeJSON(w, http.StatusOK, view.NewAirgibsView(airgibs))
 }
