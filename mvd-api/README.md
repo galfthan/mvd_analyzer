@@ -275,6 +275,30 @@ limit exceeded → `429 + Retry-After`. Exempt paths, key issuance, and the
 `/v1/auth/check` self-test are described above and in
 [`API.md` §2.5](API.md).
 
+### Access-log identity: `label` vs `discord` / `key`
+
+Each request logs three identity fields, and the distinction matters when you
+ask *who* called:
+
+| Field | Value |
+|---|---|
+| `label` | The human label: the key's **note**, else the Discord name, else the hash prefix. Handy to read, but **lossy** — a note masks everything behind it, and the portal stamps `note="portal"` on every key it issues, so all portal users share one label |
+| `discord` | The key's Discord display name, verbatim. Empty for a CLI-issued key with no Discord identity |
+| `key` | The first 8 hex chars of the key's SHA-256 hash — the same prefix `mvd-api keys list` prints in its PREFIX column, so it's the stable join between the log and the key store. Never the key, never the full hash |
+
+Query `discord` or `key`, not `label`, when you need attribution:
+
+```sh
+# who is actually using the API (portal users appear individually)
+journalctl -u mvd-api -o cat \
+  | jq -r 'select(.msg=="request" and .key!="") | "\(.discord) \(.key) \(.method) \(.path)"'
+```
+
+All three are empty on an auth-exempt path (`/healthz`, `/v1/version`,
+`/openapi.yaml`, `/docs`, `/portal/*`) and on a `401` — those requests never
+resolve a key, so they are genuinely unattributable. A valid key sent to an
+exempt path is *not* recorded: the auth middleware never runs there.
+
 ## Cache layout
 
 Under `-cache-dir`:
