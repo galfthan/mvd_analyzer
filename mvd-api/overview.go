@@ -167,93 +167,16 @@ func BuildOverview(r *result.Result) Overview {
 	return ov
 }
 
-// --- units-governed /overview surface (schema v56) ---
-
-type overviewStreakUnits struct {
-	Player   string `json:"player"`
-	Team     string `json:"team,omitempty"`
-	Weapon   string `json:"weapon,omitempty"`
-	Length   int    `json:"length"`
-	Start    any    `json:"start"`
-	Duration any    `json:"duration"`
-}
-
-type overviewPowerupUnits struct {
-	Player   string `json:"player"`
-	Team     string `json:"team,omitempty"`
-	Type     string `json:"type"`
-	Start    any    `json:"start"`
-	Duration any    `json:"duration"`
-	Frags    int    `json:"frags"`
-}
-
-// OverviewUnitsView is Overview with the match-position times (duration,
-// matchStart, matchEnd, streak/powerup start+duration) unit-governed and a
-// timeUnit echo (schema v56). The `timing` block is a wall-clock anchor whose
-// fields carry explicit *Ms names (demoOffset, pauses[].atMs/durationMs) — it
-// is the documented ms island (like /demoinfo) and never converts.
-type OverviewUnitsView struct {
-	TimeUnit         view.TimeUnit          `json:"timeUnit"`
-	SchemaVersion    int                    `json:"schemaVersion"`
-	FilePath         string                 `json:"filePath,omitempty"`
-	Map              string                 `json:"map,omitempty"`
-	GameDir          string                 `json:"gameDir,omitempty"`
-	Mode             string                 `json:"mode,omitempty"`
-	Matchtag         string                 `json:"matchtag,omitempty"`
-	Duration         any                    `json:"duration"`
-	MatchStart       any                    `json:"matchStart"`
-	MatchEnd         any                    `json:"matchEnd"`
-	Teams            []OverviewTeam         `json:"teams,omitempty"`
-	Players          []OverviewPlayer       `json:"players"`
-	TopStreaks       []overviewStreakUnits  `json:"topStreaks,omitempty"`
-	TopPowerups      []overviewPowerupUnits `json:"topPowerups,omitempty"`
-	LocCount         int                    `json:"locCount"`
-	HasRegionControl bool                   `json:"hasRegionControl"`
-	Timing           *OverviewTiming        `json:"timing,omitempty"`
-	PlayerUserIDs    map[string]int         `json:"playerUserIDs,omitempty"`
-	Errors           []string               `json:"errors,omitempty"`
-}
-
-// OverviewUnits reshapes an Overview to the unit surface.
-func OverviewUnits(ov Overview, u view.TimeUnit) OverviewUnitsView {
-	out := OverviewUnitsView{
-		TimeUnit:         u,
-		SchemaVersion:    ov.SchemaVersion,
-		FilePath:         ov.FilePath,
-		Map:              ov.Map,
-		GameDir:          ov.GameDir,
-		Mode:             ov.Mode,
-		Matchtag:         ov.Matchtag,
-		Duration:         view.MsToUnit(ov.Duration, u),
-		MatchStart:       view.MsToUnit(ov.MatchStart, u),
-		MatchEnd:         view.MsToUnit(ov.MatchEnd, u),
-		Teams:            ov.Teams,
-		Players:          ov.Players,
-		LocCount:         ov.LocCount,
-		HasRegionControl: ov.HasRegionControl,
-		Timing:           ov.Timing,
-		PlayerUserIDs:    ov.PlayerUserIDs,
-		Errors:           ov.Errors,
-	}
-	if ov.TopStreaks != nil {
-		out.TopStreaks = make([]overviewStreakUnits, len(ov.TopStreaks))
-		for i, s := range ov.TopStreaks {
-			out.TopStreaks[i] = overviewStreakUnits{
-				Player: s.Player, Team: s.Team, Weapon: s.Weapon, Length: s.Length,
-				Start: view.MsToUnit(s.Start, u), Duration: view.MsToUnit(s.Duration, u),
-			}
-		}
-	}
-	if ov.TopPowerups != nil {
-		out.TopPowerups = make([]overviewPowerupUnits, len(ov.TopPowerups))
-		for i, p := range ov.TopPowerups {
-			out.TopPowerups[i] = overviewPowerupUnits{
-				Player: p.Player, Team: p.Team, Type: p.Type, Frags: p.Frags,
-				Start: view.MsToUnit(p.Start, u), Duration: view.MsToUnit(p.Duration, u),
-			}
-		}
-	}
-	return out
+// OverviewEnvelope wraps the /overview body with a fixed timeUnit echo (schema
+// v56). Overview's descriptive times (duration, matchStart/End, streak/powerup
+// start+duration) are all int32 milliseconds, so the echo is a constant "ms".
+// Embedding flattens Overview's fields, so the body is Overview verbatim plus a
+// leading timeUnit — no parallel field list to drift. The `timing` block keeps
+// its own explicit *Ms names (demoOffset, pauses[].atMs/durationMs) — the
+// wall-clock anchor island, like /demoinfo.
+type OverviewEnvelope struct {
+	TimeUnit view.TimeUnit `json:"timeUnit"`
+	Overview
 }
 
 func topStreaks(in []result.FragStreakEvent, n int) []OverviewStreak {

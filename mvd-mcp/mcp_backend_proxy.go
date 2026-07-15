@@ -307,9 +307,7 @@ func (p *proxyBackend) GetOverview(ctx context.Context, in GetOverviewInput) (an
 	if err != nil {
 		return nil, err
 	}
-	q := query{}
-	q.str("units", in.Units)
-	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
+	return p.fetchOpaque(ctx, "GET", path, nil)
 }
 
 func (p *proxyBackend) GetDemoInfo(ctx context.Context, in GetDemoInfoInput) (any, error) {
@@ -339,7 +337,6 @@ func (p *proxyBackend) GetFrags(ctx context.Context, in GetFragsInput) (any, err
 	q.seconds("from", in.StartTime)
 	q.seconds("to", in.EndTime)
 	q.boolean("summary", in.Summary)
-	q.str("units", in.Units)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
@@ -356,7 +353,6 @@ func (p *proxyBackend) GetDamage(ctx context.Context, in GetDamageInput) (any, e
 	// Empty dmg stays out of the query so the REST summary-aware default
 	// resolution applies (both under the summary default, raw otherwise).
 	q.str("dmg", in.Dmg)
-	q.str("units", in.Units)
 	summary, defaulted := summaryDefaultTrue(in.Summary)
 	q.boolean("summary", summary)
 	out, err := p.fetchOpaque(ctx, "GET", path, url.Values(q))
@@ -400,7 +396,6 @@ func (p *proxyBackend) GetChat(ctx context.Context, in GetChatInput) (any, error
 	q.seconds("to", in.EndTime)
 	q.csv("players", in.Players)
 	q.csv("types", in.Types)
-	q.str("units", in.Units)
 	return p.fetchOpaqueList(ctx, "GET", path, url.Values(q), "messages")
 }
 
@@ -414,7 +409,6 @@ func (p *proxyBackend) GetBackpacks(ctx context.Context, in GetBackpacksInput) (
 	q.csv("weapons", in.Weapons)
 	q.seconds("from", in.StartTime)
 	q.seconds("to", in.EndTime)
-	q.str("units", in.Units)
 	return p.fetchOpaqueList(ctx, "GET", path, url.Values(q), "backpacks")
 }
 
@@ -429,7 +423,6 @@ func (p *proxyBackend) GetItems(ctx context.Context, in GetItemsInput) (any, err
 	q.csv("kinds", in.Kinds)
 	q.seconds("from", in.StartTime)
 	q.seconds("to", in.EndTime)
-	q.str("units", in.Units)
 	summary, defaulted := summaryDefaultTrue(in.Summary)
 	q.boolean("summary", summary)
 	out, err := p.fetchOpaque(ctx, "GET", path, url.Values(q))
@@ -457,7 +450,6 @@ func (p *proxyBackend) GetWeaponPickups(ctx context.Context, in GetWeaponPickups
 	q.str("source", in.Source)
 	q.seconds("from", in.StartTime)
 	q.seconds("to", in.EndTime)
-	q.str("units", in.Units)
 	return p.fetchOpaqueList(ctx, "GET", path, url.Values(q), "pickups")
 }
 
@@ -495,7 +487,6 @@ func (p *proxyBackend) GetBuckets(ctx context.Context, in GetBucketsInput) (any,
 	}
 	q.str("loc", in.Loc)
 	q.str("layout", in.Layout)
-	q.str("units", in.Units)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
@@ -510,7 +501,6 @@ func (p *proxyBackend) GetEvents(ctx context.Context, in GetEventsInput) (any, e
 	q.csv("players", in.Players)
 	q.csv("types", in.Types)
 	q.str("loc", in.Loc)
-	q.str("units", in.Units)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
@@ -533,7 +523,6 @@ func (p *proxyBackend) GetStreamSlice(ctx context.Context, in GetStreamSliceInpu
 	q.csv("players", in.Players)
 	q.csv("fields", in.Fields)
 	q.str("loc", in.Loc)
-	q.str("units", in.Units)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
@@ -547,7 +536,6 @@ func (p *proxyBackend) GetStateAt(ctx context.Context, in GetStateAtInput) (any,
 	q.csv("players", in.Players)
 	q.csv("fields", in.Fields)
 	q.str("loc", in.Loc)
-	q.str("units", in.Units)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
@@ -572,7 +560,6 @@ func (p *proxyBackend) GetLocTrails(ctx context.Context, in GetLocTrailsInput) (
 		q.set("minDwellMs", strconv.Itoa(minDwell))
 	}
 	q.str("loc", in.Loc)
-	q.str("units", in.Units)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 

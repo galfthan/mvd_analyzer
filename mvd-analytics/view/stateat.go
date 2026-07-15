@@ -22,8 +22,11 @@ type StateAtOptions struct {
 // StateAtView returns each requested player's state at Time. Empty
 // players slice → no players matched the filter.
 type StateAtView struct {
-	Time    float64                  `json:"t"`
-	Players map[string]PlayerStateAt `json:"players"`
+	// TimeUnit echoes this endpoint's native unit ("s"); set by the mvd-api
+	// handler (schema v56). Omitted on the WASM/qw-analyze paths.
+	TimeUnit TimeUnit                 `json:"timeUnit,omitempty"`
+	Time     float64                  `json:"t"`
+	Players  map[string]PlayerStateAt `json:"players"`
 }
 
 // PlayerStateAt holds each requested field at Time. Pointers (and

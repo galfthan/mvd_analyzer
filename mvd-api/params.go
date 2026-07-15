@@ -6,8 +6,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/mvd-analyzer/mvd-analytics/view"
 )
 
 // ciGet returns a query value by case-insensitive key. The documented
@@ -261,27 +259,6 @@ func (p *qp) Dmg() string {
 		p.err = err
 	}
 	return v
-}
-
-// Units reads ?units=ms|s (schema v56). Empty → nativeDefault, the endpoint's
-// current native unit, so an existing consumer that omits the param sees zero
-// behaviour change. "ms" and "s" force that unit (requesting the native one is
-// a no-op). Any other value is a 400 invalid_param. No-op after a prior error.
-func (p *qp) Units(nativeDefault view.TimeUnit) view.TimeUnit {
-	if p.err != nil {
-		return nativeDefault
-	}
-	switch strings.ToLower(strings.TrimSpace(ciGet(p.q, "units"))) {
-	case "":
-		return nativeDefault
-	case "ms":
-		return view.UnitMs
-	case "s":
-		return view.UnitSec
-	default:
-		p.err = fmt.Errorf("invalid units=%q (want 'ms' or 's')", ciGet(p.q, "units"))
-		return nativeDefault
-	}
 }
 
 // Reducers reads the "field=name,..." reducer-override param. No-op after

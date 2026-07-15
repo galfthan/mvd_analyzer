@@ -7,50 +7,51 @@ detail.
 
 ## 2026-07-15 (tweak-api)
 
-- **Unit-selectable REST/MCP time output (schema v56).** Every demo
-  endpoint carrying a **match-position** timestamp now accepts an
-  optional `units=ms|s` query param and echoes a top-level
-  `"timeUnit": "ms"|"s"` naming the effective unit, so every governed
-  response is self-describing. **Additive and non-breaking** — with no
-  `units` the endpoint keeps its current native unit, so existing
-  consumers see zero change. Field names never change (`time` stays
-  `time`, `t` stays `t`); only the number's unit/type does. `units=s`
-  renders an ms-native endpoint's timestamps as float64 seconds,
-  `units=ms` renders a seconds-native endpoint's as int32 ms;
-  requesting the native unit is a no-op and an invalid value is
-  `400 invalid_param`. `ms→s` is `float64(ms)/1000`; `s→ms` is
-  `round(sec*1000)`, lossless because the seconds originate from int32 ms.
-  - **Native defaults.** ms-native: `/frags`, `/damage`, `/shots`,
-    `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, the `/items`
-    full phase timeline, `/overview`. seconds-native: `/events`,
-    `/state-at`, `/stream-slice` (envelope only), `/loc-trails`,
-    `/buckets?layout=row`, the `/items?summary=true` shape.
+- **`timeUnit` echo + codified time-unit naming convention (schema
+  v56).** Every demo endpoint carrying a descriptively-named
+  **match-position** timestamp now echoes a top-level
+  `"timeUnit": "ms"|"s"` naming that endpoint's **fixed** native unit, so
+  every governed response is self-describing. There is **no unit
+  selection** — an earlier `units=ms|s` conversion param was dropped as
+  over-engineered (a parallel `any`-typed shadow-struct hierarchy with a
+  field-drift hazard, for a divide-by-1000 any client can do). Instead
+  the naming rule is now official and fully determines every unit:
+  - **`t` = float seconds; `time` = int32 milliseconds — always**, on
+    every sparse (match-position) field, on every endpoint.
+  - **Descriptive names** (`startTime`/`endTime`,
+    `availableFrom`/`takenAt`/`respawnAt`, `nextDeathTime`, `dropTime`,
+    `duration`, `start`, …) carry the endpoint's fixed native unit,
+    declared by its `timeUnit` echo. Native ms: `/frags`, `/damage`,
+    `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, the
+    `/items` full phase timeline, `/overview`. Native seconds:
+    `/events`, `/state-at`, `/stream-slice` (envelope only),
+    `/loc-trails`, `/buckets?layout=row`, the `/items?summary=true`
+    shape.
+  - **Dense per-sample payloads are the documented exception** — always
+    int32 ms, under compact names, no echo: the `/stream-slice` embedded
+    change/interval/position tracks (`t`/`s`/`e` are ms even though the
+    envelope `startTime`/`endTime` are seconds), the `/aim` crosshair `t`
+    + `lgRamp` `since` samples, and the columnar `/buckets` axis
+    `startMs` + `windowMs` (Ms-suffixed). Hence `/aim` and
+    `/buckets?layout=column` (the default layout) are **ungoverned**, as
+    are `/region-control` and `/demoinfo` (KTX's own integer-seconds
+    island). `/overview`'s `timing` block is a wall-clock island with
+    explicit `*Ms` names.
   - **Shape change — bare arrays become objects.** To carry the
     `timeUnit` echo, the four endpoints that returned a top-level JSON
     array now return an envelope object: `/chat` →
     `{timeUnit, messages:[…]}`, `/airgibs` → `{timeUnit, airgibs:[…]}`,
     `/backpacks` → `{timeUnit, backpacks:[…]}`, `/weapon-pickups` →
     `{timeUnit, pickups:[…]}`. Consumers indexing the old top-level array
-    must read the named field.
-  - **Dense per-sample payloads stay int32 ms, by design** — `units`
-    never touches them and they carry no `timeUnit`: the `/stream-slice`
-    embedded change/interval/position tracks (only the envelope
-    `startTime`/`endTime` convert), the `/aim` crosshair `t` + `lgRamp`
-    `since` samples, and the columnar `/buckets` axis `startMs` +
-    `windowMs` (window size). Hence `/aim` (no sparse match-position
-    field) and `/buckets?layout=column` (the default layout) are
-    **ungoverned** — no param, no echo — as are `/region-control` (no
-    match-position field) and `/demoinfo` (KTX's own integer-seconds
-    clock). `/overview`'s `timing` block is a wall-clock island with
-    explicit `*Ms` names and never converts.
+    must read the named field. This is the one non-additive change; every
+    other endpoint just gains the additive `timeUnit` field.
   - **Escape hatch.** `GET /v1/demos/{id}/artifacts/{name}` serves the
-    raw stored result sections in int32 ms as-is — no `units`, no
-    `timeUnit` — the way to always get the raw stored milliseconds.
-  - **MCP parity.** The mvd-mcp proxy tools mapping to governed
-    endpoints gained an optional `units` input; `getAim` and
-    `getRegionControl` did not (ungoverned). Stored `result.*` structs
-    are unchanged — still int32 ms; this is a transport-surface change
-    only. See [mvd-api/API.md §2.1](mvd-api/API.md) and
+    raw stored result sections in int32 ms as-is — no `timeUnit` — the
+    way to always get the raw stored milliseconds.
+  - Stored `result.*` structs, `qw-analyze`/WASM output, and the golden
+    corpus are unchanged — still int32 ms; this is a transport-surface
+    change only (schemaVersion restamped to 56). See
+    [mvd-api/API.md §2.1](mvd-api/API.md) and
     [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) §"Time units".
 
 ## 2026-07-14 (tweak-api)

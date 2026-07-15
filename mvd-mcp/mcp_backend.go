@@ -56,7 +56,6 @@ type LoadDemoOutput struct {
 // GetOverviewInput is just a demoId reference (gameId:N or sha:HEX).
 type GetOverviewInput struct {
 	DemoID string `json:"demoId" jsonschema:"the demo id from loadDemo: 'gameId:NNNN' or 'sha:HEX'"`
-	Units  string `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (ms); the response echoes the effective unit in timeUnit."`
 }
 
 // GetBucketsInput mirrors /v1/demos/{id}/buckets query params.
@@ -71,7 +70,6 @@ type GetBucketsInput struct {
 	IncludeTeam bool              `json:"includeTeam,omitempty"`
 	Loc         string            `json:"loc,omitempty" jsonschema:"loc representation: 'name' (default, resolved loc names) or 'index' (raw LocTable indices; decode via getLocTable). Ignored for layout=column, which always returns raw 'li' indices plus a locTable legend for decoding them locally"`
 	Layout      string            `json:"layout,omitempty" jsonschema:"'column' (default) returns the compact column-major shape: per (player,field) one array indexed by bucket, where time(i)=startMs+i*windowMs — best for time-series/trend questions (far fewer tokens). 'row' returns one self-describing object per bucket. For point-in-time snapshots use getStateAt instead"`
-	Units       string            `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (seconds); the response echoes the effective unit in timeUnit."`
 }
 
 // GetEventsInput mirrors /v1/demos/{id}/events query params.
@@ -82,7 +80,6 @@ type GetEventsInput struct {
 	Players   []string `json:"players,omitempty"`
 	Types     []string `json:"types,omitempty" jsonschema:"event types. Default set (when empty): frag, powerup, streak, spawn, death, weapon, item, chat, pickup. Opt-in (pass explicitly): loc, health, armor, damage, telefrag, stomp. pickup = identity-rich takes: world takes detail{item, kind, entNum, loc?, source:'world'}, backpack/unknown grants detail{item, kind, source, entNum?, dropper?} (no loc); weapon/item = held-interval gain/lose (the holding story). spawn carries detail{loc} and includes the synthesized match-start spawn at t=0. A damage event carries detail{victim, damage, weapon, isSplash?, ...}; telefrag/stomp carry detail{victim, isTeam?} with player = the killer (the kill is already in the frag feed, hence opt-in)"`
 	Loc       string   `json:"loc,omitempty" jsonschema:"loc-event representation: 'name' (default) or 'index' (raw LocTable index; decode via getLocTable)"`
-	Units     string   `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (seconds); the response echoes the effective unit in timeUnit."`
 }
 
 // GetStreamSliceInput mirrors /v1/demos/{id}/stream-slice query params.
@@ -93,7 +90,6 @@ type GetStreamSliceInput struct {
 	Players   []string `json:"players,omitempty"`
 	Fields    []string `json:"fields,omitempty" jsonschema:"field codes: h=health, a=armor, at=armorType, li=location (NOTE: the selector code is li; the loc= param picks how it renders — name under output key 'loc' (default) or raw index under 'li'), pos, view, hgt, lq, vel, rl/lg/gl/ssg/sng (held weapons), q/pe/r (powerups), sh/nl/rk/cl (ammo), sp/d (spawn/death events). Empty = all standard fields; an unknown code errors with the full list"`
 	Loc       string   `json:"loc,omitempty" jsonschema:"loc representation: 'name' (default) or 'index' (raw LocTable index stream; decode via getLocTable)"`
-	Units     string   `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (seconds); the response echoes the effective unit in timeUnit."`
 }
 
 // GetStateAtInput mirrors /v1/demos/{id}/state-at query params.
@@ -103,7 +99,6 @@ type GetStateAtInput struct {
 	Players []string `json:"players,omitempty"`
 	Fields  []string `json:"fields,omitempty" jsonschema:"field codes: h=health, a=armor, at=armorType, li=location (NOTE: the selector code is li; the loc= param picks how it renders — name under output key 'loc' (default) or raw index under 'li'), pos, view, hgt, lq, vel, rl/lg/gl/ssg/sng (held weapons), q/pe/r (powerups), sh/nl/rk/cl (ammo), sp/d rejected here (no point-in-time meaning). Empty = all standard fields; an unknown code errors with the full list"`
 	Loc     string   `json:"loc,omitempty" jsonschema:"loc representation: 'name' (default) or 'index' (raw LocTable index; decode via getLocTable)"`
-	Units   string   `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (seconds); the response echoes the effective unit in timeUnit."`
 }
 
 // GetLocTrailsInput mirrors /v1/demos/{id}/loc-trails query params.
@@ -114,7 +109,6 @@ type GetLocTrailsInput struct {
 	StartTime  float64  `json:"startTime,omitempty"`
 	EndTime    float64  `json:"endTime,omitempty"`
 	Loc        string   `json:"loc,omitempty" jsonschema:"residence representation: 'name' (default) or 'index' (raw LocTable index; decode via getLocTable)"`
-	Units      string   `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (seconds); the response echoes the effective unit in timeUnit."`
 }
 
 // GetLocTableInput identifies a demo for its interned loc-name table —
@@ -153,7 +147,6 @@ type GetFragsInput struct {
 	StartTime float64  `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds (frags at or after this time)"`
 	EndTime   float64  `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds (frags at or before this time)"`
 	Summary   bool     `json:"summary,omitempty" jsonschema:"return only aggregates, dropping the big per-event kill log (avoids overflowing context)"`
-	Units     string   `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (ms); the response echoes the effective unit in timeUnit."`
 }
 
 // GetDamageInput mirrors /v1/demos/{id}/damage query params. When any scoping
@@ -168,7 +161,6 @@ type GetDamageInput struct {
 	EndTime   float64  `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds (hits at or before this time)"`
 	Summary   *bool    `json:"summary,omitempty" jsonschema:"MCP default TRUE (REST differs): aggregates only, the big per-hit damage log dropped. Pass false for the full log."`
 	Dmg       string   `json:"dmg,omitempty" jsonschema:"damage family: raw | bounded | both; semantics and the default (bounded) are described in the tool description"`
-	Units     string   `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (ms); the response echoes the effective unit in timeUnit."`
 }
 
 // GetAimInput identifies a demo for its per-player aim analysis, with optional
@@ -196,7 +188,6 @@ type GetChatInput struct {
 	EndTime   float64  `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds"`
 	Players   []string `json:"players,omitempty" jsonschema:"restrict to these speaker names"`
 	Types     []string `json:"types,omitempty" jsonschema:"chat-event types: 'chat' (public say), 'teamsay'. Empty = both."`
-	Units     string   `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (ms); the response echoes the effective unit in timeUnit."`
 }
 
 // GetBackpacksInput filters /v1/demos/{id}/backpacks.
@@ -206,7 +197,6 @@ type GetBackpacksInput struct {
 	Weapons   []string `json:"weapons,omitempty" jsonschema:"restrict to these dropped-weapon codes (rl, lg); empty = both. Forwarded as a CSV set, matching REST /backpacks"`
 	StartTime float64  `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds (drops at or after this time)"`
 	EndTime   float64  `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds"`
-	Units     string   `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (ms); the response echoes the effective unit in timeUnit."`
 }
 
 // GetItemsInput filters /v1/demos/{id}/items.
@@ -218,7 +208,6 @@ type GetItemsInput struct {
 	StartTime float64  `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds. Timeline mode keeps phases OVERLAPPING the window; summary mode counts takes INSIDE it"`
 	EndTime   float64  `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds (e.g. endTime:60 = the opening minute)"`
 	Summary   *bool    `json:"summary,omitempty" jsonschema:"MCP default TRUE (REST differs): per-item take aggregates {takenCount, byPlayer, firstTake} instead of the full phase timeline. Pass false for every phase (available/taken/respawn cycles)."`
-	Units     string   `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = native (timeline mode ms, summary mode seconds); the response echoes the effective unit in timeUnit."`
 }
 
 // GetMapEntitiesByMapInput addresses the static layout by map name
@@ -237,7 +226,6 @@ type GetWeaponPickupsInput struct {
 	Source    string   `json:"source,omitempty" jsonschema:"'world' (spawner) or 'backpack' (RL/LG drop)"`
 	StartTime float64  `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds (pickups at or after this time)"`
 	EndTime   float64  `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds"`
-	Units     string   `json:"units,omitempty" jsonschema:"time unit for match-position timestamps: 'ms' or 's'. Omitted = this endpoint's native unit (ms); the response echoes the effective unit in timeUnit."`
 }
 
 // ListArtifactsInput has no parameters — the artifact manifest is static

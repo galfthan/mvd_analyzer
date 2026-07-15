@@ -22,7 +22,10 @@ type LocTrailsOptions struct {
 // LocTrailsView is the response shape: per-player loc-name sequence
 // with dwell durations.
 type LocTrailsView struct {
-	Players []PlayerTrail `json:"players"`
+	// TimeUnit echoes this endpoint's native unit ("s"); set by the mvd-api
+	// handler (schema v56). Omitted on the WASM/qw-analyze paths.
+	TimeUnit TimeUnit      `json:"timeUnit,omitempty"`
+	Players  []PlayerTrail `json:"players"`
 }
 
 // PlayerTrail is one player's loc journey within the requested

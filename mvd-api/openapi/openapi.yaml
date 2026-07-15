@@ -359,7 +359,6 @@ paths:
         match had none.
       parameters:
         - $ref: "#/components/parameters/DemoId"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: The overview.
@@ -451,7 +450,6 @@ paths:
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
         - $ref: "#/components/parameters/Summary"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: Aggregates + kill log (log omitted with `summary`).
@@ -508,7 +506,6 @@ paths:
         - $ref: "#/components/parameters/To"
         - $ref: "#/components/parameters/Summary"
         - $ref: "#/components/parameters/Dmg"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: Aggregates + per-hit log (log omitted with `summary`).
@@ -536,7 +533,6 @@ paths:
         `shots_unavailable` when no weapon fires were decoded.
       parameters:
         - $ref: "#/components/parameters/DemoId"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: The shots section.
@@ -625,7 +621,6 @@ paths:
         - $ref: "#/components/parameters/To"
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/ChatTypes"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: Matching chat events.
@@ -656,7 +651,6 @@ paths:
         - $ref: "#/components/parameters/WeaponsLegacy"
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: Matching backpack drops.
@@ -692,7 +686,6 @@ paths:
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
         - $ref: "#/components/parameters/Summary"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: Item timelines, or per-item aggregates with `summary`.
@@ -725,7 +718,6 @@ paths:
         - $ref: "#/components/parameters/Source"
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: Matching pickups.
@@ -763,7 +755,6 @@ paths:
         - $ref: "#/components/parameters/IncludeTeam"
         - $ref: "#/components/parameters/Loc"
         - $ref: "#/components/parameters/Layout"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: Bucketed series (columnar or row layout).
@@ -794,7 +785,6 @@ paths:
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/EventTypes"
         - $ref: "#/components/parameters/Loc"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: Matching events.
@@ -825,7 +815,6 @@ paths:
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/Fields"
         - $ref: "#/components/parameters/Loc"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: The slice.
@@ -858,7 +847,6 @@ paths:
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/Fields"
         - $ref: "#/components/parameters/Loc"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: Per-player state at the instant.
@@ -988,7 +976,6 @@ paths:
         - $ref: "#/components/parameters/MinDwellMs"
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/Loc"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: The trails.
@@ -1069,7 +1056,6 @@ paths:
         `airgibs_unavailable` when the demo has no timeline analysis.
       parameters:
         - $ref: "#/components/parameters/DemoId"
-        - $ref: "#/components/parameters/Units"
       responses:
         "200":
           description: The airgib list.
@@ -1461,24 +1447,6 @@ components:
             - sp
             - d
             # field-code-enum:end
-    Units:
-      name: units
-      in: query
-      description: >
-        Time unit for the response's MATCH-POSITION timestamps (schema v56):
-        `ms` (int32 milliseconds) or `s` (float64 seconds). Omit for the
-        endpoint's native unit — the ms-native pass-throughs (frags, damage,
-        shots, chat, airgibs, backpacks, weapon-pickups, items timeline,
-        overview) default to `ms`; the derived views (events, buckets rows,
-        state-at, stream-slice envelope, loc-trails, items summary) default to
-        `s`. Field NAMES never change; only the number's unit/type does. The
-        response always echoes the effective unit in `timeUnit`. DENSE
-        per-sample payloads stay ms regardless (aim crosshair `t`/lgRamp
-        `since`, the stream-slice embedded entries, the columnar buckets
-        startMs/windowMs axis). An unknown value is 400 `invalid_param`.
-      schema:
-        type: string
-        enum: [ms, s]
     Loc:
       name: loc
       in: query
@@ -1769,10 +1737,13 @@ components:
     TimeUnit:
       type: string
       description: >
-        The effective unit of a governed response's MATCH-POSITION timestamps
-        (schema v56): `ms` (int32 milliseconds) or `s` (float64 seconds),
-        selected by the `units` query param and echoed here so the body is
-        self-describing.
+        The unit of a governed response's descriptively-named MATCH-POSITION
+        timestamps (schema v56): `ms` (int32 milliseconds) or `s` (float64
+        seconds). Fixed per endpoint — there is no unit selection — and echoed
+        here so the body is self-describing. This general two-value form is
+        used by the schemas reused across units (Frags/Damage/Shots/
+        ItemsTimelines, shared with the raw /artifacts envelope); a single-unit
+        response inlines a one-value enum instead.
       enum: [ms, s]
     Health:
       type: object
@@ -1878,10 +1849,11 @@ components:
     Overview:
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [ms] }
         duration:
-          type: number
-          description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         errors:
           items:
             type: string
@@ -1899,11 +1871,13 @@ components:
         map:
           type: string
         matchEnd:
-          type: number
-          description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         matchStart:
-          type: number
-          description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         matchtag:
           type: string
         mode:
@@ -1995,15 +1969,17 @@ components:
             additionalProperties: false
             properties:
               duration:
-                type: number
-                description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               frags:
                 type: integer
               player:
                 type: string
               start:
-                type: number
-                description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               team:
                 type: string
               type:
@@ -2023,15 +1999,17 @@ components:
             additionalProperties: false
             properties:
               duration:
-                type: number
-                description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               length:
                 type: integer
               player:
                 type: string
               start:
-                type: number
-                description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               team:
                 type: string
               weapon:
@@ -2381,8 +2359,9 @@ components:
               killer:
                 type: string
               time:
-                type: number
-                description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               victim:
                 type: string
               weapon:
@@ -2576,8 +2555,9 @@ components:
               isTeam:
                 type: boolean
               time:
-                type: number
-                description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               victim:
                 type: string
               victimWep:
@@ -2704,8 +2684,9 @@ components:
               isTeam:
                 type: boolean
               time:
-                type: number
-                description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               victim:
                 type: string
               victimWep:
@@ -2745,8 +2726,9 @@ components:
               isTeam:
                 type: boolean
               time:
-                type: number
-                description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               victim:
                 type: string
               victimWep:
@@ -2870,8 +2852,9 @@ components:
               team:
                 type: string
               time:
-                type: number
-                description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               victimKinds:
                 items:
                   type: string
@@ -3379,8 +3362,9 @@ components:
         team:
           type: string
         time:
-          type: number
-          description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         type:
           type: string
         victim:
@@ -3412,8 +3396,9 @@ components:
         team:
           type: string
         time:
-          type: number
-          description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         weapon:
           type: string
       required:
@@ -3429,8 +3414,9 @@ components:
         backpackEnt:
           type: integer
         dropTime:
-          type: number
-          description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         dropper:
           type: string
         dropperTeam:
@@ -3442,8 +3428,9 @@ components:
         kills:
           type: integer
         nextDeathTime:
-          type: number
-          description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         player:
           type: string
         source:
@@ -3451,8 +3438,9 @@ components:
         team:
           type: string
         time:
-          type: number
-          description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         weapon:
           type: string
       required:
@@ -3484,14 +3472,17 @@ components:
                   additionalProperties: false
                   properties:
                     availableFrom:
-                      type: number
-                      description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                      maximum: 2.147483647e+09
+                      minimum: -2.147483648e+09
+                      type: integer
                     respawnAt:
-                      type: number
-                      description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                      maximum: 2.147483647e+09
+                      minimum: -2.147483648e+09
+                      type: integer
                     takenAt:
-                      type: number
-                      description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+                      maximum: 2.147483647e+09
+                      minimum: -2.147483648e+09
+                      type: integer
                     takenBy:
                       type: string
                     team:
@@ -3529,7 +3520,7 @@ components:
     ItemsSummary:
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [s] }
         items:
           items:
             additionalProperties: false
@@ -3595,8 +3586,9 @@ components:
         loc:
           type: string
         time:
-          type: number
-          description: match-relative time; int32 ms when timeUnit=ms, float seconds when timeUnit=s
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         victim:
           type: string
         victimTeam:
@@ -4428,7 +4420,7 @@ components:
       required: [timeUnit, events]
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [s] }
         events:
           type: [array, "null"]
           items:
@@ -4478,7 +4470,7 @@ components:
     BucketsRow:
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [s] }
         buckets:
           items:
             additionalProperties: false
@@ -4586,7 +4578,7 @@ components:
     StreamSlice:
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [s] }
         endTime:
           type: number
         players:
@@ -5412,7 +5404,7 @@ components:
     StateAt:
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [s] }
         players:
           additionalProperties:
             additionalProperties: false
@@ -5572,7 +5564,7 @@ components:
     LocTrails:
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [s] }
         players:
           items:
             additionalProperties: false
@@ -5732,13 +5724,12 @@ components:
       type: object
       description: >
         /chat body (schema v56) — `{timeUnit, messages}`. messages are
-        result.MatchEvent entries; each `time` is int32 ms (native, timeUnit
-        `ms`) or float seconds (units=s, timeUnit `s`). messages is [] when
-        nothing matches.
+        result.MatchEvent entries; each `time` is int32 ms (timeUnit is the
+        fixed `ms` for this endpoint). messages is [] when nothing matches.
       required: [timeUnit, messages]
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [ms] }
         messages:
           type: array
           items: { $ref: "#/components/schemas/MatchEvent" }
@@ -5746,11 +5737,11 @@ components:
       type: object
       description: >
         /backpacks body (schema v56) — `{timeUnit, backpacks}`; backpacks is
-        [] when none. `time` follows timeUnit (ms native / s under units=s).
+        [] when none. `time` is int32 ms (timeUnit is the fixed `ms`).
       required: [timeUnit, backpacks]
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [ms] }
         backpacks:
           type: array
           items: { $ref: "#/components/schemas/BackpackDrop" }
@@ -5758,11 +5749,12 @@ components:
       type: object
       description: >
         /weapon-pickups body (schema v56) — `{timeUnit, pickups}`; pickups is
-        [] when none. `time`/`nextDeathTime`/`dropTime` follow timeUnit.
+        [] when none. `time`/`nextDeathTime`/`dropTime` are int32 ms (timeUnit
+        is the fixed `ms`).
       required: [timeUnit, pickups]
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [ms] }
         pickups:
           type: array
           items: { $ref: "#/components/schemas/WeaponPickup" }
@@ -5770,11 +5762,12 @@ components:
       type: object
       description: >
         /airgibs body (schema v56) — `{timeUnit, airgibs}`; airgibs is sorted
-        by height descending and [] on BSP-less maps. `time` follows timeUnit.
+        by height descending and [] on BSP-less maps. `time` is int32 ms
+        (timeUnit is the fixed `ms`).
       required: [timeUnit, airgibs]
       additionalProperties: false
       properties:
-        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
+        timeUnit: { type: string, enum: [ms] }
         airgibs:
           type: array
           items: { $ref: "#/components/schemas/AirgibEvent" }

@@ -199,13 +199,13 @@ infers their JSON Schemas from struct tags and exposes them via
 
 Every tool that maps to a time-carrying demo endpoint (getOverview,
 getFrags, getDamage, getChat, getBackpacks, getItems, getWeaponPickups,
-getBuckets, getEvents, getStreamSlice, getStateAt, getLocTrails) also
-takes an optional `units: "ms"|"s"` input, forwarded to the REST
-`units` param (schema v56): omitted = the endpoint's native unit, and
-the response echoes the effective unit in `timeUnit`. See
-[mvd-api/API.md §2.1](../mvd-api/API.md) for the native defaults and
-the always-ms dense-payload exception. The per-tool tables below omit
-this shared field.
+getBuckets, getEvents, getStreamSlice, getStateAt, getLocTrails) echoes
+a top-level `timeUnit` (`"ms"`|`"s"`) naming that endpoint's fixed
+native unit (schema v56) — there is no unit-selection input. The unit of
+any field follows one rule: `t` is float seconds, `time` is int32 ms,
+and descriptively-named times use the echoed `timeUnit`. See
+[mvd-api/API.md §2.1](../mvd-api/API.md) for the per-endpoint values and
+the always-ms dense-payload exception.
 
 #### `searchGames(...)`
 

@@ -1250,34 +1250,40 @@ The view-layer query API (`view.Buckets`, `view.Events`,
 takes and returns `float64` seconds at its public surface, so any
 consumer querying through `view.*` is unaffected.
 
-#### Transport surface: `units` + `timeUnit` echo (schema v56)
+#### Transport surface: the `timeUnit` echo (schema v56)
 
 The **stored `result.*` structs are unchanged — still `int32` ms** as
-listed above. What v56 adds is on the **REST/MCP transport only**: each
-endpoint carrying a match-position timestamp has a *native* unit (ms for
-`/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`, `/backpacks`,
-`/weapon-pickups`, the `/items` full timeline, `/overview`; seconds for
-`/events`, `/state-at`, `/stream-slice` envelope, `/loc-trails`,
-`/buckets?layout=row`, the `/items` summary), an optional `units=ms|s`
-param that overrides it (field names never change, only the number's
-unit/type), and a top-level `"timeUnit":"ms"|"s"` echo naming the
-effective unit. `ms→s` is `float64(ms)/1000`; `s→ms` is
-`round(sec*1000)`, lossless because the seconds originate from int32 ms.
-See [mvd-api/API.md §2.1](../mvd-api/API.md) for the full endpoint
-matrix and the authoritative per-operation shapes in
+listed above. What v56 adds is on the **REST/MCP transport only**, and it
+is a fixed naming convention, **not a unit selection**:
+
+- The sparse match-position fields are absolute everywhere: **`t` is
+  float seconds, `time` is int32 ms** — always, on every endpoint.
+- Descriptively-named times (`startTime`/`endTime`,
+  `availableFrom`/`takenAt`/`respawnAt`, `nextDeathTime`, `dropTime`,
+  `duration`, `start`, …) carry the endpoint's FIXED native unit, and
+  every governed response echoes a top-level **`"timeUnit":"ms"|"s"`**
+  naming it. Native ms: `/frags`, `/damage`, `/shots`, `/chat`,
+  `/airgibs`, `/backpacks`, `/weapon-pickups`, the `/items` full
+  timeline, `/overview`. Native seconds: `/events`, `/state-at`,
+  `/stream-slice` envelope, `/loc-trails`, `/buckets?layout=row`, the
+  `/items` summary. There is no `units` param — the unit is determined
+  entirely by the field name plus this echo.
+
+See [mvd-api/API.md §2.1](../mvd-api/API.md) for the full endpoint matrix
+and the authoritative per-operation shapes in
 `mvd-api/openapi/openapi.yaml`.
 
-**Dense per-sample payloads stay int32 ms regardless of `units`, by
-design**, and carry no `timeUnit`: the `/stream-slice` embedded change /
-interval / position tracks (only the envelope `startTime`/`endTime`
-convert), the `/aim` crosshair `t` + `lgRamp` `since` samples, and the
-columnar `/buckets` axis `startMs` + `windowMs` (window *size*). Hence
-`/aim` and `/buckets?layout=column` (the default) are ungoverned — no
-`units`, no `timeUnit`. `/demoinfo` (KTX's own clock, §DemoInfoResult)
-and `/region-control` (no match-position field) are ungoverned too. The
-raw-artifact accessor `GET /v1/demos/{id}/artifacts/{name}` always
-serves the stored sections in int32 ms as-is — the exact-ms escape
-hatch.
+**Dense per-sample payloads are the documented exception — always int32
+ms, under compact names, no `timeUnit`**: the `/stream-slice` embedded
+change / interval / position tracks (`t`/`s`/`e` are ms even though the
+envelope `startTime`/`endTime` are seconds), the `/aim` crosshair `t` +
+`lgRamp` `since` samples, and the columnar `/buckets` axis `startMs` +
+`windowMs` (Ms-suffixed; window *size*). Hence `/aim` and
+`/buckets?layout=column` (the default) are ungoverned — no `timeUnit`.
+`/demoinfo` (KTX's own clock, §DemoInfoResult) and `/region-control` (no
+match-position field) are ungoverned too. The raw-artifact accessor
+`GET /v1/demos/{id}/artifacts/{name}` always serves the stored sections
+in int32 ms as-is — the exact-ms escape hatch.
 
 #### Why integer ms
 
@@ -1846,7 +1852,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
-| v56 | **Unit-selectable REST/MCP transport** (additive; stored structs unchanged — still int32 ms). Every endpoint with a match-position timestamp gains an optional `units=ms\|s` param (native unit when absent → no behaviour change) plus a top-level `timeUnit` echo of the effective unit; field names never change, only the number's unit/type. The four formerly bare-array endpoints wrap their array to carry the echo: `/chat`→`{timeUnit,messages}`, `/airgibs`→`{timeUnit,airgibs}`, `/backpacks`→`{timeUnit,backpacks}`, `/weapon-pickups`→`{timeUnit,pickups}`. Dense per-sample payloads (`/stream-slice` embedded tracks, `/aim` samples, columnar `/buckets` axis) stay int32 ms and are ungoverned, as are `/aim`, `/buckets?layout=column`, `/region-control`, `/demoinfo`, and the raw `/artifacts/{name}` accessor. See the §"Transport surface" note above and [mvd-api/API.md §2.1](../mvd-api/API.md). |
+| v56 | **`timeUnit` echo on the REST/MCP transport** (additive; stored structs unchanged — still int32 ms). Every endpoint with a descriptively-named match-position timestamp echoes a top-level `timeUnit` naming that endpoint's FIXED native unit (`ms` for the pass-throughs frags/damage/shots/chat/airgibs/backpacks/weapon-pickups/items-timeline/overview, `s` for the derived views events/state-at/stream-slice-envelope/loc-trails/buckets-row/items-summary). There is **no unit selection**: the sparse `t` (float seconds) and `time` (int32 ms) names are absolute, and the echo plus field name fully determine every unit. The four formerly bare-array endpoints wrap their array to carry the echo: `/chat`→`{timeUnit,messages}`, `/airgibs`→`{timeUnit,airgibs}`, `/backpacks`→`{timeUnit,backpacks}`, `/weapon-pickups`→`{timeUnit,pickups}` (the one non-additive shape change). Dense per-sample payloads (`/stream-slice` embedded tracks, `/aim` samples, columnar `/buckets` axis) stay int32 ms and are ungoverned, as are `/aim`, `/buckets?layout=column`, `/region-control`, `/demoinfo`, and the raw `/artifacts/{name}` accessor. See the §"Transport surface" note above and [mvd-api/API.md §2.1](../mvd-api/API.md). |
 | v55 | Bounded damage becomes **death-value-derived and the default**. The v54 shadow-health cap is replaced: a survived hit is bounded == raw by identity, a killing hit's overkill comes from the end-of-frame death broadcast (bounded = raw + deathValue; corpus reconciliation tightens ~2.5x, max +-16/player on given/taken). Fallback to the approximate shadow cap only for the -99 corpse clamp and respawn-masked deaths; same-frame multi-hit deaths cascade the overkill from the last hit backward. The REST/MCP `dmg` **default flips to `bounded`** for summaries AND the full log (`raw`/`both` opt-in; a *defaulted* request on a `skipped:*` demo falls back to raw, only an explicit `dmg=bounded` 422s). Unfiltered bounded summaries substitute KTX's exact scoreboard figures (given/givenTeam/givenSelf/ewep/byWeapon-enemy; `taken` and the `enemyVs*` buckets stay reconstructed) with provenance in the new `damage.boundedSource` (`ktx` / `reconstructed`). |
 | v54 | The **bounded damage family** (additive). The wire carries only KTX's unbound damage; the scoreboard's bounded `dmg_dealt` (armor absorbed + health damage capped to remaining health) is now reconstructed per hit from tracked victim vitals: `damage.events[].bounded` (absent = equal to `damage`; `0` is a real nullified-hit value), `damage.byPlayer.<p>.bounded` (a nested `PlayerDamage`), `damage.scoreboard` deltas gain a `bounded` nest incl. `streamTeam`/`scoreTeam`, plus the `dmg` family echo and `boundedMode` (`skipped:*` on midair/instagib/dmgfrags demos — no bounded fields there). Telefrags **and stomps** now fold their bounded damage into `given`/`givenTeam`/`taken` in **both** families, matching KTX's own accumulation (telefrag: armor+health, the wire 9999 is a sentinel; stomp: the honest ~10 HP wire value); `telefrags[]`/`stomps[]` entries carry the per-kill `bounded` value. `byWeapon`/`matrix`/`ewep`/`totalDamage` still exclude positional kills (KTX `wpNONE` parity). |
 | v53 | Columnar buckets become **loc-self-contained**; view shape only, no stored-field change (bumped so the immutable schemaVersion-keyed ETags stop revalidating pre-legend bodies). The `/buckets` `layout=column` envelope gains `locTable` — the demo's interned loc-name legend, present iff an `li` column is in the output. Columnar keeps the compact raw index (row mode keeps resolving names per bucket); consumers decode locally instead of a `/loc-table` round trip. |
