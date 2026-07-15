@@ -68,7 +68,11 @@ func colVal(cp *view.ColumnarPlayer, field string, i int) any {
 	case []int32:
 		return s[j]
 	case result.Coords:
-		return s[j]
+		// Box as result.Coord, matching how the row path boxes every
+		// Coords-derived scalar (firstHeight returns result.Coord) — the
+		// DeepEqual below compares dynamic types, and float32-vs-Coord is
+		// exactly the mismatch that only appears once BSPs provision hgt.
+		return result.Coord(s[j])
 	case []float64:
 		return s[j]
 	case []string:
@@ -94,9 +98,9 @@ func reconstructPlayers(cb *view.ColumnarBuckets, i int) map[string]map[string]a
 		pdata := make(map[string]any)
 		if colVal(cp, "x", i) != nil {
 			pdata[view.FieldPosition] = [3]result.Coord{
-				result.Coord(colVal(cp, "x", i).(float32)),
-				result.Coord(colVal(cp, "y", i).(float32)),
-				result.Coord(colVal(cp, "z", i).(float32)),
+				colVal(cp, "x", i).(result.Coord),
+				colVal(cp, "y", i).(result.Coord),
+				colVal(cp, "z", i).(result.Coord),
 			}
 		}
 		if colVal(cp, "vp", i) != nil {
@@ -107,9 +111,9 @@ func reconstructPlayers(cb *view.ColumnarBuckets, i int) map[string]map[string]a
 		}
 		if colVal(cp, "vx", i) != nil {
 			pdata[view.FieldVelocity] = [3]result.Coord{
-				result.Coord(colVal(cp, "vx", i).(float32)),
-				result.Coord(colVal(cp, "vy", i).(float32)),
-				result.Coord(colVal(cp, "vz", i).(float32)),
+				colVal(cp, "vx", i).(result.Coord),
+				colVal(cp, "vy", i).(result.Coord),
+				colVal(cp, "vz", i).(result.Coord),
 			}
 		}
 		for field := range cp.Cols {
