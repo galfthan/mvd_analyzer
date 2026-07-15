@@ -1000,13 +1000,29 @@ func TestAirgibs(t *testing.T) {
 	if status != 200 {
 		t.Fatalf("status = %d (%s)", status, body)
 	}
-	var arr []map[string]any
-	if err := json.Unmarshal(body, &arr); err != nil {
-		t.Fatalf("unmarshal: %v (%s)", err, body)
-	}
+	arr := unitsList(t, body, "airgibs", "ms")
 	if len(arr) != 1 || arr[0]["attacker"] != "bps" {
 		t.Errorf("airgibs = %s; want one bps hit", body)
 	}
+}
+
+// unitsList decodes a v56 {timeUnit, <key>: [...]} list envelope, checking the
+// timeUnit echo, and returns the named list.
+func unitsList(t *testing.T, body []byte, key, wantUnit string) []map[string]any {
+	t.Helper()
+	var env map[string]json.RawMessage
+	if err := json.Unmarshal(body, &env); err != nil {
+		t.Fatalf("unmarshal envelope: %v (%s)", err, body)
+	}
+	var unit string
+	if err := json.Unmarshal(env["timeUnit"], &unit); err != nil || unit != wantUnit {
+		t.Fatalf("timeUnit = %s, want %q (%s)", env["timeUnit"], wantUnit, body)
+	}
+	var arr []map[string]any
+	if err := json.Unmarshal(env[key], &arr); err != nil {
+		t.Fatalf("unmarshal %q list: %v (%s)", key, err, body)
+	}
+	return arr
 }
 
 func TestAirgibs_EmptyWithoutBSP(t *testing.T) {
@@ -1019,8 +1035,11 @@ func TestAirgibs_EmptyWithoutBSP(t *testing.T) {
 	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
 	defer srv.Close()
 	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
-	if status != 200 || strings.TrimSpace(string(body)) != "[]" {
-		t.Errorf("status = %d, body = %q; want 200 []", status, body)
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	if arr := unitsList(t, body, "airgibs", "ms"); len(arr) != 0 {
+		t.Errorf("body = %q; want an empty airgibs list", body)
 	}
 }
 
@@ -1204,8 +1223,7 @@ func TestChat_All(t *testing.T) {
 	if status != 200 {
 		t.Fatalf("status = %d (%s)", status, body)
 	}
-	var arr []map[string]any
-	_ = json.Unmarshal(body, &arr)
+	arr := unitsList(t, body, "messages", "ms")
 	// 3 chat/teamsay events (frag is filtered out by default types).
 	if len(arr) != 3 {
 		t.Errorf("len = %d; want 3 (body=%s)", len(arr), body)
@@ -1216,8 +1234,7 @@ func TestChat_PlayerFilter(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
 	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat?players=bps")
-	var arr []map[string]any
-	_ = json.Unmarshal(body, &arr)
+	arr := unitsList(t, body, "messages", "ms")
 	if len(arr) != 1 || arr[0]["player"] != "bps" {
 		t.Errorf("expected only bps; got %s", body)
 	}
@@ -1227,8 +1244,7 @@ func TestChat_TimeWindow(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
 	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat?from=15&to=100")
-	var arr []map[string]any
-	_ = json.Unmarshal(body, &arr)
+	arr := unitsList(t, body, "messages", "ms")
 	// only the teamsay at t=20 is in [15, 100].
 	if len(arr) != 1 || arr[0]["type"] != "teamsay" {
 		t.Errorf("expected only the teamsay; got %s", body)
@@ -1239,8 +1255,7 @@ func TestChat_TypesFilter(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
 	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat?types=teamsay")
-	var arr []map[string]any
-	_ = json.Unmarshal(body, &arr)
+	arr := unitsList(t, body, "messages", "ms")
 	if len(arr) != 1 || arr[0]["type"] != "teamsay" {
 		t.Errorf("expected one teamsay; got %s", body)
 	}
@@ -1250,15 +1265,14 @@ func TestBackpacks(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
 	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/backpacks")
-	var arr []map[string]any
-	_ = json.Unmarshal(body, &arr)
+	arr := unitsList(t, body, "backpacks", "ms")
 	if len(arr) != 2 {
 		t.Errorf("len = %d; want 2", len(arr))
 	}
 
 	// weapon=lg filter
 	body, _ = getRaw(t, srv.URL+"/v1/demos/gameId:42/backpacks?weapon=lg")
-	_ = json.Unmarshal(body, &arr)
+	arr = unitsList(t, body, "backpacks", "ms")
 	if len(arr) != 1 || arr[0]["weapon"] != "lg" {
 		t.Errorf("weapon=lg filter failed: %s", body)
 	}
@@ -1319,8 +1333,7 @@ func TestWeaponPickups_SourceFilter(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
 	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/weapon-pickups?source=backpack")
-	var arr []map[string]any
-	_ = json.Unmarshal(body, &arr)
+	arr := unitsList(t, body, "pickups", "ms")
 	if len(arr) != 1 || arr[0]["source"] != "backpack" {
 		t.Errorf("source=backpack: %s", body)
 	}

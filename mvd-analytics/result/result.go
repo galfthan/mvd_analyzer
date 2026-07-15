@@ -667,7 +667,27 @@ package result
 //     back to the shadow-health cap.
 //   - Corpus given/taken reconcile ~2.5× tighter (max |Δ| 16/15 vs 44/44);
 //     ewep/team bands unchanged (the victim-item one-frame window).
-const CurrentSchemaVersion = 55
+//
+// v56: REST time-unit selection (transport-surface only — no stored change).
+//   - Every demo endpoint carrying a MATCH-POSITION timestamp gains an
+//     optional `units=ms|s` query param and echoes a top-level `timeUnit`.
+//     Defaults are unchanged: each endpoint keeps its current native unit
+//     (the pass-throughs frags/damage/shots/chat/airgibs/backpacks/
+//     weapon-pickups/items-timeline/overview stay int32 ms; the derived
+//     views events/buckets-rows/state-at/stream-slice-envelope/loc-trails/
+//     items-summary stay float64 s), so an existing consumer that omits the
+//     param sees zero behaviour change beyond the additive `timeUnit` field.
+//     `units=s` renders an ms-native endpoint's timestamps as seconds;
+//     `units=ms` renders a seconds-native endpoint's as int ms — field NAMES
+//     never change. DENSE per-sample payloads always stay ms regardless
+//     (aim crosshair `t` / lgRamp `since`, stream-slice embedded entries,
+//     columnar buckets startMs/windowMs axis); /aim (no sparse match
+//     position) and /demoinfo (KTX units island) are ungoverned. The bare-
+//     array bodies (chat/airgibs/backpacks/weapon-pickups) gain a
+//     {timeUnit, <list>} envelope so the echo has a home. Stored result.*
+//     structs, qw-analyze/WASM output, and the golden corpus are unchanged
+//     (this bump only restamps schemaVersion).
+const CurrentSchemaVersion = 56
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

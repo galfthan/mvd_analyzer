@@ -337,6 +337,26 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "airgibs", url: "/v1/demos/gameId:42/airgibs", path: "/v1/demos/{id}/airgibs", status: 200},
 
 		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},
+		// units= param (schema v56): the governed time-carrying endpoints echo
+		// a top-level timeUnit and re-unit their MATCH-POSITION timestamps.
+		// units=s on ms-native endpoints (timestamps become float seconds):
+		{name: "frags-units-s", url: "/v1/demos/gameId:42/frags?units=s", path: "/v1/demos/{id}/frags", status: 200},
+		{name: "damage-units-s", url: "/v1/demos/gameId:42/damage?units=s", path: "/v1/demos/{id}/damage", status: 200},
+		{name: "shots-units-s", url: "/v1/demos/gameId:42/shots?units=s", path: "/v1/demos/{id}/shots", status: 200},
+		{name: "overview-units-s", url: "/v1/demos/gameId:42/overview?units=s", path: "/v1/demos/{id}/overview", status: 200},
+		{name: "chat-units-s", url: "/v1/demos/gameId:42/chat?units=s", path: "/v1/demos/{id}/chat", status: 200},
+		{name: "backpacks-units-s", url: "/v1/demos/gameId:42/backpacks?units=s", path: "/v1/demos/{id}/backpacks", status: 200},
+		{name: "weapon-pickups-units-s", url: "/v1/demos/gameId:42/weapon-pickups?units=s", path: "/v1/demos/{id}/weapon-pickups", status: 200},
+		{name: "airgibs-units-s", url: "/v1/demos/gameId:42/airgibs?units=s", path: "/v1/demos/{id}/airgibs", status: 200},
+		{name: "items-units-s", url: "/v1/demos/gameId:42/items?units=s", path: "/v1/demos/{id}/items", status: 200},
+		{name: "items-summary-units-s", url: "/v1/demos/gameId:42/items?summary=1&units=s", path: "/v1/demos/{id}/items", status: 200},
+		// units=ms on seconds-native endpoints (timestamps become int32 ms):
+		{name: "events-units-ms", url: "/v1/demos/gameId:42/events?units=ms", path: "/v1/demos/{id}/events", status: 200},
+		{name: "buckets-row-units-ms", url: "/v1/demos/gameId:42/buckets?windowMs=5000&layout=row&units=ms", path: "/v1/demos/{id}/buckets", status: 200},
+		{name: "state-at-units-ms", url: "/v1/demos/gameId:42/state-at?time=30&units=ms", path: "/v1/demos/{id}/state-at", status: 200},
+		{name: "stream-slice-units-ms", url: "/v1/demos/gameId:42/stream-slice?from=10&to=20&fields=h,a&units=ms", path: "/v1/demos/{id}/stream-slice", status: 200},
+		{name: "loc-trails-units-ms", url: "/v1/demos/gameId:42/loc-trails?minDwellMs=500&units=ms", path: "/v1/demos/{id}/loc-trails", status: 200},
+		{name: "err-units-invalid", url: "/v1/demos/gameId:42/frags?units=nope", path: "/v1/demos/{id}/frags", status: 400},
 
 		{name: "map-entities", url: "/v1/maps/dm3/entities", path: "/v1/maps/{map}/entities", status: 200},
 		{name: "map-entities-filtered", url: "/v1/maps/dm3/entities?types=item&kinds=armor,weapon", path: "/v1/maps/{map}/entities", status: 200},

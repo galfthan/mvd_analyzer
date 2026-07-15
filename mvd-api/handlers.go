@@ -233,7 +233,12 @@ func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	writeJSON(w, http.StatusOK, BuildOverview(res))
+	p := newQP(r.URL.Query())
+	units := p.Units(view.UnitMs)
+	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	writeJSON(w, http.StatusOK, OverviewUnits(BuildOverview(res), units))
 }
 
 // handleMetadata: GET /v1/demos/{id}/metadata — full server cvars +
@@ -302,6 +307,7 @@ func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 		To:      p.Sec("to", 0),
 		Summary: p.Bool("summary"),
 	}
+	units := p.Units(view.UnitMs)
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
@@ -310,7 +316,7 @@ func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 		s.writeUnavailable(w, r, err, "frags_unavailable", "this demo has no frag log")
 		return
 	}
-	writeJSON(w, http.StatusOK, out)
+	writeJSON(w, http.StatusOK, view.FragsUnits(out, units))
 }
 
 // handleDamage: GET /v1/demos/{id}/damage — per-hit damage log +
@@ -358,6 +364,7 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 		Summary: p.Bool("summary"),
 		Dmg:     p.Dmg(),
 	}
+	units := p.Units(view.UnitMs)
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
@@ -398,7 +405,7 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 			"this demo has no damage data (no KTX mvdhidden_dmgdone stream)")
 		return
 	}
-	writeJSON(w, http.StatusOK, out)
+	writeJSON(w, http.StatusOK, view.DamageUnits(out, units))
 }
 
 // handleShots: GET /v1/demos/{id}/shots — the per-fire weapon stream
@@ -415,13 +422,18 @@ func (s *server) handleShots(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	p := newQP(r.URL.Query())
+	units := p.Units(view.UnitMs)
+	if writeInvalidParam(w, p.Err()) {
+		return
+	}
 	sh, err := view.Shots(res)
 	if err != nil {
 		s.writeUnavailable(w, r, err, "shots_unavailable",
 			"this demo has no shot data (no weapon fires decoded)")
 		return
 	}
-	writeJSON(w, http.StatusOK, sh)
+	writeJSON(w, http.StatusOK, view.ShotsUnits(sh, units))
 }
 
 // handleAim: GET /v1/demos/{id}/aim — per-player aim analysis (result.Aim):
@@ -494,10 +506,11 @@ func (s *server) handleChat(w http.ResponseWriter, r *http.Request) {
 		Players: p.CSV("players"),
 		Types:   p.CSV("types"),
 	}
+	units := p.Units(view.UnitMs)
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
-	writeJSON(w, http.StatusOK, view.Chat(res, opts))
+	writeJSON(w, http.StatusOK, view.ChatUnits(view.Chat(res, opts), units))
 }
 
 // handleDemoInfo: GET /v1/demos/{id}/demoinfo — KTX demoinfo blob
@@ -538,10 +551,11 @@ func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 		From:    p.Sec("from", 0),
 		To:      p.Sec("to", 0),
 	}
+	units := p.Units(view.UnitMs)
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
-	writeJSON(w, http.StatusOK, view.Backpacks(res, opts))
+	writeJSON(w, http.StatusOK, view.BackpacksUnits(view.Backpacks(res, opts), units))
 }
 
 // handleItems: GET /v1/demos/{id}/items — per-item pickup/respawn
@@ -585,14 +599,24 @@ func (s *server) handleItems(w http.ResponseWriter, r *http.Request) {
 		To:      p.Sec("to", 0),
 	}
 	summary := p.Bool("summary")
+	// Native unit differs by shape: the full phase timeline is ms-native
+	// (availableFrom/takenAt/respawnAt are stored ms), the summary firstTake.t
+	// is seconds-native. units= overrides either; timeUnit echoes the effective
+	// unit so the shape stays self-describing.
+	var units view.TimeUnit
+	if summary {
+		units = p.Units(view.UnitSec)
+	} else {
+		units = p.Units(view.UnitMs)
+	}
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
 	if summary {
-		writeJSON(w, http.StatusOK, view.ItemsSummary(res, opts))
+		writeJSON(w, http.StatusOK, view.ItemsSummaryUnits(view.ItemsSummary(res, opts), units))
 		return
 	}
-	writeJSON(w, http.StatusOK, view.Items(res, opts))
+	writeJSON(w, http.StatusOK, view.ItemsUnits(view.Items(res, opts), units))
 }
 
 // handleWeaponPickups: GET /v1/demos/{id}/weapon-pickups — slot-weapon
@@ -619,6 +643,7 @@ func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
 		From:    p.Sec("from", 0),
 		To:      p.Sec("to", 0),
 	}
+	units := p.Units(view.UnitMs)
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
@@ -631,7 +656,7 @@ func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
 			fmt.Sprintf("unknown source %q; valid: world, backpack, unknown", opts.Source))
 		return
 	}
-	writeJSON(w, http.StatusOK, view.WeaponPickups(res, opts))
+	writeJSON(w, http.StatusOK, view.WeaponPickupsUnits(view.WeaponPickups(res, opts), units))
 }
 
 func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
@@ -651,6 +676,9 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 		LocIndex:    p.LocIndex(),
 		Layout:      p.Layout(),
 	}
+	// units governs the row layout's per-bucket `t` only; the columnar layout's
+	// startMs/windowMs axis is a dense ms-always exception (no timeUnit echo).
+	units := p.Units(view.UnitSec)
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
@@ -666,7 +694,7 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
-	writeJSON(w, http.StatusOK, bv)
+	writeJSON(w, http.StatusOK, view.BucketsUnits(bv, units))
 }
 
 func (s *server) handleEvents(w http.ResponseWriter, r *http.Request) {
@@ -682,6 +710,7 @@ func (s *server) handleEvents(w http.ResponseWriter, r *http.Request) {
 		Types:     p.CSV("types"),
 		LocIndex:  p.LocIndex(),
 	}
+	units := p.Units(view.UnitSec)
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
@@ -689,7 +718,7 @@ func (s *server) handleEvents(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
-	writeJSON(w, http.StatusOK, ev)
+	writeJSON(w, http.StatusOK, view.EventsUnits(ev, units))
 }
 
 func (s *server) handleStreamSlice(w http.ResponseWriter, r *http.Request) {
@@ -705,6 +734,7 @@ func (s *server) handleStreamSlice(w http.ResponseWriter, r *http.Request) {
 		Fields:    p.CSV("fields"),
 		LocIndex:  p.LocIndex(),
 	}
+	units := p.Units(view.UnitSec)
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
@@ -712,7 +742,7 @@ func (s *server) handleStreamSlice(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
-	writeJSON(w, http.StatusOK, sl)
+	writeJSON(w, http.StatusOK, view.StreamSliceUnits(sl, units))
 }
 
 func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
@@ -732,6 +762,7 @@ func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
 		Fields:   p.CSV("fields"),
 		LocIndex: p.LocIndex(),
 	}
+	units := p.Units(view.UnitSec)
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
@@ -739,7 +770,7 @@ func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
-	writeJSON(w, http.StatusOK, sa)
+	writeJSON(w, http.StatusOK, view.StateAtUnits(sa, units))
 }
 
 // handleLOS: GET /v1/demos/{id}/los — per-player line-of-sight intervals.
@@ -857,6 +888,7 @@ func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 		Players:    p.CSV("players"),
 		LocIndex:   p.LocIndex(),
 	}
+	units := p.Units(view.UnitSec)
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
@@ -864,7 +896,7 @@ func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
-	writeJSON(w, http.StatusOK, tr)
+	writeJSON(w, http.StatusOK, view.LocTrailsUnits(tr, units))
 }
 
 // handleLocTable: GET /v1/demos/{id}/loc-table — the interned loc-name
@@ -918,11 +950,16 @@ func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	p := newQP(r.URL.Query())
+	units := p.Units(view.UnitMs)
+	if writeInvalidParam(w, p.Err()) {
+		return
+	}
 	airgibs, err := view.Airgibs(res)
 	if err != nil {
 		s.writeUnavailable(w, r, err, "airgibs_unavailable",
 			"this demo has no timeline analysis")
 		return
 	}
-	writeJSON(w, http.StatusOK, airgibs)
+	writeJSON(w, http.StatusOK, view.AirgibsUnits(airgibs, units))
 }

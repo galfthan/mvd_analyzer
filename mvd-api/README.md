@@ -179,7 +179,8 @@ systemd `EnvironmentFile` that carries the secrets machine-side.
 
 > **Building a frontend or tool?** [`API.md`](API.md) is the detailed
 > HTTP reference — per-endpoint parameters, response semantics, units
-> (the seconds-vs-milliseconds gotcha), caching, and task recipes. A
+> (native defaults, the `units=ms|s` override + `timeUnit` echo),
+> caching, and task recipes. A
 > machine-readable OpenAPI 3.1 spec is served at `/openapi.yaml` (drift
 > tests pin it to the code and validate its response schemas against the
 > golden corpus), browsable at `/docs`. The table below is just the
@@ -259,9 +260,10 @@ the code, so it can't go stale. [`API.md`](API.md) is the high-level
 guide around it:
 
 - **Getting started** — demo addressing, auto-load, the typical flow.
-- **Query conventions + units** — the seconds-vs-milliseconds split
-  (view envelopes are seconds; raw stream entries, the columnar grid,
-  and all `/overview` times are int32 ms).
+- **Query conventions + units** — per-endpoint native time units
+  (derived views seconds, pass-throughs int32 ms), the `units=ms|s`
+  override + `timeUnit` echo (schema v56), and the always-ms dense
+  payloads (raw stream entries, the columnar grid, aim samples).
 - **Caching, errors, auth, CORS** — the cross-cutting behaviour.
 - **Choosing the right endpoint** — state-at vs buckets vs stream-slice
   vs events.

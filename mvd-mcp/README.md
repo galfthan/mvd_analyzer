@@ -197,6 +197,16 @@ infers their JSON Schemas from struct tags and exposes them via
 `tools/list`. Source of truth:
 [`mcp_backend.go`](mcp_backend.go).
 
+Every tool that maps to a time-carrying demo endpoint (getOverview,
+getFrags, getDamage, getChat, getBackpacks, getItems, getWeaponPickups,
+getBuckets, getEvents, getStreamSlice, getStateAt, getLocTrails) also
+takes an optional `units: "ms"|"s"` input, forwarded to the REST
+`units` param (schema v56): omitted = the endpoint's native unit, and
+the response echoes the effective unit in `timeUnit`. See
+[mvd-api/API.md §2.1](../mvd-api/API.md) for the native defaults and
+the always-ms dense-payload exception. The per-tool tables below omit
+this shared field.
+
 #### `searchGames(...)`
 
 All fields optional; an empty filter returns the most recent matches.

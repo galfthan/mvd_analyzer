@@ -65,25 +65,69 @@ reachable without an API key.
 
 ## 2. Conventions (read this once)
 
-### 2.1 Time units — the one real gotcha
+### 2.1 Time units — native defaults, and the `units` override
 
-The API mixes two time units **on purpose**, and frontend code must
-track which is which:
+Each endpoint carrying a **match-position** timestamp has a **native
+unit** — the unit it emits when you pass no `units` param. Two families:
 
-| Where | Unit | Examples (real output) |
-|---|---|---|
-| **Query inputs** `from` / `to` / `time` | **seconds** (float) | `?from=105&to=110`, `?time=105` |
-| **View envelope** times | **seconds** (float) | `events[].t=101.298`, `state-at.t=105`, `stream-slice.startTime=105`, row-bucket `.t=120`, loc-trail `s`/`e`=`1.015` |
-| **`/overview`** times | **int32 milliseconds** | `duration`, `matchStart`, `matchEnd`, `topStreaks[].start`/`.duration`, `topPowerups[].start`/`.duration`, `timing.*` |
-| **Raw stream entries** embedded in `/stream-slice` | **int32 milliseconds** | `h:[{ "t":105000, "v":-7 }]`, `pos.t:[105001,…]`, `rl:[{ "s":105000,"e":105182 }]` |
-| **Columnar buckets** axis | **int32 milliseconds** | `startMs`, `windowMs`, `time(i)=startMs+i*windowMs` |
+| Native unit | Endpoints (match-position fields) |
+|---|---|
+| **int32 milliseconds** | `/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, `/items` (full phase timeline — `availableFrom`/`takenAt`/`respawnAt`), `/overview` (`duration`, `matchStart`, `matchEnd`, `topStreaks[].start`/`.duration`, `topPowerups[].start`/`.duration`) |
+| **float64 seconds** | `/events` (`t`, plus `detail.endTime`/`detail.duration`), `/buckets?layout=row` (each bucket's `t`), `/state-at` (`t`), `/stream-slice` (envelope `startTime`/`endTime`), `/loc-trails` (each residence `s`/`e`), `/items?summary=true` (`firstTake.t`) |
 
-Rule of thumb: anything the **view layer synthesises** (event lists,
-window bounds, trail dwell spans, row-bucket timestamps) is **seconds**;
-anything copied **verbatim from the stored schema** (the change-stream /
-interval / position arrays, the columnar grid) is **int32 ms**. The
-underlying schema is all int32 ms — see RESULT_SCHEMA.md §"Time units".
-Scale ms→s by `* 0.001`.
+**Override with `units=ms|s`.** Any governed endpoint accepts an
+optional `units` param (schema v56). `units=s` renders an ms-native
+endpoint's match-position timestamps as float64 **seconds**; `units=ms`
+renders a seconds-native endpoint's as int32 **milliseconds**. Field
+names never change — `time` stays `time`, `t` stays `t`; only the
+number's unit/type changes. Requesting the native unit is a no-op, an
+invalid value is `400 invalid_param`. `ms→s` is `float64(ms)/1000`;
+`s→ms` is `round(sec*1000)` and is lossless (the seconds values
+originate from int32 ms).
+
+**Self-describing responses.** Every governed response echoes a
+top-level `"timeUnit": "ms"|"s"` naming the effective unit, so a
+consumer never has to guess. The four formerly bare-array endpoints now
+wrap their array in an object to carry it: `/chat` →
+`{timeUnit, messages:[…]}`, `/airgibs` → `{timeUnit, airgibs:[…]}`,
+`/backpacks` → `{timeUnit, backpacks:[…]}`, `/weapon-pickups` →
+`{timeUnit, pickups:[…]}`.
+
+**Dense per-sample payloads are always int32 ms — `units` does not
+touch them.** By design these stay ms regardless of the param, and they
+carry no `timeUnit` of their own:
+
+| Where | Always-ms fields |
+|---|---|
+| Raw stream entries embedded in `/stream-slice` | `h:[{ "t":105000,… }]`, `pos.t:[…]`, `rl:[{ "s":…,"e":… }]` (the change / interval / position tracks — only the envelope `startTime`/`endTime` are governed) |
+| `/aim` samples | crosshair `t`, `lgRamp` `since` |
+| Columnar `/buckets` axis | `startMs`, `windowMs` (`time(i)=startMs+i*windowMs`) — `windowMs` is a window *size*, not a position |
+
+Consequences of the dense rule:
+
+- **`/aim` is ungoverned** — it has no sparse match-position field (only
+  dense samples), so it takes no `units` param and echoes no `timeUnit`.
+- **`/buckets?layout=column`** (the **default** layout) is
+  dense-always-ms: it does not convert and carries no `timeUnit`. Only
+  `layout=row` is governed. (In row mode `windowMs`, the window size,
+  also stays ms; only the bucket `t` position converts.)
+- **`/items` native unit is shape-dependent**: the full timeline is
+  ms-native, the `summary=true` shape (`firstTake.t`) is seconds-native.
+  `units` overrides either and `timeUnit` echoes the effective unit.
+- **`/overview`'s `timing` block is a wall-clock island** and never
+  converts: its fields are explicitly `*Ms`-named (`demoOffset`,
+  `demoStartUnixMs`, `demoStartAccuracyMs`, `pauses[].atMs`/`.durationMs`).
+- **`/demoinfo` is untouched** — KTX's own clock, integer seconds (see
+  RESULT_SCHEMA.md §DemoInfoResult); not a pipeline match-position time.
+- **`/region-control` is ungoverned** — its response is bucket-state
+  strings + percentages, no match-position timestamp.
+
+**Escape hatch — raw stored ms.** The generic accessor
+`GET /v1/demos/{id}/artifacts/{name}` serves the raw stored result
+sections in **int32 ms as-is**; it takes no `units` param and echoes no
+`timeUnit`. Use it when you always want the stored millisecond values,
+independent of any view-layer unit choice. The underlying schema is all
+int32 ms — see RESULT_SCHEMA.md §"Time units".
 
 ### 2.2 Query parameters
 
@@ -122,6 +166,12 @@ weapon / item / kind / loc / layout tokens.
   `422 bounded_unavailable`. Unfiltered bounded summaries source the
   per-player figures from KTX's exact scoreboard (`boundedSource: "ktx"`).
 - **`time`** — match-relative **seconds**; **required** on `/state-at`.
+- **`units`** (`ms`/`s`) — overrides the response's match-position time
+  unit; invalid value → `400 invalid_param`. Governs the endpoints in
+  §2.1; ungoverned on `/aim`, `/buckets?layout=column`,
+  `/region-control`, `/demoinfo`, and `/artifacts/{name}`. Governs
+  **output rendering only** — the query inputs `from`/`to`/`time` are
+  always seconds regardless.
 - **`windowMs`** — integer milliseconds (`/buckets`, `/region-control`).
   ⚠️ **Defaults to 50 ms when omitted** — on a 20-minute match that is
   ~24,000 windows per field per player. Always pass an explicit
