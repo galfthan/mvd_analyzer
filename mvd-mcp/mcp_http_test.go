@@ -21,10 +21,10 @@ const (
 	userKey    = "qwmvd_userkey"
 )
 
-// stubAPI is a fake auth-enabled mvd-api: it answers one tool endpoint
-// (/v1/demos/{id}/overview), 401ing unless the request carries a known key.
-// It records the Authorization header seen on the LAST proxied overview call
-// so a test can assert which key was forwarded.
+// stubAPI is a fake auth-enabled mvd-api: it answers two tool endpoints
+// (/v1/demos/{id}/overview and /v1/games/search), 401ing unless the request
+// carries a known key. It records the Authorization header seen on the LAST
+// proxied overview call so a test can assert which key was forwarded.
 type stubAPI struct {
 	overviewAuth atomic.Value // string: Authorization on the last overview call
 }
@@ -47,6 +47,16 @@ func (s *stubAPI) handler() http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"map":"dm6","schemaVersion":50}`))
+	})
+	mux.HandleFunc("GET /v1/games/search", func(w http.ResponseWriter, r *http.Request) {
+		if k := bearerToken(r); k != serviceKey && k != userKey {
+			w.Header().Set("WWW-Authenticate", "Bearer")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"limit":20,"offset":0,"count":0,"games":[]}`))
 	})
 	return mux
 }
@@ -79,8 +89,7 @@ func newMCPTestServer(t *testing.T) (*httptest.Server, *stubAPI) {
 	t.Cleanup(apiSrv.Close)
 
 	logger := slog.New(slog.NewTextHandler(&testWriter{t}, &slog.HandlerOptions{Level: slog.LevelError}))
-	search := &fakeSearcher{}
-	handler := newStreamableHandler(newGetServer(apiSrv.URL, serviceKey, 5*time.Second, search), logger)
+	handler := newStreamableHandler(newGetServer(apiSrv.URL, serviceKey, 5*time.Second), logger)
 
 	mux := http.NewServeMux()
 	mux.Handle(mcpPath, handler)
@@ -184,8 +193,10 @@ func TestHTTP_ForeignBearer_Ignored(t *testing.T) {
 	}
 }
 
-// TestHTTP_AnonymousSearch proves the Supabase search tool — which does not
-// transit mvd-api — is callable without any Authorization header.
+// TestHTTP_AnonymousSearch proves searchGames is callable without any client
+// Authorization header: it proxies to mvd-api's GET /v1/games/search like
+// every other tool, and the shim supplies its own service key upstream, so an
+// anonymous MCP caller still gets an authenticated search.
 func TestHTTP_AnonymousSearch(t *testing.T) {
 	srv, _ := newMCPTestServer(t)
 
@@ -271,7 +282,7 @@ func TestHTTP_ErrorSurfacesAPIMessage(t *testing.T) {
 	defer api.Close()
 
 	logger := slog.New(slog.NewTextHandler(&testWriter{t}, &slog.HandlerOptions{Level: slog.LevelError}))
-	handler := newStreamableHandler(newGetServer(api.URL, serviceKey, 5*time.Second, nil), logger)
+	handler := newStreamableHandler(newGetServer(api.URL, serviceKey, 5*time.Second), logger)
 	mux := http.NewServeMux()
 	mux.Handle(mcpPath, handler)
 	mux.Handle(mcpPath+"/", handler)

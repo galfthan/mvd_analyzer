@@ -77,11 +77,7 @@ func runHTTP(addr, apiURL, apiKey string, timeout time.Duration, logger *slog.Lo
 		logger.Warn("MVD_API_KEY is not set; proxied calls carry no key and will 401 against an auth-enabled mvd-api")
 	}
 
-	// One searcher shared across all sessions: it holds no per-request state
-	// (the hub anon key is public), so there is nothing per-key to isolate.
-	search := newSupabaseClient(timeout)
-
-	handler := newStreamableHandler(newGetServer(apiURL, apiKey, timeout, search), logger)
+	handler := newStreamableHandler(newGetServer(apiURL, apiKey, timeout), logger)
 
 	mux := http.NewServeMux()
 	// Serve both "/mcp" and "/mcp/" so a client that appends a slash still hits
@@ -131,16 +127,18 @@ func runHTTP(addr, apiURL, apiKey string, timeout time.Duration, logger *slog.Lo
 // newGetServer returns the per-request server factory for HTTP mode: each
 // request gets a fresh mcp.Server whose proxy backend forwards the service
 // key — or the caller's own qwmvd_ bearer when one is presented — to mvd-api,
-// which is the single point of key validation. Shared by runHTTP and the
-// tests so both exercise the same key selection.
-func newGetServer(apiURL, apiKey string, timeout time.Duration, search searcher) func(*http.Request) *mcp.Server {
+// which is the single point of key validation. The backend also serves as the
+// searcher (searchGames proxies to mvd-api too), so search inherits the same
+// per-request key. Shared by runHTTP and the tests so both exercise the same
+// key selection.
+func newGetServer(apiURL, apiKey string, timeout time.Duration) func(*http.Request) *mcp.Server {
 	return func(r *http.Request) *mcp.Server {
 		key := apiKey
 		if t := bearerToken(r); strings.HasPrefix(t, apiKeyPrefix) {
 			key = t
 		}
 		backend := newProxyBackend(apiURL, key, timeout)
-		return newMCPServer(backend, search)
+		return newMCPServer(backend, backend)
 	}
 }
 

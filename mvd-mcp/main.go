@@ -1,8 +1,8 @@
 // mvd-mcp is an MCP server that forwards every tool call to a running
-// mvd-api. The shim is intentionally minimal: its only qwanalytics
-// dependency is the stdlib-only hubfetch package (shared with mvd-api so
-// searchGames and GET /v1/games/search answer discovery identically), so
-// the distributable binary stays small (~5 MB) and stable against
+// mvd-api — including searchGames, which proxies to GET /v1/games/search.
+// The shim is intentionally minimal: it imports no qwanalytics code, holds
+// no hub configuration or secrets, and has a single egress point (mvd-api),
+// so the distributable binary stays small (~5 MB) and stable against
 // analytics-side changes.
 //
 // It has two transports:
@@ -122,8 +122,7 @@ func run(args []string) error {
 	logger.Info("mvd-mcp starting", "api", *apiURL, "label", *label, "keySet", apiKey != "")
 
 	backend := newProxyBackend(*apiURL, bearer, timeout)
-	search := newSupabaseClient(timeout)
-	srv := newMCPServer(backend, search)
+	srv := newMCPServer(backend, backend)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -149,13 +148,14 @@ func run(args []string) error {
 }
 
 // newMCPServer builds an mcp.Server with every tool registered against the
-// given proxy backend and hub searcher. Shared by stdio mode (one server for
-// the process lifetime) and HTTP mode (one per request, with a per-request
-// backend carrying the caller's key).
+// given proxy backend and searcher — normally the same *proxyBackend, since
+// searchGames proxies to mvd-api like every other tool. Shared by stdio mode
+// (one server for the process lifetime) and HTTP mode (one per request, with
+// a per-request backend carrying the caller's key).
 func newMCPServer(backend MCPBackend, search searcher) *mcp.Server {
 	srv := mcp.NewServer(&mcp.Implementation{
 		Name:    serverName,
-		Title:   "QuakeWorld MVD analytics (proxy to mvd-api + hub Supabase search)",
+		Title:   "QuakeWorld MVD analytics (proxy to mvd-api)",
 		Version: GitTag,
 	}, nil)
 	registerTools(srv, backend, search)

@@ -7,6 +7,16 @@ detail.
 
 ## 2026-07-14 (tweak-api)
 
+- **MCP `searchGames` now routes through `mvd-api` (operator-facing, no
+  schema bump).** The shim's one remaining direct-to-hub tool now proxies to
+  `GET /v1/games/search` like every other tool, so `mvd-mcp` has a single
+  egress point (`mvd-api`), holds no hub configuration or secrets, and no
+  longer imports `hubfetch` (or any `mvd-analytics` code at all). **Deploy
+  change:** drop `HUB_SUPABASE_URL` / `HUB_SUPABASE_KEY` from `mvd-mcp`'s
+  `mcp.env` — its only secret is now `MVD_API_KEY`. The tool's request shape
+  and `{limit, offset, count, total?, games}` response are unchanged; a hub
+  failure surfaces as the API's `502 hub_upstream` message.
+
 - **Hub URL / key / CDN moved out of the source into the environment
   (operator-facing, no schema bump).** `hubfetch` no longer compiles in the
   Supabase URL, anon key, and CDN base; `NewClient()` reads
@@ -15,9 +25,10 @@ detail.
   examples. When unset the client returns a clear "hub not configured"
   error on use: `mvd-api` still starts and serves its local cache, but a
   cache miss and `GET /v1/games/search` return `502 hub_upstream`, and the
-  MCP `searchGames` tool reports the same. **Deploy change:** add the three
-  vars to `mvd-api`'s `secrets.env` and (for `searchGames`) `mvd-mcp`'s
-  `mcp.env` — see `deploy/README.md`. Golden-corpus tests are unaffected
+  MCP `searchGames` tool — which proxies to that endpoint — surfaces the
+  same 502. **Deploy change:** add the three vars to `mvd-api`'s
+  `secrets.env` only; `mvd-mcp` needs no hub vars (it routes search through
+  the API) — see `deploy/README.md`. Golden-corpus tests are unaffected
   offline (they read the committed cache); only a cold cache needs the vars.
 
 - **Game discovery over REST: `GET /v1/games/search` (no schema bump).**

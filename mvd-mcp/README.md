@@ -41,8 +41,7 @@ mvd-mcp version
 
 | Env var | Description |
 |---|---|
-| `MVD_API_KEY` | API key forwarded as `Authorization: Bearer` on every proxied `mvd-api` call. Required (as an operator-issued **service** key) when the target `mvd-api` runs with `-auth-dir`; unnecessary against a local no-auth `mvd-api`. An env var, not a flag, so the secret never shows in `ps`. |
-| `HUB_SUPABASE_URL`, `HUB_SUPABASE_KEY` | hub.quakeworld.nu connection for `searchGames`. That tool queries the hub directly (it does not proxy through `mvd-api`), so the shim needs the PostgREST `v1_games` URL and the public Supabase anon key. Unset → `searchGames` returns "hub not configured"; every other (proxied) tool is unaffected. `HUB_CDN_URL` is not used by the shim. |
+| `MVD_API_KEY` | API key forwarded as `Authorization: Bearer` on every proxied `mvd-api` call. Required (as an operator-issued **service** key) when the target `mvd-api` runs with `-auth-dir`; unnecessary against a local no-auth `mvd-api`. An env var, not a flag, so the secret never shows in `ps`. This is the shim's **only** configuration secret — it needs no hub credentials, since `searchGames` proxies to `mvd-api` too. |
 
 ## Tool surface
 
@@ -56,7 +55,7 @@ vocabulary, and the reducer registry.
 
 | Tool | Backing |
 |---|---|
-| `searchGames` | hub.quakeworld.nu Supabase (direct) |
+| `searchGames` | `mvd-api` `GET /v1/games/search` |
 | `loadDemo` | `mvd-api` `POST /v1/demos/{id}` |
 | `getOverview` | `mvd-api` `GET /v1/demos/{id}/overview` |
 | `getDemoInfo` | `mvd-api` `GET /v1/demos/{id}/demoinfo` |
@@ -570,18 +569,19 @@ materialised on demand (first call may be slow). No filters — for
 filtered reads use the curated tools. Errors with `artifact_unknown`
 (HTTP 404) for an unknown or non-servable name.
 
-### Why search bypasses mvd-api
+### Search routes through mvd-api
 
 Discovery (finding demos by player names, teams, map, etc.) is
-hub.quakeworld.nu's job — `mvd-mcp` queries its public Supabase
-endpoint directly, the same way the web frontend does. `mvd-api` is
-narrowly responsible for "given a known demoId, fetch the bytes,
-parse, cache, and serve analytics views." We don't shadow-host hub
-search.
+hub.quakeworld.nu's data, but the shim does **not** talk to the hub
+directly. `searchGames` proxies to `mvd-api`'s `GET /v1/games/search`
+like every other tool, so `mvd-api` is the single egress point and the
+only place the hub connection (URL + anon key) is configured. The shim
+holds no hub secrets and needs no hub env vars.
 
-The Supabase anon key is public (shipped in the web bundle) and the
-request shape mirrors the web's exactly, so there's no second source
-of truth for the search semantics.
+This was once the one exception — the shim queried the hub's public
+Supabase endpoint itself — but that split meant two code paths to the
+hub and hub credentials in two places. Now that `mvd-api` owns the
+search endpoint, the shim is a uniform proxy: one backend, one key.
 
 ## Local MCP
 
@@ -616,8 +616,9 @@ make build-all-platforms                    # everything above + mvd-api targets
 ## Typical session shape
 
 1. `searchGames({player: "bps", map: "dm6"})` → list of recent
-   matches with rosters, scores, dates — directly from the hub. Cheap.
-   No `mvd-api` round-trip; agent can filter / rank from the rows.
+   matches with rosters, scores, dates from the hub catalog (via
+   `mvd-api`'s `GET /v1/games/search`). Cheap — no demo parse; the
+   agent can filter / rank from the rows.
 2. `loadDemo({gameId: 12345})` → tells `mvd-api` to fetch + parse +
    cache. Slow only on cold demos.
 3. `getOverview` / `getBuckets` / `getStateAt` / ... → analytics for

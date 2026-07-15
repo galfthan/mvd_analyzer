@@ -9,13 +9,12 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// registerTools wires every MCP tool onto the given server. Tools
-// that act on a single demo go through `b` (the mvd-api proxy);
-// `searchGames` goes through `sr` (a hub.quakeworld.nu Supabase client).
-// The search query itself lives in the shared hubfetch package, so the
-// MCP shim and mvd-api's GET /v1/games/search answer discovery
-// identically; the shim keeps its own client only so a stdio session can
-// search without a running mvd-api.
+// registerTools wires every MCP tool onto the given server. Tools that act
+// on a single demo go through `b` (the mvd-api proxy); `searchGames` goes
+// through `sr`, which proxies to mvd-api's GET /v1/games/search — normally
+// the same *proxyBackend as `b`. mvd-api owns the hub connection, so the
+// shim needs no hub configuration and has a single egress point. The seam
+// stays a distinct interface only so tool tests can inject a fake searcher.
 //
 // All view-shaped tool outputs are opaque JSON pass-through; only
 // LoadDemo is typed, because consumers need to extract `demoId`

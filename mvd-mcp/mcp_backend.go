@@ -240,10 +240,10 @@ type GetArtifactInput struct {
 	Name   string `json:"name" jsonschema:"artifact name from listArtifacts (e.g. frag, damage, loc-graph, los). Only 'servable' artifacts are reachable"`
 }
 
-// SearchGamesInput searches hub.quakeworld.nu's Supabase. The same
-// search is exposed over REST as GET /v1/games/search (both share the
-// hubfetch implementation). All fields optional; an empty filter returns
-// the most recent matches.
+// SearchGamesInput searches hub.quakeworld.nu's game catalog. It is
+// forwarded verbatim to mvd-api's GET /v1/games/search, which owns the hub
+// connection. All fields optional; an empty filter returns the most recent
+// matches.
 type SearchGamesInput struct {
 	Players  []string `json:"players,omitempty"  jsonschema:"player names to match (FTS on players_fts, AND'd across multiple)"`
 	Teams    []string `json:"teams,omitempty"    jsonschema:"team names that must appear in team_names (contains)"`

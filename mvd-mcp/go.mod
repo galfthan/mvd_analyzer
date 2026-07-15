@@ -5,7 +5,6 @@ go 1.25.0
 require (
 	github.com/google/jsonschema-go v0.4.3
 	github.com/modelcontextprotocol/go-sdk v1.6.0
-	github.com/mvd-analyzer/mvd-analytics v0.0.0
 )
 
 require (
@@ -15,5 +14,3 @@ require (
 	golang.org/x/oauth2 v0.35.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 )
-
-replace github.com/mvd-analyzer/mvd-analytics => ../mvd-analytics

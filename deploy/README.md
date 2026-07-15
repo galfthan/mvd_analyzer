@@ -91,18 +91,15 @@ sudo chmod 600 /etc/mvd/secrets.env
 
 mvd-mcp authenticates to mvd-api with one operator-issued **service**
 key (higher rate class). Issue it with the CLI (not the portal) and put
-it in `/etc/mvd/mcp.env`, which `mvd-mcp.service` reads:
+it in `/etc/mvd/mcp.env`, which `mvd-mcp.service` reads. That key is the
+shim's only secret — every tool (including `searchGames`, which proxies to
+`GET /v1/games/search`) routes through mvd-api, so no hub vars go here:
 
 ```sh
 sudo -u mvd /opt/mvd/bin/mvd-api keys issue \
     -auth-dir /opt/mvd/auth -service -note "mvd-mcp"
 sudo tee /etc/mvd/mcp.env >/dev/null <<'EOF'
 MVD_API_KEY=qwmvd_…
-# The searchGames tool queries the hub directly (not via mvd-api), so the
-# shim needs the same hub connection vars as secrets.env. HUB_CDN_URL is
-# not used by search and may be omitted here.
-HUB_SUPABASE_URL=https://<project>.supabase.co/rest/v1/v1_games
-HUB_SUPABASE_KEY=your-supabase-anon-key
 EOF
 sudo chmod 600 /etc/mvd/mcp.env
 ```
