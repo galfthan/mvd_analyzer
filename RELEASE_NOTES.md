@@ -7,31 +7,6 @@ detail.
 
 ## 2026-07-14 (tweak-api)
 
-- **REST/MCP time fields unified to seconds (schema v56, BREAKING for the
-  affected endpoints).** Nine curated endpoints were raw pass-throughs that
-  leaked the stored int32-millisecond timestamps onto the HTTP surface. They
-  now follow the same rule as `/events` and `/buckets`:
-  - **`/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`, `/backpacks`** —
-    the primary `time` field is renamed **`t`** and served in **float
-    seconds** (damage `telefrags[]`/`stomps[]` positional-kill times too).
-  - **`/weapon-pickups`** — `time`→`t`; `nextDeathTime` and `dropTime` keep
-    their names but become **seconds**.
-  - **`/items`** — phase `availableFrom` / `takenAt` / `respawnAt` become
-    **seconds** (names kept).
-  - **`/aim`** — the dense per-fire sample columns stay int32 **ms** (a
-    dense-payload, not a match position) but are renamed to explicit-`Ms`
-    names so they never collide with the seconds `t`: crosshair `t`→**`tMs`**,
-    lgRamp `since`→**`sinceMs`**.
-  - The generic `/artifacts/{name}` accessor serves the **same seconds view
-    shape** for the sections that also have a curated endpoint
-    (frag/damage/shots/aim/items/backpacks/weapon-pickups); the raw
-    stored-structure artifacts (match/messages/timeline/map-entities) stay
-    ms, like `/overview`.
-  - **The stored Result is unchanged** — `qw-analyze` / WASM still emit int32
-    ms, and the WASM frontend (which reads the raw Result) is unaffected. The
-    change is view-layer only; the OpenAPI response schemas, `API.md` §2.1,
-    and `RESULT_SCHEMA.md`'s stored-vs-view note were updated in lock-step.
-
 - **Hub URL / key / CDN moved out of the source into the environment
   (operator-facing, no schema bump).** `hubfetch` no longer compiles in the
   Supabase URL, anon key, and CDN base; `NewClient()` reads

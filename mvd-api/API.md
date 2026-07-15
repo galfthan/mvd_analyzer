@@ -73,26 +73,17 @@ track which is which:
 | Where | Unit | Examples (real output) |
 |---|---|---|
 | **Query inputs** `from` / `to` / `time` | **seconds** (float) | `?from=105&to=110`, `?time=105` |
-| **View envelope** times — every timestamp that names a match position | **seconds** (float) | `events[].t`, `frags[].t`, `damage.events[].t`, `shots[].t`, `chat[].t`, `airgibs[].t`, `backpacks[].t`, `weaponPickups[].t`/`.nextDeathTime`/`.dropTime`, `items[].phases[].availableFrom`/`.takenAt`/`.respawnAt`, `state-at.t`, `stream-slice.startTime`, row-bucket `.t`, loc-trail `s`/`e` |
-| **Dense aim sample columns** | **int32 ms**, explicit-`Ms` name | `aim.players[].crosshair.tMs[]`, `aim.players[].lgRamp.sinceMs[]` |
+| **View envelope** times | **seconds** (float) | `events[].t=101.298`, `state-at.t=105`, `stream-slice.startTime=105`, row-bucket `.t=120`, loc-trail `s`/`e`=`1.015` |
 | **`/overview`** times | **int32 milliseconds** | `duration`, `matchStart`, `matchEnd`, `topStreaks[].start`/`.duration`, `topPowerups[].start`/`.duration`, `timing.*` |
 | **Raw stream entries** embedded in `/stream-slice` | **int32 milliseconds** | `h:[{ "t":105000, "v":-7 }]`, `pos.t:[105001,…]`, `rl:[{ "s":105000,"e":105182 }]` |
 | **Columnar buckets** axis | **int32 milliseconds** | `startMs`, `windowMs`, `time(i)=startMs+i*windowMs` |
 
-The rule (schema v56): **every timestamp that names a match position on
-the view surface is seconds.** The primary event time is `t`; multi-field
-records keep their descriptive names (`nextDeathTime`, `dropTime`,
-`availableFrom`, `takenAt`, `respawnAt`, positional-kill times) but are
-seconds too. Milliseconds survive only where a value is copied **verbatim
-from the stored schema** (the change-stream / interval / position arrays,
-the columnar grid, `/overview`) and inside the **dense aim sample columns**,
-which carry an explicit `Ms` name (`tMs`, `sinceMs`) so they never collide
-with the seconds `t`. The generic `/artifacts/{name}` accessor serves the
-same seconds view shape for the sections that also have a curated endpoint
-(frag/damage/shots/aim/items/backpacks/weapon-pickups); its raw
-stored-structure artifacts (match/messages/timeline/map-entities) stay ms
-like `/overview`. The underlying stored schema (qw-analyze / WASM) is all
-int32 ms — see RESULT_SCHEMA.md §"Time units". Scale ms→s by `* 0.001`.
+Rule of thumb: anything the **view layer synthesises** (event lists,
+window bounds, trail dwell spans, row-bucket timestamps) is **seconds**;
+anything copied **verbatim from the stored schema** (the change-stream /
+interval / position arrays, the columnar grid) is **int32 ms**. The
+underlying schema is all int32 ms — see RESULT_SCHEMA.md §"Time units".
+Scale ms→s by `* 0.001`.
 
 ### 2.2 Query parameters
 

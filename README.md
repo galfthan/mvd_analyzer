@@ -444,14 +444,7 @@ query API (`view.Buckets`, `view.Events`, `view.StreamSlice`,
 `view.StateAt`) still takes and emits float64 seconds at its public
 surface, so consumers querying through `view.*` (including the WASM
 bridge's `getBuckets` / `getEvents` / `getStreamSlice` / `getStateAt`
-exports) are unaffected. Schema v56 extends that seconds convention to
-the remaining REST/MCP pass-through endpoints (`/frags`, `/damage`,
-`/shots`, `/aim`, `/items`, `/backpacks`, `/weapon-pickups`, `/chat`,
-`/airgibs`): the primary event time is renamed `t` and every
-match-position timestamp is float seconds, the dense aim sample columns
-staying int32 ms under explicit `tMs` / `sinceMs` names. The stored
-Result (and the WASM frontend that reads it) is unchanged — the
-normalization is view-layer only (see `mvd-api/API.md` §2.1). Schema v9 adds visibility-aware loc
+exports) are unaffected. Schema v9 adds visibility-aware loc
 attribution: when a per-map BSP is available, the analyzer rejects
 candidate loc-points that fall outside the player's potentially-
 visible-set (PVS), eliminating brief "wall-bleed" phantom loc visits

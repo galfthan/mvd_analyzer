@@ -10,20 +10,6 @@ For tutorial-grade narrative on Items, Backpacks, and WeaponPickups
 [`README.md`](README.md). Pipeline architecture and how to add an
 analyzer are also covered there.
 
-**Stored vs. view — time units.** This document describes the **stored**
-Result: the JSON that `qw-analyze` and the WASM build emit verbatim. Every
-timestamp in it is **int32 milliseconds** (a `time` / `t` / `s` / `e` /
-`availableFrom` / … field). The REST/MCP host serves most sections through a
-thin **view** layer that re-shapes those timestamps to **float seconds** for
-the HTTP surface (schema v56): the primary event time is renamed `t`,
-multi-field records keep their names but become seconds, and the dense aim
-sample columns stay ms under explicit `Ms` names (`tMs`, `sinceMs`). So a
-`FragEntry.time` of `123456` on disk is `t: 123.456` over `/frags`. The
-authoritative per-endpoint response *shapes* (seconds) are the schemas in
-[`mvd-api/openapi/openapi.yaml`](../mvd-api/openapi/openapi.yaml); the unit
-rule is [`mvd-api/API.md` §2.1](../mvd-api/API.md). The field tables below are
-the stored (ms) shape unless a section says otherwise.
-
 ## Top-level shape
 
 `result.Result` (defined in `result/result.go`):
@@ -340,9 +326,7 @@ is exact and works on any QW server); for LG — which has no per-shot fire
 sound — it is one `TE_LIGHTNING2` beam, emitted once per fire tick and
 carrying the firing entity directly (`source:"beam"`). One beam == one LG
 attack == one cell, so LG counts match KTX `acc.attacks` exactly. Times are
-match-relative ms (same clock as `damage.events[].time`) in the **stored**
-shape; over `/shots` the view renames `time`→`t` and serves it in **seconds**
-(schema v56 — see the stored-vs-view note at the top and `Shot` below).
+match-relative ms (same clock as `damage.events[].time`).
 
 The `shots` stream is **match-gated** (schema v50): warmup / prewar /
 post-match fires are dropped at the source, like every analytics stream
@@ -389,7 +373,7 @@ every victim is an enemy (the common case); when present it is parallel to
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| Time | `time` | int32 | Match-relative ms **(stored)**. Over `/shots` this is `t` in **seconds** (view surface, schema v56). |
+| Time | `time` | int32 | Match-relative ms. |
 | Player | `player` | string | Resolved shooter. |
 | Team | `team` | string (omitempty) | |
 | Weapon | `weapon` | string | |

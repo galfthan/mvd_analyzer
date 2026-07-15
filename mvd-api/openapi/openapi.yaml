@@ -18,7 +18,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "56"
+  version: "55"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -28,15 +28,11 @@ info:
 
     ### Time units — the one real gotcha
     Query inputs `from` / `to` / `time` are match-relative **seconds**
-    (float). Every timestamp that names a match position on the view surface
-    is **seconds**: the primary event time is `t`; multi-field records keep
-    their descriptive names (`nextDeathTime`, `dropTime`, `availableFrom`,
-    `takenAt`, `respawnAt`, positional-kill times) but are seconds too.
-    Milliseconds survive only where the value is copied verbatim from the
-    stored schema — the change-stream / interval / position arrays, the
-    columnar bucket grid, `/overview` times — and inside the dense aim
-    sample columns, which carry an explicit `Ms` name (`tMs`, `sinceMs`).
-    Scale ms→s by `* 0.001`.
+    (float). View-synthesised outputs (event lists, window bounds, trail
+    dwell spans, row-bucket timestamps) are **seconds**; anything copied
+    verbatim from the stored schema (change-stream / interval / position
+    arrays, the columnar bucket grid, `/overview` times) is **int32
+    milliseconds**. Scale ms→s by `* 0.001`.
 
     ### Caching
     Per-demo 2xx responses carry `Cache-Control: public, max-age=86400,
@@ -616,9 +612,9 @@ paths:
       tags: [timeline]
       summary: Chat-only event slice
       description: >
-        Chat messages with speaker/team (t in match-relative seconds, type,
-        player, team, message, messageClean). Always 200 — empty list when
-        nothing matches.
+        Chat messages with speaker/team, mirrored from result.MatchEvent
+        (Time, Type, Player, Team, Message, MessageClean). Always 200 —
+        empty list when nothing matches.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/From"
@@ -2348,15 +2344,16 @@ components:
                 type: boolean
               killer:
                 type: string
-              t:
-                description: Frag time, match-relative seconds.
-                type: number
+              time:
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               victim:
                 type: string
               weapon:
                 type: string
             required:
-              - t
+              - time
               - killer
               - victim
               - weapon
@@ -2539,9 +2536,10 @@ components:
                 type: boolean
               isTeam:
                 type: boolean
-              t:
-                description: Hit time, match-relative seconds.
-                type: number
+              time:
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               victim:
                 type: string
               victimWep:
@@ -2549,7 +2547,7 @@ components:
               weapon:
                 type: string
             required:
-              - t
+              - time
               - attacker
               - victim
               - weapon
@@ -2667,9 +2665,10 @@ components:
                 type: integer
               isTeam:
                 type: boolean
-              t:
-                description: Kill time, match-relative seconds.
-                type: number
+              time:
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               victim:
                 type: string
               victimWep:
@@ -2679,7 +2678,7 @@ components:
                   EnemyVs*/EWep fold. Omitted on team/self/world kills.
                 type: string
             required:
-              - t
+              - time
               - attacker
               - victim
             type: object
@@ -2708,9 +2707,10 @@ components:
                 type: integer
               isTeam:
                 type: boolean
-              t:
-                description: Kill time, match-relative seconds.
-                type: number
+              time:
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               victim:
                 type: string
               victimWep:
@@ -2719,7 +2719,7 @@ components:
                   enemy kills only. Omitted on team/self/world kills.
                 type: string
             required:
-              - t
+              - time
               - attacker
               - victim
             type: object
@@ -2827,11 +2827,12 @@ components:
                 type: string
               source:
                 type: string
-              t:
-                description: Fire time, match-relative seconds.
-                type: number
               team:
                 type: string
+              time:
+                maximum: 2.147483647e+09
+                minimum: -2.147483648e+09
+                type: integer
               victimKinds:
                 items:
                   type: string
@@ -2847,7 +2848,7 @@ components:
               weapon:
                 type: string
             required:
-              - t
+              - time
               - player
               - weapon
               - source
@@ -2904,11 +2905,7 @@ components:
                     type:
                       - "null"
                       - array
-                  tMs:
-                    description: >
-                      Per-fire sample time in int32 MILLISECONDS. Dense-payload
-                      exception: it stays ms and carries an explicit `Ms` name
-                      so it never collides with the seconds `t` convention.
+                  t:
                     items:
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
@@ -2935,7 +2932,7 @@ components:
                       - "null"
                       - array
                 required:
-                  - tMs
+                  - t
                   - w
                   - dyaw
                   - dpitch
@@ -2956,10 +2953,7 @@ components:
                     type:
                       - "null"
                       - array
-                  sinceMs:
-                    description: >
-                      MILLISECONDS since the shaft opened (dense-payload
-                      exception; explicit-Ms name).
+                  since:
                     items:
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
@@ -2974,7 +2968,7 @@ components:
                       - "null"
                       - array
                 required:
-                  - sinceMs
+                  - since
                   - hit
                 type:
                   - "null"
@@ -3342,9 +3336,10 @@ components:
           type: string
         team:
           type: string
-        t:
-          description: Match-relative seconds.
-          type: number
+        time:
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         type:
           type: string
         victim:
@@ -3352,7 +3347,7 @@ components:
         weapon:
           type: string
       required:
-        - t
+        - time
         - type
         - player
         - team
@@ -3375,13 +3370,14 @@ components:
           type: string
         team:
           type: string
-        t:
-          description: Match-relative seconds.
-          type: number
+        time:
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         weapon:
           type: string
       required:
-        - t
+        - time
         - player
         - weapon
         - origin
@@ -3393,8 +3389,9 @@ components:
         backpackEnt:
           type: integer
         dropTime:
-          description: Originating backpack-drop time, match-relative seconds.
-          type: number
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         dropper:
           type: string
         dropperTeam:
@@ -3406,21 +3403,23 @@ components:
         kills:
           type: integer
         nextDeathTime:
-          description: Picker's next death, match-relative seconds; 0 if none before match end.
-          type: number
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         player:
           type: string
         source:
           type: string
         team:
           type: string
-        t:
-          description: Match-relative seconds.
-          type: number
+        time:
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         weapon:
           type: string
       required:
-        - t
+        - time
         - player
         - weapon
         - source
@@ -3447,14 +3446,17 @@ components:
                   additionalProperties: false
                   properties:
                     availableFrom:
-                      description: Phase start, match-relative seconds (0 = since match start).
-                      type: number
+                      maximum: 2.147483647e+09
+                      minimum: -2.147483648e+09
+                      type: integer
                     respawnAt:
-                      description: Respawn time, match-relative seconds; omitted while still held.
-                      type: number
+                      maximum: 2.147483647e+09
+                      minimum: -2.147483648e+09
+                      type: integer
                     takenAt:
-                      description: Take time, match-relative seconds.
-                      type: number
+                      maximum: 2.147483647e+09
+                      minimum: -2.147483648e+09
+                      type: integer
                     takenBy:
                       type: string
                     team:
@@ -3552,9 +3554,10 @@ components:
           type: boolean
         loc:
           type: string
-        t:
-          description: Match-relative seconds.
-          type: number
+        time:
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         victim:
           type: string
         victimTeam:
@@ -3562,7 +3565,7 @@ components:
         victimUserID:
           type: integer
       required:
-        - t
+        - time
         - attacker
         - victim
         - height
@@ -5680,8 +5683,8 @@ components:
     Chat:
       type: array
       description: >
-        /chat body — chat events (t in match-relative seconds). [] when
-        nothing matches.
+        /chat body — chat events, verbatim result.MatchEvent entries
+        (time is int32 ms). [] when nothing matches.
       items: { $ref: "#/components/schemas/MatchEvent" }
     Backpacks:
       type: array
