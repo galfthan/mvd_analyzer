@@ -917,8 +917,8 @@ func TestStateAt_HappyPath(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
 	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=15&fields=h,a&players=bps", 200)
-	if resp["t"].(float64) != 15 {
-		t.Errorf("t = %v; want 15", resp["t"])
+	if resp["time"].(float64) != 15 {
+		t.Errorf("time = %v; want 15", resp["time"])
 	}
 	players, _ := resp["players"].(map[string]any)
 	if _, ok := players["bps"]; !ok {

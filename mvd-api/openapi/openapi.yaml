@@ -2358,7 +2358,7 @@ components:
                 type: boolean
               killer:
                 type: string
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -2367,7 +2367,7 @@ components:
               weapon:
                 type: string
             required:
-              - time
+              - t
               - killer
               - victim
               - weapon
@@ -2554,7 +2554,7 @@ components:
                 type: boolean
               isTeam:
                 type: boolean
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -2565,7 +2565,7 @@ components:
               weapon:
                 type: string
             required:
-              - time
+              - t
               - attacker
               - victim
               - weapon
@@ -2683,7 +2683,7 @@ components:
                 type: integer
               isTeam:
                 type: boolean
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -2696,7 +2696,7 @@ components:
                   EnemyVs*/EWep fold. Omitted on team/self/world kills.
                 type: string
             required:
-              - time
+              - t
               - attacker
               - victim
             type: object
@@ -2725,7 +2725,7 @@ components:
                 type: integer
               isTeam:
                 type: boolean
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -2737,7 +2737,7 @@ components:
                   enemy kills only. Omitted on team/self/world kills.
                 type: string
             required:
-              - time
+              - t
               - attacker
               - victim
             type: object
@@ -2851,7 +2851,7 @@ components:
                 type: string
               team:
                 type: string
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -2870,7 +2870,7 @@ components:
               weapon:
                 type: string
             required:
-              - time
+              - t
               - player
               - weapon
               - source
@@ -3365,7 +3365,7 @@ components:
           type: string
         team:
           type: string
-        time:
+        t:
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
@@ -3376,7 +3376,7 @@ components:
         weapon:
           type: string
       required:
-        - time
+        - t
         - type
         - player
         - team
@@ -3399,14 +3399,14 @@ components:
           type: string
         team:
           type: string
-        time:
+        t:
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         weapon:
           type: string
       required:
-        - time
+        - t
         - player
         - weapon
         - origin
@@ -3441,14 +3441,14 @@ components:
           type: string
         team:
           type: string
-        time:
+        t:
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         weapon:
           type: string
       required:
-        - time
+        - t
         - player
         - weapon
         - source
@@ -3538,14 +3538,14 @@ components:
               firstTake:
                 additionalProperties: false
                 properties:
-                  t:
+                  time:
                     type: number
                   takenBy:
                     type: string
                   team:
                     type: string
                 required:
-                  - t
+                  - time
                 type:
                   - "null"
                   - object
@@ -3589,7 +3589,7 @@ components:
           type: boolean
         loc:
           type: string
-        time:
+        t:
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
@@ -3600,7 +3600,7 @@ components:
         victimUserID:
           type: integer
       required:
-        - time
+        - t
         - attacker
         - victim
         - height
@@ -3961,7 +3961,7 @@ components:
                 type: boolean
               loc:
                 type: string
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -3972,7 +3972,7 @@ components:
               victimUserID:
                 type: integer
             required:
-              - time
+              - t
               - attacker
               - victim
               - height
@@ -3989,12 +3989,12 @@ components:
                 type: string
               team:
                 type: string
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
             required:
-              - time
+              - t
               - player
               - team
             type: object
@@ -4011,12 +4011,12 @@ components:
                 type: string
               team:
                 type: string
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
             required:
-              - time
+              - t
               - player
               - team
               - delta
@@ -4046,12 +4046,12 @@ components:
                 type: integer
               team:
                 type: string
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
             required:
-              - time
+              - t
               - endTime
               - playerName
               - playerUserID
@@ -4071,12 +4071,12 @@ components:
                 type: string
               team:
                 type: string
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
             required:
-              - time
+              - t
               - player
               - team
             type: object
@@ -4138,12 +4138,12 @@ components:
                 type: string
               team:
                 type: string
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
             required:
-              - time
+              - t
               - endTime
               - playerName
               - playerSlot
@@ -4338,7 +4338,7 @@ components:
                 type: string
               team:
                 type: string
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -4349,7 +4349,7 @@ components:
               weapon:
                 type: string
             required:
-              - time
+              - t
               - type
               - player
               - team
@@ -4380,7 +4380,7 @@ components:
                 type: string
               team:
                 type: string
-              time:
+              t:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -4388,7 +4388,7 @@ components:
               - item
               - kind
               - entNum
-              - time
+              - t
               - takenBy
             type: object
           type:
@@ -4431,10 +4431,10 @@ components:
           type: [array, "null"]
           items:
             type: object
-            required: [t, type]
+            required: [time, type]
             additionalProperties: false
             properties:
-              t:
+              time:
                 type: number
                 description: Match-relative seconds.
               type: { type: string }
@@ -4490,7 +4490,7 @@ components:
                   - "null"
               partial:
                 type: boolean
-              t:
+              time:
                 type: number
               team:
                 additionalProperties:
@@ -4498,7 +4498,7 @@ components:
                   type: object
                 type: object
             required:
-              - t
+              - time
               - p
             type: object
           type:
@@ -5561,11 +5561,11 @@ components:
           type:
             - object
             - "null"
-        t:
+        time:
           type: number
       required:
         - timeUnit
-        - t
+        - time
         - players
       type: object
     LocTrails:
@@ -5582,7 +5582,7 @@ components:
                 items:
                   additionalProperties: false
                   properties:
-                    e:
+                    end:
                       type: number
                     li:
                       maximum: 32767
@@ -5592,11 +5592,11 @@ components:
                         - integer
                     loc:
                       type: string
-                    s:
+                    start:
                       type: number
                   required:
-                    - s
-                    - e
+                    - start
+                    - end
                   type: object
                 type:
                   - "null"

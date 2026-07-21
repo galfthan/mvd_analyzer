@@ -20,7 +20,7 @@ func marshal(t *testing.T, v any) string {
 
 // TestFragsEnvelopeFlattens checks the pass-through envelope echoes the fixed
 // ms unit and flattens the stored FragResult fields verbatim (no shadow copy,
-// so `time` stays the stored int32 ms and can never drift).
+// so `t` stays the stored int32 ms and can never drift).
 func TestFragsEnvelopeFlattens(t *testing.T) {
 	fr := &result.FragResult{
 		TotalFrags: 1,
@@ -32,7 +32,7 @@ func TestFragsEnvelopeFlattens(t *testing.T) {
 	if !strings.Contains(got, `"timeUnit":"ms"`) {
 		t.Errorf("frags envelope missing ms echo: %s", got)
 	}
-	if !strings.Contains(got, `"time":12345`) {
+	if !strings.Contains(got, `"t":12345`) {
 		t.Errorf("frags time not stored int ms: %s", got)
 	}
 	// The embedded struct's fields flatten to the top level.
@@ -59,7 +59,7 @@ func TestListEnvelopes(t *testing.T) {
 		t.Errorf("empty airgibs should be []: %s", s)
 	}
 	bp := BackpacksEnvelope{TimeUnit: UnitMs, Backpacks: []result.BackpackDrop{{Time: 1000, Weapon: "rl"}}}
-	if s := marshal(t, bp); !strings.Contains(s, `"backpacks":[`) || !strings.Contains(s, `"time":1000`) {
+	if s := marshal(t, bp); !strings.Contains(s, `"backpacks":[`) || !strings.Contains(s, `"t":1000`) {
 		t.Errorf("backpacks envelope wrong: %s", s)
 	}
 	wp := WeaponPickupsEnvelope{TimeUnit: UnitMs, Pickups: []result.WeaponPickup{{Time: 2000, Weapon: "lg", Source: "backpack"}}}
@@ -69,17 +69,17 @@ func TestListEnvelopes(t *testing.T) {
 }
 
 // TestDerivedViewEcho checks the seconds-native derived views carry the fixed
-// "s" echo when the handler sets it, and that `t` stays float seconds.
+// "s" echo when the handler sets it, and that `time` stays float seconds.
 func TestDerivedViewEcho(t *testing.T) {
 	ev := &EventsView{TimeUnit: UnitSec, Events: []TaggedEvent{
 		{T: 10.5, Type: "streak", Player: "a", Detail: map[string]any{"endTime": 20.25}},
 	}}
-	if s := marshal(t, ev); !strings.Contains(s, `"timeUnit":"s"`) || !strings.Contains(s, `"t":10.5`) ||
+	if s := marshal(t, ev); !strings.Contains(s, `"timeUnit":"s"`) || !strings.Contains(s, `"time":10.5`) ||
 		!strings.Contains(s, `"endTime":20.25`) {
 		t.Errorf("events echo/seconds wrong: %s", s)
 	}
 	sa := &StateAtView{TimeUnit: UnitSec, Time: 30, Players: map[string]PlayerStateAt{}}
-	if s := marshal(t, sa); !strings.Contains(s, `"timeUnit":"s"`) || !strings.Contains(s, `"t":30`) {
+	if s := marshal(t, sa); !strings.Contains(s, `"timeUnit":"s"`) || !strings.Contains(s, `"time":30`) {
 		t.Errorf("state-at echo wrong: %s", s)
 	}
 }

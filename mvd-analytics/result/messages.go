@@ -16,7 +16,7 @@ type MessagesResult struct {
 // elided via omitempty when it equals Message — consumers should treat
 // a missing MessageClean as "use Message".
 type MatchEvent struct {
-	Time         int32  `json:"time"`                   // Match-relative milliseconds (schema v8)
+	Time         int32  `json:"t"`                      // Match-relative milliseconds (schema v8)
 	Type         string `json:"type"`                   // "frag", "chat", "teamsay"
 	Player       string `json:"player"`                 // Who sent/killed
 	Team         string `json:"team"`                   // Player's team

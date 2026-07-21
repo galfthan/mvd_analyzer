@@ -624,14 +624,15 @@ package result
 //     appended to errors[] so /overview surfaces it without a new field.
 //
 // v53: columnar buckets become loc-self-contained (view shape only — no
-//   stored field changes; bumped so the immutable schemaVersion-keyed
-//   ETags stop revalidating the pre-legend bodies).
-//   - The /buckets layout=column envelope gains locTable: the demo's
-//     interned loc-name legend, present iff an "li" column is in the
-//     output. Columnar keeps the compact raw index (unlike row mode,
-//     which resolves names per bucket); the legend lets a consumer —
-//     notably an MCP agent on the columnar default — decode locally
-//     instead of a /loc-table round trip.
+//
+//	stored field changes; bumped so the immutable schemaVersion-keyed
+//	ETags stop revalidating the pre-legend bodies).
+//	- The /buckets layout=column envelope gains locTable: the demo's
+//	  interned loc-name legend, present iff an "li" column is in the
+//	  output. Columnar keeps the compact raw index (unlike row mode,
+//	  which resolves names per bucket); the legend lets a consumer —
+//	  notably an MCP agent on the columnar default — decode locally
+//	  instead of a /loc-table round trip.
 //
 // v54: the bounded damage family (additive).
 //   - The wire carries only KTX's UNBOUND damage (overkill-inclusive,
@@ -675,17 +676,25 @@ package result
 //     frags/damage/shots/chat/airgibs/backpacks/weapon-pickups/items-timeline/
 //     overview, "s" (float64 seconds) for the derived views events/
 //     buckets-rows/state-at/stream-slice-envelope/loc-trails/items-summary.
-//     There is NO unit selection: the sparse `t` (float seconds) and `time`
-//     (int32 ms) fields always carry those units, and every other match-
-//     position field carries the endpoint's native unit named by the echo.
-//     DENSE per-sample payloads always stay ms (aim crosshair `t` / lgRamp
-//     `since`, stream-slice embedded tracks, columnar buckets startMs/
-//     windowMs axis); /aim (no sparse match position) and /demoinfo (KTX
-//     units island) are ungoverned. The four bare-array bodies
-//     (chat/airgibs/backpacks/weapon-pickups) gain a {timeUnit, <list>}
-//     envelope so the echo has a home — the one non-additive shape change.
-//     Stored result.* structs, qw-analyze/WASM output, and the golden corpus
-//     are unchanged (this bump only restamps schemaVersion).
+//     There is NO unit selection: the sparse `t` (int32 ms) and `time`
+//     (float seconds) fields always carry those units, and every other
+//     match-position field carries the endpoint's native unit named by the
+//     echo. This polarity is exception-free — the stored ms event lists and
+//     the dense per-sample arrays both use `t`-in-ms (the dense arrays
+//     always did; compact name = compact type), while the float-seconds view
+//     surfaces use `time`. DENSE per-sample payloads always stay ms (aim
+//     crosshair `t` / lgRamp `since`, stream-slice embedded tracks, columnar
+//     buckets startMs/windowMs axis); /aim (no sparse match position) and
+//     /demoinfo (KTX units island) are ungoverned. The four bare-array
+//     bodies (chat/airgibs/backpacks/weapon-pickups) gain a {timeUnit,
+//     <list>} envelope so the echo has a home.
+//   - Time-field polarity flip: every stored ms field formerly tagged
+//     `json:"time"` is now `json:"t"` (frag/damage/shot/chat/backpack/
+//     weapon-pickup/opening/airgib/timeline events); the seconds view
+//     surfaces flip `json:"t"`→`json:"time"` (events/buckets-row/state-at/
+//     items-summary firstTake); loc-trails residences rename `s`/`e`→
+//     `start`/`end`. Go field names are unchanged (only the JSON tags).
+//     The golden corpus was regenerated for the key renames.
 const CurrentSchemaVersion = 56
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each

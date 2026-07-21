@@ -29,7 +29,7 @@ package result
 // a weapon is by construction HadBefore=false, and all subsequent
 // pickups of that same weapon in the same life are HadBefore=true.
 type WeaponPickup struct {
-	Time          int32  `json:"time"` // Match-relative milliseconds (schema v8)
+	Time          int32  `json:"t"` // Match-relative milliseconds (schema v8)
 	Player        string `json:"player"`
 	Team          string `json:"team,omitempty"`
 	Weapon        string `json:"weapon"` // "rl","lg","gl","ssg","sng","ng"

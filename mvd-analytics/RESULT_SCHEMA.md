@@ -99,7 +99,7 @@ Defined in `result/frag.go`.
 
 | Field | JSON key | Type |
 |---|---|---|
-| Time | `time` | int32 (match-relative ms) |
+| Time | `t` | int32 (match-relative ms) |
 | Killer | `killer` | string |
 | Victim | `victim` | string |
 | Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `ax`, `tele`, env: `lava`/`fall`/`water`/`slime`/`world`/`squish`) |
@@ -176,7 +176,7 @@ The per-player / matrix aggregates AND the `events` log are both **match-time
 only** (schema v50): the analyzer drops out-of-match (warmup / post-match) hits
 at the source, so every damage figure and the `events` log are built from the
 same in-match hit set (KTX scoreboard parity). Each `events` entry carries the
-match-relative `time` so consumers can still window within the match.
+match-relative `t` so consumers can still window within the match.
 
 **Positional kills (telefrag, stomp) fold their honest value into
 `given`/`givenTeam`/`taken` — and, on enemy kills, the `enemyVs*`/`ewep`
@@ -228,7 +228,7 @@ fold-in added to the aggregates.
 
 | Field | JSON key | Type |
 |---|---|---|
-| Time | `time` | int32 (match-relative ms) |
+| Time | `t` | int32 (match-relative ms) |
 | Attacker | `attacker` | string (killer) |
 | Victim | `victim` | string |
 | IsTeam | `isTeam` | bool (omitempty — same team) |
@@ -240,7 +240,7 @@ fold-in added to the aggregates.
 
 | Field | JSON key | Type |
 |---|---|---|
-| Time | `time` | int32 (match-relative ms) |
+| Time | `t` | int32 (match-relative ms) |
 | Attacker | `attacker` | string (`world` for environmental / non-player inflictor) |
 | Victim | `victim` | string |
 | Weapon | `weapon` | string (attacker weapon `rl`/`lg`/…, or env category `fall`/`lava`/…) |
@@ -331,7 +331,7 @@ match-relative ms (same clock as `damage.events[].time`).
 The `shots` stream is **match-gated** (schema v50): warmup / prewar /
 post-match fires are dropped at the source, like every analytics stream
 except chat, so the stream and the `byPlayer` aggregates are both match-only.
-To correlate aiming with fires, join a shot's `time` against the
+To correlate aiming with fires, join a shot's `t` against the
 shooter's `streams.players[].pos` track (`vP`/`vYa` view angles, `vX/vY/vZ`
 velocity) by player + nearest `t`.
 
@@ -373,7 +373,7 @@ every victim is an enemy (the common case); when present it is parallel to
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| Time | `time` | int32 | Match-relative ms. |
+| Time | `t` | int32 | Match-relative ms. |
 | Player | `player` | string | Resolved shooter. |
 | Team | `team` | string (omitempty) | |
 | Weapon | `weapon` | string | |
@@ -602,7 +602,7 @@ Defined in `result/messages.go`.
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| Time | `time` | int32 | Match-relative ms. |
+| Time | `t` | int32 | Match-relative ms. |
 | Type | `type` | string | `"frag"`, `"chat"`, `"teamsay"`. |
 | Player | `player` | string | Sender / killer. |
 | Team | `team` | string | Sender's team. |
@@ -683,17 +683,17 @@ Bucketed data is served as `view.BucketsView` (row) or
 
 ### TimelineFragEvent
 
-`{ time, player, team, delta }`. Score-delta channel (`+1` enemy kill,
+`{ t, player, team, delta }`. Score-delta channel (`+1` enemy kill,
 `-1` suicide / teamkill, `+2` for the rare gib double-frag KTX edge).
 Reconstruct the killer ↔ victim relationship from `FragResult.Frags[]`
-or `MessagesResult.Events[type=frag]` by matching `time`. `team` is
+or `MessagesResult.Events[type=frag]` by matching `t`. `team` is
 best-effort: `""` when the player's team never resolves (e.g. an empty
 userinfo/demoinfo team); in 1v1 results the duel normalization rewrites
 it to the player's own name.
 
 ### TimelineDeathEvent
 
-`{ time, player, team }`. One record per death, sourced from the
+`{ t, player, team }`. One record per death, sourced from the
 authoritative protocol DeathEvent and gated to match time exactly like
 `fragEvents` — every death counts once (enemy kill, suicide, world, or
 being teamkilled), so a player's death count here matches their
@@ -706,12 +706,12 @@ attacker. Pairs with `killEvents` for the Timeline tab's per-player
 
 ### TimelineKillEvent
 
-`{ time, player, team }`. One record per enemy kill, keyed on the
+`{ t, player, team }`. One record per enemy kill, keyed on the
 **killer**, sourced from the canonical frag log (`FragResult.Frags[]` /
 `CoreOutputs.FragEntries`) filtered to real enemy kills (suicides and
 teamkills excluded). A player's cumulative `killEvents` reconciles
 exactly with `frags.byPlayer[].kills` and thus the kills-based
-efficiency `kills / (kills + deaths)`. Parallel to `deathEvents`: `time`
+efficiency `kills / (kills + deaths)`. Parallel to `deathEvents`: `t`
 is match-relative ms on the same clock (both are shifted by
 `streams.global.demoOffset` in post-processing — the Timeline per-player
 drill-down plots `killEvents − deathEvents` as a windowed +/- area, so
@@ -724,23 +724,23 @@ duel normalization rewrites it to the player's own name.
 
 ### PowerupEvent
 
-`{ time, endTime, playerName, playerSlot, playerUserID, team,
+`{ t, endTime, playerName, playerSlot, playerUserID, team,
 powerupType, duration, frags }`. One record per powerup run. Carries
 both `playerSlot` and `playerUserID` (TimelineFragEvent doesn't —
 intentional: that channel is lean by design).
 
 ### FragStreakEvent
 
-`{ time, endTime, playerName, playerUserID, team, frags, duration,
+`{ t, endTime, playerName, playerUserID, team, frags, duration,
 ewep }`. One record per spawn-to-death life with ≥ 1 enemy kill, top 10
 by frag count. A player already alive at match start has that first
 life's spawn synthesized at match start (the real spawn happened during
-warmup), so an opening run reads `time: 0`. `ewep` = effective weapon =
+warmup), so an opening run reads `t: 0`. `ewep` = effective weapon =
 the weapon that scored the most kills during the streak.
 
 ### AirgibEvent
 
-`{ time, attacker, attackerTeam, attackerUserID, victim, victimTeam,
+`{ t, attacker, attackerTeam, attackerUserID, victim, victimTeam,
 victimUserID, height, heightAboveAttacker, loc, damage, lethal }`. One
 record per direct
 enemy rocket hit landed on an airborne victim (an "airgib"). `height` is
@@ -1257,7 +1257,10 @@ listed above. What v56 adds is on the **REST/MCP transport only**, and it
 is a fixed naming convention, **not a unit selection**:
 
 - The sparse match-position fields are absolute everywhere: **`t` is
-  float seconds, `time` is int32 ms** — always, on every endpoint.
+  int32 ms, `time` is float seconds** — always, on every endpoint. This
+  polarity is exception-free: the dense per-sample arrays already used
+  `t`-in-ms, so they conform without change, and the big sparse event
+  lists get the compact key for the compact type.
 - **`timeUnit` is the unit of every time value in a response.** Every
   `/v1/demos/{id}/*` response echoes a top-level **`"timeUnit":"ms"|"s"`**,
   with two exceptions: `/demoinfo` (KTX's own clock, a mix of native
@@ -1271,7 +1274,7 @@ is a fixed naming convention, **not a unit selection**:
   `/items` summary.
 
 The field-name conventions still hold: the sparse match-position `t`
-(float seconds) and `time` (int32 ms) names are absolute everywhere, and
+(int32 ms) and `time` (float seconds) names are absolute everywhere, and
 dense per-sample arrays use compact names and stay int32 ms — the
 `/stream-slice` embedded change / interval / position tracks (`t`/`s`/`e`
 are ms even though that envelope's `timeUnit` is `s`), the `/aim`
@@ -1703,7 +1706,7 @@ gets "up" for such weapons; the closed phases still carry
 **Summary shape** (`/items?summary=true`, `view.ItemsSummary`): per-item
 take aggregates instead of the phase timeline —
 `{ items: [{ name, kind, entNum, loc?, takenCount, byPlayer?: {name: n},
-firstTake?: { t, takenBy?, team? } }] }` with `t` in match-relative
+firstTake?: { time, takenBy?, team? } }] }` with `time` in match-relative
 **seconds** (view surface unit). With a `from`/`to` window, the full
 timeline keeps phases **overlapping** the window while the summary
 counts takes **inside** it; identity-filtered items survive with
@@ -1759,13 +1762,13 @@ its `teleportDst` (where you arrive) by `teleportSrc.target` ==
 ## Backpacks (`backpacks`)
 
 Defined in `result/backpacks.go`. Each `BackpackDrop` is
-`{ time, player, team, weapon ("rl"|"lg"), origin, loc, entNum }`.
+`{ t, player, team, weapon ("rl"|"lg"), origin, loc, entNum }`.
 `entNum` is the join key with `WeaponPickup.BackpackEnt`.
 
 ## WeaponPickups (`weaponPickups`)
 
 Defined in `result/weapon_pickups.go`. Each entry is a slot-weapon
-acquisition: `{ time, player, team, weapon,
+acquisition: `{ t, player, team, weapon,
 source ("world"|"backpack"|"unknown"), hadBefore, inferred, kills,
 nextDeathTime, backpackEnt, dropper, dropperTeam, dropTime }`. `kills`
 is the kills-before-next-death effectiveness metric (only non-zero on
@@ -1792,7 +1795,7 @@ one cheap fetch.
 ```jsonc
 {
   "players":    [ { "name", "team"?, "loc"? } ],   // match-start spawn loc
-  "firstTakes": [ { "item", "kind", "entNum", "loc"?, "time", "takenBy", "team"? } ]
+  "firstTakes": [ { "item", "kind", "entNum", "loc"?, "t", "takenBy", "team"? } ]
 }
 ```
 
@@ -1803,7 +1806,7 @@ one cheap fetch.
   (warmup takes are skipped), sorted by time. Tracked kinds: armors,
   mega, powerups, and the RL/LG weapon pads. `item`/`entNum`/`loc`
   identify the spawner (`ItemTimeline` naming: `ya_1` vs `ya_2`). A
-  spawner nobody took has no entry. `time` is match-relative ms.
+  spawner nobody took has no entry. `t` is match-relative ms.
 - Omitted entirely when no match start was detected (t=0 would be the
   demo open, not an opening).
 
@@ -1850,7 +1853,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
-| v56 | **`timeUnit` echo on the REST/MCP transport** (additive; stored structs unchanged — still int32 ms). `timeUnit` is the unit of every time value in a response: **every `/v1/demos/{id}/*` response echoes a top-level `timeUnit`, except `/demoinfo` (mixed KTX-native units) and `/artifacts/{name}` (raw stored bytes)**. The value is FIXED per endpoint — no unit selection: `ms` for frags/damage/shots/chat/airgibs/backpacks/weapon-pickups/items-timeline/overview/aim/buckets-column/region-control, `s` for the derived views events/state-at/stream-slice-envelope/loc-trails/buckets-row/items-summary. Field-name conventions still hold: the sparse `t` (float seconds) and `time` (int32 ms) names are absolute, and dense per-sample arrays (`/stream-slice` embedded tracks, `/aim` samples, columnar `/buckets` axis) stay int32 ms under compact names. The four formerly bare-array endpoints wrap their array to carry the echo: `/chat`→`{timeUnit,messages}`, `/airgibs`→`{timeUnit,airgibs}`, `/backpacks`→`{timeUnit,backpacks}`, `/weapon-pickups`→`{timeUnit,pickups}` (the one non-additive shape change). See the §"Transport surface" note above and [mvd-api/API.md §2.1](../mvd-api/API.md). |
+| v56 | **`timeUnit` echo on the REST/MCP transport** (additive; stored structs unchanged — still int32 ms). `timeUnit` is the unit of every time value in a response: **every `/v1/demos/{id}/*` response echoes a top-level `timeUnit`, except `/demoinfo` (mixed KTX-native units) and `/artifacts/{name}` (raw stored bytes)**. The value is FIXED per endpoint — no unit selection: `ms` for frags/damage/shots/chat/airgibs/backpacks/weapon-pickups/items-timeline/overview/aim/buckets-column/region-control, `s` for the derived views events/state-at/stream-slice-envelope/loc-trails/buckets-row/items-summary. Field-name polarity (exception-free): **`t` is int32 ms, `time` is float seconds** — always, on every endpoint. The stored ms event lists (frags/damage/shots/chat/backpacks/weapon-pickups/airgibs/timeline events) carry their timestamp under `t`; the float-seconds view surfaces (events/state-at/buckets-row/items-summary `firstTake`) carry it under `time`; loc-trails residences use `start`/`end`. The dense per-sample arrays (`/stream-slice` embedded tracks, `/aim` samples, columnar `/buckets` axis) already used `t`-in-ms and conform natively. The four formerly bare-array endpoints wrap their array to carry the echo: `/chat`→`{timeUnit,messages}`, `/airgibs`→`{timeUnit,airgibs}`, `/backpacks`→`{timeUnit,backpacks}`, `/weapon-pickups`→`{timeUnit,pickups}` (the one non-additive shape change). See the §"Transport surface" note above and [mvd-api/API.md §2.1](../mvd-api/API.md). |
 | v55 | Bounded damage becomes **death-value-derived and the default**. The v54 shadow-health cap is replaced: a survived hit is bounded == raw by identity, a killing hit's overkill comes from the end-of-frame death broadcast (bounded = raw + deathValue; corpus reconciliation tightens ~2.5x, max +-16/player on given/taken). Fallback to the approximate shadow cap only for the -99 corpse clamp and respawn-masked deaths; same-frame multi-hit deaths cascade the overkill from the last hit backward. The REST/MCP `dmg` **default flips to `bounded`** for summaries AND the full log (`raw`/`both` opt-in; a *defaulted* request on a `skipped:*` demo falls back to raw, only an explicit `dmg=bounded` 422s). Unfiltered bounded summaries substitute KTX's exact scoreboard figures (given/givenTeam/givenSelf/ewep/byWeapon-enemy; `taken` and the `enemyVs*` buckets stay reconstructed) with provenance in the new `damage.boundedSource` (`ktx` / `reconstructed`). |
 | v54 | The **bounded damage family** (additive). The wire carries only KTX's unbound damage; the scoreboard's bounded `dmg_dealt` (armor absorbed + health damage capped to remaining health) is now reconstructed per hit from tracked victim vitals: `damage.events[].bounded` (absent = equal to `damage`; `0` is a real nullified-hit value), `damage.byPlayer.<p>.bounded` (a nested `PlayerDamage`), `damage.scoreboard` deltas gain a `bounded` nest incl. `streamTeam`/`scoreTeam`, plus the `dmg` family echo and `boundedMode` (`skipped:*` on midair/instagib/dmgfrags demos — no bounded fields there). Telefrags **and stomps** now fold their bounded damage into `given`/`givenTeam`/`taken` in **both** families, matching KTX's own accumulation (telefrag: armor+health, the wire 9999 is a sentinel; stomp: the honest ~10 HP wire value); `telefrags[]`/`stomps[]` entries carry the per-kill `bounded` value. `byWeapon`/`matrix`/`ewep`/`totalDamage` still exclude positional kills (KTX `wpNONE` parity). |
 | v53 | Columnar buckets become **loc-self-contained**; view shape only, no stored-field change (bumped so the immutable schemaVersion-keyed ETags stop revalidating pre-legend bodies). The `/buckets` `layout=column` envelope gains `locTable` — the demo's interned loc-name legend, present iff an `li` column is in the output. Columnar keeps the compact raw index (row mode keeps resolving names per bucket); consumers decode locally instead of a `/loc-table` round trip. |

@@ -261,7 +261,7 @@ guide around it:
 
 - **Getting started** — demo addressing, auto-load, the typical flow.
 - **Query conventions + units** — the fixed naming convention (`t` =
-  float seconds, `time` = int32 ms; descriptive names carry the
+  int32 ms, `time` = float seconds; descriptive names carry the
   endpoint's native unit, named by the `timeUnit` echo, schema v56) and
   the always-ms dense payloads (raw stream entries, the columnar grid,
   aim samples).

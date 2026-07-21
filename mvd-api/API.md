@@ -88,17 +88,25 @@ the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/airgibs` →
 `/weapon-pickups` → `{timeUnit, pickups:[…]}`.
 
 **Field-name conventions (consistent with the echo).** The two sparse
-match-position field names are absolute on *every* endpoint: a top-level
-**`t`** is float seconds and a **`time`** is int32 ms. Descriptively-named
+match-position field names are absolute on *every* endpoint: a **`t`** is
+int32 ms and a top-level **`time`** is float seconds. This polarity is
+exception-free — sparse event lists (`/frags`, `/damage`, `/shots`,
+`/chat`, `/backpacks`, `/weapon-pickups`, `/airgibs`) and the dense
+per-sample arrays both carry their int32-ms axis under `t` (the dense
+arrays always did — that is the whole point of this polarity, and the big
+event lists get the compact key for the compact type). Descriptively-named
 times (`startTime`/`endTime`, `availableFrom`/`takenAt`/`respawnAt`,
-`nextDeathTime`, `dropTime`, `duration`, `start`) don't encode their unit
-in the name — that's what `timeUnit` is for. Dense per-sample arrays use
-compact names and are always int32 ms: `/aim`'s crosshair `t` + `lgRamp`
-`since`, the columnar `/buckets` axis (`startMs`/`windowMs`,
+`nextDeathTime`, `dropTime`, `duration`, `start`/`end`) don't encode their
+unit in the name — that's what `timeUnit` is for. Dense per-sample arrays
+use compact names and are always int32 ms: `/aim`'s crosshair `t` +
+`lgRamp` `since`, the columnar `/buckets` axis (`startMs`/`windowMs`,
 `time(i)=startMs+i*windowMs`), and the raw stream tracks embedded in
 `/stream-slice` (`h:[{ "t":105000,… }]`, `pos.t:[…]`, `rl:[{ "s","e" }]`
 — ms even though that envelope's `timeUnit` is `s`, which governs its
-top-level `startTime`/`endTime`).
+top-level `startTime`/`endTime` and the `/loc-trails` `start`/`end`). The
+float-seconds view surfaces — `/events`, `/buckets?layout=row`,
+`/state-at`, `/items?summary=true`'s `firstTake` — carry their timestamp
+under `time`.
 
 The two exceptions:
 

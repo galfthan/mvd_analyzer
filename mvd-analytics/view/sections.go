@@ -888,7 +888,7 @@ func Items(r *result.Result, opts ItemOptions) *result.ItemsResult {
 // aggregates instead of the full phase timeline. Cheap enough to be the
 // MCP-layer default (PLAN-api-usability D1).
 type ItemsSummaryView struct {
-	// TimeUnit echoes this shape's native unit ("s", the firstTake.t unit);
+	// TimeUnit echoes this shape's native unit ("s", the firstTake.time unit);
 	// set by the mvd-api handler (schema v56). Omitted on non-REST paths.
 	TimeUnit TimeUnit      `json:"timeUnit,omitempty"`
 	Items    []ItemSummary `json:"items"`
@@ -907,9 +907,9 @@ type ItemSummary struct {
 	FirstTake  *ItemTake      `json:"firstTake,omitempty"`
 }
 
-// ItemTake is one take: t in match-relative seconds (view surface unit).
+// ItemTake is one take: time in match-relative seconds (view surface unit).
 type ItemTake struct {
-	T       float64 `json:"t"`
+	T       float64 `json:"time"`
 	TakenBy string  `json:"takenBy,omitempty"`
 	Team    string  `json:"team,omitempty"`
 }

@@ -5,6 +5,33 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-21 (tweak-api)
+
+- **Time-field polarity flip — `t` is ms, `time` is seconds (still schema
+  v56, unreleased).** The time-field naming convention flips so it becomes
+  exception-free:
+  - **`t` = int32 milliseconds, ALWAYS** — sparse event lists and dense
+    per-sample arrays alike. The dense stored arrays already used `t`-in-ms,
+    so they conform without change — that is the point of this polarity, and
+    the big sparse event lists (frags/damage/shots/chat/…) get the compact
+    key for the compact type (a payload win).
+  - **`time` = float64 seconds, ALWAYS.**
+  - Descriptive names (`startTime`, `endTime`, `nextDeathTime`, `dropTime`,
+    `duration`, `availableFrom`/`takenAt`/`respawnAt`, …) keep carrying the
+    endpoint's native unit, declared by the `timeUnit` echo; `*Ms`-suffixed
+    names (`startMs`, `windowMs`, `atMs`, `durationMs`) are unchanged;
+    `/demoinfo` stays the KTX units island.
+  - **JSON key renames.** Stored ms fields `json:"time"`→`json:"t"`
+    (FragEntry, DamageEntry, PositionalKill, Shot, MatchEvent/chat,
+    AirgibEvent, BackpackDrop, WeaponPickup, OpeningResult firstTakes,
+    and the timeline frag/death/kill/powerup/streak events). Seconds view
+    surfaces `json:"t"`→`json:"time"` (events `TaggedEvent`, buckets-row,
+    state-at, items-summary `firstTake`). loc-trails residences rename
+    `s`/`e`→`start`/`end`. Go field names are unchanged — only the JSON
+    tags. The webapp reads, OpenAPI spec, MCP tool descriptions, and the
+    committed golden corpus were updated in lock-step (golden diff audited
+    as a pure key rename — no value changed). schemaVersion stays 56.
+
 ## 2026-07-15 (tweak-api)
 
 - **`timeUnit` echo + codified time-unit naming convention (schema
@@ -24,13 +51,14 @@ detail.
     `/events`, `/state-at`, `/stream-slice` (envelope), `/loc-trails`,
     `/buckets?layout=row`, the `/items?summary=true` shape.
   - **Field-name conventions still hold.** The sparse match-position `t`
-    (float seconds) and `time` (int32 ms) names are absolute on every
-    endpoint, and dense per-sample arrays stay int32 ms under compact
-    names — the `/stream-slice` embedded change/interval/position tracks
-    (`t`/`s`/`e` are ms even though that envelope's `timeUnit` is `s`),
-    the `/aim` crosshair `t` + `lgRamp` `since` samples, and the columnar
-    `/buckets` axis `startMs` + `windowMs`. `/overview`'s `timing` block
-    is a wall-clock island with explicit `*Ms` names.
+    (int32 ms) and `time` (float seconds) names are absolute on every
+    endpoint (see the 2026-07-21 polarity-flip entry above), and dense
+    per-sample arrays stay int32 ms under compact names — the
+    `/stream-slice` embedded change/interval/position tracks (`t`/`s`/`e`
+    are ms even though that envelope's `timeUnit` is `s`), the `/aim`
+    crosshair `t` + `lgRamp` `since` samples, and the columnar `/buckets`
+    axis `startMs` + `windowMs`. `/overview`'s `timing` block is a
+    wall-clock island with explicit `*Ms` names.
   - **Shape change — bare arrays become objects.** To carry the
     `timeUnit` echo, the four endpoints that returned a top-level JSON
     array now return an envelope object: `/chat` →
@@ -42,9 +70,10 @@ detail.
   - **Escape hatch.** `GET /v1/demos/{id}/artifacts/{name}` serves the
     raw stored result sections in int32 ms as-is — no `timeUnit`, one of
     the two exceptions — the way to always get the raw stored milliseconds.
-  - Stored `result.*` structs, `qw-analyze`/WASM output, and the golden
-    corpus are unchanged — still int32 ms; this is a transport-surface
-    change only (schemaVersion restamped to 56). See
+  - Stored `result.*` structs stay int32 ms; the transport surface added
+    only the `timeUnit` echo here (schemaVersion restamped to 56). The
+    JSON *key* rename that finalized the polarity landed later in v56 —
+    see the 2026-07-21 entry above. See
     [mvd-api/API.md §2.1](mvd-api/API.md) and
     [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) §"Time units".
 

@@ -40,7 +40,7 @@ type TimelineAnalysisResult struct {
 // lethality to the airborne hit when a later rocket landed the kill; it is
 // a highlight heuristic, not an exact killing-blow flag.
 type AirgibEvent struct {
-	Time           int32   `json:"time"`                     // hit time, match-relative ms
+	Time           int32   `json:"t"`                        // hit time, match-relative ms
 	Attacker       string  `json:"attacker"`                 // resolved name of the rocketeer
 	AttackerTeam   string  `json:"attackerTeam,omitempty"`   //
 	AttackerUserID int     `json:"attackerUserID,omitempty"` // for Hub viewer links (shooter perspective)
@@ -146,7 +146,7 @@ type MapLocation struct {
 // TimelineFragEvent represents a single frag with time, player and team info.
 // Time is integer milliseconds (schema v8).
 type TimelineFragEvent struct {
-	Time   int32  `json:"time"`
+	Time   int32  `json:"t"`
 	Player string `json:"player"` // Player name who got the frag
 	Team   string `json:"team"`
 	Delta  int    `json:"delta"` // Frag count change (+1 for kill, -1 for suicide/teamkill)
@@ -172,7 +172,7 @@ type TimelinePause struct {
 // player->deaths (ktx/src/client.c) and thus its efficiency definition.
 // Time is integer milliseconds (schema v8).
 type TimelineDeathEvent struct {
-	Time   int32  `json:"time"`
+	Time   int32  `json:"t"`
 	Player string `json:"player"` // Player name who died
 	Team   string `json:"team"`
 }
@@ -186,7 +186,7 @@ type TimelineDeathEvent struct {
 // the kills-based efficiency = kills/(kills+deaths). Time is integer
 // milliseconds (schema v8).
 type TimelineKillEvent struct {
-	Time   int32  `json:"time"`
+	Time   int32  `json:"t"`
 	Player string `json:"player"` // Player name who got the kill (killer)
 	Team   string `json:"team"`
 }
@@ -194,7 +194,7 @@ type TimelineKillEvent struct {
 // PowerupEvent represents a powerup pickup event for Key Moments.
 // Time/EndTime/Duration are integer milliseconds (schema v8).
 type PowerupEvent struct {
-	Time         int32  `json:"time"`         // Demo time when picked up (ms)
+	Time         int32  `json:"t"`            // Demo time when picked up (ms)
 	EndTime      int32  `json:"endTime"`      // Demo time when lost/expired (ms)
 	PlayerName   string `json:"playerName"`   // Player name
 	PlayerSlot   int    `json:"playerSlot"`   // Player slot in demo
@@ -208,7 +208,7 @@ type PowerupEvent struct {
 // FragStreakEvent represents a frag streak (spawn-to-death run) for Key Moments.
 // Time/EndTime/Duration are integer milliseconds (schema v8).
 type FragStreakEvent struct {
-	Time         int32  `json:"time"`         // Demo time when player spawned (ms)
+	Time         int32  `json:"t"`            // Demo time when player spawned (ms)
 	EndTime      int32  `json:"endTime"`      // Demo time when player died (or match ended) (ms)
 	PlayerName   string `json:"playerName"`   // Player name
 	PlayerUserID int    `json:"playerUserID"` // Player UserID for Hub viewer track param

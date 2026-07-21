@@ -17,7 +17,7 @@ package result
 // only emits the hint for heavy weapons, and the QW protocol does
 // not transmit backpack contents as wire-level entity state.
 type BackpackDrop struct {
-	Time   int32      `json:"time"` // Match-relative milliseconds (schema v8)
+	Time   int32      `json:"t"` // Match-relative milliseconds (schema v8)
 	Player string     `json:"player"`
 	Team   string     `json:"team,omitempty"`
 	Weapon string     `json:"weapon"` // "rl" or "lg"

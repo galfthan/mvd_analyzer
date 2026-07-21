@@ -204,8 +204,10 @@ getLocTrails) echoes a top-level `timeUnit` (`"ms"`|`"s"`) — the unit of
 every time value in the response (schema v56) — with two exceptions,
 getDemoInfo (mixed KTX-native units) and getArtifact (raw stored bytes).
 There is no unit-selection input. Field-name conventions still hold: `t`
-is float seconds, `time` is int32 ms, and dense per-sample arrays stay
-int32 ms under compact names. See
+is int32 ms (sparse event lists and dense per-sample arrays alike),
+`time` is float seconds, and descriptive names (`startTime`, `endTime`,
+`nextDeathTime`, …) carry the endpoint's native unit per the `timeUnit`
+echo. See
 [mvd-api/API.md §2.1](../mvd-api/API.md) for the per-endpoint values.
 
 #### `searchGames(...)`
@@ -407,7 +409,7 @@ Useful for movement-pattern reasoning ("what's adjacent to RA?",
 | `players`   | `string[]` | all | Restrict to these speakers |
 | `types`     | `string[]` | `["chat","teamsay"]` | Narrow to one of the two |
 
-Output: `{ messages: []result.MatchEvent }` — each entry has `time`,
+Output: `{ messages: []result.MatchEvent }` — each entry has `t`,
 `type` (`chat` or `teamsay`), `player`, `team`, `message` (raw with
 ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
 `getEvents(types:["chat"])` when you only want chat. (mvd-api returns a
@@ -423,7 +425,7 @@ structuredContent must be a JSON object.)
 | `weapons` | `string[]` | both | Dropped-weapon codes (`rl`, `lg`); forwarded as a CSV set, matching REST `/backpacks` |
 | `startTime`/`endTime` | `number` | full match | Match-relative **seconds**; windows the drop time |
 
-Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
+Output: `{ backpacks: []result.BackpackDrop }` — each entry has `t`,
 `player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
 (resolved name), `entNum` (server edict — joins to
 `weapon-pickups[].backpackEnt`). (Wrapped under `backpacks`; see the
@@ -441,8 +443,8 @@ Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
 | `summary` | `bool` | **`true`** (MCP-only default) | Per-item take aggregates `{takenCount, byPlayer, firstTake}` instead of the full phase timeline. Pass `false` for every phase (REST `/items` defaults to the timeline; the defaulted MCP response carries a `hint` field saying how to opt out). |
 
 Summary output: `{ items: [{ name, kind, entNum, loc?, takenCount,
-byPlayer?: {name: n}, firstTake?: { t, takenBy?, team? } }] }` — `t` in
-match-relative seconds. The one-call shape for "who took which YA, and
+byPlayer?: {name: n}, firstTake?: { time, takenBy?, team? } }] }` — `time`
+in match-relative seconds. The one-call shape for "who took which YA, and
 who got there first".
 
 Timeline output (`summary: false`): `result.ItemsResult` —
@@ -462,7 +464,7 @@ Timeline output (`summary: false`): `result.ItemsResult` —
 | `source`  | `string`   | both | `world` (spawner) or `backpack` (RL/LG drop) |
 | `startTime`/`endTime` | `number` | full match | Match-relative **seconds**; windows the pickup time |
 
-Output: `{ pickups: []result.WeaponPickup }` — each entry has `time`,
+Output: `{ pickups: []result.WeaponPickup }` — each entry has `t`,
 `player`, `team`, `weapon`, `source`, `hadBefore`, `kills` (before
 picker's next death), `nextDeathTime`, plus for backpack pickups
 `backpackEnt`, `dropper`, `dropperTeam`, `dropTime`. Joins to
@@ -498,7 +500,7 @@ Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
 | `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` |
 
 Output: `view.EventsView` —
-`{ events: [{ t, type, player, detail }, …] }`. Per-type `detail`
+`{ events: [{ time, type, player, detail }, …] }`. Per-type `detail`
 keys are in RESULT_SCHEMA.md.
 
 #### `getStreamSlice({demoId, ...})`
@@ -524,7 +526,7 @@ intervals clamped to the window).
 | `players` | `string[]` | all | — |
 | `fields`  | `string[]` | all standard minus `sp`/`d` | Spawn/death timestamps are rejected — they're events, not state |
 
-Output: `view.StateAtView` — `{ t, players: { name: {...fields} } }`.
+Output: `view.StateAtView` — `{ time, players: { name: {...fields} } }`.
 Change streams resolve to "latest entry ≤ time" (carry-forward);
 intervals to membership; position to nearest sample.
 
@@ -539,7 +541,7 @@ intervals to membership; position to nearest sample.
 | `endTime`    | `float64` | match end | — |
 
 Output: `view.LocTrailsView` —
-`{ players: [{ name, sequence: [{ s, e, loc }, …] }, …] }`.
+`{ players: [{ name, sequence: [{ start, end, loc }, …] }, …] }`.
 
 #### `getRegionControl({demoId, windowMs?, startTime?, endTime?})`
 

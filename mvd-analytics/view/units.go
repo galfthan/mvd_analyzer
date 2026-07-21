@@ -17,8 +17,8 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 //   - "s" (float64 seconds): the derived views (events, buckets rows, state-at,
 //     stream-slice envelope, loc-trails, items summary).
 //
-// The sparse match-position field names are still absolute: a top-level `t` is
-// float seconds and a `time` is int32 ms on every endpoint; `timeUnit` names
+// The sparse match-position field names are still absolute: a `t` is int32 ms
+// and a top-level `time` is float seconds on every endpoint; `timeUnit` names
 // the unit of the descriptively-named times (startTime, respawnAt, duration, …)
 // that a reader would otherwise have to guess.
 //

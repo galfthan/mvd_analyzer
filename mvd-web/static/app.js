@@ -1852,13 +1852,13 @@ function displayKeyMoments(result) {
     // Get hub info for viewer links (from currentResult which may have hubInfo set)
     const hubInfo = currentResult?.hubInfo;
 
-    // Schema v8: powerupEvents/fragStreaks time/endTime/duration fields
-    // are int32 ms on the raw result. Convert to seconds at intake so
-    // the rest of this function (formatDuration, setCurrentTime, hub
+    // Schema v56: powerupEvents/fragStreaks carry `t` (int32 ms) plus the
+    // descriptive endTime/duration (also ms). Convert to seconds at intake
+    // so the rest of this function (formatDuration, setCurrentTime, hub
     // URL `from`/`to` which expect seconds) is unchanged.
     const powerupEvents = (result.timelineAnalysis?.powerupEvents || []).map(ev => ({
         ...ev,
-        time: ev.time * 0.001,
+        time: ev.t * 0.001,
         endTime: (ev.endTime || 0) * 0.001,
         duration: (ev.duration || 0) * 0.001,
     }));
@@ -1911,10 +1911,10 @@ function displayKeyMoments(result) {
     const streakEmpty = document.getElementById('fragstreaks-empty');
     streakBody.innerHTML = '';
 
-    // Same v8 ms→s conversion for fragStreaks (time/endTime/duration are ms).
+    // Same ms→s conversion for fragStreaks (`t`/endTime/duration are ms).
     const fragStreaks = (result.timelineAnalysis?.fragStreaks || []).map(s => ({
         ...s,
-        time: s.time * 0.001,
+        time: s.t * 0.001,
         endTime: (s.endTime || 0) * 0.001,
         duration: (s.duration || 0) * 0.001,
     }));
@@ -1976,8 +1976,8 @@ function displayAirgibs(result) {
     if (!table || !body) return;
 
     const hubInfo = currentResult?.hubInfo || null;
-    // time is int32 ms on the raw result; keep a seconds copy for seek/hub.
-    const data = (result.timelineAnalysis?.airgibs || []).map(a => ({ ...a, timeSec: a.time * 0.001 }));
+    // `t` is int32 ms on the raw result; keep a seconds copy for seek/hub.
+    const data = (result.timelineAnalysis?.airgibs || []).map(a => ({ ...a, timeSec: a.t * 0.001 }));
 
     if (data.length === 0) {
         body.innerHTML = '';
@@ -1991,7 +1991,7 @@ function displayAirgibs(result) {
     table.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc', 'sort-desc', 'sort-active'));
     const aboveTh = table.querySelector('thead th[data-sort="aboveShooter"]');
     if (aboveTh) aboveTh.classList.add('sort-desc');
-    data.sort((a, b) => ((b.heightAboveAttacker ?? 0) - (a.heightAboveAttacker ?? 0)) || (a.time - b.time));
+    data.sort((a, b) => ((b.heightAboveAttacker ?? 0) - (a.heightAboveAttacker ?? 0)) || (a.t - b.t));
 
     // heightAboveAttacker is omitted on the wire for a dead-level 0 (omitempty)
     // and when the shooter had no position sample near the hit — the neutral 0
@@ -2022,7 +2022,7 @@ function displayAirgibs(result) {
             <td>${escapeHtml(a.victim || 'Unknown')}</td>
             <td>${escapeHtml(a.loc || '-')}</td>
             <td data-sort-value="${a.lethal ? 1 : 0}">${lethalCell}</td>
-            <td class="time-cell time-link" data-sort-value="${a.time}">${formatDuration(a.timeSec)}</td>
+            <td class="time-cell time-link" data-sort-value="${a.t}">${formatDuration(a.timeSec)}</td>
             <td>${watchCell}</td>
         `;
         tr.querySelector('.time-link').addEventListener('click', () => setCurrentTime(a.timeSec));
@@ -2486,7 +2486,7 @@ function displayPackDrops(result) {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // Schema v8: backpacks[].time, weaponPickups[].time / .nextDeathTime /
+    // Schema v56: backpacks[].t, weaponPickups[].t / .nextDeathTime /
     // .dropTime are int32 ms. The pickup↔drop join must happen in the
     // same time space — index against raw ms `dropTime` (an exact int)
     // before converting. After the join, convert ms→s so hubAnchor /
@@ -2507,12 +2507,12 @@ function displayPackDrops(result) {
     }
 
     const rows = rawDrops.map(rawDrop => {
-        const rawPickup = pickupByKey[`${rawDrop.entNum}@${rawDrop.time}`] || null;
+        const rawPickup = pickupByKey[`${rawDrop.entNum}@${rawDrop.t}`] || null;
         // Convert ms→s on the per-row copy so downstream renderers see seconds.
-        const drop = { ...rawDrop, time: rawDrop.time * 0.001 };
+        const drop = { ...rawDrop, time: rawDrop.t * 0.001 };
         const pickup = rawPickup ? {
             ...rawPickup,
-            time: rawPickup.time * 0.001,
+            time: rawPickup.t * 0.001,
             nextDeathTime: (rawPickup.nextDeathTime || 0) * 0.001,
             dropTime: (rawPickup.dropTime || 0) * 0.001,
         } : null;
@@ -3029,16 +3029,16 @@ function displayTimelineAnalysis(result) {
     timelineState.matchStartTime = 0;
     timelineState.demoOffset = (result.streams?.global?.demoOffset || 0) * 0.001;
     timelineState.duration = (result.match?.duration || 600000) * 0.001;
-    timelineState.events = (result.messages?.events || []).map(e => ({ ...e, time: e.time * 0.001 }));
+    timelineState.events = (result.messages?.events || []).map(e => ({ ...e, time: e.t * 0.001 }));
     // Sorted by time once here so prepScoreData / precomputeFragCounts don't
     // each re-sort a clone on every render (pan-drag re-renders many times/sec).
-    timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.time * 0.001 })).sort((a, b) => a.time - b.time); // Frag events from stat tracking
-    timelineState.deathEvents = (timeline?.deathEvents || []).map(d => ({ ...d, time: d.time * 0.001 })); // Per-player deaths (every death) for the frags/deaths drill-down
-    timelineState.killEvents = (timeline?.killEvents || []).map(k => ({ ...k, time: k.time * 0.001 })); // Per-player enemy kills (killer-keyed) for the frags/deaths drill-down
-    timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.time * 0.001 })); // RL/LG drops from KTX hint
+    timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.t * 0.001 })).sort((a, b) => a.time - b.time); // Frag events from stat tracking
+    timelineState.deathEvents = (timeline?.deathEvents || []).map(d => ({ ...d, time: d.t * 0.001 })); // Per-player deaths (every death) for the frags/deaths drill-down
+    timelineState.killEvents = (timeline?.killEvents || []).map(k => ({ ...k, time: k.t * 0.001 })); // Per-player enemy kills (killer-keyed) for the frags/deaths drill-down
+    timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.t * 0.001 })); // RL/LG drops from KTX hint
     timelineState.powerupEvents = (timeline?.powerupEvents || []).map(ev => ({ // per-run records: player, team, frags, duration
         ...ev,
-        time: ev.time * 0.001,
+        time: ev.t * 0.001,
         endTime: (ev.endTime || 0) * 0.001,
         duration: (ev.duration || 0) * 0.001,
     }));
@@ -4647,7 +4647,7 @@ function buildFullChat() {
 
     if (!currentResult?.messages?.events || teams.length < 2) return;
 
-    // Schema v8: messages.events[].time is int32 ms on the raw result;
+    // Schema v56: messages.events[].t is int32 ms on the raw result;
     // timelineState.events was already converted to seconds at intake in
     // displayTimelineAnalysis, so use that pre-converted copy here.
     // `duration` (timelineState.duration) is also seconds.
@@ -6307,11 +6307,11 @@ function initMapView(result) {
     // Backpack drops — mirrors mapState.deathEvents in shape so renderMap
     // can fade them on the same DEATH_X_DURATION timeline. Only RL/LG drops
     // exist in result.backpacks today (see qwanalytics/result/backpacks.go).
-    // Schema v8: d.time is int32 ms; convert to seconds because the renderMap
+    // Schema v56: d.t is int32 ms; convert to seconds because the renderMap
     // fade compares against mapState.currentTime (seconds) and DEATH_X_DURATION
     // (seconds).
     mapState.dropEvents = (result.backpacks || []).map(d => ({
-        t:      d.time * 0.001,
+        t:      d.t * 0.001,
         wx:     d.origin?.[0] || 0,
         wy:     d.origin?.[1] || 0,
         wz:     d.origin?.[2] || 0,

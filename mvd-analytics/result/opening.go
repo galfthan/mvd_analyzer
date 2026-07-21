@@ -29,7 +29,7 @@ type OpeningTake struct {
 	Kind    string `json:"kind"`
 	EntNum  int    `json:"entNum"`
 	Loc     string `json:"loc,omitempty"`
-	Time    int32  `json:"time"` // match-relative milliseconds (schema v8)
+	Time    int32  `json:"t"` // match-relative milliseconds (schema v8)
 	TakenBy string `json:"takenBy"`
 	Team    string `json:"team,omitempty"`
 }

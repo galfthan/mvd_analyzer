@@ -40,8 +40,8 @@ type PlayerTrail struct {
 // unexported li always holds the index so grouping/merging stay
 // name-agnostic and the index render is a final relabel.
 type TrailEntry struct {
-	Start float64 `json:"s"`
-	End   float64 `json:"e"`
+	Start float64 `json:"start"`
+	End   float64 `json:"end"`
 	Loc   string  `json:"loc,omitempty"`
 	Li    *int16  `json:"li,omitempty"`
 
