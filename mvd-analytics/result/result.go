@@ -684,8 +684,9 @@ package result
 //     always did; compact name = compact type), while the float-seconds view
 //     surfaces use `time`. DENSE per-sample payloads always stay ms (aim
 //     crosshair `t` / lgRamp `since`, stream-slice embedded tracks, columnar
-//     buckets startMs/windowMs axis); /aim (no sparse match position) and
-//     /demoinfo (KTX units island) are ungoverned. The four bare-array
+//     buckets startMs/windowMs axis); /aim echoes "ms" (its dense samples).
+//     Only /demoinfo (KTX units island) and /artifacts (raw stored bytes)
+//     are echo-exempt. The four bare-array
 //     bodies (chat/airgibs/backpacks/weapon-pickups) gain a {timeUnit,
 //     <list>} envelope so the echo has a home.
 //   - Time-field polarity flip: every stored ms field formerly tagged

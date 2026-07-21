@@ -69,9 +69,13 @@ func (s *server) handleGamesSearch(w http.ResponseWriter, r *http.Request) {
 	out, err := s.searcher.Search(ctx, params)
 	if err != nil {
 		// The search hits a live upstream (or is unconfigured); either way
-		// this is a bad-gateway condition, not a client error. The message
-		// is hub-supplied / config text — no local cache path leaks.
-		writeError(w, http.StatusBadGateway, "hub_upstream", err.Error())
+		// this is a bad-gateway condition, not a client error. The raw error
+		// embeds the upstream PostgREST body and, on a transport failure, the
+		// full hub URL+query — log it server-side against the request id and
+		// hand the client a generic message so no upstream detail leaks.
+		s.logger.Error("hub search upstream error",
+			"request_id", requestID(r.Context()), "err", err.Error())
+		writeError(w, http.StatusBadGateway, "hub_upstream", "game catalog search failed upstream")
 		return
 	}
 	// Discovery data is public and slow-moving but not immutable per-URL like

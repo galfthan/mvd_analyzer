@@ -200,11 +200,14 @@ infers their JSON Schemas from struct tags and exposes them via
 Every tool that maps to a demo endpoint (getOverview, getFrags,
 getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
 getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
-getLocTrails) echoes a top-level `timeUnit` (`"ms"`|`"s"`) — the unit of
-every time value in the response (schema v56) — with two exceptions,
-getDemoInfo (mixed KTX-native units) and getArtifact (raw stored bytes).
-There is no unit-selection input. Field-name conventions still hold: `t`
-is int32 ms (sparse event lists and dense per-sample arrays alike),
+getLocTrails) and carries match-position time echoes a top-level
+`timeUnit` (`"ms"`|`"s"`) — the unit of every time value in the response
+(schema v56). The tools not in that list carry no echo: getDemoInfo
+(mixed KTX-native units) and getArtifact (raw stored bytes) are exempt,
+and getMetadata, getLocGraph and getLocTable have no match-position time
+to unit in the first place. There is no unit-selection input. Field-name
+conventions still hold: `t` is int32 ms (sparse event lists and dense
+per-sample arrays alike),
 `time` is float seconds, and descriptive names (`startTime`, `endTime`,
 `nextDeathTime`, …) carry the endpoint's native unit per the `timeUnit`
 echo. See

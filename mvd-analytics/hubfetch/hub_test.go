@@ -1,6 +1,7 @@
 package hubfetch
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -154,6 +155,37 @@ func TestDownload_NoSHAUsesSourceDirectly(t *testing.T) {
 	}
 	if string(data) != "X" || srcHits != 1 {
 		t.Errorf("data=%q hits=%d", data, srcHits)
+	}
+}
+
+// TestCatalogBodySizeCap covers the metadata read cap (Search AND Resolve):
+// an oversized upstream catalog body is rejected with the cap error rather
+// than read unbounded (a compromised/buggy hub or a MITM of the Supabase URL
+// must not be able to OOM the host). Shrinks the package-level cap so the
+// test is cheap.
+func TestCatalogBodySizeCap(t *testing.T) {
+	orig := maxCatalogBytes
+	maxCatalogBytes = 1024
+	defer func() { maxCatalogBytes = orig }()
+
+	// Serve a JSON array that is far larger than the cap.
+	oversized := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte("["))
+		w.Write(make([]byte, maxCatalogBytes+64)) // NUL padding inside the array
+		w.Write([]byte("]"))
+	}))
+	defer oversized.Close()
+
+	c := NewClient()
+	c.SupabaseURL = oversized.URL
+	c.APIKey = "test-anon-key"
+
+	if _, err := c.Search(context.Background(), SearchParams{}); err == nil || !strings.Contains(err.Error(), "cap") {
+		t.Errorf("Search over-cap body: got err=%v, want a cap error", err)
+	}
+	if _, err := c.Resolve(1); err == nil || !strings.Contains(err.Error(), "cap") {
+		t.Errorf("Resolve over-cap body: got err=%v, want a cap error", err)
 	}
 }
 

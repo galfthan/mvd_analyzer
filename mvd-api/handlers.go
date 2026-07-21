@@ -791,8 +791,9 @@ func losBody(res *result.Result) any {
 		PVS  []result.LosTrack `json:"pvs,omitempty"`
 	}
 	out := struct {
-		Players []losPlayer `json:"players"`
-	}{Players: []losPlayer{}} // never null: the doc + API.md promise a players array
+		TimeUnit view.TimeUnit `json:"timeUnit"`
+		Players  []losPlayer   `json:"players"`
+	}{TimeUnit: view.UnitMs, Players: []losPlayer{}} // never null: the doc + API.md promise a players array. Intervals are int32-ms → ms.
 	if res.Streams != nil {
 		out.Players = make([]losPlayer, len(res.Streams.Players))
 		for i := range res.Streams.Players {
@@ -818,8 +819,9 @@ func (s *server) handleProjectiles(w http.ResponseWriter, r *http.Request) {
 		pr = res.Streams.Projectiles
 	}
 	writeJSON(w, http.StatusOK, struct {
+		TimeUnit    view.TimeUnit             `json:"timeUnit"`
 		Projectiles *result.ProjectileStreams `json:"projectiles"`
-	}{pr})
+	}{view.UnitMs, pr})
 }
 
 // handleBeams serves the LG bolt stream (from the always-full base parse).
@@ -833,8 +835,9 @@ func (s *server) handleBeams(w http.ResponseWriter, r *http.Request) {
 		bm = res.Streams.Beams
 	}
 	writeJSON(w, http.StatusOK, struct {
-		Beams *result.BeamStreams `json:"beams"`
-	}{bm})
+		TimeUnit view.TimeUnit       `json:"timeUnit"`
+		Beams    *result.BeamStreams `json:"beams"`
+	}{view.UnitMs, bm})
 }
 
 // handleNails serves the ng/sng nail-flight stream (highest volume; from the
@@ -849,8 +852,9 @@ func (s *server) handleNails(w http.ResponseWriter, r *http.Request) {
 		nl = res.Streams.Nails
 	}
 	writeJSON(w, http.StatusOK, struct {
-		Nails *result.ProjectileStreams `json:"nails"`
-	}{nl})
+		TimeUnit view.TimeUnit             `json:"timeUnit"`
+		Nails    *result.ProjectileStreams `json:"nails"`
+	}{view.UnitMs, nl})
 }
 
 func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {

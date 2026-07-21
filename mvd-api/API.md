@@ -70,16 +70,18 @@ reachable without an API key.
 `timeUnit` is **the unit of every time value in the response**. There is
 **no unit selection** — the value is fixed per endpoint. The rule is:
 
-> **Every `/v1/demos/{id}/*` JSON response carries a top-level
-> `"timeUnit": "ms"|"s"`, except `/demoinfo` (mixed KTX-native units) and
-> `/artifacts/{name}` (raw stored bytes).**
+> **Every `/v1/demos/{id}/*` JSON response that carries match-position
+> time values echoes a top-level `"timeUnit": "ms"|"s"`, except
+> `/demoinfo` (KTX's own mixed units) and `/artifacts/{name}` (raw stored
+> bytes). Responses with no match-position time — `/loc-table`,
+> `/loc-graph`, `/metadata` — carry no echo.**
 
 Read `timeUnit` and you know the unit of that response's times — no
 per-field guessing. The value is fixed per endpoint:
 
 | `timeUnit` | Endpoints |
 |---|---|
-| **`"ms"`** (int32 milliseconds) | `/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, `/items` (full phase timeline), `/overview`, `/aim`, `/buckets?layout=column`, `/region-control` |
+| **`"ms"`** (int32 milliseconds) | `/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, `/items` (full phase timeline), `/overview`, `/aim`, `/buckets?layout=column`, `/region-control`, `/los`, `/streams/projectiles`, `/streams/beams`, `/streams/nails` |
 | **`"s"`** (float64 seconds) | `/events`, `/buckets?layout=row`, `/state-at`, `/stream-slice`, `/loc-trails`, `/items?summary=true` |
 
 The four formerly bare-array endpoints wrap their array in an object so
@@ -108,14 +110,21 @@ float-seconds view surfaces — `/events`, `/buckets?layout=row`,
 `/state-at`, `/items?summary=true`'s `firstTake` — carry their timestamp
 under `time`.
 
-The two exceptions:
+The exceptions — time-carrying responses that still don't echo:
 
 - **`/demoinfo` is the KTX units island** — KTX's own clock, a mix of
   native units (see RESULT_SCHEMA.md §DemoInfoResult), so no single echo
   describes it.
 - **`/artifacts/{name}`** serves the raw stored result sections
   byte-for-byte (the exact-bytes escape hatch), no echo. The underlying
-  stored schema is all int32 ms — see RESULT_SCHEMA.md §"Time units".
+  stored schema is all int32 ms — see RESULT_SCHEMA.md §"Time units". The
+  one exception is `/artifacts/los`: los is a materialized artifact, not a
+  raw stored section, so it aliases the `/los` body and carries its `"ms"`
+  echo like the curated endpoint.
+
+Separately, the responses with **no match-position time at all** —
+`/loc-table`, `/loc-graph`, `/metadata` — carry no echo because there is
+no time value to unit.
 
 `/overview`'s `timing` block is orthogonal to the echo: its wall-clock
 fields are explicitly `*Ms`-named (`demoOffset`, `demoStartUnixMs`,

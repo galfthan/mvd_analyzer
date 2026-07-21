@@ -109,7 +109,16 @@ func (c *Client) Search(ctx context.Context, params SearchParams) (any, error) {
 		return nil, fmt.Errorf("hub search: %w", err)
 	}
 	defer resp.Body.Close()
-	body, _ := io.ReadAll(resp.Body)
+	// Cap the metadata read: read one byte past the cap so an over-cap body
+	// is detectable (see maxCatalogBytes) — a compromised/buggy hub must not
+	// be able to OOM the host with an oversized catalog page.
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxCatalogBytes+1))
+	if err != nil {
+		return nil, fmt.Errorf("hub search: %w", err)
+	}
+	if int64(len(body)) > maxCatalogBytes {
+		return nil, fmt.Errorf("hub search: response exceeds %d-byte cap", maxCatalogBytes)
+	}
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent {
 		return nil, fmt.Errorf("hub search: status %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
 	}

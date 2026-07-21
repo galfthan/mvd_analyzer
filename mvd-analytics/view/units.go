@@ -5,15 +5,20 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 // Time-unit ECHO for the REST transport surface (schema v56).
 //
 // `timeUnit` is the unit of every time value in a response (API.md §2.1).
-// EVERY `/v1/demos/{id}/*` JSON response carries it, with two principled
-// exceptions: `/demoinfo` (KTX's own clock, a mix of native units) and
-// `/artifacts/{name}` (the raw stored result sections, served byte-for-byte).
-// There is NO unit selection — the value is FIXED per endpoint:
+// EVERY `/v1/demos/{id}/*` JSON response that carries match-position time
+// values echoes it, except `/demoinfo` (KTX's own clock, a mix of native
+// units) and `/artifacts/{name}` (the raw stored result sections, served
+// byte-for-byte; except /artifacts/los, a materialized view aliasing /los
+// that carries its "ms" echo). Responses with no match-position time — /loc-table,
+// /loc-graph, /metadata — carry no echo. There is NO unit selection — the
+// value is FIXED per endpoint:
 //
 //   - "ms" (int32 milliseconds): the stored pass-throughs (frags, damage,
 //     shots, chat, airgibs, backpacks, weapon-pickups, items timeline,
 //     overview), plus /aim (dense crosshair `t` + lgRamp `since`), the
-//     columnar /buckets axis (startMs/windowMs), and /region-control (windowMs).
+//     columnar /buckets axis (startMs/windowMs), /region-control (windowMs),
+//     and the dense columnar stream bodies (/los intervals, /streams/
+//     projectiles + /streams/beams + /streams/nails — all int32-ms columns).
 //   - "s" (float64 seconds): the derived views (events, buckets rows, state-at,
 //     stream-slice envelope, loc-trails, items summary).
 //

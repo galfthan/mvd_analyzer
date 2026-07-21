@@ -326,7 +326,7 @@ is exact and works on any QW server); for LG — which has no per-shot fire
 sound — it is one `TE_LIGHTNING2` beam, emitted once per fire tick and
 carrying the firing entity directly (`source:"beam"`). One beam == one LG
 attack == one cell, so LG counts match KTX `acc.attacks` exactly. Times are
-match-relative ms (same clock as `damage.events[].time`).
+match-relative ms (same clock as `damage.events[].t`).
 
 The `shots` stream is **match-gated** (schema v50): warmup / prewar /
 post-match fires are dropped at the source, like every analytics stream
@@ -1262,14 +1262,19 @@ is a fixed naming convention, **not a unit selection**:
   `t`-in-ms, so they conform without change, and the big sparse event
   lists get the compact key for the compact type.
 - **`timeUnit` is the unit of every time value in a response.** Every
-  `/v1/demos/{id}/*` response echoes a top-level **`"timeUnit":"ms"|"s"`**,
-  with two exceptions: `/demoinfo` (KTX's own clock, a mix of native
-  units — §DemoInfoResult) and `/artifacts/{name}` (raw stored sections,
-  int32 ms as-is — the exact-ms escape hatch). There is no `units` param;
+  `/v1/demos/{id}/*` response that carries match-position time values
+  echoes a top-level **`"timeUnit":"ms"|"s"`**, except `/demoinfo` (KTX's
+  own clock, a mix of native units — §DemoInfoResult) and
+  `/artifacts/{name}` (raw stored sections, int32 ms as-is — the exact-ms
+  escape hatch; `/artifacts/los` is the lone exception, a materialized view
+  aliasing `/los` and carrying its `"ms"` echo). Responses with no
+  match-position time — `/loc-table`,
+  `/loc-graph`, `/metadata` — carry no echo. There is no `units` param;
   the value is FIXED per endpoint. Native ms: `/frags`, `/damage`,
   `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, the
   `/items` full timeline, `/overview`, `/aim`, `/buckets?layout=column`,
-  `/region-control`. Native seconds: `/events`, `/state-at`,
+  `/region-control`, `/los`, `/streams/projectiles`, `/streams/beams`,
+  `/streams/nails`. Native seconds: `/events`, `/state-at`,
   `/stream-slice` envelope, `/loc-trails`, `/buckets?layout=row`, the
   `/items` summary.
 
@@ -1853,7 +1858,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
-| v56 | **`timeUnit` echo on the REST/MCP transport** (additive; stored structs unchanged — still int32 ms). `timeUnit` is the unit of every time value in a response: **every `/v1/demos/{id}/*` response echoes a top-level `timeUnit`, except `/demoinfo` (mixed KTX-native units) and `/artifacts/{name}` (raw stored bytes)**. The value is FIXED per endpoint — no unit selection: `ms` for frags/damage/shots/chat/airgibs/backpacks/weapon-pickups/items-timeline/overview/aim/buckets-column/region-control, `s` for the derived views events/state-at/stream-slice-envelope/loc-trails/buckets-row/items-summary. Field-name polarity (exception-free): **`t` is int32 ms, `time` is float seconds** — always, on every endpoint. The stored ms event lists (frags/damage/shots/chat/backpacks/weapon-pickups/airgibs/timeline events) carry their timestamp under `t`; the float-seconds view surfaces (events/state-at/buckets-row/items-summary `firstTake`) carry it under `time`; loc-trails residences use `start`/`end`. The dense per-sample arrays (`/stream-slice` embedded tracks, `/aim` samples, columnar `/buckets` axis) already used `t`-in-ms and conform natively. The four formerly bare-array endpoints wrap their array to carry the echo: `/chat`→`{timeUnit,messages}`, `/airgibs`→`{timeUnit,airgibs}`, `/backpacks`→`{timeUnit,backpacks}`, `/weapon-pickups`→`{timeUnit,pickups}` (the one non-additive shape change). See the §"Transport surface" note above and [mvd-api/API.md §2.1](../mvd-api/API.md). |
+| v56 | **`timeUnit` echo on the REST/MCP transport** (additive; stored structs unchanged — still int32 ms). `timeUnit` is the unit of every time value in a response: **every `/v1/demos/{id}/*` response that carries match-position time values echoes a top-level `timeUnit`, except `/demoinfo` (mixed KTX-native units) and `/artifacts/{name}` (raw stored bytes); responses with no match-position time — `/loc-table`, `/loc-graph`, `/metadata` — carry no echo**. The value is FIXED per endpoint — no unit selection: `ms` for frags/damage/shots/chat/airgibs/backpacks/weapon-pickups/items-timeline/overview/aim/buckets-column/region-control/los/streams-projectiles/streams-beams/streams-nails, `s` for the derived views events/state-at/stream-slice-envelope/loc-trails/buckets-row/items-summary. Field-name polarity (exception-free): **`t` is int32 ms, `time` is float seconds** — always, on every endpoint. The stored ms event lists (frags/damage/shots/chat/backpacks/weapon-pickups/airgibs/timeline events) carry their timestamp under `t`; the float-seconds view surfaces (events/state-at/buckets-row/items-summary `firstTake`) carry it under `time`; loc-trails residences use `start`/`end`. The dense per-sample arrays (`/stream-slice` embedded tracks, `/aim` samples, columnar `/buckets` axis) already used `t`-in-ms and conform natively. The four formerly bare-array endpoints wrap their array to carry the echo: `/chat`→`{timeUnit,messages}`, `/airgibs`→`{timeUnit,airgibs}`, `/backpacks`→`{timeUnit,backpacks}`, `/weapon-pickups`→`{timeUnit,pickups}` (the one non-additive shape change). See the §"Transport surface" note above and [mvd-api/API.md §2.1](../mvd-api/API.md). |
 | v55 | Bounded damage becomes **death-value-derived and the default**. The v54 shadow-health cap is replaced: a survived hit is bounded == raw by identity, a killing hit's overkill comes from the end-of-frame death broadcast (bounded = raw + deathValue; corpus reconciliation tightens ~2.5x, max +-16/player on given/taken). Fallback to the approximate shadow cap only for the -99 corpse clamp and respawn-masked deaths; same-frame multi-hit deaths cascade the overkill from the last hit backward. The REST/MCP `dmg` **default flips to `bounded`** for summaries AND the full log (`raw`/`both` opt-in; a *defaulted* request on a `skipped:*` demo falls back to raw, only an explicit `dmg=bounded` 422s). Unfiltered bounded summaries substitute KTX's exact scoreboard figures (given/givenTeam/givenSelf/ewep/byWeapon-enemy; `taken` and the `enemyVs*` buckets stay reconstructed) with provenance in the new `damage.boundedSource` (`ktx` / `reconstructed`). |
 | v54 | The **bounded damage family** (additive). The wire carries only KTX's unbound damage; the scoreboard's bounded `dmg_dealt` (armor absorbed + health damage capped to remaining health) is now reconstructed per hit from tracked victim vitals: `damage.events[].bounded` (absent = equal to `damage`; `0` is a real nullified-hit value), `damage.byPlayer.<p>.bounded` (a nested `PlayerDamage`), `damage.scoreboard` deltas gain a `bounded` nest incl. `streamTeam`/`scoreTeam`, plus the `dmg` family echo and `boundedMode` (`skipped:*` on midair/instagib/dmgfrags demos — no bounded fields there). Telefrags **and stomps** now fold their bounded damage into `given`/`givenTeam`/`taken` in **both** families, matching KTX's own accumulation (telefrag: armor+health, the wire 9999 is a sentinel; stomp: the honest ~10 HP wire value); `telefrags[]`/`stomps[]` entries carry the per-kill `bounded` value. `byWeapon`/`matrix`/`ewep`/`totalDamage` still exclude positional kills (KTX `wpNONE` parity). |
 | v53 | Columnar buckets become **loc-self-contained**; view shape only, no stored-field change (bumped so the immutable schemaVersion-keyed ETags stop revalidating pre-legend bodies). The `/buckets` `layout=column` envelope gains `locTable` — the demo's interned loc-name legend, present iff an `li` column is in the output. Columnar keeps the compact raw index (row mode keeps resolving names per bucket); consumers decode locally instead of a `/loc-table` round trip. |

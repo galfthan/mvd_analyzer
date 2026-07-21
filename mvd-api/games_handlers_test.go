@@ -90,8 +90,14 @@ func TestGamesSearch_UpstreamError(t *testing.T) {
 	if status != 502 {
 		t.Fatalf("status = %d, want 502 (body=%s)", status, body)
 	}
-	if !strings.Contains(string(body), `"hub_upstream"`) || !strings.Contains(string(body), "boom") {
-		t.Errorf("body does not carry the hub_upstream code + upstream message: %s", body)
+	// The client sees the hub_upstream code and a generic message; the raw
+	// upstream detail (which can embed the hub URL/query on a transport
+	// failure) is logged server-side, not returned.
+	if !strings.Contains(string(body), `"hub_upstream"`) || !strings.Contains(string(body), "game catalog search failed upstream") {
+		t.Errorf("body does not carry the hub_upstream code + generic message: %s", body)
+	}
+	if strings.Contains(string(body), "boom") {
+		t.Errorf("body leaks verbatim upstream detail: %s", body)
 	}
 }
 

@@ -49,6 +49,17 @@ const (
 // const, only so tests can shrink it to exercise the boundary cheaply.
 var maxDownloadBytes int64 = 64 << 20
 
+// maxCatalogBytes caps how many bytes a catalog metadata response (Resolve
+// and Search) may read before the client rejects it. These are small JSON
+// payloads — a single game row for Resolve, a page of at most 100 rows for
+// Search — so the cap is far below the demo cap: a compromised or buggy hub
+// (or a MITM of HUB_SUPABASE_URL) must not be able to OOM the API host with
+// an oversized metadata body (a single Search was observed allocating
+// ~900 MiB from an unbounded read). 16 MiB is well above any legitimate
+// page yet bounds the blast radius. A variable, not a const, only so tests
+// can shrink it to exercise the boundary cheaply.
+var maxCatalogBytes int64 = 16 << 20
+
 // ErrNotFound is returned by Resolve when the hub has no row for the
 // requested gameId (an empty result set). Callers should detect it with
 // errors.Is rather than matching the message, so a hub outage whose body
@@ -128,13 +139,22 @@ func (c *Client) Resolve(gameID int) (*GameInfo, error) {
 		return nil, fmt.Errorf("supabase resolve: %w", err)
 	}
 	defer resp.Body.Close()
+	// Cap the metadata read: read one byte past the cap so an over-cap body
+	// is detectable (see maxCatalogBytes). Applies to both the error and the
+	// success bodies since both come from this upstream response.
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxCatalogBytes+1))
+	if err != nil {
+		return nil, fmt.Errorf("supabase resolve: %w", err)
+	}
+	if int64(len(body)) > maxCatalogBytes {
+		return nil, fmt.Errorf("supabase resolve: response exceeds %d-byte cap", maxCatalogBytes)
+	}
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("supabase resolve: status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var rows []GameInfo
-	if err := json.NewDecoder(resp.Body).Decode(&rows); err != nil {
+	if err := json.Unmarshal(body, &rows); err != nil {
 		return nil, fmt.Errorf("supabase resolve: decode: %w", err)
 	}
 	if len(rows) == 0 {

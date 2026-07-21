@@ -5798,9 +5798,10 @@ components:
         /los body (and the lazy `los` artifact) — per-player LOS/PVS
         interval sets. `los`/`pvs` are omitted for a player with no
         sightlines and empty on maps without a provisioned BSP.
-      required: [players]
+      required: [timeUnit, players]
       additionalProperties: false
       properties:
+        timeUnit: { type: string, enum: [ms] }
         players:
           type: array
           items:
@@ -5817,9 +5818,10 @@ components:
                 items: { $ref: "#/components/schemas/LosTrack" }
     Projectiles:
       type: object
-      required: [projectiles]
+      required: [timeUnit, projectiles]
       additionalProperties: false
       properties:
+        timeUnit: { type: string, enum: [ms] }
         projectiles:
           description: Rocket/grenade flight stream; null when the demo has none.
           oneOf:
@@ -5827,9 +5829,10 @@ components:
             - type: "null"
     Beams:
       type: object
-      required: [beams]
+      required: [timeUnit, beams]
       additionalProperties: false
       properties:
+        timeUnit: { type: string, enum: [ms] }
         beams:
           description: LG bolt stream; null when the demo has none.
           oneOf:
@@ -5837,9 +5840,10 @@ components:
             - type: "null"
     Nails:
       type: object
-      required: [nails]
+      required: [timeUnit, nails]
       additionalProperties: false
       properties:
+        timeUnit: { type: string, enum: [ms] }
         nails:
           description: Nail flight stream; null when the demo has none.
           oneOf:

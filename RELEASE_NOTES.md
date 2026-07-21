@@ -7,6 +7,23 @@ detail.
 
 ## 2026-07-21 (tweak-api)
 
+- **Review fixes — echo-rule completeness + hub read hardening (still
+  schema v56, unreleased).**
+  - `/los`, `/streams/projectiles`, `/streams/beams`, `/streams/nails` now
+    carry the `"timeUnit": "ms"` echo (their columns are all int32 ms), so
+    the documented "every time-carrying `/v1/demos/{id}/*` response echoes
+    `timeUnit`" rule is true end to end. The rule's wording is corrected
+    everywhere to its honest form: time-carrying responses echo, with
+    `/demoinfo` and `/artifacts/{name}` exempt, and the three timeless
+    responses (`/loc-table`, `/loc-graph`, `/metadata`) carry no echo.
+  - **Security.** `hubfetch` Search/Resolve now cap the upstream catalog
+    read at 16 MiB (`maxCatalogBytes`) — previously an unbounded
+    `io.ReadAll` let a compromised/buggy hub or a MITM of
+    `HUB_SUPABASE_URL` OOM the API host. And `GET /v1/games/search` no
+    longer echoes the raw upstream error (which can embed the hub URL +
+    query) into its 502 body — it returns a generic message and logs the
+    detail server-side.
+
 - **Time-field polarity flip — `t` is ms, `time` is seconds (still schema
   v56, unreleased).** The time-field naming convention flips so it becomes
   exception-free:
@@ -36,18 +53,23 @@ detail.
 
 - **`timeUnit` echo + codified time-unit naming convention (schema
   v56).** `timeUnit` is **the unit of every time value in a response**.
-  **Every `/v1/demos/{id}/*` JSON response now echoes a top-level
-  `"timeUnit": "ms"|"s"`, with exactly two exceptions: `/demoinfo`
-  (mixed KTX-native units) and `/artifacts/{name}` (raw stored bytes).**
-  There is **no unit selection** — an earlier `units=ms|s` conversion
+  **Every `/v1/demos/{id}/*` JSON response that carries match-position
+  time values echoes a top-level `"timeUnit": "ms"|"s"`, except
+  `/demoinfo` (mixed KTX-native units) and `/artifacts/{name}` (raw
+  stored bytes). Responses with no match-position time — `/loc-table`,
+  `/loc-graph`, `/metadata` — carry no echo.** There is **no unit
+  selection** — an earlier `units=ms|s` conversion
   param was dropped as over-engineered (a parallel `any`-typed
   shadow-struct hierarchy with a field-drift hazard, for a divide-by-1000
   any client can do). The value is **fixed per endpoint**:
   - **Native ms**: `/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`,
     `/backpacks`, `/weapon-pickups`, the `/items` full phase timeline,
     `/overview`, **`/aim`, `/buckets?layout=column`, `/region-control`**
-    (the last three are new this pass — every value in each is ms, so the
-    echo is a truthful `ms`; they used to carry none). **Native seconds**:
+    (new this pass — every value in each is ms, so the echo is a truthful
+    `ms`; they used to carry none), and the dense columnar stream bodies
+    **`/los`, `/streams/projectiles`, `/streams/beams`, `/streams/nails`**
+    (int32-ms columns — added in the 2026-07-21 review pass so the echo
+    rule is honest end to end). **Native seconds**:
     `/events`, `/state-at`, `/stream-slice` (envelope), `/loc-trails`,
     `/buckets?layout=row`, the `/items?summary=true` shape.
   - **Field-name conventions still hold.** The sparse match-position `t`
@@ -68,8 +90,8 @@ detail.
     must read the named field. This is the one non-additive change; every
     other endpoint just gains the additive `timeUnit` field.
   - **Escape hatch.** `GET /v1/demos/{id}/artifacts/{name}` serves the
-    raw stored result sections in int32 ms as-is — no `timeUnit`, one of
-    the two exceptions — the way to always get the raw stored milliseconds.
+    raw stored result sections in int32 ms as-is — no `timeUnit` — the
+    way to always get the raw stored milliseconds.
   - Stored `result.*` structs stay int32 ms; the transport surface added
     only the `timeUnit` echo here (schemaVersion restamped to 56). The
     JSON *key* rename that finalized the polarity landed later in v56 —
