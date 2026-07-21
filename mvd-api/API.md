@@ -37,6 +37,11 @@ Base URL defaults to `http://localhost:8080`. A demo is addressed by an
   good for bookmarking a warm entry) or one you uploaded with
   `uploadDemo` (`POST /v1/demos`).
 
+Don't have a `gameId` yet? **`GET /v1/games/search`** discovers demos in
+the hub catalog by player / team / map / mode / matchtag / date, returns
+`{limit, offset, count, total?, games}`, and each row's `id` becomes the
+`gameId:<id>` you feed the flow below.
+
 Typical frontend flow:
 
 ```
@@ -60,25 +65,73 @@ reachable without an API key.
 
 ## 2. Conventions (read this once)
 
-### 2.1 Time units — the one real gotcha
+### 2.1 Time units — the `timeUnit` echo
 
-The API mixes two time units **on purpose**, and frontend code must
-track which is which:
+`timeUnit` is **the unit of every time value in the response**. There is
+**no unit selection** — the value is fixed per endpoint. The rule is:
 
-| Where | Unit | Examples (real output) |
-|---|---|---|
-| **Query inputs** `from` / `to` / `time` | **seconds** (float) | `?from=105&to=110`, `?time=105` |
-| **View envelope** times | **seconds** (float) | `events[].t=101.298`, `state-at.t=105`, `stream-slice.startTime=105`, row-bucket `.t=120`, loc-trail `s`/`e`=`1.015` |
-| **`/overview`** times | **int32 milliseconds** | `duration`, `matchStart`, `matchEnd`, `topStreaks[].start`/`.duration`, `topPowerups[].start`/`.duration`, `timing.*` |
-| **Raw stream entries** embedded in `/stream-slice` | **int32 milliseconds** | `h:[{ "t":105000, "v":-7 }]`, `pos.t:[105001,…]`, `rl:[{ "s":105000,"e":105182 }]` |
-| **Columnar buckets** axis | **int32 milliseconds** | `startMs`, `windowMs`, `time(i)=startMs+i*windowMs` |
+> **Every `/v1/demos/{id}/*` JSON response that carries match-position
+> time values echoes a top-level `"timeUnit": "ms"|"s"`, except
+> `/demoinfo` (KTX's own mixed units) and `/artifacts/{name}` (raw stored
+> bytes). Responses with no match-position time — `/loc-table`,
+> `/loc-graph`, `/metadata` — carry no echo.**
 
-Rule of thumb: anything the **view layer synthesises** (event lists,
-window bounds, trail dwell spans, row-bucket timestamps) is **seconds**;
-anything copied **verbatim from the stored schema** (the change-stream /
-interval / position arrays, the columnar grid) is **int32 ms**. The
-underlying schema is all int32 ms — see RESULT_SCHEMA.md §"Time units".
-Scale ms→s by `* 0.001`.
+Read `timeUnit` and you know the unit of that response's times — no
+per-field guessing. The value is fixed per endpoint:
+
+| `timeUnit` | Endpoints |
+|---|---|
+| **`"ms"`** (int32 milliseconds) | `/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, `/items` (full phase timeline), `/overview`, `/aim`, `/buckets?layout=column`, `/region-control`, `/los`, `/streams/projectiles`, `/streams/beams`, `/streams/nails` |
+| **`"s"`** (float64 seconds) | `/events`, `/buckets?layout=row`, `/state-at`, `/stream-slice`, `/loc-trails`, `/items?summary=true` |
+
+The four formerly bare-array endpoints wrap their array in an object so
+the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/airgibs` →
+`{timeUnit, airgibs:[…]}`, `/backpacks` → `{timeUnit, backpacks:[…]}`,
+`/weapon-pickups` → `{timeUnit, pickups:[…]}`.
+
+**Field-name conventions (consistent with the echo).** The two sparse
+match-position field names are absolute on *every* endpoint: a **`t`** is
+int32 ms and a top-level **`time`** is float seconds. This polarity is
+exception-free — sparse event lists (`/frags`, `/damage`, `/shots`,
+`/chat`, `/backpacks`, `/weapon-pickups`, `/airgibs`) and the dense
+per-sample arrays both carry their int32-ms axis under `t` (the dense
+arrays always did — that is the whole point of this polarity, and the big
+event lists get the compact key for the compact type). Descriptively-named
+times (`startTime`/`endTime`, `availableFrom`/`takenAt`/`respawnAt`,
+`nextDeathTime`, `dropTime`, `duration`, `start`/`end`) don't encode their
+unit in the name — that's what `timeUnit` is for. Dense per-sample arrays
+use compact names and are always int32 ms: `/aim`'s crosshair `t` +
+`lgRamp` `since`, the columnar `/buckets` axis (`startMs`/`windowMs`,
+`time(i)=startMs+i*windowMs`), and the raw stream tracks embedded in
+`/stream-slice` (`h:[{ "t":105000,… }]`, `pos.t:[…]`, `rl:[{ "s","e" }]`
+— ms even though that envelope's `timeUnit` is `s`, which governs its
+top-level `startTime`/`endTime` and the `/loc-trails` `start`/`end`). The
+float-seconds view surfaces — `/events`, `/buckets?layout=row`,
+`/state-at`, `/items?summary=true`'s `firstTake` — carry their timestamp
+under `time`.
+
+The exceptions — time-carrying responses that still don't echo:
+
+- **`/demoinfo` is the KTX units island** — KTX's own clock, a mix of
+  native units (see RESULT_SCHEMA.md §DemoInfoResult), so no single echo
+  describes it.
+- **`/artifacts/{name}`** serves the raw stored result sections
+  byte-for-byte (the exact-bytes escape hatch), no echo. The underlying
+  stored schema is all int32 ms — see RESULT_SCHEMA.md §"Time units". The
+  one exception is `/artifacts/los`: los is a materialized artifact, not a
+  raw stored section, so it aliases the `/los` body and carries its `"ms"`
+  echo like the curated endpoint.
+
+Separately, the responses with **no match-position time at all** —
+`/loc-table`, `/loc-graph`, `/metadata` — carry no echo because there is
+no time value to unit.
+
+`/overview`'s `timing` block is orthogonal to the echo: its wall-clock
+fields are explicitly `*Ms`-named (`demoOffset`, `demoStartUnixMs`,
+`demoStartAccuracyMs`, `pauses[].atMs`/`.durationMs`).
+
+**Query inputs are unaffected**: `from`/`to`/`time` are always
+match-relative **seconds**, regardless of any response's `timeUnit`.
 
 ### 2.2 Query parameters
 
@@ -126,8 +179,8 @@ weapon / item / kind / loc / layout tokens.
 - **There is deliberately no `limit`/`offset` pagination** on the
   per-demo endpoints: the data is time-series, so the size controls are
   the `from`/`to` window, `players`/`fields` scoping, and `summary`.
-  (`searchGames`-style pagination exists only on the hub search, which
-  is not part of this API.)
+  `limit`/`offset` pagination applies only to the game-discovery
+  endpoint `GET /v1/games/search` (page until `offset + count >= total`).
 - **`loc`** — `name` (default) resolves loc indices to names; `index`
   returns the raw `LocTable` index for index-based math (decode via
   `/loc-table`). Honoured by `buckets`, `events`, `stream-slice`,

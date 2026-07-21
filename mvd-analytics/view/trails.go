@@ -22,7 +22,10 @@ type LocTrailsOptions struct {
 // LocTrailsView is the response shape: per-player loc-name sequence
 // with dwell durations.
 type LocTrailsView struct {
-	Players []PlayerTrail `json:"players"`
+	// TimeUnit echoes this endpoint's native unit ("s"); set by the mvd-api
+	// handler (schema v56). Omitted on the WASM/qw-analyze paths.
+	TimeUnit TimeUnit      `json:"timeUnit,omitempty"`
+	Players  []PlayerTrail `json:"players"`
 }
 
 // PlayerTrail is one player's loc journey within the requested
@@ -37,8 +40,8 @@ type PlayerTrail struct {
 // unexported li always holds the index so grouping/merging stay
 // name-agnostic and the index render is a final relabel.
 type TrailEntry struct {
-	Start float64 `json:"s"`
-	End   float64 `json:"e"`
+	Start float64 `json:"start"`
+	End   float64 `json:"end"`
 	Loc   string  `json:"loc,omitempty"`
 	Li    *int16  `json:"li,omitempty"`
 

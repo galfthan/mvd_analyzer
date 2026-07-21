@@ -167,6 +167,7 @@ func (f *fakeHub) hubClient() *hubfetch.Client {
 	c := hubfetch.NewClient()
 	c.SupabaseURL = f.supabaseURL
 	c.CDNBase = f.cdnBase
+	c.APIKey = "test-anon-key"
 	return c
 }
 
@@ -384,6 +385,7 @@ func TestGetResult_HubUpstreamError(t *testing.T) {
 	defer srv.Close()
 
 	hub := hubfetch.NewClient()
+	hub.APIKey = "test-anon-key"
 	hub.SupabaseURL = srv.URL
 	hub.CDNBase = srv.URL + "/cdn"
 
@@ -433,6 +435,7 @@ func TestGetResult_HubUpstream_BodyContainsNotFound(t *testing.T) {
 	defer srv.Close()
 
 	hub := hubfetch.NewClient()
+	hub.APIKey = "test-anon-key"
 	hub.SupabaseURL = srv.URL
 	hub.CDNBase = srv.URL + "/cdn"
 

@@ -11,7 +11,7 @@ type FragResult struct {
 // FragEntry represents a single frag event. Time is match-relative
 // milliseconds (schema v8).
 type FragEntry struct {
-	Time       int32  `json:"time"`
+	Time       int32  `json:"t"`
 	Killer     string `json:"killer"`
 	Victim     string `json:"victim"`
 	Weapon     string `json:"weapon"`

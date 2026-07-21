@@ -39,6 +39,11 @@ var (
 // visibility BSP (the same two cheap calls timeline_finalize.go makes); no-op
 // (LOS simply absent) when the map has no provisioned BSP — mirroring the
 // PositionTrack.H/Lq gate — or when there are fewer than two players.
+//
+// The map is resolved via Result.EffectiveMap (demoinfo map, else the
+// serverinfo `map` key), so LOS/PVS light up even on demos with no KTX
+// demoinfo block (2024-era MVDSV 1.00 / KTX 1.43-1.44 recordings) as long as
+// the BSP is provisioned.
 func ComputeLOS(res *Result) {
 	if res == nil || res.Streams == nil {
 		return
@@ -47,14 +52,15 @@ func ComputeLOS(res *Result) {
 		return // idempotent — already computed (possibly to "no LOS")
 	}
 	res.Streams.LOSComputed = true
-	if res.DemoInfo == nil || res.DemoInfo.Map == "" {
+	mapName := res.EffectiveMap()
+	if mapName == "" {
 		return
 	}
 	players := res.Streams.Players
 	if len(players) < 2 {
 		return
 	}
-	data := mapbsp.LoadBytes(res.DemoInfo.Map)
+	data := mapbsp.LoadBytes(mapName)
 	if data == nil {
 		return
 	}

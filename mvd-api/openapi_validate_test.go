@@ -336,6 +336,15 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "region-control", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "airgibs", url: "/v1/demos/gameId:42/airgibs", path: "/v1/demos/{id}/airgibs", status: 200},
 
+		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},
+		// The timeUnit echo (schema v56) is asserted by the schema-validated
+		// cases above: overview / events / state-at / stream-slice / loc-trails /
+		// buckets-row / items-summary, the four list envelopes (chat, airgibs,
+		// backpacks, weapon-pickups), and the four dense columnar stream bodies
+		// (los, streams/projectiles, streams/beams, streams/nails) all mark
+		// timeUnit `required`, so a 200 that validates confirms the fixed native
+		// echo is present.
+
 		{name: "map-entities", url: "/v1/maps/dm3/entities", path: "/v1/maps/{map}/entities", status: 200},
 		{name: "map-entities-filtered", url: "/v1/maps/dm3/entities?types=item&kinds=armor,weapon", path: "/v1/maps/{map}/entities", status: 200},
 

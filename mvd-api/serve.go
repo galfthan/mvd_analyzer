@@ -46,7 +46,10 @@ func runServe(args []string) error {
 	}
 
 	logger := newLogger(*logFormat)
-	cache := democache.New(*cacheDir, hubfetch.NewClient())
+	// One hub client backs both the on-demand demo fetch (via the cache) and
+	// GET /v1/games/search, so a single set of hub env vars configures both.
+	hub := hubfetch.NewClient()
+	cache := democache.New(*cacheDir, hub)
 	cache.MaxBytes = *cacheMaxBytes
 	cache.MaxParses = *maxParses
 	cache.ParseTimeout = *parseTimeout
@@ -105,7 +108,7 @@ func runServe(args []string) error {
 		dailyBytes: *uploadBytes,
 		dailyCount: *uploadCount,
 	}
-	handler := newRouter(cache, logger, *mapsDir, upload, auth, portalHandler)
+	handler := newRouter(cache, logger, *mapsDir, upload, auth, portalHandler, hub)
 
 	srv := &http.Server{
 		Addr:         *addr,

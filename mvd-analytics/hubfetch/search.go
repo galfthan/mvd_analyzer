@@ -1,4 +1,4 @@
-package main
+package hubfetch
 
 import (
 	"context"
@@ -9,55 +9,42 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 )
 
-// hub.quakeworld.nu Supabase. The anon key is public — it's the same
-// one shipped in the web bundle (mvd-web/static/app.js).
-const (
-	supabaseURL    = "https://ncsphkjfominimxztjip.supabase.co/rest/v1/v1_games"
-	supabaseAPIKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc3Boa2pmb21pbmlteHp0amlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY5Mzg1NjMsImV4cCI6MjAxMjUxNDU2M30.NN6hjlEW-qB4Og9hWAVlgvUdwrbBO13s8OkAJuBGVbo"
+// SearchSelect is the column set the game search returns — mirrors the
+// web's SEARCH_SELECT and the fields the MCP searchGames tool documents.
+const SearchSelect = "id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url"
 
-	// Fields the search returns — mirrors the web's SEARCH_SELECT.
-	supabaseSearchSelect = "id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url"
-)
-
-// searcher is the interface searchGames tool depends on, so tests can
-// inject an httptest-faked Supabase.
-type searcher interface {
-	Search(ctx context.Context, in SearchGamesInput) (any, error)
+// SearchParams are the filters for a hub game search. All fields are
+// optional; an empty SearchParams returns the most recent matches. The
+// zero value of Limit resolves to 20 (capped at 100).
+type SearchParams struct {
+	Players  []string // FTS on players_fts, AND'd across multiple
+	Teams    []string // team names that must appear in team_names (contains)
+	Map      string   // map name, exact match
+	Mode     string   // game mode, exact match
+	Matchtag string   // tournament/event tag, case-insensitive substring
+	From     string   // ISO date lower bound, inclusive (YYYY-MM-DD)
+	To       string   // ISO date upper bound, inclusive (YYYY-MM-DD)
+	Limit    int      // max rows (default 20, capped at 100)
+	Offset   int      // pagination offset
+	Roster   bool     // true = verbatim hub rows; false = compact {name,team,frags}
 }
 
-// supabaseClient queries hub.quakeworld.nu's PostgREST surface
-// directly. mvd-mcp uses this from the MCP shim so the search path
-// doesn't route through mvd-api — discovery is the hub's
-// responsibility, not ours, and the data is already public.
-type supabaseClient struct {
-	baseURL string
-	apiKey  string
-	http    *http.Client
-}
-
-func newSupabaseClient(timeout time.Duration) *supabaseClient {
-	if timeout <= 0 {
-		timeout = 30 * time.Second
+// Search runs a hub game search with the given filters against the
+// PostgREST v1_games surface. It returns the response as a
+// map[string]any with keys {limit, offset, count, games} plus total when
+// the hub reports a Content-Range. Rosters are compacted to
+// {name, team, frags} unless params.Roster is set.
+func (c *Client) Search(ctx context.Context, params SearchParams) (any, error) {
+	if err := c.configErr(); err != nil {
+		return nil, err
 	}
-	return &supabaseClient{
-		baseURL: supabaseURL,
-		apiKey:  supabaseAPIKey,
-		http:    &http.Client{Timeout: timeout},
-	}
-}
-
-// Search runs a hub search with the given filters. Returns the raw
-// PostgREST response as `[]any` of game rows (each row is a
-// map[string]any with the SEARCH_SELECT fields).
-func (s *supabaseClient) Search(ctx context.Context, in SearchGamesInput) (any, error) {
 	parts := []string{
-		"select=" + url.QueryEscape(supabaseSearchSelect),
+		"select=" + url.QueryEscape(SearchSelect),
 		"order=timestamp.desc",
 	}
-	limit := in.Limit
+	limit := params.Limit
 	if limit <= 0 {
 		limit = 20
 	}
@@ -65,11 +52,11 @@ func (s *supabaseClient) Search(ctx context.Context, in SearchGamesInput) (any, 
 		limit = 100
 	}
 	parts = append(parts, "limit="+strconv.Itoa(limit))
-	if in.Offset > 0 {
-		parts = append(parts, "offset="+strconv.Itoa(in.Offset))
+	if params.Offset > 0 {
+		parts = append(parts, "offset="+strconv.Itoa(params.Offset))
 	}
 
-	for _, p := range in.Players {
+	for _, p := range params.Players {
 		p = strings.TrimSpace(p)
 		if p == "" {
 			continue
@@ -78,7 +65,7 @@ func (s *supabaseClient) Search(ctx context.Context, in SearchGamesInput) (any, 
 		// (PostgREST's default semantics for repeats on one column).
 		parts = append(parts, "players_fts=fts.'"+url.QueryEscape(p)+"'")
 	}
-	for _, t := range in.Teams {
+	for _, t := range params.Teams {
 		t = strings.TrimSpace(t)
 		if t == "" {
 			continue
@@ -86,30 +73,30 @@ func (s *supabaseClient) Search(ctx context.Context, in SearchGamesInput) (any, 
 		// cs (contains) on the team_names text[] column.
 		parts = append(parts, "team_names=cs.{"+url.QueryEscape(t)+"}")
 	}
-	if in.Map != "" {
-		parts = append(parts, "map=eq."+url.QueryEscape(in.Map))
+	if params.Map != "" {
+		parts = append(parts, "map=eq."+url.QueryEscape(params.Map))
 	}
-	if in.Mode != "" {
-		parts = append(parts, "mode=eq."+url.QueryEscape(in.Mode))
+	if params.Mode != "" {
+		parts = append(parts, "mode=eq."+url.QueryEscape(params.Mode))
 	}
-	if in.Matchtag != "" {
-		parts = append(parts, "matchtag=ilike.%25"+url.QueryEscape(in.Matchtag)+"%25")
+	if params.Matchtag != "" {
+		parts = append(parts, "matchtag=ilike.%25"+url.QueryEscape(params.Matchtag)+"%25")
 	}
-	if in.From != "" {
-		parts = append(parts, "timestamp=gte."+url.QueryEscape(in.From))
+	if params.From != "" {
+		parts = append(parts, "timestamp=gte."+url.QueryEscape(params.From))
 	}
-	if in.To != "" {
+	if params.To != "" {
 		// Match the web's behaviour: include the full end day.
-		parts = append(parts, "timestamp=lte."+url.QueryEscape(in.To+"T23:59:59"))
+		parts = append(parts, "timestamp=lte."+url.QueryEscape(params.To+"T23:59:59"))
 	}
 
-	full := s.baseURL + "?" + strings.Join(parts, "&")
+	full := c.SupabaseURL + "?" + strings.Join(parts, "&")
 	req, err := http.NewRequestWithContext(ctx, "GET", full, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("apikey", s.apiKey)
-	req.Header.Set("Authorization", "Bearer "+s.apiKey)
+	req.Header.Set("apikey", c.APIKey)
+	req.Header.Set("Authorization", "Bearer "+c.APIKey)
 	req.Header.Set("accept-profile", "public")
 	// Ask PostgREST for the total match count (Content-Range: 0-19/1234)
 	// so pagination is honest: `count` is rows-in-this-page, `total` is
@@ -117,12 +104,21 @@ func (s *supabaseClient) Search(ctx context.Context, in SearchGamesInput) (any, 
 	// 206 Partial Content for a partial page — that is success here.
 	req.Header.Set("Prefer", "count=exact")
 
-	resp, err := s.http.Do(req)
+	resp, err := c.HTTP.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("hub search: %w", err)
 	}
 	defer resp.Body.Close()
-	body, _ := io.ReadAll(resp.Body)
+	// Cap the metadata read: read one byte past the cap so an over-cap body
+	// is detectable (see maxCatalogBytes) — a compromised/buggy hub must not
+	// be able to OOM the host with an oversized catalog page.
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxCatalogBytes+1))
+	if err != nil {
+		return nil, fmt.Errorf("hub search: %w", err)
+	}
+	if int64(len(body)) > maxCatalogBytes {
+		return nil, fmt.Errorf("hub search: response exceeds %d-byte cap", maxCatalogBytes)
+	}
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent {
 		return nil, fmt.Errorf("hub search: status %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
 	}
@@ -131,12 +127,12 @@ func (s *supabaseClient) Search(ctx context.Context, in SearchGamesInput) (any, 
 	if err := json.Unmarshal(body, &games); err != nil {
 		return nil, fmt.Errorf("hub search: decode: %w", err)
 	}
-	if !in.Roster {
+	if !params.Roster {
 		compactRosters(games)
 	}
 	out := map[string]any{
 		"limit":  limit,
-		"offset": in.Offset,
+		"offset": params.Offset,
 		"count":  len(games),
 		"games":  games,
 	}
@@ -194,5 +190,3 @@ func parseContentRangeTotal(cr string) (int, bool) {
 	}
 	return total, true
 }
-
-var _ searcher = (*supabaseClient)(nil)

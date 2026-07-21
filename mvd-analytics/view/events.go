@@ -23,7 +23,11 @@ type EventsFilter struct {
 // EventsView is the response shape: a flat list of TaggedEvent in
 // time order.
 type EventsView struct {
-	Events []TaggedEvent `json:"events"`
+	// TimeUnit echoes this endpoint's native unit ("s"); set by the mvd-api
+	// handler (schema v56). Omitted (and thus absent) on the WASM/qw-analyze
+	// paths, which never set it.
+	TimeUnit TimeUnit      `json:"timeUnit,omitempty"`
+	Events   []TaggedEvent `json:"events"`
 }
 
 // TaggedEvent is a uniform time-ordered event record. Detail is
@@ -31,7 +35,7 @@ type EventsView struct {
 // and may be nil for spawn / death where the timestamp is the whole
 // signal.
 type TaggedEvent struct {
-	T      float64        `json:"t"`
+	T      float64        `json:"time"`
 	Type   string         `json:"type"`
 	Player string         `json:"player,omitempty"`
 	Detail map[string]any `json:"detail,omitempty"`

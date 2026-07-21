@@ -192,22 +192,22 @@ type GetChatInput struct {
 
 // GetBackpacksInput filters /v1/demos/{id}/backpacks.
 type GetBackpacksInput struct {
-	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
-	Players []string `json:"players,omitempty" jsonschema:"restrict to drops by these dropper names"`
-	Weapons []string `json:"weapons,omitempty" jsonschema:"restrict to these dropped-weapon codes (rl, lg); empty = both. Forwarded as a CSV set, matching REST /backpacks"`
-	StartTime float64 `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds (drops at or after this time)"`
-	EndTime   float64 `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds"`
+	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Players   []string `json:"players,omitempty" jsonschema:"restrict to drops by these dropper names"`
+	Weapons   []string `json:"weapons,omitempty" jsonschema:"restrict to these dropped-weapon codes (rl, lg); empty = both. Forwarded as a CSV set, matching REST /backpacks"`
+	StartTime float64  `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds (drops at or after this time)"`
+	EndTime   float64  `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds"`
 }
 
 // GetItemsInput filters /v1/demos/{id}/items.
 type GetItemsInput struct {
-	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
-	Items   []string `json:"items,omitempty" jsonschema:"item name or kind token (case-insensitive). A kind matches every instance of a type (YA → ya_1, ya_2; RA; MH; Quad; Pent; Ring; RL; LG; GL; SSG; SNG; NG); a suffixed name matches one instance (ya_1)."`
-	Players []string `json:"players,omitempty" jsonschema:"restrict phases to those taken by these player names (phases with no TakenBy survive)"`
-	Kinds   []string `json:"kinds,omitempty" jsonschema:"item category (case-insensitive): armor, mega, health, powerup, weapon, ammo. A raw kind token (ra, quad, rl, ...) is also accepted."`
-	StartTime float64 `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds. Timeline mode keeps phases OVERLAPPING the window; summary mode counts takes INSIDE it"`
-	EndTime   float64 `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds (e.g. endTime:60 = the opening minute)"`
-	Summary   *bool   `json:"summary,omitempty" jsonschema:"MCP default TRUE (REST differs): per-item take aggregates {takenCount, byPlayer, firstTake} instead of the full phase timeline. Pass false for every phase (available/taken/respawn cycles)."`
+	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Items     []string `json:"items,omitempty" jsonschema:"item name or kind token (case-insensitive). A kind matches every instance of a type (YA → ya_1, ya_2; RA; MH; Quad; Pent; Ring; RL; LG; GL; SSG; SNG; NG); a suffixed name matches one instance (ya_1)."`
+	Players   []string `json:"players,omitempty" jsonschema:"restrict phases to those taken by these player names (phases with no TakenBy survive)"`
+	Kinds     []string `json:"kinds,omitempty" jsonschema:"item category (case-insensitive): armor, mega, health, powerup, weapon, ammo. A raw kind token (ra, quad, rl, ...) is also accepted."`
+	StartTime float64  `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds. Timeline mode keeps phases OVERLAPPING the window; summary mode counts takes INSIDE it"`
+	EndTime   float64  `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds (e.g. endTime:60 = the opening minute)"`
+	Summary   *bool    `json:"summary,omitempty" jsonschema:"MCP default TRUE (REST differs): per-item take aggregates {takenCount, byPlayer, firstTake} instead of the full phase timeline. Pass false for every phase (available/taken/respawn cycles)."`
 }
 
 // GetMapEntitiesByMapInput addresses the static layout by map name
@@ -220,12 +220,12 @@ type GetMapEntitiesByMapInput struct {
 
 // GetWeaponPickupsInput filters /v1/demos/{id}/weapon-pickups.
 type GetWeaponPickupsInput struct {
-	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
-	Players []string `json:"players,omitempty" jsonschema:"restrict to picks by these names"`
-	Weapons []string `json:"weapons,omitempty" jsonschema:"weapon codes: rl, lg, gl, ssg, sng, ng"`
-	Source  string   `json:"source,omitempty" jsonschema:"'world' (spawner) or 'backpack' (RL/LG drop)"`
-	StartTime float64 `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds (pickups at or after this time)"`
-	EndTime   float64 `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds"`
+	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Players   []string `json:"players,omitempty" jsonschema:"restrict to picks by these names"`
+	Weapons   []string `json:"weapons,omitempty" jsonschema:"weapon codes: rl, lg, gl, ssg, sng, ng"`
+	Source    string   `json:"source,omitempty" jsonschema:"'world' (spawner) or 'backpack' (RL/LG drop)"`
+	StartTime float64  `json:"startTime,omitempty" jsonschema:"window start in match-relative seconds (pickups at or after this time)"`
+	EndTime   float64  `json:"endTime,omitempty" jsonschema:"window end in match-relative seconds"`
 }
 
 // ListArtifactsInput has no parameters — the artifact manifest is static
@@ -240,10 +240,10 @@ type GetArtifactInput struct {
 	Name   string `json:"name" jsonschema:"artifact name from listArtifacts (e.g. frag, damage, loc-graph, los). Only 'servable' artifacts are reachable"`
 }
 
-// SearchGamesInput hits hub.quakeworld.nu's Supabase directly — not
-// mvd-api. Discovery is the hub's job; mvd-api only handles parse +
-// cache for demos chosen from a search. All fields optional; an
-// empty filter returns the most recent matches.
+// SearchGamesInput searches hub.quakeworld.nu's game catalog. It is
+// forwarded verbatim to mvd-api's GET /v1/games/search, which owns the hub
+// connection. All fields optional; an empty filter returns the most recent
+// matches.
 type SearchGamesInput struct {
 	Players  []string `json:"players,omitempty"  jsonschema:"player names to match (FTS on players_fts, AND'd across multiple)"`
 	Teams    []string `json:"teams,omitempty"    jsonschema:"team names that must appear in team_names (contains)"`

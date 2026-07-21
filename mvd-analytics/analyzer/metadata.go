@@ -150,6 +150,13 @@ func (a *MetadataAnalyzer) Finalize(result *Result) error {
 	return nil
 }
 
+// PopulateCore publishes the serverinfo `map` key so downstream producers
+// (timeline: loc / floor-height / liquid / region control) can resolve the map
+// even when the KTX demoinfo block is absent — see CoreOutputs.EffectiveMap.
+func (a *MetadataAnalyzer) PopulateCore(co *CoreOutputs) {
+	co.ServerInfoMap = a.serverInfo["map"]
+}
+
 // parseCountdownCenterprint walks the post-Q_normalizetext countdown table
 // and pulls each known KTX setting row into a MatchSettings struct.
 //

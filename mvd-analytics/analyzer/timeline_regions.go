@@ -58,10 +58,12 @@ func (a *TimelineAnalyzer) buildControlRegions() []ControlRegion {
 		return nil
 	}
 
-	// Get map name for map-specific customization
+	// Get map name for map-specific customization. Resolved via
+	// EffectiveMap (demoinfo map, else the serverinfo `map` key) so region
+	// control works on demos with no KTX demoinfo block.
 	mapName := ""
-	if a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
-		mapName = strings.ToLower(a.core.DemoInfo.Map)
+	if raw := a.core.EffectiveMap(); raw != "" {
+		mapName = strings.ToLower(raw)
 		if idx := strings.LastIndex(mapName, "/"); idx >= 0 {
 			mapName = mapName[idx+1:]
 		}

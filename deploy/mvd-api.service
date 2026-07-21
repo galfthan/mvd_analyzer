@@ -11,6 +11,12 @@
 # come from EnvironmentFile — NEVER put them in ExecStart flags: flags are
 # visible in `ps` (PLAN-hosting D9). The file is root-owned 0600.
 #
+# The same EnvironmentFile also carries the hub connection vars
+# (HUB_SUPABASE_URL, HUB_SUPABASE_KEY, HUB_CDN_URL) — the API needs them to
+# fetch demos on cache miss and to serve GET /v1/games/search. Without them
+# the server still starts and serves the local cache, but a cache miss and
+# any /games/search return 502 hub_upstream ("hub not configured").
+#
 # Install: copy to /etc/systemd/system/mvd-api.service, then
 #   systemctl daemon-reload && systemctl enable --now mvd-api
 
@@ -25,7 +31,8 @@ User=mvd
 Group=mvd
 WorkingDirectory=/opt/mvd
 
-# Discord client id/secret + portal cookie HMAC secret arrive here, not on
+# Discord client id/secret + portal cookie HMAC secret AND the hub
+# connection vars (HUB_SUPABASE_URL/KEY, HUB_CDN_URL) arrive here, not on
 # the command line. See deploy/README.md for the file's contents.
 EnvironmentFile=/etc/mvd/secrets.env
 

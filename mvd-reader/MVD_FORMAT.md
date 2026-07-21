@@ -1395,6 +1395,8 @@ Offset  Size  Field
 
 *Source: ezQuake `sv_demo_misc.c:851-873`*
 
+**Not always present.** MVDSV writes this block only when KTX issues `cmd demoinfo` at end-of-match (`mvdsv/src/sv_demo_misc.c:851`, driven by `ktx/src/commands.c:7740`). Older recorders — e.g. MVDSV 1.00 with KTX 1.43/1.44 (2024-era) — never issue it, so those demos carry **no demoinfo block at all**: the whole `players[]` scoreboard and the top-level `map` are absent. Downstream code must not treat this absence as "no map" — the canonical map name is still available in serverinfo (the `map` key of the `fullserverinfo` stufftext), which every demo carries. `mvd-analytics` resolves the map through `EffectiveMap` (demoinfo map, else serverinfo `map`) precisely so BSP-derived features (LOS/PVS, loc, floor height, liquid, region control) light up on demoinfo-less demos.
+
 #### KTX Demoinfo JSON Schema
 
 The JSON structure is **KTX mod specific**. Other server mods may use different schemas or omit demoinfo entirely.

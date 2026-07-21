@@ -154,13 +154,18 @@ func ensureCached(t *testing.T, cacheDir string, entry corpusEntry) string {
 		return cachePath
 	}
 
-	if !networkAllowed() {
+	client := hubfetch.NewClient()
+	if client.SupabaseURL == "" || client.APIKey == "" {
+		t.Fatalf("demo %d (%s) not in cache and the hub is not configured — set %s / %s (and %s) to fetch on cache miss, or populate %s manually. Steady-state golden runs are offline; only a cold cache needs the hub.",
+			entry.GameID, entry.Label,
+			hubfetch.EnvSupabaseURL, hubfetch.EnvSupabaseKey, hubfetch.EnvCDNURL, cachePath)
+	}
+	if !networkAllowed(client) {
 		t.Fatalf("demo %d (%s) not in cache and network probe failed — populate %s manually or run online once",
 			entry.GameID, entry.Label, cachePath)
 	}
 
 	t.Logf("cache miss for game %d (%s) — fetching from hub", entry.GameID, entry.Label)
-	client := hubfetch.NewClient()
 	info, err := client.Resolve(entry.GameID)
 	if err != nil {
 		t.Fatalf("resolve gameId %d: %v", entry.GameID, err)
@@ -175,11 +180,12 @@ func ensureCached(t *testing.T, cacheDir string, entry corpusEntry) string {
 	return cachePath
 }
 
-// networkAllowed does a 2-second HEAD against the Supabase host. If
-// that fails, we treat the environment as offline so the test can give
-// a clean "populate the cache" message instead of a generic timeout.
-func networkAllowed() bool {
-	u, _ := url.Parse(hubfetch.SupabaseURL)
+// networkAllowed does a 2-second HEAD against the configured Supabase
+// host. If that fails, we treat the environment as offline so the test can
+// give a clean "populate the cache" message instead of a generic timeout.
+// The caller has already checked the client is configured.
+func networkAllowed(client *hubfetch.Client) bool {
+	u, _ := url.Parse(client.SupabaseURL)
 	if u == nil {
 		return false
 	}

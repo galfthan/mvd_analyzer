@@ -118,12 +118,14 @@ func lazyArtifactSpecs() []nodeSpec {
 
 // losArtifact is the per-player line-of-sight / PVS interval sets
 // (Streams.Players[].LOS/PVS), the heaviest position-derived pass. It
-// requires the timeline (the Streams container) and demoinfo (the map name,
-// to load the BSP); the BSP itself is loaded by ComputeLOS, not a DAG edge.
+// requires the timeline (the Streams container) plus the two map-name sources
+// ComputeLOS resolves through Result.EffectiveMap — demoinfo (the KTX map) and
+// metadata (the serverinfo `map` fallback for demoinfo-less demos); the BSP
+// itself is loaded by ComputeLOS, not a DAG edge.
 var losArtifact = &LazyArtifact{
 	spec: nodeSpec{
 		Name:     "los",
-		Requires: []string{"timeline", "demoinfo"},
+		Requires: []string{"timeline", "demoinfo", "metadata"},
 		Provides: []string{"los"},
 		Lazy:     true,
 		cost:     costHeavy,

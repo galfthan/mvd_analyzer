@@ -233,7 +233,7 @@ func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	writeJSON(w, http.StatusOK, BuildOverview(res))
+	writeJSON(w, http.StatusOK, OverviewEnvelope{TimeUnit: view.UnitMs, Overview: BuildOverview(res)})
 }
 
 // handleMetadata: GET /v1/demos/{id}/metadata — full server cvars +
@@ -310,7 +310,7 @@ func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 		s.writeUnavailable(w, r, err, "frags_unavailable", "this demo has no frag log")
 		return
 	}
-	writeJSON(w, http.StatusOK, out)
+	writeJSON(w, http.StatusOK, view.FragsEnvelope{TimeUnit: view.UnitMs, FragResult: out})
 }
 
 // handleDamage: GET /v1/demos/{id}/damage — per-hit damage log +
@@ -398,7 +398,7 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 			"this demo has no damage data (no KTX mvdhidden_dmgdone stream)")
 		return
 	}
-	writeJSON(w, http.StatusOK, out)
+	writeJSON(w, http.StatusOK, view.DamageEnvelope{TimeUnit: view.UnitMs, DamageResult: out})
 }
 
 // handleShots: GET /v1/demos/{id}/shots — the per-fire weapon stream
@@ -421,7 +421,7 @@ func (s *server) handleShots(w http.ResponseWriter, r *http.Request) {
 			"this demo has no shot data (no weapon fires decoded)")
 		return
 	}
-	writeJSON(w, http.StatusOK, sh)
+	writeJSON(w, http.StatusOK, view.ShotsEnvelope{TimeUnit: view.UnitMs, ShotsResult: sh})
 }
 
 // handleAim: GET /v1/demos/{id}/aim — per-player aim analysis (result.Aim):
@@ -466,7 +466,7 @@ func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
 			"this demo has no aim data (needs shots + position/view streams)")
 		return
 	}
-	writeJSON(w, http.StatusOK, am)
+	writeJSON(w, http.StatusOK, view.AimEnvelope{TimeUnit: view.UnitMs, AimResult: am})
 }
 
 // handleChat: GET /v1/demos/{id}/chat — chat-only slice of
@@ -497,7 +497,7 @@ func (s *server) handleChat(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
-	writeJSON(w, http.StatusOK, view.Chat(res, opts))
+	writeJSON(w, http.StatusOK, view.ChatEnvelope{TimeUnit: view.UnitMs, Messages: view.Chat(res, opts)})
 }
 
 // handleDemoInfo: GET /v1/demos/{id}/demoinfo — KTX demoinfo blob
@@ -541,7 +541,7 @@ func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
-	writeJSON(w, http.StatusOK, view.Backpacks(res, opts))
+	writeJSON(w, http.StatusOK, view.BackpacksEnvelope{TimeUnit: view.UnitMs, Backpacks: view.Backpacks(res, opts)})
 }
 
 // handleItems: GET /v1/demos/{id}/items — per-item pickup/respawn
@@ -588,11 +588,16 @@ func (s *server) handleItems(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	// The native unit differs by shape and is fixed per shape: the full phase
+	// timeline is ms-native (availableFrom/takenAt/respawnAt are stored ms), the
+	// summary firstTake.t is seconds-native. timeUnit echoes it either way.
 	if summary {
-		writeJSON(w, http.StatusOK, view.ItemsSummary(res, opts))
+		sv := view.ItemsSummary(res, opts)
+		sv.TimeUnit = view.UnitSec
+		writeJSON(w, http.StatusOK, sv)
 		return
 	}
-	writeJSON(w, http.StatusOK, view.Items(res, opts))
+	writeJSON(w, http.StatusOK, view.ItemsEnvelope{TimeUnit: view.UnitMs, ItemsResult: view.Items(res, opts)})
 }
 
 // handleWeaponPickups: GET /v1/demos/{id}/weapon-pickups — slot-weapon
@@ -631,7 +636,7 @@ func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
 			fmt.Sprintf("unknown source %q; valid: world, backpack, unknown", opts.Source))
 		return
 	}
-	writeJSON(w, http.StatusOK, view.WeaponPickups(res, opts))
+	writeJSON(w, http.StatusOK, view.WeaponPickupsEnvelope{TimeUnit: view.UnitMs, Pickups: view.WeaponPickups(res, opts)})
 }
 
 func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
@@ -655,10 +660,12 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if opts.Layout == "column" {
+		// The columnar layout's startMs/windowMs axis is int32 ms; echo "ms".
 		cb, err := view.BucketsColumnar(res, opts)
 		if writeInvalidParam(w, err) {
 			return
 		}
+		cb.TimeUnit = view.UnitMs
 		writeJSON(w, http.StatusOK, cb)
 		return
 	}
@@ -666,6 +673,7 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
+	bv.TimeUnit = view.UnitSec
 	writeJSON(w, http.StatusOK, bv)
 }
 
@@ -689,6 +697,7 @@ func (s *server) handleEvents(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
+	ev.TimeUnit = view.UnitSec
 	writeJSON(w, http.StatusOK, ev)
 }
 
@@ -712,6 +721,7 @@ func (s *server) handleStreamSlice(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
+	sl.TimeUnit = view.UnitSec
 	writeJSON(w, http.StatusOK, sl)
 }
 
@@ -739,6 +749,7 @@ func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
+	sa.TimeUnit = view.UnitSec
 	writeJSON(w, http.StatusOK, sa)
 }
 
@@ -780,8 +791,9 @@ func losBody(res *result.Result) any {
 		PVS  []result.LosTrack `json:"pvs,omitempty"`
 	}
 	out := struct {
-		Players []losPlayer `json:"players"`
-	}{Players: []losPlayer{}} // never null: the doc + API.md promise a players array
+		TimeUnit view.TimeUnit `json:"timeUnit"`
+		Players  []losPlayer   `json:"players"`
+	}{TimeUnit: view.UnitMs, Players: []losPlayer{}} // never null: the doc + API.md promise a players array. Intervals are int32-ms → ms.
 	if res.Streams != nil {
 		out.Players = make([]losPlayer, len(res.Streams.Players))
 		for i := range res.Streams.Players {
@@ -807,8 +819,9 @@ func (s *server) handleProjectiles(w http.ResponseWriter, r *http.Request) {
 		pr = res.Streams.Projectiles
 	}
 	writeJSON(w, http.StatusOK, struct {
+		TimeUnit    view.TimeUnit             `json:"timeUnit"`
 		Projectiles *result.ProjectileStreams `json:"projectiles"`
-	}{pr})
+	}{view.UnitMs, pr})
 }
 
 // handleBeams serves the LG bolt stream (from the always-full base parse).
@@ -822,8 +835,9 @@ func (s *server) handleBeams(w http.ResponseWriter, r *http.Request) {
 		bm = res.Streams.Beams
 	}
 	writeJSON(w, http.StatusOK, struct {
-		Beams *result.BeamStreams `json:"beams"`
-	}{bm})
+		TimeUnit view.TimeUnit       `json:"timeUnit"`
+		Beams    *result.BeamStreams `json:"beams"`
+	}{view.UnitMs, bm})
 }
 
 // handleNails serves the ng/sng nail-flight stream (highest volume; from the
@@ -838,8 +852,9 @@ func (s *server) handleNails(w http.ResponseWriter, r *http.Request) {
 		nl = res.Streams.Nails
 	}
 	writeJSON(w, http.StatusOK, struct {
-		Nails *result.ProjectileStreams `json:"nails"`
-	}{nl})
+		TimeUnit view.TimeUnit             `json:"timeUnit"`
+		Nails    *result.ProjectileStreams `json:"nails"`
+	}{view.UnitMs, nl})
 }
 
 func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
@@ -864,6 +879,7 @@ func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
+	tr.TimeUnit = view.UnitSec
 	writeJSON(w, http.StatusOK, tr)
 }
 
@@ -905,7 +921,7 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
-	writeJSON(w, http.StatusOK, rcv)
+	writeJSON(w, http.StatusOK, view.RegionControlEnvelope{TimeUnit: view.UnitMs, RegionControlResult: rcv})
 }
 
 // handleAirgibs: GET /v1/demos/{id}/airgibs — the Key Moments airgib list
@@ -924,5 +940,5 @@ func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 			"this demo has no timeline analysis")
 		return
 	}
-	writeJSON(w, http.StatusOK, airgibs)
+	writeJSON(w, http.StatusOK, view.AirgibsEnvelope{TimeUnit: view.UnitMs, Airgibs: airgibs})
 }

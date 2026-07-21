@@ -46,7 +46,7 @@ func cannedAPI(t *testing.T, recordAuth *string) *httptest.Server {
 	})
 	mux.HandleFunc("GET /v1/demos/{id}/state-at", func(w http.ResponseWriter, r *http.Request) {
 		t := r.URL.Query().Get("time")
-		fmt.Fprintf(w, `{"t":%s,"players":{}}`, defaultIfEmpty(t, "0"))
+		fmt.Fprintf(w, `{"time":%s,"players":{}}`, defaultIfEmpty(t, "0"))
 	})
 	mux.HandleFunc("GET /v1/demos/{id}/loc-trails", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"players":[]}`))
@@ -218,8 +218,8 @@ func TestProxy_GetStateAt(t *testing.T) {
 		t.Fatalf("GetStateAt: %v", err)
 	}
 	m := out.(map[string]any)
-	if m["t"].(float64) != 15 {
-		t.Errorf("t=%v; want 15", m["t"])
+	if m["time"].(float64) != 15 {
+		t.Errorf("time=%v; want 15", m["time"])
 	}
 }
 

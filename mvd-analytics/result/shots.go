@@ -43,7 +43,7 @@ type ShotsResult struct {
 // IsSelf/IsTeam semantics. Omitted when every victim is an enemy (the common
 // case); when present it is parallel to Victims.
 type Shot struct {
-	Time        int32    `json:"time"`
+	Time        int32    `json:"t"`
 	Player      string   `json:"player"`
 	Team        string   `json:"team,omitempty"`
 	Weapon      string   `json:"weapon"`

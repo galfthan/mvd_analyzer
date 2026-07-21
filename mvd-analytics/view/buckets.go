@@ -43,6 +43,10 @@ type BucketsOptions struct {
 // bucket's player map carries a "loc" name; in index mode it carries
 // the raw "li" index, which a consumer decodes against /loc-table.
 type BucketsView struct {
+	// TimeUnit echoes the row layout's native unit ("s"); set by the mvd-api
+	// handler (schema v56). The columnar layout has its own ms-suffixed axis
+	// and no echo. Omitted on the WASM/qw-analyze paths.
+	TimeUnit TimeUnit     `json:"timeUnit,omitempty"`
 	WindowMs int          `json:"windowMs"`
 	Buckets  []ViewBucket `json:"buckets"`
 }
@@ -60,7 +64,7 @@ type BucketsView struct {
 // Team, when populated, is keyed by team name and carries the
 // IncludeTeam aggregate counters.
 type ViewBucket struct {
-	T       float64                   `json:"t"`
+	T       float64                   `json:"time"`
 	Players map[string]map[string]any `json:"p"`
 	// Team is keyed by team name → field → value. Most fields are
 	// int counters (rl, lg, w, th, ta, …); the special key "abt"

@@ -1,19 +1,24 @@
 // Package hubfetch resolves and downloads MVD demos from
-// hub.quakeworld.nu by game ID. It mirrors the fetch flow already used
-// by the web frontend (mvd-web/static/app.js, the SUPABASE_URL / CDN
-// path): query the Supabase v1_games endpoint for the demo's sha256 +
-// source URL, then try the public CDN before falling back to the
-// original recording server.
+// hub.quakeworld.nu by game ID, and searches its game catalog. It mirrors
+// the fetch flow already used by the web frontend (mvd-web/static/app.js,
+// the SUPABASE_URL / CDN path): query the Supabase v1_games endpoint for
+// the demo's sha256 + source URL, then try the public CDN before falling
+// back to the original recording server.
 //
-// The Supabase URL and anon key are public (already shipped in the
-// browser bundle) and authenticate read-only access to the public
-// game catalog. There is no token rotation concern.
+// The Supabase URL, anon key, and CDN base are NOT compiled in — they are
+// read from the environment (HUB_SUPABASE_URL / HUB_SUPABASE_KEY /
+// HUB_CDN_URL) by NewClient. The anon key authenticates read-only access
+// to the public catalog, but keeping it out of the source tree (and out of
+// the deploy examples) means it can be rotated without a rebuild. When the
+// vars are unset the client returns a clear "hub not configured" error on
+// use rather than firing empty requests at a hardcoded host.
 //
 // Its consumers are the golden test harness
-// (mvd-analytics/analyzer/golden_test.go) and mvd-api (via
-// mvd-api/internal/democache). It is intentionally small and has no
-// dependency on the analyzer or result packages so it can be reused for
-// ad-hoc tooling (e.g. a future cache-warming CLI).
+// (mvd-analytics/analyzer/golden_test.go), mvd-api (via
+// mvd-api/internal/democache for demo fetch and directly for
+// GET /v1/games/search), and the mvd-mcp shim's searchGames tool. It is
+// intentionally small and has no dependency on the analyzer or result
+// packages so it can be reused for ad-hoc tooling.
 package hubfetch
 
 import (
@@ -23,16 +28,18 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 )
 
-// SupabaseURL is the v1_games REST endpoint backing hub.quakeworld.nu.
-// The anon key below is the same one shipped in mvd-web/static/app.js.
+// Environment variables that configure the hub client. NewClient reads
+// them; unset URL or key makes every call return a "hub not configured"
+// error (see configErr).
 const (
-	SupabaseURL    = "https://ncsphkjfominimxztjip.supabase.co/rest/v1/v1_games"
-	SupabaseAPIKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc3Boa2pmb21pbmlteHp0amlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY5Mzg1NjMsImV4cCI6MjAxMjUxNDU2M30.NN6hjlEW-qB4Og9hWAVlgvUdwrbBO13s8OkAJuBGVbo"
-	CDNBase        = "https://d.quake.world"
+	EnvSupabaseURL = "HUB_SUPABASE_URL" // v1_games PostgREST endpoint
+	EnvSupabaseKey = "HUB_SUPABASE_KEY" // Supabase anon key (public, read-only)
+	EnvCDNURL      = "HUB_CDN_URL"      // demo CDN base, e.g. https://d.quake.world
 )
 
 // maxDownloadBytes caps how many bytes a single demo download may read
@@ -41,6 +48,17 @@ const (
 // one oversized body. 64 MiB is far above any real MVD. A variable, not a
 // const, only so tests can shrink it to exercise the boundary cheaply.
 var maxDownloadBytes int64 = 64 << 20
+
+// maxCatalogBytes caps how many bytes a catalog metadata response (Resolve
+// and Search) may read before the client rejects it. These are small JSON
+// payloads — a single game row for Resolve, a page of at most 100 rows for
+// Search — so the cap is far below the demo cap: a compromised or buggy hub
+// (or a MITM of HUB_SUPABASE_URL) must not be able to OOM the API host with
+// an oversized metadata body (a single Search was observed allocating
+// ~900 MiB from an unbounded read). 16 MiB is well above any legitimate
+// page yet bounds the blast radius. A variable, not a const, only so tests
+// can shrink it to exercise the boundary cheaply.
+var maxCatalogBytes int64 = 16 << 20
 
 // ErrNotFound is returned by Resolve when the hub has no row for the
 // requested gameId (an empty result set). Callers should detect it with
@@ -60,21 +78,41 @@ type GameInfo struct {
 }
 
 // Client is a small wrapper around http.Client so tests can swap in
-// httptest.Server URLs.  Defaults work for production: 30 s timeout,
-// the public Supabase + CDN bases.
+// httptest.Server URLs. SupabaseURL / APIKey / CDNBase come from the
+// environment via NewClient; tests set them directly.
 type Client struct {
 	HTTP        *http.Client
-	SupabaseURL string // overrides const for testing
-	CDNBase     string // overrides const for testing
+	SupabaseURL string // v1_games PostgREST endpoint (HUB_SUPABASE_URL)
+	APIKey      string // Supabase anon key (HUB_SUPABASE_KEY)
+	CDNBase     string // demo CDN base (HUB_CDN_URL)
 }
 
-// NewClient returns a Client with sensible defaults.
+// NewClient returns a Client configured from the environment
+// (HUB_SUPABASE_URL / HUB_SUPABASE_KEY / HUB_CDN_URL) with a 30 s HTTP
+// timeout. Unset vars leave the corresponding field empty; Resolve /
+// Search then return a "hub not configured" error rather than issuing a
+// request against an empty host (mvd-api still starts fine for
+// purely-local / cached use).
 func NewClient() *Client {
 	return &Client{
 		HTTP:        &http.Client{Timeout: 30 * time.Second},
-		SupabaseURL: SupabaseURL,
-		CDNBase:     CDNBase,
+		SupabaseURL: os.Getenv(EnvSupabaseURL),
+		APIKey:      os.Getenv(EnvSupabaseKey),
+		CDNBase:     os.Getenv(EnvCDNURL),
 	}
+}
+
+// configErr reports whether the client has the minimum configuration to
+// reach the hub (a Supabase URL and an API key). Callers return this
+// before issuing a request so an unconfigured server gives an actionable
+// message instead of a confusing empty-host failure. Through democache's
+// classifyHubError it surfaces as ErrHubUpstream (a 502), and through
+// GET /v1/games/search as hub_upstream — both explaining the missing env.
+func (c *Client) configErr() error {
+	if c.SupabaseURL == "" || c.APIKey == "" {
+		return fmt.Errorf("hub not configured: set %s and %s", EnvSupabaseURL, EnvSupabaseKey)
+	}
+	return nil
 }
 
 // Resolve looks up game metadata by hub gameId. It returns the
@@ -82,6 +120,9 @@ func NewClient() *Client {
 // `?id=eq.N` with a JSON array of rows; an empty array means the game
 // does not exist.
 func (c *Client) Resolve(gameID int) (*GameInfo, error) {
+	if err := c.configErr(); err != nil {
+		return nil, err
+	}
 	q := url.Values{}
 	q.Set("select", "id,demo_sha256,demo_source_url")
 	q.Set("id", "eq."+strconv.Itoa(gameID))
@@ -89,8 +130,8 @@ func (c *Client) Resolve(gameID int) (*GameInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("apikey", SupabaseAPIKey)
-	req.Header.Set("Authorization", "Bearer "+SupabaseAPIKey)
+	req.Header.Set("apikey", c.APIKey)
+	req.Header.Set("Authorization", "Bearer "+c.APIKey)
 	req.Header.Set("accept-profile", "public")
 
 	resp, err := c.HTTP.Do(req)
@@ -98,13 +139,22 @@ func (c *Client) Resolve(gameID int) (*GameInfo, error) {
 		return nil, fmt.Errorf("supabase resolve: %w", err)
 	}
 	defer resp.Body.Close()
+	// Cap the metadata read: read one byte past the cap so an over-cap body
+	// is detectable (see maxCatalogBytes). Applies to both the error and the
+	// success bodies since both come from this upstream response.
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxCatalogBytes+1))
+	if err != nil {
+		return nil, fmt.Errorf("supabase resolve: %w", err)
+	}
+	if int64(len(body)) > maxCatalogBytes {
+		return nil, fmt.Errorf("supabase resolve: response exceeds %d-byte cap", maxCatalogBytes)
+	}
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("supabase resolve: status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var rows []GameInfo
-	if err := json.NewDecoder(resp.Body).Decode(&rows); err != nil {
+	if err := json.Unmarshal(body, &rows); err != nil {
 		return nil, fmt.Errorf("supabase resolve: decode: %w", err)
 	}
 	if len(rows) == 0 {
@@ -121,9 +171,9 @@ func (c *Client) Download(info *GameInfo) ([]byte, error) {
 		return nil, errors.New("nil GameInfo")
 	}
 
-	// Path 1: CDN, when we have a sha to address it.
+	// Path 1: CDN, when it is configured and we have a sha to address it.
 	var cdnErr error
-	if len(info.DemoSHA256) >= 3 {
+	if c.CDNBase != "" && len(info.DemoSHA256) >= 3 {
 		cdnURL := fmt.Sprintf("%s/%s/%s.mvd.gz", c.CDNBase, info.DemoSHA256[:3], info.DemoSHA256)
 		data, err := c.fetch(cdnURL)
 		if err == nil {

@@ -54,6 +54,21 @@ With `-portal` set, the server **refuses to start** if `-auth-dir`,
 `-portal-base-url`, or any of the three env vars is missing — a
 misconfigured portal never runs half-open.
 
+The **hub connection** is also environment-driven (kept out of the source
+tree so the anon key can rotate without a rebuild):
+
+| Env var | Description |
+|---|---|
+| `HUB_SUPABASE_URL` | hub.quakeworld.nu PostgREST `v1_games` endpoint |
+| `HUB_SUPABASE_KEY` | Supabase anon key (public, read-only) |
+| `HUB_CDN_URL`      | Demo CDN base (e.g. `https://d.quake.world`); optional — without it, downloads fall back to each demo's source URL |
+
+These back on-demand demo fetch (cache miss) and `GET /v1/games/search`.
+Unlike the portal, they are **not** a startup requirement — the server
+starts and serves the local cache without them, but a cache miss and any
+`/games/search` return `502 hub_upstream` with a "hub not configured"
+message.
+
 Running the server is the default action — bare flags (or an explicit
 `serve`) start it. A positional first argument that isn't a known
 subcommand (`version`, `cache`, `keys`) is rejected with a usage error
@@ -164,7 +179,8 @@ systemd `EnvironmentFile` that carries the secrets machine-side.
 
 > **Building a frontend or tool?** [`API.md`](API.md) is the detailed
 > HTTP reference — per-endpoint parameters, response semantics, units
-> (the seconds-vs-milliseconds gotcha), caching, and task recipes. A
+> (the fixed `t`/`time` naming convention + per-endpoint `timeUnit`
+> echo), caching, and task recipes. A
 > machine-readable OpenAPI 3.1 spec is served at `/openapi.yaml` (drift
 > tests pin it to the code and validate its response schemas against the
 > golden corpus), browsable at `/docs`. The table below is just the
@@ -228,6 +244,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/loc-table` | — | `{ "locTable": []string }` (decoder for `loc=index`; index 0 = "" no-loc) |
 | GET | `/v1/demos/{id}/region-control` | `windowMs` | `result.RegionControlResult` |
 | GET | `/v1/demos/{id}/airgibs` | — | `[]result.AirgibEvent` (Key Moments: direct rocket hits on airborne victims, height-sorted; empty without the map BSP) |
+| GET | `/v1/games/search` | `players`, `teams`, `map`, `mode`, `matchtag`, `from`, `to`, `limit`, `offset`, `roster` | `{limit, offset, count, total?, games}` — hub.quakeworld.nu game discovery (no demo; live upstream, 502 `hub_upstream`). REST twin of the MCP `searchGames` tool (shared `hubfetch` impl) |
 | GET | `/v1/maps/{map}/entities` | `types`, `kinds` | `result.MapEntitiesResult` (static layout by map name, no demo needed) |
 | GET | `/v1/maps/{map}/geometry` | — | `mapgeom.MapRegions` floor-polygon JSON (needs `-maps-dir`; REST-only) |
 | GET | `/v1/artifacts` | — | `{schemaVersion, artifacts:[…]}` — the DAG manifest (name, cost, lazy, requires/provides, resultKey, servable); static, ETag `"artifacts-v<n>"` |
@@ -243,9 +260,11 @@ the code, so it can't go stale. [`API.md`](API.md) is the high-level
 guide around it:
 
 - **Getting started** — demo addressing, auto-load, the typical flow.
-- **Query conventions + units** — the seconds-vs-milliseconds split
-  (view envelopes are seconds; raw stream entries, the columnar grid,
-  and all `/overview` times are int32 ms).
+- **Query conventions + units** — the fixed naming convention (`t` =
+  int32 ms, `time` = float seconds; descriptive names carry the
+  endpoint's native unit, named by the `timeUnit` echo, schema v56) and
+  the always-ms dense payloads (raw stream entries, the columnar grid,
+  aim samples).
 - **Caching, errors, auth, CORS** — the cross-cutting behaviour.
 - **Choosing the right endpoint** — state-at vs buckets vs stream-slice
   vs events.

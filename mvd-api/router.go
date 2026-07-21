@@ -13,9 +13,10 @@ import (
 // (EnsureLOS), where the SHA is resolved and the tier-3 artifact is
 // read/written, so the server holds no per-demo lock of its own.
 type server struct {
-	store   demoStore
-	logger  *slog.Logger
-	mapsDir string // directory of per-map geometry JSON; "" disables /geometry
+	store    demoStore
+	logger   *slog.Logger
+	mapsDir  string       // directory of per-map geometry JSON; "" disables /geometry
+	searcher gameSearcher // hub game search backing GET /v1/games/search; nil disables it
 
 	// upload holds the POST /v1/demos limits; uploadLedger is the per-key
 	// daily quota (skipped in no-auth mode). Both are inert when uploads are
@@ -39,8 +40,8 @@ type uploadConfig struct {
 // between accessLog and recover. p may be nil (portal disabled); when non-nil
 // its /portal routes are registered on the mux (and are auth-exempt, so they
 // are reachable without an API key even in auth mode — see authExempt).
-func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uploadConfig, auth *authenticator, p *portal.Portal) http.Handler {
-	s := &server{store: store, logger: logger, mapsDir: mapsDir, upload: upload, uploadLedger: newUploadLedger()}
+func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uploadConfig, auth *authenticator, p *portal.Portal, searcher gameSearcher) http.Handler {
+	s := &server{store: store, logger: logger, mapsDir: mapsDir, searcher: searcher, upload: upload, uploadLedger: newUploadLedger()}
 	mux := http.NewServeMux()
 
 	// Portal routes are registered ONLY when -portal is set (p != nil). When
@@ -98,6 +99,9 @@ func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uplo
 	mux.HandleFunc("GET /v1/demos/{id}/loc-table", s.handleLocTable)
 	mux.HandleFunc("GET /v1/demos/{id}/region-control", s.handleRegionControl)
 	mux.HandleFunc("GET /v1/demos/{id}/airgibs", s.handleAirgibs)
+
+	// Hub game discovery (no demo needed; hits a live upstream).
+	mux.HandleFunc("GET /v1/games/search", s.handleGamesSearch)
 
 	// Per-map static data (no demo needed).
 	mux.HandleFunc("GET /v1/maps/{map}/entities", s.handleMapEntitiesByMap)

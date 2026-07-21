@@ -5,6 +5,157 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-21 (tweak-api)
+
+- **Review fixes — echo-rule completeness + hub read hardening (still
+  schema v56, unreleased).**
+  - `/los`, `/streams/projectiles`, `/streams/beams`, `/streams/nails` now
+    carry the `"timeUnit": "ms"` echo (their columns are all int32 ms), so
+    the documented "every time-carrying `/v1/demos/{id}/*` response echoes
+    `timeUnit`" rule is true end to end. The rule's wording is corrected
+    everywhere to its honest form: time-carrying responses echo, with
+    `/demoinfo` and `/artifacts/{name}` exempt, and the three timeless
+    responses (`/loc-table`, `/loc-graph`, `/metadata`) carry no echo.
+  - **Security.** `hubfetch` Search/Resolve now cap the upstream catalog
+    read at 16 MiB (`maxCatalogBytes`) — previously an unbounded
+    `io.ReadAll` let a compromised/buggy hub or a MITM of
+    `HUB_SUPABASE_URL` OOM the API host. And `GET /v1/games/search` no
+    longer echoes the raw upstream error (which can embed the hub URL +
+    query) into its 502 body — it returns a generic message and logs the
+    detail server-side.
+
+- **Time-field polarity flip — `t` is ms, `time` is seconds (still schema
+  v56, unreleased).** The time-field naming convention flips so it becomes
+  exception-free:
+  - **`t` = int32 milliseconds, ALWAYS** — sparse event lists and dense
+    per-sample arrays alike. The dense stored arrays already used `t`-in-ms,
+    so they conform without change — that is the point of this polarity, and
+    the big sparse event lists (frags/damage/shots/chat/…) get the compact
+    key for the compact type (a payload win).
+  - **`time` = float64 seconds, ALWAYS.**
+  - Descriptive names (`startTime`, `endTime`, `nextDeathTime`, `dropTime`,
+    `duration`, `availableFrom`/`takenAt`/`respawnAt`, …) keep carrying the
+    endpoint's native unit, declared by the `timeUnit` echo; `*Ms`-suffixed
+    names (`startMs`, `windowMs`, `atMs`, `durationMs`) are unchanged;
+    `/demoinfo` stays the KTX units island.
+  - **JSON key renames.** Stored ms fields `json:"time"`→`json:"t"`
+    (FragEntry, DamageEntry, PositionalKill, Shot, MatchEvent/chat,
+    AirgibEvent, BackpackDrop, WeaponPickup, OpeningResult firstTakes,
+    and the timeline frag/death/kill/powerup/streak events). Seconds view
+    surfaces `json:"t"`→`json:"time"` (events `TaggedEvent`, buckets-row,
+    state-at, items-summary `firstTake`). loc-trails residences rename
+    `s`/`e`→`start`/`end`. Go field names are unchanged — only the JSON
+    tags. The webapp reads, OpenAPI spec, MCP tool descriptions, and the
+    committed golden corpus were updated in lock-step (golden diff audited
+    as a pure key rename — no value changed). schemaVersion stays 56.
+
+## 2026-07-15 (tweak-api)
+
+- **`timeUnit` echo + codified time-unit naming convention (schema
+  v56).** `timeUnit` is **the unit of every time value in a response**.
+  **Every `/v1/demos/{id}/*` JSON response that carries match-position
+  time values echoes a top-level `"timeUnit": "ms"|"s"`, except
+  `/demoinfo` (mixed KTX-native units) and `/artifacts/{name}` (raw
+  stored bytes). Responses with no match-position time — `/loc-table`,
+  `/loc-graph`, `/metadata` — carry no echo.** There is **no unit
+  selection** — an earlier `units=ms|s` conversion
+  param was dropped as over-engineered (a parallel `any`-typed
+  shadow-struct hierarchy with a field-drift hazard, for a divide-by-1000
+  any client can do). The value is **fixed per endpoint**:
+  - **Native ms**: `/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`,
+    `/backpacks`, `/weapon-pickups`, the `/items` full phase timeline,
+    `/overview`, **`/aim`, `/buckets?layout=column`, `/region-control`**
+    (new this pass — every value in each is ms, so the echo is a truthful
+    `ms`; they used to carry none), and the dense columnar stream bodies
+    **`/los`, `/streams/projectiles`, `/streams/beams`, `/streams/nails`**
+    (int32-ms columns — added in the 2026-07-21 review pass so the echo
+    rule is honest end to end). **Native seconds**:
+    `/events`, `/state-at`, `/stream-slice` (envelope), `/loc-trails`,
+    `/buckets?layout=row`, the `/items?summary=true` shape.
+  - **Field-name conventions still hold.** The sparse match-position `t`
+    (int32 ms) and `time` (float seconds) names are absolute on every
+    endpoint (see the 2026-07-21 polarity-flip entry above), and dense
+    per-sample arrays stay int32 ms under compact names — the
+    `/stream-slice` embedded change/interval/position tracks (`t`/`s`/`e`
+    are ms even though that envelope's `timeUnit` is `s`), the `/aim`
+    crosshair `t` + `lgRamp` `since` samples, and the columnar `/buckets`
+    axis `startMs` + `windowMs`. `/overview`'s `timing` block is a
+    wall-clock island with explicit `*Ms` names.
+  - **Shape change — bare arrays become objects.** To carry the
+    `timeUnit` echo, the four endpoints that returned a top-level JSON
+    array now return an envelope object: `/chat` →
+    `{timeUnit, messages:[…]}`, `/airgibs` → `{timeUnit, airgibs:[…]}`,
+    `/backpacks` → `{timeUnit, backpacks:[…]}`, `/weapon-pickups` →
+    `{timeUnit, pickups:[…]}`. Consumers indexing the old top-level array
+    must read the named field. This is the one non-additive change; every
+    other endpoint just gains the additive `timeUnit` field.
+  - **Escape hatch.** `GET /v1/demos/{id}/artifacts/{name}` serves the
+    raw stored result sections in int32 ms as-is — no `timeUnit` — the
+    way to always get the raw stored milliseconds.
+  - Stored `result.*` structs stay int32 ms; the transport surface added
+    only the `timeUnit` echo here (schemaVersion restamped to 56). The
+    JSON *key* rename that finalized the polarity landed later in v56 —
+    see the 2026-07-21 entry above. See
+    [mvd-api/API.md §2.1](mvd-api/API.md) and
+    [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) §"Time units".
+
+## 2026-07-14 (tweak-api)
+
+- **MCP `searchGames` now routes through `mvd-api` (operator-facing, no
+  schema bump).** The shim's one remaining direct-to-hub tool now proxies to
+  `GET /v1/games/search` like every other tool, so `mvd-mcp` has a single
+  egress point (`mvd-api`), holds no hub configuration or secrets, and no
+  longer imports `hubfetch` (or any `mvd-analytics` code at all). **Deploy
+  change:** drop `HUB_SUPABASE_URL` / `HUB_SUPABASE_KEY` from `mvd-mcp`'s
+  `mcp.env` — its only secret is now `MVD_API_KEY`. The tool's request shape
+  and `{limit, offset, count, total?, games}` response are unchanged; a hub
+  failure surfaces as the API's `502 hub_upstream` message.
+
+- **Hub URL / key / CDN moved out of the source into the environment
+  (operator-facing, no schema bump).** `hubfetch` no longer compiles in the
+  Supabase URL, anon key, and CDN base; `NewClient()` reads
+  `HUB_SUPABASE_URL`, `HUB_SUPABASE_KEY`, and `HUB_CDN_URL` instead, so the
+  key can rotate without a rebuild and never sits in the tree or the deploy
+  examples. When unset the client returns a clear "hub not configured"
+  error on use: `mvd-api` still starts and serves its local cache, but a
+  cache miss and `GET /v1/games/search` return `502 hub_upstream`, and the
+  MCP `searchGames` tool — which proxies to that endpoint — surfaces the
+  same 502. **Deploy change:** add the three vars to `mvd-api`'s
+  `secrets.env` only; `mvd-mcp` needs no hub vars (it routes search through
+  the API) — see `deploy/README.md`. Golden-corpus tests are unaffected
+  offline (they read the committed cache); only a cold cache needs the vars.
+
+- **Game discovery over REST: `GET /v1/games/search` (no schema bump).**
+  The hub.quakeworld.nu catalog search that used to live only in the MCP
+  `searchGames` tool is now a first-class REST endpoint, so a plain HTTP
+  client can find a `gameId` without the MCP shim. Query by `players`,
+  `teams`, `map`, `mode`, `matchtag`, `from`/`to` (ISO dates), with
+  `limit`/`offset` pagination and `roster` for verbatim rows; the response
+  is the same `{limit, offset, count, total?, games}` the MCP tool returns
+  (compact `{name, team, frags}` rosters by default). The query itself
+  moved into the shared `hubfetch` package, so the REST endpoint and the
+  MCP tool answer discovery identically. It proxies a live upstream, so it
+  is uncached and maps hub failures to `502 hub_upstream`. No schema bump —
+  the search response is not part of the demo `Result` (same as the upload
+  endpoint before it).
+- **BSP-derived features now work on demos with no KTX demoinfo block (no
+  schema bump).** LOS/PVS, loc resolution, floor height (`pos.h`), liquid
+  state (`pos.lq`), and region control were all gated on the KTX demoinfo
+  hidden block (`res.DemoInfo.Map`). Older recorders — e.g. MVDSV 1.00 with
+  KTX 1.43/1.44 (2024-era) — never emit that block: MVDSV writes it only when
+  KTX issues `cmd demoinfo` (`mvdsv/src/sv_demo_misc.c:851`,
+  `ktx/src/commands.c:7740`). Those demos got `DemoInfo == nil` and silently
+  produced none of the above, even with positions recorded and the BSP
+  provisioned. The map is now resolved through a single `EffectiveMap`
+  accessor (`result.Result.EffectiveMap` post-hoc, `CoreOutputs.EffectiveMap`
+  at pipeline time) that prefers the demoinfo map and falls back to the
+  serverinfo `map` key — which every demo carries. No result **shape**
+  changes; the affected fields simply populate where they were previously
+  absent, so no `CurrentSchemaVersion` bump (consistent with prior
+  "existing field now populates more often" changes). Requires the map's BSP
+  to be provisioned, same as before.
+
+
 ## 2026-07-14 (deploy-upload-config)
 
 - **Deployment: BSPs for LOS, explicit limits, memory ceiling (no schema

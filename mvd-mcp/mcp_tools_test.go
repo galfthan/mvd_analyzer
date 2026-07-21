@@ -103,7 +103,7 @@ func (f *fakeBackend) GetStreamSlice(_ context.Context, _ GetStreamSliceInput) (
 	return map[string]any{"players": []any{}}, nil
 }
 func (f *fakeBackend) GetStateAt(_ context.Context, in GetStateAtInput) (any, error) {
-	return map[string]any{"t": in.Time, "players": map[string]any{}}, nil
+	return map[string]any{"time": in.Time, "players": map[string]any{}}, nil
 }
 func (f *fakeBackend) GetLocTrails(_ context.Context, _ GetLocTrailsInput) (any, error) {
 	return map[string]any{"players": []any{}}, nil

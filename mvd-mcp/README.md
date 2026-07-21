@@ -41,7 +41,7 @@ mvd-mcp version
 
 | Env var | Description |
 |---|---|
-| `MVD_API_KEY` | API key forwarded as `Authorization: Bearer` on every proxied `mvd-api` call. Required (as an operator-issued **service** key) when the target `mvd-api` runs with `-auth-dir`; unnecessary against a local no-auth `mvd-api`. An env var, not a flag, so the secret never shows in `ps`. |
+| `MVD_API_KEY` | API key forwarded as `Authorization: Bearer` on every proxied `mvd-api` call. Required (as an operator-issued **service** key) when the target `mvd-api` runs with `-auth-dir`; unnecessary against a local no-auth `mvd-api`. An env var, not a flag, so the secret never shows in `ps`. This is the shim's **only** configuration secret — it needs no hub credentials, since `searchGames` proxies to `mvd-api` too. |
 
 ## Tool surface
 
@@ -55,7 +55,7 @@ vocabulary, and the reducer registry.
 
 | Tool | Backing |
 |---|---|
-| `searchGames` | hub.quakeworld.nu Supabase (direct) |
+| `searchGames` | `mvd-api` `GET /v1/games/search` |
 | `loadDemo` | `mvd-api` `POST /v1/demos/{id}` |
 | `getOverview` | `mvd-api` `GET /v1/demos/{id}/overview` |
 | `getDemoInfo` | `mvd-api` `GET /v1/demos/{id}/demoinfo` |
@@ -196,6 +196,22 @@ The Go types below are what `registerTools` declares; the MCP SDK
 infers their JSON Schemas from struct tags and exposes them via
 `tools/list`. Source of truth:
 [`mcp_backend.go`](mcp_backend.go).
+
+Every tool that maps to a demo endpoint (getOverview, getFrags,
+getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
+getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
+getLocTrails) and carries match-position time echoes a top-level
+`timeUnit` (`"ms"`|`"s"`) — the unit of every time value in the response
+(schema v56). The tools not in that list carry no echo: getDemoInfo
+(mixed KTX-native units) and getArtifact (raw stored bytes) are exempt,
+and getMetadata, getLocGraph and getLocTable have no match-position time
+to unit in the first place. There is no unit-selection input. Field-name
+conventions still hold: `t` is int32 ms (sparse event lists and dense
+per-sample arrays alike),
+`time` is float seconds, and descriptive names (`startTime`, `endTime`,
+`nextDeathTime`, …) carry the endpoint's native unit per the `timeUnit`
+echo. See
+[mvd-api/API.md §2.1](../mvd-api/API.md) for the per-endpoint values.
 
 #### `searchGames(...)`
 
@@ -396,7 +412,7 @@ Useful for movement-pattern reasoning ("what's adjacent to RA?",
 | `players`   | `string[]` | all | Restrict to these speakers |
 | `types`     | `string[]` | `["chat","teamsay"]` | Narrow to one of the two |
 
-Output: `{ messages: []result.MatchEvent }` — each entry has `time`,
+Output: `{ messages: []result.MatchEvent }` — each entry has `t`,
 `type` (`chat` or `teamsay`), `player`, `team`, `message` (raw with
 ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
 `getEvents(types:["chat"])` when you only want chat. (mvd-api returns a
@@ -412,7 +428,7 @@ structuredContent must be a JSON object.)
 | `weapons` | `string[]` | both | Dropped-weapon codes (`rl`, `lg`); forwarded as a CSV set, matching REST `/backpacks` |
 | `startTime`/`endTime` | `number` | full match | Match-relative **seconds**; windows the drop time |
 
-Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
+Output: `{ backpacks: []result.BackpackDrop }` — each entry has `t`,
 `player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
 (resolved name), `entNum` (server edict — joins to
 `weapon-pickups[].backpackEnt`). (Wrapped under `backpacks`; see the
@@ -430,8 +446,8 @@ Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
 | `summary` | `bool` | **`true`** (MCP-only default) | Per-item take aggregates `{takenCount, byPlayer, firstTake}` instead of the full phase timeline. Pass `false` for every phase (REST `/items` defaults to the timeline; the defaulted MCP response carries a `hint` field saying how to opt out). |
 
 Summary output: `{ items: [{ name, kind, entNum, loc?, takenCount,
-byPlayer?: {name: n}, firstTake?: { t, takenBy?, team? } }] }` — `t` in
-match-relative seconds. The one-call shape for "who took which YA, and
+byPlayer?: {name: n}, firstTake?: { time, takenBy?, team? } }] }` — `time`
+in match-relative seconds. The one-call shape for "who took which YA, and
 who got there first".
 
 Timeline output (`summary: false`): `result.ItemsResult` —
@@ -451,7 +467,7 @@ Timeline output (`summary: false`): `result.ItemsResult` —
 | `source`  | `string`   | both | `world` (spawner) or `backpack` (RL/LG drop) |
 | `startTime`/`endTime` | `number` | full match | Match-relative **seconds**; windows the pickup time |
 
-Output: `{ pickups: []result.WeaponPickup }` — each entry has `time`,
+Output: `{ pickups: []result.WeaponPickup }` — each entry has `t`,
 `player`, `team`, `weapon`, `source`, `hadBefore`, `kills` (before
 picker's next death), `nextDeathTime`, plus for backpack pickups
 `backpackEnt`, `dropper`, `dropperTeam`, `dropTime`. Joins to
@@ -487,7 +503,7 @@ Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
 | `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` |
 
 Output: `view.EventsView` —
-`{ events: [{ t, type, player, detail }, …] }`. Per-type `detail`
+`{ events: [{ time, type, player, detail }, …] }`. Per-type `detail`
 keys are in RESULT_SCHEMA.md.
 
 #### `getStreamSlice({demoId, ...})`
@@ -513,7 +529,7 @@ intervals clamped to the window).
 | `players` | `string[]` | all | — |
 | `fields`  | `string[]` | all standard minus `sp`/`d` | Spawn/death timestamps are rejected — they're events, not state |
 
-Output: `view.StateAtView` — `{ t, players: { name: {...fields} } }`.
+Output: `view.StateAtView` — `{ time, players: { name: {...fields} } }`.
 Change streams resolve to "latest entry ≤ time" (carry-forward);
 intervals to membership; position to nearest sample.
 
@@ -528,7 +544,7 @@ intervals to membership; position to nearest sample.
 | `endTime`    | `float64` | match end | — |
 
 Output: `view.LocTrailsView` —
-`{ players: [{ name, sequence: [{ s, e, loc }, …] }, …] }`.
+`{ players: [{ name, sequence: [{ start, end, loc }, …] }, …] }`.
 
 #### `getRegionControl({demoId, windowMs?, startTime?, endTime?})`
 
@@ -569,18 +585,19 @@ materialised on demand (first call may be slow). No filters — for
 filtered reads use the curated tools. Errors with `artifact_unknown`
 (HTTP 404) for an unknown or non-servable name.
 
-### Why search bypasses mvd-api
+### Search routes through mvd-api
 
 Discovery (finding demos by player names, teams, map, etc.) is
-hub.quakeworld.nu's job — `mvd-mcp` queries its public Supabase
-endpoint directly, the same way the web frontend does. `mvd-api` is
-narrowly responsible for "given a known demoId, fetch the bytes,
-parse, cache, and serve analytics views." We don't shadow-host hub
-search.
+hub.quakeworld.nu's data, but the shim does **not** talk to the hub
+directly. `searchGames` proxies to `mvd-api`'s `GET /v1/games/search`
+like every other tool, so `mvd-api` is the single egress point and the
+only place the hub connection (URL + anon key) is configured. The shim
+holds no hub secrets and needs no hub env vars.
 
-The Supabase anon key is public (shipped in the web bundle) and the
-request shape mirrors the web's exactly, so there's no second source
-of truth for the search semantics.
+This was once the one exception — the shim queried the hub's public
+Supabase endpoint itself — but that split meant two code paths to the
+hub and hub credentials in two places. Now that `mvd-api` owns the
+search endpoint, the shim is a uniform proxy: one backend, one key.
 
 ## Local MCP
 
@@ -615,8 +632,9 @@ make build-all-platforms                    # everything above + mvd-api targets
 ## Typical session shape
 
 1. `searchGames({player: "bps", map: "dm6"})` → list of recent
-   matches with rosters, scores, dates — directly from the hub. Cheap.
-   No `mvd-api` round-trip; agent can filter / rank from the rows.
+   matches with rosters, scores, dates from the hub catalog (via
+   `mvd-api`'s `GET /v1/games/search`). Cheap — no demo parse; the
+   agent can filter / rank from the rows.
 2. `loadDemo({gameId: 12345})` → tells `mvd-api` to fetch + parse +
    cache. Slow only on cold demos.
 3. `getOverview` / `getBuckets` / `getStateAt` / ... → analytics for

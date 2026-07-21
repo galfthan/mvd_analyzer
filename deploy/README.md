@@ -75,6 +75,14 @@ DISCORD_CLIENT_ID=your-discord-client-id
 DISCORD_CLIENT_SECRET=your-discord-client-secret
 # 32+ random bytes; e.g. `openssl rand -base64 48`
 PORTAL_COOKIE_SECRET=replace-with-a-long-random-string
+# hub.quakeworld.nu connection — needed to fetch demos on cache miss and to
+# serve GET /v1/games/search. The key is the public Supabase anon key (read
+# only); grab the current values from hub.quakeworld.nu's web bundle. Without
+# these the API still serves the local cache, but cache misses and
+# /games/search return 502 hub_upstream.
+HUB_SUPABASE_URL=https://<project>.supabase.co/rest/v1/v1_games
+HUB_SUPABASE_KEY=your-supabase-anon-key
+HUB_CDN_URL=https://d.quake.world
 EOF
 sudo chmod 600 /etc/mvd/secrets.env
 ```
@@ -83,7 +91,9 @@ sudo chmod 600 /etc/mvd/secrets.env
 
 mvd-mcp authenticates to mvd-api with one operator-issued **service**
 key (higher rate class). Issue it with the CLI (not the portal) and put
-it in `/etc/mvd/mcp.env`, which `mvd-mcp.service` reads:
+it in `/etc/mvd/mcp.env`, which `mvd-mcp.service` reads. That key is the
+shim's only secret — every tool (including `searchGames`, which proxies to
+`GET /v1/games/search`) routes through mvd-api, so no hub vars go here:
 
 ```sh
 sudo -u mvd /opt/mvd/bin/mvd-api keys issue \

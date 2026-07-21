@@ -17,9 +17,18 @@ import (
 // orchestration step — most of the heavy lifting is delegated to the
 // aggregate / powerup / streak / region helpers.
 func (a *TimelineAnalyzer) Finalize(result *Result) error {
-	// Try to load loc file from DemoInfo.Map if not already loaded
-	if a.locFinder == nil && a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
-		if finder, err := locvis.LoadForMap(a.core.DemoInfo.Map); err == nil {
+	// Resolve the map once (demoinfo map, else the serverinfo `map` key) so
+	// every BSP-derived pass below lights up even on demos with no KTX
+	// demoinfo block — see CoreOutputs.EffectiveMap. Empty when no source
+	// names a map, which leaves loc/clip/vis loading skipped as before.
+	mapName := ""
+	if a.core != nil {
+		mapName = a.core.EffectiveMap()
+	}
+
+	// Try to load loc file from the resolved map if not already loaded
+	if a.locFinder == nil && mapName != "" {
+		if finder, err := locvis.LoadForMap(mapName); err == nil {
 			a.locFinder = finder
 		}
 	}
@@ -30,8 +39,8 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// origins. Missing corpus (no BSP for the map, or an HL/Q2 format we
 	// don't parse) leaves clipHull nil → the PositionTrack.H column
 	// stays absent.
-	if a.clipHull == nil && a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
-		if hull, moverHulls, err := mapclip.LoadForMapWithMovers(a.core.DemoInfo.Map, a.moverSubModels()); err == nil {
+	if a.clipHull == nil && mapName != "" {
+		if hull, moverHulls, err := mapclip.LoadForMapWithMovers(mapName, a.moverSubModels()); err == nil {
 			a.clipHull = hull
 			a.moverHulls = moverHulls
 		}
@@ -42,8 +51,8 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// rather than through locFinder: locvis requires the .loc corpus and
 	// is nil on maps that have a BSP but no locs, which would silently
 	// lose liquid data exactly where it's available.
-	if a.visBSP == nil && a.core != nil && a.core.DemoInfo != nil && a.core.DemoInfo.Map != "" {
-		if data := mapbsp.LoadBytes(a.core.DemoInfo.Map); data != nil {
+	if a.visBSP == nil && mapName != "" {
+		if data := mapbsp.LoadBytes(mapName); data != nil {
 			if vb, err := bspvis.LoadBytes(data); err == nil {
 				a.visBSP = vb
 			}

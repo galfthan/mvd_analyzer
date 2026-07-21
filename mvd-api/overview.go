@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-analytics/view"
 )
 
 // Overview is a curated summary of a parsed *Result, cheap to compute
@@ -164,6 +165,18 @@ func BuildOverview(r *result.Result) Overview {
 	})
 
 	return ov
+}
+
+// OverviewEnvelope wraps the /overview body with a fixed timeUnit echo (schema
+// v56). Overview's descriptive times (duration, matchStart/End, streak/powerup
+// start+duration) are all int32 milliseconds, so the echo is a constant "ms".
+// Embedding flattens Overview's fields, so the body is Overview verbatim plus a
+// leading timeUnit — no parallel field list to drift. The `timing` block keeps
+// its own explicit *Ms names (demoOffset, pauses[].atMs/durationMs) — the
+// wall-clock anchor island, like /demoinfo.
+type OverviewEnvelope struct {
+	TimeUnit view.TimeUnit `json:"timeUnit"`
+	Overview
 }
 
 func topStreaks(in []result.FragStreakEvent, n int) []OverviewStreak {

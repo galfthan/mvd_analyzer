@@ -26,6 +26,10 @@ type StreamSliceOptions struct {
 // requested window with the same JSON keys as result.PlayerStream so
 // consumers can treat a slice as a mini stream.
 type StreamSliceView struct {
+	// TimeUnit echoes the envelope's native unit ("s"); set by the mvd-api
+	// handler (schema v56). The embedded per-sample tracks stay dense int32 ms
+	// regardless. Omitted on the WASM/qw-analyze paths.
+	TimeUnit  TimeUnit      `json:"timeUnit,omitempty"`
 	StartTime float64       `json:"startTime"`
 	EndTime   float64       `json:"endTime"`
 	Players   []PlayerSlice `json:"players"`

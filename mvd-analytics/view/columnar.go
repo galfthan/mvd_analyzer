@@ -28,6 +28,10 @@ import (
 // when at least one player carries an "li" column; index 0 is the ""
 // no-loc sentinel, same as /loc-table.
 type ColumnarBuckets struct {
+	// TimeUnit echoes this layout's native unit ("ms"): the startMs/windowMs
+	// axis is int32 ms. Set by the mvd-api handler (schema v56); omitted on the
+	// WASM/qw-analyze paths, which build the struct directly.
+	TimeUnit      TimeUnit                   `json:"timeUnit,omitempty"`
 	WindowMs      int                        `json:"windowMs"`
 	StartMs       int32                      `json:"startMs"`
 	Count         int                        `json:"count"`
