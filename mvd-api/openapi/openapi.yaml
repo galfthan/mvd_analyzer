@@ -2887,6 +2887,7 @@ components:
     Aim:
       additionalProperties: false
       properties:
+        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         players:
           items:
             additionalProperties: false
@@ -3106,6 +3107,9 @@ components:
             - "null"
             - array
       required:
+        # timeUnit is present on the /aim governed response but omitted by the
+        # raw-ms /artifacts envelope (which reuses this schema), so it stays
+        # optional-but-declared rather than required.
         - players
       type: object
     LocGraph:
@@ -3605,6 +3609,7 @@ components:
     RegionControl:
       additionalProperties: false
       properties:
+        timeUnit: { type: string, enum: [ms] }
         bucketStates:
           additionalProperties:
             type: string
@@ -3705,6 +3710,7 @@ components:
         teamB:
           type: string
       required:
+        - timeUnit
         - regions
       type: object
     ProjectileStreams:
@@ -4512,9 +4518,10 @@ components:
         implicit: time(i) = startMs + i*windowMs (int32 ms). Each player
         object inlines its dense columns at the top level keyed by field
         code; boolean columns (and the alive mask) serialize as 0/1.
-      required: [windowMs, startMs, count]
+      required: [timeUnit, windowMs, startMs, count]
       additionalProperties: false
       properties:
+        timeUnit: { type: string, enum: [ms] }
         windowMs: { type: integer }
         startMs: { type: integer }
         count: { type: integer }

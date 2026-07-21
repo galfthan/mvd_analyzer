@@ -4,24 +4,23 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 
 // Time-unit ECHO for the REST transport surface (schema v56).
 //
-// The rule (API.md §2.1) is a fixed, per-endpoint naming convention — there is
-// NO unit selection:
+// `timeUnit` is the unit of every time value in a response (API.md §2.1).
+// EVERY `/v1/demos/{id}/*` JSON response carries it, with two principled
+// exceptions: `/demoinfo` (KTX's own clock, a mix of native units) and
+// `/artifacts/{name}` (the raw stored result sections, served byte-for-byte).
+// There is NO unit selection — the value is FIXED per endpoint:
 //
-//   - The sparse match-position fields `t` (float seconds) and `time` (int32
-//     milliseconds) always carry those units, on every endpoint.
-//   - Descriptively-named times (startTime/endTime, availableFrom/takenAt/
-//     respawnAt, nextDeathTime, dropTime, duration, start, …) carry the
-//     endpoint's NATIVE unit, declared by the response's `timeUnit` echo:
-//     "ms" for the stored pass-throughs (frags, damage, shots, chat, airgibs,
-//     backpacks, weapon-pickups, items timeline, overview) and "s" for the
-//     derived views (events, buckets rows, state-at, stream-slice envelope,
-//     loc-trails, items summary).
-//   - Every governed response echoes `timeUnit` so a reader never has to guess
-//     which unit a descriptive field is in.
-//   - Dense per-sample payloads are the documented exception and are always
-//     int32 ms under compact names (aim crosshair `t` + lgRamp `since`;
-//     stream-slice embedded tracks); the columnar buckets axis is Ms-suffixed
-//     (startMs/windowMs). Those carry no echo and never move.
+//   - "ms" (int32 milliseconds): the stored pass-throughs (frags, damage,
+//     shots, chat, airgibs, backpacks, weapon-pickups, items timeline,
+//     overview), plus /aim (dense crosshair `t` + lgRamp `since`), the
+//     columnar /buckets axis (startMs/windowMs), and /region-control (windowMs).
+//   - "s" (float64 seconds): the derived views (events, buckets rows, state-at,
+//     stream-slice envelope, loc-trails, items summary).
+//
+// The sparse match-position field names are still absolute: a top-level `t` is
+// float seconds and a `time` is int32 ms on every endpoint; `timeUnit` names
+// the unit of the descriptively-named times (startTime, respawnAt, duration, …)
+// that a reader would otherwise have to guess.
 //
 // The stored result.* structs and their JSON tags are the ON-DISK contract
 // (qw-analyze / WASM emit them verbatim, in ms) and are left untouched. The
@@ -29,8 +28,9 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 // the HTTP boundary and can never drift from the on-disk shape; the four bare-
 // array bodies gain a {timeUnit, <list>} object so the echo has somewhere to
 // live. The derived views carry the echo on their own view struct (see the
-// TimeUnit field on EventsView / BucketsView / StateAtView / StreamSliceView /
-// LocTrailsView / ItemsSummaryView), set by the mvd-api handler.
+// TimeUnit field on EventsView / BucketsView / ColumnarBuckets / StateAtView /
+// StreamSliceView / LocTrailsView / ItemsSummaryView), set by the mvd-api
+// handler.
 
 // TimeUnit is the fixed native unit a governed response echoes for its
 // descriptively-named match-position timestamps.
@@ -71,6 +71,24 @@ type ShotsEnvelope struct {
 type ItemsEnvelope struct {
 	TimeUnit TimeUnit `json:"timeUnit"`
 	*result.ItemsResult
+}
+
+// AimEnvelope wraps the /aim section (ms-native). Aim's payload is dense
+// (crosshair `t`, lgRamp `since`) and entirely int32 ms, so the echo is a
+// constant "ms". The /artifacts/{name} accessor keeps serving the stored
+// AimResult raw (no envelope) — only the curated endpoint echoes.
+type AimEnvelope struct {
+	TimeUnit TimeUnit `json:"timeUnit"`
+	*result.AimResult
+}
+
+// RegionControlEnvelope wraps the /region-control view (ms-native): its
+// windowMs axis is int32 ms. RegionControlView aliases result.RegionControlResult
+// (also baked into the parse-time Result), so embedding flattens its fields at
+// the HTTP boundary and can never drift from that shape.
+type RegionControlEnvelope struct {
+	TimeUnit TimeUnit `json:"timeUnit"`
+	*result.RegionControlResult
 }
 
 // --- bare-array bodies: {timeUnit, <list>} object so the echo has a home ---

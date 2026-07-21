@@ -466,7 +466,7 @@ func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
 			"this demo has no aim data (needs shots + position/view streams)")
 		return
 	}
-	writeJSON(w, http.StatusOK, am)
+	writeJSON(w, http.StatusOK, view.AimEnvelope{TimeUnit: view.UnitMs, AimResult: am})
 }
 
 // handleChat: GET /v1/demos/{id}/chat — chat-only slice of
@@ -660,12 +660,12 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if opts.Layout == "column" {
-		// The columnar layout has its own ms-suffixed startMs/windowMs axis
-		// (dense, no echo); only the row layout echoes timeUnit.
+		// The columnar layout's startMs/windowMs axis is int32 ms; echo "ms".
 		cb, err := view.BucketsColumnar(res, opts)
 		if writeInvalidParam(w, err) {
 			return
 		}
+		cb.TimeUnit = view.UnitMs
 		writeJSON(w, http.StatusOK, cb)
 		return
 	}
@@ -917,7 +917,7 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
-	writeJSON(w, http.StatusOK, rcv)
+	writeJSON(w, http.StatusOK, view.RegionControlEnvelope{TimeUnit: view.UnitMs, RegionControlResult: rcv})
 }
 
 // handleAirgibs: GET /v1/demos/{id}/airgibs — the Key Moments airgib list

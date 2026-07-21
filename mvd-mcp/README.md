@@ -197,15 +197,16 @@ infers their JSON Schemas from struct tags and exposes them via
 `tools/list`. Source of truth:
 [`mcp_backend.go`](mcp_backend.go).
 
-Every tool that maps to a time-carrying demo endpoint (getOverview,
-getFrags, getDamage, getChat, getBackpacks, getItems, getWeaponPickups,
-getBuckets, getEvents, getStreamSlice, getStateAt, getLocTrails) echoes
-a top-level `timeUnit` (`"ms"`|`"s"`) naming that endpoint's fixed
-native unit (schema v56) — there is no unit-selection input. The unit of
-any field follows one rule: `t` is float seconds, `time` is int32 ms,
-and descriptively-named times use the echoed `timeUnit`. See
-[mvd-api/API.md §2.1](../mvd-api/API.md) for the per-endpoint values and
-the always-ms dense-payload exception.
+Every tool that maps to a demo endpoint (getOverview, getFrags,
+getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
+getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
+getLocTrails) echoes a top-level `timeUnit` (`"ms"`|`"s"`) — the unit of
+every time value in the response (schema v56) — with two exceptions,
+getDemoInfo (mixed KTX-native units) and getArtifact (raw stored bytes).
+There is no unit-selection input. Field-name conventions still hold: `t`
+is float seconds, `time` is int32 ms, and dense per-sample arrays stay
+int32 ms under compact names. See
+[mvd-api/API.md §2.1](../mvd-api/API.md) for the per-endpoint values.
 
 #### `searchGames(...)`
 

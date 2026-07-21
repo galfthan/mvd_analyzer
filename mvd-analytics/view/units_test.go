@@ -93,3 +93,48 @@ func TestDerivedViewNoEchoWhenUnset(t *testing.T) {
 		t.Errorf("unset EventsView must omit timeUnit: %s", s)
 	}
 }
+
+// TestAimEnvelopeFlattens checks the /aim pass-through envelope echoes the fixed
+// ms unit (aim is entirely dense int32-ms) and flattens the stored AimResult.
+func TestAimEnvelopeFlattens(t *testing.T) {
+	am := &result.AimResult{Players: []result.PlayerAim{{Player: "a", Mode: "duel"}}}
+	got := marshal(t, AimEnvelope{TimeUnit: UnitMs, AimResult: am})
+	if !strings.Contains(got, `"timeUnit":"ms"`) {
+		t.Errorf("aim envelope missing ms echo: %s", got)
+	}
+	if !strings.Contains(got, `"players":[`) || !strings.Contains(got, `"player":"a"`) {
+		t.Errorf("embedded AimResult fields not flattened: %s", got)
+	}
+}
+
+// TestRegionControlEnvelopeFlattens checks the /region-control envelope echoes
+// the fixed ms unit (windowMs axis) and flattens the stored RegionControlResult.
+func TestRegionControlEnvelopeFlattens(t *testing.T) {
+	rc := &result.RegionControlResult{
+		TeamA:        "red",
+		TeamB:        "blue",
+		BucketStates: map[string]string{"mid": "A_b"},
+	}
+	got := marshal(t, RegionControlEnvelope{TimeUnit: UnitMs, RegionControlResult: rc})
+	if !strings.Contains(got, `"timeUnit":"ms"`) {
+		t.Errorf("region-control envelope missing ms echo: %s", got)
+	}
+	if !strings.Contains(got, `"teamA":"red"`) || !strings.Contains(got, `"bucketStates":`) {
+		t.Errorf("embedded RegionControlResult fields not flattened: %s", got)
+	}
+}
+
+// TestColumnarBucketsEcho checks the columnar /buckets layout carries the fixed
+// "ms" echo when the handler sets it (its startMs/windowMs axis is int32 ms),
+// and that the WASM/qw-analyze path (TimeUnit unset) omits it entirely — the
+// omitempty guard keeps that constructor-direct output byte-identical to pre-v56.
+func TestColumnarBucketsEcho(t *testing.T) {
+	cb := &ColumnarBuckets{TimeUnit: UnitMs, WindowMs: 5000, StartMs: 0, Count: 3}
+	if s := marshal(t, cb); !strings.Contains(s, `"timeUnit":"ms"`) || !strings.Contains(s, `"windowMs":5000`) {
+		t.Errorf("columnar echo/ms wrong: %s", s)
+	}
+	unset := &ColumnarBuckets{WindowMs: 5000, StartMs: 0, Count: 3}
+	if s := marshal(t, unset); strings.Contains(s, "timeUnit") {
+		t.Errorf("unset ColumnarBuckets must omit timeUnit (WASM path): %s", s)
+	}
+}

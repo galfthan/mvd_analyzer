@@ -65,76 +65,53 @@ reachable without an API key.
 
 ## 2. Conventions (read this once)
 
-### 2.1 Time units — one fixed naming convention
+### 2.1 Time units — the `timeUnit` echo
 
-Time units are **fixed per field by name** — there is **no unit
-selection**. Three rules, plus the `timeUnit` echo, fully determine
-every unit in every response:
+`timeUnit` is **the unit of every time value in the response**. There is
+**no unit selection** — the value is fixed per endpoint. The rule is:
 
-**1. The two sparse (match-position) field names are absolute.** On
-*every* endpoint:
+> **Every `/v1/demos/{id}/*` JSON response carries a top-level
+> `"timeUnit": "ms"|"s"`, except `/demoinfo` (mixed KTX-native units) and
+> `/artifacts/{name}` (raw stored bytes).**
 
-| Field | Unit | Type |
-|---|---|---|
-| **`t`** | seconds | float |
-| **`time`** | milliseconds | int32 |
+Read `timeUnit` and you know the unit of that response's times — no
+per-field guessing. The value is fixed per endpoint:
 
-If a field is named `t` it is float seconds; if it is named `time` it is
-int32 ms. This never varies by endpoint.
-
-**2. Descriptively-named times carry the endpoint's native unit, named
-by the `timeUnit` echo.** Fields like `startTime`/`endTime`,
-`availableFrom`/`takenAt`/`respawnAt`, `nextDeathTime`, `dropTime`,
-`duration`, `start` do not encode their unit in the name, so every
-governed response echoes a top-level **`"timeUnit": "ms"|"s"`** stating
-which unit those fields use. The value is **fixed per endpoint**:
-
-| `timeUnit` | Endpoints (their descriptive match-position fields) |
+| `timeUnit` | Endpoints |
 |---|---|
-| **`"ms"`** (int32 milliseconds) | `/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, `/items` (full phase timeline — `availableFrom`/`takenAt`/`respawnAt`), `/overview` (`duration`, `matchStart`, `matchEnd`, `topStreaks[].start`/`.duration`, `topPowerups[].start`/`.duration`) |
-| **`"s"`** (float64 seconds) | `/events`, `/buckets?layout=row`, `/state-at`, `/stream-slice` (envelope `startTime`/`endTime`), `/loc-trails` (each residence `s`/`e`), `/items?summary=true` (`firstTake.t`) |
+| **`"ms"`** (int32 milliseconds) | `/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, `/items` (full phase timeline), `/overview`, `/aim`, `/buckets?layout=column`, `/region-control` |
+| **`"s"`** (float64 seconds) | `/events`, `/buckets?layout=row`, `/state-at`, `/stream-slice`, `/loc-trails`, `/items?summary=true` |
 
 The four formerly bare-array endpoints wrap their array in an object so
 the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/airgibs` →
 `{timeUnit, airgibs:[…]}`, `/backpacks` → `{timeUnit, backpacks:[…]}`,
 `/weapon-pickups` → `{timeUnit, pickups:[…]}`.
 
-**3. Dense per-sample payloads are the documented exception — always
-int32 ms, under compact names, with no echo:**
+**Field-name conventions (consistent with the echo).** The two sparse
+match-position field names are absolute on *every* endpoint: a top-level
+**`t`** is float seconds and a **`time`** is int32 ms. Descriptively-named
+times (`startTime`/`endTime`, `availableFrom`/`takenAt`/`respawnAt`,
+`nextDeathTime`, `dropTime`, `duration`, `start`) don't encode their unit
+in the name — that's what `timeUnit` is for. Dense per-sample arrays use
+compact names and are always int32 ms: `/aim`'s crosshair `t` + `lgRamp`
+`since`, the columnar `/buckets` axis (`startMs`/`windowMs`,
+`time(i)=startMs+i*windowMs`), and the raw stream tracks embedded in
+`/stream-slice` (`h:[{ "t":105000,… }]`, `pos.t:[…]`, `rl:[{ "s","e" }]`
+— ms even though that envelope's `timeUnit` is `s`, which governs its
+top-level `startTime`/`endTime`).
 
-| Where | Always-ms fields |
-|---|---|
-| Raw stream tracks embedded in `/stream-slice` | `h:[{ "t":105000,… }]`, `pos.t:[…]`, `rl:[{ "s":…,"e":… }]` (the change / interval / position tracks are ms even though the enclosing envelope's `startTime`/`endTime` are seconds) |
-| `/aim` samples | crosshair `t`, `lgRamp` `since` |
-| Columnar `/buckets` axis | `startMs`, `windowMs` (`time(i)=startMs+i*windowMs`) — Ms-suffixed on purpose; `windowMs` is a window *size*, not a position |
+The two exceptions:
 
-Note the deliberate collision: a **dense** `t`/`s`/`e` inside a
-stream-slice track is int32 ms, whereas a **sparse** `t` (events,
-state-at, buckets rows) is float seconds. The enclosing shape tells them
-apart — dense tracks live under a player's field arrays, the sparse `t`
-is a top-level event/row key.
-
-Corollaries:
-
-- **`/aim` and `/buckets?layout=column` (the default layout) are
-  ungoverned** — they carry only dense ms payloads, no sparse
-  match-position field, so no `timeUnit`. Only `/buckets?layout=row`
-  echoes one. (In row mode `windowMs`, the window size, still stays ms;
-  only the bucket `t` is float seconds.)
-- **`/items` is shape-dependent**: the full timeline echoes `"ms"`, the
-  `summary=true` shape (`firstTake.t`) echoes `"s"`.
-- **`/overview`'s `timing` block is a wall-clock island** and is
-  independent of the echo: its fields are explicitly `*Ms`-named
-  (`demoOffset`, `demoStartUnixMs`, `demoStartAccuracyMs`,
-  `pauses[].atMs`/`.durationMs`).
-- **`/demoinfo` is the KTX units island** — KTX's own clock, integer
-  seconds (see RESULT_SCHEMA.md §DemoInfoResult); not a pipeline
-  match-position time, no echo.
-- **`/region-control` is ungoverned** — bucket-state strings +
-  percentages, no match-position timestamp.
-- **`/artifacts/{name}`** serves the raw stored result sections in
-  int32 ms as-is (the exact-bytes escape hatch), no echo. The underlying
+- **`/demoinfo` is the KTX units island** — KTX's own clock, a mix of
+  native units (see RESULT_SCHEMA.md §DemoInfoResult), so no single echo
+  describes it.
+- **`/artifacts/{name}`** serves the raw stored result sections
+  byte-for-byte (the exact-bytes escape hatch), no echo. The underlying
   stored schema is all int32 ms — see RESULT_SCHEMA.md §"Time units".
+
+`/overview`'s `timing` block is orthogonal to the echo: its wall-clock
+fields are explicitly `*Ms`-named (`demoOffset`, `demoStartUnixMs`,
+`demoStartAccuracyMs`, `pauses[].atMs`/`.durationMs`).
 
 **Query inputs are unaffected**: `from`/`to`/`time` are always
 match-relative **seconds**, regardless of any response's `timeUnit`.

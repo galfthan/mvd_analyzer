@@ -8,35 +8,29 @@ detail.
 ## 2026-07-15 (tweak-api)
 
 - **`timeUnit` echo + codified time-unit naming convention (schema
-  v56).** Every demo endpoint carrying a descriptively-named
-  **match-position** timestamp now echoes a top-level
-  `"timeUnit": "ms"|"s"` naming that endpoint's **fixed** native unit, so
-  every governed response is self-describing. There is **no unit
-  selection** — an earlier `units=ms|s` conversion param was dropped as
-  over-engineered (a parallel `any`-typed shadow-struct hierarchy with a
-  field-drift hazard, for a divide-by-1000 any client can do). Instead
-  the naming rule is now official and fully determines every unit:
-  - **`t` = float seconds; `time` = int32 milliseconds — always**, on
-    every sparse (match-position) field, on every endpoint.
-  - **Descriptive names** (`startTime`/`endTime`,
-    `availableFrom`/`takenAt`/`respawnAt`, `nextDeathTime`, `dropTime`,
-    `duration`, `start`, …) carry the endpoint's fixed native unit,
-    declared by its `timeUnit` echo. Native ms: `/frags`, `/damage`,
-    `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, the
-    `/items` full phase timeline, `/overview`. Native seconds:
-    `/events`, `/state-at`, `/stream-slice` (envelope only),
-    `/loc-trails`, `/buckets?layout=row`, the `/items?summary=true`
-    shape.
-  - **Dense per-sample payloads are the documented exception** — always
-    int32 ms, under compact names, no echo: the `/stream-slice` embedded
-    change/interval/position tracks (`t`/`s`/`e` are ms even though the
-    envelope `startTime`/`endTime` are seconds), the `/aim` crosshair `t`
-    + `lgRamp` `since` samples, and the columnar `/buckets` axis
-    `startMs` + `windowMs` (Ms-suffixed). Hence `/aim` and
-    `/buckets?layout=column` (the default layout) are **ungoverned**, as
-    are `/region-control` and `/demoinfo` (KTX's own integer-seconds
-    island). `/overview`'s `timing` block is a wall-clock island with
-    explicit `*Ms` names.
+  v56).** `timeUnit` is **the unit of every time value in a response**.
+  **Every `/v1/demos/{id}/*` JSON response now echoes a top-level
+  `"timeUnit": "ms"|"s"`, with exactly two exceptions: `/demoinfo`
+  (mixed KTX-native units) and `/artifacts/{name}` (raw stored bytes).**
+  There is **no unit selection** — an earlier `units=ms|s` conversion
+  param was dropped as over-engineered (a parallel `any`-typed
+  shadow-struct hierarchy with a field-drift hazard, for a divide-by-1000
+  any client can do). The value is **fixed per endpoint**:
+  - **Native ms**: `/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`,
+    `/backpacks`, `/weapon-pickups`, the `/items` full phase timeline,
+    `/overview`, **`/aim`, `/buckets?layout=column`, `/region-control`**
+    (the last three are new this pass — every value in each is ms, so the
+    echo is a truthful `ms`; they used to carry none). **Native seconds**:
+    `/events`, `/state-at`, `/stream-slice` (envelope), `/loc-trails`,
+    `/buckets?layout=row`, the `/items?summary=true` shape.
+  - **Field-name conventions still hold.** The sparse match-position `t`
+    (float seconds) and `time` (int32 ms) names are absolute on every
+    endpoint, and dense per-sample arrays stay int32 ms under compact
+    names — the `/stream-slice` embedded change/interval/position tracks
+    (`t`/`s`/`e` are ms even though that envelope's `timeUnit` is `s`),
+    the `/aim` crosshair `t` + `lgRamp` `since` samples, and the columnar
+    `/buckets` axis `startMs` + `windowMs`. `/overview`'s `timing` block
+    is a wall-clock island with explicit `*Ms` names.
   - **Shape change — bare arrays become objects.** To carry the
     `timeUnit` echo, the four endpoints that returned a top-level JSON
     array now return an envelope object: `/chat` →
@@ -46,8 +40,8 @@ detail.
     must read the named field. This is the one non-additive change; every
     other endpoint just gains the additive `timeUnit` field.
   - **Escape hatch.** `GET /v1/demos/{id}/artifacts/{name}` serves the
-    raw stored result sections in int32 ms as-is — no `timeUnit` — the
-    way to always get the raw stored milliseconds.
+    raw stored result sections in int32 ms as-is — no `timeUnit`, one of
+    the two exceptions — the way to always get the raw stored milliseconds.
   - Stored `result.*` structs, `qw-analyze`/WASM output, and the golden
     corpus are unchanged — still int32 ms; this is a transport-surface
     change only (schemaVersion restamped to 56). See
