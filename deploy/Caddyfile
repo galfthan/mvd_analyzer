@@ -30,6 +30,24 @@
 		}
 	}
 
+	# --- OAuth discovery probes -----------------------------------------
+	# MCP clients (claude.ai connectors, MCP inspector) probe these
+	# well-known paths when a server is added. Left alone they fall through
+	# to mvd-api, whose auth middleware answers 401 + WWW-Authenticate —
+	# which the client reads as "OAuth lives here", so it attempts dynamic
+	# client registration and fails ("Couldn't register with …'s sign-in
+	# service"). /mcp itself is anonymous; a clean 404 tells clients to
+	# connect without OAuth.
+	handle /.well-known/oauth-authorization-server* {
+		respond 404
+	}
+	handle /.well-known/oauth-protected-resource* {
+		respond 404
+	}
+	handle /.well-known/openid-configuration* {
+		respond 404
+	}
+
 	# --- REST API + Discord portal --------------------------------------
 	# Everything else (/v1/*, /portal/*, /healthz, /v1/version) -> mvd-api.
 	handle {
