@@ -272,10 +272,10 @@ func TestFragsParams_WindowAndSummary(t *testing.T) {
 		t.Errorf("totalFrags = %v, want 2 (stored, summary keeps authoritative)", resp["totalFrags"])
 	}
 
-	// window from=15s keeps only the t=20s frag; aggregates recompute to 1.
-	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/frags?from=15", 200)
+	// window from=15000ms keeps only the t=20000ms frag; aggregates recompute to 1.
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/frags?from=15000", 200)
 	if int(resp["totalFrags"].(float64)) != 1 {
-		t.Errorf("from=15: totalFrags = %v, want 1", resp["totalFrags"])
+		t.Errorf("from=15000: totalFrags = %v, want 1", resp["totalFrags"])
 	}
 
 	// malformed from is a clean 400 invalid_param.
@@ -989,7 +989,7 @@ func TestEvents_Default(t *testing.T) {
 func TestStreamSlice(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
-	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=30&fields=h,a", 200)
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=30000&fields=h,a", 200)
 	if _, ok := resp["players"].([]any); !ok && resp["players"] != nil {
 		t.Errorf("players shape unexpected: %T", resp["players"])
 	}
@@ -1018,7 +1018,7 @@ func TestStreamSlice_ViewVelocityFields(t *testing.T) {
 
 	// stream-slice: view + vel each project into their own sibling track,
 	// and pos stays absent when not requested (clean break).
-	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=0.4&fields=view,vel&players=bps", 200)
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=400&fields=view,vel&players=bps", 200)
 	players, _ := resp["players"].([]any)
 	if len(players) == 0 {
 		t.Fatal("stream-slice returned no players")
@@ -1035,7 +1035,7 @@ func TestStreamSlice_ViewVelocityFields(t *testing.T) {
 	}
 
 	// state-at: view + vel surface as point objects on the player.
-	st := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=0.1&fields=view,vel&players=bps", 200)
+	st := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=100&fields=view,vel&players=bps", 200)
 	sp := st["players"].(map[string]any)["bps"].(map[string]any)
 	if _, ok := sp["view"]; !ok {
 		t.Errorf("state-at missing view: %v", sp)
@@ -1048,7 +1048,7 @@ func TestStreamSlice_ViewVelocityFields(t *testing.T) {
 	getJSON(t, srv.URL+"/v1/demos/gameId:42/buckets?windowMs=100&fields=vel&players=bps", 200)
 
 	// An unknown field code is rejected with 400 (no silent pass-through).
-	if _, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=1&fields=bogus"); status != 400 {
+	if _, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=1000&fields=bogus"); status != 400 {
 		t.Errorf("unknown field status = %d; want 400", status)
 	}
 }
@@ -1065,9 +1065,9 @@ func TestStateAt_MissingTime(t *testing.T) {
 func TestStateAt_HappyPath(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
-	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=15&fields=h,a&players=bps", 200)
-	if resp["time"].(float64) != 15 {
-		t.Errorf("time = %v; want 15", resp["time"])
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=15000&fields=h,a&players=bps", 200)
+	if resp["t"].(float64) != 15000 {
+		t.Errorf("t = %v; want 15000", resp["t"])
 	}
 	players, _ := resp["players"].(map[string]any)
 	if _, ok := players["bps"]; !ok {
@@ -1343,19 +1343,19 @@ func TestAimParams(t *testing.T) {
 		t.Errorf("players=bps returned %v, want bps", p["player"])
 	}
 
-	// from=15 recomputes: only bps's t=20s lg fire survives → 1 shot.
-	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/aim?from=15", 200)
+	// from=15000 recomputes: only bps's t=20000ms lg fire survives → 1 shot.
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/aim?from=15000", 200)
 	players, _ = resp["players"].([]any)
 	if len(players) != 1 {
-		t.Fatalf("from=15 returned %d players, want 1 (only bps fired in window)", len(players))
+		t.Fatalf("from=15000 returned %d players, want 1 (only bps fired in window)", len(players))
 	}
 	p, _ := players[0].(map[string]any)
 	weapons, _ := p["weapons"].([]any)
 	if len(weapons) != 1 {
-		t.Fatalf("from=15 bps weapons = %v, want 1 row", p["weapons"])
+		t.Fatalf("from=15000 bps weapons = %v, want 1 row", p["weapons"])
 	}
 	if w, _ := weapons[0].(map[string]any); w["shots"] != float64(1) {
-		t.Errorf("from=15 windowed lg shots = %v, want 1", w["shots"])
+		t.Errorf("from=15000 windowed lg shots = %v, want 1", w["shots"])
 	}
 
 	// malformed from is a clean 400 invalid_param.
@@ -1392,9 +1392,9 @@ func TestChat_PlayerFilter(t *testing.T) {
 func TestChat_TimeWindow(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
-	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat?from=15&to=100")
+	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat?from=15000&to=100000")
 	arr := unitsList(t, body, "messages", "ms")
-	// only the teamsay at t=20 is in [15, 100].
+	// only the teamsay at t=20000 is in [15000, 100000].
 	if len(arr) != 1 || arr[0]["type"] != "teamsay" {
 		t.Errorf("expected only the teamsay; got %s", body)
 	}

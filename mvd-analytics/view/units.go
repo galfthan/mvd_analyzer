@@ -2,30 +2,20 @@ package view
 
 import "github.com/mvd-analyzer/mvd-analytics/result"
 
-// Time-unit ECHO for the REST transport surface (schema v56).
+// Time-unit ECHO for the REST transport surface (schema v57, pure-ms model).
 //
-// `timeUnit` is the unit of every time value in a response (API.md §2.1).
-// EVERY `/v1/demos/{id}/*` JSON response that carries match-position time
-// values echoes it, except `/demoinfo` (KTX's own clock, a mix of native
-// units) and `/artifacts/{name}` (the raw stored result sections, served
-// byte-for-byte; except /artifacts/los, a materialized view aliasing /los
-// that carries its "ms" echo). Responses with no match-position time — /loc-table,
-// /loc-graph, /metadata — carry no echo. There is NO unit selection — the
-// value is FIXED per endpoint:
+// Every time value in the API is int32 milliseconds — inputs and outputs,
+// REST and MCP alike. `timeUnit` is therefore a CONSTANT "ms" self-description
+// echo (API.md §2.1): EVERY `/v1/demos/{id}/*` JSON response that carries
+// match-position time values echoes "ms". The v56 seconds surfaces (events,
+// buckets rows, state-at, stream-slice envelope, loc-trails, items summary)
+// were flipped to int32 ms in v57 — the view layer does no float time math.
 //
-//   - "ms" (int32 milliseconds): the stored pass-throughs (frags, damage,
-//     shots, chat, airgibs, backpacks, weapon-pickups, items timeline,
-//     overview), plus /aim (dense crosshair `t` + lgRamp `since`), the
-//     columnar /buckets axis (startMs/windowMs), /region-control (windowMs),
-//     and the dense columnar stream bodies (/los intervals, /streams/
-//     projectiles + /streams/beams + /streams/nails — all int32-ms columns).
-//   - "s" (float64 seconds): the derived views (events, buckets rows, state-at,
-//     stream-slice envelope, loc-trails, items summary).
-//
-// The sparse match-position field names are still absolute: a `t` is int32 ms
-// and a top-level `time` is float seconds on every endpoint; `timeUnit` names
-// the unit of the descriptively-named times (startTime, respawnAt, duration, …)
-// that a reader would otherwise have to guess.
+// The one seconds island is `/demoinfo` (KTX's own clock, a mix of native
+// units), which carries no echo. `/artifacts/{name}` serves the raw stored
+// result sections byte-for-byte (except /artifacts/los, a materialized view
+// aliasing /los that carries its "ms" echo). Responses with no match-position
+// time — /loc-table, /loc-graph, /metadata — carry no echo.
 //
 // The stored result.* structs and their JSON tags are the ON-DISK contract
 // (qw-analyze / WASM emit them verbatim, in ms) and are left untouched. The
@@ -37,15 +27,14 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 // StreamSliceView / LocTrailsView / ItemsSummaryView), set by the mvd-api
 // handler.
 
-// TimeUnit is the fixed native unit a governed response echoes for its
-// descriptively-named match-position timestamps.
+// TimeUnit is the native unit a governed response echoes. In the v57
+// pure-ms model it is always UnitMs.
 type TimeUnit string
 
 const (
-	// UnitMs marks a response whose descriptive times are int32 milliseconds.
+	// UnitMs marks a response whose times are int32 milliseconds. This is
+	// the only unit in the v57 pure-ms model.
 	UnitMs TimeUnit = "ms"
-	// UnitSec marks a response whose descriptive times are float64 seconds.
-	UnitSec TimeUnit = "s"
 )
 
 // --- pass-through stored sections: {timeUnit} + the embedded stored struct ---

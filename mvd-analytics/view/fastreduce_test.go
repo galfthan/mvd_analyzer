@@ -45,22 +45,22 @@ func sampleStream() result.PlayerStream {
 // This is the correctness lock for the buckets.go optimisation.
 func TestFastReduceParity(t *testing.T) {
 	p := sampleStream()
-	step := 0.05 // 50ms windows, matching the default bucketing
+	const stepMs = int32(50) // 50ms windows, matching the default bucketing
 	for _, f := range AllStandardFields {
 		red, err := resolveReducerName(f, nil) // default reducer for this field
 		if err != nil {
 			t.Fatalf("resolveReducerName(%q): %v", f, err)
 		}
 		name := red.Name()
-		for bs := -0.1; bs < 1.6; bs += step {
-			be := bs + step
+		for bs := int32(-100); bs < 1600; bs += stepMs {
+			be := bs + stepMs
 			got, ok := fastReduce(&p, f, name, bs, be)
 			if !ok {
 				t.Fatalf("field %q reducer %q: fast path declined a default field", f, name)
 			}
 			want := red.Apply(collectSamples(&p, f, bs, be))
 			if !reflect.DeepEqual(got, want) {
-				t.Fatalf("field %q reducer %q window [%.3f,%.3f): fast=%#v slow=%#v",
+				t.Fatalf("field %q reducer %q window [%d,%d): fast=%#v slow=%#v",
 					f, name, bs, be, got, want)
 			}
 		}
@@ -73,7 +73,7 @@ func TestFastReduceParity(t *testing.T) {
 func TestFastReduceFallback(t *testing.T) {
 	p := sampleStream()
 	for _, rn := range []string{"mean", "min", "max", "last", "dominant", "held-any", "majority"} {
-		if _, ok := fastReduce(&p, FieldHealth, rn, 0, 0.05); ok {
+		if _, ok := fastReduce(&p, FieldHealth, rn, 0, 50); ok {
 			t.Fatalf("reducer %q should not be fast-pathed", rn)
 		}
 	}

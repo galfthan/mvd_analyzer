@@ -39,18 +39,15 @@ func TestAimWindowMatchesShotCounts(t *testing.T) {
 	span := hi - lo
 	t0 := lo + span/4
 	t1 := hi - span/4
-	fromSec := float64(t0) / 1000.0
-	toSec := float64(t1) / 1000.0
 
-	got, err := view.Aim(res, view.AimOptions{From: fromSec, To: toSec})
+	got, err := view.Aim(res, view.AimOptions{From: t0, To: t1})
 	if err != nil {
 		t.Fatalf("windowed Aim: %v", err)
 	}
 
-	// secToMs rounds to nearest ms; reproduce the exact window bounds the view
-	// used so the hand-derived shot counts line up with the recompute.
-	startMs := int32(fromSec*1000 + 0.5)
-	endMs := int32(toSec*1000 + 0.5)
+	// v57 pure-ms: the window bounds are the exact int32 ms passed in.
+	startMs := t0
+	endMs := t1
 
 	// For every player in the windowed result, the per-weapon Shots must equal
 	// the count of that player's shots of that weapon inside [startMs,endMs].

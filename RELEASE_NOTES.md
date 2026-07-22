@@ -92,6 +92,69 @@ schema bump. Closes review finding 6 and the v55 open cache-invalidation item.
   never cached in the first place. The corrupt-BSP branch keeps its own
   per-process negative memo so repeated requests don't re-parse the bad file.
 
+### Phase 4: pure-ms time model + key renames (schema 56→57)
+
+The breaking sweep. **Every time value in the API is now int32
+milliseconds** — request params and response fields, REST and MCP alike.
+This is the client-migration section: read the two tripwires first.
+
+**⚠️ Tripwire 1 — `/events` `t` is now milliseconds.** The `/events` row
+timestamp was float **seconds** in v55 (under the key `t`), was **absent**
+in v56 (the intermediate seconds convention used `time`), and is int32
+**milliseconds** under `t` again in v57. An archaeological client that
+still reads `/events[].t` as seconds silently gets values **1000× too
+large**. There is no shape signal for this beyond `X-Schema-Version: 57`
+— audit any code that read `/events` `t` before v57.
+
+**⚠️ Tripwire 2 — `from`/`to`/`time` query params are now integer ms.**
+On every demo endpoint these were float **seconds**; they are now
+**integer milliseconds**. Old float-seconds values are rejected loudly:
+`from=10.5` (or any non-integer) 400s `invalid_param` with an `(integer
+milliseconds)` hint, rather than silently misfiltering. Multiply your old
+seconds values by 1000. (Search `from`/`to` are unchanged — calendar
+dates `YYYY-MM-DD`.)
+
+**Unit flip — the six v56 seconds surfaces, now int32 ms:**
+
+| Surface | v56 | v57 |
+|---|---|---|
+| `/events` rows | `time` float s | `t` int32 ms (`endTime`/`duration` in detail also ms) |
+| `/buckets?layout=row` | per-bucket `time` float s | `t` int32 ms |
+| `/state-at` | `time` float s (envelope) | `t` int32 ms |
+| `/stream-slice` envelope | `startTime`/`endTime` float s | `start`/`end` int32 ms |
+| `/loc-trails` | `start`/`end` float s | int32 ms (keys unchanged) |
+| `/items?summary=true` | `firstTake.time` float s | `firstTake.t` int32 ms |
+| query params `from`/`to`/`time` | float s | integer ms |
+
+**Key renames (JSON):**
+
+| Old | New | Where |
+|---|---|---|
+| `o` / `iv` | `other` / `intervals` | `LosTrack` (`/los`, `/artifacts/los`, `pvs`) |
+| `events` | `messages` | `MessagesResult` array — `/artifacts/messages` is now `{messages:{messages:[…]}}` |
+| `startMs` | `start` | columnar `/buckets` axis (implicit `time(i)=start+i*windowMs`) |
+| `time` | `t` | per-item time keys: `/events`, `/buckets?layout=row`, `/state-at`, `/items` `firstTake` |
+| `startTime` / `endTime` | `start` / `end` | `/stream-slice` envelope |
+
+**null → `[]`.** Governed top-level arrays that could serialize as `null`
+now always serialize as `[]` when empty: `/events`, `/stream-slice`
+`players`, `/loc-trails` `players`. Nested arrays deeper in a body may
+still be `null`.
+
+**`UnitSec` deletion + `timeUnit` constant.** `view.UnitSec` is deleted;
+the view layer does no float time math. `timeUnit` is kept as a constant
+`"ms"` self-description echo — now truthful on every governed response.
+
+**Deliberate non-renames** (documented exceptions, unchanged in v57):
+`result.Interval` keeps terse `s`/`e` (per-row keys in dense arrays stay
+terse — the payload discipline is deliberate); projectile / beam `s*` /
+`e*` column-family prefixes (`s`,`sx`… / `e`,`ez` — these *are* flight-time
+bounds); `windowMs` / `partialLastMs` durations (already ms, names stay);
+`/demoinfo` is the sole KTX-native seconds island.
+
+`CurrentSchemaVersion` bumps 56→57; version-keyed ETags/cache paths
+self-invalidate. MCP tool input schemas and descriptions move with REST.
+
 ## 2026-07-21 (tweak-api)
 
 - **Review fixes — echo-rule completeness + hub read hardening (still

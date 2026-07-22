@@ -18,7 +18,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "56"
+  version: "57"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -26,13 +26,21 @@ info:
     read curated analysis sections — frags, damage, aim, item timelines,
     positional streams — as JSON.
 
-    ### Time units — the one real gotcha
-    Query inputs `from` / `to` / `time` are match-relative **seconds**
-    (float). View-synthesised outputs (event lists, window bounds, trail
-    dwell spans, row-bucket timestamps) are **seconds**; anything copied
-    verbatim from the stored schema (change-stream / interval / position
-    arrays, the columnar bucket grid, `/overview` times) is **int32
-    milliseconds**. Scale ms→s by `* 0.001`.
+    ### Time units — one rule
+    **All times are int32 milliseconds** — request params and response
+    fields, REST and MCP alike. The time-valued query params `from` / `to`
+    / `time` are **integer milliseconds**; a non-integer value (e.g.
+    `from=10.5`) 400s with code `invalid_param` and an `(integer
+    milliseconds)` hint rather than misfiltering. Every response time field
+    (event `t`, window bounds, trail dwell spans, row-bucket `t`, state-at
+    `t`, item `firstTake.t`, the columnar bucket grid) is int32 ms.
+    `timeUnit`, where present, is a constant `"ms"` self-description echo.
+
+    Two documented exceptions, neither a match-relative time: `/demoinfo`
+    is the KTX-native units island (integer seconds on KTX's own clock,
+    `timelimit` in minutes, item hold in seconds) and carries no `timeUnit`
+    echo; search `from` / `to` are calendar dates (`YYYY-MM-DD`), not
+    times.
 
     ### Caching
     Per-demo 2xx responses carry `Cache-Control: public, max-age=86400,
@@ -752,8 +760,8 @@ paths:
         defaults to 50 ms — on a 20-minute match that is ~24,000 windows
         per field per player; always pass a windowMs sized to your
         question. `layout=column` (default) returns the compact columnar
-        grid (int32 ms axis); `layout=row` returns row objects (float
-        seconds `t`).
+        grid (int32 ms axis); `layout=row` returns row objects (int32 ms
+        `t`).
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/WindowMs"
@@ -816,8 +824,8 @@ paths:
       summary: Raw per-player stream slice
       description: >
         Verbatim slices of the stored per-player streams (change-stream /
-        interval / position tracks) for a time window. Entries are int32
-        MILLISECONDS (raw schema); the envelope times are seconds.
+        interval / position tracks) for a time window. Entries and the
+        envelope `start`/`end` bounds are all int32 MILLISECONDS.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/From"
@@ -846,8 +854,9 @@ paths:
       summary: Point-in-time player state
       description: >
         Every requested field carried forward to the instant `time`
-        (match-relative seconds; REQUIRED — missing returns 400
-        missing_param). Field selector codes are the same registry as
+        (match-relative integer ms; REQUIRED — missing returns 400
+        missing_param). The response echoes the sample instant as `t`
+        (int32 ms). Field selector codes are the same registry as
         /buckets and /stream-slice, except `sp`/`d` are rejected (spawns
         and deaths have no point-in-time meaning — use /events); note the
         `li` code renders as output key `loc`.
@@ -979,8 +988,8 @@ paths:
       tags: [positional]
       summary: Per-player loc dwell trails
       description: >
-        Consecutive loc residences per player as `[s,e)` spans (float
-        seconds). `minDwellMs` filters out blips shorter than the
+        Consecutive loc residences per player as `[start, end)` spans
+        (int32 ms). `minDwellMs` filters out blips shorter than the
         threshold.
       parameters:
         - $ref: "#/components/parameters/DemoId"
@@ -1299,16 +1308,19 @@ components:
       name: from
       in: query
       description: >
-        Window start, match-relative SECONDS (float). 0 / omitted = no
+        Window start, match-relative integer MILLISECONDS. 0 / omitted = no
         lower bound. Endpoints treat the window as inclusive on both ends.
-      schema: { type: number, minimum: 0 }
+        A non-integer value 400s with code `invalid_param` and an `(integer
+        milliseconds)` hint.
+      schema: { type: integer, minimum: 0 }
     To:
       name: to
       in: query
       description: >
-        Window end, match-relative SECONDS (float). 0 / omitted = no
-        upper bound.
-      schema: { type: number, minimum: 0 }
+        Window end, match-relative integer MILLISECONDS. 0 / omitted = no
+        upper bound. A non-integer value 400s with code `invalid_param` and
+        an `(integer milliseconds)` hint.
+      schema: { type: integer, minimum: 0 }
     Players:
       name: players
       in: query
@@ -1551,8 +1563,8 @@ components:
       description: >
         Window size, integer MILLISECONDS. ⚠️ Defaults to 50 ms — on a
         20-minute match that is ~24,000 windows per field per player.
-        Always pass a windowMs sized to your question. Note the unit split
-        within one call: windowMs is ms while from/to are seconds.
+        Always pass a windowMs sized to your question. All time params are
+        ms: windowMs, from, and to alike.
       schema:
         type: integer
         default: 50
@@ -1568,8 +1580,11 @@ components:
       name: time
       in: query
       required: true
-      description: The instant to sample, match-relative SECONDS (float).
-      schema: { type: number }
+      description: >
+        The instant to sample, match-relative integer MILLISECONDS. A
+        non-integer value 400s with code `invalid_param` and an `(integer
+        milliseconds)` hint.
+      schema: { type: integer, minimum: 0 }
     SearchPlayers:
       name: players
       in: query
@@ -1802,14 +1817,13 @@ components:
     TimeUnit:
       type: string
       description: >
-        The unit of a governed response's descriptively-named MATCH-POSITION
-        timestamps (schema v56): `ms` (int32 milliseconds) or `s` (float64
-        seconds). Fixed per endpoint — there is no unit selection — and echoed
-        here so the body is self-describing. This general two-value form is
-        used by the schemas reused across units (Frags/Damage/Shots/
-        ItemsTimelines, shared with the raw /artifacts envelope); a single-unit
-        response inlines a one-value enum instead.
-      enum: [ms, s]
+        The unit of a governed response's time values (schema v57): always
+        `ms` (int32 milliseconds). In the pure-ms model there is only one
+        unit, so this echo is a constant `"ms"` self-description present so
+        the body is self-describing. This shared component is referenced by
+        the schemas reused across the raw /artifacts envelope
+        (Frags/Damage/Shots/ItemsTimelines); the value is invariant.
+      enum: [ms]
     Health:
       type: object
       required: [ok, schemaVersion]
@@ -3596,7 +3610,7 @@ components:
     ItemsSummary:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [s] }
+        timeUnit: { type: string, enum: [ms] }
         items:
           items:
             additionalProperties: false
@@ -3610,14 +3624,15 @@ components:
               firstTake:
                 additionalProperties: false
                 properties:
-                  time:
-                    type: number
+                  t:
+                    type: integer
+                    description: First-take time, int32 ms.
                   takenBy:
                     type: string
                   team:
                     type: string
                 required:
-                  - time
+                  - t
                 type:
                   - "null"
                   - object
@@ -3916,7 +3931,10 @@ components:
     LosTrack:
       additionalProperties: false
       properties:
-        iv:
+        intervals:
+          description: >
+            Half-open [s, e) ms spans the looker saw the other player. Per-row
+            keys stay terse (dense array).
           items:
             additionalProperties: false
             properties:
@@ -3924,10 +3942,12 @@ components:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
+                description: Interval end, int32 ms (exclusive).
               s:
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
+                description: Interval start, int32 ms (inclusive).
             required:
               - s
               - e
@@ -3935,13 +3955,14 @@ components:
           type:
             - "null"
             - array
-        o:
+        other:
           maximum: 32767
           minimum: -32768
           type: integer
+          description: Index into Streams.Players (the seen player).
       required:
-        - o
-        - iv
+        - other
+        - intervals
       type: object
     MapEntities:
       additionalProperties: false
@@ -4398,7 +4419,7 @@ components:
     Messages:
       additionalProperties: false
       properties:
-        events:
+        messages:
           items:
             additionalProperties: false
             properties:
@@ -4431,7 +4452,7 @@ components:
             - "null"
             - array
       required:
-        - events
+        - messages
       type: object
     Opening:
       additionalProperties: false
@@ -4498,17 +4519,17 @@ components:
       required: [timeUnit, events]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [s] }
+        timeUnit: { type: string, enum: [ms] }
         events:
-          type: [array, "null"]
+          type: array
           items:
             type: object
-            required: [time, type]
+            required: [t, type]
             additionalProperties: false
             properties:
-              time:
-                type: number
-                description: Match-relative seconds.
+              t:
+                type: integer
+                description: Match-relative time, int32 ms.
               type: { type: string }
               player: { type: string }
               detail:
@@ -4520,10 +4541,10 @@ components:
                   value: { type: integer, description: new value (health/armor/loc index) }
                   bounded: { type: integer, description: reconstructed bounded kill value (telefrag/stomp events); absent when the bounded reconstruction was skipped; 0 is a real nullified-stomp value }
                   powerup: { type: string }
-                  endTime: { type: number, description: seconds (powerup/streak) }
+                  endTime: { type: integer, description: int32 ms (powerup/streak) }
                   frags: { type: integer, description: frags during the powerup run }
                   length: { type: integer, description: streak length }
-                  duration: { type: number, description: streak duration, seconds }
+                  duration: { type: integer, description: streak duration, int32 ms }
                   weapon: { type: string }
                   victim: { type: string }
                   damage: { type: integer }
@@ -4548,7 +4569,7 @@ components:
     BucketsRow:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [s] }
+        timeUnit: { type: string, enum: [ms] }
         buckets:
           items:
             additionalProperties: false
@@ -4562,15 +4583,16 @@ components:
                   - "null"
               partial:
                 type: boolean
-              time:
-                type: number
+              t:
+                type: integer
+                description: Bucket start, int32 ms.
               team:
                 additionalProperties:
                   additionalProperties: true
                   type: object
                 type: object
             required:
-              - time
+              - t
               - p
             type: object
           type:
@@ -4587,15 +4609,15 @@ components:
       type: object
       description: >
         Column-major buckets (layout=column, the default). The time axis is
-        implicit: time(i) = startMs + i*windowMs (int32 ms). Each player
+        implicit: time(i) = start + i*windowMs (int32 ms). Each player
         object inlines its dense columns at the top level keyed by field
         code; boolean columns (and the alive mask) serialize as 0/1.
-      required: [timeUnit, windowMs, startMs, count]
+      required: [timeUnit, windowMs, start, count]
       additionalProperties: false
       properties:
         timeUnit: { type: string, enum: [ms] }
         windowMs: { type: integer }
-        startMs: { type: integer }
+        start: { type: integer, description: First bucket start, int32 ms. }
         count: { type: integer }
         partialLastMs:
           type: integer
@@ -4657,9 +4679,10 @@ components:
     StreamSlice:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [s] }
-        endTime:
-          type: number
+        timeUnit: { type: string, enum: [ms] }
+        end:
+          type: integer
+          description: Window end, int32 ms (the exact bound used for slicing).
         players:
           items:
             additionalProperties: false
@@ -5469,21 +5492,20 @@ components:
             required:
               - name
             type: object
-          type:
-            - "null"
-            - array
-        startTime:
-          type: number
+          type: array
+        start:
+          type: integer
+          description: Window start, int32 ms (the exact bound used for slicing).
       required:
         - timeUnit
-        - startTime
-        - endTime
+        - start
+        - end
         - players
       type: object
     StateAt:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [s] }
+        timeUnit: { type: string, enum: [ms] }
         players:
           additionalProperties:
             additionalProperties: false
@@ -5633,17 +5655,18 @@ components:
           type:
             - object
             - "null"
-        time:
-          type: number
+        t:
+          type: integer
+          description: Sample instant, int32 ms.
       required:
         - timeUnit
-        - time
+        - t
         - players
       type: object
     LocTrails:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [s] }
+        timeUnit: { type: string, enum: [ms] }
         players:
           items:
             additionalProperties: false
@@ -5655,7 +5678,8 @@ components:
                   additionalProperties: false
                   properties:
                     end:
-                      type: number
+                      type: integer
+                      description: Residence end, int32 ms.
                     li:
                       maximum: 32767
                       minimum: -32768
@@ -5665,7 +5689,8 @@ components:
                     loc:
                       type: string
                     start:
-                      type: number
+                      type: integer
+                      description: Residence start, int32 ms.
                   required:
                     - start
                     - end
@@ -5677,9 +5702,7 @@ components:
               - name
               - sequence
             type: object
-          type:
-            - "null"
-            - array
+          type: array
       required:
         - timeUnit
         - players
@@ -5802,9 +5825,9 @@ components:
     Chat:
       type: object
       description: >
-        /chat body (schema v56) — `{timeUnit, messages}`. messages are
-        result.MatchEvent entries; each `time` is int32 ms (timeUnit is the
-        fixed `ms` for this endpoint). messages is [] when nothing matches.
+        /chat body — `{timeUnit, messages}`. messages are
+        result.MatchEvent entries; each `t` is int32 ms (timeUnit is the
+        constant `ms` echo). messages is [] when nothing matches.
       required: [timeUnit, messages]
       additionalProperties: false
       properties:
@@ -5815,8 +5838,8 @@ components:
     Backpacks:
       type: object
       description: >
-        /backpacks body (schema v56) — `{timeUnit, backpacks}`; backpacks is
-        [] when none. `time` is int32 ms (timeUnit is the fixed `ms`).
+        /backpacks body — `{timeUnit, backpacks}`; backpacks is
+        [] when none. `t` is int32 ms (timeUnit is the constant `ms` echo).
       required: [timeUnit, backpacks]
       additionalProperties: false
       properties:
@@ -5827,9 +5850,9 @@ components:
     WeaponPickups:
       type: object
       description: >
-        /weapon-pickups body (schema v56) — `{timeUnit, pickups}`; pickups is
-        [] when none. `time`/`nextDeathTime`/`dropTime` are int32 ms (timeUnit
-        is the fixed `ms`).
+        /weapon-pickups body — `{timeUnit, pickups}`; pickups is
+        [] when none. `t`/`nextDeathTime`/`dropTime` are int32 ms (timeUnit
+        is the constant `ms` echo).
       required: [timeUnit, pickups]
       additionalProperties: false
       properties:
@@ -5840,9 +5863,9 @@ components:
     Airgibs:
       type: object
       description: >
-        /airgibs body (schema v56) — `{timeUnit, airgibs}`; airgibs is sorted
-        by height descending and [] on BSP-less maps. `time` is int32 ms
-        (timeUnit is the fixed `ms`).
+        /airgibs body — `{timeUnit, airgibs}`; airgibs is sorted
+        by height descending and [] on BSP-less maps. `t` is int32 ms
+        (timeUnit is the constant `ms` echo).
       required: [timeUnit, airgibs]
       additionalProperties: false
       properties:

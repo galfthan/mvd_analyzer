@@ -2,7 +2,6 @@ package view
 
 import (
 	"fmt"
-	"math"
 	"sort"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -14,8 +13,8 @@ import (
 // windows over the whole match."
 type BucketsOptions struct {
 	WindowMs    int               // 50 if zero
-	StartTime   float64           // match start if zero
-	EndTime     float64           // match end if zero
+	StartTime   int32             // match start if zero, int32 ms
+	EndTime     int32             // match end if zero, int32 ms
 	Players     []string          // all if empty
 	Fields      []string          // AllStandardFields if empty
 	Reducers    map[string]string // per-field overrides; merged with DefaultReducers
@@ -43,9 +42,8 @@ type BucketsOptions struct {
 // bucket's player map carries a "loc" name; in index mode it carries
 // the raw "li" index, which a consumer decodes against /loc-table.
 type BucketsView struct {
-	// TimeUnit echoes the row layout's native unit ("s"); set by the mvd-api
-	// handler (schema v56). The columnar layout has its own ms-suffixed axis
-	// and no echo. Omitted on the WASM/qw-analyze paths.
+	// TimeUnit echoes the row layout's native unit (constant "ms", schema v57);
+	// set by the mvd-api handler. Omitted on the WASM/qw-analyze paths.
 	TimeUnit TimeUnit     `json:"timeUnit,omitempty"`
 	WindowMs int          `json:"windowMs"`
 	Buckets  []ViewBucket `json:"buckets"`
@@ -64,7 +62,7 @@ type BucketsView struct {
 // Team, when populated, is keyed by team name and carries the
 // IncludeTeam aggregate counters.
 type ViewBucket struct {
-	T       float64                   `json:"time"`
+	T       int32                     `json:"t"`
 	Players map[string]map[string]any `json:"p"`
 	// Team is keyed by team name → field → value. Most fields are
 	// int counters (rl, lg, w, th, ta, …); the special key "abt"
@@ -81,7 +79,7 @@ func Buckets(r *result.Result, opts BucketsOptions) (*BucketsView, error) {
 	if r == nil || r.Streams == nil {
 		return &BucketsView{WindowMs: bucketWindowMsOrDefault(opts.WindowMs)}, nil
 	}
-	windowMs, windowSec, err := resolveWindow(opts.WindowMs)
+	windowMs, err := resolveWindow(opts.WindowMs)
 	if err != nil {
 		return nil, err
 	}
@@ -112,15 +110,16 @@ func Buckets(r *result.Result, opts BucketsOptions) (*BucketsView, error) {
 		fieldRedNames[i] = fieldReds[i].Name()
 	}
 
-	// Public API uses float64 seconds; the schema stores Global.Match*
-	// as int32 ms (schema v8) — convert once at the entry.
+	// Pure-ms model (schema v57): options and the stored Global.Match*
+	// are both int32 ms, so the whole grid is integer arithmetic — no
+	// float time math, no rounding at the bucket boundary.
 	start := opts.StartTime
 	end := opts.EndTime
 	if end == 0 {
-		end = secs(r.Streams.Global.MatchEnd)
+		end = r.Streams.Global.MatchEnd
 	}
 	if start == 0 {
-		start = secs(r.Streams.Global.MatchStart)
+		start = r.Streams.Global.MatchStart
 	}
 	if end <= start {
 		return &BucketsView{WindowMs: windowMs, Buckets: nil}, nil
@@ -129,11 +128,12 @@ func Buckets(r *result.Result, opts BucketsOptions) (*BucketsView, error) {
 	playerFilter := newPlayerFilter(opts.Players)
 	playerStreams := selectPlayers(r.Streams.Players, playerFilter)
 
+	wMs := int32(windowMs)
 	totalSpan := end - start
-	full := int(math.Floor((totalSpan + 1e-12) / windowSec))
-	remainder := totalSpan - float64(full)*windowSec
+	full := int(totalSpan / wMs)
+	remainder := totalSpan - int32(full)*wMs
 	bucketCount := full
-	hasPartial := remainder > 1e-9
+	hasPartial := remainder > 0
 	if hasPartial {
 		bucketCount++
 	}
@@ -143,8 +143,8 @@ func Buckets(r *result.Result, opts BucketsOptions) (*BucketsView, error) {
 
 	buckets := make([]ViewBucket, bucketCount)
 	for i := 0; i < bucketCount; i++ {
-		bStart := start + float64(i)*windowSec
-		bEnd := bStart + windowSec
+		bStart := start + int32(i)*wMs
+		bEnd := bStart + wMs
 		if hasPartial && i == bucketCount-1 {
 			bEnd = end
 		}
@@ -218,7 +218,7 @@ func resolveBucketLocNames(buckets []ViewBucket, locTable []string) {
 //   - If the player has positions but no spawn/death streams (e.g.,
 //     already alive at match start in a demo where parser never
 //     emitted a synthetic SpawnEvent), fall back to position presence.
-func playerActiveInWindow(p *result.PlayerStream, bStart, bEnd float64) bool {
+func playerActiveInWindow(p *result.PlayerStream, bStart, bEnd int32) bool {
 	hasSpawnDeath := len(p.Spawns) > 0 || len(p.Deaths) > 0
 	hasPositions := p.Position != nil && len(p.Position.T) > 0
 
@@ -229,8 +229,8 @@ func playerActiveInWindow(p *result.PlayerStream, bStart, bEnd float64) bool {
 
 	// Spawns / Deaths are int32 ms (schema v8); convert the window
 	// bounds once and stay in int32 for the comparison loop.
-	bStartMs := int32(bStart * 1000)
-	bEndMs := int32(bEnd * 1000)
+	bStartMs := bStart
+	bEndMs := bEnd
 
 	if hasSpawnDeath {
 		latestKind := ""
@@ -271,14 +271,13 @@ func playerActiveInWindow(p *result.PlayerStream, bStart, bEnd float64) bool {
 	return positionTouchesWindow(p.Position, bStart, bEnd)
 }
 
-func positionTouchesWindow(pt *result.PositionTrack, bStart, bEnd float64) bool {
+func positionTouchesWindow(pt *result.PositionTrack, bStart, bEnd int32) bool {
 	if pt == nil || len(pt.T) == 0 {
 		return false
 	}
-	const fudge = 0.1 // slightly more than one 50 ms bucket
-	// pt.T is int32 ms (schema v8); convert window bounds once.
-	loMs := int32((bStart - fudge) * 1000)
-	bEndMs := int32(bEnd * 1000)
+	const fudge = int32(100) // slightly more than one 50 ms bucket (ms)
+	loMs := bStart - fudge
+	bEndMs := bEnd
 	// Binary-search for the first sample >= loMs; if it lands before
 	// bEndMs we have a touch.
 	i := sort.Search(len(pt.T), func(i int) bool { return pt.T[i] >= loMs })
@@ -292,14 +291,14 @@ func bucketWindowMsOrDefault(ms int) int {
 	return ms
 }
 
-func resolveWindow(ms int) (int, float64, error) {
+func resolveWindow(ms int) (int, error) {
 	if ms < 0 {
-		return 0, 0, fmt.Errorf("WindowMs must be > 0, got %d", ms)
+		return 0, fmt.Errorf("WindowMs must be > 0, got %d", ms)
 	}
 	if ms == 0 {
 		ms = 50
 	}
-	return ms, float64(ms) / 1000.0, nil
+	return ms, nil
 }
 
 // playerFilter enforces an opt-in name filter. nil pointer → accept
@@ -345,7 +344,7 @@ func reducePlayer(
 	fields []string,
 	reds []Reducer,
 	redNames []string,
-	bStart, bEnd float64,
+	bStart, bEnd int32,
 ) map[string]any {
 	// out is allocated lazily on the first non-nil field so that inactive
 	// players (no field produced a value) cost no map allocation — the
@@ -385,7 +384,7 @@ func reducePlayer(
 // and exact semantics are preserved for custom reducers. The values
 // returned here are byte-identical to the slice path — same boxed types,
 // same carry-forward rules — locked by TestFastReduceParity.
-func fastReduce(p *result.PlayerStream, field, reducer string, bStart, bEnd float64) (any, bool) {
+func fastReduce(p *result.PlayerStream, field, reducer string, bStart, bEnd int32) (any, bool) {
 	kind, ok := FieldKindFor(field)
 	if !ok {
 		return nil, false
@@ -403,7 +402,7 @@ func fastReduce(p *result.PlayerStream, field, reducer string, bStart, bEnd floa
 				return nil, true
 			}
 			// Matches intervalSamples[0]: held at exactly bStart.
-			return intervalContains(s, int32(bStart*1000)), true
+			return intervalContains(s, bStart), true
 		case KindPosition:
 			return firstPosition(p.Position, bStart, bEnd), true
 		case KindView:
@@ -427,32 +426,32 @@ func fastReduce(p *result.PlayerStream, field, reducer string, bStart, bEnd floa
 // firstChangeI16 returns changeSamplesI16(stream, bStart, bEnd)[0].V
 // without building the slice: the carry value (last change at/before
 // bStart) if any, else the first in-window change, else nil.
-func firstChangeI16(stream []result.ChangeI16, bStart, bEnd float64) any {
+func firstChangeI16(stream []result.ChangeI16, bStart, bEnd int32) any {
 	// len, not nil: an empty-but-non-nil stream (a player with no readings,
 	// or any JSON round-trip of one) must not panic on stream[0] below.
 	if len(stream) == 0 {
 		return nil
 	}
-	if carry := indexI16AtOrBefore(stream, int32(bStart*1000)); carry >= 0 {
+	if carry := indexI16AtOrBefore(stream, bStart); carry >= 0 {
 		return stream[carry].V
 	}
 	// carry < 0 ⇒ stream[0].T > bStartMs; it's the first in-window sample
 	// when it also lands before bEnd.
-	if stream[0].T < int32(bEnd*1000) {
+	if stream[0].T < bEnd {
 		return stream[0].V
 	}
 	return nil
 }
 
 // firstChangeStr is firstChangeI16 for string change streams.
-func firstChangeStr(stream []result.ChangeStr, bStart, bEnd float64) any {
+func firstChangeStr(stream []result.ChangeStr, bStart, bEnd int32) any {
 	if len(stream) == 0 { // len, not nil — see firstChangeI16
 		return nil
 	}
-	if carry := indexStrAtOrBefore(stream, int32(bStart*1000)); carry >= 0 {
+	if carry := indexStrAtOrBefore(stream, bStart); carry >= 0 {
 		return stream[carry].V
 	}
-	if stream[0].T < int32(bEnd*1000) {
+	if stream[0].T < bEnd {
 		return stream[0].V
 	}
 	return nil
@@ -460,7 +459,7 @@ func firstChangeStr(stream []result.ChangeStr, bStart, bEnd float64) any {
 
 // firstPosition returns positionSamples(p, bStart, bEnd)[0].V without the
 // slice: the first in-window sample, else the carry-forward sample, else nil.
-func firstPosition(pt *result.PositionTrack, bStart, bEnd float64) any {
+func firstPosition(pt *result.PositionTrack, bStart, bEnd int32) any {
 	if pt == nil {
 		return nil
 	}
@@ -468,9 +467,9 @@ func firstPosition(pt *result.PositionTrack, bStart, bEnd float64) any {
 	if n == 0 {
 		return nil
 	}
-	bStartMs := int32(bStart * 1000)
+	bStartMs := bStart
 	firstIn := sort.Search(n, func(i int) bool { return pt.T[i] >= bStartMs })
-	if firstIn < n && pt.T[firstIn] < int32(bEnd*1000) {
+	if firstIn < n && pt.T[firstIn] < bEnd {
 		return positionTriple(pt, firstIn)
 	}
 	if firstIn > 0 {
@@ -482,17 +481,17 @@ func firstPosition(pt *result.PositionTrack, bStart, bEnd float64) any {
 // anyEventInWindow reports whether the event-list stream has any timestamp
 // in [bStart, bEnd) — AnyReducer's result over eventListSamples, computed
 // with a binary search instead of a scan. The stream is sorted ascending.
-func anyEventInWindow(stream []int32, bStart, bEnd float64) any {
-	bStartMs := int32(bStart * 1000)
+func anyEventInWindow(stream []int32, bStart, bEnd int32) any {
+	bStartMs := bStart
 	i := sort.Search(len(stream), func(i int) bool { return stream[i] >= bStartMs })
-	return i < len(stream) && stream[i] < int32(bEnd*1000)
+	return i < len(stream) && stream[i] < bEnd
 }
 
 // collectSamples walks the appropriate stream of p and returns Samples
 // suitable for reduction. Carry-forward semantics: for change streams,
 // the last entry with T <= bStart is included so reducers like "last"
 // behave as "value at end of window even when nothing changed inside."
-func collectSamples(p *result.PlayerStream, field string, bStart, bEnd float64) []Sample {
+func collectSamples(p *result.PlayerStream, field string, bStart, bEnd int32) []Sample {
 	kind, ok := FieldKindFor(field)
 	if !ok {
 		return nil
@@ -520,7 +519,7 @@ func collectSamples(p *result.PlayerStream, field string, bStart, bEnd float64) 
 	return nil
 }
 
-func changeI16Samples(p *result.PlayerStream, field string, bStart, bEnd float64) []Sample {
+func changeI16Samples(p *result.PlayerStream, field string, bStart, bEnd int32) []Sample {
 	stream := streamI16(p, field)
 	if stream == nil {
 		return nil
@@ -528,7 +527,7 @@ func changeI16Samples(p *result.PlayerStream, field string, bStart, bEnd float64
 	return changeSamplesI16(stream, bStart, bEnd)
 }
 
-func changeStrSamples(p *result.PlayerStream, field string, bStart, bEnd float64) []Sample {
+func changeStrSamples(p *result.PlayerStream, field string, bStart, bEnd int32) []Sample {
 	stream := streamStr(p, field)
 	if stream == nil {
 		return nil
@@ -536,7 +535,7 @@ func changeStrSamples(p *result.PlayerStream, field string, bStart, bEnd float64
 	return changeSamplesStr(stream, bStart, bEnd)
 }
 
-func intervalSamples(p *result.PlayerStream, field string, bStart, bEnd float64) []Sample {
+func intervalSamples(p *result.PlayerStream, field string, bStart, bEnd int32) []Sample {
 	stream := streamInterval(p, field)
 	if stream == nil {
 		return nil
@@ -548,10 +547,10 @@ func intervalSamples(p *result.PlayerStream, field string, bStart, bEnd float64)
 	const samplesPerWindow = 8
 	out := make([]Sample, samplesPerWindow)
 	span := bEnd - bStart
-	out[0] = Sample{T: bStart, V: intervalContains(stream, int32(bStart*1000))}
+	out[0] = Sample{T: float64(bStart), V: intervalContains(stream, bStart)}
 	for i := 1; i < samplesPerWindow; i++ {
-		t := bStart + float64(i)*span/float64(samplesPerWindow)
-		out[i] = Sample{T: t, V: intervalContains(stream, int32(t*1000))}
+		t := bStart + int32(int64(span)*int64(i)/int64(samplesPerWindow))
+		out[i] = Sample{T: float64(t), V: intervalContains(stream, t)}
 	}
 	return out
 }
@@ -571,7 +570,7 @@ func intervalSamples(p *result.PlayerStream, field string, bStart, bEnd float64)
 // first in-window sample (or carry in gap buckets); "last" returns
 // the last in-window sample (or carry); "mean"/"min"/"max" don't
 // include the carry unless the bucket is empty.
-func positionSamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
+func positionSamples(p *result.PlayerStream, bStart, bEnd int32) []Sample {
 	if p.Position == nil {
 		return nil
 	}
@@ -584,8 +583,8 @@ func positionSamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
 	// seconds (public view API). Convert window once; the comparison
 	// loop stays in int32 ms. Sample.T is the public unit, float64
 	// seconds, converted once per emitted sample.
-	bStartMs := int32(bStart * 1000)
-	bEndMs := int32(bEnd * 1000)
+	bStartMs := bStart
+	bEndMs := bEnd
 	// First sample with T >= bStartMs (inclusive). Treats samples
 	// landing exactly on the bucket boundary as the bucket's first
 	// event, matching v6's int-division semantics.
@@ -596,12 +595,12 @@ func positionSamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
 		if t >= bEndMs {
 			break
 		}
-		out = append(out, Sample{T: secs(t), V: positionTriple(pt, i)})
+		out = append(out, Sample{T: float64(t), V: positionTriple(pt, i)})
 	}
 	if len(out) == 0 && firstIn > 0 {
 		// Gap bucket — fall back to the latest sample before bStart.
 		idx := firstIn - 1
-		out = append(out, Sample{T: secs(pt.T[idx]), V: positionTriple(pt, idx)})
+		out = append(out, Sample{T: float64(pt.T[idx]), V: positionTriple(pt, idx)})
 	}
 	return out
 }
@@ -623,7 +622,7 @@ func viewPair(pt *result.PositionTrack, i int) [2]int16 {
 // sample, else the carry-forward sample, else nil. Each returns nil when
 // its column is absent (no view recorded, or no BSP for h/lq), so the
 // field is omitted exactly as the row builder's omitempty would.
-func firstView(pt *result.PositionTrack, bStart, bEnd float64) any {
+func firstView(pt *result.PositionTrack, bStart, bEnd int32) any {
 	if pt == nil || len(pt.VP) != len(pt.T) || len(pt.VYa) != len(pt.T) {
 		return nil
 	}
@@ -633,7 +632,7 @@ func firstView(pt *result.PositionTrack, bStart, bEnd float64) any {
 	return nil
 }
 
-func firstHeight(pt *result.PositionTrack, bStart, bEnd float64) any {
+func firstHeight(pt *result.PositionTrack, bStart, bEnd int32) any {
 	if pt == nil || len(pt.H) != len(pt.T) {
 		return nil
 	}
@@ -643,7 +642,7 @@ func firstHeight(pt *result.PositionTrack, bStart, bEnd float64) any {
 	return nil
 }
 
-func firstLiquid(pt *result.PositionTrack, bStart, bEnd float64) any {
+func firstLiquid(pt *result.PositionTrack, bStart, bEnd int32) any {
 	if pt == nil || len(pt.Lq) != len(pt.T) {
 		return nil
 	}
@@ -657,7 +656,7 @@ func firstLiquid(pt *result.PositionTrack, bStart, bEnd float64) any {
 	return nil
 }
 
-func firstVelocity(pt *result.PositionTrack, bStart, bEnd float64) any {
+func firstVelocity(pt *result.PositionTrack, bStart, bEnd int32) any {
 	if pt == nil || len(pt.VX) != len(pt.T) || len(pt.VY) != len(pt.T) || len(pt.VZ) != len(pt.T) {
 		return nil
 	}
@@ -670,14 +669,14 @@ func firstVelocity(pt *result.PositionTrack, bStart, bEnd float64) any {
 // firstPosIndex returns the index of the first sample in [bStart, bEnd),
 // else the carry-forward sample before bStart, else -1. Shared liveness
 // logic behind firstPosition/firstView/firstHeight/firstLiquid.
-func firstPosIndex(pt *result.PositionTrack, bStart, bEnd float64) int {
+func firstPosIndex(pt *result.PositionTrack, bStart, bEnd int32) int {
 	n := len(pt.T)
 	if n == 0 {
 		return -1
 	}
-	bStartMs := int32(bStart * 1000)
+	bStartMs := bStart
 	firstIn := sort.Search(n, func(i int) bool { return pt.T[i] >= bStartMs })
-	if firstIn < n && pt.T[firstIn] < int32(bEnd*1000) {
+	if firstIn < n && pt.T[firstIn] < bEnd {
 		return firstIn
 	}
 	if firstIn > 0 {
@@ -690,7 +689,7 @@ func firstPosIndex(pt *result.PositionTrack, bStart, bEnd float64) int {
 // the view, height, and liquid columns: in-window samples chronological,
 // or a single carry-forward sample in a gap bucket. Empty (nil) when the
 // underlying column is absent.
-func viewSamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
+func viewSamples(p *result.PlayerStream, bStart, bEnd int32) []Sample {
 	pt := p.Position
 	if pt == nil || len(pt.VP) != len(pt.T) || len(pt.VYa) != len(pt.T) {
 		return nil
@@ -698,7 +697,7 @@ func viewSamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
 	return columnSamples(pt, bStart, bEnd, func(i int) any { return viewPair(pt, i) })
 }
 
-func heightSamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
+func heightSamples(p *result.PlayerStream, bStart, bEnd int32) []Sample {
 	pt := p.Position
 	if pt == nil || len(pt.H) != len(pt.T) {
 		return nil
@@ -706,7 +705,7 @@ func heightSamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
 	return columnSamples(pt, bStart, bEnd, func(i int) any { return result.Coord(pt.H[i]) })
 }
 
-func liquidSamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
+func liquidSamples(p *result.PlayerStream, bStart, bEnd int32) []Sample {
 	pt := p.Position
 	if pt == nil || len(pt.Lq) != len(pt.T) {
 		return nil
@@ -714,7 +713,7 @@ func liquidSamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
 	return columnSamples(pt, bStart, bEnd, func(i int) any { return int16(pt.Lq[i]) })
 }
 
-func velocitySamples(p *result.PlayerStream, bStart, bEnd float64) []Sample {
+func velocitySamples(p *result.PlayerStream, bStart, bEnd int32) []Sample {
 	pt := p.Position
 	if pt == nil || len(pt.VX) != len(pt.T) || len(pt.VY) != len(pt.T) || len(pt.VZ) != len(pt.T) {
 		return nil
@@ -731,13 +730,13 @@ func velocityTriple(pt *result.PositionTrack, i int) [3]result.Coord {
 // columnSamples is positionSamples generalised over a per-index value
 // accessor, so the view/height/liquid columns share the identical
 // window-membership and gap-bucket carry-forward semantics.
-func columnSamples(pt *result.PositionTrack, bStart, bEnd float64, valAt func(i int) any) []Sample {
+func columnSamples(pt *result.PositionTrack, bStart, bEnd int32, valAt func(i int) any) []Sample {
 	n := len(pt.T)
 	if n == 0 {
 		return nil
 	}
-	bStartMs := int32(bStart * 1000)
-	bEndMs := int32(bEnd * 1000)
+	bStartMs := bStart
+	bEndMs := bEnd
 	firstIn := sort.Search(n, func(i int) bool { return pt.T[i] >= bStartMs })
 	out := make([]Sample, 0, 4)
 	for i := firstIn; i < n; i++ {
@@ -745,42 +744,42 @@ func columnSamples(pt *result.PositionTrack, bStart, bEnd float64, valAt func(i 
 		if t >= bEndMs {
 			break
 		}
-		out = append(out, Sample{T: secs(t), V: valAt(i)})
+		out = append(out, Sample{T: float64(t), V: valAt(i)})
 	}
 	if len(out) == 0 && firstIn > 0 {
 		idx := firstIn - 1
-		out = append(out, Sample{T: secs(pt.T[idx]), V: valAt(idx)})
+		out = append(out, Sample{T: float64(pt.T[idx]), V: valAt(idx)})
 	}
 	return out
 }
 
-func eventListSamples(p *result.PlayerStream, field string, bStart, bEnd float64) []Sample {
+func eventListSamples(p *result.PlayerStream, field string, bStart, bEnd int32) []Sample {
 	stream := streamEventList(p, field)
 	if stream == nil {
 		return nil
 	}
 	// Stream is int32 ms (schema v8); compare in ms then convert each
 	// in-window timestamp to seconds for the public Sample.
-	bStartMs := int32(bStart * 1000)
-	bEndMs := int32(bEnd * 1000)
+	bStartMs := bStart
+	bEndMs := bEnd
 	out := make([]Sample, 0, 2)
 	for _, t := range stream {
 		if t < bStartMs || t >= bEndMs {
 			continue
 		}
-		ts := secs(t)
+		ts := float64(t)
 		out = append(out, Sample{T: ts, V: ts})
 	}
 	return out
 }
 
-func changeSamplesI16(stream []result.ChangeI16, bStart, bEnd float64) []Sample {
-	bStartMs := int32(bStart * 1000)
-	bEndMs := int32(bEnd * 1000)
+func changeSamplesI16(stream []result.ChangeI16, bStart, bEnd int32) []Sample {
+	bStartMs := bStart
+	bEndMs := bEnd
 	out := make([]Sample, 0, 4)
 	carry := indexI16AtOrBefore(stream, bStartMs)
 	if carry >= 0 {
-		out = append(out, Sample{T: secs(stream[carry].T), V: stream[carry].V})
+		out = append(out, Sample{T: float64(stream[carry].T), V: stream[carry].V})
 	}
 	startIdx := carry + 1
 	if startIdx < 0 {
@@ -794,18 +793,18 @@ func changeSamplesI16(stream []result.ChangeI16, bStart, bEnd float64) []Sample 
 		if c.T >= bEndMs {
 			break
 		}
-		out = append(out, Sample{T: secs(c.T), V: c.V})
+		out = append(out, Sample{T: float64(c.T), V: c.V})
 	}
 	return out
 }
 
-func changeSamplesStr(stream []result.ChangeStr, bStart, bEnd float64) []Sample {
-	bStartMs := int32(bStart * 1000)
-	bEndMs := int32(bEnd * 1000)
+func changeSamplesStr(stream []result.ChangeStr, bStart, bEnd int32) []Sample {
+	bStartMs := bStart
+	bEndMs := bEnd
 	out := make([]Sample, 0, 4)
 	carry := indexStrAtOrBefore(stream, bStartMs)
 	if carry >= 0 {
-		out = append(out, Sample{T: secs(stream[carry].T), V: stream[carry].V})
+		out = append(out, Sample{T: float64(stream[carry].T), V: stream[carry].V})
 	}
 	startIdx := carry + 1
 	if startIdx < 0 {
@@ -819,7 +818,7 @@ func changeSamplesStr(stream []result.ChangeStr, bStart, bEnd float64) []Sample 
 		if c.T >= bEndMs {
 			break
 		}
-		out = append(out, Sample{T: secs(c.T), V: c.V})
+		out = append(out, Sample{T: float64(c.T), V: c.V})
 	}
 	return out
 }

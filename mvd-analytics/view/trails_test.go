@@ -36,13 +36,13 @@ func TestLocTrailsBasic(t *testing.T) {
 	if len(seq) != 3 {
 		t.Fatalf("len seq = %d, want 3 (rl→ya→rl)", len(seq))
 	}
-	if seq[0].Loc != "rl" || seq[0].Start != 0 || seq[0].End != 3 {
+	if seq[0].Loc != "rl" || seq[0].Start != 0 || seq[0].End != 3000 {
 		t.Fatalf("seq[0] = %+v", seq[0])
 	}
-	if seq[1].Loc != "ya" || seq[1].Start != 3 || seq[1].End != 7 {
+	if seq[1].Loc != "ya" || seq[1].Start != 3000 || seq[1].End != 7000 {
 		t.Fatalf("seq[1] = %+v", seq[1])
 	}
-	if seq[2].Loc != "rl" || seq[2].Start != 7 || seq[2].End != 10 {
+	if seq[2].Loc != "rl" || seq[2].Start != 7000 || seq[2].End != 10000 {
 		t.Fatalf("seq[2] = %+v", seq[2])
 	}
 }

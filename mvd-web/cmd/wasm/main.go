@@ -316,7 +316,7 @@ func defaultStoredRegions(stored []result.ControlRegion) []result.ControlRegion 
 // no other consumer — so the map overlay requests it on first toggle.
 // analyzer.ComputeLOS is idempotent (Streams.LOSComputed), so repeat calls are
 // cheap. Returns the per-player visibility tracks (name + los/pvs, each
-// [{o,iv}]) aligned with streams.players: los is the clear-raycast sightline,
+// [{other,intervals}]) aligned with streams.players: los is the clear-raycast sightline,
 // pvs the potentially-visible-set superset. A map with no usable visibility BSP
 // yields ErrNoBSP (not latched) — the overlay simply stays empty; the error is
 // logged and swallowed so the toggle degrades gracefully rather than failing.

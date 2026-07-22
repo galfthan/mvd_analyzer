@@ -212,8 +212,8 @@ type PlayerStream struct {
 // direction is not considered: this is geometric visibility, not whether the
 // opponent is within the looker's FOV.
 type LosTrack struct {
-	Other int16      `json:"o"`  // index into Streams.Players (the seen player)
-	Iv    []Interval `json:"iv"` // half-open [Start,End) ms the looker saw Other
+	Other int16      `json:"other"`     // index into Streams.Players (the seen player)
+	Iv    []Interval `json:"intervals"` // half-open [Start,End) ms the looker saw Other
 }
 
 // GlobalStream carries the match window plus the demo/wall-clock anchor —

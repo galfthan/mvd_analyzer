@@ -11,8 +11,8 @@ import (
 type LocTrailsOptions struct {
 	Players    []string
 	MinDwellMs int
-	StartTime  float64
-	EndTime    float64
+	StartTime  int32 // window start, int32 ms (0 = match start)
+	EndTime    int32 // window end, int32 ms (0 = match end)
 	// LocIndex selects the residence representation: false (default)
 	// names each residence (TrailEntry.Loc); true emits the raw
 	// LocTable index (TrailEntry.Li). Decode the index via /loc-table.
@@ -22,8 +22,8 @@ type LocTrailsOptions struct {
 // LocTrailsView is the response shape: per-player loc-name sequence
 // with dwell durations.
 type LocTrailsView struct {
-	// TimeUnit echoes this endpoint's native unit ("s"); set by the mvd-api
-	// handler (schema v56). Omitted on the WASM/qw-analyze paths.
+	// TimeUnit echoes this endpoint's native unit (constant "ms", schema v57);
+	// set by the mvd-api handler. Omitted on the WASM/qw-analyze paths.
 	TimeUnit TimeUnit      `json:"timeUnit,omitempty"`
 	Players  []PlayerTrail `json:"players"`
 }
@@ -40,10 +40,10 @@ type PlayerTrail struct {
 // unexported li always holds the index so grouping/merging stay
 // name-agnostic and the index render is a final relabel.
 type TrailEntry struct {
-	Start float64 `json:"start"`
-	End   float64 `json:"end"`
-	Loc   string  `json:"loc,omitempty"`
-	Li    *int16  `json:"li,omitempty"`
+	Start int32  `json:"start"`
+	End   int32  `json:"end"`
+	Loc   string `json:"loc,omitempty"`
+	Li    *int16 `json:"li,omitempty"`
 
 	li int16
 }
@@ -54,19 +54,19 @@ type TrailEntry struct {
 // intervals, then optionally folds short dwells into their neighbour.
 func LocTrails(r *result.Result, opts LocTrailsOptions) (*LocTrailsView, error) {
 	if r == nil || r.Streams == nil || r.TimelineAnalysis == nil {
-		return &LocTrailsView{}, nil
+		return &LocTrailsView{Players: []PlayerTrail{}}, nil
 	}
 	locTable := r.TimelineAnalysis.LocTable
 	if len(locTable) == 0 {
-		return &LocTrailsView{}, nil
+		return &LocTrailsView{Players: []PlayerTrail{}}, nil
 	}
 	end := opts.EndTime
 	if end == 0 {
-		end = secs(r.Streams.Global.MatchEnd)
+		end = r.Streams.Global.MatchEnd
 	}
 	pf := newPlayerFilter(opts.Players)
-	out := &LocTrailsView{}
-	minDwell := float64(opts.MinDwellMs) / 1000.0
+	out := &LocTrailsView{Players: []PlayerTrail{}}
+	minDwell := int32(opts.MinDwellMs)
 
 	for _, p := range r.Streams.Players {
 		if !pf.accepts(p.Name) {
@@ -96,16 +96,14 @@ func LocTrails(r *result.Result, opts LocTrailsOptions) (*LocTrailsView, error) 
 // entry per residence. The final entry is closed at windowEnd (or
 // match end). Entries entirely outside the window are dropped.
 //
-// The loc-change stream T is int32 ms (schema v8); windowStart and
-// windowEnd are float64 seconds (public view API). Convert windows
-// once and keep the inner walk in int32 ms; TrailEntry.Start/End are
-// the public float64-seconds shape.
-func buildTrailRaw(stream []result.ChangeI16, windowStart, windowEnd float64, locTable []string) []TrailEntry {
+// The loc-change stream T, windowStart, windowEnd, and TrailEntry.Start/
+// End are all int32 ms (schema v57 pure-ms model).
+func buildTrailRaw(stream []result.ChangeI16, windowStart, windowEnd int32, locTable []string) []TrailEntry {
 	if len(stream) == 0 {
 		return nil
 	}
-	windowStartMs := int32(windowStart * 1000)
-	windowEndMs := int32(windowEnd * 1000)
+	windowStartMs := windowStart
+	windowEndMs := windowEnd
 	out := make([]TrailEntry, 0, len(stream))
 	for i, c := range stream {
 		segStart := c.T
@@ -136,8 +134,8 @@ func buildTrailRaw(stream []result.ChangeI16, windowStart, windowEnd float64, lo
 			continue
 		}
 		out = append(out, TrailEntry{
-			Start: secs(segStart),
-			End:   secs(segEnd),
+			Start: segStart,
+			End:   segEnd,
 			Loc:   locName,
 			li:    c.V,
 		})
@@ -149,7 +147,7 @@ func buildTrailRaw(stream []result.ChangeI16, windowStart, windowEnd float64, lo
 // preceding entry. Keeps the earlier loc name (its dwell extends to
 // cover the dropped span), which matches the analyzer's blip-filter
 // behaviour.
-func mergeShortDwells(seq []TrailEntry, minDwell float64) []TrailEntry {
+func mergeShortDwells(seq []TrailEntry, minDwell int32) []TrailEntry {
 	if len(seq) <= 1 {
 		return seq
 	}

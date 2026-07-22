@@ -71,12 +71,12 @@ func TestBucketsPartialFlag(t *testing.T) {
 		Name:   "p1",
 		Health: []result.ChangeI16{{T: 0, V: 100}},
 	})
-	// Match length 10s with windowMs=3000ms → 3 full + 1 partial (1s).
+	// Match length 10000ms with windowMs=3000ms → 3 full + 1 partial (1000ms).
 	bv, err := Buckets(r, BucketsOptions{
 		WindowMs:  3000,
 		Fields:    []string{FieldHealth},
-		StartTime: 0, EndTime: 10,
-	}) // StartTime/EndTime are seconds (public API)
+		StartTime: 0, EndTime: 10000,
+	}) // StartTime/EndTime are int32 ms (v57)
 	if err != nil {
 		t.Fatalf("Buckets error: %v", err)
 	}

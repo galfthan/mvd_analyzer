@@ -230,8 +230,8 @@ func TestColumnarParityCorpus(t *testing.T) {
 						t.Fatalf("count = %d, want %d", cb.Count, len(row.Buckets))
 					}
 					if cb.Count > 0 {
-						if want := int32(row.Buckets[0].T * 1000); cb.StartMs != want {
-							t.Fatalf("startMs = %d, want %d", cb.StartMs, want)
+						if want := row.Buckets[0].T; cb.Start != want {
+							t.Fatalf("start = %d, want %d", cb.Start, want)
 						}
 						lastPartial := row.Buckets[len(row.Buckets)-1].Partial
 						if (cb.PartialLastMs != 0) != lastPartial {

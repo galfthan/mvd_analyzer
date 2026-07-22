@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"net/url"
 	"sort"
 	"strconv"
@@ -42,19 +41,6 @@ func parseCSV(v string) []string {
 		}
 	}
 	return out
-}
-
-// parseFloat parses a query-string number. Empty → default.
-func parseFloat(q url.Values, key string, defaultVal float64) (float64, error) {
-	v := ciGet(q, key)
-	if v == "" {
-		return defaultVal, nil
-	}
-	f, err := strconv.ParseFloat(v, 64)
-	if err != nil {
-		return 0, fmt.Errorf("invalid %s=%q", key, v)
-	}
-	return f, nil
 }
 
 // parseInt parses a query-string integer. Empty → default.
@@ -223,39 +209,31 @@ func (p *qp) Unknown() error {
 	return fmt.Errorf("unknown query parameter %q; accepted: %s", unknown[0], strings.Join(acc, ", "))
 }
 
-// maxSecBound is the largest match-relative seconds bound the view layer can
-// represent: secToMs rounds sec*1000 to int32 ms, so a larger value would wrap
-// under Go's implementation-defined out-of-range float→int32 conversion and
-// silently filter everything with an HTTP 200 instead of erroring.
-const maxSecBound = float64(math.MaxInt32) / 1000.0
-
-// Sec reads a match-relative seconds bound (from/to/time; empty → def) and
-// validates it. NaN/Inf, negatives, and values whose millisecond form
-// overflows int32 are rejected here rather than reaching the view's secToMs,
-// where the bad float→int32 conversion would produce a silent all-filtered 200.
-// No-op after a prior error.
-func (p *qp) Sec(key string, def float64) float64 {
+// Ms reads a match-relative integer-millisecond bound (from/to/time; empty →
+// def). In the v57 pure-ms model every time-valued query param is integer
+// milliseconds: a non-integer value like "10.5" is rejected with a
+// "(integer milliseconds)" hint — the deliberate v56→v57 migration tripwire
+// that catches old float-seconds callers loudly instead of misfiltering. The
+// value must be >= 0 and fit int32. No-op after a prior error.
+func (p *qp) Ms(key string, def int32) int32 {
 	p.mark(key)
 	if p.err != nil {
 		return def
 	}
-	v, err := parseFloat(p.q, key, def)
+	v := ciGet(p.q, key)
+	if v == "" {
+		return def
+	}
+	n, err := strconv.ParseInt(v, 10, 32)
 	if err != nil {
-		p.err = err
+		p.err = fmt.Errorf("invalid %s=%q (integer milliseconds)", key, v)
 		return def
 	}
-	switch {
-	case math.IsNaN(v) || math.IsInf(v, 0):
-		p.err = fmt.Errorf("invalid %s=%q (not a finite number)", key, ciGet(p.q, key))
-		return def
-	case v < 0:
-		p.err = fmt.Errorf("invalid %s=%q (must be >= 0)", key, ciGet(p.q, key))
-		return def
-	case v > maxSecBound:
-		p.err = fmt.Errorf("invalid %s=%q (exceeds the maximum match time)", key, ciGet(p.q, key))
+	if n < 0 {
+		p.err = fmt.Errorf("invalid %s=%q (must be >= 0)", key, v)
 		return def
 	}
-	return v
+	return int32(n)
 }
 
 // Int reads an integer param (empty → def). No-op after a prior error.

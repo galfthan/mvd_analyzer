@@ -155,7 +155,7 @@ var eventSections = []eventSection{
 	{name: "shots.byPlayer", path: []string{"shots", "byPlayer"}, ownerKey: "player"},
 	// The damage/messages/frags logs are deliberately ungated.
 	{name: "damage.events", path: []string{"damage", "events"}, postMatch: true},
-	{name: "messages.events", path: []string{"messages", "events"}, ownerKey: "player", postMatch: true},
+	{name: "messages.messages", path: []string{"messages", "messages"}, ownerKey: "player", postMatch: true},
 	{name: "frags.frags", path: []string{"frags", "frags"}, postMatch: true},
 	{name: "weaponPickups", path: []string{"weaponPickups"}, ownerKey: "player", teamOwner: map[string]string{"dropperTeam": "dropper"}},
 	{name: "backpacks", path: []string{"backpacks"}, ownerKey: "player"},

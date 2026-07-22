@@ -68,18 +68,19 @@ func TestListEnvelopes(t *testing.T) {
 	}
 }
 
-// TestDerivedViewEcho checks the seconds-native derived views carry the fixed
-// "s" echo when the handler sets it, and that `time` stays float seconds.
+// TestDerivedViewEcho checks the v57 pure-ms derived views carry the constant
+// "ms" echo when the handler sets it, and that `t` is int32 ms (the seconds
+// surfaces were flipped in v57).
 func TestDerivedViewEcho(t *testing.T) {
-	ev := &EventsView{TimeUnit: UnitSec, Events: []TaggedEvent{
-		{T: 10.5, Type: "streak", Player: "a", Detail: map[string]any{"endTime": 20.25}},
+	ev := &EventsView{TimeUnit: UnitMs, Events: []TaggedEvent{
+		{T: 10500, Type: "streak", Player: "a", Detail: map[string]any{"endTime": 20250}},
 	}}
-	if s := marshal(t, ev); !strings.Contains(s, `"timeUnit":"s"`) || !strings.Contains(s, `"time":10.5`) ||
-		!strings.Contains(s, `"endTime":20.25`) {
-		t.Errorf("events echo/seconds wrong: %s", s)
+	if s := marshal(t, ev); !strings.Contains(s, `"timeUnit":"ms"`) || !strings.Contains(s, `"t":10500`) ||
+		!strings.Contains(s, `"endTime":20250`) {
+		t.Errorf("events echo/ms wrong: %s", s)
 	}
-	sa := &StateAtView{TimeUnit: UnitSec, Time: 30, Players: map[string]PlayerStateAt{}}
-	if s := marshal(t, sa); !strings.Contains(s, `"timeUnit":"s"`) || !strings.Contains(s, `"time":30`) {
+	sa := &StateAtView{TimeUnit: UnitMs, Time: 30000, Players: map[string]PlayerStateAt{}}
+	if s := marshal(t, sa); !strings.Contains(s, `"timeUnit":"ms"`) || !strings.Contains(s, `"t":30000`) {
 		t.Errorf("state-at echo wrong: %s", s)
 	}
 }
@@ -125,15 +126,15 @@ func TestRegionControlEnvelopeFlattens(t *testing.T) {
 }
 
 // TestColumnarBucketsEcho checks the columnar /buckets layout carries the fixed
-// "ms" echo when the handler sets it (its startMs/windowMs axis is int32 ms),
+// "ms" echo when the handler sets it (its start/windowMs axis is int32 ms),
 // and that the WASM/qw-analyze path (TimeUnit unset) omits it entirely — the
-// omitempty guard keeps that constructor-direct output byte-identical to pre-v56.
+// omitempty guard keeps that constructor-direct output byte-identical.
 func TestColumnarBucketsEcho(t *testing.T) {
-	cb := &ColumnarBuckets{TimeUnit: UnitMs, WindowMs: 5000, StartMs: 0, Count: 3}
+	cb := &ColumnarBuckets{TimeUnit: UnitMs, WindowMs: 5000, Start: 0, Count: 3}
 	if s := marshal(t, cb); !strings.Contains(s, `"timeUnit":"ms"`) || !strings.Contains(s, `"windowMs":5000`) {
 		t.Errorf("columnar echo/ms wrong: %s", s)
 	}
-	unset := &ColumnarBuckets{WindowMs: 5000, StartMs: 0, Count: 3}
+	unset := &ColumnarBuckets{WindowMs: 5000, Start: 0, Count: 3}
 	if s := marshal(t, unset); strings.Contains(s, "timeUnit") {
 		t.Errorf("unset ColumnarBuckets must omit timeUnit (WASM path): %s", s)
 	}

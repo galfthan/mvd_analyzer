@@ -699,7 +699,37 @@ package result
 //     items-summary firstTake); loc-trails residences rename `s`/`e`→
 //     `start`/`end`. Go field names are unchanged (only the JSON tags).
 //     The golden corpus was regenerated for the key renames.
-const CurrentSchemaVersion = 56
+//
+// v57: pure-ms time model + bound renames + null→[] (breaking sweep).
+//   - PURE-MS MODEL. Every time value in the API is int32 milliseconds —
+//     inputs and outputs, REST and MCP alike. The six v56 float-seconds view
+//     surfaces (events, buckets rows, state-at, stream-slice envelope,
+//     loc-trails, items summary) flip to int32 ms; the view layer now does NO
+//     float time math. Time-valued query params (`from`/`to`/`time` on every
+//     demo endpoint, REST and MCP) become INTEGER MILLISECONDS — a non-integer
+//     like `from=10.5` is rejected with a "(integer milliseconds)" hint (the
+//     v56→v57 tripwire). `view.UnitSec` is deleted; `timeUnit` stays as a
+//     CONSTANT "ms" echo everywhere it appears. Exceptions, documented:
+//     /demoinfo (KTX-native seconds island) and search `from`/`to` (calendar
+//     dates YYYY-MM-DD). NOTE the two silent-1000× tripwires: `/events` `t` was
+//     seconds in v55, absent in v56, and is ms in v57; and `from`/`to` inputs
+//     are now ms.
+//   - KEY RENAMES (JSON tags; Go field names mostly unchanged). LosTrack
+//     `o`/`iv` → `other`/`intervals` (once-per-track, descriptive);
+//     MessagesResult array key `events` → `messages`; ColumnarBuckets `startMs`
+//     → `start`; per-item time keys unify on `t` (events `time`→`t`, row-major
+//     buckets `time`→`t`, state-at `time`→`t`, items firstTake `time`→`t`);
+//     stream-slice envelope `startTime`/`endTime` → `start`/`end`. Terse
+//     per-row keys are DELIBERATELY kept: result.Interval `s`/`e`, projectile/
+//     beam `s`,`sx`…`e`,`ez`, columnar `t`/`v`.
+//   - null→[] for governed top-level view arrays (events, stream-slice
+//     players, loc-trails players) — never null when empty. Nested nullables
+//     and the documented-null projectiles/beams/nails objects are untouched.
+//   - Cross-phase v57 items (see RELEASE_NOTES): `unknown_param` 400 on
+//     unknown query keys/enum values; `los_unavailable` 422 (no-BSP /los, never
+//     persisted/latched); `server_hostname` in search rows; `/artifacts`
+//     echoing `timeUnit:"ms"`.
+const CurrentSchemaVersion = 57
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

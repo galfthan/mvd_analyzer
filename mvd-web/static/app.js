@@ -313,7 +313,7 @@ function applyDeferredBuckets(data) {
     // Re-run the inits, now that bucket-derived data is present. Order
     // matches displayResults: region control feeds timeline + map.
     if (ta && ta.regionControl) initRegionControlData(currentResult);
-    if (ta || currentResult.messages?.events) displayTimelineAnalysis(currentResult);
+    if (ta || currentResult.messages?.messages) displayTimelineAnalysis(currentResult);
     if (ta) initMapView(currentResult);
 
     // Re-render whichever tab is active so Timeline/Map paint with the new
@@ -1123,7 +1123,7 @@ function displayResults(result) {
     }
 
     // Timeline Analysis (new graphical view)
-    if (result.timelineAnalysis || result.messages?.events) {
+    if (result.timelineAnalysis || result.messages?.messages) {
         timeRender('displayTimelineAnalysis', () => displayTimelineAnalysis(result));
     }
 
@@ -3029,7 +3029,7 @@ function displayTimelineAnalysis(result) {
     timelineState.matchStartTime = 0;
     timelineState.demoOffset = (result.streams?.global?.demoOffset || 0) * 0.001;
     timelineState.duration = (result.match?.duration || 600000) * 0.001;
-    timelineState.events = (result.messages?.events || []).map(e => ({ ...e, time: e.t * 0.001 }));
+    timelineState.events = (result.messages?.messages || []).map(e => ({ ...e, time: e.t * 0.001 }));
     // Sorted by time once here so prepScoreData / precomputeFragCounts don't
     // each re-sort a clone on every render (pan-drag re-renders many times/sec).
     timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.t * 0.001 })).sort((a, b) => a.time - b.time); // Frag events from stat tracking
@@ -3079,25 +3079,25 @@ function displayTimelineAnalysis(result) {
 //
 // The worker ships a column-major ColumnarBuckets object (see
 // mvd-analytics/view/columnar.go), stored on timelineState.bucketView:
-//   { windowMs, startMs, count,
+//   { windowMs, start, count,
 //     players: { name: { first, n, alive:[0/1], validFrom:{f:idx},
 //                        h|a|li|sh|nl|rk|cl:[i16], x|y|z:[i32], at:[str],
 //                        rl|lg|gl|ssg|sng|q|pe|r|sp|d:[0/1] } },
 //     teams:   { name: { rl|lg|rllg|w|gl|q|pe|r|pw|th|ta:[int], abt:{ra|ya|ga:[int]} } } }
-// Time axis is implicit: time(i) = (startMs + i*windowMs)/1000 seconds, so
+// Time axis is implicit: time(i) = (start + i*windowMs)/1000 seconds, so
 // time→index is O(1) arithmetic (no more per-bucket binary search). Booleans
 // and the alive mask are 0/1. A player only "exists" at bucket i while alive[i]
 // is set; values carry forward through dead buckets, so callers must gate on
 // liveness exactly as the old row shape omitted dead players per bucket.
 
 function bucketTimeSec(view, i) {
-    return (view.startMs + i * view.windowMs) / 1000;
+    return (view.start + i * view.windowMs) / 1000;
 }
 
 // Bucket whose half-open span contains tSec (floor), clamped to a valid index.
 function bucketIndexAtTime(view, tSec) {
     if (!view || !view.count) return -1;
-    let i = Math.floor((tSec * 1000 - view.startMs) / view.windowMs);
+    let i = Math.floor((tSec * 1000 - view.start) / view.windowMs);
     if (i < 0) i = 0;
     if (i >= view.count) i = view.count - 1;
     return i;
@@ -3107,7 +3107,7 @@ function bucketIndexAtTime(view, tSec) {
 // binarySearchBucketStart for range scans over a visible window.
 function bucketIndexAtOrAfter(view, tSec) {
     if (!view || !view.count) return 0;
-    let i = Math.ceil((tSec * 1000 - view.startMs) / view.windowMs);
+    let i = Math.ceil((tSec * 1000 - view.start) / view.windowMs);
     if (i < 0) i = 0;
     if (i > view.count) i = view.count;
     return i;
@@ -4645,9 +4645,9 @@ function buildFullChat() {
     teamAContainer.innerHTML = '';
     teamBContainer.innerHTML = '';
 
-    if (!currentResult?.messages?.events || teams.length < 2) return;
+    if (!currentResult?.messages?.messages || teams.length < 2) return;
 
-    // Schema v56: messages.events[].t is int32 ms on the raw result;
+    // Schema v57: messages.messages[].t is int32 ms on the raw result;
     // timelineState.events was already converted to seconds at intake in
     // displayTimelineAnalysis, so use that pre-converted copy here.
     // `duration` (timelineState.duration) is also seconds.
@@ -9105,8 +9105,8 @@ function buildVisByPair(players, field) {
         if (!p || !Array.isArray(p[field])) continue;
         const byTarget = (byPair[p.name] ||= {});
         for (const tr of p[field]) {
-            const other = idxToName[tr.o];
-            if (other != null && Array.isArray(tr.iv)) byTarget[other] = tr.iv;
+            const other = idxToName[tr.other];
+            if (other != null && Array.isArray(tr.intervals)) byTarget[other] = tr.intervals;
         }
     }
     return byPair;

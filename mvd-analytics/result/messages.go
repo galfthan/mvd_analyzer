@@ -2,7 +2,7 @@ package result
 
 // MessagesResult contains match messages (frags and chat) for timeline display.
 type MessagesResult struct {
-	Events []MatchEvent `json:"events"`
+	Events []MatchEvent `json:"messages"`
 }
 
 // MatchEvent represents a frag or chat message in the match.

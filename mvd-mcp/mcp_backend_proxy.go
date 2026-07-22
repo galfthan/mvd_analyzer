@@ -217,11 +217,12 @@ func (q query) csv(key string, vals []string) {
 	}
 }
 
-// seconds encodes a match-relative time; 0 means "unset" (as every REST
-// from/to defaults to the full window).
-func (q query) seconds(key string, sec float64) {
-	if sec != 0 {
-		q.set(key, secStr(sec))
+// ms encodes a match-relative time in integer milliseconds (schema v57
+// pure-ms model); 0 means "unset" (as every REST from/to defaults to the
+// full window).
+func (q query) ms(key string, t int32) {
+	if t != 0 {
+		q.set(key, msStr(t))
 	}
 }
 
@@ -272,7 +273,7 @@ func (q query) boolean(key string, v bool) {
 	}
 }
 
-func secStr(sec float64) string { return strconv.FormatFloat(sec, 'f', -1, 64) }
+func msStr(t int32) string { return strconv.Itoa(int(t)) }
 
 // --- MCPBackend impl ---
 
@@ -334,8 +335,8 @@ func (p *proxyBackend) GetFrags(ctx context.Context, in GetFragsInput) (any, err
 	q := query{}
 	q.csv("players", in.Players)
 	q.csv("weapons", in.Weapons)
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	q.boolean("summary", in.Summary)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
@@ -348,8 +349,8 @@ func (p *proxyBackend) GetDamage(ctx context.Context, in GetDamageInput) (any, e
 	q := query{}
 	q.csv("players", in.Players)
 	q.csv("weapons", in.Weapons)
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	// Empty dmg stays out of the query so the REST summary-aware default
 	// resolution applies (both under the summary default, raw otherwise).
 	q.str("dmg", in.Dmg)
@@ -370,8 +371,8 @@ func (p *proxyBackend) GetAim(ctx context.Context, in GetAimInput) (any, error) 
 	}
 	q := query{}
 	q.csv("players", in.Players)
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	summary, defaulted := summaryDefaultTrue(in.Summary)
 	q.boolean("summary", summary)
 	out, err := p.fetchOpaque(ctx, "GET", path, url.Values(q))
@@ -392,8 +393,8 @@ func (p *proxyBackend) GetChat(ctx context.Context, in GetChatInput) (any, error
 		return nil, err
 	}
 	q := query{}
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	q.csv("players", in.Players)
 	q.csv("types", in.Types)
 	return p.fetchOpaqueList(ctx, "GET", path, url.Values(q), "messages")
@@ -407,8 +408,8 @@ func (p *proxyBackend) GetBackpacks(ctx context.Context, in GetBackpacksInput) (
 	q := query{}
 	q.csv("players", in.Players)
 	q.csv("weapons", in.Weapons)
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	return p.fetchOpaqueList(ctx, "GET", path, url.Values(q), "backpacks")
 }
 
@@ -421,8 +422,8 @@ func (p *proxyBackend) GetItems(ctx context.Context, in GetItemsInput) (any, err
 	q.csv("items", in.Items)
 	q.csv("players", in.Players)
 	q.csv("kinds", in.Kinds)
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	summary, defaulted := summaryDefaultTrue(in.Summary)
 	q.boolean("summary", summary)
 	out, err := p.fetchOpaque(ctx, "GET", path, url.Values(q))
@@ -448,8 +449,8 @@ func (p *proxyBackend) GetWeaponPickups(ctx context.Context, in GetWeaponPickups
 	q.csv("players", in.Players)
 	q.csv("weapons", in.Weapons)
 	q.str("source", in.Source)
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	return p.fetchOpaqueList(ctx, "GET", path, url.Values(q), "pickups")
 }
 
@@ -471,8 +472,8 @@ func (p *proxyBackend) GetBuckets(ctx context.Context, in GetBucketsInput) (any,
 	}
 	q := query{}
 	q.intv("windowMs", windowMs)
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	q.csv("players", in.Players)
 	q.csv("fields", in.Fields)
 	if len(in.Reducers) > 0 {
@@ -496,8 +497,8 @@ func (p *proxyBackend) GetEvents(ctx context.Context, in GetEventsInput) (any, e
 		return nil, err
 	}
 	q := query{}
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	q.csv("players", in.Players)
 	q.csv("types", in.Types)
 	q.str("loc", in.Loc)
@@ -518,8 +519,8 @@ func (p *proxyBackend) GetStreamSlice(ctx context.Context, in GetStreamSliceInpu
 		return nil, err
 	}
 	q := query{}
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	q.csv("players", in.Players)
 	q.csv("fields", in.Fields)
 	q.str("loc", in.Loc)
@@ -532,7 +533,7 @@ func (p *proxyBackend) GetStateAt(ctx context.Context, in GetStateAtInput) (any,
 		return nil, err
 	}
 	q := query{}
-	q.set("time", secStr(in.Time)) // required — always sent, even for time=0
+	q.set("time", msStr(in.Time)) // required — always sent, even for time=0
 	q.csv("players", in.Players)
 	q.csv("fields", in.Fields)
 	q.str("loc", in.Loc)
@@ -545,8 +546,8 @@ func (p *proxyBackend) GetLocTrails(ctx context.Context, in GetLocTrailsInput) (
 		return nil, err
 	}
 	q := query{}
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	q.csv("players", in.Players)
 	// MCP default: 250 ms dwell filter. Raw trails are dominated by
 	// nearest-loc flicker at region boundaries; an agent reading a
@@ -646,7 +647,7 @@ func (p *proxyBackend) GetRegionControl(ctx context.Context, in GetRegionControl
 	}
 	q := query{}
 	q.intv("windowMs", windowMs)
-	q.seconds("from", in.StartTime)
-	q.seconds("to", in.EndTime)
+	q.ms("from", in.StartTime)
+	q.ms("to", in.EndTime)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }

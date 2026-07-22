@@ -346,8 +346,8 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 	case "buckets":
 		bv, err := view.Buckets(res, view.BucketsOptions{
 			WindowMs:    int(vopts.bucketDur / time.Millisecond),
-			StartTime:   vopts.from.Seconds(),
-			EndTime:     vopts.to.Seconds(),
+			StartTime:   int32(vopts.from.Milliseconds()),
+			EndTime:     int32(vopts.to.Milliseconds()),
 			Players:     vopts.players,
 			Fields:      vopts.fields,
 			Reducers:    vopts.reducers,
@@ -360,8 +360,8 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 
 	case "events":
 		ev, err := view.Events(res, view.EventsFilter{
-			StartTime: vopts.from.Seconds(),
-			EndTime:   vopts.to.Seconds(),
+			StartTime: int32(vopts.from.Milliseconds()),
+			EndTime:   int32(vopts.to.Milliseconds()),
 			Players:   vopts.players,
 			Types:     vopts.eventTypes,
 		})
@@ -372,8 +372,8 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 
 	case "stream-slice":
 		ssv, err := view.StreamSlice(res, view.StreamSliceOptions{
-			StartTime: vopts.from.Seconds(),
-			EndTime:   vopts.to.Seconds(),
+			Start:   int32(vopts.from.Milliseconds()),
+			End:     int32(vopts.to.Milliseconds()),
 			Players:   vopts.players,
 			Fields:    vopts.fields,
 		})
@@ -387,7 +387,7 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 			return fmt.Errorf("-view state-at requires -time")
 		}
 		v, err := view.StateAt(res, view.StateAtOptions{
-			Time:    vopts.timeAt.Seconds(),
+			Time:    int32(vopts.timeAt.Milliseconds()),
 			Players: vopts.players,
 			Fields:  vopts.fields,
 		})
@@ -400,8 +400,8 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 		tv, err := view.LocTrails(res, view.LocTrailsOptions{
 			Players:    vopts.players,
 			MinDwellMs: int(vopts.minDwell / time.Millisecond),
-			StartTime:  vopts.from.Seconds(),
-			EndTime:    vopts.to.Seconds(),
+			StartTime:  int32(vopts.from.Milliseconds()),
+			EndTime:    int32(vopts.to.Milliseconds()),
 		})
 		if err != nil {
 			return err

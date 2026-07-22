@@ -3,7 +3,6 @@ package view
 import (
 	"errors"
 	"fmt"
-	"math"
 	"sort"
 	"strings"
 
@@ -41,8 +40,8 @@ var ErrBoundedUnavailable = fmt.Errorf("bounded damage family unavailable: %w", 
 type FragOptions struct {
 	Players []string // killer or victim in this set
 	Weapons []string // weapon token (rl, lg, ...); case-insensitive
-	From    float64  // window start, match-relative seconds (0 = no bound)
-	To      float64  // window end, match-relative seconds (0 = no bound)
+	From    int32    // window start, int32 ms (0 = no bound)
+	To      int32    // window end, int32 ms (0 = no bound)
 	Summary bool     // drop the per-event Frags log; keep only aggregates
 }
 
@@ -89,8 +88,8 @@ func Frags(r *result.Result, opts FragOptions) (*result.FragResult, error) {
 		return r.Frags, nil
 	}
 
-	startMs := secToMs(opts.From)
-	endMs := secToMs(opts.To)
+	startMs := opts.From
+	endMs := opts.To
 
 	// Filter the log to the entries the caller asked for.
 	var filtered []result.FragEntry
@@ -173,8 +172,8 @@ func Frags(r *result.Result, opts FragOptions) (*result.FragResult, error) {
 type DamageOptions struct {
 	Players []string // attacker or victim in this set
 	Weapons []string // attacker weapon token; "tele"/"stomp" select positional kills; case-insensitive
-	From    float64  // window start, match-relative seconds (0 = no bound)
-	To      float64  // window end, match-relative seconds (0 = no bound)
+	From    int32    // window start, int32 ms (0 = no bound)
+	To      int32    // window end, int32 ms (0 = no bound)
 	Summary bool     // drop the per-hit Events log; keep only aggregates
 
 	// Dmg selects the damage family: "" / "raw" strip the
@@ -287,8 +286,8 @@ func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) 
 		return out, nil
 	}
 
-	startMs := secToMs(opts.From)
-	endMs := secToMs(opts.To)
+	startMs := opts.From
+	endMs := opts.To
 
 	matchEvent := func(attacker, victim, weapon string, tMs int32) bool {
 		if len(weapons) > 0 && !weapons[strings.ToLower(weapon)] {
@@ -809,8 +808,8 @@ type ItemOptions struct {
 	Items   []string // instance Name ("ya_1") or kind token ("ya"); case-insensitive
 	Players []string // keep only phases TakenBy one of these (case-sensitive)
 	Kinds   []string // item category (armor, mega, ...) or raw kind; case-insensitive
-	From    float64  // window start, match-relative seconds (0 = no bound)
-	To      float64  // window end, match-relative seconds (0 = no bound)
+	From    int32    // window start, int32 ms (0 = no bound)
+	To      int32    // window end, int32 ms (0 = no bound)
 }
 
 // Items returns the demo's per-item pickup/respawn timeline, optionally
@@ -832,8 +831,8 @@ func Items(r *result.Result, opts ItemOptions) *result.ItemsResult {
 	itemSet := toLowerSet(opts.Items)
 	players := toSet(opts.Players)
 	kindSet := toLowerSet(opts.Kinds)
-	startMs := secToMs(opts.From)
-	endMs := secToMs(opts.To)
+	startMs := opts.From
+	endMs := opts.To
 	if len(itemSet) == 0 && len(players) == 0 && len(kindSet) == 0 && startMs == 0 && endMs == 0 {
 		return r.Items
 	}
@@ -888,8 +887,8 @@ func Items(r *result.Result, opts ItemOptions) *result.ItemsResult {
 // aggregates instead of the full phase timeline. Cheap enough to be the
 // MCP-layer default (PLAN-api-usability D1).
 type ItemsSummaryView struct {
-	// TimeUnit echoes this shape's native unit ("s", the firstTake.time unit);
-	// set by the mvd-api handler (schema v56). Omitted on non-REST paths.
+	// TimeUnit echoes this shape's native unit (constant "ms", the firstTake.t
+	// unit; schema v57); set by the mvd-api handler. Omitted on non-REST paths.
 	TimeUnit TimeUnit      `json:"timeUnit,omitempty"`
 	Items    []ItemSummary `json:"items"`
 }
@@ -907,11 +906,11 @@ type ItemSummary struct {
 	FirstTake  *ItemTake      `json:"firstTake,omitempty"`
 }
 
-// ItemTake is one take: time in match-relative seconds (view surface unit).
+// ItemTake is one take: t in match-relative int32 ms (schema v57).
 type ItemTake struct {
-	T       float64 `json:"time"`
-	TakenBy string  `json:"takenBy,omitempty"`
-	Team    string  `json:"team,omitempty"`
+	T       int32  `json:"t"`
+	TakenBy string `json:"takenBy,omitempty"`
+	Team    string `json:"team,omitempty"`
 }
 
 // ItemsSummary reduces the (filtered) item timelines to per-item take
@@ -920,8 +919,8 @@ type ItemTake struct {
 // nothing took them in the window (their availability is still signal).
 func ItemsSummary(r *result.Result, opts ItemOptions) *ItemsSummaryView {
 	filtered := Items(r, opts)
-	startMs := secToMs(opts.From)
-	endMs := secToMs(opts.To)
+	startMs := opts.From
+	endMs := opts.To
 	out := &ItemsSummaryView{Items: make([]ItemSummary, 0, len(filtered.Items))}
 	for _, it := range filtered.Items {
 		s := ItemSummary{Name: it.Name, Kind: it.Kind, EntNum: it.EntNum, Loc: it.Loc}
@@ -944,8 +943,8 @@ func ItemsSummary(r *result.Result, opts ItemOptions) *ItemsSummaryView {
 				}
 				s.ByPlayer[ph.TakenBy]++
 			}
-			if s.FirstTake == nil || secs(ph.TakenAt) < s.FirstTake.T {
-				s.FirstTake = &ItemTake{T: secs(ph.TakenAt), TakenBy: ph.TakenBy, Team: ph.Team}
+			if s.FirstTake == nil || ph.TakenAt < s.FirstTake.T {
+				s.FirstTake = &ItemTake{T: ph.TakenAt, TakenBy: ph.TakenBy, Team: ph.Team}
 			}
 		}
 		out.Items = append(out.Items, s)
@@ -958,8 +957,8 @@ func ItemsSummary(r *result.Result, opts ItemOptions) *ItemsSummaryView {
 type BackpackOptions struct {
 	Players []string // dropper name (case-sensitive)
 	Weapons []string // "rl"/"lg"; case-insensitive (CSV — multiple accepted)
-	From    float64  // window start, match-relative seconds (0 = no bound)
-	To      float64  // window end, match-relative seconds (0 = no bound)
+	From    int32    // window start, int32 ms (0 = no bound)
+	To      int32    // window end, int32 ms (0 = no bound)
 }
 
 // Backpacks returns the demo's RL/LG backpack drops, optionally filtered.
@@ -972,8 +971,8 @@ func Backpacks(r *result.Result, opts BackpackOptions) []result.BackpackDrop {
 	}
 	players := toSet(opts.Players)
 	weapons := toLowerSet(opts.Weapons)
-	startMs := secToMs(opts.From)
-	endMs := secToMs(opts.To)
+	startMs := opts.From
+	endMs := opts.To
 	for _, b := range r.Backpacks {
 		if len(players) > 0 && !players[b.Player] {
 			continue
@@ -995,8 +994,8 @@ type WeaponPickupOptions struct {
 	Players []string // picker name (case-sensitive)
 	Weapons []string // weapon token; case-insensitive
 	Source  string   // "world" | "backpack"; case-insensitive
-	From    float64  // window start, match-relative seconds (0 = no bound)
-	To      float64  // window end, match-relative seconds (0 = no bound)
+	From    int32    // window start, int32 ms (0 = no bound)
+	To      int32    // window end, int32 ms (0 = no bound)
 }
 
 // WeaponPickups returns the demo's slot-weapon acquisitions, optionally
@@ -1010,8 +1009,8 @@ func WeaponPickups(r *result.Result, opts WeaponPickupOptions) []result.WeaponPi
 	players := toSet(opts.Players)
 	weapons := toLowerSet(opts.Weapons)
 	source := strings.ToLower(strings.TrimSpace(opts.Source))
-	startMs := secToMs(opts.From)
-	endMs := secToMs(opts.To)
+	startMs := opts.From
+	endMs := opts.To
 	for _, wp := range r.WeaponPickups {
 		if len(players) > 0 && !players[wp.Player] {
 			continue
@@ -1034,8 +1033,8 @@ func WeaponPickups(r *result.Result, opts WeaponPickupOptions) []result.WeaponPi
 // match-relative seconds (0 disables that bound); Types defaults to
 // {chat, teamsay}.
 type ChatOptions struct {
-	From    float64
-	To      float64
+	From    int32 // int32 ms
+	To      int32 // int32 ms
 	Players []string // sender name (case-sensitive)
 	Types   []string // defaults to chat,teamsay
 }
@@ -1052,8 +1051,8 @@ func Chat(r *result.Result, opts ChatOptions) []result.MatchEvent {
 	if len(types) == 0 {
 		types = map[string]bool{"chat": true, "teamsay": true}
 	}
-	startMs := secToMs(opts.From)
-	endMs := secToMs(opts.To)
+	startMs := opts.From
+	endMs := opts.To
 	for _, ev := range r.Messages.Events {
 		if !types[ev.Type] {
 			continue
@@ -1070,21 +1069,6 @@ func Chat(r *result.Result, opts ChatOptions) []result.MatchEvent {
 		out = append(out, ev)
 	}
 	return out
-}
-
-// secToMs converts a match-relative seconds bound to int32 ms, rounding to
-// the nearest ms (not truncating) so e.g. from=0.29s maps to 290ms, not 289.
-func secToMs(sec float64) int32 {
-	return int32(math.Round(sec * 1000))
-}
-
-// secs converts int32 ms to the view surface's float64 seconds.
-// Division (not `*0.001`) matters: IEEE division is correctly rounded,
-// so the result is the double nearest to the decimal value and JSON
-// prints "13.155" — multiplying by the inexact 0.001 can land one ulp
-// off and print "13.155000000000001" (PLAN-api-usability D8).
-func secs(ms int32) float64 {
-	return float64(ms) / 1000
 }
 
 // toSet builds a case-sensitive lookup set, trimming and dropping empties.

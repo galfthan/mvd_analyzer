@@ -439,12 +439,12 @@ position) recorded at the rate it actually changed. Schema v8 stores
 seconds — the MVD wire format delivers ms deltas, and keeping the
 unit integer end-to-end eliminates the float-precision drift that
 previously broke spawn/death-boundary comparisons in locgraph and
-keeps the schema consistent and sensible to extend. The view-layer
-query API (`view.Buckets`, `view.Events`, `view.StreamSlice`,
-`view.StateAt`) still takes and emits float64 seconds at its public
-surface, so consumers querying through `view.*` (including the WASM
-bridge's `getBuckets` / `getEvents` / `getStreamSlice` / `getStateAt`
-exports) are unaffected. Schema v9 adds visibility-aware loc
+keeps the schema consistent and sensible to extend. As of schema v57
+(the pure-ms model) the view-layer query API (`view.Buckets`,
+`view.Events`, `view.StreamSlice`, `view.StateAt`) also takes and emits
+**int32 milliseconds** at its public surface — no seconds anywhere,
+inputs or outputs, so REST/MCP `from`/`to`/`time` params and every
+response time field are int32 ms alike. Schema v9 adds visibility-aware loc
 attribution: when a per-map BSP is available, the analyzer rejects
 candidate loc-points that fall outside the player's potentially-
 visible-set (PVS), eliminating brief "wall-bleed" phantom loc visits
