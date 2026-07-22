@@ -115,6 +115,57 @@ func TestGamesSearch_InvalidParam(t *testing.T) {
 	}
 }
 
+// A malformed from/to date is rejected at the API boundary with a 400
+// invalid_param instead of reaching the hub and surfacing as a 502
+// hub_upstream (review finding: bad search dates were a 502).
+func TestGamesSearch_BadDate(t *testing.T) {
+	cases := []struct {
+		name string
+		url  string
+	}{
+		{"from-not-a-date", "/v1/games/search?from=notadate"},
+		{"from-wrong-length", "/v1/games/search?from=2024-8-1"},
+		{"to-not-a-date", "/v1/games/search?to=nope"},
+		{"from-impossible-day", "/v1/games/search?from=2024-13-40"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			sr := &capturingSearcher{}
+			srv := newSearchServer(t, sr)
+			defer srv.Close()
+
+			body, status := getRaw(t, srv.URL+tc.url)
+			if status != 400 {
+				t.Fatalf("status = %d, want 400 (body=%s)", status, body)
+			}
+			if !strings.Contains(string(body), `"invalid_param"`) {
+				t.Errorf("body missing invalid_param code: %s", body)
+			}
+			if strings.Contains(string(body), `"hub_upstream"`) {
+				t.Errorf("bad date must not reach the hub (502): %s", body)
+			}
+			if sr.seen {
+				t.Error("searcher must not be called when a date fails to parse")
+			}
+		})
+	}
+}
+
+// A well-formed from/to date passes validation and reaches the searcher.
+func TestGamesSearch_ValidDateReachesSearcher(t *testing.T) {
+	sr := &capturingSearcher{}
+	srv := newSearchServer(t, sr)
+	defer srv.Close()
+
+	getJSON(t, srv.URL+"/v1/games/search?from=2024-08-01&to=2024-08-31", 200)
+	if !sr.seen {
+		t.Fatal("searcher was not invoked for a valid date range")
+	}
+	if sr.got.From != "2024-08-01" || sr.got.To != "2024-08-31" {
+		t.Errorf("from/to = %q/%q; want 2024-08-01/2024-08-31", sr.got.From, sr.got.To)
+	}
+}
+
 // A server with no searcher configured answers 502 hub_upstream rather than
 // panicking on a nil dependency.
 func TestGamesSearch_NotConfigured(t *testing.T) {

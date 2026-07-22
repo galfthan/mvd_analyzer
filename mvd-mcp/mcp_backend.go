@@ -243,15 +243,17 @@ type GetArtifactInput struct {
 // SearchGamesInput searches hub.quakeworld.nu's game catalog. It is
 // forwarded verbatim to mvd-api's GET /v1/games/search, which owns the hub
 // connection. All fields optional; an empty filter returns the most recent
-// matches.
+// matches. Result rows include server_hostname (the QW server the game was
+// played on) alongside id, timestamp, mode, matchtag, map, teams, players,
+// demo_sha256 and demo_source_url.
 type SearchGamesInput struct {
-	Players  []string `json:"players,omitempty"  jsonschema:"player names to match (FTS on players_fts, AND'd across multiple)"`
+	Players  []string `json:"players,omitempty"  jsonschema:"player names to match (case-insensitive full-text search on the roster, AND'd across multiple names)"`
 	Teams    []string `json:"teams,omitempty"    jsonschema:"team names that must appear in team_names (contains)"`
 	Map      string   `json:"map,omitempty"      jsonschema:"map name, exact match (e.g. dm6)"`
 	Mode     string   `json:"mode,omitempty"     jsonschema:"game mode, exact match (e.g. 1on1, 2on2, 4on4, FFA)"`
 	Matchtag string   `json:"matchtag,omitempty" jsonschema:"tournament/event tag, case-insensitive substring (e.g. qwsl)"`
-	From     string   `json:"from,omitempty"     jsonschema:"ISO date lower bound, inclusive (YYYY-MM-DD)"`
-	To       string   `json:"to,omitempty"       jsonschema:"ISO date upper bound, inclusive (YYYY-MM-DD)"`
+	From     string   `json:"from,omitempty"     jsonschema:"calendar date lower bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
+	To       string   `json:"to,omitempty"       jsonschema:"calendar date upper bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
 	Limit    int      `json:"limit,omitempty"    jsonschema:"max rows (default 20, capped at 100)"`
 	Offset   int      `json:"offset,omitempty"   jsonschema:"pagination offset"`
 	Roster   bool     `json:"roster,omitempty"   jsonschema:"true = verbatim hub rows with full roster detail (per-player ping, color arrays, name_color). Default = compact rows: players projected to {name, team, frags}"`

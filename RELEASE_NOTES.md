@@ -41,6 +41,30 @@ No response-shape change — this phase only tightens which requests are
   runs before the heavy raycast compute, and for `/region-control` /
   `/state-at` before the availability / missing-time checks.
 
+### Phase 2: search fixes (dates, `server_hostname`, case docs)
+
+Touches `GET /v1/games/search` (and its MCP `searchGames` proxy) only; no
+schema bump.
+
+- **Malformed search `from`/`to` now 400 `invalid_param` instead of 502.**
+  The `from`/`to` calendar-date bounds are validated at the API boundary as
+  strict `YYYY-MM-DD` (exactly 10 characters and a real date); a bad value
+  fails fast with a client-side `400 invalid_param` rather than reaching the
+  hub and surfacing as an opaque `502 hub_upstream`.
+- **Search rows now include `server_hostname`** — the QuakeWorld server a
+  game was played on (closes review finding 3). It is a snake_case hub
+  passthrough (consistent with the `demo_sha256` island) and appears in both
+  compact and `roster=true` rows. Added to the hubfetch select list and
+  mirrored into the web app's direct-Supabase `SEARCH_SELECT`.
+- **Doc fix: the search `players` filter is case-INsensitive** (finding 2).
+  It is a PostgREST full-text search, which lowercases both query and
+  indexed names (`to_tsvector`) — so `bps` and `BPS` match the same games.
+  The spec/API.md/MCP text previously claimed it was case-sensitive; the
+  claim is corrected and now contrasts it with the per-demo endpoints'
+  exact, case-sensitive `players` filter. The search `from`/`to` (calendar
+  dates) are likewise distinguished from the per-demo endpoints' `from`/`to`
+  (match-relative times).
+
 ## 2026-07-21 (tweak-api)
 
 - **Review fixes — echo-rule completeness + hub read hardening (still

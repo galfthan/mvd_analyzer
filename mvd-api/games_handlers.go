@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -64,6 +65,21 @@ func (s *server) handleGamesSearch(w http.ResponseWriter, r *http.Request) {
 	}
 	if writeUnknownParam(w, p.Unknown()) {
 		return
+	}
+	// from/to are calendar dates, not times: validate them at the API
+	// boundary as strict YYYY-MM-DD so a malformed value fails fast with a
+	// client-side 400 instead of reaching the hub and surfacing as a 502
+	// hub_upstream. hubfetch stays unchanged; the MCP searchGames tool
+	// proxies this endpoint and inherits the check.
+	for _, dp := range [...]struct{ key, v string }{{"from", params.From}, {"to", params.To}} {
+		if dp.v == "" {
+			continue
+		}
+		if _, err := time.Parse("2006-01-02", dp.v); err != nil || len(dp.v) != 10 {
+			writeError(w, http.StatusBadRequest, "invalid_param",
+				fmt.Sprintf("invalid %s=%q (want YYYY-MM-DD)", dp.key, dp.v))
+			return
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), gamesSearchTimeout)

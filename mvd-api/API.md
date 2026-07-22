@@ -40,7 +40,13 @@ Base URL defaults to `http://localhost:8080`. A demo is addressed by an
 Don't have a `gameId` yet? **`GET /v1/games/search`** discovers demos in
 the hub catalog by player / team / map / mode / matchtag / date, returns
 `{limit, offset, count, total?, games}`, and each row's `id` becomes the
-`gameId:<id>` you feed the flow below.
+`gameId:<id>` you feed the flow below. Each row also carries
+`server_hostname` (the QW server the game was played on). The `players`
+filter is a **case-insensitive** full-text search (unlike the per-demo
+endpoints' exact, case-sensitive `players` filter). Its `from`/`to` are
+**calendar dates**, strict `YYYY-MM-DD` — a malformed date 400s
+`invalid_param` (it is not the match-relative `from`/`to` the per-demo
+endpoints use).
 
 Typical frontend flow:
 

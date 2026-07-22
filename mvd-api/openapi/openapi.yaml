@@ -1572,8 +1572,11 @@ components:
       in: query
       description: >
         CSV of player names to match (full-text search on the roster,
-        AND'd across multiple names). Case-sensitive (QW names are
-        case-significant).
+        AND'd across multiple names). Case-INsensitive: the hub matches via
+        PostgREST full-text search, which lowercases both the query and the
+        indexed names (`to_tsvector`), so `bps` and `BPS` match the same
+        games. This differs from the per-demo endpoints' `players` filter,
+        which is an exact, case-sensitive name match.
       style: form
       explode: false
       schema:
@@ -1609,12 +1612,26 @@ components:
     SearchFrom:
       name: from
       in: query
-      description: ISO date lower bound, inclusive (`YYYY-MM-DD`).
+      description: >
+        Calendar date lower bound, inclusive. Strict `YYYY-MM-DD` (exactly
+        10 characters, a real date); a malformed value is rejected with
+        `400 invalid_param` at the API boundary (it no longer reaches the
+        hub as a `502 hub_upstream`). NOTE these are calendar dates that
+        select which games to list — unrelated to the per-demo endpoints'
+        `from`/`to`, which are match-relative times bounding a window
+        within one demo.
       schema: { type: string }
     SearchTo:
       name: to
       in: query
-      description: ISO date upper bound, inclusive (`YYYY-MM-DD`).
+      description: >
+        Calendar date upper bound, inclusive (the whole end day is
+        included). Strict `YYYY-MM-DD` (exactly 10 characters, a real
+        date); a malformed value is rejected with `400 invalid_param` at
+        the API boundary (it no longer reaches the hub as a `502
+        hub_upstream`). NOTE these are calendar dates that select which
+        games to list — unrelated to the per-demo endpoints' `from`/`to`,
+        which are match-relative times bounding a window within one demo.
       schema: { type: string }
     SearchLimit:
       name: limit
@@ -1878,11 +1895,18 @@ components:
           description: >
             Matching games, newest first. Each row carries id, timestamp,
             mode, matchtag, map, teams, players, demo_sha256,
-            demo_source_url; `players` is compact ({name, team, frags})
-            unless roster=true.
+            demo_source_url, server_hostname; `players` is compact
+            ({name, team, frags}) unless roster=true.
           items:
             type: object
             additionalProperties: true
+            properties:
+              server_hostname:
+                type: string
+                description: >
+                  The QuakeWorld server the game was played on (hub
+                  passthrough, snake_case verbatim). Present in both compact
+                  and roster rows.
     # --- Per-endpoint response schemas (full field-level).
     # Bootstrapped from the Go structs (result/, view/, mvd-api Overview)
     # via reflection and hand-curated; every schema is validated against

@@ -391,7 +391,7 @@ async function fetchGameFromHub(gameId) {
 }
 
 const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 'to'];
-const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url';
+const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url,server_hostname';
 
 async function searchHub(filters) {
     const parts = [
