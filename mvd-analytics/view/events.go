@@ -73,17 +73,24 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 	if len(types) == 0 {
 		types = defaultEventTypes
 	} else {
-		// An explicit list is validated against the known vocabulary so a typo
-		// 400s instead of silently matching nothing (the silent-enum gap).
+		// Enum values are case-insensitive, matching every other token
+		// filter (players/weapons/loc): lowercase before validating AND
+		// before use so the want-map keys line up with the lowercase
+		// KnownEventTypes vocabulary. An explicit list is validated so a
+		// typo 400s instead of silently matching nothing (the silent-enum gap).
 		known := make(map[string]bool, len(KnownEventTypes))
 		for _, t := range KnownEventTypes {
 			known[t] = true
 		}
-		for _, t := range types {
-			if !known[t] {
+		lowered := make([]string, len(types))
+		for i, t := range types {
+			lt := strings.ToLower(t)
+			if !known[lt] {
 				return nil, fmt.Errorf("unknown event type %q; valid: %s", t, strings.Join(KnownEventTypes, ", "))
 			}
+			lowered[i] = lt
 		}
+		types = lowered
 	}
 	want := make(map[string]bool, len(types))
 	for _, t := range types {
@@ -346,8 +353,9 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 				continue
 			}
 			// Spawns / Deaths are int32 ms (schema v8); the TaggedEvent
-			// public schema is float64 seconds. Convert per-entry; the
-			// outer filter / window is in seconds.
+			// public schema is int32 ms too (v57 pure-ms model), so the
+			// timestamp passes straight through — the outer filter / window
+			// is int32 ms as well.
 			if want["spawn"] {
 				for _, tMs := range p.Spawns {
 					ts := tMs

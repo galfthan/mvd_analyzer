@@ -78,14 +78,14 @@ and response fields, REST and MCP alike (schema v57, the pure-ms model).
 There is no unit selection and no per-endpoint split. `timeUnit`, where
 present, is a **constant `"ms"` self-description echo**:
 
-> **Every `/v1/demos/{id}/*` JSON response that carries match-position
-> time values echoes a top-level `"timeUnit": "ms"`, including
-> `/artifacts/{name}` (which since v57 echoes a `timeUnit` sibling of the
-> resultKey when the section carries match-position time). The lone
-> exception is `/demoinfo` (KTX's own mixed units). Responses with no
-> match-position time — `/loc-table`, `/loc-graph`, `/metadata`, and the
-> no-time artifacts (`/artifacts/{metadata,map-entities,loc-graph}`) —
-> carry no echo.**
+> **Every `/v1/demos/{id}/*` JSON response that carries time values
+> echoes a top-level `"timeUnit": "ms"`, including `/artifacts/{name}`
+> (which since v57 echoes a `timeUnit` sibling of the resultKey when the
+> section carries time). `/loc-graph` echoes too — its node weights are
+> aggregate durations, int32 ms since v57. The lone exception is
+> `/demoinfo` (KTX's own mixed units). Responses with no time value at
+> all — `/loc-table`, `/metadata`, and the no-time artifacts
+> (`/artifacts/{metadata,map-entities}`) — carry no echo.**
 
 The four formerly bare-array endpoints wrap their array in an object so
 the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/airgibs` →
@@ -114,18 +114,18 @@ The exceptions — time-carrying responses that still don't echo:
 - **`/artifacts/{name}`** serves the raw stored result section under its
   resultKey (the exact-bytes escape hatch). Since v57 it also echoes a
   top-level `"timeUnit": "ms"` **sibling** of the resultKey whenever the
-  section carries match-position time — `frag`, `damage`, `shots`, `aim`,
-  `opening`, `match`, `messages`, `timeline`, `items`, `backpacks`,
-  `weapon-pickups` (e.g. `/artifacts/messages` → `{timeUnit, messages:{…}}`).
-  The no-time artifacts — `metadata`, `map-entities`, `loc-graph` — carry
-  no echo, and `/artifacts/demoinfo` is the KTX units island. The
+  section carries time — `frag`, `damage`, `shots`, `aim`, `opening`,
+  `match`, `messages`, `timeline`, `items`, `backpacks`, `weapon-pickups`,
+  `loc-graph` (e.g. `/artifacts/messages` → `{timeUnit, messages:{…}}`).
+  loc-graph's node weights are aggregate durations (int32 ms since v57),
+  so it echoes too. The no-time artifacts — `metadata`, `map-entities` —
+  carry no echo, and `/artifacts/demoinfo` is the KTX units island. The
   underlying stored schema is all int32 ms — see RESULT_SCHEMA.md §"Time
   units". `/artifacts/los` is a materialized artifact that aliases the
   `/los` body and carries its `"ms"` echo like the curated endpoint.
 
-Separately, the responses with **no match-position time at all** —
-`/loc-table`, `/loc-graph`, `/metadata` — carry no echo because there is
-no time value to unit.
+Separately, the responses with **no time value at all** — `/loc-table`
+and `/metadata` — carry no echo because there is no time value to unit.
 
 `/overview`'s `timing` block is consistent with the rule: its wall-clock
 fields are explicitly `*Ms`-named (`demoOffset`, `demoStartUnixMs`,
@@ -136,6 +136,15 @@ endpoints are **integer milliseconds**. A non-integer value (e.g.
 `from=10.5`) 400s with `invalid_param` and an `(integer milliseconds)`
 hint rather than misfiltering. The only date-typed params are search
 `from`/`to` (calendar dates `YYYY-MM-DD`), which are not times.
+
+> **⚠️ The ms tripwire only catches NON-INTEGER forms.** `from=10.5` or
+> `from=1e3` reject because they are not integers — but a whole-number
+> value that *was* meant as seconds, e.g. `from=60` (intending 60 s), is a
+> perfectly valid integer ms and **cannot be detected**. A pre-v57 caller
+> that passed integer seconds migrates **silently** to a window 1000× too
+> small — `from=60` now means 60 ms, not 60 s, and quietly returns almost
+> nothing instead of erroring. Audit every caller that passed integer
+> seconds and multiply by 1000.
 
 ### 2.2 Query parameters
 

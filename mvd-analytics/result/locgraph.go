@@ -17,26 +17,26 @@ type LocGraphResult struct {
 // powerup, so consumers can re-weight the graph / heatmap by combat
 // posture without re-deriving from streams.
 type LocNode struct {
-	Name     string             `json:"name"`
-	X        float32            `json:"x"`
-	Y        float32            `json:"y"`
-	Z        float32            `json:"z"`
-	Total    float64            `json:"total"`
-	ByPlayer map[string]float64 `json:"byPlayer"`
-	ByTeam   map[string]float64 `json:"byTeam,omitempty"`
-	Armed    *LocWeights        `json:"armed,omitempty"`
-	Unarmed  *LocWeights        `json:"unarmed,omitempty"`
-	Quad     *LocWeights        `json:"quad,omitempty"`
-	Pent     *LocWeights        `json:"pent,omitempty"`
+	Name     string           `json:"name"`
+	X        float32          `json:"x"`
+	Y        float32          `json:"y"`
+	Z        float32          `json:"z"`
+	Total    int32            `json:"total"`    // time spent, int32 ms
+	ByPlayer map[string]int32 `json:"byPlayer"` // per-player time, int32 ms
+	ByTeam   map[string]int32 `json:"byTeam,omitempty"` // per-team time, int32 ms
+	Armed    *LocWeights      `json:"armed,omitempty"`
+	Unarmed  *LocWeights      `json:"unarmed,omitempty"`
+	Quad     *LocWeights      `json:"quad,omitempty"`
+	Pent     *LocWeights      `json:"pent,omitempty"`
 }
 
-// LocWeights is a time-spent breakdown (seconds) for one conditioned
+// LocWeights is a time-spent breakdown (int32 ms) for one conditioned
 // metric on a LocNode — same shape as the node's own Total / ByPlayer /
 // ByTeam, omitted entirely when no observed sample met the condition.
 type LocWeights struct {
-	Total    float64            `json:"total"`
-	ByPlayer map[string]float64 `json:"byPlayer"`
-	ByTeam   map[string]float64 `json:"byTeam,omitempty"`
+	Total    int32            `json:"total"`    // time spent, int32 ms
+	ByPlayer map[string]int32 `json:"byPlayer"` // per-player time, int32 ms
+	ByTeam   map[string]int32 `json:"byTeam,omitempty"` // per-team time, int32 ms
 }
 
 // LocEdge is a directed transition from one loc to another, with

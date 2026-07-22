@@ -215,7 +215,7 @@ func BucketsColumnar(r *result.Result, opts BucketsOptions) (*ColumnarBuckets, e
 	}
 
 	cb := &ColumnarBuckets{WindowMs: g.windowMs, Start: g.start, Count: g.count}
-	if g.count == 0 {
+	if g.count <= 0 {
 		return cb, nil
 	}
 	if g.hasPartial {

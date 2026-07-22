@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+	"math"
 	"sort"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -137,7 +138,7 @@ func Buckets(r *result.Result, opts BucketsOptions) (*BucketsView, error) {
 	if hasPartial {
 		bucketCount++
 	}
-	if bucketCount == 0 {
+	if bucketCount <= 0 {
 		return &BucketsView{WindowMs: windowMs}, nil
 	}
 
@@ -294,6 +295,13 @@ func bucketWindowMsOrDefault(ms int) int {
 func resolveWindow(ms int) (int, error) {
 	if ms < 0 {
 		return 0, fmt.Errorf("WindowMs must be > 0, got %d", ms)
+	}
+	// The grid arithmetic casts windowMs to int32; a value above
+	// math.MaxInt32 wraps negative and either panics the row builder on
+	// make([]ViewBucket, negative) or lets columnar serve a bogus
+	// negative count. Reject it before the cast.
+	if ms > math.MaxInt32 {
+		return 0, fmt.Errorf("WindowMs must be <= %d, got %d", math.MaxInt32, ms)
 	}
 	if ms == 0 {
 		ms = 50
@@ -579,10 +587,10 @@ func positionSamples(p *result.PlayerStream, bStart, bEnd int32) []Sample {
 	if n == 0 {
 		return nil
 	}
-	// pt.T is int32 ms (schema v8); window bounds arrive in float64
-	// seconds (public view API). Convert window once; the comparison
-	// loop stays in int32 ms. Sample.T is the public unit, float64
-	// seconds, converted once per emitted sample.
+	// pt.T is int32 ms (schema v8); window bounds arrive in int32 ms too
+	// (v57 pure-ms model), so the comparison loop is all int32 ms. Sample.T
+	// is float64 milliseconds — an internal reducer intermediate that holds
+	// the int32-ms timestamp widened for the reducer math.
 	bStartMs := bStart
 	bEndMs := bEnd
 	// First sample with T >= bStartMs (inclusive). Treats samples
@@ -758,8 +766,9 @@ func eventListSamples(p *result.PlayerStream, field string, bStart, bEnd int32) 
 	if stream == nil {
 		return nil
 	}
-	// Stream is int32 ms (schema v8); compare in ms then convert each
-	// in-window timestamp to seconds for the public Sample.
+	// Stream is int32 ms (schema v8); window bounds are int32 ms too
+	// (v57 pure-ms model). Sample.T is float64 milliseconds — an internal
+	// reducer intermediate holding the int32-ms timestamp widened.
 	bStartMs := bStart
 	bEndMs := bEnd
 	out := make([]Sample, 0, 2)
@@ -824,8 +833,8 @@ func changeSamplesStr(stream []result.ChangeStr, bStart, bEnd int32) []Sample {
 }
 
 // index*AtOrBefore returns the largest index i for which stream[i].T
-// is <= the query tMs. The query is integer ms (schema v8); callers
-// converting from seconds use int32(t * 1000) at the boundary.
+// is <= the query tMs. The query is integer ms (schema v8); callers pass
+// int32 ms directly (v57 pure-ms model — no seconds boundary conversion).
 func indexI16AtOrBefore(stream []result.ChangeI16, tMs int32) int {
 	i := sort.Search(len(stream), func(i int) bool { return stream[i].T > tMs })
 	return i - 1
@@ -900,8 +909,8 @@ func streamInterval(p *result.PlayerStream, field string) []result.Interval {
 }
 
 // streamEventList returns the raw int32-ms timestamp slice for a
-// spawn/death-style event field. Callers wrap the seconds conversion
-// where the public Sample type (float64 seconds) is materialised.
+// spawn/death-style event field. The public Sample type carries T as
+// float64 milliseconds (an internal reducer intermediate).
 func streamEventList(p *result.PlayerStream, field string) []int32 {
 	switch field {
 	case FieldSpawns:

@@ -35,13 +35,13 @@ type eagerArtifact struct {
 	extract func(*result.Result) (any, error)
 	code    string
 	msg     string
-	// echoMs is true when the artifact's stored section carries match-position
-	// time values (all int32 ms in the v57 pure-ms model), so the envelope
-	// gains a "timeUnit":"ms" self-description echo (matching the curated
-	// endpoints). False for the no-time-field sections (metadata, map-entities,
-	// loc-graph — its weights are aggregate durations, not positions) and the
-	// /demoinfo KTX-native-units island. Audited per section against the
-	// backing result.* struct.
+	// echoMs is true when the artifact's stored section carries time values
+	// (all int32 ms in the v57 pure-ms model), so the envelope gains a
+	// "timeUnit":"ms" self-description echo (matching the curated endpoints).
+	// loc-graph echoes: its node weights are aggregate durations, int32 ms
+	// since v57. False only for the genuinely time-free sections (metadata,
+	// map-entities) and the /demoinfo KTX-native-units island. Audited per
+	// section against the backing result.* struct.
 	echoMs bool
 }
 
@@ -68,7 +68,7 @@ var eagerArtifacts = map[string]eagerArtifact{
 	"aim": {extract: func(r *result.Result) (any, error) { return view.Aim(r, view.AimOptions{}) },
 		code: "aim_unavailable", msg: "this demo has no aim data (needs shots + position/view streams)", echoMs: true},
 	"loc-graph": {extract: func(r *result.Result) (any, error) { return view.LocGraph(r) },
-		code: "locgraph_unavailable", msg: "this demo has no loc graph (probably no position track was emitted)"},
+		code: "locgraph_unavailable", msg: "this demo has no loc graph (probably no position track was emitted)", echoMs: true},
 	"opening": {extract: func(r *result.Result) (any, error) {
 		if r.Opening == nil {
 			return nil, view.ErrUnavailable

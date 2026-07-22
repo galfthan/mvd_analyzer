@@ -280,16 +280,17 @@ func fullArtifactStore() *fakeStore {
 }
 
 // TestArtifact_TimeUnitEcho pins the per-artifact timeUnit echo (v57): every
-// eager artifact whose stored section carries match-position ms time echoes
-// "timeUnit":"ms"; the no-time-field artifacts (metadata, map-entities,
-// loc-graph) and the /demoinfo KTX-native island carry no echo. Drives every
-// servable eager artifact through the HTTP endpoint so the map and the wire
-// agree.
+// eager artifact whose stored section carries ms time echoes "timeUnit":"ms";
+// the no-time-field artifacts (metadata, map-entities) and the /demoinfo
+// KTX-native island carry no echo. loc-graph echoes — its node weights are
+// int32-ms durations. Drives every servable eager artifact through the HTTP
+// endpoint so the map and the wire agree.
 func TestArtifact_TimeUnitEcho(t *testing.T) {
 	// Expected echo decision per the audit (mirrors eagerArtifacts[].echoMs).
 	wantEcho := map[string]bool{
-		"demoinfo": false, "metadata": false, "map-entities": false, "loc-graph": false,
-		"frag": true, "damage": true, "shots": true, "aim": true, "opening": true,
+		"demoinfo": false, "metadata": false, "map-entities": false,
+		"loc-graph": true,
+		"frag":      true, "damage": true, "shots": true, "aim": true, "opening": true,
 		"match": true, "messages": true, "timeline": true, "items": true,
 		"backpacks": true, "weapon-pickups": true,
 	}

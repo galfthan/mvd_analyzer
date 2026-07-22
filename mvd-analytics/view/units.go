@@ -14,12 +14,14 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 // The one seconds island is `/demoinfo` (KTX's own clock, a mix of native
 // units), which carries no echo. `/artifacts/{name}` serves the raw stored
 // result section under its resultKey and, since v57, ALSO echoes a top-level
-// "timeUnit":"ms" SIBLING of that key whenever the section carries match-
-// position time (frag, damage, shots, aim, opening, match, messages, timeline,
-// items, backpacks, weapon-pickups; /artifacts/los echoes via its /los body).
-// The no-time-field artifacts — /artifacts/{metadata,map-entities,loc-graph} —
-// and the /demoinfo KTX-native island carry no echo. Responses with no match-
-// position time — /loc-table, /loc-graph, /metadata — carry no echo either.
+// "timeUnit":"ms" SIBLING of that key whenever the section carries time
+// values (frag, damage, shots, aim, opening, match, messages, timeline,
+// items, backpacks, weapon-pickups, loc-graph; /artifacts/los echoes via its
+// /los body). loc-graph's node weights are aggregate durations (int32 ms since
+// v57), so it echoes too. The no-time-field artifacts — /artifacts/{metadata,
+// map-entities} — and the /demoinfo KTX-native island carry no echo.
+// /loc-table and /metadata carry no match-position time and no echo; /loc-graph
+// now carries int32-ms node weights and echoes "ms" via LocGraphEnvelope.
 //
 // The stored result.* structs and their JSON tags are the ON-DISK contract
 // (qw-analyze / WASM emit them verbatim, in ms) and are left untouched. The
@@ -78,6 +80,15 @@ type ItemsEnvelope struct {
 type AimEnvelope struct {
 	TimeUnit TimeUnit `json:"timeUnit"`
 	*result.AimResult
+}
+
+// LocGraphEnvelope wraps the /loc-graph movement graph (ms-native): node
+// time weights (Total / ByPlayer / ByTeam and the conditioned LocWeights)
+// are int32 ms since schema v57. Edge weights stay transition counts.
+// LocGraphResult embeds so its locs/edges flatten at the HTTP boundary.
+type LocGraphEnvelope struct {
+	TimeUnit TimeUnit `json:"timeUnit"`
+	*result.LocGraphResult
 }
 
 // RegionControlEnvelope wraps the /region-control view (ms-native): its

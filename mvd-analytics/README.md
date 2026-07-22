@@ -22,8 +22,10 @@ that downstream consumers render, summarise, or feed to an agent.
   to a different player slot are no longer dropped — `PlayerStream`
   Spawns/Deaths counts rise and the downstream LocGraph / LocTrails /
   RegionControl / WeaponPickups shift across the new boundaries.
-  Public view-layer outputs still emit seconds. Full field reference
-  in [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
+  Public view-layer outputs and inputs are int32 milliseconds (schema
+  v57, the pure-ms model — no seconds surfaces except `/demoinfo`'s
+  KTX-native island). See [RESULT_SCHEMA.md](RESULT_SCHEMA.md) §"Time
+  units". Full field reference in [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
 - `analyzer/` — the `Analyzer` interface, the read-only event/userinfo
   `Context`, the typed `CoreOutputs` bundle that producer analysers
   populate for downstream consumers, and the `Registry` that drives a

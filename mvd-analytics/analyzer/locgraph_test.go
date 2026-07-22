@@ -125,18 +125,18 @@ func TestBuildLocGraph_BasicTransitionsAndTeleport(t *testing.T) {
 	}
 
 	// p1 visits A 2 buckets, B 2 buckets, C 2 buckets; p2 visits A 6
-	// buckets. So node-time A=8, B=2, C=2 in 50 ms units.
-	const D = 0.05
-	if got := nodes["A"].Total; !approxEq(got, 8*D) {
+	// buckets. So node-time A=8, B=2, C=2 in 50 ms units — exact int32 ms.
+	const D int32 = 50
+	if got := nodes["A"].Total; got != 8*D {
 		t.Errorf("A total = %v, want %v", got, 8*D)
 	}
-	if got := nodes["B"].Total; !approxEq(got, 2*D) {
+	if got := nodes["B"].Total; got != 2*D {
 		t.Errorf("B total = %v, want %v", got, 2*D)
 	}
-	if got := nodes["C"].Total; !approxEq(got, 2*D) {
+	if got := nodes["C"].Total; got != 2*D {
 		t.Errorf("C total = %v, want %v", got, 2*D)
 	}
-	if got := nodes["A"].ByTeam["blue"]; !approxEq(got, 6*D) {
+	if got := nodes["A"].ByTeam["blue"]; got != 6*D {
 		t.Errorf("A byTeam[blue] = %v, want %v", got, 6*D)
 	}
 
@@ -205,25 +205,25 @@ func TestBuildLocGraph_ArmedAndQuadConditioning(t *testing.T) {
 	for _, n := range graph.Locs {
 		nodes[n.Name] = n
 	}
-	const D = 0.05
+	const D int32 = 50
 	A, B := nodes["A"], nodes["B"]
 
-	if !approxEq(A.Total, 2*D) || !approxEq(B.Total, 2*D) {
+	if A.Total != 2*D || B.Total != 2*D {
 		t.Fatalf("totals A=%v B=%v want %v each", A.Total, B.Total, 2*D)
 	}
 
 	// Armed: both A samples, but only the first B sample (ms 100).
-	if A.Armed == nil || !approxEq(A.Armed.Total, 2*D) {
+	if A.Armed == nil || A.Armed.Total != 2*D {
 		t.Errorf("A.Armed = %+v, want total %v", A.Armed, 2*D)
 	} else {
-		if !approxEq(A.Armed.ByPlayer["p1"], 2*D) {
+		if A.Armed.ByPlayer["p1"] != 2*D {
 			t.Errorf("A.Armed.ByPlayer[p1] = %v, want %v", A.Armed.ByPlayer["p1"], 2*D)
 		}
-		if !approxEq(A.Armed.ByTeam["red"], 2*D) {
+		if A.Armed.ByTeam["red"] != 2*D {
 			t.Errorf("A.Armed.ByTeam[red] = %v, want %v", A.Armed.ByTeam["red"], 2*D)
 		}
 	}
-	if B.Armed == nil || !approxEq(B.Armed.Total, 1*D) {
+	if B.Armed == nil || B.Armed.Total != 1*D {
 		t.Errorf("B.Armed = %+v, want total %v", B.Armed, 1*D)
 	}
 
@@ -231,12 +231,12 @@ func TestBuildLocGraph_ArmedAndQuadConditioning(t *testing.T) {
 	if A.Quad != nil {
 		t.Errorf("A.Quad = %+v, want nil", A.Quad)
 	}
-	if B.Quad == nil || !approxEq(B.Quad.Total, 1*D) {
+	if B.Quad == nil || B.Quad.Total != 1*D {
 		t.Errorf("B.Quad = %+v, want total %v", B.Quad, 1*D)
 	}
 
 	// Pent: only the first A sample (ms 0) — B never had pent.
-	if A.Pent == nil || !approxEq(A.Pent.Total, 1*D) {
+	if A.Pent == nil || A.Pent.Total != 1*D {
 		t.Errorf("A.Pent = %+v, want total %v", A.Pent, 1*D)
 	}
 	if B.Pent != nil {
@@ -248,20 +248,20 @@ func TestBuildLocGraph_ArmedAndQuadConditioning(t *testing.T) {
 	if A.Unarmed != nil {
 		t.Errorf("A.Unarmed = %+v, want nil", A.Unarmed)
 	}
-	if B.Unarmed == nil || !approxEq(B.Unarmed.Total, 1*D) {
+	if B.Unarmed == nil || B.Unarmed.Total != 1*D {
 		t.Errorf("B.Unarmed = %+v, want total %v", B.Unarmed, 1*D)
 	}
 	// Armed + Unarmed time must reconstitute each loc's total.
-	armedB := 0.0
+	var armedB int32
 	if B.Armed != nil {
 		armedB = B.Armed.Total
 	}
-	if !approxEq(armedB+B.Unarmed.Total, B.Total) {
+	if armedB+B.Unarmed.Total != B.Total {
 		t.Errorf("B armed+unarmed = %v, want total %v", armedB+B.Unarmed.Total, B.Total)
 	}
 
 	// Conditioned metrics can never exceed the unconditioned total.
-	if B.Armed != nil && B.Armed.Total > B.Total+1e-9 {
+	if B.Armed != nil && B.Armed.Total > B.Total {
 		t.Errorf("B.Armed.Total %v > B.Total %v", B.Armed.Total, B.Total)
 	}
 
@@ -281,17 +281,4 @@ func TestBuildLocGraph_ArmedAndQuadConditioning(t *testing.T) {
 	if ab.Quad != nil {
 		t.Errorf("A→B.Quad = %+v, want nil", ab.Quad)
 	}
-}
-
-func approxEq(a, b float64) bool {
-	// Node-time is float64 accumulated from int32-ms-derived dts;
-	// a small fp tolerance is still sensible since the *.05 dts
-	// individually aren't representable exactly, even if there's no
-	// per-sample roundtrip.
-	const eps = 1e-9
-	d := a - b
-	if d < 0 {
-		d = -d
-	}
-	return d < eps
 }

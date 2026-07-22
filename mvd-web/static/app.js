@@ -10354,10 +10354,11 @@ function attachLocGraphInteractions(cy) {
 
 function nodeTooltipHtml(node) {
     const name = node.data('name');
-    const total = node.data('total') || 0;
+    // Node time weights are int32 ms (schema v57); the UI shows seconds.
+    const total = (node.data('total') || 0) / 1000;
     const byPlayer = node.data('byPlayer') || {};
     const top = Object.entries(byPlayer).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const rows = top.map(([p, t]) => `<div>· ${escapeHtml(p)}: ${t.toFixed(1)}s</div>`).join('');
+    const rows = top.map(([p, t]) => `<div>· ${escapeHtml(p)}: ${(t / 1000).toFixed(1)}s</div>`).join('');
     return `<div><strong>${escapeHtml(name)}</strong></div>
 <div>Total time: ${total.toFixed(1)}s</div>
 ${rows}`;
@@ -10581,7 +10582,8 @@ function buildLocHeatmap(result, metric) {
     return {
         rows, columns, teamCols,
         cellTitle: (col, row, ci) => {
-            const sec = row.secs[ci] || 0;
+            // row.secs holds int32-ms weights (schema v57); show seconds.
+            const sec = (row.secs[ci] || 0) / 1000;
             const pct = row.cells[ci].p != null ? row.cells[ci].p : 0;
             const suffix = col.kind === 'team' ? 'of team time' : 'of their time';
             const who = col.full + (col.kind === 'player' && col.team && col.team !== col.full ? ` (${col.team})` : '');

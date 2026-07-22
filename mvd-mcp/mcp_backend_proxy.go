@@ -512,7 +512,7 @@ func (p *proxyBackend) GetStreamSlice(ctx context.Context, in GetStreamSliceInpu
 	// biggest payload this service can emit, and never what an agent
 	// wants blind. REST /stream-slice stays unwindowed for programs.
 	if in.StartTime == 0 && in.EndTime == 0 {
-		return nil, errors.New("stream-slice needs a time window at the MCP layer: pass startTime and/or endTime (match-relative seconds; keep windows tens of seconds). For whole-match overviews use getBuckets; for one instant use getStateAt")
+		return nil, errors.New("stream-slice needs a time window at the MCP layer: pass startTime and/or endTime (match-relative integer milliseconds; keep windows tens of thousands of ms (tens of seconds)). For whole-match overviews use getBuckets; for one instant use getStateAt")
 	}
 	path, err := demoPath(in.DemoID, "/stream-slice")
 	if err != nil {

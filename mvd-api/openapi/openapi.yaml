@@ -606,7 +606,9 @@ paths:
       summary: Per-map loc adjacency graph
       description: >
         Which locs are reachable from which, weighted by observed traversal.
-        422 `locgraph_unavailable` when no position track was emitted.
+        Node weights (time spent) are int32 ms; edge weights are transition
+        counts. Echoes `timeUnit:"ms"`. 422 `locgraph_unavailable` when no
+        position track was emitted.
       parameters:
         - $ref: "#/components/parameters/DemoId"
       responses:
@@ -3517,6 +3519,7 @@ components:
     LocGraph:
       additionalProperties: false
       properties:
+        timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         edges:
           description: "Directed loc-transition edges."
           items:
@@ -3666,20 +3669,20 @@ components:
                 additionalProperties: false
                 properties:
                   byPlayer:
-                    description: "Per-player time spent (seconds), keyed by player name."
+                    description: "Per-player time spent (int32 ms), keyed by player name."
                     additionalProperties:
-                      type: number
+                      type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
-                    description: "Per-team time spent (seconds), keyed by team name."
+                    description: "Per-team time spent (int32 ms), keyed by team name."
                     additionalProperties:
-                      type: number
+                      type: integer
                     type: object
                   total:
-                    description: "Aggregate time spent, seconds."
-                    type: number
+                    description: "Aggregate time spent, int32 ms."
+                    type: integer
                 required:
                   - total
                   - byPlayer
@@ -3687,16 +3690,16 @@ components:
                   - "null"
                   - object
               byPlayer:
-                description: "Per-player time spent (seconds), keyed by player name."
+                description: "Per-player time spent (int32 ms), keyed by player name."
                 additionalProperties:
-                  type: number
+                  type: integer
                 type:
                   - object
                   - "null"
               byTeam:
-                description: "Per-team time spent (seconds), keyed by team name."
+                description: "Per-team time spent (int32 ms), keyed by team name."
                 additionalProperties:
-                  type: number
+                  type: integer
                 type: object
               name:
                 description: "Loc name."
@@ -3706,20 +3709,20 @@ components:
                 additionalProperties: false
                 properties:
                   byPlayer:
-                    description: "Per-player time spent (seconds), keyed by player name."
+                    description: "Per-player time spent (int32 ms), keyed by player name."
                     additionalProperties:
-                      type: number
+                      type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
-                    description: "Per-team time spent (seconds), keyed by team name."
+                    description: "Per-team time spent (int32 ms), keyed by team name."
                     additionalProperties:
-                      type: number
+                      type: integer
                     type: object
                   total:
-                    description: "Aggregate time spent, seconds."
-                    type: number
+                    description: "Aggregate time spent, int32 ms."
+                    type: integer
                 required:
                   - total
                   - byPlayer
@@ -3731,20 +3734,20 @@ components:
                 additionalProperties: false
                 properties:
                   byPlayer:
-                    description: "Per-player time spent (seconds), keyed by player name."
+                    description: "Per-player time spent (int32 ms), keyed by player name."
                     additionalProperties:
-                      type: number
+                      type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
-                    description: "Per-team time spent (seconds), keyed by team name."
+                    description: "Per-team time spent (int32 ms), keyed by team name."
                     additionalProperties:
-                      type: number
+                      type: integer
                     type: object
                   total:
-                    description: "Aggregate time spent, seconds."
-                    type: number
+                    description: "Aggregate time spent, int32 ms."
+                    type: integer
                 required:
                   - total
                   - byPlayer
@@ -3752,27 +3755,27 @@ components:
                   - "null"
                   - object
               total:
-                description: "Aggregate time spent, seconds."
-                type: number
+                description: "Aggregate time spent, int32 ms."
+                type: integer
               unarmed:
                 description: "Same time-spent breakdown restricted to samples holding neither RL nor LG."
                 additionalProperties: false
                 properties:
                   byPlayer:
-                    description: "Per-player time spent (seconds), keyed by player name."
+                    description: "Per-player time spent (int32 ms), keyed by player name."
                     additionalProperties:
-                      type: number
+                      type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
-                    description: "Per-team time spent (seconds), keyed by team name."
+                    description: "Per-team time spent (int32 ms), keyed by team name."
                     additionalProperties:
-                      type: number
+                      type: integer
                     type: object
                   total:
-                    description: "Aggregate time spent, seconds."
-                    type: number
+                    description: "Aggregate time spent, int32 ms."
+                    type: integer
                 required:
                   - total
                   - byPlayer
@@ -4436,9 +4439,7 @@ components:
               - s
               - e
             type: object
-          type:
-            - "null"
-            - array
+          type: array
         other:
           maximum: 32767
           minimum: -32768
@@ -6618,10 +6619,11 @@ components:
             aim: { $ref: "#/components/schemas/Aim" }
             timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
-          required: [locGraph]
+          required: [locGraph, timeUnit]
           additionalProperties: false
           properties:
             locGraph: { $ref: "#/components/schemas/LocGraph" }
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
           required: [opening, timeUnit]
           additionalProperties: false

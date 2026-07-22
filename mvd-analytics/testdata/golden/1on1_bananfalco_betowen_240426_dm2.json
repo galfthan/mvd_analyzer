@@ -8315,33 +8315,33 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 7.85699999999999,
-            "betowen": 5.4079999999999995
+            "banan falco": 7857,
+            "betowen": 5408
           },
           "byTeam": {
-            "banan falco": 7.85699999999999,
-            "betowen": 5.4079999999999995
+            "banan falco": 7857,
+            "betowen": 5408
           },
-          "total": 13.264999999999954
+          "total": 13265
         },
         "byPlayer": {
-          "banan falco": 7.85699999999999,
-          "betowen": 9.953999999999988
+          "banan falco": 7857,
+          "betowen": 9954
         },
         "byTeam": {
-          "banan falco": 7.85699999999999,
-          "betowen": 9.953999999999988
+          "banan falco": 7857,
+          "betowen": 9954
         },
         "name": "GL",
-        "total": 17.810999999999982,
+        "total": 17811,
         "unarmed": {
           "byPlayer": {
-            "betowen": 4.546000000000001
+            "betowen": 4546
           },
           "byTeam": {
-            "betowen": 4.546000000000001
+            "betowen": 4546
           },
-          "total": 4.546000000000001
+          "total": 4546
         },
         "x": 1977.375,
         "y": -1131.75,
@@ -8350,35 +8350,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 29.733000000000217,
-            "betowen": 28.57200000000018
+            "banan falco": 29733,
+            "betowen": 28572
           },
           "byTeam": {
-            "banan falco": 29.733000000000217,
-            "betowen": 28.57200000000018
+            "banan falco": 29733,
+            "betowen": 28572
           },
-          "total": 58.305000000000135
+          "total": 58305
         },
         "byPlayer": {
-          "banan falco": 34.55100000000024,
-          "betowen": 41.70200000000024
+          "banan falco": 34551,
+          "betowen": 41702
         },
         "byTeam": {
-          "banan falco": 34.55100000000024,
-          "betowen": 41.70200000000024
+          "banan falco": 34551,
+          "betowen": 41702
         },
         "name": "NG",
-        "total": 76.25300000000057,
+        "total": 76253,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 4.818,
-            "betowen": 13.129999999999963
+            "banan falco": 4818,
+            "betowen": 13130
           },
           "byTeam": {
-            "banan falco": 4.818,
-            "betowen": 13.129999999999963
+            "banan falco": 4818,
+            "betowen": 13130
           },
-          "total": 17.947999999999976
+          "total": 17948
         },
         "x": 2314.625,
         "y": -79.875,
@@ -8387,33 +8387,33 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 1.0060000000000002,
-            "betowen": 1.0780000000000003
+            "banan falco": 1006,
+            "betowen": 1078
           },
           "byTeam": {
-            "banan falco": 1.0060000000000002,
-            "betowen": 1.0780000000000003
+            "banan falco": 1006,
+            "betowen": 1078
           },
-          "total": 2.084
+          "total": 2084
         },
         "byPlayer": {
-          "banan falco": 1.0060000000000002,
-          "betowen": 1.4669999999999996
+          "banan falco": 1006,
+          "betowen": 1467
         },
         "byTeam": {
-          "banan falco": 1.0060000000000002,
-          "betowen": 1.4669999999999996
+          "banan falco": 1006,
+          "betowen": 1467
         },
         "name": "Quad",
-        "total": 2.472999999999999,
+        "total": 2473,
         "unarmed": {
           "byPlayer": {
-            "betowen": 0.38899999999999996
+            "betowen": 389
           },
           "byTeam": {
-            "betowen": 0.38899999999999996
+            "betowen": 389
           },
-          "total": 0.38899999999999996
+          "total": 389
         },
         "x": 1965.125,
         "y": -674.375,
@@ -8422,35 +8422,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 20.72600000000004,
-            "betowen": 9.141999999999987
+            "banan falco": 20726,
+            "betowen": 9142
           },
           "byTeam": {
-            "banan falco": 20.72600000000004,
-            "betowen": 9.141999999999987
+            "banan falco": 20726,
+            "betowen": 9142
           },
-          "total": 29.86800000000017
+          "total": 29868
         },
         "byPlayer": {
-          "banan falco": 22.96000000000007,
-          "betowen": 12.297999999999965
+          "banan falco": 22960,
+          "betowen": 12298
         },
         "byTeam": {
-          "banan falco": 22.96000000000007,
-          "betowen": 12.297999999999965
+          "banan falco": 22960,
+          "betowen": 12298
         },
         "name": "Quad.button",
-        "total": 35.25800000000019,
+        "total": 35258,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 2.233999999999999,
-            "betowen": 3.1559999999999997
+            "banan falco": 2234,
+            "betowen": 3156
           },
           "byTeam": {
-            "banan falco": 2.233999999999999,
-            "betowen": 3.1559999999999997
+            "banan falco": 2234,
+            "betowen": 3156
           },
-          "total": 5.390000000000001
+          "total": 5390
         },
         "x": 1648,
         "y": -801.75,
@@ -8459,33 +8459,33 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 36.81500000000018,
-            "betowen": 33.27400000000023
+            "banan falco": 36815,
+            "betowen": 33274
           },
           "byTeam": {
-            "banan falco": 36.81500000000018,
-            "betowen": 33.27400000000023
+            "banan falco": 36815,
+            "betowen": 33274
           },
-          "total": 70.08900000000024
+          "total": 70089
         },
         "byPlayer": {
-          "banan falco": 36.81500000000018,
-          "betowen": 41.497000000000206
+          "banan falco": 36815,
+          "betowen": 41497
         },
         "byTeam": {
-          "banan falco": 36.81500000000018,
-          "betowen": 41.497000000000206
+          "banan falco": 36815,
+          "betowen": 41497
         },
         "name": "Quad.low",
-        "total": 78.31200000000055,
+        "total": 78312,
         "unarmed": {
           "byPlayer": {
-            "betowen": 8.22299999999999
+            "betowen": 8223
           },
           "byTeam": {
-            "betowen": 8.22299999999999
+            "betowen": 8223
           },
-          "total": 8.22299999999999
+          "total": 8223
         },
         "x": 1913.125,
         "y": -464,
@@ -8494,33 +8494,33 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 2.0119999999999996,
-            "betowen": 0.8890000000000002
+            "banan falco": 2012,
+            "betowen": 889
           },
           "byTeam": {
-            "banan falco": 2.0119999999999996,
-            "betowen": 0.8890000000000002
+            "banan falco": 2012,
+            "betowen": 889
           },
-          "total": 2.901000000000001
+          "total": 2901
         },
         "byPlayer": {
-          "banan falco": 2.0119999999999996,
-          "betowen": 1.3570000000000002
+          "banan falco": 2012,
+          "betowen": 1357
         },
         "byTeam": {
-          "banan falco": 2.0119999999999996,
-          "betowen": 1.3570000000000002
+          "banan falco": 2012,
+          "betowen": 1357
         },
         "name": "Quad.way",
-        "total": 3.369000000000002,
+        "total": 3369,
         "unarmed": {
           "byPlayer": {
-            "betowen": 0.4679999999999999
+            "betowen": 468
           },
           "byTeam": {
-            "betowen": 0.4679999999999999
+            "betowen": 468
           },
-          "total": 0.4679999999999999
+          "total": 468
         },
         "x": 1679,
         "y": -399.875,
@@ -8529,25 +8529,25 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 35.98100000000026,
-            "betowen": 37.422000000000224
+            "banan falco": 35981,
+            "betowen": 37422
           },
           "byTeam": {
-            "banan falco": 35.98100000000026,
-            "betowen": 37.422000000000224
+            "banan falco": 35981,
+            "betowen": 37422
           },
-          "total": 73.40300000000042
+          "total": 73403
         },
         "byPlayer": {
-          "banan falco": 35.98100000000026,
-          "betowen": 37.422000000000224
+          "banan falco": 35981,
+          "betowen": 37422
         },
         "byTeam": {
-          "banan falco": 35.98100000000026,
-          "betowen": 37.422000000000224
+          "banan falco": 35981,
+          "betowen": 37422
         },
         "name": "RA.MH",
-        "total": 73.40300000000042,
+        "total": 73403,
         "x": 2481,
         "y": -2294.125,
         "z": 120
@@ -8555,25 +8555,25 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 3.4790000000000023,
-            "betowen": 12.826999999999966
+            "banan falco": 3479,
+            "betowen": 12827
           },
           "byTeam": {
-            "banan falco": 3.4790000000000023,
-            "betowen": 12.826999999999966
+            "banan falco": 3479,
+            "betowen": 12827
           },
-          "total": 16.30599999999995
+          "total": 16306
         },
         "byPlayer": {
-          "banan falco": 3.4790000000000023,
-          "betowen": 12.826999999999966
+          "banan falco": 3479,
+          "betowen": 12827
         },
         "byTeam": {
-          "banan falco": 3.4790000000000023,
-          "betowen": 12.826999999999966
+          "banan falco": 3479,
+          "betowen": 12827
         },
         "name": "RA.MH/rox",
-        "total": 16.30599999999995,
+        "total": 16306,
         "x": 2169.25,
         "y": -2365.625,
         "z": 200
@@ -8581,35 +8581,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 66.09899999999999,
-            "betowen": 41.11600000000012
+            "banan falco": 66099,
+            "betowen": 41116
           },
           "byTeam": {
-            "banan falco": 66.09899999999999,
-            "betowen": 41.11600000000012
+            "banan falco": 66099,
+            "betowen": 41116
           },
-          "total": 107.21500000000165
+          "total": 107215
         },
         "byPlayer": {
-          "banan falco": 72.9640000000003,
-          "betowen": 48.86200000000004
+          "banan falco": 72964,
+          "betowen": 48862
         },
         "byTeam": {
-          "banan falco": 72.9640000000003,
-          "betowen": 48.86200000000004
+          "banan falco": 72964,
+          "betowen": 48862
         },
         "name": "big",
-        "total": 121.82600000000208,
+        "total": 121826,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 6.864999999999993,
-            "betowen": 7.745999999999996
+            "banan falco": 6865,
+            "betowen": 7746
           },
           "byTeam": {
-            "banan falco": 6.864999999999993,
-            "betowen": 7.745999999999996
+            "banan falco": 6865,
+            "betowen": 7746
           },
-          "total": 14.610999999999954
+          "total": 14611
         },
         "x": 1681.5,
         "y": -1083.5,
@@ -8618,33 +8618,33 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 17.70699999999996,
-            "betowen": 7.094999999999996
+            "banan falco": 17707,
+            "betowen": 7095
           },
           "byTeam": {
-            "banan falco": 17.70699999999996,
-            "betowen": 7.094999999999996
+            "banan falco": 17707,
+            "betowen": 7095
           },
-          "total": 24.802000000000113
+          "total": 24802
         },
         "byPlayer": {
-          "banan falco": 21.906000000000056,
-          "betowen": 7.094999999999996
+          "banan falco": 21906,
+          "betowen": 7095
         },
         "byTeam": {
-          "banan falco": 21.906000000000056,
-          "betowen": 7.094999999999996
+          "banan falco": 21906,
+          "betowen": 7095
         },
         "name": "big.button",
-        "total": 29.00100000000019,
+        "total": 29001,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 4.199
+            "banan falco": 4199
           },
           "byTeam": {
-            "banan falco": 4.199
+            "banan falco": 4199
           },
-          "total": 4.199
+          "total": 4199
         },
         "x": 1798.5,
         "y": -1519.875,
@@ -8653,35 +8653,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 30.579000000000192,
-            "betowen": 33.606000000000215
+            "banan falco": 30579,
+            "betowen": 33606
           },
           "byTeam": {
-            "banan falco": 30.579000000000192,
-            "betowen": 33.606000000000215
+            "banan falco": 30579,
+            "betowen": 33606
           },
-          "total": 64.18499999999996
+          "total": 64185
         },
         "byPlayer": {
-          "banan falco": 33.761000000000195,
-          "betowen": 37.11300000000021
+          "banan falco": 33761,
+          "betowen": 37113
         },
         "byTeam": {
-          "banan falco": 33.761000000000195,
-          "betowen": 37.11300000000021
+          "banan falco": 33761,
+          "betowen": 37113
         },
         "name": "big.stairs",
-        "total": 70.87400000000024,
+        "total": 70874,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 3.1820000000000013,
-            "betowen": 3.5070000000000006
+            "banan falco": 3182,
+            "betowen": 3507
           },
           "byTeam": {
-            "banan falco": 3.1820000000000013,
-            "betowen": 3.5070000000000006
+            "banan falco": 3182,
+            "betowen": 3507
           },
-          "total": 6.6889999999999965
+          "total": 6689
         },
         "x": 1854.25,
         "y": -1283.625,
@@ -8690,25 +8690,25 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 3.4470000000000005,
-            "betowen": 1.948
+            "banan falco": 3447,
+            "betowen": 1948
           },
           "byTeam": {
-            "banan falco": 3.4470000000000005,
-            "betowen": 1.948
+            "banan falco": 3447,
+            "betowen": 1948
           },
-          "total": 5.3950000000000005
+          "total": 5395
         },
         "byPlayer": {
-          "banan falco": 3.4470000000000005,
-          "betowen": 1.948
+          "banan falco": 3447,
+          "betowen": 1948
         },
         "byTeam": {
-          "banan falco": 3.4470000000000005,
-          "betowen": 1.948
+          "banan falco": 3447,
+          "betowen": 1948
         },
         "name": "big.wall",
-        "total": 5.3950000000000005,
+        "total": 5395,
         "x": 1660.25,
         "y": -832.875,
         "z": 184
@@ -8716,35 +8716,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 9.206999999999983,
-            "betowen": 25.40700000000008
+            "banan falco": 9207,
+            "betowen": 25407
           },
           "byTeam": {
-            "banan falco": 9.206999999999983,
-            "betowen": 25.40700000000008
+            "banan falco": 9207,
+            "betowen": 25407
           },
-          "total": 34.61400000000017
+          "total": 34614
         },
         "byPlayer": {
-          "banan falco": 10.064999999999976,
-          "betowen": 28.40100000000012
+          "banan falco": 10065,
+          "betowen": 28401
         },
         "byTeam": {
-          "banan falco": 10.064999999999976,
-          "betowen": 28.40100000000012
+          "banan falco": 10065,
+          "betowen": 28401
         },
         "name": "floating",
-        "total": 38.466000000000136,
+        "total": 38466,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 0.8580000000000002,
-            "betowen": 2.994
+            "banan falco": 858,
+            "betowen": 2994
           },
           "byTeam": {
-            "banan falco": 0.8580000000000002,
-            "betowen": 2.994
+            "banan falco": 858,
+            "betowen": 2994
           },
-          "total": 3.852000000000001
+          "total": 3852
         },
         "x": 1623.5,
         "y": -1028.625,
@@ -8753,35 +8753,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 17.311999999999962,
-            "betowen": 7.4549999999999965
+            "banan falco": 17312,
+            "betowen": 7455
           },
           "byTeam": {
-            "banan falco": 17.311999999999962,
-            "betowen": 7.4549999999999965
+            "banan falco": 17312,
+            "betowen": 7455
           },
-          "total": 24.76700000000007
+          "total": 24767
         },
         "byPlayer": {
-          "banan falco": 20.306000000000015,
-          "betowen": 9.362999999999985
+          "banan falco": 20306,
+          "betowen": 9363
         },
         "byTeam": {
-          "banan falco": 20.306000000000015,
-          "betowen": 9.362999999999985
+          "banan falco": 20306,
+          "betowen": 9363
         },
         "name": "high.RL",
-        "total": 29.669000000000153,
+        "total": 29669,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 2.9939999999999998,
-            "betowen": 1.9079999999999995
+            "banan falco": 2994,
+            "betowen": 1908
           },
           "byTeam": {
-            "banan falco": 2.9939999999999998,
-            "betowen": 1.9079999999999995
+            "banan falco": 2994,
+            "betowen": 1908
           },
-          "total": 4.901999999999999
+          "total": 4902
         },
         "x": 1348.625,
         "y": -498.5,
@@ -8790,35 +8790,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 63.3440000000001,
-            "betowen": 62.73600000000019
+            "banan falco": 63344,
+            "betowen": 62736
           },
           "byTeam": {
-            "banan falco": 63.3440000000001,
-            "betowen": 62.73600000000019
+            "banan falco": 63344,
+            "betowen": 62736
           },
-          "total": 126.0800000000023
+          "total": 126080
         },
         "byPlayer": {
-          "banan falco": 67.4750000000002,
-          "betowen": 73.1970000000005
+          "banan falco": 67475,
+          "betowen": 73197
         },
         "byTeam": {
-          "banan falco": 67.4750000000002,
-          "betowen": 73.1970000000005
+          "banan falco": 67475,
+          "betowen": 73197
         },
         "name": "low.RL",
-        "total": 140.67200000000022,
+        "total": 140672,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 4.131000000000001,
-            "betowen": 10.460999999999977
+            "banan falco": 4131,
+            "betowen": 10461
           },
           "byTeam": {
-            "banan falco": 4.131000000000001,
-            "betowen": 10.460999999999977
+            "banan falco": 4131,
+            "betowen": 10461
           },
-          "total": 14.591999999999949
+          "total": 14592
         },
         "x": 2376.625,
         "y": -1667,
@@ -8827,33 +8827,33 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 4.638,
-            "betowen": 17.581999999999965
+            "banan falco": 4638,
+            "betowen": 17582
           },
           "byTeam": {
-            "banan falco": 4.638,
-            "betowen": 17.581999999999965
+            "banan falco": 4638,
+            "betowen": 17582
           },
-          "total": 22.220000000000066
+          "total": 22220
         },
         "byPlayer": {
-          "banan falco": 4.638,
-          "betowen": 24.16700000000008
+          "banan falco": 4638,
+          "betowen": 24167
         },
         "byTeam": {
-          "banan falco": 4.638,
-          "betowen": 24.16700000000008
+          "banan falco": 4638,
+          "betowen": 24167
         },
         "name": "low.button",
-        "total": 28.80500000000018,
+        "total": 28805,
         "unarmed": {
           "byPlayer": {
-            "betowen": 6.584999999999995
+            "betowen": 6585
           },
           "byTeam": {
-            "betowen": 6.584999999999995
+            "betowen": 6585
           },
-          "total": 6.584999999999995
+          "total": 6585
         },
         "x": 2231.875,
         "y": -2160,
@@ -8862,25 +8862,25 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 10.302999999999974,
-            "betowen": 10.499999999999975
+            "banan falco": 10303,
+            "betowen": 10500
           },
           "byTeam": {
-            "banan falco": 10.302999999999974,
-            "betowen": 10.499999999999975
+            "banan falco": 10303,
+            "betowen": 10500
           },
-          "total": 20.803000000000036
+          "total": 20803
         },
         "byPlayer": {
-          "banan falco": 10.302999999999974,
-          "betowen": 10.499999999999975
+          "banan falco": 10303,
+          "betowen": 10500
         },
         "byTeam": {
-          "banan falco": 10.302999999999974,
-          "betowen": 10.499999999999975
+          "banan falco": 10303,
+          "betowen": 10500
         },
         "name": "low.lift",
-        "total": 20.803000000000036,
+        "total": 20803,
         "x": 2448,
         "y": -1055.5,
         "z": 24
@@ -8888,25 +8888,25 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 21.521000000000033,
-            "betowen": 15.154999999999951
+            "banan falco": 21521,
+            "betowen": 15155
           },
           "byTeam": {
-            "banan falco": 21.521000000000033,
-            "betowen": 15.154999999999951
+            "banan falco": 21521,
+            "betowen": 15155
           },
-          "total": 36.6760000000002
+          "total": 36676
         },
         "byPlayer": {
-          "banan falco": 21.521000000000033,
-          "betowen": 15.154999999999951
+          "banan falco": 21521,
+          "betowen": 15155
         },
         "byTeam": {
-          "banan falco": 21.521000000000033,
-          "betowen": 15.154999999999951
+          "banan falco": 21521,
+          "betowen": 15155
         },
         "name": "low.stairs",
-        "total": 36.6760000000002,
+        "total": 36676,
         "x": 2664,
         "y": -1712,
         "z": 120
@@ -8914,35 +8914,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 13.37199999999996,
-            "betowen": 24.5920000000001
+            "banan falco": 13372,
+            "betowen": 24592
           },
           "byTeam": {
-            "banan falco": 13.37199999999996,
-            "betowen": 24.5920000000001
+            "banan falco": 13372,
+            "betowen": 24592
           },
-          "total": 37.96400000000021
+          "total": 37964
         },
         "byPlayer": {
-          "banan falco": 15.00799999999995,
-          "betowen": 29.839000000000183
+          "banan falco": 15008,
+          "betowen": 29839
         },
         "byTeam": {
-          "banan falco": 15.00799999999995,
-          "betowen": 29.839000000000183
+          "banan falco": 15008,
+          "betowen": 29839
         },
         "name": "path",
-        "total": 44.84700000000019,
+        "total": 44847,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 1.636,
-            "betowen": 5.246999999999999
+            "banan falco": 1636,
+            "betowen": 5247
           },
           "byTeam": {
-            "banan falco": 1.636,
-            "betowen": 5.246999999999999
+            "banan falco": 1636,
+            "betowen": 5247
           },
-          "total": 6.882999999999995
+          "total": 6883
         },
         "x": 2575.5,
         "y": -454.25,
@@ -8951,35 +8951,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 15.832999999999954,
-            "betowen": 18.648999999999976
+            "banan falco": 15833,
+            "betowen": 18649
           },
           "byTeam": {
-            "banan falco": 15.832999999999954,
-            "betowen": 18.648999999999976
+            "banan falco": 15833,
+            "betowen": 18649
           },
-          "total": 34.48200000000016
+          "total": 34482
         },
         "byPlayer": {
-          "banan falco": 16.649999999999963,
-          "betowen": 21.96000000000004
+          "banan falco": 16650,
+          "betowen": 21960
         },
         "byTeam": {
-          "banan falco": 16.649999999999963,
-          "betowen": 21.96000000000004
+          "banan falco": 16650,
+          "betowen": 21960
         },
         "name": "path.lift",
-        "total": 38.61000000000015,
+        "total": 38610,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 0.8170000000000002,
-            "betowen": 3.3110000000000017
+            "banan falco": 817,
+            "betowen": 3311
           },
           "byTeam": {
-            "banan falco": 0.8170000000000002,
-            "betowen": 3.3110000000000017
+            "banan falco": 817,
+            "betowen": 3311
           },
-          "total": 4.128000000000002
+          "total": 4128
         },
         "x": 2513.625,
         "y": -899.375,
@@ -8988,33 +8988,33 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 31.30600000000023,
-            "betowen": 12.027999999999965
+            "banan falco": 31306,
+            "betowen": 12028
           },
           "byTeam": {
-            "banan falco": 31.30600000000023,
-            "betowen": 12.027999999999965
+            "banan falco": 31306,
+            "betowen": 12028
           },
-          "total": 43.33400000000021
+          "total": 43334
         },
         "byPlayer": {
-          "banan falco": 36.039000000000215,
-          "betowen": 12.027999999999965
+          "banan falco": 36039,
+          "betowen": 12028
         },
         "byTeam": {
-          "banan falco": 36.039000000000215,
-          "betowen": 12.027999999999965
+          "banan falco": 36039,
+          "betowen": 12028
         },
         "name": "platforms",
-        "total": 48.06700000000019,
+        "total": 48067,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 4.733
+            "banan falco": 4733
           },
           "byTeam": {
-            "banan falco": 4.733
+            "banan falco": 4733
           },
-          "total": 4.733
+          "total": 4733
         },
         "x": 2155.125,
         "y": -1651.375,
@@ -9023,33 +9023,33 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 12.731999999999964,
-            "betowen": 6.549999999999995
+            "banan falco": 12732,
+            "betowen": 6550
           },
           "byTeam": {
-            "banan falco": 12.731999999999964,
-            "betowen": 6.549999999999995
+            "banan falco": 12732,
+            "betowen": 6550
           },
-          "total": 19.281999999999993
+          "total": 19282
         },
         "byPlayer": {
-          "banan falco": 12.731999999999964,
-          "betowen": 6.823999999999995
+          "banan falco": 12732,
+          "betowen": 6824
         },
         "byTeam": {
-          "banan falco": 12.731999999999964,
-          "betowen": 6.823999999999995
+          "banan falco": 12732,
+          "betowen": 6824
         },
         "name": "secret",
-        "total": 19.555999999999997,
+        "total": 19556,
         "unarmed": {
           "byPlayer": {
-            "betowen": 0.274
+            "betowen": 274
           },
           "byTeam": {
-            "betowen": 0.274
+            "betowen": 274
           },
-          "total": 0.274
+          "total": 274
         },
         "x": 2391,
         "y": -677,
@@ -9058,35 +9058,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 14.728999999999946,
-            "betowen": 21.943000000000033
+            "banan falco": 14729,
+            "betowen": 21943
           },
           "byTeam": {
-            "banan falco": 14.728999999999946,
-            "betowen": 21.943000000000033
+            "banan falco": 14729,
+            "betowen": 21943
           },
-          "total": 36.67200000000021
+          "total": 36672
         },
         "byPlayer": {
-          "banan falco": 34.664000000000236,
-          "betowen": 55.99200000000016
+          "banan falco": 34664,
+          "betowen": 55992
         },
         "byTeam": {
-          "banan falco": 34.664000000000236,
-          "betowen": 55.99200000000016
+          "banan falco": 34664,
+          "betowen": 55992
         },
         "name": "tele",
-        "total": 90.656000000001,
+        "total": 90656,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 19.935000000000006,
-            "betowen": 34.04900000000024
+            "banan falco": 19935,
+            "betowen": 34049
           },
           "byTeam": {
-            "banan falco": 19.935000000000006,
-            "betowen": 34.04900000000024
+            "banan falco": 19935,
+            "betowen": 34049
           },
-          "total": 53.98400000000018
+          "total": 53984
         },
         "x": 2316.625,
         "y": -23.5,
@@ -9095,35 +9095,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 2.65,
-            "betowen": 4.675000000000002
+            "banan falco": 2650,
+            "betowen": 4675
           },
           "byTeam": {
-            "banan falco": 2.65,
-            "betowen": 4.675000000000002
+            "banan falco": 2650,
+            "betowen": 4675
           },
-          "total": 7.324999999999995
+          "total": 7325
         },
         "byPlayer": {
-          "banan falco": 13.285999999999955,
-          "betowen": 23.08300000000005
+          "banan falco": 13286,
+          "betowen": 23083
         },
         "byTeam": {
-          "banan falco": 13.285999999999955,
-          "betowen": 23.08300000000005
+          "banan falco": 13286,
+          "betowen": 23083
         },
         "name": "tele.YA",
-        "total": 36.36900000000022,
+        "total": 36369,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 10.635999999999973,
-            "betowen": 18.40799999999998
+            "banan falco": 10636,
+            "betowen": 18408
           },
           "byTeam": {
-            "banan falco": 10.635999999999973,
-            "betowen": 18.40799999999998
+            "banan falco": 10636,
+            "betowen": 18408
           },
-          "total": 29.044000000000192
+          "total": 29044
         },
         "x": 2796.625,
         "y": -38.75,
@@ -9132,35 +9132,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 12.587999999999964,
-            "betowen": 4.545999999999999
+            "banan falco": 12588,
+            "betowen": 4546
           },
           "byTeam": {
-            "banan falco": 12.587999999999964,
-            "betowen": 4.545999999999999
+            "banan falco": 12588,
+            "betowen": 4546
           },
-          "total": 17.13399999999995
+          "total": 17134
         },
         "byPlayer": {
-          "banan falco": 13.71899999999996,
-          "betowen": 8.290999999999993
+          "banan falco": 13719,
+          "betowen": 8291
         },
         "byTeam": {
-          "banan falco": 13.71899999999996,
-          "betowen": 8.290999999999993
+          "banan falco": 13719,
+          "betowen": 8291
         },
         "name": "tele.entry",
-        "total": 22.010000000000055,
+        "total": 22010,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 1.131,
-            "betowen": 3.745
+            "banan falco": 1131,
+            "betowen": 3745
           },
           "byTeam": {
-            "banan falco": 1.131,
-            "betowen": 3.745
+            "banan falco": 1131,
+            "betowen": 3745
           },
-          "total": 4.875999999999997
+          "total": 4876
         },
         "x": 2122.25,
         "y": 186.625,
@@ -9169,35 +9169,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 25.36500000000009,
-            "betowen": 11.948999999999973
+            "banan falco": 25365,
+            "betowen": 11949
           },
           "byTeam": {
-            "banan falco": 25.36500000000009,
-            "betowen": 11.948999999999973
+            "banan falco": 25365,
+            "betowen": 11949
           },
-          "total": 37.31400000000016
+          "total": 37314
         },
         "byPlayer": {
-          "banan falco": 33.3770000000002,
-          "betowen": 19.335999999999984
+          "banan falco": 33377,
+          "betowen": 19336
         },
         "byTeam": {
-          "banan falco": 33.3770000000002,
-          "betowen": 19.335999999999984
+          "banan falco": 33377,
+          "betowen": 19336
         },
         "name": "tele.high",
-        "total": 52.71300000000008,
+        "total": 52713,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 8.01199999999999,
-            "betowen": 7.386999999999994
+            "banan falco": 8012,
+            "betowen": 7387
           },
           "byTeam": {
-            "banan falco": 8.01199999999999,
-            "betowen": 7.386999999999994
+            "banan falco": 8012,
+            "betowen": 7387
           },
-          "total": 15.398999999999951
+          "total": 15399
         },
         "x": 1309.875,
         "y": -1021.625,
@@ -9206,35 +9206,35 @@
       {
         "armed": {
           "byPlayer": {
-            "banan falco": 12.033999999999972,
-            "betowen": 1.243
+            "banan falco": 12034,
+            "betowen": 1243
           },
           "byTeam": {
-            "banan falco": 12.033999999999972,
-            "betowen": 1.243
+            "banan falco": 12034,
+            "betowen": 1243
           },
-          "total": 13.276999999999967
+          "total": 13277
         },
         "byPlayer": {
-          "banan falco": 13.462999999999965,
-          "betowen": 8.306999999999992
+          "banan falco": 13463,
+          "betowen": 8307
         },
         "byTeam": {
-          "banan falco": 13.462999999999965,
-          "betowen": 8.306999999999992
+          "banan falco": 13463,
+          "betowen": 8307
         },
         "name": "water",
-        "total": 21.77000000000004,
+        "total": 21770,
         "unarmed": {
           "byPlayer": {
-            "banan falco": 1.429,
-            "betowen": 7.063999999999996
+            "banan falco": 1429,
+            "betowen": 7064
           },
           "byTeam": {
-            "banan falco": 1.429,
-            "betowen": 7.063999999999996
+            "banan falco": 1429,
+            "betowen": 7064
           },
-          "total": 8.49299999999999
+          "total": 8493
         },
         "x": 2327.625,
         "y": -415.5,

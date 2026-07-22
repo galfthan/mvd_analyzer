@@ -586,6 +586,20 @@ func TestEnumValues_Rejected(t *testing.T) {
 	}
 }
 
+// TestEnumValues_CaseInsensitive: /events and /chat type enums are
+// case-insensitive (matching every other token filter). Mixed/upper case
+// values validate and are lowercased before use.
+func TestEnumValues_CaseInsensitive(t *testing.T) {
+	srv := newTestServer(t, fragDamageStore())
+	defer srv.Close()
+	for _, u := range []string{"events?types=Frag", "chat?types=TEAMSAY", "chat?types=Chat,TeamSay"} {
+		body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/"+u)
+		if status != 200 {
+			t.Errorf("%s: status = %d, want 200 (body=%s)", u, status, body)
+		}
+	}
+}
+
 // TestShotsNailsLegacyParam_Accepted: the retired `nails` opt-in is accepted
 // and ignored — /shots?nails=1 still 200s.
 func TestShotsNailsLegacyParam_Accepted(t *testing.T) {
@@ -933,6 +947,26 @@ func TestBuckets_BadParam(t *testing.T) {
 	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/buckets?windowMs=banana")
 	if status != 400 {
 		t.Errorf("status = %d; want 400 (body=%s)", status, string(resp))
+	}
+}
+
+// TestBuckets_WindowMsOverflow: a windowMs above math.MaxInt32 wraps
+// negative when cast to int32 in the grid arithmetic (panicking the row
+// builder, serving a bogus negative count on columnar). resolveWindow now
+// rejects it → 400 invalid_param on BOTH layouts.
+func TestBuckets_WindowMsOverflow(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	for _, layout := range []string{"row", "column"} {
+		u := srv.URL + "/v1/demos/gameId:42/buckets?windowMs=4294967295&fields=h,a&layout=" + layout
+		body, status := getRaw(t, u)
+		if status != 400 {
+			t.Errorf("layout=%s: status = %d, want 400 (body=%s)", layout, status, body)
+			continue
+		}
+		if code := errBodyCode(t, body); code != "invalid_param" {
+			t.Errorf("layout=%s: code = %q, want invalid_param", layout, code)
+		}
 	}
 }
 

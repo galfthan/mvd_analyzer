@@ -52,7 +52,7 @@ func Shots(r *result.Result) (*result.ShotsResult, error) {
 }
 
 // AimOptions filters the per-player aim analysis. Empty fields mean "no
-// filter". From/To are match-relative SECONDS (0 disables that bound),
+// filter". From/To are match-relative int32 ms (0 disables that bound),
 // matching getFrags/getDamage.
 type AimOptions struct {
 	Players []string // scope to these shooters (case-sensitive)

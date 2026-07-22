@@ -86,7 +86,7 @@ func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 
 	addTool(s, &mcp.Tool{
 		Name:        "getLocGraph",
-		Description: "Per-map adjacency graph of named locations: which locs are reachable from which, with edge weights derived from per-player loc-to-loc transitions. Useful for movement-pattern reasoning ('what's adjacent to RA?').",
+		Description: "Per-map adjacency graph of named locations: which locs are reachable from which, with edge weights derived from per-player loc-to-loc transitions. Useful for movement-pattern reasoning ('what's adjacent to RA?'). Node weights (total/byPlayer/byTeam and the armed/unarmed/quad/pent breakdowns) are time-spent values in integer milliseconds (v57 pure-ms model); edge weights are transition counts. The response echoes ms in timeUnit.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in GetLocGraphInput) (*mcp.CallToolResult, any, error) {
 		out, err := b.GetLocGraph(ctx, in)
 		return toolResult(out, err)

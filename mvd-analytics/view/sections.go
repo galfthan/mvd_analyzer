@@ -36,7 +36,7 @@ var ErrBoundedUnavailable = fmt.Errorf("bounded damage family unavailable: %w", 
 // case-insensitively against their canonical lowercase form.
 
 // FragOptions filters FragResult. Empty fields mean "no filter". From/To
-// are match-relative SECONDS (0 disables that bound), matching getEvents.
+// are match-relative int32 ms (0 disables that bound), matching getEvents.
 type FragOptions struct {
 	Players []string // killer or victim in this set
 	Weapons []string // weapon token (rl, lg, ...); case-insensitive
@@ -168,7 +168,7 @@ func Frags(r *result.Result, opts FragOptions) (*result.FragResult, error) {
 }
 
 // DamageOptions filters DamageResult. Empty fields mean "no filter". From/To
-// are match-relative SECONDS (0 disables that bound), matching getEvents.
+// are match-relative int32 ms (0 disables that bound), matching getEvents.
 type DamageOptions struct {
 	Players []string // attacker or victim in this set
 	Weapons []string // attacker weapon token; "tele"/"stomp" select positional kills; case-insensitive
@@ -1030,7 +1030,7 @@ func WeaponPickups(r *result.Result, opts WeaponPickupOptions) []result.WeaponPi
 }
 
 // ChatOptions filters the chat/teamsay event list. From/To are
-// match-relative seconds (0 disables that bound); Types defaults to
+// match-relative int32 ms (0 disables that bound); Types defaults to
 // {chat, teamsay}.
 type ChatOptions struct {
 	From    int32 // int32 ms

@@ -290,7 +290,7 @@ func (s *server) handleLocGraph(w http.ResponseWriter, r *http.Request) {
 			"this demo has no loc graph (probably no position track was emitted)")
 		return
 	}
-	writeJSON(w, http.StatusOK, lg)
+	writeJSON(w, http.StatusOK, view.LocGraphEnvelope{TimeUnit: view.UnitMs, LocGraphResult: lg})
 }
 
 // handleFrags: GET /v1/demos/{id}/frags — top-level frag aggregates +
@@ -309,8 +309,8 @@ func (s *server) handleLocGraph(w http.ResponseWriter, r *http.Request) {
 //	               where killer or victim is in the set
 //	weapons  csv   — restrict aggregates + the Frags list to these weapons
 //	               (legacy alias: weapon)
-//	from     float — window start, match-relative seconds (0 = no bound)
-//	to       float — window end, match-relative seconds (0 = no bound)
+//	from     int — window start, match-relative integer ms (0 = no bound)
+//	to       int — window end, match-relative integer ms (0 = no bound)
 //	summary  bool  — drop the per-event Frags log; return only aggregates
 func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
@@ -366,8 +366,8 @@ func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 //	               entries where attacker or victim is in the set
 //	weapons  csv   — restrict aggregates + Matrix/Events + per-player
 //	               ByWeapon to these (attacker) weapons (legacy alias: weapon)
-//	from     float — window start, match-relative seconds (0 = no bound)
-//	to       float — window end, match-relative seconds (0 = no bound)
+//	from     int — window start, match-relative integer ms (0 = no bound)
+//	to       int — window end, match-relative integer ms (0 = no bound)
 //	summary  bool  — drop the per-hit Events log; return only aggregates
 //	dmg      enum  — raw | bounded | both (default: bounded)
 func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
@@ -478,8 +478,8 @@ func (s *server) handleShots(w http.ResponseWriter, r *http.Request) {
 // Query params:
 //
 //	players  csv   — scope to these shooters
-//	from     float — window start, match-relative seconds (0 = no bound)
-//	to       float — window end, match-relative seconds (0 = no bound)
+//	from     int — window start, match-relative integer ms (0 = no bound)
+//	to       int — window end, match-relative integer ms (0 = no bound)
 //	summary  bool  — return only the per-player weapons aggregates
 func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
@@ -514,7 +514,7 @@ func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
 //
 // Query params:
 //
-//	from, to   match-relative seconds, both inclusive
+//	from, to   match-relative integer ms, both inclusive
 //	players    csv — restrict to these speakers
 //	types      csv — defaults to ["chat","teamsay"]; pass a subset to narrow
 //
@@ -540,14 +540,17 @@ func (s *server) handleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// types is a closed vocabulary {chat, teamsay}; a typo must 400, not
-	// silently match nothing. Chat() matches ev.Type case-sensitively, so
-	// validate exactly.
-	for _, t := range opts.Types {
-		if t != "chat" && t != "teamsay" {
+	// silently match nothing. Enum values are case-insensitive (matching
+	// every other token filter): lowercase before validating AND before use
+	// so Chat()'s case-sensitive ev.Type match (stored lowercase) lines up.
+	for i, t := range opts.Types {
+		lt := strings.ToLower(t)
+		if lt != "chat" && lt != "teamsay" {
 			writeError(w, http.StatusBadRequest, "invalid_param",
 				fmt.Sprintf("unknown chat type %q; valid: chat, teamsay", t))
 			return
 		}
+		opts.Types[i] = lt
 	}
 	writeJSON(w, http.StatusOK, view.ChatEnvelope{TimeUnit: view.UnitMs, Messages: view.Chat(res, opts)})
 }
@@ -580,7 +583,7 @@ func (s *server) handleDemoInfo(w http.ResponseWriter, r *http.Request) {
 //	players  csv — restrict to drops by these dropper names
 //	weapons  csv — restrict to these weapons ("rl"/"lg"; case-insensitive;
 //	             legacy alias: weapon)
-//	from/to  match-relative seconds — window the drop time
+//	from/to  match-relative integer ms — window the drop time
 func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
@@ -623,7 +626,7 @@ func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 // Phases with no TakenBy survive any players= filter (they represent
 // the item's availability state at match end / dropped runs).
 //
-//	from/to  match-relative seconds — keep phases OVERLAPPING the window
+//	from/to  match-relative integer ms — keep phases OVERLAPPING the window
 //	         (a phase covers [availableFrom, respawnAt), open-ended when
 //	         respawnAt is 0)
 //	summary  bool — per-item take aggregates (takenCount, byPlayer,
@@ -671,7 +674,7 @@ func (s *server) handleItems(w http.ResponseWriter, r *http.Request) {
 //	weapons  csv — "rl","lg","gl","ssg","sng","ng" (case-insensitive;
 //	             legacy alias: weapon)
 //	source   "world" | "backpack" | "unknown"
-//	from/to  match-relative seconds — window the pickup time
+//	from/to  match-relative integer ms — window the pickup time
 func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {

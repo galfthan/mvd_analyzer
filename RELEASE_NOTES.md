@@ -161,11 +161,13 @@ Spec/doc pass on top of the v57 shapes; no further schema bump.
 
 - **`/artifacts/{name}` now echoes `timeUnit:"ms"`.** The generic artifact
   envelope gains a top-level `"timeUnit":"ms"` **sibling** of the resultKey
-  for every artifact whose stored section carries match-position time —
+  for every artifact whose stored section carries time —
   `frag`, `damage`, `shots`, `aim`, `opening`, `match`, `messages`,
-  `timeline`, `items`, `backpacks`, `weapon-pickups` (audited per section
-  against the backing `result.*` struct). The no-time-field artifacts
-  (`metadata`, `map-entities`, `loc-graph`) and the `/demoinfo` KTX-native
+  `timeline`, `items`, `backpacks`, `weapon-pickups`, `loc-graph` (audited
+  per section against the backing `result.*` struct; `loc-graph` echoes
+  because its node weights are int32-ms durations — see the post-review
+  fix below). The no-time-field artifacts (`metadata`, `map-entities`) and
+  the `/demoinfo` KTX-native
   island carry no echo; `/artifacts/los` keeps echoing via its `/los` body.
   The echo is now **required** in the spec on those artifact-envelope
   branches, so the self-description is guaranteed, not optional.
@@ -191,6 +193,33 @@ Spec/doc pass on top of the v57 shapes; no further schema bump.
   now carries a non-empty `description`, enforced by a new
   `TestOpenAPIDescriptionCoverage` walk (no allowlist; failures anchor the
   offending schema-path).
+
+### Post-review fixes
+
+Three follow-up fixes on top of the v57 shapes; no further schema bump.
+
+- **`windowMs` overflow guard (400 instead of panic/garbage).** `windowMs`
+  is cast to `int32` in the bucket-grid arithmetic; an unbounded value
+  above `math.MaxInt32` (e.g. `?windowMs=4294967295`) wrapped negative,
+  panicking the row layout (500) and serving a bogus negative `count` on
+  the columnar layout (200). `view.resolveWindow` now rejects
+  `windowMs > math.MaxInt32` (keeping the existing `< 0` reject) → **400
+  `invalid_param`** on both `/buckets` layouts. The `bucketCount == 0` /
+  `count == 0` grid guards are also hardened to `<= 0` defensively.
+- **loc-graph node weights are now int32 ms (BREAKING for early-v57
+  consumers).** `LocGraphResult` node time weights
+  (`LocNode`/`LocWeights` `total`/`byPlayer`/`byTeam` and the
+  `armed`/`unarmed`/`quad`/`pent` breakdowns) were still float64 **seconds**
+  — the one surface the pure-ms flip missed. They are now **int32 ms**, so
+  values are ×1000 and integer. Edge weights stay transition counts.
+  `/loc-graph` and `/artifacts/loc-graph` now carry `timeUnit:"ms"`. Any
+  consumer that read the early-v57 seconds values must divide by 1000 (or
+  read them as ms).
+- **Enum values are case-insensitive.** `/events` `types` and `/chat`
+  `types` validated case-**sensitively** while every other token filter
+  lowercases; `types=Frag` or `types=TEAMSAY` now validate and match
+  (lowercased before validation and before use), matching the rest of the
+  API.
 
 ## 2026-07-21 (tweak-api)
 
