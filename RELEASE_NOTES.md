@@ -8,7 +8,7 @@ detail.
 ## 2026-07-22 (clean-out-seconds-from-pipeline) — internal refactor, no schema change
 
 Integer-milliseconds end to end through mvd-reader → mvd-analytics.
-**No schema bump, no API change, and the wire output is byte-identical**
+**No schema bump, no API change, and the result JSON is byte-identical**
 — the full golden corpus (4on4 / 2on2 / 1on1 + reconnect) passes
 unchanged without `-update-golden`, which is the acceptance proof that
 the change is lossless.
@@ -25,9 +25,18 @@ the change is lossless.
   item-attribution correlation windows are all int32 ms. The match-end
   fallback is now computed once via `MatchTimingDetector.EffectiveEndMs`
   instead of duplicated float logic in the clock and the timeline.
-- `events.Sec(ms)` survives only as a presentation helper (qw-analyze /
-  diagnostic human output). The one wire-native float-seconds time,
-  `ServerData.ServerTime` (id1 `svc_serverdata`), is unchanged.
+- `events.Sec(ms)` survives as the sanctioned presentation-edge helper
+  (currently uncalled — qw-analyze derives via `EventTime()`, and the
+  parser diagnostic inlines the conversion to avoid an import cycle).
+  The one wire-native float-seconds time, `ServerData.ServerTime`
+  (id1 `svc_serverdata`), is unchanged.
+- Two behavior notes, no Result impact: the `qw-analyze -format events`
+  raw dump now serializes `TimeMs` where it used to show a float `Time`
+  field (the structs changed; the dump mirrors them), and exact-boundary
+  window comparisons (e.g. a hint exactly 250 ms before a state flip)
+  are now deterministic where the old float math was rounding-dependent
+  at the boundary — no corpus demo hits such a boundary, hence the
+  byte-identical goldens.
 
 ## 2026-07-22 (api-cleanup-2) — schema v57 (in progress, unreleased)
 

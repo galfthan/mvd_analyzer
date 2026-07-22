@@ -95,7 +95,7 @@ func (d *MatchTimingDetector) OnIntermission(tMs int32) {
 // sample — when the demo was cut before intermission (F13). Shared by the
 // clock and the timeline so both close intervals at the same instant.
 func (d *MatchTimingDetector) EffectiveEndMs(fallbackMs int32) int32 {
-	if d.EndTime == 0 {
+	if !d.Ended {
 		return fallbackMs
 	}
 	return d.EndTime

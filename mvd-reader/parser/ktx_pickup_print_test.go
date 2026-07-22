@@ -29,7 +29,7 @@ func TestTryEmitPickupPrint_Armor(t *testing.T) {
 				t.Fatalf("no event for %q", tc.msg)
 			}
 			if captured.Kind != tc.kind || captured.PlayerNum != 3 || captured.TimeMs != 42500 {
-				t.Errorf("got %+v, want {PlayerNum=3, Kind=%q, Time=42.5}", captured, tc.kind)
+				t.Errorf("got %+v, want {PlayerNum=3, Kind=%q, TimeMs=42500}", captured, tc.kind)
 			}
 		})
 	}
@@ -193,7 +193,7 @@ func TestTryEmitPickupPrint_Backpack(t *testing.T) {
 		t.Fatal("no backpack pickup event")
 	}
 	if captured.PlayerNum != 4 || captured.TimeMs != 3140 {
-		t.Errorf("got %+v, want {PlayerNum=4, Time=3.14}", captured)
+		t.Errorf("got %+v, want {PlayerNum=4, TimeMs=3140}", captured)
 	}
 }
 

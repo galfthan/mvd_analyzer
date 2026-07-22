@@ -231,7 +231,7 @@ Bits 3-7: Additional data (for dem_single and dem_stats: player number)
 
 **Important**: The first message typically has `time_delta = 0`. Subsequent messages accumulate time deltas to track demo time.
 
-The decoder accumulates these deltas as an `int32` cumulative millisecond counter (`mvd.Decoder.timeMs`) — the canonical, exact wire-native value. A derived `float64` seconds view (`CurrentTime()`) is exposed for callers that prefer seconds arithmetic, but persistence-layer consumers should use the integer-ms value to avoid float-precision drift across boundary comparisons. The analytics layer's schema v8 stores **every** timestamped result field as `int32` ms for the same reason — the wire format's integer unit flows end-to-end through the pipeline.
+The decoder accumulates these deltas as an `int32` cumulative millisecond counter (`mvd.Decoder.timeMs`) — the canonical, exact wire-native value. A derived `float64` seconds view (`CurrentTime()`) is retained only as a human-readable diagnostics accessor — pipeline code must use the integer-ms value; float seconds is never a pipeline representation. The analytics layer's schema v8 stores **every** timestamped result field as `int32` ms for the same reason — the wire format's integer unit flows end-to-end through the pipeline.
 
 ### Message Types
 
@@ -2485,9 +2485,9 @@ Resolve `modelindex` → path via the `svc_modellist` table. Index 0 is reserved
 **Implementation pattern** (see `mvd-reader/parser/entities.go`):
 
 1. On `svc_modellist` / `svc_fte_modellistshort`: populate `modelList[modelindex] = path`.
-2. On `svc_spawnbaseline` / `svc_fte_spawnbaseline2`: store `EntityState{modelIndex, origin, skin, frame, ...}` keyed by entity number. Classify against the model path; if recognised, emit `ItemSpawnEvent{EntNum, Kind, Origin, Time}`.
+2. On `svc_spawnbaseline` / `svc_fte_spawnbaseline2`: store `EntityState{modelIndex, origin, skin, frame, ...}` keyed by entity number. Classify against the model path; if recognised, emit `ItemSpawnEvent{EntNum, Kind, Origin, TimeMs}`.
 3. On `svc_packetentities` (full) / `svc_deltapacketentities` (delta): maintain a rolling `currentEntities` map. Full packets replace it; deltas copy from previous and apply per-entity updates. `U_REMOVE` deletes; other flags update fields.
-4. Diff new frame vs previous frame per tracked item — emit `ItemStateEvent{EntNum, Kind, Taken: bool, Time}` on every visibility flip (present + modelindex > 0 → absent, or vice versa).
+4. Diff new frame vs previous frame per tracked item — emit `ItemStateEvent{EntNum, Kind, Taken: bool, TimeMs}` on every visibility flip (present + modelindex > 0 → absent, or vice versa).
 
 Baselines seed the "initial" state so items at match start are already "up". Non-item entities (players, lights) pass through the item classifier as empty kind and are silently filtered — except inline brush-model entities (which feed the mover events below) and slow projectiles (which feed the projectile events below).
 
