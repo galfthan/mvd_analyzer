@@ -31,6 +31,7 @@ type fakeStore struct {
 	putResult *result.Result // registered under the put SHA so GetResult hits (default: stubResult)
 	parseFail bool           // GetResult(sha:…) returns ErrParse — simulate an unparseable upload
 	removed   []string       // SHAs passed to RemoveDemo (assert parse-gate cleanup)
+	losErr    error          // EnsureLOS returns this (e.g. a wrapped analyzer.ErrNoBSP) instead of computing
 }
 
 func (f *fakeStore) GetResult(_ context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error) {
@@ -81,14 +82,21 @@ func (f *fakeStore) RemoveDemo(sha string) {
 }
 
 // EnsureLOS runs the (idempotent) LOS pass on the stored Result, mirroring the
-// real store: a BSP-less stub computes to empty and latches Streams.LOSComputed
-// so a second /los request is a no-op.
+// real store: a legitimately empty (<2-player) stub latches Streams.LOSComputed
+// so a second /los request is a no-op, while a map with no usable BSP surfaces
+// analyzer.ErrNoBSP (which the handler maps to 422 los_unavailable). A test can
+// force that error path via losErr (wrapped, as the real cache wraps it).
 func (f *fakeStore) EnsureLOS(ctx context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error) {
 	res, meta, err := f.GetResult(ctx, id)
 	if err != nil {
 		return nil, meta, err
 	}
-	analyzer.ComputeLOS(res)
+	if f.losErr != nil {
+		return nil, meta, f.losErr
+	}
+	if err := analyzer.ComputeLOS(res); err != nil {
+		return nil, meta, fmt.Errorf("compute los: %w", err)
+	}
 	return res, meta, nil
 }
 
@@ -264,10 +272,10 @@ func TestFragsParams_WindowAndSummary(t *testing.T) {
 		t.Errorf("totalFrags = %v, want 2 (stored, summary keeps authoritative)", resp["totalFrags"])
 	}
 
-	// window from=15s keeps only the t=20s frag; aggregates recompute to 1.
-	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/frags?from=15", 200)
+	// window from=15000ms keeps only the t=20000ms frag; aggregates recompute to 1.
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/frags?from=15000", 200)
 	if int(resp["totalFrags"].(float64)) != 1 {
-		t.Errorf("from=15: totalFrags = %v, want 1", resp["totalFrags"])
+		t.Errorf("from=15000: totalFrags = %v, want 1", resp["totalFrags"])
 	}
 
 	// malformed from is a clean 400 invalid_param.
@@ -492,6 +500,140 @@ func TestTimeBoundParams_Rejected400(t *testing.T) {
 	}
 }
 
+// errBodyCode decodes the error-envelope code from a response body.
+func errBodyCode(t *testing.T, body []byte) string {
+	t.Helper()
+	var env struct {
+		Error struct {
+			Code string `json:"code"`
+		} `json:"error"`
+	}
+	if err := json.Unmarshal(body, &env); err != nil {
+		t.Fatalf("decode error body: %v (body=%s)", err, string(body))
+	}
+	return env.Error.Code
+}
+
+// TestUnknownParam_Rejected: an unrecognised query key 400s with code
+// unknown_param across the param, zero-param, and legacy-param handler
+// families (Phase 1).
+func TestUnknownParam_Rejected(t *testing.T) {
+	srv := newTestServer(t, fragDamageStore())
+	defer srv.Close()
+
+	urls := []string{
+		"frags?bogus=1", "damage?nope=x", "aim?xyz=1", "chat?zzz=1",
+		"backpacks?foo=1", "items?bar=1", "weapon-pickups?baz=1",
+		"buckets?windowMs=50&junk=1", "events?rubbish=1", "stream-slice?nonsense=1",
+		"state-at?time=1&whoops=1", "loc-trails?whatever=1", "region-control?bogus=1",
+		"overview?extra=1", "metadata?extra=1", "demoinfo?extra=1",
+		"loc-graph?extra=1", "loc-table?extra=1", "shots?other=1",
+		"streams/projectiles?extra=1", "streams/beams?extra=1",
+		"streams/nails?extra=1", "airgibs?extra=1", "los?extra=1",
+		"artifacts/frag?extra=1",
+	}
+	for _, u := range urls {
+		body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/"+u)
+		if status != 400 {
+			t.Errorf("%s: status = %d, want 400 (body=%s)", u, status, body)
+			continue
+		}
+		if code := errBodyCode(t, body); code != "unknown_param" {
+			t.Errorf("%s: code = %q, want unknown_param", u, code)
+		}
+	}
+
+	// The non-demo GETs reject unknown params too.
+	for _, u := range []string{"/v1/artifacts?extra=1", "/v1/graph?extra=1", "/v1/games/search?extra=1", "/v1/maps/dm3/entities?extra=1"} {
+		body, status := getRaw(t, srv.URL+u)
+		if status != 400 || errBodyCode(t, body) != "unknown_param" {
+			t.Errorf("%s: status = %d code = %q, want 400 unknown_param (body=%s)", u, status, errBodyCode(t, body), body)
+		}
+	}
+}
+
+// TestMixedCaseParams_Accepted: canonical params spelled in a different case
+// are consumed (marked) and must not 400 as unknown_param.
+func TestMixedCaseParams_Accepted(t *testing.T) {
+	srv := newTestServer(t, fragDamageStore())
+	defer srv.Close()
+
+	for _, u := range []string{
+		"buckets?WindowMs=50", "frags?FROM=10&TO=20", "damage?Players=bps",
+		"events?Types=frag", "weapon-pickups?Source=world", "buckets?Layout=row",
+	} {
+		body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/"+u)
+		if status != 200 {
+			t.Errorf("%s: status = %d, want 200 (body=%s)", u, status, body)
+		}
+	}
+}
+
+// TestEnumValues_Rejected: an unknown /events or /chat type value 400s with
+// invalid_param (not a silent empty match).
+func TestEnumValues_Rejected(t *testing.T) {
+	srv := newTestServer(t, fragDamageStore())
+	defer srv.Close()
+	for _, u := range []string{"events?types=bogus", "chat?types=bogus"} {
+		body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/"+u)
+		if status != 400 {
+			t.Errorf("%s: status = %d, want 400 (body=%s)", u, status, body)
+			continue
+		}
+		if code := errBodyCode(t, body); code != "invalid_param" {
+			t.Errorf("%s: code = %q, want invalid_param", u, code)
+		}
+	}
+}
+
+// TestEnumValues_CaseInsensitive: /events and /chat type enums are
+// case-insensitive (matching every other token filter). Mixed/upper case
+// values validate and are lowercased before use.
+func TestEnumValues_CaseInsensitive(t *testing.T) {
+	srv := newTestServer(t, fragDamageStore())
+	defer srv.Close()
+	for _, u := range []string{"events?types=Frag", "chat?types=TEAMSAY", "chat?types=Chat,TeamSay"} {
+		body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/"+u)
+		if status != 200 {
+			t.Errorf("%s: status = %d, want 200 (body=%s)", u, status, body)
+		}
+	}
+}
+
+// TestShotsNailsLegacyParam_Accepted: the retired `nails` opt-in is accepted
+// and ignored — /shots?nails=1 still 200s.
+func TestShotsNailsLegacyParam_Accepted(t *testing.T) {
+	r := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Shots:         &result.ShotsResult{Shots: []result.Shot{{Time: 1000, Player: "bps", Weapon: "lg"}}},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	if body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/shots?nails=1"); status != 200 {
+		t.Errorf("shots?nails=1: status = %d, want 200 (body=%s)", status, body)
+	}
+}
+
+// TestLabelParam_AcceptedEverywhere: ?label=x (the global traffic-source tag)
+// is accepted on every endpoint family, never unknown_param.
+func TestLabelParam_AcceptedEverywhere(t *testing.T) {
+	srv := newTestServer(t, fragDamageStore())
+	defer srv.Close()
+	for _, u := range []string{
+		"/v1/demos/gameId:42/frags?label=x",
+		"/v1/demos/gameId:42/overview?label=x",
+		"/v1/demos/gameId:42/buckets?windowMs=50&label=x",
+		"/v1/demos/gameId:42/artifacts/frag?label=x",
+		"/v1/artifacts?label=x",
+		"/v1/graph?label=x",
+	} {
+		body, status := getRaw(t, srv.URL+u)
+		if status == 400 && errBodyCode(t, body) == "unknown_param" {
+			t.Errorf("%s: label rejected as unknown_param (body=%s)", u, body)
+		}
+	}
+}
+
 func newTestServer(t *testing.T, store demoStore) *httptest.Server {
 	t.Helper()
 	return newTestServerMaps(t, store, "")
@@ -677,6 +819,27 @@ func TestLOS(t *testing.T) {
 	}
 }
 
+// TestLOS_NoBSP_422: a map with no usable visibility BSP surfaces
+// analyzer.ErrNoBSP from EnsureLOS (wrapped, as the real cache wraps it), which
+// both the curated /los and the generic /artifacts/los route must translate to
+// 422 los_unavailable — never a 200-empty or a masked 500.
+func TestLOS_NoBSP_422(t *testing.T) {
+	store := storeWithStub()
+	store.losErr = fmt.Errorf("compute los: %w", analyzer.ErrNoBSP)
+	srv := newTestServer(t, store)
+	defer srv.Close()
+
+	for _, path := range []string{"/v1/demos/gameId:42/los", "/v1/demos/gameId:42/artifacts/los"} {
+		body, status := getRaw(t, srv.URL+path)
+		if status != 422 {
+			t.Fatalf("GET %s: status = %d; want 422 (body=%s)", path, status, body)
+		}
+		if !strings.Contains(string(body), "los_unavailable") {
+			t.Errorf("GET %s: 422 body must name los_unavailable: %s", path, body)
+		}
+	}
+}
+
 func TestOverview(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
@@ -787,6 +950,26 @@ func TestBuckets_BadParam(t *testing.T) {
 	}
 }
 
+// TestBuckets_WindowMsOverflow: a windowMs above math.MaxInt32 wraps
+// negative when cast to int32 in the grid arithmetic (panicking the row
+// builder, serving a bogus negative count on columnar). resolveWindow now
+// rejects it → 400 invalid_param on BOTH layouts.
+func TestBuckets_WindowMsOverflow(t *testing.T) {
+	srv := newTestServer(t, storeWithStub())
+	defer srv.Close()
+	for _, layout := range []string{"row", "column"} {
+		u := srv.URL + "/v1/demos/gameId:42/buckets?windowMs=4294967295&fields=h,a&layout=" + layout
+		body, status := getRaw(t, u)
+		if status != 400 {
+			t.Errorf("layout=%s: status = %d, want 400 (body=%s)", layout, status, body)
+			continue
+		}
+		if code := errBodyCode(t, body); code != "invalid_param" {
+			t.Errorf("layout=%s: code = %q, want invalid_param", layout, code)
+		}
+	}
+}
+
 func TestBuckets_ColumnLayout(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
@@ -840,7 +1023,7 @@ func TestEvents_Default(t *testing.T) {
 func TestStreamSlice(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
-	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=30&fields=h,a", 200)
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=30000&fields=h,a", 200)
 	if _, ok := resp["players"].([]any); !ok && resp["players"] != nil {
 		t.Errorf("players shape unexpected: %T", resp["players"])
 	}
@@ -869,7 +1052,7 @@ func TestStreamSlice_ViewVelocityFields(t *testing.T) {
 
 	// stream-slice: view + vel each project into their own sibling track,
 	// and pos stays absent when not requested (clean break).
-	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=0.4&fields=view,vel&players=bps", 200)
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=400&fields=view,vel&players=bps", 200)
 	players, _ := resp["players"].([]any)
 	if len(players) == 0 {
 		t.Fatal("stream-slice returned no players")
@@ -886,7 +1069,7 @@ func TestStreamSlice_ViewVelocityFields(t *testing.T) {
 	}
 
 	// state-at: view + vel surface as point objects on the player.
-	st := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=0.1&fields=view,vel&players=bps", 200)
+	st := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=100&fields=view,vel&players=bps", 200)
 	sp := st["players"].(map[string]any)["bps"].(map[string]any)
 	if _, ok := sp["view"]; !ok {
 		t.Errorf("state-at missing view: %v", sp)
@@ -899,7 +1082,7 @@ func TestStreamSlice_ViewVelocityFields(t *testing.T) {
 	getJSON(t, srv.URL+"/v1/demos/gameId:42/buckets?windowMs=100&fields=vel&players=bps", 200)
 
 	// An unknown field code is rejected with 400 (no silent pass-through).
-	if _, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=1&fields=bogus"); status != 400 {
+	if _, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/stream-slice?from=0&to=1000&fields=bogus"); status != 400 {
 		t.Errorf("unknown field status = %d; want 400", status)
 	}
 }
@@ -916,9 +1099,9 @@ func TestStateAt_MissingTime(t *testing.T) {
 func TestStateAt_HappyPath(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
-	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=15&fields=h,a&players=bps", 200)
-	if resp["time"].(float64) != 15 {
-		t.Errorf("time = %v; want 15", resp["time"])
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/state-at?time=15000&fields=h,a&players=bps", 200)
+	if resp["time"].(float64) != 15000 {
+		t.Errorf("time = %v; want 15000", resp["time"])
 	}
 	players, _ := resp["players"].(map[string]any)
 	if _, ok := players["bps"]; !ok {
@@ -1194,19 +1377,19 @@ func TestAimParams(t *testing.T) {
 		t.Errorf("players=bps returned %v, want bps", p["player"])
 	}
 
-	// from=15 recomputes: only bps's t=20s lg fire survives → 1 shot.
-	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/aim?from=15", 200)
+	// from=15000 recomputes: only bps's t=20000ms lg fire survives → 1 shot.
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/aim?from=15000", 200)
 	players, _ = resp["players"].([]any)
 	if len(players) != 1 {
-		t.Fatalf("from=15 returned %d players, want 1 (only bps fired in window)", len(players))
+		t.Fatalf("from=15000 returned %d players, want 1 (only bps fired in window)", len(players))
 	}
 	p, _ := players[0].(map[string]any)
 	weapons, _ := p["weapons"].([]any)
 	if len(weapons) != 1 {
-		t.Fatalf("from=15 bps weapons = %v, want 1 row", p["weapons"])
+		t.Fatalf("from=15000 bps weapons = %v, want 1 row", p["weapons"])
 	}
 	if w, _ := weapons[0].(map[string]any); w["shots"] != float64(1) {
-		t.Errorf("from=15 windowed lg shots = %v, want 1", w["shots"])
+		t.Errorf("from=15000 windowed lg shots = %v, want 1", w["shots"])
 	}
 
 	// malformed from is a clean 400 invalid_param.
@@ -1243,9 +1426,9 @@ func TestChat_PlayerFilter(t *testing.T) {
 func TestChat_TimeWindow(t *testing.T) {
 	srv := newTestServer(t, storeWithStub())
 	defer srv.Close()
-	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat?from=15&to=100")
+	body, _ := getRaw(t, srv.URL+"/v1/demos/gameId:42/chat?from=15000&to=100000")
 	arr := unitsList(t, body, "messages", "ms")
-	// only the teamsay at t=20 is in [15, 100].
+	// only the teamsay at t=20000 is in [15000, 100000].
 	if len(arr) != 1 || arr[0]["type"] != "teamsay" {
 		t.Errorf("expected only the teamsay; got %s", body)
 	}

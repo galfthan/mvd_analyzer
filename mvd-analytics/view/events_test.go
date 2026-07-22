@@ -79,7 +79,7 @@ func TestEventsTimeOrdered(t *testing.T) {
 		},
 	}
 	v, _ := Events(r, EventsFilter{})
-	last := -1.0
+	last := int32(-1)
 	for _, e := range v.Events {
 		if e.T < last {
 			t.Fatalf("events out of order: %v", v.Events)
@@ -118,7 +118,7 @@ func TestEventsDamageOptIn(t *testing.T) {
 		t.Fatalf("damage events = %d, want 1", len(v.Events))
 	}
 	e := v.Events[0]
-	if e.Type != "damage" || e.Player != "killer" || e.T != 2.0 {
+	if e.Type != "damage" || e.Player != "killer" || e.T != 2000 {
 		t.Errorf("event = %+v, want damage/killer/2.0", e)
 	}
 	if e.Detail["victim"] != "target" || e.Detail["damage"] != 89 ||
@@ -166,7 +166,7 @@ func TestEventsTelefragOptIn(t *testing.T) {
 		t.Fatalf("telefrag events = %d, want 1", len(v.Events))
 	}
 	e := v.Events[0]
-	if e.Type != "telefrag" || e.Player != "tp" || e.T != 3.0 || e.Detail["victim"] != "victim" {
+	if e.Type != "telefrag" || e.Player != "tp" || e.T != 3000 || e.Detail["victim"] != "victim" {
 		t.Errorf("event = %+v", e)
 	}
 }
@@ -238,7 +238,7 @@ func TestEventsPickupDefault(t *testing.T) {
 		t.Fatalf("len(pickups) = %d, want 3 (ya world, rl world, rl backpack): %+v", len(pickups), pickups)
 	}
 	ya := pickups[0]
-	if ya.T != 5.0 || ya.Player != "p1" {
+	if ya.T != 5000 || ya.Player != "p1" {
 		t.Fatalf("ya pickup = %+v", ya)
 	}
 	for k, want := range map[string]any{
@@ -251,11 +251,11 @@ func TestEventsPickupDefault(t *testing.T) {
 	}
 	// Exactly one pickup at t=7 (the item-timeline row; the WeaponPickups
 	// world row is suppressed).
-	if pickups[1].T != 7.0 || pickups[1].Detail["item"] != "rl_1" || pickups[1].Detail["source"] != "world" {
+	if pickups[1].T != 7000 || pickups[1].Detail["item"] != "rl_1" || pickups[1].Detail["source"] != "world" {
 		t.Fatalf("rl world pickup = %+v", pickups[1])
 	}
 	bp := pickups[2]
-	if bp.T != 9.0 || bp.Player != "p2" {
+	if bp.T != 9000 || bp.Player != "p2" {
 		t.Fatalf("backpack pickup = %+v", bp)
 	}
 	for k, want := range map[string]any{
@@ -287,7 +287,7 @@ func TestEventsPickupPlayerAndWindowFilter(t *testing.T) {
 	if len(v.Events) != 1 || v.Events[0].Player != "p2" {
 		t.Fatalf("player-filtered pickups = %+v, want p2's only", v.Events)
 	}
-	v, err = Events(r, EventsFilter{Types: []string{"pickup"}, EndTime: 10})
+	v, err = Events(r, EventsFilter{Types: []string{"pickup"}, EndTime: 10000})
 	if err != nil {
 		t.Fatalf("Events: %v", err)
 	}

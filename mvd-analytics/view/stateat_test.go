@@ -16,7 +16,7 @@ func TestStateAtCarryForward(t *testing.T) {
 		RL: []result.Interval{{Start: 1000, End: 3000}},
 	})
 	v, err := StateAt(r, StateAtOptions{
-		Time:   2.5,
+		Time:   2500,
 		Fields: []string{FieldHealth, FieldRL},
 	})
 	if err != nil {
@@ -51,7 +51,7 @@ func TestStateAtViewHeightLiquid(t *testing.T) {
 		},
 	})
 	v, err := StateAt(r, StateAtOptions{
-		Time:   1.1, // nearest sample is index 1 (t=1000)
+		Time:   1100, // nearest sample is index 1 (t=1000)
 		Fields: []string{FieldView, FieldHeight, FieldLiquid, FieldVelocity},
 	})
 	if err != nil {
@@ -106,7 +106,7 @@ func TestStateAtBeforeFirstSample(t *testing.T) {
 		Health: []result.ChangeI16{{T: 5000, V: 100}},
 	})
 	v, err := StateAt(r, StateAtOptions{
-		Time:   2.0,
+		Time:   2000,
 		Fields: []string{FieldHealth},
 	})
 	if err != nil {
@@ -124,13 +124,13 @@ func TestStateAtIntervalBoundary(t *testing.T) {
 		Quad: []result.Interval{{Start: 1000, End: 2000}},
 	})
 	// At end boundary (half-open): Time=2.0 should NOT be in interval.
-	v, _ := StateAt(r, StateAtOptions{Time: 2.0, Fields: []string{FieldQuad}})
+	v, _ := StateAt(r, StateAtOptions{Time: 2000, Fields: []string{FieldQuad}})
 	st := v.Players["p1"]
 	if st.Quad == nil || *st.Quad != false {
 		t.Fatalf("Quad at end boundary = %v, want false", st.Quad)
 	}
 	// At start boundary (closed): should be true.
-	v, _ = StateAt(r, StateAtOptions{Time: 1.0, Fields: []string{FieldQuad}})
+	v, _ = StateAt(r, StateAtOptions{Time: 1000, Fields: []string{FieldQuad}})
 	st = v.Players["p1"]
 	if st.Quad == nil || *st.Quad != true {
 		t.Fatalf("Quad at start boundary = %v, want true", st.Quad)
@@ -139,7 +139,7 @@ func TestStateAtIntervalBoundary(t *testing.T) {
 
 func TestStateAtSpawnDeathRejected(t *testing.T) {
 	r := makeStream(t, result.PlayerStream{Name: "p1"})
-	_, err := StateAt(r, StateAtOptions{Time: 1, Fields: []string{FieldSpawns}})
+	_, err := StateAt(r, StateAtOptions{Time: 1000, Fields: []string{FieldSpawns}})
 	if err == nil {
 		t.Fatalf("expected error for FieldSpawns in StateAt")
 	}
@@ -156,19 +156,19 @@ func TestStateAtLocResolvesName(t *testing.T) {
 		},
 		TimelineAnalysis: &result.TimelineAnalysisResult{LocTable: []string{"", "rl", "ya"}},
 	}
-	v, err := StateAt(r, StateAtOptions{Time: 2.5, Fields: []string{FieldLoc}})
+	v, err := StateAt(r, StateAtOptions{Time: 2500, Fields: []string{FieldLoc}})
 	if err != nil {
 		t.Fatalf("StateAt: %v", err)
 	}
 	if got := v.Players["p1"].Loc; got == nil || *got != "rl" {
 		t.Fatalf("Loc at 2.5 = %v, want rl", got)
 	}
-	v, _ = StateAt(r, StateAtOptions{Time: 6, Fields: []string{FieldLoc}})
+	v, _ = StateAt(r, StateAtOptions{Time: 6000, Fields: []string{FieldLoc}})
 	if got := v.Players["p1"].Loc; got == nil || *got != "ya" {
 		t.Fatalf("Loc at 6 = %v, want ya", got)
 	}
 	// Index mode → raw LocTable index in Li, Loc nil.
-	vi, _ := StateAt(r, StateAtOptions{Time: 2.5, Fields: []string{FieldLoc}, LocIndex: true})
+	vi, _ := StateAt(r, StateAtOptions{Time: 2500, Fields: []string{FieldLoc}, LocIndex: true})
 	st := vi.Players["p1"]
 	if st.Li == nil || *st.Li != 1 {
 		t.Fatalf("Li at 2.5 = %v, want 1", st.Li)

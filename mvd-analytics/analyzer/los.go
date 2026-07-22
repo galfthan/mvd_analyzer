@@ -1,12 +1,47 @@
 package analyzer
 
 import (
+	"errors"
+	"fmt"
 	"sort"
+	"sync"
 
 	"github.com/mvd-analyzer/mvd-analytics/bspvis"
+	"github.com/mvd-analyzer/mvd-analytics/loc"
 	"github.com/mvd-analyzer/mvd-analytics/mapbsp"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
+
+// ErrNoBSP is returned by ComputeLOS when the pass cannot run because the map's
+// visibility BSP is unavailable — the demo carries no map name, no BSP is
+// provisioned for the map, or a provisioned BSP fails to parse. It is distinct
+// from a legitimately empty result (a <2-player demo, which latches and
+// persists): ErrNoBSP means "unknown, retry once provisioned", so callers must
+// NOT latch, persist, or cache it. mvd-api maps it to 422 los_unavailable. Use
+// errors.Is(err, ErrNoBSP) — ComputeLOS wraps it with %w for a distinct message
+// per cause.
+var ErrNoBSP = errors.New("no visibility BSP for this map")
+
+// losBspFail memoises maps whose provisioned BSP bytes exist but fail to parse
+// (the corrupt-file branch below). It mirrors mapbsp's memoised nil so repeated
+// /los requests on such a map don't re-parse the (multi-MB) BSP every time.
+// Keyed by the same normalised map name mapbsp uses so aliases fold together.
+var (
+	losBspFailMu   sync.Mutex
+	losBspFailMemo = map[string]bool{}
+)
+
+func losBspFailKnown(mapName string) bool {
+	losBspFailMu.Lock()
+	defer losBspFailMu.Unlock()
+	return losBspFailMemo[loc.NormalizeMapName(mapName)]
+}
+
+func losBspFailRemember(mapName string) {
+	losBspFailMu.Lock()
+	losBspFailMemo[loc.NormalizeMapName(mapName)] = true
+	losBspFailMu.Unlock()
+}
 
 // Line-of-sight geometry. These mirror the standard Quake player hull used by
 // mapclip (mins {-16,-16,-24}, maxs {16,16,32}); the eye sits +22 above the
@@ -28,45 +63,66 @@ var (
 // position-derived pass (N² pairs × samples × rays) and has no in-pipeline
 // consumer, so the registry no longer runs it. Callers invoke it on demand —
 // the web map's LOS overlay (WASM), `qw-analyze -include los`, the mvd-api
-// `/los` endpoint — and it is idempotent: the first call sets Streams.LOSComputed
-// (gob-persisted), later calls return immediately, so a map with no BSP is
-// attempted once and not retried.
+// `/los` endpoint.
+//
+// Contract (the returned error and the LOSComputed latch move together):
+//
+//	res == nil / Streams == nil  → nil, no latch  (a demo property; API serves 200 empty)
+//	already latched              → nil            (idempotent — computed once already)
+//	< 2 players                  → nil, LATCH SET  (legitimately empty; cacheable/persistable)
+//	EffectiveMap() == ""         → ErrNoBSP, no latch  (no map name)
+//	no provisioned BSP           → ErrNoBSP, no latch  (BSP not shipped)
+//	provisioned BSP won't parse  → ErrNoBSP, no latch  (corrupt file — memoised per map)
+//	computed                     → nil, LATCH SET
+//
+// The latch is set ONLY for outcomes that should stick (a genuine compute or a
+// legitimately empty <2-player demo). The three ErrNoBSP cases DELIBERATELY do
+// not latch, so a caller that later provisions the BSP (or restarts the
+// process, dropping mapbsp's memoised nil) retries and the pass heals — the
+// former "attempted once and never retried" behaviour was the poisoned-cache
+// root cause. All three ErrNoBSP messages wrap the sentinel with %w, so
+// errors.Is(err, ErrNoBSP) holds for every one.
 //
 // It must be called only after the times are match-relative (every producer
 // stamps match-relative times at Finalize via co.Clock, so any handed-out
 // Result qualifies), so positions, spawns/deaths and the mover poses share one epoch
 // and the emitted intervals need no further normalization. It loads its own
-// visibility BSP (the same two cheap calls timeline_finalize.go makes); no-op
-// (LOS simply absent) when the map has no provisioned BSP — mirroring the
-// PositionTrack.H/Lq gate — or when there are fewer than two players.
+// visibility BSP (the same two cheap calls timeline_finalize.go makes).
 //
 // The map is resolved via Result.EffectiveMap (demoinfo map, else the
 // serverinfo `map` key), so LOS/PVS light up even on demos with no KTX
 // demoinfo block (2024-era MVDSV 1.00 / KTX 1.43-1.44 recordings) as long as
 // the BSP is provisioned.
-func ComputeLOS(res *Result) {
+func ComputeLOS(res *Result) error {
 	if res == nil || res.Streams == nil {
-		return
+		return nil // demo property, not an error — the API serves 200 empty
 	}
 	if res.Streams.LOSComputed {
-		return // idempotent — already computed (possibly to "no LOS")
-	}
-	res.Streams.LOSComputed = true
-	mapName := res.EffectiveMap()
-	if mapName == "" {
-		return
+		return nil // idempotent — already computed (possibly to "no LOS")
 	}
 	players := res.Streams.Players
 	if len(players) < 2 {
-		return
+		res.Streams.LOSComputed = true // legitimately empty — must stay persistable
+		return nil
+	}
+	mapName := res.EffectiveMap()
+	if mapName == "" {
+		return fmt.Errorf("%w: demo carries no map name", ErrNoBSP)
 	}
 	data := mapbsp.LoadBytes(mapName)
 	if data == nil {
-		return
+		return fmt.Errorf("%w: BSP not provisioned for %q", ErrNoBSP, mapName)
+	}
+	if losBspFailKnown(mapName) {
+		return fmt.Errorf("%w: provisioned BSP for %q could not be loaded", ErrNoBSP, mapName)
 	}
 	vb, err := bspvis.LoadBytes(data)
 	if err != nil || vb == nil {
-		return
+		losBspFailRemember(mapName)
+		if err != nil {
+			return fmt.Errorf("%w: provisioned BSP for %q could not be loaded: %v", ErrNoBSP, mapName, err)
+		}
+		return fmt.Errorf("%w: provisioned BSP for %q could not be loaded", ErrNoBSP, mapName)
 	}
 
 	matchEnd := res.Streams.Global.MatchEnd
@@ -97,6 +153,8 @@ func ComputeLOS(res *Result) {
 			players[ai].PVS = pvs
 		}
 	}
+	res.Streams.LOSComputed = true
+	return nil
 }
 
 // visAccum collects per-opponent half-open visibility intervals from a boolean

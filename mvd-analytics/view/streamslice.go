@@ -9,12 +9,13 @@ import (
 // short event — they get every transition that occurred, not a
 // reduced bucket value.
 //
-// StartTime / EndTime are required (zero values mean match start /
+// Start / End are required (zero values mean match start /
 // match end); Players empty → all; Fields empty → AllStandardFields.
+// Both are int32 ms (schema v57 pure-ms model).
 type StreamSliceOptions struct {
-	StartTime float64
-	EndTime   float64
-	Players   []string
+	Start   int32
+	End     int32
+	Players []string
 	Fields    []string
 	// LocIndex selects the loc representation: false (default) resolves
 	// to loc names (PlayerSlice.Loc); true emits the raw LocTable index
@@ -26,13 +27,14 @@ type StreamSliceOptions struct {
 // requested window with the same JSON keys as result.PlayerStream so
 // consumers can treat a slice as a mini stream.
 type StreamSliceView struct {
-	// TimeUnit echoes the envelope's native unit ("s"); set by the mvd-api
-	// handler (schema v56). The embedded per-sample tracks stay dense int32 ms
-	// regardless. Omitted on the WASM/qw-analyze paths.
-	TimeUnit  TimeUnit      `json:"timeUnit,omitempty"`
-	StartTime float64       `json:"startTime"`
-	EndTime   float64       `json:"endTime"`
-	Players   []PlayerSlice `json:"players"`
+	// TimeUnit echoes the envelope's native unit (constant "ms", schema v57);
+	// set by the mvd-api handler. The embedded per-sample tracks are dense
+	// int32 ms and Start/End are the exact ms bounds used for slicing.
+	// Omitted on the WASM/qw-analyze paths.
+	TimeUnit TimeUnit      `json:"timeUnit,omitempty"`
+	Start    int32         `json:"start"`
+	End      int32         `json:"end"`
+	Players  []PlayerSlice `json:"players"`
 }
 
 // PlayerSlice mirrors result.PlayerStream with one notable
@@ -89,12 +91,12 @@ type PlayerSlice struct {
 }
 
 // StreamSlice walks each player's streams and returns the entries
-// that fall in [StartTime, EndTime). For change streams a
-// carry-forward entry is prepended at StartTime; intervals overlapping
-// the window are clamped to fit.
+// that fall in [Start, End). For change streams a carry-forward entry
+// is prepended at Start; intervals overlapping the window are clamped
+// to fit.
 func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, error) {
 	if r == nil || r.Streams == nil {
-		return &StreamSliceView{StartTime: opts.StartTime, EndTime: opts.EndTime}, nil
+		return &StreamSliceView{Start: opts.Start, End: opts.End, Players: []PlayerSlice{}}, nil
 	}
 	fields := opts.Fields
 	if len(fields) == 0 {
@@ -107,20 +109,20 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 	for _, f := range fields {
 		requested[f] = true
 	}
-	start := opts.StartTime
-	end := opts.EndTime
-	// Global.Match* is int32 ms (schema v8); public view API is
-	// float64 seconds — convert once at the entry.
+	start := opts.Start
+	end := opts.End
+	// Pure-ms model (schema v57): Global.Match* and the option bounds are
+	// both int32 ms — no conversion.
 	if end == 0 {
-		end = secs(r.Streams.Global.MatchEnd)
+		end = r.Streams.Global.MatchEnd
 	}
 	if start == 0 {
-		start = secs(r.Streams.Global.MatchStart)
+		start = r.Streams.Global.MatchStart
 	}
 	pf := newPlayerFilter(opts.Players)
 	locTable := locTableOf(r)
 
-	out := &StreamSliceView{StartTime: start, EndTime: end}
+	out := &StreamSliceView{Start: start, End: end, Players: []PlayerSlice{}}
 	for _, p := range r.Streams.Players {
 		if !pf.accepts(p.Name) {
 			continue
@@ -206,12 +208,12 @@ func StreamSlice(r *result.Result, opts StreamSliceOptions) (*StreamSliceView, e
 	return out, nil
 }
 
-// Slice helpers operate in int32 ms (schema v8). The public view API
-// takes float64 seconds; convert once at the entry of each helper.
+// Slice helpers operate in int32 ms (schema v57 pure-ms model); the
+// window bounds arrive as int32 ms and are used directly.
 
-func sliceI16(stream []result.ChangeI16, start, end float64) []result.ChangeI16 {
-	startMs := int32(start * 1000)
-	endMs := int32(end * 1000)
+func sliceI16(stream []result.ChangeI16, start, end int32) []result.ChangeI16 {
+	startMs := start
+	endMs := end
 	out := make([]result.ChangeI16, 0, 4)
 	if idx := indexI16AtOrBefore(stream, startMs); idx >= 0 {
 		out = append(out, result.ChangeI16{T: startMs, V: stream[idx].V})
@@ -238,9 +240,9 @@ func sliceI16(stream []result.ChangeI16, start, end float64) []result.ChangeI16 
 // its loc name through locTable as it goes. Carry-forward and dedup
 // happen on the resolved name so two indices mapping to the same name
 // (or to "") collapse like any other no-op transition.
-func sliceLocNames(stream []result.ChangeI16, locTable []string, start, end float64) []result.ChangeStr {
-	startMs := int32(start * 1000)
-	endMs := int32(end * 1000)
+func sliceLocNames(stream []result.ChangeI16, locTable []string, start, end int32) []result.ChangeStr {
+	startMs := start
+	endMs := end
 	out := make([]result.ChangeStr, 0, 4)
 	if idx := indexI16AtOrBefore(stream, startMs); idx >= 0 {
 		out = append(out, result.ChangeStr{T: startMs, V: locNameAt(locTable, stream[idx].V)})
@@ -264,9 +266,9 @@ func sliceLocNames(stream []result.ChangeI16, locTable []string, start, end floa
 	return out
 }
 
-func sliceStr(stream []result.ChangeStr, start, end float64) []result.ChangeStr {
-	startMs := int32(start * 1000)
-	endMs := int32(end * 1000)
+func sliceStr(stream []result.ChangeStr, start, end int32) []result.ChangeStr {
+	startMs := start
+	endMs := end
 	out := make([]result.ChangeStr, 0, 4)
 	if idx := indexStrAtOrBefore(stream, startMs); idx >= 0 {
 		out = append(out, result.ChangeStr{T: startMs, V: stream[idx].V})
@@ -289,9 +291,9 @@ func sliceStr(stream []result.ChangeStr, start, end float64) []result.ChangeStr 
 	return out
 }
 
-func sliceInterval(stream []result.Interval, start, end float64) []result.Interval {
-	startMs := int32(start * 1000)
-	endMs := int32(end * 1000)
+func sliceInterval(stream []result.Interval, start, end int32) []result.Interval {
+	startMs := start
+	endMs := end
 	out := make([]result.Interval, 0, 4)
 	for _, iv := range stream {
 		if iv.End <= startMs || iv.Start >= endMs {
@@ -313,12 +315,11 @@ func sliceInterval(stream []result.Interval, start, end float64) []result.Interv
 	return out
 }
 
-// sliceInts is the int32-ms variant of sliceFloats, used for the
-// schema-v8 Spawns / Deaths streams. Window bounds are float64 seconds
-// (public view API); convert once and stay in int32 for the loop.
-func sliceInts(stream []int32, start, end float64) []int32 {
-	startMs := int32(start * 1000)
-	endMs := int32(end * 1000)
+// sliceInts windows the int32-ms Spawns / Deaths streams; bounds are
+// int32 ms (schema v57).
+func sliceInts(stream []int32, start, end int32) []int32 {
+	startMs := start
+	endMs := end
 	out := make([]int32, 0, 4)
 	for _, t := range stream {
 		if t < startMs || t >= endMs {
@@ -341,13 +342,13 @@ func sliceInts(stream []int32, start, end float64) []int32 {
 // PositionTrack column checklist site 7 (view-layer kind/slice/columnar
 // plumbing — slicePosition and its sibling slice*/columnar projectors);
 // see the checklist in result/coord.go (PositionTrack.MarshalJSON).
-func slicePosition(pt *result.PositionTrack, start, end float64) *result.PositionTrack {
+func slicePosition(pt *result.PositionTrack, start, end int32) *result.PositionTrack {
 	if pt == nil {
 		return nil
 	}
 	// pt.T is int32 ms (schema v8); convert window once.
-	startMs := int32(start * 1000)
-	endMs := int32(end * 1000)
+	startMs := start
+	endMs := end
 	hasLi := len(pt.Li) == len(pt.T)
 	out := &result.PositionTrack{}
 	for i := range pt.T {
@@ -375,9 +376,9 @@ func slicePosition(pt *result.PositionTrack, start, end float64) *result.Positio
 // sliceWindowIndices returns the [lo, hi) index range of pt.T samples
 // inside [start, end). Shared by the column projectors so they all agree
 // on window membership (inclusive lower bound, matching slicePosition).
-func sliceWindowIndices(pt *result.PositionTrack, start, end float64) (int, int) {
-	startMs := int32(start * 1000)
-	endMs := int32(end * 1000)
+func sliceWindowIndices(pt *result.PositionTrack, start, end int32) (int, int) {
+	startMs := start
+	endMs := end
 	lo := 0
 	for lo < len(pt.T) && pt.T[lo] < startMs {
 		lo++
@@ -391,7 +392,7 @@ func sliceWindowIndices(pt *result.PositionTrack, start, end float64) (int, int)
 
 // sliceView projects the view-direction columns (t, vp, vya). Returns nil
 // when the track has no view samples in the window.
-func sliceView(pt *result.PositionTrack, start, end float64) *result.PositionTrack {
+func sliceView(pt *result.PositionTrack, start, end int32) *result.PositionTrack {
 	if pt == nil || len(pt.VP) != len(pt.T) || len(pt.VYa) != len(pt.T) {
 		return nil
 	}
@@ -408,7 +409,7 @@ func sliceView(pt *result.PositionTrack, start, end float64) *result.PositionTra
 
 // sliceHeight projects the floor-height column (t, h). Returns nil when
 // the track has no height column (no BSP) or no samples in the window.
-func sliceHeight(pt *result.PositionTrack, start, end float64) *result.PositionTrack {
+func sliceHeight(pt *result.PositionTrack, start, end int32) *result.PositionTrack {
 	if pt == nil || len(pt.H) != len(pt.T) {
 		return nil
 	}
@@ -424,7 +425,7 @@ func sliceHeight(pt *result.PositionTrack, start, end float64) *result.PositionT
 
 // sliceLiquid projects the liquid-state column (t, lq). Returns nil when
 // the track has no liquid column (no BSP) or no samples in the window.
-func sliceLiquid(pt *result.PositionTrack, start, end float64) *result.PositionTrack {
+func sliceLiquid(pt *result.PositionTrack, start, end int32) *result.PositionTrack {
 	if pt == nil || len(pt.Lq) != len(pt.T) {
 		return nil
 	}
@@ -440,7 +441,7 @@ func sliceLiquid(pt *result.PositionTrack, start, end float64) *result.PositionT
 
 // sliceVelocity projects the velocity columns (t, vx, vy, vz). Returns
 // nil when the track has no velocity samples in the window.
-func sliceVelocity(pt *result.PositionTrack, start, end float64) *result.PositionTrack {
+func sliceVelocity(pt *result.PositionTrack, start, end int32) *result.PositionTrack {
 	if pt == nil || len(pt.VX) != len(pt.T) || len(pt.VY) != len(pt.T) || len(pt.VZ) != len(pt.T) {
 		return nil
 	}

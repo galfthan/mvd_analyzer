@@ -99,7 +99,7 @@ Defined in `result/frag.go`.
 
 | Field | JSON key | Type |
 |---|---|---|
-| Time | `t` | int32 (match-relative ms) |
+| Time | `time` | int32 (match-relative ms) |
 | Killer | `killer` | string |
 | Victim | `victim` | string |
 | Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `ax`, `tele`, env: `lava`/`fall`/`water`/`slime`/`world`/`squish`) |
@@ -176,7 +176,7 @@ The per-player / matrix aggregates AND the `events` log are both **match-time
 only** (schema v50): the analyzer drops out-of-match (warmup / post-match) hits
 at the source, so every damage figure and the `events` log are built from the
 same in-match hit set (KTX scoreboard parity). Each `events` entry carries the
-match-relative `t` so consumers can still window within the match.
+match-relative `time` so consumers can still window within the match.
 
 **Positional kills (telefrag, stomp) fold their honest value into
 `given`/`givenTeam`/`taken` — and, on enemy kills, the `enemyVs*`/`ewep`
@@ -228,7 +228,7 @@ fold-in added to the aggregates.
 
 | Field | JSON key | Type |
 |---|---|---|
-| Time | `t` | int32 (match-relative ms) |
+| Time | `time` | int32 (match-relative ms) |
 | Attacker | `attacker` | string (killer) |
 | Victim | `victim` | string |
 | IsTeam | `isTeam` | bool (omitempty — same team) |
@@ -240,7 +240,7 @@ fold-in added to the aggregates.
 
 | Field | JSON key | Type |
 |---|---|---|
-| Time | `t` | int32 (match-relative ms) |
+| Time | `time` | int32 (match-relative ms) |
 | Attacker | `attacker` | string (`world` for environmental / non-player inflictor) |
 | Victim | `victim` | string |
 | Weapon | `weapon` | string (attacker weapon `rl`/`lg`/…, or env category `fall`/`lava`/…) |
@@ -331,9 +331,9 @@ match-relative ms (same clock as `damage.events[].t`).
 The `shots` stream is **match-gated** (schema v50): warmup / prewar /
 post-match fires are dropped at the source, like every analytics stream
 except chat, so the stream and the `byPlayer` aggregates are both match-only.
-To correlate aiming with fires, join a shot's `t` against the
+To correlate aiming with fires, join a shot's `time` against the
 shooter's `streams.players[].pos` track (`vP`/`vYa` view angles, `vX/vY/vZ`
-velocity) by player + nearest `t`.
+velocity) by player + nearest pos-track `t`.
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
@@ -373,7 +373,7 @@ every victim is an enemy (the common case); when present it is parallel to
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| Time | `t` | int32 | Match-relative ms. |
+| Time | `time` | int32 | Match-relative ms. |
 | Player | `player` | string | Resolved shooter. |
 | Team | `team` | string (omitempty) | |
 | Weapon | `weapon` | string | |
@@ -444,7 +444,7 @@ Experimental and additive — it never modifies its inputs.
 **Filtering (`/aim`, `getAim`).** No schema change; a query-layer concern.
 With no time window the **stored** `res.Aim` is served (a `players` filter
 selects named shooters' match-wide aim; `summary` drops the `crosshair` +
-`lgRamp` sample blocks). A `from`/`to` window (match-relative seconds)
+`lgRamp` sample blocks). A `from`/`to` window (match-relative integer ms)
 **recomputes** aim over the shots in the window via `aimcore.Compute`, so every
 field scopes to the window consistently. See the /aim operation in the
 served OpenAPI spec (mvd-api `/openapi.yaml`, browsable at `/docs`).
@@ -596,13 +596,13 @@ Defined in `result/messages.go`.
 
 | Field | JSON key | Type |
 |---|---|---|
-| Events | `events` | []MatchEvent |
+| Events | `messages` | []MatchEvent |
 
 ### MatchEvent
 
 | Field | JSON key | Type | Notes |
 |---|---|---|---|
-| Time | `t` | int32 | Match-relative ms. |
+| Time | `time` | int32 | Match-relative ms. |
 | Type | `type` | string | `"frag"`, `"chat"`, `"teamsay"`. |
 | Player | `player` | string | Sender / killer. |
 | Team | `team` | string | Sender's team. |
@@ -683,17 +683,17 @@ Bucketed data is served as `view.BucketsView` (row) or
 
 ### TimelineFragEvent
 
-`{ t, player, team, delta }`. Score-delta channel (`+1` enemy kill,
+`{ time, player, team, delta }`. Score-delta channel (`+1` enemy kill,
 `-1` suicide / teamkill, `+2` for the rare gib double-frag KTX edge).
 Reconstruct the killer ↔ victim relationship from `FragResult.Frags[]`
-or `MessagesResult.Events[type=frag]` by matching `t`. `team` is
+or `MessagesResult.Events[type=frag]` by matching `time`. `team` is
 best-effort: `""` when the player's team never resolves (e.g. an empty
 userinfo/demoinfo team); in 1v1 results the duel normalization rewrites
 it to the player's own name.
 
 ### TimelineDeathEvent
 
-`{ t, player, team }`. One record per death, sourced from the
+`{ time, player, team }`. One record per death, sourced from the
 authoritative protocol DeathEvent and gated to match time exactly like
 `fragEvents` — every death counts once (enemy kill, suicide, world, or
 being teamkilled), so a player's death count here matches their
@@ -706,12 +706,12 @@ attacker. Pairs with `killEvents` for the Timeline tab's per-player
 
 ### TimelineKillEvent
 
-`{ t, player, team }`. One record per enemy kill, keyed on the
+`{ time, player, team }`. One record per enemy kill, keyed on the
 **killer**, sourced from the canonical frag log (`FragResult.Frags[]` /
 `CoreOutputs.FragEntries`) filtered to real enemy kills (suicides and
 teamkills excluded). A player's cumulative `killEvents` reconciles
 exactly with `frags.byPlayer[].kills` and thus the kills-based
-efficiency `kills / (kills + deaths)`. Parallel to `deathEvents`: `t`
+efficiency `kills / (kills + deaths)`. Parallel to `deathEvents`: `time`
 is match-relative ms on the same clock (both are shifted by
 `streams.global.demoOffset` in post-processing — the Timeline per-player
 drill-down plots `killEvents − deathEvents` as a windowed +/- area, so
@@ -724,23 +724,23 @@ duel normalization rewrites it to the player's own name.
 
 ### PowerupEvent
 
-`{ t, endTime, playerName, playerSlot, playerUserID, team,
+`{ time, endTime, playerName, playerSlot, playerUserID, team,
 powerupType, duration, frags }`. One record per powerup run. Carries
 both `playerSlot` and `playerUserID` (TimelineFragEvent doesn't —
 intentional: that channel is lean by design).
 
 ### FragStreakEvent
 
-`{ t, endTime, playerName, playerUserID, team, frags, duration,
+`{ time, endTime, playerName, playerUserID, team, frags, duration,
 ewep }`. One record per spawn-to-death life with ≥ 1 enemy kill, top 10
 by frag count. A player already alive at match start has that first
 life's spawn synthesized at match start (the real spawn happened during
-warmup), so an opening run reads `t: 0`. `ewep` = effective weapon =
+warmup), so an opening run reads `time: 0`. `ewep` = effective weapon =
 the weapon that scored the most kills during the streak.
 
 ### AirgibEvent
 
-`{ t, attacker, attackerTeam, attackerUserID, victim, victimTeam,
+`{ time, attacker, attackerTeam, attackerUserID, victim, victimTeam,
 victimUserID, height, heightAboveAttacker, loc, damage, lethal }`. One
 record per direct
 enemy rocket hit landed on an airborne victim (an "airgib"). `height` is
@@ -1014,10 +1014,24 @@ last value forward until the next entry (so `h: [{t:0,v:100},{t:10000,v:50}]`
 means health is 100 from `t=0` and 50 from `t=10000`). Health/Armor/Loc/ammo
 use these. An `Interval` is a half-open `[s, e)` period during which something
 was *true* (start included, end excluded) — weapons-held, powerups, and
-`LosTrack.iv` use these.
+`LosTrack.intervals` use these.
 
 `t` / `s` / `e` are **integer milliseconds** since the stream's time
 origin (see PositionTrack for the unit rationale).
+
+**Dense/sparse key rule (the general form):** the time-field key follows
+what the data scales with. **Sample-rate-scaled** arrays — the ~77 Hz
+stream tracks (`PositionTrack.T`), the columnar `/buckets` grid, the aim
+sample columns, projectile/beam fire-time columns — repeat their key once
+**per sample**, so they take the terse **`t`** (and `Interval` keeps
+`s`/`e`; `ChangeI16`/`ChangeStr` keep `t`/`v`) — the payload discipline is
+deliberate. **Event-scaled** sparse lists and singleton timestamps —
+frags, damage, shots, chat, backpacks, weapon-pickups, opening takes,
+timeline events, the events/row-bucket/state-at/`firstTake` view surfaces —
+carry the descriptive **`time`**. Both keys are always int32 ms; the unit
+is never in the name (`timeUnit` echoes it). The same discipline names
+per-track / per-body keys descriptively (`LosTrack` uses `other` /
+`intervals`, not `o` / `iv`).
 
 ### LosTrack (`streams.players[].los[]`)
 
@@ -1025,7 +1039,7 @@ One entry per opponent this player (the **looker**) ever had a clear line of
 sight to, as half-open `[s, e)` ms `Interval`s.
 
 ```
-LosTrack = { "o": int16, "iv": [Interval...] }   // o = index into streams.players (the seen player)
+LosTrack = { "other": int16, "intervals": [Interval...] }   // other = index into streams.players (the seen player)
 ```
 
 LOS is **computed lazily**, not during the default parse — it is the heaviest
@@ -1076,7 +1090,7 @@ cast only for potentially-visible pairs), so every `los` interval lies inside a
 `pvs` interval for the same opponent; because the PVS is a conservative superset
 of true reachability the gate loses no real sightline. The gap between them — on
 the wire but no clear ray — is an occlusion-tolerant proximity/awareness signal.
-Like `los`, it is per-ordered-pair (`o` indexes `streams.players`), computed only
+Like `los`, it is per-ordered-pair (`other` indexes `streams.players`), computed only
 while both players are alive, raw transitions with no smoothing.
 
 ### PositionTrack
@@ -1245,47 +1259,43 @@ Every timestamped field in this schema — `PositionTrack.T`,
 `ItemPhase.AvailableFrom/TakenAt/RespawnAt` —
 is stored as `int32` integer milliseconds. External consumers that
 want seconds must scale by `* 0.001`.
-The view-layer query API (`view.Buckets`, `view.Events`,
-`view.StreamSlice.StartTime/EndTime`, `view.StateAt.Time`) still
-takes and returns `float64` seconds at its public surface, so any
-consumer querying through `view.*` is unaffected.
+As of schema v57 the view-layer query API (`view.Buckets`, `view.Events`,
+`view.StreamSlice.Start/End`, `view.StateAt.Time`) also takes and returns
+**int32 ms** at its public surface — the pure-ms model, no seconds
+anywhere in `view.*`.
 
-#### Transport surface: the `timeUnit` echo (schema v56)
+#### Transport surface: the `timeUnit` echo (schema v57 — pure ms)
 
 The **stored `result.*` structs are unchanged — still `int32` ms** as
-listed above. What v56 adds is on the **REST/MCP transport only**, and it
-is a fixed naming convention, **not a unit selection**:
+listed above. The v57 transport is now **all int32 ms too**, inputs and
+outputs, REST and MCP alike — the one-rule model:
 
-- The sparse match-position fields are absolute everywhere: **`t` is
-  int32 ms, `time` is float seconds** — always, on every endpoint. This
-  polarity is exception-free: the dense per-sample arrays already used
-  `t`-in-ms, so they conform without change, and the big sparse event
-  lists get the compact key for the compact type.
-- **`timeUnit` is the unit of every time value in a response.** Every
+- **Every time value in a response is int32 ms.** The v56 seconds
+  surfaces (`/events`, `/state-at`, `/stream-slice` envelope,
+  `/loc-trails`, `/buckets?layout=row`, the `/items` summary) were flipped
+  to int32 ms in v57 — but under the SAME descriptive key they carried in
+  v55: **`time`** (events row, row-bucket, state-at envelope, items
+  `firstTake`). That is the dense/sparse rule (see the [ChangeI16 /
+  Interval note](#changei16--changestr--interval)): event-scaled sparse
+  surfaces use `time`, sample-rate-scaled dense arrays use `t`; both are
+  int32 ms. Envelope bounds are `start`/`end` (stream-slice) or
+  `start`/`windowMs` (columnar buckets), all int32 ms. `view.UnitSec` is
+  deleted.
+- **`timeUnit` is a constant `"ms"` self-description echo.** Every
   `/v1/demos/{id}/*` response that carries match-position time values
-  echoes a top-level **`"timeUnit":"ms"|"s"`**, except `/demoinfo` (KTX's
-  own clock, a mix of native units — §DemoInfoResult) and
-  `/artifacts/{name}` (raw stored sections, int32 ms as-is — the exact-ms
-  escape hatch; `/artifacts/los` is the lone exception, a materialized view
-  aliasing `/los` and carrying its `"ms"` echo). Responses with no
-  match-position time — `/loc-table`,
-  `/loc-graph`, `/metadata` — carry no echo. There is no `units` param;
-  the value is FIXED per endpoint. Native ms: `/frags`, `/damage`,
-  `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, the
-  `/items` full timeline, `/overview`, `/aim`, `/buckets?layout=column`,
-  `/region-control`, `/los`, `/streams/projectiles`, `/streams/beams`,
-  `/streams/nails`. Native seconds: `/events`, `/state-at`,
-  `/stream-slice` envelope, `/loc-trails`, `/buckets?layout=row`, the
-  `/items` summary.
-
-The field-name conventions still hold: the sparse match-position `t`
-(int32 ms) and `time` (float seconds) names are absolute everywhere, and
-dense per-sample arrays use compact names and stay int32 ms — the
-`/stream-slice` embedded change / interval / position tracks (`t`/`s`/`e`
-are ms even though that envelope's `timeUnit` is `s`), the `/aim`
-crosshair `t` + `lgRamp` `since` samples, and the columnar `/buckets`
-axis `startMs` + `windowMs` (Ms-suffixed; a window *size*). For those
-three the whole response is ms, so their `timeUnit` is a truthful `ms`.
+  echoes a top-level **`"timeUnit":"ms"`**. `/artifacts/{name}` is no
+  exception: since Phase 5 it carries a `"timeUnit":"ms"` sibling for
+  every time-bearing section it serves (`/artifacts/los`, aliasing `/los`,
+  is one such). `/loc-graph` echoes too — its node weights are aggregate
+  durations, int32 ms since v57. The exceptions carry no match-relative
+  time and no echo: `/demoinfo` (KTX's own clock, a mix of native units —
+  §DemoInfoResult) is the sole seconds island, and the genuinely timeless
+  sections — `/metadata`, `/loc-table`, `/maps/{map}/entities` — carry no
+  echo.
+- **Time-valued query params are int32 ms too.** `from` / `to` / `time`
+  on demo endpoints are integer milliseconds; a non-integer value 400s
+  `invalid_param` with an `(integer milliseconds)` hint. Search
+  `from`/`to` are calendar dates (`YYYY-MM-DD`), not times.
 
 See [mvd-api/API.md §2.1](../mvd-api/API.md) for the full endpoint matrix
 and the authoritative per-operation shapes in
@@ -1325,16 +1335,13 @@ truth. Integer storage:
    (pre-normalize, the demo-relative match start) directly.
 4. **View layer** (`mvd-analytics/view/`): if the field is queryable
    via `view.Buckets` / `view.Events` / `view.StreamSlice` /
-   `view.StateAt`, follow the existing pattern — accept window
-   bounds in float64 seconds, convert to int32 ms once at entry, do
-   comparisons in int32 ms, emit float64 seconds at the public
-   output. Don't push ms through the view's public surface without a
-   deliberate decision.
+   `view.StateAt`, follow the existing pattern — window bounds and
+   emitted timestamps are all int32 ms end-to-end (pure-ms model, v57);
+   no float conversion at the boundary.
 5. **Tests**: write fixtures with int32-ms literals (`Time: 5000`,
    not `Time: 5.0`).
-6. **Frontend** (`mvd-web/static/app.js`): if the new field is read
-   from the raw schema (not via the view layer), add a `* 0.001` at
-   the read site. View-layer consumers (most panels) need no change.
+6. **Frontend** (`mvd-web/static/app.js`): the field is int32 ms whether
+   read from the raw schema or via the view layer — no `* 0.001` scaling.
 
 ### Append rules (the dedup invariant)
 
@@ -1479,7 +1486,7 @@ across arrays.
 ```go
 view.BucketsColumnar(r, view.BucketsOptions{WindowMs: 50, IncludeTeam: true})
 // → *ColumnarBuckets {
-//     windowMs, startMs, count, partialLastMs?,
+//     windowMs, start, count, partialLastMs?,
 //     locTable?: ["", "RA", …],           // li legend (v53); present iff an li column is emitted
 //     players: { name: {
 //        first, n,                       // active span [first, first+n)
@@ -1496,7 +1503,7 @@ view.BucketsColumnar(r, view.BucketsOptions{WindowMs: 50, IncludeTeam: true})
 //   }
 ```
 
-Conventions: `time(i) = startMs + i*windowMs` (int32 ms); booleans and
+Conventions: `time(i) = start + i*windowMs` (int32 ms); booleans and
 the `alive` mask are `0`/`1`; the `li` column keeps the compact raw
 index and the envelope's `locTable` legend decodes it (schema v53 —
 identical content to `/loc-table`, index 0 = the `""` no-loc sentinel),
@@ -1518,7 +1525,7 @@ per-player spawn/death event streams (`/events`, or the raw
 
 ```go
 view.Events(r, view.EventsFilter{
-    StartTime: 60.0, EndTime: 120.0,
+    StartTime: 60000, EndTime: 120000, // int32 ms
     Types: []string{"frag", "powerup"},
 })
 // → *EventsView { Events: []TaggedEvent }
@@ -1558,16 +1565,16 @@ adds `damage` when its raw fold diverged from `bounded`. Mirrors the
 
 ```go
 view.StreamSlice(r, view.StreamSliceOptions{
-    StartTime: 432.0, EndTime: 442.0,
-    Players:   []string{"bps"},
-    Fields:    []string{"h", "a", "rl", "pe"},
+    Start:   432000, End: 442000, // int32 ms
+    Players: []string{"bps"},
+    Fields:  []string{"h", "a", "rl", "pe"},
 })
-// → *StreamSliceView { Players: []PlayerSlice }
+// → *StreamSliceView { Start, End, Players: []PlayerSlice }
 ```
 
-Raw, unreduced change entries falling in `[StartTime, EndTime)`. For
+Raw, unreduced change entries falling in `[Start, End)` (int32 ms). For
 each requested field, a synthetic carry-forward entry is prepended at
-`StartTime` showing the value at window entry; intervals overlapping
+`Start` showing the value at window entry; intervals overlapping
 the window are clamped.
 
 The loc field is resolved to loc **names** by default (JSON key `loc`,
@@ -1579,11 +1586,11 @@ get the raw `li` index stream (`[]ChangeI16`) instead — decode it via
 
 ```go
 view.StateAt(r, view.StateAtOptions{
-    Time:    432.5,
+    Time:    432500, // int32 ms
     Players: []string{"bps"},
     Fields:  []string{"h", "a", "rl", "pos"},
 })
-// → *StateAtView { Time, Players: map[string]PlayerStateAt }
+// → *StateAtView { Time (JSON key "time"), Players: map[string]PlayerStateAt }
 ```
 
 Resolves each requested field at `Time`. Change streams use latest
@@ -1657,9 +1664,11 @@ Defined in `result/locgraph.go`.
 ### LocNode
 
 `{ name, x, y, z, total, byPlayer, byTeam, armed?, unarmed?, quad?, pent? }`
-— total seconds spent at each named location, aggregated all-players +
-per-player + per-team. `armed`, `unarmed`, `quad` and `pent` are optional
-`LocWeights` (`{ total, byPlayer, byTeam }`, same shape) carrying that
+— total time spent (int32 ms, schema v57) at each named location,
+aggregated all-players + per-player + per-team (`total` / `byPlayer` /
+`byTeam`; `x`/`y`/`z` are float map coords). `armed`, `unarmed`, `quad`
+and `pent` are optional
+`LocWeights` (`{ total, byPlayer, byTeam }`, same int32-ms shape) carrying that
 breakdown restricted to samples where the player held RL or LG (`armed`),
 held neither (`unarmed`, the complement of `armed`), or had an active
 quad / pent powerup; omitted when no observed sample met the condition.
@@ -1712,7 +1721,7 @@ gets "up" for such weapons; the closed phases still carry
 take aggregates instead of the phase timeline —
 `{ items: [{ name, kind, entNum, loc?, takenCount, byPlayer?: {name: n},
 firstTake?: { time, takenBy?, team? } }] }` with `time` in match-relative
-**seconds** (view surface unit). With a `from`/`to` window, the full
+**int32 ms** (pure-ms view surface). With a `from`/`to` window, the full
 timeline keeps phases **overlapping** the window while the summary
 counts takes **inside** it; identity-filtered items survive with
 `takenCount: 0` when nothing took them in the window.
@@ -1767,13 +1776,13 @@ its `teleportDst` (where you arrive) by `teleportSrc.target` ==
 ## Backpacks (`backpacks`)
 
 Defined in `result/backpacks.go`. Each `BackpackDrop` is
-`{ t, player, team, weapon ("rl"|"lg"), origin, loc, entNum }`.
+`{ time, player, team, weapon ("rl"|"lg"), origin, loc, entNum }`.
 `entNum` is the join key with `WeaponPickup.BackpackEnt`.
 
 ## WeaponPickups (`weaponPickups`)
 
 Defined in `result/weapon_pickups.go`. Each entry is a slot-weapon
-acquisition: `{ t, player, team, weapon,
+acquisition: `{ time, player, team, weapon,
 source ("world"|"backpack"|"unknown"), hadBefore, inferred, kills,
 nextDeathTime, backpackEnt, dropper, dropperTeam, dropTime }`. `kills`
 is the kills-before-next-death effectiveness metric (only non-zero on
@@ -1800,7 +1809,7 @@ one cheap fetch.
 ```jsonc
 {
   "players":    [ { "name", "team"?, "loc"? } ],   // match-start spawn loc
-  "firstTakes": [ { "item", "kind", "entNum", "loc"?, "t", "takenBy", "team"? } ]
+  "firstTakes": [ { "item", "kind", "entNum", "loc"?, "time", "takenBy", "team"? } ]
 }
 ```
 
@@ -1811,7 +1820,7 @@ one cheap fetch.
   (warmup takes are skipped), sorted by time. Tracked kinds: armors,
   mega, powerups, and the RL/LG weapon pads. `item`/`entNum`/`loc`
   identify the spawner (`ItemTimeline` naming: `ya_1` vs `ya_2`). A
-  spawner nobody took has no entry. `t` is match-relative ms.
+  spawner nobody took has no entry. `time` is match-relative ms.
 - Omitted entirely when no match start was detected (t=0 would be the
   demo open, not an opening).
 
@@ -1858,6 +1867,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v57 | **Pure-ms time model + bound renames.** Every time value in the API is now int32 ms — inputs and outputs, REST and MCP alike. The six v56 seconds surfaces (`/events`, `/buckets?layout=row`, `/state-at`, `/stream-slice` envelope, `/loc-trails`, `/items` summary) flip to int32 ms; the view layer does no float time math. `LocGraphResult` node weights (`LocNode`/`LocWeights` `total`/`byPlayer`/`byTeam`) also flip from float64 seconds to int32 ms (a post-review fix; edge transition-count weights stay int), and `/loc-graph` now echoes `timeUnit:"ms"`. `view.UnitSec` is deleted and `timeUnit` becomes a constant `"ms"` echo. Time-valued query params `from`/`to`/`time` on demo endpoints become **integer ms** (a non-integer value 400s `invalid_param` with an `(integer milliseconds)` hint). Per-item time key follows the dense/sparse rule: event-scaled sparse surfaces keep the descriptive `time` (the v55 spelling — frags/damage/shots/chat/backpacks/weapon-pickups/opening/timeline entries are unchanged from v55; the former v56 `t` on the flipped view surfaces events row / buckets row / state-at envelope / items `firstTake` reverts to `time`), while sample-rate-scaled dense arrays keep the terse `t` (stream tracks, aim samples, columnar grid, projectile/beam columns) — both int32 ms. Other key renames: stream-slice envelope `startTime`/`endTime`→`start`/`end`; columnar buckets `startMs`→`start`; `LosTrack` `o`/`iv`→`other`/`intervals`; `MessagesResult` array key `events`→`messages` (so `/artifacts/messages` is `{messages:{messages:[…]}}`). Governed top-level arrays that were nullable are now never null (`/events`, `/stream-slice` `players`, `/loc-trails` `players`). Deliberate non-renames: `Interval` keeps terse `s`/`e` (per-row keys stay terse); projectile/beam `s*`/`e*` column-family prefixes; `windowMs`/`partialLastMs` durations. `/demoinfo` stays the KTX-native seconds island; search `from`/`to` stay calendar dates. |
 | v56 | **`timeUnit` echo on the REST/MCP transport** (additive; stored structs unchanged — still int32 ms). `timeUnit` is the unit of every time value in a response: **every `/v1/demos/{id}/*` response that carries match-position time values echoes a top-level `timeUnit`, except `/demoinfo` (mixed KTX-native units) and `/artifacts/{name}` (raw stored bytes); responses with no match-position time — `/loc-table`, `/loc-graph`, `/metadata` — carry no echo**. The value is FIXED per endpoint — no unit selection: `ms` for frags/damage/shots/chat/airgibs/backpacks/weapon-pickups/items-timeline/overview/aim/buckets-column/region-control/los/streams-projectiles/streams-beams/streams-nails, `s` for the derived views events/state-at/stream-slice-envelope/loc-trails/buckets-row/items-summary. Field-name polarity (exception-free): **`t` is int32 ms, `time` is float seconds** — always, on every endpoint. The stored ms event lists (frags/damage/shots/chat/backpacks/weapon-pickups/airgibs/timeline events) carry their timestamp under `t`; the float-seconds view surfaces (events/state-at/buckets-row/items-summary `firstTake`) carry it under `time`; loc-trails residences use `start`/`end`. The dense per-sample arrays (`/stream-slice` embedded tracks, `/aim` samples, columnar `/buckets` axis) already used `t`-in-ms and conform natively. The four formerly bare-array endpoints wrap their array to carry the echo: `/chat`→`{timeUnit,messages}`, `/airgibs`→`{timeUnit,airgibs}`, `/backpacks`→`{timeUnit,backpacks}`, `/weapon-pickups`→`{timeUnit,pickups}` (the one non-additive shape change). See the §"Transport surface" note above and [mvd-api/API.md §2.1](../mvd-api/API.md). |
 | v55 | Bounded damage becomes **death-value-derived and the default**. The v54 shadow-health cap is replaced: a survived hit is bounded == raw by identity, a killing hit's overkill comes from the end-of-frame death broadcast (bounded = raw + deathValue; corpus reconciliation tightens ~2.5x, max +-16/player on given/taken). Fallback to the approximate shadow cap only for the -99 corpse clamp and respawn-masked deaths; same-frame multi-hit deaths cascade the overkill from the last hit backward. The REST/MCP `dmg` **default flips to `bounded`** for summaries AND the full log (`raw`/`both` opt-in; a *defaulted* request on a `skipped:*` demo falls back to raw, only an explicit `dmg=bounded` 422s). Unfiltered bounded summaries substitute KTX's exact scoreboard figures (given/givenTeam/givenSelf/ewep/byWeapon-enemy; `taken` and the `enemyVs*` buckets stay reconstructed) with provenance in the new `damage.boundedSource` (`ktx` / `reconstructed`). |
 | v54 | The **bounded damage family** (additive). The wire carries only KTX's unbound damage; the scoreboard's bounded `dmg_dealt` (armor absorbed + health damage capped to remaining health) is now reconstructed per hit from tracked victim vitals: `damage.events[].bounded` (absent = equal to `damage`; `0` is a real nullified-hit value), `damage.byPlayer.<p>.bounded` (a nested `PlayerDamage`), `damage.scoreboard` deltas gain a `bounded` nest incl. `streamTeam`/`scoreTeam`, plus the `dmg` family echo and `boundedMode` (`skipped:*` on midair/instagib/dmgfrags demos — no bounded fields there). Telefrags **and stomps** now fold their bounded damage into `given`/`givenTeam`/`taken` in **both** families, matching KTX's own accumulation (telefrag: armor+health, the wire 9999 is a sentinel; stomp: the honest ~10 HP wire value); `telefrags[]`/`stomps[]` entries carry the per-kill `bounded` value. `byWeapon`/`matrix`/`ewep`/`totalDamage` still exclude positional kills (KTX `wpNONE` parity). |

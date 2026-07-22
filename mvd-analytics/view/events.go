@@ -1,7 +1,9 @@
 package view
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
@@ -10,8 +12,8 @@ import (
 // type. An empty Types filter selects the discrete-event set (D15);
 // an explicit list — even with one entry — overrides that default.
 type EventsFilter struct {
-	StartTime float64
-	EndTime   float64
+	StartTime int32 // window start, int32 ms (0 = no bound)
+	EndTime   int32 // window end, int32 ms (0 = no bound)
 	Players   []string
 	Types     []string
 	// LocIndex selects the loc-event representation: false (default)
@@ -23,9 +25,9 @@ type EventsFilter struct {
 // EventsView is the response shape: a flat list of TaggedEvent in
 // time order.
 type EventsView struct {
-	// TimeUnit echoes this endpoint's native unit ("s"); set by the mvd-api
-	// handler (schema v56). Omitted (and thus absent) on the WASM/qw-analyze
-	// paths, which never set it.
+	// TimeUnit echoes this endpoint's native unit (constant "ms", schema v57);
+	// set by the mvd-api handler. Omitted (and thus absent) on the WASM/
+	// qw-analyze paths, which never set it.
 	TimeUnit TimeUnit      `json:"timeUnit,omitempty"`
 	Events   []TaggedEvent `json:"events"`
 }
@@ -35,7 +37,7 @@ type EventsView struct {
 // and may be nil for spawn / death where the timestamp is the whole
 // signal.
 type TaggedEvent struct {
-	T      float64        `json:"time"`
+	T      int32          `json:"time"`
 	Type   string         `json:"type"`
 	Player string         `json:"player,omitempty"`
 	Detail map[string]any `json:"detail,omitempty"`
@@ -48,41 +50,67 @@ var defaultEventTypes = []string{
 	"pickup",
 }
 
+// KnownEventTypes is every event type Events recognises: the default
+// discrete set (defaultEventTypes) plus the opt-in high-frequency /
+// dedicated-lens types (damage, telefrag, stomp, health, armor, loc). An
+// EventsFilter.Types value outside this set is rejected (the handler turns
+// the returned error into 400 invalid_param). The openapi EventTypes enum is
+// drift-pinned to this slice.
+var KnownEventTypes = []string{
+	"frag", "powerup", "streak", "spawn", "death", "weapon", "item", "chat",
+	"pickup", "damage", "telefrag", "stomp", "health", "armor", "loc",
+}
+
 // Events returns a time-ordered list of events matching the filter.
 // Synthesised from result.TimelineAnalysis.{FragEvents, PowerupEvents,
 // FragStreaks}, result.Messages, result.Streams change entries, and —
 // for the pickup type — result.Items / result.WeaponPickups.
 func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 	if r == nil {
-		return &EventsView{}, nil
+		return &EventsView{Events: []TaggedEvent{}}, nil
 	}
 	types := filter.Types
 	if len(types) == 0 {
 		types = defaultEventTypes
+	} else {
+		// Enum values are case-insensitive, matching every other token
+		// filter (players/weapons/loc): lowercase before validating AND
+		// before use so the want-map keys line up with the lowercase
+		// KnownEventTypes vocabulary. An explicit list is validated so a
+		// typo 400s instead of silently matching nothing (the silent-enum gap).
+		known := make(map[string]bool, len(KnownEventTypes))
+		for _, t := range KnownEventTypes {
+			known[t] = true
+		}
+		lowered := make([]string, len(types))
+		for i, t := range types {
+			lt := strings.ToLower(t)
+			if !known[lt] {
+				return nil, fmt.Errorf("unknown event type %q; valid: %s", t, strings.Join(KnownEventTypes, ", "))
+			}
+			lowered[i] = lt
+		}
+		types = lowered
 	}
 	want := make(map[string]bool, len(types))
 	for _, t := range types {
 		want[t] = true
 	}
 	pf := newPlayerFilter(filter.Players)
-	// Public end is float64 seconds; schema stores int32 ms. Convert at
-	// the boundary.
+	// Pure-ms model (schema v57): filter bounds, stream times, and the
+	// emitted TaggedEvent.T are all int32 ms — no conversion.
 	end := filter.EndTime
 	if end == 0 && r.Streams != nil {
-		end = secs(r.Streams.Global.MatchEnd)
+		end = r.Streams.Global.MatchEnd
 	}
 	if end == 0 {
 		end = inferMatchEnd(r)
 	}
 
-	// Helper: convert int32-ms timestamp from a result-schema field
-	// into the float64-seconds TaggedEvent.T, plus window check.
-	msToSec := func(tMs int32) float64 { return secs(tMs) }
-
 	var events []TaggedEvent
 	if want["frag"] && r.TimelineAnalysis != nil {
 		for _, fe := range r.TimelineAnalysis.FragEvents {
-			ts := msToSec(fe.Time)
+			ts := fe.Time
 			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
@@ -97,7 +125,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 	}
 	if want["powerup"] && r.TimelineAnalysis != nil {
 		for _, pe := range r.TimelineAnalysis.PowerupEvents {
-			ts := msToSec(pe.Time)
+			ts := pe.Time
 			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
@@ -108,7 +136,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			// D10, PLAN-api-usability). The Result keeps all three.
 			detail := map[string]any{
 				"powerup": pe.PowerupType,
-				"endTime": msToSec(pe.EndTime),
+				"endTime": pe.EndTime,
 				"frags":   pe.Frags,
 				"team":    pe.Team,
 			}
@@ -119,7 +147,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 	}
 	if want["streak"] && r.TimelineAnalysis != nil {
 		for _, fs := range r.TimelineAnalysis.FragStreaks {
-			ts := msToSec(fs.Time)
+			ts := fs.Time
 			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
@@ -128,8 +156,8 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			}
 			detail := map[string]any{
 				"length":   fs.Frags,
-				"endTime":  msToSec(fs.EndTime),
-				"duration": msToSec(fs.Duration),
+				"endTime":  fs.EndTime,
+				"duration": fs.Duration,
 				"weapon":   fs.Ewep,
 				"team":     fs.Team,
 			}
@@ -140,7 +168,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 	}
 	if want["damage"] && r.Damage != nil {
 		for _, d := range r.Damage.Events {
-			ts := msToSec(d.Time)
+			ts := d.Time
 			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
@@ -177,7 +205,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 		// Telefrags also appear as "frag" events (from obituaries); this is
 		// the dedicated lens, opt-in so the default kill feed isn't doubled.
 		for _, tf := range r.Damage.Telefrags {
-			ts := msToSec(tf.Time)
+			ts := tf.Time
 			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
@@ -200,7 +228,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 		// Like telefrag: stomp kills also appear as "frag" events, so this
 		// dedicated lens is opt-in to avoid doubling the kill feed.
 		for _, st := range r.Damage.Stomps {
-			ts := msToSec(st.Time)
+			ts := st.Time
 			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
@@ -226,7 +254,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 	}
 	if want["chat"] && r.Messages != nil {
 		for _, msg := range r.Messages.Events {
-			ts := msToSec(msg.Time)
+			ts := msg.Time
 			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
@@ -263,7 +291,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 					if ph.TakenAt == 0 && ph.TakenBy == "" {
 						continue // untaken availability phase
 					}
-					ts := msToSec(ph.TakenAt)
+					ts := ph.TakenAt
 					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
@@ -292,7 +320,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			if wp.Source == "world" {
 				continue // world takes are covered by the item timelines above
 			}
-			ts := msToSec(wp.Time)
+			ts := wp.Time
 			if !inWindow(ts, filter.StartTime, end) {
 				continue
 			}
@@ -325,11 +353,12 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 				continue
 			}
 			// Spawns / Deaths are int32 ms (schema v8); the TaggedEvent
-			// public schema is float64 seconds. Convert per-entry; the
-			// outer filter / window is in seconds.
+			// public schema is int32 ms too (v57 pure-ms model), so the
+			// timestamp passes straight through — the outer filter / window
+			// is int32 ms as well.
 			if want["spawn"] {
 				for _, tMs := range p.Spawns {
-					ts := secs(tMs)
+					ts := tMs
 					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
@@ -348,7 +377,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			}
 			if want["death"] {
 				for _, tMs := range p.Deaths {
-					ts := secs(tMs)
+					ts := tMs
 					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
@@ -376,7 +405,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			if want["health"] {
 				prev := int16(0)
 				for i, c := range p.Health {
-					ts := msToSec(c.T)
+					ts := c.T
 					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
@@ -391,7 +420,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			if want["armor"] {
 				prev := int16(0)
 				for i, c := range p.Armor {
-					ts := msToSec(c.T)
+					ts := c.T
 					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
@@ -406,7 +435,7 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			if want["loc"] && r.TimelineAnalysis != nil {
 				locTable := r.TimelineAnalysis.LocTable
 				for _, c := range p.Loc {
-					ts := msToSec(c.T)
+					ts := c.T
 					if !inWindow(ts, filter.StartTime, end) {
 						continue
 					}
@@ -430,6 +459,9 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 		}
 		return events[i].Type < events[j].Type
 	})
+	if events == nil {
+		events = []TaggedEvent{}
+	}
 	return &EventsView{Events: events}, nil
 }
 
@@ -464,7 +496,7 @@ func locAtSpawn(stream []result.ChangeI16, tMs int32) (int16, bool) {
 	return 0, false
 }
 
-func inWindow(t, start, end float64) bool {
+func inWindow(t, start, end int32) bool {
 	if start != 0 && t < start {
 		return false
 	}
@@ -478,10 +510,10 @@ func appendIntervalEvents(
 	events []TaggedEvent,
 	player, kindLabel string,
 	streams map[string][]result.Interval,
-	start, end float64,
+	start, end int32,
 ) []TaggedEvent {
-	// Interval.Start/End are int32 ms (schema v8); TaggedEvent.T is
-	// float64 seconds — convert each emission. Iterate codes in sorted
+	// Interval.Start/End and TaggedEvent.T are all int32 ms (schema v57).
+	// Iterate codes in sorted
 	// order (not Go map-range order) so same-(T,Type) events across codes
 	// append deterministically; the caller's final (T,Type) sort is stable
 	// and leaves these ties in this order, giving byte-stable output.
@@ -493,8 +525,8 @@ func appendIntervalEvents(
 	for _, code := range codes {
 		ivs := streams[code]
 		for _, iv := range ivs {
-			startSec := secs(iv.Start)
-			endSec := secs(iv.End)
+			startSec := iv.Start
+			endSec := iv.End
 			if inWindow(startSec, start, end) {
 				events = append(events, TaggedEvent{
 					T: startSec, Type: kindLabel, Player: player,
@@ -513,11 +545,10 @@ func appendIntervalEvents(
 }
 
 // inferMatchEnd is a fallback when r.Streams is absent. Reads
-// Match.Duration (match-relative coords ⇒ end == duration) and converts
-// to float64 seconds (public view API unit; result schema stores ms).
-func inferMatchEnd(r *result.Result) float64 {
+// Match.Duration (match-relative coords ⇒ end == duration), int32 ms.
+func inferMatchEnd(r *result.Result) int32 {
 	if r.Match != nil {
-		return secs(r.Match.Duration)
+		return r.Match.Duration
 	}
 	return 0
 }

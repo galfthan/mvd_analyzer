@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/mvd-analyzer/mvd-analytics/analyzer"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
 	"github.com/mvd-analyzer/mvd-api/internal/democache"
@@ -165,6 +166,19 @@ func writeInvalidParam(w http.ResponseWriter, err error) bool {
 	return true
 }
 
+// writeUnknownParam writes the 400 unknown_param envelope for a non-nil err
+// (an unrecognised query key, from qp.Unknown). Reports whether it wrote, so
+// callers do `if writeUnknownParam(w, p.Unknown()) { return }` right after the
+// writeInvalidParam(p.Err()) check — the invalid_param → unknown_param →
+// missing_param/availability order.
+func writeUnknownParam(w http.ResponseWriter, err error) bool {
+	if err == nil {
+		return false
+	}
+	writeError(w, http.StatusBadRequest, "unknown_param", err.Error())
+	return true
+}
+
 // cacheState is the X-Cache value for the tier that served meta.
 func cacheState(meta democache.CacheMeta) string {
 	switch {
@@ -233,6 +247,9 @@ func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	writeJSON(w, http.StatusOK, OverviewEnvelope{TimeUnit: view.UnitMs, Overview: BuildOverview(res)})
 }
 
@@ -242,6 +259,9 @@ func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleMetadata(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	md, err := view.Metadata(res)
@@ -261,13 +281,16 @@ func (s *server) handleLocGraph(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	lg, err := view.LocGraph(res)
 	if err != nil {
 		s.writeUnavailable(w, r, err, "locgraph_unavailable",
 			"this demo has no loc graph (probably no position track was emitted)")
 		return
 	}
-	writeJSON(w, http.StatusOK, lg)
+	writeJSON(w, http.StatusOK, view.LocGraphEnvelope{TimeUnit: view.UnitMs, LocGraphResult: lg})
 }
 
 // handleFrags: GET /v1/demos/{id}/frags — top-level frag aggregates +
@@ -286,8 +309,8 @@ func (s *server) handleLocGraph(w http.ResponseWriter, r *http.Request) {
 //	               where killer or victim is in the set
 //	weapons  csv   — restrict aggregates + the Frags list to these weapons
 //	               (legacy alias: weapon)
-//	from     float — window start, match-relative seconds (0 = no bound)
-//	to       float — window end, match-relative seconds (0 = no bound)
+//	from     int — window start, match-relative integer ms (0 = no bound)
+//	to       int — window end, match-relative integer ms (0 = no bound)
 //	summary  bool  — drop the per-event Frags log; return only aggregates
 func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
@@ -298,11 +321,14 @@ func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 	opts := view.FragOptions{
 		Players: p.CSV("players"),
 		Weapons: p.CSVAny("weapons", "weapon"),
-		From:    p.Sec("from", 0),
-		To:      p.Sec("to", 0),
+		From:    p.Ms("from", 0),
+		To:      p.Ms("to", 0),
 		Summary: p.Bool("summary"),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 	out, err := view.Frags(res, opts)
@@ -340,8 +366,8 @@ func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 //	               entries where attacker or victim is in the set
 //	weapons  csv   — restrict aggregates + Matrix/Events + per-player
 //	               ByWeapon to these (attacker) weapons (legacy alias: weapon)
-//	from     float — window start, match-relative seconds (0 = no bound)
-//	to       float — window end, match-relative seconds (0 = no bound)
+//	from     int — window start, match-relative integer ms (0 = no bound)
+//	to       int — window end, match-relative integer ms (0 = no bound)
 //	summary  bool  — drop the per-hit Events log; return only aggregates
 //	dmg      enum  — raw | bounded | both (default: bounded)
 func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
@@ -353,12 +379,15 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 	opts := view.DamageOptions{
 		Players: p.CSV("players"),
 		Weapons: p.CSVAny("weapons", "weapon"),
-		From:    p.Sec("from", 0),
-		To:      p.Sec("to", 0),
+		From:    p.Ms("from", 0),
+		To:      p.Ms("to", 0),
 		Summary: p.Bool("summary"),
 		Dmg:     p.Dmg(),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 	// Single resolution point for the damage-family default — the MCP layer
@@ -415,6 +444,13 @@ func (s *server) handleShots(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	// `nails` is the retired opt-in — accepted and ignored (see the doc
+	// comment) rather than rejected, so old callers don't 400.
+	p := newQP(r.URL.Query())
+	p.Accept("nails")
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	sh, err := view.Shots(res)
 	if err != nil {
 		s.writeUnavailable(w, r, err, "shots_unavailable",
@@ -442,8 +478,8 @@ func (s *server) handleShots(w http.ResponseWriter, r *http.Request) {
 // Query params:
 //
 //	players  csv   — scope to these shooters
-//	from     float — window start, match-relative seconds (0 = no bound)
-//	to       float — window end, match-relative seconds (0 = no bound)
+//	from     int — window start, match-relative integer ms (0 = no bound)
+//	to       int — window end, match-relative integer ms (0 = no bound)
 //	summary  bool  — return only the per-player weapons aggregates
 func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
@@ -453,11 +489,14 @@ func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
 	p := newQP(r.URL.Query())
 	opts := view.AimOptions{
 		Players: p.CSV("players"),
-		From:    p.Sec("from", 0),
-		To:      p.Sec("to", 0),
+		From:    p.Ms("from", 0),
+		To:      p.Ms("to", 0),
 		Summary: p.Bool("summary"),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 	am, err := view.Aim(res, opts)
@@ -475,7 +514,7 @@ func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
 //
 // Query params:
 //
-//	from, to   match-relative seconds, both inclusive
+//	from, to   match-relative integer ms, both inclusive
 //	players    csv — restrict to these speakers
 //	types      csv — defaults to ["chat","teamsay"]; pass a subset to narrow
 //
@@ -489,13 +528,29 @@ func (s *server) handleChat(w http.ResponseWriter, r *http.Request) {
 	}
 	p := newQP(r.URL.Query())
 	opts := view.ChatOptions{
-		From:    p.Sec("from", 0),
-		To:      p.Sec("to", 0),
+		From:    p.Ms("from", 0),
+		To:      p.Ms("to", 0),
 		Players: p.CSV("players"),
 		Types:   p.CSV("types"),
 	}
 	if writeInvalidParam(w, p.Err()) {
 		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	// types is a closed vocabulary {chat, teamsay}; a typo must 400, not
+	// silently match nothing. Enum values are case-insensitive (matching
+	// every other token filter): lowercase before validating AND before use
+	// so Chat()'s case-sensitive ev.Type match (stored lowercase) lines up.
+	for i, t := range opts.Types {
+		lt := strings.ToLower(t)
+		if lt != "chat" && lt != "teamsay" {
+			writeError(w, http.StatusBadRequest, "invalid_param",
+				fmt.Sprintf("unknown chat type %q; valid: chat, teamsay", t))
+			return
+		}
+		opts.Types[i] = lt
 	}
 	writeJSON(w, http.StatusOK, view.ChatEnvelope{TimeUnit: view.UnitMs, Messages: view.Chat(res, opts)})
 }
@@ -506,6 +561,9 @@ func (s *server) handleChat(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleDemoInfo(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	di, err := view.DemoInfo(res)
@@ -525,7 +583,7 @@ func (s *server) handleDemoInfo(w http.ResponseWriter, r *http.Request) {
 //	players  csv — restrict to drops by these dropper names
 //	weapons  csv — restrict to these weapons ("rl"/"lg"; case-insensitive;
 //	             legacy alias: weapon)
-//	from/to  match-relative seconds — window the drop time
+//	from/to  match-relative integer ms — window the drop time
 func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
@@ -535,10 +593,13 @@ func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 	opts := view.BackpackOptions{
 		Players: p.CSV("players"),
 		Weapons: p.CSVAny("weapons", "weapon"),
-		From:    p.Sec("from", 0),
-		To:      p.Sec("to", 0),
+		From:    p.Ms("from", 0),
+		To:      p.Ms("to", 0),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 	writeJSON(w, http.StatusOK, view.BackpacksEnvelope{TimeUnit: view.UnitMs, Backpacks: view.Backpacks(res, opts)})
@@ -565,7 +626,7 @@ func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 // Phases with no TakenBy survive any players= filter (they represent
 // the item's availability state at match end / dropped runs).
 //
-//	from/to  match-relative seconds — keep phases OVERLAPPING the window
+//	from/to  match-relative integer ms — keep phases OVERLAPPING the window
 //	         (a phase covers [availableFrom, respawnAt), open-ended when
 //	         respawnAt is 0)
 //	summary  bool — per-item take aggregates (takenCount, byPlayer,
@@ -581,19 +642,22 @@ func (s *server) handleItems(w http.ResponseWriter, r *http.Request) {
 		Items:   p.CSV("items"),
 		Players: p.CSV("players"),
 		Kinds:   p.CSV("kinds"),
-		From:    p.Sec("from", 0),
-		To:      p.Sec("to", 0),
+		From:    p.Ms("from", 0),
+		To:      p.Ms("to", 0),
 	}
 	summary := p.Bool("summary")
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
-	// The native unit differs by shape and is fixed per shape: the full phase
-	// timeline is ms-native (availableFrom/takenAt/respawnAt are stored ms), the
-	// summary firstTake.t is seconds-native. timeUnit echoes it either way.
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	// Both shapes are int32 ms (v57 pure-ms model): the full phase timeline
+	// (availableFrom/takenAt/respawnAt) and the summary firstTake.t alike.
+	// timeUnit echoes the constant "ms".
 	if summary {
 		sv := view.ItemsSummary(res, opts)
-		sv.TimeUnit = view.UnitSec
+		sv.TimeUnit = view.UnitMs
 		writeJSON(w, http.StatusOK, sv)
 		return
 	}
@@ -610,7 +674,7 @@ func (s *server) handleItems(w http.ResponseWriter, r *http.Request) {
 //	weapons  csv — "rl","lg","gl","ssg","sng","ng" (case-insensitive;
 //	             legacy alias: weapon)
 //	source   "world" | "backpack" | "unknown"
-//	from/to  match-relative seconds — window the pickup time
+//	from/to  match-relative integer ms — window the pickup time
 func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
@@ -620,11 +684,14 @@ func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
 	opts := view.WeaponPickupOptions{
 		Players: p.CSV("players"),
 		Weapons: p.CSVAny("weapons", "weapon"),
-		Source:  ciGet(r.URL.Query(), "source"),
-		From:    p.Sec("from", 0),
-		To:      p.Sec("to", 0),
+		Source:  p.Str("source"),
+		From:    p.Ms("from", 0),
+		To:      p.Ms("to", 0),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 	// source is an enum like loc/layout — a typo must 400, not silently
@@ -647,8 +714,8 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 	p := newQP(r.URL.Query())
 	opts := view.BucketsOptions{
 		WindowMs:    p.Int("windowMs", 50),
-		StartTime:   p.Sec("from", 0),
-		EndTime:     p.Sec("to", 0),
+		StartTime:   p.Ms("from", 0),
+		EndTime:     p.Ms("to", 0),
 		Players:     p.CSV("players"),
 		Fields:      p.CSV("fields"),
 		Reducers:    p.Reducers("reducers"),
@@ -659,8 +726,10 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	if opts.Layout == "column" {
-		// The columnar layout's startMs/windowMs axis is int32 ms; echo "ms".
 		cb, err := view.BucketsColumnar(res, opts)
 		if writeInvalidParam(w, err) {
 			return
@@ -673,7 +742,7 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
-	bv.TimeUnit = view.UnitSec
+	bv.TimeUnit = view.UnitMs
 	writeJSON(w, http.StatusOK, bv)
 }
 
@@ -684,8 +753,8 @@ func (s *server) handleEvents(w http.ResponseWriter, r *http.Request) {
 	}
 	p := newQP(r.URL.Query())
 	filter := view.EventsFilter{
-		StartTime: p.Sec("from", 0),
-		EndTime:   p.Sec("to", 0),
+		StartTime: p.Ms("from", 0),
+		EndTime:   p.Ms("to", 0),
 		Players:   p.CSV("players"),
 		Types:     p.CSV("types"),
 		LocIndex:  p.LocIndex(),
@@ -693,11 +762,14 @@ func (s *server) handleEvents(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	ev, err := view.Events(res, filter)
 	if writeInvalidParam(w, err) {
 		return
 	}
-	ev.TimeUnit = view.UnitSec
+	ev.TimeUnit = view.UnitMs
 	writeJSON(w, http.StatusOK, ev)
 }
 
@@ -708,20 +780,23 @@ func (s *server) handleStreamSlice(w http.ResponseWriter, r *http.Request) {
 	}
 	p := newQP(r.URL.Query())
 	opts := view.StreamSliceOptions{
-		StartTime: p.Sec("from", 0),
-		EndTime:   p.Sec("to", 0),
-		Players:   p.CSV("players"),
-		Fields:    p.CSV("fields"),
-		LocIndex:  p.LocIndex(),
+		Start:    p.Ms("from", 0),
+		End:      p.Ms("to", 0),
+		Players:  p.CSV("players"),
+		Fields:   p.CSV("fields"),
+		LocIndex: p.LocIndex(),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 	sl, err := view.StreamSlice(res, opts)
 	if writeInvalidParam(w, err) {
 		return
 	}
-	sl.TimeUnit = view.UnitSec
+	sl.TimeUnit = view.UnitMs
 	writeJSON(w, http.StatusOK, sl)
 }
 
@@ -731,13 +806,9 @@ func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	q := r.URL.Query()
-	if ciGet(q, "time") == "" {
-		writeError(w, http.StatusBadRequest, "missing_param", "time is required")
-		return
-	}
 	p := newQP(q)
 	opts := view.StateAtOptions{
-		Time:     p.Sec("time", 0),
+		Time:     p.Ms("time", 0),
 		Players:  p.CSV("players"),
 		Fields:   p.CSV("fields"),
 		LocIndex: p.LocIndex(),
@@ -745,11 +816,20 @@ func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	// missing_param comes after the param-hygiene checks (invalid → unknown →
+	// missing): a bad or unknown param wins over the absent-time report.
+	if ciGet(q, "time") == "" {
+		writeError(w, http.StatusBadRequest, "missing_param", "time is required")
+		return
+	}
 	sa, err := view.StateAt(res, opts)
 	if writeInvalidParam(w, err) {
 		return
 	}
-	sa.TimeUnit = view.UnitSec
+	sa.TimeUnit = view.UnitMs
 	writeJSON(w, http.StatusOK, sa)
 }
 
@@ -761,16 +841,28 @@ func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
 // the result to the tier-3 artifact cache, so later requests — and later
 // processes, after a restart or an LRU eviction — splice it from disk instead
 // of recomputing. The tier-2 gob stays lean — LOS is never baked into it.
-// Returns 200 with a players array; los is omitted for a player with no
-// sightlines and empty for every player on a map with no provisioned BSP.
+// Returns 200 with a players array (los omitted for a player with no
+// sightlines); 422 los_unavailable when the map has no usable visibility BSP
+// (no map name, BSP not provisioned, or a provisioned BSP that won't parse) —
+// that outcome is never latched or cached, so provisioning the BSP heals it.
 func (s *server) handleLOS(w http.ResponseWriter, r *http.Request) {
 	id, err := democache.ParseDemoID(r.PathValue("id"))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid_demo_id", err.Error())
 		return
 	}
+	// Reject unknown params BEFORE EnsureLOS: LOS is the heaviest lazy pass,
+	// and a typo'd param must not trigger the raycast compute.
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	res, meta, err := s.store.EnsureLOS(r.Context(), id)
 	if err != nil {
+		if errors.Is(err, analyzer.ErrNoBSP) {
+			writeError(w, http.StatusUnprocessableEntity, "los_unavailable",
+				"line of sight needs the map's visibility BSP, which is not available for this demo")
+			return
+		}
 		s.mapStoreError(w, r, err)
 		return
 	}
@@ -783,7 +875,9 @@ func (s *server) handleLOS(w http.ResponseWriter, r *http.Request) {
 
 // losBody is the /los (and `los` artifact) response body: per-player LOS/PVS
 // interval sets. Shared so the curated endpoint and the generic artifact
-// endpoint never fork the shape.
+// endpoint never fork the shape. Only reached on a successful (200) compute —
+// a map with no usable BSP is a 422 los_unavailable before this runs, so this
+// never renders an all-empty body for a BSP-less map.
 func losBody(res *result.Result) any {
 	type losPlayer struct {
 		Name string            `json:"name"`
@@ -814,6 +908,9 @@ func (s *server) handleProjectiles(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	var pr *result.ProjectileStreams
 	if res.Streams != nil {
 		pr = res.Streams.Projectiles
@@ -828,6 +925,9 @@ func (s *server) handleProjectiles(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleBeams(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	var bm *result.BeamStreams
@@ -845,6 +945,9 @@ func (s *server) handleBeams(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleNails(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	var nl *result.ProjectileStreams
@@ -866,8 +969,8 @@ func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 	// Field order here fixes which of several malformed params is reported:
 	// keep from, to, minDwellMs, loc — the historical read order.
 	opts := view.LocTrailsOptions{
-		StartTime:  p.Sec("from", 0),
-		EndTime:    p.Sec("to", 0),
+		StartTime:  p.Ms("from", 0),
+		EndTime:    p.Ms("to", 0),
 		MinDwellMs: p.Int("minDwellMs", 0),
 		Players:    p.CSV("players"),
 		LocIndex:   p.LocIndex(),
@@ -875,11 +978,14 @@ func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	tr, err := view.LocTrails(res, opts)
 	if writeInvalidParam(w, err) {
 		return
 	}
-	tr.TimeUnit = view.UnitSec
+	tr.TimeUnit = view.UnitMs
 	writeJSON(w, http.StatusOK, tr)
 }
 
@@ -890,6 +996,9 @@ func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleLocTable(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	table := []string{}
@@ -904,17 +1013,22 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if err := view.RegionControlAvailable(res); err != nil {
-		s.writeUnavailable(w, r, err, "region_control_unavailable", "this demo has no region-control layout")
-		return
-	}
+	// Param hygiene (invalid → unknown) runs BEFORE the availability 422: a
+	// typo'd param on a demo that also lacks region control must 400, not 422.
 	p := newQP(r.URL.Query())
 	opts := view.RegionControlOptions{
 		WindowMs:  p.Int("windowMs", 50),
-		StartTime: p.Sec("from", 0),
-		EndTime:   p.Sec("to", 0),
+		StartTime: p.Ms("from", 0),
+		EndTime:   p.Ms("to", 0),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	if err := view.RegionControlAvailable(res); err != nil {
+		s.writeUnavailable(w, r, err, "region_control_unavailable", "this demo has no region-control layout")
 		return
 	}
 	rcv, err := view.RegionControl(res, opts)
@@ -932,6 +1046,9 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	airgibs, err := view.Airgibs(res)

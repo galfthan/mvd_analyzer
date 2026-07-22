@@ -2,7 +2,6 @@ package view
 
 import (
 	"encoding/json"
-	"math"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
@@ -14,7 +13,7 @@ import (
 // 4on4 that collapses ~1.5M allocations / ~36 MB JSON to a few hundred
 // slices and an order-of-magnitude smaller payload.
 //
-// The per-bucket time axis is implicit: time(i) = StartMs + i*WindowMs.
+// The per-bucket time axis is implicit: time(i) = Start + i*WindowMs.
 // PartialLastMs, when non-zero, is the (shorter) end of the final
 // bucket; its start is still regular.
 //
@@ -28,12 +27,12 @@ import (
 // when at least one player carries an "li" column; index 0 is the ""
 // no-loc sentinel, same as /loc-table.
 type ColumnarBuckets struct {
-	// TimeUnit echoes this layout's native unit ("ms"): the startMs/windowMs
-	// axis is int32 ms. Set by the mvd-api handler (schema v56); omitted on the
-	// WASM/qw-analyze paths, which build the struct directly.
+	// TimeUnit echoes this layout's native unit (constant "ms", schema v57):
+	// the start/windowMs axis is int32 ms. Set by the mvd-api handler; omitted
+	// on the WASM/qw-analyze paths, which build the struct directly.
 	TimeUnit      TimeUnit                   `json:"timeUnit,omitempty"`
 	WindowMs      int                        `json:"windowMs"`
-	StartMs       int32                      `json:"startMs"`
+	Start         int32                      `json:"start"`
 	Count         int                        `json:"count"`
 	PartialLastMs int32                      `json:"partialLastMs,omitempty"`
 	LocTable      []string                   `json:"locTable,omitempty"`
@@ -130,21 +129,20 @@ func (ct *ColumnarTeam) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
-// bucketGrid is the shared time→bucket mapping. start/end are seconds
-// (public view units); the columnar wire form converts to int32 ms.
+// bucketGrid is the shared time→bucket mapping. start/end are int32 ms
+// (schema v57 pure-ms model); the grid is integer arithmetic throughout.
 type bucketGrid struct {
 	windowMs   int
-	windowSec  float64
-	start, end float64
+	start, end int32
 	count      int
 	hasPartial bool
 }
 
 // bounds returns [bStart, bEnd) for bucket i, matching the loop in
-// Buckets (the final bucket is clamped to end when partial).
-func (g bucketGrid) bounds(i int) (float64, float64) {
-	bStart := g.start + float64(i)*g.windowSec
-	bEnd := bStart + g.windowSec
+// Buckets (the final bucket is clamped to end when partial). All ms.
+func (g bucketGrid) bounds(i int) (int32, int32) {
+	bStart := g.start + int32(i)*int32(g.windowMs)
+	bEnd := bStart + int32(g.windowMs)
 	if g.hasPartial && i == g.count-1 {
 		bEnd = g.end
 	}
@@ -156,27 +154,28 @@ func (g bucketGrid) bounds(i int) (float64, float64) {
 // grid is byte-identical to the row grid; the parity test deep-equals
 // the two builders, so any drift is caught immediately.
 func resolveBucketGrid(r *result.Result, opts BucketsOptions) (bucketGrid, error) {
-	windowMs, windowSec, err := resolveWindow(opts.WindowMs)
+	windowMs, err := resolveWindow(opts.WindowMs)
 	if err != nil {
 		return bucketGrid{}, err
 	}
-	g := bucketGrid{windowMs: windowMs, windowSec: windowSec}
+	g := bucketGrid{windowMs: windowMs}
 	g.end = opts.EndTime
 	g.start = opts.StartTime
 	if g.end == 0 {
-		g.end = secs(r.Streams.Global.MatchEnd)
+		g.end = r.Streams.Global.MatchEnd
 	}
 	if g.start == 0 {
-		g.start = secs(r.Streams.Global.MatchStart)
+		g.start = r.Streams.Global.MatchStart
 	}
 	if g.end <= g.start {
 		return g, nil // count stays 0
 	}
+	wMs := int32(windowMs)
 	totalSpan := g.end - g.start
-	full := int(math.Floor((totalSpan + 1e-12) / windowSec))
-	remainder := totalSpan - float64(full)*windowSec
+	full := int(totalSpan / wMs)
+	remainder := totalSpan - int32(full)*wMs
 	g.count = full
-	g.hasPartial = remainder > 1e-9
+	g.hasPartial = remainder > 0
 	if g.hasPartial {
 		g.count++
 	}
@@ -215,12 +214,12 @@ func BucketsColumnar(r *result.Result, opts BucketsOptions) (*ColumnarBuckets, e
 		redNames[i] = red.Name()
 	}
 
-	cb := &ColumnarBuckets{WindowMs: g.windowMs, StartMs: int32(g.start * 1000), Count: g.count}
-	if g.count == 0 {
+	cb := &ColumnarBuckets{WindowMs: g.windowMs, Start: g.start, Count: g.count}
+	if g.count <= 0 {
 		return cb, nil
 	}
 	if g.hasPartial {
-		cb.PartialLastMs = int32(g.end * 1000)
+		cb.PartialLastMs = g.end
 	}
 
 	playerFilter := newPlayerFilter(opts.Players)

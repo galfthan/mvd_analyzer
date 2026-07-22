@@ -135,7 +135,7 @@ func TestAim_SummaryDropsSampleBlocks(t *testing.T) {
 // sample must fall inside the window.
 func TestAim_TimeWindowRecomputes(t *testing.T) {
 	r := aimFixture()
-	got, err := Aim(r, AimOptions{From: 1.5})
+	got, err := Aim(r, AimOptions{From: 1500})
 	if err != nil {
 		t.Fatalf("Aim: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestAim_TimeWindowRecomputes(t *testing.T) {
 // A window with an upper bound only: [0, 1.5s] keeps just A's t=1000 fire.
 func TestAim_TimeWindowUpperBound(t *testing.T) {
 	r := aimFixture()
-	got, err := Aim(r, AimOptions{To: 1.5})
+	got, err := Aim(r, AimOptions{To: 1500})
 	if err != nil {
 		t.Fatalf("Aim: %v", err)
 	}
@@ -187,7 +187,7 @@ func TestAim_TimeWindowUpperBound(t *testing.T) {
 // summary composes with a window: recompute, then drop the sample blocks.
 func TestAim_WindowAndSummary(t *testing.T) {
 	r := aimFixture()
-	got, err := Aim(r, AimOptions{From: 1.5, Summary: true})
+	got, err := Aim(r, AimOptions{From: 1500, Summary: true})
 	if err != nil {
 		t.Fatalf("Aim: %v", err)
 	}
@@ -220,7 +220,7 @@ func TestFilteredEmptyAimIsArrayNotNull(t *testing.T) {
 
 	// window matching no shots (recompute branch), scoped to nobody so the
 	// recompute yields no players.
-	got2, err := Aim(r, AimOptions{From: 1.5, Players: []string{"nobody"}})
+	got2, err := Aim(r, AimOptions{From: 1500, Players: []string{"nobody"}})
 	if err != nil {
 		t.Fatalf("Aim: %v", err)
 	}

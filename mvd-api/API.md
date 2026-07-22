@@ -40,7 +40,13 @@ Base URL defaults to `http://localhost:8080`. A demo is addressed by an
 Don't have a `gameId` yet? **`GET /v1/games/search`** discovers demos in
 the hub catalog by player / team / map / mode / matchtag / date, returns
 `{limit, offset, count, total?, games}`, and each row's `id` becomes the
-`gameId:<id>` you feed the flow below.
+`gameId:<id>` you feed the flow below. Each row also carries
+`server_hostname` (the QW server the game was played on). The `players`
+filter is a **case-insensitive** full-text search (unlike the per-demo
+endpoints' exact, case-sensitive `players` filter). Its `from`/`to` are
+**calendar dates**, strict `YYYY-MM-DD` — a malformed date 400s
+`invalid_param` (it is not the match-relative `from`/`to` the per-demo
+endpoints use).
 
 Typical frontend flow:
 
@@ -65,81 +71,99 @@ reachable without an API key.
 
 ## 2. Conventions (read this once)
 
-### 2.1 Time units — the `timeUnit` echo
+### 2.1 Time units — one rule: everything is int32 ms
 
-`timeUnit` is **the unit of every time value in the response**. There is
-**no unit selection** — the value is fixed per endpoint. The rule is:
+**Every time value in the API is int32 milliseconds** — request params
+and response fields, REST and MCP alike (schema v57, the pure-ms model).
+There is no unit selection and no per-endpoint split. `timeUnit`, where
+present, is a **constant `"ms"` self-description echo**:
 
-> **Every `/v1/demos/{id}/*` JSON response that carries match-position
-> time values echoes a top-level `"timeUnit": "ms"|"s"`, except
-> `/demoinfo` (KTX's own mixed units) and `/artifacts/{name}` (raw stored
-> bytes). Responses with no match-position time — `/loc-table`,
-> `/loc-graph`, `/metadata` — carry no echo.**
-
-Read `timeUnit` and you know the unit of that response's times — no
-per-field guessing. The value is fixed per endpoint:
-
-| `timeUnit` | Endpoints |
-|---|---|
-| **`"ms"`** (int32 milliseconds) | `/frags`, `/damage`, `/shots`, `/chat`, `/airgibs`, `/backpacks`, `/weapon-pickups`, `/items` (full phase timeline), `/overview`, `/aim`, `/buckets?layout=column`, `/region-control`, `/los`, `/streams/projectiles`, `/streams/beams`, `/streams/nails` |
-| **`"s"`** (float64 seconds) | `/events`, `/buckets?layout=row`, `/state-at`, `/stream-slice`, `/loc-trails`, `/items?summary=true` |
+> **Every `/v1/demos/{id}/*` JSON response that carries time values
+> echoes a top-level `"timeUnit": "ms"`, including `/artifacts/{name}`
+> (which since v57 echoes a `timeUnit` sibling of the resultKey when the
+> section carries time). `/loc-graph` echoes too — its node weights are
+> aggregate durations, int32 ms since v57. The lone exception is
+> `/demoinfo` (KTX's own mixed units). Responses with no time value at
+> all — `/loc-table`, `/metadata`, and the no-time artifacts
+> (`/artifacts/{metadata,map-entities}`) — carry no echo.**
 
 The four formerly bare-array endpoints wrap their array in an object so
 the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/airgibs` →
 `{timeUnit, airgibs:[…]}`, `/backpacks` → `{timeUnit, backpacks:[…]}`,
 `/weapon-pickups` → `{timeUnit, pickups:[…]}`.
 
-**Field-name conventions (consistent with the echo).** The two sparse
-match-position field names are absolute on *every* endpoint: a **`t`** is
-int32 ms and a top-level **`time`** is float seconds. This polarity is
-exception-free — sparse event lists (`/frags`, `/damage`, `/shots`,
-`/chat`, `/backpacks`, `/weapon-pickups`, `/airgibs`) and the dense
-per-sample arrays both carry their int32-ms axis under `t` (the dense
-arrays always did — that is the whole point of this polarity, and the big
-event lists get the compact key for the compact type). Descriptively-named
-times (`startTime`/`endTime`, `availableFrom`/`takenAt`/`respawnAt`,
-`nextDeathTime`, `dropTime`, `duration`, `start`/`end`) don't encode their
-unit in the name — that's what `timeUnit` is for. Dense per-sample arrays
-use compact names and are always int32 ms: `/aim`'s crosshair `t` +
-`lgRamp` `since`, the columnar `/buckets` axis (`startMs`/`windowMs`,
-`time(i)=startMs+i*windowMs`), and the raw stream tracks embedded in
-`/stream-slice` (`h:[{ "t":105000,… }]`, `pos.t:[…]`, `rl:[{ "s","e" }]`
-— ms even though that envelope's `timeUnit` is `s`, which governs its
-top-level `startTime`/`endTime` and the `/loc-trails` `start`/`end`). The
-float-seconds view surfaces — `/events`, `/buckets?layout=row`,
-`/state-at`, `/items?summary=true`'s `firstTake` — carry their timestamp
-under `time`.
+**Field-name conventions — the dense/sparse key rule.** The per-item
+time key follows what the data scales with; both spellings are int32 ms
+(the name never encodes the unit). **Event-scaled** sparse lists and
+singleton timestamps carry the descriptive **`time`**: the event lists
+(`/frags`, `/damage`, `/shots`, `/chat`, `/backpacks`,
+`/weapon-pickups`, `/airgibs`), `/events` rows, `/buckets?layout=row`
+rows, `/state-at`'s envelope, and `/items?summary=true`'s `firstTake`.
+**Sample-rate-scaled** dense arrays carry the terse **`t`**: `/aim`'s
+crosshair `t` + `lgRamp` `since`, the columnar `/buckets` grid, and the
+raw stream tracks embedded in `/stream-slice` (`h:[{ "t":105000,… }]`,
+`pos.t:[…]`, `rl:[{ "s","e" }]`). Other descriptively-named times
+(`endTime`, `availableFrom`/`takenAt`/`respawnAt`, `nextDeathTime`,
+`dropTime`, `duration`, `start`/`end`) are int32 ms too. Envelope bounds
+are `start`/`end` on `/stream-slice` and `/loc-trails`, and
+`start`/`windowMs` on the columnar `/buckets` axis
+(`time(i)=start+i*windowMs`).
 
 The exceptions — time-carrying responses that still don't echo:
 
 - **`/demoinfo` is the KTX units island** — KTX's own clock, a mix of
   native units (see RESULT_SCHEMA.md §DemoInfoResult), so no single echo
-  describes it.
-- **`/artifacts/{name}`** serves the raw stored result sections
-  byte-for-byte (the exact-bytes escape hatch), no echo. The underlying
-  stored schema is all int32 ms — see RESULT_SCHEMA.md §"Time units". The
-  one exception is `/artifacts/los`: los is a materialized artifact, not a
-  raw stored section, so it aliases the `/los` body and carries its `"ms"`
-  echo like the curated endpoint.
+  describes it. This is the **sole seconds surface** in the API.
+- **`/artifacts/{name}`** serves the raw stored result section under its
+  resultKey (the exact-bytes escape hatch). Since v57 it also echoes a
+  top-level `"timeUnit": "ms"` **sibling** of the resultKey whenever the
+  section carries time — `frag`, `damage`, `shots`, `aim`, `opening`,
+  `match`, `messages`, `timeline`, `items`, `backpacks`, `weapon-pickups`,
+  `loc-graph` (e.g. `/artifacts/messages` → `{timeUnit, messages:{…}}`).
+  loc-graph's node weights are aggregate durations (int32 ms since v57),
+  so it echoes too. The no-time artifacts — `metadata`, `map-entities` —
+  carry no echo, and `/artifacts/demoinfo` is the KTX units island. The
+  underlying stored schema is all int32 ms — see RESULT_SCHEMA.md §"Time
+  units". `/artifacts/los` is a materialized artifact that aliases the
+  `/los` body and carries its `"ms"` echo like the curated endpoint.
 
-Separately, the responses with **no match-position time at all** —
-`/loc-table`, `/loc-graph`, `/metadata` — carry no echo because there is
-no time value to unit.
+Separately, the responses with **no time value at all** — `/loc-table`
+and `/metadata` — carry no echo because there is no time value to unit.
 
-`/overview`'s `timing` block is orthogonal to the echo: its wall-clock
+`/overview`'s `timing` block is consistent with the rule: its wall-clock
 fields are explicitly `*Ms`-named (`demoOffset`, `demoStartUnixMs`,
 `demoStartAccuracyMs`, `pauses[].atMs`/`.durationMs`).
 
-**Query inputs are unaffected**: `from`/`to`/`time` are always
-match-relative **seconds**, regardless of any response's `timeUnit`.
+**Query inputs follow the same rule**: `from`/`to`/`time` on demo
+endpoints are **integer milliseconds**. A non-integer value (e.g.
+`from=10.5`) 400s with `invalid_param` and an `(integer milliseconds)`
+hint rather than misfiltering. The only date-typed params are search
+`from`/`to` (calendar dates `YYYY-MM-DD`), which are not times.
+
+> **⚠️ The ms tripwire only catches NON-INTEGER forms.** `from=10.5` or
+> `from=1e3` reject because they are not integers — but a whole-number
+> value that *was* meant as seconds, e.g. `from=60` (intending 60 s), is a
+> perfectly valid integer ms and **cannot be detected**. A pre-v57 caller
+> that passed integer seconds migrates **silently** to a window 1000× too
+> small — `from=60` now means 60 ms, not 60 s, and quietly returns almost
+> nothing instead of erroring. Audit every caller that passed integer
+> seconds and multiply by 1000.
 
 ### 2.2 Query parameters
 
 Parameter **names are case-insensitive**; the canonical (documented)
 spelling is camelCase — `windowMs`, `minDwellMs`, `includeTeam` — but
-`windowms` / `WindowMs` resolve too. Parameter **values** are case-sensitive
+`windowms` / `WindowMs` resolve too. (Documented exception: search's
+`matchtag` is a lowercase single word, mirroring the KTX serverinfo key,
+not camelCase.) Parameter **values** are case-sensitive
 for player names (QW names are case-significant) and case-insensitive for
 weapon / item / kind / loc / layout tokens.
+
+An **unrecognised parameter name is rejected**, not ignored: a query key an
+endpoint does not accept 400s with code `unknown_param`, naming the offender
+and the accepted keys. The global `label` traffic-source tag is accepted on
+every endpoint. Enum-valued params likewise reject an unknown **value** with
+`400 invalid_param` (e.g. `/events?types=bogus`) instead of matching nothing.
 
 - **`players`, `fields`, `types`** — comma-separated lists; URL-decode
   once. Omit `players` to get all; omit `fields`/`types` to get the
@@ -152,9 +176,10 @@ weapon / item / kind / loc / layout tokens.
 - **`reducers`** (`/buckets`) — comma-separated `field=name` pairs, e.g.
   `reducers=h=min,a=last`. Names come from the reducer registry in
   RESULT_SCHEMA.md.
-- **`from` / `to`** — match-relative **seconds**. Omit for the whole
-  match. Honoured by `events`, `stream-slice`, `loc-trails`, `chat`,
-  `region-control`, and (schema-unchanged) `frags` / `damage`.
+- **`from` / `to`** — match-relative **integer milliseconds**. Omit for
+  the whole match. Honoured by `events`, `stream-slice`, `loc-trails`,
+  `chat`, `region-control`, `aim`, and `frags` / `damage`. A non-integer
+  value 400s `invalid_param` with an `(integer milliseconds)` hint.
 - **`summary`** (`/frags`, `/damage`, `/aim`, `/items`) — `1`/`true` drops
   the big per-event log / sample arrays / phase timeline and returns only
   the aggregates.
@@ -169,18 +194,22 @@ weapon / item / kind / loc / layout tokens.
   falls back to `raw`; an *explicit* `dmg=bounded` there is a
   `422 bounded_unavailable`. Unfiltered bounded summaries source the
   per-player figures from KTX's exact scoreboard (`boundedSource: "ktx"`).
-- **`time`** — match-relative **seconds**; **required** on `/state-at`.
+- **`time`** — match-relative **integer milliseconds**; **required** on
+  `/state-at`. A non-integer value 400s `invalid_param` with an `(integer
+  milliseconds)` hint.
 - **`windowMs`** — integer milliseconds (`/buckets`, `/region-control`).
   ⚠️ **Defaults to 50 ms when omitted** — on a 20-minute match that is
   ~24,000 windows per field per player. Always pass an explicit
   `windowMs` sized to your question (the hosted MCP layer injects 5000).
-  Note the unit split *within one call*: `windowMs` is **ms** while
-  `from`/`to` are **seconds**.
+  All time params are ms: `windowMs`, `from`, and `to` alike.
 - **There is deliberately no `limit`/`offset` pagination** on the
   per-demo endpoints: the data is time-series, so the size controls are
   the `from`/`to` window, `players`/`fields` scoping, and `summary`.
   `limit`/`offset` pagination applies only to the game-discovery
   endpoint `GET /v1/games/search` (page until `offset + count >= total`).
+  There `limit` defaults to 20 and is capped at 100 — a `limit` above 100,
+  or a negative `limit`/`offset`, is rejected with `400 invalid_param`
+  (no longer silently clamped).
 - **`loc`** — `name` (default) resolves loc indices to names; `index`
   returns the raw `LocTable` index for index-based math (decode via
   `/loc-table`). Honoured by `buckets`, `events`, `stream-slice`,
@@ -194,8 +223,11 @@ The valid **field codes** (`h`, `a`, `rl`, `pos`, `view`, `hgt`, `lq`,
 Note (schema v31+): `pos` is **strictly x/y/z** (+ the per-sample loc
 label `li`). The player's **view direction** is the opt-in `view` field
 (raw `angle16` pitch/yaw state after `svc_playerinfo` delta
-carry-forward, decode `deg = uint16(v)*360/65536`, pitch > 180° =
-looking up); floor height is `hgt`; liquid state is `lq`;
+carry-forward, decode `deg = uint16(v)*360/65536` — equivalently
+`deg = ((v mod 65536) + 65536) mod 65536 × 360 / 65536` — pitch > 180° =
+looking up). These `vp`/`vya` view angles (and `/state-at`'s `view`) are
+**raw angle16 wire shorts**; contrast `/aim`'s `dyaw`/`dpitch`, which are
+already **float degrees** off the target. Floor height is `hgt`; liquid state is `lq`;
 **velocity** (vx/vy/vz, Quake units/sec, schema v32) is `vel`.
 Height/liquid no longer ride along `pos` — request each by code.
 Note (schema v33+): the coordinate values `pos` x/y/z, `vel` vx/vy/vz,
@@ -257,7 +289,8 @@ Non-2xx responses use a stable envelope:
 | HTTP | `code` | Meaning |
 |---|---|---|
 | 400 | `invalid_demo_id` | malformed `{id}` |
-| 400 | `invalid_param` | malformed **or rejected** query parameter — bad number, malformed `reducers` pair, unknown `loc`/`layout` token, unknown `fields` code, or unknown reducer name |
+| 400 | `invalid_param` | malformed **or rejected** query parameter — bad number, malformed `reducers` pair, unknown `loc`/`layout` token, unknown `fields` code, unknown reducer name, or an unknown enum value (e.g. `/events`/`/chat` `types`) |
+| 400 | `unknown_param` | an unrecognised query parameter **name** — the message names the offending key and the endpoint's accepted keys. The global `label` traffic-source tag is accepted everywhere |
 | 400 | `missing_param` | required param absent (e.g. `time` on `/state-at`) |
 | 401 | `unauthorized` | **auth mode only** — missing / invalid / revoked API key on a protected route. Carries `WWW-Authenticate: Bearer`. The body is deliberately generic and never says whether the key was absent vs revoked (see §2.5). |
 | 429 | `rate_limited` | **auth mode only** — per-key rate limit exceeded. Carries `Retry-After: <seconds>`; wait that long and retry (see §2.5). |
@@ -272,6 +305,7 @@ Non-2xx responses use a stable envelope:
 | 422 | `shots_unavailable` | no shot data (no weapon fires decoded) |
 | 422 | `aim_unavailable` | no aim data (needs shots + position/view streams) |
 | 422 | `locgraph_unavailable` | no position track |
+| 422 | `los_unavailable` | `/los` on a map with no usable visibility BSP (no map name, BSP not provisioned, or a provisioned BSP that fails to parse) — never cached, so a retry after provisioning succeeds |
 | 422 | `opening_unavailable` | no detected match start (`/v1/demos/{id}/artifacts/opening`) |
 | 422 | `region_control_unavailable` | no region-control layout for this map |
 | 422 | `airgibs_unavailable` | no timeline analysis (BSP-less maps return `[]`, not this) |
@@ -300,6 +334,11 @@ unavailable for this demo", not a hard failure, and use `/overview`
 is always computable or list-shaped — `/items`, `/backpacks`,
 `/weapon-pickups`, `/chat` — instead return **`200` with an empty body**
 when there's nothing, never `422`.
+
+**Null vs `[]`.** A governed response's **top-level array is never
+`null`** — an empty result is `[]` (`/events`, `/stream-slice` `players`,
+`/loc-trails` `players`, and the list endpoints above). Nested arrays
+deeper in a body may still be `null`; check before iterating.
 
 ### 2.5 Authentication
 

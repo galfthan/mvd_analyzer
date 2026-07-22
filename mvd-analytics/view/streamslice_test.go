@@ -15,10 +15,10 @@ func TestStreamSliceCarryForward(t *testing.T) {
 		},
 	})
 	v, err := StreamSlice(r, StreamSliceOptions{
-		StartTime: 2,
-		EndTime:   4,
-		Fields:    []string{FieldHealth},
-	}) // StartTime/EndTime are seconds (public API)
+		Start:  2000,
+		End:    4000,
+		Fields: []string{FieldHealth},
+	}) // Start/End are int32 ms (v57)
 	if err != nil {
 		t.Fatalf("StreamSlice: %v", err)
 	}
@@ -39,10 +39,10 @@ func TestStreamSliceIntervalClamping(t *testing.T) {
 		RL:   []result.Interval{{Start: 1000, End: 6000}},
 	})
 	v, err := StreamSlice(r, StreamSliceOptions{
-		StartTime: 2,
-		EndTime:   4,
-		Fields:    []string{FieldRL},
-	}) // StartTime/EndTime are seconds (public API)
+		Start:  2000,
+		End:    4000,
+		Fields: []string{FieldRL},
+	}) // Start/End are int32 ms (v57)
 	if err != nil {
 		t.Fatalf("StreamSlice: %v", err)
 	}
@@ -68,9 +68,9 @@ func TestStreamSlicePosition(t *testing.T) {
 		},
 	})
 	v, err := StreamSlice(r, StreamSliceOptions{
-		StartTime: 1.5,
-		EndTime:   3.5,
-		Fields:    []string{FieldPosition},
+		Start:  1500,
+		End:    3500,
+		Fields: []string{FieldPosition},
 	})
 	if err != nil {
 		t.Fatalf("StreamSlice: %v", err)
@@ -114,9 +114,9 @@ func TestStreamSliceColumnProjection(t *testing.T) {
 		},
 	})
 	v, err := StreamSlice(r, StreamSliceOptions{
-		StartTime: 1.5,
-		EndTime:   3.5,
-		Fields:    []string{FieldPosition, FieldHeight, FieldLiquid, FieldView, FieldVelocity},
+		Start:  1500,
+		End:    3500,
+		Fields: []string{FieldPosition, FieldHeight, FieldLiquid, FieldView, FieldVelocity},
 	})
 	if err != nil {
 		t.Fatalf("StreamSlice: %v", err)
@@ -174,9 +174,9 @@ func TestStreamSliceColumnProjection(t *testing.T) {
 		},
 	})
 	v2, err := StreamSlice(r2, StreamSliceOptions{
-		StartTime: 0,
-		EndTime:   2,
-		Fields:    []string{FieldPosition, FieldHeight, FieldLiquid, FieldView, FieldVelocity},
+		Start:  0,
+		End:    2000,
+		Fields: []string{FieldPosition, FieldHeight, FieldLiquid, FieldView, FieldVelocity},
 	})
 	if err != nil {
 		t.Fatalf("StreamSlice: %v", err)
@@ -202,7 +202,7 @@ func TestStreamSliceLocResolvesNames(t *testing.T) {
 		},
 		TimelineAnalysis: &result.TimelineAnalysisResult{LocTable: []string{"", "rl", "ya"}},
 	}
-	v, err := StreamSlice(r, StreamSliceOptions{StartTime: 0, EndTime: 10, Fields: []string{FieldLoc}})
+	v, err := StreamSlice(r, StreamSliceOptions{Start: 0, End: 10000, Fields: []string{FieldLoc}})
 	if err != nil {
 		t.Fatalf("StreamSlice: %v", err)
 	}
@@ -218,7 +218,7 @@ func TestStreamSliceLocResolvesNames(t *testing.T) {
 		}
 	}
 	// Index mode → raw int16 index stream under Li, Loc empty.
-	vi, _ := StreamSlice(r, StreamSliceOptions{StartTime: 0, EndTime: 10, Fields: []string{FieldLoc}, LocIndex: true})
+	vi, _ := StreamSlice(r, StreamSliceOptions{Start: 0, End: 10000, Fields: []string{FieldLoc}, LocIndex: true})
 	li := vi.Players[0].Li
 	wantI := []int16{1, 2, 1}
 	if len(li) != len(wantI) {

@@ -255,15 +255,15 @@ func TestFrags_WeaponFilterRecomputes(t *testing.T) {
 func TestFrags_TimeWindow(t *testing.T) {
 	r := filterFixture()
 	// from-only: keep entries at t>=2.5s => t3000,t4000,t5000 (3).
-	if out, _ := Frags(r, FragOptions{From: 2.5}); out.TotalFrags != 3 {
+	if out, _ := Frags(r, FragOptions{From: 2500}); out.TotalFrags != 3 {
 		t.Errorf("from=2.5: TotalFrags=%d, want 3", out.TotalFrags)
 	}
 	// to-only: keep entries at t<=2.5s => t1000,t2000 (2).
-	if out, _ := Frags(r, FragOptions{To: 2.5}); out.TotalFrags != 2 {
+	if out, _ := Frags(r, FragOptions{To: 2500}); out.TotalFrags != 2 {
 		t.Errorf("to=2.5: TotalFrags=%d, want 2", out.TotalFrags)
 	}
 	// both: [1.5,4.5] => t2000,t3000,t4000 (3).
-	if out, _ := Frags(r, FragOptions{From: 1.5, To: 4.5}); out.TotalFrags != 3 {
+	if out, _ := Frags(r, FragOptions{From: 1500, To: 4500}); out.TotalFrags != 3 {
 		t.Errorf("[1.5,4.5]: TotalFrags=%d, want 3", out.TotalFrags)
 	}
 }
@@ -272,7 +272,7 @@ func TestFrags_CombinedFilters(t *testing.T) {
 	r := filterFixture()
 	// players=alpha, weapon=rl, window [0.5,3.5]: rl+alpha in [1,3.5] =>
 	// t1000, t3000 (both alpha rl enemy kills). t4000 suicide is >3.5.
-	out, _ := Frags(r, FragOptions{Players: []string{"alpha"}, Weapons: []string{"rl"}, From: 0.5, To: 3.5})
+	out, _ := Frags(r, FragOptions{Players: []string{"alpha"}, Weapons: []string{"rl"}, From: 500, To: 3500})
 	if out.TotalFrags != 2 {
 		t.Errorf("combined: TotalFrags=%d, want 2", out.TotalFrags)
 	}
@@ -396,12 +396,12 @@ func TestFilteredEmptyLogIsArrayNotNull(t *testing.T) {
 func TestDamage_TimeWindowAndWeapon(t *testing.T) {
 	r := filterFixture()
 	// weapon=rl, window [0.5,3.5]: rl events at t1000,t3000 => total 160.
-	out, _ := Damage(r, DamageOptions{Weapons: []string{"rl"}, From: 0.5, To: 3.5})
+	out, _ := Damage(r, DamageOptions{Weapons: []string{"rl"}, From: 500, To: 3500})
 	if len(out.Events) != 2 || out.TotalDamage != 160 {
 		t.Errorf("rl [0.5,3.5]: events=%d total=%d, want 2/160", len(out.Events), out.TotalDamage)
 	}
 	// to-only 1.5s: only t1000 (alpha->bravo 100).
-	out2, _ := Damage(r, DamageOptions{To: 1.5})
+	out2, _ := Damage(r, DamageOptions{To: 1500})
 	if len(out2.Events) != 1 || out2.TotalDamage != 100 {
 		t.Errorf("to=1.5: events=%d total=%d, want 1/100", len(out2.Events), out2.TotalDamage)
 	}
@@ -456,22 +456,21 @@ func TestDamage_AllPlayersRecomputeEqualsStored(t *testing.T) {
 	}
 }
 
-// TestDamage_FromRoundsToNearestMs pins the seconds→ms rounding: a bound of
-// 0.29s must map to 290ms (round), not 289ms (truncate). An event at exactly
-// 290ms is then kept by from=0.29.
-func TestDamage_FromRoundsToNearestMs(t *testing.T) {
+// TestDamage_FromInclusiveLowerBound pins the closed lower bound (v57 pure-ms):
+// from=290ms keeps an event landing at exactly 290ms.
+func TestDamage_FromInclusiveLowerBound(t *testing.T) {
 	r := &result.Result{Damage: &result.DamageResult{
 		ByWeapon: map[string]int{}, ByPlayer: map[string]*result.PlayerDamage{},
 		Events: []result.DamageEntry{
 			{Time: 290, Attacker: "alpha", Victim: "bravo", Weapon: "rl", Damage: 50, VictimWep: "rl"},
 		},
 	}}
-	out, err := Damage(r, DamageOptions{From: 0.29})
+	out, err := Damage(r, DamageOptions{From: 290})
 	if err != nil {
 		t.Fatalf("Damage: %v", err)
 	}
 	if len(out.Events) != 1 {
-		t.Errorf("from=0.29 dropped the t=290ms event (truncation bug): events=%d, want 1", len(out.Events))
+		t.Errorf("from=290 dropped the t=290ms event (closed lower bound): events=%d, want 1", len(out.Events))
 	}
 }
 
@@ -677,7 +676,7 @@ func TestDamage_FilteredWindowExcludesTeleFold(t *testing.T) {
 	// [1.6s, ...] drops ev1(1000) and the telefrag(1500); keeps ev3(3000) and
 	// the stomp(1700). alpha's only enemy-given hit is ev3 (200) — the tele's
 	// +50 must NOT fold.
-	out, err := Damage(r, DamageOptions{Dmg: "both", From: 1.6})
+	out, err := Damage(r, DamageOptions{Dmg: "both", From: 1600})
 	if err != nil {
 		t.Fatalf("Damage: %v", err)
 	}
@@ -858,7 +857,7 @@ func TestDamage_StoredNeverMutated(t *testing.T) {
 	_, _ = Damage(r, DamageOptions{Dmg: "bounded"})
 	_, _ = Damage(r, DamageOptions{Dmg: "both"})
 	_, _ = Damage(r, DamageOptions{Dmg: "bounded", Players: []string{"alpha", "bravo"}})
-	_, _ = Damage(r, DamageOptions{Dmg: "raw", From: 1.6})
+	_, _ = Damage(r, DamageOptions{Dmg: "raw", From: 1600})
 	if after := mustJSON(r.Damage); after != before {
 		t.Fatalf("stored Result was mutated:\nbefore %s\nafter  %s", before, after)
 	}
@@ -917,8 +916,8 @@ func TestChat_DefaultsAndWindow(t *testing.T) {
 	if got := Chat(r, ChatOptions{}); len(got) != 2 {
 		t.Errorf("default: got %d, want 2", len(got))
 	}
-	// Time window in seconds keeps only the teamsay at t=20s.
-	got := Chat(r, ChatOptions{From: 15, To: 100})
+	// Time window (ms) keeps only the teamsay at t=20000ms.
+	got := Chat(r, ChatOptions{From: 15000, To: 100000})
 	if len(got) != 1 || got[0].Type != "teamsay" {
 		t.Errorf("window [15,100]: got %v", got)
 	}
@@ -947,7 +946,7 @@ func itemsFixture() *result.Result {
 // TestItems_Window: phases OVERLAPPING [from,to] survive; an open-ended
 // phase (respawnAt 0) overlaps any later window.
 func TestItems_Window(t *testing.T) {
-	v := Items(itemsFixture(), ItemOptions{From: 26, To: 60})
+	v := Items(itemsFixture(), ItemOptions{From: 26000, To: 60000})
 	if len(v.Items) != 2 {
 		t.Fatalf("items = %d, want 2", len(v.Items))
 	}
@@ -968,7 +967,7 @@ func TestItems_Window(t *testing.T) {
 // the window (not overlap), keeps zero-take items, and firstTake is the
 // earliest counted take.
 func TestItemsSummary_CountsInsideWindow(t *testing.T) {
-	s := ItemsSummary(itemsFixture(), ItemOptions{To: 60})
+	s := ItemsSummary(itemsFixture(), ItemOptions{To: 60000})
 	if len(s.Items) != 2 {
 		t.Fatalf("items = %d, want 2", len(s.Items))
 	}
@@ -979,7 +978,7 @@ func TestItemsSummary_CountsInsideWindow(t *testing.T) {
 	if ya.ByPlayer["p1"] != 1 || ya.ByPlayer["p2"] != 1 {
 		t.Errorf("ya byPlayer = %+v", ya.ByPlayer)
 	}
-	if ya.FirstTake == nil || ya.FirstTake.T != 5.0 || ya.FirstTake.TakenBy != "p1" {
+	if ya.FirstTake == nil || ya.FirstTake.T != 5000 || ya.FirstTake.TakenBy != "p1" {
 		t.Errorf("ya firstTake = %+v", ya.FirstTake)
 	}
 	quad := s.Items[1]
@@ -993,7 +992,7 @@ func TestItemsSummary_FullMatch(t *testing.T) {
 	if s.Items[0].TakenCount != 3 {
 		t.Errorf("ya takenCount = %d, want 3", s.Items[0].TakenCount)
 	}
-	if s.Items[1].FirstTake == nil || s.Items[1].FirstTake.T != 62.0 {
+	if s.Items[1].FirstTake == nil || s.Items[1].FirstTake.T != 62000 {
 		t.Errorf("quad firstTake = %+v", s.Items[1].FirstTake)
 	}
 }
@@ -1003,7 +1002,7 @@ func TestBackpacks_Window(t *testing.T) {
 		{Time: 5000, Player: "p1", Weapon: "rl"},
 		{Time: 65000, Player: "p2", Weapon: "lg"},
 	}}
-	out := Backpacks(r, BackpackOptions{From: 10, To: 70})
+	out := Backpacks(r, BackpackOptions{From: 10000, To: 70000})
 	if len(out) != 1 || out[0].Player != "p2" {
 		t.Fatalf("windowed backpacks = %+v", out)
 	}
@@ -1014,7 +1013,7 @@ func TestWeaponPickups_Window(t *testing.T) {
 		{Time: 5000, Player: "p1", Weapon: "rl", Source: "world"},
 		{Time: 65000, Player: "p2", Weapon: "rl", Source: "backpack"},
 	}}
-	out := WeaponPickups(r, WeaponPickupOptions{To: 60})
+	out := WeaponPickups(r, WeaponPickupOptions{To: 60000})
 	if len(out) != 1 || out[0].Player != "p1" {
 		t.Fatalf("windowed pickups = %+v", out)
 	}
@@ -1034,19 +1033,19 @@ func TestItems_WindowBoundaries(t *testing.T) {
 			},
 		},
 	}}}
-	v := Items(r, ItemOptions{From: 30})
+	v := Items(r, ItemOptions{From: 30000})
 	if len(v.Items) != 1 || len(v.Items[0].Phases) != 2 {
 		t.Fatalf("zero-length phase at from boundary dropped: %+v", v.Items)
 	}
-	s := ItemsSummary(r, ItemOptions{From: 30})
+	s := ItemsSummary(r, ItemOptions{From: 30000})
 	if s.Items[0].TakenCount != 1 {
 		t.Errorf("take at exactly from: takenCount = %d, want 1", s.Items[0].TakenCount)
 	}
-	s = ItemsSummary(r, ItemOptions{To: 30})
+	s = ItemsSummary(r, ItemOptions{To: 30000})
 	if s.Items[0].TakenCount != 1 {
 		t.Errorf("take at exactly to: takenCount = %d, want 1 (closed window, getFrags parity)", s.Items[0].TakenCount)
 	}
-	s = ItemsSummary(r, ItemOptions{To: 29.999})
+	s = ItemsSummary(r, ItemOptions{To: 29999})
 	if s.Items[0].TakenCount != 0 {
 		t.Errorf("take just past to: takenCount = %d, want 0", s.Items[0].TakenCount)
 	}

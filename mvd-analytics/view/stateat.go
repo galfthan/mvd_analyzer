@@ -9,7 +9,7 @@ import (
 // StateAtOptions specifies the moment in time to interrogate plus the
 // optional player / field filter. Time is required.
 type StateAtOptions struct {
-	Time    float64
+	Time    int32 // point-in-time, int32 ms
 	Players []string
 	Fields  []string
 	// LocIndex selects the loc representation: false (default) resolves
@@ -22,10 +22,10 @@ type StateAtOptions struct {
 // StateAtView returns each requested player's state at Time. Empty
 // players slice → no players matched the filter.
 type StateAtView struct {
-	// TimeUnit echoes this endpoint's native unit ("s"); set by the mvd-api
-	// handler (schema v56). Omitted on the WASM/qw-analyze paths.
+	// TimeUnit echoes this endpoint's native unit (constant "ms", schema v57);
+	// set by the mvd-api handler. Omitted on the WASM/qw-analyze paths.
 	TimeUnit TimeUnit                 `json:"timeUnit,omitempty"`
-	Time     float64                  `json:"time"`
+	Time     int32                    `json:"time"`
 	Players  map[string]PlayerStateAt `json:"players"`
 }
 
@@ -124,10 +124,9 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 	pf := newPlayerFilter(opts.Players)
 	locTable := locTableOf(r)
 
-	// Public opts.Time is float64 seconds; schema stores int32 ms.
-	// Convert once at the entry; every index/contains lookup below
-	// takes int32 ms.
-	tMs := int32(opts.Time * 1000)
+	// Pure-ms model (schema v57): opts.Time is int32 ms; every
+	// index/contains lookup below takes int32 ms directly.
+	tMs := opts.Time
 	out := &StateAtView{Time: opts.Time, Players: make(map[string]PlayerStateAt)}
 	for _, p := range r.Streams.Players {
 		if !pf.accepts(p.Name) {
@@ -217,7 +216,7 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 			requested[FieldLiquid] || requested[FieldVelocity]) &&
 			p.Position != nil && len(p.Position.T) > 0 {
 			pt := p.Position
-			idx := nearestPositionIndex(pt, opts.Time)
+			idx := nearestPositionIndex(pt, tMs)
 			if idx >= 0 {
 				if requested[FieldPosition] {
 					ps.Pos = &Position3D{X: pt.X[idx], Y: pt.Y[idx], Z: pt.Z[idx]}
@@ -258,16 +257,13 @@ func stateAtDefaultFields() []string {
 	return out
 }
 
-// nearestPositionIndex finds the position sample closest to t. If t
-// is between two samples, the closer one wins; ties go to the earlier
-// sample. -1 if pt is empty. t is float64 seconds (public view API);
-// pt.T is int32 ms (schema v8) — convert the query once and stay in
-// int32 for the loop.
-func nearestPositionIndex(pt *result.PositionTrack, t float64) int {
+// nearestPositionIndex finds the position sample closest to tMs. If
+// tMs is between two samples, the closer one wins; ties go to the
+// earlier sample. -1 if pt is empty. tMs is int32 ms (schema v57).
+func nearestPositionIndex(pt *result.PositionTrack, tMs int32) int {
 	if len(pt.T) == 0 {
 		return -1
 	}
-	tMs := int32(t * 1000)
 	best := -1
 	bestDiff := int32(0)
 	for i := range pt.T {

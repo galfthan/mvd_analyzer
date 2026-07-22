@@ -297,7 +297,7 @@ func TestHTTP_ErrorSurfacesAPIMessage(t *testing.T) {
 	defer cancel()
 	res, err := sess.CallTool(ctx, &mcp.CallToolParams{
 		Name:      "getStateAt",
-		Arguments: map[string]any{"demoId": "gameId:42", "time": 0.3, "fields": []string{"loc"}},
+		Arguments: map[string]any{"demoId": "gameId:42", "time": 300, "fields": []string{"loc"}},
 	})
 	if err != nil {
 		t.Fatalf("CallTool must not fail at the protocol level: %v", err)

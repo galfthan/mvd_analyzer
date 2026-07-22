@@ -30,8 +30,8 @@ const (
 // explicit Regions / TeamA / TeamB / TeamOf overrides.
 type RegionControlOptions struct {
 	WindowMs  int                      // bucket resolution; 0 → 50
-	StartTime float64                  // sub-window lower bound in seconds; 0 → match start
-	EndTime   float64                  // sub-window upper bound in seconds; 0 → match end
+	StartTime int32                    // sub-window lower bound, int32 ms; 0 → match start
+	EndTime   int32                    // sub-window upper bound, int32 ms; 0 → match end
 	Regions   []result.ControlRegion   // overrides r.TimelineAnalysis.RegionControl.Regions
 	TeamA     string                   // overrides r.TimelineAnalysis.RegionControl.TeamA
 	TeamB     string                   // overrides r.TimelineAnalysis.RegionControl.TeamB
@@ -133,10 +133,10 @@ func RegionControl(r *result.Result, opts RegionControlOptions) (*result.RegionC
 	}
 	var startMs, endMs int32
 	if opts.StartTime > 0 {
-		startMs = int32(opts.StartTime * 1000)
+		startMs = opts.StartTime
 	}
 	if opts.EndTime > 0 {
-		endMs = int32(opts.EndTime * 1000)
+		endMs = opts.EndTime
 	}
 
 	bucketStates, stats := classifyRegions(r, regions, teamA, teamB, teamOf, windowMs, startMs, endMs)

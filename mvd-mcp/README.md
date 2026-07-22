@@ -200,17 +200,19 @@ infers their JSON Schemas from struct tags and exposes them via
 Every tool that maps to a demo endpoint (getOverview, getFrags,
 getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
 getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
-getLocTrails) and carries match-position time echoes a top-level
-`timeUnit` (`"ms"`|`"s"`) — the unit of every time value in the response
-(schema v56). The tools not in that list carry no echo: getDemoInfo
-(mixed KTX-native units) and getArtifact (raw stored bytes) are exempt,
-and getMetadata, getLocGraph and getLocTable have no match-position time
-to unit in the first place. There is no unit-selection input. Field-name
-conventions still hold: `t` is int32 ms (sparse event lists and dense
-per-sample arrays alike),
-`time` is float seconds, and descriptive names (`startTime`, `endTime`,
-`nextDeathTime`, …) carry the endpoint's native unit per the `timeUnit`
-echo. See
+getLocTrails, getLocGraph) and carries match-position time echoes a
+top-level constant `timeUnit` (`"ms"`) — every time value in the API is
+int32 ms (schema v57, pure-ms model). getLocGraph is on that list because
+its node weights are int32-ms durations, and getArtifact responses carry
+the echo for every time-bearing section too. The exceptions:
+getDemoInfo is the KTX island (mixed KTX-native units), and
+getMetadata, getLocTable and getMapEntities have no
+match-position time to unit in the first place. There is no
+unit-selection input. Field-name conventions follow the dense/sparse
+rule: sparse event lists and singleton timestamps use `time`,
+sample-rate-scaled dense arrays use `t` — both int32 ms — and descriptive
+names (`startTime`, `endTime`, `nextDeathTime`, …) are int32 ms too, the
+unit named by the constant `timeUnit` echo. See
 [mvd-api/API.md §2.1](../mvd-api/API.md) for the per-endpoint values.
 
 #### `searchGames(...)`
@@ -263,7 +265,7 @@ every subsequent per-demo tool expects.
 | `demoId` | `string` (required) | `gameId:N` or `sha:HEX` |
 
 Output: `Overview` —
-see [`../mvd-api/README.md`](../mvd-api/README.md#getoverview).
+see [`../mvd-api/README.md`](../mvd-api/README.md#rest-endpoints).
 
 #### `getDemoInfo({demoId})`
 
@@ -304,8 +306,8 @@ Frag aggregates + the full kill log. Cheaper than aggregating
 | `demoId`    | `string` (required) | — | — |
 | `players`   | `string[]` | all | Restrict aggregates + log to entries involving these (killer OR victim) |
 | `weapons`   | `string[]` | all | Restrict aggregates + log to these weapon codes (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `axe`, `sg`, …) |
-| `startTime` | `number` | match start | Window start, match-relative **seconds** (keep kills at `time ≥ startTime`) |
-| `endTime`   | `number` | match end | Window end, match-relative **seconds** (keep kills at `time ≤ endTime`) |
+| `startTime` | `integer` | match start | Window start, match-relative **milliseconds** (keep kills at `time ≥ startTime`) |
+| `endTime`   | `integer` | match end | Window end, match-relative **milliseconds** (keep kills at `time ≤ endTime`) |
 | `summary`   | `bool` | `false` | Return only aggregates, dropping the kill log. **Deliberately the opposite default from getDamage/getAim/getItems**: a kill log is one row per frag — small, and usually the point of the call. |
 
 When any scoping filter (`players` / `weapons` / `startTime` / `endTime`) is
@@ -329,8 +331,8 @@ time-ordered per-hit log.
 | `demoId`    | `string` (required) | — | — |
 | `players`   | `string[]` | all | Restrict aggregates + log to entries involving these (attacker OR victim) |
 | `weapons`   | `string[]` | all | Restrict to these **attacker** weapon codes (`rl`, `lg`, `gl`, `ssg`, `sng`, `sg`, `tele`, …) |
-| `startTime` | `number` | match start | Window start, match-relative **seconds** (keep hits at `time ≥ startTime`) |
-| `endTime`   | `number` | match end | Window end, match-relative **seconds** (keep hits at `time ≤ endTime`) |
+| `startTime` | `integer` | match start | Window start, match-relative **milliseconds** (keep hits at `time ≥ startTime`) |
+| `endTime`   | `integer` | match end | Window end, match-relative **milliseconds** (keep hits at `time ≤ endTime`) |
 | `summary`   | `bool` | **`true`** (MCP-only default) | Aggregates only, the big per-hit damage log dropped. Pass `false` for the full log (REST `/damage` defaults to the full log; the defaulted MCP response carries a `hint` field saying how to opt out). |
 
 The damage output — the aggregates AND the per-hit `events` log — is
@@ -375,8 +377,8 @@ to opt out).
 |---|---|---|
 | `demoId` | `string` (required) | — |
 | `players` | `string[]` | scope to these shooters. With no time window, selects their **match-wide** aim; with a window, restricts the recompute. |
-| `startTime` | `float` | window start, match-relative **seconds**. Setting a window **recomputes** aim over the shots in it, so every figure (weapons, crosshair, lgRamp) scopes to the window. |
-| `endTime` | `float` | window end, match-relative seconds. |
+| `startTime` | `integer` | window start, match-relative **milliseconds**. Setting a window **recomputes** aim over the shots in it, so every figure (weapons, crosshair, lgRamp) scopes to the window. |
+| `endTime` | `integer` | window end, match-relative milliseconds. |
 | `summary` | `bool` | **default `true` (MCP-only)**: only the `weapons` aggregates, the per-fire `crosshair`/`lgRamp` arrays dropped. Pass `false` for the full arrays. |
 
 With no time window the **stored** match-wide aim is served (no recompute);
@@ -407,17 +409,16 @@ Useful for movement-pattern reasoning ("what's adjacent to RA?",
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `demoId`    | `string` (required) | — | — |
-| `startTime` | `float64` | match start | Window start, match-relative seconds |
-| `endTime`   | `float64` | match end | Window end |
+| `startTime` | `integer` | match start | Window start, match-relative milliseconds |
+| `endTime`   | `integer` | match end | Window end, match-relative milliseconds |
 | `players`   | `string[]` | all | Restrict to these speakers |
 | `types`     | `string[]` | `["chat","teamsay"]` | Narrow to one of the two |
 
-Output: `{ messages: []result.MatchEvent }` — each entry has `t`,
+Output: `{ messages: []result.MatchEvent }` — each entry has `time`,
 `type` (`chat` or `teamsay`), `player`, `team`, `message` (raw with
 ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
 `getEvents(types:["chat"])` when you only want chat. (mvd-api returns a
-bare array here; the MCP tool wraps it under `messages` because MCP
-structuredContent must be a JSON object.)
+`{timeUnit, messages}` envelope; the MCP tool passes it through.)
 
 #### `getBackpacks({demoId, ...})`
 
@@ -426,13 +427,13 @@ structuredContent must be a JSON object.)
 | `demoId`  | `string` (required) | — | — |
 | `players` | `string[]` | all | Restrict to drops by these dropper names |
 | `weapons` | `string[]` | both | Dropped-weapon codes (`rl`, `lg`); forwarded as a CSV set, matching REST `/backpacks` |
-| `startTime`/`endTime` | `number` | full match | Match-relative **seconds**; windows the drop time |
+| `startTime`/`endTime` | `integer` | full match | Match-relative **milliseconds**; windows the drop time |
 
-Output: `{ backpacks: []result.BackpackDrop }` — each entry has `t`,
+Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
 `player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
 (resolved name), `entNum` (server edict — joins to
-`weapon-pickups[].backpackEnt`). (Wrapped under `backpacks`; see the
-`getChat` note.)
+`weapon-pickups[].backpackEnt`). (REST returns a `{timeUnit, backpacks}`
+envelope; the MCP tool passes it through.)
 
 #### `getItems({demoId, ...})`
 
@@ -442,12 +443,12 @@ Output: `{ backpacks: []result.BackpackDrop }` — each entry has `t`,
 | `items`   | `string[]` | all | Item name or kind token, case-insensitive. A kind matches every instance of a type (`YA` → `ya_1`, `ya_2`; `RA`; `MH`; `Quad`; `Pent`; `Ring`; `RL`; `LG`; `GL`; `SSG`; `SNG`; `NG`); a suffixed name matches one instance (`ya_1`). |
 | `players` | `string[]` | all | Restrict phases to those taken by these names; phases with no `takenBy` survive |
 | `kinds`   | `string[]` | all | Category, case-insensitive: `armor`, `mega`, `health`, `powerup`, `weapon`, `ammo`. A raw kind token (`ra`, `quad`, …) also matches. |
-| `startTime`/`endTime` | `number` | full match | Match-relative **seconds**. Timeline mode keeps phases **overlapping** the window; summary mode counts takes **inside** it. `endTime: 60` = the opening minute. |
+| `startTime`/`endTime` | `integer` | full match | Match-relative **milliseconds**. Timeline mode keeps phases **overlapping** the window; summary mode counts takes **inside** it. `endTime: 60000` = the opening minute. |
 | `summary` | `bool` | **`true`** (MCP-only default) | Per-item take aggregates `{takenCount, byPlayer, firstTake}` instead of the full phase timeline. Pass `false` for every phase (REST `/items` defaults to the timeline; the defaulted MCP response carries a `hint` field saying how to opt out). |
 
 Summary output: `{ items: [{ name, kind, entNum, loc?, takenCount,
 byPlayer?: {name: n}, firstTake?: { time, takenBy?, team? } }] }` — `time`
-in match-relative seconds. The one-call shape for "who took which YA, and
+in match-relative milliseconds. The one-call shape for "who took which YA, and
 who got there first".
 
 Timeline output (`summary: false`): `result.ItemsResult` —
@@ -465,14 +466,14 @@ Timeline output (`summary: false`): `result.ItemsResult` —
 | `players` | `string[]` | all | Restrict to picks by these names |
 | `weapons` | `string[]` | all | `rl`, `lg`, `gl`, `ssg`, `sng`, `ng` |
 | `source`  | `string`   | both | `world` (spawner) or `backpack` (RL/LG drop) |
-| `startTime`/`endTime` | `number` | full match | Match-relative **seconds**; windows the pickup time |
+| `startTime`/`endTime` | `integer` | full match | Match-relative **milliseconds**; windows the pickup time |
 
-Output: `{ pickups: []result.WeaponPickup }` — each entry has `t`,
+Output: `{ pickups: []result.WeaponPickup }` — each entry has `time`,
 `player`, `team`, `weapon`, `source`, `hadBefore`, `kills` (before
 picker's next death), `nextDeathTime`, plus for backpack pickups
 `backpackEnt`, `dropper`, `dropperTeam`, `dropTime`. Joins to
-`getBackpacks` via `backpackEnt` == `backpacks[].entNum`. (Wrapped under
-`pickups`; see the `getChat` note.)
+`getBackpacks` via `backpackEnt` == `backpacks[].entNum`. (REST returns a
+`{timeUnit, pickups}` envelope; the MCP tool passes it through.)
 
 #### `getBuckets({demoId, ...})`
 
@@ -480,14 +481,14 @@ picker's next death), `nextDeathTime`, plus for backpack pickups
 |---|---|---|---|
 | `demoId`      | `string` (required) | — | — |
 | `windowMs`    | `int`     | **5000** (MCP default) | Bucket size in ms. The REST API itself defaults to 50 — the MCP proxy injects 5000 when the caller omits it: 50 ms emits ~24K buckets per match and even 1 s is ~1200 per field per player, while 5 s resolves the trend/control questions a bucketed timeline answers (a quad run is 30 s). Pass an explicit value (1000, 50, …) to override either way; for instants use getStateAt, for exact events getEvents. |
-| `startTime`   | `float64` | match start | Window start, match-relative seconds |
-| `endTime`     | `float64` | match end | Window end |
+| `startTime`   | `integer` | match start | Window start, match-relative milliseconds |
+| `endTime`     | `integer` | match end | Window end, match-relative milliseconds |
 | `players`     | `string[]` | all | Restrict to these player names |
 | `fields`      | `string[]` | all standard | Field codes — see RESULT_SCHEMA.md |
 | `reducers`    | `{[code]: name}` | per-field defaults | Reducer-name override per field |
 | `includeTeam` | `bool`    | `false` | Also emit per-team aggregates per bucket |
 | `loc`         | `string`  | `name` | Ignored for `layout=column` (always the raw `li` index + a `locTable` legend in the envelope to decode it — no `getLocTable` call needed) |
-| `layout`      | `string`  | **`column`** | `column` = compact column-major `ColumnarBuckets` (one array per `(player,field)`, `time(i)=startMs+i*windowMs`, booleans 0/1); `row` = one self-describing object per bucket. Prefer column for series/trend reads; use `getStateAt` for snapshots. |
+| `layout`      | `string`  | **`column`** | `column` = compact column-major `ColumnarBuckets` (one array per `(player,field)`, `time(i)=start+i*windowMs`, booleans 0/1); `row` = one self-describing object per bucket. Prefer column for series/trend reads; use `getStateAt` for snapshots. |
 
 Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
 — see [RESULT_SCHEMA.md → Buckets](../mvd-analytics/RESULT_SCHEMA.md#buckets).
@@ -497,8 +498,8 @@ Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `demoId`    | `string` (required) | — | — |
-| `startTime` | `float64` | match start | — |
-| `endTime`   | `float64` | match end | — |
+| `startTime` | `integer` | match start | Match-relative milliseconds |
+| `endTime`   | `integer` | match end | Match-relative milliseconds |
 | `players`   | `string[]` | all | — |
 | `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` |
 
@@ -511,8 +512,8 @@ keys are in RESULT_SCHEMA.md.
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `demoId`    | `string` (required) | — | — |
-| `startTime` | `float64` | — | **At least one of startTime/endTime is required at the MCP layer** — an unwindowed slice is native-rate entries for the whole match, the biggest payload this service can emit. Keep windows tens of seconds. (REST `/stream-slice` stays unwindowed.) |
-| `endTime`   | `float64` | — | See `startTime`. |
+| `startTime` | `integer` | — | **At least one of startTime/endTime is required at the MCP layer** — an unwindowed slice is native-rate entries for the whole match, the biggest payload this service can emit. Keep windows tens of thousands of ms (tens of seconds). Match-relative milliseconds. (REST `/stream-slice` stays unwindowed.) |
+| `endTime`   | `integer` | — | See `startTime`. Match-relative milliseconds. |
 | `players`   | `string[]` | all | — |
 | `fields`    | `string[]` | all standard | — |
 
@@ -525,7 +526,7 @@ intervals clamped to the window).
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `demoId`  | `string`  (required) | — | — |
-| `time`    | `float64` (required) | — | Match-relative seconds |
+| `time`    | `integer` (required) | — | Match-relative milliseconds |
 | `players` | `string[]` | all | — |
 | `fields`  | `string[]` | all standard minus `sp`/`d` | Spawn/death timestamps are rejected — they're events, not state |
 
@@ -540,8 +541,8 @@ intervals to membership; position to nearest sample.
 | `demoId`     | `string` (required) | — | — |
 | `players`    | `string[]` | all | — |
 | `minDwellMs` | `int`     | **250** (MCP default; REST 0) | Drop residences shorter than this (nearest-loc flicker), folded into neighbour. Pass `0` explicitly for the raw stream. |
-| `startTime`  | `float64` | match start | — |
-| `endTime`    | `float64` | match end | — |
+| `startTime`  | `integer` | match start | Match-relative milliseconds |
+| `endTime`    | `integer` | match end | Match-relative milliseconds |
 
 Output: `view.LocTrailsView` —
 `{ players: [{ name, sequence: [{ start, end, loc }, …] }, …] }`.
@@ -552,7 +553,7 @@ Output: `view.LocTrailsView` —
 |---|---|---|---|
 | `demoId`   | `string` (required) | — | — |
 | `windowMs` | `int` | **5000** (MCP default) | Bucket size for the per-region state strings. Same MCP-vs-REST split as `getBuckets`: REST default is 50, MCP proxy injects 5000 to keep `bucketStates` lengths manageable (a 20-min match: 240 chars per region instead of 24K). |
-| `startTime`/`endTime` | `number` | full match | Match-relative **seconds**; windows the bucket range |
+| `startTime`/`endTime` | `integer` | full match | Match-relative **milliseconds**; windows the bucket range |
 
 Output: `result.RegionControlResult`. Errors with
 `region_control_unavailable` (HTTP 422) if the demo's map has no

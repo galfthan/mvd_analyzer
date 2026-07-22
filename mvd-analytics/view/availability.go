@@ -52,12 +52,12 @@ func Shots(r *result.Result) (*result.ShotsResult, error) {
 }
 
 // AimOptions filters the per-player aim analysis. Empty fields mean "no
-// filter". From/To are match-relative SECONDS (0 disables that bound),
+// filter". From/To are match-relative int32 ms (0 disables that bound),
 // matching getFrags/getDamage.
 type AimOptions struct {
 	Players []string // scope to these shooters (case-sensitive)
-	From    float64  // window start, match-relative seconds (0 = no bound)
-	To      float64  // window end, match-relative seconds (0 = no bound)
+	From    int32    // window start, int32 ms (0 = no bound)
+	To      int32    // window end, int32 ms (0 = no bound)
 	Summary bool     // drop the big Crosshair + LGRamp sample blocks per player
 }
 
@@ -109,11 +109,11 @@ func Aim(r *result.Result, opts AimOptions) (*result.AimResult, error) {
 		// Window set: recompute over the windowed shot slice + named players.
 		q := aimcore.Query{Players: players}
 		if opts.From != 0 {
-			from := secToMs(opts.From)
+			from := opts.From
 			q.FromMs = &from
 		}
 		if opts.To != 0 {
-			to := secToMs(opts.To)
+			to := opts.To
 			q.ToMs = &to
 		}
 		base = aimcore.Compute(r, q)

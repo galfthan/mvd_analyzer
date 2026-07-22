@@ -20,7 +20,7 @@ func marshal(t *testing.T, v any) string {
 
 // TestFragsEnvelopeFlattens checks the pass-through envelope echoes the fixed
 // ms unit and flattens the stored FragResult fields verbatim (no shadow copy,
-// so `t` stays the stored int32 ms and can never drift).
+// so `time` stays the stored int32 ms and can never drift).
 func TestFragsEnvelopeFlattens(t *testing.T) {
 	fr := &result.FragResult{
 		TotalFrags: 1,
@@ -32,7 +32,7 @@ func TestFragsEnvelopeFlattens(t *testing.T) {
 	if !strings.Contains(got, `"timeUnit":"ms"`) {
 		t.Errorf("frags envelope missing ms echo: %s", got)
 	}
-	if !strings.Contains(got, `"t":12345`) {
+	if !strings.Contains(got, `"time":12345`) {
 		t.Errorf("frags time not stored int ms: %s", got)
 	}
 	// The embedded struct's fields flatten to the top level.
@@ -59,7 +59,7 @@ func TestListEnvelopes(t *testing.T) {
 		t.Errorf("empty airgibs should be []: %s", s)
 	}
 	bp := BackpacksEnvelope{TimeUnit: UnitMs, Backpacks: []result.BackpackDrop{{Time: 1000, Weapon: "rl"}}}
-	if s := marshal(t, bp); !strings.Contains(s, `"backpacks":[`) || !strings.Contains(s, `"t":1000`) {
+	if s := marshal(t, bp); !strings.Contains(s, `"backpacks":[`) || !strings.Contains(s, `"time":1000`) {
 		t.Errorf("backpacks envelope wrong: %s", s)
 	}
 	wp := WeaponPickupsEnvelope{TimeUnit: UnitMs, Pickups: []result.WeaponPickup{{Time: 2000, Weapon: "lg", Source: "backpack"}}}
@@ -68,18 +68,19 @@ func TestListEnvelopes(t *testing.T) {
 	}
 }
 
-// TestDerivedViewEcho checks the seconds-native derived views carry the fixed
-// "s" echo when the handler sets it, and that `time` stays float seconds.
+// TestDerivedViewEcho checks the v57 pure-ms derived views carry the constant
+// "ms" echo when the handler sets it, and that `time` is int32 ms (the seconds
+// surfaces were flipped in v57).
 func TestDerivedViewEcho(t *testing.T) {
-	ev := &EventsView{TimeUnit: UnitSec, Events: []TaggedEvent{
-		{T: 10.5, Type: "streak", Player: "a", Detail: map[string]any{"endTime": 20.25}},
+	ev := &EventsView{TimeUnit: UnitMs, Events: []TaggedEvent{
+		{T: 10500, Type: "streak", Player: "a", Detail: map[string]any{"endTime": 20250}},
 	}}
-	if s := marshal(t, ev); !strings.Contains(s, `"timeUnit":"s"`) || !strings.Contains(s, `"time":10.5`) ||
-		!strings.Contains(s, `"endTime":20.25`) {
-		t.Errorf("events echo/seconds wrong: %s", s)
+	if s := marshal(t, ev); !strings.Contains(s, `"timeUnit":"ms"`) || !strings.Contains(s, `"time":10500`) ||
+		!strings.Contains(s, `"endTime":20250`) {
+		t.Errorf("events echo/ms wrong: %s", s)
 	}
-	sa := &StateAtView{TimeUnit: UnitSec, Time: 30, Players: map[string]PlayerStateAt{}}
-	if s := marshal(t, sa); !strings.Contains(s, `"timeUnit":"s"`) || !strings.Contains(s, `"time":30`) {
+	sa := &StateAtView{TimeUnit: UnitMs, Time: 30000, Players: map[string]PlayerStateAt{}}
+	if s := marshal(t, sa); !strings.Contains(s, `"timeUnit":"ms"`) || !strings.Contains(s, `"time":30000`) {
 		t.Errorf("state-at echo wrong: %s", s)
 	}
 }
@@ -125,15 +126,15 @@ func TestRegionControlEnvelopeFlattens(t *testing.T) {
 }
 
 // TestColumnarBucketsEcho checks the columnar /buckets layout carries the fixed
-// "ms" echo when the handler sets it (its startMs/windowMs axis is int32 ms),
+// "ms" echo when the handler sets it (its start/windowMs axis is int32 ms),
 // and that the WASM/qw-analyze path (TimeUnit unset) omits it entirely — the
-// omitempty guard keeps that constructor-direct output byte-identical to pre-v56.
+// omitempty guard keeps that constructor-direct output byte-identical.
 func TestColumnarBucketsEcho(t *testing.T) {
-	cb := &ColumnarBuckets{TimeUnit: UnitMs, WindowMs: 5000, StartMs: 0, Count: 3}
+	cb := &ColumnarBuckets{TimeUnit: UnitMs, WindowMs: 5000, Start: 0, Count: 3}
 	if s := marshal(t, cb); !strings.Contains(s, `"timeUnit":"ms"`) || !strings.Contains(s, `"windowMs":5000`) {
 		t.Errorf("columnar echo/ms wrong: %s", s)
 	}
-	unset := &ColumnarBuckets{WindowMs: 5000, StartMs: 0, Count: 3}
+	unset := &ColumnarBuckets{WindowMs: 5000, Start: 0, Count: 3}
 	if s := marshal(t, unset); strings.Contains(s, "timeUnit") {
 		t.Errorf("unset ColumnarBuckets must omit timeUnit (WASM path): %s", s)
 	}

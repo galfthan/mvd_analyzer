@@ -85,7 +85,7 @@ type DamageResult struct {
 // attacker's given/givenTeam and the victim's taken (see DamageResult).
 // Time is match-relative milliseconds.
 type PositionalKill struct {
-	Time     int32  `json:"t"`
+	Time     int32  `json:"time"`
 	Attacker string `json:"attacker"` // killer ("world" only in the degenerate non-player case)
 	Victim   string `json:"victim"`
 	IsTeam   bool   `json:"isTeam,omitempty"` // killer and victim on the same team
@@ -117,7 +117,7 @@ type PositionalKill struct {
 // DamageEntry is a single damage event. Time is match-relative
 // milliseconds (matches FragEntry.Time).
 type DamageEntry struct {
-	Time      int32  `json:"t"`
+	Time      int32  `json:"time"`
 	Attacker  string `json:"attacker"` // "world" for environmental / non-player inflictor
 	Victim    string `json:"victim"`
 	Weapon    string `json:"weapon"`              // attacker weapon, or environmental category

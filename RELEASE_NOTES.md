@@ -5,6 +5,285 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-22 (api-cleanup-2) — schema v57 (in progress, unreleased)
+
+The `api-cleanup-2` release addresses the v56 API-review findings in
+phases; the schema bump 56→57 and the pure-ms time model land in a later
+phase. Each phase appends its own subsection below.
+
+### Phase 1: request validation (`unknown_param` + enum values)
+
+No response-shape change — this phase only tightens which requests are
+*rejected*.
+
+- **Unknown query-parameter names now 400 with a new `unknown_param`
+  code.** Previously an unrecognised query key (a typo, a stale param) was
+  silently ignored, so a mistaken filter returned an unfiltered body. Every
+  endpoint now rejects any query key it does not consume, naming the
+  offending key and the endpoint's accepted keys in the message. Enforced
+  by consumed-key tracking in the shared `qp` reader (each accessor records
+  the keys it reads), so the accepted set can never drift from what the
+  handler actually uses. Two-direction spec↔handler test sweep pins it.
+- **The global `label` traffic-source tag is accepted on every endpoint**
+  (it is read by request logging, not any handler), so tagging traffic with
+  `?label=…` never 400s.
+- **Legacy / accepted-and-ignored params stay accepted.** The retired
+  `nails` opt-in on `/shots` and the deprecated `weapon` alias of `weapons`
+  are whitelisted (documented `deprecated` in the spec) rather than rejected.
+- **Unknown enum *values* now 400 `invalid_param` instead of matching
+  nothing.** `/events?types=` is validated against the known event-type
+  vocabulary (`view.KnownEventTypes`, drift-pinned to the spec enum) and
+  `/chat?types=` against `{chat, teamsay}`. `weapons=` CSV values, `/items`
+  tokens, and map-entity `types`/`kinds` stay open (data-derived
+  vocabularies) — noted as out of scope.
+- Check order per handler is `invalid_param` → `unknown_param` →
+  `missing_param` / availability `422`; for `/los` the unknown-param check
+  runs before the heavy raycast compute, and for `/region-control` /
+  `/state-at` before the availability / missing-time checks.
+
+### Phase 2: search fixes (dates, `server_hostname`, case docs)
+
+Touches `GET /v1/games/search` (and its MCP `searchGames` proxy) only; no
+schema bump.
+
+- **Malformed search `from`/`to` now 400 `invalid_param` instead of 502.**
+  The `from`/`to` calendar-date bounds are validated at the API boundary as
+  strict `YYYY-MM-DD` (exactly 10 characters and a real date); a bad value
+  fails fast with a client-side `400 invalid_param` rather than reaching the
+  hub and surfacing as an opaque `502 hub_upstream`.
+- **Search rows now include `server_hostname`** — the QuakeWorld server a
+  game was played on (closes review finding 3). It is a snake_case hub
+  passthrough (consistent with the `demo_sha256` island) and appears in both
+  compact and `roster=true` rows. Added to the hubfetch select list and
+  mirrored into the web app's direct-Supabase `SEARCH_SELECT`.
+- **Doc fix: the search `players` filter is case-INsensitive** (finding 2).
+  It is a PostgREST full-text search, which lowercases both query and
+  indexed names (`to_tsvector`) — so `bps` and `BPS` match the same games.
+  The spec/API.md/MCP text previously claimed it was case-sensitive; the
+  claim is corrected and now contrasts it with the per-demo endpoints'
+  exact, case-sensitive `players` filter. The search `from`/`to` (calendar
+  dates) are likewise distinguished from the per-demo endpoints' `from`/`to`
+  (match-relative times).
+
+### Phase 3: `/los` no-BSP → 422 `los_unavailable`
+
+Touches `GET /v1/demos/{id}/los` and `GET /v1/demos/{id}/artifacts/los`; no
+schema bump. Closes review finding 6 and the v55 open cache-invalidation item.
+
+- **The poisoned-cache failure class is eliminated at the root.** Previously
+  `/los` on a map with no provisioned visibility BSP latched
+  `Streams.LOSComputed` *before* the BSP check and returned `200` with empty
+  intervals — an outcome that was then persisted to the tier-3 artifact cache
+  and never retried, so provisioning the BSP afterwards did nothing until the
+  cache was manually cleared. `analyzer.ComputeLOS` now returns a new
+  `analyzer.ErrNoBSP` for the three no-usable-BSP causes (the demo carries no
+  map name, no BSP is provisioned for the map, or a provisioned BSP fails to
+  parse) and does **not** latch, persist, or cache anything. The latch is set
+  only on a genuine compute or a legitimately empty `<2`-player demo (which
+  stays cacheable). Retry is cheap — no empty gob is ever written.
+- **`/los` now returns `422 los_unavailable`** for those cases, matching its
+  `*_unavailable` siblings (`aim_unavailable`, `locgraph_unavailable`, …)
+  instead of the misleading `200`-empty. Both the curated `/los` endpoint and
+  the generic `/artifacts/los` route map `ErrNoBSP` to the same `422`.
+- **Ops note: BSP provisioning heals on process restart.** `mapbsp` memoises
+  its "not found" result per process, so once a BSP is shipped, restart the
+  API (or wait for the memo to be dropped) and the next `/los` request computes
+  and caches normally — no cache purge needed, because the no-BSP outcome was
+  never cached in the first place. The corrupt-BSP branch keeps its own
+  per-process negative memo so repeated requests don't re-parse the bad file.
+
+### Phase 4: pure-ms time model + key renames (schema 56→57)
+
+The breaking sweep. **Every time value in the API is now int32
+milliseconds** — request params and response fields, REST and MCP alike.
+This is the client-migration section: read the two tripwires first.
+
+**⚠️ Tripwire 1 — the key moved, so the break is loud, not silent.**
+The per-item time key follows a **dense/sparse rule**: event-scaled
+sparse surfaces use the descriptive **`time`**, sample-rate-scaled dense
+arrays use the terse **`t`** — both int32 ms. This is deliberately the
+v55 spelling, which splits clients into two clean groups:
+
+- **v55 `time`(ms) per-item keys and units are unchanged.** `/frags`,
+  `/damage`, `/shots`, `/chat`, `/backpacks`, `/weapon-pickups` already
+  carried their timestamp under `time` in int32 ms in v55; that key and
+  unit are untouched in v57. **But four response *envelopes* moved**
+  (v56, not v57): `/chat`, `/backpacks`, `/weapon-pickups`, and
+  `/airgibs` changed from a bare top-level array to a `{timeUnit, <list>}`
+  envelope, keyed `messages` / `backpacks` / `pickups` / `airgibs`
+  respectively. That is a **loud break** — a v55 client iterating the
+  response body directly now iterates an object and fails; reach through
+  the named list key instead. The per-item keys and units inside are
+  unchanged. `/frags`, `/damage`, `/shots` keep **truly-additive**
+  envelopes (the `timeUnit` sibling was flattened onto the existing
+  object), so old readers of those three are fine.
+- **v55 `t`(seconds) readers on `/events`, `/buckets?layout=row`,
+  `/state-at`, and `/items?summary` break loudly — by design.** Those
+  surfaces carried `t` in float **seconds** in v55. In v57 the value is
+  `time` in int32 **ms** — the `t` key is *gone*. A stale client reading
+  `/events[].t` now gets `undefined` and fails fast instead of silently
+  ingesting a 1000×-off number; re-read the field as `time` (already in
+  ms). ⚠️ **A dual-key fallback does NOT protect you.** A v55-portable
+  reader doing `ev.get("time", ev.get("t"))` (or `ev.t ?? ev.time`) is not
+  caught by the loud break — the fallback now resolves to `time` and
+  yields **ms where the code expected seconds**, a silent 1000× error.
+  Drop the fallback and read `time` as ms.
+
+The **same-key unit flips** left (value float seconds → int32 ms, key
+kept — audit any code that read those as seconds):
+
+- `/events` detail maps: `endTime` (powerup + streak details) and
+  `duration` (streak detail). There is no `startTime` key.
+- `/loc-graph` node time weights (`total`/`byPlayer`/`byTeam` plus the
+  `armed`/`unarmed`/`quad`/`pent` breakdowns) — see [Post-review
+  fixes](#post-review-fixes) below.
+
+**⚠️ Tripwire 2 — `from`/`to`/`time` query params are now integer ms.**
+On every demo endpoint these were float **seconds**; they are now
+**integer milliseconds**. Old float-seconds values are rejected loudly:
+`from=10.5` (or any non-integer) 400s `invalid_param` with an `(integer
+milliseconds)` hint, rather than silently misfiltering, and a negative
+value now 400s too (`must be >= 0`). Multiply your old seconds values by
+1000. (Search `from`/`to` are unchanged — calendar dates `YYYY-MM-DD`.)
+**But the tripwire only catches NON-INTEGER forms.** A whole-number value
+that *was* meant as seconds — e.g. `from=60` (intending 60 s) — is a
+perfectly valid integer ms and **cannot be detected**: it migrates
+**silently** to a window 1000× too small (`from=60` now means 60 ms and
+returns almost nothing instead of erroring). Audit every caller that
+passed integer seconds and multiply by 1000.
+
+**Unit flip — the seconds surfaces, now int32 ms (keys per the
+dense/sparse rule):**
+
+| Surface | v55 | v57 |
+|---|---|---|
+| `/events` rows | `t` float s | `time` int32 ms (`endTime`/`duration` in detail also ms) |
+| `/buckets?layout=row` | per-bucket `t` float s | `time` int32 ms |
+| `/state-at` | `t` float s (envelope) | `time` int32 ms |
+| `/stream-slice` envelope | `startTime`/`endTime` float s | `start`/`end` int32 ms |
+| `/loc-trails` | `s`/`e` float s | `start`/`end` int32 ms |
+| `/items?summary=true` | `firstTake.t` float s | `firstTake.time` int32 ms |
+| `/loc-graph` node weights | `total`/`byPlayer`/`byTeam` (+`armed`/`unarmed`/`quad`/`pent`) float s | same keys, int32 ms (see [Post-review fixes](#post-review-fixes)) |
+| query params `from`/`to`/`time` | float s | integer ms |
+
+**Key renames (JSON):**
+
+| Old | New | Where |
+|---|---|---|
+| `o` / `iv` | `other` / `intervals` | `LosTrack` (`/los`, `/artifacts/los`, `pvs`) |
+| `events` | `messages` | `MessagesResult` array — `/artifacts/messages` is now `{messages:{messages:[…]}}` |
+| `startMs` | `start` | columnar `/buckets` axis (implicit `time(i)=start+i*windowMs`) |
+| `t` | `time` | per-item time key on the flipped view surfaces: `/events`, `/buckets?layout=row`, `/state-at`, `/items` `firstTake` (the v55 `t`(seconds) → v57 `time`(ms); the stored sparse lists already spelled it `time`) |
+| `startTime` / `endTime` | `start` / `end` | `/stream-slice` envelope |
+
+**null → `[]`.** Governed top-level arrays that could serialize as `null`
+now always serialize as `[]` when empty: `/events`, `/stream-slice`
+`players`, `/loc-trails` `players`. Nested arrays deeper in a body may
+still be `null`.
+
+**`UnitSec` deletion + `timeUnit` constant.** `view.UnitSec` is deleted;
+the view layer does no float time math. `timeUnit` is kept as a constant
+`"ms"` self-description echo — now truthful on every governed response.
+
+**Deliberate non-renames** (documented exceptions, unchanged in v57):
+the dense/sparse time-key rule keeps the terse **`t`** on every
+sample-rate-scaled array (stream tracks, aim samples, the columnar
+`/buckets` grid, projectile/beam columns) and the descriptive **`time`**
+on the sparse stored lists that already used it in v55 (frags, damage,
+shots, chat, backpacks, weapon-pickups, opening takes, timeline events);
+`result.Interval` keeps terse `s`/`e` (per-row keys in dense arrays stay
+terse — the payload discipline is deliberate); projectile / beam `s*` /
+`e*` column-family prefixes (`s`,`sx`… / `e`,`ez` — these *are* flight-time
+bounds); `windowMs` / `partialLastMs` durations (already ms, names stay);
+`/demoinfo` is the sole KTX-native seconds island.
+
+`CurrentSchemaVersion` bumps 56→57; version-keyed ETags/cache paths
+self-invalidate. MCP tool input schemas and descriptions move with REST.
+
+### Phase 5: artifact timeUnit echo + spec completeness
+
+Spec/doc pass on top of the v57 shapes; no further schema bump.
+
+- **`/artifacts/{name}` now echoes `timeUnit:"ms"`.** The generic artifact
+  envelope gains a top-level `"timeUnit":"ms"` **sibling** of the resultKey
+  for every artifact whose stored section carries time —
+  `frag`, `damage`, `shots`, `aim`, `opening`, `match`, `messages`,
+  `timeline`, `items`, `backpacks`, `weapon-pickups`, `loc-graph` (audited
+  per section against the backing `result.*` struct; `loc-graph` echoes
+  because its node weights are int32-ms durations — see the post-review
+  fix below). The no-time-field artifacts (`metadata`, `map-entities`) and
+  the `/demoinfo` KTX-native
+  island carry no echo; `/artifacts/los` keeps echoing via its `/los` body.
+  The echo is now **required** in the spec on those artifact-envelope
+  branches, so the self-description is guaranteed, not optional.
+- **Per-track stream-slice column schemas.** The `/stream-slice` player
+  tracks (`pos`/`view`/`hgt`/`lq`/`vel`) were one loose universal schema
+  listing every column; they are now split into per-track schemas mirroring
+  the slice projections (`pos` carries `li`, `view` carries `vp`/`vya`,
+  `hgt` carries `h`, `lq` carries `lq`, `vel` carries `vx`/`vy`/`vz`; all
+  share the `t`/`x`/`y`/`z` spine), so the spec can express which columns
+  each track actually has.
+- **Angle16 documented.** The `vp`/`vya` view angles (stream-slice `view`
+  track and `/state-at`'s `view`) are raw angle16 wire shorts; their spec
+  descriptions and API.md now carry the decode formula
+  `deg = ((v mod 65536)+65536) mod 65536 × 360 / 65536` and contrast
+  `/aim`'s `dyaw`/`dpitch`, which are float degrees.
+- **Prose fixes.** ProjectileStreams/BeamStreams document the `s*`/`e*`
+  spawn/end column-family prefix scheme (distinct from `result.Interval`'s
+  terse per-row `s`/`e`); the messages schema notes the array includes
+  `type:"frag"` lines, not just chat; `matchtag`'s lowercase-single-word
+  casing is a documented exception.
+- **100% OpenAPI description coverage.** Every property in
+  `components.schemas` (recursively) and every `components.parameters` entry
+  now carries a non-empty `description`, enforced by a new
+  `TestOpenAPIDescriptionCoverage` walk (no allowlist; failures anchor the
+  offending schema-path).
+
+### Post-review fixes
+
+Three follow-up fixes on top of the v57 shapes; no further schema bump.
+
+- **`windowMs` overflow guard (400 instead of panic/garbage).** `windowMs`
+  is cast to `int32` in the bucket-grid arithmetic; an unbounded value
+  above `math.MaxInt32` (e.g. `?windowMs=4294967295`) wrapped negative,
+  panicking the row layout (500) and serving a bogus negative `count` on
+  the columnar layout (200). `view.resolveWindow` now rejects
+  `windowMs > math.MaxInt32` (keeping the existing `< 0` reject) → **400
+  `invalid_param`** on both `/buckets` layouts. The `bucketCount == 0` /
+  `count == 0` grid guards are also hardened to `<= 0` defensively.
+- **loc-graph node weights are now int32 ms (BREAKING for early-v57
+  consumers).** `LocGraphResult` node time weights
+  (`LocNode`/`LocWeights` `total`/`byPlayer`/`byTeam` and the
+  `armed`/`unarmed`/`quad`/`pent` breakdowns) were still float64 **seconds**
+  — the one surface the pure-ms flip missed. They are now **int32 ms**, so
+  values are ×1000 and integer. Edge weights stay transition counts.
+  `/loc-graph` and `/artifacts/loc-graph` now carry `timeUnit:"ms"`. Any
+  consumer that read the early-v57 seconds values must divide by 1000 (or
+  read them as ms).
+- **Enum values are case-insensitive.** `/events` `types` and `/chat`
+  `types` validated case-**sensitively** while every other token filter
+  lowercases; `types=Frag` or `types=TEAMSAY` now validate and match
+  (lowercased before validation and before use), matching the rest of the
+  API.
+
+### Post-release polish
+
+Two doc/behaviour touch-ups on top of the v57 shapes; no further schema bump.
+
+- **`label` is now documented per-endpoint in the OpenAPI spec (doc-only).**
+  The non-secret `?label=` traffic-source tag (read by request logging,
+  globally accepted on every request) was only described in the spec intro
+  prose. It is now a reusable `Label` component parameter referenced by every
+  operation's `parameters` list, so `/openapi.yaml` and `/docs` show it on
+  each endpoint. No behaviour change — it was always accepted.
+- **Search `limit > 100` / negatives now 400 instead of a silent clamp
+  (behaviour tightening).** `GET /v1/games/search` previously clamped `limit`
+  to the hub's 100-row page cap. In line with v57's reject-loudly posture it
+  now returns **400 `invalid_param`** for a `limit` above 100 and for a
+  negative `limit`/`offset`; `limit=0`/omitted still means the default 20.
+  The MCP `searchGames` tool proxies this endpoint and inherits the 400.
+  hubfetch keeps its clamp as a server-side belt for direct library callers.
+
 ## 2026-07-21 (tweak-api)
 
 - **Review fixes — echo-rule completeness + hub read hardening (still
@@ -16,6 +295,9 @@ detail.
     everywhere to its honest form: time-carrying responses echo, with
     `/demoinfo` and `/artifacts/{name}` exempt, and the three timeless
     responses (`/loc-table`, `/loc-graph`, `/metadata`) carry no echo.
+    [v57 correction: `/loc-graph` node weights ARE time-valued — see v57
+    Post-review fixes; they are int32 ms as of v57, so `/loc-graph` echoes
+    `timeUnit:"ms"` and is no longer timeless.]
   - **Security.** `hubfetch` Search/Resolve now cap the upstream catalog
     read at 16 MiB (`maxCatalogBytes`) — previously an unbounded
     `io.ReadAll` let a compromised/buggy hub or a MITM of

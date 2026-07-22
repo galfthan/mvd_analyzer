@@ -127,9 +127,8 @@ func synthFromBucketView(bv *BucketsView, field, player string) []result.ChangeI
 		if !ok {
 			continue
 		}
-		// b.T is float64 seconds (public ViewBucket API); ChangeI16.T
-		// is int32 ms in schema v8.
-		out = append(out, result.ChangeI16{T: int32(b.T * 1000), V: int16(f)})
+		// b.T and ChangeI16.T are both int32 ms (v57 pure-ms model).
+		out = append(out, result.ChangeI16{T: b.T, V: int16(f)})
 	}
 	return out
 }

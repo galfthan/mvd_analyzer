@@ -313,7 +313,7 @@ function applyDeferredBuckets(data) {
     // Re-run the inits, now that bucket-derived data is present. Order
     // matches displayResults: region control feeds timeline + map.
     if (ta && ta.regionControl) initRegionControlData(currentResult);
-    if (ta || currentResult.messages?.events) displayTimelineAnalysis(currentResult);
+    if (ta || currentResult.messages?.messages) displayTimelineAnalysis(currentResult);
     if (ta) initMapView(currentResult);
 
     // Re-render whichever tab is active so Timeline/Map paint with the new
@@ -391,7 +391,7 @@ async function fetchGameFromHub(gameId) {
 }
 
 const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 'to'];
-const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url';
+const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url,server_hostname';
 
 async function searchHub(filters) {
     const parts = [
@@ -1123,7 +1123,7 @@ function displayResults(result) {
     }
 
     // Timeline Analysis (new graphical view)
-    if (result.timelineAnalysis || result.messages?.events) {
+    if (result.timelineAnalysis || result.messages?.messages) {
         timeRender('displayTimelineAnalysis', () => displayTimelineAnalysis(result));
     }
 
@@ -1852,13 +1852,13 @@ function displayKeyMoments(result) {
     // Get hub info for viewer links (from currentResult which may have hubInfo set)
     const hubInfo = currentResult?.hubInfo;
 
-    // Schema v56: powerupEvents/fragStreaks carry `t` (int32 ms) plus the
+    // Schema v57: powerupEvents/fragStreaks carry `time` (int32 ms) plus the
     // descriptive endTime/duration (also ms). Convert to seconds at intake
     // so the rest of this function (formatDuration, setCurrentTime, hub
     // URL `from`/`to` which expect seconds) is unchanged.
     const powerupEvents = (result.timelineAnalysis?.powerupEvents || []).map(ev => ({
         ...ev,
-        time: ev.t * 0.001,
+        time: ev.time * 0.001,
         endTime: (ev.endTime || 0) * 0.001,
         duration: (ev.duration || 0) * 0.001,
     }));
@@ -1911,10 +1911,10 @@ function displayKeyMoments(result) {
     const streakEmpty = document.getElementById('fragstreaks-empty');
     streakBody.innerHTML = '';
 
-    // Same ms→s conversion for fragStreaks (`t`/endTime/duration are ms).
+    // Same ms→s conversion for fragStreaks (`time`/endTime/duration are ms).
     const fragStreaks = (result.timelineAnalysis?.fragStreaks || []).map(s => ({
         ...s,
-        time: s.t * 0.001,
+        time: s.time * 0.001,
         endTime: (s.endTime || 0) * 0.001,
         duration: (s.duration || 0) * 0.001,
     }));
@@ -1977,7 +1977,7 @@ function displayAirgibs(result) {
 
     const hubInfo = currentResult?.hubInfo || null;
     // `t` is int32 ms on the raw result; keep a seconds copy for seek/hub.
-    const data = (result.timelineAnalysis?.airgibs || []).map(a => ({ ...a, timeSec: a.t * 0.001 }));
+    const data = (result.timelineAnalysis?.airgibs || []).map(a => ({ ...a, timeSec: a.time * 0.001 }));
 
     if (data.length === 0) {
         body.innerHTML = '';
@@ -1991,7 +1991,7 @@ function displayAirgibs(result) {
     table.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc', 'sort-desc', 'sort-active'));
     const aboveTh = table.querySelector('thead th[data-sort="aboveShooter"]');
     if (aboveTh) aboveTh.classList.add('sort-desc');
-    data.sort((a, b) => ((b.heightAboveAttacker ?? 0) - (a.heightAboveAttacker ?? 0)) || (a.t - b.t));
+    data.sort((a, b) => ((b.heightAboveAttacker ?? 0) - (a.heightAboveAttacker ?? 0)) || (a.time - b.time));
 
     // heightAboveAttacker is omitted on the wire for a dead-level 0 (omitempty)
     // and when the shooter had no position sample near the hit — the neutral 0
@@ -2022,7 +2022,7 @@ function displayAirgibs(result) {
             <td>${escapeHtml(a.victim || 'Unknown')}</td>
             <td>${escapeHtml(a.loc || '-')}</td>
             <td data-sort-value="${a.lethal ? 1 : 0}">${lethalCell}</td>
-            <td class="time-cell time-link" data-sort-value="${a.t}">${formatDuration(a.timeSec)}</td>
+            <td class="time-cell time-link" data-sort-value="${a.time}">${formatDuration(a.timeSec)}</td>
             <td>${watchCell}</td>
         `;
         tr.querySelector('.time-link').addEventListener('click', () => setCurrentTime(a.timeSec));
@@ -2486,7 +2486,7 @@ function displayPackDrops(result) {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // Schema v56: backpacks[].t, weaponPickups[].t / .nextDeathTime /
+    // Schema v57: backpacks[].time, weaponPickups[].time / .nextDeathTime /
     // .dropTime are int32 ms. The pickup↔drop join must happen in the
     // same time space — index against raw ms `dropTime` (an exact int)
     // before converting. After the join, convert ms→s so hubAnchor /
@@ -2507,12 +2507,12 @@ function displayPackDrops(result) {
     }
 
     const rows = rawDrops.map(rawDrop => {
-        const rawPickup = pickupByKey[`${rawDrop.entNum}@${rawDrop.t}`] || null;
+        const rawPickup = pickupByKey[`${rawDrop.entNum}@${rawDrop.time}`] || null;
         // Convert ms→s on the per-row copy so downstream renderers see seconds.
-        const drop = { ...rawDrop, time: rawDrop.t * 0.001 };
+        const drop = { ...rawDrop, time: rawDrop.time * 0.001 };
         const pickup = rawPickup ? {
             ...rawPickup,
-            time: rawPickup.t * 0.001,
+            time: rawPickup.time * 0.001,
             nextDeathTime: (rawPickup.nextDeathTime || 0) * 0.001,
             dropTime: (rawPickup.dropTime || 0) * 0.001,
         } : null;
@@ -3029,16 +3029,16 @@ function displayTimelineAnalysis(result) {
     timelineState.matchStartTime = 0;
     timelineState.demoOffset = (result.streams?.global?.demoOffset || 0) * 0.001;
     timelineState.duration = (result.match?.duration || 600000) * 0.001;
-    timelineState.events = (result.messages?.events || []).map(e => ({ ...e, time: e.t * 0.001 }));
+    timelineState.events = (result.messages?.messages || []).map(e => ({ ...e, time: e.time * 0.001 }));
     // Sorted by time once here so prepScoreData / precomputeFragCounts don't
     // each re-sort a clone on every render (pan-drag re-renders many times/sec).
-    timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.t * 0.001 })).sort((a, b) => a.time - b.time); // Frag events from stat tracking
-    timelineState.deathEvents = (timeline?.deathEvents || []).map(d => ({ ...d, time: d.t * 0.001 })); // Per-player deaths (every death) for the frags/deaths drill-down
-    timelineState.killEvents = (timeline?.killEvents || []).map(k => ({ ...k, time: k.t * 0.001 })); // Per-player enemy kills (killer-keyed) for the frags/deaths drill-down
-    timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.t * 0.001 })); // RL/LG drops from KTX hint
+    timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.time * 0.001 })).sort((a, b) => a.time - b.time); // Frag events from stat tracking
+    timelineState.deathEvents = (timeline?.deathEvents || []).map(d => ({ ...d, time: d.time * 0.001 })); // Per-player deaths (every death) for the frags/deaths drill-down
+    timelineState.killEvents = (timeline?.killEvents || []).map(k => ({ ...k, time: k.time * 0.001 })); // Per-player enemy kills (killer-keyed) for the frags/deaths drill-down
+    timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.time * 0.001 })); // RL/LG drops from KTX hint
     timelineState.powerupEvents = (timeline?.powerupEvents || []).map(ev => ({ // per-run records: player, team, frags, duration
         ...ev,
-        time: ev.t * 0.001,
+        time: ev.time * 0.001,
         endTime: (ev.endTime || 0) * 0.001,
         duration: (ev.duration || 0) * 0.001,
     }));
@@ -3079,25 +3079,25 @@ function displayTimelineAnalysis(result) {
 //
 // The worker ships a column-major ColumnarBuckets object (see
 // mvd-analytics/view/columnar.go), stored on timelineState.bucketView:
-//   { windowMs, startMs, count,
+//   { windowMs, start, count,
 //     players: { name: { first, n, alive:[0/1], validFrom:{f:idx},
 //                        h|a|li|sh|nl|rk|cl:[i16], x|y|z:[i32], at:[str],
 //                        rl|lg|gl|ssg|sng|q|pe|r|sp|d:[0/1] } },
 //     teams:   { name: { rl|lg|rllg|w|gl|q|pe|r|pw|th|ta:[int], abt:{ra|ya|ga:[int]} } } }
-// Time axis is implicit: time(i) = (startMs + i*windowMs)/1000 seconds, so
+// Time axis is implicit: time(i) = (start + i*windowMs)/1000 seconds, so
 // time→index is O(1) arithmetic (no more per-bucket binary search). Booleans
 // and the alive mask are 0/1. A player only "exists" at bucket i while alive[i]
 // is set; values carry forward through dead buckets, so callers must gate on
 // liveness exactly as the old row shape omitted dead players per bucket.
 
 function bucketTimeSec(view, i) {
-    return (view.startMs + i * view.windowMs) / 1000;
+    return (view.start + i * view.windowMs) / 1000;
 }
 
 // Bucket whose half-open span contains tSec (floor), clamped to a valid index.
 function bucketIndexAtTime(view, tSec) {
     if (!view || !view.count) return -1;
-    let i = Math.floor((tSec * 1000 - view.startMs) / view.windowMs);
+    let i = Math.floor((tSec * 1000 - view.start) / view.windowMs);
     if (i < 0) i = 0;
     if (i >= view.count) i = view.count - 1;
     return i;
@@ -3107,7 +3107,7 @@ function bucketIndexAtTime(view, tSec) {
 // binarySearchBucketStart for range scans over a visible window.
 function bucketIndexAtOrAfter(view, tSec) {
     if (!view || !view.count) return 0;
-    let i = Math.ceil((tSec * 1000 - view.startMs) / view.windowMs);
+    let i = Math.ceil((tSec * 1000 - view.start) / view.windowMs);
     if (i < 0) i = 0;
     if (i > view.count) i = view.count;
     return i;
@@ -4645,9 +4645,9 @@ function buildFullChat() {
     teamAContainer.innerHTML = '';
     teamBContainer.innerHTML = '';
 
-    if (!currentResult?.messages?.events || teams.length < 2) return;
+    if (!currentResult?.messages?.messages || teams.length < 2) return;
 
-    // Schema v56: messages.events[].t is int32 ms on the raw result;
+    // Schema v57: messages.messages[].time is int32 ms on the raw result;
     // timelineState.events was already converted to seconds at intake in
     // displayTimelineAnalysis, so use that pre-converted copy here.
     // `duration` (timelineState.duration) is also seconds.
@@ -6307,11 +6307,11 @@ function initMapView(result) {
     // Backpack drops — mirrors mapState.deathEvents in shape so renderMap
     // can fade them on the same DEATH_X_DURATION timeline. Only RL/LG drops
     // exist in result.backpacks today (see qwanalytics/result/backpacks.go).
-    // Schema v56: d.t is int32 ms; convert to seconds because the renderMap
+    // Schema v57: d.time is int32 ms; convert to seconds because the renderMap
     // fade compares against mapState.currentTime (seconds) and DEATH_X_DURATION
     // (seconds).
     mapState.dropEvents = (result.backpacks || []).map(d => ({
-        t:      d.t * 0.001,
+        t:      d.time * 0.001,
         wx:     d.origin?.[0] || 0,
         wy:     d.origin?.[1] || 0,
         wz:     d.origin?.[2] || 0,
@@ -9105,8 +9105,8 @@ function buildVisByPair(players, field) {
         if (!p || !Array.isArray(p[field])) continue;
         const byTarget = (byPair[p.name] ||= {});
         for (const tr of p[field]) {
-            const other = idxToName[tr.o];
-            if (other != null && Array.isArray(tr.iv)) byTarget[other] = tr.iv;
+            const other = idxToName[tr.other];
+            if (other != null && Array.isArray(tr.intervals)) byTarget[other] = tr.intervals;
         }
     }
     return byPair;
@@ -10354,10 +10354,11 @@ function attachLocGraphInteractions(cy) {
 
 function nodeTooltipHtml(node) {
     const name = node.data('name');
-    const total = node.data('total') || 0;
+    // Node time weights are int32 ms (schema v57); the UI shows seconds.
+    const total = (node.data('total') || 0) / 1000;
     const byPlayer = node.data('byPlayer') || {};
     const top = Object.entries(byPlayer).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const rows = top.map(([p, t]) => `<div>· ${escapeHtml(p)}: ${t.toFixed(1)}s</div>`).join('');
+    const rows = top.map(([p, t]) => `<div>· ${escapeHtml(p)}: ${(t / 1000).toFixed(1)}s</div>`).join('');
     return `<div><strong>${escapeHtml(name)}</strong></div>
 <div>Total time: ${total.toFixed(1)}s</div>
 ${rows}`;
@@ -10581,7 +10582,8 @@ function buildLocHeatmap(result, metric) {
     return {
         rows, columns, teamCols,
         cellTitle: (col, row, ci) => {
-            const sec = row.secs[ci] || 0;
+            // row.secs holds int32-ms weights (schema v57); show seconds.
+            const sec = (row.secs[ci] || 0) / 1000;
             const pct = row.cells[ci].p != null ? row.cells[ci].p : 0;
             const suffix = col.kind === 'team' ? 'of team time' : 'of their time';
             const who = col.full + (col.kind === 'player' && col.team && col.team !== col.full ? ` (${col.team})` : '');

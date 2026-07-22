@@ -22,13 +22,18 @@ import (
 // constant at app.js (MAX_MOVE_PER_BUCKET = 2500 * bucketDuration).
 const teleportBaseThreshold = 2500.0
 
-// locgraphSampleDt is the assumed per-sample interval used for
-// teleport classification + node-time accumulation when the actual
-// sample-to-sample dt exceeds it. Native position samples arrive at
-// roughly 13 ms apart (~77 Hz) but can have gaps when a player dies;
-// clamping prevents a death-induced 5 s gap from inflating one
-// loc's residence by 5 s.
+// locgraphSampleDt is the assumed per-sample interval (seconds) used for
+// teleport classification. Native position samples arrive at roughly
+// 13 ms apart (~77 Hz). It scales the per-second teleport threshold into
+// a per-sample displacement bound below.
 const locgraphSampleDt = 0.05
+
+// locgraphSampleDtMs is the same clamp as locgraphSampleDt, expressed in
+// int32 ms, used to bound node-time accumulation: a death-induced 5 s
+// gap between samples must not inflate one loc's residence by 5 s.
+// Node-time weights are int32 ms (schema v57 pure-ms model), so the
+// accumulation is exact integer math over the int32-ms sample deltas.
+const locgraphSampleDtMs int32 = 50
 
 // BuildLocGraph aggregates each player's native-rate PositionTrack
 // into a loc-to-loc movement graph. Runs after time normalization /
@@ -68,7 +73,7 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 	ensureNode := func(name string) *LocNode {
 		n := nodes[name]
 		if n == nil {
-			n = &LocNode{Name: name, ByPlayer: make(map[string]float64)}
+			n = &LocNode{Name: name, ByPlayer: make(map[string]int32)}
 			nodes[name] = n
 		}
 		return n
@@ -83,18 +88,18 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 		return e
 	}
 
-	// addWeight folds dt into a conditioned node LocWeights (RL/LG-armed or
-	// quad), lazily allocating it so locs the condition never touched stay
-	// nil (omitempty in JSON).
-	addWeight := func(w **LocWeights, player, team string, dt float64) {
+	// addWeight folds dt (int32 ms) into a conditioned node LocWeights
+	// (RL/LG-armed or quad), lazily allocating it so locs the condition
+	// never touched stay nil (omitempty in JSON).
+	addWeight := func(w **LocWeights, player, team string, dt int32) {
 		if *w == nil {
-			*w = &LocWeights{ByPlayer: make(map[string]float64)}
+			*w = &LocWeights{ByPlayer: make(map[string]int32)}
 		}
 		(*w).Total += dt
 		(*w).ByPlayer[player] += dt
 		if team != "" {
 			if (*w).ByTeam == nil {
-				(*w).ByTeam = make(map[string]float64)
+				(*w).ByTeam = make(map[string]int32)
 			}
 			(*w).ByTeam[team] += dt
 		}
@@ -181,18 +186,18 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 			y := pt.Y[i]
 
 			// Node-time: residence in this loc grows by the gap to the
-			// next sample (clamped by locgraphSampleDt to avoid death
-			// gaps inflating node-time). dt is float64 seconds — the
-			// public LocNode.Total unit — converted once from the int32-
-			// ms delta.
-			var dt float64
+			// next sample (clamped by locgraphSampleDtMs to avoid death
+			// gaps inflating node-time). dt is int32 ms — the public
+			// LocNode.Total unit (schema v57) — taken directly from the
+			// int32-ms sample delta, so accumulation is exact integer math.
+			var dt int32
 			if i+1 < len(pt.T) {
-				dt = float64(pt.T[i+1]-t) * 0.001
+				dt = pt.T[i+1] - t
 			} else {
-				dt = locgraphSampleDt
+				dt = locgraphSampleDtMs
 			}
-			if dt > locgraphSampleDt {
-				dt = locgraphSampleDt
+			if dt > locgraphSampleDtMs {
+				dt = locgraphSampleDtMs
 			}
 			if dt < 0 {
 				dt = 0
@@ -202,7 +207,7 @@ func BuildLocGraph(result *Result) *LocGraphResult {
 			node.ByPlayer[p.Name] += dt
 			if team != "" {
 				if node.ByTeam == nil {
-					node.ByTeam = make(map[string]float64)
+					node.ByTeam = make(map[string]int32)
 				}
 				node.ByTeam[team] += dt
 			}

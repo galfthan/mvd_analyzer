@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -34,6 +35,14 @@ type eagerArtifact struct {
 	extract func(*result.Result) (any, error)
 	code    string
 	msg     string
+	// echoMs is true when the artifact's stored section carries time values
+	// (all int32 ms in the v57 pure-ms model), so the envelope gains a
+	// "timeUnit":"ms" self-description echo (matching the curated endpoints).
+	// loc-graph echoes: its node weights are aggregate durations, int32 ms
+	// since v57. False only for the genuinely time-free sections (metadata,
+	// map-entities) and the /demoinfo KTX-native-units island. Audited per
+	// section against the backing result.* struct.
+	echoMs bool
 }
 
 // eagerArtifacts maps each servable eager artifact (by DAG node name) to its
@@ -46,44 +55,47 @@ var eagerArtifacts = map[string]eagerArtifact{
 	"demoinfo": {extract: func(r *result.Result) (any, error) { return view.DemoInfo(r) },
 		code: "demoinfo_unavailable", msg: "this demo has no KTX demoinfo block (likely non-KTX or pre-match abort)"},
 	"frag": {extract: func(r *result.Result) (any, error) { return view.Frags(r, view.FragOptions{}) },
-		code: "frags_unavailable", msg: "this demo has no frag log"},
+		code: "frags_unavailable", msg: "this demo has no frag log", echoMs: true},
 	"metadata": {extract: func(r *result.Result) (any, error) { return view.Metadata(r) },
 		code: "metadata_unavailable", msg: "this demo has no metadata (no fullserverinfo / no countdown centerprint)"},
 	// Dmg "both" keeps the artifact "the stored section as-is": the view's
 	// unset default is the raw strip, which would silently delete the
 	// stored bounded family from an endpoint contracted to serve it.
 	"damage": {extract: func(r *result.Result) (any, error) { return view.Damage(r, view.DamageOptions{Dmg: "both"}) },
-		code: "damage_unavailable", msg: "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"},
+		code: "damage_unavailable", msg: "this demo has no damage data (no KTX mvdhidden_dmgdone stream)", echoMs: true},
 	"shots": {extract: func(r *result.Result) (any, error) { return view.Shots(r) },
-		code: "shots_unavailable", msg: "this demo has no shot data (no weapon fires decoded)"},
+		code: "shots_unavailable", msg: "this demo has no shot data (no weapon fires decoded)", echoMs: true},
 	"aim": {extract: func(r *result.Result) (any, error) { return view.Aim(r, view.AimOptions{}) },
-		code: "aim_unavailable", msg: "this demo has no aim data (needs shots + position/view streams)"},
+		code: "aim_unavailable", msg: "this demo has no aim data (needs shots + position/view streams)", echoMs: true},
 	"loc-graph": {extract: func(r *result.Result) (any, error) { return view.LocGraph(r) },
-		code: "locgraph_unavailable", msg: "this demo has no loc graph (probably no position track was emitted)"},
+		code: "locgraph_unavailable", msg: "this demo has no loc graph (probably no position track was emitted)", echoMs: true},
 	"opening": {extract: func(r *result.Result) (any, error) {
 		if r.Opening == nil {
 			return nil, view.ErrUnavailable
 		}
 		return r.Opening, nil
 	},
-		code: "opening_unavailable", msg: "this demo has no opening (no detected match start)"},
+		code: "opening_unavailable", msg: "this demo has no opening (no detected match start)", echoMs: true},
 
 	// Always-computable / list-shaped sections: 200 with the raw section (which
 	// may be null/empty), never 422 — the same convention the curated endpoints
 	// use for these.
-	"match":          {extract: func(r *result.Result) (any, error) { return r.Match, nil }},
-	"messages":       {extract: func(r *result.Result) (any, error) { return r.Messages, nil }},
-	"timeline":       {extract: func(r *result.Result) (any, error) { return r.TimelineAnalysis, nil }},
-	"items":          {extract: func(r *result.Result) (any, error) { return r.Items, nil }},
+	"match":          {extract: func(r *result.Result) (any, error) { return r.Match, nil }, echoMs: true},
+	"messages":       {extract: func(r *result.Result) (any, error) { return r.Messages, nil }, echoMs: true},
+	"timeline":       {extract: func(r *result.Result) (any, error) { return r.TimelineAnalysis, nil }, echoMs: true},
+	"items":          {extract: func(r *result.Result) (any, error) { return r.Items, nil }, echoMs: true},
 	"map-entities":   {extract: func(r *result.Result) (any, error) { return r.MapEntities, nil }},
-	"backpacks":      {extract: func(r *result.Result) (any, error) { return r.Backpacks, nil }},
-	"weapon-pickups": {extract: func(r *result.Result) (any, error) { return r.WeaponPickups, nil }},
+	"backpacks":      {extract: func(r *result.Result) (any, error) { return r.Backpacks, nil }, echoMs: true},
+	"weapon-pickups": {extract: func(r *result.Result) (any, error) { return r.WeaponPickups, nil }, echoMs: true},
 }
 
 // handleArtifactsManifest: GET /v1/artifacts — the manifest of every DAG node
 // (name, requires, provides, mutates, lazy, cost, resultKey, servable,
 // description). Static per binary; ETag keyed on the schema version.
 func (s *server) handleArtifactsManifest(w http.ResponseWriter, r *http.Request) {
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	s.writeStaticCacheHeaders(w, "artifacts")
 	if staticRevalidated(w, r, "artifacts") {
 		return
@@ -98,6 +110,9 @@ func (s *server) handleArtifactsManifest(w http.ResponseWriter, r *http.Request)
 // resultKey / lazy + the artifact edges), exactly analyzer.ExportGraph("json").
 // Static per binary; ETag keyed on the schema version.
 func (s *server) handleGraph(w http.ResponseWriter, r *http.Request) {
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	s.writeStaticCacheHeaders(w, "graph")
 	if staticRevalidated(w, r, "graph") {
 		return
@@ -123,10 +138,10 @@ func (s *server) handleArtifact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Artifacts are parameter-free; parameterised reads are the view endpoints
-	// (plan §3.4/§7). Reject any query params rather than silently ignoring them.
-	if len(r.URL.Query()) > 0 {
-		writeError(w, http.StatusBadRequest, "invalid_param",
-			"artifact endpoints take no query parameters (parameterised reads are the view endpoints)")
+	// (plan §3.4/§7). Reject any query param (other than the global `label`)
+	// rather than silently ignoring it. newQP marks nothing, so Unknown()
+	// flags every non-label key as unknown_param.
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	id, err := democache.ParseDemoID(r.PathValue("id"))
@@ -162,7 +177,14 @@ func (s *server) handleArtifact(w http.ResponseWriter, r *http.Request) {
 		s.writeUnavailable(w, r, err, ea.code, ea.msg)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{meta.ResultKey: section})
+	body := map[string]any{meta.ResultKey: section}
+	if ea.echoMs {
+		// Self-description echo (v57 pure-ms): the section carries match-position
+		// time values, all int32 ms. The no-time-field artifacts and /demoinfo
+		// carry no echo; the lazy /artifacts/los echoes via losBody.
+		body["timeUnit"] = string(view.UnitMs)
+	}
+	writeJSON(w, http.StatusOK, body)
 }
 
 // serveLazyArtifact materialises the los artifact through the same store hook
@@ -174,6 +196,11 @@ func (s *server) serveLazyArtifact(w http.ResponseWriter, r *http.Request, id de
 	case "los":
 		res, meta, err := s.store.EnsureLOS(r.Context(), id)
 		if err != nil {
+			if errors.Is(err, analyzer.ErrNoBSP) {
+				writeError(w, http.StatusUnprocessableEntity, "los_unavailable",
+					"line of sight needs the map's visibility BSP, which is not available for this demo")
+				return
+			}
 			s.mapStoreError(w, r, err)
 			return
 		}

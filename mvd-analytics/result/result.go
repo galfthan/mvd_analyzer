@@ -419,7 +419,10 @@ package result
 //     since it is the heaviest position-derived pass — and so absent unless a
 //     consumer requested it (web LOS overlay, qw-analyze -include los,
 //     mvd-api /los). The Streams.LOSComputed guard (gob-only, json:"-") makes
-//     it idempotent.
+//     it idempotent — but note it latches only on a genuine compute or a
+//     legitimately empty <2-player demo; a map with no usable BSP yields
+//     analyzer.ErrNoBSP without latching (mvd-api → 422 los_unavailable), so
+//     no empty result is ever persisted and provisioning the BSP later heals.
 //
 // v38:
 //   - PlayerStream gains PVS []LosTrack alongside LOS: per-opponent
@@ -696,7 +699,50 @@ package result
 //     items-summary firstTake); loc-trails residences rename `s`/`e`→
 //     `start`/`end`. Go field names are unchanged (only the JSON tags).
 //     The golden corpus was regenerated for the key renames.
-const CurrentSchemaVersion = 56
+//
+// v57: pure-ms time model + bound renames + null→[] (breaking sweep).
+//   - PURE-MS MODEL. Every time value in the API is int32 milliseconds —
+//     inputs and outputs, REST and MCP alike. The six v56 float-seconds view
+//     surfaces (events, buckets rows, state-at, stream-slice envelope,
+//     loc-trails, items summary) flip to int32 ms; the view layer now does NO
+//     float time math. Time-valued query params (`from`/`to`/`time` on every
+//     demo endpoint, REST and MCP) become INTEGER MILLISECONDS — a non-integer
+//     like `from=10.5` is rejected with a "(integer milliseconds)" hint (the
+//     v56→v57 tripwire). `view.UnitSec` is deleted; `timeUnit` stays as a
+//     CONSTANT "ms" echo everywhere it appears. Exceptions, documented:
+//     /demoinfo (KTX-native seconds island) and search `from`/`to` (calendar
+//     dates YYYY-MM-DD). Two migration tripwires: `from`/`to` inputs are now
+//     ms; and the v55 float-seconds view surfaces (events/buckets-row/state-at/
+//     items firstTake) are now int32 ms under the SAME key they carried in v55
+//     — `time` — so a v55 reader that still divides by 1000 (or reads the v56
+//     `t`, now gone) breaks loudly instead of silently.
+//   - PER-ITEM TIME KEY: the DENSE/SPARSE split (final v57 naming). Sample-
+//     rate-scaled arrays (~77 Hz stream tracks, columnar sample columns, aim
+//     sample arrays) use the terse `t`; event-scaled sparse lists and singleton
+//     timestamps use the descriptive `time`. This is the v55 layout: every
+//     stored sparse list (frags/damage/shots/chat/backpacks/weapon-pickups/
+//     opening/airgibs/timeline events) kept `time` unchanged from v55, so v55
+//     clients of those lists keep working; the derived view surfaces (events,
+//     row-major buckets, state-at, items firstTake) — seconds in v55 — become
+//     int32 ms but ALSO under `time`, dropping the transient v56 `t` for good.
+//     Both keys are ALWAYS int32 ms; the unit is NEVER encoded in the name (the
+//     `timeUnit` echo names it). DENSE terse keys DELIBERATELY kept: PositionTrack
+//     `t`, ChangeI16/ChangeStr `t`/`v` (the stream-slice change columns),
+//     result.Interval `s`/`e`, aim `t`, projectile/beam `s`,`sx`…`e`,`ez`.
+//     (Columnar BUCKETS carry no time key at all — their axis is the
+//     implicit start + i*windowMs.)
+//   - KEY RENAMES (JSON tags; Go field names mostly unchanged). LosTrack
+//     `o`/`iv` → `other`/`intervals` (once-per-track, descriptive);
+//     MessagesResult array key `events` → `messages`; ColumnarBuckets `startMs`
+//     → `start`; stream-slice envelope `startTime`/`endTime` → `start`/`end`.
+//   - null→[] for governed top-level view arrays (events, stream-slice
+//     players, loc-trails players) — never null when empty. Nested nullables
+//     and the documented-null projectiles/beams/nails objects are untouched.
+//   - Cross-phase v57 items (see RELEASE_NOTES): `unknown_param` 400 on
+//     unknown query keys/enum values; `los_unavailable` 422 (no-BSP /los, never
+//     persisted/latched); `server_hostname` in search rows; `/artifacts`
+//     echoing `timeUnit:"ms"`.
+const CurrentSchemaVersion = 57
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

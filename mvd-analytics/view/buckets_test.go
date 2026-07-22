@@ -1,6 +1,7 @@
 package view
 
 import (
+	"math"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
@@ -71,12 +72,12 @@ func TestBucketsPartialFlag(t *testing.T) {
 		Name:   "p1",
 		Health: []result.ChangeI16{{T: 0, V: 100}},
 	})
-	// Match length 10s with windowMs=3000ms → 3 full + 1 partial (1s).
+	// Match length 10000ms with windowMs=3000ms → 3 full + 1 partial (1000ms).
 	bv, err := Buckets(r, BucketsOptions{
 		WindowMs:  3000,
 		Fields:    []string{FieldHealth},
-		StartTime: 0, EndTime: 10,
-	}) // StartTime/EndTime are seconds (public API)
+		StartTime: 0, EndTime: 10000,
+	}) // StartTime/EndTime are int32 ms (v57)
 	if err != nil {
 		t.Fatalf("Buckets error: %v", err)
 	}
@@ -111,6 +112,48 @@ func TestBucketsUnknownFieldErrors(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatalf("expected error for unknown field")
+	}
+}
+
+// TestResolveWindowBounds pins the windowMs guard rails: negative and
+// above-int32 values both error (the int32 cast in the grid arithmetic
+// would otherwise wrap negative → panic/garbage); zero defaults to 50; a
+// normal value passes through.
+func TestResolveWindowBounds(t *testing.T) {
+	if _, err := resolveWindow(-1); err == nil {
+		t.Errorf("windowMs=-1: want error")
+	}
+	if _, err := resolveWindow(math.MaxInt32 + 1); err == nil {
+		t.Errorf("windowMs=MaxInt32+1: want error")
+	}
+	if got, err := resolveWindow(0); err != nil || got != 50 {
+		t.Errorf("windowMs=0: got (%d,%v), want (50,nil)", got, err)
+	}
+	if got, err := resolveWindow(1000); err != nil || got != 1000 {
+		t.Errorf("windowMs=1000: got (%d,%v), want (1000,nil)", got, err)
+	}
+}
+
+// TestBucketsGridGuard exercises the count<=0 guard: an inverted window
+// (end<=start) yields zero buckets on both builders rather than a
+// negative-length make or a bogus count.
+func TestBucketsGridGuard(t *testing.T) {
+	r := makeStream(t, result.PlayerStream{Name: "p1"})
+	// end (100 ms) before start (5000 ms) → no buckets.
+	opts := BucketsOptions{Fields: []string{FieldHealth}, StartTime: 5000, EndTime: 100}
+	bv, err := Buckets(r, opts)
+	if err != nil {
+		t.Fatalf("row: unexpected error: %v", err)
+	}
+	if len(bv.Buckets) != 0 {
+		t.Errorf("row: got %d buckets, want 0", len(bv.Buckets))
+	}
+	cb, err := BucketsColumnar(r, opts)
+	if err != nil {
+		t.Fatalf("columnar: unexpected error: %v", err)
+	}
+	if cb.Count != 0 {
+		t.Errorf("columnar: count = %d, want 0", cb.Count)
 	}
 }
 

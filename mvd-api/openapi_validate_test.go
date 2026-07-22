@@ -21,7 +21,9 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"testing"
@@ -327,7 +329,11 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "state-at", url: "/v1/demos/gameId:42/state-at?time=30&fields=" + strings.TrimSuffix(allFieldCodes, ",sp,d"), path: "/v1/demos/{id}/state-at", status: 200},
 		{name: "err-state-at-sp", url: "/v1/demos/gameId:42/state-at?time=30&fields=sp", path: "/v1/demos/{id}/state-at", status: 400},
 		{name: "state-at-locindex", url: "/v1/demos/gameId:42/state-at?time=30&loc=index", path: "/v1/demos/{id}/state-at", status: 200},
-		{name: "los", url: "/v1/demos/gameId:42/los", path: "/v1/demos/{id}/los", status: 200},
+		// los on gameId:42 (real streams, no test BSP) is a 422 los_unavailable
+		// (Phase 3); gameId:43 has no Streams, so /los is a legitimate 200-empty
+		// that still validates the Los schema (timeUnit + empty players array).
+		{name: "los", url: "/v1/demos/gameId:43/los", path: "/v1/demos/{id}/los", status: 200},
+		{name: "err-los-unavailable", url: "/v1/demos/gameId:42/los", path: "/v1/demos/{id}/los", status: 422},
 		{name: "projectiles", url: "/v1/demos/gameId:42/streams/projectiles", path: "/v1/demos/{id}/streams/projectiles", status: 200},
 		{name: "beams", url: "/v1/demos/gameId:42/streams/beams", path: "/v1/demos/{id}/streams/beams", status: 200},
 		{name: "nails", url: "/v1/demos/gameId:42/streams/nails", path: "/v1/demos/{id}/streams/nails", status: 200},
@@ -368,9 +374,15 @@ func validationCases(t *testing.T) []validationCase {
 		if !m.Servable {
 			continue
 		}
+		demo := "gameId:42"
+		if m.Name == "los" {
+			// los on gameId:42 (real streams, no test BSP) is 422 los_unavailable;
+			// gameId:43 (no Streams) is a legitimate 200-empty los body.
+			demo = "gameId:43"
+		}
 		cases = append(cases, validationCase{
 			name:   "artifact-" + m.Name,
-			url:    "/v1/demos/gameId:42/artifacts/" + m.Name,
+			url:    "/v1/demos/" + demo + "/artifacts/" + m.Name,
 			path:   "/v1/demos/{id}/artifacts/{name}",
 			status: 200,
 		})
@@ -467,4 +479,287 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	})
 }
 
+// TestOpenAPIDescriptionCoverage enforces 100% description coverage: every
+// property in components.schemas (recursively — through properties maps,
+// items, additionalProperties, and oneOf/anyOf/allOf branches) and every
+// components.parameters entry must carry a non-empty `description`. A property
+// that is a pure `$ref` is exempt — its semantics live on the referenced
+// schema. No allowlist; a new undocumented field fails the test with its
+// schema-path anchor so the miss is easy to locate.
+func TestOpenAPIDescriptionCoverage(t *testing.T) {
+	sd := specDoc(t)
+
+	var misses []string
+	nonEmptyDesc := func(m map[string]any) bool {
+		d, _ := m["description"].(string)
+		return strings.TrimSpace(d) != ""
+	}
+
+	var walk func(node any, path string)
+	walk = func(node any, path string) {
+		m, ok := node.(map[string]any)
+		if !ok {
+			return
+		}
+		// Every entry of a `properties` map is a sub-schema that must carry a
+		// description unless it is a pure $ref (semantics live on the target).
+		if props, ok := m["properties"].(map[string]any); ok {
+			// Deterministic order for stable failure output.
+			keys := make([]string, 0, len(props))
+			for k := range props {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+			for _, k := range keys {
+				pm, _ := props[k].(map[string]any)
+				sub := path + ".properties." + k
+				if pm == nil {
+					continue
+				}
+				if _, isRef := pm["$ref"]; !isRef && !nonEmptyDesc(pm) {
+					misses = append(misses, sub)
+				}
+				walk(pm, sub)
+			}
+		}
+		if items, ok := m["items"].(map[string]any); ok {
+			walk(items, path+".items")
+		}
+		if ap, ok := m["additionalProperties"].(map[string]any); ok {
+			walk(ap, path+".additionalProperties")
+		}
+		for _, kw := range []string{"oneOf", "anyOf", "allOf"} {
+			if branches, ok := m[kw].([]any); ok {
+				for i, b := range branches {
+					walk(b, fmt.Sprintf("%s.%s[%d]", path, kw, i))
+				}
+			}
+		}
+	}
+
+	// components.schemas — recurse each component.
+	schemaNames := make([]string, 0, len(sd.defs))
+	for name := range sd.defs {
+		schemaNames = append(schemaNames, name)
+	}
+	sort.Strings(schemaNames)
+	for _, name := range schemaNames {
+		walk(sd.defs[name], "components.schemas."+name)
+	}
+
+	// components.parameters — each entry must have a description.
+	comps, _ := sd.doc["components"].(map[string]any)
+	if params, ok := comps["parameters"].(map[string]any); ok {
+		pnames := make([]string, 0, len(params))
+		for name := range params {
+			pnames = append(pnames, name)
+		}
+		sort.Strings(pnames)
+		for _, name := range pnames {
+			pm, _ := params[name].(map[string]any)
+			if pm != nil && !nonEmptyDesc(pm) {
+				misses = append(misses, "components.parameters."+name)
+			}
+		}
+	}
+
+	if len(misses) > 0 {
+		t.Errorf("%d schema properties / parameters lack a non-empty description:\n%s",
+			len(misses), strings.Join(misses, "\n"))
+	}
+}
+
 var _ = httptest.NewServer // silence unused-import drift if the helper moves
+
+// queryParams returns an operation's documented query-parameter names and the
+// subset marked required, resolving component $refs. Parameter refs keep the
+// #/components/parameters/ form (loadSpecDocument only rewrites schema refs).
+func (sd *specDocument) queryParams(t *testing.T, path, method string) (names []string, required map[string]bool) {
+	t.Helper()
+	required = map[string]bool{}
+	pathItem, _ := sd.doc["paths"].(map[string]any)[path].(map[string]any)
+	if pathItem == nil {
+		t.Fatalf("spec has no path %q", path)
+	}
+	op, _ := pathItem[strings.ToLower(method)].(map[string]any)
+	if op == nil {
+		return nil, required
+	}
+	params, _ := op["parameters"].([]any)
+	comps, _ := sd.doc["components"].(map[string]any)
+	compParams, _ := comps["parameters"].(map[string]any)
+	for _, pr := range params {
+		pm, _ := pr.(map[string]any)
+		if ref, ok := pm["$ref"].(string); ok {
+			name, ok := strings.CutPrefix(ref, "#/components/parameters/")
+			if !ok {
+				t.Fatalf("unexpected parameter $ref %q", ref)
+			}
+			pm, _ = compParams[name].(map[string]any)
+			if pm == nil {
+				t.Fatalf("unresolvable parameter component %q", name)
+			}
+		}
+		if pm["in"] != "query" {
+			continue
+		}
+		nm, _ := pm["name"].(string)
+		names = append(names, nm)
+		if req, _ := pm["required"].(bool); req {
+			required[nm] = true
+		}
+	}
+	return names, required
+}
+
+// plausibleParamValue returns a value unlikely to be rejected as invalid_param
+// for a documented query parameter, so a sweep request carrying it exercises
+// name-acceptance (never unknown_param) rather than a value error. Only the
+// unknown_param code fails the sweep assertion, so any value would technically
+// do; these keep the requests realistic. `types` uses "chat", a valid value
+// for both /events (an event type) and /chat (a message type).
+func plausibleParamValue(name string) string {
+	switch name {
+	case "time":
+		return "30"
+	case "from":
+		return "0"
+	case "to":
+		return "60"
+	case "windowMs":
+		return "5000"
+	case "minDwellMs":
+		return "100"
+	case "limit", "offset":
+		return "10"
+	case "summary", "includeTeam", "roster":
+		return "1"
+	case "dmg":
+		return "bounded"
+	case "loc":
+		return "name"
+	case "layout":
+		return "row"
+	case "source":
+		return "world"
+	case "fields":
+		return "h"
+	case "reducers":
+		return "h=min"
+	case "kinds":
+		return "armor"
+	case "items":
+		return "ya"
+	case "weapons", "weapon":
+		return "rl"
+	case "players", "teams":
+		return "bps"
+	case "map":
+		return "dm3"
+	case "mode":
+		return "4on4"
+	case "matchtag":
+		return "x"
+	case "nails":
+		return "1"
+	case "types":
+		return "chat"
+	}
+	return "x"
+}
+
+// concreteGetPath fills the path params of a spec GET path pattern with the
+// validation fixtures (gameId:42, dm3, the frag artifact).
+func concreteGetPath(p string) string {
+	p = strings.ReplaceAll(p, "{id}", "gameId:42")
+	p = strings.ReplaceAll(p, "{map}", "dm3")
+	p = strings.ReplaceAll(p, "{name}", "frag")
+	return p
+}
+
+// fetchStatusAndCode issues a GET and returns the status plus the error-body
+// code (empty for a non-error / non-JSON body).
+func fetchStatusAndCode(t *testing.T, u string) (int, string) {
+	t.Helper()
+	resp, err := http.Get(u)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	var env struct {
+		Error struct {
+			Code string `json:"code"`
+		} `json:"error"`
+	}
+	_ = json.Unmarshal(body, &env)
+	return resp.StatusCode, env.Error.Code
+}
+
+// TestOpenAPIParamSweep is the two-direction pin between the spec's declared
+// query params and the handlers' consumed-key sets (Phase 1): (i) every
+// documented query parameter on every governed GET must be accepted (never
+// unknown_param); (ii) a bogus param on every governed GET must 400
+// unknown_param. Meta/doc endpoints that do no param validation are excluded.
+func TestOpenAPIParamSweep(t *testing.T) {
+	sd := specDoc(t)
+	res := goldenResult(t)
+	addBoundedFamily(res.Damage)
+	store := &fakeStore{byID: map[string]*result.Result{"gameId:42": res}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+
+	exclude := map[string]bool{
+		"GET /healthz":            true, // no params, no validation
+		"GET /v1/version":         true,
+		"GET /v1/auth/check":      true,
+		"GET /openapi.yaml":       true, // served asset
+		"GET /docs":               true,
+		"GET /docs/result-schema": true,
+	}
+
+	withParams := func(base url.Values, extra ...[2]string) string {
+		q := url.Values{}
+		for k, vs := range base {
+			q[k] = append([]string(nil), vs...)
+		}
+		for _, kv := range extra {
+			q.Set(kv[0], kv[1])
+		}
+		return q.Encode()
+	}
+
+	swept := 0
+	for op := range specPaths(t) {
+		if !strings.HasPrefix(op, "GET ") || exclude[op] {
+			continue
+		}
+		pathPattern := strings.TrimPrefix(op, "GET ")
+		names, required := sd.queryParams(t, pathPattern, "GET")
+		concrete := concreteGetPath(pathPattern)
+
+		reqVals := url.Values{}
+		for n := range required {
+			reqVals.Set(n, plausibleParamValue(n))
+		}
+
+		// (i) each documented query param is accepted (never unknown_param).
+		for _, n := range names {
+			u := srv.URL + concrete + "?" + withParams(reqVals, [2]string{n, plausibleParamValue(n)})
+			if _, code := fetchStatusAndCode(t, u); code == "unknown_param" {
+				t.Errorf("%s: documented param %q returned unknown_param — its accessor is not marking the key", op, n)
+			}
+		}
+
+		// (ii) a bogus param 400s unknown_param.
+		u := srv.URL + concrete + "?" + withParams(reqVals, [2]string{"bogusparam987", "1"})
+		status, code := fetchStatusAndCode(t, u)
+		if status != http.StatusBadRequest || code != "unknown_param" {
+			t.Errorf("%s: ?bogusparam987=1 = %d/%q, want 400/unknown_param", op, status, code)
+		}
+		swept++
+	}
+	if swept < 25 {
+		t.Fatalf("param sweep covered only %d GET ops — has the enumeration regressed?", swept)
+	}
+}
