@@ -155,6 +155,43 @@ bounds); `windowMs` / `partialLastMs` durations (already ms, names stay);
 `CurrentSchemaVersion` bumps 56→57; version-keyed ETags/cache paths
 self-invalidate. MCP tool input schemas and descriptions move with REST.
 
+### Phase 5: artifact timeUnit echo + spec completeness
+
+Spec/doc pass on top of the v57 shapes; no further schema bump.
+
+- **`/artifacts/{name}` now echoes `timeUnit:"ms"`.** The generic artifact
+  envelope gains a top-level `"timeUnit":"ms"` **sibling** of the resultKey
+  for every artifact whose stored section carries match-position time —
+  `frag`, `damage`, `shots`, `aim`, `opening`, `match`, `messages`,
+  `timeline`, `items`, `backpacks`, `weapon-pickups` (audited per section
+  against the backing `result.*` struct). The no-time-field artifacts
+  (`metadata`, `map-entities`, `loc-graph`) and the `/demoinfo` KTX-native
+  island carry no echo; `/artifacts/los` keeps echoing via its `/los` body.
+  The echo is now **required** in the spec on those artifact-envelope
+  branches, so the self-description is guaranteed, not optional.
+- **Per-track stream-slice column schemas.** The `/stream-slice` player
+  tracks (`pos`/`view`/`hgt`/`lq`/`vel`) were one loose universal schema
+  listing every column; they are now split into per-track schemas mirroring
+  the slice projections (`pos` carries `li`, `view` carries `vp`/`vya`,
+  `hgt` carries `h`, `lq` carries `lq`, `vel` carries `vx`/`vy`/`vz`; all
+  share the `t`/`x`/`y`/`z` spine), so the spec can express which columns
+  each track actually has.
+- **Angle16 documented.** The `vp`/`vya` view angles (stream-slice `view`
+  track and `/state-at`'s `view`) are raw angle16 wire shorts; their spec
+  descriptions and API.md now carry the decode formula
+  `deg = ((v mod 65536)+65536) mod 65536 × 360 / 65536` and contrast
+  `/aim`'s `dyaw`/`dpitch`, which are float degrees.
+- **Prose fixes.** ProjectileStreams/BeamStreams document the `s*`/`e*`
+  spawn/end column-family prefix scheme (distinct from `result.Interval`'s
+  terse per-row `s`/`e`); the messages schema notes the array includes
+  `type:"frag"` lines, not just chat; `matchtag`'s lowercase-single-word
+  casing is a documented exception.
+- **100% OpenAPI description coverage.** Every property in
+  `components.schemas` (recursively) and every `components.parameters` entry
+  now carries a non-empty `description`, enforced by a new
+  `TestOpenAPIDescriptionCoverage` walk (no allowlist; failures anchor the
+  offending schema-path).
+
 ## 2026-07-21 (tweak-api)
 
 - **Review fixes — echo-rule completeness + hub read hardening (still

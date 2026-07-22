@@ -79,10 +79,13 @@ There is no unit selection and no per-endpoint split. `timeUnit`, where
 present, is a **constant `"ms"` self-description echo**:
 
 > **Every `/v1/demos/{id}/*` JSON response that carries match-position
-> time values echoes a top-level `"timeUnit": "ms"`, except `/demoinfo`
-> (KTX's own mixed units) and `/artifacts/{name}` (raw stored bytes).
-> Responses with no match-position time — `/loc-table`, `/loc-graph`,
-> `/metadata` — carry no echo.**
+> time values echoes a top-level `"timeUnit": "ms"`, including
+> `/artifacts/{name}` (which since v57 echoes a `timeUnit` sibling of the
+> resultKey when the section carries match-position time). The lone
+> exception is `/demoinfo` (KTX's own mixed units). Responses with no
+> match-position time — `/loc-table`, `/loc-graph`, `/metadata`, and the
+> no-time artifacts (`/artifacts/{metadata,map-entities,loc-graph}`) —
+> carry no echo.**
 
 The four formerly bare-array endpoints wrap their array in an object so
 the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/airgibs` →
@@ -108,12 +111,17 @@ The exceptions — time-carrying responses that still don't echo:
 - **`/demoinfo` is the KTX units island** — KTX's own clock, a mix of
   native units (see RESULT_SCHEMA.md §DemoInfoResult), so no single echo
   describes it. This is the **sole seconds surface** in the API.
-- **`/artifacts/{name}`** serves the raw stored result sections
-  byte-for-byte (the exact-bytes escape hatch), no echo. The underlying
-  stored schema is all int32 ms — see RESULT_SCHEMA.md §"Time units". The
-  one exception is `/artifacts/los`: los is a materialized artifact, not a
-  raw stored section, so it aliases the `/los` body and carries its `"ms"`
-  echo like the curated endpoint.
+- **`/artifacts/{name}`** serves the raw stored result section under its
+  resultKey (the exact-bytes escape hatch). Since v57 it also echoes a
+  top-level `"timeUnit": "ms"` **sibling** of the resultKey whenever the
+  section carries match-position time — `frag`, `damage`, `shots`, `aim`,
+  `opening`, `match`, `messages`, `timeline`, `items`, `backpacks`,
+  `weapon-pickups` (e.g. `/artifacts/messages` → `{timeUnit, messages:{…}}`).
+  The no-time artifacts — `metadata`, `map-entities`, `loc-graph` — carry
+  no echo, and `/artifacts/demoinfo` is the KTX units island. The
+  underlying stored schema is all int32 ms — see RESULT_SCHEMA.md §"Time
+  units". `/artifacts/los` is a materialized artifact that aliases the
+  `/los` body and carries its `"ms"` echo like the curated endpoint.
 
 Separately, the responses with **no match-position time at all** —
 `/loc-table`, `/loc-graph`, `/metadata` — carry no echo because there is
@@ -133,7 +141,9 @@ hint rather than misfiltering. The only date-typed params are search
 
 Parameter **names are case-insensitive**; the canonical (documented)
 spelling is camelCase — `windowMs`, `minDwellMs`, `includeTeam` — but
-`windowms` / `WindowMs` resolve too. Parameter **values** are case-sensitive
+`windowms` / `WindowMs` resolve too. (Documented exception: search's
+`matchtag` is a lowercase single word, mirroring the KTX serverinfo key,
+not camelCase.) Parameter **values** are case-sensitive
 for player names (QW names are case-significant) and case-insensitive for
 weapon / item / kind / loc / layout tokens.
 
@@ -198,8 +208,11 @@ The valid **field codes** (`h`, `a`, `rl`, `pos`, `view`, `hgt`, `lq`,
 Note (schema v31+): `pos` is **strictly x/y/z** (+ the per-sample loc
 label `li`). The player's **view direction** is the opt-in `view` field
 (raw `angle16` pitch/yaw state after `svc_playerinfo` delta
-carry-forward, decode `deg = uint16(v)*360/65536`, pitch > 180° =
-looking up); floor height is `hgt`; liquid state is `lq`;
+carry-forward, decode `deg = uint16(v)*360/65536` — equivalently
+`deg = ((v mod 65536) + 65536) mod 65536 × 360 / 65536` — pitch > 180° =
+looking up). These `vp`/`vya` view angles (and `/state-at`'s `view`) are
+**raw angle16 wire shorts**; contrast `/aim`'s `dyaw`/`dpitch`, which are
+already **float degrees** off the target. Floor height is `hgt`; liquid state is `lq`;
 **velocity** (vx/vy/vz, Quake units/sec, schema v32) is `vel`.
 Height/liquid no longer ride along `pos` — request each by code.
 Note (schema v33+): the coordinate values `pos` x/y/z, `vel` vx/vy/vz,

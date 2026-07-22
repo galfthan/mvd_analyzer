@@ -1626,6 +1626,9 @@ components:
       in: query
       description: >
         Tournament / event tag, case-insensitive substring (e.g. `qwsl`).
+        Documented casing exception: the param name is the lowercase single
+        word `matchtag` (mirroring the KTX serverinfo key), not camelCase like
+        the other multi-word query params.
       schema: { type: string }
     SearchFrom:
       name: from
@@ -1770,6 +1773,7 @@ components:
       additionalProperties: false
       properties:
         error:
+          description: "Error object (code + message)."
           type: object
           required: [code, message]
           additionalProperties: false
@@ -1829,8 +1833,8 @@ components:
       required: [ok, schemaVersion]
       additionalProperties: false
       properties:
-        ok: { type: boolean }
-        schemaVersion: { type: integer }
+        ok: { type: boolean, description: "Service healthy." }
+        schemaVersion: { type: integer, description: "Result schema version this response was produced under." }
     Version:
       type: object
       required: [hash, tag, buildDate]
@@ -1838,7 +1842,7 @@ components:
       properties:
         hash: { type: string, description: Git commit hash of the build. }
         tag: { type: string, description: Git tag, if any. }
-        buildDate: { type: string }
+        buildDate: { type: string, description: "Build date." }
     LoadResult:
       type: object
       required: [demoId, sha256, fromCache, schemaVersion]
@@ -1847,16 +1851,17 @@ components:
         demoId:
           type: string
           description: Canonical `sha:HEX` id — use it for subsequent calls.
-        sha256: { type: string }
-        fromCache: { type: boolean }
-        schemaVersion: { type: integer }
+        sha256: { type: string, description: "Demo SHA-256." }
+        fromCache: { type: boolean, description: "The result was served from cache." }
+        schemaVersion: { type: integer, description: "Result schema version this response was produced under." }
     ArtifactsManifest:
       type: object
       required: [schemaVersion, artifacts]
       additionalProperties: false
       properties:
-        schemaVersion: { type: integer }
+        schemaVersion: { type: integer, description: "Result schema version this response was produced under." }
         artifacts:
+          description: "DAG node manifest entries."
           type: array
           items: { $ref: "#/components/schemas/ArtifactMeta" }
     ArtifactMeta:
@@ -1867,14 +1872,17 @@ components:
       properties:
         name: { type: string, description: DAG node name. }
         requires:
+          description: "Upstream nodes this node depends on."
           type: [array, "null"]
           items: { type: string }
         provides:
+          description: "Result sections this node provides."
           type: [array, "null"]
           items: { type: string }
-        mutates: { type: boolean }
-        lazy: { type: boolean }
+        mutates: { type: boolean, description: "Result sections this node mutates." }
+        lazy: { type: boolean, description: "Materialised on demand (not in the base parse)." }
         cost:
+          description: "Materialisation cost class."
           type: string
           enum: [light, heavy]
         resultKey:
@@ -1882,8 +1890,8 @@ components:
           description: >
             Top-level Result JSON key (the generic artifact endpoint's body
             key). Empty = internal / no direct section.
-        servable: { type: boolean }
-        description: { type: string }
+        servable: { type: boolean, description: "Exposed via GET /v1/demos/{id}/artifacts/{name}." }
+        description: { type: string, description: "Human-readable description." }
     GamesSearchResult:
       type: object
       description: >
@@ -1935,58 +1943,77 @@ components:
     Overview:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         duration:
+          description: "Match duration, int32 ms."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         errors:
+          description: "Non-fatal analyzer errors encountered while producing this result."
           items:
             type: string
           type:
             - "null"
             - array
         filePath:
+          description: "Source demo path."
           type: string
         gameDir:
+          description: "Game directory (mod)."
           type: string
         hasRegionControl:
+          description: "Region-control data is available for this demo."
           type: boolean
         locCount:
+          description: "Number of named locs available for the map."
           type: integer
         map:
+          description: "Map name."
           type: string
         matchEnd:
+          description: "Match end, int32 ms."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         matchStart:
+          description: "Match start, int32 ms."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         matchtag:
+          description: "Tournament / event tag."
           type: string
         mode:
+          description: "Match mode (e.g. Duel/Team/FFA)."
           type: string
         playerUserIDs:
+          description: "Player name → UserID map (Hub viewer links)."
           additionalProperties:
             type: integer
           type: object
         players:
+          description: "Final per-player scoreboard summary."
           items:
             additionalProperties: false
             properties:
               deaths:
+                description: "Deaths (all causes)."
                 type: integer
               frags:
+                description: "Net QW frag score."
                 type: integer
               kills:
+                description: "Enemy kills (from the corrected frag log)."
                 type: integer
               name:
+                description: "Name / display label."
                 type: string
               suicides:
+                description: "Suicide deaths."
                 type: integer
               team:
+                description: "Team name."
                 type: string
             required:
               - name
@@ -1999,14 +2026,18 @@ components:
             - "null"
             - array
         schemaVersion:
+          description: "Result schema version this response was produced under."
           type: integer
         teams:
+          description: "Per-team frag totals."
           items:
             additionalProperties: false
             properties:
               frags:
+                description: "Net QW frag score."
                 type: integer
               name:
+                description: "Name / display label."
                 type: string
             required:
               - name
@@ -2016,27 +2047,34 @@ components:
             - "null"
             - array
         timing:
+          description: "Wall-clock anchor + pause data mapping match game-time to real time."
           additionalProperties: false
           properties:
             demoOffset:
+              description: "Demo-start offset from match start, int32 ms."
               maximum: 2.147483647e+09
               minimum: -2.147483648e+09
               type: integer
             demoStartAccuracyMs:
+              description: "Uncertainty of the demo-start wall-clock anchor, int32 ms."
               maximum: 2.147483647e+09
               minimum: -2.147483648e+09
               type: integer
             demoStartUnixMs:
+              description: "Wall-clock time of demo start, Unix ms."
               type: integer
             pauses:
+              description: "Game pauses as flat game-time→wall-clock segments."
               items:
                 additionalProperties: false
                 properties:
                   atMs:
+                    description: "Match-relative game time the pause sits at, int32 ms."
                     maximum: 2.147483647e+09
                     minimum: -2.147483648e+09
                     type: integer
                   durationMs:
+                    description: "Real wall-clock ms the pause lasted."
                     maximum: 2.147483647e+09
                     minimum: -2.147483648e+09
                     type: integer
@@ -2051,24 +2089,31 @@ components:
             - "null"
             - object
         topPowerups:
+          description: "Top powerup runs (Key Moments)."
           items:
             additionalProperties: false
             properties:
               duration:
+                description: "Match duration, int32 ms."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               frags:
+                description: "Net QW frag score."
                 type: integer
               player:
+                description: "Player display name."
                 type: string
               start:
+                description: "Start time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               team:
+                description: "Team name."
                 type: string
               type:
+                description: "Type discriminator."
                 type: string
             required:
               - player
@@ -2081,24 +2126,31 @@ components:
             - "null"
             - array
         topStreaks:
+          description: "Top frag streaks (Key Moments)."
           items:
             additionalProperties: false
             properties:
               duration:
+                description: "Match duration, int32 ms."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               length:
+                description: "Streak length (kills)."
                 type: integer
               player:
+                description: "Player display name."
                 type: string
               start:
+                description: "Start time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               team:
+                description: "Team name."
                 type: string
               weapon:
+                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - player
@@ -2123,56 +2175,79 @@ components:
       additionalProperties: false
       properties:
         countdownText:
+          description: "Raw color-stripped countdown centerprint text."
           type: string
         matchSettings:
+          description: "Parsed KTX countdown-centerprint match settings."
           additionalProperties: false
           properties:
             airstep:
+              description: "Airstep mode."
               type: boolean
             antilag:
+              description: "Antilag setting (0/1/2)."
               type: integer
             deathmatch:
+              description: "serverinfo deathmatch mode (0..5)."
               type: integer
             dmgfrags:
+              description: "Damage-as-frags mode."
               type: boolean
             fraglimit:
+              description: "Frag limit."
               type: integer
             instagib:
+              description: "Instagib mode."
               type: boolean
             matchtag:
+              description: "Tournament / event tag."
               type: string
             midair:
+              description: "Midair mode."
               type: boolean
             mode:
+              description: "Mode."
               type: string
             noItems:
+              description: "No-items mode."
               type: boolean
             noweapon:
+              description: "Disabled weapons (e.g. \"gl axe\")."
               type: string
             overtime:
+              description: "Overtime rule (\"5\" minutes or \"sd\")."
               type: string
             powerups:
+              description: "Powerups setting (\"on\"/\"off\"/\"QPRS\")."
               type: string
             socdv2:
+              description: "SOCD v2 policy (\"stats\"/\"warn\"/\"block\")."
               type: string
             spawnK:
+              description: "Numeric k_spw value (0..4)."
               type:
                 - "null"
                 - integer
             spawnmodel:
+              description: "Respawn model short name (QW/KTS/KT/KTX/KT2)."
               type: string
             teamplay:
+              description: "QW teamplay setting."
               type: integer
             timelimit:
+              description: "Time limit, minutes."
               type: integer
             vwep:
+              description: "Visible-weapons mode."
               type: boolean
             yawnmode:
+              description: "Yawnmode (SSG) mode."
               type: boolean
           type:
             - "null"
             - object
         serverInfo:
+          description: "Union of serverinfo key/value pairs (fullserverinfo + later updates)."
           additionalProperties:
             type: string
           type: object
@@ -2181,31 +2256,43 @@ components:
       additionalProperties: false
       properties:
         date:
+          description: "Match date (KTX)."
           type: string
         demo:
+          description: "Demo filename (KTX)."
           type: string
         duration:
+          description: "Match duration, KTX-native units."
           type: integer
         fraglimit:
+          description: "Frag limit."
           type: integer
         hostname:
+          description: "Server hostname."
           type: string
         ip:
+          description: "Server IP."
           type: string
         map:
+          description: "Map name (KTX)."
           type: string
         mode:
+          description: "Match mode (KTX)."
           type: string
         players:
+          description: "Per-player KTX stat blocks."
           items:
             additionalProperties: false
             properties:
               bot:
+                description: "Bot block (present only for frogbot slots)."
                 additionalProperties: false
                 properties:
                   customised:
+                    description: "Bot settings were customised."
                     type: boolean
                   skill:
+                    description: "Bot skill level."
                     type: integer
                 required:
                   - skill
@@ -2214,25 +2301,35 @@ components:
                   - "null"
                   - object
               bottomColor:
+                description: "Player pants colour index."
                 type: integer
               control:
+                description: "KTX map-control share."
                 type: number
               dmg:
+                description: "Damage stat block (KTX)."
                 additionalProperties: false
                 properties:
                   enemy-weapons:
+                    description: "Enemy-weapon damage given (KTX dmg.enemy-weapons)."
                     type: integer
                   given:
+                    description: "Damage given (KTX dmg.given)."
                     type: integer
                   self:
+                    description: "Self damage / self kills (KTX)."
                     type: integer
                   taken:
+                    description: "Damage taken (KTX dmg.taken, enemy-only)."
                     type: integer
                   taken-to-die:
+                    description: "Damage taken to die (KTX dmg.taken-to-die)."
                     type: integer
                   team:
+                    description: "Team name."
                     type: integer
                   team-weapons:
+                    description: "Team-weapon damage given (KTX dmg.team-weapons)."
                     type: integer
                 required:
                   - taken
@@ -2241,59 +2338,79 @@ components:
                   - "null"
                   - object
               handicap:
+                description: "Player handicap setting."
                 type: integer
               items:
+                description: "Per-item stat blocks (KTX), keyed by item name."
                 additionalProperties:
                   additionalProperties: false
                   properties:
                     time:
+                      description: "Item hold time (KTX-native units)."
                       type: integer
                     took:
+                      description: "Times this item was taken (KTX)."
                       type: integer
                   type:
                     - "null"
                     - object
                 type: object
               login:
+                description: "Authenticated login handle."
                 type: string
               name:
+                description: "Name / display label."
                 type: string
               ping:
+                description: "Player ping, ms."
                 type: integer
               speed:
+                description: "Speed stats (KTX units/sec)."
                 additionalProperties: false
                 properties:
                   avg:
+                    description: "Average."
                     type: number
                   max:
+                    description: "Maximum."
                     type: number
                 type:
                   - "null"
                   - object
               spree:
+                description: "Spree stats (KTX)."
                 additionalProperties: false
                 properties:
                   max:
+                    description: "Maximum."
                     type: integer
                   quad:
+                    description: "Quad-conditioned metric."
                     type: integer
                 type:
                   - "null"
                   - object
               stats:
+                description: "Frag/death stat block (KTX)."
                 additionalProperties: false
                 properties:
                   deaths:
+                    description: "Deaths (KTX stat)."
                     type: integer
                   frags:
+                    description: "Frags (KTX stat)."
                     type: integer
                   kills:
+                    description: "Kills (KTX stat)."
                     type: integer
                   spawn-frags:
+                    description: "Spawn frags (KTX stat)."
                     type: integer
                   suicides:
+                    description: "Suicides (KTX stat)."
                     type: integer
                   tk:
+                    description: "Team kills (KTX stat)."
                     type: integer
                 required:
                   - frags
@@ -2302,23 +2419,31 @@ components:
                   - "null"
                   - object
               team:
+                description: "Team name."
                 type: string
               topColor:
+                description: "Player shirt colour index."
                 type: integer
               weapons:
+                description: "Per-weapon stat blocks (KTX), keyed by weapon name."
                 additionalProperties:
                   additionalProperties: false
                   properties:
                     acc:
+                      description: "Accuracy block (KTX authoritative)."
                       additionalProperties: false
                       properties:
                         attacks:
+                          description: "Attack count in KTX weapon units (pellets for SG/SSG)."
                           type: integer
                         hits:
+                          description: "Hits (KTX acc)."
                           type: integer
                         real:
+                          description: "Real hits (not splash) — KTX acc."
                           type: integer
                         virtual:
+                          description: "Virtual hits (splash) — KTX acc."
                           type: integer
                       required:
                         - attacks
@@ -2327,43 +2452,58 @@ components:
                         - "null"
                         - object
                     damage:
+                      description: "Raw/unbound damage amount, including overkill."
                       additionalProperties: false
                       properties:
                         enemy:
+                          description: "Enemy-weapon damage (KTX dmg.enemy-weapons)."
                           type: integer
                         team:
+                          description: "Team name."
                           type: integer
                       type:
                         - "null"
                         - object
                     deaths:
+                      description: "Deaths (KTX stat)."
                       type: integer
                     kills:
+                      description: "Kills (KTX stat)."
                       additionalProperties: false
                       properties:
                         enemy:
+                          description: "Enemy-weapon damage (KTX dmg.enemy-weapons)."
                           type: integer
                         self:
+                          description: "Self damage / self kills (KTX)."
                           type: integer
                         team:
+                          description: "Team name."
                           type: integer
                         total:
+                          description: "Total kills (KTX)."
                           type: integer
                       type:
                         - "null"
                         - object
                     pickups:
+                      description: "Pickup stat block (KTX)."
                       additionalProperties: false
                       properties:
                         dropped:
+                          description: "Backpacks dropped (KTX)."
                           type: integer
                         spawn-taken:
+                          description: "Spawn-item takes (KTX pickup stat)."
                           type: integer
                         spawn-total-taken:
+                          description: "Spawn-item total takes (KTX pickup stat)."
                           type: integer
                         taken:
+                          description: "Damage taken (KTX dmg.taken, enemy-only)."
                           type: integer
                         total-taken:
+                          description: "Total item takes (KTX pickup stat)."
                           type: integer
                       type:
                         - "null"
@@ -2373,8 +2513,10 @@ components:
                     - object
                 type: object
               xferLG:
+                description: "LG transfers (KTX stat)."
                 type: integer
               xferRL:
+                description: "RL transfers (KTX stat)."
                 type: integer
             required:
               - name
@@ -2384,18 +2526,23 @@ components:
             - "null"
             - array
         port:
+          description: "Server port."
           type: integer
         rawJson:
+          description: "Raw KTX JSON (kept only for debugging failed parses)."
           type: string
         teams:
+          description: "Team names."
           items:
             type: string
           type:
             - "null"
             - array
         timelimit:
+          description: "Time limit, minutes."
           type: integer
         version:
+          description: "Version."
           type: integer
       type: object
     Frags:
@@ -2403,20 +2550,25 @@ components:
       properties:
         timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         byPlayer:
+          description: "Per-player breakdown, keyed by player name."
           additionalProperties:
             additionalProperties: false
             properties:
               byWeapon:
+                description: "Total frags by weapon, keyed by weapon name."
                 additionalProperties:
                   type: integer
                 type:
                   - object
                   - "null"
               deaths:
+                description: "Deaths (all causes)."
                 type: integer
               kills:
+                description: "Enemy kills (from the corrected frag log)."
                 type: integer
               teamkills:
+                description: "Teammates this player killed (KTX \"tk\")."
                 type: integer
             required:
               - kills
@@ -2429,28 +2581,36 @@ components:
             - object
             - "null"
         byWeapon:
+          description: "Total frags by weapon, keyed by weapon name."
           additionalProperties:
             type: integer
           type:
             - object
             - "null"
         frags:
+          description: "Chronological frag-event log."
           items:
             additionalProperties: false
             properties:
               isSuicide:
+                description: "Suicide frag."
                 type: boolean
               isTeamKill:
+                description: "Team-kill frag."
                 type: boolean
               killer:
+                description: "Killer (attacker) name."
                 type: string
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               victim:
+                description: "Victim (killed player) name."
                 type: string
               weapon:
+                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - t
@@ -2462,11 +2622,13 @@ components:
             - "null"
             - array
         totalFrags:
+          description: "Total frags in the log."
           type: integer
       required:
-        # timeUnit is present on the /frags governed response but omitted by the
-        # raw-ms /artifacts envelope (which reuses this schema), so it stays
-        # optional-but-declared rather than required.
+        # timeUnit is flattened INTO the governed /frags response (always
+        # echoed) but carried as an /artifacts envelope SIBLING of the `frags`
+        # key (required on that branch, not inside this object), so within this
+        # reused schema it stays optional-but-declared.
         - totalFrags
         - frags
         - byWeapon
@@ -2498,6 +2660,7 @@ components:
           type: string
           enum: [ktx, reconstructed]
         byPlayer:
+          description: "Per-player breakdown, keyed by player name."
           additionalProperties:
             additionalProperties: false
             properties:
@@ -2511,32 +2674,44 @@ components:
                 additionalProperties: false
                 properties:
                   byWeapon:
+                    description: "Enemy damage by attacker weapon, keyed by weapon name."
                     additionalProperties:
                       type: integer
                     type:
                       - object
                       - "null"
                   enemyVsBoth:
+                    description: "Enemy-given damage where the victim held both RL and LG."
                     type: integer
                   enemyVsLg:
+                    description: "Enemy-given damage where the victim held LG (not RL)."
                     type: integer
                   enemyVsMid:
+                    description: "Enemy-given damage where the victim held ssg/sng/gl, no LG/RL."
                     type: integer
                   enemyVsRl:
+                    description: "Enemy-given damage where the victim held RL (not LG)."
                     type: integer
                   enemyVsSg:
+                    description: "Enemy-given damage where the victim held shotgun-tier only."
                     type: integer
                   ewep:
+                    description: "Effective weapon (most kills with)."
                     type: integer
                   given:
+                    description: "Damage given to enemies (the \"useful\" number; KTX dmg.given)."
                     type: integer
                   givenSelf:
+                    description: "Self damage (attacker == victim)."
                     type: integer
                   givenTeam:
+                    description: "Damage given to teammates."
                     type: integer
                   taken:
+                    description: "Damage taken from all sources (enemy + team + self + env)."
                     type: integer
                   takenEnv:
+                    description: "Damage taken from world / environment."
                     type: integer
                 required:
                   - given
@@ -2553,36 +2728,50 @@ components:
                   - ewep
                 type: object
               byWeapon:
+                description: "Enemy damage by attacker weapon, keyed by weapon name."
                 additionalProperties:
                   type: integer
                 type:
                   - object
                   - "null"
               enemyVsBoth:
+                description: "Enemy-given damage where the victim held both RL and LG."
                 type: integer
               enemyVsLg:
+                description: "Enemy-given damage where the victim held LG (not RL)."
                 type: integer
               enemyVsMid:
+                description: "Enemy-given damage where the victim held ssg/sng/gl, no LG/RL."
                 type: integer
               enemyVsRl:
+                description: "Enemy-given damage where the victim held RL (not LG)."
                 type: integer
               enemyVsSg:
+                description: "Enemy-given damage where the victim held shotgun-tier only."
                 type: integer
               ewep:
+                description: "Effective weapon (most kills with)."
                 type: integer
               given:
+                description: "Damage given to enemies (the \"useful\" number; KTX dmg.given)."
                 type: integer
               givenSelf:
+                description: "Self damage (attacker == victim)."
                 type: integer
               givenTeam:
+                description: "Damage given to teammates."
                 type: integer
               stomps:
+                description: "Head-stomp kills, separate from weapon damage."
                 type: integer
               taken:
+                description: "Damage taken from all sources (enemy + team + self + env)."
                 type: integer
               takenEnv:
+                description: "Damage taken from world / environment."
                 type: integer
               telefrags:
+                description: "Instant-kill telefrags, separate from weapon damage."
                 type: integer
             required:
               - given
@@ -2604,6 +2793,7 @@ components:
             - object
             - "null"
         byWeapon:
+          description: "Enemy damage by attacker weapon, keyed by weapon name."
           additionalProperties:
             type: integer
           type:
@@ -2617,10 +2807,12 @@ components:
           type: string
           enum: [both, bounded]
         events:
+          description: "Per-hit damage log, time-ordered (excludes telefrags + stomps)."
           items:
             additionalProperties: false
             properties:
               attacker:
+                description: "Attacker name (\"world\" for an environmental / non-player inflictor)."
                 type: string
               bounded:
                 description: >
@@ -2631,24 +2823,33 @@ components:
                   dmg=both.
                 type: integer
               damage:
+                description: "Raw/unbound damage amount, including overkill."
                 type: integer
               isEnv:
+                description: "Environmental / world-sourced."
                 type: boolean
               isSelf:
+                description: "Attacker == victim."
                 type: boolean
               isSplash:
+                description: "Indirect hit (e.g. rocket splash)."
                 type: boolean
               isTeam:
+                description: "Same team, not self."
                 type: boolean
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               victim:
+                description: "Victim (killed player) name."
                 type: string
               victimWep:
+                description: "Victim weapon class at hit time (sg|mid|lg|rl|both)."
                 type: string
               weapon:
+                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - t
@@ -2661,20 +2862,25 @@ components:
             - "null"
             - array
         matrix:
+          description: "Attacker→victim damage totals."
           items:
             additionalProperties: false
             properties:
               attacker:
+                description: "Attacker name (\"world\" for an environmental / non-player inflictor)."
                 type: string
               byWeapon:
+                description: "Enemy damage by attacker weapon, keyed by weapon name."
                 additionalProperties:
                   type: integer
                 type:
                   - object
                   - "null"
               damage:
+                description: "Raw/unbound damage amount, including overkill."
                 type: integer
               victim:
+                description: "Victim (killed player) name."
                 type: string
             required:
               - attacker
@@ -2686,9 +2892,11 @@ components:
             - "null"
             - array
         scoreboard:
+          description: "Stream-derived totals vs the KTX end-of-match scoreboard (diagnostic only)."
           additionalProperties: false
           properties:
             byPlayer:
+              description: "Per-player breakdown, keyed by player name."
               additionalProperties:
                 additionalProperties: false
                 properties:
@@ -2702,14 +2910,19 @@ components:
                     additionalProperties: false
                     properties:
                       scoreTeam:
+                        description: "KTX scoreboard team damage."
                         type: integer
                       streamEwep:
+                        description: "This pipeline's enemy-weapon figure."
                         type: integer
                       streamGiven:
+                        description: "This pipeline's given figure (unbound in the raw row; bounded in the nest)."
                         type: integer
                       streamTaken:
+                        description: "This pipeline's taken figure (unbound raw; bounded-enemy-only in the nest)."
                         type: integer
                       streamTeam:
+                        description: "This pipeline's bounded team-given figure."
                         type: integer
                     required:
                       - streamGiven
@@ -2719,16 +2932,22 @@ components:
                       - scoreTeam
                     type: object
                   scoreEwep:
+                    description: "KTX scoreboard enemy-weapon damage (bounded)."
                     type: integer
                   scoreGiven:
+                    description: "KTX scoreboard given (bounded)."
                     type: integer
                   scoreTaken:
+                    description: "KTX scoreboard taken (bounded)."
                     type: integer
                   streamEwep:
+                    description: "This pipeline's enemy-weapon figure."
                     type: integer
                   streamGiven:
+                    description: "This pipeline's given figure (unbound in the raw row; bounded in the nest)."
                     type: integer
                   streamTaken:
+                    description: "This pipeline's taken figure (unbound raw; bounded-enemy-only in the nest)."
                     type: integer
                 required:
                   - streamGiven
@@ -2749,10 +2968,12 @@ components:
             - "null"
             - object
         stomps:
+          description: "Head-stomp kills, separate from weapon damage."
           items:
             additionalProperties: false
             properties:
               attacker:
+                description: "Attacker name (\"world\" for an environmental / non-player inflictor)."
                 type: string
               bounded:
                 description: >
@@ -2768,12 +2989,15 @@ components:
                   value). Omitted means equal to `bounded`.
                 type: integer
               isTeam:
+                description: "Same team, not self."
                 type: boolean
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               victim:
+                description: "Victim (killed player) name."
                 type: string
               victimWep:
                 description: >
@@ -2790,10 +3014,12 @@ components:
             - "null"
             - array
         telefrags:
+          description: "Instant-kill telefrags, separate from weapon damage."
           items:
             additionalProperties: false
             properties:
               attacker:
+                description: "Attacker name (\"world\" for an environmental / non-player inflictor)."
                 type: string
               bounded:
                 description: >
@@ -2810,12 +3036,15 @@ components:
                   is normally omitted).
                 type: integer
               isTeam:
+                description: "Same team, not self."
                 type: boolean
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               victim:
+                description: "Victim (killed player) name."
                 type: string
               victimWep:
                 description: >
@@ -2831,11 +3060,13 @@ components:
             - "null"
             - array
         totalDamage:
+          description: "Total enemy damage dealt."
           type: integer
       required:
-        # timeUnit is present on the /damage governed response but omitted by the
-        # raw-ms /artifacts envelope (which reuses this schema), so it stays
-        # optional-but-declared rather than required.
+        # timeUnit is flattened INTO the governed /damage response (always
+        # echoed) but carried as an /artifacts envelope SIBLING of the `damage`
+        # key (required on that branch, not inside this object), so within this
+        # reused schema it stays optional-but-declared.
         - totalDamage
         - events
         - byWeapon
@@ -2847,26 +3078,35 @@ components:
       properties:
         timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         byPlayer:
+          description: "Per-player match-time fire counts and accuracy."
           items:
             additionalProperties: false
             properties:
               byWeapon:
+                description: "Per-weapon fire counts / accuracy for this player."
                 items:
                   additionalProperties: false
                   properties:
                     accuracy:
+                      description: "Hits / shots in [0,1] over all victims (KTX scoreboard parity)."
                       type: number
                     enemyHits:
+                      description: "Fires with ≥1 enemy victim."
                       type: integer
                     hits:
+                      description: "Linkable fires that connected."
                       type: integer
                     selfHits:
+                      description: "Fires with ≥1 self victim (rl/gl splash)."
                       type: integer
                     shots:
+                      description: "Every detected fire, chronological."
                       type: integer
                     teamHits:
+                      description: "Fires with ≥1 teammate victim."
                       type: integer
                     weapon:
+                      description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                       type: string
                   required:
                     - weapon
@@ -2876,10 +3116,13 @@ components:
                   - "null"
                   - array
               player:
+                description: "Shooter name."
                 type: string
               team:
+                description: "Team name."
                 type: string
               total:
+                description: "Total fires by this player."
                 type: integer
             required:
               - player
@@ -2890,22 +3133,29 @@ components:
             - "null"
             - array
         reconciliation:
+          description: "Cross-check of detected counts against KTX authoritative stats (diagnostic only)."
           additionalProperties: false
           properties:
             byPlayer:
+              description: "Per-player match-time fire counts and accuracy."
               additionalProperties:
                 items:
                   additionalProperties: false
                   properties:
                     ktxAttacks:
+                      description: "KTX authoritative attack count."
                       type: integer
                     ktxHits:
+                      description: "KTX authoritative hit count."
                       type: integer
                     streamAttacks:
+                      description: "Detected fires converted to KTX attack units."
                       type: integer
                     streamShots:
+                      description: "Detected discrete fires (this pipeline)."
                       type: integer
                     weapon:
+                      description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                       type: string
                   required:
                     - weapon
@@ -2926,34 +3176,43 @@ components:
             - "null"
             - object
         shots:
+          description: "Every detected fire, chronological."
           items:
             additionalProperties: false
             properties:
               hit:
+                description: "Whether the fire connected (Go-linked hit truth)."
                 type: boolean
               player:
+                description: "Shooter name."
                 type: string
               source:
+                description: "Source."
                 type: string
               team:
+                description: "Team name."
                 type: string
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               victimKinds:
+                description: "Per-victim class — \"enemy\"/\"team\"/\"self\" (parallel to victims)."
                 items:
                   type: string
                 type:
                   - "null"
                   - array
               victims:
+                description: "Victim names for this fire (parallel to victimKinds)."
                 items:
                   type: string
                 type:
                   - "null"
                   - array
               weapon:
+                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - t
@@ -2965,9 +3224,10 @@ components:
             - "null"
             - array
       required:
-        # timeUnit is present on the /shots governed response but omitted by the
-        # raw-ms /artifacts envelope (which reuses this schema), so it stays
-        # optional-but-declared rather than required.
+        # timeUnit is flattened INTO the governed /shots response (always
+        # echoed) but carried as an /artifacts envelope SIBLING of the `shots`
+        # key (required on that branch, not inside this object), so within this
+        # reused schema it stays optional-but-declared.
         - shots
       type: object
     Aim:
@@ -2975,49 +3235,58 @@ components:
       properties:
         timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         players:
+          description: "Per-player aim analysis blocks."
           items:
             additionalProperties: false
             properties:
               crosshair:
+                description: "Columnar per-hitscan-fire crosshair-error samples (shared index)."
                 additionalProperties: false
                 properties:
                   dist:
+                    description: "Muzzle→target-center distance, map units."
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   dpitch:
+                    description: "Signed pitch error to target, float degrees (target above = positive)."
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   dyaw:
+                    description: "Signed yaw error to target, float degrees (target left = positive)."
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   hit:
+                    description: "Per-sample hit flag (shares the column index)."
                     items:
                       type: boolean
                     type:
                       - "null"
                       - array
                   npitch:
+                    description: "Pitch error normalised by target angular half-height (|n|≤1 ≈ on hitbox)."
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   nyaw:
+                    description: "Yaw error normalised by target angular half-width."
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   t:
+                    description: "Event/sample time, int32 ms since match start."
                     items:
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
@@ -3026,18 +3295,21 @@ components:
                       - "null"
                       - array
                   team:
+                    description: "Per-sample flag: the attributed target was a teammate (nil when none)."
                     items:
                       type: boolean
                     type:
                       - "null"
                       - array
                   tgt:
+                    description: "Attributed target name."
                     items:
                       type: string
                     type:
                       - "null"
                       - array
                   w:
+                    description: "Weapon per sample."
                     items:
                       type: string
                     type:
@@ -3057,15 +3329,18 @@ components:
                   - "null"
                   - object
               lgRamp:
+                description: "Columnar per-LG-fire ramp-onto-target series."
                 additionalProperties: false
                 properties:
                   hit:
+                    description: "Per-sample hit flag (shares the column index)."
                     items:
                       type: boolean
                     type:
                       - "null"
                       - array
                   since:
+                    description: "Milliseconds since the start of the shaft this fire belongs to."
                     items:
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
@@ -3074,6 +3349,7 @@ components:
                       - "null"
                       - array
                   team:
+                    description: "Per-sample flag: the attributed target was a teammate (nil when none)."
                     items:
                       type: boolean
                     type:
@@ -3086,96 +3362,135 @@ components:
                   - "null"
                   - object
               mode:
+                description: "Mode."
                 type: string
               player:
+                description: "Player display name."
                 type: string
               team:
+                description: "Team name."
                 type: string
               weapons:
+                description: "Per-weapon effectiveness entries (ordered by weapon rank)."
                 items:
                   additionalProperties: false
                   properties:
                     blocked:
+                      description: "LG whiffs blocked short by geometry with a live enemy behind."
                       type: integer
                     direct:
+                      description: "Direct (non-splash) contacts ≈ KTX hits."
                       type: integer
                     enemy:
+                      description: "Enemy-victim slice of this weapon's hit counters (emitted when it differs from the top-level counters)."
                       additionalProperties: false
                       properties:
                         direct:
+                          description: "Direct (non-splash) contacts ≈ KTX hits."
                           type: integer
                         full:
+                          description: "Fires where all pellets hit."
                           type: integer
                         hits:
+                          description: "Fires that connected."
                           type: integer
                         miss:
+                          description: "Zero-hit fires (SG/SSG per-pellet; LG aim-error whiffs)."
                           type: integer
                         partial:
+                          description: "This bucket is a short trailing window."
                           type: integer
                         pelletHits:
+                          description: "Pellet hits (Σ damage / 4; KTX acc.hits)."
                           type: integer
                       type:
                         - "null"
                         - object
                     full:
+                      description: "Fires where all pellets hit."
                       type: integer
                     hits:
+                      description: "Fires that connected."
                       type: integer
                     miss:
+                      description: "Zero-hit fires (SG/SSG per-pellet; LG aim-error whiffs)."
                       type: integer
                     missed:
+                      description: "Fires that linked to no impact."
                       type: integer
                     outOfRange:
+                      description: "LG whiffs where the enemy was beyond the beam reach."
                       type: integer
                     partial:
+                      description: "This bucket is a short trailing window."
                       type: integer
                     pelletHits:
+                      description: "Pellet hits (Σ damage / 4; KTX acc.hits)."
                       type: integer
                     pellets:
+                      description: "Pellets fired (shots × 6/14)."
                       type: integer
                     self:
+                      description: "Self-victim slice of this weapon's hit counters (rl/gl self-splash)."
                       additionalProperties: false
                       properties:
                         direct:
+                          description: "Direct (non-splash) contacts ≈ KTX hits."
                           type: integer
                         full:
+                          description: "Fires where all pellets hit."
                           type: integer
                         hits:
+                          description: "Fires that connected."
                           type: integer
                         miss:
+                          description: "Zero-hit fires (SG/SSG per-pellet; LG aim-error whiffs)."
                           type: integer
                         partial:
+                          description: "This bucket is a short trailing window."
                           type: integer
                         pelletHits:
+                          description: "Pellet hits (Σ damage / 4; KTX acc.hits)."
                           type: integer
                       type:
                         - "null"
                         - object
                     shots:
+                      description: "Weapon fires."
                       type: integer
                     splash:
+                      description: "Linked hits that were splash-only."
                       type: integer
                     team:
+                      description: "Team-victim slice of this weapon's hit counters (same fields, team victims only)."
                       additionalProperties: false
                       properties:
                         direct:
+                          description: "Direct (non-splash) contacts ≈ KTX hits."
                           type: integer
                         full:
+                          description: "Fires where all pellets hit."
                           type: integer
                         hits:
+                          description: "Fires that connected."
                           type: integer
                         miss:
+                          description: "Zero-hit fires (SG/SSG per-pellet; LG aim-error whiffs)."
                           type: integer
                         partial:
+                          description: "This bucket is a short trailing window."
                           type: integer
                         pelletHits:
+                          description: "Pellet hits (Σ damage / 4; KTX acc.hits)."
                           type: integer
                       type:
                         - "null"
                         - object
                     unresolved:
+                      description: "LG fires with no matching beam."
                       type: integer
                     weapon:
+                      description: "Weapon this effectiveness entry covers."
                       type: string
                   required:
                     - weapon
@@ -3193,32 +3508,38 @@ components:
             - "null"
             - array
       required:
-        # timeUnit is present on the /aim governed response but omitted by the
-        # raw-ms /artifacts envelope (which reuses this schema), so it stays
-        # optional-but-declared rather than required.
+        # timeUnit is flattened INTO the governed /aim response (always echoed)
+        # but carried as an /artifacts envelope SIBLING of the `aim` key
+        # (required on that branch, not inside this object), so within this
+        # reused schema it stays optional-but-declared.
         - players
       type: object
     LocGraph:
       additionalProperties: false
       properties:
         edges:
+          description: "Directed loc-transition edges."
           items:
             additionalProperties: false
             properties:
               armed:
+                description: "Same transition-count breakdown restricted to transitions while holding RL or LG."
                 additionalProperties: false
                 properties:
                   byPlayer:
+                    description: "Per-player transition counts, keyed by player name."
                     additionalProperties:
                       type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
+                    description: "Per-team transition counts, keyed by team name."
                     additionalProperties:
                       type: integer
                     type: object
                   total:
+                    description: "Aggregate transition count."
                     type: integer
                 required:
                   - total
@@ -3227,33 +3548,41 @@ components:
                   - "null"
                   - object
               byPlayer:
+                description: "Per-player transition counts, keyed by player name."
                 additionalProperties:
                   type: integer
                 type:
                   - object
                   - "null"
               byTeam:
+                description: "Per-team transition counts, keyed by team name."
                 additionalProperties:
                   type: integer
                 type: object
               from:
+                description: "Edge source."
                 type: string
               kind:
+                description: "Transition kind."
                 type: string
               pent:
+                description: "Same transition-count breakdown restricted to transitions with an active Pent."
                 additionalProperties: false
                 properties:
                   byPlayer:
+                    description: "Per-player transition counts, keyed by player name."
                     additionalProperties:
                       type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
+                    description: "Per-team transition counts, keyed by team name."
                     additionalProperties:
                       type: integer
                     type: object
                   total:
+                    description: "Aggregate transition count."
                     type: integer
                 required:
                   - total
@@ -3262,19 +3591,23 @@ components:
                   - "null"
                   - object
               quad:
+                description: "Same transition-count breakdown restricted to transitions with an active Quad."
                 additionalProperties: false
                 properties:
                   byPlayer:
+                    description: "Per-player transition counts, keyed by player name."
                     additionalProperties:
                       type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
+                    description: "Per-team transition counts, keyed by team name."
                     additionalProperties:
                       type: integer
                     type: object
                   total:
+                    description: "Aggregate transition count."
                     type: integer
                 required:
                   - total
@@ -3283,23 +3616,29 @@ components:
                   - "null"
                   - object
               to:
+                description: "Edge target."
                 type: string
               total:
+                description: "Aggregate transition count."
                 type: integer
               unarmed:
+                description: "Same transition-count breakdown restricted to transitions holding neither RL nor LG."
                 additionalProperties: false
                 properties:
                   byPlayer:
+                    description: "Per-player transition counts, keyed by player name."
                     additionalProperties:
                       type: integer
                     type:
                       - object
                       - "null"
                   byTeam:
+                    description: "Per-team transition counts, keyed by team name."
                     additionalProperties:
                       type: integer
                     type: object
                   total:
+                    description: "Aggregate transition count."
                     type: integer
                 required:
                   - total
@@ -3318,23 +3657,28 @@ components:
             - "null"
             - array
         locs:
+          description: "Location nodes / membership list."
           items:
             additionalProperties: false
             properties:
               armed:
+                description: "Same time-spent breakdown restricted to samples while holding RL or LG."
                 additionalProperties: false
                 properties:
                   byPlayer:
+                    description: "Per-player time spent (seconds), keyed by player name."
                     additionalProperties:
                       type: number
                     type:
                       - object
                       - "null"
                   byTeam:
+                    description: "Per-team time spent (seconds), keyed by team name."
                     additionalProperties:
                       type: number
                     type: object
                   total:
+                    description: "Aggregate time spent, seconds."
                     type: number
                 required:
                   - total
@@ -3343,31 +3687,38 @@ components:
                   - "null"
                   - object
               byPlayer:
+                description: "Per-player time spent (seconds), keyed by player name."
                 additionalProperties:
                   type: number
                 type:
                   - object
                   - "null"
               byTeam:
+                description: "Per-team time spent (seconds), keyed by team name."
                 additionalProperties:
                   type: number
                 type: object
               name:
+                description: "Loc name."
                 type: string
               pent:
+                description: "Same time-spent breakdown restricted to samples with an active Pent."
                 additionalProperties: false
                 properties:
                   byPlayer:
+                    description: "Per-player time spent (seconds), keyed by player name."
                     additionalProperties:
                       type: number
                     type:
                       - object
                       - "null"
                   byTeam:
+                    description: "Per-team time spent (seconds), keyed by team name."
                     additionalProperties:
                       type: number
                     type: object
                   total:
+                    description: "Aggregate time spent, seconds."
                     type: number
                 required:
                   - total
@@ -3376,19 +3727,23 @@ components:
                   - "null"
                   - object
               quad:
+                description: "Same time-spent breakdown restricted to samples with an active Quad."
                 additionalProperties: false
                 properties:
                   byPlayer:
+                    description: "Per-player time spent (seconds), keyed by player name."
                     additionalProperties:
                       type: number
                     type:
                       - object
                       - "null"
                   byTeam:
+                    description: "Per-team time spent (seconds), keyed by team name."
                     additionalProperties:
                       type: number
                     type: object
                   total:
+                    description: "Aggregate time spent, seconds."
                     type: number
                 required:
                   - total
@@ -3397,21 +3752,26 @@ components:
                   - "null"
                   - object
               total:
+                description: "Aggregate time spent, seconds."
                 type: number
               unarmed:
+                description: "Same time-spent breakdown restricted to samples holding neither RL nor LG."
                 additionalProperties: false
                 properties:
                   byPlayer:
+                    description: "Per-player time spent (seconds), keyed by player name."
                     additionalProperties:
                       type: number
                     type:
                       - object
                       - "null"
                   byTeam:
+                    description: "Per-team time spent (seconds), keyed by team name."
                     additionalProperties:
                       type: number
                     type: object
                   total:
+                    description: "Aggregate time spent, seconds."
                     type: number
                 required:
                   - total
@@ -3420,10 +3780,13 @@ components:
                   - "null"
                   - object
               x:
+                description: "X coordinate, map units."
                 type: number
               "y":
+                description: "Y coordinate, map units."
                 type: number
               z:
+                description: "Z coordinate, map units."
                 type: number
             required:
               - name
@@ -3444,22 +3807,30 @@ components:
       additionalProperties: false
       properties:
         message:
+          description: "Chat text or frag description (ezQuake-markup-preserving)."
           type: string
         messageClean:
+          description: "Same text with ezQuake markup stripped (plain text)."
           type: string
         player:
+          description: "Player display name."
           type: string
         team:
+          description: "Team name."
           type: string
         t:
+          description: "Event/sample time, int32 ms since match start."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         type:
+          description: "Type discriminator."
           type: string
         victim:
+          description: "Victim (killed player) name."
           type: string
         weapon:
+          description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
         - t
@@ -3472,24 +3843,31 @@ components:
       additionalProperties: false
       properties:
         entNum:
+          description: "Server entity/edict number — stable id within a match."
           type: integer
         loc:
+          description: "Nearest named location from the map .loc file."
           type: string
         origin:
+          description: "World-space origin [x,y,z], map units."
           items:
             type: number
           maxItems: 3
           minItems: 3
           type: array
         player:
+          description: "Player display name."
           type: string
         team:
+          description: "Team name."
           type: string
         t:
+          description: "Event/sample time, int32 ms since match start."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         weapon:
+          description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
         - t
@@ -3502,36 +3880,49 @@ components:
       additionalProperties: false
       properties:
         backpackEnt:
+          description: "Originating BackpackDrop entNum (backpack source only)."
           type: integer
         dropTime:
+          description: "Drop time of the source backpack, int32 ms."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         dropper:
+          description: "Backpack dropper name."
           type: string
         dropperTeam:
+          description: "Backpack dropper team."
           type: string
         hadBefore:
+          description: "Picker already held this weapon (redundant grab, zero kills credited)."
           type: boolean
         inferred:
+          description: "Synthesized from a STAT_ITEMS flip (weapon-stay recovery), not a KTX hint."
           type: boolean
         kills:
+          description: "Kills credited to the weapon this pickup granted."
           type: integer
         nextDeathTime:
+          description: "Picker's next death, int32 ms (0 = never died before match end)."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         player:
+          description: "Player display name."
           type: string
         source:
+          description: "Pickup source (\"world\"/\"backpack\"/\"unknown\")."
           type: string
         team:
+          description: "Team name."
           type: string
         t:
+          description: "Event/sample time, int32 ms since match start."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         weapon:
+          description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
         - t
@@ -3546,36 +3937,47 @@ components:
       properties:
         timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         items:
+          description: "Per-item timelines."
           items:
             additionalProperties: false
             properties:
               entNum:
+                description: "Server entity/edict number — stable id within a match."
                 type: integer
               kind:
+                description: "Item kind — compact vocabulary (rl/lg/ra/mh/quad/…)."
                 type: string
               loc:
+                description: "Nearest named location from the map .loc file."
                 type: string
               name:
+                description: "Name / display label."
                 type: string
               phases:
+                description: "Observable up→taken→respawn rows for this item."
                 items:
                   additionalProperties: false
                   properties:
                     availableFrom:
+                      description: "Time this phase became available, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     respawnAt:
+                      description: "Respawn time, int32 ms since match start (0 = unknown / still held)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     takenAt:
+                      description: "Take time, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     takenBy:
+                      description: "Picker display name."
                       type: string
                     team:
+                      description: "Team name."
                       type: string
                   required:
                     - availableFrom
@@ -3584,10 +3986,13 @@ components:
                   - "null"
                   - array
               x:
+                description: "X coordinate, map units."
                 type: number
               "y":
+                description: "Y coordinate, map units."
                 type: number
               z:
+                description: "Z coordinate, map units."
                 type: number
             required:
               - name
@@ -3602,34 +4007,41 @@ components:
             - "null"
             - array
       required:
-        # timeUnit is present on the /items timeline governed response but omitted
-        # by the raw-ms /artifacts envelope (which reuses this schema), so it stays
-        # optional-but-declared rather than required.
+        # timeUnit is flattened INTO the governed /items timeline response
+        # (always echoed) but carried as an /artifacts envelope SIBLING of the
+        # `items` key (required on that branch, not inside this object), so
+        # within this reused schema it stays optional-but-declared.
         - items
       type: object
     ItemsSummary:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         items:
+          description: "Per-item take summaries."
           items:
             additionalProperties: false
             properties:
               byPlayer:
+                description: "Take counts by player, keyed by player name."
                 additionalProperties:
                   type: integer
                 type: object
               entNum:
+                description: "Server entity/edict number — stable id within a match."
                 type: integer
               firstTake:
+                description: "First in-match take (null if never taken)."
                 additionalProperties: false
                 properties:
                   t:
                     type: integer
                     description: First-take time, int32 ms.
                   takenBy:
+                    description: "Picker display name."
                     type: string
                   team:
+                    description: "Team name."
                     type: string
                 required:
                   - t
@@ -3637,12 +4049,16 @@ components:
                   - "null"
                   - object
               kind:
+                description: "Item kind — compact vocabulary (rl/lg/ra/mh/quad/…)."
                 type: string
               loc:
+                description: "Nearest named location from the map .loc file."
                 type: string
               name:
+                description: "Name / display label."
                 type: string
               takenCount:
+                description: "Number of in-match takes."
                 type: integer
             required:
               - name
@@ -3661,30 +4077,42 @@ components:
       additionalProperties: false
       properties:
         attacker:
+          description: "Attacker name (\"world\" for an environmental / non-player inflictor)."
           type: string
         attackerTeam:
+          description: "Attacker team name."
           type: string
         attackerUserID:
+          description: "Attacker UserID (Hub viewer link)."
           type: integer
         damage:
+          description: "Raw rocket damage (unbound, incl. overkill)."
           type: integer
         height:
+          description: "Victim feet above the floor at the hit, map units."
           type: number
         heightAboveAttacker:
+          description: "Victim origin minus shooter origin at the hit, map units (negative = below)."
           type: number
         lethal:
+          description: "The hit killed the victim (matching rocket frag within a short window)."
           type: boolean
         loc:
+          description: "Nearest named location from the map .loc file."
           type: string
         t:
+          description: "Event/sample time, int32 ms since match start."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         victim:
+          description: "Victim (killed player) name."
           type: string
         victimTeam:
+          description: "Victim team name."
           type: string
         victimUserID:
+          description: "Victim UserID (Hub viewer link)."
           type: integer
       required:
         - t
@@ -3696,38 +4124,49 @@ components:
     RegionControl:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         bucketStates:
+          description: "Per-bucket per-region control codes (one ASCII char each)."
           additionalProperties:
             type: string
           type: object
         regions:
+          description: "Named control regions."
           items:
             additionalProperties: false
             properties:
               centroidX:
+                description: "Region centroid X, map units."
                 type: number
               centroidY:
+                description: "Region centroid Y, map units."
                 type: number
               locs:
+                description: "Location nodes / membership list."
                 items:
                   type: string
                 type:
                   - "null"
                   - array
               name:
+                description: "Region name."
                 type: string
               points:
+                description: "Rendering anchors (MapLocation points) for the region overlay."
                 items:
                   additionalProperties: false
                   properties:
                     name:
+                      description: "Region name."
                       type: string
                     x:
+                      description: "X coordinate, map units."
                       type: number
                     "y":
+                      description: "Y coordinate, map units."
                       type: number
                     z:
+                      description: "Z coordinate, map units."
                       type: number
                   required:
                     - x
@@ -3749,18 +4188,23 @@ components:
             - "null"
             - array
         stats:
+          description: "Per-region match-aggregate control shares."
           additionalProperties:
             additionalProperties: false
             properties:
               byPlayer:
+                description: "Per-player presence in this region, keyed by player name."
                 additionalProperties:
                   additionalProperties: false
                   properties:
                     armed:
+                      description: "Bucket count present while carrying RL or LG."
                       type: integer
                     team:
+                      description: "Team name."
                       type: string
                     unarmed:
+                      description: "Bucket count present without RL/LG."
                       type: integer
                   required:
                     - team
@@ -3769,18 +4213,25 @@ components:
                   type: object
                 type: object
               contested:
+                description: "Share of buckets contested (percent)."
                 type: number
               empty:
+                description: "Share of buckets empty — no living players (percent)."
                 type: number
               teamAControl:
+                description: "Share of buckets under team-A control (percent)."
                 type: number
               teamAWeakControl:
+                description: "Share of buckets under team-A weak control (percent)."
                 type: number
               teamBControl:
+                description: "Share of buckets under team-B control (percent)."
                 type: number
               teamBWeakControl:
+                description: "Share of buckets under team-B weak control (percent)."
                 type: number
               weakContested:
+                description: "Share of buckets weakly contested (percent)."
                 type: number
             required:
               - teamAControl
@@ -3793,8 +4244,10 @@ components:
             type: object
           type: object
         teamA:
+          description: "Team name mapped to control slot \"A\"."
           type: string
         teamB:
+          description: "Team name mapped to control slot \"B\"."
           type: string
       required:
         - timeUnit
@@ -3802,8 +4255,17 @@ components:
       type: object
     ProjectileStreams:
       additionalProperties: false
+      description: >
+        Columnar projectile (rl/gl, or nails) flight streams — parallel arrays
+        indexed together, one entry per tracked projectile. Columns use a
+        spawn/end prefix family: `s`,`sx`,`sy`,`sz` are the spawn (fire) time +
+        origin and `e`,`ex`,`ey`,`ez` the end (impact/despawn) time + origin.
+        This `s*`/`e*` prefix is a column-family grouping (a time column plus
+        its x/y/z), unrelated to result.Interval's terse per-row `s`/`e`
+        interval-bound keys.
       properties:
         e:
+          description: "End (impact/despawn) time column, int32 ms — parallel array."
           items:
             maximum: 2.147483647e+09
             minimum: -2.147483648e+09
@@ -3812,24 +4274,28 @@ components:
             - "null"
             - array
         ex:
+          description: "End origin X column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         ey:
+          description: "End origin Y column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         ez:
+          description: "End origin Z column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         s:
+          description: "Spawn (fire) time column, int32 ms — parallel array."
           items:
             maximum: 2.147483647e+09
             minimum: -2.147483648e+09
@@ -3838,24 +4304,28 @@ components:
             - "null"
             - array
         sx:
+          description: "Spawn origin X column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         sy:
+          description: "Spawn origin Y column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         sz:
+          description: "Spawn origin Z column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         w:
+          description: "Weapon column (parallel array)."
           items:
             type: string
           type:
@@ -3874,44 +4344,58 @@ components:
       type: object
     BeamStreams:
       additionalProperties: false
+      description: >
+        Columnar LG beam streams — parallel arrays indexed together, one entry
+        per beam. Columns use the same spawn/end prefix family as
+        ProjectileStreams: `sx`,`sy`,`sz` are the beam start origin, `ex`,`ey`,`ez`
+        the beam end origin, and `t` the fire time. The `s*`/`e*` prefix is a
+        column-family grouping, unrelated to result.Interval's terse per-row
+        `s`/`e` interval-bound keys.
       properties:
         ex:
+          description: "Beam end X column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         ey:
+          description: "Beam end Y column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         ez:
+          description: "Beam end Z column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         sx:
+          description: "Beam start X column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         sy:
+          description: "Beam start Y column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         sz:
+          description: "Beam start Z column, map units."
           items:
             type: number
           type:
             - "null"
             - array
         t:
+          description: "Fire-time column, int32 ms — parallel array."
           items:
             maximum: 2.147483647e+09
             minimum: -2.147483648e+09
@@ -3968,19 +4452,23 @@ components:
       additionalProperties: false
       properties:
         entities:
+          description: "Static map entities (item spawns, spawnpoints, teleports, buttons)."
           items:
             additionalProperties: false
             properties:
               bounds:
+                description: "Brush-entity volume in world coords."
                 additionalProperties: false
                 properties:
                   max:
+                    description: "Maximum corner [x,y,z], world coords."
                     items:
                       type: number
                     maxItems: 3
                     minItems: 3
                     type: array
                   min:
+                    description: "Minimum corner [x,y,z], world coords."
                     items:
                       type: number
                     maxItems: 3
@@ -3993,26 +4481,37 @@ components:
                   - "null"
                   - object
               class:
+                description: "Raw BSP classname."
                 type: string
               kind:
+                description: "Item kind (items only)."
                 type: string
               loc:
+                description: "Nearest named location from the map .loc file."
                 type: string
               name:
+                description: "Loc-based label (disambiguated)."
                 type: string
               spawnflags:
+                description: "BSP spawnflags bitfield."
                 type: integer
               target:
+                description: "teleportSrc → destination targetname."
                 type: string
               targetName:
+                description: "teleportDst → its own targetname."
                 type: string
               type:
+                description: "Entity type (\"item\"/\"spawn\"/\"teleportDst\"/\"teleportSrc\"/\"button\"/\"door\")."
                 type: string
               x:
+                description: "X coordinate, map units."
                 type: number
               "y":
+                description: "Y coordinate, map units."
                 type: number
               z:
+                description: "Z coordinate, map units."
                 type: number
             required:
               - type
@@ -4026,6 +4525,7 @@ components:
             - "null"
             - array
         map:
+          description: "Map name."
           type: string
       required:
         - map
@@ -4035,34 +4535,47 @@ components:
       additionalProperties: false
       properties:
         airgibs:
+          description: "Airborne rocket-hit highlights, sorted by height descending."
           items:
             additionalProperties: false
             properties:
               attacker:
+                description: "Attacker name (\"world\" for an environmental / non-player inflictor)."
                 type: string
               attackerTeam:
+                description: "Attacker team name."
                 type: string
               attackerUserID:
+                description: "Attacker UserID (Hub viewer link)."
                 type: integer
               damage:
+                description: "Raw rocket damage (unbound, incl. overkill)."
                 type: integer
               height:
+                description: "Victim feet above the floor at the hit, map units."
                 type: number
               heightAboveAttacker:
+                description: "Victim origin minus shooter origin at the hit, map units (negative = below)."
                 type: number
               lethal:
+                description: "The hit killed the victim (matching rocket frag within a short window)."
                 type: boolean
               loc:
+                description: "Nearest named location from the map .loc file."
                 type: string
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               victim:
+                description: "Victim (killed player) name."
                 type: string
               victimTeam:
+                description: "Victim team name."
                 type: string
               victimUserID:
+                description: "Victim UserID (Hub viewer link)."
                 type: integer
             required:
               - t
@@ -4075,14 +4588,18 @@ components:
             - "null"
             - array
         deathEvents:
+          description: "Per-player death events for the frags/deaths drill-down."
           items:
             additionalProperties: false
             properties:
               player:
+                description: "Player display name."
                 type: string
               team:
+                description: "Team name."
                 type: string
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -4095,16 +4612,21 @@ components:
             - "null"
             - array
         fragEvents:
+          description: "Frag events for the score timeline."
           items:
             additionalProperties: false
             properties:
               delta:
+                description: "Frag-count change (+1 kill, -1 suicide/teamkill)."
                 type: integer
               player:
+                description: "Player display name."
                 type: string
               team:
+                description: "Team name."
                 type: string
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -4118,28 +4640,37 @@ components:
             - "null"
             - array
         fragStreaks:
+          description: "Top frag streaks (spawn-to-death runs) for Key Moments."
           items:
             additionalProperties: false
             properties:
               duration:
+                description: "Duration, int32 ms."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               endTime:
+                description: "End time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               ewep:
+                description: "Effective weapon (most kills with)."
                 type: string
               frags:
+                description: "Frag count (net QW score)."
                 type: integer
               playerName:
+                description: "Player name."
                 type: string
               playerUserID:
+                description: "Player UserID (Hub viewer link)."
                 type: integer
               team:
+                description: "Team name."
                 type: string
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -4157,14 +4688,18 @@ components:
             - "null"
             - array
         killEvents:
+          description: "Per-player enemy-kill events for the frags/deaths drill-down."
           items:
             additionalProperties: false
             properties:
               player:
+                description: "Player display name."
                 type: string
               team:
+                description: "Team name."
                 type: string
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -4177,22 +4712,28 @@ components:
             - "null"
             - array
         locTable:
+          description: "Interned loc names; index 0 is the \"\" sentinel."
           items:
             type: string
           type:
             - "null"
             - array
         locationData:
+          description: "Named .loc points for the map view."
           items:
             additionalProperties: false
             properties:
               name:
+                description: "Loc name."
                 type: string
               x:
+                description: "X coordinate, map units."
                 type: number
               "y":
+                description: "Y coordinate, map units."
                 type: number
               z:
+                description: "Z coordinate, map units."
                 type: number
             required:
               - x
@@ -4204,34 +4745,45 @@ components:
             - "null"
             - array
         playerUserIDs:
+          description: "Player name → UserID map (Hub viewer links)."
           additionalProperties:
             type: integer
           type: object
         powerupEvents:
+          description: "Powerup pickups for Key Moments."
           items:
             additionalProperties: false
             properties:
               duration:
+                description: "Duration, int32 ms."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               endTime:
+                description: "End time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               frags:
+                description: "Frag count (net QW score)."
                 type: integer
               playerName:
+                description: "Player name."
                 type: string
               playerSlot:
+                description: "Player slot in the demo."
                 type: integer
               playerUserID:
+                description: "Player UserID (Hub viewer link)."
                 type: integer
               powerupType:
+                description: "Powerup type (\"quad\", \"pent\", or \"ring\")."
                 type: string
               team:
+                description: "Team name."
                 type: string
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -4250,39 +4802,51 @@ components:
             - "null"
             - array
         regionControl:
+          description: "Region-control statistics."
           additionalProperties: false
           properties:
             bucketStates:
+              description: "Per-bucket per-region control codes (one ASCII char each)."
               additionalProperties:
                 type: string
               type: object
             regions:
+              description: "Named control regions."
               items:
                 additionalProperties: false
                 properties:
                   centroidX:
+                    description: "Region centroid X, map units."
                     type: number
                   centroidY:
+                    description: "Region centroid Y, map units."
                     type: number
                   locs:
+                    description: "Location nodes / membership list."
                     items:
                       type: string
                     type:
                       - "null"
                       - array
                   name:
+                    description: "Loc name."
                     type: string
                   points:
+                    description: "Rendering anchors (MapLocation points) for the region overlay."
                     items:
                       additionalProperties: false
                       properties:
                         name:
+                          description: "Loc name."
                           type: string
                         x:
+                          description: "X coordinate, map units."
                           type: number
                         "y":
+                          description: "Y coordinate, map units."
                           type: number
                         z:
+                          description: "Z coordinate, map units."
                           type: number
                       required:
                         - x
@@ -4304,18 +4868,23 @@ components:
                 - "null"
                 - array
             stats:
+              description: "Per-region match-aggregate control shares."
               additionalProperties:
                 additionalProperties: false
                 properties:
                   byPlayer:
+                    description: "Per-player breakdown, keyed by player name."
                     additionalProperties:
                       additionalProperties: false
                       properties:
                         armed:
+                          description: "Bucket count present while carrying RL or LG."
                           type: integer
                         team:
+                          description: "Team name."
                           type: string
                         unarmed:
+                          description: "Bucket count present without RL/LG."
                           type: integer
                       required:
                         - team
@@ -4324,18 +4893,25 @@ components:
                       type: object
                     type: object
                   contested:
+                    description: "Share of buckets contested (percent)."
                     type: number
                   empty:
+                    description: "Share of buckets empty — no living players (percent)."
                     type: number
                   teamAControl:
+                    description: "Share of buckets under team-A control (percent)."
                     type: number
                   teamAWeakControl:
+                    description: "Share of buckets under team-A weak control (percent)."
                     type: number
                   teamBControl:
+                    description: "Share of buckets under team-B control (percent)."
                     type: number
                   teamBWeakControl:
+                    description: "Share of buckets under team-B weak control (percent)."
                     type: number
                   weakContested:
+                    description: "Share of buckets weakly contested (percent)."
                     type: number
                 required:
                   - teamAControl
@@ -4348,8 +4924,10 @@ components:
                 type: object
               type: object
             teamA:
+              description: "Team name mapped to control slot \"A\"."
               type: string
             teamB:
+              description: "Team name mapped to control slot \"B\"."
               type: string
           required:
             - regions
@@ -4361,28 +4939,38 @@ components:
       additionalProperties: false
       properties:
         duration:
+          description: "Duration, int32 ms."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
         gameDir:
+          description: "Game directory (mod)."
           type: string
         map:
+          description: "Map name."
           type: string
         players:
+          description: "Final scoreboard lines."
           items:
             additionalProperties: false
             properties:
               deaths:
+                description: "Deaths (all causes)."
                 type: integer
               frags:
+                description: "Net QW frag score (svc_updatefrags scoreboard, frozen at match end)."
                 type: integer
               kills:
+                description: "Enemy kills (from the corrected frag log)."
                 type: integer
               name:
+                description: "Name / display label."
                 type: string
               suicides:
+                description: "Suicide deaths."
                 type: integer
               team:
+                description: "Team name."
                 type: string
             required:
               - name
@@ -4396,12 +4984,15 @@ components:
             - "null"
             - array
         teams:
+          description: "Per-team frag totals."
           items:
             additionalProperties: false
             properties:
               frags:
+                description: "Net QW frag score (svc_updatefrags scoreboard, frozen at match end)."
                 type: integer
               name:
+                description: "Name / display label."
                 type: string
             required:
               - name
@@ -4418,28 +5009,42 @@ components:
       type: object
     Messages:
       additionalProperties: false
+      description: >
+        /artifacts/messages body under the `messages` resultKey — the match
+        message log (result.MessagesResult). The `messages` array is NOT
+        chat-only: it interleaves `type:"frag"` obituary/notification lines
+        with `type:"chat"` and `type:"teamsay"` lines, in match order.
       properties:
         messages:
+          description: "Match message log — frag/chat/teamsay lines in match order."
           items:
             additionalProperties: false
             properties:
               message:
+                description: "Chat text or frag description (ezQuake-markup-preserving)."
                 type: string
               messageClean:
+                description: "Same text with ezQuake markup stripped (plain text)."
                 type: string
               player:
+                description: "Player display name."
                 type: string
               team:
+                description: "Team name."
                 type: string
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
               type:
+                description: "Type discriminator."
                 type: string
               victim:
+                description: "Victim (killed player) name."
                 type: string
               weapon:
+                description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
               - t
@@ -4458,22 +5063,30 @@ components:
       additionalProperties: false
       properties:
         firstTakes:
+          description: "First in-match take of each tracked item spawner."
           items:
             additionalProperties: false
             properties:
               entNum:
+                description: "Server entity/edict number — stable id within a match."
                 type: integer
               item:
+                description: "Spawner item name (ItemTimeline naming, e.g. ya_1)."
                 type: string
               kind:
+                description: "Item kind — compact vocabulary (rl/lg/ra/mh/quad/…)."
                 type: string
               loc:
+                description: "Nearest named location from the map .loc file."
                 type: string
               takenBy:
+                description: "Picker display name."
                 type: string
               team:
+                description: "Team name."
                 type: string
               t:
+                description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
@@ -4488,14 +5101,18 @@ components:
             - "null"
             - array
         players:
+          description: "Per-player match-start spawn positions."
           items:
             additionalProperties: false
             properties:
               loc:
+                description: "Nearest named location from the map .loc file."
                 type: string
               name:
+                description: "Name / display label."
                 type: string
               team:
+                description: "Team name."
                 type: string
             required:
               - name
@@ -4519,8 +5136,9 @@ components:
       required: [timeUnit, events]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         events:
+          description: "Tagged event list ([] when nothing matches)."
           type: array
           items:
             type: object
@@ -4530,51 +5148,55 @@ components:
               t:
                 type: integer
                 description: Match-relative time, int32 ms.
-              type: { type: string }
-              player: { type: string }
+              type: { type: string, description: "Type discriminator." }
+              player: { type: string, description: "Player display name." }
               detail:
+                description: "Type-specific detail fields for this event."
                 type: object
                 additionalProperties: true
                 properties:
-                  team: { type: string }
+                  team: { type: string, description: "Team name." }
                   delta: { type: integer, description: frag delta (frag) or value change (health/armor) }
                   value: { type: integer, description: new value (health/armor/loc index) }
                   bounded: { type: integer, description: reconstructed bounded kill value (telefrag/stomp events); absent when the bounded reconstruction was skipped; 0 is a real nullified-stomp value }
-                  powerup: { type: string }
+                  powerup: { type: string, description: "Powerup type." }
                   endTime: { type: integer, description: int32 ms (powerup/streak) }
                   frags: { type: integer, description: frags during the powerup run }
                   length: { type: integer, description: streak length }
                   duration: { type: integer, description: streak duration, int32 ms }
-                  weapon: { type: string }
-                  victim: { type: string }
-                  damage: { type: integer }
-                  isSplash: { type: boolean }
-                  isEnv: { type: boolean }
-                  isSelf: { type: boolean }
-                  isTeam: { type: boolean }
-                  victimWep: { type: string }
+                  weapon: { type: string, description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)." }
+                  victim: { type: string, description: "Victim (killed player) name." }
+                  damage: { type: integer, description: "Raw/unbound damage amount, including overkill." }
+                  isSplash: { type: boolean, description: "Indirect hit (e.g. rocket splash)." }
+                  isEnv: { type: boolean, description: "Environmental / world-sourced." }
+                  isSelf: { type: boolean, description: "Attacker == victim." }
+                  isTeam: { type: boolean, description: "Same team, not self." }
+                  victimWep: { type: string, description: "Victim weapon class at hit time (sg|mid|lg|rl|both)." }
                   gain: { type: string, description: weapon/item code gained (interval start) }
                   lose: { type: string, description: weapon/item code lost (interval end) }
                   item: { type: string, description: spawner instance name (pickup), e.g. ya_1 }
-                  kind: { type: string }
-                  entNum: { type: integer }
+                  kind: { type: string, description: "Item kind — compact vocabulary (rl/lg/ra/mh/quad/…)." }
+                  entNum: { type: integer, description: "Server entity/edict number — stable id within a match." }
                   source:
+                    description: "Source."
                     type: string
                     enum: [world, backpack, unknown]
-                  dropper: { type: string }
-                  loc: { type: string }
+                  dropper: { type: string, description: "Backpack dropper name." }
+                  loc: { type: string, description: "Nearest named location from the map .loc file." }
                   li: { type: integer, description: raw LocTable index (loc=index mode) }
                   text: { type: string, description: chat message }
                   clean: { type: string, description: chat message, color codes stripped }
     BucketsRow:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         buckets:
+          description: "Per-window bucket rows."
           items:
             additionalProperties: false
             properties:
               p:
+                description: "Per-player reduced values, keyed by player name."
                 additionalProperties:
                   additionalProperties: true
                   type: object
@@ -4582,11 +5204,13 @@ components:
                   - object
                   - "null"
               partial:
+                description: "This bucket is a short trailing window."
                 type: boolean
               t:
                 type: integer
                 description: Bucket start, int32 ms.
               team:
+                description: "Per-team reduced values, keyed by team name."
                 additionalProperties:
                   additionalProperties: true
                   type: object
@@ -4599,6 +5223,7 @@ components:
             - "null"
             - array
         windowMs:
+          description: "Bucket width, int32 ms."
           type: integer
       required:
         - timeUnit
@@ -4615,10 +5240,10 @@ components:
       required: [timeUnit, windowMs, start, count]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
-        windowMs: { type: integer }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
+        windowMs: { type: integer, description: "Bucket width, int32 ms." }
         start: { type: integer, description: First bucket start, int32 ms. }
-        count: { type: integer }
+        count: { type: integer, description: "Number of buckets." }
         partialLastMs:
           type: integer
           description: Shorter end of the final bucket when the match length is not a multiple of windowMs.
@@ -4632,6 +5257,7 @@ components:
             (v53).
           items: { type: string }
         players:
+          description: "Per-player columnar bucket series, keyed by player name."
           type: object
           additionalProperties:
             type: object
@@ -4643,9 +5269,10 @@ components:
               length n — numeric, string (at), or 0/1 series.
             required: [first, n, alive]
             properties:
-              first: { type: integer }
-              n: { type: integer }
+              first: { type: integer, description: "Index of the first populated column." }
+              n: { type: integer, description: "Per-column sample counts." }
               alive:
+                description: "Per-column alive flags."
                 type: array
                 items: { type: integer, minimum: 0, maximum: 1 }
               validFrom:
@@ -4660,6 +5287,7 @@ components:
               items:
                 type: [number, string]
         teams:
+          description: "Per-team columnar bucket series, keyed by team name."
           type: object
           additionalProperties:
             type: object
@@ -4669,6 +5297,7 @@ components:
               sub-columns nest under abt.
             properties:
               abt:
+                description: "Per-column armed-both-teams flags."
                 type: object
                 additionalProperties:
                   type: array
@@ -4679,23 +5308,27 @@ components:
     StreamSlice:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         end:
           type: integer
           description: Window end, int32 ms (the exact bound used for slicing).
         players:
+          description: "Per-player stream slices over the window (mini result.PlayerStream shapes)."
           items:
             additionalProperties: false
             properties:
               a:
+                description: "Armor change stream (t/v pairs)."
                 items:
                   additionalProperties: false
                   properties:
                     t:
+                      description: "Event/sample time, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     v:
+                      description: "Sample value at time t."
                       maximum: 32767
                       minimum: -32768
                       type: integer
@@ -4707,14 +5340,17 @@ components:
                   - "null"
                   - array
               at:
+                description: "Armor-type change stream (t/v pairs)."
                 items:
                   additionalProperties: false
                   properties:
                     t:
+                      description: "Event/sample time, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     v:
+                      description: "Sample value at time t."
                       type: string
                   required:
                     - t
@@ -4724,14 +5360,17 @@ components:
                   - "null"
                   - array
               cl:
+                description: "Cells-ammo change stream (t/v pairs)."
                 items:
                   additionalProperties: false
                   properties:
                     t:
+                      description: "Event/sample time, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     v:
+                      description: "Sample value at time t."
                       maximum: 32767
                       minimum: -32768
                       type: integer
@@ -4743,6 +5382,7 @@ components:
                   - "null"
                   - array
               d:
+                description: "Death timestamps, int32 ms."
                 items:
                   maximum: 2.147483647e+09
                   minimum: -2.147483648e+09
@@ -4751,14 +5391,17 @@ components:
                   - "null"
                   - array
               gl:
+                description: "GL-held intervals."
                 items:
                   additionalProperties: false
                   properties:
                     e:
+                      description: "Interval end, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     s:
+                      description: "Interval start, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
@@ -4770,14 +5413,17 @@ components:
                   - "null"
                   - array
               h:
+                description: "Health change stream (t/v pairs)."
                 items:
                   additionalProperties: false
                   properties:
                     t:
+                      description: "Event/sample time, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     v:
+                      description: "Sample value at time t."
                       maximum: 32767
                       minimum: -32768
                       type: integer
@@ -4790,30 +5436,12 @@ components:
                   - array
               hgt:
                 additionalProperties: false
+                description: >
+                  Floor-height track: t plus the height above the floor (h). x/y/z are the
+                  shared spine, null on this track. Present only when a BSP was provisioned.
                 properties:
-                  h:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  li:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
-                  lq:
-                    items:
-                      maximum: 127
-                      minimum: -128
-                      type: integer
-                    type:
-                      - "null"
-                      - array
                   t:
+                    description: per-sample time, int32 ms since match start (parallel to this track's value columns).
                     items:
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
@@ -4821,53 +5449,29 @@ components:
                     type:
                       - "null"
                       - array
-                  vp:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
-                  vx:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  vy:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  vya:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
-                  vz:
+                  h:
+                    description: floor height beneath the player, map units (BSP-derived; a NoFloor sentinel marks samples with no floor to measure from).
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   x:
+                    description: x position column, map units — populated only on the pos track; null on the sibling tracks that share the t/x/y/z spine.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
-                  "y":
+                  y:
+                    description: y position column, map units — populated only on the pos track; null on the sibling tracks that share the spine.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   z:
+                    description: z position column, map units — populated only on the pos track; null on the sibling tracks that share the spine.
                     items:
                       type: number
                     type:
@@ -4878,18 +5482,22 @@ components:
                   - x
                   - "y"
                   - z
+                  - h
                 type:
                   - "null"
                   - object
               lg:
+                description: "LG-held intervals."
                 items:
                   additionalProperties: false
                   properties:
                     e:
+                      description: "Interval end, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     s:
+                      description: "Interval start, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
@@ -4901,14 +5509,17 @@ components:
                   - "null"
                   - array
               li:
+                description: "Loc-index change stream (t/v pairs); decode v via /loc-table."
                 items:
                   additionalProperties: false
                   properties:
                     t:
+                      description: "Event/sample time, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     v:
+                      description: "Sample value at time t."
                       maximum: 32767
                       minimum: -32768
                       type: integer
@@ -4920,14 +5531,17 @@ components:
                   - "null"
                   - array
               loc:
+                description: "Loc-name change stream (t/v pairs)."
                 items:
                   additionalProperties: false
                   properties:
                     t:
+                      description: "Event/sample time, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     v:
+                      description: "Sample value at time t."
                       type: string
                   required:
                     - t
@@ -4938,30 +5552,12 @@ components:
                   - array
               lq:
                 additionalProperties: false
+                description: >
+                  Liquid-state track: t plus the liquid code (lq). x/y/z are the shared
+                  spine, null on this track. Present only when a BSP was provisioned.
                 properties:
-                  h:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  li:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
-                  lq:
-                    items:
-                      maximum: 127
-                      minimum: -128
-                      type: integer
-                    type:
-                      - "null"
-                      - array
                   t:
+                    description: per-sample time, int32 ms since match start (parallel to this track's value columns).
                     items:
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
@@ -4969,53 +5565,31 @@ components:
                     type:
                       - "null"
                       - array
-                  vp:
+                  lq:
+                    description: liquid state — 0 dry, else (type<<2)|level with type 1 water / 2 slime / 3 lava and submersion level 0-3 (decode via LqType / LqLevel).
                     items:
-                      maximum: 32767
-                      minimum: -32768
+                      maximum: 127
+                      minimum: -128
                       type: integer
-                    type:
-                      - "null"
-                      - array
-                  vx:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  vy:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  vya:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
-                  vz:
-                    items:
-                      type: number
                     type:
                       - "null"
                       - array
                   x:
+                    description: x position column, map units — populated only on the pos track; null on the sibling tracks that share the t/x/y/z spine.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
-                  "y":
+                  y:
+                    description: y position column, map units — populated only on the pos track; null on the sibling tracks that share the spine.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   z:
+                    description: z position column, map units — populated only on the pos track; null on the sibling tracks that share the spine.
                     items:
                       type: number
                     type:
@@ -5026,20 +5600,25 @@ components:
                   - x
                   - "y"
                   - z
+                  - lq
                 type:
                   - "null"
                   - object
               name:
+                description: "Player name."
                 type: string
               nl:
+                description: "Nails-ammo change stream (t/v pairs)."
                 items:
                   additionalProperties: false
                   properties:
                     t:
+                      description: "Event/sample time, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     v:
+                      description: "Sample value at time t."
                       maximum: 32767
                       minimum: -32768
                       type: integer
@@ -5051,14 +5630,17 @@ components:
                   - "null"
                   - array
               pe:
+                description: "Pent-held intervals."
                 items:
                   additionalProperties: false
                   properties:
                     e:
+                      description: "Interval end, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     s:
+                      description: "Interval start, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
@@ -5071,30 +5653,13 @@ components:
                   - array
               pos:
                 additionalProperties: false
+                description: >
+                  Position track: the t/x/y/z spine plus the per-sample loc index (li). This
+                  is the only track that fills x/y/z; sibling tracks (view/hgt/lq/vel) share
+                  the spine but null it.
                 properties:
-                  h:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  li:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
-                  lq:
-                    items:
-                      maximum: 127
-                      minimum: -128
-                      type: integer
-                    type:
-                      - "null"
-                      - array
                   t:
+                    description: per-sample time, int32 ms since match start (parallel to this track's value columns).
                     items:
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
@@ -5102,53 +5667,31 @@ components:
                     type:
                       - "null"
                       - array
-                  vp:
+                  li:
+                    description: per-sample loc-table index; decode via /loc-table.
                     items:
                       maximum: 32767
                       minimum: -32768
                       type: integer
-                    type:
-                      - "null"
-                      - array
-                  vx:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  vy:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  vya:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
-                  vz:
-                    items:
-                      type: number
                     type:
                       - "null"
                       - array
                   x:
+                    description: x position column, map units — populated only on the pos track; null on the sibling tracks that share the t/x/y/z spine.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
-                  "y":
+                  y:
+                    description: y position column, map units — populated only on the pos track; null on the sibling tracks that share the spine.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   z:
+                    description: z position column, map units — populated only on the pos track; null on the sibling tracks that share the spine.
                     items:
                       type: number
                     type:
@@ -5163,14 +5706,17 @@ components:
                   - "null"
                   - object
               q:
+                description: "Quad-held intervals."
                 items:
                   additionalProperties: false
                   properties:
                     e:
+                      description: "Interval end, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     s:
+                      description: "Interval start, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
@@ -5182,14 +5728,17 @@ components:
                   - "null"
                   - array
               r:
+                description: "Ring (invisibility) held intervals."
                 items:
                   additionalProperties: false
                   properties:
                     e:
+                      description: "Interval end, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     s:
+                      description: "Interval start, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
@@ -5201,14 +5750,17 @@ components:
                   - "null"
                   - array
               rk:
+                description: "Rockets-ammo change stream (t/v pairs)."
                 items:
                   additionalProperties: false
                   properties:
                     t:
+                      description: "Event/sample time, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     v:
+                      description: "Sample value at time t."
                       maximum: 32767
                       minimum: -32768
                       type: integer
@@ -5220,14 +5772,17 @@ components:
                   - "null"
                   - array
               rl:
+                description: "RL-held intervals."
                 items:
                   additionalProperties: false
                   properties:
                     e:
+                      description: "Interval end, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     s:
+                      description: "Interval start, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
@@ -5239,14 +5794,17 @@ components:
                   - "null"
                   - array
               sh:
+                description: "Shells-ammo change stream (t/v pairs)."
                 items:
                   additionalProperties: false
                   properties:
                     t:
+                      description: "Event/sample time, int32 ms since match start."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     v:
+                      description: "Sample value at time t."
                       maximum: 32767
                       minimum: -32768
                       type: integer
@@ -5258,14 +5816,17 @@ components:
                   - "null"
                   - array
               sng:
+                description: "SNG-held intervals."
                 items:
                   additionalProperties: false
                   properties:
                     e:
+                      description: "Interval end, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     s:
+                      description: "Interval start, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
@@ -5277,6 +5838,7 @@ components:
                   - "null"
                   - array
               sp:
+                description: "Spawn timestamps, int32 ms."
                 items:
                   maximum: 2.147483647e+09
                   minimum: -2.147483648e+09
@@ -5285,14 +5847,17 @@ components:
                   - "null"
                   - array
               ssg:
+                description: "SSG-held intervals."
                 items:
                   additionalProperties: false
                   properties:
                     e:
+                      description: "Interval end, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
                     s:
+                      description: "Interval start, int32 ms since match start (terse per-row key)."
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
                       type: integer
@@ -5305,30 +5870,12 @@ components:
                   - array
               vel:
                 additionalProperties: false
+                description: >
+                  Velocity track: t plus the vx/vy/vz velocity columns. x/y/z are the shared
+                  spine, null on this track.
                 properties:
-                  h:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  li:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
-                  lq:
-                    items:
-                      maximum: 127
-                      minimum: -128
-                      type: integer
-                    type:
-                      - "null"
-                      - array
                   t:
+                    description: per-sample time, int32 ms since match start (parallel to this track's value columns).
                     items:
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
@@ -5336,53 +5883,43 @@ components:
                     type:
                       - "null"
                       - array
-                  vp:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
                   vx:
+                    description: velocity x column, Quake units per second (central difference).
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   vy:
+                    description: velocity y column, Quake units per second.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
-                  vya:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
                   vz:
+                    description: velocity z column, Quake units per second.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   x:
+                    description: x position column, map units — populated only on the pos track; null on the sibling tracks that share the t/x/y/z spine.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
-                  "y":
+                  y:
+                    description: y position column, map units — populated only on the pos track; null on the sibling tracks that share the spine.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   z:
+                    description: z position column, map units — populated only on the pos track; null on the sibling tracks that share the spine.
                     items:
                       type: number
                     type:
@@ -5393,35 +5930,20 @@ components:
                   - x
                   - "y"
                   - z
+                  - vx
+                  - vy
+                  - vz
                 type:
                   - "null"
                   - object
               view:
                 additionalProperties: false
+                description: >
+                  View-direction track: t plus view pitch (vp) and yaw (vya) as raw angle16
+                  shorts. x/y/z are the shared spine, null on this track.
                 properties:
-                  h:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  li:
-                    items:
-                      maximum: 32767
-                      minimum: -32768
-                      type: integer
-                    type:
-                      - "null"
-                      - array
-                  lq:
-                    items:
-                      maximum: 127
-                      minimum: -128
-                      type: integer
-                    type:
-                      - "null"
-                      - array
                   t:
+                    description: per-sample time, int32 ms since match start (parallel to this track's value columns).
                     items:
                       maximum: 2.147483647e+09
                       minimum: -2.147483648e+09
@@ -5430,26 +5952,16 @@ components:
                       - "null"
                       - array
                   vp:
+                    description: view pitch, raw angle16 wire short — degrees = ((v mod 65536) + 65536) mod 65536 x 360 / 65536 (>180 = looking up); contrast /aim's float-degree dpitch.
                     items:
                       maximum: 32767
                       minimum: -32768
                       type: integer
-                    type:
-                      - "null"
-                      - array
-                  vx:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
-                  vy:
-                    items:
-                      type: number
                     type:
                       - "null"
                       - array
                   vya:
+                    description: view yaw, raw angle16 wire short — degrees = ((v mod 65536) + 65536) mod 65536 x 360 / 65536; contrast /aim's float-degree dyaw.
                     items:
                       maximum: 32767
                       minimum: -32768
@@ -5457,25 +5969,22 @@ components:
                     type:
                       - "null"
                       - array
-                  vz:
-                    items:
-                      type: number
-                    type:
-                      - "null"
-                      - array
                   x:
+                    description: x position column, map units — populated only on the pos track; null on the sibling tracks that share the t/x/y/z spine.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
-                  "y":
+                  y:
+                    description: y position column, map units — populated only on the pos track; null on the sibling tracks that share the spine.
                     items:
                       type: number
                     type:
                       - "null"
                       - array
                   z:
+                    description: z position column, map units — populated only on the pos track; null on the sibling tracks that share the spine.
                     items:
                       type: number
                     type:
@@ -5486,6 +5995,8 @@ components:
                   - x
                   - "y"
                   - z
+                  - vp
+                  - vya
                 type:
                   - "null"
                   - object
@@ -5505,79 +6016,96 @@ components:
     StateAt:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         players:
+          description: "Per-player entries."
           additionalProperties:
             additionalProperties: false
             properties:
               a:
+                description: "Armor value at the instant."
                 maximum: 32767
                 minimum: -32768
                 type:
                   - "null"
                   - integer
               at:
+                description: "Armor type at the instant."
                 type:
                   - "null"
                   - string
               cl:
+                description: "Cells ammo at the instant."
                 maximum: 32767
                 minimum: -32768
                 type:
                   - "null"
                   - integer
               gl:
+                description: "Holding GL at the instant."
                 type:
                   - "null"
                   - boolean
               h:
+                description: "Health value at the instant."
                 maximum: 32767
                 minimum: -32768
                 type:
                   - "null"
                   - integer
               hgt:
+                description: "Height above the floor at the instant, map units (BSP-derived)."
                 type:
                   - "null"
                   - number
               lg:
+                description: "Holding LG at the instant."
                 type:
                   - "null"
                   - boolean
               li:
+                description: "Loc-table index; decode via /loc-table."
                 maximum: 32767
                 minimum: -32768
                 type:
                   - "null"
                   - integer
               loc:
+                description: "Nearest named location from the map .loc file."
                 type:
                   - "null"
                   - string
               lq:
+                description: "Liquid code at the instant (0 dry, else (type<<2)|level)."
                 maximum: 127
                 minimum: -128
                 type:
                   - "null"
                   - integer
               nl:
+                description: "Nails ammo at the instant."
                 maximum: 32767
                 minimum: -32768
                 type:
                   - "null"
                   - integer
               pe:
+                description: "Pent active at the instant."
                 type:
                   - "null"
                   - boolean
               pos:
+                description: "Position [x,y,z] at the instant, map units."
                 additionalProperties: false
                 properties:
                   x:
+                    description: "X coordinate, map units."
                     type: number
                   "y":
+                    description: "Y coordinate, map units."
                     type: number
                   z:
+                    description: "Z coordinate, map units."
                     type: number
                 required:
                   - x
@@ -5587,45 +6115,56 @@ components:
                   - "null"
                   - object
               q:
+                description: "Quad active at the instant."
                 type:
                   - "null"
                   - boolean
               r:
+                description: "Ring (invisibility) active at the instant."
                 type:
                   - "null"
                   - boolean
               rk:
+                description: "Rockets ammo at the instant."
                 maximum: 32767
                 minimum: -32768
                 type:
                   - "null"
                   - integer
               rl:
+                description: "Holding RL at the instant."
                 type:
                   - "null"
                   - boolean
               sh:
+                description: "Shells ammo at the instant."
                 maximum: 32767
                 minimum: -32768
                 type:
                   - "null"
                   - integer
               sng:
+                description: "Holding SNG at the instant."
                 type:
                   - "null"
                   - boolean
               ssg:
+                description: "Holding SSG at the instant."
                 type:
                   - "null"
                   - boolean
               vel:
+                description: "Velocity [vx,vy,vz] at the instant, Quake units per second."
                 additionalProperties: false
                 properties:
                   vx:
+                    description: "Velocity X, Quake units per second."
                     type: number
                   vy:
+                    description: "Velocity Y, Quake units per second."
                     type: number
                   vz:
+                    description: "Velocity Z, Quake units per second."
                     type: number
                 required:
                   - vx
@@ -5636,12 +6175,15 @@ components:
                   - object
               view:
                 additionalProperties: false
+                description: View direction at the instant (raw angle16 shorts).
                 properties:
                   vp:
+                    description: view pitch, raw angle16 wire short — degrees = ((v mod 65536) + 65536) mod 65536 x 360 / 65536 (>180 = looking up); contrast /aim's float-degree dpitch.
                     maximum: 32767
                     minimum: -32768
                     type: integer
                   vya:
+                    description: view yaw, raw angle16 wire short — degrees = ((v mod 65536) + 65536) mod 65536 x 360 / 65536; contrast /aim's float-degree dyaw.
                     maximum: 32767
                     minimum: -32768
                     type: integer
@@ -5666,14 +6208,17 @@ components:
     LocTrails:
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         players:
+          description: "Per-player loc trails."
           items:
             additionalProperties: false
             properties:
               name:
+                description: "Name / display label."
                 type: string
               sequence:
+                description: "Ordered loc residences for this player."
                 items:
                   additionalProperties: false
                   properties:
@@ -5681,12 +6226,14 @@ components:
                       type: integer
                       description: Residence end, int32 ms.
                     li:
+                      description: "Loc-table index; decode via /loc-table."
                       maximum: 32767
                       minimum: -32768
                       type:
                         - "null"
                         - integer
                     loc:
+                      description: "Nearest named location from the map .loc file."
                       type: string
                     start:
                       type: integer
@@ -5711,15 +6258,20 @@ components:
       additionalProperties: false
       properties:
         bounds:
+          description: "Axis-aligned bounding box in world coords."
           additionalProperties: false
           properties:
             maxX:
+              description: "Maximum X, map units."
               type: number
             maxY:
+              description: "Maximum Y, map units."
               type: number
             minX:
+              description: "Minimum X, map units."
               type: number
             minY:
+              description: "Minimum Y, map units."
               type: number
           required:
             - minX
@@ -5728,12 +6280,15 @@ components:
             - maxY
           type: object
         liquids:
+          description: "Liquid-surface triangles by kind."
           items:
             additionalProperties: false
             properties:
               kind:
+                description: "Item kind — compact vocabulary (rl/lg/ra/mh/quad/…)."
                 type: string
               tris:
+                description: "Flattened triangle vertex buffer (float array)."
                 items:
                   type: number
                 type:
@@ -5747,18 +6302,22 @@ components:
             - "null"
             - array
         locs:
+          description: "Location nodes / membership list."
           items:
             additionalProperties: false
             properties:
               name:
+                description: "Loc name."
                 type: string
               tris:
+                description: "Flattened triangle vertex buffer (float array)."
                 items:
                   type: number
                 type:
                   - "null"
                   - array
               z:
+                description: "Z coordinate, map units."
                 type: number
             required:
               - name
@@ -5769,15 +6328,20 @@ components:
             - "null"
             - array
         map:
+          description: "Map name."
           type: string
         pruned:
+          description: "Provenance of dropped geometry (empty-map pruning)."
           additionalProperties: false
           properties:
             demos:
+              description: "Demos considered."
               type: integer
             facesDropped:
+              description: "BSP faces dropped."
               type: integer
             points:
+              description: "Rendering anchors (MapLocation points) for the region overlay."
               type: integer
           required:
             - demos
@@ -5787,12 +6351,15 @@ components:
             - "null"
             - object
         submodels:
+          description: "Brush submodel triangle sets."
           items:
             additionalProperties: false
             properties:
               id:
+                description: "Identifier."
                 type: integer
               tris:
+                description: "Flattened triangle vertex buffer (float array)."
                 items:
                   type: number
                 type:
@@ -5806,8 +6373,10 @@ components:
             - "null"
             - array
         version:
+          description: "Version."
           type: integer
         walls:
+          description: "Wall triangle vertex buffer (flat float array)."
           items:
             type: number
           type:
@@ -5831,8 +6400,9 @@ components:
       required: [timeUnit, messages]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         messages:
+          description: "Match message log — frag/chat/teamsay lines in match order."
           type: array
           items: { $ref: "#/components/schemas/MatchEvent" }
     Backpacks:
@@ -5843,8 +6413,9 @@ components:
       required: [timeUnit, backpacks]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         backpacks:
+          description: "Dropped RL/LG backpack list."
           type: array
           items: { $ref: "#/components/schemas/BackpackDrop" }
     WeaponPickups:
@@ -5856,8 +6427,9 @@ components:
       required: [timeUnit, pickups]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         pickups:
+          description: "Weapon-pickup list."
           type: array
           items: { $ref: "#/components/schemas/WeaponPickup" }
     Airgibs:
@@ -5869,8 +6441,9 @@ components:
       required: [timeUnit, airgibs]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         airgibs:
+          description: "Airborne rocket-hit highlights, sorted by height descending."
           type: array
           items: { $ref: "#/components/schemas/AirgibEvent" }
     Items:
@@ -5897,19 +6470,22 @@ components:
       required: [timeUnit, players]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         players:
+          description: "Per-player line-of-sight tracks."
           type: array
           items:
             type: object
             required: [name]
             additionalProperties: false
             properties:
-              name: { type: string }
+              name: { type: string, description: "Player name." }
               los:
+                description: "Line-of-sight intervals to other players."
                 type: array
                 items: { $ref: "#/components/schemas/LosTrack" }
               pvs:
+                description: "Potentially-visible-set intervals to other players."
                 type: array
                 items: { $ref: "#/components/schemas/LosTrack" }
     Projectiles:
@@ -5917,7 +6493,7 @@ components:
       required: [timeUnit, projectiles]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         projectiles:
           description: Rocket/grenade flight stream; null when the demo has none.
           oneOf:
@@ -5928,7 +6504,7 @@ components:
       required: [timeUnit, beams]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         beams:
           description: LG bolt stream; null when the demo has none.
           oneOf:
@@ -5939,7 +6515,7 @@ components:
       required: [timeUnit, nails]
       additionalProperties: false
       properties:
-        timeUnit: { type: string, enum: [ms] }
+        timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         nails:
           description: Nail flight stream; null when the demo has none.
           oneOf:
@@ -5961,36 +6537,41 @@ components:
       additionalProperties: false
       properties:
         nodes:
+          description: "Analyzer DAG nodes."
           type: [array, "null"]
           items:
             type: object
             required: [name, requires, provides, mutates, lazy, depth, cost, resultKey]
             additionalProperties: false
             properties:
-              name: { type: string }
+              name: { type: string, description: "Name / display label." }
               requires:
+                description: "Upstream nodes this node depends on."
                 type: [array, "null"]
                 items: { type: string }
               provides:
+                description: "Result sections this node provides."
                 type: [array, "null"]
                 items: { type: string }
-              mutates: { type: boolean }
-              lazy: { type: boolean }
-              depth: { type: integer }
+              mutates: { type: boolean, description: "Result sections this node mutates." }
+              lazy: { type: boolean, description: "Materialised on demand (not in the base parse)." }
+              depth: { type: integer, description: "DAG depth." }
               cost:
+                description: "Materialisation cost class."
                 type: string
                 enum: [light, heavy]
-              resultKey: { type: string }
+              resultKey: { type: string, description: "Result JSON key this artifact serves under." }
         edges:
+          description: "Directed loc-transition edges."
           type: [array, "null"]
           items:
             type: object
             required: [from, to, artifact]
             additionalProperties: false
             properties:
-              from: { type: string }
-              to: { type: string }
-              artifact: { type: string }
+              from: { type: string, description: "Edge source." }
+              to: { type: string, description: "Edge target." }
+              artifact: { type: string, description: "Artifact name this edge carries." }
     ArtifactEnvelope:
       description: >
         GET /v1/demos/{id}/artifacts/{name} body — a single-key envelope
@@ -6008,92 +6589,110 @@ components:
           properties:
             demoInfo: { $ref: "#/components/schemas/DemoInfo" }
         - type: object
-          required: [frags]
+          required: [frags, timeUnit]
           additionalProperties: false
           properties:
             frags: { $ref: "#/components/schemas/Frags" }
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
           required: [metadata]
           additionalProperties: false
           properties:
             metadata: { $ref: "#/components/schemas/Metadata" }
         - type: object
-          required: [damage]
+          required: [damage, timeUnit]
           additionalProperties: false
           properties:
             damage: { $ref: "#/components/schemas/Damage" }
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
-          required: [shots]
+          required: [shots, timeUnit]
           additionalProperties: false
           properties:
             shots: { $ref: "#/components/schemas/Shots" }
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
-          required: [aim]
+          required: [aim, timeUnit]
           additionalProperties: false
           properties:
             aim: { $ref: "#/components/schemas/Aim" }
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
           required: [locGraph]
           additionalProperties: false
           properties:
             locGraph: { $ref: "#/components/schemas/LocGraph" }
         - type: object
-          required: [opening]
+          required: [opening, timeUnit]
           additionalProperties: false
           properties:
             opening: { $ref: "#/components/schemas/Opening" }
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
-          required: [match]
+          required: [match, timeUnit]
           additionalProperties: false
           properties:
             match:
+              description: Match summary section (null on demos without it).
               oneOf:
                 - $ref: "#/components/schemas/Match"
                 - type: "null"
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
-          required: [messages]
+          required: [messages, timeUnit]
           additionalProperties: false
           properties:
             messages:
+              description: Match message log section (null on demos without it).
               oneOf:
                 - $ref: "#/components/schemas/Messages"
                 - type: "null"
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
-          required: [timelineAnalysis]
+          required: [timelineAnalysis, timeUnit]
           additionalProperties: false
           properties:
             timelineAnalysis:
+              description: Event-shaped derived timeline section (null on demos without it).
               oneOf:
                 - $ref: "#/components/schemas/TimelineAnalysis"
                 - type: "null"
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
-          required: [items]
+          required: [items, timeUnit]
           additionalProperties: false
           properties:
             items:
+              description: Per-item pickup-timeline section (null on demos without it).
               oneOf:
                 - $ref: "#/components/schemas/ItemsTimelines"
                 - type: "null"
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
           required: [mapEntities]
           additionalProperties: false
           properties:
             mapEntities:
+              description: Static map-entity layout section (null when no corpus exists for the map).
               oneOf:
                 - $ref: "#/components/schemas/MapEntities"
                 - type: "null"
         - type: object
-          required: [backpacks]
+          required: [backpacks, timeUnit]
           additionalProperties: false
           properties:
             backpacks:
+              description: Dropped RL/LG backpack list (null on demos without it).
               type: [array, "null"]
               items: { $ref: "#/components/schemas/BackpackDrop" }
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - type: object
-          required: [weaponPickups]
+          required: [weaponPickups, timeUnit]
           additionalProperties: false
           properties:
             weaponPickups:
+              description: Slot-weapon pickup list (null on demos without it).
               type: [array, "null"]
               items: { $ref: "#/components/schemas/WeaponPickup" }
+            timeUnit: { $ref: "#/components/schemas/TimeUnit" }
         - $ref: "#/components/schemas/Los"

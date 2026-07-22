@@ -13,9 +13,13 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 //
 // The one seconds island is `/demoinfo` (KTX's own clock, a mix of native
 // units), which carries no echo. `/artifacts/{name}` serves the raw stored
-// result sections byte-for-byte (except /artifacts/los, a materialized view
-// aliasing /los that carries its "ms" echo). Responses with no match-position
-// time — /loc-table, /loc-graph, /metadata — carry no echo.
+// result section under its resultKey and, since v57, ALSO echoes a top-level
+// "timeUnit":"ms" SIBLING of that key whenever the section carries match-
+// position time (frag, damage, shots, aim, opening, match, messages, timeline,
+// items, backpacks, weapon-pickups; /artifacts/los echoes via its /los body).
+// The no-time-field artifacts — /artifacts/{metadata,map-entities,loc-graph} —
+// and the /demoinfo KTX-native island carry no echo. Responses with no match-
+// position time — /loc-table, /loc-graph, /metadata — carry no echo either.
 //
 // The stored result.* structs and their JSON tags are the ON-DISK contract
 // (qw-analyze / WASM emit them verbatim, in ms) and are left untouched. The

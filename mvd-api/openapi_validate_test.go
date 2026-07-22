@@ -23,6 +23,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"testing"
@@ -476,6 +477,96 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 			}
 		}
 	})
+}
+
+// TestOpenAPIDescriptionCoverage enforces 100% description coverage: every
+// property in components.schemas (recursively — through properties maps,
+// items, additionalProperties, and oneOf/anyOf/allOf branches) and every
+// components.parameters entry must carry a non-empty `description`. A property
+// that is a pure `$ref` is exempt — its semantics live on the referenced
+// schema. No allowlist; a new undocumented field fails the test with its
+// schema-path anchor so the miss is easy to locate.
+func TestOpenAPIDescriptionCoverage(t *testing.T) {
+	sd := specDoc(t)
+
+	var misses []string
+	nonEmptyDesc := func(m map[string]any) bool {
+		d, _ := m["description"].(string)
+		return strings.TrimSpace(d) != ""
+	}
+
+	var walk func(node any, path string)
+	walk = func(node any, path string) {
+		m, ok := node.(map[string]any)
+		if !ok {
+			return
+		}
+		// Every entry of a `properties` map is a sub-schema that must carry a
+		// description unless it is a pure $ref (semantics live on the target).
+		if props, ok := m["properties"].(map[string]any); ok {
+			// Deterministic order for stable failure output.
+			keys := make([]string, 0, len(props))
+			for k := range props {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+			for _, k := range keys {
+				pm, _ := props[k].(map[string]any)
+				sub := path + ".properties." + k
+				if pm == nil {
+					continue
+				}
+				if _, isRef := pm["$ref"]; !isRef && !nonEmptyDesc(pm) {
+					misses = append(misses, sub)
+				}
+				walk(pm, sub)
+			}
+		}
+		if items, ok := m["items"].(map[string]any); ok {
+			walk(items, path+".items")
+		}
+		if ap, ok := m["additionalProperties"].(map[string]any); ok {
+			walk(ap, path+".additionalProperties")
+		}
+		for _, kw := range []string{"oneOf", "anyOf", "allOf"} {
+			if branches, ok := m[kw].([]any); ok {
+				for i, b := range branches {
+					walk(b, fmt.Sprintf("%s.%s[%d]", path, kw, i))
+				}
+			}
+		}
+	}
+
+	// components.schemas — recurse each component.
+	schemaNames := make([]string, 0, len(sd.defs))
+	for name := range sd.defs {
+		schemaNames = append(schemaNames, name)
+	}
+	sort.Strings(schemaNames)
+	for _, name := range schemaNames {
+		walk(sd.defs[name], "components.schemas."+name)
+	}
+
+	// components.parameters — each entry must have a description.
+	comps, _ := sd.doc["components"].(map[string]any)
+	if params, ok := comps["parameters"].(map[string]any); ok {
+		pnames := make([]string, 0, len(params))
+		for name := range params {
+			pnames = append(pnames, name)
+		}
+		sort.Strings(pnames)
+		for _, name := range pnames {
+			pm, _ := params[name].(map[string]any)
+			if pm != nil && !nonEmptyDesc(pm) {
+				misses = append(misses, "components.parameters."+name)
+			}
+		}
+	}
+
+	if len(misses) > 0 {
+		t.Errorf("%d schema properties / parameters lack a non-empty description:\n%s",
+			len(misses), strings.Join(misses, "\n"))
+	}
 }
 
 var _ = httptest.NewServer // silence unused-import drift if the helper moves

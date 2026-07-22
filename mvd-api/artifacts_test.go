@@ -247,6 +247,80 @@ func TestArtifact_LazyLOS(t *testing.T) {
 	}
 }
 
+// fullArtifactStore carries a demo with every eager-artifact section
+// populated, so each servable eager artifact returns 200 and its timeUnit
+// echo (or absence) can be asserted per the echoMs audit.
+func fullArtifactStore() *fakeStore {
+	r := stubResult() // Match, Metadata, Messages, DemoInfo, Backpacks, Items, WeaponPickups, TimelineAnalysis
+	r.Frags = &result.FragResult{
+		TotalFrags: 1,
+		ByWeapon:   map[string]int{"rl": 1},
+		ByPlayer:   map[string]*result.PlayerFrags{"bps": {Kills: 1, ByWeapon: map[string]int{"rl": 1}}},
+		Frags:      []result.FragEntry{{Time: 10000, Killer: "bps", Victim: "valla", Weapon: "rl"}},
+	}
+	r.Damage = &result.DamageResult{
+		Dmg: "both", BoundedMode: "standard", TotalDamage: 100,
+		ByWeapon: map[string]int{"rl": 100},
+		ByPlayer: map[string]*result.PlayerDamage{"bps": {Given: 100, ByWeapon: map[string]int{"rl": 100}}},
+		Events:   []result.DamageEntry{{Time: 10000, Attacker: "bps", Victim: "valla", Weapon: "rl", Damage: 100}},
+	}
+	r.Shots = &result.ShotsResult{
+		Shots: []result.Shot{{Time: 10000, Player: "bps", Weapon: "rl", Source: "sound"}},
+	}
+	r.Aim = &result.AimResult{
+		Players: []result.PlayerAim{{Player: "bps", Mode: "duel"}},
+	}
+	r.Opening = &result.OpeningResult{
+		Players:    []result.OpeningPlayer{{Name: "bps", Team: "blue"}},
+		FirstTakes: []result.OpeningTake{{Item: "ra", Kind: "ra", EntNum: 9, Time: 20000, TakenBy: "bps"}},
+	}
+	r.LocGraph = &result.LocGraphResult{}
+	r.MapEntities = &result.MapEntitiesResult{Map: "dm6"}
+	return &fakeStore{byID: map[string]*result.Result{"gameId:42": r}}
+}
+
+// TestArtifact_TimeUnitEcho pins the per-artifact timeUnit echo (v57): every
+// eager artifact whose stored section carries match-position ms time echoes
+// "timeUnit":"ms"; the no-time-field artifacts (metadata, map-entities,
+// loc-graph) and the /demoinfo KTX-native island carry no echo. Drives every
+// servable eager artifact through the HTTP endpoint so the map and the wire
+// agree.
+func TestArtifact_TimeUnitEcho(t *testing.T) {
+	// Expected echo decision per the audit (mirrors eagerArtifacts[].echoMs).
+	wantEcho := map[string]bool{
+		"demoinfo": false, "metadata": false, "map-entities": false, "loc-graph": false,
+		"frag": true, "damage": true, "shots": true, "aim": true, "opening": true,
+		"match": true, "messages": true, "timeline": true, "items": true,
+		"backpacks": true, "weapon-pickups": true,
+	}
+	srv := newTestServer(t, fullArtifactStore())
+	defer srv.Close()
+
+	for name, ea := range eagerArtifacts {
+		want, listed := wantEcho[name]
+		if !listed {
+			t.Errorf("eager artifact %q has no expected-echo entry — extend TestArtifact_TimeUnitEcho", name)
+			continue
+		}
+		if ea.echoMs != want {
+			t.Errorf("eagerArtifacts[%q].echoMs = %v; want %v (audit table)", name, ea.echoMs, want)
+		}
+		body, resp := getWithHeaders(t, srv.URL+"/v1/demos/gameId:42/artifacts/"+name)
+		if resp.StatusCode != 200 {
+			t.Errorf("%s: status = %d; want 200 (%v)", name, resp.StatusCode, body)
+			continue
+		}
+		unit, present := body["timeUnit"]
+		if want {
+			if !present || unit != "ms" {
+				t.Errorf("%s: timeUnit = %v (present=%v); want \"ms\"", name, unit, present)
+			}
+		} else if present {
+			t.Errorf("%s: timeUnit = %v present; want absent (no-time-field / KTX island)", name, unit)
+		}
+	}
+}
+
 // TestEveryServableEagerArtifactHasAccessor pins eagerArtifacts to the
 // manifest: a new servable DAG node without a wired accessor would pass
 // the 404 gate and then 500 on fetch (this caught the `opening` node in
