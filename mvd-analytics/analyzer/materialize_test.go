@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -96,8 +97,9 @@ func TestLOSTier3DriftDiscarded(t *testing.T) {
 	}
 }
 
-// TestLOSBuildNoBSP: Build through the artifact latches even with no BSP, so
-// the compute is attempted once (matching ComputeLOS).
+// TestLOSBuildNoBSP: Build through the artifact returns ErrNoBSP and does NOT
+// latch when the map has no usable BSP, so EncodeTier3 refuses to persist and
+// the caller (mvd-api) reports 422 los_unavailable and retries later.
 func TestLOSBuildNoBSP(t *testing.T) {
 	art, _ := LazyArtifactByName("los")
 	res := &result.Result{
@@ -107,10 +109,13 @@ func TestLOSBuildNoBSP(t *testing.T) {
 			{Name: "B", Position: &result.PositionTrack{T: []int32{0, 50}}},
 		}},
 	}
-	if err := art.Build(res, MaterializeDeps{}); err != nil {
-		t.Fatalf("Build: %v", err)
+	if err := art.Build(res, MaterializeDeps{}); !errors.Is(err, ErrNoBSP) {
+		t.Fatalf("Build on a BSP-less map = %v; want ErrNoBSP", err)
 	}
-	if !art.Computed(res) {
-		t.Error("los Build should latch even with no BSP")
+	if art.Computed(res) {
+		t.Error("los Build must NOT latch on a BSP-less map (never persist an empty result)")
+	}
+	if _, ok, _ := art.EncodeTier3(res); ok {
+		t.Error("EncodeTier3 must refuse to persist an unlatched (ErrNoBSP) Result")
 	}
 }

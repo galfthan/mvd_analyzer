@@ -287,8 +287,12 @@ func analyzePath(path string, regionsOverride []config.MapRegionOverride, opts a
 	}
 	// Line of sight is computed lazily (the heaviest position-derived pass);
 	// the same pass also fills the PVS tracks, so los and pvs appear together.
+	// A map with no usable visibility BSP yields ErrNoBSP — warn and continue
+	// (the LOS section is simply absent), matching the API's non-fatal handling.
 	if opts.computeLOS {
-		analyzer.ComputeLOS(res)
+		if err := analyzer.ComputeLOS(res); err != nil {
+			fmt.Fprintf(os.Stderr, "warning: line of sight unavailable: %v\n", err)
+		}
 	}
 	return res, nil
 }

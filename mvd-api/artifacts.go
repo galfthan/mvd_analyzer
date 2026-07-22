@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -180,6 +181,11 @@ func (s *server) serveLazyArtifact(w http.ResponseWriter, r *http.Request, id de
 	case "los":
 		res, meta, err := s.store.EnsureLOS(r.Context(), id)
 		if err != nil {
+			if errors.Is(err, analyzer.ErrNoBSP) {
+				writeError(w, http.StatusUnprocessableEntity, "los_unavailable",
+					"line of sight needs the map's visibility BSP, which is not available for this demo")
+				return
+			}
 			s.mapStoreError(w, r, err)
 			return
 		}

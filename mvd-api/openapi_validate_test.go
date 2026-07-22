@@ -328,7 +328,11 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "state-at", url: "/v1/demos/gameId:42/state-at?time=30&fields=" + strings.TrimSuffix(allFieldCodes, ",sp,d"), path: "/v1/demos/{id}/state-at", status: 200},
 		{name: "err-state-at-sp", url: "/v1/demos/gameId:42/state-at?time=30&fields=sp", path: "/v1/demos/{id}/state-at", status: 400},
 		{name: "state-at-locindex", url: "/v1/demos/gameId:42/state-at?time=30&loc=index", path: "/v1/demos/{id}/state-at", status: 200},
-		{name: "los", url: "/v1/demos/gameId:42/los", path: "/v1/demos/{id}/los", status: 200},
+		// los on gameId:42 (real streams, no test BSP) is a 422 los_unavailable
+		// (Phase 3); gameId:43 has no Streams, so /los is a legitimate 200-empty
+		// that still validates the Los schema (timeUnit + empty players array).
+		{name: "los", url: "/v1/demos/gameId:43/los", path: "/v1/demos/{id}/los", status: 200},
+		{name: "err-los-unavailable", url: "/v1/demos/gameId:42/los", path: "/v1/demos/{id}/los", status: 422},
 		{name: "projectiles", url: "/v1/demos/gameId:42/streams/projectiles", path: "/v1/demos/{id}/streams/projectiles", status: 200},
 		{name: "beams", url: "/v1/demos/gameId:42/streams/beams", path: "/v1/demos/{id}/streams/beams", status: 200},
 		{name: "nails", url: "/v1/demos/gameId:42/streams/nails", path: "/v1/demos/{id}/streams/nails", status: 200},
@@ -369,9 +373,15 @@ func validationCases(t *testing.T) []validationCase {
 		if !m.Servable {
 			continue
 		}
+		demo := "gameId:42"
+		if m.Name == "los" {
+			// los on gameId:42 (real streams, no test BSP) is 422 los_unavailable;
+			// gameId:43 (no Streams) is a legitimate 200-empty los body.
+			demo = "gameId:43"
+		}
 		cases = append(cases, validationCase{
 			name:   "artifact-" + m.Name,
-			url:    "/v1/demos/gameId:42/artifacts/" + m.Name,
+			url:    "/v1/demos/" + demo + "/artifacts/" + m.Name,
 			path:   "/v1/demos/{id}/artifacts/{name}",
 			status: 200,
 		})

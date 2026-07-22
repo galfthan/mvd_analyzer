@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/mvd-analyzer/mvd-analytics/analyzer"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
 	"github.com/mvd-analyzer/mvd-api/internal/democache"
@@ -838,8 +839,10 @@ func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
 // the result to the tier-3 artifact cache, so later requests — and later
 // processes, after a restart or an LRU eviction — splice it from disk instead
 // of recomputing. The tier-2 gob stays lean — LOS is never baked into it.
-// Returns 200 with a players array; los is omitted for a player with no
-// sightlines and empty for every player on a map with no provisioned BSP.
+// Returns 200 with a players array (los omitted for a player with no
+// sightlines); 422 los_unavailable when the map has no usable visibility BSP
+// (no map name, BSP not provisioned, or a provisioned BSP that won't parse) —
+// that outcome is never latched or cached, so provisioning the BSP heals it.
 func (s *server) handleLOS(w http.ResponseWriter, r *http.Request) {
 	id, err := democache.ParseDemoID(r.PathValue("id"))
 	if err != nil {
@@ -853,6 +856,11 @@ func (s *server) handleLOS(w http.ResponseWriter, r *http.Request) {
 	}
 	res, meta, err := s.store.EnsureLOS(r.Context(), id)
 	if err != nil {
+		if errors.Is(err, analyzer.ErrNoBSP) {
+			writeError(w, http.StatusUnprocessableEntity, "los_unavailable",
+				"line of sight needs the map's visibility BSP, which is not available for this demo")
+			return
+		}
 		s.mapStoreError(w, r, err)
 		return
 	}
@@ -865,7 +873,9 @@ func (s *server) handleLOS(w http.ResponseWriter, r *http.Request) {
 
 // losBody is the /los (and `los` artifact) response body: per-player LOS/PVS
 // interval sets. Shared so the curated endpoint and the generic artifact
-// endpoint never fork the shape.
+// endpoint never fork the shape. Only reached on a successful (200) compute —
+// a map with no usable BSP is a 422 los_unavailable before this runs, so this
+// never renders an all-empty body for a BSP-less map.
 func losBody(res *result.Result) any {
 	type losPlayer struct {
 		Name string            `json:"name"`

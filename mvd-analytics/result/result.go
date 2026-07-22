@@ -419,7 +419,10 @@ package result
 //     since it is the heaviest position-derived pass — and so absent unless a
 //     consumer requested it (web LOS overlay, qw-analyze -include los,
 //     mvd-api /los). The Streams.LOSComputed guard (gob-only, json:"-") makes
-//     it idempotent.
+//     it idempotent — but note it latches only on a genuine compute or a
+//     legitimately empty <2-player demo; a map with no usable BSP yields
+//     analyzer.ErrNoBSP without latching (mvd-api → 422 los_unavailable), so
+//     no empty result is ever persisted and provisioning the BSP later heals.
 //
 // v38:
 //   - PlayerStream gains PVS []LosTrack alongside LOS: per-opponent

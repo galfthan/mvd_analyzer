@@ -65,6 +65,33 @@ schema bump.
   dates) are likewise distinguished from the per-demo endpoints' `from`/`to`
   (match-relative times).
 
+### Phase 3: `/los` no-BSP → 422 `los_unavailable`
+
+Touches `GET /v1/demos/{id}/los` and `GET /v1/demos/{id}/artifacts/los`; no
+schema bump. Closes review finding 6 and the v55 open cache-invalidation item.
+
+- **The poisoned-cache failure class is eliminated at the root.** Previously
+  `/los` on a map with no provisioned visibility BSP latched
+  `Streams.LOSComputed` *before* the BSP check and returned `200` with empty
+  intervals — an outcome that was then persisted to the tier-3 artifact cache
+  and never retried, so provisioning the BSP afterwards did nothing until the
+  cache was manually cleared. `analyzer.ComputeLOS` now returns a new
+  `analyzer.ErrNoBSP` for the three no-usable-BSP causes (the demo carries no
+  map name, no BSP is provisioned for the map, or a provisioned BSP fails to
+  parse) and does **not** latch, persist, or cache anything. The latch is set
+  only on a genuine compute or a legitimately empty `<2`-player demo (which
+  stays cacheable). Retry is cheap — no empty gob is ever written.
+- **`/los` now returns `422 los_unavailable`** for those cases, matching its
+  `*_unavailable` siblings (`aim_unavailable`, `locgraph_unavailable`, …)
+  instead of the misleading `200`-empty. Both the curated `/los` endpoint and
+  the generic `/artifacts/los` route map `ErrNoBSP` to the same `422`.
+- **Ops note: BSP provisioning heals on process restart.** `mapbsp` memoises
+  its "not found" result per process, so once a BSP is shipped, restart the
+  API (or wait for the memo to be dropped) and the next `/los` request computes
+  and caches normally — no cache purge needed, because the no-BSP outcome was
+  never cached in the first place. The corrupt-BSP branch keeps its own
+  per-process negative memo so repeated requests don't re-parse the bad file.
+
 ## 2026-07-21 (tweak-api)
 
 - **Review fixes — echo-rule completeness + hub read hardening (still

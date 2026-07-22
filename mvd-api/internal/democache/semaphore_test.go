@@ -187,7 +187,11 @@ func TestParseSemaphore_BoundsConcurrentLOSRaycasts(t *testing.T) {
 		}
 		time.Sleep(30 * time.Millisecond)
 		cur.Add(-1)
-		return art.Build(res, analyzer.MaterializeDeps{})
+		// Simulate a successful compute: latch (the real art.Build would return
+		// ErrNoBSP here — 2 players, no BSP — which is not what this concurrency
+		// test exercises).
+		res.Streams.LOSComputed = true
+		return nil
 	}
 
 	var wg sync.WaitGroup
@@ -244,7 +248,10 @@ func TestParseSemaphore_LOSRespectsCtxCancellationWhileQueued(t *testing.T) {
 		case shaB + ".mvd.gz":
 			bBuilds.Add(1) // must never run: B is cancelled while queued
 		}
-		return art.Build(res, analyzer.MaterializeDeps{})
+		// Simulate a successful compute: latch (the real art.Build would return
+		// ErrNoBSP — 2 players, no BSP — which is orthogonal to this test).
+		res.Streams.LOSComputed = true
+		return nil
 	}
 
 	aDone := make(chan struct{})

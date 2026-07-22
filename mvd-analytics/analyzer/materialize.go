@@ -42,8 +42,10 @@ type LazyArtifact struct {
 	// computed reports whether res already carries this artifact (the latch).
 	computed func(res *result.Result) bool
 	// build materialises the artifact onto res in place (the compute path).
-	// A build that cannot run (no BSP) is not an error — it sets the latch and
-	// leaves the artifact absent, matching ComputeLOS's no-BSP behaviour.
+	// A build that cannot run because the map has no usable visibility BSP
+	// returns analyzer.ErrNoBSP and does NOT latch, so the caller reports it
+	// (mvd-api → 422 los_unavailable) and never persists an empty result;
+	// a legitimately empty build (a <2-player demo) latches and persists.
 	build func(res *result.Result, deps MaterializeDeps) error
 	// encode extracts the artifact's side-struct from res as a tier-3 gob;
 	// ok=false when there is nothing worth persisting (latch unset).
@@ -135,8 +137,10 @@ var losArtifact = &LazyArtifact{
 		return res.Streams != nil && res.Streams.LOSComputed
 	},
 	build: func(res *result.Result, _ MaterializeDeps) error {
-		ComputeLOS(res) // idempotent; no-op / latch-only when no BSP or <2 players
-		return nil
+		// Idempotent (Streams.LOSComputed). Returns ErrNoBSP (no latch) when the
+		// map has no usable visibility BSP; latches on a genuine compute or a
+		// legitimately empty <2-player demo.
+		return ComputeLOS(res)
 	},
 	encode: encodeLOS,
 	decode: decodeLOS,

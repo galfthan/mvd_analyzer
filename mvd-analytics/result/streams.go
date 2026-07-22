@@ -29,19 +29,26 @@ type Streams struct {
 	// higher volume than rockets/grenades.
 	Nails *ProjectileStreams `json:"nails,omitempty"`
 
-	// LOSComputed records whether the (lazy) line-of-sight pass has run on
-	// this in-memory Result, so a caller (web overlay, -include los, the
-	// mvd-api /los endpoint) computes it on demand exactly once and does not
-	// retry on maps that genuinely have no LOS (no BSP). It latches for the
+	// LOSComputed records whether the (lazy) line-of-sight pass has run to a
+	// result worth keeping on this in-memory Result, so a caller (web overlay,
+	// -include los, the mvd-api /los endpoint) computes it on demand exactly
+	// once. It latches ONLY on outcomes that should stick: a genuine compute or
+	// a legitimately empty <2-player demo. It deliberately does NOT latch when
+	// the map has no usable visibility BSP — analyzer.ComputeLOS returns
+	// ErrNoBSP there and leaves this false, so a request that arrives after the
+	// BSP is provisioned (or after a restart drops mapbsp's memoised nil)
+	// retries instead of serving a poisoned empty forever. It latches for the
 	// lifetime of this Result value. The API's tier-2 gob is written once at
 	// parse (before any LOS pass), so a Result re-decoded from it starts with
-	// LOSComputed=false; but the API persists the computed LOS separately in
-	// its tier-3 artifact cache (mvd-api/internal/democache), so the /los pass
-	// is not re-run after a restart or eviction — the warm request splices the
-	// cached intervals and re-sets this latch. Excluded from JSON (`json:"-"`):
-	// consumers read presence/absence of PlayerStream.LOS itself, and the
-	// goldens stay agnostic to it. See analyzer.ComputeLOS and the "los" lazy
-	// artifact (analyzer/materialize.go).
+	// LOSComputed=false; the API persists a successful LOS separately in its
+	// tier-3 artifact cache (mvd-api/internal/democache), so the pass is not
+	// re-run after a restart or eviction — the warm request splices the cached
+	// intervals and re-sets this latch. An ErrNoBSP outcome is never persisted
+	// (encodeLOS refuses to encode an unlatched Result), so no empty los gob is
+	// ever written. Excluded from JSON (`json:"-"`): consumers read
+	// presence/absence of PlayerStream.LOS itself, and the goldens stay
+	// agnostic to it. See analyzer.ComputeLOS and the "los" lazy artifact
+	// (analyzer/materialize.go).
 	LOSComputed bool `json:"-"`
 
 	// ShotStreamsComputed / NailsComputed latch the spatial weapon-fire streams:

@@ -546,9 +546,14 @@ func (c *Cache) RemoveDemo(sha string) {
 // interval sets materialised (Streams.Players[].LOS/PVS). LOS is the heaviest
 // position-derived pass and has no in-pipeline consumer, so it is computed on
 // demand: latch check → tier-3 load+splice → else compute (analyzer.ComputeLOS,
-// which loads its own visibility BSP) → write tier-3. It needs no raw bytes, so
-// there is no degrade — a map with no provisioned BSP computes to an empty LOS,
-// latches, and is cached as such (computed once).
+// which loads its own visibility BSP) → write tier-3. It needs no raw bytes.
+//
+// A map with no usable visibility BSP is NOT cached as empty: ComputeLOS returns
+// analyzer.ErrNoBSP (wrapped below as "compute los: %w"), which propagates out of
+// EnsureLOS BEFORE tier3Store, so nothing is persisted and Streams.LOSComputed
+// stays false — the next request retries cheaply and the pass heals once the BSP
+// is provisioned. The handler maps ErrNoBSP to 422 los_unavailable. Only a
+// genuine compute or a legitimately empty <2-player demo latches and is cached.
 //
 // Serialised per SHA (losLocks) with the need-check inside the lock, so /los
 // for demo B does not queue behind demo A's raycast and two callers for one

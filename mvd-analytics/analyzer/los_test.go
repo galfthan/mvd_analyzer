@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -242,8 +243,9 @@ func TestComputePvsAB_SupersetOfLos(t *testing.T) {
 	}
 }
 
-// TestComputeLOS_NoBSP: a map with no provisioned BSP leaves LOS absent, and
-// the pass marks itself computed so it is not retried.
+// TestComputeLOS_NoBSP: a 2-player demo whose map has no provisioned BSP returns
+// ErrNoBSP and does NOT latch, so a later request (after the BSP is provisioned)
+// retries instead of serving a poisoned empty. LOS/PVS stay absent.
 func TestComputeLOS_NoBSP(t *testing.T) {
 	ts := []int32{0, 50}
 	res := &Result{
@@ -255,16 +257,78 @@ func TestComputeLOS_NoBSP(t *testing.T) {
 			},
 		},
 	}
-	ComputeLOS(res)
-	if !res.Streams.LOSComputed {
-		t.Errorf("ComputeLOS should mark LOSComputed even with no BSP")
+	err := ComputeLOS(res)
+	if !errors.Is(err, ErrNoBSP) {
+		t.Fatalf("ComputeLOS on a BSP-less map = %v; want ErrNoBSP", err)
+	}
+	if res.Streams.LOSComputed {
+		t.Errorf("ComputeLOS must NOT latch on a BSP-less map (poisoned-cache root cause)")
 	}
 	for i := range res.Streams.Players {
-		if res.Streams.Players[i].LOS != nil {
-			t.Errorf("player %q got LOS on a BSP-less map: %v", res.Streams.Players[i].Name, res.Streams.Players[i].LOS)
+		if res.Streams.Players[i].LOS != nil || res.Streams.Players[i].PVS != nil {
+			t.Errorf("player %q got LOS/PVS on a BSP-less map", res.Streams.Players[i].Name)
 		}
-		if res.Streams.Players[i].PVS != nil {
-			t.Errorf("player %q got PVS on a BSP-less map: %v", res.Streams.Players[i].Name, res.Streams.Players[i].PVS)
-		}
+	}
+}
+
+// TestComputeLOS_NoMapName: a demo carrying no map name at all cannot resolve a
+// BSP → ErrNoBSP, no latch.
+func TestComputeLOS_NoMapName(t *testing.T) {
+	ts := []int32{0, 50}
+	res := &Result{
+		Streams: &result.Streams{
+			Players: []result.PlayerStream{
+				{Name: "A", Position: staticTrack(ts, 0, 0, 0)},
+				{Name: "B", Position: staticTrack(ts, 100, 0, 0)},
+			},
+		},
+	}
+	if err := ComputeLOS(res); !errors.Is(err, ErrNoBSP) {
+		t.Fatalf("ComputeLOS with no map name = %v; want ErrNoBSP", err)
+	}
+	if res.Streams.LOSComputed {
+		t.Errorf("ComputeLOS must NOT latch when the demo carries no map name")
+	}
+}
+
+// TestComputeLOS_FewerThanTwoPlayers: a legitimately empty demo (<2 players)
+// returns nil, LATCHES, and is persistable (encodeLOS reports ok) — it must
+// stay cacheable, unlike the ErrNoBSP cases.
+func TestComputeLOS_FewerThanTwoPlayers(t *testing.T) {
+	res := &Result{
+		DemoInfo: &DemoInfoResult{Map: "zzz_no_such_map_xyz"},
+		Streams: &result.Streams{
+			Players: []result.PlayerStream{
+				{Name: "A", Position: staticTrack([]int32{0, 50}, 0, 0, 0)},
+			},
+		},
+	}
+	if err := ComputeLOS(res); err != nil {
+		t.Fatalf("ComputeLOS with <2 players = %v; want nil (legitimately empty)", err)
+	}
+	if !res.Streams.LOSComputed {
+		t.Errorf("a <2-player demo must latch (legitimately empty, cacheable)")
+	}
+	if _, ok, err := encodeLOS(res); err != nil || !ok {
+		t.Errorf("encodeLOS on a latched empty demo: ok=%v err=%v; want ok=true (persistable)", ok, err)
+	}
+}
+
+// TestComputeLOS_AlreadyLatched: the fast path — an already-latched Result
+// returns nil without touching the map/BSP, even for one that would otherwise
+// error.
+func TestComputeLOS_AlreadyLatched(t *testing.T) {
+	res := &Result{
+		DemoInfo: &DemoInfoResult{Map: "zzz_no_such_map_xyz"},
+		Streams: &result.Streams{
+			LOSComputed: true,
+			Players: []result.PlayerStream{
+				{Name: "A", Position: staticTrack([]int32{0, 50}, 0, 0, 0)},
+				{Name: "B", Position: staticTrack([]int32{0, 50}, 100, 0, 0)},
+			},
+		},
+	}
+	if err := ComputeLOS(res); err != nil {
+		t.Errorf("already-latched ComputeLOS = %v; want nil (fast path)", err)
 	}
 }

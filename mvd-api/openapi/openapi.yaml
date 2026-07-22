@@ -879,9 +879,11 @@ paths:
       description: >
         LOS/PVS interval sets per player. The heaviest position-derived
         pass — computed lazily on first request, then cached (tier-3
-        artifact). Always 200: `los` omitted for a player with no
-        sightlines; empty for every player when the map's BSP was not
-        provisioned.
+        artifact). 200 with a players array (`los` omitted for a player
+        with no sightlines). 422 `los_unavailable` when the map has no
+        usable visibility BSP (no map name, BSP not provisioned, or a
+        provisioned BSP that fails to parse) — that outcome is never
+        cached, so a retry after the BSP is provisioned succeeds.
       parameters:
         - $ref: "#/components/parameters/DemoId"
       responses:
@@ -895,6 +897,7 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/DemoNotFound" }
+        "422": { $ref: "#/components/responses/Unavailable" }
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
@@ -1113,7 +1116,7 @@ paths:
         | aim | /aim | aim | 422 aim_unavailable |
         | loc-graph | /loc-graph | locGraph | 422 locgraph_unavailable |
         | opening | — (artifact only) | opening | 422 opening_unavailable |
-        | los | /los | — (serves the /los body, no envelope key) | 200, empty lists |
+        | los | /los | — (serves the /los body, no envelope key) | 422 los_unavailable (map has no usable visibility BSP) |
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/ArtifactName"
@@ -1782,6 +1785,7 @@ components:
         - invalid_gzip
         - invalid_param
         - locgraph_unavailable
+        - los_unavailable
         - map_unavailable
         - metadata_unavailable
         - missing_param
@@ -5865,7 +5869,8 @@ components:
       description: >
         /los body (and the lazy `los` artifact) — per-player LOS/PVS
         interval sets. `los`/`pvs` are omitted for a player with no
-        sightlines and empty on maps without a provisioned BSP.
+        sightlines. A map with no usable visibility BSP is a 422
+        `los_unavailable`, not an empty body.
       required: [timeUnit, players]
       additionalProperties: false
       properties:

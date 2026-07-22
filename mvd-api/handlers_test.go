@@ -31,6 +31,7 @@ type fakeStore struct {
 	putResult *result.Result // registered under the put SHA so GetResult hits (default: stubResult)
 	parseFail bool           // GetResult(sha:…) returns ErrParse — simulate an unparseable upload
 	removed   []string       // SHAs passed to RemoveDemo (assert parse-gate cleanup)
+	losErr    error          // EnsureLOS returns this (e.g. a wrapped analyzer.ErrNoBSP) instead of computing
 }
 
 func (f *fakeStore) GetResult(_ context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error) {
@@ -81,14 +82,21 @@ func (f *fakeStore) RemoveDemo(sha string) {
 }
 
 // EnsureLOS runs the (idempotent) LOS pass on the stored Result, mirroring the
-// real store: a BSP-less stub computes to empty and latches Streams.LOSComputed
-// so a second /los request is a no-op.
+// real store: a legitimately empty (<2-player) stub latches Streams.LOSComputed
+// so a second /los request is a no-op, while a map with no usable BSP surfaces
+// analyzer.ErrNoBSP (which the handler maps to 422 los_unavailable). A test can
+// force that error path via losErr (wrapped, as the real cache wraps it).
 func (f *fakeStore) EnsureLOS(ctx context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error) {
 	res, meta, err := f.GetResult(ctx, id)
 	if err != nil {
 		return nil, meta, err
 	}
-	analyzer.ComputeLOS(res)
+	if f.losErr != nil {
+		return nil, meta, f.losErr
+	}
+	if err := analyzer.ComputeLOS(res); err != nil {
+		return nil, meta, fmt.Errorf("compute los: %w", err)
+	}
 	return res, meta, nil
 }
 
@@ -794,6 +802,27 @@ func TestLOS(t *testing.T) {
 	}
 	if !store.byID["gameId:42"].Streams.LOSComputed {
 		t.Errorf("LOSComputed should latch after the first /los request")
+	}
+}
+
+// TestLOS_NoBSP_422: a map with no usable visibility BSP surfaces
+// analyzer.ErrNoBSP from EnsureLOS (wrapped, as the real cache wraps it), which
+// both the curated /los and the generic /artifacts/los route must translate to
+// 422 los_unavailable — never a 200-empty or a masked 500.
+func TestLOS_NoBSP_422(t *testing.T) {
+	store := storeWithStub()
+	store.losErr = fmt.Errorf("compute los: %w", analyzer.ErrNoBSP)
+	srv := newTestServer(t, store)
+	defer srv.Close()
+
+	for _, path := range []string{"/v1/demos/gameId:42/los", "/v1/demos/gameId:42/artifacts/los"} {
+		body, status := getRaw(t, srv.URL+path)
+		if status != 422 {
+			t.Fatalf("GET %s: status = %d; want 422 (body=%s)", path, status, body)
+		}
+		if !strings.Contains(string(body), "los_unavailable") {
+			t.Errorf("GET %s: 422 body must name los_unavailable: %s", path, body)
+		}
 	}
 }
 

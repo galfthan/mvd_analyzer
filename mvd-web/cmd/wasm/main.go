@@ -317,13 +317,18 @@ func defaultStoredRegions(stored []result.ControlRegion) []result.ControlRegion 
 // analyzer.ComputeLOS is idempotent (Streams.LOSComputed), so repeat calls are
 // cheap. Returns the per-player visibility tracks (name + los/pvs, each
 // [{o,iv}]) aligned with streams.players: los is the clear-raycast sightline,
-// pvs the potentially-visible-set superset. An empty los/pvs on every player
-// means the map has no BSP.
+// pvs the potentially-visible-set superset. A map with no usable visibility BSP
+// yields ErrNoBSP (not latched) — the overlay simply stays empty; the error is
+// logged and swallowed so the toggle degrades gracefully rather than failing.
 func computeLineOfSight(this js.Value, args []js.Value) interface{} {
 	if lastResult == nil || lastResult.Streams == nil {
 		return errorJSON("no demo analyzed yet")
 	}
-	analyzer.ComputeLOS(lastResult)
+	if err := analyzer.ComputeLOS(lastResult); err != nil {
+		// Degrade gracefully: the overlay stays empty. println goes to the
+		// browser console (no fmt import needed in the wasm build).
+		println("line of sight unavailable:", err.Error())
+	}
 	players := lastResult.Streams.Players
 	out := make([]struct {
 		Name string            `json:"name"`
