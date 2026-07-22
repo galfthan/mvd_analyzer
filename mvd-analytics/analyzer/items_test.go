@@ -27,13 +27,13 @@ func newTestItemAnalyzer() (*ItemAnalyzer, *Context) {
 func TestItemAnalyzer_RAPickupRespawn(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "nexus", Team: "ahoy"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{100, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{100, 0, 0}, TimeMs: 9900})
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 75, Kind: "ra", Origin: [3]float32{100, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: true, Time: 10})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 75, Kind: "ra", Origin: [3]float32{100, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: true, TimeMs: 10000})
 	// Wire respawn 45 s later — 25 s past the real respawn time.
 	// Insta-regrab simulation: we still want RespawnAt=30, not 45.
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: false, Time: 45})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: false, TimeMs: 45000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -67,10 +67,10 @@ func TestItemAnalyzer_RAPickupRespawn(t *testing.T) {
 func TestItemAnalyzer_QuadNominalRespawn(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 128, 282}, Time: 16.6})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 128, 282}, TimeMs: 16600})
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 43, Kind: "quad", Origin: [3]float32{0, 128, 282}, Time: 0})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 43, Kind: "quad", Taken: true, Time: 16.692})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 43, Kind: "quad", Origin: [3]float32{0, 128, 282}, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 43, Kind: "quad", Taken: true, TimeMs: 16692})
 	// No wire respawn yet — quad was insta-regrabbed each cycle.
 
 	r := &Result{}
@@ -92,22 +92,22 @@ func TestItemAnalyzer_TwoMHs(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "p1"}
 	ctx.Players[3] = &events.PlayerInfo{Slot: 3, Name: "p2"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{1000, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 3, Origin: [3]float32{-1000, 0, 0}, Time: 10.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{1000, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 3, Origin: [3]float32{-1000, 0, 0}, TimeMs: 10900})
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 20, Kind: "mh", Origin: [3]float32{1000, 0, 0}})
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 21, Kind: "mh", Origin: [3]float32{-1000, 0, 0}})
 	// MH 20 → p1 @ t=10; holder starts at 200 (primed so crossing is
 	// observable), rots down past 100 at t=110.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 200, Time: 10})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 20, Kind: "mh", Taken: true, Time: 10})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 200, TimeMs: 10000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 20, Kind: "mh", Taken: true, TimeMs: 10000})
 	// MH 21 → p2 @ t=11; holder at 200, drops past 100 at t=90.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 200, Time: 11})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 21, Kind: "mh", Taken: true, Time: 11})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 200, TimeMs: 11000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 21, Kind: "mh", Taken: true, TimeMs: 11000})
 
 	// Rot-end crossings.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 100, Time: 110})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 100, Time: 90})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 100, TimeMs: 110000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 100, TimeMs: 90000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -138,15 +138,15 @@ func TestItemAnalyzer_TwoMHs(t *testing.T) {
 func TestItemAnalyzer_MHRotTickdown(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "mh", Origin: [3]float32{0, 0, 0}})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 200, Time: 10})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 50, Kind: "mh", Taken: true, Time: 10})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 200, TimeMs: 10000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 50, Kind: "mh", Taken: true, TimeMs: 10000})
 	// Interim rot observations: still > 100.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 150, Time: 60})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 150, TimeMs: 60000})
 	// Final crossing.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, Time: 110})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, TimeMs: 110000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -163,13 +163,13 @@ func TestItemAnalyzer_MHRotTickdown(t *testing.T) {
 func TestItemAnalyzer_MHHolderDiesMidRot(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "mh", Origin: [3]float32{0, 0, 0}})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 200, Time: 10})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 50, Kind: "mh", Taken: true, Time: 10})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 200, TimeMs: 10000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 50, Kind: "mh", Taken: true, TimeMs: 10000})
 	// Holder dies at t=30 (way past the 5 s floor).
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, TimeMs: 30000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -186,13 +186,13 @@ func TestItemAnalyzer_MHHolderDiesMidRot(t *testing.T) {
 func TestItemAnalyzer_MHInstantDeathFloor(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "mh", Origin: [3]float32{0, 0, 0}})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 200, Time: 10})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 50, Kind: "mh", Taken: true, Time: 10})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 200, TimeMs: 10000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 50, Kind: "mh", Taken: true, TimeMs: 10000})
 	// Rocket to the face at t=10.1, instant death.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 0, Time: 10.1})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 0, TimeMs: 10100})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -216,14 +216,14 @@ func TestItemAnalyzer_TwoMHsSameHolder(t *testing.T) {
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 41, Kind: "mh", Origin: [3]float32{1, 0, 0}})
 	// Position samples interleave with the takes — the rolling history
 	// only keeps ~1 s, so a sample must exist near each touch instant.
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 200, Time: 10})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 40, Kind: "mh", Taken: true, Time: 10})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, Time: 11.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 250, Time: 12})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 41, Kind: "mh", Taken: true, Time: 12})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 200, TimeMs: 10000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 40, Kind: "mh", Taken: true, TimeMs: 10000})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, TimeMs: 11900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 250, TimeMs: 12000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 41, Kind: "mh", Taken: true, TimeMs: 12000})
 	// Rot across both; crossing at t=80.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, Time: 80})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, TimeMs: 80000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -266,8 +266,8 @@ func TestItemAnalyzer_PreMatchEventsIgnored(t *testing.T) {
 	// matchStarted left false.
 
 	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 75, Kind: "ra", Origin: [3]float32{0, 0, 0}})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: true, Time: 2})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: false, Time: 5})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: true, TimeMs: 2000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 75, Kind: "ra", Taken: false, TimeMs: 5000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -291,13 +291,13 @@ func TestItemAnalyzer_LayeredAttribution_HintWins(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "far_picker", Team: "ahoy"}
 	ctx.Players[3] = &events.PlayerInfo{Slot: 3, Name: "bystander", Team: "bhb"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{500, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 3, Origin: [3]float32{0, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{500, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 3, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 80, Kind: "ra", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 80, Kind: "ra", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
 	// PlayerEnt 3 is edict 3 = slot 2 = far_picker.
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 80, RespawnSec: 20, PlayerEnt: 3, Time: 10.0})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 80, Kind: "ra", Taken: true, Time: 10.01})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 80, RespawnSec: 20, PlayerEnt: 3, TimeMs: 10000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 80, Kind: "ra", Taken: true, TimeMs: 10010})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -316,12 +316,12 @@ func TestItemAnalyzer_LayeredAttribution_PrintWhenNoHint(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "msg0player"}
 	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "closer"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 1, Origin: [3]float32{1000, 0, 0}, Time: 4.9})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{0, 0, 0}, Time: 4.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 1, Origin: [3]float32{1000, 0, 0}, TimeMs: 4900})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{0, 0, 0}, TimeMs: 4900})
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 81, Kind: "ya", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.ItemPickupPrintEvent{PlayerNum: 1, Kind: "ya", Time: 5.0})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 81, Kind: "ya", Taken: true, Time: 5.01})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 81, Kind: "ya", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemPickupPrintEvent{PlayerNum: 1, Kind: "ya", TimeMs: 5000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 81, Kind: "ya", Taken: true, TimeMs: 5010})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -340,15 +340,15 @@ func TestItemAnalyzer_LayeredAttribution_StatDeltaWhenNoHintNoPrint(t *testing.T
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[4] = &events.PlayerInfo{Slot: 4, Name: "real_picker"}
 	ctx.Players[5] = &events.PlayerInfo{Slot: 5, Name: "bystander"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 4, Origin: [3]float32{500, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 5, Origin: [3]float32{0, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 4, Origin: [3]float32{500, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 5, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 82, Kind: "ra", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 82, Kind: "ra", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
 	// Seed slot 4's items snapshot — first update sets baseline silently.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 4, StatIndex: events.StatItems, Value: 0, Time: 1.0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 4, StatIndex: events.StatItems, Value: 0, TimeMs: 1000})
 	// Pickup: IT_ARMOR3 bit transitions 0→1.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 4, StatIndex: events.StatItems, Value: events.ITArmor3, Time: 9.99})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 82, Kind: "ra", Taken: true, Time: 10.0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 4, StatIndex: events.StatItems, Value: events.ITArmor3, TimeMs: 9990})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 82, Kind: "ra", Taken: true, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -365,13 +365,13 @@ func TestItemAnalyzer_LayeredAttribution_AmmoBoxStatDelta(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "rl_owner"}
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "noisy"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 1, Origin: [3]float32{2000, 0, 0}, Time: 19.9})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, Time: 19.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 1, Origin: [3]float32{2000, 0, 0}, TimeMs: 19900})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, TimeMs: 19900})
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 83, Kind: "rockets", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatRockets, Value: 5, Time: 1.0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatRockets, Value: 10, Time: 19.9})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 83, Kind: "rockets", Taken: true, Time: 20.0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 83, Kind: "rockets", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatRockets, Value: 5, TimeMs: 1000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatRockets, Value: 10, TimeMs: 19900})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 83, Kind: "rockets", Taken: true, TimeMs: 20000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -385,10 +385,10 @@ func TestItemAnalyzer_LayeredAttribution_AmmoBoxStatDelta(t *testing.T) {
 func TestItemAnalyzer_LayeredAttribution_DistanceFallbackUnderRadius(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "close"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{32, 0, 0}, Time: 4.9}) // 32 u away → squared 1024 < 16384
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{32, 0, 0}, TimeMs: 4900}) // 32 u away → squared 1024 < 16384
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 84, Kind: "ga", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 84, Kind: "ga", Taken: true, Time: 5})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 84, Kind: "ga", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 84, Kind: "ga", Taken: true, TimeMs: 5000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -405,10 +405,10 @@ func TestItemAnalyzer_LayeredAttribution_DistanceFallbackUnderRadius(t *testing.
 func TestItemAnalyzer_LayeredAttribution_DistanceRefusedBeyondRadius(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "far"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{500, 0, 0}, Time: 4.9}) // squared 250000 > 16384
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{500, 0, 0}, TimeMs: 4900}) // squared 250000 > 16384
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 85, Kind: "ga", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 85, Kind: "ga", Taken: true, Time: 5})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 85, Kind: "ga", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 85, Kind: "ga", Taken: true, TimeMs: 5000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -429,17 +429,17 @@ func TestItemAnalyzer_LayeredAttribution_StatTieBreakByDistance(t *testing.T) {
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "uninvolved"}
 	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "candidate_far"}
 	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "candidate_near"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, Time: 9.9})   // closest, but no stat evidence
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 1, Origin: [3]float32{100, 0, 0}, Time: 9.9}) // candidate, far
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{50, 0, 0}, Time: 9.9})  // candidate, near
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})   // closest, but no stat evidence
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 1, Origin: [3]float32{100, 0, 0}, TimeMs: 9900}) // candidate, far
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{50, 0, 0}, TimeMs: 9900})  // candidate, near
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 86, Kind: "h25", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 86, Kind: "h25", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
 	// Both slot 1 and slot 2 see +25 health at the same time.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: 100, Time: 1.0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 100, Time: 1.0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: 125, Time: 9.99})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 125, Time: 9.99})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 86, Kind: "h25", Taken: true, Time: 10.0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: 100, TimeMs: 1000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 100, TimeMs: 1000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatHealth, Value: 125, TimeMs: 9990})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 125, TimeMs: 9990})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 86, Kind: "h25", Taken: true, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -455,14 +455,14 @@ func TestItemAnalyzer_LayeredAttribution_HintBeatsContradictoryStat(t *testing.T
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "hint_says"}
 	ctx.Players[3] = &events.PlayerInfo{Slot: 3, Name: "stat_says"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{0, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 3, Origin: [3]float32{0, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 3, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 87, Kind: "ra", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatItems, Value: 0, Time: 1.0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatItems, Value: events.ITArmor3, Time: 9.99})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 87, RespawnSec: 20, PlayerEnt: 3 /* slot 2 */, Time: 10.0})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 87, Kind: "ra", Taken: true, Time: 10.0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 87, Kind: "ra", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatItems, Value: 0, TimeMs: 1000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatItems, Value: events.ITArmor3, TimeMs: 9990})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 87, RespawnSec: 20, PlayerEnt: 3 /* slot 2 */, TimeMs: 10000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 87, Kind: "ra", Taken: true, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -479,23 +479,23 @@ func TestItemAnalyzer_LayeredAttribution_RespawnLoadoutNotMistakenForPickup(t *t
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "respawned"}
 	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "real_picker"}
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 1, Origin: [3]float32{200, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 1, Origin: [3]float32{200, 0, 0}, TimeMs: 9900})
 
 	// Slot 0 dies and respawns; the post-spawn loadout would otherwise
 	// generate +25 shells / +items evidence.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, Time: 0.5})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 0, Time: 1.0})
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 1.0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, Time: 5.0})
-	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 0, Time: 5.0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatShells, Value: 25, Time: 5.0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, TimeMs: 500})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 0, TimeMs: 1000})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, TimeMs: 1000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatHealth, Value: 100, TimeMs: 5000})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 0, TimeMs: 5000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatShells, Value: 25, TimeMs: 5000})
 
 	// Then slot 1 picks up a real shells box.
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 88, Kind: "shells", Origin: [3]float32{200, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatShells, Value: 0, Time: 6.0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatShells, Value: 20, Time: 9.99})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 88, Kind: "shells", Taken: true, Time: 10.0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 88, Kind: "shells", Origin: [3]float32{200, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatShells, Value: 0, TimeMs: 6000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatShells, Value: 20, TimeMs: 9990})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 88, Kind: "shells", Taken: true, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -518,22 +518,22 @@ func TestItemAnalyzer_ContestedDoubleHealthGoesToGainer(t *testing.T) {
 	ctx.Players[3] = &events.PlayerInfo{Slot: 3, Name: "gainer", Team: "ahoy"}
 	// The bystander stands exactly on the boxes (would win on distance);
 	// the gainer is farther away but is the one whose health rose.
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{0, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 3, Origin: [3]float32{100, 0, 0}, Time: 9.9})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 3, Origin: [3]float32{100, 0, 0}, TimeMs: 9900})
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 80, Kind: "h25", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 81, Kind: "h25", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 80, Kind: "h25", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 81, Kind: "h25", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
 
 	// Seed health baselines silently.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 28, Time: 9.8})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 100, Time: 9.8})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 28, TimeMs: 9800})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 100, TimeMs: 9800})
 	// Gainer jumps +50 (both boxes); bystander takes -24 damage (no pickup).
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 78, Time: 10.0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 76, Time: 10.0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 3, StatIndex: events.StatHealth, Value: 78, TimeMs: 10000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatHealth, Value: 76, TimeMs: 10000})
 
 	// Both boxes taken in the same frame.
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 80, Kind: "h25", Taken: true, Time: 10.0})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 81, Kind: "h25", Taken: true, Time: 10.0})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 80, Kind: "h25", Taken: true, TimeMs: 10000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 81, Kind: "h25", Taken: true, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -563,12 +563,12 @@ func TestItemAnalyzer_WeaponStayFlipClosesPhase(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "ace", Team: "red"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{500, 500, 100}, Time: 0})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{505, 500, 100}, Time: 9.9})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{500, 500, 100}, TimeMs: 0})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 2, Origin: [3]float32{505, 500, 100}, TimeMs: 9900})
 	// Seed the STAT_ITEMS baseline silently, then flip the RL bit.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatItems, Value: 1, Time: 5})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, Time: 10})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatItems, Value: 1, TimeMs: 5000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -600,12 +600,12 @@ func TestItemAnalyzer_WeaponStayNearestEntityWins(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 91, Kind: "rl", Origin: [3]float32{200, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{190, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 10})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 91, Kind: "rl", Origin: [3]float32{200, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{190, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 5000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -626,10 +626,10 @@ func TestItemAnalyzer_WeaponStayNoPositionNoPhase(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "lg", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItLightning, Time: 10})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "lg", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 5000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItLightning, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -645,13 +645,13 @@ func TestItemAnalyzer_WeaponStayBackpackGrantSkipsPad(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
-	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 32, PlayerEnt: 2, Time: 9.8})
-	_ = a.OnEvent(&events.BackpackPickupHintEvent{BackpackEnt: 200, PlayerEnt: 1, Time: 9.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 10})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 5000})
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 32, PlayerEnt: 2, TimeMs: 9800})
+	_ = a.OnEvent(&events.BackpackPickupHintEvent{BackpackEnt: 200, PlayerEnt: 1, TimeMs: 9900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -670,12 +670,12 @@ func TestItemAnalyzer_WeaponStayPendingHintSkipsSynthesis(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 90, PlayerEnt: 1, Time: 9.95})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 10})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 5000})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 90, PlayerEnt: 1, TimeMs: 9950})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -690,11 +690,11 @@ func TestItemAnalyzer_NoWeaponStaySynthesisInDmm1(t *testing.T) {
 	a, ctx := newTestItemAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\1"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 10})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\1"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 90, Kind: "rl", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 5000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)

@@ -59,7 +59,7 @@ func (a *MessagesAnalyzer) handlePrint(e *events.PrintEvent) error {
 	// Level 3 is PRINT_CHAT (mm1/mm2 messages)
 	if e.Level == events.PrintChat {
 		// Parse chat message format: "name: message" or "(team) name: message"
-		event := a.parseChatMessage(msg, e.Time)
+		event := a.parseChatMessage(msg, events.Sec(e.TimeMs))
 		if event != nil && !a.seenChat(event) {
 			a.appendEvent(event)
 		}
@@ -68,7 +68,7 @@ func (a *MessagesAnalyzer) handlePrint(e *events.PrintEvent) error {
 
 	// Try to parse as frag (levels 1-2 are typically obituaries)
 	if e.Level <= 2 {
-		frag := a.parseObituarySimple(msg, e.Time)
+		frag := a.parseObituarySimple(msg, events.Sec(e.TimeMs))
 		if frag != nil {
 			a.appendEvent(frag)
 		}

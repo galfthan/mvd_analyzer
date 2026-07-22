@@ -134,7 +134,7 @@ func (a *DamageAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(e.Time)
+		a.timing.OnIntermission(events.Sec(e.TimeMs))
 	case *events.StuffTextEvent:
 		// Serverinfo capture for the bounded arithmetic (teamplay,
 		// k_midair/k_instagib/k_dmgfrags) — same sources as MetadataAnalyzer.
@@ -169,7 +169,7 @@ func (a *DamageAnalyzer) OnEvent(event events.Event) error {
 				// as the frame's overkill signal for the bounded arithmetic.
 				if e.Value <= 0 {
 					a.deaths[e.PlayerNum] = append(a.deaths[e.PlayerNum],
-						deathMarker{tMs: msTime(e.Time), value: e.Value})
+						deathMarker{tMs: e.TimeMs, value: e.Value})
 				}
 			}
 		case events.StatArmor:
@@ -191,7 +191,7 @@ func (a *DamageAnalyzer) OnEvent(event events.Event) error {
 			damage:       e.Damage,
 			deathType:    e.DeathType,
 			isSplash:     e.IsSplash,
-			tMs:          msTime(e.Time),
+			tMs:          e.TimeMs,
 			victimItem:   a.items[e.Victim],
 			victimHealth: v.health,
 			victimArmor:  v.armor,

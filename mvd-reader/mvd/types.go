@@ -207,12 +207,10 @@ type DemoMessage struct {
 	// TimeMs is the canonical cumulative demo time in integer milliseconds.
 	// MVD wire format encodes time as 1-byte ms deltas; we accumulate them as
 	// int32 to keep the value exact and avoid float-precision drift that
-	// previously broke spawn/death boundary comparisons in the analyzer.
+	// previously broke spawn/death boundary comparisons in the analyzer. This
+	// is the only demo-time representation the pipeline carries; float seconds
+	// is a presentation-edge concern (events.Sec / Decoder.CurrentTime).
 	TimeMs int32
-	// Time is the same value derived as float64 seconds, for non-boundary
-	// arithmetic where seconds ergonomics are nicer. Persistence and exact
-	// comparisons should use TimeMs instead.
-	Time float64
 }
 
 // PlayerInfo represents player metadata
@@ -238,6 +236,10 @@ type ServerData struct {
 	MVD1Extensions    uint32
 	ServerCount       int
 	GameDir           string
+	// ServerTime is the id1 svc_serverdata level time in float seconds,
+	// exactly as it comes off the wire (a native float field of the
+	// protocol). It is the one deliberately-retained wire-float time; every
+	// other demo-time value in the pipeline is integer milliseconds.
 	ServerTime        float32
 	LevelName         string
 	MapFile           string // BSP filename from model list (e.g., "maps/dm2.bsp")

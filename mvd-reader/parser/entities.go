@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -70,11 +69,11 @@ type ItemSpawnEvent struct {
 	EntNum int
 	Kind   string // "ra","ya","ga","mh","h25","h15","rl","lg",...,"quad","pent","ring","suit","shells","nails","rockets","cells"
 	Origin [3]float32
-	Time   float64
+	TimeMs int32
 }
 
 func (e *ItemSpawnEvent) EventType() EventType { return EventItemSpawn }
-func (e *ItemSpawnEvent) EventTime() float64   { return e.Time }
+func (e *ItemSpawnEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // ItemStateEvent fires on every visibility transition of a tracked item
 // entity. Taken=true means the item became invisible (picked up);
@@ -94,11 +93,11 @@ type ItemStateEvent struct {
 	EntNum int
 	Kind   string
 	Taken  bool
-	Time   float64
+	TimeMs int32
 }
 
 func (e *ItemStateEvent) EventType() EventType { return EventItemState }
-func (e *ItemStateEvent) EventTime() float64   { return e.Time }
+func (e *ItemStateEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // MoverSpawnEvent fires once per inline brush-model entity — an entity
 // whose model is a "*N" submodel of the map BSP (func_plat, func_door,
@@ -115,12 +114,11 @@ type MoverSpawnEvent struct {
 	Model    string // inline model path from the precache list: "*1", "*2", ...
 	SubModel int    // N — index into the map BSP's submodel (dmodel) array
 	Origin   [3]float32
-	Time     float64
 	TimeMs   int32
 }
 
 func (e *MoverSpawnEvent) EventType() EventType { return EventMoverSpawn }
-func (e *MoverSpawnEvent) EventTime() float64   { return e.Time }
+func (e *MoverSpawnEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // MoverStateEvent fires on every wire-state change of a tracked mover:
 // its origin moved (the lift/door/train travelling — MVD deltas only
@@ -132,12 +130,11 @@ type MoverStateEvent struct {
 	EntNum  int
 	Origin  [3]float32
 	Visible bool
-	Time    float64
 	TimeMs  int32 // wire-native demo ms, same clock as PlayerPositionEvent.TimeMs
 }
 
 func (e *MoverStateEvent) EventType() EventType { return EventMoverState }
-func (e *MoverStateEvent) EventTime() float64   { return e.Time }
+func (e *MoverStateEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // ProjectileSpawnEvent fires the first frame a slow-projectile entity —
 // a rocket (`progs/missile.mdl`) or grenade (`progs/grenade.mdl`) — is
@@ -150,12 +147,11 @@ type ProjectileSpawnEvent struct {
 	EntNum int
 	Kind   string // "rl" (rocket) | "gl" (grenade)
 	Origin [3]float32
-	Time   float64
 	TimeMs int32
 }
 
 func (e *ProjectileSpawnEvent) EventType() EventType { return EventProjectileSpawn }
-func (e *ProjectileSpawnEvent) EventTime() float64   { return e.Time }
+func (e *ProjectileSpawnEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // ProjectileDespawnEvent fires when a tracked projectile entity leaves the
 // wire — removed on impact (T_MissileTouch → explosion + radius damage) or
@@ -167,12 +163,11 @@ type ProjectileDespawnEvent struct {
 	EntNum int
 	Kind   string
 	Origin [3]float32
-	Time   float64
 	TimeMs int32
 }
 
 func (e *ProjectileDespawnEvent) EventType() EventType { return EventProjectileDespawn }
-func (e *ProjectileDespawnEvent) EventTime() float64   { return e.Time }
+func (e *ProjectileDespawnEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // modelPathToKind maps standard Quake 1 item model paths to the compact
 // kind strings we surface in the Result schema. Unrecognised paths
@@ -279,13 +274,6 @@ func classifyMover(modelPath string) (int, bool) {
 	return n, true
 }
 
-// wireMs converts a float demo time (seconds) back to the wire-native
-// integer milliseconds it was decoded from. Lossless: the decoder
-// derives Time as TimeMs/1000.
-func wireMs(t float64) int32 {
-	return int32(math.Round(t * 1000))
-}
-
 // resolveModel returns the model path for a modelindex from the
 // parser's model list, empty string if the index is out of range or
 // the model is the null model (index 0).
@@ -298,7 +286,7 @@ func (p *Parser) resolveModel(modelIndex int) string {
 
 // parseSpawnBaseline decodes svc_spawnbaseline (2-byte entnum +
 // baseline body). Mirrors ezquake CL_ParseBaseline at cl_parse.c:1817.
-func (p *Parser) parseSpawnBaseline(r *mvd.BufferReader, time float64, floatCoords bool) error {
+func (p *Parser) parseSpawnBaseline(r *mvd.BufferReader, timeMs int32, floatCoords bool) error {
 	ent, err := r.ReadUint16()
 	if err != nil {
 		return err
@@ -307,7 +295,7 @@ func (p *Parser) parseSpawnBaseline(r *mvd.BufferReader, time float64, floatCoor
 	if err != nil {
 		return err
 	}
-	return p.registerBaseline(int(ent), state, time)
+	return p.registerBaseline(int(ent), state, timeMs)
 }
 
 // readBaselineBody decodes the fixed baseline layout — model(1) +
@@ -364,7 +352,7 @@ func readBaselineBody(r *mvd.BufferReader, floatCoords bool) (*EntityState, erro
 // with a 2-byte delta flag word and uses the same wire encoding as a
 // packetentities delta. The entity number comes out of the delta's
 // low 9 bits (plus U_FTE_ENTITYDBL extensions).
-func (p *Parser) parseSpawnBaseline2(r *mvd.BufferReader, time float64, floatCoords bool) error {
+func (p *Parser) parseSpawnBaseline2(r *mvd.BufferReader, timeMs int32, floatCoords bool) error {
 	word, err := r.ReadUint16()
 	if err != nil {
 		return err
@@ -373,14 +361,14 @@ func (p *Parser) parseSpawnBaseline2(r *mvd.BufferReader, time float64, floatCoo
 	if err != nil {
 		return err
 	}
-	return p.registerBaseline(entNum, state, time)
+	return p.registerBaseline(entNum, state, timeMs)
 }
 
 // registerBaseline stores a baseline, seeds the current-frame state
 // from it (so the item starts "up"), emits ItemSpawnEvent if this is
 // a tracked item kind and MoverSpawnEvent if it is an inline
 // brush-model entity.
-func (p *Parser) registerBaseline(entNum int, state *EntityState, time float64) error {
+func (p *Parser) registerBaseline(entNum int, state *EntityState, timeMs int32) error {
 	if p.baselines == nil {
 		p.baselines = make(map[int]*EntityState)
 	}
@@ -415,7 +403,7 @@ func (p *Parser) registerBaseline(entNum int, state *EntityState, time float64) 
 			EntNum: entNum,
 			Kind:   kind,
 			Origin: state.Origin,
-			Time:   time,
+			TimeMs: timeMs,
 		})
 	}
 	if sub, ok := classifyMover(path); ok {
@@ -426,8 +414,7 @@ func (p *Parser) registerBaseline(entNum int, state *EntityState, time float64) 
 				Model:    path,
 				SubModel: sub,
 				Origin:   state.Origin,
-				Time:     time,
-				TimeMs:   wireMs(time),
+				TimeMs:   timeMs,
 			})
 		}
 		// A resent baseline for a known mover resets its pose; surface
@@ -437,8 +424,7 @@ func (p *Parser) registerBaseline(entNum int, state *EntityState, time float64) 
 				EntNum:  entNum,
 				Origin:  state.Origin,
 				Visible: true,
-				Time:    time,
-				TimeMs:  wireMs(time),
+				TimeMs:  timeMs,
 			})
 		}
 	}
@@ -521,7 +507,7 @@ func (p *Parser) parsePacketEntities(r *mvd.BufferReader, delta, floatCoords boo
 		newFrame[entNum] = state
 	}
 
-	if err := p.diffEntityTransitions(newFrame, p.currentEntities, p.lastEntityPacketTime, p.lastEntityPacketTimeMs); err != nil {
+	if err := p.diffEntityTransitions(newFrame, p.currentEntities, p.lastEntityPacketTimeMs); err != nil {
 		return err
 	}
 	p.currentEntities = newFrame
@@ -746,7 +732,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, fr
 // Also emits ItemSpawnEvent / MoverSpawnEvent for entities that hadn't
 // been classified yet (e.g. baseline arrived before the model list)
 // when we can now resolve the kind.
-func (p *Parser) diffEntityTransitions(newFrame, oldFrame map[int]*EntityState, time float64, timeMs int32) error {
+func (p *Parser) diffEntityTransitions(newFrame, oldFrame map[int]*EntityState, timeMs int32) error {
 	// Union of keys from old + new (tracked entities only). Sort the
 	// entity numbers before emitting so that downstream stateful
 	// consumers (e.g. items.go's layered attribution) see same-frame
@@ -767,13 +753,13 @@ func (p *Parser) diffEntityTransitions(newFrame, oldFrame map[int]*EntityState, 
 	for _, ent := range ents {
 		s := newFrame[ent]
 		o := oldFrame[ent]
-		if err := p.diffItemEntity(ent, s, o, time); err != nil {
+		if err := p.diffItemEntity(ent, s, o, timeMs); err != nil {
 			return err
 		}
-		if err := p.diffMoverEntity(ent, s, o, time, timeMs); err != nil {
+		if err := p.diffMoverEntity(ent, s, o, timeMs); err != nil {
 			return err
 		}
-		if err := p.diffProjectileEntity(ent, s, o, time, timeMs); err != nil {
+		if err := p.diffProjectileEntity(ent, s, o, timeMs); err != nil {
 			return err
 		}
 	}
@@ -785,7 +771,7 @@ func (p *Parser) diffEntityTransitions(newFrame, oldFrame map[int]*EntityState, 
 // the wire (impact / timeout). Unlike items and movers — whose entity
 // numbers are stable — projectile entnums are recycled, so the per-ent
 // classification is cleared on despawn and re-derived on the next spawn.
-func (p *Parser) diffProjectileEntity(ent int, s, o *EntityState, time float64, timeMs int32) error {
+func (p *Parser) diffProjectileEntity(ent int, s, o *EntityState, timeMs int32) error {
 	if p.spawnedProjectiles == nil {
 		p.spawnedProjectiles = make(map[int]string)
 	}
@@ -806,7 +792,7 @@ func (p *Parser) diffProjectileEntity(ent int, s, o *EntityState, time float64, 
 			return nil
 		}
 		p.spawnedProjectiles[ent] = curKind
-		return p.emit(&ProjectileSpawnEvent{EntNum: ent, Kind: curKind, Origin: s.Origin, Time: time, TimeMs: timeMs})
+		return p.emit(&ProjectileSpawnEvent{EntNum: ent, Kind: curKind, Origin: s.Origin, TimeMs: timeMs})
 	}
 
 	if curKind == tracked {
@@ -821,12 +807,12 @@ func (p *Parser) diffProjectileEntity(ent int, s, o *EntityState, time float64, 
 		origin = o.Origin
 	}
 	delete(p.spawnedProjectiles, ent)
-	if err := p.emit(&ProjectileDespawnEvent{EntNum: ent, Kind: tracked, Origin: origin, Time: time, TimeMs: timeMs}); err != nil {
+	if err := p.emit(&ProjectileDespawnEvent{EntNum: ent, Kind: tracked, Origin: origin, TimeMs: timeMs}); err != nil {
 		return err
 	}
 	if curKind != "" {
 		p.spawnedProjectiles[ent] = curKind
-		return p.emit(&ProjectileSpawnEvent{EntNum: ent, Kind: curKind, Origin: s.Origin, Time: time, TimeMs: timeMs})
+		return p.emit(&ProjectileSpawnEvent{EntNum: ent, Kind: curKind, Origin: s.Origin, TimeMs: timeMs})
 	}
 	return nil
 }
@@ -835,7 +821,7 @@ func (p *Parser) diffProjectileEntity(ent int, s, o *EntityState, time float64, 
 // a frame diff. Resolve current kind preferring whatever state exists
 // now, so baselines that landed before the model list still get an
 // ItemSpawnEvent once we can name the model.
-func (p *Parser) diffItemEntity(ent int, s, o *EntityState, time float64) error {
+func (p *Parser) diffItemEntity(ent int, s, o *EntityState, timeMs int32) error {
 	kind := p.spawnedItems[ent]
 	if kind == "" {
 		src := s
@@ -855,7 +841,7 @@ func (p *Parser) diffItemEntity(ent int, s, o *EntityState, time float64) error 
 						EntNum: ent,
 						Kind:   kind,
 						Origin: origin,
-						Time:   time,
+						TimeMs: timeMs,
 					}); err != nil {
 						return err
 					}
@@ -876,7 +862,7 @@ func (p *Parser) diffItemEntity(ent int, s, o *EntityState, time float64) error 
 		EntNum: ent,
 		Kind:   kind,
 		Taken:  !newVisible,
-		Time:   time,
+		TimeMs: timeMs,
 	})
 }
 
@@ -885,7 +871,7 @@ func (p *Parser) diffItemEntity(ent int, s, o *EntityState, time float64) error 
 // changes — a travelling lift re-sends its origin every frame it
 // moves, and the analyzer's pose timeline is exactly those changes
 // (hold-last between them, see MoverStateEvent).
-func (p *Parser) diffMoverEntity(ent int, s, o *EntityState, time float64, timeMs int32) error {
+func (p *Parser) diffMoverEntity(ent int, s, o *EntityState, timeMs int32) error {
 	if _, seenMover := p.spawnedMovers[ent]; !seenMover {
 		// Late classification: a mover whose baseline arrived before
 		// the model list gets its spawn here, same as items.
@@ -911,7 +897,6 @@ func (p *Parser) diffMoverEntity(ent int, s, o *EntityState, time float64, timeM
 			Model:    path,
 			SubModel: sub,
 			Origin:   origin,
-			Time:     time,
 			TimeMs:   timeMs,
 		}); err != nil {
 			return err
@@ -934,7 +919,6 @@ func (p *Parser) diffMoverEntity(ent int, s, o *EntityState, time float64, timeM
 		EntNum:  ent,
 		Origin:  origin,
 		Visible: newVisible,
-		Time:    time,
 		TimeMs:  timeMs,
 	})
 }

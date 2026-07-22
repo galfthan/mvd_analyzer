@@ -22,8 +22,8 @@ func TestBackpackAnalyzer_RLHintEmitsDrop(t *testing.T) {
 	a, ctx := newTestBackpackAnalyzer()
 	ctx.Players[4] = &events.PlayerInfo{Slot: 4, Name: "ace", Team: "red"}
 
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 4, Origin: [3]float32{200, 0, 0}, Time: 29.9})
-	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 142, ItemFlags: 32, PlayerEnt: 5, Time: 30})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 4, Origin: [3]float32{200, 0, 0}, TimeMs: 29900})
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 142, ItemFlags: 32, PlayerEnt: 5, TimeMs: 30000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -52,7 +52,7 @@ func TestBackpackAnalyzer_RLHintEmitsDrop(t *testing.T) {
 func TestBackpackAnalyzer_LGHintEmitsDrop(t *testing.T) {
 	a, ctx := newTestBackpackAnalyzer()
 	ctx.Players[3] = &events.PlayerInfo{Slot: 3, Name: "lgdropper"}
-	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 64, PlayerEnt: 4, Time: 5})
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 64, PlayerEnt: 4, TimeMs: 5000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -70,8 +70,8 @@ func TestBackpackAnalyzer_EntityStateEventsIgnored(t *testing.T) {
 	a, ctx := newTestBackpackAnalyzer()
 	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "p"}
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "backpack", Origin: [3]float32{0, 0, 0}, Time: 10})
-	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 50, Kind: "backpack", Taken: true, Time: 11})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 50, Kind: "backpack", Origin: [3]float32{0, 0, 0}, TimeMs: 10000})
+	_ = a.OnEvent(&events.ItemStateEvent{EntNum: 50, Kind: "backpack", Taken: true, TimeMs: 11000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -89,7 +89,7 @@ func TestBackpackAnalyzer_UnrecognisedFlagsDropped(t *testing.T) {
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "x"}
 
 	for _, flags := range []int{0, 32 | 64, 1, 4} {
-		_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: flags, PlayerEnt: 1, Time: 1})
+		_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: flags, PlayerEnt: 1, TimeMs: 1000})
 	}
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -108,7 +108,7 @@ func TestBackpackAnalyzer_PreMatchIgnored(t *testing.T) {
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 	// matchStarted intentionally false.
 
-	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: 32, PlayerEnt: 1, Time: 1})
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: 32, PlayerEnt: 1, TimeMs: 1000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -124,7 +124,7 @@ func TestBackpackAnalyzer_UnknownSlotSkipped(t *testing.T) {
 	a, _ := newTestBackpackAnalyzer()
 
 	// PlayerEnt=10 -> slot=9, but ctx.Players[9] is nil.
-	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: 32, PlayerEnt: 10, Time: 1})
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 1, ItemFlags: 32, PlayerEnt: 10, TimeMs: 1000})
 	r := &Result{}
 	_ = a.Finalize(r)
 	out := r.Backpacks
@@ -141,8 +141,8 @@ func TestBackpackAnalyzer_SortedByTime(t *testing.T) {
 	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "b"}
 
 	// Submit out of order: t=20 first, then t=10.
-	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 10, ItemFlags: 32, PlayerEnt: 1, Time: 20})
-	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 20, ItemFlags: 64, PlayerEnt: 2, Time: 10})
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 10, ItemFlags: 32, PlayerEnt: 1, TimeMs: 20000})
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 20, ItemFlags: 64, PlayerEnt: 2, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)

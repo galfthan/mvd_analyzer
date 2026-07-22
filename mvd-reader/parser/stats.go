@@ -9,21 +9,21 @@ type StatUpdateEvent struct {
 	PlayerNum int
 	StatIndex int
 	Value     int
-	Time      float64
+	TimeMs    int32
 }
 
 func (e *StatUpdateEvent) EventType() EventType { return EventStatUpdate }
-func (e *StatUpdateEvent) EventTime() float64   { return e.Time }
+func (e *StatUpdateEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // FragUpdateEvent is emitted when a player's frag count changes
 type FragUpdateEvent struct {
 	PlayerNum int
 	Frags     int
-	Time      float64
+	TimeMs    int32
 }
 
 func (e *FragUpdateEvent) EventType() EventType { return EventFragUpdate }
-func (e *FragUpdateEvent) EventTime() float64   { return e.Time }
+func (e *FragUpdateEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // DamageEvent is emitted when damage is dealt (from hidden messages)
 type DamageEvent struct {
@@ -32,21 +32,21 @@ type DamageEvent struct {
 	Damage    int  // Amount of damage dealt
 	DeathType int  // Weapon/death type (DtRL, DtSG, etc.)
 	IsSplash  bool // True if splash damage
-	Time      float64
+	TimeMs    int32
 }
 
 func (e *DamageEvent) EventType() EventType { return EventDamage }
-func (e *DamageEvent) EventTime() float64   { return e.Time }
+func (e *DamageEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // DemoInfoEvent is emitted when embedded JSON stats are found
 type DemoInfoEvent struct {
 	BlockNum int    // Block number for multi-block JSON
 	Content  []byte // JSON content (may be partial)
-	Time     float64
+	TimeMs   int32
 }
 
 func (e *DemoInfoEvent) EventType() EventType { return EventDemoInfo }
-func (e *DemoInfoEvent) EventTime() float64   { return e.Time }
+func (e *DemoInfoEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // DemoStartTimestampEvent carries the wall-clock time the server opened the
 // MVD file (mvdhidden block 0x000B). UnixMs is Unix epoch milliseconds; it is
@@ -61,12 +61,12 @@ func (e *DemoInfoEvent) EventTime() float64   { return e.Time }
 // 11701 — those demos also carry a correct `epoch` cvar). Consumers that
 // treat UnixMs as a wall clock should range-check it before trusting it.
 type DemoStartTimestampEvent struct {
-	UnixMs int64   // Unix epoch milliseconds at demo open (wall clock)
-	Time   float64 // demo-relative time of the block (≈ 0)
+	UnixMs int64 // Unix epoch milliseconds at demo open (wall clock)
+	TimeMs int32 // demo-relative time of the block (≈ 0)
 }
 
 func (e *DemoStartTimestampEvent) EventType() EventType { return EventDemoStartTimestamp }
-func (e *DemoStartTimestampEvent) EventTime() float64   { return e.Time }
+func (e *DemoStartTimestampEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // PausedDurationEvent carries one mvdhidden_paused_duration sample (0x000A):
 // the real wall-clock milliseconds that elapsed across a single demo idle frame
@@ -83,12 +83,12 @@ func (e *DemoStartTimestampEvent) EventTime() float64   { return e.Time }
 // dem_multiple payload is a bare type_id + byte), so the parser decodes it via a
 // dedicated path rather than the normal length-prefixed block loop.
 type PausedDurationEvent struct {
-	DurationMs int     // real wall-clock ms elapsed during this paused idle frame (0–255)
-	Time       float64 // demo-relative (game) time of the block; frozen across a pause
+	DurationMs int   // real wall-clock ms elapsed during this paused idle frame (0–255)
+	TimeMs     int32 // demo-relative (game) time of the block; frozen across a pause
 }
 
 func (e *PausedDurationEvent) EventType() EventType { return EventPausedDuration }
-func (e *PausedDurationEvent) EventTime() float64   { return e.Time }
+func (e *PausedDurationEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // DeathEvent is emitted when a player transitions from alive to dead.
 // Two protocol-level signals feed this:
@@ -105,17 +105,16 @@ func (e *PausedDurationEvent) EventTime() float64   { return e.Time }
 // which signal fired first. Obituary parsing for killer / weapon
 // attribution remains a separate concern in analytics.
 //
-// TimeMs is the canonical wire-native time in integer milliseconds. Use it
-// for boundary comparisons (analyzer persistence layer); Time is the
-// derived float64 seconds view.
+// TimeMs is the canonical wire-native time in integer milliseconds; it is the
+// only demo-time representation the event carries (use events.Sec for a
+// human-readable seconds view).
 type DeathEvent struct {
 	PlayerNum int
-	Time      float64
 	TimeMs    int32
 }
 
 func (e *DeathEvent) EventType() EventType { return EventDeath }
-func (e *DeathEvent) EventTime() float64   { return e.Time }
+func (e *DeathEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // SpawnEvent is emitted when a player transitions from dead to alive —
 // either a respawn after death, or a first-spawn when a player joins
@@ -129,15 +128,14 @@ func (e *DeathEvent) EventTime() float64   { return e.Time }
 // TimeMs is the canonical wire-native time in integer milliseconds.
 type SpawnEvent struct {
 	PlayerNum int
-	Time      float64
 	TimeMs    int32
 }
 
 func (e *SpawnEvent) EventType() EventType { return EventSpawn }
-func (e *SpawnEvent) EventTime() float64   { return e.Time }
+func (e *SpawnEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // parseUpdateStat parses svc_updatestat message (byte value)
-func (p *Parser) parseUpdateStat(r *mvd.BufferReader, time float64, timeMs int32, playerNum int) error {
+func (p *Parser) parseUpdateStat(r *mvd.BufferReader, timeMs int32, playerNum int) error {
 	statIndex, err := r.ReadByte()
 	if err != nil {
 		return err
@@ -148,11 +146,11 @@ func (p *Parser) parseUpdateStat(r *mvd.BufferReader, time float64, timeMs int32
 		return err
 	}
 
-	return p.updateStat(playerNum, int(statIndex), int(value), time, timeMs)
+	return p.updateStat(playerNum, int(statIndex), int(value), timeMs)
 }
 
 // parseUpdateStatLong parses svc_updatestatlong message (long value)
-func (p *Parser) parseUpdateStatLong(r *mvd.BufferReader, time float64, timeMs int32, playerNum int) error {
+func (p *Parser) parseUpdateStatLong(r *mvd.BufferReader, timeMs int32, playerNum int) error {
 	statIndex, err := r.ReadByte()
 	if err != nil {
 		return err
@@ -163,11 +161,11 @@ func (p *Parser) parseUpdateStatLong(r *mvd.BufferReader, time float64, timeMs i
 		return err
 	}
 
-	return p.updateStat(playerNum, int(statIndex), int(value), time, timeMs)
+	return p.updateStat(playerNum, int(statIndex), int(value), timeMs)
 }
 
 // parseUpdateFrags parses svc_updatefrags message
-func (p *Parser) parseUpdateFrags(r *mvd.BufferReader, time float64) error {
+func (p *Parser) parseUpdateFrags(r *mvd.BufferReader, timeMs int32) error {
 	playerNum, err := r.ReadByte()
 	if err != nil {
 		return err
@@ -190,12 +188,12 @@ func (p *Parser) parseUpdateFrags(r *mvd.BufferReader, time float64) error {
 	return p.emit(&FragUpdateEvent{
 		PlayerNum: int(playerNum),
 		Frags:     int(frags),
-		Time:      time,
+		TimeMs:    timeMs,
 	})
 }
 
 // updateStat updates player stats and emits event
-func (p *Parser) updateStat(playerNum, statIndex, value int, time float64, timeMs int32) error {
+func (p *Parser) updateStat(playerNum, statIndex, value int, timeMs int32) error {
 	// Health-transition detection for DeathEvent / SpawnEvent — captured
 	// from the pre-mutation value so the transition check below is driven
 	// by the actual 100→-20 style edge, not the post-mutation state.
@@ -249,7 +247,7 @@ func (p *Parser) updateStat(playerNum, statIndex, value int, time float64, timeM
 		PlayerNum: playerNum,
 		StatIndex: statIndex,
 		Value:     value,
-		Time:      time,
+		TimeMs:    timeMs,
 	}); err != nil {
 		return err
 	}
@@ -262,10 +260,10 @@ func (p *Parser) updateStat(playerNum, statIndex, value int, time float64, timeM
 	// can fire for the same transition without producing a duplicate.
 	if isHealthUpdate {
 		if healthOld > 0 && healthNew <= 0 {
-			return p.maybeEmitDeath(playerNum, time, timeMs)
+			return p.maybeEmitDeath(playerNum, timeMs)
 		}
 		if healthOld <= 0 && healthNew > 0 {
-			return p.maybeEmitSpawn(playerNum, time, timeMs)
+			return p.maybeEmitSpawn(playerNum, timeMs)
 		}
 	}
 	return nil
@@ -275,7 +273,7 @@ func (p *Parser) updateStat(playerNum, statIndex, value int, time float64, timeM
 // last-known dead/alive state is "alive" or unknown. Deduplicates across
 // the two transition sources (StatHealth edges, DF_DEAD bit in
 // svc_playerinfo) so consumers see one event per real transition.
-func (p *Parser) maybeEmitDeath(playerNum int, time float64, timeMs int32) error {
+func (p *Parser) maybeEmitDeath(playerNum int, timeMs int32) error {
 	if playerNum < 0 || playerNum >= mvd.MaxClients {
 		return nil
 	}
@@ -284,11 +282,11 @@ func (p *Parser) maybeEmitDeath(playerNum int, time float64, timeMs int32) error
 	}
 	p.playerDeadKnown[playerNum] = true
 	p.playerDead[playerNum] = true
-	return p.emit(&DeathEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
+	return p.emit(&DeathEvent{PlayerNum: playerNum, TimeMs: timeMs})
 }
 
 // maybeEmitSpawn mirrors maybeEmitDeath for the alive transition.
-func (p *Parser) maybeEmitSpawn(playerNum int, time float64, timeMs int32) error {
+func (p *Parser) maybeEmitSpawn(playerNum int, timeMs int32) error {
 	if playerNum < 0 || playerNum >= mvd.MaxClients {
 		return nil
 	}
@@ -297,7 +295,7 @@ func (p *Parser) maybeEmitSpawn(playerNum int, time float64, timeMs int32) error
 	}
 	p.playerDeadKnown[playerNum] = true
 	p.playerDead[playerNum] = false
-	return p.emit(&SpawnEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
+	return p.emit(&SpawnEvent{PlayerNum: playerNum, TimeMs: timeMs})
 }
 
 // forceEmitDeath emits a DeathEvent unconditionally and updates the
@@ -328,11 +326,11 @@ func (p *Parser) maybeEmitSpawn(playerNum int, time float64, timeMs int32) error
 // becomes observable on the wire (the deflection case), no
 // SpawnEvent fires and the death sits unpaired — that's a faithful
 // reflection of what KTX's own scoreboard reports.
-func (p *Parser) forceEmitDeath(playerNum int, time float64, timeMs int32) error {
+func (p *Parser) forceEmitDeath(playerNum int, timeMs int32) error {
 	if playerNum < 0 || playerNum >= mvd.MaxClients {
 		return nil
 	}
 	p.playerDeadKnown[playerNum] = true
 	p.playerDead[playerNum] = true
-	return p.emit(&DeathEvent{PlayerNum: playerNum, Time: time, TimeMs: timeMs})
+	return p.emit(&DeathEvent{PlayerNum: playerNum, TimeMs: timeMs})
 }

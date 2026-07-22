@@ -80,7 +80,7 @@ func (a *FragAnalyzer) OnEvent(event events.Event) error {
 		a.timing.OnPrint(e)
 		a.handleObituaryPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(e.Time)
+		a.timing.OnIntermission(events.Sec(e.TimeMs))
 	case *events.DeathEvent:
 		// Count authoritative deaths during the match. KTX bumps
 		// targ->deaths for every death (ktx/src/client.c:5124), but
@@ -115,7 +115,7 @@ func (a *FragAnalyzer) handleObituaryPrint(e *events.PrintEvent) {
 		return
 	}
 
-	frag := a.parseObituary(e.Message, e.Time)
+	frag := a.parseObituary(e.Message, events.Sec(e.TimeMs))
 	if frag == nil {
 		return
 	}

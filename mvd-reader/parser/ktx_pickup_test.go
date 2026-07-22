@@ -13,7 +13,7 @@ func TestTryEmitItemPickupHint_Armor(t *testing.T) {
 		return nil
 	})
 
-	if err := p.tryEmitItemPickupHint("//ktx took 17 20 5\n", 12.5); err != nil {
+	if err := p.tryEmitItemPickupHint("//ktx took 17 20 5\n", 12500); err != nil {
 		t.Fatalf("tryEmitItemPickupHint: %v", err)
 	}
 	if captured == nil {
@@ -22,8 +22,8 @@ func TestTryEmitItemPickupHint_Armor(t *testing.T) {
 	if captured.ItemEnt != 17 || captured.RespawnSec != 20 || captured.PlayerEnt != 5 {
 		t.Errorf("hint = %+v, want {17, 20, 5}", captured)
 	}
-	if captured.Time != 12.5 {
-		t.Errorf("Time = %f, want 12.5", captured.Time)
+	if captured.TimeMs != 12500 {
+		t.Errorf("TimeMs = %d, want 12500", captured.TimeMs)
 	}
 }
 
@@ -40,7 +40,7 @@ func TestTryEmitItemPickupHint_MegahealthRespawnZero(t *testing.T) {
 
 	// MH passes respawn_sec = 0 at ktx/src/items.c:355 — the 20 s
 	// timer doesn't arm until rot completes.
-	if err := p.tryEmitItemPickupHint("//ktx took 31 0 3\n", 45.0); err != nil {
+	if err := p.tryEmitItemPickupHint("//ktx took 31 0 3\n", 45000); err != nil {
 		t.Fatalf("tryEmitItemPickupHint: %v", err)
 	}
 	if captured == nil || captured.RespawnSec != 0 {
@@ -123,7 +123,7 @@ func TestTryEmitBackpackPickupHint_RL(t *testing.T) {
 		return nil
 	})
 
-	if err := p.tryEmitBackpackPickupHint("//ktx bp 142 3\n", 7.25); err != nil {
+	if err := p.tryEmitBackpackPickupHint("//ktx bp 142 3\n", 7250); err != nil {
 		t.Fatalf("tryEmitBackpackPickupHint: %v", err)
 	}
 	if captured == nil {
@@ -132,8 +132,8 @@ func TestTryEmitBackpackPickupHint_RL(t *testing.T) {
 	if captured.BackpackEnt != 142 || captured.PlayerEnt != 3 {
 		t.Errorf("hint = %+v, want {142, 3}", captured)
 	}
-	if captured.Time != 7.25 {
-		t.Errorf("Time = %f, want 7.25", captured.Time)
+	if captured.TimeMs != 7250 {
+		t.Errorf("TimeMs = %d, want 7250", captured.TimeMs)
 	}
 }
 

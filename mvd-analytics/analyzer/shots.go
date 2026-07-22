@@ -152,7 +152,7 @@ func (a *ShotsAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(e.Time)
+		a.timing.OnIntermission(events.Sec(e.TimeMs))
 	case *events.PlayerPositionEvent:
 		a.pos[e.PlayerNum] = e.Origin
 	case *events.SoundEvent:
@@ -184,7 +184,7 @@ func (a *ShotsAnalyzer) OnEvent(event events.Event) error {
 					attacker: e.Attacker,
 					victim:   e.Victim,
 					weapon:   w,
-					tMs:      msTime(e.Time),
+					tMs:      e.TimeMs,
 				})
 			}
 		}

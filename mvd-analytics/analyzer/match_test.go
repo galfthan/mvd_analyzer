@@ -19,11 +19,11 @@ func TestMatchAnalyzer_PostMatchFragResetIgnored(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", Time: 5})
-	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 34, Time: 1197})
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match is over\n", Time: 1210})
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 34, TimeMs: 1197000})
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match is over\n", TimeMs: 1210000})
 	// Post-match reconnect: the server re-inits the slot's scoreboard.
-	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 0, Time: 1213})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 0, TimeMs: 1213000})
 
 	var res Result
 	if err := a.Finalize(&res); err != nil {
@@ -50,12 +50,12 @@ func TestMatchAnalyzer_InMatchFragUpdatesApply(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", Time: 5})
-	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 16, Time: 571})
+	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 16, TimeMs: 571000})
 	// Mid-match reconnect: re-init to 0, then the server restores.
-	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 0, Time: 613})
-	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 16, Time: 614})
-	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 17, Time: 629})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 0, TimeMs: 613000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 16, TimeMs: 614000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 17, TimeMs: 629000})
 
 	var res Result
 	if err := a.Finalize(&res); err != nil {

@@ -177,7 +177,7 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 		// svc_intermission is the most reliable end-of-match signal: KTX
 		// fires it on timelimit/fraglimit hit even when there's no matching
 		// bprint string.
-		a.timing.OnIntermission(e.Time)
+		a.timing.OnIntermission(events.Sec(e.TimeMs))
 	case *events.FragUpdateEvent:
 		// Track frag events from frag updates (more reliable than stat updates)
 		a.handleFragUpdate(e)
@@ -270,7 +270,7 @@ func (a *TimelineAnalyzer) handleFragUpdate(e *events.FragUpdateEvent) {
 		// reads 272→10, but by keeping state at 9 the correction gives delta +1).
 		if delta >= -5 && delta <= 5 {
 			a.rawFrags = append(a.rawFrags, fragEvent{
-				Time:      e.Time,
+				Time:      events.Sec(e.TimeMs),
 				PlayerNum: e.PlayerNum,
 				Delta:     delta,
 			})
@@ -299,7 +299,7 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 		// Drop sentinel values so they don't get sampled into buckets.
 		if e.Value <= 250 {
 			state.vitals.health = e.Value
-			state.streams.recordHealth(msTime(e.Time), int16(e.Value))
+			state.streams.recordHealth(e.TimeMs, int16(e.Value))
 		}
 	case events.StatArmor:
 		// Same shape: KTX overwrites armorvalue in pre-match speed-meter
@@ -307,25 +307,25 @@ func (a *TimelineAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) error {
 		// at 200 (RA). Reject anything larger.
 		if e.Value <= 200 {
 			state.vitals.armor = e.Value
-			state.streams.recordArmor(msTime(e.Time), int16(e.Value))
+			state.streams.recordArmor(e.TimeMs, int16(e.Value))
 		}
 	case events.StatItems:
 		state.items = e.Value
 		w, p, at := itemBitsToLoadouts(e.Value)
-		state.streams.recordItemFlags(msTime(e.Time), w, p)
-		state.streams.recordArmorType(msTime(e.Time), at)
+		state.streams.recordItemFlags(e.TimeMs, w, p)
+		state.streams.recordArmorType(e.TimeMs, at)
 	case events.StatShells:
 		state.ammo.shells = e.Value
-		state.streams.recordShells(msTime(e.Time), int16(e.Value))
+		state.streams.recordShells(e.TimeMs, int16(e.Value))
 	case events.StatNails:
 		state.ammo.nails = e.Value
-		state.streams.recordNails(msTime(e.Time), int16(e.Value))
+		state.streams.recordNails(e.TimeMs, int16(e.Value))
 	case events.StatRockets:
 		state.ammo.rockets = e.Value
-		state.streams.recordRockets(msTime(e.Time), int16(e.Value))
+		state.streams.recordRockets(e.TimeMs, int16(e.Value))
 	case events.StatCells:
 		state.ammo.cells = e.Value
-		state.streams.recordCells(msTime(e.Time), int16(e.Value))
+		state.streams.recordCells(e.TimeMs, int16(e.Value))
 	}
 	return nil
 }
@@ -338,7 +338,7 @@ func (a *TimelineAnalyzer) handleDeath(e *events.DeathEvent) {
 		return
 	}
 	state := a.getOrCreatePlayerState(e.PlayerNum)
-	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: e.Time, PlayerNum: e.PlayerNum})
+	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: events.Sec(e.TimeMs), PlayerNum: e.PlayerNum})
 	state.streams.recordDeath(e.TimeMs)
 	state.isDead = true
 }
@@ -351,7 +351,7 @@ func (a *TimelineAnalyzer) handleSpawn(e *events.SpawnEvent) {
 		return
 	}
 	state := a.getOrCreatePlayerState(e.PlayerNum)
-	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: e.Time, PlayerNum: e.PlayerNum})
+	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: events.Sec(e.TimeMs), PlayerNum: e.PlayerNum})
 	state.streams.recordSpawn(e.TimeMs)
 	state.isDead = false
 }

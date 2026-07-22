@@ -30,11 +30,11 @@ type ItemPickupHintEvent struct {
 	ItemEnt    int // server edict of the picked-up item
 	RespawnSec int // nominal respawn timer in seconds; 0 for MH until rot
 	PlayerEnt  int // picking player's edict (slot + 1; edict 0 is world)
-	Time       float64
+	TimeMs     int32
 }
 
 func (e *ItemPickupHintEvent) EventType() EventType { return EventItemPickupHint }
-func (e *ItemPickupHintEvent) EventTime() float64   { return e.Time }
+func (e *ItemPickupHintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // BackpackPickupHintEvent is the typed representation of KTX's
 // `//ktx bp <backpack_ent> <player_ent>` STUFFCMD_DEMOONLY directive
@@ -50,11 +50,11 @@ func (e *ItemPickupHintEvent) EventTime() float64   { return e.Time }
 type BackpackPickupHintEvent struct {
 	BackpackEnt int // server edict of the picked-up backpack
 	PlayerEnt   int // picking player's edict (slot + 1)
-	Time        float64
+	TimeMs      int32
 }
 
 func (e *BackpackPickupHintEvent) EventType() EventType { return EventBackpackPickupHint }
-func (e *BackpackPickupHintEvent) EventTime() float64   { return e.Time }
+func (e *BackpackPickupHintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 const (
 	// ktxDirectivePrefix is the common opener for every KTX
@@ -96,17 +96,17 @@ func parseKtxHintInts(cmd, prefix string, n int) ([]int, bool) {
 // hint matchers, but only when it carries a `//ktx ` directive — the
 // common case (weapon-stat tickers, download hints, fullserverinfo)
 // short-circuits after one prefix check.
-func (p *Parser) tryEmitKtxHints(cmd string, time float64) error {
+func (p *Parser) tryEmitKtxHints(cmd string, timeMs int32) error {
 	if !strings.HasPrefix(cmd, ktxDirectivePrefix) {
 		return nil
 	}
-	if err := p.tryEmitBackpackDropHint(cmd, time); err != nil {
+	if err := p.tryEmitBackpackDropHint(cmd, timeMs); err != nil {
 		return err
 	}
-	if err := p.tryEmitItemPickupHint(cmd, time); err != nil {
+	if err := p.tryEmitItemPickupHint(cmd, timeMs); err != nil {
 		return err
 	}
-	return p.tryEmitBackpackPickupHint(cmd, time)
+	return p.tryEmitBackpackPickupHint(cmd, timeMs)
 }
 
 // tryEmitItemPickupHint scans a stuffcmd payload for `//ktx took`
@@ -114,7 +114,7 @@ func (p *Parser) tryEmitKtxHints(cmd string, time float64) error {
 // silently on malformed input — the StuffTextEvent for the same
 // command has already been emitted by the caller, so dropping a
 // hint event is a soft failure.
-func (p *Parser) tryEmitItemPickupHint(cmd string, time float64) error {
+func (p *Parser) tryEmitItemPickupHint(cmd string, timeMs int32) error {
 	v, ok := parseKtxHintInts(cmd, ktxTookPrefix, 3)
 	if !ok {
 		return nil
@@ -123,14 +123,14 @@ func (p *Parser) tryEmitItemPickupHint(cmd string, time float64) error {
 		ItemEnt:    v[0],
 		RespawnSec: v[1],
 		PlayerEnt:  v[2],
-		Time:       time,
+		TimeMs:     timeMs,
 	})
 }
 
 // tryEmitBackpackPickupHint scans a stuffcmd payload for `//ktx bp`
 // and emits a typed BackpackPickupHintEvent on success. Silently
 // drops malformed input for the same reason as above.
-func (p *Parser) tryEmitBackpackPickupHint(cmd string, time float64) error {
+func (p *Parser) tryEmitBackpackPickupHint(cmd string, timeMs int32) error {
 	v, ok := parseKtxHintInts(cmd, ktxBpPrefix, 2)
 	if !ok {
 		return nil
@@ -138,6 +138,6 @@ func (p *Parser) tryEmitBackpackPickupHint(cmd string, time float64) error {
 	return p.emit(&BackpackPickupHintEvent{
 		BackpackEnt: v[0],
 		PlayerEnt:   v[1],
-		Time:        time,
+		TimeMs:      timeMs,
 	})
 }

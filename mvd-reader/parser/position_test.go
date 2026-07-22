@@ -46,17 +46,17 @@ func TestParsePlayerInfo_CarriesForwardDeltaCompressedAngles(t *testing.T) {
 
 	baseFlags := uint16(mvd.DFOrigin | mvd.DFOriginY | mvd.DFOriginZ | mvd.DFAngles | mvd.DFAnglesY)
 	r := mvd.NewBufferReader(buildPlayerInfoPayloadFull(1, baseFlags, [3]int16{8, 16, 24}, [3]int16{1000, -2000, 0}))
-	if err := p.parsePlayerInfo(r, 1.0, 1000, false); err != nil {
+	if err := p.parsePlayerInfo(r, 1000, false); err != nil {
 		t.Fatalf("parsePlayerInfo initial: %v", err)
 	}
 
 	r = mvd.NewBufferReader(buildPlayerInfoPayloadFull(1, 0, [3]int16{}, [3]int16{}))
-	if err := p.parsePlayerInfo(r, 1.016, 1016, false); err != nil {
+	if err := p.parsePlayerInfo(r, 1016, false); err != nil {
 		t.Fatalf("parsePlayerInfo omitted angles: %v", err)
 	}
 
 	r = mvd.NewBufferReader(buildPlayerInfoPayloadFull(1, mvd.DFAnglesY, [3]int16{}, [3]int16{0, -1900, 0}))
-	if err := p.parsePlayerInfo(r, 1.029, 1029, false); err != nil {
+	if err := p.parsePlayerInfo(r, 1029, false); err != nil {
 		t.Fatalf("parsePlayerInfo partial angle update: %v", err)
 	}
 
@@ -87,7 +87,7 @@ func TestParsePlayerInfo_FirstSeenAliveFiresSpawn(t *testing.T) {
 	})
 
 	r := mvd.NewBufferReader(buildPlayerInfoPayload(3, 0)) // no DF_DEAD
-	if err := p.parsePlayerInfo(r, 1.0, 1000, false); err != nil {
+	if err := p.parsePlayerInfo(r, 1000, false); err != nil {
 		t.Fatalf("parsePlayerInfo: %v", err)
 	}
 	if spawns != 1 || deaths != 0 {
@@ -112,7 +112,7 @@ func TestParsePlayerInfo_FirstSeenDeadDoesNotFireDeath(t *testing.T) {
 	})
 
 	r := mvd.NewBufferReader(buildPlayerInfoPayload(3, mvd.DFDead))
-	if err := p.parsePlayerInfo(r, 1.0, 1000, false); err != nil {
+	if err := p.parsePlayerInfo(r, 1000, false); err != nil {
 		t.Fatalf("parsePlayerInfo (dead): %v", err)
 	}
 	if spawns != 0 || deaths != 0 {
@@ -122,7 +122,7 @@ func TestParsePlayerInfo_FirstSeenDeadDoesNotFireDeath(t *testing.T) {
 	// Subsequent alive sample must produce a SpawnEvent against the
 	// pre-seeded dead state.
 	r = mvd.NewBufferReader(buildPlayerInfoPayload(3, 0))
-	if err := p.parsePlayerInfo(r, 2.0, 2000, false); err != nil {
+	if err := p.parsePlayerInfo(r, 2000, false); err != nil {
 		t.Fatalf("parsePlayerInfo (alive): %v", err)
 	}
 	if spawns != 1 || deaths != 0 {
@@ -152,7 +152,7 @@ func TestParsePlayerInfo_TransitionsFireDeathAndSpawn(t *testing.T) {
 		{0, 1300},                      // dead → alive
 	} {
 		r := mvd.NewBufferReader(buildPlayerInfoPayload(2, frame.flags))
-		if err := p.parsePlayerInfo(r, float64(frame.ms)/1000.0, frame.ms, false); err != nil {
+		if err := p.parsePlayerInfo(r, frame.ms, false); err != nil {
 			t.Fatalf("parsePlayerInfo ms=%d: %v", frame.ms, err)
 		}
 	}
@@ -190,13 +190,13 @@ func TestDeathSpawnDedup_AcrossStatAndPlayerInfoSignals(t *testing.T) {
 
 	// First svc_playerinfo, alive — fires SpawnEvent.
 	r := mvd.NewBufferReader(buildPlayerInfoPayload(0, 0))
-	if err := p.parsePlayerInfo(r, 1.0, 1000, false); err != nil {
+	if err := p.parsePlayerInfo(r, 1000, false); err != nil {
 		t.Fatalf("first playerinfo: %v", err)
 	}
 	// Stat reaches us next; healthOld=0 (default) and healthNew=100
 	// would normally fire a SpawnEvent — but dedup against the prior
 	// playerinfo SpawnEvent means it's a no-op.
-	if err := p.updateStat(0, mvd.StatHealth, 100, 1.1, 1100); err != nil {
+	if err := p.updateStat(0, mvd.StatHealth, 100, 1100); err != nil {
 		t.Fatalf("stat 100: %v", err)
 	}
 	if spawns != 1 || deaths != 0 {
@@ -206,10 +206,10 @@ func TestDeathSpawnDedup_AcrossStatAndPlayerInfoSignals(t *testing.T) {
 	// Player dies: DF_DEAD set in playerinfo first, then health
 	// crosses 0 in a stat update — second signal must be a no-op.
 	r = mvd.NewBufferReader(buildPlayerInfoPayload(0, mvd.DFDead))
-	if err := p.parsePlayerInfo(r, 2.0, 2000, false); err != nil {
+	if err := p.parsePlayerInfo(r, 2000, false); err != nil {
 		t.Fatalf("death playerinfo: %v", err)
 	}
-	if err := p.updateStat(0, mvd.StatHealth, -10, 2.05, 2050); err != nil {
+	if err := p.updateStat(0, mvd.StatHealth, -10, 2050); err != nil {
 		t.Fatalf("stat -10: %v", err)
 	}
 	if deaths != 1 || spawns != 1 {
@@ -218,11 +218,11 @@ func TestDeathSpawnDedup_AcrossStatAndPlayerInfoSignals(t *testing.T) {
 
 	// Respawn: stat fires first this time (0 → 100), then DF_DEAD
 	// clears in playerinfo — dedup again.
-	if err := p.updateStat(0, mvd.StatHealth, 100, 3.0, 3000); err != nil {
+	if err := p.updateStat(0, mvd.StatHealth, 100, 3000); err != nil {
 		t.Fatalf("respawn stat: %v", err)
 	}
 	r = mvd.NewBufferReader(buildPlayerInfoPayload(0, 0))
-	if err := p.parsePlayerInfo(r, 3.01, 3010, false); err != nil {
+	if err := p.parsePlayerInfo(r, 3010, false); err != nil {
 		t.Fatalf("respawn playerinfo: %v", err)
 	}
 	if deaths != 1 || spawns != 2 {

@@ -27,21 +27,20 @@ const (
 // resolved from the parser's svc_soundlist table, or "" if the sound list
 // has not been received yet or SoundNum is out of range.
 //
-// Time is float64 seconds (the ergonomic view); TimeMs is the canonical
-// wire-native value in integer milliseconds — consumers that persist into
-// the result schema or compare against other ms timestamps must use TimeMs.
+// TimeMs is the canonical wire-native demo time in integer milliseconds —
+// the only demo-time representation the event carries (use events.Sec for a
+// human-readable seconds view).
 type SoundEvent struct {
 	Ent      int        // emitting entity (player slot = Ent-1 when a client)
 	Channel  int        // 3-bit channel index (CHAN_WEAPON = 1)
 	SoundNum int        // wire sound index into the soundlist
 	Name     string     // resolved precache path, "" if unknown
 	Origin   [3]float32 // world position the sound played at
-	Time     float64
 	TimeMs   int32
 }
 
 func (e *SoundEvent) EventType() EventType { return EventSound }
-func (e *SoundEvent) EventTime() float64   { return e.Time }
+func (e *SoundEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // parseSound decodes svc_sound. Wire layout
 // (ezquake-source/src/cl_parse.c:1951-1986):
@@ -58,7 +57,7 @@ func (e *SoundEvent) EventTime() float64   { return e.Time }
 // Volume and attenuation are consumed but not retained — no consumer needs
 // them today. They are the candidate fields to surface if one ever wants
 // to separate local (full-volume) from distance-attenuated sounds.
-func (p *Parser) parseSound(r *mvd.BufferReader, time float64, timeMs int32, floatCoords bool) error {
+func (p *Parser) parseSound(r *mvd.BufferReader, timeMs int32, floatCoords bool) error {
 	channel, err := r.ReadUint16()
 	if err != nil {
 		return err
@@ -100,7 +99,6 @@ func (p *Parser) parseSound(r *mvd.BufferReader, time float64, timeMs int32, flo
 		SoundNum: int(soundNum),
 		Name:     p.resolveSound(int(soundNum)),
 		Origin:   origin,
-		Time:     time,
 		TimeMs:   timeMs,
 	})
 }

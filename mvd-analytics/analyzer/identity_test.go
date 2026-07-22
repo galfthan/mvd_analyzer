@@ -9,11 +9,11 @@ import (
 )
 
 // userinfo is a tiny helper for feeding a slot occupancy / name into the
-// identity analyzer at a given time (seconds).
-func userinfo(slot, userid int, name string, t float64) *events.UserInfoEvent {
+// identity analyzer at a given time (milliseconds).
+func userinfo(slot, userid int, name string, tMs int32) *events.UserInfoEvent {
 	return &events.UserInfoEvent{
 		Player: &events.PlayerInfo{Slot: slot, UserID: userid, Name: name},
-		Time:   t,
+		TimeMs: tMs,
 	}
 }
 
@@ -46,9 +46,9 @@ func TestIdentity_ReconnectDifferentSlot_DemoinfoJoin(t *testing.T) {
 		{Name: "biggz", Team: "jah"},
 	}}
 	co := runIdentity(t, di,
-		userinfo(7, 8, "rusti", 5),    // rusti, first half, slot 7
-		userinfo(2, 14, "rusti", 609), // rusti reconnects on slot 2
-		userinfo(7, 15, "Luk", 766),   // slot 7 reused by a phantom
+		userinfo(7, 8, "rusti", 5000),    // rusti, first half, slot 7
+		userinfo(2, 14, "rusti", 609000), // rusti reconnects on slot 2
+		userinfo(7, 15, "Luk", 766000),   // slot 7 reused by a phantom
 	)
 
 	if got := co.SlotIdentityAt(7, 300_000).Name; got != "rusti" {
@@ -78,10 +78,10 @@ func TestIdentity_ReconnectDifferentSlot_DemoinfoJoin(t *testing.T) {
 // for unauthenticated players).
 func TestIdentity_ReconnectByKTXPrint(t *testing.T) {
 	co := runIdentity(t, nil,
-		userinfo(7, 8, "rusti", 5),
-		&events.PrintEvent{Message: "rusti left the game with 16 frags", Time: 605, TargetPlayerNum: -1},
-		userinfo(2, 14, "rusti", 609),
-		&events.PrintEvent{Message: "rusti [jah] rejoins the game with 16 frags", Time: 610, TargetPlayerNum: -1},
+		userinfo(7, 8, "rusti", 5000),
+		&events.PrintEvent{Message: "rusti left the game with 16 frags", TimeMs: 605000, TargetPlayerNum: -1},
+		userinfo(2, 14, "rusti", 609000),
+		&events.PrintEvent{Message: "rusti [jah] rejoins the game with 16 frags", TimeMs: 610000, TargetPlayerNum: -1},
 	)
 	if a, b := identityKeyAt(co, 7, 300_000), identityKeyAt(co, 2, 900_000); a == "" || a != b {
 		t.Errorf("KTX rejoin print should unify rusti's sessions, got %q and %q", a, b)
@@ -92,8 +92,8 @@ func TestIdentity_ReconnectByKTXPrint(t *testing.T) {
 // demoinfo, no auth and no reconnect print (a bare / old demo).
 func TestIdentity_FallbackNameJoin(t *testing.T) {
 	co := runIdentity(t, nil,
-		userinfo(7, 8, "rusti", 5),
-		userinfo(2, 14, "rusti", 609),
+		userinfo(7, 8, "rusti", 5000),
+		userinfo(2, 14, "rusti", 609000),
 	)
 	if a, b := identityKeyAt(co, 7, 100_000), identityKeyAt(co, 2, 900_000); a == "" || a != b {
 		t.Errorf("bare-demo same-name sessions should unify, got %q and %q", a, b)
@@ -106,8 +106,8 @@ func TestIdentity_FallbackNameJoin(t *testing.T) {
 func TestIdentity_RenameSameSlotStaysOneSession(t *testing.T) {
 	di := &result.DemoInfoResult{Players: []result.DemoInfoPlayer{{Name: "newname", Team: "red"}}}
 	co := runIdentity(t, di,
-		userinfo(3, 9, "oldname", 5),
-		userinfo(3, 9, "newname", 200), // rename, same userid
+		userinfo(3, 9, "oldname", 5000),
+		userinfo(3, 9, "newname", 200000), // rename, same userid
 	)
 	if n := len(co.Sessions[3]); n != 1 {
 		t.Fatalf("rename with same userid should stay one session, got %d", n)

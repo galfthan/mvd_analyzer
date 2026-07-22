@@ -25,12 +25,16 @@ func (p *Parser) DiagnosticWarnings() []Warning {
 }
 
 // warn records a diagnostic warning. In non-diagnostic mode this is a no-op.
-func (p *Parser) warn(time float64, typ, format string, args ...interface{}) {
+// timeMs is the canonical wire-native demo time; Warning.Time is the derived
+// float seconds view, kept for the human-readable diagnostic output only
+// (the parser cannot import events.Sec without an import cycle, so the
+// identical conversion is inlined here).
+func (p *Parser) warn(timeMs int32, typ, format string, args ...interface{}) {
 	if !p.diagnosticMode {
 		return
 	}
 	p.warnings = append(p.warnings, Warning{
-		Time:    time,
+		Time:    float64(timeMs) * 0.001,
 		Type:    typ,
 		Message: fmt.Sprintf(format, args...),
 	})

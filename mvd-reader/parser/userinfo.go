@@ -10,14 +10,14 @@ import (
 // UserInfoEvent is emitted when player info is updated
 type UserInfoEvent struct {
 	Player *mvd.PlayerInfo
-	Time   float64
+	TimeMs int32
 }
 
 func (e *UserInfoEvent) EventType() EventType { return EventUserInfo }
-func (e *UserInfoEvent) EventTime() float64   { return e.Time }
+func (e *UserInfoEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // parseUserInfo parses svc_updateuserinfo message
-func (p *Parser) parseUserInfo(r *mvd.BufferReader, time float64) error {
+func (p *Parser) parseUserInfo(r *mvd.BufferReader, timeMs int32) error {
 	// Read player slot
 	slot, err := r.ReadByte()
 	if err != nil {
@@ -54,14 +54,14 @@ func (p *Parser) parseUserInfo(r *mvd.BufferReader, time float64) error {
 	parseUserInfoString(userinfo, player)
 
 	// Emit event
-	return p.emit(&UserInfoEvent{Player: player, Time: time})
+	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs})
 }
 
 // parseSetInfo parses svc_setinfo (single key/value update for a player).
 // This is how name/team/skin changes are propagated mid-game; without
 // handling it the parser keeps the initial userinfo and chat / timeline
 // data fall out of sync with the player's current name.
-func (p *Parser) parseSetInfo(r *mvd.BufferReader, time float64) error {
+func (p *Parser) parseSetInfo(r *mvd.BufferReader, timeMs int32) error {
 	slot, err := r.ReadByte()
 	if err != nil {
 		return err
@@ -107,7 +107,7 @@ func (p *Parser) parseSetInfo(r *mvd.BufferReader, time float64) error {
 		return nil
 	}
 
-	return p.emit(&UserInfoEvent{Player: player, Time: time})
+	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs})
 }
 
 // parseUserInfoString parses a backslash-delimited userinfo string

@@ -163,7 +163,7 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(e.Time)
+		a.timing.OnIntermission(events.Sec(e.TimeMs))
 	case *events.StuffTextEvent:
 		a.weaponStay.OnStuffText(e)
 	case *events.ServerInfoEvent:
@@ -177,7 +177,7 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 		}
 	case *events.PlayerPositionEvent:
 		if a.weaponStay.WeaponStay() {
-			a.pos.Record(e.PlayerNum, e.Origin, e.Time)
+			a.pos.Record(e.PlayerNum, e.Origin, events.Sec(e.TimeMs))
 		}
 	case *events.ItemSpawnEvent:
 		if _, ok := weaponBit[e.Kind]; ok {
@@ -191,11 +191,11 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	case *events.BackpackPickupHintEvent:
 		a.handlePackPickup(e)
 	case *events.SpawnEvent:
-		a.flips.OnSpawn(e.PlayerNum, e.Time)
+		a.flips.OnSpawn(e.PlayerNum, events.Sec(e.TimeMs))
 	case *events.DeathEvent:
-		a.flips.OnDeath(e.PlayerNum, e.Time)
+		a.flips.OnDeath(e.PlayerNum, events.Sec(e.TimeMs))
 		if a.timing.Started && !a.timing.Ended {
-			a.deaths = append(a.deaths, wpDeathRecord{time: e.Time, slot: e.PlayerNum})
+			a.deaths = append(a.deaths, wpDeathRecord{time: events.Sec(e.TimeMs), slot: e.PlayerNum})
 		}
 	}
 	return nil
@@ -217,7 +217,7 @@ func (a *WeaponPickupsAnalyzer) maybeSynthesizeFromItemsFlip(e *events.StatUpdat
 	if slot < 0 || slot >= len(a.ctx.Players) || a.ctx.Players[slot] == nil {
 		return
 	}
-	kinds := a.flips.Observe(slot, e.Value, e.Time)
+	kinds := a.flips.Observe(slot, e.Value, events.Sec(e.TimeMs))
 	if !a.timing.Started {
 		return
 	}
@@ -225,14 +225,14 @@ func (a *WeaponPickupsAnalyzer) maybeSynthesizeFromItemsFlip(e *events.StatUpdat
 		// A hint-driven record (//ktx bp, or //ktx took if weapon-stay
 		// was somehow mis-detected) precedes the stat flip on the wire —
 		// if one already explains this grant, don't double-record it.
-		if a.recentRecordExplains(slot, kind, e.Time) {
+		if a.recentRecordExplains(slot, kind, events.Sec(e.TimeMs)) {
 			continue
 		}
 		a.pickups = append(a.pickups, wpPickupRecord{
-			time:        e.Time,
+			time:        events.Sec(e.TimeMs),
 			pickerSlot:  slot,
 			weapon:      kind,
-			source:      a.classifyFlipSource(slot, kind, e.Time),
+			source:      a.classifyFlipSource(slot, kind, events.Sec(e.TimeMs)),
 			hadBefore:   false, // by construction: the bit was 0
 			inferred:    true,
 			dropperSlot: -1,
@@ -311,7 +311,7 @@ func (a *WeaponPickupsAnalyzer) handleDropHint(e *events.BackpackDropHintEvent) 
 	a.packInfo[e.BackpackEnt] = packDrop{
 		weapon:      weapon,
 		dropperSlot: slot,
-		dropTime:    e.Time,
+		dropTime:    events.Sec(e.TimeMs),
 	}
 }
 
@@ -332,7 +332,7 @@ func (a *WeaponPickupsAnalyzer) handleItemPickup(e *events.ItemPickupHintEvent) 
 	// record in place — the hint is the authoritative source. hadBefore
 	// stays false: the flip proved the bit was fresh (the post-flip
 	// playerItems would misread it as a redundant grab).
-	if rec := a.inferredRecordFor(slot, kind, e.Time); rec != nil {
+	if rec := a.inferredRecordFor(slot, kind, events.Sec(e.TimeMs)); rec != nil {
 		rec.source = "world"
 		rec.inferred = false
 		return
@@ -340,7 +340,7 @@ func (a *WeaponPickupsAnalyzer) handleItemPickup(e *events.ItemPickupHintEvent) 
 	bit := weaponBit[kind]
 	hadBefore := a.playerItems[slot]&bit != 0
 	a.pickups = append(a.pickups, wpPickupRecord{
-		time:        e.Time,
+		time:        events.Sec(e.TimeMs),
 		pickerSlot:  slot,
 		weapon:      kind,
 		source:      "world",
@@ -381,7 +381,7 @@ func (a *WeaponPickupsAnalyzer) handlePackPickup(e *events.BackpackPickupHintEve
 	// Late-hint insurance, mirroring handleItemPickup: if the flip's
 	// synthesized record landed first, rewrite it as the backpack
 	// pickup this hint proves it was.
-	if rec := a.inferredRecordFor(slot, drop.weapon, e.Time); rec != nil {
+	if rec := a.inferredRecordFor(slot, drop.weapon, events.Sec(e.TimeMs)); rec != nil {
 		rec.source = "backpack"
 		rec.inferred = false
 		rec.backpackEnt = e.BackpackEnt
@@ -393,7 +393,7 @@ func (a *WeaponPickupsAnalyzer) handlePackPickup(e *events.BackpackPickupHintEve
 	bit := weaponBit[drop.weapon]
 	hadBefore := a.playerItems[slot]&bit != 0
 	a.pickups = append(a.pickups, wpPickupRecord{
-		time:        e.Time,
+		time:        events.Sec(e.TimeMs),
 		pickerSlot:  slot,
 		weapon:      drop.weapon,
 		source:      "backpack",

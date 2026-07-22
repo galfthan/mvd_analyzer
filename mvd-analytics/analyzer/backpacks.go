@@ -66,7 +66,7 @@ func (a *BackpackAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(e.Time)
+		a.timing.OnIntermission(events.Sec(e.TimeMs))
 	case *events.StuffTextEvent:
 		if strings.HasPrefix(e.Command, "fullserverinfo ") {
 			a.extractMapName(e.Command)
@@ -97,7 +97,7 @@ func (a *BackpackAnalyzer) handleHint(e *events.BackpackDropHintEvent) {
 	}
 	pl := a.ctx.Players[slot]
 	a.drops = append(a.drops, BackpackDrop{
-		Time:   msTime(e.Time),
+		Time:   e.TimeMs,
 		Player: pl.Name,
 		Team:   pl.Team,
 		Weapon: weapon,

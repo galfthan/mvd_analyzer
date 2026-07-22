@@ -27,7 +27,7 @@ func TestParseNails_Decode(t *testing.T) {
 	payload = append(payload, 8)
 	payload = append(payload, b1[:]...)
 
-	if err := p.parseNails(mvd.NewBufferReader(payload), true, 1.0, 1000); err != nil {
+	if err := p.parseNails(mvd.NewBufferReader(payload), true, 1000); err != nil {
 		t.Fatalf("parseNails: %v", err)
 	}
 	if got == nil || len(got.Nails) != 2 {
@@ -58,7 +58,7 @@ func TestParseNails_GatedOff(t *testing.T) {
 	})
 	payload := []byte{1, 7, 1, 2, 3, 4, 5, 6} // svc_nails2: count 1, id 7, 6 bytes
 	r := mvd.NewBufferReader(payload)
-	if err := p.parseNails(r, true, 1, 1000); err != nil {
+	if err := p.parseNails(r, true, 1000); err != nil {
 		t.Fatalf("parseNails: %v", err)
 	}
 	if fired {

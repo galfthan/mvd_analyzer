@@ -74,7 +74,7 @@ func TestParseSound_WeaponFireEntityAndChannel(t *testing.T) {
 	// ent 4 (player slot 3), CHAN_WEAPON, sound_num 2, origin (100,-50,200).
 	origin := [3]float32{100, -50, 200}
 	payload := soundPayload(4, 1, 2, origin, false, false)
-	if err := p.parseSound(mvd.NewBufferReader(payload), 7.5, 7500, false); err != nil {
+	if err := p.parseSound(mvd.NewBufferReader(payload), 7500, false); err != nil {
 		t.Fatalf("parseSound: %v", err)
 	}
 	got := (*get)()
@@ -87,8 +87,8 @@ func TestParseSound_WeaponFireEntityAndChannel(t *testing.T) {
 	if got.Origin != origin {
 		t.Errorf("origin: got %v want %v", got.Origin, origin)
 	}
-	if got.Time != 7.5 || got.TimeMs != 7500 {
-		t.Errorf("time: got %v/%d", got.Time, got.TimeMs)
+	if got.TimeMs != 7500 {
+		t.Errorf("time: got %d", got.TimeMs)
 	}
 	// No soundlist received yet -> Name unresolved.
 	if got.Name != "" {
@@ -102,7 +102,7 @@ func TestParseSound_VolumeAndAttenuationFlagsSkipped(t *testing.T) {
 
 	origin := [3]float32{0, 0, 16}
 	payload := soundPayload(7, 1, 5, origin, true, true)
-	if err := p.parseSound(mvd.NewBufferReader(payload), 1, 1000, false); err != nil {
+	if err := p.parseSound(mvd.NewBufferReader(payload), 1000, false); err != nil {
 		t.Fatalf("parseSound: %v", err)
 	}
 	got := (*get)()
@@ -130,7 +130,7 @@ func TestParseSound_FloatCoords(t *testing.T) {
 		binary.LittleEndian.PutUint32(fb, math.Float32bits(origin[i]))
 		b = append(b, fb...)
 	}
-	if err := p.parseSound(mvd.NewBufferReader(b), 2, 2000, true); err != nil {
+	if err := p.parseSound(mvd.NewBufferReader(b), 2000, true); err != nil {
 		t.Fatalf("parseSound float: %v", err)
 	}
 	got := (*get)()
@@ -162,7 +162,7 @@ func TestParseSoundList_ResolvesName(t *testing.T) {
 
 	// A sound emitted after the list resolves its name.
 	get := captureSound(p)
-	if err := p.parseSound(mvd.NewBufferReader(soundPayload(2, 1, 1, [3]float32{1, 2, 3}, false, false)), 1, 1000, false); err != nil {
+	if err := p.parseSound(mvd.NewBufferReader(soundPayload(2, 1, 1, [3]float32{1, 2, 3}, false, false)), 1000, false); err != nil {
 		t.Fatalf("parseSound: %v", err)
 	}
 	if got := (*get)(); got == nil || got.Name != "weapons/rocket1i.wav" {

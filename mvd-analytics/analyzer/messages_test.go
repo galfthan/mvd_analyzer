@@ -22,17 +22,17 @@ func feedPrints(t *testing.T, prints ...*events.PrintEvent) []MatchEvent {
 	return a.events
 }
 
-func chatPrint(msg string, tSec float64) *events.PrintEvent {
-	return &events.PrintEvent{Level: events.PrintChat, Message: msg, Time: tSec}
+func chatPrint(msg string, tMs int32) *events.PrintEvent {
+	return &events.PrintEvent{Level: events.PrintChat, Message: msg, TimeMs: tMs}
 }
 
 // MVDSV delivers chat per recipient (one svc_print per player), so identical
 // copies sharing the same wire-ms must collapse to a single event.
 func TestChatDedupIdenticalCopies(t *testing.T) {
 	got := feedPrints(t,
-		chatPrint("alice: gg", 10.0),
-		chatPrint("alice: gg", 10.0),
-		chatPrint("alice: gg", 10.0),
+		chatPrint("alice: gg", 10000),
+		chatPrint("alice: gg", 10000),
+		chatPrint("alice: gg", 10000),
 	)
 	if len(got) != 1 {
 		t.Fatalf("want 1 event after dedup, got %d: %+v", len(got), got)
@@ -45,8 +45,8 @@ func TestChatDedupIdenticalCopies(t *testing.T) {
 // The same line at a different time is a distinct message and must be kept.
 func TestChatDedupKeepsDistinctTimes(t *testing.T) {
 	got := feedPrints(t,
-		chatPrint("alice: gg", 10.0),
-		chatPrint("alice: gg", 11.0),
+		chatPrint("alice: gg", 10000),
+		chatPrint("alice: gg", 11000),
 	)
 	if len(got) != 2 {
 		t.Fatalf("want 2 events for distinct times, got %d: %+v", len(got), got)
@@ -57,9 +57,9 @@ func TestChatDedupKeepsDistinctTimes(t *testing.T) {
 // key includes Type), so both are kept.
 func TestChatDedupSayAndTeamsayIndependent(t *testing.T) {
 	got := feedPrints(t,
-		chatPrint("alice: gg", 10.0),   // public say  -> type "chat"
-		chatPrint("(alice): gg", 10.0), // say_team    -> type "teamsay"
-		chatPrint("(alice): gg", 10.0), // duplicate teamsay copy
+		chatPrint("alice: gg", 10000),   // public say  -> type "chat"
+		chatPrint("(alice): gg", 10000), // say_team    -> type "teamsay"
+		chatPrint("(alice): gg", 10000), // duplicate teamsay copy
 	)
 	if len(got) != 2 {
 		t.Fatalf("want 2 events (chat + teamsay), got %d: %+v", len(got), got)
@@ -76,10 +76,10 @@ func TestChatDedupSayAndTeamsayIndependent(t *testing.T) {
 // Obituaries arrive as a single broadcast copy and are intentionally NOT
 // deduped — the frag path must pass every copy through verbatim.
 func TestObituariesNotDeduped(t *testing.T) {
-	obit := func(tSec float64) *events.PrintEvent {
-		return &events.PrintEvent{Level: events.PrintMedium, Message: "alice rides bob's rocket", Time: tSec}
+	obit := func(tMs int32) *events.PrintEvent {
+		return &events.PrintEvent{Level: events.PrintMedium, Message: "alice rides bob's rocket", TimeMs: tMs}
 	}
-	got := feedPrints(t, obit(10.0), obit(10.0))
+	got := feedPrints(t, obit(10000), obit(10000))
 	if len(got) != 2 {
 		t.Fatalf("want 2 frag events (frags not deduped), got %d: %+v", len(got), got)
 	}

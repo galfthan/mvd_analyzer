@@ -37,6 +37,14 @@ type Source interface {
 // a type switch on Event to dispatch on the specific event kind.
 type Event = parser.Event
 
+// Sec converts an integer-millisecond demo timestamp to float64 seconds.
+// It is a presentation helper only: the pipeline representation of demo
+// time is integer milliseconds (event TimeMs fields, Result ms fields),
+// and this exists solely for the edges that print or log human-readable
+// seconds. Do not reintroduce float seconds into the pipeline — round-trip
+// through this and back is lossy at the boundaries the ms values guard.
+func Sec(ms int32) float64 { return float64(ms) * 0.001 }
+
 // Concrete event types emitted on the Source.
 type (
 	ServerDataEvent          = parser.ServerDataEvent

@@ -13,7 +13,7 @@ func TestTryEmitBackpackDropHint_RLDrop(t *testing.T) {
 		return nil
 	})
 
-	if err := p.tryEmitBackpackDropHint("//ktx drop 142 32 5\n", 1.5); err != nil {
+	if err := p.tryEmitBackpackDropHint("//ktx drop 142 32 5\n", 1500); err != nil {
 		t.Fatalf("tryEmitBackpackDropHint: %v", err)
 	}
 	if captured == nil {
@@ -22,8 +22,8 @@ func TestTryEmitBackpackDropHint_RLDrop(t *testing.T) {
 	if captured.BackpackEnt != 142 || captured.ItemFlags != 32 || captured.PlayerEnt != 5 {
 		t.Errorf("hint = %+v, want {142, 32, 5}", captured)
 	}
-	if captured.Time != 1.5 {
-		t.Errorf("Time = %f, want 1.5", captured.Time)
+	if captured.TimeMs != 1500 {
+		t.Errorf("TimeMs = %d, want 1500", captured.TimeMs)
 	}
 }
 

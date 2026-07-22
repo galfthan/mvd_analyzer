@@ -84,7 +84,7 @@ func TestParseObituaryLine(t *testing.T) {
 // unification (messages.go previously had its own drifted table).
 func TestMessagesObituaryDriftFixed(t *testing.T) {
 	obit := func(msg string) *events.PrintEvent {
-		return &events.PrintEvent{Level: events.PrintMedium, Message: msg, Time: 1}
+		return &events.PrintEvent{Level: events.PrintMedium, Message: msg, TimeMs: 1000}
 	}
 	cases := []struct {
 		msg    string

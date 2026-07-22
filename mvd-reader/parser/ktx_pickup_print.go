@@ -56,11 +56,11 @@ import (
 type ItemPickupPrintEvent struct {
 	PlayerNum int    // 0-based slot (from dem_single header)
 	Kind      string // see Kind vocabulary above
-	Time      float64
+	TimeMs    int32
 }
 
 func (e *ItemPickupPrintEvent) EventType() EventType { return EventItemPickupPrint }
-func (e *ItemPickupPrintEvent) EventTime() float64   { return e.Time }
+func (e *ItemPickupPrintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // BackpackPickupPrintEvent fires when KTX's backpack opener line
 // `"You get "` (ktx/src/items.c:2404) is addressed to a specific
@@ -82,11 +82,11 @@ func (e *ItemPickupPrintEvent) EventTime() float64   { return e.Time }
 // tick), which the MVD already transports for every player.
 type BackpackPickupPrintEvent struct {
 	PlayerNum int // 0-based slot
-	Time      float64
+	TimeMs    int32
 }
 
 func (e *BackpackPickupPrintEvent) EventType() EventType { return EventBackpackPickupPrint }
-func (e *BackpackPickupPrintEvent) EventTime() float64   { return e.Time }
+func (e *BackpackPickupPrintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // ktxNetnameToKind maps KTX item `netname` strings (the %s in
 // `"You got the %s\n"`) to the Kind vocabulary. Source refs are
@@ -131,7 +131,7 @@ const (
 // event on success. A missing target (targetPlayerNum == -1) or a
 // non-PRINT_LOW level suppresses matching; chat, obituaries, and
 // other broadcast prints flow past untouched.
-func (p *Parser) tryEmitPickupPrint(level int, msg string, targetPlayerNum int, time float64) error {
+func (p *Parser) tryEmitPickupPrint(level int, msg string, targetPlayerNum int, timeMs int32) error {
 	if targetPlayerNum < 0 {
 		return nil
 	}
@@ -153,7 +153,7 @@ func (p *Parser) tryEmitPickupPrint(level int, msg string, targetPlayerNum int, 
 		return p.emit(&ItemPickupPrintEvent{
 			PlayerNum: targetPlayerNum,
 			Kind:      kind,
-			Time:      time,
+			TimeMs:    timeMs,
 		})
 	}
 
@@ -167,7 +167,7 @@ func (p *Parser) tryEmitPickupPrint(level int, msg string, targetPlayerNum int, 
 		return p.emit(&ItemPickupPrintEvent{
 			PlayerNum: targetPlayerNum,
 			Kind:      kind,
-			Time:      time,
+			TimeMs:    timeMs,
 		})
 	}
 
@@ -178,7 +178,7 @@ func (p *Parser) tryEmitPickupPrint(level int, msg string, targetPlayerNum int, 
 	if strings.HasPrefix(trimmed, ktxBackpackOpen) {
 		return p.emit(&BackpackPickupPrintEvent{
 			PlayerNum: targetPlayerNum,
-			Time:      time,
+			TimeMs:    timeMs,
 		})
 	}
 

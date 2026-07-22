@@ -61,7 +61,7 @@ func (d *MatchTimingDetector) OnPrint(e *events.PrintEvent) {
 		for _, p := range matchStartPatterns {
 			if strings.Contains(msg, p) {
 				d.Started = true
-				d.StartTime = e.Time
+				d.StartTime = events.Sec(e.TimeMs)
 				return
 			}
 		}
@@ -73,7 +73,7 @@ func (d *MatchTimingDetector) OnPrint(e *events.PrintEvent) {
 	for _, p := range matchEndPatterns {
 		if strings.Contains(msg, p) {
 			d.Ended = true
-			d.EndTime = e.Time
+			d.EndTime = events.Sec(e.TimeMs)
 			return
 		}
 	}

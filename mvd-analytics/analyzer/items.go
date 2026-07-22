@@ -275,7 +275,7 @@ func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(e.Time)
+		a.timing.OnIntermission(events.Sec(e.TimeMs))
 	case *events.StuffTextEvent:
 		if strings.HasPrefix(e.Command, "fullserverinfo ") {
 			a.extractMapName(e.Command)
@@ -293,11 +293,11 @@ func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 			if a.recentPackGrant[slot] == nil {
 				a.recentPackGrant[slot] = make(map[string]float64)
 			}
-			a.recentPackGrant[slot][w] = e.Time
+			a.recentPackGrant[slot][w] = events.Sec(e.TimeMs)
 			delete(a.packWeapon, e.BackpackEnt)
 		}
 	case *events.PlayerPositionEvent:
-		a.recordPositionSample(e.PlayerNum, e.Origin, e.Time)
+		a.recordPositionSample(e.PlayerNum, e.Origin, events.Sec(e.TimeMs))
 	case *events.ItemSpawnEvent:
 		a.handleItemSpawn(e)
 	case *events.ItemStateEvent:
@@ -385,23 +385,23 @@ func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
 		if last.TakenAt > 0 {
 			return
 		}
-		last.TakenAt = msTime(e.Time)
-		slot, source := a.attributeWithLayeredSignals(e.EntNum, it.kind, it.origin, e.Time)
+		last.TakenAt = e.TimeMs
+		slot, source := a.attributeWithLayeredSignals(e.EntNum, it.kind, it.origin, events.Sec(e.TimeMs))
 		it.pickups[len(it.pickups)-1] = phaseAttribution{slot: slot, source: source}
 		a.attrCounts[source]++
 
 		if it.kind == "mh" {
 			// Start holder tracking; RespawnAt stays 0 until the
 			// holder's health drops to <= 100.
-			a.mhPickup[e.EntNum] = e.Time
+			a.mhPickup[e.EntNum] = events.Sec(e.TimeMs)
 			if slot >= 0 {
 				a.heldMHs[slot] = append(a.heldMHs[slot], e.EntNum)
 			}
 			return
 		}
 		if sec, ok := kindRespawnSec[it.kind]; ok {
-			last.RespawnAt = msTime(e.Time + sec)
-			a.scheduleSyntheticRespawn(e.EntNum, e.Time+sec, 0)
+			last.RespawnAt = msTime(events.Sec(e.TimeMs) + sec)
+			a.scheduleSyntheticRespawn(e.EntNum, events.Sec(e.TimeMs)+sec, 0)
 		}
 		return
 	}
@@ -409,7 +409,7 @@ func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
 	// Wire respawn: open the next available phase. Cancel any pending
 	// synthetic schedule for this entity — the wire just told us
 	// nobody picked it up at the predicted moment.
-	it.phases = append(it.phases, ItemPhase{AvailableFrom: msTime(e.Time)})
+	it.phases = append(it.phases, ItemPhase{AvailableFrom: e.TimeMs})
 	it.pickups = append(it.pickups, phaseAttribution{slot: -1})
 	delete(a.syntheticChain, e.EntNum)
 }
@@ -766,12 +766,12 @@ func (a *ItemAnalyzer) handleItemPickupHint(e *events.ItemPickupHintEvent) {
 				// Wire is still showing the entity as taken from
 				// the previous phase, but KTX says it just got
 				// touched again — must be an insta-regrab.
-				a.recordSyntheticTakeFromHint(e.ItemEnt, e.Time, slot)
+				a.recordSyntheticTakeFromHint(e.ItemEnt, events.Sec(e.TimeMs), slot)
 				return
 			}
 		}
 	}
-	a.pendingHints[e.ItemEnt] = pendingHint{playerSlot: slot, time: e.Time}
+	a.pendingHints[e.ItemEnt] = pendingHint{playerSlot: slot, time: events.Sec(e.TimeMs)}
 }
 
 // recordSyntheticTakeFromHint mirrors recordSyntheticPickup but uses
@@ -834,7 +834,7 @@ func (a *ItemAnalyzer) handleItemPickupPrint(e *events.ItemPickupPrintEvent) {
 	}
 	a.pendingPrints[e.PlayerNum] = append(a.pendingPrints[e.PlayerNum], pendingPrint{
 		kind: e.Kind,
-		time: e.Time,
+		time: events.Sec(e.TimeMs),
 	})
 }
 
@@ -853,10 +853,10 @@ func (a *ItemAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) {
 	// death frames — see weaponFlipTracker. Only the synthesis itself
 	// is match-gated.
 	if e.StatIndex == events.StatItems && a.weaponStay.WeaponStay() {
-		kinds := a.wsFlips.Observe(e.PlayerNum, e.Value, e.Time)
+		kinds := a.wsFlips.Observe(e.PlayerNum, e.Value, events.Sec(e.TimeMs))
 		if a.timing.Started && !a.timing.Ended {
 			for _, kind := range kinds {
-				a.synthesizeWeaponStayPickup(e.PlayerNum, kind, e.Time)
+				a.synthesizeWeaponStayPickup(e.PlayerNum, kind, events.Sec(e.TimeMs))
 			}
 		}
 	}
@@ -879,7 +879,7 @@ func (a *ItemAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) {
 		prev := a.playerHealth[e.PlayerNum]
 		a.playerHealth[e.PlayerNum] = e.Value
 		if prev > 100 && e.Value <= 100 {
-			a.stampHeldMHs(e.PlayerNum, e.Time)
+			a.stampHeldMHs(e.PlayerNum, events.Sec(e.TimeMs))
 		}
 	case events.StatItems:
 		if e.Value&events.ITSuperHealth != 0 {
@@ -889,7 +889,7 @@ func (a *ItemAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) {
 		// inside item_megahealth_rot at rot-end (items.c:401), so this
 		// is redundant with the health crossing above in the normal
 		// case but catches the path where the health stream is thin.
-		a.stampHeldMHs(e.PlayerNum, e.Time)
+		a.stampHeldMHs(e.PlayerNum, events.Sec(e.TimeMs))
 	}
 }
 
@@ -935,10 +935,10 @@ func (a *ItemAnalyzer) classifyStatDelta(e *events.StatUpdateEvent) {
 		// can't masquerade as a stack of small healths.
 		switch {
 		case delta > 0 && delta <= 25:
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"h15", "h25"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"h15", "h25"})
 		case delta > 25 && delta <= 50:
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"h15", "h25"})
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"h15", "h25"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"h15", "h25"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"h15", "h25"})
 		}
 	case events.StatArmor:
 		if !snap.armorSet {
@@ -968,51 +968,51 @@ func (a *ItemAnalyzer) classifyStatDelta(e *events.StatUpdateEvent) {
 		// Armor — mutually exclusive bits. Whichever was newly set
 		// identifies the kind.
 		if newlySet&events.ITArmor1 != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"ga"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"ga"})
 		}
 		if newlySet&events.ITArmor2 != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"ya"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"ya"})
 		}
 		if newlySet&events.ITArmor3 != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"ra"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"ra"})
 		}
 		// Weapons.
 		if newlySet&events.ITSuperShotgun != 0 {
-			a.weaponBitGained(e.PlayerNum, "ssg", e.Time)
+			a.weaponBitGained(e.PlayerNum, "ssg", events.Sec(e.TimeMs))
 		}
 		if newlySet&events.ITNailgun != 0 {
-			a.weaponBitGained(e.PlayerNum, "ng", e.Time)
+			a.weaponBitGained(e.PlayerNum, "ng", events.Sec(e.TimeMs))
 		}
 		if newlySet&events.ITSuperNailgun != 0 {
-			a.weaponBitGained(e.PlayerNum, "sng", e.Time)
+			a.weaponBitGained(e.PlayerNum, "sng", events.Sec(e.TimeMs))
 		}
 		if newlySet&events.ITGrenadeLauncher != 0 {
-			a.weaponBitGained(e.PlayerNum, "gl", e.Time)
+			a.weaponBitGained(e.PlayerNum, "gl", events.Sec(e.TimeMs))
 		}
 		if newlySet&events.ITRocketLauncher != 0 {
-			a.weaponBitGained(e.PlayerNum, "rl", e.Time)
+			a.weaponBitGained(e.PlayerNum, "rl", events.Sec(e.TimeMs))
 		}
 		if newlySet&events.ITLightning != 0 {
-			a.weaponBitGained(e.PlayerNum, "lg", e.Time)
+			a.weaponBitGained(e.PlayerNum, "lg", events.Sec(e.TimeMs))
 		}
 		// Powerups.
 		if newlySet&events.ITQuad != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"quad"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"quad"})
 		}
 		if newlySet&events.ITInvulnerability != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"pent"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"pent"})
 		}
 		if newlySet&events.ITInvisibility != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"ring"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"ring"})
 		}
 		if newlySet&events.ITSuit != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"suit"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"suit"})
 		}
 		// Megahealth — IT_SUPERHEALTH transition is the canonical
 		// pickup signal (the +100 health is correlated but not
 		// uniquely identifying).
 		if newlySet&events.ITSuperHealth != 0 {
-			a.pushStatEvidence(e.PlayerNum, e.Time, []string{"mh"})
+			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"mh"})
 		}
 	}
 }
@@ -1105,7 +1105,7 @@ func (a *ItemAnalyzer) pushAmmoEvidence(e *events.StatUpdateEvent, field *int, s
 	delta := e.Value - *field
 	*field = e.Value
 	if delta > 0 {
-		a.pushStatEvidence(e.PlayerNum, e.Time, []string{kind})
+		a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{kind})
 	}
 }
 
@@ -1160,7 +1160,7 @@ func (a *ItemAnalyzer) pruneBuffers(t float64) {
 // doesn't masquerade as pickup deltas. The first stat update for each
 // field re-seeds the baseline silently.
 func (a *ItemAnalyzer) handleSpawn(e *events.SpawnEvent) {
-	a.wsFlips.OnSpawn(e.PlayerNum, e.Time)
+	a.wsFlips.OnSpawn(e.PlayerNum, events.Sec(e.TimeMs))
 	if !a.timing.Started || a.timing.Ended {
 		return
 	}
@@ -1175,12 +1175,12 @@ func (a *ItemAnalyzer) handleSpawn(e *events.SpawnEvent) {
 // stat snapshot / pending evidence so the upcoming respawn loadout
 // doesn't feed the classifier.
 func (a *ItemAnalyzer) handleDeath(e *events.DeathEvent) {
-	a.wsFlips.OnDeath(e.PlayerNum, e.Time)
+	a.wsFlips.OnDeath(e.PlayerNum, events.Sec(e.TimeMs))
 	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	a.playerHealth[e.PlayerNum] = 0
-	a.stampHeldMHs(e.PlayerNum, e.Time)
+	a.stampHeldMHs(e.PlayerNum, events.Sec(e.TimeMs))
 	delete(a.playerStats, e.PlayerNum)
 	delete(a.pendingStatEvidence, e.PlayerNum)
 }

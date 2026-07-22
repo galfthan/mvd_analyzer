@@ -35,12 +35,11 @@ type BeamEvent struct {
 	Type   int // raw TE type: 5/6/9
 	Start  [3]float32
 	End    [3]float32
-	Time   float64
 	TimeMs int32
 }
 
 func (e *BeamEvent) EventType() EventType { return EventBeam }
-func (e *BeamEvent) EventTime() float64   { return e.Time }
+func (e *BeamEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // parseTempEntity decodes a svc_temp_entity payload. Lightning beams are
 // surfaced as BeamEvent; every other (point-effect) type is consumed for
@@ -48,7 +47,7 @@ func (e *BeamEvent) EventTime() float64   { return e.Time }
 // a diagnostic. Wire layout per type is handled in the switch below (ref:
 // ezquake cl_tent.c::CL_ParseTEnt); an unknown type returns errUnknownTE
 // since its length can't be guessed without drifting the parser.
-func (p *Parser) parseTempEntity(r *mvd.BufferReader, time float64, timeMs int32, floatCoords bool) (byte, error) {
+func (p *Parser) parseTempEntity(r *mvd.BufferReader, timeMs int32, floatCoords bool) (byte, error) {
 	teType, err := r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -90,7 +89,6 @@ func (p *Parser) parseTempEntity(r *mvd.BufferReader, time float64, timeMs int32
 			Type:   int(teType),
 			Start:  start,
 			End:    end,
-			Time:   time,
 			TimeMs: timeMs,
 		})
 	case 0, 1, 3, 4, 7, 8, 10, 11, 13:

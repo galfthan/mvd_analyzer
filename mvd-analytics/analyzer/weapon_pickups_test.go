@@ -22,9 +22,9 @@ func TestWeaponPickups_WorldRLWithKills(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[4] = &events.PlayerInfo{Slot: 4, Name: "ace", Team: "red"}
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Time: 0})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 100, PlayerEnt: 5, Time: 10})
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 4, Time: 30})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", TimeMs: 0})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 100, PlayerEnt: 5, TimeMs: 10000})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 4, TimeMs: 30000})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
 		{Time: 12000, Killer: "ace", Victim: "x", Weapon: "rl"},
@@ -63,9 +63,9 @@ func TestWeaponPickups_HadBeforeDoesNotClaimKills(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "hoarder", Team: "blue"}
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 77, Kind: "rl", Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 4})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 77, PlayerEnt: 3, Time: 5})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 77, Kind: "rl", TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 2, StatIndex: events.StatItems, Value: wpItRocketLauncher, TimeMs: 4000})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 77, PlayerEnt: 3, TimeMs: 5000})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
 		{Time: 6000, Killer: "hoarder", Weapon: "rl"},
@@ -90,8 +90,8 @@ func TestWeaponPickups_BackpackPickupAttribution(t *testing.T) {
 	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "dropper", Team: "red"}
 	ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "thief", Team: "blue"}
 
-	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 32, PlayerEnt: 2, Time: 10})
-	_ = a.OnEvent(&events.BackpackPickupHintEvent{BackpackEnt: 200, PlayerEnt: 3, Time: 11})
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 32, PlayerEnt: 2, TimeMs: 10000})
+	_ = a.OnEvent(&events.BackpackPickupHintEvent{BackpackEnt: 200, PlayerEnt: 3, TimeMs: 11000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -122,10 +122,10 @@ func TestWeaponPickups_NonWeaponHintsIgnored(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "ra", Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 2, Kind: "mh", Time: 0})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 5})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 2, PlayerEnt: 1, Time: 6})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "ra", TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 2, Kind: "mh", TimeMs: 0})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, TimeMs: 5000})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 2, PlayerEnt: 1, TimeMs: 6000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -141,9 +141,9 @@ func TestWeaponPickups_TeamkillsAndSuicidesExcluded(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "rl", Time: 0})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 5})
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "rl", TimeMs: 0})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, TimeMs: 5000})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, TimeMs: 30000})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
 		{Time: 10000, Killer: "p", Weapon: "rl", IsSuicide: true},
@@ -172,11 +172,11 @@ func TestWeaponPickups_RedundantSecondPickupGetsZero(t *testing.T) {
 	// Pickup 1 at t=10 (hadBefore=false), pickup 2 at t=20
 	// (hadBefore=true after StatUpdate at t=11), death at t=30.
 	// Frags at t=12, t=15, t=25, t=28 — all RL.
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "rl", Time: 0})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 10})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 11})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 20})
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "rl", TimeMs: 0})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, TimeMs: 10000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, TimeMs: 11000})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, TimeMs: 20000})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, TimeMs: 30000})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
 		{Time: 12000, Killer: "p", Weapon: "rl"},
@@ -212,13 +212,13 @@ func TestWeaponPickups_FreshPickupAfterDeathIsItsOwnGrant(t *testing.T) {
 
 	// Life 1: pickup at t=10 (fresh), death at t=30 — STAT_ITEMS
 	// clears at death, which the server sends as a StatUpdate.
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "rl", Time: 0})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 10})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 11})
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 30})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "rl", TimeMs: 0})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, TimeMs: 10000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, TimeMs: 11000})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, TimeMs: 30000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 30000})
 	// Life 2: pickup at t=40 (fresh again), no further death.
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 40})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, TimeMs: 40000})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
 		{Time: 20000, Killer: "p", Weapon: "rl"}, // life 1
@@ -246,12 +246,12 @@ func TestWeaponPickups_WeaponStaySynthesisWorld(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "ace", Team: "red"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{500, 500, 100}, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItShotgun, Time: 5}) // seeds baseline
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{510, 500, 100}, Time: 9.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItShotgun | wpItRocketLauncher, Time: 10})
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{500, 500, 100}, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItShotgun, TimeMs: 5000}) // seeds baseline
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{510, 500, 100}, TimeMs: 9900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItShotgun | wpItRocketLauncher, TimeMs: 10000})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, TimeMs: 30000})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
 		{Time: 12000, Killer: "ace", Victim: "x", Weapon: "rl"},
@@ -281,11 +281,11 @@ func TestWeaponPickups_WeaponStayBackpackNotDoubleCounted(t *testing.T) {
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "dropper", Team: "red"}
 	ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "thief", Team: "blue"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatItems, Value: 0, Time: 5}) // seeds baseline
-	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 32, PlayerEnt: 1, Time: 10})
-	_ = a.OnEvent(&events.BackpackPickupHintEvent{BackpackEnt: 200, PlayerEnt: 2, Time: 11})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 11.2})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatItems, Value: 0, TimeMs: 5000}) // seeds baseline
+	_ = a.OnEvent(&events.BackpackDropHintEvent{BackpackEnt: 200, ItemFlags: 32, PlayerEnt: 1, TimeMs: 10000})
+	_ = a.OnEvent(&events.BackpackPickupHintEvent{BackpackEnt: 200, PlayerEnt: 2, TimeMs: 11000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 1, StatIndex: events.StatItems, Value: wpItRocketLauncher, TimeMs: 11200})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -305,11 +305,11 @@ func TestWeaponPickups_WeaponStayFlipAwayFromPadIsUnknown(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "gl", Origin: [3]float32{5000, 5000, 100}, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItGrenadeLauncher, Time: 10})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "gl", Origin: [3]float32{5000, 5000, 100}, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 5000})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{0, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItGrenadeLauncher, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -330,19 +330,19 @@ func TestWeaponPickups_WeaponStaySpawnLoadoutNotRecorded(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\5"`, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\5"`, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 5000})
 	// STAT-before-SPAWN ordering: loadout lands while still flagged dead.
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 10})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, TimeMs: 10000})
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems,
-		Value: wpItShotgun | wpItSuperShotgun, Time: 20})
-	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 0, Time: 20})
+		Value: wpItShotgun | wpItSuperShotgun, TimeMs: 20000})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 0, TimeMs: 20000})
 	// SPAWN-before-STAT ordering: loadout lands in the respawn frame.
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 30})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 30})
-	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 0, Time: 40})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, TimeMs: 30000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 30000})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 0, TimeMs: 40000})
 	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems,
-		Value: wpItShotgun | wpItSuperShotgun | wpItRocketLauncher, Time: 40.02})
+		Value: wpItShotgun | wpItSuperShotgun | wpItRocketLauncher, TimeMs: 40020})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -360,16 +360,16 @@ func TestWeaponPickups_WeaponStayPickupAfterDeathFrameRecorded(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, Time: 5}) // seed: holds RL
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, TimeMs: 5000}) // seed: holds RL
 	// Death frame, exact wire order observed in kill.mvd:
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 13.8})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1, Time: 13.8}) // respawn loadout (SG only)
-	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 0, Time: 13.8})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, TimeMs: 13800})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1, TimeMs: 13800}) // respawn loadout (SG only)
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 0, TimeMs: 13800})
 	// First pickup of the new life, well past the spawn window.
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 15.0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, Time: 15.1})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, TimeMs: 15000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, TimeMs: 15100})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -391,15 +391,15 @@ func TestWeaponPickups_WeaponStayDeathFrameGrabRecorded(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1, Time: 5})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 9.99})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1, TimeMs: 5000})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, TimeMs: 9990})
 	// Death frame: DEATH then the flip at the same timestamp.
-	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, Time: 10})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, Time: 10})
+	_ = a.OnEvent(&events.DeathEvent{PlayerNum: 0, TimeMs: 10000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, TimeMs: 10000})
 	// Later, still dead: a bookkeeping flip must be absorbed.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher | wpItLightning, Time: 11.5})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher | wpItLightning, TimeMs: 11500})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -421,14 +421,14 @@ func TestWeaponPickups_WeaponStayWarmupBaselineCarries(t *testing.T) {
 	a.timing.Started = false // exercise the warmup phase explicitly
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
 	// Warmup: baseline seeds (SG only) before the match starts.
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1, Time: 8})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1, TimeMs: 8000})
 	a.timing.Started = true
 	// First in-match update IS the RL grant.
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, Time: 10})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 1 | wpItRocketLauncher, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -448,9 +448,9 @@ func TestWeaponPickups_NoSynthesisInDmm1(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\1"`, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 10})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\1"`, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 5000})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, TimeMs: 10000})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -466,12 +466,12 @@ func TestWeaponPickups_LateHintUpgradesInferredRecord(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "p"}
 
-	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, Time: 0})
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{0, 0, 0}, Time: 0})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, Time: 5})
-	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, Time: 9.9})
-	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, Time: 10})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 100, PlayerEnt: 1, Time: 10.1})
+	_ = a.OnEvent(&events.StuffTextEvent{Command: `fullserverinfo "\deathmatch\3"`, TimeMs: 0})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 100, Kind: "rl", Origin: [3]float32{0, 0, 0}, TimeMs: 0})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: 0, TimeMs: 5000})
+	_ = a.OnEvent(&events.PlayerPositionEvent{PlayerNum: 0, Origin: [3]float32{10, 0, 0}, TimeMs: 9900})
+	_ = a.OnEvent(&events.StatUpdateEvent{PlayerNum: 0, StatIndex: events.StatItems, Value: wpItRocketLauncher, TimeMs: 10000})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 100, PlayerEnt: 1, TimeMs: 10100})
 
 	r := &Result{}
 	_ = a.Finalize(r)
@@ -490,8 +490,8 @@ func TestWeaponPickups_NoNextDeathKillsUnbounded(t *testing.T) {
 	a, ctx := newTestWeaponPickupsAnalyzer()
 	ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "survivor"}
 
-	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "lg", Time: 0})
-	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, Time: 5})
+	_ = a.OnEvent(&events.ItemSpawnEvent{EntNum: 1, Kind: "lg", TimeMs: 0})
+	_ = a.OnEvent(&events.ItemPickupHintEvent{ItemEnt: 1, PlayerEnt: 1, TimeMs: 5000})
 
 	a.core = &CoreOutputs{FragEntries: []FragEntry{
 		{Time: 10000, Killer: "survivor", Weapon: "lg"},

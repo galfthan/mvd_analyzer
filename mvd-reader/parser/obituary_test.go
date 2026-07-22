@@ -90,7 +90,7 @@ func TestObituaryDeath_GatedOnMatchStart(t *testing.T) {
 	})
 
 	// Pre-match obit — must not fire.
-	if err := p.tryEmitObituaryDeath("sailorman rides multibear's rocket\n", 1.0, 1000); err != nil {
+	if err := p.tryEmitObituaryDeath("sailorman rides multibear's rocket\n", 1000); err != nil {
 		t.Fatalf("pre-match obit: %v", err)
 	}
 	if deaths != 0 {
@@ -104,7 +104,7 @@ func TestObituaryDeath_GatedOnMatchStart(t *testing.T) {
 	}
 
 	// Same obit, post-start — must fire exactly once.
-	if err := p.tryEmitObituaryDeath("sailorman rides multibear's rocket\n", 2.0, 2000); err != nil {
+	if err := p.tryEmitObituaryDeath("sailorman rides multibear's rocket\n", 2000); err != nil {
 		t.Fatalf("post-match obit: %v", err)
 	}
 	if deaths != 1 {
@@ -135,10 +135,10 @@ func TestObituaryDeath_ForceEmitsEvenWhenStateAlreadyDead(t *testing.T) {
 	})
 
 	// Two consecutive deflections while nlk's wire state stays dead.
-	if err := p.tryEmitObituaryDeath("Satan's power deflects nlk's telefrag\n", 631.4, 631419); err != nil {
+	if err := p.tryEmitObituaryDeath("Satan's power deflects nlk's telefrag\n", 631419); err != nil {
 		t.Fatalf("first deflect: %v", err)
 	}
-	if err := p.tryEmitObituaryDeath("Satan's power deflects nlk's telefrag\n", 633.5, 633548); err != nil {
+	if err := p.tryEmitObituaryDeath("Satan's power deflects nlk's telefrag\n", 633548); err != nil {
 		t.Fatalf("second deflect: %v", err)
 	}
 	if deaths != 2 {
@@ -170,7 +170,7 @@ func TestParsePrint_ObituaryFiresDeathAndNextPlayerInfoFiresSpawn(t *testing.T) 
 	payload = append(payload, []byte(msg)...)
 	payload = append(payload, 0)
 	r := mvd.NewBufferReader(payload)
-	if err := p.parsePrint(r, 5.0, 5000, -1); err != nil {
+	if err := p.parsePrint(r, 5000, -1); err != nil {
 		t.Fatalf("parsePrint: %v", err)
 	}
 
@@ -178,7 +178,7 @@ func TestParsePrint_ObituaryFiresDeathAndNextPlayerInfoFiresSpawn(t *testing.T) 
 	pi := []byte{5} // player slot
 	pi = binary.LittleEndian.AppendUint16(pi, 0)
 	pi = append(pi, 0) // frame
-	if err := p.parsePlayerInfo(mvd.NewBufferReader(pi), 5.05, 5050, false); err != nil {
+	if err := p.parsePlayerInfo(mvd.NewBufferReader(pi), 5050, false); err != nil {
 		t.Fatalf("parsePlayerInfo: %v", err)
 	}
 

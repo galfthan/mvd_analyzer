@@ -16,11 +16,11 @@ type PrintEvent struct {
 	Level           int
 	Message         string
 	TargetPlayerNum int // 0-based slot for dem_single; -1 for broadcast prints
-	Time            float64
+	TimeMs          int32
 }
 
 func (e *PrintEvent) EventType() EventType { return EventPrint }
-func (e *PrintEvent) EventTime() float64   { return e.Time }
+func (e *PrintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 
 // parsePrint parses svc_print message. `targetPlayerNum` is the
 // dem_single slot from the MVD container (or -1 for non-dem_single
@@ -34,7 +34,7 @@ func (e *PrintEvent) EventTime() float64   { return e.Time }
 // wire and the dem_stats block carrying the health drop is addressed
 // to a different POV. maybeEmitDeath dedupes against the other two
 // sources so we don't double-count when they do fire.
-func (p *Parser) parsePrint(r *mvd.BufferReader, time float64, timeMs int32, targetPlayerNum int) error {
+func (p *Parser) parsePrint(r *mvd.BufferReader, timeMs int32, targetPlayerNum int) error {
 	level, err := r.ReadByte()
 	if err != nil {
 		return err
@@ -51,15 +51,15 @@ func (p *Parser) parsePrint(r *mvd.BufferReader, time float64, timeMs int32, tar
 		Level:           int(level),
 		Message:         cleanedMessage,
 		TargetPlayerNum: targetPlayerNum,
-		Time:            time,
+		TimeMs:          timeMs,
 	}); err != nil {
 		return err
 	}
 	p.updateMatchStartedFromPrint(cleanedMessage)
-	if err := p.tryEmitObituaryDeath(cleanedMessage, time, timeMs); err != nil {
+	if err := p.tryEmitObituaryDeath(cleanedMessage, timeMs); err != nil {
 		return err
 	}
-	return p.tryEmitPickupPrint(int(level), cleanedMessage, targetPlayerNum, time)
+	return p.tryEmitPickupPrint(int(level), cleanedMessage, targetPlayerNum, timeMs)
 }
 
 // tryEmitObituaryDeath inspects an obituary print line, resolves the
@@ -80,7 +80,7 @@ func (p *Parser) parsePrint(r *mvd.BufferReader, time float64, timeMs int32, tar
 // gate opens, the follow-up SpawnEvent arrives naturally on the
 // player's next svc_playerinfo frame with DF_DEAD clear — the same
 // state-transition the existing maybeEmitSpawn path detects.
-func (p *Parser) tryEmitObituaryDeath(msg string, time float64, timeMs int32) error {
+func (p *Parser) tryEmitObituaryDeath(msg string, timeMs int32) error {
 	if !p.matchStarted {
 		return nil
 	}
@@ -92,7 +92,7 @@ func (p *Parser) tryEmitObituaryDeath(msg string, time float64, timeMs int32) er
 	if slot < 0 {
 		return nil
 	}
-	return p.forceEmitDeath(slot, time, timeMs)
+	return p.forceEmitDeath(slot, timeMs)
 }
 
 // MatchStartPatterns is the canonical set of case-insensitive substrings
