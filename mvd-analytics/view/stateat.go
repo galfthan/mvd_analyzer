@@ -25,7 +25,7 @@ type StateAtView struct {
 	// TimeUnit echoes this endpoint's native unit (constant "ms", schema v57);
 	// set by the mvd-api handler. Omitted on the WASM/qw-analyze paths.
 	TimeUnit TimeUnit                 `json:"timeUnit,omitempty"`
-	Time     int32                    `json:"t"`
+	Time     int32                    `json:"time"`
 	Players  map[string]PlayerStateAt `json:"players"`
 }
 

@@ -711,17 +711,28 @@ package result
 //     v56→v57 tripwire). `view.UnitSec` is deleted; `timeUnit` stays as a
 //     CONSTANT "ms" echo everywhere it appears. Exceptions, documented:
 //     /demoinfo (KTX-native seconds island) and search `from`/`to` (calendar
-//     dates YYYY-MM-DD). NOTE the two silent-1000× tripwires: `/events` `t` was
-//     seconds in v55, absent in v56, and is ms in v57; and `from`/`to` inputs
-//     are now ms.
+//     dates YYYY-MM-DD). Two migration tripwires: `from`/`to` inputs are now
+//     ms; and the v55 float-seconds view surfaces (events/buckets-row/state-at/
+//     items firstTake) are now int32 ms under the SAME key they carried in v55
+//     — `time` — so a v55 reader that still divides by 1000 (or reads the v56
+//     `t`, now gone) breaks loudly instead of silently.
+//   - PER-ITEM TIME KEY: the DENSE/SPARSE split (final v57 naming). Sample-
+//     rate-scaled arrays (~77 Hz stream tracks, columnar sample columns, aim
+//     sample arrays) use the terse `t`; event-scaled sparse lists and singleton
+//     timestamps use the descriptive `time`. This is the v55 layout: every
+//     stored sparse list (frags/damage/shots/chat/backpacks/weapon-pickups/
+//     opening/airgibs/timeline events) kept `time` unchanged from v55, so v55
+//     clients of those lists keep working; the derived view surfaces (events,
+//     row-major buckets, state-at, items firstTake) — seconds in v55 — become
+//     int32 ms but ALSO under `time`, dropping the transient v56 `t` for good.
+//     Both keys are ALWAYS int32 ms; the unit is NEVER encoded in the name (the
+//     `timeUnit` echo names it). DENSE terse keys DELIBERATELY kept: PositionTrack
+//     `t`, ChangeI16/ChangeStr `t`, result.Interval `s`/`e`, aim `t`, columnar
+//     `t`/`v`, projectile/beam `s`,`sx`…`e`,`ez`.
 //   - KEY RENAMES (JSON tags; Go field names mostly unchanged). LosTrack
 //     `o`/`iv` → `other`/`intervals` (once-per-track, descriptive);
 //     MessagesResult array key `events` → `messages`; ColumnarBuckets `startMs`
-//     → `start`; per-item time keys unify on `t` (events `time`→`t`, row-major
-//     buckets `time`→`t`, state-at `time`→`t`, items firstTake `time`→`t`);
-//     stream-slice envelope `startTime`/`endTime` → `start`/`end`. Terse
-//     per-row keys are DELIBERATELY kept: result.Interval `s`/`e`, projectile/
-//     beam `s`,`sx`…`e`,`ez`, columnar `t`/`v`.
+//     → `start`; stream-slice envelope `startTime`/`endTime` → `start`/`end`.
 //   - null→[] for governed top-level view arrays (events, stream-slice
 //     players, loc-trails players) — never null when empty. Nested nullables
 //     and the documented-null projectiles/beams/nails objects are untouched.

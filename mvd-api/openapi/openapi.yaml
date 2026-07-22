@@ -32,8 +32,13 @@ info:
     / `time` are **integer milliseconds**; a non-integer value (e.g.
     `from=10.5`) 400s with code `invalid_param` and an `(integer
     milliseconds)` hint rather than misfiltering. Every response time field
-    (event `t`, window bounds, trail dwell spans, row-bucket `t`, state-at
-    `t`, item `firstTake.t`, the columnar bucket grid) is int32 ms.
+    is int32 ms — but two key spellings share that one unit, by a
+    dense/sparse rule: sample-rate-scaled arrays use the terse key `t`
+    (stream tracks, aim samples, the columnar bucket grid, projectile/beam
+    columns); event-scaled sparse lists and singleton timestamps use the
+    descriptive key `time` (frag/damage/shot/chat/backpack/weapon-pickup/
+    airgib/timeline entries, events rows, row-bucket `time`, state-at
+    `time`, item `firstTake.time`). The name never encodes the unit —
     `timeUnit`, where present, is a constant `"ms"` self-description echo.
 
     Two documented exceptions, neither a match-relative time: `/demoinfo`
@@ -763,7 +768,7 @@ paths:
         per field per player; always pass a windowMs sized to your
         question. `layout=column` (default) returns the compact columnar
         grid (int32 ms axis); `layout=row` returns row objects (int32 ms
-        `t`).
+        `time`).
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/WindowMs"
@@ -857,7 +862,7 @@ paths:
       description: >
         Every requested field carried forward to the instant `time`
         (match-relative integer ms; REQUIRED — missing returns 400
-        missing_param). The response echoes the sample instant as `t`
+        missing_param). The response echoes the sample instant as `time`
         (int32 ms). Field selector codes are the same registry as
         /buckets and /stream-slice, except `sp`/`d` are rejected (spawns
         and deaths have no point-in-time meaning — use /events); note the
@@ -2603,7 +2608,7 @@ components:
               killer:
                 description: "Killer (attacker) name."
                 type: string
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
@@ -2615,7 +2620,7 @@ components:
                 description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
-              - t
+              - time
               - killer
               - victim
               - weapon
@@ -2839,7 +2844,7 @@ components:
               isTeam:
                 description: "Same team, not self."
                 type: boolean
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
@@ -2854,7 +2859,7 @@ components:
                 description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
-              - t
+              - time
               - attacker
               - victim
               - weapon
@@ -2993,7 +2998,7 @@ components:
               isTeam:
                 description: "Same team, not self."
                 type: boolean
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
@@ -3008,7 +3013,7 @@ components:
                   EnemyVs*/EWep fold. Omitted on team/self/world kills.
                 type: string
             required:
-              - t
+              - time
               - attacker
               - victim
             type: object
@@ -3040,7 +3045,7 @@ components:
               isTeam:
                 description: "Same team, not self."
                 type: boolean
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
@@ -3054,7 +3059,7 @@ components:
                   enemy kills only. Omitted on team/self/world kills.
                 type: string
             required:
-              - t
+              - time
               - attacker
               - victim
             type: object
@@ -3194,7 +3199,7 @@ components:
               team:
                 description: "Team name."
                 type: string
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
@@ -3217,7 +3222,7 @@ components:
                 description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
-              - t
+              - time
               - player
               - weapon
               - source
@@ -3821,7 +3826,7 @@ components:
         team:
           description: "Team name."
           type: string
-        t:
+        time:
           description: "Event/sample time, int32 ms since match start."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
@@ -3836,7 +3841,7 @@ components:
           description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
-        - t
+        - time
         - type
         - player
         - team
@@ -3864,7 +3869,7 @@ components:
         team:
           description: "Team name."
           type: string
-        t:
+        time:
           description: "Event/sample time, int32 ms since match start."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
@@ -3873,7 +3878,7 @@ components:
           description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
-        - t
+        - time
         - player
         - weapon
         - origin
@@ -3919,7 +3924,7 @@ components:
         team:
           description: "Team name."
           type: string
-        t:
+        time:
           description: "Event/sample time, int32 ms since match start."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
@@ -3928,7 +3933,7 @@ components:
           description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
           type: string
       required:
-        - t
+        - time
         - player
         - weapon
         - source
@@ -4037,7 +4042,7 @@ components:
                 description: "First in-match take (null if never taken)."
                 additionalProperties: false
                 properties:
-                  t:
+                  time:
                     type: integer
                     description: First-take time, int32 ms.
                   takenBy:
@@ -4047,7 +4052,7 @@ components:
                     description: "Team name."
                     type: string
                 required:
-                  - t
+                  - time
                 type:
                   - "null"
                   - object
@@ -4103,7 +4108,7 @@ components:
         loc:
           description: "Nearest named location from the map .loc file."
           type: string
-        t:
+        time:
           description: "Event/sample time, int32 ms since match start."
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
@@ -4118,7 +4123,7 @@ components:
           description: "Victim UserID (Hub viewer link)."
           type: integer
       required:
-        - t
+        - time
         - attacker
         - victim
         - height
@@ -4564,7 +4569,7 @@ components:
               loc:
                 description: "Nearest named location from the map .loc file."
                 type: string
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
@@ -4579,7 +4584,7 @@ components:
                 description: "Victim UserID (Hub viewer link)."
                 type: integer
             required:
-              - t
+              - time
               - attacker
               - victim
               - height
@@ -4599,13 +4604,13 @@ components:
               team:
                 description: "Team name."
                 type: string
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
             required:
-              - t
+              - time
               - player
               - team
             type: object
@@ -4626,13 +4631,13 @@ components:
               team:
                 description: "Team name."
                 type: string
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
             required:
-              - t
+              - time
               - player
               - team
               - delta
@@ -4670,13 +4675,13 @@ components:
               team:
                 description: "Team name."
                 type: string
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
             required:
-              - t
+              - time
               - endTime
               - playerName
               - playerUserID
@@ -4699,13 +4704,13 @@ components:
               team:
                 description: "Team name."
                 type: string
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
             required:
-              - t
+              - time
               - player
               - team
             type: object
@@ -4783,13 +4788,13 @@ components:
               team:
                 description: "Team name."
                 type: string
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
                 type: integer
             required:
-              - t
+              - time
               - endTime
               - playerName
               - playerSlot
@@ -5033,7 +5038,7 @@ components:
               team:
                 description: "Team name."
                 type: string
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
@@ -5048,7 +5053,7 @@ components:
                 description: "Weapon — lowercase KTX class name (sg/ssg/ng/sng/gl/rl/lg)."
                 type: string
             required:
-              - t
+              - time
               - type
               - player
               - team
@@ -5086,7 +5091,7 @@ components:
               team:
                 description: "Team name."
                 type: string
-              t:
+              time:
                 description: "Event/sample time, int32 ms since match start."
                 maximum: 2.147483647e+09
                 minimum: -2.147483648e+09
@@ -5095,7 +5100,7 @@ components:
               - item
               - kind
               - entNum
-              - t
+              - time
               - takenBy
             type: object
           type:
@@ -5143,10 +5148,10 @@ components:
           type: array
           items:
             type: object
-            required: [t, type]
+            required: [time, type]
             additionalProperties: false
             properties:
-              t:
+              time:
                 type: integer
                 description: Match-relative time, int32 ms.
               type: { type: string, description: "Type discriminator." }
@@ -5207,7 +5212,7 @@ components:
               partial:
                 description: "This bucket is a short trailing window."
                 type: boolean
-              t:
+              time:
                 type: integer
                 description: Bucket start, int32 ms.
               team:
@@ -5217,7 +5222,7 @@ components:
                   type: object
                 type: object
             required:
-              - t
+              - time
               - p
             type: object
           type:
@@ -6198,12 +6203,12 @@ components:
           type:
             - object
             - "null"
-        t:
+        time:
           type: integer
           description: Sample instant, int32 ms.
       required:
         - timeUnit
-        - t
+        - time
         - players
       type: object
     LocTrails:
@@ -6396,7 +6401,7 @@ components:
       type: object
       description: >
         /chat body — `{timeUnit, messages}`. messages are
-        result.MatchEvent entries; each `t` is int32 ms (timeUnit is the
+        result.MatchEvent entries; each `time` is int32 ms (timeUnit is the
         constant `ms` echo). messages is [] when nothing matches.
       required: [timeUnit, messages]
       additionalProperties: false
@@ -6410,7 +6415,7 @@ components:
       type: object
       description: >
         /backpacks body — `{timeUnit, backpacks}`; backpacks is
-        [] when none. `t` is int32 ms (timeUnit is the constant `ms` echo).
+        [] when none. `time` is int32 ms (timeUnit is the constant `ms` echo).
       required: [timeUnit, backpacks]
       additionalProperties: false
       properties:
@@ -6423,7 +6428,7 @@ components:
       type: object
       description: >
         /weapon-pickups body — `{timeUnit, pickups}`; pickups is
-        [] when none. `t`/`nextDeathTime`/`dropTime` are int32 ms (timeUnit
+        [] when none. `time`/`nextDeathTime`/`dropTime` are int32 ms (timeUnit
         is the constant `ms` echo).
       required: [timeUnit, pickups]
       additionalProperties: false
@@ -6437,7 +6442,7 @@ components:
       type: object
       description: >
         /airgibs body — `{timeUnit, airgibs}`; airgibs is sorted
-        by height descending and [] on BSP-less maps. `t` is int32 ms
+        by height descending and [] on BSP-less maps. `time` is int32 ms
         (timeUnit is the constant `ms` echo).
       required: [timeUnit, airgibs]
       additionalProperties: false

@@ -260,11 +260,11 @@ the code, so it can't go stale. [`API.md`](API.md) is the high-level
 guide around it:
 
 - **Getting started** — demo addressing, auto-load, the typical flow.
-- **Query conventions + units** — the fixed naming convention (`t` =
-  int32 ms, `time` = float seconds; descriptive names carry the
-  endpoint's native unit, named by the `timeUnit` echo, schema v56) and
-  the always-ms dense payloads (raw stream entries, the columnar grid,
-  aim samples).
+- **Query conventions + units** — the dense/sparse key rule (sparse
+  event lists and singleton timestamps use `time`, sample-rate-scaled
+  dense arrays use `t`; both are int32 ms in the v57 pure-ms model, the
+  unit named by the constant `timeUnit` echo) and the always-ms dense
+  payloads (raw stream entries, the columnar grid, aim samples).
 - **Caching, errors, auth, CORS** — the cross-cutting behaviour.
 - **Choosing the right endpoint** — state-at vs buckets vs stream-slice
   vs events.

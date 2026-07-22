@@ -63,7 +63,7 @@ type BucketsView struct {
 // Team, when populated, is keyed by team name and carries the
 // IncludeTeam aggregate counters.
 type ViewBucket struct {
-	T       int32                     `json:"t"`
+	T       int32                     `json:"time"`
 	Players map[string]map[string]any `json:"p"`
 	// Team is keyed by team name → field → value. Most fields are
 	// int counters (rl, lg, w, th, ta, …); the special key "abt"

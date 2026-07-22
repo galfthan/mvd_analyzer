@@ -92,19 +92,22 @@ the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/airgibs` →
 `{timeUnit, airgibs:[…]}`, `/backpacks` → `{timeUnit, backpacks:[…]}`,
 `/weapon-pickups` → `{timeUnit, pickups:[…]}`.
 
-**Field-name conventions.** Per-item time keys are `t` (int32 ms)
-everywhere: the sparse event lists (`/frags`, `/damage`, `/shots`,
-`/chat`, `/backpacks`, `/weapon-pickups`, `/airgibs`), `/events` rows,
-`/buckets?layout=row` rows, `/state-at`'s envelope, and
-`/items?summary=true`'s `firstTake`. Descriptively-named times
+**Field-name conventions — the dense/sparse key rule.** The per-item
+time key follows what the data scales with; both spellings are int32 ms
+(the name never encodes the unit). **Event-scaled** sparse lists and
+singleton timestamps carry the descriptive **`time`**: the event lists
+(`/frags`, `/damage`, `/shots`, `/chat`, `/backpacks`,
+`/weapon-pickups`, `/airgibs`), `/events` rows, `/buckets?layout=row`
+rows, `/state-at`'s envelope, and `/items?summary=true`'s `firstTake`.
+**Sample-rate-scaled** dense arrays carry the terse **`t`**: `/aim`'s
+crosshair `t` + `lgRamp` `since`, the columnar `/buckets` grid, and the
+raw stream tracks embedded in `/stream-slice` (`h:[{ "t":105000,… }]`,
+`pos.t:[…]`, `rl:[{ "s","e" }]`). Other descriptively-named times
 (`endTime`, `availableFrom`/`takenAt`/`respawnAt`, `nextDeathTime`,
 `dropTime`, `duration`, `start`/`end`) are int32 ms too. Envelope bounds
 are `start`/`end` on `/stream-slice` and `/loc-trails`, and
 `start`/`windowMs` on the columnar `/buckets` axis
-(`time(i)=start+i*windowMs`). Dense per-sample arrays use compact names
-and are int32 ms: `/aim`'s crosshair `t` + `lgRamp` `since`, and the raw
-stream tracks embedded in `/stream-slice` (`h:[{ "t":105000,… }]`,
-`pos.t:[…]`, `rl:[{ "s","e" }]`).
+(`time(i)=start+i*windowMs`).
 
 The exceptions — time-carrying responses that still don't echo:
 

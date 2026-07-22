@@ -37,7 +37,7 @@ type EventsView struct {
 // and may be nil for spawn / death where the timestamp is the whole
 // signal.
 type TaggedEvent struct {
-	T      int32          `json:"t"`
+	T      int32          `json:"time"`
 	Type   string         `json:"type"`
 	Player string         `json:"player,omitempty"`
 	Detail map[string]any `json:"detail,omitempty"`

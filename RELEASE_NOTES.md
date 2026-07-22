@@ -98,13 +98,26 @@ The breaking sweep. **Every time value in the API is now int32
 milliseconds** — request params and response fields, REST and MCP alike.
 This is the client-migration section: read the two tripwires first.
 
-**⚠️ Tripwire 1 — `/events` `t` is now milliseconds.** The `/events` row
-timestamp was float **seconds** in v55 (under the key `t`), was **absent**
-in v56 (the intermediate seconds convention used `time`), and is int32
-**milliseconds** under `t` again in v57. An archaeological client that
-still reads `/events[].t` as seconds silently gets values **1000× too
-large**. There is no shape signal for this beyond `X-Schema-Version: 57`
-— audit any code that read `/events` `t` before v57.
+**⚠️ Tripwire 1 — the key moved, so the break is loud, not silent.**
+The per-item time key follows a **dense/sparse rule**: event-scaled
+sparse surfaces use the descriptive **`time`**, sample-rate-scaled dense
+arrays use the terse **`t`** — both int32 ms. This is deliberately the
+v55 spelling, which splits clients into two clean groups:
+
+- **v55 `time`(ms) readers are unchanged.** `/frags`, `/damage`,
+  `/shots`, `/chat`, `/backpacks`, `/weapon-pickups` already carried
+  their timestamp under `time` in int32 ms in v55; that key and unit are
+  untouched in v57. No migration.
+- **v55 `t`(seconds) readers on `/events`, `/buckets?layout=row`,
+  `/state-at` break loudly — by design.** Those surfaces carried `t` in
+  float **seconds** in v55. In v57 the value is `time` in int32 **ms** —
+  the `t` key is *gone*. A stale client reading `/events[].t` now gets
+  `undefined` and fails fast instead of silently ingesting a 1000×-off
+  number; re-read the field as `time` (already in ms).
+
+The only **same-key unit flip** left is inside `/events` detail maps:
+the `startTime`/`endTime` values went float seconds → int32 ms with
+their keys kept — audit any code that read those as seconds.
 
 **⚠️ Tripwire 2 — `from`/`to`/`time` query params are now integer ms.**
 On every demo endpoint these were float **seconds**; they are now
@@ -114,16 +127,17 @@ milliseconds)` hint, rather than silently misfiltering. Multiply your old
 seconds values by 1000. (Search `from`/`to` are unchanged — calendar
 dates `YYYY-MM-DD`.)
 
-**Unit flip — the six v56 seconds surfaces, now int32 ms:**
+**Unit flip — the seconds surfaces, now int32 ms (keys per the
+dense/sparse rule):**
 
-| Surface | v56 | v57 |
+| Surface | v55 | v57 |
 |---|---|---|
-| `/events` rows | `time` float s | `t` int32 ms (`endTime`/`duration` in detail also ms) |
-| `/buckets?layout=row` | per-bucket `time` float s | `t` int32 ms |
-| `/state-at` | `time` float s (envelope) | `t` int32 ms |
+| `/events` rows | `t` float s | `time` int32 ms (`startTime`/`endTime` in detail also ms) |
+| `/buckets?layout=row` | per-bucket `t` float s | `time` int32 ms |
+| `/state-at` | `t` float s (envelope) | `time` int32 ms |
 | `/stream-slice` envelope | `startTime`/`endTime` float s | `start`/`end` int32 ms |
-| `/loc-trails` | `start`/`end` float s | int32 ms (keys unchanged) |
-| `/items?summary=true` | `firstTake.time` float s | `firstTake.t` int32 ms |
+| `/loc-trails` | `s`/`e` float s | `start`/`end` int32 ms |
+| `/items?summary=true` | `firstTake.t` float s | `firstTake.time` int32 ms |
 | query params `from`/`to`/`time` | float s | integer ms |
 
 **Key renames (JSON):**
@@ -133,7 +147,7 @@ dates `YYYY-MM-DD`.)
 | `o` / `iv` | `other` / `intervals` | `LosTrack` (`/los`, `/artifacts/los`, `pvs`) |
 | `events` | `messages` | `MessagesResult` array — `/artifacts/messages` is now `{messages:{messages:[…]}}` |
 | `startMs` | `start` | columnar `/buckets` axis (implicit `time(i)=start+i*windowMs`) |
-| `time` | `t` | per-item time keys: `/events`, `/buckets?layout=row`, `/state-at`, `/items` `firstTake` |
+| `t` | `time` | per-item time key on the flipped view surfaces: `/events`, `/buckets?layout=row`, `/state-at`, `/items` `firstTake` (the v55 `t`(seconds) → v57 `time`(ms); the stored sparse lists already spelled it `time`) |
 | `startTime` / `endTime` | `start` / `end` | `/stream-slice` envelope |
 
 **null → `[]`.** Governed top-level arrays that could serialize as `null`
@@ -146,6 +160,11 @@ the view layer does no float time math. `timeUnit` is kept as a constant
 `"ms"` self-description echo — now truthful on every governed response.
 
 **Deliberate non-renames** (documented exceptions, unchanged in v57):
+the dense/sparse time-key rule keeps the terse **`t`** on every
+sample-rate-scaled array (stream tracks, aim samples, the columnar
+`/buckets` grid, projectile/beam columns) and the descriptive **`time`**
+on the sparse stored lists that already used it in v55 (frags, damage,
+shots, chat, backpacks, weapon-pickups, opening takes, timeline events);
 `result.Interval` keeps terse `s`/`e` (per-row keys in dense arrays stay
 terse — the payload discipline is deliberate); projectile / beam `s*` /
 `e*` column-family prefixes (`s`,`sx`… / `e`,`ez` — these *are* flight-time
