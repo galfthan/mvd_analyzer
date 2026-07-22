@@ -34,8 +34,10 @@ info:
     milliseconds)` hint rather than misfiltering. Every response time field
     is int32 ms — but two key spellings share that one unit, by a
     dense/sparse rule: sample-rate-scaled arrays use the terse key `t`
-    (stream tracks, aim samples, the columnar bucket grid, projectile/beam
-    columns); event-scaled sparse lists and singleton timestamps use the
+    (stream tracks, aim samples, projectile/beam columns); the columnar
+    bucket grid carries no time key at all — its axis is implicit
+    (`time(i) = start + i*windowMs`); event-scaled sparse lists and
+    singleton timestamps use the
     descriptive key `time` (frag/damage/shot/chat/backpack/weapon-pickup/
     airgib/timeline entries, events rows, row-bucket `time`, state-at
     `time`, item `firstTake.time`). The name never encodes the unit —

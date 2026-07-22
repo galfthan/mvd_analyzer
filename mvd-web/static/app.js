@@ -1852,7 +1852,7 @@ function displayKeyMoments(result) {
     // Get hub info for viewer links (from currentResult which may have hubInfo set)
     const hubInfo = currentResult?.hubInfo;
 
-    // Schema v56: powerupEvents/fragStreaks carry `time` (int32 ms) plus the
+    // Schema v57: powerupEvents/fragStreaks carry `time` (int32 ms) plus the
     // descriptive endTime/duration (also ms). Convert to seconds at intake
     // so the rest of this function (formatDuration, setCurrentTime, hub
     // URL `from`/`to` which expect seconds) is unchanged.
@@ -2486,7 +2486,7 @@ function displayPackDrops(result) {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // Schema v56: backpacks[].time, weaponPickups[].time / .nextDeathTime /
+    // Schema v57: backpacks[].time, weaponPickups[].time / .nextDeathTime /
     // .dropTime are int32 ms. The pickup↔drop join must happen in the
     // same time space — index against raw ms `dropTime` (an exact int)
     // before converting. After the join, convert ms→s so hubAnchor /
@@ -4647,7 +4647,7 @@ function buildFullChat() {
 
     if (!currentResult?.messages?.messages || teams.length < 2) return;
 
-    // Schema v57: messages.messages[].t is int32 ms on the raw result;
+    // Schema v57: messages.messages[].time is int32 ms on the raw result;
     // timelineState.events was already converted to seconds at intake in
     // displayTimelineAnalysis, so use that pre-converted copy here.
     // `duration` (timelineState.duration) is also seconds.
@@ -6307,7 +6307,7 @@ function initMapView(result) {
     // Backpack drops — mirrors mapState.deathEvents in shape so renderMap
     // can fade them on the same DEATH_X_DURATION timeline. Only RL/LG drops
     // exist in result.backpacks today (see qwanalytics/result/backpacks.go).
-    // Schema v56: d.time is int32 ms; convert to seconds because the renderMap
+    // Schema v57: d.time is int32 ms; convert to seconds because the renderMap
     // fade compares against mapState.currentTime (seconds) and DEATH_X_DURATION
     // (seconds).
     mapState.dropEvents = (result.backpacks || []).map(d => ({

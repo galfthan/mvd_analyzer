@@ -178,14 +178,17 @@ func (p *proxyBackend) fetchOpaque(ctx context.Context, method, path string, q u
 	return out, nil
 }
 
-// fetchOpaqueList is fetchOpaque for the mvd-api endpoints whose body is
-// a top-level JSON array (/chat, /backpacks, /weapon-pickups). The MCP
-// SDK requires a tool's structuredContent to be a JSON object, so a bare
-// array fails validation ("expected record, received array"). We wrap it
-// under `key` here, at the MCP boundary, rather than reshaping the REST
-// contract — bare-array bodies are valid HTTP and the array-only
-// constraint is the MCP layer's. An already-object body (defensive, e.g.
-// a future shape change or an error envelope) passes through untouched.
+// fetchOpaqueList is fetchOpaque for the /chat, /backpacks, and
+// /weapon-pickups endpoints. Since v56 these REST bodies are already
+// `{timeUnit, <list>}` objects (keyed `messages` / `backpacks` /
+// `pickups`), so the object branch below now handles every real response
+// and passes it through untouched — the MCP structuredContent object
+// constraint is satisfied by the envelope itself. The array-wrapping
+// branch is retained as dead-code defence: if a REST body ever regressed
+// to a bare top-level array (which the MCP SDK rejects with "expected
+// record, received array"), it is wrapped under `key` at the MCP boundary
+// rather than reshaping the REST contract. `key` still matches the
+// envelope's list key so both paths yield the same shape.
 func (p *proxyBackend) fetchOpaqueList(ctx context.Context, method, path string, q url.Values, key string) (any, error) {
 	var out any
 	if err := p.do(ctx, method, path, q, &out); err != nil {

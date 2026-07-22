@@ -727,8 +727,10 @@ package result
 //     int32 ms but ALSO under `time`, dropping the transient v56 `t` for good.
 //     Both keys are ALWAYS int32 ms; the unit is NEVER encoded in the name (the
 //     `timeUnit` echo names it). DENSE terse keys DELIBERATELY kept: PositionTrack
-//     `t`, ChangeI16/ChangeStr `t`, result.Interval `s`/`e`, aim `t`, columnar
-//     `t`/`v`, projectile/beam `s`,`sx`…`e`,`ez`.
+//     `t`, ChangeI16/ChangeStr `t`/`v` (the stream-slice change columns),
+//     result.Interval `s`/`e`, aim `t`, projectile/beam `s`,`sx`…`e`,`ez`.
+//     (Columnar BUCKETS carry no time key at all — their axis is the
+//     implicit start + i*windowMs.)
 //   - KEY RENAMES (JSON tags; Go field names mostly unchanged). LosTrack
 //     `o`/`iv` → `other`/`intervals` (once-per-track, descriptive);
 //     MessagesResult array key `events` → `messages`; ColumnarBuckets `startMs`

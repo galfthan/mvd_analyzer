@@ -1283,15 +1283,15 @@ outputs, REST and MCP alike — the one-rule model:
   deleted.
 - **`timeUnit` is a constant `"ms"` self-description echo.** Every
   `/v1/demos/{id}/*` response that carries match-position time values
-  echoes a top-level **`"timeUnit":"ms"`**. The two exceptions carry no
-  match-relative time and no echo: `/demoinfo` (KTX's own clock, a mix of
-  native units — §DemoInfoResult) is the sole seconds island, and
-  `/artifacts/{name}` serves raw stored sections byte-for-byte
-  (`/artifacts/los` is the lone materialized-view exception, aliasing
-  `/los` with its `"ms"` echo). `/loc-graph` echoes too — its node weights
-  are aggregate durations, int32 ms since v57. Responses with no time
-  value at all — `/loc-table`, `/metadata` — carry no echo; `/demoinfo` is
-  the genuinely sole seconds island.
+  echoes a top-level **`"timeUnit":"ms"`**. `/artifacts/{name}` is no
+  exception: since Phase 5 it carries a `"timeUnit":"ms"` sibling for
+  every time-bearing section it serves (`/artifacts/los`, aliasing `/los`,
+  is one such). `/loc-graph` echoes too — its node weights are aggregate
+  durations, int32 ms since v57. The exceptions carry no match-relative
+  time and no echo: `/demoinfo` (KTX's own clock, a mix of native units —
+  §DemoInfoResult) is the sole seconds island, and the genuinely timeless
+  sections — `/metadata`, `/loc-table`, `/maps/{map}/entities` — carry no
+  echo.
 - **Time-valued query params are int32 ms too.** `from` / `to` / `time`
   on demo endpoints are integer milliseconds; a non-integer value 400s
   `invalid_param` with an `(integer milliseconds)` hint. Search
@@ -1590,7 +1590,7 @@ view.StateAt(r, view.StateAtOptions{
     Players: []string{"bps"},
     Fields:  []string{"h", "a", "rl", "pos"},
 })
-// → *StateAtView { Time (JSON key "t"), Players: map[string]PlayerStateAt }
+// → *StateAtView { Time (JSON key "time"), Players: map[string]PlayerStateAt }
 ```
 
 Resolves each requested field at `Time`. Change streams use latest
@@ -1776,13 +1776,13 @@ its `teleportDst` (where you arrive) by `teleportSrc.target` ==
 ## Backpacks (`backpacks`)
 
 Defined in `result/backpacks.go`. Each `BackpackDrop` is
-`{ t, player, team, weapon ("rl"|"lg"), origin, loc, entNum }`.
+`{ time, player, team, weapon ("rl"|"lg"), origin, loc, entNum }`.
 `entNum` is the join key with `WeaponPickup.BackpackEnt`.
 
 ## WeaponPickups (`weaponPickups`)
 
 Defined in `result/weapon_pickups.go`. Each entry is a slot-weapon
-acquisition: `{ t, player, team, weapon,
+acquisition: `{ time, player, team, weapon,
 source ("world"|"backpack"|"unknown"), hadBefore, inferred, kills,
 nextDeathTime, backpackEnt, dropper, dropperTeam, dropTime }`. `kills`
 is the kills-before-next-death effectiveness metric (only non-zero on
@@ -1820,7 +1820,7 @@ one cheap fetch.
   (warmup takes are skipped), sorted by time. Tracked kinds: armors,
   mega, powerups, and the RL/LG weapon pads. `item`/`entNum`/`loc`
   identify the spawner (`ItemTimeline` naming: `ya_1` vs `ya_2`). A
-  spawner nobody took has no entry. `t` is match-relative ms.
+  spawner nobody took has no entry. `time` is match-relative ms.
 - Omitted entirely when no match start was detected (t=0 would be the
   demo open, not an opening).
 

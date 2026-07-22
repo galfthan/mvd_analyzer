@@ -104,40 +104,66 @@ sparse surfaces use the descriptive **`time`**, sample-rate-scaled dense
 arrays use the terse **`t`** — both int32 ms. This is deliberately the
 v55 spelling, which splits clients into two clean groups:
 
-- **v55 `time`(ms) readers are unchanged.** `/frags`, `/damage`,
-  `/shots`, `/chat`, `/backpacks`, `/weapon-pickups` already carried
-  their timestamp under `time` in int32 ms in v55; that key and unit are
-  untouched in v57. No migration.
+- **v55 `time`(ms) per-item keys and units are unchanged.** `/frags`,
+  `/damage`, `/shots`, `/chat`, `/backpacks`, `/weapon-pickups` already
+  carried their timestamp under `time` in int32 ms in v55; that key and
+  unit are untouched in v57. **But four response *envelopes* moved**
+  (v56, not v57): `/chat`, `/backpacks`, `/weapon-pickups`, and
+  `/airgibs` changed from a bare top-level array to a `{timeUnit, <list>}`
+  envelope, keyed `messages` / `backpacks` / `pickups` / `airgibs`
+  respectively. That is a **loud break** — a v55 client iterating the
+  response body directly now iterates an object and fails; reach through
+  the named list key instead. The per-item keys and units inside are
+  unchanged. `/frags`, `/damage`, `/shots` keep **truly-additive**
+  envelopes (the `timeUnit` sibling was flattened onto the existing
+  object), so old readers of those three are fine.
 - **v55 `t`(seconds) readers on `/events`, `/buckets?layout=row`,
-  `/state-at` break loudly — by design.** Those surfaces carried `t` in
-  float **seconds** in v55. In v57 the value is `time` in int32 **ms** —
-  the `t` key is *gone*. A stale client reading `/events[].t` now gets
-  `undefined` and fails fast instead of silently ingesting a 1000×-off
-  number; re-read the field as `time` (already in ms).
+  `/state-at`, and `/items?summary` break loudly — by design.** Those
+  surfaces carried `t` in float **seconds** in v55. In v57 the value is
+  `time` in int32 **ms** — the `t` key is *gone*. A stale client reading
+  `/events[].t` now gets `undefined` and fails fast instead of silently
+  ingesting a 1000×-off number; re-read the field as `time` (already in
+  ms). ⚠️ **A dual-key fallback does NOT protect you.** A v55-portable
+  reader doing `ev.get("time", ev.get("t"))` (or `ev.t ?? ev.time`) is not
+  caught by the loud break — the fallback now resolves to `time` and
+  yields **ms where the code expected seconds**, a silent 1000× error.
+  Drop the fallback and read `time` as ms.
 
-The only **same-key unit flip** left is inside `/events` detail maps:
-the `startTime`/`endTime` values went float seconds → int32 ms with
-their keys kept — audit any code that read those as seconds.
+The **same-key unit flips** left (value float seconds → int32 ms, key
+kept — audit any code that read those as seconds):
+
+- `/events` detail maps: `endTime` (powerup + streak details) and
+  `duration` (streak detail). There is no `startTime` key.
+- `/loc-graph` node time weights (`total`/`byPlayer`/`byTeam` plus the
+  `armed`/`unarmed`/`quad`/`pent` breakdowns) — see [Post-review
+  fixes](#post-review-fixes) below.
 
 **⚠️ Tripwire 2 — `from`/`to`/`time` query params are now integer ms.**
 On every demo endpoint these were float **seconds**; they are now
 **integer milliseconds**. Old float-seconds values are rejected loudly:
 `from=10.5` (or any non-integer) 400s `invalid_param` with an `(integer
-milliseconds)` hint, rather than silently misfiltering. Multiply your old
-seconds values by 1000. (Search `from`/`to` are unchanged — calendar
-dates `YYYY-MM-DD`.)
+milliseconds)` hint, rather than silently misfiltering, and a negative
+value now 400s too (`must be >= 0`). Multiply your old seconds values by
+1000. (Search `from`/`to` are unchanged — calendar dates `YYYY-MM-DD`.)
+**But the tripwire only catches NON-INTEGER forms.** A whole-number value
+that *was* meant as seconds — e.g. `from=60` (intending 60 s) — is a
+perfectly valid integer ms and **cannot be detected**: it migrates
+**silently** to a window 1000× too small (`from=60` now means 60 ms and
+returns almost nothing instead of erroring). Audit every caller that
+passed integer seconds and multiply by 1000.
 
 **Unit flip — the seconds surfaces, now int32 ms (keys per the
 dense/sparse rule):**
 
 | Surface | v55 | v57 |
 |---|---|---|
-| `/events` rows | `t` float s | `time` int32 ms (`startTime`/`endTime` in detail also ms) |
+| `/events` rows | `t` float s | `time` int32 ms (`endTime`/`duration` in detail also ms) |
 | `/buckets?layout=row` | per-bucket `t` float s | `time` int32 ms |
 | `/state-at` | `t` float s (envelope) | `time` int32 ms |
 | `/stream-slice` envelope | `startTime`/`endTime` float s | `start`/`end` int32 ms |
 | `/loc-trails` | `s`/`e` float s | `start`/`end` int32 ms |
 | `/items?summary=true` | `firstTake.t` float s | `firstTake.time` int32 ms |
+| `/loc-graph` node weights | `total`/`byPlayer`/`byTeam` (+`armed`/`unarmed`/`quad`/`pent`) float s | same keys, int32 ms (see [Post-review fixes](#post-review-fixes)) |
 | query params `from`/`to`/`time` | float s | integer ms |
 
 **Key renames (JSON):**
@@ -251,6 +277,9 @@ Three follow-up fixes on top of the v57 shapes; no further schema bump.
     everywhere to its honest form: time-carrying responses echo, with
     `/demoinfo` and `/artifacts/{name}` exempt, and the three timeless
     responses (`/loc-table`, `/loc-graph`, `/metadata`) carry no echo.
+    [v57 correction: `/loc-graph` node weights ARE time-valued — see v57
+    Post-review fixes; they are int32 ms as of v57, so `/loc-graph` echoes
+    `timeUnit:"ms"` and is no longer timeless.]
   - **Security.** `hubfetch` Search/Resolve now cap the upstream catalog
     read at 16 MiB (`maxCatalogBytes`) — previously an unbounded
     `io.ReadAll` let a compromised/buggy hub or a MITM of
