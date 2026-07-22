@@ -24,6 +24,7 @@ type NailsFrameEvent struct {
 
 func (e *NailsFrameEvent) EventType() EventType { return EventNails }
 func (e *NailsFrameEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *NailsFrameEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // SetDecodeNails opts the parser into nail tracking. It enables both nail
 // sources: decoding svc_nails / svc_nails2 into NailsFrameEvent (non-nailhack

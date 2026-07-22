@@ -66,7 +66,7 @@ func (a *BackpackAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(events.Sec(e.TimeMs))
+		a.timing.OnIntermission(e.TimeMs)
 	case *events.StuffTextEvent:
 		if strings.HasPrefix(e.Command, "fullserverinfo ") {
 			a.extractMapName(e.Command)

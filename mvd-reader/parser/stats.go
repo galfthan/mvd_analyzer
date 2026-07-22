@@ -14,6 +14,7 @@ type StatUpdateEvent struct {
 
 func (e *StatUpdateEvent) EventType() EventType { return EventStatUpdate }
 func (e *StatUpdateEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *StatUpdateEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // FragUpdateEvent is emitted when a player's frag count changes
 type FragUpdateEvent struct {
@@ -24,6 +25,7 @@ type FragUpdateEvent struct {
 
 func (e *FragUpdateEvent) EventType() EventType { return EventFragUpdate }
 func (e *FragUpdateEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *FragUpdateEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // DamageEvent is emitted when damage is dealt (from hidden messages)
 type DamageEvent struct {
@@ -37,6 +39,7 @@ type DamageEvent struct {
 
 func (e *DamageEvent) EventType() EventType { return EventDamage }
 func (e *DamageEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *DamageEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // DemoInfoEvent is emitted when embedded JSON stats are found
 type DemoInfoEvent struct {
@@ -47,6 +50,7 @@ type DemoInfoEvent struct {
 
 func (e *DemoInfoEvent) EventType() EventType { return EventDemoInfo }
 func (e *DemoInfoEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *DemoInfoEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // DemoStartTimestampEvent carries the wall-clock time the server opened the
 // MVD file (mvdhidden block 0x000B). UnixMs is Unix epoch milliseconds; it is
@@ -67,6 +71,7 @@ type DemoStartTimestampEvent struct {
 
 func (e *DemoStartTimestampEvent) EventType() EventType { return EventDemoStartTimestamp }
 func (e *DemoStartTimestampEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *DemoStartTimestampEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // PausedDurationEvent carries one mvdhidden_paused_duration sample (0x000A):
 // the real wall-clock milliseconds that elapsed across a single demo idle frame
@@ -89,6 +94,7 @@ type PausedDurationEvent struct {
 
 func (e *PausedDurationEvent) EventType() EventType { return EventPausedDuration }
 func (e *PausedDurationEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *PausedDurationEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // DeathEvent is emitted when a player transitions from alive to dead.
 // Two protocol-level signals feed this:
@@ -115,6 +121,7 @@ type DeathEvent struct {
 
 func (e *DeathEvent) EventType() EventType { return EventDeath }
 func (e *DeathEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *DeathEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // SpawnEvent is emitted when a player transitions from dead to alive —
 // either a respawn after death, or a first-spawn when a player joins
@@ -133,6 +140,7 @@ type SpawnEvent struct {
 
 func (e *SpawnEvent) EventType() EventType { return EventSpawn }
 func (e *SpawnEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *SpawnEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // parseUpdateStat parses svc_updatestat message (byte value)
 func (p *Parser) parseUpdateStat(r *mvd.BufferReader, timeMs int32, playerNum int) error {

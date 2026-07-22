@@ -35,6 +35,7 @@ type ItemPickupHintEvent struct {
 
 func (e *ItemPickupHintEvent) EventType() EventType { return EventItemPickupHint }
 func (e *ItemPickupHintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ItemPickupHintEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // BackpackPickupHintEvent is the typed representation of KTX's
 // `//ktx bp <backpack_ent> <player_ent>` STUFFCMD_DEMOONLY directive
@@ -55,6 +56,7 @@ type BackpackPickupHintEvent struct {
 
 func (e *BackpackPickupHintEvent) EventType() EventType { return EventBackpackPickupHint }
 func (e *BackpackPickupHintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *BackpackPickupHintEvent) EventTimeMs() int32   { return e.TimeMs }
 
 const (
 	// ktxDirectivePrefix is the common opener for every KTX

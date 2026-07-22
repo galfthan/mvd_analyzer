@@ -26,6 +26,10 @@ that downstream consumers render, summarise, or feed to an agent.
   v57, the pure-ms model — no seconds surfaces except `/demoinfo`'s
   KTX-native island). See [RESULT_SCHEMA.md](RESULT_SCHEMA.md) §"Time
   units". Full field reference in [RESULT_SCHEMA.md](RESULT_SCHEMA.md).
+  Internally too the analyzers consume integer ms end to end: every
+  event carries `TimeMs int32` (`EventTimeMs()`), so there are no
+  float-seconds time intermediates in the pipeline — `events.Sec(ms)`
+  is a presentation-only helper for human-readable tooling.
 - `analyzer/` — the `Analyzer` interface, the read-only event/userinfo
   `Context`, the typed `CoreOutputs` bundle that producer analysers
   populate for downstream consumers, and the `Registry` that drives a

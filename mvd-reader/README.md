@@ -49,6 +49,16 @@ for {
 }
 ```
 
+**Event time.** Every event carries the demo-clock timestamp as
+`TimeMs int32` (integer milliseconds), exposed on the `Event` interface
+as `EventTimeMs() int32`. That is the canonical unit the whole pipeline
+consumes — no event struct holds float seconds. `EventTime() float64`
+and the `events.Sec(ms)` helper are presentation twins
+(`float64(TimeMs)*0.001`) for logs / human-readable tooling only. The
+one wire-native float-seconds time is `ServerData.ServerTime`
+(id1 `svc_serverdata`, on `ServerDataEvent.Data`), kept as-is because
+that is how the protocol carries it.
+
 The concrete event list, in stable order:
 
 | Type | Purpose |

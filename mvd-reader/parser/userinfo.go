@@ -15,6 +15,7 @@ type UserInfoEvent struct {
 
 func (e *UserInfoEvent) EventType() EventType { return EventUserInfo }
 func (e *UserInfoEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *UserInfoEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // parseUserInfo parses svc_updateuserinfo message
 func (p *Parser) parseUserInfo(r *mvd.BufferReader, timeMs int32) error {

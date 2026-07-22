@@ -24,6 +24,7 @@ type PlayerPositionEvent struct {
 
 func (e *PlayerPositionEvent) EventType() EventType { return EventPlayerInfo }
 func (e *PlayerPositionEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *PlayerPositionEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // parsePlayerInfo parses svc_playerinfo message and emits position events
 func (p *Parser) parsePlayerInfo(r *mvd.BufferReader, timeMs int32, floatCoords bool) error {

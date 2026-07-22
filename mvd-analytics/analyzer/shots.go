@@ -152,7 +152,7 @@ func (a *ShotsAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(events.Sec(e.TimeMs))
+		a.timing.OnIntermission(e.TimeMs)
 	case *events.PlayerPositionEvent:
 		a.pos[e.PlayerNum] = e.Origin
 	case *events.SoundEvent:
@@ -320,9 +320,9 @@ func (a *ShotsAnalyzer) Finalize(result *Result) error {
 	// keeps nothing; started with no detected end (demo cut before intermission)
 	// is unbounded above.
 	started := a.timing.Started
-	matchStartMs := msTime(a.timing.StartTime)
+	matchStartMs := a.timing.StartTime
 	ended := a.timing.Ended
-	matchEndMs := msTime(a.timing.EndTime)
+	matchEndMs := a.timing.EndTime
 	inMatchWindow := func(tMs int32) bool {
 		if !started || tMs < matchStartMs {
 			return false

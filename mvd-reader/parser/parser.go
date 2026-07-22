@@ -19,6 +19,10 @@ var errUnknownSvc = errors.New("unknown svc command")
 type Event interface {
 	EventType() EventType
 	EventTime() float64
+	// EventTimeMs is the canonical integer-millisecond event timestamp.
+	// EventTime() is its float-seconds presentation twin (float64(TimeMs)*0.001);
+	// the pipeline consumes ms and only formats seconds at the edges.
+	EventTimeMs() int32
 }
 
 // EventType identifies the type of event
@@ -67,6 +71,7 @@ type IntermissionEvent struct {
 
 func (e *IntermissionEvent) EventType() EventType { return EventIntermission }
 func (e *IntermissionEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *IntermissionEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // StuffTextEvent is emitted for svc_stufftext (cmd 9). The server pushes
 // console commands into the client this way — at connection time it sends
@@ -80,6 +85,7 @@ type StuffTextEvent struct {
 
 func (e *StuffTextEvent) EventType() EventType { return EventStuffText }
 func (e *StuffTextEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *StuffTextEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // CenterPrintEvent is emitted for svc_centerprint (cmd 26). KTX uses this
 // during the match countdown to render the full match settings table
@@ -93,6 +99,7 @@ type CenterPrintEvent struct {
 
 func (e *CenterPrintEvent) EventType() EventType { return EventCenterPrint }
 func (e *CenterPrintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *CenterPrintEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // ServerInfoEvent is emitted for svc_serverinfo (cmd 52), which is a
 // single-key/value serverinfo update sent mid-game (status changes,
@@ -106,6 +113,7 @@ type ServerInfoEvent struct {
 
 func (e *ServerInfoEvent) EventType() EventType { return EventServerInfo }
 func (e *ServerInfoEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ServerInfoEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // maxHiddenBlockSize caps the length of a single hidden-message block
 // (dem_multiple with player_mask=0). The largest legitimate block in the

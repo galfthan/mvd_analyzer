@@ -93,23 +93,23 @@ func (a *TimelineAnalyzer) SetRegionsOverride(regs []config.MapRegionOverride) {
 
 // fragEvent tracks a frag before team assignment
 type fragEvent struct {
-	Time      float64
+	Time      int32 // demo-clock ms
 	PlayerNum int
 	Delta     int // +N for kills, -N for suicides/teamkills
 }
 
 // deathEvent tracks a player death (detected via health transition)
 type deathEvent struct {
-	Time      float64
+	Time      int32 // demo-clock ms
 	PlayerNum int
 }
 
 // pauseSample is one mvdhidden 0x000A paused_duration block: the demo-relative
-// (game) time of the idle frame and the real wall-clock ms it spanned. The
+// (game) time of the idle frame (ms) and the real wall-clock ms it spanned. The
 // game clock is frozen across a pause, so all samples of one pause share a
 // Time; Finalize sums DurationMs over each contiguous run.
 type pauseSample struct {
-	Time       float64
+	Time       int32
 	DurationMs int
 }
 
@@ -177,7 +177,7 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 		// svc_intermission is the most reliable end-of-match signal: KTX
 		// fires it on timelimit/fraglimit hit even when there's no matching
 		// bprint string.
-		a.timing.OnIntermission(events.Sec(e.TimeMs))
+		a.timing.OnIntermission(e.TimeMs)
 	case *events.FragUpdateEvent:
 		// Track frag events from frag updates (more reliable than stat updates)
 		a.handleFragUpdate(e)
@@ -270,7 +270,7 @@ func (a *TimelineAnalyzer) handleFragUpdate(e *events.FragUpdateEvent) {
 		// reads 272→10, but by keeping state at 9 the correction gives delta +1).
 		if delta >= -5 && delta <= 5 {
 			a.rawFrags = append(a.rawFrags, fragEvent{
-				Time:      events.Sec(e.TimeMs),
+				Time:      e.TimeMs,
 				PlayerNum: e.PlayerNum,
 				Delta:     delta,
 			})
@@ -338,7 +338,7 @@ func (a *TimelineAnalyzer) handleDeath(e *events.DeathEvent) {
 		return
 	}
 	state := a.getOrCreatePlayerState(e.PlayerNum)
-	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: events.Sec(e.TimeMs), PlayerNum: e.PlayerNum})
+	a.rawDeaths = append(a.rawDeaths, deathEvent{Time: e.TimeMs, PlayerNum: e.PlayerNum})
 	state.streams.recordDeath(e.TimeMs)
 	state.isDead = true
 }
@@ -351,7 +351,7 @@ func (a *TimelineAnalyzer) handleSpawn(e *events.SpawnEvent) {
 		return
 	}
 	state := a.getOrCreatePlayerState(e.PlayerNum)
-	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: events.Sec(e.TimeMs), PlayerNum: e.PlayerNum})
+	a.rawSpawns = append(a.rawSpawns, deathEvent{Time: e.TimeMs, PlayerNum: e.PlayerNum})
 	state.streams.recordSpawn(e.TimeMs)
 	state.isDead = false
 }

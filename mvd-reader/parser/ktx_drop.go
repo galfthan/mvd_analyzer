@@ -18,6 +18,7 @@ type BackpackDropHintEvent struct {
 
 func (e *BackpackDropHintEvent) EventType() EventType { return EventBackpackDropHint }
 func (e *BackpackDropHintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *BackpackDropHintEvent) EventTimeMs() int32   { return e.TimeMs }
 
 const ktxDropPrefix = "//ktx drop "
 

@@ -85,7 +85,7 @@ func (d *weaponStayDetector) WeaponStay() bool {
 // Loadout stat updates land in the respawn frame itself, so the window
 // is one-to-two frames; anything wider eats genuine fast grabs — on
 // small maps (dm4) players reach a weapon within 250 ms of spawning.
-const spawnSuppressWindow = 0.050
+const spawnSuppressWindow int32 = 50
 
 // deathGrabWindow: a weapon-bit gain landing this soon after the
 // slot's DeathEvent is a grab-then-die — the player touched the pad
@@ -95,7 +95,7 @@ const spawnSuppressWindow = 0.050
 // only ever clears weapon bits (pack drop, respawn strip), so a bit
 // gained in the death frame can only be a real touch, and KTX counts
 // it (weapon_touch ran before the kill).
-const deathGrabWindow = 0.050
+const deathGrabWindow int32 = 50
 
 // weaponFlipTracker turns per-slot STAT_ITEMS updates into weapon-grant
 // detections for weapon-stay synthesis.
@@ -125,25 +125,25 @@ type weaponFlipTracker struct {
 	items     map[int]int
 	seeded    map[int]bool
 	dead      map[int]bool
-	lastSpawn map[int]float64
-	lastDeath map[int]float64
+	lastSpawn map[int]int32
+	lastDeath map[int]int32
 }
 
-func (t *weaponFlipTracker) OnSpawn(slot int, time float64) {
+func (t *weaponFlipTracker) OnSpawn(slot int, time int32) {
 	if t.lastSpawn == nil {
-		t.lastSpawn = make(map[int]float64)
+		t.lastSpawn = make(map[int]int32)
 		t.dead = make(map[int]bool)
 	}
 	t.lastSpawn[slot] = time
 	t.dead[slot] = false
 }
 
-func (t *weaponFlipTracker) OnDeath(slot int, time float64) {
+func (t *weaponFlipTracker) OnDeath(slot int, time int32) {
 	if t.dead == nil {
 		t.dead = make(map[int]bool)
 	}
 	if t.lastDeath == nil {
-		t.lastDeath = make(map[int]float64)
+		t.lastDeath = make(map[int]int32)
 	}
 	t.dead[slot] = true
 	t.lastDeath[slot] = time
@@ -153,7 +153,7 @@ func (t *weaponFlipTracker) OnDeath(slot int, time float64) {
 // weapon kinds it granted (0→1 bit flips), already filtered for
 // death-frame bookkeeping and spawn loadout. Order follows
 // weaponKindsOrdered for determinism.
-func (t *weaponFlipTracker) Observe(slot int, value int, time float64) []string {
+func (t *weaponFlipTracker) Observe(slot int, value int, time int32) []string {
 	if t.items == nil {
 		t.items = make(map[int]int)
 		t.seeded = make(map[int]bool)
@@ -200,12 +200,12 @@ type posTracker struct {
 
 // Record appends one origin sample and prunes entries older than the
 // 1 s horizon.
-func (p *posTracker) Record(slot int, origin [3]float32, t float64) {
+func (p *posTracker) Record(slot int, origin [3]float32, t int32) {
 	if p.hist == nil {
 		p.hist = make(map[int][]posSample)
 	}
 	hist := append(p.hist[slot], posSample{origin: origin, time: t})
-	cutoff := t - 1.0
+	cutoff := t - 1000
 	keepFrom := 0
 	for keepFrom < len(hist) && hist[keepFrom].time < cutoff {
 		keepFrom++
@@ -216,7 +216,7 @@ func (p *posTracker) Record(slot int, origin [3]float32, t float64) {
 // MinDistSqIn returns the smallest squared distance between the slot's
 // samples inside [from, to] and target. ok=false when the slot has no
 // sample in the window.
-func (p *posTracker) MinDistSqIn(slot int, from, to float64, target [3]float32) (float32, bool) {
+func (p *posTracker) MinDistSqIn(slot int, from, to int32, target [3]float32) (float32, bool) {
 	return minDistSqOverWindow(p.hist[slot], from, to, target)
 }
 
@@ -225,7 +225,7 @@ func (p *posTracker) MinDistSqIn(slot int, from, to float64, target [3]float32) 
 // from <= time <= to. Shared by posTracker and ItemAnalyzer's
 // playerPosHist so the two weapon-stay classifiers use identical
 // proximity semantics.
-func minDistSqOverWindow(hist []posSample, from, to float64, target [3]float32) (float32, bool) {
+func minDistSqOverWindow(hist []posSample, from, to int32, target [3]float32) (float32, bool) {
 	best := float32(0)
 	found := false
 	for i := range hist {

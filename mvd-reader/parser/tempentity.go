@@ -40,6 +40,7 @@ type BeamEvent struct {
 
 func (e *BeamEvent) EventType() EventType { return EventBeam }
 func (e *BeamEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *BeamEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // parseTempEntity decodes a svc_temp_entity payload. Lightning beams are
 // surfaced as BeamEvent; every other (point-effect) type is consumed for

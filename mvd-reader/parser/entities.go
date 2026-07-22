@@ -74,6 +74,7 @@ type ItemSpawnEvent struct {
 
 func (e *ItemSpawnEvent) EventType() EventType { return EventItemSpawn }
 func (e *ItemSpawnEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ItemSpawnEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // ItemStateEvent fires on every visibility transition of a tracked item
 // entity. Taken=true means the item became invisible (picked up);
@@ -98,6 +99,7 @@ type ItemStateEvent struct {
 
 func (e *ItemStateEvent) EventType() EventType { return EventItemState }
 func (e *ItemStateEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ItemStateEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // MoverSpawnEvent fires once per inline brush-model entity — an entity
 // whose model is a "*N" submodel of the map BSP (func_plat, func_door,
@@ -119,6 +121,7 @@ type MoverSpawnEvent struct {
 
 func (e *MoverSpawnEvent) EventType() EventType { return EventMoverSpawn }
 func (e *MoverSpawnEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *MoverSpawnEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // MoverStateEvent fires on every wire-state change of a tracked mover:
 // its origin moved (the lift/door/train travelling — MVD deltas only
@@ -135,6 +138,7 @@ type MoverStateEvent struct {
 
 func (e *MoverStateEvent) EventType() EventType { return EventMoverState }
 func (e *MoverStateEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *MoverStateEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // ProjectileSpawnEvent fires the first frame a slow-projectile entity —
 // a rocket (`progs/missile.mdl`) or grenade (`progs/grenade.mdl`) — is
@@ -152,6 +156,7 @@ type ProjectileSpawnEvent struct {
 
 func (e *ProjectileSpawnEvent) EventType() EventType { return EventProjectileSpawn }
 func (e *ProjectileSpawnEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ProjectileSpawnEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // ProjectileDespawnEvent fires when a tracked projectile entity leaves the
 // wire — removed on impact (T_MissileTouch → explosion + radius damage) or
@@ -168,6 +173,7 @@ type ProjectileDespawnEvent struct {
 
 func (e *ProjectileDespawnEvent) EventType() EventType { return EventProjectileDespawn }
 func (e *ProjectileDespawnEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ProjectileDespawnEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // modelPathToKind maps standard Quake 1 item model paths to the compact
 // kind strings we surface in the Result schema. Unrecognised paths

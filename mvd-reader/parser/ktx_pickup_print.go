@@ -61,6 +61,7 @@ type ItemPickupPrintEvent struct {
 
 func (e *ItemPickupPrintEvent) EventType() EventType { return EventItemPickupPrint }
 func (e *ItemPickupPrintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ItemPickupPrintEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // BackpackPickupPrintEvent fires when KTX's backpack opener line
 // `"You get "` (ktx/src/items.c:2404) is addressed to a specific
@@ -87,6 +88,7 @@ type BackpackPickupPrintEvent struct {
 
 func (e *BackpackPickupPrintEvent) EventType() EventType { return EventBackpackPickupPrint }
 func (e *BackpackPickupPrintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *BackpackPickupPrintEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // ktxNetnameToKind maps KTX item `netname` strings (the %s in
 // `"You got the %s\n"`) to the Kind vocabulary. Source refs are

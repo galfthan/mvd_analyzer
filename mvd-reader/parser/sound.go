@@ -41,6 +41,7 @@ type SoundEvent struct {
 
 func (e *SoundEvent) EventType() EventType { return EventSound }
 func (e *SoundEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *SoundEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // parseSound decodes svc_sound. Wire layout
 // (ezquake-source/src/cl_parse.c:1951-1986):

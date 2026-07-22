@@ -21,6 +21,7 @@ type PrintEvent struct {
 
 func (e *PrintEvent) EventType() EventType { return EventPrint }
 func (e *PrintEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *PrintEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // parsePrint parses svc_print message. `targetPlayerNum` is the
 // dem_single slot from the MVD container (or -1 for non-dem_single

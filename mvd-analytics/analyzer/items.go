@@ -2,7 +2,6 @@ package analyzer
 
 import (
 	"fmt"
-	"math"
 	"slices"
 	"sort"
 	"strings"
@@ -64,9 +63,9 @@ type ItemAnalyzer struct {
 	// drops to <= 100 (rot tick-down or death), with a 5 s
 	// minimum-hold floor enforced by KTX's `item_megahealth_rot`
 	// (ktx/src/items.c:353).
-	mhPickup     map[int]float64 // MH entNum -> pickup time
-	heldMHs      map[int][]int   // slot -> MH entNums they currently hold
-	playerHealth map[int]int     // slot -> last seen StatHealth value
+	mhPickup     map[int]int32 // MH entNum -> pickup time (demo-clock ms)
+	heldMHs      map[int][]int // slot -> MH entNums they currently hold
+	playerHealth map[int]int   // slot -> last seen StatHealth value
 
 	// Weapon-stay support (deathmatch 2/3/5, coop): weapon entities
 	// never emit a Taken transition there, so weapon phases are closed
@@ -78,7 +77,7 @@ type ItemAnalyzer struct {
 	weaponStay      weaponStayDetector
 	wsFlips         weaponFlipTracker
 	packWeapon      map[int]string
-	recentPackGrant map[int]map[string]float64
+	recentPackGrant map[int]map[string]int32
 
 	// Per-source attribution counters surfaced by the diagnostic harness.
 	attrCounts map[string]int
@@ -93,17 +92,17 @@ type ItemAnalyzer struct {
 	syntheticEnabled bool
 	syntheticChain   map[int]*syntheticSchedule // entNum -> next predicted pickup
 	// nextDue is the earliest (predicted + settle) time across syntheticChain,
-	// or +Inf when the chain is empty. processSyntheticRespawns early-returns
+	// or maxInt32 when the chain is empty. processSyntheticRespawns early-returns
 	// while currentT < nextDue instead of sorting the chain on every event.
 	// Inserts lower it (scheduleSyntheticRespawn); it's recomputed after the
 	// synthesis loop mutates the chain. Kept a conservative lower bound —
 	// deletes elsewhere may leave it stale-low, which only costs an extra loop
 	// pass, never a missed pickup.
-	nextDue float64
+	nextDue int32
 }
 
 type syntheticSchedule struct {
-	predicted float64
+	predicted int32 // demo-clock ms
 	chainLen  int
 }
 
@@ -113,7 +112,7 @@ type syntheticSchedule struct {
 // a touch instant that is already behind the current event.
 type posSample struct {
 	origin [3]float32
-	time   float64
+	time   int32 // demo-clock ms
 }
 
 type itemEntity struct {
@@ -139,42 +138,42 @@ type playerStatSnapshot struct {
 
 type pendingPrint struct {
 	kind string
-	time float64
+	time int32 // demo-clock ms
 }
 
 type pendingHint struct {
 	playerSlot int
-	time       float64
+	time       int32 // demo-clock ms
 }
 
 type statEvidence struct {
-	time     float64
+	time     int32 // demo-clock ms
 	kinds    []string
 	consumed bool
 }
 
 const (
-	// Hint→state correlation window. KTX emits //ktx took in the
+	// Hint→state correlation window (ms). KTX emits //ktx took in the
 	// same touch frame; ItemStateEvent.Taken=true arrives at the
 	// next baseline-diff packet (~14 ms). Allow 250 ms for safety.
-	hintMatchWindow = 0.250
+	hintMatchWindow int32 = 250
 
-	// Print→state correlation window. svc_print is server-immediate,
+	// Print→state correlation window (ms). svc_print is server-immediate,
 	// same window as the hint.
-	printMatchWindow = 0.250
+	printMatchWindow int32 = 250
 
-	// Stat-delta correlation windows. Stat updates arrive at ~3 Hz
+	// Stat-delta correlation windows (ms). Stat updates arrive at ~3 Hz
 	// per player so they can lag the touch by up to ~330 ms; allow
 	// generous forward window. Backward is small because pickups
 	// don't trigger stat updates ahead of the touch instant.
-	statForwardWindow  = 0.500
-	statBackwardWindow = 0.100
+	statForwardWindow  int32 = 500
+	statBackwardWindow int32 = 100
 
-	// Position recency — a slot whose nearest position sample is
+	// Position recency (ms) — a slot whose nearest position sample is
 	// further than this from the touch instant has no usable position
 	// data and is dropped from distance consideration. With per-frame
 	// position streams the nearest sample is typically ~15 ms away.
-	positionRecencyWindow = 0.250
+	positionRecencyWindow int32 = 250
 
 	// Touch-proximity gate. A genuine pickup is a bbox overlap
 	// (~32-48 u center-to-center, ~65 u worst case in 3D with origin
@@ -188,15 +187,15 @@ const (
 	// weapon-stay flip classifiers.
 	touchGateSq = float32(128 * 128)
 
-	// Cap on how long pending evidence/print/hint entries are kept.
+	// Cap on how long pending evidence/print/hint entries are kept (ms).
 	// Anything older is pruned at attribution time so the buffers
 	// don't grow unbounded across a 30-minute match.
-	maxBufferAge = 1.0
+	maxBufferAge int32 = 1000
 
-	// Synthesis settling window. Wait this long after the predicted
+	// Synthesis settling window (ms). Wait this long after the predicted
 	// respawn time before deciding to synthesize, so any stat update
 	// that lags the touch instant has a chance to land.
-	syntheticSettleWindow = 0.5
+	syntheticSettleWindow int32 = 500
 
 	// Cap chain length per entity to defend against runaway prediction
 	// when wire-level termination signals are missing entirely.
@@ -205,31 +204,31 @@ const (
 	syntheticMaxChain = 60
 )
 
-// Standard Quake 1 / KTX / ktpro respawn times in seconds, keyed by the
-// compact item kind strings emitted by the parser
-// (qwdemo/parser/entities.go). MH is 20 only as a fallback — the rot
+// Standard Quake 1 / KTX / ktpro respawn times in milliseconds, keyed by
+// the compact item kind strings emitted by the parser
+// (qwdemo/parser/entities.go). MH is 20 s only as a fallback — the rot
 // phase that precedes it is handled separately via holder health
 // tracking.
-var kindRespawnSec = map[string]float64{
-	"rl":      30,
-	"lg":      30,
-	"ssg":     30,
-	"sng":     30,
-	"ng":      30,
-	"gl":      30,
-	"ra":      20,
-	"ya":      20,
-	"ga":      20,
-	"h25":     20,
-	"h15":     20,
-	"shells":  30,
-	"nails":   30,
-	"rockets": 30,
-	"cells":   30,
-	"quad":    60,
-	"suit":    60,
-	"pent":    300,
-	"ring":    300,
+var kindRespawnMs = map[string]int32{
+	"rl":      30000,
+	"lg":      30000,
+	"ssg":     30000,
+	"sng":     30000,
+	"ng":      30000,
+	"gl":      30000,
+	"ra":      20000,
+	"ya":      20000,
+	"ga":      20000,
+	"h25":     20000,
+	"h15":     20000,
+	"shells":  30000,
+	"nails":   30000,
+	"rockets": 30000,
+	"cells":   30000,
+	"quad":    60000,
+	"suit":    60000,
+	"pent":    300000,
+	"ring":    300000,
 }
 
 func NewItemAnalyzer() *ItemAnalyzer {
@@ -240,15 +239,15 @@ func NewItemAnalyzer() *ItemAnalyzer {
 		pendingStatEvidence: make(map[int][]statEvidence),
 		pendingPrints:       make(map[int][]pendingPrint),
 		pendingHints:        make(map[int]pendingHint),
-		mhPickup:            make(map[int]float64),
+		mhPickup:            make(map[int]int32),
 		heldMHs:             make(map[int][]int),
 		playerHealth:        make(map[int]int),
 		packWeapon:          make(map[int]string),
-		recentPackGrant:     make(map[int]map[string]float64),
+		recentPackGrant:     make(map[int]map[string]int32),
 		attrCounts:          make(map[string]int),
 		syntheticEnabled:    true,
 		syntheticChain:      make(map[int]*syntheticSchedule),
-		nextDue:             math.Inf(1),
+		nextDue:             maxInt32,
 	}
 }
 
@@ -275,7 +274,7 @@ func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(events.Sec(e.TimeMs))
+		a.timing.OnIntermission(e.TimeMs)
 	case *events.StuffTextEvent:
 		if strings.HasPrefix(e.Command, "fullserverinfo ") {
 			a.extractMapName(e.Command)
@@ -291,13 +290,13 @@ func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 		if w, ok := a.packWeapon[e.BackpackEnt]; ok {
 			slot := e.PlayerEnt - 1
 			if a.recentPackGrant[slot] == nil {
-				a.recentPackGrant[slot] = make(map[string]float64)
+				a.recentPackGrant[slot] = make(map[string]int32)
 			}
-			a.recentPackGrant[slot][w] = events.Sec(e.TimeMs)
+			a.recentPackGrant[slot][w] = e.TimeMs
 			delete(a.packWeapon, e.BackpackEnt)
 		}
 	case *events.PlayerPositionEvent:
-		a.recordPositionSample(e.PlayerNum, e.Origin, events.Sec(e.TimeMs))
+		a.recordPositionSample(e.PlayerNum, e.Origin, e.TimeMs)
 	case *events.ItemSpawnEvent:
 		a.handleItemSpawn(e)
 	case *events.ItemStateEvent:
@@ -313,7 +312,7 @@ func (a *ItemAnalyzer) OnEvent(event events.Event) error {
 	case *events.ItemPickupPrintEvent:
 		a.handleItemPickupPrint(e)
 	}
-	a.processSyntheticRespawns(event.EventTime())
+	a.processSyntheticRespawns(event.EventTimeMs())
 	return nil
 }
 
@@ -386,22 +385,22 @@ func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
 			return
 		}
 		last.TakenAt = e.TimeMs
-		slot, source := a.attributeWithLayeredSignals(e.EntNum, it.kind, it.origin, events.Sec(e.TimeMs))
+		slot, source := a.attributeWithLayeredSignals(e.EntNum, it.kind, it.origin, e.TimeMs)
 		it.pickups[len(it.pickups)-1] = phaseAttribution{slot: slot, source: source}
 		a.attrCounts[source]++
 
 		if it.kind == "mh" {
 			// Start holder tracking; RespawnAt stays 0 until the
 			// holder's health drops to <= 100.
-			a.mhPickup[e.EntNum] = events.Sec(e.TimeMs)
+			a.mhPickup[e.EntNum] = e.TimeMs
 			if slot >= 0 {
 				a.heldMHs[slot] = append(a.heldMHs[slot], e.EntNum)
 			}
 			return
 		}
-		if sec, ok := kindRespawnSec[it.kind]; ok {
-			last.RespawnAt = msTime(events.Sec(e.TimeMs) + sec)
-			a.scheduleSyntheticRespawn(e.EntNum, events.Sec(e.TimeMs)+sec, 0)
+		if respMs, ok := kindRespawnMs[it.kind]; ok {
+			last.RespawnAt = e.TimeMs + respMs
+			a.scheduleSyntheticRespawn(e.EntNum, e.TimeMs+respMs, 0)
 		}
 		return
 	}
@@ -418,10 +417,10 @@ func (a *ItemAnalyzer) handleItemState(e *events.ItemStateEvent) {
 // and prunes anything older than the synthesis window cap. Cheap; the
 // per-slot history rarely exceeds ~80 entries given the ~73 Hz sample
 // rate and a 1 s prune horizon.
-func (a *ItemAnalyzer) recordPositionSample(slot int, origin [3]float32, t float64) {
+func (a *ItemAnalyzer) recordPositionSample(slot int, origin [3]float32, t int32) {
 	hist := a.playerPosHist[slot]
 	hist = append(hist, posSample{origin: origin, time: t})
-	cutoff := t - 1.0
+	cutoff := t - 1000
 	keepFrom := 0
 	for keepFrom < len(hist) && hist[keepFrom].time < cutoff {
 		keepFrom++
@@ -436,13 +435,13 @@ func (a *ItemAnalyzer) recordPositionSample(slot int, origin [3]float32, t float
 // ok only when that sample is within maxAge of t on either side. With
 // per-frame position streams the nearest sample is typically ~15 ms
 // away; a slot without one that fresh has no usable position data.
-func (a *ItemAnalyzer) positionNear(slot int, t, maxAge float64) ([3]float32, bool) {
+func (a *ItemAnalyzer) positionNear(slot int, t, maxAge int32) ([3]float32, bool) {
 	hist := a.playerPosHist[slot]
 	if len(hist) == 0 {
 		return [3]float32{}, false
 	}
 	bestIdx := -1
-	bestDelta := 1e18
+	bestDelta := int32(maxInt32)
 	for i := range hist {
 		dt := hist[i].time - t
 		if dt < 0 {
@@ -462,7 +461,7 @@ func (a *ItemAnalyzer) positionNear(slot int, t, maxAge float64) ([3]float32, bo
 // positionAt is positionNear with the generous stat-correlation window
 // — used where the reference time is itself imprecise (the predicted
 // respawn instant of the insta-regrab pass).
-func (a *ItemAnalyzer) positionAt(slot int, t float64) ([3]float32, bool) {
+func (a *ItemAnalyzer) positionAt(slot int, t int32) ([3]float32, bool) {
 	return a.positionNear(slot, t, statForwardWindow)
 }
 
@@ -471,7 +470,7 @@ func (a *ItemAnalyzer) positionAt(slot int, t float64) ([3]float32, bool) {
 // transition before then, the schedule is cleared in handleItemState.
 // Otherwise processSyntheticRespawns will try to synthesize a pickup
 // once the predicted moment plus settle window has passed.
-func (a *ItemAnalyzer) scheduleSyntheticRespawn(ent int, predicted float64, chainLen int) {
+func (a *ItemAnalyzer) scheduleSyntheticRespawn(ent int, predicted int32, chainLen int) {
 	if !a.syntheticEnabled {
 		return
 	}
@@ -491,7 +490,7 @@ func (a *ItemAnalyzer) scheduleSyntheticRespawn(ent int, predicted float64, chai
 // for any entity whose predicted respawn passed at least
 // syntheticSettleWindow ago. The settle window lets stat-update events
 // that lag the touch instant land before we make the call.
-func (a *ItemAnalyzer) processSyntheticRespawns(currentT float64) {
+func (a *ItemAnalyzer) processSyntheticRespawns(currentT int32) {
 	if !a.syntheticEnabled || !a.timing.Started || a.timing.Ended {
 		return
 	}
@@ -533,10 +532,10 @@ func (a *ItemAnalyzer) processSyntheticRespawns(currentT float64) {
 }
 
 // recomputeNextDue resets nextDue to the earliest (predicted + settle) across
-// the current chain, or +Inf when it's empty. Called after the synthesis loop
+// the current chain, or maxInt32 when it is empty. Called after the synthesis loop
 // mutates the chain; inserts lower it incrementally (scheduleSyntheticRespawn).
 func (a *ItemAnalyzer) recomputeNextDue() {
-	a.nextDue = math.Inf(1)
+	a.nextDue = maxInt32
 	for _, s := range a.syntheticChain {
 		if due := s.predicted + syntheticSettleWindow; due < a.nextDue {
 			a.nextDue = due
@@ -549,7 +548,7 @@ func (a *ItemAnalyzer) recomputeNextDue() {
 // Stat-evidence match is required (the universal "the player's stats
 // ticked up consistent with this kind" signal); position is checked as
 // a sanity guard against false positives.
-func (a *ItemAnalyzer) findSyntheticPicker(kind string, origin [3]float32, predicted float64) (int, bool) {
+func (a *ItemAnalyzer) findSyntheticPicker(kind string, origin [3]float32, predicted int32) (int, bool) {
 	type cand struct {
 		slot  int
 		evIdx int
@@ -595,18 +594,17 @@ func (a *ItemAnalyzer) findSyntheticPicker(kind string, origin [3]float32, predi
 // alternates available -> taken; we append both transitions at the
 // same time (predicted), since the synthesis assumption is "respawn
 // and pickup happen in the same server tick".
-func (a *ItemAnalyzer) recordSyntheticPickup(ent int, t float64, slot int, chainLen int) {
+func (a *ItemAnalyzer) recordSyntheticPickup(ent int, t int32, slot int, chainLen int) {
 	it := a.items[ent]
 	if it == nil {
 		return
 	}
-	tMs := msTime(t)
-	it.phases = append(it.phases, ItemPhase{AvailableFrom: tMs, TakenAt: tMs})
+	it.phases = append(it.phases, ItemPhase{AvailableFrom: t, TakenAt: t})
 	it.pickups = append(it.pickups, phaseAttribution{slot: slot, source: "synthetic"})
 	last := &it.phases[len(it.phases)-1]
-	if sec, ok := kindRespawnSec[it.kind]; ok {
-		last.RespawnAt = msTime(t + sec)
-		a.scheduleSyntheticRespawn(ent, t+sec, chainLen)
+	if respMs, ok := kindRespawnMs[it.kind]; ok {
+		last.RespawnAt = t + respMs
+		a.scheduleSyntheticRespawn(ent, t+respMs, chainLen)
 	} else {
 		delete(a.syntheticChain, ent)
 	}
@@ -616,11 +614,11 @@ func (a *ItemAnalyzer) recordSyntheticPickup(ent int, t float64, slot int, chain
 // attributeWithLayeredSignals walks the four signal layers in priority
 // order and returns the first hit. Returns (-1, "none") if no signal
 // produces a candidate inside its window / radius.
-func (a *ItemAnalyzer) attributeWithLayeredSignals(entNum int, kind string, itemPos [3]float32, t float64) (int, string) {
+func (a *ItemAnalyzer) attributeWithLayeredSignals(entNum int, kind string, itemPos [3]float32, t int32) (int, string) {
 	a.pruneBuffers(t)
 
 	// Layer 1: KTX `//ktx took` hint, keyed by entNum.
-	if h, ok := a.pendingHints[entNum]; ok && absDelta(h.time, t) <= hintMatchWindow {
+	if h, ok := a.pendingHints[entNum]; ok && absI32(h.time-t) <= hintMatchWindow {
 		delete(a.pendingHints, entNum)
 		return h.playerSlot, "hint"
 	}
@@ -635,7 +633,7 @@ func (a *ItemAnalyzer) attributeWithLayeredSignals(entNum int, kind string, item
 	for _, slot := range sortedKeys(a.pendingPrints) {
 		entries := a.pendingPrints[slot]
 		for i, entry := range entries {
-			if entry.kind == kind && absDelta(entry.time, t) <= printMatchWindow {
+			if entry.kind == kind && absI32(entry.time-t) <= printMatchWindow {
 				prints = append(prints, printCandidate{slot: slot, entryIdx: i})
 				break
 			}
@@ -711,7 +709,7 @@ func (a *ItemAnalyzer) attributeWithLayeredSignals(entNum int, kind string, item
 // data and is not a candidate. If restrictTo is non-nil, only those
 // slots are considered. Returns -1 when no candidate satisfies the
 // gate.
-func (a *ItemAnalyzer) distanceBest(itemPos [3]float32, restrictTo map[int]bool, t float64) int {
+func (a *ItemAnalyzer) distanceBest(itemPos [3]float32, restrictTo map[int]bool, t int32) int {
 	bestSlot := -1
 	bestDistSq := float32(1e18)
 	for _, slot := range sortedKeys(a.playerPosHist) {
@@ -766,12 +764,12 @@ func (a *ItemAnalyzer) handleItemPickupHint(e *events.ItemPickupHintEvent) {
 				// Wire is still showing the entity as taken from
 				// the previous phase, but KTX says it just got
 				// touched again — must be an insta-regrab.
-				a.recordSyntheticTakeFromHint(e.ItemEnt, events.Sec(e.TimeMs), slot)
+				a.recordSyntheticTakeFromHint(e.ItemEnt, e.TimeMs, slot)
 				return
 			}
 		}
 	}
-	a.pendingHints[e.ItemEnt] = pendingHint{playerSlot: slot, time: events.Sec(e.TimeMs)}
+	a.pendingHints[e.ItemEnt] = pendingHint{playerSlot: slot, time: e.TimeMs}
 }
 
 // recordSyntheticTakeFromHint mirrors recordSyntheticPickup but uses
@@ -786,13 +784,12 @@ func (a *ItemAnalyzer) handleItemPickupHint(e *events.ItemPickupHintEvent) {
 // existing handler stamps "all MH ents in heldMHs[slot]"), which is
 // wrong. Stat-delta chain forwarding stays disabled for MH because
 // its predicted respawn depends on rot.
-func (a *ItemAnalyzer) recordSyntheticTakeFromHint(ent int, t float64, slot int) {
+func (a *ItemAnalyzer) recordSyntheticTakeFromHint(ent int, t int32, slot int) {
 	it := a.items[ent]
 	if it == nil {
 		return
 	}
-	tMs := msTime(t)
-	it.phases = append(it.phases, ItemPhase{AvailableFrom: tMs, TakenAt: tMs})
+	it.phases = append(it.phases, ItemPhase{AvailableFrom: t, TakenAt: t})
 	it.pickups = append(it.pickups, phaseAttribution{slot: slot, source: "hint"})
 	last := &it.phases[len(it.phases)-1]
 
@@ -815,9 +812,9 @@ func (a *ItemAnalyzer) recordSyntheticTakeFromHint(ent int, t float64, slot int)
 		}
 		// MH respawn is rot-driven; no synthetic schedule.
 		delete(a.syntheticChain, ent)
-	} else if sec, ok := kindRespawnSec[it.kind]; ok {
-		last.RespawnAt = msTime(t + sec)
-		a.scheduleSyntheticRespawn(ent, t+sec, 0)
+	} else if respMs, ok := kindRespawnMs[it.kind]; ok {
+		last.RespawnAt = t + respMs
+		a.scheduleSyntheticRespawn(ent, t+respMs, 0)
 	} else {
 		delete(a.syntheticChain, ent)
 	}
@@ -834,7 +831,7 @@ func (a *ItemAnalyzer) handleItemPickupPrint(e *events.ItemPickupPrintEvent) {
 	}
 	a.pendingPrints[e.PlayerNum] = append(a.pendingPrints[e.PlayerNum], pendingPrint{
 		kind: e.Kind,
-		time: events.Sec(e.TimeMs),
+		time: e.TimeMs,
 	})
 }
 
@@ -853,10 +850,10 @@ func (a *ItemAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) {
 	// death frames — see weaponFlipTracker. Only the synthesis itself
 	// is match-gated.
 	if e.StatIndex == events.StatItems && a.weaponStay.WeaponStay() {
-		kinds := a.wsFlips.Observe(e.PlayerNum, e.Value, events.Sec(e.TimeMs))
+		kinds := a.wsFlips.Observe(e.PlayerNum, e.Value, e.TimeMs)
 		if a.timing.Started && !a.timing.Ended {
 			for _, kind := range kinds {
-				a.synthesizeWeaponStayPickup(e.PlayerNum, kind, events.Sec(e.TimeMs))
+				a.synthesizeWeaponStayPickup(e.PlayerNum, kind, e.TimeMs)
 			}
 		}
 	}
@@ -879,7 +876,7 @@ func (a *ItemAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) {
 		prev := a.playerHealth[e.PlayerNum]
 		a.playerHealth[e.PlayerNum] = e.Value
 		if prev > 100 && e.Value <= 100 {
-			a.stampHeldMHs(e.PlayerNum, events.Sec(e.TimeMs))
+			a.stampHeldMHs(e.PlayerNum, e.TimeMs)
 		}
 	case events.StatItems:
 		if e.Value&events.ITSuperHealth != 0 {
@@ -889,7 +886,7 @@ func (a *ItemAnalyzer) handleStatUpdate(e *events.StatUpdateEvent) {
 		// inside item_megahealth_rot at rot-end (items.c:401), so this
 		// is redundant with the health crossing above in the normal
 		// case but catches the path where the health stream is thin.
-		a.stampHeldMHs(e.PlayerNum, events.Sec(e.TimeMs))
+		a.stampHeldMHs(e.PlayerNum, e.TimeMs)
 	}
 }
 
@@ -935,10 +932,10 @@ func (a *ItemAnalyzer) classifyStatDelta(e *events.StatUpdateEvent) {
 		// can't masquerade as a stack of small healths.
 		switch {
 		case delta > 0 && delta <= 25:
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"h15", "h25"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"h15", "h25"})
 		case delta > 25 && delta <= 50:
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"h15", "h25"})
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"h15", "h25"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"h15", "h25"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"h15", "h25"})
 		}
 	case events.StatArmor:
 		if !snap.armorSet {
@@ -968,51 +965,51 @@ func (a *ItemAnalyzer) classifyStatDelta(e *events.StatUpdateEvent) {
 		// Armor — mutually exclusive bits. Whichever was newly set
 		// identifies the kind.
 		if newlySet&events.ITArmor1 != 0 {
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"ga"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"ga"})
 		}
 		if newlySet&events.ITArmor2 != 0 {
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"ya"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"ya"})
 		}
 		if newlySet&events.ITArmor3 != 0 {
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"ra"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"ra"})
 		}
 		// Weapons.
 		if newlySet&events.ITSuperShotgun != 0 {
-			a.weaponBitGained(e.PlayerNum, "ssg", events.Sec(e.TimeMs))
+			a.weaponBitGained(e.PlayerNum, "ssg", e.TimeMs)
 		}
 		if newlySet&events.ITNailgun != 0 {
-			a.weaponBitGained(e.PlayerNum, "ng", events.Sec(e.TimeMs))
+			a.weaponBitGained(e.PlayerNum, "ng", e.TimeMs)
 		}
 		if newlySet&events.ITSuperNailgun != 0 {
-			a.weaponBitGained(e.PlayerNum, "sng", events.Sec(e.TimeMs))
+			a.weaponBitGained(e.PlayerNum, "sng", e.TimeMs)
 		}
 		if newlySet&events.ITGrenadeLauncher != 0 {
-			a.weaponBitGained(e.PlayerNum, "gl", events.Sec(e.TimeMs))
+			a.weaponBitGained(e.PlayerNum, "gl", e.TimeMs)
 		}
 		if newlySet&events.ITRocketLauncher != 0 {
-			a.weaponBitGained(e.PlayerNum, "rl", events.Sec(e.TimeMs))
+			a.weaponBitGained(e.PlayerNum, "rl", e.TimeMs)
 		}
 		if newlySet&events.ITLightning != 0 {
-			a.weaponBitGained(e.PlayerNum, "lg", events.Sec(e.TimeMs))
+			a.weaponBitGained(e.PlayerNum, "lg", e.TimeMs)
 		}
 		// Powerups.
 		if newlySet&events.ITQuad != 0 {
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"quad"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"quad"})
 		}
 		if newlySet&events.ITInvulnerability != 0 {
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"pent"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"pent"})
 		}
 		if newlySet&events.ITInvisibility != 0 {
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"ring"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"ring"})
 		}
 		if newlySet&events.ITSuit != 0 {
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"suit"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"suit"})
 		}
 		// Megahealth — IT_SUPERHEALTH transition is the canonical
 		// pickup signal (the +100 health is correlated but not
 		// uniquely identifying).
 		if newlySet&events.ITSuperHealth != 0 {
-			a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{"mh"})
+			a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{"mh"})
 		}
 	}
 }
@@ -1023,7 +1020,7 @@ func (a *ItemAnalyzer) classifyStatDelta(e *events.StatUpdateEvent) {
 // for weapons — the wsFlips tracker path in handleStatUpdate owns the
 // synthesis instead (it needs boundary rules the match-gated snapshot
 // this delta came from can't provide).
-func (a *ItemAnalyzer) weaponBitGained(slot int, kind string, t float64) {
+func (a *ItemAnalyzer) weaponBitGained(slot int, kind string, t int32) {
 	if a.weaponStay.WeaponStay() {
 		return
 	}
@@ -1044,12 +1041,12 @@ func (a *ItemAnalyzer) weaponBitGained(slot int, kind string, t float64) {
 // gate is tight. No candidate → no phase (a non-RL/LG backpack grant
 // away from any pad lands here; WeaponPickupsAnalyzer still records it
 // kind-level with source "unknown").
-func (a *ItemAnalyzer) synthesizeWeaponStayPickup(slot int, kind string, t float64) {
+func (a *ItemAnalyzer) synthesizeWeaponStayPickup(slot int, kind string, t int32) {
 	// Safety net: if a //ktx took hint for this slot+kind is pending,
 	// the wire path owns the pickup (weapons evidently do disappear —
 	// weapon-stay was mis-detected).
 	for ent, h := range a.pendingHints {
-		if h.playerSlot != slot || absDelta(h.time, t) > hintMatchWindow {
+		if h.playerSlot != slot || absI32(h.time-t) > hintMatchWindow {
 			continue
 		}
 		if it := a.items[ent]; it != nil && it.kind == kind {
@@ -1058,7 +1055,7 @@ func (a *ItemAnalyzer) synthesizeWeaponStayPickup(slot int, kind string, t float
 	}
 	// A recent //ktx bp grant of the same kind already explains the
 	// bit flip — that pickup belongs to the backpack, not a pad.
-	if gt, ok := a.recentPackGrant[slot][kind]; ok && absDelta(gt, t) <= statForwardWindow {
+	if gt, ok := a.recentPackGrant[slot][kind]; ok && absI32(gt-t) <= statForwardWindow {
 		return
 	}
 	bestEnt := -1
@@ -1083,12 +1080,11 @@ func (a *ItemAnalyzer) synthesizeWeaponStayPickup(slot int, kind string, t float
 		return
 	}
 	it := a.items[bestEnt]
-	tMs := msTime(t)
 	last := &it.phases[len(it.phases)-1]
-	last.TakenAt = tMs
-	last.RespawnAt = tMs // weapon-stay: the weapon never left the map
+	last.TakenAt = t
+	last.RespawnAt = t // weapon-stay: the weapon never left the map
 	it.pickups[len(it.pickups)-1] = phaseAttribution{slot: slot, source: "weaponstay"}
-	it.phases = append(it.phases, ItemPhase{AvailableFrom: tMs})
+	it.phases = append(it.phases, ItemPhase{AvailableFrom: t})
 	it.pickups = append(it.pickups, phaseAttribution{slot: -1})
 	a.attrCounts["weaponstay"]++
 }
@@ -1105,13 +1101,13 @@ func (a *ItemAnalyzer) pushAmmoEvidence(e *events.StatUpdateEvent, field *int, s
 	delta := e.Value - *field
 	*field = e.Value
 	if delta > 0 {
-		a.pushStatEvidence(e.PlayerNum, events.Sec(e.TimeMs), []string{kind})
+		a.pushStatEvidence(e.PlayerNum, e.TimeMs, []string{kind})
 	}
 }
 
 // pushStatEvidence appends a stat-delta evidence row to a slot's
 // pending buffer.
-func (a *ItemAnalyzer) pushStatEvidence(slot int, time float64, kinds []string) {
+func (a *ItemAnalyzer) pushStatEvidence(slot int, time int32, kinds []string) {
 	a.pendingStatEvidence[slot] = append(a.pendingStatEvidence[slot], statEvidence{
 		time:  time,
 		kinds: kinds,
@@ -1120,7 +1116,7 @@ func (a *ItemAnalyzer) pushStatEvidence(slot int, time float64, kinds []string) 
 
 // pruneBuffers drops entries older than maxBufferAge from the pending
 // buffers so they don't grow unbounded across long matches.
-func (a *ItemAnalyzer) pruneBuffers(t float64) {
+func (a *ItemAnalyzer) pruneBuffers(t int32) {
 	cutoff := t - maxBufferAge
 	for slot, entries := range a.pendingPrints {
 		kept := entries[:0]
@@ -1160,7 +1156,7 @@ func (a *ItemAnalyzer) pruneBuffers(t float64) {
 // doesn't masquerade as pickup deltas. The first stat update for each
 // field re-seeds the baseline silently.
 func (a *ItemAnalyzer) handleSpawn(e *events.SpawnEvent) {
-	a.wsFlips.OnSpawn(e.PlayerNum, events.Sec(e.TimeMs))
+	a.wsFlips.OnSpawn(e.PlayerNum, e.TimeMs)
 	if !a.timing.Started || a.timing.Ended {
 		return
 	}
@@ -1175,21 +1171,21 @@ func (a *ItemAnalyzer) handleSpawn(e *events.SpawnEvent) {
 // stat snapshot / pending evidence so the upcoming respawn loadout
 // doesn't feed the classifier.
 func (a *ItemAnalyzer) handleDeath(e *events.DeathEvent) {
-	a.wsFlips.OnDeath(e.PlayerNum, events.Sec(e.TimeMs))
+	a.wsFlips.OnDeath(e.PlayerNum, e.TimeMs)
 	if !a.timing.Started || a.timing.Ended {
 		return
 	}
 	a.playerHealth[e.PlayerNum] = 0
-	a.stampHeldMHs(e.PlayerNum, events.Sec(e.TimeMs))
+	a.stampHeldMHs(e.PlayerNum, e.TimeMs)
 	delete(a.playerStats, e.PlayerNum)
 	delete(a.pendingStatEvidence, e.PlayerNum)
 }
 
 // stampHeldMHs closes out every MH phase currently owned by the given
-// slot by stamping RespawnAt = max(pickup + 5, crossing) + 20.
+// slot by stamping RespawnAt = max(pickup + 5 s, crossing) + 20 s.
 // Idempotent — calling it twice for the same slot has no effect the
 // second time because heldMHs[slot] is cleared.
-func (a *ItemAnalyzer) stampHeldMHs(slot int, crossing float64) {
+func (a *ItemAnalyzer) stampHeldMHs(slot int, crossing int32) {
 	ents := a.heldMHs[slot]
 	if len(ents) == 0 {
 		return
@@ -1205,10 +1201,10 @@ func (a *ItemAnalyzer) stampHeldMHs(slot int, crossing float64) {
 		}
 		pickup := a.mhPickup[ent]
 		rotEnd := crossing
-		if pickup+5 > rotEnd {
-			rotEnd = pickup + 5
+		if pickup+5000 > rotEnd {
+			rotEnd = pickup + 5000
 		}
-		last.RespawnAt = msTime(rotEnd + 20)
+		last.RespawnAt = rotEnd + 20000
 		delete(a.mhPickup, ent)
 	}
 	delete(a.heldMHs, slot)
@@ -1360,14 +1356,6 @@ func (a *ItemAnalyzer) resolveAttributions(it *itemEntity) {
 }
 
 // --- helpers ---
-
-func absDelta(a, b float64) float64 {
-	d := a - b
-	if d < 0 {
-		return -d
-	}
-	return d
-}
 
 func containsKind(kinds []string, k string) bool {
 	return slices.Contains(kinds, k)

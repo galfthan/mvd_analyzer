@@ -5,19 +5,19 @@ import "testing"
 // TestCoalescePauses folds per-idle-frame paused_duration samples into one
 // segment per pause: contiguous samples (game clock frozen, so near-identical
 // times) sum into one DurationMs anchored at the plateau (latest) game time; a
-// real-gameplay gap larger than pauseCoalesceGapSec starts a new segment.
+// real-gameplay gap larger than pauseCoalesceGapMs starts a new segment.
 // Mirrors duel-with-pauses.mvd: two ~6.6s pauses, each a leading transition
 // frame at a slightly earlier time plus a run at the frozen plateau.
 func TestCoalescePauses(t *testing.T) {
 	samples := []pauseSample{
-		// pause 1: transition frame at 28.455, then plateau at 28.465
-		{Time: 28.455, DurationMs: 104},
-		{Time: 28.465, DurationMs: 100},
-		{Time: 28.465, DurationMs: 105},
-		// pause 2 (after ~10s of play): transition at 38.186, plateau at 38.199
-		{Time: 38.186, DurationMs: 107},
-		{Time: 38.199, DurationMs: 100},
-		{Time: 38.199, DurationMs: 102},
+		// pause 1: transition frame at 28455 ms, then plateau at 28465 ms
+		{Time: 28455, DurationMs: 104},
+		{Time: 28465, DurationMs: 100},
+		{Time: 28465, DurationMs: 105},
+		// pause 2 (after ~10s of play): transition at 38186 ms, plateau at 38199 ms
+		{Time: 38186, DurationMs: 107},
+		{Time: 38199, DurationMs: 100},
+		{Time: 38199, DurationMs: 102},
 	}
 	got := coalescePauses(samples)
 	if len(got) != 2 {

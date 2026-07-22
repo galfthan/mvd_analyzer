@@ -12,6 +12,7 @@ type ServerDataEvent struct {
 
 func (e *ServerDataEvent) EventType() EventType { return EventServerData }
 func (e *ServerDataEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ServerDataEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // parseServerData parses svc_serverdata message
 func (p *Parser) parseServerData(r *mvd.BufferReader, timeMs int32) error {

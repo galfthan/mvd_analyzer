@@ -1,7 +1,6 @@
 package analyzer
 
 import (
-	"math"
 	"sort"
 
 	"github.com/mvd-analyzer/mvd-reader/events"
@@ -94,23 +93,23 @@ func (a *WeaponPickupsAnalyzer) identityAt(slot int, tMs int32) SlotInfo {
 type packDrop struct {
 	weapon      string // "rl" or "lg"
 	dropperSlot int
-	dropTime    float64
+	dropTime    int32 // demo-clock ms
 }
 
 type wpPickupRecord struct {
-	time        float64
+	time        int32 // demo-clock ms
 	pickerSlot  int
 	weapon      string
 	source      string // "world" | "backpack" | "unknown"
 	hadBefore   bool
-	inferred    bool    // synthesized from a STAT_ITEMS flip (weapon-stay), no KTX hint
-	backpackEnt int     // 0 for world pickups
-	dropperSlot int     // -1 for world pickups
-	dropTime    float64 // 0 for world pickups
+	inferred    bool  // synthesized from a STAT_ITEMS flip (weapon-stay), no KTX hint
+	backpackEnt int   // 0 for world pickups
+	dropperSlot int   // -1 for world pickups
+	dropTime    int32 // 0 for world pickups
 }
 
 type wpDeathRecord struct {
-	time float64
+	time int32 // demo-clock ms
 	slot int
 }
 
@@ -163,7 +162,7 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:
-		a.timing.OnIntermission(events.Sec(e.TimeMs))
+		a.timing.OnIntermission(e.TimeMs)
 	case *events.StuffTextEvent:
 		a.weaponStay.OnStuffText(e)
 	case *events.ServerInfoEvent:
@@ -177,7 +176,7 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 		}
 	case *events.PlayerPositionEvent:
 		if a.weaponStay.WeaponStay() {
-			a.pos.Record(e.PlayerNum, e.Origin, events.Sec(e.TimeMs))
+			a.pos.Record(e.PlayerNum, e.Origin, e.TimeMs)
 		}
 	case *events.ItemSpawnEvent:
 		if _, ok := weaponBit[e.Kind]; ok {
@@ -191,11 +190,11 @@ func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	case *events.BackpackPickupHintEvent:
 		a.handlePackPickup(e)
 	case *events.SpawnEvent:
-		a.flips.OnSpawn(e.PlayerNum, events.Sec(e.TimeMs))
+		a.flips.OnSpawn(e.PlayerNum, e.TimeMs)
 	case *events.DeathEvent:
-		a.flips.OnDeath(e.PlayerNum, events.Sec(e.TimeMs))
+		a.flips.OnDeath(e.PlayerNum, e.TimeMs)
 		if a.timing.Started && !a.timing.Ended {
-			a.deaths = append(a.deaths, wpDeathRecord{time: events.Sec(e.TimeMs), slot: e.PlayerNum})
+			a.deaths = append(a.deaths, wpDeathRecord{time: e.TimeMs, slot: e.PlayerNum})
 		}
 	}
 	return nil
@@ -217,7 +216,7 @@ func (a *WeaponPickupsAnalyzer) maybeSynthesizeFromItemsFlip(e *events.StatUpdat
 	if slot < 0 || slot >= len(a.ctx.Players) || a.ctx.Players[slot] == nil {
 		return
 	}
-	kinds := a.flips.Observe(slot, e.Value, events.Sec(e.TimeMs))
+	kinds := a.flips.Observe(slot, e.Value, e.TimeMs)
 	if !a.timing.Started {
 		return
 	}
@@ -225,14 +224,14 @@ func (a *WeaponPickupsAnalyzer) maybeSynthesizeFromItemsFlip(e *events.StatUpdat
 		// A hint-driven record (//ktx bp, or //ktx took if weapon-stay
 		// was somehow mis-detected) precedes the stat flip on the wire —
 		// if one already explains this grant, don't double-record it.
-		if a.recentRecordExplains(slot, kind, events.Sec(e.TimeMs)) {
+		if a.recentRecordExplains(slot, kind, e.TimeMs) {
 			continue
 		}
 		a.pickups = append(a.pickups, wpPickupRecord{
-			time:        events.Sec(e.TimeMs),
+			time:        e.TimeMs,
 			pickerSlot:  slot,
 			weapon:      kind,
-			source:      a.classifyFlipSource(slot, kind, events.Sec(e.TimeMs)),
+			source:      a.classifyFlipSource(slot, kind, e.TimeMs),
 			hadBefore:   false, // by construction: the bit was 0
 			inferred:    true,
 			dropperSlot: -1,
@@ -250,7 +249,7 @@ func (a *WeaponPickupsAnalyzer) maybeSynthesizeFromItemsFlip(e *events.StatUpdat
 // spurious Taken transitions per resting pack; see the visibility-
 // flutter note in mvd-reader/MVD_FORMAT.md). KTX `taken` parity is
 // preserved either way; only the world-vs-pack split can drift.
-func (a *WeaponPickupsAnalyzer) classifyFlipSource(slot int, kind string, t float64) string {
+func (a *WeaponPickupsAnalyzer) classifyFlipSource(slot int, kind string, t int32) string {
 	if _, ok := a.nearestWeaponEntityDistSq(slot, kind, t); ok {
 		return "world"
 	}
@@ -261,7 +260,7 @@ func (a *WeaponPickupsAnalyzer) classifyFlipSource(slot int, kind string, t floa
 // already exists within statForwardWindow of t. Records are appended in
 // event order, so scanning back from the tail terminates at the window
 // edge.
-func (a *WeaponPickupsAnalyzer) recentRecordExplains(slot int, kind string, t float64) bool {
+func (a *WeaponPickupsAnalyzer) recentRecordExplains(slot int, kind string, t int32) bool {
 	for i := len(a.pickups) - 1; i >= 0; i-- {
 		rec := &a.pickups[i]
 		if t-rec.time > statForwardWindow {
@@ -280,7 +279,7 @@ func (a *WeaponPickupsAnalyzer) recentRecordExplains(slot int, kind string, t fl
 // touchGateSq. The window (not the flip instant) matters:
 // per-player stat updates can lag the touch by a few hundred ms,
 // during which the picker keeps moving.
-func (a *WeaponPickupsAnalyzer) nearestWeaponEntityDistSq(slot int, kind string, t float64) (float32, bool) {
+func (a *WeaponPickupsAnalyzer) nearestWeaponEntityDistSq(slot int, kind string, t int32) (float32, bool) {
 	best := float32(0)
 	found := false
 	for ent, k := range a.itemKind {
@@ -311,7 +310,7 @@ func (a *WeaponPickupsAnalyzer) handleDropHint(e *events.BackpackDropHintEvent) 
 	a.packInfo[e.BackpackEnt] = packDrop{
 		weapon:      weapon,
 		dropperSlot: slot,
-		dropTime:    events.Sec(e.TimeMs),
+		dropTime:    e.TimeMs,
 	}
 }
 
@@ -332,7 +331,7 @@ func (a *WeaponPickupsAnalyzer) handleItemPickup(e *events.ItemPickupHintEvent) 
 	// record in place — the hint is the authoritative source. hadBefore
 	// stays false: the flip proved the bit was fresh (the post-flip
 	// playerItems would misread it as a redundant grab).
-	if rec := a.inferredRecordFor(slot, kind, events.Sec(e.TimeMs)); rec != nil {
+	if rec := a.inferredRecordFor(slot, kind, e.TimeMs); rec != nil {
 		rec.source = "world"
 		rec.inferred = false
 		return
@@ -340,7 +339,7 @@ func (a *WeaponPickupsAnalyzer) handleItemPickup(e *events.ItemPickupHintEvent) 
 	bit := weaponBit[kind]
 	hadBefore := a.playerItems[slot]&bit != 0
 	a.pickups = append(a.pickups, wpPickupRecord{
-		time:        events.Sec(e.TimeMs),
+		time:        e.TimeMs,
 		pickerSlot:  slot,
 		weapon:      kind,
 		source:      "world",
@@ -353,7 +352,7 @@ func (a *WeaponPickupsAnalyzer) handleItemPickup(e *events.ItemPickupHintEvent) 
 // (slot, kind) within statForwardWindow of t, or nil. Used by the hint
 // handlers to upgrade a flip-derived record in place when its hint
 // arrives late instead of appending a duplicate.
-func (a *WeaponPickupsAnalyzer) inferredRecordFor(slot int, kind string, t float64) *wpPickupRecord {
+func (a *WeaponPickupsAnalyzer) inferredRecordFor(slot int, kind string, t int32) *wpPickupRecord {
 	for i := len(a.pickups) - 1; i >= 0; i-- {
 		rec := &a.pickups[i]
 		if t-rec.time > statForwardWindow {
@@ -381,7 +380,7 @@ func (a *WeaponPickupsAnalyzer) handlePackPickup(e *events.BackpackPickupHintEve
 	// Late-hint insurance, mirroring handleItemPickup: if the flip's
 	// synthesized record landed first, rewrite it as the backpack
 	// pickup this hint proves it was.
-	if rec := a.inferredRecordFor(slot, drop.weapon, events.Sec(e.TimeMs)); rec != nil {
+	if rec := a.inferredRecordFor(slot, drop.weapon, e.TimeMs); rec != nil {
 		rec.source = "backpack"
 		rec.inferred = false
 		rec.backpackEnt = e.BackpackEnt
@@ -393,7 +392,7 @@ func (a *WeaponPickupsAnalyzer) handlePackPickup(e *events.BackpackPickupHintEve
 	bit := weaponBit[drop.weapon]
 	hadBefore := a.playerItems[slot]&bit != 0
 	a.pickups = append(a.pickups, wpPickupRecord{
-		time:        events.Sec(e.TimeMs),
+		time:        e.TimeMs,
 		pickerSlot:  slot,
 		weapon:      drop.weapon,
 		source:      "backpack",
@@ -433,7 +432,7 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 	// Partition deaths by slot, time-ordered, for next-death lookup.
 	// Deaths are recorded in arrival order which is already monotonic
 	// in time since OnEvent is serial.
-	deathsBySlot := make(map[int][]float64)
+	deathsBySlot := make(map[int][]int32)
 	for _, d := range a.deaths {
 		deathsBySlot[d.slot] = append(deathsBySlot[d.slot], d.time)
 	}
@@ -445,8 +444,8 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 	type pwKey struct{ killer, weapon string }
 	type pickupWindow struct {
 		pickupIdx int
-		start     float64
-		end       float64
+		start     int32
+		end       int32
 	}
 	windowsByPW := make(map[pwKey][]pickupWindow)
 	for i, p := range a.pickups {
@@ -458,9 +457,9 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 		}
 		end := findNextAfter(deathsBySlot[p.pickerSlot], p.time)
 		if end == 0 {
-			end = math.Inf(1)
+			end = maxInt32 // player never dies again this match
 		}
-		k := pwKey{a.identityAt(p.pickerSlot, msTime(p.time)).Name, p.weapon}
+		k := pwKey{a.identityAt(p.pickerSlot, p.time).Name, p.weapon}
 		windowsByPW[k] = append(windowsByPW[k], pickupWindow{i, p.time, end})
 	}
 
@@ -476,13 +475,11 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 		}
 		windows := windowsByPW[pwKey{f.Killer, f.Weapon}]
 		best := -1
-		// FragEntry.Time is int32 ms (schema v8); pickup window
-		// start/end are still float64 seconds — convert per-frag.
-		fTimeSec := float64(f.Time) * 0.001
+		// FragEntry.Time and the pickup windows are all int32 ms (schema v8).
 		for _, w := range windows {
-			if w.start < fTimeSec && fTimeSec <= w.end {
+			if w.start < f.Time && f.Time <= w.end {
 				best = w.pickupIdx
-			} else if w.start >= fTimeSec {
+			} else if w.start >= f.Time {
 				break // windows are time-ordered; further starts are all in the future
 			}
 		}
@@ -499,12 +496,12 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 		}
 		nextDeath := findNextAfter(deathsBySlot[p.pickerSlot], p.time)
 
-		pickerID := a.identityAt(p.pickerSlot, msTime(p.time))
+		pickerID := a.identityAt(p.pickerSlot, p.time)
 		// Born-correct team labels: the roster rewrites a duel participant's
 		// team (picker and dropper) to their own name. Formerly the
 		// normalizeDuelTeams weapon-pickups block.
 		entry := WeaponPickup{
-			Time:          msTime(p.time),
+			Time:          p.time,
 			Player:        pickerID.Name,
 			Team:          a.core.TeamFor(pickerID.Name, pickerID.Team),
 			Weapon:        p.weapon,
@@ -512,13 +509,13 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 			HadBefore:     p.hadBefore,
 			Inferred:      p.inferred,
 			Kills:         kills[i],
-			NextDeathTime: msTime(nextDeath),
+			NextDeathTime: nextDeath,
 		}
 		if p.source == "backpack" {
 			entry.BackpackEnt = p.backpackEnt
-			entry.DropTime = msTime(p.dropTime)
+			entry.DropTime = p.dropTime
 			if dropper := a.ctx.Players[p.dropperSlot]; dropper != nil {
-				dropperID := a.identityAt(p.dropperSlot, msTime(p.dropTime))
+				dropperID := a.identityAt(p.dropperSlot, p.dropTime)
 				entry.Dropper = dropperID.Name
 				entry.DropperTeam = a.core.TeamFor(dropperID.Name, dropperID.Team)
 			}
@@ -552,7 +549,7 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 // slice strictly greater than t. Returns 0 if none — callers treat 0
 // as "no death before match end" and count kills up to the end of
 // the frag list.
-func findNextAfter(sorted []float64, t float64) float64 {
+func findNextAfter(sorted []int32, t int32) int32 {
 	for _, v := range sorted {
 		if v > t {
 			return v
