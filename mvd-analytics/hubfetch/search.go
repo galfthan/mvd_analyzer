@@ -48,6 +48,9 @@ func (c *Client) Search(ctx context.Context, params SearchParams) (any, error) {
 	if limit <= 0 {
 		limit = 20
 	}
+	// Server-side belt: mvd-api's search handler already 400s a limit above
+	// 100, so this clamp only fires for a direct hubfetch caller (e.g. a test
+	// or CLI) that bypasses the API boundary.
 	if limit > 100 {
 		limit = 100
 	}

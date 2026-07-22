@@ -266,6 +266,24 @@ Three follow-up fixes on top of the v57 shapes; no further schema bump.
   (lowercased before validation and before use), matching the rest of the
   API.
 
+### Post-release polish
+
+Two doc/behaviour touch-ups on top of the v57 shapes; no further schema bump.
+
+- **`label` is now documented per-endpoint in the OpenAPI spec (doc-only).**
+  The non-secret `?label=` traffic-source tag (read by request logging,
+  globally accepted on every request) was only described in the spec intro
+  prose. It is now a reusable `Label` component parameter referenced by every
+  operation's `parameters` list, so `/openapi.yaml` and `/docs` show it on
+  each endpoint. No behaviour change — it was always accepted.
+- **Search `limit > 100` / negatives now 400 instead of a silent clamp
+  (behaviour tightening).** `GET /v1/games/search` previously clamped `limit`
+  to the hub's 100-row page cap. In line with v57's reject-loudly posture it
+  now returns **400 `invalid_param`** for a `limit` above 100 and for a
+  negative `limit`/`offset`; `limit=0`/omitted still means the default 20.
+  The MCP `searchGames` tool proxies this endpoint and inherits the 400.
+  hubfetch keeps its clamp as a server-side belt for direct library callers.
+
 ## 2026-07-21 (tweak-api)
 
 - **Review fixes — echo-rule completeness + hub read hardening (still

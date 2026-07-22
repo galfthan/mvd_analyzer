@@ -115,6 +115,92 @@ func TestGamesSearch_InvalidParam(t *testing.T) {
 	}
 }
 
+// limit/offset are bounded at the API boundary rather than silently clamped
+// downstream (v57 reject-loudly posture): limit>100 and negative limit/offset
+// 400 invalid_param; limit=0 stays the default; a valid limit reaches the
+// searcher unchanged.
+func TestGamesSearch_LimitOffsetBounds(t *testing.T) {
+	t.Run("limit-too-large", func(t *testing.T) {
+		sr := &capturingSearcher{}
+		srv := newSearchServer(t, sr)
+		defer srv.Close()
+
+		body, status := getRaw(t, srv.URL+"/v1/games/search?limit=500")
+		if status != 400 {
+			t.Fatalf("status = %d, want 400 (body=%s)", status, body)
+		}
+		if !strings.Contains(string(body), `"invalid_param"`) || !strings.Contains(string(body), "max 100") {
+			t.Errorf("body missing invalid_param/max-100 detail: %s", body)
+		}
+		if sr.seen {
+			t.Error("searcher must not be called when limit is out of range")
+		}
+	})
+
+	t.Run("limit-at-cap-reaches-searcher", func(t *testing.T) {
+		sr := &capturingSearcher{}
+		srv := newSearchServer(t, sr)
+		defer srv.Close()
+
+		getJSON(t, srv.URL+"/v1/games/search?limit=100", 200)
+		if !sr.seen {
+			t.Fatal("searcher was not invoked for limit=100")
+		}
+		if sr.got.Limit != 100 {
+			t.Errorf("limit = %d; want 100", sr.got.Limit)
+		}
+	})
+
+	t.Run("limit-zero-default", func(t *testing.T) {
+		sr := &capturingSearcher{}
+		srv := newSearchServer(t, sr)
+		defer srv.Close()
+
+		getJSON(t, srv.URL+"/v1/games/search?limit=0", 200)
+		if !sr.seen {
+			t.Fatal("searcher was not invoked for limit=0")
+		}
+		// 0 is passed through as "default"; hubfetch resolves it to 20.
+		if sr.got.Limit != 0 {
+			t.Errorf("limit = %d; want 0 (default sentinel)", sr.got.Limit)
+		}
+	})
+
+	t.Run("negative-offset", func(t *testing.T) {
+		sr := &capturingSearcher{}
+		srv := newSearchServer(t, sr)
+		defer srv.Close()
+
+		body, status := getRaw(t, srv.URL+"/v1/games/search?offset=-1")
+		if status != 400 {
+			t.Fatalf("status = %d, want 400 (body=%s)", status, body)
+		}
+		if !strings.Contains(string(body), `"invalid_param"`) {
+			t.Errorf("body missing invalid_param code: %s", body)
+		}
+		if sr.seen {
+			t.Error("searcher must not be called when offset is negative")
+		}
+	})
+
+	t.Run("negative-limit", func(t *testing.T) {
+		sr := &capturingSearcher{}
+		srv := newSearchServer(t, sr)
+		defer srv.Close()
+
+		body, status := getRaw(t, srv.URL+"/v1/games/search?limit=-5")
+		if status != 400 {
+			t.Fatalf("status = %d, want 400 (body=%s)", status, body)
+		}
+		if !strings.Contains(string(body), `"invalid_param"`) {
+			t.Errorf("body missing invalid_param code: %s", body)
+		}
+		if sr.seen {
+			t.Error("searcher must not be called when limit is negative")
+		}
+	})
+}
+
 // A malformed from/to date is rejected at the API boundary with a 400
 // invalid_param instead of reaching the hub and surfacing as a 502
 // hub_upstream (review finding: bad search dates were a 502).

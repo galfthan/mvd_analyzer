@@ -207,6 +207,9 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   the `from`/`to` window, `players`/`fields` scoping, and `summary`.
   `limit`/`offset` pagination applies only to the game-discovery
   endpoint `GET /v1/games/search` (page until `offset + count >= total`).
+  There `limit` defaults to 20 and is capped at 100 — a `limit` above 100,
+  or a negative `limit`/`offset`, is rejected with `400 invalid_param`
+  (no longer silently clamped).
 - **`loc`** — `name` (default) resolves loc indices to names; `index`
   returns the raw `LocTable` index for index-based math (decode via
   `/loc-table`). Honoured by `buckets`, `events`, `stream-slice`,

@@ -117,6 +117,8 @@ paths:
       tags: [meta]
       summary: Liveness probe
       security: []
+      parameters:
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Server is up.
@@ -132,6 +134,8 @@ paths:
         The OpenAPI 3.1 description of this server, embedded in the binary.
         ETag is a content hash; revalidate with If-None-Match.
       security: []
+      parameters:
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The spec.
@@ -148,6 +152,8 @@ paths:
         Interactive reference for this spec (vendored RapiDoc; no external
         requests). Point a browser here.
       security: []
+      parameters:
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The viewer page.
@@ -167,6 +173,8 @@ paths:
         (vendored renderer, no external requests). Raw markdown at
         /docs/result-schema.md.
       security: []
+      parameters:
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The rendered reference.
@@ -180,6 +188,8 @@ paths:
       tags: [meta]
       summary: Build stamp
       security: []
+      parameters:
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Build identity of the running binary.
@@ -195,6 +205,8 @@ paths:
         204 when the Bearer key is valid. Deliberately NOT auth-exempt —
         this route is the check itself. In no-auth (localhost) mode it
         always succeeds.
+      parameters:
+        - $ref: "#/components/parameters/Label"
       responses:
         "204":
           description: Key accepted.
@@ -209,6 +221,8 @@ paths:
         Every DAG node (name, requires, provides, mutates, lazy, cost,
         resultKey, servable, description). Static per binary; ETag
         `"artifacts-v<schemaVersion>"`.
+      parameters:
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The manifest.
@@ -232,6 +246,8 @@ paths:
         Nodes (cost / resultKey / lazy) + artifact edges, exactly
         `analyzer.ExportGraph("json")`. Static per binary; ETag
         `"graph-v<schemaVersion>"`.
+      parameters:
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The graph.
@@ -288,6 +304,8 @@ paths:
             schema:
               type: string
               format: binary
+      parameters:
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Demo identity + cache state.
@@ -348,6 +366,7 @@ paths:
         Non-cacheable action: no Cache-Control/ETag on the response.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Demo identity + cache state.
@@ -382,6 +401,7 @@ paths:
         match had none.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The overview.
@@ -414,6 +434,7 @@ paths:
         pre-match aborts.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The KTX demoinfo section.
@@ -440,6 +461,7 @@ paths:
         demo has no fullserverinfo / countdown centerprint.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The metadata section.
@@ -473,6 +495,7 @@ paths:
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
         - $ref: "#/components/parameters/Summary"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Aggregates + kill log (log omitted with `summary`).
@@ -529,6 +552,7 @@ paths:
         - $ref: "#/components/parameters/To"
         - $ref: "#/components/parameters/Summary"
         - $ref: "#/components/parameters/Dmg"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Aggregates + per-hit log (log omitted with `summary`).
@@ -558,6 +582,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/ShotsNails"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The shots section.
@@ -591,6 +616,7 @@ paths:
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
         - $ref: "#/components/parameters/Summary"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The aim section (columnar blocks omitted with `summary`).
@@ -618,6 +644,7 @@ paths:
         position track was emitted.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The loc graph.
@@ -648,6 +675,7 @@ paths:
         - $ref: "#/components/parameters/To"
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/ChatTypes"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Matching chat events.
@@ -678,6 +706,7 @@ paths:
         - $ref: "#/components/parameters/WeaponsLegacy"
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Matching backpack drops.
@@ -713,6 +742,7 @@ paths:
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
         - $ref: "#/components/parameters/Summary"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Item timelines, or per-item aggregates with `summary`.
@@ -745,6 +775,7 @@ paths:
         - $ref: "#/components/parameters/Source"
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Matching pickups.
@@ -782,6 +813,7 @@ paths:
         - $ref: "#/components/parameters/IncludeTeam"
         - $ref: "#/components/parameters/Loc"
         - $ref: "#/components/parameters/Layout"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Bucketed series (columnar or row layout).
@@ -812,6 +844,7 @@ paths:
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/EventTypes"
         - $ref: "#/components/parameters/Loc"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Matching events.
@@ -842,6 +875,7 @@ paths:
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/Fields"
         - $ref: "#/components/parameters/Loc"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The slice.
@@ -875,6 +909,7 @@ paths:
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/Fields"
         - $ref: "#/components/parameters/Loc"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Per-player state at the instant.
@@ -904,6 +939,7 @@ paths:
         cached, so a retry after the BSP is provisioned succeeds.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Per-player LOS/PVS intervals.
@@ -929,6 +965,7 @@ paths:
         null when the demo has none.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The stream.
@@ -953,6 +990,7 @@ paths:
         none.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The stream.
@@ -977,6 +1015,7 @@ paths:
         `{"nails": …}`, null when none.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The stream.
@@ -1007,6 +1046,7 @@ paths:
         - $ref: "#/components/parameters/MinDwellMs"
         - $ref: "#/components/parameters/Players"
         - $ref: "#/components/parameters/Loc"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The trails.
@@ -1032,6 +1072,7 @@ paths:
         Empty array when the demo carried no loc data.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The table.
@@ -1060,6 +1101,7 @@ paths:
         - $ref: "#/components/parameters/WindowMs"
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The control timeline.
@@ -1087,6 +1129,7 @@ paths:
         `airgibs_unavailable` when the demo has no timeline analysis.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The airgib list.
@@ -1138,6 +1181,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/ArtifactName"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: Single-key artifact envelope.
@@ -1184,6 +1228,7 @@ paths:
         - $ref: "#/components/parameters/SearchLimit"
         - $ref: "#/components/parameters/SearchOffset"
         - $ref: "#/components/parameters/SearchRoster"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The matching page of games.
@@ -1212,6 +1257,7 @@ paths:
         - $ref: "#/components/parameters/MapName"
         - $ref: "#/components/parameters/EntityTypes"
         - $ref: "#/components/parameters/Kinds"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The entity list.
@@ -1238,6 +1284,7 @@ paths:
         `"geo-<map>-<size>"`.
       parameters:
         - $ref: "#/components/parameters/MapName"
+        - $ref: "#/components/parameters/Label"
       responses:
         "200":
           description: The geometry document.
@@ -1263,6 +1310,14 @@ components:
         unvalidated source label for the access log. Exempt even in auth
         mode: /healthz, /v1/version, /openapi.yaml, /docs.
   parameters:
+    Label:
+      name: label
+      in: query
+      required: false
+      description: >
+        Non-secret traffic-source tag for access-log attribution. Accepted on
+        every endpoint; never affects the response.
+      schema: { type: string }
     DemoId:
       name: id
       in: path
@@ -1666,7 +1721,10 @@ components:
     SearchLimit:
       name: limit
       in: query
-      description: Max rows per page. Default 20, capped at 100.
+      description: >
+        Max rows per page. Default 20 (0 / omitted → 20). A value above 100
+        or a negative value is rejected with `400 invalid_param` — no longer
+        silently clamped.
       schema:
         type: integer
         default: 20
@@ -1675,7 +1733,9 @@ components:
     SearchOffset:
       name: offset
       in: query
-      description: Pagination offset (number of rows to skip).
+      description: >
+        Pagination offset (number of rows to skip). A negative value is
+        rejected with `400 invalid_param`.
       schema:
         type: integer
         minimum: 0

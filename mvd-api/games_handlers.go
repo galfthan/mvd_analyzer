@@ -35,7 +35,7 @@ const gamesSearchTimeout = 15 * time.Second
 //	mode      exact game mode (1on1, 2on2, 4on4, FFA, …)
 //	matchtag  case-insensitive substring of the tournament/event tag
 //	from,to   ISO date bounds, inclusive (YYYY-MM-DD)
-//	limit     max rows (default 20, capped at 100)
+//	limit     max rows (default 20; > 100 or negative → 400 invalid_param)
 //	offset    pagination offset
 //	roster    1/true = verbatim hub rows; default = compact {name,team,frags}
 //
@@ -80,6 +80,26 @@ func (s *server) handleGamesSearch(w http.ResponseWriter, r *http.Request) {
 				fmt.Sprintf("invalid %s=%q (want YYYY-MM-DD)", dp.key, dp.v))
 			return
 		}
+	}
+	// limit/offset are bounded at the API boundary rather than silently
+	// clamped downstream (v57 reject-loudly posture): a limit above the hub's
+	// 100-row page cap, or a negative limit/offset, 400s here instead of being
+	// quietly corrected. limit=0 stays "default" (hubfetch resolves it to 20).
+	// hubfetch keeps its own clamp as a server-side belt (search.go).
+	if params.Limit > 100 {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("invalid limit=%d (max 100)", params.Limit))
+		return
+	}
+	if params.Limit < 0 {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("invalid limit=%d (must be >= 0)", params.Limit))
+		return
+	}
+	if params.Offset < 0 {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("invalid offset=%d (must be >= 0)", params.Offset))
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), gamesSearchTimeout)
