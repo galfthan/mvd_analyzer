@@ -86,9 +86,9 @@ belongs in the frontend.
   but red elsewhere. Use `getTeamOrder()` / `timelineState.teams` to map
   a team name to its color index. The CSS mirror is `--team-a..--team-d`.
 - **Always run tests.** `make test` (which runs
-  `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-web/...`) before every
-  commit, no exceptions for "trivial" changes. If a test you don't
-  understand fails, surface it — don't skip it.
+  `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/... ./mvd-web/...`)
+  before every commit, no exceptions for "trivial" changes. If a test you
+  don't understand fails, surface it — don't skip it.
 - Tests come in three layers:
   1. **Unit tests** alongside the code (`*_test.go`). Coverage spans
      `mvd-reader/parser/` (KTX pickup/drop/print, stats, userinfo),

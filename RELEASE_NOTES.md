@@ -5,6 +5,42 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-22 (api-cleanup-2) — schema v57 (in progress, unreleased)
+
+The `api-cleanup-2` release addresses the v56 API-review findings in
+phases; the schema bump 56→57 and the pure-ms time model land in a later
+phase. Each phase appends its own subsection below.
+
+### Phase 1: request validation (`unknown_param` + enum values)
+
+No response-shape change — this phase only tightens which requests are
+*rejected*.
+
+- **Unknown query-parameter names now 400 with a new `unknown_param`
+  code.** Previously an unrecognised query key (a typo, a stale param) was
+  silently ignored, so a mistaken filter returned an unfiltered body. Every
+  endpoint now rejects any query key it does not consume, naming the
+  offending key and the endpoint's accepted keys in the message. Enforced
+  by consumed-key tracking in the shared `qp` reader (each accessor records
+  the keys it reads), so the accepted set can never drift from what the
+  handler actually uses. Two-direction spec↔handler test sweep pins it.
+- **The global `label` traffic-source tag is accepted on every endpoint**
+  (it is read by request logging, not any handler), so tagging traffic with
+  `?label=…` never 400s.
+- **Legacy / accepted-and-ignored params stay accepted.** The retired
+  `nails` opt-in on `/shots` and the deprecated `weapon` alias of `weapons`
+  are whitelisted (documented `deprecated` in the spec) rather than rejected.
+- **Unknown enum *values* now 400 `invalid_param` instead of matching
+  nothing.** `/events?types=` is validated against the known event-type
+  vocabulary (`view.KnownEventTypes`, drift-pinned to the spec enum) and
+  `/chat?types=` against `{chat, teamsay}`. `weapons=` CSV values, `/items`
+  tokens, and map-entity `types`/`kinds` stay open (data-derived
+  vocabularies) — noted as out of scope.
+- Check order per handler is `invalid_param` → `unknown_param` →
+  `missing_param` / availability `422`; for `/los` the unknown-param check
+  runs before the heavy raycast compute, and for `/region-control` /
+  `/state-at` before the availability / missing-time checks.
+
 ## 2026-07-21 (tweak-api)
 
 - **Review fixes — echo-rule completeness + hub read hardening (still

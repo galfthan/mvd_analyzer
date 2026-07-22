@@ -141,6 +141,12 @@ spelling is camelCase — `windowMs`, `minDwellMs`, `includeTeam` — but
 for player names (QW names are case-significant) and case-insensitive for
 weapon / item / kind / loc / layout tokens.
 
+An **unrecognised parameter name is rejected**, not ignored: a query key an
+endpoint does not accept 400s with code `unknown_param`, naming the offender
+and the accepted keys. The global `label` traffic-source tag is accepted on
+every endpoint. Enum-valued params likewise reject an unknown **value** with
+`400 invalid_param` (e.g. `/events?types=bogus`) instead of matching nothing.
+
 - **`players`, `fields`, `types`** — comma-separated lists; URL-decode
   once. Omit `players` to get all; omit `fields`/`types` to get the
   endpoint's default set.
@@ -257,7 +263,8 @@ Non-2xx responses use a stable envelope:
 | HTTP | `code` | Meaning |
 |---|---|---|
 | 400 | `invalid_demo_id` | malformed `{id}` |
-| 400 | `invalid_param` | malformed **or rejected** query parameter — bad number, malformed `reducers` pair, unknown `loc`/`layout` token, unknown `fields` code, or unknown reducer name |
+| 400 | `invalid_param` | malformed **or rejected** query parameter — bad number, malformed `reducers` pair, unknown `loc`/`layout` token, unknown `fields` code, unknown reducer name, or an unknown enum value (e.g. `/events`/`/chat` `types`) |
+| 400 | `unknown_param` | an unrecognised query parameter **name** — the message names the offending key and the endpoint's accepted keys. The global `label` traffic-source tag is accepted everywhere |
 | 400 | `missing_param` | required param absent (e.g. `time` on `/state-at`) |
 | 401 | `unauthorized` | **auth mode only** — missing / invalid / revoked API key on a protected route. Carries `WWW-Authenticate: Bearer`. The body is deliberately generic and never says whether the key was absent vs revoked (see §2.5). |
 | 429 | `rate_limited` | **auth mode only** — per-key rate limit exceeded. Carries `Retry-After: <seconds>`; wait that long and retry (see §2.5). |

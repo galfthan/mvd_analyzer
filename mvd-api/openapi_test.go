@@ -275,6 +275,20 @@ func TestOpenAPIFieldCodesCurrent(t *testing.T) {
 	diffSets(t, "field-code enum", got, want)
 }
 
+// TestOpenAPIEventTypesCurrent pins the EventTypes param enum to
+// view.KnownEventTypes: the default discrete set plus the opt-in lens types.
+// A new event type recognised by view.Events must be added both there and to
+// the marker block.
+func TestOpenAPIEventTypesCurrent(t *testing.T) {
+	want := append([]string{}, view.KnownEventTypes...)
+	got := markerBlock(t, "event-type-enum")
+	diffSets(t, "event-type enum", got, want)
+	if t.Failed() {
+		t.Logf("expected event-type-enum block (view.KnownEventTypes order):\n            - %s",
+			strings.Join(want, "\n            - "))
+	}
+}
+
 // TestOpenAPIErrorCodesCurrent pins the ErrorCode enum to the writeError /
 // writeUnavailable call sites across the package (plus the eagerArtifacts
 // code table). Scanning source beats a canonical slice refactor: the codes

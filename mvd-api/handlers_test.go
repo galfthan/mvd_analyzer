@@ -492,6 +492,126 @@ func TestTimeBoundParams_Rejected400(t *testing.T) {
 	}
 }
 
+// errBodyCode decodes the error-envelope code from a response body.
+func errBodyCode(t *testing.T, body []byte) string {
+	t.Helper()
+	var env struct {
+		Error struct {
+			Code string `json:"code"`
+		} `json:"error"`
+	}
+	if err := json.Unmarshal(body, &env); err != nil {
+		t.Fatalf("decode error body: %v (body=%s)", err, string(body))
+	}
+	return env.Error.Code
+}
+
+// TestUnknownParam_Rejected: an unrecognised query key 400s with code
+// unknown_param across the param, zero-param, and legacy-param handler
+// families (Phase 1).
+func TestUnknownParam_Rejected(t *testing.T) {
+	srv := newTestServer(t, fragDamageStore())
+	defer srv.Close()
+
+	urls := []string{
+		"frags?bogus=1", "damage?nope=x", "aim?xyz=1", "chat?zzz=1",
+		"backpacks?foo=1", "items?bar=1", "weapon-pickups?baz=1",
+		"buckets?windowMs=50&junk=1", "events?rubbish=1", "stream-slice?nonsense=1",
+		"state-at?time=1&whoops=1", "loc-trails?whatever=1", "region-control?bogus=1",
+		"overview?extra=1", "metadata?extra=1", "demoinfo?extra=1",
+		"loc-graph?extra=1", "loc-table?extra=1", "shots?other=1",
+		"streams/projectiles?extra=1", "streams/beams?extra=1",
+		"streams/nails?extra=1", "airgibs?extra=1", "los?extra=1",
+		"artifacts/frag?extra=1",
+	}
+	for _, u := range urls {
+		body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/"+u)
+		if status != 400 {
+			t.Errorf("%s: status = %d, want 400 (body=%s)", u, status, body)
+			continue
+		}
+		if code := errBodyCode(t, body); code != "unknown_param" {
+			t.Errorf("%s: code = %q, want unknown_param", u, code)
+		}
+	}
+
+	// The non-demo GETs reject unknown params too.
+	for _, u := range []string{"/v1/artifacts?extra=1", "/v1/graph?extra=1", "/v1/games/search?extra=1", "/v1/maps/dm3/entities?extra=1"} {
+		body, status := getRaw(t, srv.URL+u)
+		if status != 400 || errBodyCode(t, body) != "unknown_param" {
+			t.Errorf("%s: status = %d code = %q, want 400 unknown_param (body=%s)", u, status, errBodyCode(t, body), body)
+		}
+	}
+}
+
+// TestMixedCaseParams_Accepted: canonical params spelled in a different case
+// are consumed (marked) and must not 400 as unknown_param.
+func TestMixedCaseParams_Accepted(t *testing.T) {
+	srv := newTestServer(t, fragDamageStore())
+	defer srv.Close()
+
+	for _, u := range []string{
+		"buckets?WindowMs=50", "frags?FROM=10&TO=20", "damage?Players=bps",
+		"events?Types=frag", "weapon-pickups?Source=world", "buckets?Layout=row",
+	} {
+		body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/"+u)
+		if status != 200 {
+			t.Errorf("%s: status = %d, want 200 (body=%s)", u, status, body)
+		}
+	}
+}
+
+// TestEnumValues_Rejected: an unknown /events or /chat type value 400s with
+// invalid_param (not a silent empty match).
+func TestEnumValues_Rejected(t *testing.T) {
+	srv := newTestServer(t, fragDamageStore())
+	defer srv.Close()
+	for _, u := range []string{"events?types=bogus", "chat?types=bogus"} {
+		body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/"+u)
+		if status != 400 {
+			t.Errorf("%s: status = %d, want 400 (body=%s)", u, status, body)
+			continue
+		}
+		if code := errBodyCode(t, body); code != "invalid_param" {
+			t.Errorf("%s: code = %q, want invalid_param", u, code)
+		}
+	}
+}
+
+// TestShotsNailsLegacyParam_Accepted: the retired `nails` opt-in is accepted
+// and ignored — /shots?nails=1 still 200s.
+func TestShotsNailsLegacyParam_Accepted(t *testing.T) {
+	r := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Shots:         &result.ShotsResult{Shots: []result.Shot{{Time: 1000, Player: "bps", Weapon: "lg"}}},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	if body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/shots?nails=1"); status != 200 {
+		t.Errorf("shots?nails=1: status = %d, want 200 (body=%s)", status, body)
+	}
+}
+
+// TestLabelParam_AcceptedEverywhere: ?label=x (the global traffic-source tag)
+// is accepted on every endpoint family, never unknown_param.
+func TestLabelParam_AcceptedEverywhere(t *testing.T) {
+	srv := newTestServer(t, fragDamageStore())
+	defer srv.Close()
+	for _, u := range []string{
+		"/v1/demos/gameId:42/frags?label=x",
+		"/v1/demos/gameId:42/overview?label=x",
+		"/v1/demos/gameId:42/buckets?windowMs=50&label=x",
+		"/v1/demos/gameId:42/artifacts/frag?label=x",
+		"/v1/artifacts?label=x",
+		"/v1/graph?label=x",
+	} {
+		body, status := getRaw(t, srv.URL+u)
+		if status == 400 && errBodyCode(t, body) == "unknown_param" {
+			t.Errorf("%s: label rejected as unknown_param (body=%s)", u, body)
+		}
+	}
+}
+
 func newTestServer(t *testing.T, store demoStore) *httptest.Server {
 	t.Helper()
 	return newTestServerMaps(t, store, "")

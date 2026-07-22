@@ -165,6 +165,19 @@ func writeInvalidParam(w http.ResponseWriter, err error) bool {
 	return true
 }
 
+// writeUnknownParam writes the 400 unknown_param envelope for a non-nil err
+// (an unrecognised query key, from qp.Unknown). Reports whether it wrote, so
+// callers do `if writeUnknownParam(w, p.Unknown()) { return }` right after the
+// writeInvalidParam(p.Err()) check — the invalid_param → unknown_param →
+// missing_param/availability order.
+func writeUnknownParam(w http.ResponseWriter, err error) bool {
+	if err == nil {
+		return false
+	}
+	writeError(w, http.StatusBadRequest, "unknown_param", err.Error())
+	return true
+}
+
 // cacheState is the X-Cache value for the tier that served meta.
 func cacheState(meta democache.CacheMeta) string {
 	switch {
@@ -233,6 +246,9 @@ func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	writeJSON(w, http.StatusOK, OverviewEnvelope{TimeUnit: view.UnitMs, Overview: BuildOverview(res)})
 }
 
@@ -242,6 +258,9 @@ func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleMetadata(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	md, err := view.Metadata(res)
@@ -259,6 +278,9 @@ func (s *server) handleMetadata(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleLocGraph(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	lg, err := view.LocGraph(res)
@@ -303,6 +325,9 @@ func (s *server) handleFrags(w http.ResponseWriter, r *http.Request) {
 		Summary: p.Bool("summary"),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 	out, err := view.Frags(res, opts)
@@ -361,6 +386,9 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	// Single resolution point for the damage-family default — the MCP layer
 	// inherits it (it proxies the REST call without a dmg param). An unset dmg
 	// resolves to "bounded" for BOTH the summary and the full-log request:
@@ -415,6 +443,13 @@ func (s *server) handleShots(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	// `nails` is the retired opt-in — accepted and ignored (see the doc
+	// comment) rather than rejected, so old callers don't 400.
+	p := newQP(r.URL.Query())
+	p.Accept("nails")
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	sh, err := view.Shots(res)
 	if err != nil {
 		s.writeUnavailable(w, r, err, "shots_unavailable",
@@ -460,6 +495,9 @@ func (s *server) handleAim(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	am, err := view.Aim(res, opts)
 	if err != nil {
 		s.writeUnavailable(w, r, err, "aim_unavailable",
@@ -497,6 +535,19 @@ func (s *server) handleChat(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	// types is a closed vocabulary {chat, teamsay}; a typo must 400, not
+	// silently match nothing. Chat() matches ev.Type case-sensitively, so
+	// validate exactly.
+	for _, t := range opts.Types {
+		if t != "chat" && t != "teamsay" {
+			writeError(w, http.StatusBadRequest, "invalid_param",
+				fmt.Sprintf("unknown chat type %q; valid: chat, teamsay", t))
+			return
+		}
+	}
 	writeJSON(w, http.StatusOK, view.ChatEnvelope{TimeUnit: view.UnitMs, Messages: view.Chat(res, opts)})
 }
 
@@ -506,6 +557,9 @@ func (s *server) handleChat(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleDemoInfo(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	di, err := view.DemoInfo(res)
@@ -539,6 +593,9 @@ func (s *server) handleBackpacks(w http.ResponseWriter, r *http.Request) {
 		To:      p.Sec("to", 0),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 	writeJSON(w, http.StatusOK, view.BackpacksEnvelope{TimeUnit: view.UnitMs, Backpacks: view.Backpacks(res, opts)})
@@ -588,6 +645,9 @@ func (s *server) handleItems(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	// The native unit differs by shape and is fixed per shape: the full phase
 	// timeline is ms-native (availableFrom/takenAt/respawnAt are stored ms), the
 	// summary firstTake.t is seconds-native. timeUnit echoes it either way.
@@ -620,11 +680,14 @@ func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
 	opts := view.WeaponPickupOptions{
 		Players: p.CSV("players"),
 		Weapons: p.CSVAny("weapons", "weapon"),
-		Source:  ciGet(r.URL.Query(), "source"),
+		Source:  p.Str("source"),
 		From:    p.Sec("from", 0),
 		To:      p.Sec("to", 0),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 	// source is an enum like loc/layout — a typo must 400, not silently
@@ -657,6 +720,9 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 		Layout:      p.Layout(),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 	if opts.Layout == "column" {
@@ -693,6 +759,9 @@ func (s *server) handleEvents(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	ev, err := view.Events(res, filter)
 	if writeInvalidParam(w, err) {
 		return
@@ -717,6 +786,9 @@ func (s *server) handleStreamSlice(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	sl, err := view.StreamSlice(res, opts)
 	if writeInvalidParam(w, err) {
 		return
@@ -731,10 +803,6 @@ func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	q := r.URL.Query()
-	if ciGet(q, "time") == "" {
-		writeError(w, http.StatusBadRequest, "missing_param", "time is required")
-		return
-	}
 	p := newQP(q)
 	opts := view.StateAtOptions{
 		Time:     p.Sec("time", 0),
@@ -743,6 +811,15 @@ func (s *server) handleStateAt(w http.ResponseWriter, r *http.Request) {
 		LocIndex: p.LocIndex(),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	// missing_param comes after the param-hygiene checks (invalid → unknown →
+	// missing): a bad or unknown param wins over the absent-time report.
+	if ciGet(q, "time") == "" {
+		writeError(w, http.StatusBadRequest, "missing_param", "time is required")
 		return
 	}
 	sa, err := view.StateAt(res, opts)
@@ -767,6 +844,11 @@ func (s *server) handleLOS(w http.ResponseWriter, r *http.Request) {
 	id, err := democache.ParseDemoID(r.PathValue("id"))
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid_demo_id", err.Error())
+		return
+	}
+	// Reject unknown params BEFORE EnsureLOS: LOS is the heaviest lazy pass,
+	// and a typo'd param must not trigger the raycast compute.
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	res, meta, err := s.store.EnsureLOS(r.Context(), id)
@@ -814,6 +896,9 @@ func (s *server) handleProjectiles(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	var pr *result.ProjectileStreams
 	if res.Streams != nil {
 		pr = res.Streams.Projectiles
@@ -828,6 +913,9 @@ func (s *server) handleProjectiles(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleBeams(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	var bm *result.BeamStreams
@@ -845,6 +933,9 @@ func (s *server) handleBeams(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleNails(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	var nl *result.ProjectileStreams
@@ -875,6 +966,9 @@ func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	tr, err := view.LocTrails(res, opts)
 	if writeInvalidParam(w, err) {
 		return
@@ -892,6 +986,9 @@ func (s *server) handleLocTable(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	table := []string{}
 	if res.TimelineAnalysis != nil && res.TimelineAnalysis.LocTable != nil {
 		table = res.TimelineAnalysis.LocTable
@@ -904,10 +1001,8 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if err := view.RegionControlAvailable(res); err != nil {
-		s.writeUnavailable(w, r, err, "region_control_unavailable", "this demo has no region-control layout")
-		return
-	}
+	// Param hygiene (invalid → unknown) runs BEFORE the availability 422: a
+	// typo'd param on a demo that also lacks region control must 400, not 422.
 	p := newQP(r.URL.Query())
 	opts := view.RegionControlOptions{
 		WindowMs:  p.Int("windowMs", 50),
@@ -915,6 +1010,13 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 		EndTime:   p.Sec("to", 0),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	if err := view.RegionControlAvailable(res); err != nil {
+		s.writeUnavailable(w, r, err, "region_control_unavailable", "this demo has no region-control layout")
 		return
 	}
 	rcv, err := view.RegionControl(res, opts)
@@ -932,6 +1034,9 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	airgibs, err := view.Airgibs(res)

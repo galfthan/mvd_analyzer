@@ -84,6 +84,9 @@ var eagerArtifacts = map[string]eagerArtifact{
 // (name, requires, provides, mutates, lazy, cost, resultKey, servable,
 // description). Static per binary; ETag keyed on the schema version.
 func (s *server) handleArtifactsManifest(w http.ResponseWriter, r *http.Request) {
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	s.writeStaticCacheHeaders(w, "artifacts")
 	if staticRevalidated(w, r, "artifacts") {
 		return
@@ -98,6 +101,9 @@ func (s *server) handleArtifactsManifest(w http.ResponseWriter, r *http.Request)
 // resultKey / lazy + the artifact edges), exactly analyzer.ExportGraph("json").
 // Static per binary; ETag keyed on the schema version.
 func (s *server) handleGraph(w http.ResponseWriter, r *http.Request) {
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	s.writeStaticCacheHeaders(w, "graph")
 	if staticRevalidated(w, r, "graph") {
 		return
@@ -123,10 +129,10 @@ func (s *server) handleArtifact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Artifacts are parameter-free; parameterised reads are the view endpoints
-	// (plan §3.4/§7). Reject any query params rather than silently ignoring them.
-	if len(r.URL.Query()) > 0 {
-		writeError(w, http.StatusBadRequest, "invalid_param",
-			"artifact endpoints take no query parameters (parameterised reads are the view endpoints)")
+	// (plan §3.4/§7). Reject any query param (other than the global `label`)
+	// rather than silently ignoring it. newQP marks nothing, so Unknown()
+	// flags every non-label key as unknown_param.
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
 	id, err := democache.ParseDemoID(r.PathValue("id"))

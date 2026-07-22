@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -148,15 +149,79 @@ func parseReducers(v string) (map[string]string, error) {
 // order of the options literal determines which of several bad params is
 // reported; keep it matching the historical read order.
 type qp struct {
-	q   url.Values
-	err error
+	q    url.Values
+	err  error
+	seen map[string]bool
 }
 
-func newQP(q url.Values) *qp { return &qp{q: q} }
+func newQP(q url.Values) *qp { return &qp{q: q, seen: map[string]bool{}} }
+
+// globalQueryAllow lists query keys accepted on every request regardless of
+// the handler. `label` is the non-secret traffic-source tag requestLabel
+// (middleware.go) reads off any request in no-auth mode; it is never a
+// handler-consumed param, so it must be whitelisted here or Unknown() would
+// reject it everywhere.
+var globalQueryAllow = map[string]bool{"label": true}
+
+// mark records that a query key (lowercased) is consumed by this handler, so
+// Unknown() does not flag it. Accessors call it for every key they read —
+// before any error short-circuit — so the accepted-key set is complete even
+// when an earlier param already failed.
+func (p *qp) mark(keys ...string) {
+	for _, k := range keys {
+		p.seen[strings.ToLower(k)] = true
+	}
+}
 
 // Err returns the first param-read error, or nil. Handlers pass it to
 // writeInvalidParam for the shared 400 invalid_param tail.
 func (p *qp) Err() error { return p.err }
+
+// Str marks key as consumed and returns its case-insensitive value (empty
+// when absent). It cannot fail — for plain string params (map/mode/source/…)
+// that were formerly read via a raw ciGet bypass, so the key is now recorded
+// for Unknown().
+func (p *qp) Str(key string) string {
+	p.mark(key)
+	return ciGet(p.q, key)
+}
+
+// Accept marks keys as consumed without reading them — for accepted-but-
+// ignored legacy params (e.g. `nails` on /shots) and zero-param endpoints
+// that want a specific param whitelisted. One mechanism, no separate helper.
+func (p *qp) Accept(keys ...string) { p.mark(keys...) }
+
+// Unknown reports the first query key (sorted) whose lowercase form was not
+// consumed by any accessor and is not globally allowed, naming the offender
+// and the sorted accepted vocabulary. Returns nil when every key was
+// recognised. Handlers wire it as `if writeUnknownParam(w, p.Unknown())`.
+func (p *qp) Unknown() error {
+	var unknown []string
+	for k := range p.q {
+		lk := strings.ToLower(k)
+		if p.seen[lk] || globalQueryAllow[lk] {
+			continue
+		}
+		unknown = append(unknown, lk)
+	}
+	if len(unknown) == 0 {
+		return nil
+	}
+	sort.Strings(unknown)
+	accepted := map[string]bool{}
+	for k := range p.seen {
+		accepted[k] = true
+	}
+	for k := range globalQueryAllow {
+		accepted[k] = true
+	}
+	acc := make([]string, 0, len(accepted))
+	for k := range accepted {
+		acc = append(acc, k)
+	}
+	sort.Strings(acc)
+	return fmt.Errorf("unknown query parameter %q; accepted: %s", unknown[0], strings.Join(acc, ", "))
+}
 
 // maxSecBound is the largest match-relative seconds bound the view layer can
 // represent: secToMs rounds sec*1000 to int32 ms, so a larger value would wrap
@@ -170,6 +235,7 @@ const maxSecBound = float64(math.MaxInt32) / 1000.0
 // where the bad float→int32 conversion would produce a silent all-filtered 200.
 // No-op after a prior error.
 func (p *qp) Sec(key string, def float64) float64 {
+	p.mark(key)
 	if p.err != nil {
 		return def
 	}
@@ -194,6 +260,7 @@ func (p *qp) Sec(key string, def float64) float64 {
 
 // Int reads an integer param (empty → def). No-op after a prior error.
 func (p *qp) Int(key string, def int) int {
+	p.mark(key)
 	if p.err != nil {
 		return def
 	}
@@ -205,7 +272,10 @@ func (p *qp) Int(key string, def int) int {
 }
 
 // CSV reads a comma-separated param. It cannot fail, so it never sets err.
-func (p *qp) CSV(key string) []string { return parseCSV(ciGet(p.q, key)) }
+func (p *qp) CSV(key string) []string {
+	p.mark(key)
+	return parseCSV(ciGet(p.q, key))
+}
 
 // CSVAny reads the first of several aliased comma-separated params that
 // has a non-empty value (earlier keys win). Exists for the
@@ -213,6 +283,7 @@ func (p *qp) CSV(key string) []string { return parseCSV(ciGet(p.q, key)) }
 // first, the legacy alias after, and a request carrying both gets the
 // canonical one.
 func (p *qp) CSVAny(keys ...string) []string {
+	p.mark(keys...)
 	for _, k := range keys {
 		if vals := parseCSV(ciGet(p.q, k)); len(vals) > 0 {
 			return vals
@@ -222,10 +293,14 @@ func (p *qp) CSVAny(keys ...string) []string {
 }
 
 // Bool reads a 0/1|true/false param. It cannot fail, so it never sets err.
-func (p *qp) Bool(key string) bool { return parseBool(p.q, key) }
+func (p *qp) Bool(key string) bool {
+	p.mark(key)
+	return parseBool(p.q, key)
+}
 
 // LocIndex reads ?loc=name|index. No-op after a prior error.
 func (p *qp) LocIndex() bool {
+	p.mark("loc")
 	if p.err != nil {
 		return false
 	}
@@ -238,6 +313,7 @@ func (p *qp) LocIndex() bool {
 
 // Layout reads ?layout=row|column (empty → "column"). No-op after error.
 func (p *qp) Layout() string {
+	p.mark("layout")
 	if p.err != nil {
 		return "column"
 	}
@@ -251,6 +327,7 @@ func (p *qp) Layout() string {
 // Dmg reads ?dmg=raw|bounded|both (empty → "", the handler resolves the
 // default to "bounded"). No-op after a prior error.
 func (p *qp) Dmg() string {
+	p.mark("dmg")
 	if p.err != nil {
 		return ""
 	}
@@ -264,6 +341,7 @@ func (p *qp) Dmg() string {
 // Reducers reads the "field=name,..." reducer-override param. No-op after
 // a prior error.
 func (p *qp) Reducers(key string) map[string]string {
+	p.mark(key)
 	if p.err != nil {
 		return nil
 	}

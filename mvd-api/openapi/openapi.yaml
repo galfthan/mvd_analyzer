@@ -55,6 +55,14 @@ info:
     values are case-sensitive (QW names are case-significant); weapon /
     item / kind / loc / layout tokens are case-insensitive.
 
+    Unknown query parameter names are rejected: a request carrying a query
+    key the endpoint does not accept 400s with code `unknown_param` (the
+    message names the offender and the accepted keys), rather than silently
+    ignoring it. The `label` traffic-source tag is accepted on every
+    endpoint. Enum-valued params (e.g. `/events` and `/chat` `types`)
+    likewise 400 (`invalid_param`) on an unknown value instead of matching
+    nothing.
+
     This document is the complete per-endpoint reference. Deep
     field-level semantics of the underlying analysis (the Result
     contract shared with the Go library and WASM builds) are served by
@@ -529,10 +537,12 @@ paths:
       description: >
         Every detected weapon fire with time/player/weapon/source, hit +
         victims where linkable, per-player aggregates, and the KTX
-        reconciliation cross-check. No query parameters. 422
-        `shots_unavailable` when no weapon fires were decoded.
+        reconciliation cross-check. Takes only the deprecated no-op `nails`
+        param (accepted and ignored). 422 `shots_unavailable` when no weapon
+        fires were decoded.
       parameters:
         - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/ShotsNails"
       responses:
         "200":
           description: The shots section.
@@ -1335,6 +1345,15 @@ components:
       schema:
         type: array
         items: { type: string }
+    ShotsNails:
+      name: nails
+      in: query
+      deprecated: true
+      description: >
+        Deprecated no-op. The retired opt-in that once gated ng/sng nail
+        linking; ng/sng fires are always in the stream now. Accepted and
+        ignored so old callers do not 400.
+      schema: { type: string }
     Summary:
       name: summary
       in: query
@@ -1377,12 +1396,16 @@ components:
       in: query
       description: >
         CSV of message types; defaults to `chat,teamsay`. Pass a subset to
-        narrow.
+        narrow. An unknown value 400s (invalid_param).
       style: form
       explode: false
       schema:
         type: array
-        items: { type: string }
+        items:
+          type: string
+          enum:
+            - chat
+            - teamsay
     EventTypes:
       name: types
       in: query
@@ -1390,12 +1413,32 @@ components:
         CSV of event types: frag, powerup, streak, spawn, death, weapon,
         item, chat, pickup (the default set), plus the opt-in
         high-frequency / dedicated lenses damage, health, armor, loc,
-        telefrag, stomp. Omit for the default set.
+        telefrag, stomp. Omit for the default set. An unknown type value
+        400s (invalid_param) rather than silently matching nothing.
       style: form
       explode: false
       schema:
         type: array
-        items: { type: string }
+        items:
+          type: string
+          enum:
+            # event-type-enum:begin — pinned to view.KnownEventTypes by TestOpenAPIEventTypesCurrent
+            - frag
+            - powerup
+            - streak
+            - spawn
+            - death
+            - weapon
+            - item
+            - chat
+            - pickup
+            - damage
+            - telefrag
+            - stomp
+            - health
+            - armor
+            - loc
+            # event-type-enum:end
     EntityTypes:
       name: types
       in: query
@@ -1730,6 +1773,7 @@ components:
         - region_control_unavailable
         - shots_unavailable
         - unauthorized
+        - unknown_param
         - unparseable_demo
         - upload_quota_exceeded
         - uploads_disabled

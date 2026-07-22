@@ -1,7 +1,9 @@
 package view
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
 )
@@ -48,6 +50,17 @@ var defaultEventTypes = []string{
 	"pickup",
 }
 
+// KnownEventTypes is every event type Events recognises: the default
+// discrete set (defaultEventTypes) plus the opt-in high-frequency /
+// dedicated-lens types (damage, telefrag, stomp, health, armor, loc). An
+// EventsFilter.Types value outside this set is rejected (the handler turns
+// the returned error into 400 invalid_param). The openapi EventTypes enum is
+// drift-pinned to this slice.
+var KnownEventTypes = []string{
+	"frag", "powerup", "streak", "spawn", "death", "weapon", "item", "chat",
+	"pickup", "damage", "telefrag", "stomp", "health", "armor", "loc",
+}
+
 // Events returns a time-ordered list of events matching the filter.
 // Synthesised from result.TimelineAnalysis.{FragEvents, PowerupEvents,
 // FragStreaks}, result.Messages, result.Streams change entries, and —
@@ -59,6 +72,18 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 	types := filter.Types
 	if len(types) == 0 {
 		types = defaultEventTypes
+	} else {
+		// An explicit list is validated against the known vocabulary so a typo
+		// 400s instead of silently matching nothing (the silent-enum gap).
+		known := make(map[string]bool, len(KnownEventTypes))
+		for _, t := range KnownEventTypes {
+			known[t] = true
+		}
+		for _, t := range types {
+			if !known[t] {
+				return nil, fmt.Errorf("unknown event type %q; valid: %s", t, strings.Join(KnownEventTypes, ", "))
+			}
+		}
 	}
 	want := make(map[string]bool, len(types))
 	for _, t := range types {

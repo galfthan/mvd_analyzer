@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -468,3 +469,196 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 }
 
 var _ = httptest.NewServer // silence unused-import drift if the helper moves
+
+// queryParams returns an operation's documented query-parameter names and the
+// subset marked required, resolving component $refs. Parameter refs keep the
+// #/components/parameters/ form (loadSpecDocument only rewrites schema refs).
+func (sd *specDocument) queryParams(t *testing.T, path, method string) (names []string, required map[string]bool) {
+	t.Helper()
+	required = map[string]bool{}
+	pathItem, _ := sd.doc["paths"].(map[string]any)[path].(map[string]any)
+	if pathItem == nil {
+		t.Fatalf("spec has no path %q", path)
+	}
+	op, _ := pathItem[strings.ToLower(method)].(map[string]any)
+	if op == nil {
+		return nil, required
+	}
+	params, _ := op["parameters"].([]any)
+	comps, _ := sd.doc["components"].(map[string]any)
+	compParams, _ := comps["parameters"].(map[string]any)
+	for _, pr := range params {
+		pm, _ := pr.(map[string]any)
+		if ref, ok := pm["$ref"].(string); ok {
+			name, ok := strings.CutPrefix(ref, "#/components/parameters/")
+			if !ok {
+				t.Fatalf("unexpected parameter $ref %q", ref)
+			}
+			pm, _ = compParams[name].(map[string]any)
+			if pm == nil {
+				t.Fatalf("unresolvable parameter component %q", name)
+			}
+		}
+		if pm["in"] != "query" {
+			continue
+		}
+		nm, _ := pm["name"].(string)
+		names = append(names, nm)
+		if req, _ := pm["required"].(bool); req {
+			required[nm] = true
+		}
+	}
+	return names, required
+}
+
+// plausibleParamValue returns a value unlikely to be rejected as invalid_param
+// for a documented query parameter, so a sweep request carrying it exercises
+// name-acceptance (never unknown_param) rather than a value error. Only the
+// unknown_param code fails the sweep assertion, so any value would technically
+// do; these keep the requests realistic. `types` uses "chat", a valid value
+// for both /events (an event type) and /chat (a message type).
+func plausibleParamValue(name string) string {
+	switch name {
+	case "time":
+		return "30"
+	case "from":
+		return "0"
+	case "to":
+		return "60"
+	case "windowMs":
+		return "5000"
+	case "minDwellMs":
+		return "100"
+	case "limit", "offset":
+		return "10"
+	case "summary", "includeTeam", "roster":
+		return "1"
+	case "dmg":
+		return "bounded"
+	case "loc":
+		return "name"
+	case "layout":
+		return "row"
+	case "source":
+		return "world"
+	case "fields":
+		return "h"
+	case "reducers":
+		return "h=min"
+	case "kinds":
+		return "armor"
+	case "items":
+		return "ya"
+	case "weapons", "weapon":
+		return "rl"
+	case "players", "teams":
+		return "bps"
+	case "map":
+		return "dm3"
+	case "mode":
+		return "4on4"
+	case "matchtag":
+		return "x"
+	case "nails":
+		return "1"
+	case "types":
+		return "chat"
+	}
+	return "x"
+}
+
+// concreteGetPath fills the path params of a spec GET path pattern with the
+// validation fixtures (gameId:42, dm3, the frag artifact).
+func concreteGetPath(p string) string {
+	p = strings.ReplaceAll(p, "{id}", "gameId:42")
+	p = strings.ReplaceAll(p, "{map}", "dm3")
+	p = strings.ReplaceAll(p, "{name}", "frag")
+	return p
+}
+
+// fetchStatusAndCode issues a GET and returns the status plus the error-body
+// code (empty for a non-error / non-JSON body).
+func fetchStatusAndCode(t *testing.T, u string) (int, string) {
+	t.Helper()
+	resp, err := http.Get(u)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	var env struct {
+		Error struct {
+			Code string `json:"code"`
+		} `json:"error"`
+	}
+	_ = json.Unmarshal(body, &env)
+	return resp.StatusCode, env.Error.Code
+}
+
+// TestOpenAPIParamSweep is the two-direction pin between the spec's declared
+// query params and the handlers' consumed-key sets (Phase 1): (i) every
+// documented query parameter on every governed GET must be accepted (never
+// unknown_param); (ii) a bogus param on every governed GET must 400
+// unknown_param. Meta/doc endpoints that do no param validation are excluded.
+func TestOpenAPIParamSweep(t *testing.T) {
+	sd := specDoc(t)
+	res := goldenResult(t)
+	addBoundedFamily(res.Damage)
+	store := &fakeStore{byID: map[string]*result.Result{"gameId:42": res}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+
+	exclude := map[string]bool{
+		"GET /healthz":            true, // no params, no validation
+		"GET /v1/version":         true,
+		"GET /v1/auth/check":      true,
+		"GET /openapi.yaml":       true, // served asset
+		"GET /docs":               true,
+		"GET /docs/result-schema": true,
+	}
+
+	withParams := func(base url.Values, extra ...[2]string) string {
+		q := url.Values{}
+		for k, vs := range base {
+			q[k] = append([]string(nil), vs...)
+		}
+		for _, kv := range extra {
+			q.Set(kv[0], kv[1])
+		}
+		return q.Encode()
+	}
+
+	swept := 0
+	for op := range specPaths(t) {
+		if !strings.HasPrefix(op, "GET ") || exclude[op] {
+			continue
+		}
+		pathPattern := strings.TrimPrefix(op, "GET ")
+		names, required := sd.queryParams(t, pathPattern, "GET")
+		concrete := concreteGetPath(pathPattern)
+
+		reqVals := url.Values{}
+		for n := range required {
+			reqVals.Set(n, plausibleParamValue(n))
+		}
+
+		// (i) each documented query param is accepted (never unknown_param).
+		for _, n := range names {
+			u := srv.URL + concrete + "?" + withParams(reqVals, [2]string{n, plausibleParamValue(n)})
+			if _, code := fetchStatusAndCode(t, u); code == "unknown_param" {
+				t.Errorf("%s: documented param %q returned unknown_param — its accessor is not marking the key", op, n)
+			}
+		}
+
+		// (ii) a bogus param 400s unknown_param.
+		u := srv.URL + concrete + "?" + withParams(reqVals, [2]string{"bogusparam987", "1"})
+		status, code := fetchStatusAndCode(t, u)
+		if status != http.StatusBadRequest || code != "unknown_param" {
+			t.Errorf("%s: ?bogusparam987=1 = %d/%q, want 400/unknown_param", op, status, code)
+		}
+		swept++
+	}
+	if swept < 25 {
+		t.Fatalf("param sweep covered only %d GET ops — has the enumeration regressed?", swept)
+	}
+}

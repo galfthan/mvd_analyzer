@@ -216,8 +216,8 @@ func TestArtifact_ParamsRejected400(t *testing.T) {
 	}
 	var env errorEnvelope
 	_ = json.Unmarshal(body, &env)
-	if env.Error.Code != "invalid_param" {
-		t.Errorf("code = %q; want invalid_param", env.Error.Code)
+	if env.Error.Code != "unknown_param" {
+		t.Errorf("code = %q; want unknown_param", env.Error.Code)
 	}
 }
 

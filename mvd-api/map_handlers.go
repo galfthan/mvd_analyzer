@@ -25,6 +25,13 @@ import (
 //	kinds  csv — restrict to item categories (armor, mega, health,
 //	             powerup, weapon, ammo) or a raw kind token (ra, quad)
 func (s *server) handleMapEntitiesByMap(w http.ResponseWriter, r *http.Request) {
+	// filterMapEntities reads types/kinds off the request; mark them here so
+	// Unknown() accepts them and rejects any other query key.
+	p := newQP(r.URL.Query())
+	p.Accept("types", "kinds")
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
 	base := loc.NormalizeMapName(r.PathValue("map"))
 	me, err := mapents.LoadForMap(base)
 	if err != nil {
@@ -42,6 +49,9 @@ func (s *server) handleMapEntitiesByMap(w http.ResponseWriter, r *http.Request) 
 // floor-polygon geometry JSON (mapgeom.MapRegions) from the maps
 // directory. REST-only (the payload is large; not an MCP tool).
 func (s *server) handleMapGeometry(w http.ResponseWriter, r *http.Request) {
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
 	if s.mapsDir == "" {
 		writeError(w, http.StatusNotFound, "map_unavailable",
 			"map geometry is not configured on this server (no -maps-dir)")

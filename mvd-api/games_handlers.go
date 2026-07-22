@@ -46,21 +46,23 @@ func (s *server) handleGamesSearch(w http.ResponseWriter, r *http.Request) {
 			"game search is not configured on this server")
 		return
 	}
-	q := r.URL.Query()
-	p := newQP(q)
+	p := newQP(r.URL.Query())
 	params := hubfetch.SearchParams{
 		Players:  p.CSV("players"),
 		Teams:    p.CSV("teams"),
-		Map:      ciGet(q, "map"),
-		Mode:     ciGet(q, "mode"),
-		Matchtag: ciGet(q, "matchtag"),
-		From:     ciGet(q, "from"),
-		To:       ciGet(q, "to"),
+		Map:      p.Str("map"),
+		Mode:     p.Str("mode"),
+		Matchtag: p.Str("matchtag"),
+		From:     p.Str("from"),
+		To:       p.Str("to"),
 		Limit:    p.Int("limit", 0),
 		Offset:   p.Int("offset", 0),
 		Roster:   p.Bool("roster"),
 	}
 	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
 		return
 	}
 
