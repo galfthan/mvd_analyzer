@@ -52,11 +52,22 @@ type RegionControlView = result.RegionControlResult
 // match window), one with Regions/TeamA/TeamB filled and no
 // BucketStates/Stats.
 //
-// Walks result.Streams natively: per windowMs (default 50) bucket,
-// find each player's last position sample with T ≤ bucket-start (via
-// PositionTrack.Li), look up loc → region, check armed via RL/LG
-// interval membership, tally per region per team, classify. "Armed"
-// means RL or LG. Pre-spawn / dead samples (Li=0) skipped.
+// Two grids, deliberately decoupled (see classifyRegions):
+//
+//   - BucketStates is the display-resolution timeline — one state code
+//     per windowMs (default 50) bucket. Each bucket is a point sample:
+//     the classification of every player's last position with T ≤
+//     bucket-start.
+//   - Stats (the match-aggregate percentages and the ByPlayer tallies)
+//     is ALWAYS computed at the native 50ms resolution, independent of
+//     the caller's windowMs, so the aggregate is not a sampling artifact
+//     of a coarse display window.
+//
+// The underlying walk (both grids): for each bucket find each player's
+// last position sample with T ≤ bucket-start (via PositionTrack.Li),
+// look up loc → region, check armed via RL/LG interval membership, tally
+// per region per team, classify. "Armed" means RL or LG. Pre-spawn /
+// dead samples (Li=0) skipped.
 //
 // All time arithmetic is integer milliseconds (schema v8); the
 // bucket grid is anchored at r.Streams.Global.MatchStart.
@@ -255,11 +266,48 @@ func defaultNameToTeam(r *result.Result) map[string]string {
 	return nameToTeam
 }
 
+// playerTally is one player's per-region presence on a single bucket
+// grid: bucket counts split by whether the player was armed at the
+// sampled bucket-start.
+type playerTally struct {
+	team    string
+	armed   int
+	unarmed int
+}
+
+// regionGrid is the classification of one bucket grid. stateBuf maps a
+// region to its per-bucket state codes (length == nBuckets); byPlayer
+// maps a region to its per-player attribution tallies at this grid's
+// resolution.
+type regionGrid struct {
+	nBuckets int
+	stateBuf map[string][]byte
+	byPlayer map[string]map[string]*playerTally
+}
+
 // classifyRegions is the per-bucket walker — formerly
 // analyzer.ComputeRegionControl. Kept private; callers go through
 // RegionControl, which resolves defaults from the Result.
 //
-// optsStartMs / optsEndMs clamp the bucket grid to a sub-window; 0
+// It builds two bucket grids over the same (sub-)window:
+//
+//   - the display grid at the caller's windowMs, which produces the
+//     BucketStates timeline (one point-sampled state code per bucket);
+//   - the stats grid at the native 50ms resolution, which produces the
+//     aggregate Stats percentages and the ByPlayer tallies.
+//
+// The two are decoupled on purpose. A single grid at a coarse windowMs
+// makes the aggregate a sampling artifact: because each bucket is
+// classified from one position sample at bucket-start, a fight that
+// starts and ends between two coarse bucket-starts is never sampled, so
+// a region could report empty:100 even though it was contested — and the
+// "match-aggregate" would then change with the caller's display
+// resolution. Computing Stats at the fixed native 50ms grid makes the
+// aggregate stable regardless of windowMs; the 50ms walk is exactly what
+// the default request already did, so the worst-case cost is unchanged.
+// When windowMs == 50 the two grids coincide and the walk runs once.
+//
+// optsStartMs / optsEndMs clamp BOTH grids to the same sub-window; 0
 // means "no override" (use MatchStart / MatchEnd respectively).
 func classifyRegions(
 	r *result.Result,
@@ -272,7 +320,6 @@ func classifyRegions(
 	if r == nil || r.Streams == nil || len(regions) == 0 {
 		return nil, nil
 	}
-	bucketDurMs := int32(windowMs)
 
 	var locTable []string
 	if r.TimelineAnalysis != nil {
@@ -303,10 +350,11 @@ func classifyRegions(
 		return nil, nil
 	}
 
-	// Bucket grid is anchored at MatchStart (always 0 on the
-	// match-relative clock every producer stamps at Finalize). The optional sub-window
-	// clamps to a tighter range; default behaviour (both opts zero)
-	// covers the full match.
+	// Grid window is anchored at MatchStart (always 0 on the
+	// match-relative clock every producer stamps at Finalize). The
+	// optional sub-window clamps to a tighter range; default behaviour
+	// (both opts zero) covers the full match. It applies identically to
+	// both grids below.
 	matchStart := r.Streams.Global.MatchStart
 	matchEnd := r.Streams.Global.MatchEnd
 	gridStart := matchStart
@@ -320,10 +368,100 @@ func classifyRegions(
 	if gridEnd <= gridStart {
 		return nil, nil
 	}
+
+	// Display grid: BucketStates at the caller's windowMs.
+	display := walkRegionGrid(r, regions, regionByLi, teamA, teamB, teamOf, int32(windowMs), gridStart, gridEnd)
+	if display == nil {
+		return nil, nil
+	}
+
+	// Stats grid: aggregate percentages + ByPlayer at the native 50ms
+	// resolution, independent of windowMs. Reuse the display walk when the
+	// two grids coincide (windowMs == 50) so we never do the work twice.
+	statsG := display
+	if windowMs != 50 {
+		statsG = walkRegionGrid(r, regions, regionByLi, teamA, teamB, teamOf, 50, gridStart, gridEnd)
+	}
+	if statsG == nil {
+		return nil, nil
+	}
+
+	bucketStates := make(map[string]string, len(regions))
+	for _, rg := range regions {
+		bucketStates[rg.Name] = string(display.stateBuf[rg.Name])
+	}
+
+	stats := make(map[string]result.RegionStats, len(regions))
+	total := float64(statsG.nBuckets)
+	pct := func(n float64) float64 { return float64(int(n/total*1000+0.5)) / 10 }
+	for _, rg := range regions {
+		var t result.RegionStats
+		for _, state := range statsG.stateBuf[rg.Name] {
+			switch state {
+			case RegionStateEmpty:
+				t.Empty++
+			case RegionStateTeamAControl:
+				t.TeamAControl++
+			case RegionStateTeamAWeakControl:
+				t.TeamAWeakControl++
+			case RegionStateContested:
+				t.Contested++
+			case RegionStateWeakContested:
+				t.WeakContested++
+			case RegionStateTeamBControl:
+				t.TeamBControl++
+			case RegionStateTeamBWeakControl:
+				t.TeamBWeakControl++
+			}
+		}
+		rgStats := result.RegionStats{
+			TeamAControl:     pct(t.TeamAControl),
+			TeamAWeakControl: pct(t.TeamAWeakControl),
+			Contested:        pct(t.Contested),
+			WeakContested:    pct(t.WeakContested),
+			Empty:            pct(t.Empty),
+			TeamBWeakControl: pct(t.TeamBWeakControl),
+			TeamBControl:     pct(t.TeamBControl),
+		}
+		if pm := statsG.byPlayer[rg.Name]; len(pm) > 0 {
+			rgStats.ByPlayer = make(map[string]result.RegionPlayerStats, len(pm))
+			for name, pt := range pm {
+				rgStats.ByPlayer[name] = result.RegionPlayerStats{
+					Team:    pt.team,
+					Armed:   pt.armed,
+					Unarmed: pt.unarmed,
+				}
+			}
+		}
+		stats[rg.Name] = rgStats
+	}
+	return bucketStates, stats
+}
+
+// walkRegionGrid classifies one bucket grid at bucketDurMs resolution
+// over [gridStart, gridEnd). For each bucket it point-samples every
+// player's position at bucket-start (their last sample with T ≤
+// bucket-start), tallies team presence + armed state per region, and
+// classifies the bucket. Returns the per-region state-code buffers plus
+// the per-region per-player attribution tallies (bucket counts at THIS
+// grid's resolution). Returns nil when the window yields no buckets.
+//
+// classifyRegions calls this once at the display windowMs (for
+// BucketStates) and once at the native 50ms resolution (for the
+// aggregate Stats), reusing a single walk when they coincide.
+func walkRegionGrid(
+	r *result.Result,
+	regions []result.ControlRegion,
+	regionByLi map[int16]string,
+	teamA, teamB string,
+	teamOf func(playerName string) string,
+	bucketDurMs int32,
+	gridStart, gridEnd int32,
+) *regionGrid {
 	// Round-half-up integer division.
 	nBuckets := int((gridEnd - gridStart + bucketDurMs/2) / bucketDurMs)
 	if nBuckets <= 0 {
-		return nil, nil
+		return nil
 	}
 
 	type counts struct{ aWpn, aNo, bWpn, bNo int }
@@ -338,11 +476,6 @@ func classifyRegions(
 	// Per-region per-player attribution tally. Counted in lock-step with
 	// the team-aggregate `presence` above so the two views never disagree
 	// about who was where.
-	type playerTally struct {
-		team    string
-		armed   int
-		unarmed int
-	}
 	byPlayer := make(map[string]map[string]*playerTally, len(regions))
 	for _, rg := range regions {
 		byPlayer[rg.Name] = make(map[string]*playerTally)
@@ -400,80 +533,33 @@ func classifyRegions(
 			// Per-player attribution: bump this player's counter for
 			// this region. Lazy-allocate so we only record entries for
 			// players that actually appeared in the region.
-			pt := byPlayer[regionName][p.Name]
-			if pt == nil {
-				pt = &playerTally{team: team}
-				byPlayer[regionName][p.Name] = pt
+			ptally := byPlayer[regionName][p.Name]
+			if ptally == nil {
+				ptally = &playerTally{team: team}
+				byPlayer[regionName][p.Name] = ptally
 			}
 			if armed {
-				pt.armed++
+				ptally.armed++
 			} else {
-				pt.unarmed++
+				ptally.unarmed++
 			}
 		}
 	}
 
-	// Classify per bucket per region; tally aggregate state percentages.
+	// Classify per bucket per region.
 	stateBuf := make(map[string][]byte, len(regions))
-	totals := make(map[string]*result.RegionStats, len(regions))
 	for _, rg := range regions {
 		stateBuf[rg.Name] = make([]byte, 0, nBuckets)
-		totals[rg.Name] = &result.RegionStats{}
 	}
 	for bi := 0; bi < nBuckets; bi++ {
 		for _, rg := range regions {
 			c := presence[bi][rg.Name]
 			state := classifyRegionState(c.aWpn, c.aNo, c.bWpn, c.bNo)
 			stateBuf[rg.Name] = append(stateBuf[rg.Name], state)
-			t := totals[rg.Name]
-			switch state {
-			case RegionStateEmpty:
-				t.Empty++
-			case RegionStateTeamAControl:
-				t.TeamAControl++
-			case RegionStateTeamAWeakControl:
-				t.TeamAWeakControl++
-			case RegionStateContested:
-				t.Contested++
-			case RegionStateWeakContested:
-				t.WeakContested++
-			case RegionStateTeamBControl:
-				t.TeamBControl++
-			case RegionStateTeamBWeakControl:
-				t.TeamBWeakControl++
-			}
 		}
 	}
 
-	bucketStates := make(map[string]string, len(regions))
-	stats := make(map[string]result.RegionStats, len(regions))
-	total := float64(nBuckets)
-	pct := func(n float64) float64 { return float64(int(n/total*1000+0.5)) / 10 }
-	for _, rg := range regions {
-		bucketStates[rg.Name] = string(stateBuf[rg.Name])
-		t := totals[rg.Name]
-		rgStats := result.RegionStats{
-			TeamAControl:     pct(t.TeamAControl),
-			TeamAWeakControl: pct(t.TeamAWeakControl),
-			Contested:        pct(t.Contested),
-			WeakContested:    pct(t.WeakContested),
-			Empty:            pct(t.Empty),
-			TeamBWeakControl: pct(t.TeamBWeakControl),
-			TeamBControl:     pct(t.TeamBControl),
-		}
-		if pm := byPlayer[rg.Name]; len(pm) > 0 {
-			rgStats.ByPlayer = make(map[string]result.RegionPlayerStats, len(pm))
-			for name, t := range pm {
-				rgStats.ByPlayer[name] = result.RegionPlayerStats{
-					Team:    t.team,
-					Armed:   t.armed,
-					Unarmed: t.unarmed,
-				}
-			}
-		}
-		stats[rg.Name] = rgStats
-	}
-	return bucketStates, stats
+	return &regionGrid{nBuckets: nBuckets, stateBuf: stateBuf, byPlayer: byPlayer}
 }
 
 // classifyRegionState is the seven-state decision rule. Faithful port
