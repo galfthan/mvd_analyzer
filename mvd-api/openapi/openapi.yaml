@@ -18,7 +18,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "58"
+  version: "59"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -1112,10 +1112,12 @@ paths:
         Team control of named map regions over time. `windowMs` (⚠️
         defaults to 50 ms — pass an explicit window) sets only the
         `bucketStates` display resolution; the aggregate `stats`
-        (percentages + `byPlayer`) are always computed at the native
-        50 ms grid, independent of `windowMs`, so they don't change with
-        the display window. 422 `region_control_unavailable` when the map
-        has no region layout.
+        (percentages + `byPlayer`) are the exact time-weighted integral
+        over the native position samples (no grid), independent of
+        `windowMs`, so they don't change with the display window.
+        `byPlayer.armed`/`unarmed` are integer milliseconds of presence.
+        422 `region_control_unavailable` when the map has no region
+        layout.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/WindowMs"
@@ -4288,23 +4290,23 @@ components:
             - "null"
             - array
         stats:
-          description: "Per-region match-aggregate control shares. Always computed at the native 50 ms resolution, independent of the request's windowMs, so the aggregate is not a sampling artifact of a coarse display window."
+          description: "Per-region match-aggregate control shares. Computed as the exact time-weighted integral over the native position samples (no grid), independent of the request's windowMs, so the aggregate is not a sampling artifact of a display window. windowMs affects only bucketStates."
           additionalProperties:
             additionalProperties: false
             properties:
               byPlayer:
-                description: "Per-player presence in this region, keyed by player name. Counts are buckets at the native 50 ms stats grid, not the display windowMs."
+                description: "Per-player presence in this region, keyed by player name. Values are integer milliseconds of presence (exact time-weighted, independent of the display windowMs)."
                 additionalProperties:
                   additionalProperties: false
                   properties:
                     armed:
-                      description: "Bucket count present while carrying RL or LG."
+                      description: "Milliseconds present while carrying RL or LG."
                       type: integer
                     team:
                       description: "Team name."
                       type: string
                     unarmed:
-                      description: "Bucket count present without RL/LG."
+                      description: "Milliseconds present without RL/LG."
                       type: integer
                   required:
                     - team
@@ -4313,25 +4315,25 @@ components:
                   type: object
                 type: object
               contested:
-                description: "Share of buckets contested (percent)."
+                description: "Share of time contested (percent)."
                 type: number
               empty:
-                description: "Share of buckets empty — no living players (percent)."
+                description: "Share of time empty — no living players (percent)."
                 type: number
               teamAControl:
-                description: "Share of buckets under team-A control (percent)."
+                description: "Share of time under team-A control (percent)."
                 type: number
               teamAWeakControl:
-                description: "Share of buckets under team-A weak control (percent)."
+                description: "Share of time under team-A weak control (percent)."
                 type: number
               teamBControl:
-                description: "Share of buckets under team-B control (percent)."
+                description: "Share of time under team-B control (percent)."
                 type: number
               teamBWeakControl:
-                description: "Share of buckets under team-B weak control (percent)."
+                description: "Share of time under team-B weak control (percent)."
                 type: number
               weakContested:
-                description: "Share of buckets weakly contested (percent)."
+                description: "Share of time weakly contested (percent)."
                 type: number
             required:
               - teamAControl
@@ -4966,23 +4968,23 @@ components:
                 - "null"
                 - array
             stats:
-              description: "Per-region match-aggregate control shares."
+              description: "Per-region match-aggregate control shares. Exact time-weighted integral over the native position samples (no grid)."
               additionalProperties:
                 additionalProperties: false
                 properties:
                   byPlayer:
-                    description: "Per-player breakdown, keyed by player name."
+                    description: "Per-player breakdown, keyed by player name. Values are integer milliseconds of presence (exact time-weighted)."
                     additionalProperties:
                       additionalProperties: false
                       properties:
                         armed:
-                          description: "Bucket count present while carrying RL or LG."
+                          description: "Milliseconds present while carrying RL or LG."
                           type: integer
                         team:
                           description: "Team name."
                           type: string
                         unarmed:
-                          description: "Bucket count present without RL/LG."
+                          description: "Milliseconds present without RL/LG."
                           type: integer
                       required:
                         - team
@@ -4991,25 +4993,25 @@ components:
                       type: object
                     type: object
                   contested:
-                    description: "Share of buckets contested (percent)."
+                    description: "Share of time contested (percent)."
                     type: number
                   empty:
-                    description: "Share of buckets empty — no living players (percent)."
+                    description: "Share of time empty — no living players (percent)."
                     type: number
                   teamAControl:
-                    description: "Share of buckets under team-A control (percent)."
+                    description: "Share of time under team-A control (percent)."
                     type: number
                   teamAWeakControl:
-                    description: "Share of buckets under team-A weak control (percent)."
+                    description: "Share of time under team-A weak control (percent)."
                     type: number
                   teamBControl:
-                    description: "Share of buckets under team-B control (percent)."
+                    description: "Share of time under team-B control (percent)."
                     type: number
                   teamBWeakControl:
-                    description: "Share of buckets under team-B weak control (percent)."
+                    description: "Share of time under team-B weak control (percent)."
                     type: number
                   weakContested:
-                    description: "Share of buckets weakly contested (percent)."
+                    description: "Share of time weakly contested (percent)."
                     type: number
                 required:
                   - teamAControl

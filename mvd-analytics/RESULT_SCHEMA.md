@@ -816,7 +816,7 @@ states at any resolution, call
 | TeamA | `teamA` | string (omitempty) | Team name encoded as `A` in BucketStates. Picked alphabetically. |
 | TeamB | `teamB` | string (omitempty) | Team name encoded as `B`. |
 | BucketStates | `bucketStates` | map[string]string (omitempty) | Populated only by query-time results (`view.RegionControl` / `recomputeRegionControl`). Region name → string of length `n_buckets`, one ASCII char per bucket at the requested `windowMs`. Each bucket is a **point-sample classification**: the state of every player's last position at bucket-start. |
-| Stats | `stats` | map[string]RegionStats (omitempty) | Region name → match-aggregate share of each control state (percent, one decimal). **Always computed at the native 50ms resolution, independent of the caller's `windowMs`**, so the aggregate is not a sampling artifact of a coarse display window (a coarse point-sample could miss a mid-bucket fight and report `empty:100`). `byPlayer` counts are native-grid buckets too. |
+| Stats | `stats` | map[string]RegionStats (omitempty) | Region name → match-aggregate share of each control state (percent, one decimal). **Computed as the exact time-weighted integral over the native position sample times, independent of the caller's `windowMs`** (no grid): the walk unions every player's Position sample times with their RL/LG armed boundaries and accumulates each constant-state interval's real duration, so the aggregate is not a sampling artifact of a display window (a coarse point-sample could miss a mid-bucket fight and report `empty:100`). `byPlayer` values are integer milliseconds of presence. |
 
 `BucketStates` codes (one byte per bucket):
 
@@ -867,15 +867,15 @@ RegionStats = {
   "empty":            float,
   "teamBWeakControl": float,
   "teamBControl":     float,
-  // Per-player attribution. Map: player name → counts of buckets this
-  // player was present in the region, counted at the native 50ms stats
-  // grid (NOT the caller's display windowMs). Multiply by 50ms to
-  // convert to milliseconds of presence.
+  // Per-player attribution. Map: player name → this player's exact
+  // time-weighted presence in the region, in integer MILLISECONDS
+  // (the integral over their native position samples, independent of
+  // the caller's display windowMs). No scaling needed — already ms.
   "byPlayer": {
     "<player>": {
       "team":    "<team>",
-      "armed":   <int>,  // buckets present carrying RL or LG
-      "unarmed": <int>   // buckets present without RL/LG
+      "armed":   <int>,  // ms present carrying RL or LG
+      "unarmed": <int>   // ms present without RL/LG
     }, ...
   }
 }
@@ -1652,9 +1652,11 @@ region names, not single loc indices.
 
 Re-derives per-bucket region state strings (`bucketStates`) at the
 requested `WindowMs` and the match-aggregate `stats` (percentages +
-per-region per-player attribution `RegionStats.byPlayer`) at the fixed
-native 50ms resolution, so the aggregate stays stable across display
-windows instead of tracking the coarse point-sample grid. Both are
+per-region per-player attribution `RegionStats.byPlayer`, the latter in
+integer milliseconds) as the exact time-weighted integral over the
+native position sample times, independent of `WindowMs` — so the
+aggregate stays stable across display windows instead of tracking the
+point-sample grid. `WindowMs` affects only `bucketStates`. Both are
 optionally clipped to a `[StartTime, EndTime)` sub-window. Options
 (`RegionControlOptions`) optionally override the regions (caller-
 edited region defs from the web UI), `TeamA`/`TeamB` labels, and
@@ -1899,6 +1901,7 @@ records what each bump changed, for consumers migrating across versions.
 
 | Version | Changes |
 |---|---|
+| v59 | **Exact time-weighted region-control stats.** `regionControl.stats` (percentages + `byPlayer`) are now the exact time-weighted integral over the native position sample times — the walk unions every player's Position sample times with their RL/LG armed-interval boundaries, classifies each constant-state interval once and accumulates its real duration — replacing the v57-era fixed native 50ms stats grid. Two consequences: the state percentages shift slightly (de-quantized — no longer snapped to 50ms quanta), and `RegionStats.byPlayer.armed`/`unarmed` change **units** from 50ms-bucket counts to integer **milliseconds** of presence (the Go field type stays `int`; the value is ~50× larger). `bucketStates` is unchanged — it stays the display point-sample grid at the caller's `windowMs`, the only thing `windowMs` now affects. Because stats no longer come from a 50ms grid, the `windowMs=50` output is no longer byte-identical to prior versions. |
 | v58 | **Demo markers** (additive). New `timelineAnalysis.demoMarkers[]` (`[]DemoMarkerEvent`) surfaces the bookmarks players insert in-game with KTX `/demomark`. Each carries match-relative `time` (negative for a warmup mark — surfaced un-gated), the marking player's `playerName`/`playerSlot`/`playerUserID`/`team` (resolved from the demo block's target slot, the only attribution channel; `playerSlot: -1` with empty identity when the block was not slot-addressed), a `spectator` flag (KTX accepts `/demomark` from spectators; omitted when false), and an optional argument-tail `label` (e.g. HoonyMode `"0 round-07"`). A matching `demomark` event type is added to `/events` **and to its default type set**, so a caller that omits `types` begins seeing the new rows. No existing field changed. |
 | v57 | **Pure-ms time model + bound renames.** Every time value in the API is now int32 ms — inputs and outputs, REST and MCP alike. The six v56 seconds surfaces (`/events`, `/buckets?layout=row`, `/state-at`, `/stream-slice` envelope, `/loc-trails`, `/items` summary) flip to int32 ms; the view layer does no float time math. `LocGraphResult` node weights (`LocNode`/`LocWeights` `total`/`byPlayer`/`byTeam`) also flip from float64 seconds to int32 ms (a post-review fix; edge transition-count weights stay int), and `/loc-graph` now echoes `timeUnit:"ms"`. `view.UnitSec` is deleted and `timeUnit` becomes a constant `"ms"` echo. Time-valued query params `from`/`to`/`time` on demo endpoints become **integer ms** (a non-integer value 400s `invalid_param` with an `(integer milliseconds)` hint). Per-item time key follows the dense/sparse rule: event-scaled sparse surfaces keep the descriptive `time` (the v55 spelling — frags/damage/shots/chat/backpacks/weapon-pickups/opening/timeline entries are unchanged from v55; the former v56 `t` on the flipped view surfaces events row / buckets row / state-at envelope / items `firstTake` reverts to `time`), while sample-rate-scaled dense arrays keep the terse `t` (stream tracks, aim samples, columnar grid, projectile/beam columns) — both int32 ms. Other key renames: stream-slice envelope `startTime`/`endTime`→`start`/`end`; columnar buckets `startMs`→`start`; `LosTrack` `o`/`iv`→`other`/`intervals`; `MessagesResult` array key `events`→`messages` (so `/artifacts/messages` is `{messages:{messages:[…]}}`). Governed top-level arrays that were nullable are now never null (`/events`, `/stream-slice` `players`, `/loc-trails` `players`). Deliberate non-renames: `Interval` keeps terse `s`/`e` (per-row keys stay terse); projectile/beam `s*`/`e*` column-family prefixes; `windowMs`/`partialLastMs` durations. `/demoinfo` stays the KTX-native seconds island; search `from`/`to` stay calendar dates. |
 | v56 | **`timeUnit` echo on the REST/MCP transport** (additive; stored structs unchanged — still int32 ms). `timeUnit` is the unit of every time value in a response: **every `/v1/demos/{id}/*` response that carries match-position time values echoes a top-level `timeUnit`, except `/demoinfo` (mixed KTX-native units) and `/artifacts/{name}` (raw stored bytes); responses with no match-position time — `/loc-table`, `/loc-graph`, `/metadata` — carry no echo**. The value is FIXED per endpoint — no unit selection: `ms` for frags/damage/shots/chat/airgibs/backpacks/weapon-pickups/items-timeline/overview/aim/buckets-column/region-control/los/streams-projectiles/streams-beams/streams-nails, `s` for the derived views events/state-at/stream-slice-envelope/loc-trails/buckets-row/items-summary. Field-name polarity (exception-free): **`t` is int32 ms, `time` is float seconds** — always, on every endpoint. The stored ms event lists (frags/damage/shots/chat/backpacks/weapon-pickups/airgibs/timeline events) carry their timestamp under `t`; the float-seconds view surfaces (events/state-at/buckets-row/items-summary `firstTake`) carry it under `time`; loc-trails residences use `start`/`end`. The dense per-sample arrays (`/stream-slice` embedded tracks, `/aim` samples, columnar `/buckets` axis) already used `t`-in-ms and conform natively. The four formerly bare-array endpoints wrap their array to carry the echo: `/chat`→`{timeUnit,messages}`, `/airgibs`→`{timeUnit,airgibs}`, `/backpacks`→`{timeUnit,backpacks}`, `/weapon-pickups`→`{timeUnit,pickups}` (the one non-additive shape change). See the §"Transport surface" note above and [mvd-api/API.md §2.1](../mvd-api/API.md). |

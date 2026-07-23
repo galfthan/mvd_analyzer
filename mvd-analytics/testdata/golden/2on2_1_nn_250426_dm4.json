@@ -53932,7 +53932,7 @@
       }
     ]
   },
-  "schemaVersion": 58,
+  "schemaVersion": 59,
   "shots": {
     "byPlayer": [
       {
@@ -101489,94 +101489,94 @@
         "LG": {
           "byPlayer": {
             "Milton": {
-              "armed": 1759,
+              "armed": 88041,
               "team": "1",
-              "unarmed": 142
+              "unarmed": 7098
             },
             "shazam": {
-              "armed": 2191,
+              "armed": 109315,
               "team": "n n",
-              "unarmed": 141
+              "unarmed": 7078
             },
             "squeeze": {
-              "armed": 1435,
+              "armed": 71884,
               "team": "1",
-              "unarmed": 105
+              "unarmed": 5180
             },
             "stepcop": {
-              "armed": 1015,
+              "armed": 50610,
               "team": "n n",
-              "unarmed": 159
+              "unarmed": 7845
             }
           },
-          "contested": 2.6,
-          "empty": 50,
+          "contested": 2.7,
+          "empty": 50.1,
           "teamAControl": 22.1,
           "teamAWeakControl": 0.9,
           "teamBControl": 22.9,
-          "teamBWeakControl": 1.5,
+          "teamBWeakControl": 1.4,
           "weakContested": 0
         },
         "QUAD": {
           "byPlayer": {
             "Milton": {
-              "armed": 997,
+              "armed": 49853,
               "team": "1",
-              "unarmed": 236
+              "unarmed": 11904
             },
             "shazam": {
-              "armed": 1022,
+              "armed": 50924,
               "team": "n n",
-              "unarmed": 415
+              "unarmed": 20789
             },
             "squeeze": {
-              "armed": 855,
+              "armed": 42780,
               "team": "1",
-              "unarmed": 408
+              "unarmed": 20334
             },
             "stepcop": {
-              "armed": 1490,
+              "armed": 74538,
               "team": "n n",
-              "unarmed": 437
+              "unarmed": 21713
             }
           },
           "contested": 2,
           "empty": 56.6,
           "teamAControl": 12.8,
           "teamAWeakControl": 4.1,
-          "teamBControl": 18.9,
+          "teamBControl": 18.8,
           "teamBWeakControl": 5.6,
           "weakContested": 0
         },
         "RA": {
           "byPlayer": {
             "Milton": {
-              "armed": 938,
+              "armed": 46990,
               "team": "1",
-              "unarmed": 180
+              "unarmed": 8949
             },
             "shazam": {
-              "armed": 475,
+              "armed": 23779,
               "team": "n n",
-              "unarmed": 228
+              "unarmed": 11413
             },
             "squeeze": {
-              "armed": 1255,
+              "armed": 62825,
               "team": "1",
-              "unarmed": 124
+              "unarmed": 6178
             },
             "stepcop": {
-              "armed": 981,
+              "armed": 49009,
               "team": "n n",
-              "unarmed": 309
+              "unarmed": 15550
             }
           },
           "contested": 1.7,
           "empty": 66.1,
           "teamAControl": 15.9,
-          "teamAWeakControl": 2.3,
+          "teamAWeakControl": 2.2,
           "teamBControl": 10.2,
-          "teamBWeakControl": 3.8,
+          "teamBWeakControl": 3.9,
           "weakContested": 0
         }
       },

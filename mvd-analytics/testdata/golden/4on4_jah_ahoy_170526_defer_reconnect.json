@@ -93814,7 +93814,7 @@
       }
     ]
   },
-  "schemaVersion": 58,
+  "schemaVersion": 59,
   "shots": {
     "byPlayer": [
       {
@@ -268128,95 +268128,95 @@
         "LG": {
           "byPlayer": {
             "[nW].Veggie": {
-              "armed": 41,
+              "armed": 2067,
               "team": "ahoy",
-              "unarmed": 2292
+              "unarmed": 114645
             },
             "biggz": {
-              "armed": 1662,
+              "armed": 83061,
               "team": "jah",
-              "unarmed": 3811
+              "unarmed": 190667
             },
             "gandi": {
-              "armed": 1705,
+              "armed": 85345,
               "team": "jah",
-              "unarmed": 1713
+              "unarmed": 85691
             },
             "nexus": {
-              "armed": 1019,
+              "armed": 51050,
               "team": "ahoy",
-              "unarmed": 2017
+              "unarmed": 100768
             },
             "ocoini": {
-              "armed": 1126,
+              "armed": 56271,
               "team": "ahoy",
-              "unarmed": 1506
+              "unarmed": 75290
             },
             "paniagua": {
-              "armed": 1249,
+              "armed": 62418,
               "team": "jah",
-              "unarmed": 2419
+              "unarmed": 120885
             },
             "rusti": {
-              "armed": 1097,
+              "armed": 54915,
               "team": "jah",
-              "unarmed": 2714
+              "unarmed": 135625
             },
             "sailorman": {
-              "armed": 1324,
+              "armed": 66184,
               "team": "ahoy",
-              "unarmed": 1313
+              "unarmed": 65553
             }
           },
           "contested": 3.3,
           "empty": 32.9,
           "teamAControl": 18.2,
-          "teamAWeakControl": 18.8,
+          "teamAWeakControl": 18.7,
           "teamBControl": 9.8,
           "teamBWeakControl": 9.6,
-          "weakContested": 7.3
+          "weakContested": 7.4
         },
         "Pent": {
           "byPlayer": {
             "[nW].Veggie": {
-              "armed": 931,
+              "armed": 46516,
               "team": "ahoy",
-              "unarmed": 1232
+              "unarmed": 61652
             },
             "biggz": {
-              "armed": 760,
+              "armed": 37969,
               "team": "jah",
-              "unarmed": 659
+              "unarmed": 32884
             },
             "gandi": {
-              "armed": 548,
+              "armed": 27393,
               "team": "jah",
-              "unarmed": 1548
+              "unarmed": 77364
             },
             "nexus": {
-              "armed": 429,
+              "armed": 21462,
               "team": "ahoy",
-              "unarmed": 769
+              "unarmed": 38333
             },
             "ocoini": {
-              "armed": 452,
+              "armed": 22583,
               "team": "ahoy",
-              "unarmed": 1792
+              "unarmed": 89685
             },
             "paniagua": {
-              "armed": 1035,
+              "armed": 51741,
               "team": "jah",
-              "unarmed": 868
+              "unarmed": 43371
             },
             "rusti": {
-              "armed": 1443,
+              "armed": 72213,
               "team": "jah",
-              "unarmed": 730
+              "unarmed": 36403
             },
             "sailorman": {
-              "armed": 675,
+              "armed": 33662,
               "team": "ahoy",
-              "unarmed": 1433
+              "unarmed": 71601
             }
           },
           "contested": 1.9,
@@ -268230,101 +268230,101 @@
         "QUAD": {
           "byPlayer": {
             "[nW].Veggie": {
-              "armed": 138,
+              "armed": 6894,
               "team": "ahoy",
-              "unarmed": 3067
+              "unarmed": 153363
             },
             "biggz": {
-              "armed": 526,
+              "armed": 26307,
               "team": "jah",
-              "unarmed": 1727
+              "unarmed": 86257
             },
             "gandi": {
-              "armed": 1227,
+              "armed": 61350,
               "team": "jah",
-              "unarmed": 1557
+              "unarmed": 77832
             },
             "nexus": {
-              "armed": 1179,
+              "armed": 58926,
               "team": "ahoy",
-              "unarmed": 3195
+              "unarmed": 159536
             },
             "ocoini": {
-              "armed": 1121,
+              "armed": 55998,
               "team": "ahoy",
-              "unarmed": 2622
+              "unarmed": 131094
             },
             "paniagua": {
-              "armed": 844,
+              "armed": 42226,
               "team": "jah",
-              "unarmed": 2777
+              "unarmed": 138865
             },
             "rusti": {
-              "armed": 1427,
+              "armed": 71421,
               "team": "jah",
-              "unarmed": 1964
+              "unarmed": 98275
             },
             "sailorman": {
-              "armed": 949,
+              "armed": 47290,
               "team": "ahoy",
-              "unarmed": 1487
+              "unarmed": 74398
             }
           },
           "contested": 2,
           "empty": 39.9,
-          "teamAControl": 12.8,
+          "teamAControl": 12.9,
           "teamAWeakControl": 12,
-          "teamBControl": 11,
+          "teamBControl": 10.9,
           "teamBWeakControl": 15.6,
           "weakContested": 6.9
         },
         "RA": {
           "byPlayer": {
             "[nW].Veggie": {
-              "armed": 8,
+              "armed": 418,
               "team": "ahoy",
-              "unarmed": 2833
+              "unarmed": 141705
             },
             "biggz": {
-              "armed": 1734,
+              "armed": 86611,
               "team": "jah",
-              "unarmed": 1825
+              "unarmed": 91237
             },
             "gandi": {
-              "armed": 1891,
+              "armed": 94693,
               "team": "jah",
-              "unarmed": 1634
+              "unarmed": 81534
             },
             "nexus": {
-              "armed": 1502,
+              "armed": 75136,
               "team": "ahoy",
-              "unarmed": 1920
+              "unarmed": 96030
             },
             "ocoini": {
-              "armed": 2415,
+              "armed": 120892,
               "team": "ahoy",
-              "unarmed": 2014
+              "unarmed": 100565
             },
             "paniagua": {
-              "armed": 2605,
+              "armed": 130293,
               "team": "jah",
-              "unarmed": 1659
+              "unarmed": 83020
             },
             "rusti": {
-              "armed": 2584,
+              "armed": 129135,
               "team": "jah",
-              "unarmed": 1414
+              "unarmed": 70718
             },
             "sailorman": {
-              "armed": 2594,
+              "armed": 129711,
               "team": "ahoy",
-              "unarmed": 1597
+              "unarmed": 79736
             }
           },
           "contested": 5,
           "empty": 26.8,
           "teamAControl": 27,
-          "teamAWeakControl": 7.7,
+          "teamAWeakControl": 7.6,
           "teamBControl": 20.3,
           "teamBWeakControl": 10.3,
           "weakContested": 3
@@ -268332,44 +268332,44 @@
         "RL": {
           "byPlayer": {
             "[nW].Veggie": {
-              "armed": 2628,
+              "armed": 131413,
               "team": "ahoy",
-              "unarmed": 6596
+              "unarmed": 329789
             },
             "biggz": {
-              "armed": 347,
+              "armed": 17470,
               "team": "jah",
-              "unarmed": 1462
+              "unarmed": 73064
             },
             "gandi": {
-              "armed": 1024,
+              "armed": 51114,
               "team": "jah",
-              "unarmed": 2508
+              "unarmed": 125390
             },
             "nexus": {
-              "armed": 1094,
+              "armed": 54739,
               "team": "ahoy",
-              "unarmed": 3867
+              "unarmed": 193454
             },
             "ocoini": {
-              "armed": 1357,
+              "armed": 67869,
               "team": "ahoy",
-              "unarmed": 3552
+              "unarmed": 177475
             },
             "paniagua": {
-              "armed": 507,
+              "armed": 25341,
               "team": "jah",
-              "unarmed": 3124
+              "unarmed": 156126
             },
             "rusti": {
-              "armed": 340,
+              "armed": 16955,
               "team": "jah",
-              "unarmed": 1421
+              "unarmed": 71074
             },
             "sailorman": {
-              "armed": 1331,
+              "armed": 66541,
               "team": "ahoy",
-              "unarmed": 2053
+              "unarmed": 102626
             }
           },
           "contested": 1.1,

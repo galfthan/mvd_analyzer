@@ -5,20 +5,28 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## 2026-07-23 (tweak-mcp) — audit fixes, view-layer changes, no schema bump
+## 2026-07-23 (tweak-mcp) — audit fixes, schema v59
 
-Closes out an external MCP-consumer audit (12 findings). Behaviour
-changes are view-layer only; no stored struct or schema version moved.
+Closes out an external MCP-consumer audit (12 findings). Most changes
+are view-layer only; the region-control stats change moves served
+values, so `CurrentSchemaVersion` bumps to **v59** and the golden
+corpus was regenerated.
 
-- **Region-control stats are no longer sampling artifacts.** `stats`
-  (the match-aggregate percentages + `byPlayer` tallies) is now always
-  computed at the native 50 ms grid, independent of the caller's
-  `windowMs`; `bucketStates` keeps the requested display resolution.
-  Previously a coarse `windowMs` point-sampled positions at bucket
-  starts, so a region could report `empty: 100` across a window in
-  which a fight happened — and the "match aggregate" changed with the
-  display resolution. `windowMs=50` output is byte-identical to before
-  (goldens unchanged).
+- **Region-control stats are now an exact time-weighted integral.**
+  `stats` (the match-aggregate percentages + `byPlayer` tallies) is
+  computed by walking the union of every player's native Position
+  sample times and their RL/LG armed-interval boundaries, classifying
+  each constant-state interval once and accumulating its **real
+  duration** — no grid at all. This replaces the interim fixed native
+  50 ms stats grid: because that grid still quantized presence to 50 ms
+  quanta, its percentages were an approximation. Two consequences: the
+  state percentages shift slightly (de-quantized), and
+  `RegionStats.byPlayer.armed`/`unarmed` change **units** from
+  50 ms-bucket counts to integer **milliseconds** of presence (Go field
+  type unchanged, `int`; value ~50× larger). `bucketStates` still honours
+  the caller's `windowMs` and is unchanged — `windowMs` now affects only
+  that display grid. As a result the `windowMs=50` output is **no longer
+  byte-identical** to prior versions (schema v59; goldens regenerated).
 - **`weapons=` filters validate against closed vocabularies.**
   `/frags`, `/damage`, `/backpacks`, `/weapon-pickups` now reject an
   unknown weapon token with `400 invalid_param` naming the valid set —

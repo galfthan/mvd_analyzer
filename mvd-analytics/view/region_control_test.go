@@ -16,7 +16,9 @@ import (
 // that window they sit in "spawn". A coarse windowMs whose bucket-starts
 // (0 and 120000) both miss the [60000,61000) window never point-samples
 // anyone in the region — the pre-fix bug that made the aggregate a
-// sampling artifact.
+// sampling artifact. The exact time-weighted stats walk instead sees the
+// [60000,61000) presence via the sample times themselves, so a 1000 ms
+// armed presence is attributed regardless of windowMs.
 func makeRegionResult() *result.Result {
 	mkPlayer := func(name, team string) result.PlayerStream {
 		return result.PlayerStream{
@@ -61,11 +63,12 @@ func regionOpts(windowMs int) RegionControlOptions {
 	}
 }
 
-// TestRegionControlStatsNativeResolution pins the sampling-artifact fix:
-// the aggregate Stats (percentages + ByPlayer) must be computed at the
-// native 50ms grid regardless of the caller's windowMs, while
-// BucketStates stays at the requested (coarse) resolution.
-func TestRegionControlStatsNativeResolution(t *testing.T) {
+// TestRegionControlStatsExactTimeWeighted pins the exact-walk behaviour:
+// the aggregate Stats (percentages + ByPlayer) are the exact
+// time-weighted integral over the native sample times, independent of the
+// caller's windowMs, while BucketStates stays at the requested (coarse)
+// resolution.
+func TestRegionControlStatsExactTimeWeighted(t *testing.T) {
 	r := makeRegionResult()
 
 	fine, err := RegionControl(r, regionOpts(50))
@@ -77,7 +80,8 @@ func TestRegionControlStatsNativeResolution(t *testing.T) {
 		t.Fatalf("RegionControl(120000): %v", err)
 	}
 
-	// Stats are resolution-independent: coarse must equal fine exactly.
+	// Stats are resolution-independent: both are exact, so coarse must
+	// equal fine exactly.
 	if !reflect.DeepEqual(coarse.Stats, fine.Stats) {
 		t.Fatalf("coarse Stats != fine Stats:\ncoarse=%+v\nfine=  %+v", coarse.Stats, fine.Stats)
 	}
@@ -89,19 +93,20 @@ func TestRegionControlStatsNativeResolution(t *testing.T) {
 		t.Fatalf("no stats for region mid")
 	}
 	if mid.Empty >= 100 {
-		t.Fatalf("region mid reported empty=%.1f; native-resolution stats should see the mid-bucket fight", mid.Empty)
+		t.Fatalf("region mid reported empty=%.1f; exact stats should see the mid-window fight", mid.Empty)
 	}
 	if mid.Contested <= 0 {
-		t.Fatalf("region mid Contested=%.1f; expected a non-zero contested share at native resolution", mid.Contested)
+		t.Fatalf("region mid Contested=%.1f; expected a non-zero contested share", mid.Contested)
 	}
 
-	// ByPlayer must reflect the native-grid bucket counts (20 buckets of
-	// 50ms across the 1000ms window), identical between the two calls.
-	if got := mid.ByPlayer["red1"].Armed; got != 20 {
-		t.Fatalf("red1 armed buckets = %d; want 20 (native 50ms grid)", got)
+	// ByPlayer is now integer MILLISECONDS of presence (time-weighted),
+	// not bucket counts: each player is armed in "mid" for the exact
+	// [60000,61000) = 1000 ms, identical between the two calls.
+	if got := mid.ByPlayer["red1"].Armed; got != 1000 {
+		t.Fatalf("red1 armed ms = %d; want 1000 (exact time-weighted)", got)
 	}
-	if got := mid.ByPlayer["blue1"].Armed; got != 20 {
-		t.Fatalf("blue1 armed buckets = %d; want 20 (native 50ms grid)", got)
+	if got := mid.ByPlayer["blue1"].Armed; got != 1000 {
+		t.Fatalf("blue1 armed ms = %d; want 1000 (exact time-weighted)", got)
 	}
 
 	// BucketStates stays at the requested display resolution: the coarse
@@ -111,5 +116,57 @@ func TestRegionControlStatsNativeResolution(t *testing.T) {
 	}
 	if n := len(fine.BucketStates["mid"]); n != 4000 {
 		t.Fatalf("fine BucketStates len = %d; want 4000 (windowMs=50)", n)
+	}
+}
+
+// TestRegionControlStatsSubGridPrecision pins precision no 50ms grid
+// could reach: a single player sits in "mid" armed for exactly
+// [60013,60037) — 24 ms, both endpoints off the 50ms grid — and the
+// exact walk must attribute exactly 24 ms of armed presence. A grid at
+// any multiple of 50ms would either miss this window entirely or snap it
+// to a 50ms quantum; only the event-driven integral gets 24.
+func TestRegionControlStatsSubGridPrecision(t *testing.T) {
+	r := &result.Result{
+		Streams: &result.Streams{
+			Players: []result.PlayerStream{
+				{
+					Name: "red1",
+					Team: "red",
+					Position: &result.PositionTrack{
+						// 13ms-spaced samples straddling a 24ms in-region window.
+						T:  []int32{0, 60013, 60037, 60050},
+						Li: []int16{2, 1, 2, 2},
+					},
+					RL: []result.Interval{{Start: 59000, End: 62000}},
+				},
+				{
+					Name: "blue1",
+					Team: "blue",
+					Position: &result.PositionTrack{
+						T:  []int32{0},
+						Li: []int16{2},
+					},
+				},
+			},
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 200000},
+		},
+		TimelineAnalysis: &result.TimelineAnalysisResult{
+			LocTable: []string{"", "mid", "spawn"},
+		},
+	}
+
+	rc, err := RegionControl(r, regionOpts(50))
+	if err != nil {
+		t.Fatalf("RegionControl(50): %v", err)
+	}
+	mid, ok := rc.Stats["mid"]
+	if !ok {
+		t.Fatalf("no stats for region mid")
+	}
+	if got := mid.ByPlayer["red1"].Armed; got != 24 {
+		t.Fatalf("red1 armed ms = %d; want exactly 24 (sub-50ms window [60013,60037))", got)
+	}
+	if _, present := mid.ByPlayer["blue1"]; present {
+		t.Fatalf("blue1 never entered mid; should have no ByPlayer entry")
 	}
 }

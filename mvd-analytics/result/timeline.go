@@ -111,11 +111,12 @@ type RegionControlResult struct {
 // The seven values sum to 100 within rounding.
 //
 // ByPlayer attributes presence to individual players: who actually held
-// the region. Each entry counts the number of buckets that player was
-// observed in the region, split by whether they were armed (carrying
-// RL or LG) at the time. Consumers answer "who kept red?" by sorting
-// the region's ByPlayer entries by Armed+Unarmed descending; "who was
-// the armed presence?" by sorting on Armed alone.
+// the region. Each entry is that player's time-weighted presence in the
+// region in integer MILLISECONDS (the exact integral over their native
+// position samples), split by whether they were armed (carrying RL or
+// LG) at the time. Consumers answer "who kept red?" by sorting the
+// region's ByPlayer entries by Armed+Unarmed descending; "who was the
+// armed presence?" by sorting on Armed alone.
 type RegionStats struct {
 	TeamAControl     float64                      `json:"teamAControl"`
 	TeamAWeakControl float64                      `json:"teamAWeakControl"`
@@ -127,13 +128,15 @@ type RegionStats struct {
 	ByPlayer         map[string]RegionPlayerStats `json:"byPlayer,omitempty"`
 }
 
-// RegionPlayerStats is one player's presence in one region, summed
-// across all buckets in the (sub-)match window. Multiplying Armed or
-// Unarmed by the bucket WindowMs yields presence in milliseconds.
+// RegionPlayerStats is one player's presence in one region over the
+// (sub-)match window, as an exact time-weighted integral over their
+// native position samples. Armed and Unarmed are integer MILLISECONDS,
+// not bucket counts — they are already presence in ms, no scaling
+// needed.
 type RegionPlayerStats struct {
 	Team    string `json:"team"`
-	Armed   int    `json:"armed"`   // bucket count present while carrying RL or LG
-	Unarmed int    `json:"unarmed"` // bucket count present without RL/LG
+	Armed   int    `json:"armed"`   // ms present while carrying RL or LG
+	Unarmed int    `json:"unarmed"` // ms present without RL/LG
 }
 
 // MapLocation represents a named point in a map for visualization.

@@ -13667,7 +13667,7 @@
       }
     ]
   },
-  "schemaVersion": 58,
+  "schemaVersion": 59,
   "shots": {
     "byPlayer": [
       {
@@ -36015,14 +36015,14 @@
         "LG": {
           "byPlayer": {
             "42": {
-              "armed": 640,
+              "armed": 31834,
               "team": "42",
-              "unarmed": 6
+              "unarmed": 308
             },
             "AHemlocksLie": {
-              "armed": 392,
+              "armed": 19512,
               "team": "AHemlocksLie",
-              "unarmed": 6
+              "unarmed": 324
             }
           },
           "contested": 0,
@@ -36036,14 +36036,14 @@
         "RA": {
           "byPlayer": {
             "42": {
-              "armed": 179,
+              "armed": 8910,
               "team": "42",
-              "unarmed": 20
+              "unarmed": 1013
             },
             "AHemlocksLie": {
-              "armed": 432,
+              "armed": 21626,
               "team": "AHemlocksLie",
-              "unarmed": 225
+              "unarmed": 11234
             }
           },
           "contested": 0,
@@ -36057,14 +36057,14 @@
         "RL": {
           "byPlayer": {
             "42": {
-              "armed": 1805,
+              "armed": 90504,
               "team": "42",
-              "unarmed": 158
+              "unarmed": 7747
             },
             "AHemlocksLie": {
-              "armed": 1291,
+              "armed": 64731,
               "team": "AHemlocksLie",
-              "unarmed": 403
+              "unarmed": 20201
             }
           },
           "contested": 2.1,

@@ -37785,7 +37785,7 @@
       }
     ]
   },
-  "schemaVersion": 58,
+  "schemaVersion": 59,
   "shots": {
     "byPlayer": [
       {
@@ -82991,55 +82991,55 @@
         "QUAD": {
           "byPlayer": {
             "psy*overon": {
-              "armed": 3031,
+              "armed": 151649,
               "team": "pys",
-              "unarmed": 627
+              "unarmed": 31415
             },
             "wd.cao": {
-              "armed": 2286,
+              "armed": 114260,
               "team": "wd",
-              "unarmed": 1656
+              "unarmed": 82737
             },
             "wd.char": {
-              "armed": 3127,
+              "armed": 156525,
               "team": "wd",
-              "unarmed": 423
+              "unarmed": 21181
             },
             "wd.dilbert": {
-              "armed": 2797,
+              "armed": 139708,
               "team": "pys",
-              "unarmed": 1535
+              "unarmed": 76799
             }
           },
           "contested": 19.1,
           "empty": 27.1,
           "teamAControl": 17.8,
-          "teamAWeakControl": 5.2,
+          "teamAWeakControl": 5.1,
           "teamBControl": 21.6,
-          "teamBWeakControl": 7.7,
+          "teamBWeakControl": 7.8,
           "weakContested": 1.5
         },
         "RA": {
           "byPlayer": {
             "psy*overon": {
-              "armed": 1404,
+              "armed": 70191,
               "team": "pys",
-              "unarmed": 505
+              "unarmed": 25246
             },
             "wd.cao": {
-              "armed": 3259,
+              "armed": 162889,
               "team": "wd",
-              "unarmed": 230
+              "unarmed": 11483
             },
             "wd.char": {
-              "armed": 2928,
+              "armed": 146413,
               "team": "wd",
-              "unarmed": 162
+              "unarmed": 8128
             },
             "wd.dilbert": {
-              "armed": 2223,
+              "armed": 111240,
               "team": "pys",
-              "unarmed": 502
+              "unarmed": 25225
             }
           },
           "contested": 12.5,
@@ -83053,24 +83053,24 @@
         "RL": {
           "byPlayer": {
             "psy*overon": {
-              "armed": 1810,
+              "armed": 90748,
               "team": "pys",
-              "unarmed": 604
+              "unarmed": 30107
             },
             "wd.cao": {
-              "armed": 2026,
+              "armed": 101606,
               "team": "wd",
-              "unarmed": 433
+              "unarmed": 21460
             },
             "wd.char": {
-              "armed": 2281,
+              "armed": 113835,
               "team": "wd",
-              "unarmed": 297
+              "unarmed": 14871
             },
             "wd.dilbert": {
-              "armed": 2013,
+              "armed": 100496,
               "team": "pys",
-              "unarmed": 643
+              "unarmed": 32020
             }
           },
           "contested": 9.5,
