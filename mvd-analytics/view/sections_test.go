@@ -90,6 +90,126 @@ func TestDamage_UnavailableAndPositional(t *testing.T) {
 	}
 }
 
+// scoreboardFixture carries a KTX scoreboard cross-check plus a per-hit log
+// spanning two weapons and two timestamps, so the filtered-Damage scoreboard
+// behaviour (present + narrowed for players-only; omitted for weapon/time
+// filters) can be pinned.
+func scoreboardFixture() *result.Result {
+	return &result.Result{
+		Damage: &result.DamageResult{
+			TotalDamage: 200,
+			ByWeapon:    map[string]int{"rl": 100, "lg": 100},
+			ByPlayer: map[string]*result.PlayerDamage{
+				"alpha": {Given: 100, ByWeapon: map[string]int{"rl": 100}},
+				"bravo": {Given: 100, ByWeapon: map[string]int{"lg": 100}},
+			},
+			Events: []result.DamageEntry{
+				{Time: 1000, Attacker: "alpha", Victim: "bravo", Weapon: "rl", Damage: 100},
+				{Time: 5000, Attacker: "bravo", Victim: "alpha", Weapon: "lg", Damage: 100},
+			},
+			Scoreboard: &result.DamageReconciliation{ByPlayer: map[string]*result.DamageDelta{
+				"alpha": {StreamGiven: 100, ScoreGiven: 100},
+				"bravo": {StreamGiven: 100, ScoreGiven: 100},
+			}},
+		},
+	}
+}
+
+// TASK 2: the KTX end-of-match scoreboard is a whole-match cross-check with no
+// per-event provenance. A players-only filter narrows it (still whole-match
+// totals for the shown players); a weapons or time-window filter OMITS it — a
+// full-match scoreboard cannot be recomputed against those filters.
+func TestDamage_ScoreboardFilterGating(t *testing.T) {
+	r := scoreboardFixture()
+
+	// players-only: scoreboard present, narrowed to the named player.
+	po, err := Damage(r, DamageOptions{Players: []string{"alpha"}})
+	if err != nil {
+		t.Fatalf("players-only: %v", err)
+	}
+	if po.Scoreboard == nil {
+		t.Fatalf("players-only: scoreboard omitted, want present + narrowed")
+	}
+	if len(po.Scoreboard.ByPlayer) != 1 || po.Scoreboard.ByPlayer["alpha"] == nil {
+		t.Errorf("players-only: scoreboard = %+v, want only alpha", po.Scoreboard.ByPlayer)
+	}
+
+	// weapons filter: scoreboard omitted.
+	wf, err := Damage(r, DamageOptions{Weapons: []string{"rl"}})
+	if err != nil {
+		t.Fatalf("weapons: %v", err)
+	}
+	if wf.Scoreboard != nil {
+		t.Errorf("weapons filter: scoreboard = %+v, want nil (no per-event provenance to recompute)", wf.Scoreboard)
+	}
+
+	// time-window filter: scoreboard omitted.
+	tf, err := Damage(r, DamageOptions{To: 3000})
+	if err != nil {
+		t.Fatalf("time: %v", err)
+	}
+	if tf.Scoreboard != nil {
+		t.Errorf("time filter: scoreboard = %+v, want nil (no per-event provenance to recompute)", tf.Scoreboard)
+	}
+
+	// players + weapons together: still omitted (a weapons filter is active).
+	pw, err := Damage(r, DamageOptions{Players: []string{"alpha"}, Weapons: []string{"rl"}})
+	if err != nil {
+		t.Fatalf("players+weapons: %v", err)
+	}
+	if pw.Scoreboard != nil {
+		t.Errorf("players+weapons: scoreboard = %+v, want nil", pw.Scoreboard)
+	}
+}
+
+// TASK 3: every Weapons filter validates against its view's closed vocabulary —
+// a bogus token returns an ErrInvalidFilter error that names the valid set,
+// while a valid token still filters. Matching stays case-insensitive.
+func TestWeaponVocabularyValidation(t *testing.T) {
+	r := filterFixture()
+
+	// Frags: bogus token → error listing the vocabulary; valid token filters.
+	if _, err := Frags(r, FragOptions{Weapons: []string{"bfg"}}); !errors.Is(err, ErrInvalidFilter) {
+		t.Errorf("Frags bogus weapon: err = %v, want ErrInvalidFilter", err)
+	} else if !strings.Contains(err.Error(), "unknown weapon") || !strings.Contains(err.Error(), "rl") {
+		t.Errorf("Frags bogus weapon: message = %q, want it to name the token + vocabulary", err.Error())
+	}
+	if out, err := Frags(r, FragOptions{Weapons: []string{"RL"}}); err != nil || out == nil {
+		t.Errorf("Frags valid weapon (case-insensitive): err = %v", err)
+	}
+	// Frag-specific phrasing-only causes are valid tokens.
+	if _, err := Frags(r, FragOptions{Weapons: []string{"teamkill"}}); err != nil {
+		t.Errorf("Frags teamkill: err = %v, want nil", err)
+	}
+
+	// Damage: bogus token → error; pseudo-tokens tele/stomp valid; env token
+	// "drown" (damage vocab) valid; frag-only "water" rejected.
+	if _, err := Damage(r, DamageOptions{Weapons: []string{"nope"}}); !errors.Is(err, ErrInvalidFilter) {
+		t.Errorf("Damage bogus weapon: err = %v, want ErrInvalidFilter", err)
+	}
+	for _, w := range []string{"tele", "stomp", "drown", "RL"} {
+		if _, err := Damage(r, DamageOptions{Weapons: []string{w}}); err != nil {
+			t.Errorf("Damage valid weapon %q: err = %v", w, err)
+		}
+	}
+
+	// Backpacks: only rl/lg; anything else rejected.
+	if _, err := Backpacks(r, BackpackOptions{Weapons: []string{"gl"}}); !errors.Is(err, ErrInvalidFilter) {
+		t.Errorf("Backpacks bogus weapon gl: err = %v, want ErrInvalidFilter", err)
+	}
+	if _, err := Backpacks(r, BackpackOptions{Weapons: []string{"LG"}}); err != nil {
+		t.Errorf("Backpacks valid weapon lg: err = %v", err)
+	}
+
+	// WeaponPickups: ssg/ng/sng/gl/rl/lg; sg (starting weapon) is not a pickup.
+	if _, err := WeaponPickups(r, WeaponPickupOptions{Weapons: []string{"sg"}}); !errors.Is(err, ErrInvalidFilter) {
+		t.Errorf("WeaponPickups bogus weapon sg: err = %v, want ErrInvalidFilter", err)
+	}
+	if _, err := WeaponPickups(r, WeaponPickupOptions{Weapons: []string{"GL"}}); err != nil {
+		t.Errorf("WeaponPickups valid weapon gl: err = %v", err)
+	}
+}
+
 func TestItems_AlwaysAvailable(t *testing.T) {
 	// Absent Items is NOT ErrUnavailable — it returns an empty list (R3).
 	out := Items(&result.Result{}, ItemOptions{})
@@ -101,19 +221,19 @@ func TestItems_AlwaysAvailable(t *testing.T) {
 func TestBackpacks_WeaponCSV(t *testing.T) {
 	r := sectionsFixture()
 	// R4: weapon is a CSV set — both rl and lg match.
-	if got := Backpacks(r, BackpackOptions{Weapons: []string{"rl", "lg"}}); len(got) != 2 {
-		t.Errorf("weapon=rl,lg: got %d, want 2", len(got))
+	if got, err := Backpacks(r, BackpackOptions{Weapons: []string{"rl", "lg"}}); err != nil || len(got) != 2 {
+		t.Errorf("weapon=rl,lg: got %d err=%v, want 2", len(got), err)
 	}
-	if got := Backpacks(r, BackpackOptions{Weapons: []string{"LG"}}); len(got) != 1 || got[0].Weapon != "lg" {
-		t.Errorf("weapon=LG: got %v, want one lg", got)
+	if got, err := Backpacks(r, BackpackOptions{Weapons: []string{"LG"}}); err != nil || len(got) != 1 || got[0].Weapon != "lg" {
+		t.Errorf("weapon=LG: got %v err=%v, want one lg", got, err)
 	}
 }
 
 func TestWeaponPickups_Source(t *testing.T) {
 	r := sectionsFixture()
-	got := WeaponPickups(r, WeaponPickupOptions{Source: "backpack"})
-	if len(got) != 1 || got[0].Source != "backpack" {
-		t.Errorf("source=backpack: got %v", got)
+	got, err := WeaponPickups(r, WeaponPickupOptions{Source: "backpack"})
+	if err != nil || len(got) != 1 || got[0].Source != "backpack" {
+		t.Errorf("source=backpack: got %v err=%v", got, err)
 	}
 }
 
@@ -1002,9 +1122,9 @@ func TestBackpacks_Window(t *testing.T) {
 		{Time: 5000, Player: "p1", Weapon: "rl"},
 		{Time: 65000, Player: "p2", Weapon: "lg"},
 	}}
-	out := Backpacks(r, BackpackOptions{From: 10000, To: 70000})
-	if len(out) != 1 || out[0].Player != "p2" {
-		t.Fatalf("windowed backpacks = %+v", out)
+	out, err := Backpacks(r, BackpackOptions{From: 10000, To: 70000})
+	if err != nil || len(out) != 1 || out[0].Player != "p2" {
+		t.Fatalf("windowed backpacks = %+v err=%v", out, err)
 	}
 }
 
@@ -1013,9 +1133,9 @@ func TestWeaponPickups_Window(t *testing.T) {
 		{Time: 5000, Player: "p1", Weapon: "rl", Source: "world"},
 		{Time: 65000, Player: "p2", Weapon: "rl", Source: "backpack"},
 	}}
-	out := WeaponPickups(r, WeaponPickupOptions{To: 60000})
-	if len(out) != 1 || out[0].Player != "p1" {
-		t.Fatalf("windowed pickups = %+v", out)
+	out, err := WeaponPickups(r, WeaponPickupOptions{To: 60000})
+	if err != nil || len(out) != 1 || out[0].Player != "p1" {
+		t.Fatalf("windowed pickups = %+v err=%v", out, err)
 	}
 }
 

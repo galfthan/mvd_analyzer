@@ -35,6 +35,81 @@ var ErrBoundedUnavailable = fmt.Errorf("bounded damage family unavailable: %w", 
 // case-significant); weapon / item / kind tokens are matched
 // case-insensitively against their canonical lowercase form.
 
+// ErrInvalidFilter marks a filter value outside the closed vocabulary that view
+// validates it against — e.g. a Weapons token no analyzer ever produces. HTTP
+// callers map it to 400 invalid_param (like events.go's unknown-type
+// rejection). It deliberately does NOT wrap ErrUnavailable, so mvd-api's 422
+// unavailability handler never mistakes a bad param for a missing capability;
+// Frags/Damage (which can return either) are told apart with
+// errors.Is(err, ErrInvalidFilter).
+var ErrInvalidFilter = errors.New("invalid filter value")
+
+// invalidFilterError carries the events.go-style message while matching the
+// ErrInvalidFilter sentinel — so the 400 body reads "unknown weapon ..." with
+// no wrapper prefix.
+type invalidFilterError struct{ msg string }
+
+func (e *invalidFilterError) Error() string        { return e.msg }
+func (e *invalidFilterError) Is(target error) bool { return target == ErrInvalidFilter }
+
+// The closed weapon vocabularies each Weapons filter validates against. Each is
+// the exact token set its PRODUCING code can emit; an unknown token would match
+// nothing, so validating up front turns a silent-empty result into a 400 that
+// names the valid set (the silent-enum gap, same fix as KnownEventTypes). Keep
+// each in lock-step with the cited producer.
+
+// fragWeaponVocab is every FragEntry.Weapon the obituary parser emits
+// (mvd-analytics/analyzer/obituary.go obituaryWeapons + obituary_parse.go
+// suicide/kill/generic pattern tables), including the phrasing-only
+// "teamkill"/"unknown"/"suicide" causes.
+var fragWeaponVocab = []string{
+	"rl", "lg", "gl", "ssg", "sng", "ng", "sg", "axe", "hook", "rail",
+	"tele", "stomp", "squish", "fall", "lava", "slime", "water", "world",
+	"unknown", "suicide", "teamkill",
+}
+
+// damageWeaponVocab is every DamageEntry.Weapon the damage analyzer emits
+// (mvd-reader/mvd.DeathTypeToWeapon + EnvironmentalDamageType, applied in
+// mvd-analytics/analyzer/damage.go), plus the pseudo-tokens "tele"/"stomp" that
+// select positional kills (telefrags/stomps carry no wire weapon; see
+// DamageOptions.Weapons).
+var damageWeaponVocab = []string{
+	"rl", "lg", "gl", "ssg", "sng", "ng", "sg", "axe", "stomp", "tele",
+	"squish", "explobox", "unknown", "lava", "slime", "drown", "fall",
+	"trigger", "suicide",
+}
+
+// backpackWeaponVocab is the RL/LG drop set
+// (mvd-analytics/analyzer/backpacks.go weaponFromItemFlags — KTX only ever
+// drops an rl or lg backpack).
+var backpackWeaponVocab = []string{"rl", "lg"}
+
+// weaponPickupVocab is the slot-weapon acquisition set
+// (mvd-analytics/analyzer/weapon_pickups.go weaponKindsOrdered).
+var weaponPickupVocab = []string{"ssg", "ng", "sng", "gl", "rl", "lg"}
+
+// validateWeapons rejects any token (matched case-insensitively, as the filters
+// themselves are) outside vocab, returning an ErrInvalidFilter-wrapped,
+// events.go-style error that names the offending token and the valid set. An
+// empty filter — and empty/whitespace tokens — pass.
+func validateWeapons(tokens []string, vocab []string) error {
+	if len(tokens) == 0 {
+		return nil
+	}
+	set := make(map[string]bool, len(vocab))
+	for _, v := range vocab {
+		set[v] = true
+	}
+	for _, t := range tokens {
+		lt := strings.TrimSpace(strings.ToLower(t))
+		if lt == "" || set[lt] {
+			continue
+		}
+		return &invalidFilterError{fmt.Sprintf("unknown weapon %q; valid: %s", t, strings.Join(vocab, ", "))}
+	}
+	return nil
+}
+
 // FragOptions filters FragResult. Empty fields mean "no filter". From/To
 // are match-relative int32 ms (0 disables that bound), matching getEvents.
 type FragOptions struct {
@@ -72,6 +147,12 @@ type FragOptions struct {
 //     unfiltered totals for reconnect / unresolved-name edge cases — that is
 //     expected and intended.
 func Frags(r *result.Result, opts FragOptions) (*result.FragResult, error) {
+	// Validate the weapon vocabulary before the capability check: a bogus
+	// token is a client error (400) regardless of whether this demo has a
+	// frag log, and it must not slip through as a silent empty match.
+	if err := validateWeapons(opts.Weapons, fragWeaponVocab); err != nil {
+		return nil, err
+	}
 	if r.Frags == nil {
 		return nil, ErrUnavailable
 	}
@@ -225,6 +306,12 @@ type DamageOptions struct {
 // serve normally. All family transforms operate on COPIES — the stored Result
 // is never mutated (aimcore/airgibs read its raw values in place).
 func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) {
+	// Validate the weapon vocabulary before the capability / family checks: a
+	// bogus token is a 400 that must win over the 422 unavailable/bounded paths
+	// and must not slip through as a silent empty match.
+	if err := validateWeapons(opts.Weapons, damageWeaponVocab); err != nil {
+		return nil, err
+	}
 	if r.Damage == nil {
 		return nil, ErrUnavailable
 	}
@@ -482,10 +569,14 @@ func Damage(r *result.Result, opts DamageOptions) (*result.DamageResult, error) 
 		}
 	}
 
-	// Scoreboard is a KTX end-of-match cross-check keyed by player; it has no
-	// per-event provenance to recompute, so narrow it by the players filter
-	// (as before) and pass the deltas through unchanged.
-	if d.Scoreboard != nil {
+	// Scoreboard is a KTX end-of-match, whole-match cross-check keyed by player;
+	// it has NO per-event provenance, so it cannot be recomputed against a
+	// weapons or time-window filter — a full-match scoreboard riding along a
+	// small windowed/weapon-scoped payload would misrepresent it and dominate
+	// the response. So OMIT it entirely when either of those filters is active,
+	// and keep only the by-player narrowing when the filter is players-only
+	// (the deltas are still whole-match totals for exactly the shown players).
+	if d.Scoreboard != nil && len(weapons) == 0 && startMs == 0 && endMs == 0 {
 		sb := &result.DamageReconciliation{ByPlayer: map[string]*result.DamageDelta{}}
 		for name, dd := range d.Scoreboard.ByPlayer {
 			if len(players) > 0 && !players[name] {
@@ -963,11 +1054,15 @@ type BackpackOptions struct {
 
 // Backpacks returns the demo's RL/LG backpack drops, optionally filtered.
 // Always available; an empty list when the demo has none. From/To window
-// the drop time.
-func Backpacks(r *result.Result, opts BackpackOptions) []result.BackpackDrop {
+// the drop time. Returns ErrInvalidFilter (400 at the REST layer) when a
+// Weapons token is outside backpackWeaponVocab.
+func Backpacks(r *result.Result, opts BackpackOptions) ([]result.BackpackDrop, error) {
+	if err := validateWeapons(opts.Weapons, backpackWeaponVocab); err != nil {
+		return nil, err
+	}
 	out := []result.BackpackDrop{}
 	if len(r.Backpacks) == 0 {
-		return out
+		return out, nil
 	}
 	players := toSet(opts.Players)
 	weapons := toLowerSet(opts.Weapons)
@@ -985,7 +1080,7 @@ func Backpacks(r *result.Result, opts BackpackOptions) []result.BackpackDrop {
 		}
 		out = append(out, b)
 	}
-	return out
+	return out, nil
 }
 
 // WeaponPickupOptions filters the weapon-pickup list. Empty fields mean "no
@@ -1000,11 +1095,15 @@ type WeaponPickupOptions struct {
 
 // WeaponPickups returns the demo's slot-weapon acquisitions, optionally
 // filtered. Always available; an empty list when the demo has none.
-// From/To window the pickup time.
-func WeaponPickups(r *result.Result, opts WeaponPickupOptions) []result.WeaponPickup {
+// From/To window the pickup time. Returns ErrInvalidFilter (400 at the REST
+// layer) when a Weapons token is outside weaponPickupVocab.
+func WeaponPickups(r *result.Result, opts WeaponPickupOptions) ([]result.WeaponPickup, error) {
+	if err := validateWeapons(opts.Weapons, weaponPickupVocab); err != nil {
+		return nil, err
+	}
 	out := []result.WeaponPickup{}
 	if len(r.WeaponPickups) == 0 {
-		return out
+		return out, nil
 	}
 	players := toSet(opts.Players)
 	weapons := toLowerSet(opts.Weapons)
@@ -1026,15 +1125,15 @@ func WeaponPickups(r *result.Result, opts WeaponPickupOptions) []result.WeaponPi
 		}
 		out = append(out, wp)
 	}
-	return out
+	return out, nil
 }
 
 // ChatOptions filters the chat/teamsay event list. From/To are
 // match-relative int32 ms (0 disables that bound); Types defaults to
 // {chat, teamsay}.
 type ChatOptions struct {
-	From    int32 // int32 ms
-	To      int32 // int32 ms
+	From    int32    // int32 ms
+	To      int32    // int32 ms
 	Players []string // sender name (case-sensitive)
 	Types   []string // defaults to chat,teamsay
 }

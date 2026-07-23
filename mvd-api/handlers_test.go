@@ -586,6 +586,53 @@ func TestEnumValues_Rejected(t *testing.T) {
 	}
 }
 
+// TestWeaponVocabulary_Rejected: an unknown weapons token 400s with
+// invalid_param on every filtering endpoint (frags/damage/backpacks/
+// weapon-pickups), not a silent all-filtered 200. A valid token still 200s.
+func TestWeaponVocabulary_Rejected(t *testing.T) {
+	// frags + damage carry their sections in fragDamageStore; backpacks +
+	// weapon-pickups in storeWithStub's stub.
+	fd := newTestServer(t, fragDamageStore())
+	defer fd.Close()
+	sw := newTestServer(t, storeWithStub())
+	defer sw.Close()
+
+	bogus := []struct {
+		srv *httptest.Server
+		u   string
+	}{
+		{fd, "frags?weapons=bfg"},
+		{fd, "damage?weapons=bfg"},
+		{sw, "backpacks?weapons=gl"},      // backpacks only takes rl/lg
+		{sw, "weapon-pickups?weapons=sg"}, // sg is not a pickup
+	}
+	for _, tc := range bogus {
+		body, status := getRaw(t, tc.srv.URL+"/v1/demos/gameId:42/"+tc.u)
+		if status != 400 {
+			t.Errorf("%s: status = %d, want 400 (body=%s)", tc.u, status, body)
+			continue
+		}
+		if code := errBodyCode(t, body); code != "invalid_param" {
+			t.Errorf("%s: code = %q, want invalid_param", tc.u, code)
+		}
+	}
+
+	// Valid tokens still 200 (case-insensitive).
+	for _, tc := range []struct {
+		srv *httptest.Server
+		u   string
+	}{
+		{fd, "frags?weapons=RL"},
+		{fd, "damage?weapons=rl,tele"},
+		{sw, "backpacks?weapons=LG"},
+		{sw, "weapon-pickups?weapons=rl"},
+	} {
+		if _, status := getRaw(t, tc.srv.URL+"/v1/demos/gameId:42/"+tc.u); status != 200 {
+			t.Errorf("%s: status = %d, want 200", tc.u, status)
+		}
+	}
+}
+
 // TestEnumValues_CaseInsensitive: /events and /chat type enums are
 // case-insensitive (matching every other token filter). Mixed/upper case
 // values validate and are lowercased before use.
