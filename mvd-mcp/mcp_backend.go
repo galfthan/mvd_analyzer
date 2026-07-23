@@ -123,6 +123,7 @@ type GetRegionControlInput struct {
 	WindowMs  int    `json:"windowMs,omitempty" jsonschema:"bucket size in MILLISECONDS (startTime/endTime are ALSO integer milliseconds); default 5000 (5 s) for the per-region state strings — finer resolution multiplies the bucketStates string length"`
 	StartTime int32  `json:"startTime,omitempty" jsonschema:"window start in match-relative milliseconds (integer)"`
 	EndTime   int32  `json:"endTime,omitempty" jsonschema:"window end in match-relative milliseconds (integer)"`
+	Regions   string `json:"regions,omitempty" jsonschema:"polygon detail: 'full' (each region's ~6KB polygon points included — needed only for drawing the map overlay), 'summary' (points stripped; name/locs/centroids kept), 'none' (regions list omitted). MCP default 'summary' for token economy (REST differs: full); pass 'full' when you need the points."`
 }
 
 // GetDemoInfoInput identifies a demo for the KTX demoinfo blob.
@@ -254,7 +255,7 @@ type SearchGamesInput struct {
 	Matchtag string   `json:"matchtag,omitempty" jsonschema:"tournament/event tag, case-insensitive substring (e.g. qwsl)"`
 	From     string   `json:"from,omitempty"     jsonschema:"calendar date lower bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
 	To       string   `json:"to,omitempty"       jsonschema:"calendar date upper bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
-	Limit    int      `json:"limit,omitempty"    jsonschema:"max rows (0 or omitted = server default 20 — 0 is the Go zero value, indistinguishable from absent at this layer; max 100; larger values rejected 400 invalid_param)"`
+	Limit    *int     `json:"limit,omitempty"    jsonschema:"max rows. Omitted = server default 20; an explicit 0 is forwarded and rejected 400 invalid_param (omit it for the default instead); max 100, larger values rejected 400 invalid_param"`
 	Offset   int      `json:"offset,omitempty"   jsonschema:"pagination offset"`
 	Roster   bool     `json:"roster,omitempty"   jsonschema:"true = verbatim hub rows with full roster detail (per-player ping, color arrays, name_color). Default = compact rows: players projected to {name, team, frags}"`
 }

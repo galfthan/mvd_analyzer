@@ -53,11 +53,36 @@ corpus was regenerated.
   pure-ms wording.
 - The `artifact_unknown` 404 now points MCP callers at `listArtifacts`
   (the old hint named only `GET /v1/artifacts`, unreachable over MCP).
+- **`searchGames`/`/v1/games/search` reject an explicit `limit=0`.** An
+  explicit `limit=0` in the query string is distinguishable from an
+  absent limit, so it now 400s `invalid_param` ("omit it for the default
+  20") rather than being silently treated as the default — the v57
+  reject-loudly posture. An omitted limit still defaults to 20; negative
+  and `>100` still 400. The MCP `searchGames` `limit` field became a
+  `*int` so an explicit `0` forwards to the REST boundary instead of
+  being dropped as the Go zero value.
+- **`/overview` `map` is the canonical shortname; new `mapTitle`.**
+  `map` now carries the map shortname from `EffectiveMap` (demoinfo →
+  serverinfo fallback — the same value `searchGames` rows and
+  `/metadata` serverinfo carry, so a consumer can join on it), where it
+  previously echoed the BSP's pretty title (`Claustrophobopolis` on
+  dm2). The pretty title moves to an additive `mapTitle`, omitted when
+  identical to `map`. View-layer only — stored `Result.Match.Map` is
+  unchanged.
+- **`/region-control` gains a `regions` param.** `full` (REST default;
+  backward-compatible — the region polygon `points` included), `summary`
+  (points stripped; name/locs/centroids kept), `none` (regions list
+  omitted). Trims the ~6 KB polygon payload for stats-only consumers;
+  `bucketStates`/`stats` are unaffected. The MCP `getRegionControl`
+  defaults to `summary` (same divergent default as `getItems`; a
+  defaulted response carries a `hint`) — pass `regions:'full'` for the
+  points. The stored Result's regions are never mutated.
 
 Deferred from the audit (tracked, not shipped here): a warming/retry
 response for cold-start analysis timeouts, hub-side `limit=0`
-semantics, recovering the real weapon behind `teamkill` frag rows, and
-a `mapTitle` alongside `map` in overview/search.
+semantics beyond the boundary rejection above, recovering the real
+weapon behind `teamkill` frag rows, and a `mapTitle` on `searchGames`
+rows (overview now has it).
 
 ## 2026-07-23 (add-airgib-pause-events) — view-layer change, no schema bump
 

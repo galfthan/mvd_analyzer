@@ -340,6 +340,8 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "loc-trails", url: "/v1/demos/gameId:42/loc-trails?minDwellMs=500", path: "/v1/demos/{id}/loc-trails", status: 200},
 		{name: "loc-table", url: "/v1/demos/gameId:42/loc-table", path: "/v1/demos/{id}/loc-table", status: 200},
 		{name: "region-control", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200},
+		{name: "region-control-summary", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=summary", path: "/v1/demos/{id}/region-control", status: 200},
+		{name: "region-control-none", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=none", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "airgibs", url: "/v1/demos/gameId:42/airgibs", path: "/v1/demos/{id}/airgibs", status: 200},
 
 		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},
@@ -642,6 +644,8 @@ func plausibleParamValue(name string) string {
 		return "row"
 	case "source":
 		return "world"
+	case "regions":
+		return "full"
 	case "fields":
 		return "h"
 	case "reducers":

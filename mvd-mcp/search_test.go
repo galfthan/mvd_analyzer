@@ -67,6 +67,7 @@ func TestSearch_ParamMapping(t *testing.T) {
 	defer f.Close()
 	s := newTestSearcher(f.srv.URL)
 
+	limit := 50
 	in := SearchGamesInput{
 		Players:  []string{"bps", "valla"},
 		Teams:    []string{"Die", "okkis"},
@@ -75,7 +76,7 @@ func TestSearch_ParamMapping(t *testing.T) {
 		Matchtag: "qwsl",
 		From:     "2025-01-01",
 		To:       "2025-12-31",
-		Limit:    50,
+		Limit:    &limit,
 		Offset:   100,
 		Roster:   true,
 	}
@@ -117,6 +118,24 @@ func TestSearch_OmitsUnsetParams(t *testing.T) {
 		if _, ok := q[k]; ok {
 			t.Errorf("unset field leaked into query as %q=%q", k, q.Get(k))
 		}
+	}
+}
+
+// TestSearch_ExplicitZeroLimitForwards: an explicit limit:0 (a non-nil *int)
+// must reach the REST boundary as limit=0 so it earns the 400, rather than
+// being silently dropped like an omitted limit. This is the whole point of the
+// *int field.
+func TestSearch_ExplicitZeroLimitForwards(t *testing.T) {
+	f := newFakeSearchAPI(`{"games":[]}`)
+	defer f.Close()
+	s := newTestSearcher(f.srv.URL)
+
+	zero := 0
+	if _, err := s.Search(context.Background(), SearchGamesInput{Limit: &zero}); err != nil {
+		t.Fatalf("Search: %v", err)
+	}
+	if got, ok := f.lastURL.Query()["limit"]; !ok || got[0] != "0" {
+		t.Errorf("explicit limit:0 not forwarded as limit=0 (query: %s)", f.lastURL.RawQuery)
 	}
 }
 

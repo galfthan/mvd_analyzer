@@ -914,6 +914,42 @@ func TestOverview(t *testing.T) {
 	}
 }
 
+// TestOverviewMapTitle pins the map/mapTitle split (v59): `map` is the
+// canonical shortname from EffectiveMap (demoinfo → serverinfo), `mapTitle`
+// the BSP's pretty title, elided when the two are identical.
+func TestOverviewMapTitle(t *testing.T) {
+	// Distinct title: demoinfo resolves the shortname "dm2", Match.Map carries
+	// the pretty BSP title.
+	distinct := &result.Result{
+		DemoInfo: &result.DemoInfoResult{Map: "dm2"},
+		Match:    &result.MatchResult{Map: "Claustrophobopolis"},
+	}
+	ov := BuildOverview(distinct)
+	if ov.Map != "dm2" {
+		t.Errorf("map = %q; want dm2 (EffectiveMap shortname)", ov.Map)
+	}
+	if ov.MapTitle != "Claustrophobopolis" {
+		t.Errorf("mapTitle = %q; want Claustrophobopolis", ov.MapTitle)
+	}
+
+	// Identical (or no distinct title): mapTitle elided.
+	same := &result.Result{
+		DemoInfo: &result.DemoInfoResult{Map: "dm3"},
+		Match:    &result.MatchResult{Map: "dm3"},
+	}
+	ov = BuildOverview(same)
+	if ov.Map != "dm3" || ov.MapTitle != "" {
+		t.Errorf("map/mapTitle = %q/%q; want dm3/\"\" (title elided when identical)", ov.Map, ov.MapTitle)
+	}
+
+	// Degraded: no shortname source — fall back to Match.Map, no mapTitle.
+	degraded := &result.Result{Match: &result.MatchResult{Map: "dm6"}}
+	ov = BuildOverview(degraded)
+	if ov.Map != "dm6" || ov.MapTitle != "" {
+		t.Errorf("degraded map/mapTitle = %q/%q; want dm6/\"\" (fallback to Match.Map)", ov.Map, ov.MapTitle)
+	}
+}
+
 // TestOverviewTiming checks that BuildOverview surfaces the wall-clock anchor
 // (streams.global) in its `timing` block — the v23 exposure that lets a
 // REST/MCP consumer map game time to real time without fetching streams.
@@ -1576,6 +1612,72 @@ func TestRegionControl_Unavailable(t *testing.T) {
 	_, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/region-control")
 	if status != 422 {
 		t.Errorf("status = %d; want 422", status)
+	}
+}
+
+// storeWithRegions serves a demo carrying a region-control layout whose regions
+// have polygon Points — the fixture for the regions=full|summary|none modes.
+func storeWithRegions() *fakeStore {
+	r := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Streams:       &result.Streams{Global: result.GlobalStream{MatchStart: 0, MatchEnd: 60000}},
+		TimelineAnalysis: &result.TimelineAnalysisResult{
+			RegionControl: &result.RegionControlResult{
+				Regions: []result.ControlRegion{
+					{Name: "mid", Locs: []string{"mid"}, CentroidX: 10, CentroidY: 20,
+						Points: []result.MapLocation{{X: 1, Y: 2, Z: 3, Name: "mid"}}},
+				},
+			},
+		},
+	}
+	return &fakeStore{byID: map[string]*result.Result{"gameId:42": r}}
+}
+
+// TestRegionControl_RegionsParam pins the regions=full|summary|none view modes
+// (v59): full keeps the polygon points, summary strips them (centroids kept),
+// none omits the regions list entirely, and a bogus value 400s. The stored
+// Result's regions must never be mutated.
+func TestRegionControl_RegionsParam(t *testing.T) {
+	store := storeWithRegions()
+	srv := newTestServer(t, store)
+	defer srv.Close()
+
+	// full (default): points present.
+	full := getJSON(t, srv.URL+"/v1/demos/gameId:42/region-control?regions=full", 200)
+	regs := full["regions"].([]any)
+	rg := regs[0].(map[string]any)
+	if pts, _ := rg["points"].([]any); len(pts) != 1 {
+		t.Errorf("regions=full: expected 1 point, got %v", rg["points"])
+	}
+
+	// summary: points stripped (null), centroid + name kept.
+	sum := getJSON(t, srv.URL+"/v1/demos/gameId:42/region-control?regions=summary", 200)
+	srg := sum["regions"].([]any)[0].(map[string]any)
+	if pts, ok := srg["points"].([]any); ok && len(pts) != 0 {
+		t.Errorf("regions=summary: points should be stripped, got %v", srg["points"])
+	}
+	if srg["centroidX"].(float64) != 10 || srg["name"] != "mid" {
+		t.Errorf("regions=summary dropped centroid/name: %+v", srg)
+	}
+
+	// none: regions omitted from the response entirely.
+	none := getJSON(t, srv.URL+"/v1/demos/gameId:42/region-control?regions=none", 200)
+	if _, present := none["regions"]; present {
+		t.Errorf("regions=none: regions key should be absent, got %v", none["regions"])
+	}
+
+	// bogus value 400s invalid_param naming the valid set.
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/region-control?regions=bogus")
+	if status != 400 {
+		t.Fatalf("regions=bogus status = %d; want 400 (body=%s)", status, body)
+	}
+	if !strings.Contains(string(body), `"invalid_param"`) || !strings.Contains(string(body), "summary") {
+		t.Errorf("bogus regions body missing invalid_param/valid-set detail: %s", body)
+	}
+
+	// The stored Result's polygon points must be intact after the summary read.
+	if pts := store.byID["gameId:42"].TimelineAnalysis.RegionControl.Regions[0].Points; len(pts) != 1 {
+		t.Errorf("stored Result regions were mutated: points=%v", pts)
 	}
 }
 

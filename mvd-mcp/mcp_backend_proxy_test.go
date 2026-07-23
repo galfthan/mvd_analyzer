@@ -210,6 +210,43 @@ func TestProxy_GetRegionControl_MCPDefaultIs5s(t *testing.T) {
 	}
 }
 
+// TestProxy_GetRegionControl_RegionsDefault: the MCP layer defaults regions to
+// summary (token economy; REST defaults to full) and a defaulted response
+// carries a hint; an explicit regions value is forwarded verbatim with no hint.
+func TestProxy_GetRegionControl_RegionsDefault(t *testing.T) {
+	var seenQuery string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seenQuery = r.URL.RawQuery
+		w.Write([]byte(`{"regions":[],"stats":{}}`))
+	}))
+	defer srv.Close()
+	b := newProxyBackend(srv.URL, "", 5*time.Second)
+
+	// Omitted → summary + hint.
+	out, err := b.GetRegionControl(context.Background(), GetRegionControlInput{DemoID: "gameId:42"})
+	if err != nil {
+		t.Fatalf("GetRegionControl: %v", err)
+	}
+	if q, _ := url.ParseQuery(seenQuery); q.Get("regions") != "summary" {
+		t.Errorf("default regions = %q; want summary", q.Get("regions"))
+	}
+	if m, ok := out.(map[string]any); !ok || m["hint"] == nil {
+		t.Errorf("defaulted-summary response missing hint: %v", out)
+	}
+
+	// Explicit full → forwarded, no hint.
+	out, err = b.GetRegionControl(context.Background(), GetRegionControlInput{DemoID: "gameId:42", Regions: "full"})
+	if err != nil {
+		t.Fatalf("GetRegionControl: %v", err)
+	}
+	if q, _ := url.ParseQuery(seenQuery); q.Get("regions") != "full" {
+		t.Errorf("explicit regions = %q; want full", q.Get("regions"))
+	}
+	if m, ok := out.(map[string]any); ok && m["hint"] != nil {
+		t.Errorf("explicit regions must not carry a hint: %v", m["hint"])
+	}
+}
+
 func TestProxy_GetStateAt(t *testing.T) {
 	srv := cannedAPI(t, nil)
 	b := newProxyBackend(srv.URL, "", 5*time.Second)

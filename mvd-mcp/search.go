@@ -30,7 +30,7 @@ func (p *proxyBackend) Search(ctx context.Context, in SearchGamesInput) (any, er
 	q.str("matchtag", in.Matchtag)
 	q.str("from", in.From)
 	q.str("to", in.To)
-	q.intv("limit", in.Limit)
+	q.intp("limit", in.Limit)
 	q.intv("offset", in.Offset)
 	q.boolean("roster", in.Roster)
 	return p.fetchOpaque(ctx, "GET", "/v1/games/search", url.Values(q))

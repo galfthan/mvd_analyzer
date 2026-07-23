@@ -1027,6 +1027,20 @@ func (s *server) handleLocTable(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"locTable": table})
 }
 
+// regionControlBody is the /region-control response. It mirrors
+// view.RegionControlEnvelope but gives `regions` omitempty so the regions=none
+// mode can drop the polygon list entirely; regions=full|summary keep it
+// (summary with each region's Points polygon stripped). The stored Result's
+// regions are never mutated — summary copies the ControlRegion structs.
+type regionControlBody struct {
+	TimeUnit     view.TimeUnit                 `json:"timeUnit"`
+	Regions      []result.ControlRegion        `json:"regions,omitempty"`
+	TeamA        string                        `json:"teamA,omitempty"`
+	TeamB        string                        `json:"teamB,omitempty"`
+	BucketStates map[string]string             `json:"bucketStates,omitempty"`
+	Stats        map[string]result.RegionStats `json:"stats,omitempty"`
+}
+
 func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
@@ -1040,6 +1054,7 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 		StartTime: p.Ms("from", 0),
 		EndTime:   p.Ms("to", 0),
 	}
+	regionsMode := p.Regions()
 	if writeInvalidParam(w, p.Err()) {
 		return
 	}
@@ -1054,7 +1069,29 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	if writeInvalidParam(w, err) {
 		return
 	}
-	writeJSON(w, http.StatusOK, view.RegionControlEnvelope{TimeUnit: view.UnitMs, RegionControlResult: rcv})
+	body := regionControlBody{
+		TimeUnit:     view.UnitMs,
+		TeamA:        rcv.TeamA,
+		TeamB:        rcv.TeamB,
+		BucketStates: rcv.BucketStates,
+		Stats:        rcv.Stats,
+	}
+	switch regionsMode {
+	case "summary":
+		// Copy each region and drop its Points polygon (~6KB total) — never
+		// mutate the stored Result's slice. name/locs/centroids are kept.
+		slim := make([]result.ControlRegion, len(rcv.Regions))
+		for i, rg := range rcv.Regions {
+			rg.Points = nil
+			slim[i] = rg
+		}
+		body.Regions = slim
+	case "none":
+		// Regions left nil → omitted from the response entirely.
+	default: // "full"
+		body.Regions = rcv.Regions
+	}
+	writeJSON(w, http.StatusOK, body)
 }
 
 // handleAirgibs: GET /v1/demos/{id}/airgibs — the Key Moments airgib list

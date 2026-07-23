@@ -1116,6 +1116,9 @@ paths:
         over the native position samples (no grid), independent of
         `windowMs`, so they don't change with the display window.
         `byPlayer.armed`/`unarmed` are integer milliseconds of presence.
+        The `regions` param trims the polygon payload: `full` (default)
+        ships the region `points`; `summary` strips them; `none` omits the
+        `regions` list entirely — `bucketStates` and `stats` are unaffected.
         422 `region_control_unavailable` when the map has no region
         layout.
       parameters:
@@ -1123,6 +1126,7 @@ paths:
         - $ref: "#/components/parameters/WindowMs"
         - $ref: "#/components/parameters/From"
         - $ref: "#/components/parameters/To"
+        - $ref: "#/components/parameters/RegionsMode"
         - $ref: "#/components/parameters/Label"
       responses:
         "200":
@@ -1619,6 +1623,20 @@ components:
       schema:
         type: string
         enum: [column, row]
+    RegionsMode:
+      name: regions
+      in: query
+      description: >
+        Region-list detail on /region-control. `full` (default,
+        backward-compatible) — the whole ControlRegion list including each
+        region's polygon `points` (~6 KB, needed only to draw the map
+        overlay). `summary` — regions with `points` stripped (`name`, `locs`,
+        `centroidX`/`centroidY` kept), for stats-only consumers. `none` — the
+        `regions` list is omitted from the response entirely. `bucketStates`
+        and `stats` are identical across all three.
+      schema:
+        type: string
+        enum: [full, summary, none]
     Dmg:
       name: dmg
       in: query
@@ -1754,8 +1772,10 @@ components:
       name: limit
       in: query
       description: >
-        Max rows per page. Default 20 (0 / omitted → 20). A value above 100
-        or a negative value is rejected with `400 invalid_param` — no longer
+        Max rows per page. Omit for the default 20. An explicit `limit=0`
+        is distinguishable from an absent one and is rejected with `400
+        invalid_param` (omit the param for the default instead); a value
+        above 100 or a negative value is likewise rejected — no longer
         silently clamped.
       schema:
         type: integer
@@ -2070,7 +2090,10 @@ components:
           description: "Number of named locs available for the map."
           type: integer
         map:
-          description: "Map name."
+          description: "Canonical map shortname (dm2, dm3, …) — the same value searchGames rows and /metadata serverinfo carry, so a caller can join on it. Resolved from demoinfo with a serverinfo fallback; on a degraded demo that resolves no shortname this falls back to the BSP title."
+          type: string
+        mapTitle:
+          description: "The BSP's pretty level title (e.g. \"Claustrophobopolis\" on dm2). Omitted when identical to `map` — the common case where the map has no distinct title."
           type: string
         matchEnd:
           description: "Match end, int32 ms."
@@ -4353,7 +4376,6 @@ components:
           type: string
       required:
         - timeUnit
-        - regions
       type: object
     ProjectileStreams:
       additionalProperties: false

@@ -13,9 +13,18 @@ import (
 // echoing the whole Result. Time fields are integer milliseconds
 // (matches schema v8).
 type Overview struct {
-	SchemaVersion    int               `json:"schemaVersion"`
-	FilePath         string            `json:"filePath,omitempty"`
-	Map              string            `json:"map,omitempty"`
+	SchemaVersion int    `json:"schemaVersion"`
+	FilePath      string `json:"filePath,omitempty"`
+	// Map is the canonical map SHORTNAME (dm2, dm3, …) — Result.EffectiveMap
+	// (demoinfo → serverinfo fallback), the same value searchGames rows and
+	// serverinfo carry, so a caller can join on it. Falls back to the BSP
+	// title (r.Match.Map) only on a degraded demo that resolves no shortname.
+	Map string `json:"map,omitempty"`
+	// MapTitle is the BSP's pretty level title (LevelName, e.g.
+	// "Claustrophobopolis" on dm2). Omitted when it equals Map — the common
+	// case where the map has no distinct title (repo precedent: MessageClean
+	// elides when identical to the raw message).
+	MapTitle         string            `json:"mapTitle,omitempty"`
 	GameDir          string            `json:"gameDir,omitempty"`
 	Mode             string            `json:"mode,omitempty"`
 	Matchtag         string            `json:"matchtag,omitempty"`
@@ -112,8 +121,19 @@ func BuildOverview(r *result.Result) Overview {
 	ov.FilePath = r.FilePath
 	ov.Errors = r.Errors
 
+	// map = the canonical shortname (joinable with searchGames / serverinfo);
+	// mapTitle = the BSP's pretty title, elided when identical. EffectiveMap
+	// resolves the shortname independent of Match (demoinfo → serverinfo), so a
+	// degraded demo with no shortname falls back to the title below.
+	ov.Map = r.EffectiveMap()
+
 	if r.Match != nil {
-		ov.Map = r.Match.Map
+		if ov.Map == "" {
+			ov.Map = r.Match.Map
+		}
+		if r.Match.Map != "" && r.Match.Map != ov.Map {
+			ov.MapTitle = r.Match.Map
+		}
 		ov.GameDir = r.Match.GameDir
 		ov.Duration = r.Match.Duration
 		for _, p := range r.Match.Players {

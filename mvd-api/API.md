@@ -216,15 +216,20 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   the `from`/`to` window, `players`/`fields` scoping, and `summary`.
   `limit`/`offset` pagination applies only to the game-discovery
   endpoint `GET /v1/games/search` (page until `offset + count >= total`).
-  There `limit` defaults to 20 and is capped at 100 — a `limit` above 100,
-  or a negative `limit`/`offset`, is rejected with `400 invalid_param`
-  (no longer silently clamped).
+  There `limit` defaults to 20 (omit the param) and is capped at 100 — an
+  explicit `limit=0`, a `limit` above 100, or a negative `limit`/`offset`
+  is rejected with `400 invalid_param` (no longer silently clamped).
 - **`loc`** — `name` (default) resolves loc indices to names; `index`
   returns the raw `LocTable` index for index-based math (decode via
   `/loc-table`). Honoured by `buckets`, `events`, `stream-slice`,
   `state-at`, `loc-trails`.
 - **`layout`** (`/buckets` only) — `column` (default, compact) or `row`.
   See the `/buckets` operation in `/docs`.
+- **`regions`** (`/region-control` only) — `full` (default) ships each
+  region's polygon `points` (~6 KB); `summary` strips them (name / locs /
+  centroids kept); `none` omits the `regions` list entirely. `bucketStates`
+  and `stats` are identical across all three. The hosted MCP layer defaults
+  to `summary`.
 
 The valid **field codes** (`h`, `a`, `rl`, `pos`, `view`, `hgt`, `lq`,
 `vel`, `sp`, `d`, …) and **reducer names** are listed once in
