@@ -14,6 +14,7 @@ func newDemoMarkTestAnalyzer() *TimelineAnalyzer {
 	a.ctx = &Context{}
 	a.ctx.Players[0] = &events.PlayerInfo{Slot: 0, Name: "alpha", Team: "red", UserID: 111}
 	a.ctx.Players[1] = &events.PlayerInfo{Slot: 1, Name: "bravo", Team: "blue", UserID: 222}
+	a.ctx.Players[2] = &events.PlayerInfo{Slot: 2, Name: "watcher", UserID: 333, Spectator: true}
 	a.playerNames[0] = "alpha"
 	a.playerNames[1] = "bravo"
 	a.playerUserIDs[0] = 111
@@ -51,6 +52,29 @@ func TestDemoMarkers_ResolveIdentityAndLabel(t *testing.T) {
 	}
 	if m1.Label != "0 round-07" {
 		t.Errorf("marker 1 label = %q, want %q", m1.Label, "0 round-07")
+	}
+	if m0.Spectator || m1.Spectator {
+		t.Errorf("player marks flagged as spectator: %v/%v", m0.Spectator, m1.Spectator)
+	}
+}
+
+// TestDemoMarkers_SpectatorMarkFlagged checks a mark from a spectator slot
+// (KTX /demomark is CF_BOTH) resolves the spectator's name and carries the
+// Spectator flag from the roster's *spectator state.
+func TestDemoMarkers_SpectatorMarkFlagged(t *testing.T) {
+	a := newDemoMarkTestAnalyzer()
+	a.rawDemoMarks = []demoMarkRecord{{Time: 200000, PlayerNum: 2}}
+
+	markers := a.buildDemoMarkers()
+	if len(markers) != 1 {
+		t.Fatalf("got %d markers, want 1", len(markers))
+	}
+	m := markers[0]
+	if !m.Spectator {
+		t.Errorf("spectator mark not flagged: %+v", m)
+	}
+	if m.PlayerName != "watcher" || m.PlayerUserID != 333 {
+		t.Errorf("spectator mark = %+v, want watcher/333", m)
 	}
 }
 

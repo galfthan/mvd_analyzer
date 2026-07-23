@@ -839,7 +839,8 @@ paths:
         polymorphic per event type. Omit `types` for the default set
         (includes `pickup` and `demomark`). `demomark` events are the
         bookmarks players insert in-game with `/demomark`; a warmup mark
-        carries a negative `time`.
+        carries a negative `time`, and a mark inserted by a spectator
+        carries `detail.spectator: true`.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/From"

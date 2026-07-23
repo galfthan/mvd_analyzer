@@ -20,6 +20,7 @@ with KTX's `/demomark` command — through the whole pipeline.
   match-relative `time` (negative for a warmup mark), the marking
   player's resolved `playerName`/`playerSlot`/`playerUserID`/`team`
   (empty with `playerSlot: -1` when the block was not slot-addressed),
+  a `spectator` flag (KTX accepts `/demomark` from spectators too),
   and the optional `label`. Team labels flow through the born-correct
   duel rewrite like the sibling event lists.
 - **API.** New `demomark` event type on `/v1/demos/{id}/events`, added to

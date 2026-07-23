@@ -211,16 +211,20 @@ type PowerupEvent struct {
 // marking player is the demo block target — the only attribution channel
 // — so PlayerSlot / PlayerName / Team / PlayerUserID are resolved from
 // that slot at the mark's time, and are empty when the mark was not
-// slot-addressed (PlayerSlot -1). Time is integer milliseconds; markers
-// inserted during warmup keep a negative match-relative time (surfaced
-// un-gated, matching the surface-authoritative-data rule).
+// slot-addressed (PlayerSlot -1). KTX accepts /demomark from spectators
+// too (CF_BOTH); Spectator distinguishes those marks, whose Team is
+// usually empty and whose PlayerUserID is not a useful Hub track target.
+// Time is integer milliseconds; markers inserted during warmup keep a
+// negative match-relative time (surfaced un-gated, matching the
+// surface-authoritative-data rule).
 type DemoMarkerEvent struct {
-	Time         int32  `json:"time"`            // match-relative ms (negative = warmup mark)
-	PlayerName   string `json:"playerName"`      // resolved name of the marking player
-	PlayerSlot   int    `json:"playerSlot"`      // marking player's wire slot; -1 if not slot-addressed
-	PlayerUserID int    `json:"playerUserID"`    // for Hub viewer track param
-	Team         string `json:"team"`            // marking player's team
-	Label        string `json:"label,omitempty"` // optional argument tail (e.g. HoonyMode "0 round-07")
+	Time         int32  `json:"time"`                // match-relative ms (negative = warmup mark)
+	PlayerName   string `json:"playerName"`          // resolved name of the marking player
+	PlayerSlot   int    `json:"playerSlot"`          // marking player's wire slot; -1 if not slot-addressed
+	PlayerUserID int    `json:"playerUserID"`        // for Hub viewer track param
+	Team         string `json:"team"`                // marking player's team
+	Spectator    bool   `json:"spectator,omitempty"` // mark inserted by a spectator, not a player
+	Label        string `json:"label,omitempty"`     // optional argument tail (e.g. HoonyMode "0 round-07")
 }
 
 // FragStreakEvent represents a frag streak (spawn-to-death run) for Key Moments.

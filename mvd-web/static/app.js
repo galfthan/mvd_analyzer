@@ -1989,10 +1989,15 @@ function displayKeyMoments(result) {
                 watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
             }
 
+            // A spectator's mark has no meaningful team (and its userID is
+            // not a useful Hub track target, but the link still frames the
+            // right time window).
+            const teamCell = marker.spectator ? 'spec' : (marker.team || '-');
+
             tr.innerHTML = `
                 <td class="time-cell time-link">${formatMarkerTime(marker.time)}</td>
                 <td>${escapeHtml(marker.playerName || 'Unknown')}</td>
-                <td>${escapeHtml(marker.team || '-')}</td>
+                <td>${escapeHtml(teamCell)}</td>
                 <td>${escapeHtml(marker.label || '-')}</td>
                 <td>${watchCell}</td>
             `;

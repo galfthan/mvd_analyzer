@@ -179,6 +179,9 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			if dm.Label != "" {
 				detail["label"] = dm.Label
 			}
+			if dm.Spectator {
+				detail["spectator"] = true
+			}
 			events = append(events, TaggedEvent{
 				T: ts, Type: "demomark", Player: dm.PlayerName, Detail: detail,
 			})
