@@ -85,3 +85,48 @@ func (a *TimelineAnalyzer) createPowerupEvent(slot int, powerupType string, star
 
 	return event
 }
+
+// buildDemoMarkers resolves every collected `//demomark` bookmark to a
+// DemoMarkerEvent. Attribution mirrors createPowerupEvent: the marking
+// slot is resolved to name/team at the mark's demo time, the team stamped
+// through the born-correct duel rewrite (co.TeamFor), and the userid taken
+// from the timeline's first-valid table (falling back to the context
+// roster). A mark that was not slot-addressed (PlayerNum -1) carries no
+// attribution and is emitted with just its time and label. `/demomark` is
+// CF_BOTH in KTX (ktx/src/commands.c:1027) — spectators can mark too, and
+// their slot resolves like any client slot — so Spectator carries the
+// roster's `*spectator` state (the same current-state approximation
+// match.go uses) to let consumers tell the two apart. All marks are
+// kept — including warmup / post-match ones — per the
+// surface-authoritative-data rule; the Time rebase to the match clock and
+// negative warmup times happen in rebaseToMatch.
+func (a *TimelineAnalyzer) buildDemoMarkers() []DemoMarkerEvent {
+	if len(a.rawDemoMarks) == 0 {
+		return nil
+	}
+	markers := make([]DemoMarkerEvent, 0, len(a.rawDemoMarks))
+	for _, m := range a.rawDemoMarks {
+		ev := DemoMarkerEvent{
+			Time:       m.Time,
+			PlayerSlot: m.PlayerNum,
+			Label:      m.Label,
+		}
+		if m.PlayerNum >= 0 {
+			ev.PlayerName, ev.Team = a.resolveAt(m.PlayerNum, m.Time)
+			ev.Team = a.core.TeamFor(ev.PlayerName, ev.Team)
+			if userID, ok := a.playerUserIDs[m.PlayerNum]; ok {
+				ev.PlayerUserID = userID
+			}
+			if ev.PlayerUserID == 0 {
+				if player := a.ctx.Players[m.PlayerNum]; player != nil && player.UserID != 0 {
+					ev.PlayerUserID = player.UserID
+				}
+			}
+			if player := a.ctx.Players[m.PlayerNum]; player != nil {
+				ev.Spectator = player.Spectator
+			}
+		}
+		markers = append(markers, ev)
+	}
+	return markers
+}

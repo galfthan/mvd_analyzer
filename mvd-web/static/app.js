@@ -1958,6 +1958,58 @@ function displayKeyMoments(result) {
         });
     }
 
+    // Display demo markers (user-inserted `/demomark` bookmarks). Rare (0-10
+    // per demo) and routinely absent — independent of the two tables above.
+    const markerBody = document.getElementById('demomarkers-body');
+    const markerEmpty = document.getElementById('demomarkers-empty');
+    markerBody.innerHTML = '';
+
+    // Same ms→s intake conversion as the sibling tables. `time` is int32 ms and
+    // may be negative for markers dropped during warmup (before match start).
+    const demoMarkers = (result.timelineAnalysis?.demoMarkers || []).map(m => ({
+        ...m,
+        time: m.time * 0.001,
+    }));
+
+    if (demoMarkers.length === 0) {
+        markerEmpty.style.display = 'block';
+    } else {
+        markerEmpty.style.display = 'none';
+
+        demoMarkers.forEach(marker => {
+            const tr = document.createElement('tr');
+
+            let watchCell = '-';
+            if (hubInfo && hubInfo.gameId) {
+                const demoOff = timelineState.demoOffset || 0;
+                const fromTime = Math.max(0, Math.floor(marker.time + demoOff) - 10);
+                const toTime = fromTime + 20;
+                const trackId = marker.playerUserID || 0;
+                const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: trackId });
+                watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
+            }
+
+            // A spectator's mark has no meaningful team (and its userID is
+            // not a useful Hub track target, but the link still frames the
+            // right time window).
+            const teamCell = marker.spectator ? 'spec' : (marker.team || '-');
+
+            tr.innerHTML = `
+                <td class="time-cell time-link">${formatMarkerTime(marker.time)}</td>
+                <td>${escapeHtml(marker.playerName || 'Unknown')}</td>
+                <td>${escapeHtml(teamCell)}</td>
+                <td>${escapeHtml(marker.label || '-')}</td>
+                <td>${watchCell}</td>
+            `;
+
+            tr.querySelector('.time-link').addEventListener('click', () => {
+                setCurrentTime(marker.time);
+            });
+
+            markerBody.appendChild(tr);
+        });
+    }
+
     // Airborne rocket gibs (sortable table, default by height).
     displayAirgibs(result);
 }
@@ -2648,6 +2700,15 @@ function formatDuration(seconds) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+// formatDuration assumes a non-negative time (Math.floor on a negative value
+// underflows both fields, e.g. -30.5 → "-1:-31"). Demo markers can carry a
+// negative match-relative time when a player marks during warmup, so format
+// the magnitude and prefix a "-".
+function formatMarkerTime(seconds) {
+    if (seconds < 0) return `-${formatDuration(-seconds)}`;
+    return formatDuration(seconds);
+}
+
 function getWeaponName(code) {
     const names = {
         'rl': 'Rocket Launcher',
@@ -2883,6 +2944,8 @@ function resetUIToCleanState() {
     hide('keymoments-empty');
     setHTML('fragstreaks-body', '');
     hide('fragstreaks-empty');
+    setHTML('demomarkers-body', '');
+    hide('demomarkers-empty');
 
     // Pack drops
     setHTML('packdrops-body', '');

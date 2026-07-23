@@ -38,9 +38,10 @@ type TimelineAnalyzer struct {
 	// mid-match, so the next frag update is a KTX stats restore / initial
 	// scoreboard, not a kill. Consumed (cleared) by handleFragUpdate.
 	fragResetPending map[int]bool
-	rawFrags         []fragEvent  // Raw frag events (player num, time)
-	rawDeaths        []deathEvent // Raw death events (player num, time)
-	rawSpawns        []deathEvent // Raw spawn events (reusing deathEvent type)
+	rawFrags         []fragEvent      // Raw frag events (player num, time)
+	rawDeaths        []deathEvent     // Raw death events (player num, time)
+	rawSpawns        []deathEvent     // Raw spawn events (reusing deathEvent type)
+	rawDemoMarks     []demoMarkRecord // Raw `//demomark` bookmarks (slot, time, label)
 	timing           MatchTimingDetector
 	locFinder        *locvis.Finder             // Visibility-aware loc finder for map (nil if no .loc file)
 	clipHull         *mapclip.Hull              // Worldspawn player clip hull for floor-height traces (nil if no clip corpus for map)
@@ -102,6 +103,16 @@ type fragEvent struct {
 type deathEvent struct {
 	Time      int32 // demo-clock ms
 	PlayerNum int
+}
+
+// demoMarkRecord is one `//demomark` bookmark as it arrives on the wire:
+// the demo-clock time, the marking player's slot (-1 if the block was not
+// slot-addressed), and the optional argument-tail label. Resolved to a
+// result.DemoMarkerEvent in Finalize.
+type demoMarkRecord struct {
+	Time      int32 // demo-clock ms
+	PlayerNum int   // marking player's wire slot; -1 if not slot-addressed
+	Label     string
 }
 
 // pauseSample is one mvdhidden 0x000A paused_duration block: the demo-relative
@@ -219,6 +230,14 @@ func (a *TimelineAnalyzer) OnEvent(event events.Event) error {
 		a.handleMoverSpawn(e)
 	case *events.MoverStateEvent:
 		a.handleMoverState(e)
+	case *events.DemoMarkEvent:
+		// Player-inserted bookmark. Recorded un-gated (warmup / post-match
+		// marks kept) — attribution and match-clock rebase happen in Finalize.
+		a.rawDemoMarks = append(a.rawDemoMarks, demoMarkRecord{
+			Time:      e.TimeMs,
+			PlayerNum: e.PlayerSlot,
+			Label:     e.Label,
+		})
 	}
 	return nil
 }

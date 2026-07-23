@@ -368,6 +368,7 @@ Concrete event types are plain structs: `ServerDataEvent`, `UserInfoEvent`,
 `ItemSpawnEvent`, `ItemStateEvent`, `BackpackDropHintEvent`,
 `ItemPickupHintEvent`, `BackpackPickupHintEvent`,
 `ItemPickupPrintEvent`, `BackpackPickupPrintEvent`,
+`DemoMarkEvent` (KTX `//demomark` player-inserted bookmark — slot + label),
 `DemoStartTimestampEvent` (mvdhidden `0x000B` wall-clock anchor),
 `PausedDurationEvent` (mvdhidden `0x000A` per-frame pause duration),
 `SoundEvent` (`svc_sound` — emitting entity + channel + resolved sound
@@ -546,7 +547,11 @@ map's BSP clip hull, later refined to a bounding-box footprint in v26 and
 to stand players on moving brush models in v27) and liquid state (`lq`,
 v28 — dry / water / slime / lava plus submersion level). v25 adds
 `timelineAnalysis.airgibs` — direct airborne rocket hits surfaced for Key
-Moments — and v29–v30 refine its ranking and uncap the list. v31 adds the
+Moments — and v29–v30 refine its ranking and uncap the list. Schema v58
+adds `timelineAnalysis.demoMarkers` — the bookmarks players insert in-game
+with KTX `/demomark`, attributed to the marking player's slot with an
+optional label and a negative `time` for a warmup mark — and a matching
+`demomark` type in the `/events` default set. v31 adds the
 player's view direction (`vp` / `vya`, raw `angle16` pitch/yaw) and splits
 the opt-in view-layer field codes (`view` / `hgt` / `lq`); v32 adds derived
 velocity (`vx` / `vy` / `vz`, units/sec) behind the `vel` code. v33 stores

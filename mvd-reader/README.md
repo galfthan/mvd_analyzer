@@ -82,6 +82,7 @@ The concrete event list, in stable order:
 | `BackpackDropHintEvent` | KTX `//ktx drop` stuffcmd: `(BackpackEnt, ItemFlags, PlayerEnt)` for RL/LG drops only |
 | `ItemPickupHintEvent` | KTX `//ktx took` stuffcmd: `(ItemEnt, RespawnSec, PlayerEnt)` — authoritative pickup attribution for every MH / armor / weapon / powerup touch |
 | `BackpackPickupHintEvent` | KTX `//ktx bp` stuffcmd: `(BackpackEnt, PlayerEnt)` — symmetric to `//ktx drop`, fires only for RL/LG packs |
+| `DemoMarkEvent` | KTX `//demomark[ <args>]` stufftext: `(PlayerSlot, Label)` — player-inserted bookmark. Slot is the dem_single block target (the only attribution channel), -1 if not slot-addressed; `Label` is the optional HoonyMode argument tail. Fires even out of match; not deduped |
 | `ItemPickupPrintEvent` | Per-client `svc_print` "You got the X" / "You receive N health" — covers ammo boxes and H15/H25 that `//ktx took` misses. **Subject to per-client `msg` cvar filter; frequently absent in competitive demos.** |
 | `BackpackPickupPrintEvent` | Per-client `svc_print` "You get " backpack opener — covers all backpack classes, including the SSG/NG/GL packs that `//ktx bp` skips. Same server-side-filter caveat as `ItemPickupPrintEvent`. |
 | `DemoStartTimestampEvent` | mvdhidden `0x000B`: wall-clock (Unix epoch ms, ULEB128) at demo open — anchor for syncing the demo to real time |

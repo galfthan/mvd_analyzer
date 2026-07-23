@@ -742,7 +742,7 @@ package result
 //     unknown query keys/enum values; `los_unavailable` 422 (no-BSP /los, never
 //     persisted/latched); `server_hostname` in search rows; `/artifacts`
 //     echoing `timeUnit:"ms"`.
-const CurrentSchemaVersion = 57
+const CurrentSchemaVersion = 58
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

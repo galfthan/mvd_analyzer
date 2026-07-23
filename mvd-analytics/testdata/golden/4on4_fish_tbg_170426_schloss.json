@@ -90806,7 +90806,7 @@
       }
     ]
   },
-  "schemaVersion": 57,
+  "schemaVersion": 58,
   "shots": {
     "byPlayer": [
       {
@@ -222171,6 +222171,36 @@
         "player": "biggz",
         "team": "'tbg",
         "time": 1199877
+      }
+    ],
+    "demoMarkers": [
+      {
+        "playerName": ".N3ophyt3.",
+        "playerSlot": 7,
+        "playerUserID": 13,
+        "team": "'tbg",
+        "time": 407784
+      },
+      {
+        "playerName": ".N3ophyt3.",
+        "playerSlot": 7,
+        "playerUserID": 13,
+        "team": "'tbg",
+        "time": 455876
+      },
+      {
+        "playerName": ".N3ophyt3.",
+        "playerSlot": 7,
+        "playerUserID": 13,
+        "team": "'tbg",
+        "time": 807413
+      },
+      {
+        "playerName": ".N3ophyt3.",
+        "playerSlot": 7,
+        "playerUserID": 13,
+        "team": "'tbg",
+        "time": 1118668
       }
     ],
     "fragEvents": [
