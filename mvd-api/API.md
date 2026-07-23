@@ -404,6 +404,28 @@ key. `Access-Control-Allow-Origin: *` and a credentialed `Authorization`
 header coexist because the key travels as a plain header, not a cookie (the
 CORS credentials mode that `*` forbids applies to cookies, not bearer tokens).
 
+### 2.7 API versioning
+
+Two version numbers move independently, and they mean different things:
+
+- **The `/v1` path prefix is the compatibility contract.** It is bumped
+  only for a *breaking* change — a field removed or renamed, an enum value
+  withdrawn, a type changed incompatibly, a default behaviour altered. As
+  long as you stay on `/v1`, existing integrations keep working.
+- **`schemaVersion` (the ETag `-v<n>` suffix, `X-Schema-Version`, and the
+  OpenAPI `info.version`) is a regeneration counter.** It ticks on *every*
+  observable change to the analysis output, including purely **additive**
+  ones — a new field, a new event type, a new enum value. It keys caches
+  and ETags, so bumping it invalidates stale client caches automatically; a
+  schema-version increase is **not** a signal that anything broke.
+
+Within `/v1`, clients must **ignore unknown fields and unknown enum
+values** so that additive changes (which only raise `schemaVersion`) never
+require a client update. Pin behaviour to `/v1`, treat `schemaVersion` as a
+cache key, and let new fields/enum members flow through unread until you
+choose to consume them. (For example, schema v58 added the `demomark`
+event type to `/events` — a no-`types` caller simply began seeing new rows.)
+
 ---
 
 ## 3. Choosing the right endpoint

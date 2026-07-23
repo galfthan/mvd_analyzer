@@ -47,7 +47,7 @@ type TaggedEvent struct {
 // high-frequency change events that drown the discrete-event story).
 var defaultEventTypes = []string{
 	"frag", "powerup", "streak", "spawn", "death", "weapon", "item", "chat",
-	"pickup",
+	"pickup", "demomark",
 }
 
 // KnownEventTypes is every event type Events recognises: the default
@@ -58,7 +58,7 @@ var defaultEventTypes = []string{
 // drift-pinned to this slice.
 var KnownEventTypes = []string{
 	"frag", "powerup", "streak", "spawn", "death", "weapon", "item", "chat",
-	"pickup", "damage", "telefrag", "stomp", "health", "armor", "loc",
+	"pickup", "demomark", "damage", "telefrag", "stomp", "health", "armor", "loc",
 }
 
 // Events returns a time-ordered list of events matching the filter.
@@ -163,6 +163,24 @@ func Events(r *result.Result, filter EventsFilter) (*EventsView, error) {
 			}
 			events = append(events, TaggedEvent{
 				T: ts, Type: "streak", Player: fs.PlayerName, Detail: detail,
+			})
+		}
+	}
+	if want["demomark"] && r.TimelineAnalysis != nil {
+		for _, dm := range r.TimelineAnalysis.DemoMarkers {
+			ts := dm.Time
+			if !inWindow(ts, filter.StartTime, end) {
+				continue
+			}
+			if !pf.accepts(dm.PlayerName) {
+				continue
+			}
+			detail := map[string]any{"team": dm.Team}
+			if dm.Label != "" {
+				detail["label"] = dm.Label
+			}
+			events = append(events, TaggedEvent{
+				T: ts, Type: "demomark", Player: dm.PlayerName, Detail: detail,
 			})
 		}
 	}

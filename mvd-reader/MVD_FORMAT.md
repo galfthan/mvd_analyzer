@@ -2666,7 +2666,7 @@ Offset  Size  Field
 1       var   command (null-terminated string)
 ```
 
-The server is pushing a console command into the client. There are three classes of stufftext you'll see in MVDs and they're all worth surfacing as parser events:
+The server is pushing a console command into the client. There are four classes of stufftext you'll see in MVDs and they're all worth surfacing as parser events:
 
 1. **`fullserverinfo "\key1\value1\key2\value2\..."`** — the bulk cvar dump sent at connection time. This is the **single richest source of server metadata** in the demo: every CVAR_SERVERINFO cvar that mvdsv exposes plus every key KTX has mirrored via `localcmd "serverinfo …"`. See [Demo Metadata Sources](#demo-metadata-sources) below for the full key list.
 2. **`//ktx …` directives** — KTX-specific client hints prefixed with `//` so older clients silently drop them. Emitted via `stuffcmd_flags(..., STUFFCMD_DEMOONLY, ...)` so they only appear in the recorded MVD, not in live gameplay. The common ones:
@@ -2694,9 +2694,18 @@ The server is pushing a console command into the client. There are three classes
     Net result on a competitive MVD: there is **no authoritative wire signal** for non-RL/LG backpack pickups. The demo still carries indirect evidence — the picker's STAT_ITEMS bit flips on for the gained weapon, and STAT_SHELLS / STAT_NAILS / STAT_ROCKETS / STAT_CELLS all jump to reflect the absorbed ammo, both arriving as ordinary `svc_updatestat` per-slot — so a heuristic analyzer could correlate stat deltas with nearby `BackpackDropHintEvent` edicts to attribute these pickups by proximity and timing. In **weapon-stay modes** (`deathmatch 2/3/5`, coop) mvd-analytics ships exactly that class of recovery: `weapon_pickups.go` synthesizes kind-level pickups from STAT_ITEMS bit flips (a flip with no weapon pad in touch range surfaces as `source: "unknown"` — almost always one of these packs). In non-weapon-stay modes no analyzer ships the correlation logic today; `result.Backpacks` and hint-driven `result.WeaponPickups` entries consequently cover only the RL/LG domain there.
 
     The `<ent>` number is a stable server edict index for the match. `<player_ent>` is `slot + 1` (edict 0 is world, edicts 1..maxclients are the player slots).
-3. **`play sound/file.wav`** style commands — countdown beeps, intermission music. Safe to ignore.
+3. **`//demomark`** — a user-inserted demo bookmark. Any player (or spectator) can type `/demomark` in-game; the KTX command handler (`ktx/src/commands.c:295`, registered at `commands.c:1027`) responds with `stuffcmd(self, "//demomark\n")`. Because `stuffcmd` to a single client is demo-recorded as a **`dem_single` block targeted at that client's slot** (`mvdsv/src/pr_cmds.c:840-848`, `MVDWrite_Begin(dem_single, cl - svs.clients, …)`), the marker's author is identified by the demo block's target slot, *not* by anything in the payload — the plain directive carries no arguments. ezquake's `demo_jump_mark` console command seeks playback to the next marker by exact-matching the string `"//demomark\n"` (`ezquake-source/src/cl_parse.c:3122-3130`, `cl_demo.c:4956`); that is the feature's entire raison d'être.
 
-A single-pass parser should emit all three as a `StuffTextEvent` and let the consuming analyzer decide which prefix to react to.
+    Wire-level details worth knowing:
+
+    - **The stufftext fires unconditionally** — `DemoMark()` sends it *before* checking `match_in_progress`, so warmup / post-match marks are in the demo too. The server-side bookkeeping that follows (an array capped at 10 markers, a 5-second debounce between entries, `commands.c:297-324`) gates only the end-of-match *listing*, not the wire signal. A parser must not assume markers are in-match, rate-limited, or capped.
+    - **In-match marks are echoed** with a `G_sprint(self, PRINT_HIGH, "Added demo marker: \220m:ss\221\n")` in the *same* `dem_single` block, where `m:ss` is match-relative time. Out-of-match marks get no echo.
+    - **Hoonymode round markers**: at the start of every HoonyMode round KTX stuffs `//demomark 0 round-%2d\n` to one arbitrary player (`ktx/src/match.c:428`) — the only variant that carries arguments. ezquake's exact-match seek ignores it; a parser should capture the argument tail as a label.
+    - **Frogbot rocket-jump marks**: with the frogbot option `FB_OPTION_DEMOMARK_ROCKETJUMPS` enabled, bots call `DemoMark()` on every rocket jump (`ktx/src/bot_botjump.c:358`), so bot demos can be dense with markers.
+    - **End-of-match listing**: if any in-match markers were recorded, KTX broadcasts a "Demo markers" table (`ktx/src/match.c:234-258`) listing `Time: m:ss (name)` per marker. The heading and `Time` label are red-text (bit 7 set on every char), so naive ASCII grep misses it. The stufftexts are the authoritative signal; the listing is presentation (and is capped/debounced as above).
+4. **`play sound/file.wav`** style commands — countdown beeps, intermission music. Safe to ignore.
+
+A single-pass parser should emit all four as a `StuffTextEvent` and let the consuming analyzer decide which prefix to react to. `//demomark` is the one class where the `StuffTextEvent` alone is insufficient — attribution lives in the demo block's target slot, which the parser must capture at demux time.
 
 ### svc_setangle (10)
 

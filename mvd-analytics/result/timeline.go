@@ -15,6 +15,7 @@ type TimelineAnalysisResult struct {
 	KillEvents    []TimelineKillEvent  `json:"killEvents,omitempty"`    // Per-player enemy kills for the frags/deaths drill-down
 	PowerupEvents []PowerupEvent       `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
 	FragStreaks   []FragStreakEvent    `json:"fragStreaks,omitempty"`   // Top longest frag streaks for Key Moments
+	DemoMarkers   []DemoMarkerEvent    `json:"demoMarkers,omitempty"`   // Player-inserted `/demomark` bookmarks for Key Moments
 	Airgibs       []AirgibEvent        `json:"airgibs,omitempty"`       // Top airborne rocket hits (airgibs) for Key Moments
 	LocationData  []MapLocation        `json:"locationData,omitempty"`  // Location points from .loc file for map view
 	LocTable      []string             `json:"locTable,omitempty"`      // Interned loc names; index 0 is "" sentinel.
@@ -40,7 +41,7 @@ type TimelineAnalysisResult struct {
 // lethality to the airborne hit when a later rocket landed the kill; it is
 // a highlight heuristic, not an exact killing-blow flag.
 type AirgibEvent struct {
-	Time           int32   `json:"time"`                        // hit time, match-relative ms
+	Time           int32   `json:"time"`                     // hit time, match-relative ms
 	Attacker       string  `json:"attacker"`                 // resolved name of the rocketeer
 	AttackerTeam   string  `json:"attackerTeam,omitempty"`   //
 	AttackerUserID int     `json:"attackerUserID,omitempty"` // for Hub viewer links (shooter perspective)
@@ -194,7 +195,7 @@ type TimelineKillEvent struct {
 // PowerupEvent represents a powerup pickup event for Key Moments.
 // Time/EndTime/Duration are integer milliseconds (schema v8).
 type PowerupEvent struct {
-	Time         int32  `json:"time"`            // Demo time when picked up (ms)
+	Time         int32  `json:"time"`         // Demo time when picked up (ms)
 	EndTime      int32  `json:"endTime"`      // Demo time when lost/expired (ms)
 	PlayerName   string `json:"playerName"`   // Player name
 	PlayerSlot   int    `json:"playerSlot"`   // Player slot in demo
@@ -205,10 +206,27 @@ type PowerupEvent struct {
 	Frags        int    `json:"frags"`        // Kills during powerup run
 }
 
+// DemoMarkerEvent is one player-inserted `/demomark` bookmark (KTX
+// stufftext `//demomark`), surfaced in Key Moments (schema v58). The
+// marking player is the demo block target — the only attribution channel
+// — so PlayerSlot / PlayerName / Team / PlayerUserID are resolved from
+// that slot at the mark's time, and are empty when the mark was not
+// slot-addressed (PlayerSlot -1). Time is integer milliseconds; markers
+// inserted during warmup keep a negative match-relative time (surfaced
+// un-gated, matching the surface-authoritative-data rule).
+type DemoMarkerEvent struct {
+	Time         int32  `json:"time"`            // match-relative ms (negative = warmup mark)
+	PlayerName   string `json:"playerName"`      // resolved name of the marking player
+	PlayerSlot   int    `json:"playerSlot"`      // marking player's wire slot; -1 if not slot-addressed
+	PlayerUserID int    `json:"playerUserID"`    // for Hub viewer track param
+	Team         string `json:"team"`            // marking player's team
+	Label        string `json:"label,omitempty"` // optional argument tail (e.g. HoonyMode "0 round-07")
+}
+
 // FragStreakEvent represents a frag streak (spawn-to-death run) for Key Moments.
 // Time/EndTime/Duration are integer milliseconds (schema v8).
 type FragStreakEvent struct {
-	Time         int32  `json:"time"`            // Demo time when player spawned (ms)
+	Time         int32  `json:"time"`         // Demo time when player spawned (ms)
 	EndTime      int32  `json:"endTime"`      // Demo time when player died (or match ended) (ms)
 	PlayerName   string `json:"playerName"`   // Player name
 	PlayerUserID int    `json:"playerUserID"` // Player UserID for Hub viewer track param

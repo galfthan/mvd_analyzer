@@ -59,6 +59,7 @@ const (
 	EventProjectileDespawn
 	EventBeam
 	EventNails
+	EventDemoMark
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -397,6 +398,17 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 				return err
 			}
 			if err := p.tryEmitKtxHints(s, msg.TimeMs); err != nil {
+				return err
+			}
+			// A `//demomark` stuffcmd is attributed by the demo block's
+			// target: mvdsv writes it as a dem_single addressed at the
+			// marking player's slot. Non-slot-addressed blocks carry no
+			// attribution, so pass -1 there.
+			demoMarkSlot := -1
+			if msg.Header.MessageType == mvd.DemSingle {
+				demoMarkSlot = msg.Header.PlayerNum
+			}
+			if err := p.tryEmitDemoMark(s, demoMarkSlot, msg.TimeMs); err != nil {
 				return err
 			}
 

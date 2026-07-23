@@ -186,6 +186,7 @@ type (
 	TimelinePause          = result.TimelinePause
 	PowerupEvent           = result.PowerupEvent
 	FragStreakEvent        = result.FragStreakEvent
+	DemoMarkerEvent        = result.DemoMarkerEvent
 	MetadataResult         = result.MetadataResult
 	MatchSettings          = result.MatchSettings
 	LocGraphResult         = result.LocGraphResult

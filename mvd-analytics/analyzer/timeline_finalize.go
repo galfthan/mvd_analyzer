@@ -286,6 +286,9 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 	// Detect top 5 longest frag streaks for Key Moments
 	fragStreaks := a.detectFragStreaks(10, names, playerUserIDsByName)
 
+	// Resolve player-inserted `/demomark` bookmarks for Key Moments
+	demoMarkers := a.buildDemoMarkers()
+
 	// Build result.TimelineAnalysis (with regions but no BucketStates
 	// yet) and then result.Streams — both are needed by
 	// regionControlPost (which calls view.RegionControl) to fill in
@@ -296,6 +299,7 @@ func (a *TimelineAnalyzer) Finalize(result *Result) error {
 		KillEvents:    killEvents,
 		PowerupEvents: powerupEvents,
 		FragStreaks:   fragStreaks,
+		DemoMarkers:   demoMarkers,
 		LocationData:  locationData,
 		LocTable:      locTable,
 		PlayerUserIDs: playerUserIDsByName,
@@ -497,6 +501,12 @@ func (a *TimelineAnalyzer) rebaseToMatch(result *Result, matchStartMs int32) {
 		for i := range ta.FragStreaks {
 			ta.FragStreaks[i].Time -= matchStartMs
 			ta.FragStreaks[i].EndTime -= matchStartMs
+		}
+		// Demo markers rebase like every other timeline event. A mark
+		// inserted during warmup goes negative here; keep it (the
+		// surface-authoritative-data rule) — the consumer decides.
+		for i := range ta.DemoMarkers {
+			ta.DemoMarkers[i].Time -= matchStartMs
 		}
 	}
 

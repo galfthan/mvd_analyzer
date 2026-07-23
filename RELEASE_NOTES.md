@@ -5,6 +5,31 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-23 (demo-marker) — schema v58, additive
+
+Surface **demo markers** — the bookmarks players insert during a game
+with KTX's `/demomark` command — through the whole pipeline.
+
+- **Layer 1.** New `DemoMarkEvent` emitted from the `//demomark`
+  stufftext alongside the generic `StuffTextEvent`. Attribution comes
+  only from the demo block target (the marking player's slot), matching
+  a token boundary so `//demomarkX` is not a marker; the optional
+  argument tail (HoonyMode `//demomark 0 round-07`) is captured as a
+  label. Un-gated — markers inserted out of match are surfaced too.
+- **Layer 2.** New `timelineAnalysis.demoMarkers[]` (`[]DemoMarkerEvent`):
+  match-relative `time` (negative for a warmup mark), the marking
+  player's resolved `playerName`/`playerSlot`/`playerUserID`/`team`
+  (empty with `playerSlot: -1` when the block was not slot-addressed),
+  and the optional `label`. Team labels flow through the born-correct
+  duel rewrite like the sibling event lists.
+- **API.** New `demomark` event type on `/v1/demos/{id}/events`, added to
+  the **default** type set — a caller that omits `types` begins seeing
+  the new rows. `info.version`/`schemaVersion` → 58.
+- Additive: no existing field or behaviour changed. Clients on `/v1`
+  that ignore unknown fields and enum values are unaffected. See
+  [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) v58 and the new
+  API-versioning note in [mvd-api/API.md §2.7](mvd-api/API.md).
+
 ## 2026-07-22 (clean-out-seconds-from-pipeline) — internal refactor, no schema change
 
 Integer-milliseconds end to end through mvd-reader → mvd-analytics.

@@ -103,12 +103,17 @@ per-sample `team` flag, and the LG ramp rescores its bars; **All** (the
 default) matches the server's authoritative numbers (KTX counts team and
 self hits too). Duels hide the Team option; Self (rl/gl self-splash —
 rocket jumps) has no crosshair samples, tables only.
-The **Key Moments** tab has three tables: powerup runs, longest frag
-streaks, and a full-width **Airborne Rocket Gibs** table — enemy rocket
-hits on airborne victims (`timelineAnalysis.airgibs`), sortable by any
-column and defaulting to height-above-shooter descending (the vertical
-gap the rocket climbed). Its rows are empty unless the map's BSP is
-provisioned (height needs the clip hull; see `PositionTrack.h`).
+The **Key Moments** tab has four tables: powerup runs, longest frag
+streaks, a **Demo Markers** table, and a full-width **Airborne Rocket
+Gibs** table — enemy rocket hits on airborne victims
+(`timelineAnalysis.airgibs`), sortable by any column and defaulting to
+height-above-shooter descending (the vertical gap the rocket climbed).
+Its rows are empty unless the map's BSP is provisioned (height needs the
+clip hull; see `PositionTrack.h`). The **Demo Markers** table lists the
+user-inserted `/demomark` bookmarks (`timelineAnalysis.demoMarkers`) —
+Time, Player, Team, Note, and a Hub Watch link — so a viewer can jump
+straight to the moments players flagged in-game; it is routinely empty
+since demos rarely carry markers, and warmup marks show a negative time.
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
