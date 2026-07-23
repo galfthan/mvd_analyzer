@@ -1578,6 +1578,17 @@ when the fold ran; `0` is a real nullified-stomp value), and a stomp
 adds `damage` when its raw fold diverged from `bounded`. Mirrors the
 `telefrags[]`/`stomps[]` entries in the damage section.
 
+The default set also includes `airgib` and `pause` (view-layer change,
+no schema bump — they surface existing Result data on the MCP-reachable
+event stream). An `airgib` event is a direct enemy rocket hit on an
+airborne victim (from `timelineAnalysis.airgibs`): `player` is the
+attacker and `detail{ victim, height, damage, attackerTeam?, victimTeam?,
+heightAboveAttacker?, loc?, lethal? }` (`lethal` omitted when false). A
+`pause` event is a game-clock freeze segment (from
+`streams.global.pauses`): it has **no** `player` — so a `players=` filter
+excludes it — and carries `detail{ durationMs }` (the real wall-clock ms
+the pause consumed).
+
 #### StreamSlice
 
 ```go

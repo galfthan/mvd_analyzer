@@ -296,6 +296,135 @@ func TestEventsPickupPlayerAndWindowFilter(t *testing.T) {
 	}
 }
 
+func TestEventsAirgibDefault(t *testing.T) {
+	r := &result.Result{
+		Streams: &result.Streams{Global: result.GlobalStream{MatchStart: 0, MatchEnd: 60000}},
+		TimelineAnalysis: &result.TimelineAnalysisResult{
+			Airgibs: []result.AirgibEvent{
+				{
+					Time: 5000, Attacker: "shooter", AttackerTeam: "red",
+					Victim: "flyer", VictimTeam: "blue", Height: 128.5,
+					HeightAboveAttacker: 90.0, Loc: "mid", Damage: 110, Lethal: true,
+				},
+				// A dead-level, non-lethal hit: heightAboveAttacker 0 and
+				// lethal false are omitted from detail.
+				{Time: 40000, Attacker: "shooter2", Victim: "flyer2", Height: 100, Damage: 55},
+			},
+		},
+	}
+	v, err := Events(r, EventsFilter{})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	var airgibs []TaggedEvent
+	for _, e := range v.Events {
+		if e.Type == "airgib" {
+			airgibs = append(airgibs, e)
+		}
+	}
+	if len(airgibs) != 2 {
+		t.Fatalf("airgib events = %d, want 2 (in default set): %+v", len(airgibs), airgibs)
+	}
+	a := airgibs[0]
+	if a.T != 5000 || a.Player != "shooter" {
+		t.Fatalf("airgib[0] = %+v", a)
+	}
+	for k, want := range map[string]any{
+		"victim": "flyer", "attackerTeam": "red", "victimTeam": "blue",
+		"height": float32(128.5), "heightAboveAttacker": float32(90.0),
+		"loc": "mid", "damage": 110, "lethal": true,
+	} {
+		if got := a.Detail[k]; got != want {
+			t.Errorf("airgib[0] detail[%s] = %v (%T), want %v (%T)", k, got, got, want, want)
+		}
+	}
+	// The dead-level hit omits heightAboveAttacker and lethal.
+	b := airgibs[1]
+	if _, ok := b.Detail["heightAboveAttacker"]; ok {
+		t.Errorf("airgib[1] should omit zero heightAboveAttacker: %+v", b.Detail)
+	}
+	if _, ok := b.Detail["lethal"]; ok {
+		t.Errorf("airgib[1] should omit false lethal: %+v", b.Detail)
+	}
+	if _, ok := b.Detail["attackerTeam"]; ok {
+		t.Errorf("airgib[1] should omit empty attackerTeam: %+v", b.Detail)
+	}
+
+	// Player filter matches the attacker.
+	fv, err := Events(r, EventsFilter{Types: []string{"airgib"}, Players: []string{"shooter"}})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	if len(fv.Events) != 1 || fv.Events[0].Player != "shooter" {
+		t.Fatalf("attacker-filtered airgibs = %+v, want shooter's only", fv.Events)
+	}
+	// Time window drops the late hit.
+	wv, err := Events(r, EventsFilter{Types: []string{"airgib"}, EndTime: 10000})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	if len(wv.Events) != 1 || wv.Events[0].T != 5000 {
+		t.Fatalf("windowed airgibs = %+v, want the t=5000 hit only", wv.Events)
+	}
+}
+
+func TestEventsPauseDefault(t *testing.T) {
+	r := &result.Result{
+		Streams: &result.Streams{
+			Global: result.GlobalStream{
+				MatchStart: 0, MatchEnd: 60000,
+				Pauses: []result.TimelinePause{
+					{AtMs: 5000, DurationMs: 12000},
+					{AtMs: 40000, DurationMs: 3000},
+				},
+			},
+		},
+	}
+	v, err := Events(r, EventsFilter{})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	var pauses []TaggedEvent
+	for _, e := range v.Events {
+		if e.Type == "pause" {
+			pauses = append(pauses, e)
+		}
+	}
+	if len(pauses) != 2 {
+		t.Fatalf("pause events = %d, want 2 (in default set): %+v", len(pauses), pauses)
+	}
+	p := pauses[0]
+	if p.T != 5000 {
+		t.Fatalf("pause[0].T = %d, want 5000", p.T)
+	}
+	if p.Player != "" {
+		t.Errorf("pause events carry no player, got %q", p.Player)
+	}
+	if got := p.Detail["durationMs"]; got != int32(12000) {
+		t.Errorf("pause[0] detail[durationMs] = %v (%T), want 12000 (int32)", got, got)
+	}
+
+	// A players= filter excludes playerless pause events.
+	fv, err := Events(r, EventsFilter{Players: []string{"someone"}})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	for _, e := range fv.Events {
+		if e.Type == "pause" {
+			t.Fatalf("players filter should exclude playerless pause events, got %+v", e)
+		}
+	}
+
+	// Time window drops the late pause.
+	wv, err := Events(r, EventsFilter{Types: []string{"pause"}, EndTime: 10000})
+	if err != nil {
+		t.Fatalf("Events: %v", err)
+	}
+	if len(wv.Events) != 1 || wv.Events[0].T != 5000 {
+		t.Fatalf("windowed pauses = %+v, want the t=5000 pause only", wv.Events)
+	}
+}
+
 func TestEventsSpawnLoc(t *testing.T) {
 	r := &result.Result{
 		TimelineAnalysis: &result.TimelineAnalysisResult{

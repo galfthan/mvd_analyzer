@@ -837,10 +837,18 @@ paths:
         Discrete match events (frags, spawns, pickups, powerups, streaks,
         chat, demo markers, …) in one time-ordered list. `detail` is
         polymorphic per event type. Omit `types` for the default set
-        (includes `pickup` and `demomark`). `demomark` events are the
-        bookmarks players insert in-game with `/demomark`; a warmup mark
-        carries a negative `time`, and a mark inserted by a spectator
-        carries `detail.spectator: true`.
+        (includes `pickup`, `demomark`, `airgib`, and `pause`). `demomark`
+        events are the bookmarks players insert in-game with `/demomark`; a
+        warmup mark carries a negative `time`, and a mark inserted by a
+        spectator carries `detail.spectator: true`. `airgib` events are
+        direct enemy rocket hits landed on an airborne victim (the Key
+        Moments highlight list): `player` is the attacker (rocketeer) and
+        `detail` carries `victim`, `attackerTeam?`/`victimTeam?`, `height`
+        (victim feet above the floor at the hit), `heightAboveAttacker?`,
+        `loc?`, `damage` (raw), and `lethal: true` when the hit killed.
+        `pause` events mark a game-clock freeze segment and carry NO
+        `player` (so a `players=` filter excludes them); `detail.durationMs`
+        is the real wall-clock ms the pause consumed.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/From"
@@ -1516,6 +1524,8 @@ components:
             - chat
             - pickup
             - demomark
+            - airgib
+            - pause
             - damage
             - telefrag
             - stomp
@@ -5203,9 +5213,9 @@ components:
         /events body — a flat, time-ordered event list. detail keys vary
         by event type (the well-known keys are typed below and validated
         when present); detail is omitted for spawn/death without a loc
-        sample. Event types: armor, chat, damage, death, frag, health,
-        item, loc, pickup, powerup, spawn, stomp, streak, telefrag,
-        weapon.
+        sample. Event types: airgib, armor, chat, damage, death, demomark,
+        frag, health, item, loc, pause, pickup, powerup, spawn, stomp,
+        streak, telefrag, weapon.
       required: [timeUnit, events]
       additionalProperties: false
       properties:
@@ -5259,6 +5269,12 @@ components:
                   li: { type: integer, description: raw LocTable index (loc=index mode) }
                   text: { type: string, description: chat message }
                   clean: { type: string, description: chat message, color codes stripped }
+                  attackerTeam: { type: string, description: "airgib attacker (rocketeer) team." }
+                  victimTeam: { type: string, description: "airgib victim team." }
+                  height: { type: number, description: "airgib victim feet above the floor at the hit (units)." }
+                  heightAboveAttacker: { type: number, description: "airgib victim origin minus shooter origin at the hit (units; negative = victim below shooter); omitted when 0." }
+                  lethal: { type: boolean, description: "airgib hit killed the victim (matching rocket frag near the hit)." }
+                  durationMs: { type: integer, description: "pause real wall-clock ms consumed (pause events)." }
     BucketsRow:
       additionalProperties: false
       properties:

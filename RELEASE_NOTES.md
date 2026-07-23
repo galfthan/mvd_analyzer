@@ -5,6 +5,32 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-23 (add-airgib-pause-events) — view-layer change, no schema bump
+
+Put **airgibs and pauses on the default event stream**. Both signals
+already existed in the Result — airgibs in `timelineAnalysis.airgibs`
+(plus the REST-only `/v1/demos/{id}/airgibs` endpoint) and pauses in
+`streams.global.pauses` — but neither was reachable from the MCP
+surface (only the curated tools proxy REST endpoints, and `getEvents`
+didn't emit them). This wires both into `/v1/demos/{id}/events`, which
+`getEvents` proxies, closing the MCP-discoverability gap.
+
+- **`airgib` event** — a direct enemy rocket hit on an airborne victim
+  (the Key Moments highlight). `player` is the attacker; `detail`
+  carries `victim`, `height`, `damage`, and the optional `attackerTeam`
+  / `victimTeam` / `heightAboveAttacker` / `loc` / `lethal`.
+- **`pause` event** — a game-clock freeze segment. It has **no**
+  `player` (so a `players=` filter excludes it) and carries
+  `detail.durationMs`, the real wall-clock ms the pause consumed.
+- Both join the `/events` **default** type set, so a caller that omits
+  `types` begins seeing the new rows.
+- **New drift test** (`mvd-api/mcp_reachability_test.go`): every
+  demo-scoped REST GET view endpoint must be reachable from the MCP
+  surface — via a curated tool, an event type, or a servable artifact —
+  so a future endpoint can't ship MCP-invisible the way `/airgibs` did.
+- View-layer only: no stored struct or schema version changed. Clients
+  on `/v1` that ignore unknown enum values are unaffected.
+
 ## 2026-07-23 (demo-marker) — schema v58, additive
 
 Surface **demo markers** — the bookmarks players insert during a game

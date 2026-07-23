@@ -551,7 +551,11 @@ Moments — and v29–v30 refine its ranking and uncap the list. Schema v58
 adds `timelineAnalysis.demoMarkers` — the bookmarks players insert in-game
 with KTX `/demomark`, attributed to the marking player's slot with an
 optional label and a negative `time` for a warmup mark — and a matching
-`demomark` type in the `/events` default set. v31 adds the
+`demomark` type in the `/events` default set. The `/events` default set
+also carries `airgib` (from `timelineAnalysis.airgibs`) and `pause`
+(from `streams.global.pauses`, playerless, `detail.durationMs`) — a
+view-layer addition (no schema bump) that puts both on the MCP surface.
+v31 adds the
 player's view direction (`vp` / `vya`, raw `angle16` pitch/yaw) and splits
 the opt-in view-layer field codes (`view` / `hgt` / `lq`); v32 adds derived
 velocity (`vx` / `vy` / `vz`, units/sec) behind the `vel` code. v33 stores
