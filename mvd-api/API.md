@@ -171,8 +171,17 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
 - **`weapons`** — comma-separated weapon tokens (`rl,lg,…`) on `/frags`,
   `/damage`, `/backpacks`, `/weapon-pickups`. A CSV set on every one of
   them since schema v36 (`/backpacks` previously took a single value).
-  The pre-16.2 singular spelling `weapon` remains an accepted legacy
-  alias; `weapons` wins when both are present.
+  Each endpoint validates the tokens against its **own closed vocabulary**
+  and rejects an unknown token with `400 invalid_param` (naming the valid
+  set) rather than matching nothing: core codes are `rl,lg,gl,ssg,sng,ng,
+  sg,axe`; `/damage` also takes the pseudo-codes `tele`/`stomp` (positional
+  kills) plus death-type/environmental codes (`explobox,squish,lava,slime,
+  drown,fall,trigger,suicide,unknown`); `/frags` also takes the obituary
+  cause codes (`hook,rail,squish,fall,lava,slime,water,world,tele,stomp,
+  unknown,suicide,teamkill`); `/backpacks` accepts only `rl,lg`;
+  `/weapon-pickups` only `ssg,ng,sng,gl,rl,lg`. The pre-16.2 singular
+  spelling `weapon` remains an accepted legacy alias; `weapons` wins when
+  both are present.
 - **`reducers`** (`/buckets`) — comma-separated `field=name` pairs, e.g.
   `reducers=h=min,a=last`. Names come from the reducer registry in
   RESULT_SCHEMA.md.
@@ -289,7 +298,7 @@ Non-2xx responses use a stable envelope:
 | HTTP | `code` | Meaning |
 |---|---|---|
 | 400 | `invalid_demo_id` | malformed `{id}` |
-| 400 | `invalid_param` | malformed **or rejected** query parameter — bad number, malformed `reducers` pair, unknown `loc`/`layout` token, unknown `fields` code, unknown reducer name, or an unknown enum value (e.g. `/events`/`/chat` `types`) |
+| 400 | `invalid_param` | malformed **or rejected** query parameter — bad number, malformed `reducers` pair, unknown `loc`/`layout` token, unknown `fields` code, unknown reducer name, an unknown enum value (e.g. `/events`/`/chat` `types`), or a `weapons` token outside the endpoint's closed vocabulary |
 | 400 | `unknown_param` | an unrecognised query parameter **name** — the message names the offending key and the endpoint's accepted keys. The global `label` traffic-source tag is accepted everywhere |
 | 400 | `missing_param` | required param absent (e.g. `time` on `/state-at`) |
 | 401 | `unauthorized` | **auth mode only** — missing / invalid / revoked API key on a protected route. Carries `WWW-Authenticate: Bearer`. The body is deliberately generic and never says whether the key was absent vs revoked (see §2.5). |

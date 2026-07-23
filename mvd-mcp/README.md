@@ -202,7 +202,7 @@ getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
 getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
 getLocTrails, getLocGraph) and carries match-position time echoes a
 top-level constant `timeUnit` (`"ms"`) — every time value in the API is
-int32 ms (schema v57, pure-ms model). getLocGraph is on that list because
+int32 ms (pure-ms model). getLocGraph is on that list because
 its node weights are int32-ms durations, and getArtifact responses carry
 the echo for every time-bearing section too. The exceptions:
 getDemoInfo is the KTX island (mixed KTX-native units), and
@@ -501,7 +501,7 @@ Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
 | `startTime` | `integer` | match start | Match-relative milliseconds |
 | `endTime`   | `integer` | match end | Match-relative milliseconds |
 | `players`   | `string[]` | all | — |
-| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` |
+| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, pause` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` |
 
 Output: `view.EventsView` —
 `{ events: [{ time, type, player, detail }, …] }`. Per-type `detail`

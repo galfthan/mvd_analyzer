@@ -220,8 +220,8 @@ func (q query) csv(key string, vals []string) {
 	}
 }
 
-// ms encodes a match-relative time in integer milliseconds (schema v57
-// pure-ms model); 0 means "unset" (as every REST from/to defaults to the
+// ms encodes a match-relative time in integer milliseconds (pure-ms
+// model); 0 means "unset" (as every REST from/to defaults to the
 // full window).
 func (q query) ms(key string, t int32) {
 	if t != 0 {

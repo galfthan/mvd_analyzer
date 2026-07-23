@@ -5,6 +5,52 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## 2026-07-23 (tweak-mcp) — audit fixes, view-layer changes, no schema bump
+
+Closes out an external MCP-consumer audit (12 findings). Behaviour
+changes are view-layer only; no stored struct or schema version moved.
+
+- **Region-control stats are no longer sampling artifacts.** `stats`
+  (the match-aggregate percentages + `byPlayer` tallies) is now always
+  computed at the native 50 ms grid, independent of the caller's
+  `windowMs`; `bucketStates` keeps the requested display resolution.
+  Previously a coarse `windowMs` point-sampled positions at bucket
+  starts, so a region could report `empty: 100` across a window in
+  which a fight happened — and the "match aggregate" changed with the
+  display resolution. `windowMs=50` output is byte-identical to before
+  (goldens unchanged).
+- **`weapons=` filters validate against closed vocabularies.**
+  `/frags`, `/damage`, `/backpacks`, `/weapon-pickups` now reject an
+  unknown weapon token with `400 invalid_param` naming the valid set —
+  the same treatment `/events` `types` already got — instead of
+  silently matching nothing. Each vocabulary is pinned to its producing
+  analyzer code (`view.fragWeaponVocab` et al.); RESULT_SCHEMA's frag
+  weapon vocabulary was corrected against the code (`axe` not `ax`,
+  plus the previously undocumented `hook`/`rail`/`stomp`/`unknown`/
+  `suicide` causes).
+- **Filtered `/damage` no longer ships the full-match scoreboard.**
+  The KTX end-of-match cross-check has no per-event provenance, so it
+  cannot be recomputed against a `weapons` or `from`/`to` filter; it is
+  now omitted under those filters (players-only filtering still narrows
+  it as before) instead of riding whole-match totals along a small
+  filtered payload.
+- **MCP tool descriptions caught up with the surface.** The `getEvents`
+  `types` description now lists the full 12-type default set (it had
+  never learned `demomark`/`airgib`/`pause` — the runtime error was the
+  only place the list existed); weapons params list their full
+  vocabularies; the `getRegionControl` description documents the
+  `bucketStates` alphabet and the counts-vs-percentages split in
+  `stats`; the `teamkill` frag token and `searchGames` `limit=0`
+  semantics are documented; the stale "v57" pin is gone from the
+  pure-ms wording.
+- The `artifact_unknown` 404 now points MCP callers at `listArtifacts`
+  (the old hint named only `GET /v1/artifacts`, unreachable over MCP).
+
+Deferred from the audit (tracked, not shipped here): a warming/retry
+response for cold-start analysis timeouts, hub-side `limit=0`
+semantics, recovering the real weapon behind `teamkill` frag rows, and
+a `mapTitle` alongside `map` in overview/search.
+
 ## 2026-07-23 (add-airgib-pause-events) — view-layer change, no schema bump
 
 Put **airgibs and pauses on the default event stream**. Both signals

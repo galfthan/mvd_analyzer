@@ -534,7 +534,11 @@ paths:
         the raw fold differs) on the telefrags[]/stomps[] entries. Per-player
         EWep buckets slice enemy-given damage by what the victim held:
         enemyVsSg/enemyVsMid/enemyVsLg/enemyVsRl/enemyVsBoth, with
-        ewep = lg+rl+both. Filters recompute aggregates like /frags. An unset
+        ewep = lg+rl+both. Filters recompute aggregates like /frags. The
+        `scoreboard` cross-check is a KTX whole-match figure with no per-event
+        provenance, so it CANNOT be recomputed against a `weapons` or `from`/`to`
+        window: it is narrowed by a players-only filter but OMITTED entirely once
+        a weapons or time-window filter is active. An unset
         `dmg` defaults to `bounded` for both the summary and the full log; an
         unfiltered bounded/both SUMMARY sources its per-player bounded figures
         from the exact KTX end-of-match scoreboard when the demo carries
@@ -1105,9 +1109,13 @@ paths:
       tags: [timeline]
       summary: Region-control timeline
       description: >
-        Team control of named map regions over time, windowed by
-        `windowMs` (⚠️ defaults to 50 ms — pass an explicit window). 422
-        `region_control_unavailable` when the map has no region layout.
+        Team control of named map regions over time. `windowMs` (⚠️
+        defaults to 50 ms — pass an explicit window) sets only the
+        `bucketStates` display resolution; the aggregate `stats`
+        (percentages + `byPlayer`) are always computed at the native
+        50 ms grid, independent of `windowMs`, so they don't change with
+        the display window. 422 `region_control_unavailable` when the map
+        has no region layout.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/WindowMs"
@@ -1413,12 +1421,19 @@ components:
       name: weapons
       in: query
       description: >
-        CSV of weapon codes (case-insensitive). Codes: rl, lg, gl, ssg,
+        CSV of weapon codes (case-insensitive). Core codes: rl, lg, gl, ssg,
         sng, ng, sg, axe; on /damage the pseudo-codes tele/stomp select
-        the positional instant kills (which carry no real weapon).
-        /backpacks accepts rl/lg only; /weapon-pickups
-        rl,lg,gl,ssg,sng,ng. The pre-16.2 singular spelling `weapon` is
-        an accepted legacy alias; `weapons` wins when both are present.
+        the positional instant kills (which carry no real weapon). Each
+        endpoint validates against its OWN closed vocabulary and returns 400
+        `invalid_param` (listing the valid set) for an unknown token — no more
+        silent empty result. /frags additionally accepts the obituary
+        environmental / cause codes (hook, rail, squish, fall, lava, slime,
+        water, world, tele, stomp, unknown, suicide, teamkill); /damage the
+        death-type + environmental codes (explobox, squish, lava, slime, drown,
+        fall, trigger, suicide, unknown); /backpacks accepts rl/lg only;
+        /weapon-pickups ssg,ng,sng,gl,rl,lg. The pre-16.2 singular spelling
+        `weapon` is an accepted legacy alias; `weapons` wins when both are
+        present.
       style: form
       explode: false
       schema:
@@ -2976,7 +2991,7 @@ components:
             - "null"
             - array
         scoreboard:
-          description: "Stream-derived totals vs the KTX end-of-match scoreboard (diagnostic only)."
+          description: "Stream-derived totals vs the KTX end-of-match scoreboard (diagnostic only). Whole-match, no per-event provenance: narrowed by a players-only filter, but omitted entirely when a weapons or from/to filter is active."
           additionalProperties: false
           properties:
             byPlayer:
@@ -4211,7 +4226,7 @@ components:
       properties:
         timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         bucketStates:
-          description: "Per-bucket per-region control codes (one ASCII char each)."
+          description: "Per-bucket per-region control codes (one ASCII char each) at the requested windowMs. Each bucket is a point-sample classification: the state of every player's last position at bucket-start."
           additionalProperties:
             type: string
           type: object
@@ -4273,12 +4288,12 @@ components:
             - "null"
             - array
         stats:
-          description: "Per-region match-aggregate control shares."
+          description: "Per-region match-aggregate control shares. Always computed at the native 50 ms resolution, independent of the request's windowMs, so the aggregate is not a sampling artifact of a coarse display window."
           additionalProperties:
             additionalProperties: false
             properties:
               byPlayer:
-                description: "Per-player presence in this region, keyed by player name."
+                description: "Per-player presence in this region, keyed by player name. Counts are buckets at the native 50 ms stats grid, not the display windowMs."
                 additionalProperties:
                   additionalProperties: false
                   properties:

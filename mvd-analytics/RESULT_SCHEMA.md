@@ -102,7 +102,7 @@ Defined in `result/frag.go`.
 | Time | `time` | int32 (match-relative ms) |
 | Killer | `killer` | string |
 | Victim | `victim` | string |
-| Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `ax`, `tele`, env: `lava`/`fall`/`water`/`slime`/`world`/`squish`) |
+| Weapon | `weapon` | string (`rl`, `lg`, `gl`, `ssg`, `sng`, `ng`, `sg`, `axe`, `hook`, `rail`, `tele`, `stomp`, env: `lava`/`fall`/`water`/`slime`/`world`/`squish`, plus `unknown`/`suicide`/`teamkill` for obituaries whose phrasing hides the weapon; the closed set is `view.fragWeaponVocab`) |
 | IsSuicide | `isSuicide` | bool (omitempty) |
 | IsTeamKill | `isTeamKill` | bool (omitempty) |
 
@@ -213,7 +213,7 @@ a `frag` event.
 | Matrix | `matrix` | []DamagePair (attacker→victim totals) |
 | Telefrags | `telefrags` | []PositionalKill (omitempty — instant kills, separate from damage) |
 | Stomps | `stomps` | []PositionalKill (omitempty — head-stomp kills, separate from damage) |
-| Scoreboard | `scoreboard` | *DamageReconciliation (omitempty) |
+| Scoreboard | `scoreboard` | *DamageReconciliation (omitempty — a KTX whole-match cross-check with no per-event provenance: a players-only filter narrows it, but a `weapons` or `from`/`to` filter OMITS it entirely, since it cannot be recomputed against those filters) |
 | Dmg | `dmg` | string (omitempty — family echo: `both` as stored, `bounded` from the view, absent on a raw view) |
 | BoundedMode | `boundedMode` | string (omitempty — `standard`, or `skipped:midair`/`skipped:instagib`/`skipped:dmgfrags`) |
 | BoundedSource | `boundedSource` | string (omitempty — provenance of a SUMMARY response's per-player bounded figures: `ktx` when substituted with KTX's exact end-of-match scoreboard totals, else `reconstructed`; set by the view ONLY on an unfiltered summary serving the bounded family — `dmg=bounded`/`dmg=both`; the stored Result never carries it) |
@@ -609,7 +609,7 @@ Defined in `result/messages.go`.
 | Message | `message` | string | Q-normalised text **with** ezQuake markup intact (color codes `&cRGB`, sound triggers `!K`, macro delimiters `{}` `[]`). |
 | MessageClean | `messageClean` | string (omitempty) | Same text with markup stripped (plain ASCII). Elided when identical to `message`. |
 | Victim | `victim` | string (omitempty) | Frag-only. |
-| Weapon | `weapon` | string (omitempty) | Frag-only. Same vocabulary as [FragEntry](#fragentry) `weapon` (`rl`/`lg`/…, env `lava`/`fall`/`water`/`slime`/`world`/`squish`, plus `teamkill` for phrasing-only teamkills). |
+| Weapon | `weapon` | string (omitempty) | Frag-only. Same vocabulary as [FragEntry](#fragentry) `weapon` (`rl`/`lg`/…, env `lava`/`fall`/`water`/`slime`/`world`/`squish`, plus `teamkill` for phrasing-only teamkills — the obituary text names no weapon, so the real one is unrecoverable from the wire). |
 
 Frag entries here overlap with `FragResult.Frags[]` — same time / killer
 / victim / weapon (both derived from the one obituary parser), plus the
@@ -815,8 +815,8 @@ states at any resolution, call
 | Regions | `regions` | []ControlRegion | Region definitions. |
 | TeamA | `teamA` | string (omitempty) | Team name encoded as `A` in BucketStates. Picked alphabetically. |
 | TeamB | `teamB` | string (omitempty) | Team name encoded as `B`. |
-| BucketStates | `bucketStates` | map[string]string (omitempty) | Populated only by query-time results (`view.RegionControl` / `recomputeRegionControl`). Region name → string of length `n_buckets`, one ASCII char per bucket. |
-| Stats | `stats` | map[string]RegionStats (omitempty) | Region name → match-aggregate share of each control state (percent, one decimal). |
+| BucketStates | `bucketStates` | map[string]string (omitempty) | Populated only by query-time results (`view.RegionControl` / `recomputeRegionControl`). Region name → string of length `n_buckets`, one ASCII char per bucket at the requested `windowMs`. Each bucket is a **point-sample classification**: the state of every player's last position at bucket-start. |
+| Stats | `stats` | map[string]RegionStats (omitempty) | Region name → match-aggregate share of each control state (percent, one decimal). **Always computed at the native 50ms resolution, independent of the caller's `windowMs`**, so the aggregate is not a sampling artifact of a coarse display window (a coarse point-sample could miss a mid-bucket fight and report `empty:100`). `byPlayer` counts are native-grid buckets too. |
 
 `BucketStates` codes (one byte per bucket):
 
@@ -868,8 +868,9 @@ RegionStats = {
   "teamBWeakControl": float,
   "teamBControl":     float,
   // Per-player attribution. Map: player name → counts of buckets this
-  // player was present in the region. Multiply by the bucket WindowMs
-  // to convert to milliseconds of presence.
+  // player was present in the region, counted at the native 50ms stats
+  // grid (NOT the caller's display windowMs). Multiply by 50ms to
+  // convert to milliseconds of presence.
   "byPlayer": {
     "<player>": {
       "team":    "<team>",
@@ -1649,8 +1650,11 @@ region names, not single loc indices.
 
 #### RegionControl
 
-Re-derives per-bucket region state strings + per-region per-player
-attribution (`RegionStats.byPlayer`) at the requested `WindowMs`,
+Re-derives per-bucket region state strings (`bucketStates`) at the
+requested `WindowMs` and the match-aggregate `stats` (percentages +
+per-region per-player attribution `RegionStats.byPlayer`) at the fixed
+native 50ms resolution, so the aggregate stays stable across display
+windows instead of tracking the coarse point-sample grid. Both are
 optionally clipped to a `[StartTime, EndTime)` sub-window. Options
 (`RegionControlOptions`) optionally override the regions (caller-
 edited region defs from the web UI), `TeamA`/`TeamB` labels, and
