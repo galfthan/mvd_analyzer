@@ -24,6 +24,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -99,7 +100,7 @@ func TestGoldenCorpus(t *testing.T) {
 			// coverage in the goldens. Gated on the BSP being resolvable above.
 			analyzer.ComputeLOS(result)
 
-			actual, err := canonicalJSON(result, densePosDemos[entry.Label])
+			actual, err := canonicalJSON(result, entry.Label)
 			if err != nil {
 				t.Fatalf("canonicalise: %v", err)
 			}
@@ -219,7 +220,7 @@ func networkAllowed(client *hubfetch.Client) bool {
 // Everything else (locGraph, schemaVersion, durations, weapon stats,
 // items, frags, …) is pinned in full; changes to those should be
 // deliberate, and -update-golden makes the intent explicit.
-func canonicalJSON(v interface{}, keepPos bool) ([]byte, error) {
+func canonicalJSON(v interface{}, label string) ([]byte, error) {
 	raw, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
@@ -228,9 +229,17 @@ func canonicalJSON(v interface{}, keepPos bool) ([]byte, error) {
 	if err := json.Unmarshal(raw, &m); err != nil {
 		return nil, err
 	}
+	if paths, ok := partialGoldenDemos[label]; ok {
+		m = projectPaths(m, paths)
+		out, err := json.MarshalIndent(m, "", "  ")
+		if err != nil {
+			return nil, err
+		}
+		return append(out, '\n'), nil
+	}
 	delete(m, "filePath")
 	sampleStreams(m)
-	if !keepPos {
+	if !densePosDemos[label] {
 		dropPositionTracks(m)
 	}
 	out, err := json.MarshalIndent(m, "", "  ")
@@ -251,6 +260,50 @@ func canonicalJSON(v interface{}, keepPos bool) ([]byte, error) {
 var densePosDemos = map[string]bool{
 	"4on4_ahoy_bhb_240426_obsidian":      true,
 	"1on1_bananfalco_betowen_240426_dm2": true,
+}
+
+// partialGoldenDemos maps a label to the dotted paths its golden pins
+// instead of the full Result. Use it for demos added to regression-pin
+// one specific feature: their full output only re-covers what the other
+// goldens already pin, at megabytes per demo (the demomark demo's full
+// golden was 4.4 MB even after dropping its ~3.4 MB compact mover
+// stream; the projection is under a kilobyte). Everything outside the
+// listed paths — including schemaVersion — is excluded, so these
+// goldens also sit out ordinary schema-bump regenerations. streams.global
+// (a few hundred bytes: matchStart/matchEnd/demoOffset/pauses) rides
+// along so TestTimelineInvariants keeps its match-relative window check
+// over the pinned events.
+var partialGoldenDemos = map[string][]string{
+	"4on4_tbg_pex_080326_dm2_demomark": {"timelineAnalysis.demoMarkers", "streams.global"},
+}
+
+// projectPaths reduces m to only the given dotted paths, preserving the
+// nesting so the golden keeps the Result's shape.
+func projectPaths(m map[string]interface{}, paths []string) map[string]interface{} {
+	out := map[string]interface{}{}
+	for _, path := range paths {
+		src, dst := m, out
+		parts := strings.Split(path, ".")
+		for i, key := range parts {
+			if i == len(parts)-1 {
+				if v, ok := src[key]; ok {
+					dst[key] = v
+				}
+				break
+			}
+			next, ok := src[key].(map[string]interface{})
+			if !ok {
+				break
+			}
+			sub, ok := dst[key].(map[string]interface{})
+			if !ok {
+				sub = map[string]interface{}{}
+				dst[key] = sub
+			}
+			src, dst = next, sub
+		}
+	}
+	return out
 }
 
 // dropPositionTracks removes streams.players[].pos — the dense

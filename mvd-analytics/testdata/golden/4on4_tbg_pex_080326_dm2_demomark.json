@@ -1,0 +1,36 @@
+{
+  "streams": {
+    "global": {
+      "demoOffset": 10253,
+      "demoStartAccuracyMs": 1000,
+      "demoStartUnixMs": 1773003405000,
+      "matchEnd": 1200079,
+      "matchStart": 0
+    }
+  },
+  "timelineAnalysis": {
+    "demoMarkers": [
+      {
+        "playerName": ".N3ophyt3.",
+        "playerSlot": 0,
+        "playerUserID": 77,
+        "team": "'tbg",
+        "time": 425132
+      },
+      {
+        "playerName": ".N3ophyt3.",
+        "playerSlot": 0,
+        "playerUserID": 77,
+        "team": "'tbg",
+        "time": 473964
+      },
+      {
+        "playerName": ".N3ophyt3.",
+        "playerSlot": 0,
+        "playerUserID": 77,
+        "team": "'tbg",
+        "time": 817757
+      }
+    ]
+  }
+}
